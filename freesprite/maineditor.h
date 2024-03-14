@@ -29,6 +29,7 @@ public:
 	void Tick();
 	void TakeInput(SDL_Event evt);
 	
+	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
 	void SetPixel(XY position, uint32_t color);
 	void DrawLine(XY from, XY to, uint32_t color);

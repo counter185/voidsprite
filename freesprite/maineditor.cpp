@@ -34,6 +34,14 @@ void MainEditor::Tick() {
 
 }
 
+void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
+	mousePixelTargetPoint =
+		XY{
+			(canvasCenterPoint.x - x) / -scale,
+			(canvasCenterPoint.y - y) / -scale
+	};
+}
+
 void MainEditor::TakeInput(SDL_Event evt) {
 
 	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
@@ -46,6 +54,7 @@ void MainEditor::TakeInput(SDL_Event evt) {
 			case SDL_MOUSEBUTTONUP:
 				if (evt.button.button == 1) {
 					if (evt.button.state) {
+						RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
 						SetPixel(mousePixelTargetPoint, 0xFF000000 | pickedColor);
 						mouseHoldPosition = mousePixelTargetPoint;
 					}
@@ -56,11 +65,7 @@ void MainEditor::TakeInput(SDL_Event evt) {
 				}
 				break;
 			case SDL_MOUSEMOTION:
-				mousePixelTargetPoint =
-					XY{
-						(canvasCenterPoint.x - evt.motion.x) / -scale,
-						(canvasCenterPoint.y - evt.motion.y) / -scale
-				};
+				RecalcMousePixelTargetPoint(evt.motion.x, evt.motion.y);
 				if (middleMouseHold) {
 					canvasCenterPoint.x += evt.motion.xrel;
 					canvasCenterPoint.y += evt.motion.yrel;
