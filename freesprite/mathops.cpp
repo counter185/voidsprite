@@ -61,6 +61,28 @@ hsv rgb2hsv(rgb in)
     return out;
 }
 
+bool tryRgbStringToColor(std::string str, unsigned int* ret)
+{
+    //https://github.com/counter185/coreplus-game/blob/8fcd218730a7927c109645b949cefbd85798c651/CORERG_VC/corerg_overlay_editor_addevent.cpp#L98C17-L111C32
+    unsigned int color = 0;
+    for (int i = 0; i < str.length(); i++) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            color += (str[i] - '0') * (1 << (4 * (5 - i)));
+        }
+        else if (str[i] >= 'a' && str[i] <= 'f') {
+            color += (str[i] - 'a' + 10) * (1 << (4 * (5 - i)));
+        }
+        else if (str[i] >= 'A' && str[i] <= 'F') {
+            color += (str[i] - 'A' + 10) * (1 << (4 * (5 - i)));
+        }
+        else {
+            return false;
+        }
+    }
+    *ret = color;
+    return true;
+}
+
 rgb hsv2rgb(hsv in)
 {
     double      hh, p, q, t, ff;

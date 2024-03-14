@@ -24,6 +24,9 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
 	for (Drawable*& a : drawablesList) {
 		if (a->isMouseIn(xyAdd(a->position, parentOffset), screenPoint)) {
 			if (focused != a) {
+				if (focused != NULL) {
+					focused->focusOut();
+				}
 				a->focusIn();
 			}
 			focused = a;

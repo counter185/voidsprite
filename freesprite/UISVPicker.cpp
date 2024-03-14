@@ -6,7 +6,7 @@
 
 void UISVPicker::drawPosIndicator(XY origin)
 {
-	g_fnt->RenderString(std::string("vpos:") + std::to_string(vPos), origin.x + 10, origin.y + wxHeight / 4);
+	//g_fnt->RenderString(std::string("vpos:") + std::to_string(vPos), origin.x + 10, origin.y + wxHeight / 4);
 
 	XY centerPoint = xyAdd(origin, XY{ (int)(wxWidth * sPos), (int)(wxHeight * (1.0f - vPos))});
 	int xdist = 3;

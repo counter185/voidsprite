@@ -161,11 +161,13 @@
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
+    <ClCompile Include="UITextField.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
     <ClInclude Include="EditorColorPicker.h" />
+    <ClInclude Include="EventCallbackListener.h" />
     <ClInclude Include="FontRenderer.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="maineditor.h" />
@@ -173,6 +175,7 @@
     <ClInclude Include="UIColorSlider.h" />
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
+    <ClInclude Include="UITextField.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

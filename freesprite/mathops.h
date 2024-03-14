@@ -18,10 +18,9 @@ struct hsv {
 //https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
 
 hsv rgb2hsv(rgb in);
-
-rgb hsv2rgb(hsv in);
-
 SDL_Color rgb2sdlcolor(rgb a);
+bool tryRgbStringToColor(std::string str, unsigned int* ret);
+rgb hsv2rgb(hsv in);
 
 bool pointInBox(XY point, SDL_Rect rect);
 

@@ -3,7 +3,7 @@
 #include "mathops.h"
 
 void UISlider::drawPosIndicator(XY origin) {
-	g_fnt->RenderString(std::string("pos:") + std::to_string(sliderPos), origin.x + 10, origin.y + wxHeight / 4);
+	//g_fnt->RenderString(std::string("pos:") + std::to_string(sliderPos), origin.x + 10, origin.y + wxHeight / 4);
 
 	XY centerPoint = xyAdd(origin, XY{ (int)(wxWidth * sliderPos), 0});
 	int xdist = 3;
@@ -30,6 +30,13 @@ void UISlider::handleInput(SDL_Event evt, XY gPosOffset)
 		case SDL_MOUSEBUTTONUP:
 			if (evt.button.button == 1) {
 				mouseHeld = evt.button.state;
+				if (evt.button.state) {
+					XY mousePos = xySubtract(XY{ evt.button.x, evt.button.y }, gPosOffset);
+					if (mousePos.y >= 0 && mousePos.y <= wxHeight) {
+						sliderPos = fclamp(0.0f, mousePos.x / (float)wxWidth, 1.0f);
+						this->onSliderPosChanged();
+					}
+				}
 			}
 			break;
 		case SDL_MOUSEMOTION:
