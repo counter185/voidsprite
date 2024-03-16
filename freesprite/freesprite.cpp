@@ -1,18 +1,21 @@
-﻿// freesprite.cpp : Ten plik zawiera funkcję „main”. W nim rozpoczyna się i kończy wykonywanie programu.
-//
-
-#include <iostream>
-
+﻿
 #include "globals.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
+#include "BaseScreen.h"
+#include "StartScreen.h"
 
-int g_windowW = 960;
-int g_windowH = 540;
+int g_windowW = 1280;
+int g_windowH = 720;
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
+
+std::vector<BaseScreen*> screenStack;
+void g_addScreen(BaseScreen* a) {
+    screenStack.push_back(a);
+}
 
 int main(int argc, char** argv)
 {
@@ -22,13 +25,15 @@ int main(int argc, char** argv)
     //SDL_CreateWindowAndRenderer(g_windowW, g_windowH, SDL_WINDOW_RESIZABLE, &g_wd, &g_rd);
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
-    MainEditor tempMainEditor(XY{ 640,480 });
+    screenStack.push_back(new StartScreen());
+
+    //MainEditor tempMainEditor(XY{ 640,480 });
 
     TTF_Init();
     g_fnt = new TextRenderer();
 
     SDL_Event evt;
-    while (true) {
+    while (!screenStack.empty()) {
         while (SDL_PollEvent(&evt)) {
             switch (evt.type) {
                 case SDL_QUIT:
@@ -52,13 +57,21 @@ int main(int argc, char** argv)
                     break;
             }
 
-            tempMainEditor.TakeInput(evt);
+            if (!screenStack.empty()) {
+                screenStack[screenStack.size() - 1]->takeInput(evt);
+            }
+        }
+
+        if (!screenStack.empty()) {
+            screenStack[screenStack.size() - 1]->tick();
         }
 
         SDL_SetRenderDrawColor(g_rd, 0,0,0,255);
         SDL_RenderClear(g_rd);
 
-        tempMainEditor.Render();
+        if (!screenStack.empty()) {
+            screenStack[screenStack.size() - 1]->render();
+        }
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};

@@ -4,6 +4,7 @@
 MainEditor::MainEditor(XY dimensions) {
 	colorPicker = new EditorColorPicker(this);
 	colorPicker->position.y = 80;
+	colorPicker->position.x = 10;
 	wxsManager.addDrawable(colorPicker);
 
 	texW = dimensions.x;
@@ -14,7 +15,7 @@ MainEditor::MainEditor(XY dimensions) {
 	FillTexture();
 }
 
-void MainEditor::Render() {
+void MainEditor::render() {
 	EnsureTextureUnlocked();
 	SDL_Rect canvasRenderRect;
 	canvasRenderRect.w = texW * scale;
@@ -30,7 +31,7 @@ void MainEditor::Render() {
 	wxsManager.renderAll();
 }
 
-void MainEditor::Tick() {
+void MainEditor::tick() {
 
 }
 
@@ -42,7 +43,7 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 	};
 }
 
-void MainEditor::TakeInput(SDL_Event evt) {
+void MainEditor::takeInput(SDL_Event evt) {
 
 	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });

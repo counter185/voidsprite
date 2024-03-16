@@ -1,9 +1,10 @@
 #pragma once
 #include "globals.h"
+#include "BaseScreen.h"
 #include "DrawableManager.h"
 #include "EditorColorPicker.h"
 
-class MainEditor
+class MainEditor : public BaseScreen
 {
 public:
 	SDL_Texture* mainTexture;
@@ -25,9 +26,9 @@ public:
 
 	MainEditor(XY dimensions);
 
-	void Render();
-	void Tick();
-	void TakeInput(SDL_Event evt);
+	void render() override;
+	void tick() override;
+	void takeInput(SDL_Event evt) override;
 	
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();

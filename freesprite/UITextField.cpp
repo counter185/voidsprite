@@ -24,6 +24,7 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 		}
 	}
 	else if (evt.type == SDL_TEXTINPUT) {
+		bool textAdded = false;
 		for (char& c : evt.text.text) {
 			if (c == '\0') {
 				break;
@@ -31,9 +32,10 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 			if ((numeric && c >= '0' && c <= '9')
 				|| !numeric) {
 				text += c;
+				textAdded = true;
 			}
 		}
-		if (callback != NULL) {
+		if (textAdded && callback != NULL) {
 			callback->eventTextInput(callback_id, text);
 		}
 	}
