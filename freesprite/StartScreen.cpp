@@ -1,5 +1,6 @@
 #include "StartScreen.h"
 #include "FontRenderer.h"
+#include "maineditor.h"
 
 void StartScreen::tick() {
 
@@ -37,6 +38,10 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_MOUSEWHEEL:
 				break;
 			case SDL_KEYDOWN:
+				break;
+			case SDL_DROPFILE:
+				g_addScreen(new MainEditor(evt.drop.file));
+				//SDL_Free(evt.drop.file);
 				break;
 		}
 	}

@@ -20,6 +20,7 @@ void g_addScreen(BaseScreen* a) {
 int main(int argc, char** argv)
 {
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
+    IMG_Init(IMG_INIT_AVIF | IMG_INIT_JPG | IMG_INIT_JXL | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
     g_wd = SDL_CreateWindow("freesprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE);
     g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_CreateWindowAndRenderer(g_windowW, g_windowH, SDL_WINDOW_RESIZABLE, &g_wd, &g_rd);

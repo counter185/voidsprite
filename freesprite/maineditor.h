@@ -8,11 +8,11 @@ class MainEditor : public BaseScreen
 {
 public:
 	SDL_Texture* mainTexture;
-	int* lockedPixels;
-	int pitch;
+	int* lockedPixels = NULL;
+	int pitch = 0;
 	bool textureLocked = false;
-	int texW, texH;
-	XY canvasCenterPoint;
+	int texW = -1, texH = -1;
+	XY canvasCenterPoint = XY{0,0};
 	XY mousePixelTargetPoint;
 	int scale = 1;
 	XY mouseHoldPosition;
@@ -25,11 +25,13 @@ public:
 	EditorColorPicker* colorPicker;
 
 	MainEditor(XY dimensions);
+	MainEditor(std::string file);
 
 	void render() override;
 	void tick() override;
 	void takeInput(SDL_Event evt) override;
 	
+	void SetUpWidgets();
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
 	void SetPixel(XY position, uint32_t color);

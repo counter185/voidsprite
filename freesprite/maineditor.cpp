@@ -2,10 +2,7 @@
 #include "FontRenderer.h"
 
 MainEditor::MainEditor(XY dimensions) {
-	colorPicker = new EditorColorPicker(this);
-	colorPicker->position.y = 80;
-	colorPicker->position.x = 10;
-	wxsManager.addDrawable(colorPicker);
+	SetUpWidgets();
 
 	texW = dimensions.x;
 	texH = dimensions.y;
@@ -13,6 +10,19 @@ MainEditor::MainEditor(XY dimensions) {
 	canvasCenterPoint = XY{ 0,0 };
 	mainTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texW, texH);
 	FillTexture();
+}
+MainEditor::MainEditor(std::string path) {
+	SetUpWidgets();
+
+	SDL_Surface* srf = IMG_Load(path.c_str());
+	texW = srf->w;
+	texH = srf->h;
+	mainTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texW, texH);
+	EnsureTextureLocked();
+	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, lockedPixels, pitch);
+	EnsureTextureUnlocked();
+	canvasCenterPoint = XY{ 0,0 };
+	SDL_FreeSurface(srf);
 }
 
 void MainEditor::render() {
@@ -33,6 +43,14 @@ void MainEditor::render() {
 
 void MainEditor::tick() {
 
+}
+
+void MainEditor::SetUpWidgets()
+{
+	colorPicker = new EditorColorPicker(this);
+	colorPicker->position.y = 80;
+	colorPicker->position.x = 10;
+	wxsManager.addDrawable(colorPicker);
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
