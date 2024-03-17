@@ -3,6 +3,8 @@
 #include "BaseScreen.h"
 #include "DrawableManager.h"
 #include "EditorColorPicker.h"
+#include "BaseBrush.h"
+#include "Brush1x1.h"
 
 class MainEditor : public BaseScreen
 {
@@ -16,6 +18,7 @@ public:
 	XY mousePixelTargetPoint;
 	int scale = 1;
 	XY mouseHoldPosition;
+	BaseBrush* currentBrush = new Brush1x1();
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
 
@@ -25,7 +28,8 @@ public:
 	EditorColorPicker* colorPicker;
 
 	MainEditor(XY dimensions);
-	MainEditor(std::string file);
+	MainEditor(SDL_Surface* srf);
+	~MainEditor();
 
 	void render() override;
 	void tick() override;

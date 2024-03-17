@@ -151,7 +151,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseBrush.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
+    <ClCompile Include="Brush1x1.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
@@ -168,7 +170,9 @@
     <ClCompile Include="UITextField.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseBrush.h" />
     <ClInclude Include="BaseScreen.h" />
+    <ClInclude Include="Brush1x1.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
     <ClInclude Include="EditorColorPicker.h" />

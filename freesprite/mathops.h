@@ -27,6 +27,9 @@ bool pointInBox(XY point, SDL_Rect rect);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
 
+int ixmin(int a, int b);
+int ixmax(int a, int b);
+int iclamp(int vmin, int b, int vmax);
 float fxmin(float a, float b);
 float fxmax(float a, float b);
 float fclamp(float vmin, float b, float vmax);

@@ -46,3 +46,11 @@ void DrawableManager::forceUnfocus() {
 		focused = NULL;
 	}
 }
+
+void DrawableManager::freeAllDrawables()
+{
+	for (int x = 0; x < drawablesList.size(); x++) {
+		delete drawablesList[x];
+	}
+	drawablesList.clear();
+}

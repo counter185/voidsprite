@@ -14,6 +14,8 @@ public:
 	bool anyFocused() { return focused != NULL; }
 	bool tryFocusOnPoint(XY screenPoint, XY parentOffset = XY{0,0});
 	void forceUnfocus();
+
+	void freeAllDrawables();
 private:
 	std::vector<Drawable*> drawablesList;
 	Drawable* focused = NULL;

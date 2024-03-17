@@ -42,7 +42,12 @@ int main(int argc, char** argv)
         while (SDL_PollEvent(&evt)) {
             switch (evt.type) {
                 case SDL_QUIT:
-                    return 0;
+                    //return 0;
+                    delete screenStack.at(screenStack.size() - 1);
+                    screenStack.pop_back();
+                    if (screenStack.size() == 0) {
+                        return 0;
+                    }
                     break;
                 case SDL_KEYDOWN:
                     break;

@@ -145,6 +145,9 @@ SDL_Color rgb2sdlcolor(rgb a) {
     return SDL_Color{ (unsigned char)(a.r * 255), (unsigned char)(a.g * 255), (unsigned char)(a.b * 255), 255 };
 }
 
+int ixmin(int a, int b) { return a > b ? b : a; }
+int ixmax(int a, int b) { return a > b ? a : b; }
+int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
 float fxmin(float a, float b) { return a > b ? b : a; }
 float fxmax(float a, float b) { return a > b ? a : b; }
 float fclamp(float vmin, float b, float vmax) { return fxmax(vmin, fxmin(b, vmax)); }

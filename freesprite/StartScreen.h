@@ -37,6 +37,9 @@ public:
 		buttonNewImage->text = "Create...";
 		wxsManager.addDrawable(buttonNewImage);
 	}
+	~StartScreen() {
+		wxsManager.freeAllDrawables();
+	}
 
 	void render() override;
 	void tick() override;

@@ -40,8 +40,15 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_KEYDOWN:
 				break;
 			case SDL_DROPFILE:
-				g_addScreen(new MainEditor(evt.drop.file));
-				//SDL_Free(evt.drop.file);
+				SDL_Surface* srf = IMG_Load(evt.drop.file);
+				if (srf == NULL) {
+					printf("imageload failed: %s\n", evt.drop.file);
+				}
+				else {
+					g_addScreen(new MainEditor(srf));
+					SDL_FreeSurface(srf);
+				}
+				SDL_free(evt.drop.file);
 				break;
 		}
 	}

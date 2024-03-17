@@ -12,10 +12,9 @@ MainEditor::MainEditor(XY dimensions) {
 	SDL_SetTextureBlendMode(mainTexture, SDL_BLENDMODE_BLEND);
 	FillTexture();
 }
-MainEditor::MainEditor(std::string path) {
+MainEditor::MainEditor(SDL_Surface* srf) {
 	SetUpWidgets();
 
-	SDL_Surface* srf = IMG_Load(path.c_str());
 	texW = srf->w;
 	texH = srf->h;
 	mainTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texW, texH);
@@ -24,7 +23,12 @@ MainEditor::MainEditor(std::string path) {
 	EnsureTextureUnlocked();
 	canvasCenterPoint = XY{ 0,0 };
 	SDL_SetTextureBlendMode(mainTexture, SDL_BLENDMODE_BLEND);
-	SDL_FreeSurface(srf);
+}
+
+MainEditor::~MainEditor() {
+	printf("hello from destructor\n");
+	wxsManager.freeAllDrawables();
+	SDL_DestroyTexture(mainTexture);
 }
 
 void MainEditor::render() {
@@ -48,7 +52,10 @@ void MainEditor::render() {
 }
 
 void MainEditor::tick() {
-
+	canvasCenterPoint = XY{
+		iclamp(-texW * scale + 4, canvasCenterPoint.x, g_windowW - 4),
+		iclamp(-texH * scale +4, canvasCenterPoint.y, g_windowH - 4)
+	};
 }
 
 void MainEditor::DrawBackground()
@@ -120,7 +127,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 				if (evt.button.button == 1) {
 					if (evt.button.state) {
 						RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
-						SetPixel(mousePixelTargetPoint, 0xFF000000 | pickedColor);
+						if (currentBrush != NULL) {
+							currentBrush->clickPress(this, mousePixelTargetPoint);
+						}
 						mouseHoldPosition = mousePixelTargetPoint;
 					}
 					leftMouseHold = evt.button.state;
@@ -136,7 +145,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 					canvasCenterPoint.y += evt.motion.yrel;
 				}
 				else if (leftMouseHold) {
-					DrawLine(mouseHoldPosition, mousePixelTargetPoint, 0xFF000000 | pickedColor);
+					if (currentBrush != NULL) {
+						currentBrush->clickDrag(this, mouseHoldPosition, mousePixelTargetPoint);
+					}
 					mouseHoldPosition = mousePixelTargetPoint;
 				}
 				break;
