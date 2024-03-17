@@ -159,6 +159,7 @@
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
     <ClCompile Include="freesprite.cpp" />
+    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="maineditor.cpp" />
     <ClCompile Include="mathops.cpp" />
     <ClCompile Include="platform.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="EventCallbackListener.h" />
     <ClInclude Include="FontRenderer.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="Layer.h" />
     <ClInclude Include="maineditor.h" />
     <ClInclude Include="mathops.h" />
     <ClInclude Include="platform.h" />

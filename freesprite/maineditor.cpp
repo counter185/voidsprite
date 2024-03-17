@@ -8,8 +8,7 @@ MainEditor::MainEditor(XY dimensions) {
 	texH = dimensions.y;
 	//canvasCenterPoint = XY{ texW / 2, texH / 2 };
 	canvasCenterPoint = XY{ 0,0 };
-	mainTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texW, texH);
-	SDL_SetTextureBlendMode(mainTexture, SDL_BLENDMODE_BLEND);
+	imgLayer = new Layer(texW, texH);
 	FillTexture();
 }
 MainEditor::MainEditor(SDL_Surface* srf) {
@@ -17,18 +16,16 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
 	texW = srf->w;
 	texH = srf->h;
-	mainTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texW, texH);
-	EnsureTextureLocked();
-	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, lockedPixels, pitch);
-	EnsureTextureUnlocked();
+
+	imgLayer = new Layer(texW, texH);
+	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, imgLayer->pixelData, texW*4);
 	canvasCenterPoint = XY{ 0,0 };
-	SDL_SetTextureBlendMode(mainTexture, SDL_BLENDMODE_BLEND);
 }
 
 MainEditor::~MainEditor() {
 	printf("hello from destructor\n");
 	wxsManager.freeAllDrawables();
-	SDL_DestroyTexture(mainTexture);
+	delete imgLayer;
 }
 
 void MainEditor::render() {
@@ -41,7 +38,7 @@ void MainEditor::render() {
 	canvasRenderRect.x = canvasCenterPoint.x;
 	canvasRenderRect.y = canvasCenterPoint.y;
 
-	SDL_RenderCopy(g_rd, mainTexture, NULL, &canvasRenderRect);
+	imgLayer->render(canvasRenderRect);
 
 	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
 	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
@@ -104,6 +101,7 @@ void MainEditor::SetUpWidgets()
 	colorPicker->position.y = 80;
 	colorPicker->position.x = 10;
 	wxsManager.addDrawable(colorPicker);
+	colorPicker->setMainEditorColorRGB(pickedColor);
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
@@ -177,42 +175,41 @@ void MainEditor::eventFileSaved(int evt_id, std::string name)
 	if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
 		printf("eventFileSaved: got file name %s\n", name.c_str());
 		
-		//IMG_SavePNG();
+		SDL_Surface* nsrf = SDL_CreateRGBSurfaceWithFormat(0, imgLayer->w, imgLayer->h, 32, SDL_PIXELFORMAT_ARGB8888);
+		memcpy(nsrf->pixels, imgLayer->pixelData, nsrf->w * nsrf->h * 4);
+		IMG_SavePNG(nsrf, name.c_str());
+		SDL_FreeSurface(nsrf);
 	}
 }
 
 void MainEditor::FillTexture() {
-	int* pixels;
-	int pitch;
-	SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
+	int* pixels = (int*)imgLayer->pixelData;
+	//int pitch;
+	//SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
 	for (int x = 0; x < texW; x++) {
 		for (int y = 0; y < texH; y++) {
 			pixels[x + (y * texW)] = 0x00000000;
 		}
 	}
-	SDL_UnlockTexture(mainTexture);
+	//SDL_UnlockTexture(mainTexture);
 }
 
 void MainEditor::EnsureTextureLocked() {
-	if (!textureLocked) {
+	/*if (!textureLocked) {
 		SDL_LockTexture(mainTexture, NULL, (void**)&lockedPixels, &pitch);
 		textureLocked = true;
-	}
+	}*/
 }
 
 void MainEditor::EnsureTextureUnlocked() {
-	if (textureLocked) {
+	/*if (textureLocked) {
 		SDL_UnlockTexture(mainTexture);
 		textureLocked = false;
-	}
+	}*/
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color) {
-	if (position.x >= 0 && position.x < texW
-		&& position.y >= 0 && position.y < texH) {
-		EnsureTextureLocked();
-		lockedPixels[position.x + (position.y * texW)] = color;
-	}
+	imgLayer->setPixel(position, color);
 }
 
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {

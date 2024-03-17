@@ -5,14 +5,13 @@
 #include "EditorColorPicker.h"
 #include "BaseBrush.h"
 #include "Brush1x1.h"
+#include "Layer.h"
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 public:
-	SDL_Texture* mainTexture;
-	int* lockedPixels = NULL;
-	int pitch = 0;
-	bool textureLocked = false;
+	Layer* imgLayer;
+
 	int texW = -1, texH = -1;
 	XY canvasCenterPoint = XY{0,0};
 	XY mousePixelTargetPoint;
@@ -44,6 +43,8 @@ public:
 	void FillTexture();
 	void SetPixel(XY position, uint32_t color);
 	void DrawLine(XY from, XY to, uint32_t color);
+
+	//DEPRECATED DO NOT USE
 	void EnsureTextureLocked();
 	void EnsureTextureUnlocked();
 };
