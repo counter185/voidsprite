@@ -9,6 +9,7 @@ MainEditor::MainEditor(XY dimensions) {
 	//canvasCenterPoint = XY{ texW / 2, texH / 2 };
 	canvasCenterPoint = XY{ 0,0 };
 	mainTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texW, texH);
+	SDL_SetTextureBlendMode(mainTexture, SDL_BLENDMODE_BLEND);
 	FillTexture();
 }
 MainEditor::MainEditor(std::string path) {
@@ -22,11 +23,14 @@ MainEditor::MainEditor(std::string path) {
 	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, lockedPixels, pitch);
 	EnsureTextureUnlocked();
 	canvasCenterPoint = XY{ 0,0 };
+	SDL_SetTextureBlendMode(mainTexture, SDL_BLENDMODE_BLEND);
 	SDL_FreeSurface(srf);
 }
 
 void MainEditor::render() {
 	EnsureTextureUnlocked();
+	DrawBackground();
+
 	SDL_Rect canvasRenderRect;
 	canvasRenderRect.w = texW * scale;
 	canvasRenderRect.h = texH * scale;
@@ -35,14 +39,56 @@ void MainEditor::render() {
 
 	SDL_RenderCopy(g_rd, mainTexture, NULL, &canvasRenderRect);
 
-	g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
-	g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
+	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
+	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
+
+	DrawForeground();
 
 	wxsManager.renderAll();
 }
 
 void MainEditor::tick() {
 
+}
+
+void MainEditor::DrawBackground()
+{
+	int lineX = 400;
+	for (int x = 40 + (SDL_GetTicks64()%5000/5000.0 * 60); x < g_windowW + lineX; x += 60) {
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x40);
+		SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x0d);
+		SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX/4*6, g_windowH);
+	}
+
+
+	int lw = texW * scale + 2;
+	int lh = texH * scale + 2;
+	SDL_Rect r = { canvasCenterPoint.x - 1, canvasCenterPoint.y - 1, lw, lh };
+	uint8_t a = 0xff;
+	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, a);
+	SDL_RenderDrawRect(g_rd, &r);
+	for (int x = 0; x < 6; x++) {
+		r.w += 2;
+		r.h += 2;
+		r.x -= 1;
+		r.y -= 1;
+		a /= 2;
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, a);
+		SDL_RenderDrawRect(g_rd, &r);
+	}
+	
+}
+
+void MainEditor::DrawForeground()
+{
+	SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };
+	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
+	SDL_RenderFillRect(g_rd, &r);
+
+	g_fnt->RenderString(std::format("{}x{} ({}%)", texW, texH, scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+
+	g_fnt->RenderString(std::format("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
 }
 
 void MainEditor::SetUpWidgets()
@@ -95,7 +141,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				break;
 			case SDL_MOUSEWHEEL:
-				scale -= evt.wheel.y;
+				scale += evt.wheel.y;
 				scale = scale < 1 ? 1 : scale;
 				break;
 			case SDL_KEYDOWN:
@@ -121,7 +167,7 @@ void MainEditor::FillTexture() {
 	SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
 	for (int x = 0; x < texW; x++) {
 		for (int y = 0; y < texH; y++) {
-			pixels[x + (y * texW)] = 0xFFA0A0A0;
+			pixels[x + (y * texW)] = 0x00000000;
 		}
 	}
 	SDL_UnlockTexture(mainTexture);

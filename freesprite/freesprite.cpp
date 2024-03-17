@@ -19,10 +19,12 @@ void g_addScreen(BaseScreen* a) {
 
 int main(int argc, char** argv)
 {
+    platformPreInit();
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
     IMG_Init(IMG_INIT_AVIF | IMG_INIT_JPG | IMG_INIT_JXL | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
-    g_wd = SDL_CreateWindow("freesprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE);
+    g_wd = SDL_CreateWindow("void\xE2\x97\x86sprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
     g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    platformInit();
     //SDL_CreateWindowAndRenderer(g_windowW, g_windowH, SDL_WINDOW_RESIZABLE, &g_wd, &g_rd);
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
@@ -32,6 +34,8 @@ int main(int argc, char** argv)
 
     TTF_Init();
     g_fnt = new TextRenderer();
+
+    platformPostInit();
 
     SDL_Event evt;
     while (!screenStack.empty()) {

@@ -31,6 +31,8 @@ public:
 	void tick() override;
 	void takeInput(SDL_Event evt) override;
 	
+	void DrawBackground();
+	void DrawForeground();
 	void SetUpWidgets();
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
