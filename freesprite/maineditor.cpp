@@ -157,9 +157,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
-					/*case SDLK_l:
-						DrawLine(XY{ 20,5 }, XY{ 50, 35 }, 0xFF000000);
-						break;*/
+					case SDLK_s:
+						platformTrySaveImageFile(this);
+						break;
 					case SDLK_RCTRL:
 						middleMouseHold = !middleMouseHold;
 						break;
@@ -169,6 +169,15 @@ void MainEditor::takeInput(SDL_Event evt) {
 	}
 	else {
 		wxsManager.passInputToFocused(evt);
+	}
+}
+
+void MainEditor::eventFileSaved(int evt_id, std::string name)
+{
+	if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
+		printf("eventFileSaved: got file name %s\n", name.c_str());
+		
+		//IMG_SavePNG();
 	}
 }
 

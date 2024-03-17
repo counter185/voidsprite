@@ -3,6 +3,11 @@
 #include <dwmapi.h>
 #include <SDL_syswm.h>
 #include <d3d9.h>
+#include <windows.h>
+#include <commdlg.h>
+
+HWND WINhWnd = NULL;
+char fileNameBuffer[MAX_PATH] = { 0 };
 
 void platformPreInit() {
 
@@ -15,7 +20,7 @@ void platformPostInit() {
         SDL_VERSION(&wmInfo.version);
         SDL_GetWindowWMInfo(g_wd, &wmInfo);
         BOOL USE_DARK_MODE = true;
-        HWND WINhWnd = wmInfo.info.win.window;
+        WINhWnd = wmInfo.info.win.window;
         bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
             WINhWnd, 20,
             &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
@@ -33,4 +38,27 @@ void platformPostInit() {
     d3dobject->GetAdapterIdentifier(0, 0, &ident);
     printf("GPU: %s\n", ident.Description);
     d3dobject->Release();
+}
+
+void platformTrySaveImageFile(EventCallbackListener* listener) {
+    OPENFILENAMEA ofna;
+    ZeroMemory(&ofna, sizeof(ofna));
+    ofna.lStructSize = sizeof(ofna);
+    ofna.hwndOwner = WINhWnd;
+    ofna.lpstrFilter = "PNG Files\0*.png\0All files\0*.*\0\0";
+    ofna.lpstrCustomFilter = NULL;
+    ofna.nFilterIndex = 1;
+    ofna.lpstrFile = fileNameBuffer;
+    ofna.nMaxFile = MAX_PATH;
+    ofna.lpstrFileTitle = NULL;
+    ofna.lpstrInitialDir = NULL;
+    ofna.Flags = OFN_EXPLORER;
+    ofna.lpstrTitle = "voidsprite: Save Image";
+    ofna.lpstrDefExt = "png";
+    if (GetSaveFileNameA(&ofna)) {
+        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, std::string(fileNameBuffer));
+    }
+    else {
+        printf("windows error: %i\n", GetLastError());
+    }
 }

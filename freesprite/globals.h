@@ -12,11 +12,10 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
-#include "platform.h"
-
 #define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_JP "appfontjp-NotoSansJP-VariableFont_wght.ttf"
 
+class EventCallbackListener;
 class TextRenderer;
 class MainEditor;
 class EditorColorPicker;
@@ -33,3 +32,5 @@ void g_addScreen(BaseScreen* a);
 struct XY {
 	int x, y;
 };
+
+#include "platform.h"

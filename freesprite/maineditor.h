@@ -6,7 +6,7 @@
 #include "BaseBrush.h"
 #include "Brush1x1.h"
 
-class MainEditor : public BaseScreen
+class MainEditor : public BaseScreen, public EventCallbackListener
 {
 public:
 	SDL_Texture* mainTexture;
@@ -34,6 +34,8 @@ public:
 	void render() override;
 	void tick() override;
 	void takeInput(SDL_Event evt) override;
+
+	void eventFileSaved(int evt_id, std::string name) override;
 	
 	void DrawBackground();
 	void DrawForeground();
