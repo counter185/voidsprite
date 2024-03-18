@@ -12,7 +12,7 @@ void EditorBrushPicker::render(XY position)
     //SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, currentV }));
 
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    SDL_SetRenderDrawColor(g_rd, 0xcd, 0xcd, 0xcd, focused ? 0xaf : 0x30);
+    SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     SDL_RenderFillRect(g_rd, &r);
 
     /*r = SDL_Rect{position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35};
@@ -41,5 +41,14 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
 {
 	if (evt_id >= 10) {
 		caller->currentBrush = g_brushes[evt_id-10];
+        updateActiveBrushButton(evt_id - 10);
 	}
+}
+
+void EditorBrushPicker::updateActiveBrushButton(int id)
+{
+    for (UIButton*& bbtn : brushButtons) {
+        bbtn->colorBGFocused = bbtn->colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
+    }
+    brushButtons[id]->colorBGFocused = brushButtons[id]->colorBGUnfocused = SDL_Color{ 0xff,0xff,0xff,0x40 };
 }

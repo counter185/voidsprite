@@ -13,11 +13,12 @@ public:
 	MainEditor* caller;
 
 	DrawableManager subWidgets;
+	std::vector<UIButton*> brushButtons;
 
 	EditorBrushPicker(MainEditor* caller) {
 		this->caller = caller;
 
-		int py = 20;
+		int py = 0;
 		int i = 0;
 		for (BaseBrush*& brush : g_brushes) {
 			UIButton* newBtn = new UIButton();
@@ -25,6 +26,7 @@ public:
 			newBtn->text = brush->getName();
 			newBtn->wxWidth = 100;
 			newBtn->setCallbackListener(10 + i++, this);
+			brushButtons.push_back(newBtn);
 			subWidgets.addDrawable(newBtn);
 		}
 	}
@@ -37,5 +39,7 @@ public:
 		subWidgets.forceUnfocus();
 	}
 	void eventButtonPressed(int evt_id) override;
+
+	void updateActiveBrushButton(int id);
 };
 

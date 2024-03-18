@@ -141,20 +141,16 @@ void MainEditor::takeInput(SDL_Event evt) {
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
 				if (evt.button.button == 1) {
-					if (evt.button.state) {
-						RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
-						if (currentBrush != NULL) {
+					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
+					if (currentBrush != NULL) {
+						if (evt.button.state) {
 							currentBrush->clickPress(this, mousePixelTargetPoint);
 						}
-						mouseHoldPosition = mousePixelTargetPoint;
-					}
-					else {
-						RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
-						if (currentBrush != NULL) {
+						else {
 							currentBrush->clickRelease(this, mousePixelTargetPoint);
 						}
-						mouseHoldPosition = mousePixelTargetPoint;
 					}
+					mouseHoldPosition = mousePixelTargetPoint;
 					leftMouseHold = evt.button.state;
 				}
 				else if (evt.button.button == 2) {
@@ -234,7 +230,7 @@ void MainEditor::EnsureTextureUnlocked() {
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color) {
-	imgLayer->setPixel(position, color);
+	imgLayer->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
 }
 
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {

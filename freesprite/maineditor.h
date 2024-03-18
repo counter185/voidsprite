@@ -23,6 +23,7 @@ public:
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
 
+	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
 
 	DrawableManager wxsManager;
