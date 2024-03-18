@@ -45,7 +45,7 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
     ofna.hwndOwner = WINhWnd;
-    ofna.lpstrFilter = "PNG Files\0*.png\0All files\0*.*\0\0";
+    ofna.lpstrFilter = "PNG Files (.png)\0*.png\0All files\0*.*\0\0";
     ofna.lpstrCustomFilter = NULL;
     ofna.nFilterIndex = 1;
     ofna.lpstrFile = fileNameBuffer;

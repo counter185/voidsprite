@@ -12,6 +12,8 @@ SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
 
+std::vector<BaseBrush*> g_brushes;
+
 std::vector<BaseScreen*> screenStack;
 void g_addScreen(BaseScreen* a) {
     screenStack.push_back(a);
@@ -29,6 +31,11 @@ int main(int argc, char** argv)
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
     screenStack.push_back(new StartScreen());
+
+    //load brushes
+    g_brushes.push_back(new Brush1x1());
+    g_brushes.push_back(new Brush3pxCircle());
+    g_brushes.push_back(new Brush1pxLine());
 
     //MainEditor tempMainEditor(XY{ 640,480 });
 
@@ -86,6 +93,8 @@ int main(int argc, char** argv)
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};
         SDL_RenderFillRect(g_rd, &temp);
+
+        g_fnt->RenderString("voidsprite 18.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
 
         SDL_RenderPresent(g_rd);
     }

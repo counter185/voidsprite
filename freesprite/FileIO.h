@@ -3,3 +3,4 @@
 #include "Layer.h"
 
 Layer* readXYZ(std::string path);
+Layer* readPNG(std::string path);

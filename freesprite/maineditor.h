@@ -5,6 +5,8 @@
 #include "EditorColorPicker.h"
 #include "BaseBrush.h"
 #include "Brush1x1.h"
+#include "Brush3pxCircle.h"
+#include "Brush1pxLine.h"
 #include "Layer.h"
 
 class MainEditor : public BaseScreen, public EventCallbackListener

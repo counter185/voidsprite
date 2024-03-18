@@ -153,9 +153,12 @@
   <ItemGroup>
     <ClCompile Include="BaseBrush.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
+    <ClCompile Include="Brush1pxLine.cpp" />
     <ClCompile Include="Brush1x1.cpp" />
+    <ClCompile Include="Brush3pxCircle.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
+    <ClCompile Include="EditorBrushPicker.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
@@ -174,9 +177,12 @@
   <ItemGroup>
     <ClInclude Include="BaseBrush.h" />
     <ClInclude Include="BaseScreen.h" />
+    <ClInclude Include="Brush1pxLine.h" />
     <ClInclude Include="Brush1x1.h" />
+    <ClInclude Include="Brush3pxCircle.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
+    <ClInclude Include="EditorBrushPicker.h" />
     <ClInclude Include="EditorColorPicker.h" />
     <ClInclude Include="EventCallbackListener.h" />
     <ClInclude Include="FileIO.h" />

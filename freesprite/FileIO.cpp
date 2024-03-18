@@ -25,12 +25,12 @@ Layer* readXYZ(std::string path)
         int res = uncompress(decompBytes, &decompressedSize, compressedData, cDataSize);
         //hopefully res == Z_OK
 
-        /*//TEMP
+        /* //write uncompressed xyz data to file:
         FILE* outf = NULL;
         fopen_s(&outf, "decompressedxyz.bin", "wb");
         fwrite(decompBytes, 1, cDataSize, outf);
         fclose(outf);
-        //END TEMP*/
+        */
 
         uint32_t colorPalette[256];
         int filePtr = 0;
@@ -50,5 +50,10 @@ Layer* readXYZ(std::string path)
         fclose(f);
         return nLayer;
     }
+    return NULL;
+}
+
+Layer* readPNG(std::string path)
+{
     return NULL;
 }

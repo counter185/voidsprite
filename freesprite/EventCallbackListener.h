@@ -3,6 +3,7 @@
 
 #define EVENT_COLORPICKER_TEXTFIELD 1
 #define EVENT_MAINEDITOR_SAVEFILE 2
+#define EVENT_BRUSHPICKER_BRUSH_CHANGED 3
 
 class EventCallbackListener {
 public:

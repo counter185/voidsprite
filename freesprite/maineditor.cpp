@@ -1,5 +1,6 @@
 #include "maineditor.h"
 #include "FontRenderer.h"
+#include "EditorBrushPicker.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	SetUpWidgets();
@@ -114,6 +115,11 @@ void MainEditor::SetUpWidgets()
 	colorPicker->position.x = 10;
 	wxsManager.addDrawable(colorPicker);
 	colorPicker->setMainEditorColorRGB(pickedColor);
+
+	EditorBrushPicker* brushPicker = new EditorBrushPicker(this);
+	brushPicker->position.y = 480;
+	brushPicker->position.x = 10;
+	wxsManager.addDrawable(brushPicker);
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
@@ -139,6 +145,13 @@ void MainEditor::takeInput(SDL_Event evt) {
 						RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
 						if (currentBrush != NULL) {
 							currentBrush->clickPress(this, mousePixelTargetPoint);
+						}
+						mouseHoldPosition = mousePixelTargetPoint;
+					}
+					else {
+						RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
+						if (currentBrush != NULL) {
+							currentBrush->clickRelease(this, mousePixelTargetPoint);
 						}
 						mouseHoldPosition = mousePixelTargetPoint;
 					}
