@@ -36,6 +36,12 @@ int main(int argc, char** argv)
     g_brushes.push_back(new Brush1x1());
     g_brushes.push_back(new Brush3pxCircle());
     g_brushes.push_back(new Brush1pxLine());
+    g_brushes.push_back(new BrushRect());
+    for (BaseBrush*& brush : g_brushes) {
+        SDL_Surface* srf = IMG_Load(brush->getIconPath().c_str());
+        brush->cachedIcon = SDL_CreateTextureFromSurface(g_rd, srf);
+        SDL_FreeSurface(srf);
+    }
 
     //MainEditor tempMainEditor(XY{ 640,480 });
 

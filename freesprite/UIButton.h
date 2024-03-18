@@ -7,6 +7,7 @@ class UIButton : public Drawable
 public:
 	std::string text;
 	int wxWidth = 250, wxHeight = 30;
+	SDL_Texture* icon = NULL;
 	
 	SDL_Color colorBGFocused = SDL_Color{ 0,0,0,0xff };
 	SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0x30 };
