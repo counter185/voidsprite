@@ -14,11 +14,23 @@ MainEditor::MainEditor(XY dimensions) {
 MainEditor::MainEditor(SDL_Surface* srf) {
 	SetUpWidgets();
 
+	//todo i mean just use MainEditor(Layer*) here
 	texW = srf->w;
 	texH = srf->h;
 
 	imgLayer = new Layer(texW, texH);
 	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, imgLayer->pixelData, texW*4);
+	canvasCenterPoint = XY{ 0,0 };
+}
+
+MainEditor::MainEditor(Layer* layer)
+{
+	SetUpWidgets();
+
+	texW = layer->w;
+	texH = layer->h;
+
+	imgLayer = layer;
 	canvasCenterPoint = XY{ 0,0 };
 }
 

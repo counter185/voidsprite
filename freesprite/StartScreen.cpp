@@ -1,6 +1,7 @@
 #include "StartScreen.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
+#include "FileIO.h"
 
 void StartScreen::tick() {
 
@@ -40,13 +41,26 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_KEYDOWN:
 				break;
 			case SDL_DROPFILE:
-				SDL_Surface* srf = IMG_Load(evt.drop.file);
-				if (srf == NULL) {
-					printf("imageload failed: %s\n", evt.drop.file);
+				std::string filePath = evt.drop.file;
+				std::string extension = filePath.substr(filePath.size() - 4);
+				if (extension == ".xyz") {
+					Layer* nlayer = readXYZ(filePath);
+					if (nlayer == NULL) {
+						printf("xyz load failed");
+					}
+					else {
+						g_addScreen(new MainEditor(nlayer));
+					}
 				}
 				else {
-					g_addScreen(new MainEditor(srf));
-					SDL_FreeSurface(srf);
+					SDL_Surface* srf = IMG_Load(filePath.c_str());
+					if (srf == NULL) {
+						printf("imageload failed: %s\n", filePath.c_str());
+					}
+					else {
+						g_addScreen(new MainEditor(srf));
+						SDL_FreeSurface(srf);
+					}
 				}
 				SDL_free(evt.drop.file);
 				break;

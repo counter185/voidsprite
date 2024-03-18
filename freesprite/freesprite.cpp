@@ -90,4 +90,5 @@ int main(int argc, char** argv)
         SDL_RenderPresent(g_rd);
     }
 
+    return 0;
 }

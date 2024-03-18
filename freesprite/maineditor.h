@@ -28,6 +28,7 @@ public:
 
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);
+	MainEditor(Layer* srf);
 	~MainEditor();
 
 	void render() override;

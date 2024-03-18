@@ -12,6 +12,8 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+#include <zlib.h>
+
 #define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_JP "appfontjp-NotoSansJP-VariableFont_wght.ttf"
 
