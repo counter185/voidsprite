@@ -157,6 +157,7 @@
     <ClCompile Include="Brush1x1.cpp" />
     <ClCompile Include="Brush3pxCircle.cpp" />
     <ClCompile Include="BrushRect.cpp" />
+    <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
     <ClCompile Include="EditorBrushPicker.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Brush1x1.h" />
     <ClInclude Include="Brush3pxCircle.h" />
     <ClInclude Include="BrushRect.h" />
+    <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
     <ClInclude Include="EditorBrushPicker.h" />
