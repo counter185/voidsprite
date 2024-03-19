@@ -1,5 +1,6 @@
 #include "FileIO.h"
 #include <png.h>
+#include "libtga/tga.h"
 
 Layer* readXYZ(std::string path)
 {
@@ -129,4 +130,49 @@ Layer* readPNG(std::string path)
     fclose(pngfile);
 
     return nlayer;
+}
+
+Layer* readTGA(std::string path) {
+    SDL_Surface* tgasrf = IMG_Load(path.c_str());
+    
+    return new Layer(tgasrf);
+    /*TGA* tga = TGAOpen(path.c_str(), "r");
+    TGAData data;
+    data.flags = TGA_IMAGE_DATA;
+    TGAReadImage(tga, &data);
+    TGAHeader* header = &tga->hdr;
+    tbyte* img = data.img_data;
+
+    Layer* nlayer = new Layer(header->width, header->height);
+    uint32_t imagePointer = 0;
+    uint32_t imgPointer = 0;
+    for (int x = 0; x < header->width * header->height; x++) {
+        nlayer->pixelData[imagePointer++] = img[imgPointer++];
+        nlayer->pixelData[imagePointer++] = img[imgPointer++];
+        nlayer->pixelData[imagePointer++] = img[imgPointer++];
+        nlayer->pixelData[imagePointer++] = img[imgPointer++];
+    }
+
+    TGAClose(tga);*/
+}
+
+Layer* readAETEX(std::string path) {
+    FILE* texfile = NULL;
+    fopen_s(&texfile, path.c_str(), "rb");
+    if (texfile != NULL) {
+        fseek(texfile, 0, SEEK_END);
+        long filesize = ftell(texfile);
+        fseek(texfile, 0x38, SEEK_SET);
+        uint8_t* tgaData = (uint8_t*)malloc(filesize - 0x38);
+        fread(tgaData, filesize - 0x38, 1, texfile);
+        fclose(texfile);
+        SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
+        SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
+        SDL_RWclose(tgarw);
+        free(tgaData);
+        return new Layer(tgasrf);
+    }
+    else {
+        return NULL;
+    }
 }

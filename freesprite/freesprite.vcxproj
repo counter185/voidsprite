@@ -167,6 +167,9 @@
     <ClCompile Include="freesprite.cpp" />
     <ClCompile Include="GlobalNavBar.cpp" />
     <ClCompile Include="Layer.cpp" />
+    <ClCompile Include="libtga\tga.c" />
+    <ClCompile Include="libtga\tgaread.c" />
+    <ClCompile Include="libtga\tgawrite.c" />
     <ClCompile Include="maineditor.cpp" />
     <ClCompile Include="mathops.cpp" />
     <ClCompile Include="platform.cpp" />
@@ -195,6 +198,8 @@
     <ClInclude Include="GlobalNavBar.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Layer.h" />
+    <ClInclude Include="libtga\tga.h" />
+    <ClInclude Include="libtga\tga_private.h" />
     <ClInclude Include="maineditor.h" />
     <ClInclude Include="mathops.h" />
     <ClInclude Include="platform.h" />

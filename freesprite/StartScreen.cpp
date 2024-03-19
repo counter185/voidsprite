@@ -45,7 +45,7 @@ void StartScreen::takeInput(SDL_Event evt)
 				break;
 			case SDL_DROPFILE:
 				std::string filePath = evt.drop.file;
-				std::string extension = filePath.substr(filePath.size() - 4);
+				std::string extension = filePath.substr(filePath.find_last_of('.'));
 				if (extension == ".xyz") {
 					Layer* nlayer = readXYZ(filePath);
 					if (nlayer == NULL) {
@@ -59,6 +59,24 @@ void StartScreen::takeInput(SDL_Event evt)
 					Layer* nlayer = readPNG(filePath);
 					if (nlayer == NULL) {
 						printf("png load failed");
+					}
+					else {
+						g_addScreen(new MainEditor(nlayer));
+					}
+				}
+				else if (extension == ".tga") {
+					Layer* nlayer = readTGA(filePath);
+					if (nlayer == NULL) {
+						printf("tga load failed");
+					}
+					else {
+						g_addScreen(new MainEditor(nlayer));
+					}
+				}
+				else if (extension == ".aetex") {
+					Layer* nlayer = readAETEX(filePath);
+					if (nlayer == NULL) {
+						printf("aetex load failed");
 					}
 					else {
 						g_addScreen(new MainEditor(nlayer));

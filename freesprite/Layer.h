@@ -15,6 +15,16 @@ public:
 		tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 		SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 	}
+	Layer(SDL_Surface* from) : Layer(from->w, from->h) {
+		//pixelData = (uint8_t*)malloc(w * h * 4);
+		if (from->format->format == SDL_PIXELFORMAT_ARGB8888) {
+			memcpy(pixelData, from->pixels, w * h * 4);
+		}
+		else {
+			SDL_ConvertPixels(w, h, from->format->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
+			SDL_FreeSurface(from);
+		}
+	}
 
 	~Layer() {
 		free(pixelData);
