@@ -7,6 +7,8 @@
 #include <map>
 #include <new>
 #include <vector>
+#include <functional>
+#include <algorithm>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -44,6 +46,11 @@ void g_addScreen(BaseScreen* a);
 
 struct XY {
 	int x, y;
+};
+
+struct NamedEditorOperation {
+	std::string name;
+	std::function<void(MainEditor*)> function;
 };
 
 #include "platform.h"

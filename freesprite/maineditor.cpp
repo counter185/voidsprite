@@ -1,6 +1,7 @@
 #include "maineditor.h"
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
+#include "GlobalNavBar.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	SetUpWidgets();
@@ -110,6 +111,9 @@ void MainEditor::DrawForeground()
 
 void MainEditor::SetUpWidgets()
 {
+	GlobalNavBar* editorNavbar = new GlobalNavBar(this);
+	wxsManager.addDrawable(editorNavbar);
+
 	colorPicker = new EditorColorPicker(this);
 	colorPicker->position.y = 80;
 	colorPicker->position.x = 10;
@@ -176,9 +180,6 @@ void MainEditor::takeInput(SDL_Event evt) {
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
-					case SDLK_s:
-						platformTrySaveImageFile(this);
-						break;
 					case SDLK_RCTRL:
 						middleMouseHold = !middleMouseHold;
 						break;
@@ -253,4 +254,9 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
 			SetPixel(XY{ x, yPos }, color);
 		}
 	}
+}
+
+void MainEditor::trySaveImage()
+{
+	platformTrySaveImageFile(this);
 }

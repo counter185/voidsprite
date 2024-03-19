@@ -48,6 +48,7 @@ public:
 	void FillTexture();
 	void SetPixel(XY position, uint32_t color);
 	void DrawLine(XY from, XY to, uint32_t color);
+	void trySaveImage();
 
 	//DEPRECATED DO NOT USE
 	void EnsureTextureLocked();
