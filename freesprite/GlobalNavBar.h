@@ -24,10 +24,9 @@ public:
 				}
 			}
 		},
-		{SDLK_g, { "Flip current layer",
+		{SDLK_r, { "Recenter canvas",
 				[](MainEditor* editor) {
-					Layer* lr = editor->imgLayer;
-					lr->flipHorizontally();
+					editor->recenterCanvas();
 				}
 			}
 		},

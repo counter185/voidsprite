@@ -53,6 +53,7 @@ public:
 	void SetPixel(XY position, uint32_t color);
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
+	void recenterCanvas();
 
 	//DEPRECATED DO NOT USE
 	void EnsureTextureLocked();

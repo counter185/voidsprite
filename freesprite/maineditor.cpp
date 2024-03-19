@@ -9,9 +9,9 @@ MainEditor::MainEditor(XY dimensions) {
 	texW = dimensions.x;
 	texH = dimensions.y;
 	//canvasCenterPoint = XY{ texW / 2, texH / 2 };
-	canvasCenterPoint = XY{ 0,0 };
 	imgLayer = new Layer(texW, texH);
 	FillTexture();
+	recenterCanvas();
 }
 MainEditor::MainEditor(SDL_Surface* srf) {
 	SetUpWidgets();
@@ -22,7 +22,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
 	imgLayer = new Layer(texW, texH);
 	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, imgLayer->pixelData, texW*4);
-	canvasCenterPoint = XY{ 0,0 };
+	recenterCanvas();
 }
 
 MainEditor::MainEditor(Layer* layer)
@@ -33,11 +33,11 @@ MainEditor::MainEditor(Layer* layer)
 	texH = layer->h;
 
 	imgLayer = layer;
-	canvasCenterPoint = XY{ 0,0 };
+	recenterCanvas();
 }
 
 MainEditor::~MainEditor() {
-	printf("hello from destructor\n");
+	//printf("hello from destructor\n");
 	wxsManager.freeAllDrawables();
 	delete imgLayer;
 }
@@ -266,4 +266,12 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
 void MainEditor::trySaveImage()
 {
 	platformTrySaveImageFile(this);
+}
+
+void MainEditor::recenterCanvas()
+{
+	canvasCenterPoint = XY{
+		(g_windowW / 2) - (texW*scale)/2,
+		(g_windowH / 2) - (texH*scale)/2
+	};
 }

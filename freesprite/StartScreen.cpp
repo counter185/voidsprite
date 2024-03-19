@@ -55,6 +55,15 @@ void StartScreen::takeInput(SDL_Event evt)
 						g_addScreen(new MainEditor(nlayer));
 					}
 				}
+				else if (extension == ".png") {
+					Layer* nlayer = readPNG(filePath);
+					if (nlayer == NULL) {
+						printf("png load failed");
+					}
+					else {
+						g_addScreen(new MainEditor(nlayer));
+					}
+				}
 				else {
 					SDL_Surface* srf = IMG_Load(filePath.c_str());
 					if (srf == NULL) {
