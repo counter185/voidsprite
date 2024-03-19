@@ -46,6 +46,17 @@ public:
 		}
 	}
 
+	unsigned int getPixelAt(XY position) {
+		if (position.x >= 0 && position.x < w
+			&& position.y >= 0 && position.y < h) {
+			uint32_t* intpxdata = (uint32_t*)pixelData;
+			return intpxdata[position.x + (position.y * w)];
+		}
+		else {
+			return 0xFF000000;
+		}
+	}
+
 	void flipHorizontally() {
 		uint32_t* px32 = (uint32_t*)pixelData;
 		for (int y = 0; y < h; y++) {

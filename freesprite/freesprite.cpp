@@ -12,6 +12,8 @@ SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
 
+SDL_Texture* g_mainlogo = NULL;
+
 std::vector<BaseBrush*> g_brushes;
 
 std::vector<BaseScreen*> screenStack;
@@ -27,8 +29,12 @@ int main(int argc, char** argv)
     g_wd = SDL_CreateWindow("void\xE2\x97\x86sprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
     g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     platformInit();
-    //SDL_CreateWindowAndRenderer(g_windowW, g_windowH, SDL_WINDOW_RESIZABLE, &g_wd, &g_rd);
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
+
+    //todo lmao clean this up
+    SDL_Surface* srf1 = IMG_Load("assets/mainlogo.png");
+    g_mainlogo = SDL_CreateTextureFromSurface(g_rd, srf1);
+    SDL_FreeSurface(srf1);
 
     screenStack.push_back(new StartScreen());
 

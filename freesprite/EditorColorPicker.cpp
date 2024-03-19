@@ -56,9 +56,14 @@ void EditorColorPicker::eventTextInput(int evt_id, std::string data)
 void EditorColorPicker::eventButtonPressed(int evt_id)
 {
     if (evt_id == EVENT_COLORPICKER_TOGGLEERASER) {
-        caller->eraserMode = !caller->eraserMode;
-        eraserButton->colorBGFocused = eraserButton->colorBGUnfocused = caller->eraserMode ? SDL_Color{0xff,0xff,0xff, 0x30} : SDL_Color{ 0,0,0, 0x80 };
+        toggleEraser();
     }
+}
+
+void EditorColorPicker::toggleEraser()
+{
+    caller->eraserMode = !caller->eraserMode;
+    eraserButton->colorBGFocused = eraserButton->colorBGUnfocused = caller->eraserMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
 }
 
 void EditorColorPicker::updateMainEditorColor()

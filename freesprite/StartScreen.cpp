@@ -9,8 +9,11 @@ void StartScreen::tick() {
 
 void StartScreen::render()
 {
+	SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
+	SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
+
 	SDL_Rect bgr = SDL_Rect{ 0, 35, 300, 300 };
-	SDL_SetRenderDrawColor(g_rd, 0x20, 0x20, 0x20, 0xff);
+	SDL_SetRenderDrawColor(g_rd, 0x20, 0x20, 0x20, 0xa0);
 	SDL_RenderFillRect(g_rd, &bgr);
 
 	g_fnt->RenderString("voidsprite", 10, 40);

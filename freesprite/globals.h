@@ -32,6 +32,7 @@ class EventCallbackListener;
 class TextRenderer;
 class MainEditor;
 class EditorColorPicker;
+class EditorBrushPicker;
 class BaseScreen;
 class BaseBrush;
 
@@ -41,6 +42,8 @@ extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
+
+extern SDL_Texture* g_mainlogo;
 
 void g_addScreen(BaseScreen* a);
 

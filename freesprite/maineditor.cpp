@@ -120,7 +120,7 @@ void MainEditor::SetUpWidgets()
 	wxsManager.addDrawable(colorPicker);
 	colorPicker->setMainEditorColorRGB(pickedColor);
 
-	EditorBrushPicker* brushPicker = new EditorBrushPicker(this);
+	brushPicker = new EditorBrushPicker(this);
 	brushPicker->position.y = 480;
 	brushPicker->position.x = 10;
 	wxsManager.addDrawable(brushPicker);
@@ -160,6 +160,10 @@ void MainEditor::takeInput(SDL_Event evt) {
 				else if (evt.button.button == 2) {
 					middleMouseHold = evt.button.state;
 				}
+				else if (evt.button.button == 3) {
+					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
+					colorPicker->setMainEditorColorRGB(imgLayer->getPixelAt(mousePixelTargetPoint));
+				}
 				break;
 			case SDL_MOUSEMOTION:
 				RecalcMousePixelTargetPoint(evt.motion.x, evt.motion.y);
@@ -180,6 +184,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
+					case SDLK_e:
+						colorPicker->toggleEraser();
+						break;
 					case SDLK_RCTRL:
 						middleMouseHold = !middleMouseHold;
 						break;

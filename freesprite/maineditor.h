@@ -12,6 +12,8 @@
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
+private:
+
 public:
 	Layer* imgLayer;
 
@@ -29,6 +31,7 @@ public:
 
 	DrawableManager wxsManager;
 	EditorColorPicker* colorPicker;
+	EditorBrushPicker* brushPicker;
 
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);

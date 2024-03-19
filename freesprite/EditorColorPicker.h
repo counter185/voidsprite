@@ -58,6 +58,7 @@ public:
 	void eventTextInput(int evt_id, std::string data) override;
 	void eventButtonPressed(int evt_id) override;
 
+	void toggleEraser();
 	void updateMainEditorColor();
 	void setMainEditorColorRGB(unsigned int col);
 	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true);
