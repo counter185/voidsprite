@@ -29,7 +29,7 @@ void StartScreen::takeInput(SDL_Event evt)
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
 	}
 
-	if (!wxsManager.anyFocused()) {
+	if (!wxsManager.anyFocused() || evt.type == SDL_DROPFILE) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:

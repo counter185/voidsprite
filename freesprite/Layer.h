@@ -48,7 +48,6 @@ public:
 
 	void flipHorizontally() {
 		uint32_t* px32 = (uint32_t*)pixelData;
-		//px32[0] = 0xFFFFFFFF;
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w / 2; x++) {
 				uint32_t p = *(px32 + (y*w) + (w - 1 - x));
