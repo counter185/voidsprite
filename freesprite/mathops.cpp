@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "mathops.h"
+#include "FontRenderer.h"
 
 bool pointInBox(XY point, SDL_Rect rect) {
     XY normalP = { point.x - rect.x, point.y - rect.y };
@@ -14,6 +15,21 @@ XY xyAdd(XY p1, XY p2)
 XY xySubtract(XY p1, XY p2)
 {
     return XY{p1.x-p2.x, p1.y-p2.y};
+}
+
+std::wstring utf8StringToWstring(std::string a)
+{
+    std::wstring ret;
+    uint32_t currentUTF8Sym = 0;
+    int nextUTFBytes = 0;
+    for (int chx = 0; chx != a.size(); chx++) {
+        char target = a.at(chx);
+        bool done = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);
+        if (done) {
+            ret += (wchar_t)currentUTF8Sym;
+        }
+    }
+    return ret;
 }
 
 hsv rgb2hsv(rgb in)

@@ -20,3 +20,5 @@ private:
 
     void RenderGlyph(uint32_t a);
 };
+
+bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out);

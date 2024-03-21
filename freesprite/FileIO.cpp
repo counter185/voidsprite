@@ -3,10 +3,10 @@
 #include <png.h>
 #include "libtga/tga.h"
 
-Layer* readXYZ(std::string path)
+Layer* readXYZ(std::wstring path)
 {
     FILE* f = NULL;
-    fopen_s(&f, path.c_str(), "rb");
+    _wfopen_s(&f, path.c_str(), L"rb");
 
     if (f != NULL) {
         fseek(f, 0, SEEK_END);
@@ -56,10 +56,10 @@ Layer* readXYZ(std::string path)
     return NULL;
 }
 
-Layer* readPNG(std::string path)
+Layer* readPNG(std::wstring path)
 {
     FILE* pngfile = NULL;
-    fopen_s(&pngfile, path.c_str(), "rb");
+    _wfopen_s(&pngfile, path.c_str(), L"rb");
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     png_infop info = png_create_info_struct(png);
     png_init_io(png, pngfile);
@@ -157,9 +157,9 @@ Layer* readTGA(std::string path) {
     TGAClose(tga);*/
 }
 
-Layer* readAETEX(std::string path) {
+Layer* readAETEX(std::wstring path) {
     FILE* texfile = NULL;
-    fopen_s(&texfile, path.c_str(), "rb");
+    _wfopen_s(&texfile, path.c_str(), L"rb");
     if (texfile != NULL) {
         fseek(texfile, 0, SEEK_END);
         long filesize = ftell(texfile);
@@ -178,10 +178,10 @@ Layer* readAETEX(std::string path) {
     }
 }
 
-MainEditor* readVOIDSN(std::string path)
+MainEditor* readVOIDSN(std::wstring path)
 {
     FILE* infile = NULL;
-    fopen_s(&infile, path.c_str(), "rb");
+    _wfopen_s(&infile, path.c_str(), L"rb");
     if (infile != NULL) {
         uint8_t voidsnversion;
         fread(&voidsnversion, 1, 1, infile);
