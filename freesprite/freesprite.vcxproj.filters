@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Pliki źródłowe\libtga">
+      <UniqueIdentifier>{b2b7876e-add1-40fe-a925-456b7b03a6ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\libtga">
+      <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\brushes">
+      <UniqueIdentifier>{a353a57e-2acc-47b3-bb06-f77e67cee149}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\brushes">
+      <UniqueIdentifier>{0e62046e-5b57-4859-bf80-7c3090abe9e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="freesprite.cpp">
@@ -60,12 +72,6 @@
     <ClCompile Include="platform.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="BaseBrush.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Brush1x1.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="Layer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
@@ -75,20 +81,35 @@
     <ClCompile Include="EditorBrushPicker.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="Brush3pxCircle.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Brush1pxLine.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="BrushRect.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="GlobalNavBar.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="libtga\tga.c">
+      <Filter>Pliki źródłowe\libtga</Filter>
+    </ClCompile>
+    <ClCompile Include="libtga\tgaread.c">
+      <Filter>Pliki źródłowe\libtga</Filter>
+    </ClCompile>
+    <ClCompile Include="libtga\tgawrite.c">
+      <Filter>Pliki źródłowe\libtga</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseBrush.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush1pxLine.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush1x1.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush3pxCircle.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushRect.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
     <ClCompile Include="BrushRectFill.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\brushes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,9 +152,6 @@
     <ClInclude Include="StartScreen.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="BaseScreen.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="UIButton.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
@@ -141,12 +159,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="platform_windows.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseBrush.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Brush1x1.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="Layer.h">
@@ -158,19 +170,34 @@
     <ClInclude Include="EditorBrushPicker.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="Brush3pxCircle.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Brush1pxLine.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="BrushRect.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="GlobalNavBar.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="libtga\tga.h">
+      <Filter>Pliki nagłówkowe\libtga</Filter>
+    </ClInclude>
+    <ClInclude Include="libtga\tga_private.h">
+      <Filter>Pliki nagłówkowe\libtga</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseBrush.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush1pxLine.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush1x1.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush3pxCircle.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushRect.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
     <ClInclude Include="BrushRectFill.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseScreen.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
