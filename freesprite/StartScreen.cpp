@@ -83,6 +83,15 @@ void StartScreen::takeInput(SDL_Event evt)
 						g_addScreen(new MainEditor(nlayer));
 					}
 				}
+				else if (extension == ".voidsn" || extension == ".voidsnv1") {
+					MainEditor* session = readVOIDSN(filePath);
+					if (session == NULL) {
+						printf("voidsession load failed");
+					}
+					else {
+						g_addScreen(session);
+					}
+				}
 				else {
 					SDL_Surface* srf = IMG_Load(filePath.c_str());
 					if (srf == NULL) {

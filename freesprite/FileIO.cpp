@@ -1,4 +1,5 @@
 #include "FileIO.h"
+#include "maineditor.h"
 #include <png.h>
 #include "libtga/tga.h"
 
@@ -177,6 +178,43 @@ Layer* readAETEX(std::string path) {
     }
 }
 
+MainEditor* readVOIDSN(std::string path)
+{
+    FILE* infile = NULL;
+    fopen_s(&infile, path.c_str(), "rb");
+    if (infile != NULL) {
+        uint8_t voidsnversion;
+        fread(&voidsnversion, 1, 1, infile);
+        switch (voidsnversion) {
+            case 1:
+                {
+                    XY dimensions;
+                    fread(&dimensions.x, 4, 1, infile);
+                    fread(&dimensions.y, 4, 1, infile);
+                    std::vector<Layer*> layers;
+                    int nlayers;
+                    fread(&nlayers, 4, 1, infile);
+                    for (int x = 0; x < nlayers; x++) {
+                        Layer* newLayer = new Layer(dimensions.x, dimensions.y);
+                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                        layers.push_back(newLayer);
+                    }
+                    MainEditor* ret = new MainEditor(layers[0]);
+                    fclose(infile);
+                    return ret;
+                }
+                break;
+            default:
+                printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
+                fclose(infile);
+                return NULL;
+        }
+
+        fclose(infile);
+    }
+    return NULL;
+}
+
 bool writePNG(std::wstring path, Layer* data)
 {
     // exports png
@@ -208,6 +246,36 @@ bool writePNG(std::wstring path, Layer* data)
 
         png_destroy_write_struct(&outpng, &outpnginfo);
         free(convertedToABGR);
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeVOIDSNv1(std::wstring path, XY projDimensions, std::vector<Layer*> data)
+{
+    FILE* outfile = NULL;
+    _wfopen_s(&outfile, path.c_str(), L"wb");
+    if (outfile != NULL) {
+        uint8_t voidsnVersion = 0x01;
+        fwrite(&voidsnVersion, 1, 1, outfile);
+        uint32_t nvalBuffer;
+
+        nvalBuffer = projDimensions.x;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+        nvalBuffer = projDimensions.y;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        nvalBuffer = data.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (Layer*& lr : data) {
+            if (lr->w * lr->h != projDimensions.x * projDimensions.y) {
+                printf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+            }
+            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+        }
+
         fclose(outfile);
         return true;
     }

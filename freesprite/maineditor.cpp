@@ -209,15 +209,19 @@ void MainEditor::takeInput(SDL_Event evt) {
 	}
 }
 
-void MainEditor::eventFileSaved(int evt_id, std::string name)
+void MainEditor::eventFileSavedW(int evt_id, std::wstring name)
 {
 	if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
-		printf("eventFileSaved: got file name %s\n", name.c_str());
-		
-		SDL_Surface* nsrf = SDL_CreateRGBSurfaceWithFormat(0, imgLayer->w, imgLayer->h, 32, SDL_PIXELFORMAT_ARGB8888);
-		memcpy(nsrf->pixels, imgLayer->pixelData, nsrf->w * nsrf->h * 4);
-		IMG_SavePNG(nsrf, name.c_str());
-		SDL_FreeSurface(nsrf);
+		printf("eventFileSavedW: got file name %ls\n", name.c_str());
+
+		size_t extStart = name.find_last_of(L".");
+		std::wstring extension = name.substr(extStart);
+		if (extension == L".voidsn") {
+			writeVOIDSNv1(name, XY{ texW, texH }, { imgLayer });
+		}
+		else {
+			writePNG(name, imgLayer);
+		}
 	}
 }
 

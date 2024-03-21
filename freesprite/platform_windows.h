@@ -7,7 +7,7 @@
 #include <commdlg.h>
 
 HWND WINhWnd = NULL;
-char fileNameBuffer[MAX_PATH] = { 0 };
+wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 
 void platformPreInit() {
 
@@ -41,11 +41,11 @@ void platformPostInit() {
 }
 
 void platformTrySaveImageFile(EventCallbackListener* listener) {
-    OPENFILENAMEA ofna;
+    OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
     ofna.hwndOwner = WINhWnd;
-    ofna.lpstrFilter = "PNG Files (.png)\0*.png\0All files\0*.*\0\0";
+    ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0voidsprite Session Files v1 (.voidsn)\0*.voidsn\0All files\0*.*\0\0";
     ofna.lpstrCustomFilter = NULL;
     ofna.nFilterIndex = 1;
     ofna.lpstrFile = fileNameBuffer;
@@ -53,10 +53,10 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.lpstrFileTitle = NULL;
     ofna.lpstrInitialDir = NULL;
     ofna.Flags = OFN_EXPLORER;
-    ofna.lpstrTitle = "voidsprite: Save Image";
-    ofna.lpstrDefExt = "png";
-    if (GetSaveFileNameA(&ofna)) {
-        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, std::string(fileNameBuffer));
+    ofna.lpstrTitle = L"voidsprite: Save Image";
+    ofna.lpstrDefExt = L"png";
+    if (GetSaveFileNameW(&ofna)) {
+        listener->eventFileSavedW(EVENT_MAINEDITOR_SAVEFILE, std::wstring(fileNameBuffer));
     }
     else {
         printf("windows error: %i\n", GetLastError());

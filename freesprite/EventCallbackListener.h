@@ -13,4 +13,5 @@ public:
 	virtual void eventTextInput(int evt_id, std::string data) {}
 	virtual void eventButtonPressed(int evt_id) {}
 	virtual void eventFileSaved(int evt_id, std::string name) {}
+	virtual void eventFileSavedW(int evt_id, std::wstring name) {}
 };

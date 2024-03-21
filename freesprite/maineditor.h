@@ -46,7 +46,7 @@ public:
 	void tick() override;
 	void takeInput(SDL_Event evt) override;
 
-	void eventFileSaved(int evt_id, std::string name) override;
+	void eventFileSavedW(int evt_id, std::wstring name) override;
 	
 	void DrawBackground();
 	void DrawForeground();
