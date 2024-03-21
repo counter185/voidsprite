@@ -40,6 +40,17 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
 	return false;
 }
 
+void DrawableManager::forceFocusOn(Drawable* d)
+{
+	if (focused != d && focused != NULL) {
+		focused->focusOut();
+	}
+	if (d != NULL) {
+		d->focusIn();
+	}
+	focused = d;
+}
+
 void DrawableManager::forceUnfocus() {
 	if (focused != NULL) {
 		focused->focusOut();

@@ -13,6 +13,7 @@ public:
 	void passInputToFocused(SDL_Event evt, XY parentOffset = XY{0,0}) { focused->handleInput(evt, xyAdd(parentOffset, focused->position)); }
 	bool anyFocused() { return focused != NULL; }
 	bool tryFocusOnPoint(XY screenPoint, XY parentOffset = XY{0,0});
+	void forceFocusOn(Drawable* d);
 	void forceUnfocus();
 
 	void freeAllDrawables();

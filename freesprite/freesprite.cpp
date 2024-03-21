@@ -107,7 +107,7 @@ int main(int argc, char** argv)
         SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};
         SDL_RenderFillRect(g_rd, &temp);
 
-        g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
+        //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
 
         SDL_RenderPresent(g_rd);
     }

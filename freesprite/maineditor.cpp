@@ -111,9 +111,6 @@ void MainEditor::DrawForeground()
 
 void MainEditor::SetUpWidgets()
 {
-	GlobalNavBar* editorNavbar = new GlobalNavBar(this);
-	wxsManager.addDrawable(editorNavbar);
-
 	colorPicker = new EditorColorPicker(this);
 	colorPicker->position.y = 80;
 	colorPicker->position.x = 10;
@@ -124,6 +121,10 @@ void MainEditor::SetUpWidgets()
 	brushPicker->position.y = 480;
 	brushPicker->position.x = 10;
 	wxsManager.addDrawable(brushPicker);
+
+	navbar = new GlobalNavBar(this);
+	wxsManager.addDrawable(navbar);
+
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
@@ -184,6 +185,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
+					case SDLK_LALT:
+						wxsManager.forceFocusOn(navbar);
+						break;
 					case SDLK_e:
 						colorPicker->toggleEraser();
 						break;

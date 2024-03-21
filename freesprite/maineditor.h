@@ -30,6 +30,7 @@ public:
 	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
 
+	GlobalNavBar* navbar;
 	DrawableManager wxsManager;
 	EditorColorPicker* colorPicker;
 	EditorBrushPicker* brushPicker;

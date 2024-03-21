@@ -31,6 +31,7 @@
 class EventCallbackListener;
 class TextRenderer;
 class MainEditor;
+class GlobalNavBar;
 class EditorColorPicker;
 class EditorBrushPicker;
 class BaseScreen;
@@ -54,6 +55,11 @@ struct XY {
 struct NamedEditorOperation {
 	std::string name;
 	std::function<void(MainEditor*)> function;
+};
+
+struct NavbarSection {
+	std::string name;
+	std::map<SDL_Keycode, NamedEditorOperation> actions;
 };
 
 #include "platform.h"
