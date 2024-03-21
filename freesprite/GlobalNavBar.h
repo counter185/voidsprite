@@ -3,6 +3,7 @@
 #include "drawable.h"
 #include "mathops.h"
 #include "maineditor.h"
+#include "FileIO.h"
 
 class GlobalNavBar : public Drawable
 {
@@ -32,6 +33,14 @@ public:
 							}
 						}
 					},
+#if _DEBUG
+					{SDLK_a, { "DebugSaveTest",
+							[](MainEditor* editor) {
+								writePNG(L"a.png", editor->imgLayer);
+							}
+						}
+					},
+#endif
 				}
 			}
 		},
@@ -44,6 +53,16 @@ public:
 							[](MainEditor* editor) {
 								Layer* lr = editor->imgLayer;
 								lr->flipHorizontally();
+							}
+						}
+					},
+					{SDLK_b, { "Swap channels RGB->BGR",
+							[](MainEditor* editor) {
+								uint8_t* convData = (uint8_t*)malloc(editor->imgLayer->w * editor->imgLayer->h * 4);
+								SDL_ConvertPixels(editor->imgLayer->w, editor->imgLayer->h, SDL_PIXELFORMAT_ARGB8888, editor->imgLayer->pixelData, editor->imgLayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, editor->imgLayer->w * 4);
+								free(editor->imgLayer->pixelData);
+								editor->imgLayer->pixelData = convData;
+								editor->imgLayer->layerDirty = true;
 							}
 						}
 					},
@@ -63,7 +82,9 @@ public:
 					},
 					{SDLK_b, { "Toggle background color",
 							[](MainEditor* editor) {
-								//todo: implement this
+								editor->backgroundColor.r = ~editor->backgroundColor.r;
+								editor->backgroundColor.g = ~editor->backgroundColor.g;
+								editor->backgroundColor.b = ~editor->backgroundColor.b;
 							}
 						}
 					},

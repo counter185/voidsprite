@@ -35,6 +35,8 @@ public:
 	EditorColorPicker* colorPicker;
 	EditorBrushPicker* brushPicker;
 
+	SDL_Color backgroundColor = SDL_Color{0,0,0,255};
+
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);
 	MainEditor(Layer* srf);

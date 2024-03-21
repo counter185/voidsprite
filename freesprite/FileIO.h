@@ -6,3 +6,5 @@ Layer* readXYZ(std::string path);
 Layer* readPNG(std::string path);
 Layer* readTGA(std::string path);
 Layer* readAETEX(std::string path);
+
+bool writePNG(std::wstring path, Layer* data);

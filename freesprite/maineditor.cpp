@@ -44,6 +44,8 @@ MainEditor::~MainEditor() {
 
 void MainEditor::render() {
 	EnsureTextureUnlocked();
+	SDL_SetRenderDrawColor(g_rd, backgroundColor.r/4*3, backgroundColor.g/4*3, backgroundColor.b/4*3, 255);
+	SDL_RenderClear(g_rd);
 	DrawBackground();
 
 	SDL_Rect canvasRenderRect;
@@ -73,9 +75,9 @@ void MainEditor::DrawBackground()
 {
 	int lineX = 400;
 	for (int x = 40 + (SDL_GetTicks64()%5000/5000.0 * 60); x < g_windowW + lineX; x += 60) {
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x40);
+		SDL_SetRenderDrawColor(g_rd, 0xff-backgroundColor.r, 0xff-backgroundColor.g, 0xff-backgroundColor.b, 0x40);
 		SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x0d);
+		SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d);
 		SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX/4*6, g_windowH);
 	}
 
@@ -84,7 +86,7 @@ void MainEditor::DrawBackground()
 	int lh = texH * scale + 2;
 	SDL_Rect r = { canvasCenterPoint.x - 1, canvasCenterPoint.y - 1, lw, lh };
 	uint8_t a = 0xff;
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, a);
+	SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, a);
 	SDL_RenderDrawRect(g_rd, &r);
 	for (int x = 0; x < 6; x++) {
 		r.w += 2;
@@ -92,7 +94,7 @@ void MainEditor::DrawBackground()
 		r.x -= 1;
 		r.y -= 1;
 		a /= 2;
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, a);
+		SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, a);
 		SDL_RenderDrawRect(g_rd, &r);
 	}
 	
