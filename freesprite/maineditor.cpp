@@ -44,7 +44,7 @@ MainEditor::~MainEditor() {
 
 void MainEditor::render() {
 	EnsureTextureUnlocked();
-	SDL_SetRenderDrawColor(g_rd, backgroundColor.r/4*3, backgroundColor.g/4*3, backgroundColor.b/4*3, 255);
+	SDL_SetRenderDrawColor(g_rd, backgroundColor.r/6*5, backgroundColor.g/6*5, backgroundColor.b/6*5, 255);
 	SDL_RenderClear(g_rd);
 	DrawBackground();
 
