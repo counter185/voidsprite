@@ -111,6 +111,9 @@
     <ClCompile Include="BrushRectFill.cpp">
       <Filter>Pliki źródłowe\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="ToolColorPicker.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -199,6 +202,9 @@
     </ClInclude>
     <ClInclude Include="BaseScreen.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolColorPicker.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
