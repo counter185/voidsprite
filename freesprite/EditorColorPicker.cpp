@@ -17,6 +17,16 @@ void EditorColorPicker::render(XY position)
     SDL_SetRenderDrawColor(g_rd, previewCol.r/6, previewCol.g / 6, previewCol.b / 6, focused ? 0xaf : 0x30);
     SDL_RenderFillRect(g_rd, &r);
 
+    XY tabOrigin = xyAdd(position, tbv->position);
+    tabOrigin.y += tbv->buttonsHeight;
+    switch (tbv->openTab) {
+        case 1:
+            g_fnt->RenderString(std::format("H {}", std::round(currentH * 1000.0f) / 1000.0f), tabOrigin.x, tabOrigin.y + 20);
+            g_fnt->RenderString(std::format("S {}", std::round(currentS * 1000.0f) / 1000.0f), tabOrigin.x, tabOrigin.y + 70);
+            g_fnt->RenderString(std::format("V {}", std::round(currentV * 1000.0f) / 1000.0f), tabOrigin.x, tabOrigin.y + 120);
+            break;
+    }
+
     r = SDL_Rect{ position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35 };
     SDL_SetRenderDrawColor(g_rd, previewCol.r, previewCol.g, previewCol.b, focused ? 0xff : 0x30);
     SDL_RenderFillRect(g_rd, &r);
@@ -60,6 +70,24 @@ void EditorColorPicker::eventButtonPressed(int evt_id)
     }
 }
 
+void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
+{
+    switch (evt_id) {
+        case EVENT_COLORPICKER_SLIDERH:
+            currentH = f * 360.0f;
+            updateMainEditorColor();
+            break;
+        case EVENT_COLORPICKER_SLIDERS:
+            currentS = f;
+            updateMainEditorColor();
+            break;
+        case EVENT_COLORPICKER_SLIDERV:
+            currentV = f;
+            updateMainEditorColor();
+            break;
+    }
+}
+
 void EditorColorPicker::toggleEraser()
 {
     caller->eraserMode = !caller->eraserMode;
@@ -77,16 +105,23 @@ void EditorColorPicker::setMainEditorColorRGB(unsigned int col) {
     setMainEditorColorRGB(SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff) });
 }
 void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders) {
-    if (updateHSVSliders) {
-        hsv a = rgb2hsv(rgb{ col.r / 255.0f, col.g / 255.0f, col.b / 255.0f });
+    hsv a = rgb2hsv(rgb{ col.r / 255.0f, col.g / 255.0f, col.b / 255.0f });
+    if (tbv->openTab != 1 || updateHSVSliders) {
+        sliderH->sliderPos = a.h / 360.0f;
+        sliderS->sliderPos = a.s;
+        sliderV->sliderPos = a.v;
+    }
+    if (tbv->openTab != 0 || updateHSVSliders) {
         hueSlider->sliderPos = a.h / 360.0;
         satValSlider->sPos = a.s;
         satValSlider->vPos = a.v;
+    }
+    if (updateHSVSliders) {
         currentH = a.h;
         currentS = a.s;
         currentV = a.v;
-        //todo clean this shit up
     }
+
     colorTextField->text = std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b);
     caller->pickedColor = (0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
 }

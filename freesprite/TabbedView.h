@@ -18,6 +18,8 @@ public:
     std::vector<Tab> tabs;
     int buttonsHeight = 30;
     int openTab = 0;
+    SDL_Color tabUnfocusedColor = SDL_Color{ 0,0,0,0xd0 };
+    SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0 };
 
     TabbedView(std::vector<Tab> tabN) {
         int buttonX = 0;
@@ -33,6 +35,7 @@ public:
 
             tabs.push_back(tabN[x]);
         }
+        updateTabButtons();
     }
     ~TabbedView() {
         tabButtons.freeAllDrawables();
@@ -65,6 +68,14 @@ public:
 
     void eventButtonPressed(int evt_id) override {
         openTab = evt_id;
+        updateTabButtons();
+    }
+
+    void updateTabButtons() {
+        for (int x = 0; x < tabButtons.drawablesList.size(); x++) {
+            UIButton* btn = (UIButton*)tabButtons.drawablesList[x];
+            btn->colorBGFocused = btn->colorBGUnfocused = openTab == x ? tabFocusedColor : tabUnfocusedColor;
+        }
     }
 };
 

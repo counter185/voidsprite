@@ -22,12 +22,16 @@ public:
 	UIColorSlider* hueSlider;
 	UISVPicker* satValSlider;
 	UITextField* colorTextField;
+	UISlider* sliderH;
+	UISlider* sliderS;
+	UISlider* sliderV;
+	TabbedView* tbv;
 
 	UIButton* eraserButton;
 
 	EditorColorPicker(MainEditor* c) {
 		caller = c;
-		TabbedView* tbv = new TabbedView({{"Visual"}, {"HSV"}, {"RGB"}});
+		tbv = new TabbedView({{"Visual"}, {"HSV"}, {"RGB"}});
 		tbv->position = XY{ 20,30 };
 		subWidgets.addDrawable(tbv);
 
@@ -38,6 +42,24 @@ public:
 		satValSlider = new UISVPicker(this);
 		satValSlider->position = XY{ 0,70 };
 		tbv->tabs[0].wxs.addDrawable(satValSlider);
+
+		sliderH = new UISlider();
+		sliderH->position = XY{ 70, 10 };
+		sliderH->wxWidth = 200;
+		sliderH->setCallbackListener(EVENT_COLORPICKER_SLIDERH, this);
+		tbv->tabs[1].wxs.addDrawable(sliderH);	
+
+		sliderS = new UISlider();
+		sliderS->position = XY{ 70, 60 };
+		sliderS->wxWidth = 200;
+		sliderS->setCallbackListener(EVENT_COLORPICKER_SLIDERS, this);
+		tbv->tabs[1].wxs.addDrawable(sliderS);		
+		
+		sliderV = new UISlider();
+		sliderV->position = XY{ 70, 110 };
+		sliderV->wxWidth = 200;
+		sliderV->setCallbackListener(EVENT_COLORPICKER_SLIDERV, this);
+		tbv->tabs[1].wxs.addDrawable(sliderV);
 
 		colorTextField = new UITextField();
 		colorTextField->position = XY{ 60, 340 };
@@ -62,6 +84,7 @@ public:
 	}
 	void eventTextInput(int evt_id, std::string data) override;
 	void eventButtonPressed(int evt_id) override;
+	void eventSliderPosChanged(int evt_id, float f) override;
 
 	void toggleEraser();
 	void updateMainEditorColor();

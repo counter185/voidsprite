@@ -7,11 +7,12 @@ void UISlider::drawPosIndicator(XY origin) {
 
 	XY centerPoint = xyAdd(origin, XY{ (int)(wxWidth * sliderPos), 0});
 	int xdist = 3;
-	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
 	for (int x = 0; x < 2; x++) {
 		int fxdist = xdist + x;
 		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist);
 		SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xd0);
 	}
 }
 

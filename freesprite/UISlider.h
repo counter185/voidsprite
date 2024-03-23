@@ -1,6 +1,7 @@
 #pragma once
 #include "drawable.h"
 #include "mathops.h"
+#include "EventCallbackListener.h"
 
 class UISlider : public Drawable
 {
@@ -22,7 +23,11 @@ public:
 		mouseHeld = false;
 	}
 
-	virtual void onSliderPosChanged() {}
+	virtual void onSliderPosChanged() {
+		if (callback != NULL) {
+			callback->eventSliderPosChanged(callback_id, sliderPos);
+		}
+	}
 
 };
 

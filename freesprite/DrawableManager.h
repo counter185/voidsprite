@@ -6,6 +6,8 @@
 class DrawableManager
 {
 public:
+	std::vector<Drawable*> drawablesList;
+
 	void addDrawable(Drawable* d);
 	void removeDrawable(Drawable* d);
 	void renderAll(XY offset = XY{0,0});
@@ -19,7 +21,6 @@ public:
 
 	void freeAllDrawables();
 private:
-	std::vector<Drawable*> drawablesList;
 	Drawable* focused = NULL;
 };
 

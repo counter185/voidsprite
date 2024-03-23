@@ -5,6 +5,9 @@
 #define EVENT_MAINEDITOR_SAVEFILE 2
 #define EVENT_BRUSHPICKER_BRUSH_CHANGED 3
 #define EVENT_COLORPICKER_TOGGLEERASER 4
+#define EVENT_COLORPICKER_SLIDERH 5
+#define EVENT_COLORPICKER_SLIDERS 6
+#define EVENT_COLORPICKER_SLIDERV 7
 
 class EventCallbackListener {
 public:
@@ -15,4 +18,5 @@ public:
 	virtual void eventFileSaved(int evt_id, std::string name) {}	//do not use
 	virtual void eventFileSavedW(int evt_id, std::wstring name) {}
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
+	virtual void eventSliderPosChanged(int evt_id, float value) {}
 };
