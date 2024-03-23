@@ -6,6 +6,7 @@
 #include "UISVPicker.h"
 #include "UITextField.h"
 #include "UIButton.h"
+#include "TabbedView.h"
 
 class EditorColorPicker : public Drawable, public EventCallbackListener
 {
@@ -26,20 +27,20 @@ public:
 
 	EditorColorPicker(MainEditor* c) {
 		caller = c;
-		/*TabbedView* tbv = new TabbedView({{"Visual"}, {"HSV"}, {"RGB"}});
+		TabbedView* tbv = new TabbedView({{"Visual"}, {"HSV"}, {"RGB"}});
 		tbv->position = XY{ 20,30 };
-		subWidgets.addDrawable(tbv);*/
+		subWidgets.addDrawable(tbv);
 
 		hueSlider = new UIColorSlider(this);
-		hueSlider->position = XY{20,30};
-		subWidgets.addDrawable(hueSlider);
+		hueSlider->position = XY{0,0};
+		tbv->tabs[0].wxs.addDrawable(hueSlider);
 
 		satValSlider = new UISVPicker(this);
-		satValSlider->position = XY{ 20,100 };
-		subWidgets.addDrawable(satValSlider);
+		satValSlider->position = XY{ 0,70 };
+		tbv->tabs[0].wxs.addDrawable(satValSlider);
 
 		colorTextField = new UITextField();
-		colorTextField->position = XY{ 20, 305 };
+		colorTextField->position = XY{ 60, 340 };
 		colorTextField->wxWidth = 140;
 		colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
 		subWidgets.addDrawable(colorTextField);

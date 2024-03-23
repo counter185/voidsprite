@@ -51,7 +51,7 @@ public:
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override {
         if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-            if (tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset)) {
+            if (!tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset)) {
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }
         }
@@ -64,7 +64,7 @@ public:
     }
 
     void eventButtonPressed(int evt_id) override {
-
+        openTab = evt_id;
     }
 };
 
