@@ -144,6 +144,9 @@
     <ClCompile Include="PopupMessageBox.cpp">
       <Filter>Pliki źródłowe\popup</Filter>
     </ClCompile>
+    <ClCompile Include="TabbedView.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -241,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="PopupMessageBox.h">
       <Filter>Pliki nagłówkowe\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="TabbedView.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

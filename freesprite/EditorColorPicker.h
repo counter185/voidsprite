@@ -26,6 +26,10 @@ public:
 
 	EditorColorPicker(MainEditor* c) {
 		caller = c;
+		/*TabbedView* tbv = new TabbedView({{"Visual"}, {"HSV"}, {"RGB"}});
+		tbv->position = XY{ 20,30 };
+		subWidgets.addDrawable(tbv);*/
+
 		hueSlider = new UIColorSlider(this);
 		hueSlider->position = XY{20,30};
 		subWidgets.addDrawable(hueSlider);

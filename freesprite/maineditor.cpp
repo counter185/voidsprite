@@ -143,7 +143,7 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 
 void MainEditor::takeInput(SDL_Event evt) {
 
-	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
 	}
 

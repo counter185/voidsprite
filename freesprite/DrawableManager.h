@@ -15,6 +15,7 @@ public:
 	bool tryFocusOnPoint(XY screenPoint, XY parentOffset = XY{0,0});
 	void forceFocusOn(Drawable* d);
 	void forceUnfocus();
+	bool mouseInAny(XY thisPositionOnScreen, XY mousePos);
 
 	void freeAllDrawables();
 private:

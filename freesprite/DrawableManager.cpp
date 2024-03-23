@@ -58,6 +58,17 @@ void DrawableManager::forceUnfocus() {
 	}
 }
 
+bool DrawableManager::mouseInAny(XY origin, XY mousePos)
+{
+	for (Drawable*& d : drawablesList) {
+		XY renderPoint = xyAdd(d->position, origin);
+		if (d->isMouseIn(renderPoint, mousePos)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void DrawableManager::freeAllDrawables()
 {
 	for (int x = 0; x < drawablesList.size(); x++) {

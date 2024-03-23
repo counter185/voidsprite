@@ -176,6 +176,7 @@
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="PopupMessageBox.cpp" />
     <ClCompile Include="StartScreen.cpp" />
+    <ClCompile Include="TabbedView.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="platform_windows.h" />
     <ClInclude Include="PopupMessageBox.h" />
     <ClInclude Include="StartScreen.h" />
+    <ClInclude Include="TabbedView.h" />
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIColorSlider.h" />
