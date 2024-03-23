@@ -13,60 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Pliki źródłowe\libtga">
-      <UniqueIdentifier>{b2b7876e-add1-40fe-a925-456b7b03a6ed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pliki nagłówkowe\libtga">
-      <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pliki nagłówkowe\brushes">
       <UniqueIdentifier>{a353a57e-2acc-47b3-bb06-f77e67cee149}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pliki źródłowe\brushes">
       <UniqueIdentifier>{0e62046e-5b57-4859-bf80-7c3090abe9e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\popup">
+      <UniqueIdentifier>{4de1fdf9-44f3-49f3-8112-39b6ce2460d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\popup">
+      <UniqueIdentifier>{ff4f4cf5-5d84-462f-8678-473afbe41528}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\external">
+      <UniqueIdentifier>{81e8270e-1bb6-412d-806b-77e2e141642d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\external\libtga">
+      <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\external">
+      <UniqueIdentifier>{a32cb1a6-5407-47ab-92fe-6e5bd7c5879b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\external\libtga">
+      <UniqueIdentifier>{b2b7876e-add1-40fe-a925-456b7b03a6ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\ui_widgets">
+      <UniqueIdentifier>{f690dacb-3219-4eca-9b18-d1d94a7e302c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\ui_widgets">
+      <UniqueIdentifier>{e62c2e0a-b6a8-4498-bade-9fb2bd8955a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\screen">
+      <UniqueIdentifier>{e201f46f-e0ea-479c-86b6-e5a02322eec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\screen">
+      <UniqueIdentifier>{b42970c2-7d17-43ca-9583-d087ee0c3c22}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="freesprite.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="drawable.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="FontRenderer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="maineditor.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="EditorColorPicker.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawableManager.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="UISlider.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="mathops.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="UIColorSlider.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="UISVPicker.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="UITextField.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="StartScreen.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseScreen.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="UIButton.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="platform.cpp">
@@ -78,20 +69,14 @@
     <ClCompile Include="FileIO.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="EditorBrushPicker.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobalNavBar.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="libtga\tga.c">
-      <Filter>Pliki źródłowe\libtga</Filter>
+      <Filter>Pliki źródłowe\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="libtga\tgaread.c">
-      <Filter>Pliki źródłowe\libtga</Filter>
+      <Filter>Pliki źródłowe\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="libtga\tgawrite.c">
-      <Filter>Pliki źródłowe\libtga</Filter>
+      <Filter>Pliki źródłowe\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="BaseBrush.cpp">
       <Filter>Pliki źródłowe\brushes</Filter>
@@ -114,48 +99,63 @@
     <ClCompile Include="ToolColorPicker.cpp">
       <Filter>Pliki źródłowe\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="BasePopup.cpp">
+      <Filter>Pliki źródłowe\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorBrushPicker.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorColorPicker.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UIButton.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UIColorSlider.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UISlider.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UISVPicker.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UITextField.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalNavBar.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableManager.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseScreen.cpp">
+      <Filter>Pliki źródłowe\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="StartScreen.cpp">
+      <Filter>Pliki źródłowe\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="maineditor.cpp">
+      <Filter>Pliki źródłowe\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupMessageBox.cpp">
+      <Filter>Pliki źródłowe\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="drawable.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="FontRenderer.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="maineditor.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="EditorColorPicker.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawableManager.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="mathops.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="UISlider.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="UIColorSlider.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="UISVPicker.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="UITextField.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="EventCallbackListener.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="StartScreen.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="UIButton.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
@@ -170,17 +170,11 @@
     <ClInclude Include="FileIO.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="EditorBrushPicker.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobalNavBar.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="libtga\tga.h">
-      <Filter>Pliki nagłówkowe\libtga</Filter>
+      <Filter>Pliki nagłówkowe\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="libtga\tga_private.h">
-      <Filter>Pliki nagłówkowe\libtga</Filter>
+      <Filter>Pliki nagłówkowe\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="BaseBrush.h">
       <Filter>Pliki nagłówkowe\brushes</Filter>
@@ -200,11 +194,53 @@
     <ClInclude Include="BrushRectFill.h">
       <Filter>Pliki nagłówkowe\brushes</Filter>
     </ClInclude>
-    <ClInclude Include="BaseScreen.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="ToolColorPicker.h">
       <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="BasePopup.h">
+      <Filter>Pliki nagłówkowe\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorBrushPicker.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorColorPicker.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalNavBar.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UIButton.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UIColorSlider.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UISlider.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UISVPicker.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UITextField.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableManager.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="StartScreen.h">
+      <Filter>Pliki nagłówkowe\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="maineditor.h">
+      <Filter>Pliki nagłówkowe\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseScreen.h">
+      <Filter>Pliki nagłówkowe\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupMessageBox.h">
+      <Filter>Pliki nagłówkowe\popup</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

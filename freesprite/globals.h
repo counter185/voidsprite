@@ -35,6 +35,7 @@ class GlobalNavBar;
 class EditorColorPicker;
 class EditorBrushPicker;
 class BaseScreen;
+class BasePopup;
 class BaseBrush;
 
 extern int g_windowW, g_windowH;
@@ -47,6 +48,9 @@ extern std::vector<BaseBrush*> g_brushes;
 extern SDL_Texture* g_mainlogo;
 
 void g_addScreen(BaseScreen* a);
+
+void g_addPopup(BasePopup* a);
+void g_popDisposeLastPopup(bool dispose = true);
 
 struct XY {
 	int x, y;

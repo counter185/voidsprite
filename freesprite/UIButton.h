@@ -10,7 +10,7 @@ public:
 	SDL_Texture* icon = NULL;
 	
 	SDL_Color colorBGFocused = SDL_Color{ 0,0,0,0xff };
-	SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0x30 };
+	SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
 	SDL_Color colorTextFocused = SDL_Color{ 255,255,255,0xff };
 	SDL_Color colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
 

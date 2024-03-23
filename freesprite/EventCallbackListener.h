@@ -12,6 +12,7 @@ public:
 	virtual void eventGeneric2(int evt_id, void* data1) {}
 	virtual void eventTextInput(int evt_id, std::string data) {}
 	virtual void eventButtonPressed(int evt_id) {}
-	virtual void eventFileSaved(int evt_id, std::string name) {}
+	virtual void eventFileSaved(int evt_id, std::string name) {}	//do not use
 	virtual void eventFileSavedW(int evt_id, std::wstring name) {}
+	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
 };

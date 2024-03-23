@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseBrush.cpp" />
+    <ClCompile Include="BasePopup.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
     <ClCompile Include="Brush1pxLine.cpp" />
     <ClCompile Include="Brush1x1.cpp" />
@@ -164,7 +165,7 @@
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
-    <ClCompile Include="freesprite.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="GlobalNavBar.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="libtga\tga.c" />
@@ -173,6 +174,7 @@
     <ClCompile Include="maineditor.cpp" />
     <ClCompile Include="mathops.cpp" />
     <ClCompile Include="platform.cpp" />
+    <ClCompile Include="PopupMessageBox.cpp" />
     <ClCompile Include="StartScreen.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="UIButton.cpp" />
@@ -183,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseBrush.h" />
+    <ClInclude Include="BasePopup.h" />
     <ClInclude Include="BaseScreen.h" />
     <ClInclude Include="Brush1pxLine.h" />
     <ClInclude Include="Brush1x1.h" />
@@ -205,6 +208,7 @@
     <ClInclude Include="mathops.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="platform_windows.h" />
+    <ClInclude Include="PopupMessageBox.h" />
     <ClInclude Include="StartScreen.h" />
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="UIButton.h" />

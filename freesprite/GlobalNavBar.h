@@ -4,6 +4,7 @@
 #include "mathops.h"
 #include "maineditor.h"
 #include "FileIO.h"
+#include "PopupMessageBox.h"
 
 class GlobalNavBar : public Drawable
 {
@@ -37,6 +38,7 @@ public:
 					{SDLK_a, { "DebugSaveTest",
 							[](MainEditor* editor) {
 								writePNG(L"a.png", editor->imgLayer);
+								g_addPopup(new PopupMessageBox("Save", "saved :)"));
 							}
 						}
 					},

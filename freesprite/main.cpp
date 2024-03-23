@@ -4,6 +4,7 @@
 #include "maineditor.h"
 #include "BaseScreen.h"
 #include "StartScreen.h"
+#include "BasePopup.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -15,6 +16,17 @@ TextRenderer* g_fnt;
 SDL_Texture* g_mainlogo = NULL;
 
 std::vector<BaseBrush*> g_brushes;
+
+std::vector<BasePopup*> popupStack;
+void g_addPopup(BasePopup* a) {
+    popupStack.push_back(a);
+}
+void g_popDisposeLastPopup(bool dispose) {
+    if (dispose) {
+        delete popupStack[popupStack.size() - 1];
+    }
+    popupStack.pop_back();
+}
 
 std::vector<BaseScreen*> screenStack;
 void g_addScreen(BaseScreen* a) {
@@ -88,11 +100,19 @@ int main(int argc, char** argv)
                     break;
             }
 
-            if (!screenStack.empty()) {
-                screenStack[screenStack.size() - 1]->takeInput(evt);
+            if (!popupStack.empty()) {
+                popupStack[popupStack.size() - 1]->takeInput(evt);
+            }
+            else {
+                if (!screenStack.empty()) {
+                    screenStack[screenStack.size() - 1]->takeInput(evt);
+                }
             }
         }
 
+        if (!popupStack.empty()) {
+            popupStack[popupStack.size() - 1]->tick();
+        }
         if (!screenStack.empty()) {
             screenStack[screenStack.size() - 1]->tick();
         }
@@ -103,6 +123,10 @@ int main(int argc, char** argv)
         if (!screenStack.empty()) {
             screenStack[screenStack.size() - 1]->render();
         }
+        if (!popupStack.empty()) {
+            popupStack[popupStack.size() - 1]->render();
+        }
+        
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};
