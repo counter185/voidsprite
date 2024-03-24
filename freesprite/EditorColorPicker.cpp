@@ -42,7 +42,7 @@ void EditorColorPicker::handleInput(SDL_Event evt, XY gPosOffset)
         subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
     }
     if (!subWidgets.anyFocused()) {
-
+        
     }
     else {
         subWidgets.passInputToFocused(evt, gPosOffset);
@@ -59,6 +59,16 @@ void EditorColorPicker::eventTextInput(int evt_id, std::string data)
                 col |= 0xff000000;
                 setMainEditorColorRGB(col);
             }
+        }
+        
+    }
+}
+
+void EditorColorPicker::eventTextInputConfirm(int evt_id, std::string data)
+{
+    if (evt_id == EVENT_COLORPICKER_TEXTFIELD) {
+        if (g_colors.contains(data)) {
+            setMainEditorColorRGB(g_colors[data]);
         }
     }
 }

@@ -16,6 +16,11 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 		switch (evt.key.keysym.sym) {
 			case SDLK_TAB:
 				break;
+			case SDLK_RETURN:
+				if (callback != NULL) {
+					callback->eventTextInputConfirm(callback_id, text);
+				}
+				break;
 			case SDLK_BACKSPACE:
 				if (!text.empty()) {
 					text = text.substr(0, text.size() - 1);

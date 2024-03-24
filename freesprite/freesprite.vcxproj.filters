@@ -248,5 +248,8 @@
     <ClInclude Include="TabbedView.h">
       <Filter>Pliki nagłówkowe\ui_widgets</Filter>
     </ClInclude>
+    <ClInclude Include="colors.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -83,6 +83,7 @@ public:
 		subWidgets.forceUnfocus();
 	}
 	void eventTextInput(int evt_id, std::string data) override;
+	void eventTextInputConfirm(int evt_id, std::string data) override;
 	void eventButtonPressed(int evt_id) override;
 	void eventSliderPosChanged(int evt_id, float f) override;
 

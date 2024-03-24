@@ -193,6 +193,7 @@
     <ClInclude Include="Brush3pxCircle.h" />
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
+    <ClInclude Include="colors.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
     <ClInclude Include="EditorBrushPicker.h" />
