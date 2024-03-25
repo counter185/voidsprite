@@ -116,6 +116,7 @@ public:
 			sectionButton->text = editorSection.second.name + std::format("({})", SDL_GetKeyName(editorSection.first));
 			sectionButton->colorBGFocused = sectionButton->colorBGUnfocused = SDL_Color{ 0,0,0,0 };
 			sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xa0 };
+			sectionButton->wxWidth = xDist - 10;
 			wxs.addDrawable(sectionButton);
 			x += xDist;
 		}
