@@ -147,6 +147,9 @@
     <ClCompile Include="TabbedView.cpp">
       <Filter>Pliki źródłowe\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="PopupSetEditorPixelGrid.cpp">
+      <Filter>Pliki źródłowe\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -250,6 +253,9 @@
     </ClInclude>
     <ClInclude Include="colors.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSetEditorPixelGrid.h">
+      <Filter>Pliki nagłówkowe\popup</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

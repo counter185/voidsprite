@@ -19,7 +19,7 @@ void UISlider::drawPosIndicator(XY origin) {
 void UISlider::render(XY pos)
 {
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
-	SDL_SetRenderDrawColor(g_rd, 0x0, 0x0, 0x0, focused ? 0xff : 0x30);
+	SDL_SetRenderDrawColor(g_rd, 0x0, 0x0, 0x0, focused ? 0xff : 0x80);
 	SDL_RenderFillRect(g_rd, &drawrect);
 	drawPosIndicator(pos);
 }

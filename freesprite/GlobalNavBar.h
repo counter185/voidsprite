@@ -5,6 +5,7 @@
 #include "maineditor.h"
 #include "FileIO.h"
 #include "PopupMessageBox.h"
+#include "PopupSetEditorPixelGrid.h"
 
 class GlobalNavBar : public Drawable
 {
@@ -90,6 +91,12 @@ public:
 								editor->backgroundColor.r = ~editor->backgroundColor.r;
 								editor->backgroundColor.g = ~editor->backgroundColor.g;
 								editor->backgroundColor.b = ~editor->backgroundColor.b;
+							}
+						}
+					},
+					{SDLK_g, { "Set pixel grid...",
+							[](MainEditor* editor) {
+								g_addPopup(new PopupSetEditorPixelGrid(editor, "Set pixel grid", "Enter grid size <w>x<h>:"));
 							}
 						}
 					},

@@ -69,6 +69,27 @@ void MainEditor::render() {
 		imgLayer->render(canvasRenderRect);
 	}
 
+	if (tileDimensions.x != 0) {
+		int dx = canvasRenderRect.x;
+		while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
+			dx += tileDimensions.x * scale;
+			if (dx >= 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
+				SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
+			}
+		}
+	}
+	if (tileDimensions.y != 0) {
+		int dy = canvasRenderRect.y;
+		while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
+			dy += tileDimensions.y * scale;
+			if (dy >= 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff-backgroundColor.r, 0xff-backgroundColor.g, 0xff-backgroundColor.b, tileGridAlpha);
+				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
+			}
+		}
+	}
+
 	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
 	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
 
