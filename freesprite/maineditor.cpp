@@ -9,7 +9,7 @@ MainEditor::MainEditor(XY dimensions) {
 	texW = dimensions.x;
 	texH = dimensions.y;
 	//canvasCenterPoint = XY{ texW / 2, texH / 2 };
-	imgLayer = new Layer(texW, texH);
+	layers.push_back(new Layer(texW, texH));
 	FillTexture();
 	recenterCanvas();
 }
@@ -20,8 +20,9 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 	texW = srf->w;
 	texH = srf->h;
 
-	imgLayer = new Layer(texW, texH);
-	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, imgLayer->pixelData, texW*4);
+	Layer* nlayer = new Layer(texW, texH);
+	layers.push_back(nlayer);
+	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, texW*4);
 	recenterCanvas();
 }
 
@@ -32,18 +33,28 @@ MainEditor::MainEditor(Layer* layer)
 	texW = layer->w;
 	texH = layer->h;
 
-	imgLayer = layer;
+	layers.push_back(layer);
+	recenterCanvas();
+}
+
+MainEditor::MainEditor(std::vector<Layer*> layers)
+{
+	SetUpWidgets();
+	texW = layers[0]->w;
+	texH = layers[0]->h;
+	this->layers = layers;
 	recenterCanvas();
 }
 
 MainEditor::~MainEditor() {
 	//printf("hello from destructor\n");
 	wxsManager.freeAllDrawables();
-	delete imgLayer;
+	for (Layer*& imgLayer : layers) {
+		delete imgLayer;
+	}
 }
 
 void MainEditor::render() {
-	EnsureTextureUnlocked();
 	SDL_SetRenderDrawColor(g_rd, backgroundColor.r/6*5, backgroundColor.g/6*5, backgroundColor.b/6*5, 255);
 	SDL_RenderClear(g_rd);
 	DrawBackground();
@@ -54,7 +65,9 @@ void MainEditor::render() {
 	canvasRenderRect.x = canvasCenterPoint.x;
 	canvasRenderRect.y = canvasCenterPoint.y;
 
-	imgLayer->render(canvasRenderRect);
+	for (Layer*& imgLayer : layers) {
+		imgLayer->render(canvasRenderRect);
+	}
 
 	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
 	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
@@ -169,7 +182,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				else if (evt.button.button == 3) {
 					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
-					colorPicker->setMainEditorColorRGB(imgLayer->getPixelAt(mousePixelTargetPoint));
+					colorPicker->setMainEditorColorRGB(getCurrentLayer()->getPixelAt(mousePixelTargetPoint));
 				}
 				break;
 			case SDL_MOUSEMOTION:
@@ -217,16 +230,18 @@ void MainEditor::eventFileSavedW(int evt_id, std::wstring name)
 		size_t extStart = name.find_last_of(L".");
 		std::wstring extension = name.substr(extStart);
 		if (extension == L".voidsn") {
-			writeVOIDSNv1(name, XY{ texW, texH }, { imgLayer });
+			writeVOIDSNv1(name, XY{ texW, texH }, layers);
 		}
 		else {
-			writePNG(name, imgLayer);
+			Layer* flat = flattenImage();
+			writePNG(name, flat);
+			delete flat;
 		}
 	}
 }
 
 void MainEditor::FillTexture() {
-	int* pixels = (int*)imgLayer->pixelData;
+	int* pixels = (int*)getCurrentLayer()->pixelData;
 	//int pitch;
 	//SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
 	for (int x = 0; x < texW; x++) {
@@ -237,22 +252,8 @@ void MainEditor::FillTexture() {
 	//SDL_UnlockTexture(mainTexture);
 }
 
-void MainEditor::EnsureTextureLocked() {
-	/*if (!textureLocked) {
-		SDL_LockTexture(mainTexture, NULL, (void**)&lockedPixels, &pitch);
-		textureLocked = true;
-	}*/
-}
-
-void MainEditor::EnsureTextureUnlocked() {
-	/*if (textureLocked) {
-		SDL_UnlockTexture(mainTexture);
-		textureLocked = false;
-	}*/
-}
-
 void MainEditor::SetPixel(XY position, uint32_t color) {
-	imgLayer->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
+	getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
 }
 
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
@@ -288,4 +289,24 @@ void MainEditor::recenterCanvas()
 		(g_windowW / 2) - (texW*scale)/2,
 		(g_windowH / 2) - (texH*scale)/2
 	};
+}
+
+Layer* MainEditor::flattenImage()
+{
+	Layer* ret = new Layer(texW, texH);
+	int x = 0;
+	for (Layer*& l : layers) {
+		if (x == 0) {
+			memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+		}
+		else {
+			uint32_t* ppx = (uint32_t*)l->pixelData;
+			uint32_t* retppx = (uint32_t*)ret->pixelData;
+			for (uint64_t p = 0; p < l->w * l->h * 4; p++) {
+				uint32_t pixel = ppx[p];
+				retppx[p] = alphaBlend(retppx[p], pixel);
+			}
+		}
+	}
+	return ret;
 }

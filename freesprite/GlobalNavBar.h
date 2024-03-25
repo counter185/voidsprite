@@ -37,7 +37,9 @@ public:
 #if _DEBUG
 					{SDLK_a, { "DebugSaveTest",
 							[](MainEditor* editor) {
-								writePNG(L"a.png", editor->imgLayer);
+								Layer* flat = editor->flattenImage();
+								writePNG(L"a.png", flat);
+								delete flat;
 								g_addPopup(new PopupMessageBox("Save", "saved :)"));
 							}
 						}
@@ -53,18 +55,19 @@ public:
 				{
 					{SDLK_f, { "Flip current layer: X axis",
 							[](MainEditor* editor) {
-								Layer* lr = editor->imgLayer;
+								Layer* lr = editor->getCurrentLayer();
 								lr->flipHorizontally();
 							}
 						}
 					},
 					{SDLK_b, { "Swap channels RGB->BGR",
 							[](MainEditor* editor) {
-								uint8_t* convData = (uint8_t*)malloc(editor->imgLayer->w * editor->imgLayer->h * 4);
-								SDL_ConvertPixels(editor->imgLayer->w, editor->imgLayer->h, SDL_PIXELFORMAT_ARGB8888, editor->imgLayer->pixelData, editor->imgLayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, editor->imgLayer->w * 4);
-								free(editor->imgLayer->pixelData);
-								editor->imgLayer->pixelData = convData;
-								editor->imgLayer->layerDirty = true;
+								Layer* clayer = editor->getCurrentLayer();
+								uint8_t* convData = (uint8_t*)malloc(clayer->w * clayer->h * 4);
+								SDL_ConvertPixels(clayer->w, clayer->h, SDL_PIXELFORMAT_ARGB8888, clayer->pixelData, clayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, clayer->w * 4);
+								free(clayer->pixelData);
+								clayer->pixelData = convData;
+								clayer->layerDirty = true;
 							}
 						}
 					},

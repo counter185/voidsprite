@@ -21,6 +21,7 @@ hsv rgb2hsv(rgb in);
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
 rgb hsv2rgb(hsv in);
+unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
 
 bool pointInBox(XY point, SDL_Rect rect);
 

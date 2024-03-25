@@ -199,7 +199,7 @@ MainEditor* readVOIDSN(std::wstring path)
                         fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
                         layers.push_back(newLayer);
                     }
-                    MainEditor* ret = new MainEditor(layers[0]);
+                    MainEditor* ret = new MainEditor(layers);
                     fclose(infile);
                     return ret;
                 }

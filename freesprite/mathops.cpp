@@ -161,6 +161,22 @@ SDL_Color rgb2sdlcolor(rgb a) {
     return SDL_Color{ (unsigned char)(a.r * 255), (unsigned char)(a.g * 255), (unsigned char)(a.b * 255), 255 };
 }
 
+unsigned int alphaBlend(unsigned int colora, unsigned int colorb) {
+    unsigned int a2 = (colorb & 0xFF000000) >> 24;
+    unsigned int alpha = a2;
+    if (alpha == 0) return colora;
+    if (alpha == 255) return colorb;
+    unsigned int a1 = (colora & 0xFF000000) >> 24;
+    unsigned int nalpha = 0x100 - alpha;
+    unsigned int rb1 = (nalpha * (colora & 0xFF00FF)) >> 8;
+    unsigned int rb2 = (alpha * (colorb & 0xFF00FF)) >> 8;
+    unsigned int g1 = (nalpha * (colora & 0x00FF00)) >> 8;
+    unsigned int g2 = (alpha * (colorb & 0x00FF00)) >> 8;
+    unsigned int anew = a1 + a2;
+    if (anew > 255) { anew = 255; }
+    return ((rb1 + rb2) & 0xFF00FF) + ((g1 + g2) & 0x00FF00) + (anew << 24);
+}
+
 int ixmin(int a, int b) { return a > b ? b : a; }
 int ixmax(int a, int b) { return a > b ? a : b; }
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }

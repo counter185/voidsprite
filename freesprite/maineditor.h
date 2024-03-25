@@ -17,7 +17,13 @@ class MainEditor : public BaseScreen, public EventCallbackListener
 private:
 
 public:
-	Layer* imgLayer;
+	std::vector<Layer*> layers;
+	int selLayer = 0;
+	Layer* getCurrentLayer() {
+		return layers[selLayer];
+	}
+	Layer* flattenImage();
+	//Layer* imgLayer;
 
 	int texW = -1, texH = -1;
 	XY canvasCenterPoint = XY{0,0};
@@ -41,6 +47,7 @@ public:
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);
 	MainEditor(Layer* srf);
+	MainEditor(std::vector<Layer*> layers);
 	~MainEditor();
 
 	void render() override;
@@ -58,9 +65,5 @@ public:
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
 	void recenterCanvas();
-
-	//DEPRECATED DO NOT USE
-	void EnsureTextureLocked();
-	void EnsureTextureUnlocked();
 };
 
