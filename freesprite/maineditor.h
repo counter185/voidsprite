@@ -24,7 +24,7 @@ public:
 	
 	Layer* flattenImage();
 
-	int maxUndoHistory = 50;
+	int maxUndoHistory = 20;
 	std::vector<Layer*> undoStack, redoStack;
 
 	int texW = -1, texH = -1;
