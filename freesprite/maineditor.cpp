@@ -12,6 +12,7 @@ MainEditor::MainEditor(XY dimensions) {
 	layers.push_back(new Layer(texW, texH));
 	FillTexture();
 	recenterCanvas();
+	initLayers();
 }
 MainEditor::MainEditor(SDL_Surface* srf) {
 	SetUpWidgets();
@@ -24,6 +25,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 	layers.push_back(nlayer);
 	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, texW*4);
 	recenterCanvas();
+	initLayers();
 }
 
 MainEditor::MainEditor(Layer* layer)
@@ -35,6 +37,7 @@ MainEditor::MainEditor(Layer* layer)
 
 	layers.push_back(layer);
 	recenterCanvas();
+	initLayers();
 }
 
 MainEditor::MainEditor(std::vector<Layer*> layers)
@@ -44,6 +47,7 @@ MainEditor::MainEditor(std::vector<Layer*> layers)
 	texH = layers[0]->h;
 	this->layers = layers;
 	recenterCanvas();
+	initLayers();
 }
 
 MainEditor::~MainEditor() {
@@ -149,6 +153,13 @@ void MainEditor::DrawForeground()
 	}
 }
 
+void MainEditor::initLayers()
+{
+	for (Layer*& l : layers) {
+		l->commitStateToUndoStack();
+	}
+}
+
 void MainEditor::SetUpWidgets()
 {
 	colorPicker = new EditorColorPicker(this);
@@ -189,6 +200,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
 					if (currentBrush != NULL) {
 						if (evt.button.state) {
+							if (!currentBrush->isReadOnly()) {
+								commitStateToCurrentLayer();
+							}
 							currentBrush->clickPress(this, mousePixelTargetPoint);
 						}
 						else {
@@ -310,6 +324,63 @@ void MainEditor::recenterCanvas()
 		(g_windowW / 2) - (texW*scale)/2,
 		(g_windowH / 2) - (texH*scale)/2
 	};
+}
+
+void MainEditor::commitStateToCurrentLayer()
+{
+	for (Layer*& x : layers) {
+		x->discardRedoStack();
+	}
+	redoStack.clear();
+	printf("commit undo state\n");
+	getCurrentLayer()->commitStateToUndoStack();
+	undoStack.push_back(getCurrentLayer());
+	if (undoStack.size() > maxUndoHistory) {
+		undoStack[0]->discardLastUndo();
+		undoStack.erase(undoStack.begin());
+	}
+}
+
+void MainEditor::undo()
+{
+	if (!undoStack.empty()) {
+		Layer* l = undoStack[undoStack.size() - 1];
+		undoStack.pop_back();
+		redoStack.push_back(l);
+		l->undo();
+	}
+}
+
+void MainEditor::redo()
+{
+	if (!redoStack.empty()) {
+		Layer* l = redoStack[redoStack.size() - 1];
+		undoStack.push_back(l);
+		redoStack.pop_back();
+		l->redo();
+	}
+}
+
+void MainEditor::layer_flipHorizontally()
+{
+	commitStateToCurrentLayer();
+	getCurrentLayer()->flipHorizontally();
+}
+
+void MainEditor::layer_swapLayerRGBtoBGR()
+{
+	commitStateToCurrentLayer();
+	Layer* clayer = getCurrentLayer();
+	uint8_t* convData = (uint8_t*)malloc(clayer->w * clayer->h * 4);
+	SDL_ConvertPixels(clayer->w, clayer->h, SDL_PIXELFORMAT_ARGB8888, clayer->pixelData, clayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, clayer->w * 4);
+	free(clayer->pixelData);
+	clayer->pixelData = convData;
+	clayer->layerDirty = true;
+}
+
+uint32_t MainEditor::layer_getPixelAt(XY pos)
+{
+	return getCurrentLayer()->getPixelAt(pos);
 }
 
 Layer* MainEditor::flattenImage()

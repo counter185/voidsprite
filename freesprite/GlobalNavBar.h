@@ -50,25 +50,39 @@ public:
 			}
 		},
 		{
+			SDLK_e,
+			{
+				"Edit",
+				{
+					{SDLK_z, { "Undo",
+							[](MainEditor* editor) {
+								editor->undo();
+							}
+						}
+					},
+					{SDLK_r, { "Redo",
+							[](MainEditor* editor) {
+								editor->redo();
+							}
+						}
+					},
+				}
+			}
+		},
+		{
 			SDLK_l,
 			{
 				"Layer",
 				{
 					{SDLK_f, { "Flip current layer: X axis",
 							[](MainEditor* editor) {
-								Layer* lr = editor->getCurrentLayer();
-								lr->flipHorizontally();
+								editor->layer_flipHorizontally();
 							}
 						}
 					},
 					{SDLK_b, { "Swap channels RGB->BGR",
 							[](MainEditor* editor) {
-								Layer* clayer = editor->getCurrentLayer();
-								uint8_t* convData = (uint8_t*)malloc(clayer->w * clayer->h * 4);
-								SDL_ConvertPixels(clayer->w, clayer->h, SDL_PIXELFORMAT_ARGB8888, clayer->pixelData, clayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, clayer->w * 4);
-								free(clayer->pixelData);
-								clayer->pixelData = convData;
-								clayer->layerDirty = true;
+								editor->layer_swapLayerRGBtoBGR();
 							}
 						}
 					},

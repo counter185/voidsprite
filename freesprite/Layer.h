@@ -4,6 +4,8 @@ class Layer
 {
 public:
 	uint8_t* pixelData;	//!!! THIS IS IN ARGB
+	std::vector<uint8_t*> undoQueue;
+	std::vector<uint8_t*> redoQueue;
 	int w, h;
 	SDL_Texture* tex;
 	bool layerDirty = true;
@@ -28,6 +30,12 @@ public:
 
 	~Layer() {
 		free(pixelData);
+		for (uint8_t*& u : undoQueue) {
+			free(u);
+		}
+		for (uint8_t*& r : redoQueue) {
+			free(r);
+		}
 		SDL_DestroyTexture(tex);
 	}
 
@@ -77,6 +85,44 @@ public:
 			}
 		}
 		layerDirty = true;
+	}
+
+	void discardRedoStack() {
+		for (uint8_t*& redoD : redoQueue) {
+			free(redoD);
+		}
+		redoQueue.clear();
+	}
+	void discardLastUndo() {
+		free(undoQueue[0]);
+		undoQueue.erase(undoQueue.begin());
+	}
+	void commitStateToUndoStack() {
+		discardRedoStack();
+		uint8_t* copiedPixelData = (uint8_t*)malloc(w * h * 4);
+		if (copiedPixelData != NULL) {
+			memcpy(copiedPixelData, pixelData, w * h * 4);
+			undoQueue.push_back(copiedPixelData);
+		}
+		else {
+			printf("malloc FAILED we are FUCKED\n");
+		}
+	}
+	void undo() {
+		if (!undoQueue.empty()) {
+			redoQueue.push_back(pixelData);
+			pixelData = undoQueue[undoQueue.size() - 1];
+			undoQueue.pop_back();
+			layerDirty = true;
+		}
+	}
+	void redo() {
+		if (!redoQueue.empty()) {
+			undoQueue.push_back(pixelData);
+			pixelData = redoQueue[redoQueue.size()-1];
+			redoQueue.pop_back();
+			layerDirty = true;
+		}
 	}
 };
 

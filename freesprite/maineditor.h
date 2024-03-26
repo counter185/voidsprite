@@ -14,16 +14,18 @@
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
-private:
-
-public:
-	std::vector<Layer*> layers;
-	int selLayer = 0;
+protected:
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}
+public:
+	std::vector<Layer*> layers;
+	int selLayer = 0;
+	
 	Layer* flattenImage();
-	//Layer* imgLayer;
+
+	int maxUndoHistory = 100;
+	std::vector<Layer*> undoStack, redoStack;
 
 	int texW = -1, texH = -1;
 	XY tileDimensions = XY{ 0,0 };
@@ -60,6 +62,7 @@ public:
 	
 	void DrawBackground();
 	void DrawForeground();
+	void initLayers();
 	void SetUpWidgets();
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
@@ -67,5 +70,13 @@ public:
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
 	void recenterCanvas();
+
+	void commitStateToCurrentLayer();
+	void undo();
+	void redo();
+
+	void layer_flipHorizontally();
+	void layer_swapLayerRGBtoBGR();
+	uint32_t layer_getPixelAt(XY pos);
 };
 
