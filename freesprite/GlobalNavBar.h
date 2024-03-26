@@ -16,6 +16,13 @@ public:
 	DrawableManager subWxs;
 	SDL_Keycode currentSubmenuOpen = -1;
 
+	std::vector<SDL_Keycode> submenuOrder = {
+		SDLK_f,
+		SDLK_e,
+		SDLK_l,
+		SDLK_v,
+	};
+
 	std::map<SDL_Keycode, NavbarSection> keyBinds = 
 	{ 
 		{
@@ -124,10 +131,10 @@ public:
 		int x = 10;
 		int xDist = 120;
 		position = XY{ 0,0 };
-		for (auto& editorSection : keyBinds) {
+		for (auto& editorSection : submenuOrder) {
 			UIButton* sectionButton = new UIButton();
 			sectionButton->position = { x, 1 };
-			sectionButton->text = editorSection.second.name + std::format("({})", SDL_GetKeyName(editorSection.first));
+			sectionButton->text = keyBinds[editorSection].name + std::format("({})", SDL_GetKeyName(editorSection));
 			sectionButton->colorBGFocused = sectionButton->colorBGUnfocused = SDL_Color{ 0,0,0,0 };
 			sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xa0 };
 			sectionButton->wxWidth = xDist - 10;

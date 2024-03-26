@@ -69,7 +69,7 @@ void GlobalNavBar::updateCurrentSubmenu()
 	}
 	else {
 		int y = wxHeight;
-		int x = 10 + std::distance(keyBinds.begin(), keyBinds.find(currentSubmenuOpen)) * 120;
+		int x = 10 + (std::find(submenuOrder.begin(), submenuOrder.end(), currentSubmenuOpen) - submenuOrder.begin()) * 120;
 		for (auto& option : keyBinds[currentSubmenuOpen].actions) {
 			UIButton* newBtn = new UIButton();
 			newBtn->position = XY{ x, y };
