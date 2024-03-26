@@ -257,10 +257,10 @@ void MainEditor::takeInput(SDL_Event evt) {
 	}
 }
 
-void MainEditor::eventFileSavedW(int evt_id, std::wstring name)
+void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 {
 	if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
-		printf("eventFileSavedW: got file name %ls\n", name.c_str());
+		printf("eventFileSaved: got file name %ls\n", name.c_str());
 
 		size_t extStart = name.find_last_of(L".");
 		std::wstring extension = name.substr(extStart);

@@ -47,9 +47,14 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_DROPFILE:
 				std::string filePath = evt.drop.file;
 				std::string extension = filePath.substr(filePath.find_last_of('.'));
-				std::wstring wFilePath = utf8StringToWstring(filePath);
+				PlatformNativePathString fPath;
+#if _WIN32
+				fPath = utf8StringToWstring(filePath);
+#else
+				fPath = filePath;
+#endif
 				if (extension == ".xyz") {
-					Layer* nlayer = readXYZ(wFilePath);
+					Layer* nlayer = readXYZ(fPath);
 					if (nlayer == NULL) {
 						printf("xyz load failed");
 					}
@@ -58,7 +63,7 @@ void StartScreen::takeInput(SDL_Event evt)
 					}
 				}
 				else if (extension == ".png") {
-					Layer* nlayer = readPNG(wFilePath);
+					Layer* nlayer = readPNG(fPath);
 					if (nlayer == NULL) {
 						printf("png load failed");
 					}
@@ -67,7 +72,7 @@ void StartScreen::takeInput(SDL_Event evt)
 					}
 				}
 				else if (extension == ".aetex") {
-					Layer* nlayer = readAETEX(wFilePath);
+					Layer* nlayer = readAETEX(fPath);
 					if (nlayer == NULL) {
 						printf("aetex load failed");
 					}
@@ -76,7 +81,7 @@ void StartScreen::takeInput(SDL_Event evt)
 					}
 				}
 				else if (extension == ".voidsn" || extension == ".voidsnv1") {
-					MainEditor* session = readVOIDSN(wFilePath);
+					MainEditor* session = readVOIDSN(fPath);
 					if (session == NULL) {
 						printf("voidsession load failed");
 					}

@@ -3,10 +3,9 @@
 #include <png.h>
 #include "libtga/tga.h"
 
-Layer* readXYZ(std::wstring path)
+Layer* readXYZ(PlatformNativePathString path)
 {
-    FILE* f = NULL;
-    _wfopen_s(&f, path.c_str(), L"rb");
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
 
     if (f != NULL) {
         fseek(f, 0, SEEK_END);
@@ -56,10 +55,9 @@ Layer* readXYZ(std::wstring path)
     return NULL;
 }
 
-Layer* readPNG(std::wstring path)
+Layer* readPNG(PlatformNativePathString path)
 {
-    FILE* pngfile = NULL;
-    _wfopen_s(&pngfile, path.c_str(), L"rb");
+    FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     png_infop info = png_create_info_struct(png);
     png_init_io(png, pngfile);
@@ -157,9 +155,8 @@ Layer* readTGA(std::string path) {
     TGAClose(tga);*/
 }
 
-Layer* readAETEX(std::wstring path) {
-    FILE* texfile = NULL;
-    _wfopen_s(&texfile, path.c_str(), L"rb");
+Layer* readAETEX(PlatformNativePathString path) {
+    FILE* texfile = platformOpenFile(path, PlatformFileModeRB);
     if (texfile != NULL) {
         fseek(texfile, 0, SEEK_END);
         long filesize = ftell(texfile);
@@ -178,10 +175,9 @@ Layer* readAETEX(std::wstring path) {
     }
 }
 
-MainEditor* readVOIDSN(std::wstring path)
+MainEditor* readVOIDSN(PlatformNativePathString path)
 {
-    FILE* infile = NULL;
-    _wfopen_s(&infile, path.c_str(), L"rb");
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile != NULL) {
         uint8_t voidsnversion;
         fread(&voidsnversion, 1, 1, infile);
@@ -215,11 +211,10 @@ MainEditor* readVOIDSN(std::wstring path)
     return NULL;
 }
 
-bool writePNG(std::wstring path, Layer* data)
+bool writePNG(PlatformNativePathString path, Layer* data)
 {
     // exports png
-    FILE* outfile;
-    _wfopen_s(&outfile, path.c_str(), L"wb");
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         png_structp outpng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
         png_infop outpnginfo = png_create_info_struct(outpng);
@@ -252,10 +247,9 @@ bool writePNG(std::wstring path, Layer* data)
     return false;
 }
 
-bool writeVOIDSNv1(std::wstring path, XY projDimensions, std::vector<Layer*> data)
+bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
-    FILE* outfile = NULL;
-    _wfopen_s(&outfile, path.c_str(), L"wb");
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         uint8_t voidsnVersion = 0x01;
         fwrite(&voidsnVersion, 1, 1, outfile);

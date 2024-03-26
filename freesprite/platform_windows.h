@@ -56,9 +56,15 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.lpstrTitle = L"voidsprite: Save Image";
     ofna.lpstrDefExt = L"png";
     if (GetSaveFileNameW(&ofna)) {
-        listener->eventFileSavedW(EVENT_MAINEDITOR_SAVEFILE, std::wstring(fileNameBuffer));
+        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, std::wstring(fileNameBuffer));
     }
     else {
         printf("windows error: %i\n", GetLastError());
     }
+}
+
+FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode) {
+    FILE* ret;
+    _wfopen_s(&ret, path.c_str(), mode.c_str());
+    return ret;
 }

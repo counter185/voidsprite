@@ -42,17 +42,6 @@ public:
 							}
 						}
 					},
-#if _DEBUG
-					{SDLK_a, { "DebugSaveTest",
-							[](MainEditor* editor) {
-								Layer* flat = editor->flattenImage();
-								writePNG(L"a.png", flat);
-								delete flat;
-								g_addPopup(new PopupMessageBox("Save", "saved :)"));
-							}
-						}
-					},
-#endif
 				}
 			}
 		},
