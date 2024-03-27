@@ -8,5 +8,9 @@ class Brush1x1 : public BaseBrush
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}
+	void renderOnCanvas(XY canvasDrawPoint, int scale) {
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+		drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
+	}
 };
 

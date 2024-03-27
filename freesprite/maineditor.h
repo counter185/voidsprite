@@ -9,6 +9,7 @@
 #include "Brush1pxLine.h"
 #include "BrushRect.h"
 #include "BrushRectFill.h"
+#include "ToolRectClone.h"
 #include "ToolColorPicker.h"
 #include "Layer.h"
 

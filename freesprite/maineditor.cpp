@@ -93,6 +93,9 @@ void MainEditor::render() {
 			}
 		}
 	}
+	if (currentBrush != NULL) {
+		currentBrush->renderOnCanvas(XY{ canvasRenderRect.x, canvasRenderRect.y }, scale);
+	}
 
 	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
 	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
@@ -217,7 +220,12 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				else if (evt.button.button == 3) {
 					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
-					colorPicker->setMainEditorColorRGB(getCurrentLayer()->getPixelAt(mousePixelTargetPoint));
+					if (currentBrush != NULL && currentBrush->overrideRightClick()) {
+						currentBrush->rightClickPress(this, mousePixelTargetPoint);
+					}
+					else {
+						colorPicker->setMainEditorColorRGB(getCurrentLayer()->getPixelAt(mousePixelTargetPoint));
+					}
 				}
 				break;
 			case SDL_MOUSEMOTION:
@@ -231,6 +239,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 						currentBrush->clickDrag(this, mouseHoldPosition, mousePixelTargetPoint);
 					}
 					mouseHoldPosition = mousePixelTargetPoint;
+				}
+				if (currentBrush != NULL) {
+					currentBrush->mouseMotion(this, mousePixelTargetPoint);
 				}
 				break;
 			case SDL_MOUSEWHEEL:

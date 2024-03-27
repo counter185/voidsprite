@@ -57,6 +57,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new BrushRect());
     g_brushes.push_back(new BrushRectFill());
     g_brushes.push_back(new ToolColorPicker());
+    g_brushes.push_back(new ToolRectClone());
     for (BaseBrush*& brush : g_brushes) {
         SDL_Surface* srf = IMG_Load(brush->getIconPath().c_str());
         brush->cachedIcon = SDL_CreateTextureFromSurface(g_rd, srf);
