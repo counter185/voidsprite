@@ -7,32 +7,107 @@
 #include "UITextField.h"
 #include "UIButton.h"
 #include "maineditor.h"
+#include "UILabel.h"
+#include "TabbedView.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
 public:
 	DrawableManager wxsManager;
 
+	TabbedView* newImageTabs;
+
 	int newImgW = 0, newImgH = 0;
 
-	StartScreen() {
-		UITextField* textFieldW = new UITextField();
-		textFieldW->setCallbackListener(2, this);
-		textFieldW->position = XY{80,120};
-		textFieldW->wxWidth = 200;
-		textFieldW->numeric = true;
-		wxsManager.addDrawable(textFieldW);
+	UITextField* tab0TextFieldW;
+	UITextField* tab0TextFieldH;
 
-		UITextField* textFieldH = new UITextField();
-		textFieldH->setCallbackListener(3, this);
-		textFieldH->position = XY{80,155};
-		textFieldH->wxWidth = 200;
-		textFieldH->numeric = true;
-		wxsManager.addDrawable(textFieldH);
+	UITextField* tab1TextFieldCW;
+	UITextField* tab1TextFieldCH;
+	UITextField* tab1TextFieldCWX;
+	UITextField* tab1TextFieldCHX;
+
+	StartScreen() {
+		newImageTabs = new TabbedView({ {"Pixel dimensions"}, {"Sprites/Tiles"}, {"Templates"} }, 160);
+		newImageTabs->position = XY{ 10, 110 };
+		wxsManager.addDrawable(newImageTabs);
+
+
+		//tab 0
+		tab0TextFieldW = new UITextField();
+		tab0TextFieldW->setCallbackListener(2, this);
+		tab0TextFieldW->position = xySubtract(XY{80,120}, newImageTabs->position);
+		tab0TextFieldW->wxWidth = 200;
+		tab0TextFieldW->numeric = true;
+		newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldW);
+
+		tab0TextFieldH = new UITextField();
+		tab0TextFieldH->setCallbackListener(3, this);
+		tab0TextFieldH->position = xySubtract(XY{ 80,155 }, newImageTabs->position);
+		tab0TextFieldH->wxWidth = 200;
+		tab0TextFieldH->numeric = true;
+		newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
+
+		UILabel* wLabel = new UILabel();
+		wLabel->text = "Width";
+		wLabel->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
+		newImageTabs->tabs[0].wxs.addDrawable(wLabel);
+
+		UILabel* hLabel = new UILabel();
+		hLabel->text = "Height";
+		hLabel->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
+		newImageTabs->tabs[0].wxs.addDrawable(hLabel);
+
+		//tab 1
+		tab1TextFieldCW = new UITextField();
+		tab1TextFieldCW->position = xySubtract(XY{ 110,120}, newImageTabs->position);
+		tab1TextFieldCW->wxWidth = 160;
+		tab1TextFieldCW->numeric = true;
+		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCW);
+
+		tab1TextFieldCH = new UITextField();
+		tab1TextFieldCH->position = xySubtract(XY{ 110,155 }, newImageTabs->position);
+		tab1TextFieldCH->wxWidth = 160;
+		tab1TextFieldCH->numeric = true;
+		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCH);
+
+		tab1TextFieldCWX = new UITextField();
+		tab1TextFieldCWX->position = xySubtract(XY{ 300,120}, newImageTabs->position);
+		tab1TextFieldCWX->wxWidth = 40;
+		tab1TextFieldCWX->numeric = true;
+		tab1TextFieldCWX->text = "1";
+		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCWX);
+
+		tab1TextFieldCHX = new UITextField();
+		tab1TextFieldCHX->position = xySubtract(XY{ 300,155 }, newImageTabs->position);
+		tab1TextFieldCHX->wxWidth = 40;
+		tab1TextFieldCHX->numeric = true;
+		tab1TextFieldCHX->text = "1";
+		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
+
+		UILabel* w2Label = new UILabel();
+		w2Label->text = "Cell width";
+		w2Label->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
+		newImageTabs->tabs[1].wxs.addDrawable(w2Label);
+
+		UILabel* h2Label = new UILabel();
+		h2Label->text = "Cell height";
+		h2Label->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
+		newImageTabs->tabs[1].wxs.addDrawable(h2Label);
+
+		UILabel* w2Label2 = new UILabel();
+		w2Label2->text = "x";
+		w2Label2->position = xySubtract(XY{ 280,120 }, newImageTabs->position);
+		newImageTabs->tabs[1].wxs.addDrawable(w2Label2);
+
+		UILabel* h2Label2 = new UILabel();
+		h2Label2->text = "x";
+		h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
+		newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
 		UIButton* buttonNewImage = new UIButton();
 		buttonNewImage->setCallbackListener(4, this);
-		buttonNewImage->position = XY{ 40,200 };
+		buttonNewImage->position = XY{ 40,260 };
 		buttonNewImage->wxWidth = 100;
 		buttonNewImage->text = "Create...";
 		wxsManager.addDrawable(buttonNewImage);
@@ -57,7 +132,26 @@ public:
 	}
 	void eventButtonPressed(int evt_id) override {
 		if (evt_id == 4) {
-			g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
+			switch (newImageTabs->openTab) {
+				case 0:
+					if (!tab0TextFieldW->text.empty() && !tab0TextFieldH->text.empty()) {
+						int newImgW = std::stoi(tab0TextFieldW->text);
+						int newImgH = std::stoi(tab0TextFieldH->text);
+						g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
+					}
+					break;
+				case 1:
+					if (!tab1TextFieldCH->text.empty() && !tab1TextFieldCW->text.empty()
+						&& !tab1TextFieldCHX->text.empty() && !tab1TextFieldCWX->text.empty()) {
+						XY cellSize = XY{ std::stoi(tab1TextFieldCW->text) , std::stoi(tab1TextFieldCH->text) };
+						int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
+						int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
+						MainEditor* newMainEditor = new MainEditor(XY{ newImgW, newImgH });
+						newMainEditor->tileDimensions = cellSize;
+						g_addScreen(newMainEditor);
+					}
+					break;
+			}
 		}
 	}
 };

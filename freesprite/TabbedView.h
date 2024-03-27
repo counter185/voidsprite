@@ -21,11 +21,11 @@ public:
     SDL_Color tabUnfocusedColor = SDL_Color{ 0,0,0,0xd0 };
     SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0 };
 
-    TabbedView(std::vector<Tab> tabN) {
+    TabbedView(std::vector<Tab> tabN, int buttonWidth = 60) {
         int buttonX = 0;
         for (int x = 0; x < tabN.size(); x++) {
             UIButton* nbutton = new UIButton();
-            nbutton->wxWidth = 60;
+            nbutton->wxWidth = buttonWidth;
             nbutton->wxHeight = buttonsHeight;
             nbutton->position = XY{ buttonX, 0 };
             nbutton->text = tabN[x].name;

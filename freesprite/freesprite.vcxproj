@@ -181,6 +181,7 @@
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
+    <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIColorSlider.h" />
+    <ClInclude Include="UILabel.h" />
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />

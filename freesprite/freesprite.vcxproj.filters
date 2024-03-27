@@ -150,6 +150,9 @@
     <ClCompile Include="PopupSetEditorPixelGrid.cpp">
       <Filter>Pliki źródłowe\popup</Filter>
     </ClCompile>
+    <ClCompile Include="UILabel.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="PopupSetEditorPixelGrid.h">
       <Filter>Pliki nagłówkowe\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="UILabel.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

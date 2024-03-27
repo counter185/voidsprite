@@ -13,15 +13,13 @@ void StartScreen::render()
 	SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
 	g_fnt->RenderString("r21.03.2024", 2, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50});
 
-	SDL_Rect bgr = SDL_Rect{ 0, 35, 300, 300 };
+	SDL_Rect bgr = SDL_Rect{ 0, 35, 560, 300 };
 	SDL_SetRenderDrawColor(g_rd, 0x20, 0x20, 0x20, 0xa0);
 	SDL_RenderFillRect(g_rd, &bgr);
 
 	g_fnt->RenderString("voidsprite", 10, 40);
 
 	g_fnt->RenderString("New image", 10, 80);
-	g_fnt->RenderString("Width", 10, 120);
-	g_fnt->RenderString("Height", 10, 155);
 
 	wxsManager.renderAll();
 }
