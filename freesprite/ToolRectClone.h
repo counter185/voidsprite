@@ -11,6 +11,7 @@ class ToolRectClone :
     SDL_Texture* cacheClonePreview = NULL;
 
     std::string getName() override { return "Clone rect"; }
+    std::string getIconPath() override { return "assets/tool_cloner.png"; }
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;
     void clickRelease(MainEditor* editor, XY pos) override;

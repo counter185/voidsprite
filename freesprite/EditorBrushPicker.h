@@ -23,6 +23,10 @@ public:
 		int i = 0;
 		for (BaseBrush*& brush : g_brushes) {
 			UIButton* newBtn = new UIButton();
+			if (px + 26 > wxWidth) {
+				py += 30;
+				px = 5;
+			}
 			newBtn->position = XY{ px, py };
 			px += 30;
 			newBtn->icon = brush->cachedIcon;

@@ -343,7 +343,7 @@ void MainEditor::commitStateToCurrentLayer()
 		x->discardRedoStack();
 	}
 	redoStack.clear();
-	printf("commit undo state\n");
+	//printf("commit undo state\n");
 	getCurrentLayer()->commitStateToUndoStack();
 	undoStack.push_back(getCurrentLayer());
 	if (undoStack.size() > maxUndoHistory) {
