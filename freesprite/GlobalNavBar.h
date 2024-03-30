@@ -6,8 +6,9 @@
 #include "FileIO.h"
 #include "PopupMessageBox.h"
 #include "PopupSetEditorPixelGrid.h"
+#include "EventCallbackListener.h"
 
-class GlobalNavBar : public Drawable
+class GlobalNavBar : public Drawable, public EventCallbackListener
 {
 public:
 	MainEditor* parent;
@@ -29,6 +30,7 @@ public:
 			SDLK_f,
 			{
 				"File",
+				{SDLK_s, SDLK_d, SDLK_c},
 				{
 					{SDLK_d, { "Save as",
 							[](MainEditor* editor) {
@@ -42,6 +44,12 @@ public:
 							}
 						}
 					},
+					{SDLK_c, { "Close",
+							[](MainEditor* editor) {
+								editor->tryClose();
+							}
+						}
+					},
 				}
 			}
 		},
@@ -49,6 +57,7 @@ public:
 			SDLK_e,
 			{
 				"Edit",
+				{SDLK_z, SDLK_r},
 				{
 					{SDLK_z, { "Undo",
 							[](MainEditor* editor) {
@@ -69,6 +78,7 @@ public:
 			SDLK_l,
 			{
 				"Layer",
+				{},
 				{
 					{SDLK_f, { "Flip current layer: X axis",
 							[](MainEditor* editor) {
@@ -89,6 +99,7 @@ public:
 			SDLK_v,
 			{
 				"View",
+				{},
 				{
 					{SDLK_r, { "Recenter canvas",
 							[](MainEditor* editor) {
@@ -127,6 +138,7 @@ public:
 			sectionButton->colorBGFocused = sectionButton->colorBGUnfocused = SDL_Color{ 0,0,0,0 };
 			sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xa0 };
 			sectionButton->wxWidth = xDist - 10;
+			sectionButton->setCallbackListener(editorSection, this);
 			wxs.addDrawable(sectionButton);
 			x += xDist;
 		}
@@ -134,19 +146,19 @@ public:
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override
 	{ 
-		//todo: mousePos.y <= wxHeight OR `isMouseIn` for any of the submenus
-		return mousePos.y <= wxHeight;
+		return mousePos.y <= wxHeight || subWxs.mouseInAny(thisPositionOnScreen, mousePos);
 	}
 	void render(XY position) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 	void focusOut() override {
 		Drawable::focusOut();
-		currentSubmenuOpen = -1;
-		updateCurrentSubmenu();
+		openSubmenu(-1);
 	}
+	void eventButtonPressed(int evt_id) override;
 
 	void tryPressHotkey(SDL_Keycode k);
 	void openSubmenu(SDL_Keycode which);
+	void doSubmenuAction(SDL_Keycode which);
 	void updateCurrentSubmenu();
 };
 

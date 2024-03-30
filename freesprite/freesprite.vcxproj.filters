@@ -154,7 +154,10 @@
       <Filter>Pliki źródłowe\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="ToolRectClone.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupYesNo.cpp">
+      <Filter>Pliki źródłowe\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -267,7 +270,10 @@
       <Filter>Pliki nagłówkowe\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectClone.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupYesNo.h">
+      <Filter>Pliki nagłówkowe\popup</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

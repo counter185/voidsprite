@@ -5,6 +5,7 @@
 #include <string>
 #include <format>
 #include <map>
+#include <unordered_map>
 #include <new>
 #include <vector>
 #include <functional>
@@ -48,6 +49,7 @@ extern std::vector<BaseBrush*> g_brushes;
 extern SDL_Texture* g_mainlogo;
 
 void g_addScreen(BaseScreen* a);
+void g_closeLastScreen();
 
 void g_addPopup(BasePopup* a);
 void g_popDisposeLastPopup(bool dispose = true);
@@ -63,6 +65,7 @@ struct NamedEditorOperation {
 
 struct NavbarSection {
 	std::string name;
+	std::vector<SDL_Keycode> order;
 	std::map<SDL_Keycode, NamedEditorOperation> actions;
 };
 

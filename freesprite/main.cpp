@@ -32,6 +32,10 @@ std::vector<BaseScreen*> screenStack;
 void g_addScreen(BaseScreen* a) {
     screenStack.push_back(a);
 }
+void g_closeLastScreen() {
+    delete screenStack[screenStack.size() - 1];
+    screenStack.pop_back();
+}
 
 int main(int argc, char** argv)
 {
@@ -77,11 +81,6 @@ int main(int argc, char** argv)
             switch (evt.type) {
                 case SDL_QUIT:
                     //return 0;
-                    delete screenStack.at(screenStack.size() - 1);
-                    screenStack.pop_back();
-                    if (screenStack.size() == 0) {
-                        return 0;
-                    }
                     break;
                 case SDL_KEYDOWN:
                     break;

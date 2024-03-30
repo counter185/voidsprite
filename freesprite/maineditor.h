@@ -38,6 +38,7 @@ public:
 	BaseBrush* currentBrush = new Brush1x1();
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
+	bool changesSinceLastSave = false;
 
 	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
@@ -60,6 +61,7 @@ public:
 	void takeInput(SDL_Event evt) override;
 
 	void eventFileSaved(int evt_id, PlatformNativePathString name) override;
+	void eventPopupClosed(int evt_id, BasePopup* p) override;
 	
 	void DrawBackground();
 	void DrawForeground();
@@ -71,6 +73,7 @@ public:
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
 	void recenterCanvas();
+	bool tryClose();
 
 	void commitStateToCurrentLayer();
 	void undo();

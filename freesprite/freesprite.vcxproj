@@ -176,6 +176,7 @@
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="PopupMessageBox.cpp" />
     <ClCompile Include="PopupSetEditorPixelGrid.cpp" />
+    <ClCompile Include="PopupYesNo.cpp" />
     <ClCompile Include="StartScreen.cpp" />
     <ClCompile Include="TabbedView.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="platform_windows.h" />
     <ClInclude Include="PopupMessageBox.h" />
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
+    <ClInclude Include="PopupYesNo.h" />
     <ClInclude Include="StartScreen.h" />
     <ClInclude Include="TabbedView.h" />
     <ClInclude Include="ToolColorPicker.h" />

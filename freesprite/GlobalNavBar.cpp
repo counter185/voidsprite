@@ -22,13 +22,27 @@ void GlobalNavBar::handleInput(SDL_Event evt, XY gPosOffset)
 	}
 
 	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-		wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
+		if (!wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position) && currentSubmenuOpen != -1) {
+			subWxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
+		}
 	}
-	if (!wxs.anyFocused()) {
+	if (wxs.anyFocused()) {
+		wxs.passInputToFocused(evt, gPosOffset);
+	}
+	else if (subWxs.anyFocused()) {
+		subWxs.passInputToFocused(evt, gPosOffset);
+	}
+}
 
+void GlobalNavBar::eventButtonPressed(int evt_id)
+{
+	if (evt_id < 0) {
+		SDL_Keycode subBtnID = -evt_id - 1;
+		doSubmenuAction(subBtnID);
 	}
 	else {
-		wxs.passInputToFocused(evt, gPosOffset);
+		SDL_Keycode submenuID = evt_id;
+		openSubmenu(submenuID);
 	}
 }
 
@@ -44,21 +58,27 @@ void GlobalNavBar::tryPressHotkey(SDL_Keycode k)
 			openSubmenu(-1);
 		}
 		else {
-			if (keyBinds[currentSubmenuOpen].actions.contains(k)) {
-				keyBinds[currentSubmenuOpen].actions[k].function(parent);
-				openSubmenu(-1);
-			}
+			doSubmenuAction(k);
 		}
 	}
 }
 
 void GlobalNavBar::openSubmenu(SDL_Keycode which)
 {
+	subWxs.forceUnfocus();
 	currentSubmenuOpen = -1;
 	updateCurrentSubmenu();
 	if (which != -1) {
 		currentSubmenuOpen = which;
 		updateCurrentSubmenu();
+	}
+}
+
+void GlobalNavBar::doSubmenuAction(SDL_Keycode which)
+{
+	if (currentSubmenuOpen != -1 && keyBinds[currentSubmenuOpen].actions.contains(which)) {
+		keyBinds[currentSubmenuOpen].actions[which].function(parent);
+		openSubmenu(-1);
 	}
 }
 
@@ -70,12 +90,15 @@ void GlobalNavBar::updateCurrentSubmenu()
 	else {
 		int y = wxHeight;
 		int x = 10 + (std::find(submenuOrder.begin(), submenuOrder.end(), currentSubmenuOpen) - submenuOrder.begin()) * 120;
+
 		for (auto& option : keyBinds[currentSubmenuOpen].actions) {
 			UIButton* newBtn = new UIButton();
-			newBtn->position = XY{ x, y };
+			std::vector<SDL_Keycode> order = keyBinds[currentSubmenuOpen].order;
+			newBtn->position = XY{ x, order.empty() ? y : (int)(wxHeight + (std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight)};
 			y += newBtn->wxHeight;
 			newBtn->colorBGFocused = newBtn->colorBGUnfocused = SDL_Color{ 0,0,0,0xa0 };
 			newBtn->text = option.second.name + std::format(" ({})", SDL_GetKeyName(option.first));
+			newBtn->setCallbackListener(-1 - option.first, this);
 			subWxs.addDrawable(newBtn);
 		}
 	}

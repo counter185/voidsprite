@@ -2,6 +2,7 @@
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "GlobalNavBar.h"
+#include "PopupYesNo.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	SetUpWidgets();
@@ -189,10 +190,28 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 	};
 }
 
+bool MainEditor::tryClose() {
+	if (!changesSinceLastSave) {
+		g_closeLastScreen();
+		return true;
+	}
+	else {
+		PopupYesNo* newPopup = new PopupYesNo("Confirm close", "You have unsaved changes");
+		newPopup->setCallbackListener(EVENT_MAINEDITOR_CONFIRM_CLOSE, this);
+		g_addPopup(newPopup);
+	}
+	return false;
+}
+
 void MainEditor::takeInput(SDL_Event evt) {
 
 	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
+	}
+	if (evt.type == SDL_QUIT) {
+		if (tryClose()) {
+			return;
+		}
 	}
 
 	if (!wxsManager.anyFocused()) {
@@ -210,6 +229,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 						}
 						else {
 							currentBrush->clickRelease(this, mousePixelTargetPoint);
+							if (!currentBrush->isReadOnly()) {
+								changesSinceLastSave = true;
+							}
 						}
 					}
 					mouseHoldPosition = mousePixelTargetPoint;
@@ -282,6 +304,16 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 			Layer* flat = flattenImage();
 			writePNG(name, flat);
 			delete flat;
+		}
+		changesSinceLastSave = false;
+	}
+}
+
+void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
+{
+	if (evt_id == EVENT_MAINEDITOR_CONFIRM_CLOSE) {
+		if (((PopupYesNo*)p)->result) {
+			g_closeLastScreen();
 		}
 	}
 }
