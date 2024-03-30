@@ -34,7 +34,7 @@ public:
 				{
 					{SDLK_d, { "Save as",
 							[](MainEditor* editor) {
-								//todo: implement save as
+								editor->trySaveAsImage();
 							}
 						}
 					},

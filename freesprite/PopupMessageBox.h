@@ -13,11 +13,12 @@ public:
     PopupMessageBox(std::string tt, std::string tx) {
         this->title = tt;
         this->text = tx;
+        wxHeight = 200;
         UIButton* nbutton = new UIButton();
         nbutton->text = "OK";
-        nbutton->position = XY{ wxWidth - 80, wxHeight - 40 };
+        nbutton->position = XY{ wxWidth - 130, wxHeight - 40 };
         nbutton->wxHeight = 35;
-        nbutton->wxWidth = 75;
+        nbutton->wxWidth = 120;
         nbutton->setCallbackListener(0, this);
         wxsManager.addDrawable(nbutton);
     }

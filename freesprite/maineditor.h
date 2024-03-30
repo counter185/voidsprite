@@ -38,7 +38,10 @@ public:
 	BaseBrush* currentBrush = new Brush1x1();
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
+
 	bool changesSinceLastSave = false;
+	PlatformNativePathString lastConfirmedSavePath;
+	bool lastConfirmedSave = false;
 
 	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
@@ -72,6 +75,7 @@ public:
 	void SetPixel(XY position, uint32_t color);
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
+	void trySaveAsImage();
 	void recenterCanvas();
 	bool tryClose();
 

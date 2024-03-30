@@ -297,15 +297,25 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 
 		size_t extStart = name.find_last_of(L".");
 		std::wstring extension = name.substr(extStart);
+		bool result = false;
 		if (extension == L".voidsn") {
-			writeVOIDSNv1(name, XY{ texW, texH }, layers);
+			result = writeVOIDSNv1(name, XY{ texW, texH }, layers);
 		}
 		else {
 			Layer* flat = flattenImage();
-			writePNG(name, flat);
+			result = writePNG(name, flat);
 			delete flat;
 		}
-		changesSinceLastSave = false;
+		if (result) {
+			g_addPopup(new PopupMessageBox("Saved", "Save successful"));
+			lastConfirmedSave = true;
+			lastConfirmedSavePath = name;
+			changesSinceLastSave = false;
+		}
+		else {
+			g_addPopup(new PopupMessageBox("Save", "Save failed"));
+		}
+		
 	}
 }
 
@@ -357,6 +367,16 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
 }
 
 void MainEditor::trySaveImage()
+{
+	if (!lastConfirmedSave) {
+		trySaveAsImage();
+	}
+	else {
+		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath);
+	}
+}
+
+void MainEditor::trySaveAsImage()
 {
 	platformTrySaveImageFile(this);
 }
