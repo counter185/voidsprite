@@ -136,5 +136,31 @@ public:
 			layerDirty = true;
 		}
 	}
+
+	int numUniqueColors(bool onlyRGB = false) {
+		return getUniqueColors(onlyRGB).size();
+	}
+
+	std::vector<uint32_t> getUniqueColors(bool onlyRGB = false) {
+		std::map<uint32_t, int> cols;
+		uint32_t* pixels = (uint32_t*)pixelData;
+		for (uint64_t x = 0; x < w * h; x++) {
+			uint32_t px = pixels[x];
+			if (onlyRGB) {
+				px |= 0xff000000;
+			}
+			else {
+				if ((px & 0xff000000) == 0) {
+					px = 0;
+				}
+			}
+			cols[px] = 1;
+		}
+		std::vector<uint32_t> ret;
+		for (auto& a : cols) {
+			ret.push_back(a.first);
+		}
+		return ret;
+	}
 };
 

@@ -303,7 +303,12 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 		}
 		else {
 			Layer* flat = flattenImage();
-			result = writePNG(name, flat);
+			if (extension == L".xyz") {
+				result = writeXYZ(name, flat);
+			}
+			else {
+				result = writePNG(name, flat);
+			}
 			delete flat;
 		}
 		if (result) {

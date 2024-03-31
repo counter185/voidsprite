@@ -15,10 +15,6 @@
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
-protected:
-	Layer* getCurrentLayer() {
-		return layers[selLayer];
-	}
 public:
 	std::vector<Layer*> layers;
 	int selLayer = 0;
@@ -84,6 +80,9 @@ public:
 	void undo();
 	void redo();
 
+	Layer* getCurrentLayer() {
+		return layers[selLayer];
+	}
 	void layer_flipHorizontally();
 	void layer_flipVertically();
 	void layer_swapLayerRGBtoBGR();

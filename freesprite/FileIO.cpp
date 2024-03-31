@@ -275,3 +275,48 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
     }
     return false;
 }
+
+bool writeXYZ(PlatformNativePathString path, Layer* data)
+{
+    std::vector<uint32_t> uniqueColors = data->getUniqueColors(true);
+    if (uniqueColors.size() > 256) {
+        printf("[XYZ] Too many colors\n");
+        return false;
+    }
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fwrite("XYZ1", 4, 1, outfile);
+        fwrite(&data->w, 2, 1, outfile);
+        fwrite(&data->h, 2, 1, outfile);
+        uint8_t paletteData[256*3];
+        int p = 0;
+        for (uint32_t& a : uniqueColors) {
+            uint32_t color = a;
+            paletteData[p++] = (color >> 16) & 0xff;
+            paletteData[p++] = (color >> 8) & 0xff;
+            paletteData[p++] = color&0xff;
+        }
+        uint8_t* pxPalleteData = (uint8_t*)malloc(data->w * data->h);
+        uint32_t* pixelData32 = (uint32_t*)data->pixelData;
+        for (uint64_t x = 0; x < data->w * data->h; x++) {
+            uint32_t pixel = pixelData32[x] | 0xff000000;
+            int index = std::find(uniqueColors.begin(), uniqueColors.end(), pixel) - uniqueColors.begin();
+            pxPalleteData[x] = (uint8_t)(index);
+        }
+        unsigned long dataLength = 256 * 3 + data->w * data->h;
+        uint8_t* combined = (uint8_t*)malloc(dataLength);
+        memcpy(combined, paletteData, 256 * 3);
+        memcpy(combined+(256*3), pxPalleteData, data->w * data->h);
+        uint8_t* dst = (uint8_t*)malloc(dataLength);
+        compress((Bytef*)dst, &dataLength, combined, dataLength);
+        fwrite(dst, dataLength, 1, outfile);
+
+        free(combined);
+        free(dst);
+        free(pxPalleteData);
+        fclose(outfile);
+        return true;
+    }
+
+    return false;
+}
