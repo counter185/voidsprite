@@ -35,6 +35,7 @@ public:
 	XY mousePixelTargetPoint;
 	int scale = 1;
 	XY mouseHoldPosition;
+	bool closeNextTick = false;
 	BaseBrush* currentBrush = new Brush1x1();
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
@@ -77,7 +78,7 @@ public:
 	void trySaveImage();
 	void trySaveAsImage();
 	void recenterCanvas();
-	bool tryClose();
+	bool requestSafeClose();
 
 	void commitStateToCurrentLayer();
 	void undo();

@@ -111,6 +111,10 @@ void MainEditor::tick() {
 		iclamp(-texW * scale + 4, canvasCenterPoint.x, g_windowW - 4),
 		iclamp(-texH * scale +4, canvasCenterPoint.y, g_windowH - 4)
 	};
+
+	if (closeNextTick) {
+		g_closeLastScreen();
+	}
 }
 
 void MainEditor::DrawBackground()
@@ -190,9 +194,9 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 	};
 }
 
-bool MainEditor::tryClose() {
+bool MainEditor::requestSafeClose() {
 	if (!changesSinceLastSave) {
-		g_closeLastScreen();
+		closeNextTick = true;
 		return true;
 	}
 	else {
@@ -209,7 +213,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
 	}
 	if (evt.type == SDL_QUIT) {
-		if (tryClose()) {
+		if (requestSafeClose()) {
 			return;
 		}
 	}

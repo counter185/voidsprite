@@ -46,7 +46,7 @@ public:
 					},
 					{SDLK_c, { "Close",
 							[](MainEditor* editor) {
-								editor->tryClose();
+								editor->requestSafeClose();
 							}
 						}
 					},
