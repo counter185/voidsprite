@@ -98,14 +98,12 @@ public:
 							}
 						}
 					},
-#if _DEBUG
 					{SDLK_x, { "Print number of colors",
 							[](MainEditor* editor) {
 								printf("%i\n", editor->getCurrentLayer()->numUniqueColors(true));
 							}
 						}
 					},
-#endif
 				}
 			}
 		},
