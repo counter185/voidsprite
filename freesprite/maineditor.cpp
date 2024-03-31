@@ -183,7 +183,6 @@ void MainEditor::SetUpWidgets()
 
 	navbar = new GlobalNavBar(this);
 	wxsManager.addDrawable(navbar);
-
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
@@ -233,9 +232,6 @@ void MainEditor::takeInput(SDL_Event evt) {
 						}
 						else {
 							currentBrush->clickRelease(this, mousePixelTargetPoint);
-							if (!currentBrush->isReadOnly()) {
-								changesSinceLastSave = true;
-							}
 						}
 					}
 					mouseHoldPosition = mousePixelTargetPoint;
@@ -406,6 +402,7 @@ void MainEditor::commitStateToCurrentLayer()
 		undoStack[0]->discardLastUndo();
 		undoStack.erase(undoStack.begin());
 	}
+	changesSinceLastSave = true;
 }
 
 void MainEditor::undo()
@@ -432,6 +429,11 @@ void MainEditor::layer_flipHorizontally()
 {
 	commitStateToCurrentLayer();
 	getCurrentLayer()->flipHorizontally();
+}
+void MainEditor::layer_flipVertically()
+{
+	commitStateToCurrentLayer();
+	getCurrentLayer()->flipVertically();
 }
 
 void MainEditor::layer_swapLayerRGBtoBGR()

@@ -86,6 +86,18 @@ public:
 		}
 		layerDirty = true;
 	}
+	void flipVertically() {
+		uint32_t* px32 = (uint32_t*)pixelData;
+		for (int y = 0; y < h/2; y++) {
+			for (int x = 0; x < w; x++) {
+				uint32_t p = *(px32 + (y*w) + (w - 1 - x));
+				uint32_t* p2 = px32 + ((h-1-y)*w) + (w - 1 - x);
+				*(px32 + (y * w) + (w - 1 - x)) = *p2;
+				*p2 = p;
+			}
+		}
+		layerDirty = true;
+	}
 
 	void discardRedoStack() {
 		for (uint8_t*& redoD : redoQueue) {

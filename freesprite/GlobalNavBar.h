@@ -86,6 +86,12 @@ public:
 							}
 						}
 					},
+					{SDLK_g, { "Flip current layer: Y axis",
+							[](MainEditor* editor) {
+								editor->layer_flipVertically();
+							}
+						}
+					},
 					{SDLK_b, { "Swap channels RGB->BGR",
 							[](MainEditor* editor) {
 								editor->layer_swapLayerRGBtoBGR();
