@@ -94,13 +94,13 @@ Layer* readPNG(PlatformNativePathString path)
     }*/
 
     int imagePointer = 0;
-    for (int y = 0; y < height; y++) {
+    for (uint32_t y = 0; y < height; y++) {
         if (numchannels == 4) {
             memcpy(nlayer->pixelData + (y * numchannels * width), rows[y], width * numchannels);
         }
         else if (numchannels == 3) {
             int currentRowPointer = 0;
-            for (int x = 0; x < width; x++) {
+            for (uint32_t x = 0; x < width; x++) {
                 nlayer->pixelData[imagePointer++] = 0xff;
                 nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
                 nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
@@ -120,7 +120,7 @@ Layer* readPNG(PlatformNativePathString path)
         SDL_FreeSurface(convSrf);
     }
 
-    for (int y = 0; y < height; y++) {
+    for (uint32_t y = 0; y < height; y++) {
         delete[] rows[y];
     }
     delete[] rows;

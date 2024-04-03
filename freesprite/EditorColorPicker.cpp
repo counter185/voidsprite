@@ -117,19 +117,19 @@ void EditorColorPicker::setMainEditorColorRGB(unsigned int col) {
 void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders) {
     hsv a = rgb2hsv(rgb{ col.r / 255.0f, col.g / 255.0f, col.b / 255.0f });
     if (tbv->openTab != 1 || updateHSVSliders) {
-        sliderH->sliderPos = a.h / 360.0f;
-        sliderS->sliderPos = a.s;
-        sliderV->sliderPos = a.v;
+        sliderH->sliderPos = (float)(a.h / 360.0f);
+        sliderS->sliderPos = (float)a.s;
+        sliderV->sliderPos = (float)a.v;
     }
     if (tbv->openTab != 0 || updateHSVSliders) {
-        hueSlider->sliderPos = a.h / 360.0;
-        satValSlider->sPos = a.s;
-        satValSlider->vPos = a.v;
+        hueSlider->sliderPos = (float)(a.h / 360.0);
+        satValSlider->sPos = (float)a.s;
+        satValSlider->vPos = (float)a.v;
     }
     if (updateHSVSliders) {
-        currentH = a.h;
-        currentS = a.s;
-        currentV = a.v;
+        currentH = (float)a.h;
+        currentS = (float)a.s;
+        currentV = (float)a.v;
     }
 
     colorTextField->text = std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b);

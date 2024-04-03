@@ -21,7 +21,7 @@ void DrawableManager::moveToFront(Drawable* d) {
 }
 
 bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
-	for (int x = drawablesList.size()-1; x >= 0; x--) {
+	for (int x = (int)drawablesList.size()-1; x >= 0; x--) {
 		Drawable* a = drawablesList[x];
 	//for (Drawable*& a : drawablesList) {
 		if (a->isMouseIn(xyAdd(a->position, parentOffset), screenPoint)) {

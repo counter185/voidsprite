@@ -123,7 +123,7 @@ public:
 		for (int x = 0; x < 2; x++) {
 			UIButton* buttonNewImage = new UIButton();
 			buttonNewImage->setCallbackListener(4, this);
-			buttonNewImage->position = XY{ 30,150 };
+			buttonNewImage->position = XY{ 30,90 };
 			buttonNewImage->wxWidth = 100;
 			buttonNewImage->text = "Create...";
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImage);

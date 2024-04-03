@@ -150,8 +150,8 @@ public:
 		}
 	}
 
-	int numUniqueColors(bool onlyRGB = false) {
-		return getUniqueColors(onlyRGB).size();
+	unsigned int numUniqueColors(bool onlyRGB = false) {
+		return (unsigned int)getUniqueColors(onlyRGB).size();
 	}
 
 	std::vector<uint32_t> getUniqueColors(bool onlyRGB = false) {
