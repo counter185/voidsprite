@@ -1,5 +1,6 @@
 #pragma once
 #include "globals.h"
+#include "mathops.h"
 class Layer
 {
 public:
@@ -61,6 +62,18 @@ public:
 			&& position.y >= 0 && position.y < h) {
 			intpxdata[position.x + (position.y * w)] = color;
 			layerDirty = true;
+		}
+	}
+	void fillRect(XY from, XY to, uint32_t color) {
+		int minx = ixmin(from.x, to.x);
+		int maxx = ixmax(from.x, to.x);
+		int miny = ixmin(from.y, to.y);
+		int maxy = ixmax(from.y, to.y);
+
+		for (int x = minx; x <= maxx; x++) {
+			for (int y = miny; y <= maxy; y++) {
+				setPixel(XY{ x,y }, color);
+			}
 		}
 	}
 

@@ -49,6 +49,12 @@
     <Filter Include="Pliki źródłowe\screen">
       <UniqueIdentifier>{b42970c2-7d17-43ca-9583-d087ee0c3c22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\templates">
+      <UniqueIdentifier>{a9bd79ad-10d4-46ca-8497-7aebd9add055}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\templates">
+      <UniqueIdentifier>{61618ffa-829c-42b3-90c1-027a310b7063}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -158,6 +164,12 @@
     </ClCompile>
     <ClCompile Include="PopupYesNo.cpp">
       <Filter>Pliki źródłowe\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseTemplate.cpp">
+      <Filter>Pliki źródłowe\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="TemplateRPG2KCharset.cpp">
+      <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -274,6 +286,12 @@
     </ClInclude>
     <ClInclude Include="PopupYesNo.h">
       <Filter>Pliki nagłówkowe\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseTemplate.h">
+      <Filter>Pliki nagłówkowe\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="TemplateRPG2KCharset.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

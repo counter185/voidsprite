@@ -38,6 +38,7 @@ class EditorBrushPicker;
 class BaseScreen;
 class BasePopup;
 class BaseBrush;
+class Layer;
 
 extern int g_windowW, g_windowH;
 extern SDL_Window* g_wd;

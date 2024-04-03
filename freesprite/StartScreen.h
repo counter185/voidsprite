@@ -9,6 +9,8 @@
 #include "maineditor.h"
 #include "UILabel.h"
 #include "TabbedView.h"
+#include "BaseTemplate.h"
+#include "TemplateRPG2KCharset.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -26,6 +28,10 @@ public:
 	UITextField* tab1TextFieldCH;
 	UITextField* tab1TextFieldCWX;
 	UITextField* tab1TextFieldCHX;
+
+	BaseTemplate* tab2templates[1] = {
+		new TemplateRPG2KCharset()
+	};
 
 	StartScreen() {
 		newImageTabs = new TabbedView({ {"Pixel dimensions"}, {"Sprites/Tiles"}, {"Templates"} }, 160);
@@ -105,12 +111,23 @@ public:
 		h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
 		newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
-		UIButton* buttonNewImage = new UIButton();
-		buttonNewImage->setCallbackListener(4, this);
-		buttonNewImage->position = XY{ 40,260 };
-		buttonNewImage->wxWidth = 100;
-		buttonNewImage->text = "Create...";
-		wxsManager.addDrawable(buttonNewImage);
+		for (int x = 0; x < 1; x++) {
+			UIButton* buttonTemplate = new UIButton();
+			buttonTemplate->position = XY{ 40, 5 + x * 30 };
+			buttonTemplate->text = tab2templates[x]->getName();
+			buttonTemplate->setCallbackListener(10 + x, this);
+			buttonTemplate->wxWidth = 400;
+			newImageTabs->tabs[2].wxs.addDrawable(buttonTemplate);
+		}
+
+		for (int x = 0; x < 2; x++) {
+			UIButton* buttonNewImage = new UIButton();
+			buttonNewImage->setCallbackListener(4, this);
+			buttonNewImage->position = XY{ 30,150 };
+			buttonNewImage->wxWidth = 100;
+			buttonNewImage->text = "Create...";
+			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImage);
+		}
 	}
 	~StartScreen() {
 		wxsManager.freeAllDrawables();
@@ -152,6 +169,11 @@ public:
 					}
 					break;
 			}
+		}
+		else if (evt_id >= 10) {
+			MainEditor* newMainEditor = new MainEditor(tab2templates[evt_id-10]->generate());
+			newMainEditor->tileDimensions = tab2templates[evt_id - 10]->tileSize();
+			g_addScreen(newMainEditor);
 		}
 	}
 };

@@ -179,6 +179,8 @@
     <ClCompile Include="PopupYesNo.cpp" />
     <ClCompile Include="StartScreen.cpp" />
     <ClCompile Include="TabbedView.cpp" />
+    <ClCompile Include="BaseTemplate.cpp" />
+    <ClCompile Include="TemplateRPG2KCharset.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="ToolRectClone.cpp" />
     <ClCompile Include="UIButton.cpp" />
@@ -219,6 +221,8 @@
     <ClInclude Include="PopupYesNo.h" />
     <ClInclude Include="StartScreen.h" />
     <ClInclude Include="TabbedView.h" />
+    <ClInclude Include="BaseTemplate.h" />
+    <ClInclude Include="TemplateRPG2KCharset.h" />
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="ToolRectClone.h" />
     <ClInclude Include="UIButton.h" />
