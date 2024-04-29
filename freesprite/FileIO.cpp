@@ -2,6 +2,7 @@
 #include "maineditor.h"
 #include <png.h>
 #include "libtga/tga.h"
+#include "easybmp/EasyBMP.h"
 
 Layer* readXYZ(PlatformNativePathString path)
 {
@@ -153,6 +154,25 @@ Layer* readTGA(std::string path) {
     }
 
     TGAClose(tga);*/
+}
+
+Layer* readBMP(PlatformNativePathString path)
+{
+    BMP nbmp;
+    nbmp.ReadFromFileW(path);
+    int w = nbmp.TellWidth();
+    int h = nbmp.TellHeight();
+    Layer* nlayer = new Layer(w, h);
+    unsigned long dataPtr = 0;
+    uint32_t* pxData32 = (uint32_t*)nlayer->pixelData;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            RGBApixel px = nbmp.GetPixel(x,y);
+            px.Alpha = 255; //TODO
+            pxData32[dataPtr++] = (px.Alpha << 24) + (px.Red << 16) + (px.Green << 8) + px.Blue;
+        }
+    }
+    return nlayer;
 }
 
 Layer* readAETEX(PlatformNativePathString path) {

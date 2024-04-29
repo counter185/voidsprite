@@ -55,6 +55,12 @@
     <Filter Include="Pliki źródłowe\templates">
       <UniqueIdentifier>{61618ffa-829c-42b3-90c1-027a310b7063}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\external\easybmp">
+      <UniqueIdentifier>{7dd202aa-e86a-4bec-b121-5c24da536967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\external\easybmp">
+      <UniqueIdentifier>{f354d5c4-bf0c-44ca-b52b-db514ccfb8c7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -169,7 +175,10 @@
       <Filter>Pliki źródłowe\templates</Filter>
     </ClCompile>
     <ClCompile Include="TemplateRPG2KCharset.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="easybmp\EasyBMP.cpp">
+      <Filter>Pliki źródłowe\external\easybmp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -291,7 +300,19 @@
       <Filter>Pliki nagłówkowe\templates</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KCharset.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="easybmp\EasyBMP.h">
+      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+    </ClInclude>
+    <ClInclude Include="easybmp\EasyBMP_BMP.h">
+      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+    </ClInclude>
+    <ClInclude Include="easybmp\EasyBMP_DataStructures.h">
+      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+    </ClInclude>
+    <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h">
+      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

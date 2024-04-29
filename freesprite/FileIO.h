@@ -5,6 +5,7 @@
 Layer* readXYZ(PlatformNativePathString path);
 Layer* readPNG(PlatformNativePathString path);
 Layer* readTGA(std::string path);
+Layer* readBMP(PlatformNativePathString path);
 Layer* readAETEX(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 

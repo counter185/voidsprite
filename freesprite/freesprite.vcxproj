@@ -161,6 +161,7 @@
     <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
+    <ClCompile Include="easybmp\EasyBMP.cpp" />
     <ClCompile Include="EditorBrushPicker.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="FileIO.cpp" />
@@ -202,6 +203,10 @@
     <ClInclude Include="colors.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
+    <ClInclude Include="easybmp\EasyBMP.h" />
+    <ClInclude Include="easybmp\EasyBMP_BMP.h" />
+    <ClInclude Include="easybmp\EasyBMP_DataStructures.h" />
+    <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h" />
     <ClInclude Include="EditorBrushPicker.h" />
     <ClInclude Include="EditorColorPicker.h" />
     <ClInclude Include="EventCallbackListener.h" />
