@@ -340,3 +340,49 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
 
     return false;
 }
+
+bool writeBMP(PlatformNativePathString path, Layer* data) {
+
+    BMP outbmp = BMP();
+    outbmp.SetBitDepth(24);
+    outbmp.SetSize(data->w, data->h);
+    for (int y = 0; y < data->h; y++) {
+        for (int x = 0; x < data->w; x++) {
+            RGBApixel px;
+            uint32_t pxx = data->getPixelAt(XY{ x,y });
+            px.Alpha = 255;
+            px.Red = pxx >> 16 & 0xff;
+            px.Green = pxx >> 8 & 0xff;
+            px.Blue = pxx & 0xff;
+            outbmp.SetPixel(x, y, px);
+        }
+    }
+    FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
+    return outbmp.WriteToFileP(nfile);
+}
+
+bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
+
+    BMP outbmp = BMP();
+    outbmp.SetBitDepth(24);
+    outbmp.SetSize(data->w, data->h);
+    for (int y = 0; y < data->h; y++) {
+        for (int x = 0; x < data->w; x++) {
+            RGBApixel px;
+            uint32_t pxx = data->getPixelAt(XY{ x,y });
+            px.Alpha = 255;
+            px.Red = pxx >> 16 & 0xff;
+            px.Green = pxx >> 8 & 0xff;
+            px.Blue = pxx & 0xff;
+            outbmp.SetPixel(x, y, px);
+        }
+    }
+    FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outbmp.WriteToFileP(nfile, false)) {
+        fseek(nfile, 0, SEEK_END);
+        fwrite("(C)Pixel", 8, 1, nfile);
+        fclose(nfile);
+        return true;
+    }
+    return false;
+}

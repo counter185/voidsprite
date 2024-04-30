@@ -76,7 +76,7 @@ class BMP
  
  bool SetSize( int NewWidth, int NewHeight );
  bool SetBitDepth( int NewDepth );
- bool WriteToFile( const char* FileName );
+ bool WriteToFileP( FILE* fp, bool closeOnSuccess = true);
  bool ReadFromFileW( std::wstring FileName );
  bool ReadFromFileA( std::string FileName );
  bool _ReadFromFile( FILE* fp );

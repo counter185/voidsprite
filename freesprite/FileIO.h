@@ -12,3 +12,5 @@ MainEditor* readVOIDSN(PlatformNativePathString path);
 bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
+bool writeBMP(PlatformNativePathString path, Layer* data);
+bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);

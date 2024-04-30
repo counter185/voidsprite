@@ -423,7 +423,7 @@ bool BMP::SetSize(int NewWidth , int NewHeight )
  return true; 
 }
 
-bool BMP::WriteToFile( const char* FileName )
+bool BMP::WriteToFileP( FILE* fp, bool closeOnSuccess )
 {
  using namespace std;
  if( !EasyBMPcheckDataSize() )
@@ -439,13 +439,13 @@ bool BMP::WriteToFile( const char* FileName )
   return false; 
  }
  
- FILE* fp = fopen( FileName, "wb" );
+ //FILE* fp = _wfopen( FileName.c_str(), L"wb");
  if( fp == NULL )
  {
   if( EasyBMPwarnings )
   {
    cout << "EasyBMP Error: Cannot open file " 
-        << FileName << " for output." << endl;
+        << /*FileName*/"file" << " for output." << endl;
   }
   fclose( fp );
   return false;
@@ -662,8 +662,9 @@ bool BMP::WriteToFile( const char* FileName )
   }
   
  }
-
- fclose(fp);
+ if (closeOnSuccess) {
+     fclose(fp);
+ }
  return true;
 }
 

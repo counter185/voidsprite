@@ -11,6 +11,8 @@ class Brush1x1 : public BaseBrush
 	void renderOnCanvas(XY canvasDrawPoint, int scale) {
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
 		drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+		drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
 	}
 };
 

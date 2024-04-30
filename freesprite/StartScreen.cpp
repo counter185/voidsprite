@@ -91,6 +91,15 @@ void StartScreen::takeInput(SDL_Event evt)
 						g_addScreen(new MainEditor(nlayer));
 					}
 				}
+				else if (extension == ".bmp") {
+					Layer* nlayer = readBMP(fPath);
+					if (nlayer == NULL) {
+						printf("BMP load failed");
+					}
+					else {
+						g_addScreen(new MainEditor(nlayer));
+					}
+				}
 				else if (extension == ".voidsn" || extension == ".voidsnv1") {
 					MainEditor* session = readVOIDSN(fPath);
 					if (session == NULL) {

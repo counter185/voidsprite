@@ -306,6 +306,12 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 			if (extension == L".xyz") {
 				result = writeXYZ(name, flat);
 			}
+			else if (extension == L".bmp") {
+				result = writeBMP(name, flat);
+			}
+			else if (extension == L".pbm") {
+				result = writeCaveStoryPBM(name, flat);
+			}
 			else {
 				result = writePNG(name, flat);
 			}
