@@ -29,6 +29,7 @@ XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
 
 std::wstring utf8StringToWstring(std::string a);
+bool stringEndsWith(std::string c, std::string endsWith);
 
 int ixmin(int a, int b);
 int ixmax(int a, int b);

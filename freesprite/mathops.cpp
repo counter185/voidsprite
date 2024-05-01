@@ -32,6 +32,14 @@ std::wstring utf8StringToWstring(std::string a)
     return ret;
 }
 
+bool stringEndsWith(std::string c, std::string endsWith)
+{
+    if (c.size() < endsWith.size()) {
+        return false;
+    }
+    return c.substr(c.size() - endsWith.size()) == endsWith;
+}
+
 hsv rgb2hsv(rgb in)
 {
     hsv         out;

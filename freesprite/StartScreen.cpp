@@ -2,6 +2,7 @@
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "FileIO.h"
+#include "PopupMessageBox.h"
 
 void StartScreen::tick() {
 
@@ -11,7 +12,7 @@ void StartScreen::render()
 {
 	SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
 	SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
-	g_fnt->RenderString("alpha31.03.2024", 2, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50});
+	g_fnt->RenderString("alpha01.05.2024", 2, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50});
 
 	SDL_Rect bgr = SDL_Rect{ 0, 35, 560, 300 };
 	SDL_SetRenderDrawColor(g_rd, 0x20, 0x20, 0x20, 0xa0);
@@ -48,59 +49,15 @@ void StartScreen::takeInput(SDL_Event evt)
 				break;
 			case SDL_DROPFILE:
 				std::string filePath = evt.drop.file;
-				std::string extension = filePath.substr(filePath.find_last_of('.'));
+				//std::string extension = filePath.substr(filePath.find_last_of('.'));
 				PlatformNativePathString fPath;
 #if _WIN32
 				fPath = utf8StringToWstring(filePath);
 #else
 				fPath = filePath;
 #endif
-				if (extension == ".xyz") {
-					Layer* nlayer = readXYZ(fPath);
-					if (nlayer == NULL) {
-						printf("xyz load failed");
-					}
-					else {
-						g_addScreen(new MainEditor(nlayer));
-					}
-				}
-				else if (extension == ".png") {
-					Layer* nlayer = readPNG(fPath);
-					if (nlayer == NULL) {
-						printf("png load failed");
-					}
-					else {
-						g_addScreen(new MainEditor(nlayer));
-					}
-				}
-				else if (extension == ".aetex") {
-					Layer* nlayer = readAETEX(fPath);
-					if (nlayer == NULL) {
-						printf("aetex load failed");
-					}
-					else {
-						g_addScreen(new MainEditor(nlayer));
-					}
-				}
-				else if (extension == ".pbm") {
-					Layer* nlayer = readBMP(fPath);
-					if (nlayer == NULL) {
-						printf("CSBMP load failed");
-					}
-					else {
-						g_addScreen(new MainEditor(nlayer));
-					}
-				}
-				else if (extension == ".bmp") {
-					Layer* nlayer = readBMP(fPath);
-					if (nlayer == NULL) {
-						printf("BMP load failed");
-					}
-					else {
-						g_addScreen(new MainEditor(nlayer));
-					}
-				}
-				else if (extension == ".voidsn" || extension == ".voidsnv1") {
+
+				if (stringEndsWith(filePath, ".voidsn") || stringEndsWith(filePath, ".voidsnv1")) {
 					MainEditor* session = readVOIDSN(fPath);
 					if (session == NULL) {
 						printf("voidsession load failed");
@@ -110,13 +67,39 @@ void StartScreen::takeInput(SDL_Event evt)
 					}
 				}
 				else {
-					SDL_Surface* srf = IMG_Load(filePath.c_str());
-					if (srf == NULL) {
-						printf("imageload failed: %s\n", filePath.c_str());
+
+					Layer* l = NULL;
+					for (FileImportNPath importer : g_fileImportersNPaths) {
+						if (stringEndsWith(filePath, importer.extension) && importer.canImport(fPath)) {
+							l = importer.importFunction(fPath);
+							if (l != NULL) {
+								break;
+							}
+							else {
+								printf("%s : load failed\n", importer.name.c_str());
+							}
+						}
+					}
+					if (l == NULL) {
+						for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
+							if (stringEndsWith(filePath, importer.extension) && importer.canImport(filePath)) {
+								l = importer.importFunction(filePath);
+								if (l != NULL) {
+									break;
+								}
+								else {
+									printf("%s : load failed\n", importer.name.c_str());
+								}
+							}
+						}
+					}
+
+					if (l != NULL) {
+						g_addScreen(new MainEditor(l));
 					}
 					else {
-						g_addScreen(new MainEditor(srf));
-						SDL_FreeSurface(srf);
+						g_addPopup(new PopupMessageBox("", "Failed to load file."));
+						printf("No importer for file available\n");
 					}
 				}
 				SDL_free(evt.drop.file);

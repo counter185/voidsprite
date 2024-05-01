@@ -195,6 +195,13 @@ Layer* readAETEX(PlatformNativePathString path) {
     }
 }
 
+Layer* readSDLImage(std::string path)
+{
+    SDL_Surface* img = IMG_Load(path.c_str());
+
+    return new Layer(img);
+}
+
 MainEditor* readVOIDSN(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);

@@ -101,6 +101,13 @@ void MainEditor::render() {
 	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
 	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
 
+	
+
+	if (wxsManager.anyFocused()) {
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+		SDL_RenderFillRect(g_rd, NULL);
+	}
+
 	DrawForeground();
 
 	wxsManager.renderAll();
@@ -243,7 +250,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 				else if (evt.button.button == 3) {
 					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
 					if (currentBrush != NULL && currentBrush->overrideRightClick()) {
-						currentBrush->rightClickPress(this, mousePixelTargetPoint);
+						if (evt.button.state) {
+							currentBrush->rightClickPress(this, mousePixelTargetPoint);
+						}
 					}
 					else {
 						colorPicker->setMainEditorColorRGB(getCurrentLayer()->getPixelAt(mousePixelTargetPoint));

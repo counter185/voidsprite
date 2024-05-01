@@ -20,8 +20,10 @@ void BrushRect::clickRelease(MainEditor* editor, XY pos)
 void BrushRect::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
 	if (heldDown) {
+		XY pointFrom = XY{ ixmin(startPos.x, lastMouseMotionPos.x), ixmin(startPos.y, lastMouseMotionPos.y) };
+		XY pointTo = XY{ ixmax(startPos.x, lastMouseMotionPos.x), ixmax(startPos.y, lastMouseMotionPos.y) };
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-		SDL_Rect r = { canvasDrawPoint.x + (startPos.x * scale), canvasDrawPoint.y + (startPos.y*scale), ((lastMousePos.x - startPos.x + 1) * scale), ((lastMousePos.y-startPos.y + 1) * scale)};
+		SDL_Rect r = { canvasDrawPoint.x + (pointFrom.x * scale), canvasDrawPoint.y + (pointFrom.y * scale), ((pointTo.x - pointFrom.x + 1) * scale), ((pointTo.y - pointFrom.y + 1) * scale) };
 		SDL_RenderFillRect(g_rd, &r);
 	}
 }
