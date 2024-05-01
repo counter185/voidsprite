@@ -199,7 +199,7 @@ Layer* readSDLImage(std::string path)
 {
     SDL_Surface* img = IMG_Load(path.c_str());
 
-    return new Layer(img);
+    return img == NULL ? NULL : new Layer(img);
 }
 
 MainEditor* readVOIDSN(PlatformNativePathString path)
