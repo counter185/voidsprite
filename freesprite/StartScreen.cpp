@@ -28,7 +28,7 @@ void StartScreen::render()
 void StartScreen::takeInput(SDL_Event evt)
 {
 	if (evt.type == SDL_QUIT) {
-		g_closeLastScreen();
+		g_closeScreen(this);
 		return;
 	}
 

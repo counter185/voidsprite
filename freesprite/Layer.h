@@ -11,6 +11,9 @@ public:
 	SDL_Texture* tex;
 	bool layerDirty = true;
 
+	bool colorKeySet = false;
+	uint32_t colorKey = 0;
+
 	Layer(int width, int height) {
 		w = width;
 		h = height;

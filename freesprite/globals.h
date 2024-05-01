@@ -51,6 +51,7 @@ extern SDL_Texture* g_mainlogo;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();
+void g_closeScreen(BaseScreen* screen);
 
 void g_addPopup(BasePopup* a);
 void g_popDisposeLastPopup(bool dispose = true);

@@ -120,7 +120,7 @@ void MainEditor::tick() {
 	};
 
 	if (closeNextTick) {
-		g_closeLastScreen();
+		g_closeScreen(this);
 	}
 }
 
@@ -343,7 +343,7 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 {
 	if (evt_id == EVENT_MAINEDITOR_CONFIRM_CLOSE) {
 		if (((PopupYesNo*)p)->result) {
-			g_closeLastScreen();
+			g_closeScreen(this);
 		}
 	}
 }

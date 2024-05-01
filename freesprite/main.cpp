@@ -28,10 +28,25 @@ void g_popDisposeLastPopup(bool dispose) {
     popupStack.pop_back();
 }
 
+int currentScreen = 0;
 std::vector<BaseScreen*> screenStack;
 void g_addScreen(BaseScreen* a) {
     screenStack.push_back(a);
+    currentScreen = screenStack.size()-1;
 }
+void g_closeScreen(BaseScreen* screen) {
+    for (int x = 0; x < screenStack.size(); x++) {
+        if (screenStack[x] == screen) {
+            delete screenStack[x];
+            screenStack.erase(screenStack.begin() + x);
+            if (currentScreen >= screenStack.size()) {
+                currentScreen = screenStack.size() - 1;
+            }
+        }
+    }
+}
+
+//do not use
 void g_closeLastScreen() {
     delete screenStack[screenStack.size() - 1];
     screenStack.pop_back();
@@ -83,6 +98,16 @@ int main(int argc, char** argv)
                     //return 0;
                     break;
                 case SDL_KEYDOWN:
+                    if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
+                        if (currentScreen != 0) {
+                            currentScreen--;
+                        }
+                    }
+                    else if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
+                        if (currentScreen < screenStack.size() - 1) {
+                            currentScreen++;
+                        }
+                    }
                     break;
                 case SDL_KEYUP:
                     break;
@@ -105,7 +130,7 @@ int main(int argc, char** argv)
             }
             else {
                 if (!screenStack.empty()) {
-                    screenStack[screenStack.size() - 1]->takeInput(evt);
+                    screenStack[currentScreen]->takeInput(evt);
                 }
             }
         }
@@ -114,17 +139,32 @@ int main(int argc, char** argv)
             popupStack[popupStack.size() - 1]->tick();
         }
         if (!screenStack.empty()) {
-            screenStack[screenStack.size() - 1]->tick();
+            screenStack[currentScreen]->tick();
         }
 
         SDL_SetRenderDrawColor(g_rd, 0,0,0,255);
         SDL_RenderClear(g_rd);
 
         if (!screenStack.empty()) {
-            screenStack[screenStack.size() - 1]->render();
+            screenStack[currentScreen]->render();
         }
         if (!popupStack.empty()) {
             popupStack[popupStack.size() - 1]->render();
+        }
+
+        XY screenIcons = {g_windowW, g_windowH - 10};
+        screenIcons = xySubtract(screenIcons, XY{ (int)(26 * screenStack.size()), 16});
+        
+        for (int x = 0; x < screenStack.size(); x++) {
+            BaseScreen* s = screenStack[x];
+            SDL_Rect r = {
+                screenIcons.x,
+                screenIcons.y,
+                16, 16
+            };
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, x == currentScreen ? 0x80 : 0x20);
+            SDL_RenderFillRect(g_rd, &r);
+            screenIcons.x += 26;
         }
         
 
