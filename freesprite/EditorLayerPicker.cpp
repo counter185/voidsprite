@@ -40,14 +40,29 @@ void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
     }
 }
 
+void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
+{
+    if (data1 == 0) {
+        caller->selLayer = evt_id;
+    }
+    else if (data1 == 1) {
+        caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;
+    }
+    layerButtons.forceUnfocus();
+    updateLayers();
+}
+
 void EditorLayerPicker::updateLayers()
 {
     layerButtons.freeAllDrawables();
     int yposition = 40;
+    int lid = 0;
     for (Layer*& l : caller->layers) {
         UILayerButton* layerButton = new UILayerButton(l->name);
+        layerButton->hideButton->colorBGFocused = layerButton->hideButton->colorBGUnfocused = (l->hidden ? SDL_Color{ 255,255,255,0x80 } : SDL_Color{0,0,0,0x80});
         layerButton->position = { 5, yposition };
         yposition += 30;
+        layerButton->setCallbackListener(lid++, this);
         layerButtons.addDrawable(layerButton);
     }
 }

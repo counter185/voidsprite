@@ -7,14 +7,23 @@ class UILayerButton : public Drawable, public EventCallbackListener
 {
 public:
 	DrawableManager subButtons;
+	UIButton* mainButton;
+	UIButton* hideButton;
 	
 	UILayerButton(std::string mainName) {
-		UIButton* mainButton = new UIButton();
+		mainButton = new UIButton();
 		mainButton->text = mainName;
 		mainButton->position = XY{ 0,0 };
-		mainButton->wxWidth = 150;
+		mainButton->wxWidth = 200;
 		mainButton->setCallbackListener(0, this);
 		subButtons.addDrawable(mainButton);
+
+		hideButton = new UIButton();
+		hideButton->text = "H";
+		hideButton->position = XY{ mainButton->wxWidth + 10,0 };
+		hideButton->wxWidth = 30;
+		hideButton->setCallbackListener(1, this);
+		subButtons.addDrawable(hideButton);
 	}
 	~UILayerButton() {
 		subButtons.freeAllDrawables();
@@ -24,6 +33,6 @@ public:
 	void render(XY position) override;
 	void handleInput(SDL_Event evt, XY gPosOffset = { 0,0 }) override;
 
-
+	void eventButtonPressed(int evt_id) override;
 };
 

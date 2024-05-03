@@ -10,7 +10,9 @@ public:
 	int w, h;
 	SDL_Texture* tex;
 	bool layerDirty = true;
+
 	std::string name = "Layer";
+	bool hidden = false;
 
 	bool colorKeySet = false;
 	uint32_t colorKey = 0;

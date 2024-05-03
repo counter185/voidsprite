@@ -47,6 +47,8 @@ Layer* readXYZ(PlatformNativePathString path)
             pxData[x] = colorPalette[decompBytes[filePtr++]];
         }
 
+        nLayer->name = "XYZ Image";
+
         free(compressedData);
         free(decompBytes);
 
@@ -90,6 +92,7 @@ Layer* readPNG(PlatformNativePathString path)
     png_read_image(png, rows);
 
     Layer* nlayer = new Layer(width, height);
+    nlayer->name = "PNG Image";
     /*if (numchannels != 4) {
         printf("hey!!!!!! don't do this yet\n");
     }*/
@@ -163,6 +166,7 @@ Layer* readBMP(PlatformNativePathString path)
     int w = nbmp.TellWidth();
     int h = nbmp.TellHeight();
     Layer* nlayer = new Layer(w, h);
+    nlayer->name = "BMP Layer";
     unsigned long dataPtr = 0;
     uint32_t* pxData32 = (uint32_t*)nlayer->pixelData;
     for (int y = 0; y < h; y++) {

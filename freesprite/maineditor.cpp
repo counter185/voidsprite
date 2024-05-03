@@ -72,7 +72,9 @@ void MainEditor::render() {
 	canvasRenderRect.y = canvasCenterPoint.y;
 
 	for (Layer*& imgLayer : layers) {
-		imgLayer->render(canvasRenderRect);
+		if (!imgLayer->hidden) {
+			imgLayer->render(canvasRenderRect);
+		}
 	}
 
 	if (tileDimensions.x != 0) {
@@ -121,7 +123,7 @@ void MainEditor::tick() {
 	};
 
 	//fuck it we ball
-	layerPicker->position.x = g_windowW - 320;
+	layerPicker->position.x = g_windowW - 260;
 
 	if (closeNextTick) {
 		g_closeScreen(this);

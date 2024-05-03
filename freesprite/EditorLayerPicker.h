@@ -7,11 +7,11 @@
 class EditorLayerPicker : public Drawable, public EventCallbackListener
 {
 public:
-	int wxWidth = 300;
+	int wxWidth = 250;
 	int wxHeight = 400;
 	MainEditor* caller;
 	DrawableManager layerButtons;
-	
+
 	EditorLayerPicker(MainEditor* editor) {
 		caller = editor;
 	}
@@ -20,6 +20,8 @@ public:
 	void render(XY position) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 	XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
+
+	void eventGeneric(int evt_id, int data1, int data2) override;
 
 	void updateLayers();
 };
