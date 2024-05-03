@@ -10,7 +10,12 @@ void DrawableManager::removeDrawable(Drawable* d) {
 }
 
 void DrawableManager::renderAll(XY offset) {
+	//tickAnchors();
+
 	for (Drawable*& a : drawablesList) {
+		//XY position = xyAdd(a->position, offset);
+		//TODO: DON'T JUST FUCKING XY{g_windowW, g_windowH}
+		//XY position = xyAdd(a->position, a->anchorPos(offset, XY{ g_windowW, g_windowH }, a->position, a->getDimensions(), a->anchor));
 		a->render(xyAdd(a->position, offset));
 	}
 }
@@ -23,6 +28,7 @@ void DrawableManager::moveToFront(Drawable* d) {
 bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
 	for (int x = (int)drawablesList.size()-1; x >= 0; x--) {
 		Drawable* a = drawablesList[x];
+		//XY anchorPosition = a->anchorPos(parentOffset, XY{ g_windowW, g_windowH }, a->position, a->getDimensions(), a->anchor);
 	//for (Drawable*& a : drawablesList) {
 		if (a->isMouseIn(xyAdd(a->position, parentOffset), screenPoint)) {
 			if (focused != a) {
@@ -63,6 +69,7 @@ void DrawableManager::forceUnfocus() {
 bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 {
 	for (Drawable*& d : drawablesList) {
+		//XY anchorPosition = d->anchorPos(origin, XY{ g_windowW, g_windowH }, d->position, d->getDimensions(), d->anchor);
 		XY renderPoint = xyAdd(d->position, origin);
 		if (d->isMouseIn(renderPoint, mousePos)) {
 			return true;
@@ -70,6 +77,18 @@ bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 	}
 	return false;
 }
+
+/*void DrawableManager::tickAnchors()
+{
+	for (Drawable*& d : drawablesList) {
+		if (d->anchor.x == 1) {
+			d->position.x = g_windowW - d->getDimensions().x;
+		}
+		if (d->anchor.y == 1) {
+			d->position.y = g_windowH - d->getDimensions().y;
+		}
+	}
+}*/
 
 void DrawableManager::freeAllDrawables()
 {

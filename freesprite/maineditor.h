@@ -3,6 +3,7 @@
 #include "BaseScreen.h"
 #include "DrawableManager.h"
 #include "EditorColorPicker.h"
+#include "EditorLayerPicker.h"
 #include "BaseBrush.h"
 #include "Brush1x1.h"
 #include "Brush3pxCircle.h"
@@ -16,6 +17,7 @@
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 public:
+
 	std::vector<Layer*> layers;
 	int selLayer = 0;
 	
@@ -47,6 +49,7 @@ public:
 	DrawableManager wxsManager;
 	EditorColorPicker* colorPicker;
 	EditorBrushPicker* brushPicker;
+	EditorLayerPicker* layerPicker;
 
 	SDL_Color backgroundColor = SDL_Color{0,0,0,255};
 
@@ -59,6 +62,8 @@ public:
 	void render() override;
 	void tick() override;
 	void takeInput(SDL_Event evt) override;
+
+	std::string getName() override { return "Editor"; }
 
 	void eventFileSaved(int evt_id, PlatformNativePathString name) override;
 	void eventPopupClosed(int evt_id, BasePopup* p) override;

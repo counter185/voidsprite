@@ -180,6 +180,12 @@
     <ClCompile Include="easybmp\EasyBMP.cpp">
       <Filter>Pliki źródłowe\external\easybmp</Filter>
     </ClCompile>
+    <ClCompile Include="EditorLayerPicker.cpp">
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UILayerButton.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -313,6 +319,12 @@
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h">
       <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorLayerPicker.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UILayerButton.h">
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

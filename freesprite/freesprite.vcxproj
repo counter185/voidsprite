@@ -164,6 +164,7 @@
     <ClCompile Include="easybmp\EasyBMP.cpp" />
     <ClCompile Include="EditorBrushPicker.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
+    <ClCompile Include="EditorLayerPicker.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UILabel.cpp" />
+    <ClCompile Include="UILayerButton.cpp" />
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
@@ -209,6 +211,7 @@
     <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h" />
     <ClInclude Include="EditorBrushPicker.h" />
     <ClInclude Include="EditorColorPicker.h" />
+    <ClInclude Include="EditorLayerPicker.h" />
     <ClInclude Include="EventCallbackListener.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="FontRenderer.h" />
@@ -233,6 +236,7 @@
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIColorSlider.h" />
     <ClInclude Include="UILabel.h" />
+    <ClInclude Include="UILayerButton.h" />
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />

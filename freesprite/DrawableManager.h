@@ -18,6 +18,7 @@ public:
 	void forceFocusOn(Drawable* d);
 	void forceUnfocus();
 	bool mouseInAny(XY thisPositionOnScreen, XY mousePos);
+	//void tickAnchors();
 
 	void freeAllDrawables();
 private:

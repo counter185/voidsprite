@@ -152,6 +152,8 @@ int main(int argc, char** argv)
             popupStack[popupStack.size() - 1]->render();
         }
 
+
+        //draw the screen icons
         XY screenIcons = {g_windowW, g_windowH - 10};
         screenIcons = xySubtract(screenIcons, XY{ (int)(26 * screenStack.size()), 16});
         
@@ -165,6 +167,9 @@ int main(int argc, char** argv)
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, x == currentScreen ? 0x80 : 0x20);
             SDL_RenderFillRect(g_rd, &r);
             screenIcons.x += 26;
+        }
+        if (!screenStack.empty()) {
+            g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
         }
         
 

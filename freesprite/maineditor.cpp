@@ -1,6 +1,7 @@
 #include "maineditor.h"
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
+#include "EditorLayerPicker.h"
 #include "GlobalNavBar.h"
 #include "PopupYesNo.h"
 
@@ -119,6 +120,9 @@ void MainEditor::tick() {
 		iclamp(-texH * scale +4, canvasCenterPoint.y, g_windowH - 4)
 	};
 
+	//fuck it we ball
+	layerPicker->position.x = g_windowW - 320;
+
 	if (closeNextTick) {
 		g_closeScreen(this);
 	}
@@ -173,6 +177,8 @@ void MainEditor::initLayers()
 	for (Layer*& l : layers) {
 		l->commitStateToUndoStack();
 	}
+
+	layerPicker->updateLayers();
 }
 
 void MainEditor::SetUpWidgets()
@@ -187,6 +193,11 @@ void MainEditor::SetUpWidgets()
 	brushPicker->position.y = 480;
 	brushPicker->position.x = 10;
 	wxsManager.addDrawable(brushPicker);
+
+	layerPicker = new EditorLayerPicker(this);
+	layerPicker->position = XY{ 440, 80 };
+	layerPicker->anchor = XY{ 1,0 };
+	wxsManager.addDrawable(layerPicker);
 
 	navbar = new GlobalNavBar(this);
 	wxsManager.addDrawable(navbar);

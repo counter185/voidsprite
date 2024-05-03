@@ -137,6 +137,8 @@ public:
 	void tick() override;
 	void takeInput(SDL_Event evt) override;
 
+	std::string getName() override { return "voidsprite Launchpad"; }
+
 	void eventTextInput(int evt_id, std::string data) override {
 		switch (evt_id) {
 			case 2:

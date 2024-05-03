@@ -1,5 +1,6 @@
 #pragma once
 #include "globals.h"
+#include "mathops.h"
 #include "EventCallbackListener.h"
 
 class Drawable
@@ -7,6 +8,7 @@ class Drawable
 public:
 	bool focused = false;
 	XY position = XY{ 50,50 };
+	XY anchor = XY{ 0,0 };
 
 	int callback_id = -1;
 	EventCallbackListener* callback = NULL;
@@ -21,5 +23,26 @@ public:
 	virtual bool focusable() { return true; }
 	virtual void handleInput(SDL_Event evt, XY gPosOffset = {0,0}) {}
 	virtual void setCallbackListener(int cb_id,  EventCallbackListener* callback) { callback_id = cb_id; this->callback = callback; }
+	virtual XY getDimensions() { return XY{ 0,0 }; };
+
+	XY anchorPos(XY origin, XY originDimensions, XY thisPositionLocal, XY thisDimensions, XY anchor) {
+		XY ret;
+		XY offset = thisPositionLocal;
+		XY endpoint = xyAdd(origin, originDimensions);
+		if (anchor.x == 1) {
+			ret.x = endpoint.x - offset.x - thisDimensions.x;
+		}
+		else {
+			ret.x = origin.x + thisPositionLocal.x;
+		}
+
+		if (anchor.y == 1) {
+			ret.y = endpoint.y - offset.y - thisDimensions.y;
+		}
+		else {
+			ret.y = origin.y + thisDimensions.y;
+		}
+		return ret;
+	}
 };
 
