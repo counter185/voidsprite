@@ -4,6 +4,7 @@
 Layer* TemplateRPG2KCharset::generate()
 {
     Layer* ret = new Layer(288, 256);
+    ret->name = "Template Layer";
     uint32_t tileBGColors[] = {
         0xff1e0000, 0xff380000,
         0xff382300, 0xff150d00,

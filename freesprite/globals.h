@@ -71,5 +71,14 @@ struct NavbarSection {
 	std::map<SDL_Keycode, NamedEditorOperation> actions;
 };
 
+#define UNDOSTACK_LAYER_DATA_MODIFIED 0
+#define UNDOSTACK_CREATE_LAYER 1
+#define UNDOSTACK_DELETE_LAYER 2
+struct UndoStackElement {
+	Layer* targetlayer;
+	uint32_t type = 0;
+	int extdata = 0;
+};
+
 #include "platform.h"
 #include "colors.h"

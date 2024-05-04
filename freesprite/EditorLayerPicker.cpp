@@ -57,6 +57,9 @@ void EditorLayerPicker::eventButtonPressed(int evt_id)
     if (evt_id == -1) {
         caller->newLayer();
     }
+    else if (evt_id == -2) {
+        caller->deleteLayer(caller->selLayer);
+    }
     updateLayers();
 }
 
@@ -71,6 +74,13 @@ void EditorLayerPicker::updateLayers()
     addBtn->wxWidth = 30;
     addBtn->setCallbackListener(-1, this);
     layerButtons.addDrawable(addBtn);
+    
+    UIButton* removeBtn = new UIButton();
+    removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
+    removeBtn->text = "-";
+    removeBtn->wxWidth = 30;
+    removeBtn->setCallbackListener(-2, this);
+    layerButtons.addDrawable(removeBtn);
 
     int yposition = 80;
     for (int lid = caller->layers.size(); lid --> 0;) {

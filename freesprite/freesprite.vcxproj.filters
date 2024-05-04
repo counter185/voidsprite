@@ -184,7 +184,7 @@
       <Filter>Pliki źródłowe\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UILayerButton.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

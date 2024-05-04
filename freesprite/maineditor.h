@@ -24,7 +24,7 @@ public:
 	Layer* flattenImage();
 
 	int maxUndoHistory = 20;
-	std::vector<Layer*> undoStack, redoStack;
+	std::vector<UndoStackElement> undoStack, redoStack;
 
 	int texW = -1, texH = -1;
 	XY tileDimensions = XY{ 0,0 };
@@ -81,11 +81,14 @@ public:
 	void recenterCanvas();
 	bool requestSafeClose();
 
+	void checkAndDiscardEndOfUndoStack();
 	void commitStateToCurrentLayer();
+	void discardRedoStack();
 	void undo();
 	void redo();
 
 	void newLayer();
+	void deleteLayer(int index);
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}

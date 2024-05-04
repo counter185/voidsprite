@@ -422,39 +422,104 @@ void MainEditor::recenterCanvas()
 	};
 }
 
+void MainEditor::checkAndDiscardEndOfUndoStack()
+{
+	if (undoStack.size() > maxUndoHistory) {
+		UndoStackElement l = undoStack[0];
+		switch (l.type) {
+			case UNDOSTACK_LAYER_DATA_MODIFIED:
+				l.targetlayer->discardLastUndo();
+				break;
+			case UNDOSTACK_DELETE_LAYER:
+				delete l.targetlayer;
+				break;
+		}
+		
+		undoStack.erase(undoStack.begin());
+	}
+}
+
 void MainEditor::commitStateToCurrentLayer()
+{
+	discardRedoStack();
+
+	//printf("commit undo state\n");
+	getCurrentLayer()->commitStateToUndoStack();
+	undoStack.push_back(UndoStackElement{ getCurrentLayer(), UNDOSTACK_LAYER_DATA_MODIFIED });
+	checkAndDiscardEndOfUndoStack();
+	changesSinceLastSave = true;
+}
+
+void MainEditor::discardRedoStack()
 {
 	for (Layer*& x : layers) {
 		x->discardRedoStack();
 	}
-	redoStack.clear();
-	//printf("commit undo state\n");
-	getCurrentLayer()->commitStateToUndoStack();
-	undoStack.push_back(getCurrentLayer());
-	if (undoStack.size() > maxUndoHistory) {
-		undoStack[0]->discardLastUndo();
-		undoStack.erase(undoStack.begin());
+
+	//clear redo stack
+	for (UndoStackElement& l : redoStack) {
+		if (l.type == UNDOSTACK_CREATE_LAYER) {
+			delete l.targetlayer;
+		}
 	}
-	changesSinceLastSave = true;
+	redoStack.clear();
 }
 
 void MainEditor::undo()
 {
 	if (!undoStack.empty()) {
-		Layer* l = undoStack[undoStack.size() - 1];
+		UndoStackElement l = undoStack[undoStack.size() - 1];
 		undoStack.pop_back();
 		redoStack.push_back(l);
-		l->undo();
+		switch (l.type) {
+			case UNDOSTACK_LAYER_DATA_MODIFIED:
+				l.targetlayer->undo();
+				break;
+			case UNDOSTACK_CREATE_LAYER:
+				//remove layer from list
+				for (int x = 0; x < layers.size(); x++) {
+					if (layers[x] == l.targetlayer) {
+						layers.erase(layers.begin() + x);
+						break;
+					}
+				}
+				layerPicker->updateLayers();
+				break;
+			case UNDOSTACK_DELETE_LAYER:
+				//add layer to list
+				layers.insert(layers.begin() + l.extdata, l.targetlayer);
+				layerPicker->updateLayers();
+				break;
+		}
 	}
 }
 
 void MainEditor::redo()
 {
 	if (!redoStack.empty()) {
-		Layer* l = redoStack[redoStack.size() - 1];
+		UndoStackElement l = redoStack[redoStack.size() - 1];
 		undoStack.push_back(l);
 		redoStack.pop_back();
-		l->redo();
+		switch (l.type) {
+		case UNDOSTACK_LAYER_DATA_MODIFIED:
+			l.targetlayer->redo();
+			break;
+		case UNDOSTACK_CREATE_LAYER:
+			//add layer back to list
+			layers.push_back(l.targetlayer);
+			layerPicker->updateLayers();
+			break;
+		case UNDOSTACK_DELETE_LAYER:
+			//add layer to list
+			for (int x = 0; x < layers.size(); x++) {
+				if (layers[x] == l.targetlayer) {
+					layers.erase(layers.begin() + x);
+					break;
+				}
+			}
+			layerPicker->updateLayers();
+			break;
+		}
 	}
 }
 
@@ -463,6 +528,31 @@ void MainEditor::newLayer()
 	Layer* nl = new Layer(texW, texH);
 	nl->name = std::format("New Layer {}", layers.size()+1);
 	layers.push_back(nl);
+
+	UndoStackElement newUndoStack = {nl, UNDOSTACK_CREATE_LAYER};
+	undoStack.push_back(newUndoStack);
+	discardRedoStack();
+	checkAndDiscardEndOfUndoStack();
+	changesSinceLastSave = true;
+}
+
+void MainEditor::deleteLayer(int index) {
+	if (layers.size() == 0) {
+		return;
+	}
+
+	discardRedoStack();
+
+	Layer* layerAtPos = layers[index];
+	layers.erase(layers.begin() + index);
+	if (selLayer >= layers.size()) {
+		selLayer = layers.size() - 1;
+	}
+
+	UndoStackElement newUndoStack = { layerAtPos, UNDOSTACK_DELETE_LAYER, index };
+	undoStack.push_back(newUndoStack);
+	checkAndDiscardEndOfUndoStack();
+	changesSinceLastSave = true;
 }
 
 void MainEditor::layer_flipHorizontally()
