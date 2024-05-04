@@ -52,17 +52,35 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     updateLayers();
 }
 
+void EditorLayerPicker::eventButtonPressed(int evt_id)
+{
+    if (evt_id == -1) {
+        caller->newLayer();
+    }
+    updateLayers();
+}
+
 void EditorLayerPicker::updateLayers()
 {
+    layerButtons.forceUnfocus();
     layerButtons.freeAllDrawables();
-    int yposition = 40;
-    int lid = 0;
-    for (Layer*& l : caller->layers) {
+
+    UIButton* addBtn = new UIButton();
+    addBtn->position = { 5, 30 };
+    addBtn->text = "+";
+    addBtn->wxWidth = 30;
+    addBtn->setCallbackListener(-1, this);
+    layerButtons.addDrawable(addBtn);
+
+    int yposition = 80;
+    for (int lid = caller->layers.size(); lid --> 0;) {
+        Layer* l = caller->layers[lid];
         UILayerButton* layerButton = new UILayerButton(l->name);
         layerButton->hideButton->colorBGFocused = layerButton->hideButton->colorBGUnfocused = (l->hidden ? SDL_Color{ 255,255,255,0x80 } : SDL_Color{0,0,0,0x80});
         layerButton->position = { 5, yposition };
+        layerButton->mainButton->colorBGFocused = layerButton->mainButton->colorBGUnfocused = (caller->selLayer == lid ? SDL_Color{ 255,255,255,0x60 } : SDL_Color{ 0,0,0,0x80 });
         yposition += 30;
-        layerButton->setCallbackListener(lid++, this);
+        layerButton->setCallbackListener(lid, this);
         layerButtons.addDrawable(layerButton);
     }
 }

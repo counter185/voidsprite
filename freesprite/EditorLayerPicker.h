@@ -22,6 +22,7 @@ public:
 	XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
 
 	void eventGeneric(int evt_id, int data1, int data2) override;
+	void eventButtonPressed(int evt_id) override;
 
 	void updateLayers();
 };

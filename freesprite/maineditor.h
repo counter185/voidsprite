@@ -85,6 +85,7 @@ public:
 	void undo();
 	void redo();
 
+	void newLayer();
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}

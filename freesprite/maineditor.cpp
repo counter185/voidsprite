@@ -458,6 +458,13 @@ void MainEditor::redo()
 	}
 }
 
+void MainEditor::newLayer()
+{
+	Layer* nl = new Layer(texW, texH);
+	nl->name = std::format("New Layer {}", layers.size()+1);
+	layers.push_back(nl);
+}
+
 void MainEditor::layer_flipHorizontally()
 {
 	commitStateToCurrentLayer();
@@ -490,15 +497,16 @@ Layer* MainEditor::flattenImage()
 	Layer* ret = new Layer(texW, texH);
 	int x = 0;
 	for (Layer*& l : layers) {
-		if (x == 0) {
+		if (x++ == 0) {
 			memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
 		}
 		else {
 			uint32_t* ppx = (uint32_t*)l->pixelData;
 			uint32_t* retppx = (uint32_t*)ret->pixelData;
-			for (uint64_t p = 0; p < l->w * l->h * 4; p++) {
+			for (uint64_t p = 0; p < l->w * l->h; p++) {
 				uint32_t pixel = ppx[p];
-				retppx[p] = alphaBlend(retppx[p], pixel);
+				uint32_t srcPixel = retppx[p];
+				retppx[p] = alphaBlend(srcPixel, pixel);
 			}
 		}
 	}
