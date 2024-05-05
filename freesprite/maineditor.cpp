@@ -641,6 +641,9 @@ Layer* MainEditor::flattenImage()
 	Layer* ret = new Layer(texW, texH);
 	int x = 0;
 	for (Layer*& l : layers) {
+		if (l->hidden) {
+			continue;
+		}
 		if (x++ == 0) {
 			memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
 		}
