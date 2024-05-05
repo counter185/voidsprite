@@ -48,6 +48,8 @@ extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
 
 extern SDL_Texture* g_mainlogo;
+extern SDL_Texture* g_iconLayerAdd;
+extern SDL_Texture* g_iconLayerDelete;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();

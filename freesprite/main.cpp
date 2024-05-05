@@ -14,6 +14,8 @@ int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
 
 SDL_Texture* g_mainlogo = NULL;
+SDL_Texture* g_iconLayerAdd = NULL;
+SDL_Texture* g_iconLayerDelete = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 
@@ -52,6 +54,13 @@ void g_closeLastScreen() {
     screenStack.pop_back();
 }
 
+SDL_Texture* IMGLoadToTexture(std::string path) {
+    SDL_Surface* srf = IMG_Load(path.c_str());
+    SDL_Texture* ret = SDL_CreateTextureFromSurface(g_rd, srf);
+    SDL_FreeSurface(srf);
+    return ret;
+}
+
 int main(int argc, char** argv)
 {
     platformPreInit();
@@ -62,10 +71,9 @@ int main(int argc, char** argv)
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
-    //todo lmao clean this up
-    SDL_Surface* srf1 = IMG_Load("assets/mainlogo.png");
-    g_mainlogo = SDL_CreateTextureFromSurface(g_rd, srf1);
-    SDL_FreeSurface(srf1);
+    g_mainlogo = IMGLoadToTexture("assets/mainlogo.png");
+    g_iconLayerAdd = IMGLoadToTexture("assets/icon_layer_add.png");
+    g_iconLayerDelete = IMGLoadToTexture("assets/icon_layer_delete.png");
 
     screenStack.push_back(new StartScreen());
 
@@ -78,9 +86,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectClone());
     for (BaseBrush*& brush : g_brushes) {
-        SDL_Surface* srf = IMG_Load(brush->getIconPath().c_str());
-        brush->cachedIcon = SDL_CreateTextureFromSurface(g_rd, srf);
-        SDL_FreeSurface(srf);
+        brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
     }
 
     //MainEditor tempMainEditor(XY{ 640,480 });

@@ -70,15 +70,17 @@ void EditorLayerPicker::updateLayers()
 
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
-    addBtn->text = "+";
+    //addBtn->text = "+";
     addBtn->wxWidth = 30;
     addBtn->setCallbackListener(-1, this);
+    addBtn->icon = g_iconLayerAdd;
     layerButtons.addDrawable(addBtn);
     
     UIButton* removeBtn = new UIButton();
     removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
-    removeBtn->text = "-";
+    //removeBtn->text = "-";
     removeBtn->wxWidth = 30;
+    removeBtn->icon = g_iconLayerDelete;
     removeBtn->setCallbackListener(-2, this);
     layerButtons.addDrawable(removeBtn);
 

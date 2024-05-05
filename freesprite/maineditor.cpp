@@ -537,7 +537,7 @@ void MainEditor::newLayer()
 }
 
 void MainEditor::deleteLayer(int index) {
-	if (layers.size() == 0) {
+	if (layers.size() <= 1) {
 		return;
 	}
 
