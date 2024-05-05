@@ -60,6 +60,12 @@ void EditorLayerPicker::eventButtonPressed(int evt_id)
     else if (evt_id == -2) {
         caller->deleteLayer(caller->selLayer);
     }
+    else if (evt_id == -3) {
+        caller->moveLayerUp(caller->selLayer);
+    }
+    else if (evt_id == -4) {
+        caller->moveLayerDown(caller->selLayer);
+    }
     updateLayers();
 }
 
@@ -83,6 +89,22 @@ void EditorLayerPicker::updateLayers()
     removeBtn->icon = g_iconLayerDelete;
     removeBtn->setCallbackListener(-2, this);
     layerButtons.addDrawable(removeBtn);
+    
+    UIButton* upBtn = new UIButton();
+    upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
+    upBtn->text = "Up";
+    upBtn->wxWidth = 30;
+    //upBtn->icon = g_iconLayerDelete;
+    upBtn->setCallbackListener(-3, this);
+    layerButtons.addDrawable(upBtn);    
+    
+    UIButton* downBtn = new UIButton();
+    downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
+    downBtn->text = "Dn.";
+    downBtn->wxWidth = 30;
+    //upBtn->icon = g_iconLayerDelete;
+    downBtn->setCallbackListener(-4, this);
+    layerButtons.addDrawable(downBtn);
 
     int yposition = 80;
     for (int lid = caller->layers.size(); lid --> 0;) {

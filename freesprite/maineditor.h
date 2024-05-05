@@ -89,6 +89,8 @@ public:
 
 	void newLayer();
 	void deleteLayer(int index);
+	void moveLayerUp(int index);
+	void moveLayerDown(int index);
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}

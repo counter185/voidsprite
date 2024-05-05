@@ -236,6 +236,10 @@ void MainEditor::takeInput(SDL_Event evt) {
 			return;
 		}
 	}
+	if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_LALT) {
+		wxsManager.forceFocusOn(navbar);
+		return;
+	}
 
 	if (!wxsManager.anyFocused()) {
 		switch (evt.type) {
@@ -294,9 +298,6 @@ void MainEditor::takeInput(SDL_Event evt) {
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
-					case SDLK_LALT:
-						wxsManager.forceFocusOn(navbar);
-						break;
 					case SDLK_e:
 						colorPicker->toggleEraser();
 						break;
@@ -490,6 +491,12 @@ void MainEditor::undo()
 				layers.insert(layers.begin() + l.extdata, l.targetlayer);
 				layerPicker->updateLayers();
 				break;
+			case UNDOSTACK_MOVE_LAYER:
+				Layer* lr = layers[l.extdata2];
+				layers.erase(layers.begin() + l.extdata2);
+				layers.insert(layers.begin() + l.extdata, lr);
+				layerPicker->updateLayers();
+				break;
 		}
 	}
 }
@@ -517,6 +524,12 @@ void MainEditor::redo()
 					break;
 				}
 			}
+			layerPicker->updateLayers();
+			break;
+		case UNDOSTACK_MOVE_LAYER:
+			Layer* lr = layers[l.extdata];
+			layers.erase(layers.begin() + l.extdata);
+			layers.insert(layers.begin() + l.extdata2, lr);
 			layerPicker->updateLayers();
 			break;
 		}
@@ -550,6 +563,47 @@ void MainEditor::deleteLayer(int index) {
 	}
 
 	UndoStackElement newUndoStack = { layerAtPos, UNDOSTACK_DELETE_LAYER, index };
+	undoStack.push_back(newUndoStack);
+	checkAndDiscardEndOfUndoStack();
+	changesSinceLastSave = true;
+}
+void MainEditor::moveLayerUp(int index) {
+	if (index >= layers.size()-1) {
+		return;
+	}
+
+	discardRedoStack();
+
+	Layer* clayer = layers[index];
+	layers.erase(layers.begin() + index);
+	layers.insert(layers.begin() + index + 1, clayer);
+
+	if (index == selLayer) {
+		selLayer++;
+	}
+
+	UndoStackElement newUndoStack = { clayer, UNDOSTACK_MOVE_LAYER, index, index+1 };
+	undoStack.push_back(newUndoStack);
+	checkAndDiscardEndOfUndoStack();
+	changesSinceLastSave = true;
+}
+
+void MainEditor::moveLayerDown(int index) {
+	if (index  <= 0) {
+		return;
+	}
+
+	discardRedoStack();
+
+	Layer* clayer = layers[index];
+	layers.erase(layers.begin() + index);
+	layers.insert(layers.begin() + index - 1, clayer);
+
+	if (index == selLayer) {
+		selLayer--;
+	}
+
+	UndoStackElement newUndoStack = { clayer, UNDOSTACK_MOVE_LAYER, index, index-1 };
 	undoStack.push_back(newUndoStack);
 	checkAndDiscardEndOfUndoStack();
 	changesSinceLastSave = true;
