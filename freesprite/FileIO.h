@@ -9,6 +9,7 @@ Layer* readBMP(PlatformNativePathString path);
 Layer* readAETEX(PlatformNativePathString path);
 Layer* readSDLImage(std::string path);
 Layer* readWiiGCTPL(PlatformNativePathString path);
+Layer* readDDS(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 bool writePNG(PlatformNativePathString path, Layer* data);
@@ -62,6 +63,9 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	},
 	{
 		"Wii/GC TPL (voidsprite custom)", ".tpl", &readWiiGCTPL
+	},
+	{
+		"DDS (ddspp+voidsprite custom)", ".dds", &readDDS
 	}
 };
 

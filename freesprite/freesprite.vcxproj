@@ -203,6 +203,7 @@
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="colors.h" />
+    <ClInclude Include="ddspp\ddspp.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
     <ClInclude Include="easybmp\EasyBMP.h" />

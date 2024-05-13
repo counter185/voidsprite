@@ -2,6 +2,7 @@
 #include "maineditor.h"
 #include <png.h>
 #include "libtga/tga.h"
+#include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
 
 Layer* readXYZ(PlatformNativePathString path)
@@ -320,6 +321,40 @@ Layer* readWiiGCTPL(PlatformNativePathString path)
         fclose(infile);
     }
     return layers.size() != 0 ? layers[0] : NULL;
+}
+
+Layer* readDDS(PlatformNativePathString path)
+{
+    Layer* ret = NULL;
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        unsigned char header[0x80];
+        fread(header, 0x80, 1, infile);
+        ddspp::Descriptor desc;
+        ddspp::Result decodeResult = ddspp::decode_header(header, desc);
+
+        switch (desc.format) {
+            case ddspp::B8G8R8A8_UNORM:
+                {
+                    ret = new Layer(desc.width, desc.height);
+                    uint32_t* pxd = (uint32_t*)ret->pixelData;
+                    for (uint64_t d = 0; d < desc.width * desc.height; d++) {
+                        uint32_t bgra;
+                        fread(&bgra, 4, 1, infile);
+                        //bgra = BEtoLE32(bgra);
+                        pxd[d] = bgra;
+                    }
+                }
+                break;
+            default:
+                printf("format not supported\n");
+                break;
+        }
+
+        fclose(infile);
+    }
+
+    return ret;
 }
 
 MainEditor* readVOIDSN(PlatformNativePathString path)

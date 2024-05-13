@@ -61,6 +61,9 @@
     <Filter Include="Pliki źródłowe\external\easybmp">
       <UniqueIdentifier>{f354d5c4-bf0c-44ca-b52b-db514ccfb8c7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\external\ddspp">
+      <UniqueIdentifier>{4b6da3e0-e184-40b0-abaa-0b4cded17aaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -325,6 +328,9 @@
     </ClInclude>
     <ClInclude Include="UILayerButton.h">
       <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="ddspp\ddspp.h">
+      <Filter>Pliki nagłówkowe\external\ddspp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
