@@ -206,6 +206,122 @@ Layer* readSDLImage(std::string path)
     return img == NULL ? NULL : new Layer(img);
 }
 
+Layer* readWiiGCTPL(PlatformNativePathString path)
+{
+    struct TPLImageOffset {
+        uint32_t headerOffset;
+        uint32_t paletteHeader;
+    };
+    struct TPLImageHeader {
+        uint16_t height;
+        uint16_t width;
+        uint32_t format;
+        uint32_t imageDataAddress;
+        uint32_t wrapS;
+        uint32_t wrapT;
+        uint32_t minFilter;
+        uint32_t magFilter;
+        float LODBias;
+        uint8_t edgeLODEnable;
+        uint8_t minLOD;
+        uint8_t maxLOD;
+        uint8_t unpacked;
+    };
+    struct TPLPaletteHeader {
+        uint16_t entryCount;
+        uint8_t unpacked;
+        uint8_t paddingByte;
+        uint32_t paletteFormat;
+        uint32_t paletteDataAddress;
+
+        bool set;
+    };
+    struct TPLImage {
+        TPLImageHeader imgHdr;
+        TPLPaletteHeader pltHdr;
+    };
+
+    std::vector<Layer*> layers;
+
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        uint32_t version;
+        uint32_t nImages;
+        uint32_t imageTableOffset;
+
+        fread(&version, 4,1, infile);
+        fread(&nImages, 4,1, infile);
+        fread(&imageTableOffset, 4,1, infile);
+        nImages = BEtoLE32(nImages);
+        imageTableOffset = BEtoLE32(imageTableOffset);
+        printf("[TPL] %i image(s)\n", nImages);
+
+        fseek(infile, imageTableOffset, SEEK_SET);
+
+        std::vector<TPLImageOffset> images;
+        std::vector<TPLImage> imageHdrs;
+        for (int x = 0; x < nImages; x++) {
+            images.push_back(TPLImageOffset());
+            fread(&images[x].headerOffset, 4, 1, infile);
+            images[x].headerOffset = BEtoLE32(images[x].headerOffset);
+            fread(&images[x].paletteHeader, 4, 1, infile);
+            images[x].paletteHeader = BEtoLE32(images[x].paletteHeader);
+        }
+
+        for (TPLImageOffset& i : images) {
+            TPLImage nImg;
+            fseek(infile, i.headerOffset, SEEK_SET);
+            fread(&nImg.imgHdr, sizeof(TPLImageHeader), 1, infile);
+            nImg.imgHdr.height = BEtoLE16(nImg.imgHdr.height);
+            nImg.imgHdr.width = BEtoLE16(nImg.imgHdr.width);
+            nImg.imgHdr.format = BEtoLE32(nImg.imgHdr.format);
+            nImg.imgHdr.imageDataAddress = BEtoLE32(nImg.imgHdr.imageDataAddress);
+            printf("image: %i x %i, format: %x, address: %x\n", nImg.imgHdr.height, nImg.imgHdr.width, nImg.imgHdr.format, nImg.imgHdr.imageDataAddress);
+            if (i.paletteHeader != NULL) {
+                fseek(infile, i.paletteHeader, SEEK_SET);
+                fread(&nImg.pltHdr, sizeof(TPLPaletteHeader), 1, infile);
+            }
+            nImg.pltHdr.set = i.paletteHeader != NULL;
+
+            fseek(infile, nImg.imgHdr.imageDataAddress, SEEK_SET);
+            switch (nImg.imgHdr.format) {
+                case 0x05:      //RGB5A3
+                    {
+                        Layer* newLayer = new Layer(nImg.imgHdr.width, nImg.imgHdr.height);
+                        newLayer->name = "TPL RGB5A3 Layer";
+                        //uint32_t* imgDataPtr = (uint32_t*)newLayer->pixelData;
+                        int xBlocks = (int)ceil(newLayer->w / 4.0);
+                        int yBlocks = (int)ceil(newLayer->h / 4.0);
+                        for (int yb = 0; yb < yBlocks; yb++) {
+                            for (int xb = 0; xb < xBlocks; xb++) {
+                                for (int ybb = 0; ybb < 4; ybb++) {
+                                    for (int xbb = 0; xbb < 4; xbb++) {
+                                        uint16_t px;
+                                        fread(&px, 2, 1, infile);
+                                        px = BEtoLE16(px);
+                                        newLayer->setPixel(XY{ xb * 4 + xbb, yb * 4 + ybb }, RGB5A3toARGB8888(px));
+                                    }
+                                }
+                            }
+                        }
+                        layers.push_back(newLayer);
+                        //TODO: don't just break if there are multiple images
+                        break;
+                    }
+                    break;
+                default:
+                    printf("unsupported format\n");
+                    break;
+            }
+
+            imageHdrs.push_back(nImg);
+        }
+
+        fclose(infile);
+    }
+    return layers.size() != 0 ? layers[0] : NULL;
+}
+
 MainEditor* readVOIDSN(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);

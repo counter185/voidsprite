@@ -193,3 +193,33 @@ float fxmax(float a, float b) { return a > b ? a : b; }
 float fclamp(float vmin, float b, float vmax) { return fxmax(vmin, fxmin(b, vmax)); }
 double dxmin(double a, double b) { return a > b ? a : b; }
 double dxmax(double a, double b) { return a > b ? a : b; }
+
+uint32_t BEtoLE32(uint32_t a)
+{
+    return (a >> 24) + ((a >> 8) & 0xff00) + ((a << 8) & 0xff0000) + (a << 24);
+}
+
+uint16_t BEtoLE16(uint16_t a)
+{
+    return (a >> 8) + (a << 8);
+}
+
+uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte)
+{
+    uint32_t outPixel = 0;
+    if (rgb5a3Byte >> 15 == 0) {
+        uint8_t a = 0x20 * (rgb5a3Byte >> 12);
+        uint8_t r = 0x11 * ((rgb5a3Byte >> 8) & 0b1111);
+        uint8_t g = 0x11 * ((rgb5a3Byte >> 4) & 0b1111);
+        uint8_t b = 0x11 * ((rgb5a3Byte) & 0b1111);
+        outPixel = (a << 24) + (r << 16) + (g << 8) + b;
+    }
+    else {
+        uint8_t a = 0xff;
+        uint8_t r = 0x8 * ((rgb5a3Byte >> 10) & 0b11111);
+        uint8_t g = 0x8 * ((rgb5a3Byte >> 5) & 0b11111);
+        uint8_t b = 0x8 * ((rgb5a3Byte) & 0b11111);
+        outPixel = (a << 24) + (r << 16) + (g << 8) + b;
+    }
+    return outPixel;
+}

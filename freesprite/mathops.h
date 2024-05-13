@@ -39,3 +39,8 @@ float fxmax(float a, float b);
 float fclamp(float vmin, float b, float vmax);
 double dxmin(double a, double b);
 double dxmax(double a, double b);
+
+uint32_t BEtoLE32(uint32_t a);
+uint16_t BEtoLE16(uint16_t a);
+
+uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte);
