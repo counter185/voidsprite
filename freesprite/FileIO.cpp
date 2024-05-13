@@ -5,7 +5,7 @@
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
 
-Layer* readXYZ(PlatformNativePathString path)
+Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
 
@@ -59,7 +59,7 @@ Layer* readXYZ(PlatformNativePathString path)
     return NULL;
 }
 
-Layer* readPNG(PlatformNativePathString path)
+Layer* readPNG(PlatformNativePathString path, uint64_t seek)
 {
     FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -136,7 +136,7 @@ Layer* readPNG(PlatformNativePathString path)
     return nlayer;
 }
 
-Layer* readTGA(std::string path) {
+Layer* readTGA(std::string path, uint64_t seek) {
     SDL_Surface* tgasrf = IMG_Load(path.c_str());
     
     return new Layer(tgasrf);
@@ -160,7 +160,7 @@ Layer* readTGA(std::string path) {
     TGAClose(tga);*/
 }
 
-Layer* readBMP(PlatformNativePathString path)
+Layer* readBMP(PlatformNativePathString path, uint64_t seek)
 {
     BMP nbmp;
     nbmp.ReadFromFileW(path);
@@ -180,35 +180,46 @@ Layer* readBMP(PlatformNativePathString path)
     return nlayer;
 }
 
-Layer* readAETEX(PlatformNativePathString path) {
+Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
     FILE* texfile = platformOpenFile(path, PlatformFileModeRB);
     if (texfile != NULL) {
         fseek(texfile, 0, SEEK_END);
         long filesize = ftell(texfile);
-        fseek(texfile, 0x38, SEEK_SET);
-        uint8_t* tgaData = (uint8_t*)malloc(filesize - 0x38);
-        fread(tgaData, filesize - 0x38, 1, texfile);
-        fclose(texfile);
-        SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
-        //todo: dds
-        SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
-        SDL_RWclose(tgarw);
-        free(tgaData);
-        return new Layer(tgasrf);
+
+        char ddsheader[4];
+        fseek(texfile, 0x34, SEEK_SET);
+        fread(&ddsheader, 4, 1, texfile);
+        if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
+            fclose(texfile);
+            return readDDS(path, 0x34);
+        }
+        else {
+
+            fseek(texfile, 0x38, SEEK_SET);
+            uint8_t* tgaData = (uint8_t*)malloc(filesize - 0x38);
+            fread(tgaData, filesize - 0x38, 1, texfile);
+            fclose(texfile);
+            SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
+            //todo: dds
+            SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
+            SDL_RWclose(tgarw);
+            free(tgaData);
+            return new Layer(tgasrf);
+        }
     }
     else {
         return NULL;
     }
 }
 
-Layer* readSDLImage(std::string path)
+Layer* readSDLImage(std::string path, uint64_t seek)
 {
     SDL_Surface* img = IMG_Load(path.c_str());
 
     return img == NULL ? NULL : new Layer(img);
 }
 
-Layer* readWiiGCTPL(PlatformNativePathString path)
+Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
 {
     struct TPLImageOffset {
         uint32_t headerOffset;
@@ -324,11 +335,14 @@ Layer* readWiiGCTPL(PlatformNativePathString path)
     return layers.size() != 0 ? layers[0] : NULL;
 }
 
-Layer* readDDS(PlatformNativePathString path)
+Layer* readDDS(PlatformNativePathString path, uint64_t seek)
 {
     Layer* ret = NULL;
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile != NULL) {
+        if (seek != 0) {
+            fseek(infile, seek, SEEK_SET);
+        }
         unsigned char header[0x80];
         fread(header, 0x80, 1, infile);
         ddspp::Descriptor desc;
@@ -424,6 +438,113 @@ Layer* readDDS(PlatformNativePathString path)
                 }
             }
                 break;
+            case ddspp::BC2_UNORM:
+            {
+                //todo holy fucking shit please clean this up
+                ret = new Layer(desc.width, desc.height);
+                ret->name = "DDS DXT2 Layer";
+                uint32_t* pxd = (uint32_t*)ret->pixelData;
+                for (int y = 0; y < desc.height; y += 4) {
+                    for (int x = 0; x < desc.width; x += 4) {
+                        // Extract color endpoints
+
+                        //this may be wrong lmao
+                        uint8_t alphaData[16];
+                        uint16_t alphaPtr = 0;
+                        for (int z = 0; z < 4; z++) {
+                            uint16_t alphaByte;
+                            fread(&alphaByte, 2, 1, infile);
+                            for (int q = 0; q < 4; q++) {
+                                //*0x11
+                                alphaData[alphaPtr++] = (alphaByte & 0b1111) * 0x11;
+                                alphaByte >>= 4;
+                            }
+                            //alphaPtr += 4;
+                        }
+                        alphaPtr = 0;
+                        //fread(alphaData, 2, 4, infile);
+
+                        uint16_t color0;
+                        uint16_t color1;
+                        fread(&color0, 2, 1, infile);
+                        fread(&color1, 2, 1, infile);
+
+
+                        //https://github.com/Benjamin-Dobell/s3tc-dxt-decompression/blob/master/s3tc.cpp
+
+                        unsigned long temp = (color0 >> 11) * 255 + 16;
+                        unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
+                        temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
+                        unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
+                        temp = (color0 & 0x001F) * 255 + 16;
+                        unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
+
+                        temp = (color1 >> 11) * 255 + 16;
+                        unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
+                        temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
+                        unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
+                        temp = (color1 & 0x001F) * 255 + 16;
+                        unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
+
+                        uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
+
+                        // Decode 4-bit indices
+                        uint32_t code;
+                        fread(&code, 4, 1, infile);
+                        //Read4BitIndices(compressedData, indices);
+
+
+
+                        // Fill ARGB array
+                        for (int dy = 0; dy < 4; ++dy) {
+                            for (int dx = 0; dx < 4; ++dx) {
+                                unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
+                                uint32_t color = 0;
+                                if (color0 > color1)
+                                {
+                                    switch (positionCode)
+                                    {
+                                    case 0: //0b00
+                                        color = PackRGBAtoARGB(r0, g0, b0, alphaData[alphaPtr++]);
+                                        break;
+                                    case 1: //0b01
+                                        color = PackRGBAtoARGB(r1, g1, b1, alphaData[alphaPtr++]);
+                                        break;
+                                    case 2: //0b10
+                                        color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, alphaData[alphaPtr++]);
+                                        break;
+                                    case 3: //0b11
+                                        color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, alphaData[alphaPtr++]);
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    switch (positionCode)
+                                    {
+                                    case 0:
+                                        color = PackRGBAtoARGB(r0, g0, b0, alphaData[alphaPtr++]);
+                                        break;
+                                    case 1:
+                                        color = PackRGBAtoARGB(r1, g1, b1, alphaData[alphaPtr++]);
+                                        break;
+                                    case 2:
+                                        color = PackRGBAtoARGB((r0 + r1) / 2, (g0 + g1) / 2, (b0 + b1) / 2, alphaData[alphaPtr++]);
+                                        break;
+                                    case 3:
+                                        color = PackRGBAtoARGB(0, 0, 0, alphaData[alphaPtr++]);
+                                        break;
+                                    }
+                                }
+
+                                ret->setPixel(XY{ x+dx, y + dy }, color);
+                                //pxd[(y + dy) * desc.width + (x + dx)] = color;
+                            }
+                        }
+                    }
+                }
+            }
+                break;
             case ddspp::B8G8R8A8_UNORM:
             {
                 ret = new Layer(desc.width, desc.height);
@@ -438,7 +559,7 @@ Layer* readDDS(PlatformNativePathString path)
             }
                 break;
             default:
-                printf("format not supported\n");
+                printf("format [%i] not supported\n", desc.format);
                 break;
         }
 

@@ -71,7 +71,7 @@ void StartScreen::takeInput(SDL_Event evt)
 					Layer* l = NULL;
 					for (FileImportNPath importer : g_fileImportersNPaths) {
 						if (stringEndsWith(filePath, importer.extension) && importer.canImport(fPath)) {
-							l = importer.importFunction(fPath);
+							l = importer.importFunction(fPath, 0);
 							if (l != NULL) {
 								break;
 							}
@@ -83,7 +83,7 @@ void StartScreen::takeInput(SDL_Event evt)
 					if (l == NULL) {
 						for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
 							if (stringEndsWith(filePath, importer.extension) && importer.canImport(filePath)) {
-								l = importer.importFunction(filePath);
+								l = importer.importFunction(filePath, 0);
 								if (l != NULL) {
 									break;
 								}

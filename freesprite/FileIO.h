@@ -2,14 +2,14 @@
 #include "globals.h"
 #include "Layer.h"
 
-Layer* readXYZ(PlatformNativePathString path);
-Layer* readPNG(PlatformNativePathString path);
-Layer* readTGA(std::string path);
-Layer* readBMP(PlatformNativePathString path);
-Layer* readAETEX(PlatformNativePathString path);
-Layer* readSDLImage(std::string path);
-Layer* readWiiGCTPL(PlatformNativePathString path);
-Layer* readDDS(PlatformNativePathString path);
+Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readTGA(std::string path, uint64_t seek = 0);
+Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readSDLImage(std::string path, uint64_t seek = 0);
+Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 bool writePNG(PlatformNativePathString path, Layer* data);
@@ -21,7 +21,7 @@ bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 struct FileImportNPath {
 	std::string name;
 	std::string extension;
-	Layer* (*importFunction)(PlatformNativePathString);
+	Layer* (*importFunction)(PlatformNativePathString, uint64_t);
 	bool (*canImport)(PlatformNativePathString) =
 		[](PlatformNativePathString p) {
 			return true;
@@ -30,7 +30,7 @@ struct FileImportNPath {
 struct FileImportUTF8Path {
 	std::string name;
 	std::string extension;
-	Layer* (*importFunction)(std::string);
+	Layer* (*importFunction)(std::string, uint64_t);
 	bool (*canImport)(std::string) =
 		[](std::string p) {
 			return true;
@@ -59,7 +59,7 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 		"RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &readXYZ
 	},
 	{
-		"Atrophy Engine AETEX v1 (SDL_Image:tga)", ".aetex", &readAETEX
+		"Atrophy Engine AETEX v1/v2 (SDL_Image:tga, DDS[fallthrough])", ".aetex", &readAETEX
 	},
 	{
 		"Wii/GC TPL (voidsprite custom)", ".tpl", &readWiiGCTPL
