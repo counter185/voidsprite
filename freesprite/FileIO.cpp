@@ -334,17 +334,107 @@ Layer* readDDS(PlatformNativePathString path)
         ddspp::Result decodeResult = ddspp::decode_header(header, desc);
 
         switch (desc.format) {
-            case ddspp::B8G8R8A8_UNORM:
-                {
-                    ret = new Layer(desc.width, desc.height);
-                    uint32_t* pxd = (uint32_t*)ret->pixelData;
-                    for (uint64_t d = 0; d < desc.width * desc.height; d++) {
-                        uint32_t bgra;
-                        fread(&bgra, 4, 1, infile);
-                        //bgra = BEtoLE32(bgra);
-                        pxd[d] = bgra;
+            case ddspp::BC1_UNORM:
+            {
+                ret = new Layer(desc.width, desc.height);
+                ret->name = "DDS DXT1 Layer";
+                uint32_t* pxd = (uint32_t*)ret->pixelData;
+                for (int y = 0; y < desc.height; y += 4) {
+                    for (int x = 0; x < desc.width; x += 4) {
+                        // Extract color endpoints
+                        uint16_t color0;
+                        uint16_t color1;
+                        fread(&color0, 2, 1, infile);
+                        fread(&color1, 2, 1, infile);
+
+
+                        //https://github.com/Benjamin-Dobell/s3tc-dxt-decompression/blob/master/s3tc.cpp
+
+                        unsigned long temp = (color0 >> 11) * 255 + 16;
+                        unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
+                        temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
+                        unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
+                        temp = (color0 & 0x001F) * 255 + 16;
+                        unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
+
+                        temp = (color1 >> 11) * 255 + 16;
+                        unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
+                        temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
+                        unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
+                        temp = (color1 & 0x001F) * 255 + 16;
+                        unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
+
+                        uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
+
+                        // Decode 4-bit indices
+                        uint32_t code;
+                        fread(&code, 4, 1, infile);
+                        //Read4BitIndices(compressedData, indices);
+
+
+
+                        // Fill ARGB array
+                        for (int dy = 0; dy < 4; ++dy) {
+                            for (int dx = 0; dx < 4; ++dx) {
+                                unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
+                                uint32_t color = 0;
+                                if (color0 > color1)
+                                {
+                                    switch (positionCode)
+                                    {
+                                    case 0:
+                                        color = PackRGBAtoARGB(r0, g0, b0, 255);
+                                        break;
+                                    case 1:
+                                        color = PackRGBAtoARGB(r1, g1, b1, 255);
+                                        break;
+                                    case 2:
+                                        color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, 255);
+                                        break;
+                                    case 3:
+                                        color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, 255);
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    switch (positionCode)
+                                    {
+                                    case 0:
+                                        color = PackRGBAtoARGB(r0, g0, b0, 255);
+                                        break;
+                                    case 1:
+                                        color = PackRGBAtoARGB(r1, g1, b1, 255);
+                                        break;
+                                    case 2:
+                                        color = PackRGBAtoARGB((r0 + r1) / 2, (g0 + g1) / 2, (b0 + b1) / 2, 255);
+                                        break;
+                                    case 3:
+                                        color = PackRGBAtoARGB(0, 0, 0, 0);
+                                        break;
+                                    }
+                                }
+
+                                ret->setPixel(XY{ x+dx, y + dy }, color);
+                                //pxd[(y + dy) * desc.width + (x + dx)] = color;
+                            }
+                        }
                     }
                 }
+            }
+                break;
+            case ddspp::B8G8R8A8_UNORM:
+            {
+                ret = new Layer(desc.width, desc.height);
+                ret->name = "DDS BGRA Layer";
+                uint32_t* pxd = (uint32_t*)ret->pixelData;
+                for (uint64_t d = 0; d < desc.width * desc.height; d++) {
+                    uint32_t bgra;
+                    fread(&bgra, 4, 1, infile);
+                    //bgra = BEtoLE32(bgra);
+                    pxd[d] = bgra;
+                }
+            }
                 break;
             default:
                 printf("format not supported\n");

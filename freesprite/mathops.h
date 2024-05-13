@@ -44,3 +44,5 @@ uint32_t BEtoLE32(uint32_t a);
 uint16_t BEtoLE16(uint16_t a);
 
 uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte);
+uint32_t RGB565toARGB8888(uint16_t rgb5a3Byte);
+uint32_t PackRGBAtoARGB(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
