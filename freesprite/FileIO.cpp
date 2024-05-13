@@ -190,6 +190,7 @@ Layer* readAETEX(PlatformNativePathString path) {
         fread(tgaData, filesize - 0x38, 1, texfile);
         fclose(texfile);
         SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
+        //todo: dds
         SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
         SDL_RWclose(tgarw);
         free(tgaData);

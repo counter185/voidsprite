@@ -65,7 +65,7 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 		"Wii/GC TPL (voidsprite custom)", ".tpl", &readWiiGCTPL
 	},
 	{
-		"DDS (ddspp+voidsprite custom)", ".dds", &readDDS
+		"DDS (ddspp+s3tc open source+voidsprite custom)", ".dds", &readDDS
 	}
 };
 
