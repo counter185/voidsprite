@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.c" />
     <ClCompile Include="BaseBrush.cpp" />
     <ClCompile Include="BasePopup.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
@@ -195,6 +196,8 @@
     <ClCompile Include="UITextField.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\miniz.h" />
+    <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.h" />
     <ClInclude Include="BaseBrush.h" />
     <ClInclude Include="BasePopup.h" />
     <ClInclude Include="BaseScreen.h" />

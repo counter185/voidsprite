@@ -64,6 +64,12 @@
     <Filter Include="Pliki nagłówkowe\external\ddspp">
       <UniqueIdentifier>{4b6da3e0-e184-40b0-abaa-0b4cded17aaf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\external\zip">
+      <UniqueIdentifier>{c989d900-cced-4222-ae46-6493433bb6fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\external\zip">
+      <UniqueIdentifier>{c2afb396-8f85-4d44-bcd4-4c678580e351}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -191,6 +197,9 @@
     </ClCompile>
     <ClCompile Include="SpritesheetPreviewScreen.cpp">
       <Filter>Pliki źródłowe\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.c">
+      <Filter>Pliki źródłowe\external\zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -337,6 +346,12 @@
     </ClInclude>
     <ClInclude Include="SpritesheetPreviewScreen.h">
       <Filter>Pliki nagłówkowe\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.h">
+      <Filter>Pliki nagłówkowe\external\zip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\miniz.h">
+      <Filter>Pliki nagłówkowe\external\zip</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -324,6 +324,9 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 		if (extension == L".voidsn") {
 			result = writeVOIDSNv1(name, XY{ texW, texH }, layers);
 		}
+		else if (extension == L".ora") {
+			result = writeOpenRaster(name, layers);
+		}
 		else {
 			Layer* flat = flattenImage();
 			if (extension == L".xyz") {

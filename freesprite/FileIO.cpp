@@ -4,6 +4,7 @@
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
+#include "zip/zip.h"
 
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 {
@@ -667,6 +668,63 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
         fclose(outfile);
         return true;
     }
+    return false;
+}
+
+bool writeOpenRaster(PlatformNativePathString path, std::vector<Layer*> data)
+{
+    char* zipBuffer;
+    size_t zipBufferSize;
+
+    zip_t * zip = zip_stream_open(NULL, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+    {
+        zip_entry_open(zip, "mimetype");
+        {
+            zip_entry_write(zip, "image/openraster", sizeof("image/openraster"));
+        }
+        zip_entry_close(zip);
+        
+        zip_entry_open(zip, "stack.xml");
+        {
+            std::string xmls = "";
+            xmls += std::format("<image version=\"0.0.1\" xres=\"72\" h=\"{}\" w=\"{}\" yres=\"72\">\n", data[0]->h, data[0]->w);
+            xmls += std::format(" <stack opacity=\"1\" x=\"0\" name=\"root\" y=\"0\" isolation=\"isolate\" composite-op=\"svg:src-over\" visibility=\"visible\">\n");
+            int i = 0;
+            for (auto l = data.rbegin(); l != data.rend(); l++) {
+                xmls += std::format("  <layer opacity=\"1\" x=\"0\" name=\"{}\" y=\"0\" src=\"data/layer{}.png\" composite-op=\"svg:src-over\" visibility=\"{}\"/>\n", (*l)->name, i++, (*l)->hidden ? "hidden" : "visible");
+            }
+            xmls += "  </stack>\n";
+            xmls += "</image>\n";
+            zip_entry_write(zip, xmls.c_str(), xmls.size());
+        }
+        zip_entry_close(zip);
+
+        int i = 0;
+        for (auto l = data.rbegin(); l != data.rend(); l++) {
+            if (writePNG(L"temp.bin", *l)) {
+                std::string fname = std::format("data/layer{}.png", i++);
+                zip_entry_open(zip, fname.c_str());
+                zip_entry_fwrite(zip, "temp.bin");
+                zip_entry_close(zip);
+            }
+            else {
+                printf("OPENRASTER: PNG WRITE ERROR\n");
+            }
+        }
+
+        zip_stream_copy(zip, (void**)&zipBuffer, &zipBufferSize);
+    }
+    zip_close(zip);
+
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+
+        fwrite(zipBuffer, zipBufferSize, 1, f);
+        fclose(f);
+        free(zipBuffer);
+        return true;
+    }
+    free(zipBuffer);
     return false;
 }
 
