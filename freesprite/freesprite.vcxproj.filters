@@ -189,6 +189,9 @@
     <ClCompile Include="UILayerButton.cpp">
       <Filter>Pliki źródłowe\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="SpritesheetPreviewScreen.cpp">
+      <Filter>Pliki źródłowe\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -331,6 +334,9 @@
     </ClInclude>
     <ClInclude Include="ddspp\ddspp.h">
       <Filter>Pliki nagłówkowe\external\ddspp</Filter>
+    </ClInclude>
+    <ClInclude Include="SpritesheetPreviewScreen.h">
+      <Filter>Pliki nagłówkowe\screen</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

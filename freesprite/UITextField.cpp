@@ -4,7 +4,7 @@
 void UITextField::render(XY pos)
 {
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
-	SDL_SetRenderDrawColor(g_rd, 0x0, 0x0, 0x0, focused ? 0xff : 0x80);
+	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, focused ? 0xff : 0x80);
 	SDL_RenderFillRect(g_rd, &drawrect);
 	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, focused ? 0x80 : 0x30);
 	SDL_RenderDrawRect(g_rd, &drawrect);

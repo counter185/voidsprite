@@ -96,7 +96,7 @@ void GlobalNavBar::updateCurrentSubmenu()
 			std::vector<SDL_Keycode> order = keyBinds[currentSubmenuOpen].order;
 			newBtn->position = XY{ x, order.empty() ? y : (int)(wxHeight + (std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight)};
 			y += newBtn->wxHeight;
-			newBtn->colorBGFocused = newBtn->colorBGUnfocused = SDL_Color{ 0,0,0,0xa0 };
+			newBtn->colorBGFocused = newBtn->colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
 			newBtn->text = option.second.name + std::format(" ({})", SDL_GetKeyName(option.first));
 			newBtn->setCallbackListener(-1 - option.first, this);
 			subWxs.addDrawable(newBtn);

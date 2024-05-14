@@ -13,6 +13,7 @@ public:
 	virtual void render() {}
 	virtual void takeInput(SDL_Event evt) {}
 	virtual void tick() {}
+	virtual BaseScreen* isSubscreenOf() { return NULL; }
 
 	virtual std::string getName() { return "Base screen"; }
 

@@ -7,6 +7,7 @@
 #include "PopupMessageBox.h"
 #include "PopupSetEditorPixelGrid.h"
 #include "EventCallbackListener.h"
+#include "SpritesheetPreviewScreen.h"
 
 class GlobalNavBar : public Drawable, public EventCallbackListener
 {
@@ -130,6 +131,12 @@ public:
 					{SDLK_g, { "Set pixel grid...",
 							[](MainEditor* editor) {
 								g_addPopup(new PopupSetEditorPixelGrid(editor, "Set pixel grid", "Enter grid size <w>x<h>:"));
+							}
+						}
+					},
+					{SDLK_s, { "Open spritesheet preview...",
+							[](MainEditor* editor) {
+								g_addScreen(new SpritesheetPreviewScreen(editor));
 							}
 						}
 					},

@@ -179,6 +179,7 @@
     <ClCompile Include="PopupMessageBox.cpp" />
     <ClCompile Include="PopupSetEditorPixelGrid.cpp" />
     <ClCompile Include="PopupYesNo.cpp" />
+    <ClCompile Include="SpritesheetPreviewScreen.cpp" />
     <ClCompile Include="StartScreen.cpp" />
     <ClCompile Include="TabbedView.cpp" />
     <ClCompile Include="BaseTemplate.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="PopupMessageBox.h" />
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
     <ClInclude Include="PopupYesNo.h" />
+    <ClInclude Include="SpritesheetPreviewScreen.h" />
     <ClInclude Include="StartScreen.h" />
     <ClInclude Include="TabbedView.h" />
     <ClInclude Include="BaseTemplate.h" />

@@ -9,6 +9,8 @@ public:
 	std::string text = "";
 	bool numeric = false;
 	int wxWidth = 250, wxHeight = 30;
+	SDL_Color bgColor = { 0,0,0, 0xff };
+
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
 		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
