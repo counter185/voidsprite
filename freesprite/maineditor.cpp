@@ -101,6 +101,10 @@ void MainEditor::render() {
 		currentBrush->renderOnCanvas(XY{ canvasRenderRect.x, canvasRenderRect.y }, scale);
 	}
 
+	if (spritesheetPreview != NULL) {
+		spritesheetPreview->previewWx->render(XY{ 0,0 });
+	}
+
 	//g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
 	//g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
 

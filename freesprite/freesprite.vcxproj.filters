@@ -201,6 +201,9 @@
     <ClCompile Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.c">
       <Filter>Pliki źródłowe\external\zip</Filter>
     </ClCompile>
+    <ClCompile Include="EditorSpritesheetPreview.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -352,6 +355,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\miniz.h">
       <Filter>Pliki nagłówkowe\external\zip</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorSpritesheetPreview.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

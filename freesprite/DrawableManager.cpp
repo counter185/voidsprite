@@ -6,7 +6,12 @@ void DrawableManager::addDrawable(Drawable* d) {
 }
 
 void DrawableManager::removeDrawable(Drawable* d) {
-	//todo
+	for (int x = 0; x < drawablesList.size(); x++) {
+		if (drawablesList[x] == d) {
+			drawablesList.erase(drawablesList.begin() + x);
+			return;
+		}
+	}
 }
 
 void DrawableManager::renderAll(XY offset) {
@@ -30,7 +35,7 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
 		Drawable* a = drawablesList[x];
 		//XY anchorPosition = a->anchorPos(parentOffset, XY{ g_windowW, g_windowH }, a->position, a->getDimensions(), a->anchor);
 	//for (Drawable*& a : drawablesList) {
-		if (a->isMouseIn(xyAdd(a->position, parentOffset), screenPoint)) {
+		if (a->focusable() && a->isMouseIn(xyAdd(a->position, parentOffset), screenPoint)) {
 			if (focused != a) {
 				if (focused != NULL) {
 					focused->focusOut();

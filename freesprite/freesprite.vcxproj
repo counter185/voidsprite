@@ -166,6 +166,7 @@
     <ClCompile Include="EditorBrushPicker.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="EditorLayerPicker.cpp" />
+    <ClCompile Include="EditorSpritesheetPreview.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="EditorBrushPicker.h" />
     <ClInclude Include="EditorColorPicker.h" />
     <ClInclude Include="EditorLayerPicker.h" />
+    <ClInclude Include="EditorSpritesheetPreview.h" />
     <ClInclude Include="EventCallbackListener.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="FontRenderer.h" />

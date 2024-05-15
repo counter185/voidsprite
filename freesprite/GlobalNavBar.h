@@ -136,7 +136,11 @@ public:
 					},
 					{SDLK_s, { "Open spritesheet preview...",
 							[](MainEditor* editor) {
-								g_addScreen(new SpritesheetPreviewScreen(editor));
+								if (editor->spritesheetPreview == NULL) {
+									SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
+									g_addScreen(newScreen);
+									editor->spritesheetPreview = newScreen;
+								}
 							}
 						}
 					},

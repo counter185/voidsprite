@@ -31,7 +31,6 @@
 
 class EventCallbackListener;
 class TextRenderer;
-class MainEditor;
 class GlobalNavBar;
 class EditorColorPicker;
 class EditorBrushPicker;
@@ -39,6 +38,8 @@ class BaseScreen;
 class BasePopup;
 class BaseBrush;
 class Layer;
+class MainEditor;
+class SpritesheetPreviewScreen;
 
 extern int g_windowW, g_windowH;
 extern SDL_Window* g_wd;
@@ -57,6 +58,7 @@ void g_closeScreen(BaseScreen* screen);
 
 void g_addPopup(BasePopup* a);
 void g_popDisposeLastPopup(bool dispose = true);
+void g_closePopup(BasePopup* a);
 
 struct XY {
 	int x, y;

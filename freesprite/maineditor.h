@@ -13,10 +13,12 @@
 #include "ToolRectClone.h"
 #include "ToolColorPicker.h"
 #include "Layer.h"
+#include "SpritesheetPreviewScreen.h"
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 public:
+	SpritesheetPreviewScreen* spritesheetPreview = NULL;
 
 	std::vector<Layer*> layers;
 	int selLayer = 0;

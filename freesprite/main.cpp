@@ -29,6 +29,14 @@ void g_popDisposeLastPopup(bool dispose) {
     }
     popupStack.pop_back();
 }
+void g_closePopup(BasePopup* a) {
+    for (int x = 0; x < popupStack.size(); x++) {
+        if (popupStack[x] == a) {
+            delete popupStack[x];
+            popupStack.erase(popupStack.begin() + x);
+        }
+    }
+}
 
 int currentScreen = 0;
 std::vector<BaseScreen*> screenStack;
@@ -38,12 +46,17 @@ void g_addScreen(BaseScreen* a) {
 }
 void g_closeScreen(BaseScreen* screen) {
     for (int x = 0; x < screenStack.size(); x++) {
+        if (screenStack[x]->isSubscreenOf() == screen) {
+            g_closeScreen(screenStack[x]);
+            x = 0;
+        }
         if (screenStack[x] == screen) {
             delete screenStack[x];
             screenStack.erase(screenStack.begin() + x);
             if (currentScreen >= screenStack.size()) {
                 currentScreen = screenStack.size() - 1;
             }
+            x--;
         }
     }
 }
@@ -131,7 +144,7 @@ int main(int argc, char** argv)
                     break;
             }
 
-            if (!popupStack.empty()) {
+            if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {
                 popupStack[popupStack.size() - 1]->takeInput(evt);
             }
             else {
@@ -154,9 +167,14 @@ int main(int argc, char** argv)
         if (!screenStack.empty()) {
             screenStack[currentScreen]->render();
         }
-        if (!popupStack.empty()) {
-            popupStack[popupStack.size() - 1]->render();
+
+        for (BasePopup*& popup : popupStack) {
+            popup->render();
         }
+
+        /*if (!popupStack.empty()) {
+            popupStack[popupStack.size() - 1]->render();
+        }*/
 
 
         //draw the screen icons
