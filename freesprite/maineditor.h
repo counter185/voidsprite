@@ -69,6 +69,7 @@ public:
 
 	void eventFileSaved(int evt_id, PlatformNativePathString name) override;
 	void eventPopupClosed(int evt_id, BasePopup* p) override;
+	void eventTextInputConfirm(int evt_id, std::string text) override;
 	
 	void DrawBackground();
 	void DrawForeground();

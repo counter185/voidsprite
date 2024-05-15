@@ -369,6 +369,14 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 	}
 }
 
+void MainEditor::eventTextInputConfirm(int evt_id, std::string text)
+{
+	if (evt_id == EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME) {
+		getCurrentLayer()->name = text;
+		layerPicker->updateLayers();
+	}
+}
+
 void MainEditor::FillTexture() {
 	int* pixels = (int*)getCurrentLayer()->pixelData;
 	//int pitch;

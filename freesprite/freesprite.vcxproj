@@ -180,6 +180,7 @@
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="PopupMessageBox.cpp" />
     <ClCompile Include="PopupSetEditorPixelGrid.cpp" />
+    <ClCompile Include="PopupTextBox.cpp" />
     <ClCompile Include="PopupYesNo.cpp" />
     <ClCompile Include="SpritesheetPreviewScreen.cpp" />
     <ClCompile Include="StartScreen.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="platform_windows.h" />
     <ClInclude Include="PopupMessageBox.h" />
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
+    <ClInclude Include="PopupTextBox.h" />
     <ClInclude Include="PopupYesNo.h" />
     <ClInclude Include="SpritesheetPreviewScreen.h" />
     <ClInclude Include="StartScreen.h" />

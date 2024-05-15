@@ -202,7 +202,10 @@
       <Filter>Pliki źródłowe\external\zip</Filter>
     </ClCompile>
     <ClCompile Include="EditorSpritesheetPreview.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupTextBox.cpp">
+      <Filter>Pliki źródłowe\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -357,7 +360,10 @@
       <Filter>Pliki nagłówkowe\external\zip</Filter>
     </ClInclude>
     <ClInclude Include="EditorSpritesheetPreview.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupTextBox.h">
+      <Filter>Pliki nagłówkowe\popup</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

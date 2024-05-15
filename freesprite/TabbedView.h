@@ -18,8 +18,8 @@ public:
     std::vector<Tab> tabs;
     int buttonsHeight = 30;
     int openTab = 0;
-    SDL_Color tabUnfocusedColor = SDL_Color{ 0,0,0,0xd0 };
-    SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0 };
+    SDL_Color tabUnfocusedColor = SDL_Color{ 0,0,0,0x30 };
+    SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0xe0 };
 
     TabbedView(std::vector<Tab> tabN, int buttonWidth = 60) {
         int buttonX = 0;
