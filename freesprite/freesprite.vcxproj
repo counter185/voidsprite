@@ -236,6 +236,7 @@
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
     <ClInclude Include="PopupTextBox.h" />
     <ClInclude Include="PopupYesNo.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SpritesheetPreviewScreen.h" />
     <ClInclude Include="StartScreen.h" />
     <ClInclude Include="TabbedView.h" />
@@ -250,6 +251,12 @@
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="freesprite.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
