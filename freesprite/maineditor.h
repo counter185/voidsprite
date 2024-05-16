@@ -88,6 +88,7 @@ public:
 	void trySaveAsImage();
 	void recenterCanvas();
 	bool requestSafeClose();
+	void zoom(int how_much);
 
 	void checkAndDiscardEndOfUndoStack();
 	void commitStateToCurrentLayer();

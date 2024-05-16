@@ -255,6 +255,22 @@ bool MainEditor::requestSafeClose() {
 	return false;
 }
 
+void MainEditor::zoom(int how_much)
+{
+	XY screenCenterPoint = XY{
+			(canvasCenterPoint.x - g_windowW/2) / -scale,
+			(canvasCenterPoint.y - g_windowH/2) / -scale
+	};
+	scale += how_much;
+	scale = scale < 1 ? 1 : scale;
+	XY onscreenPointNow = XY{
+		canvasCenterPoint.x + screenCenterPoint.x * scale,
+		canvasCenterPoint.y + screenCenterPoint.y * scale
+	};
+	XY pointDiff = xySubtract(XY{ g_windowW / 2, g_windowH / 2 }, onscreenPointNow);
+	canvasCenterPoint = xyAdd(canvasCenterPoint, pointDiff);
+}
+
 void MainEditor::takeInput(SDL_Event evt) {
 
 	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
@@ -322,8 +338,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				break;
 			case SDL_MOUSEWHEEL:
-				scale += evt.wheel.y;
-				scale = scale < 1 ? 1 : scale;
+				zoom(evt.wheel.y);
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
