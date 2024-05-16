@@ -9,6 +9,7 @@ Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSDLImage(std::string path, uint64_t seek = 0);
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
@@ -64,6 +65,9 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	},
 	{
 		"Wii/GC TPL (voidsprite custom)", ".tpl", &readWiiGCTPL
+	},
+	{
+		"NES: dump CHR-ROM (voidsprite custom)", ".nes", &readNES
 	},
 	{
 		"DDS (ddspp+s3tc open source+voidsprite custom)", ".dds", &readDDS

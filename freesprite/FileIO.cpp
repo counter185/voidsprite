@@ -336,6 +336,63 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
     return layers.size() != 0 ? layers[0] : NULL;
 }
 
+Layer* readNES(PlatformNativePathString path, uint64_t seek)
+{
+    struct NESHeader {
+        uint8_t header[4];
+        uint8_t prgRoms;
+        uint8_t chrRoms;
+        uint8_t flag6,flag7,flag8,flag9,flag10;
+        uint8_t unusedPadding[5];
+    };
+    Layer* ret = NULL;
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        NESHeader header;
+        fread(&header, sizeof(NESHeader), 1, infile);
+        printf("Mapper: %i%i\n", header.flag7>>4, header.flag6 >> 4);
+        bool trainerPresent = (header.flag6 >> 3) & 0b1;
+
+        if (trainerPresent) {
+            fseek(infile, 512, SEEK_CUR);
+        }
+        fseek(infile, 16384 * header.prgRoms, SEEK_CUR);
+        uint8_t* chrRomData = (uint8_t*)malloc(8192 * (int)header.chrRoms);
+        fread(chrRomData, 8192, header.chrRoms, infile);
+
+        ret = new Layer(32 * 8, 16 * 8 * header.chrRoms);
+        ret->name = "NES CHR-ROM Dump";
+        int dataPointer = 0;
+
+        for (int y = 0; y < 16 * header.chrRoms; y++) {
+            for (int x = 0; x < 32; x++) {
+                uint8_t part1[8];
+                uint8_t part2[8];
+                memcpy(part1, chrRomData + dataPointer, 8);
+                memcpy(part2, chrRomData + dataPointer + 8, 8);
+                for (int yy = 0; yy < 8; yy++) {
+                    uint8_t p1p = part1[yy];
+                    uint8_t p2p = part2[yy];
+                    for (int xx = 0; xx < 8; xx++) {
+                        uint8_t colorValue = (((p1p >> (7 - xx)) & 0b1) + (((p2p >> (7 - xx)) & 0b1) << 1)) * 0x55;
+                        ret->setPixel(XY{ x * 8 + xx, y * 8 + yy }, 0xFF000000 + (colorValue<<16) + (colorValue<<8) + colorValue);
+                    }
+                }
+                dataPointer += 0x10;
+            }
+        }
+
+        //GET RID OF THIS LMAO
+        /*FILE* f2 = platformOpenFile(L"temp.bin", L"wb");
+        fwrite(chrRomData, 8192, header.chrRoms, f2);
+        fclose(f2);*/
+
+        free(chrRomData);
+        fclose(infile);
+    }
+    return ret;
+}
+
 Layer* readDDS(PlatformNativePathString path, uint64_t seek)
 {
     Layer* ret = NULL;
