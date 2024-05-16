@@ -11,6 +11,7 @@
 #include "TabbedView.h"
 #include "BaseTemplate.h"
 #include "TemplateRPG2KCharset.h"
+#include "TemplateMC64x32Skin.h"
 #include "PopupMessageBox.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
@@ -30,8 +31,9 @@ public:
 	UITextField* tab1TextFieldCWX;
 	UITextField* tab1TextFieldCHX;
 
-	BaseTemplate* tab2templates[1] = {
-		new TemplateRPG2KCharset()
+	BaseTemplate* tab2templates[2] = {
+		new TemplateRPG2KCharset(),
+		new TemplateMC64x32Skin()
 	};
 
 	StartScreen() {
@@ -112,7 +114,7 @@ public:
 		h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
 		newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
-		for (int x = 0; x < 1; x++) {
+		for (int x = 0; x < 2; x++) {
 			UIButton* buttonTemplate = new UIButton();
 			buttonTemplate->position = XY{ 40, 5 + x * 30 };
 			buttonTemplate->text = tab2templates[x]->getName();

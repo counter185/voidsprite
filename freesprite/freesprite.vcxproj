@@ -186,6 +186,7 @@
     <ClCompile Include="StartScreen.cpp" />
     <ClCompile Include="TabbedView.cpp" />
     <ClCompile Include="BaseTemplate.cpp" />
+    <ClCompile Include="TemplateMC64x32Skin.cpp" />
     <ClCompile Include="TemplateRPG2KCharset.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="ToolRectClone.cpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="StartScreen.h" />
     <ClInclude Include="TabbedView.h" />
     <ClInclude Include="BaseTemplate.h" />
+    <ClInclude Include="TemplateMC64x32Skin.h" />
     <ClInclude Include="TemplateRPG2KCharset.h" />
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="ToolRectClone.h" />

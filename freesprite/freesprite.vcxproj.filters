@@ -213,6 +213,9 @@
     <ClCompile Include="ToolSetYSymmetry.cpp">
       <Filter>Pliki źródłowe\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="TemplateMC64x32Skin.cpp">
+      <Filter>Pliki źródłowe\templates</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -379,6 +382,9 @@
     </ClInclude>
     <ClInclude Include="ToolSetYSymmetry.h">
       <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="TemplateMC64x32Skin.h">
+      <Filter>Pliki nagłówkowe\templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
