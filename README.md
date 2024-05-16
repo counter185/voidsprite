@@ -27,6 +27,11 @@ Free C++ sprite editor
 - BMP
 - Cave Story engine PBM
 
+## Building
+
+1. Go to `freesprite/devlibs` and extract `devlibs.7z` to the current directory (right click `devlibs.7z` and `Extract here`).
+2. Go back to the repository root and run the `copy_devlibs.bat` script
+3. Open `freesprite.sln` with Visual Studio and build/run like any other C++ program
 
 ## Licenses
 
