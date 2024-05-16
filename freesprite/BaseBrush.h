@@ -9,6 +9,7 @@ public:
 
 	virtual void resetState() {}
 	virtual bool isReadOnly() { return false; }
+	virtual bool wantDoublePosPrecision() { return false; }
 	virtual bool overrideRightClick() { return false; }
 	virtual std::string getIconPath() { return "assets/brush_default.png"; }
 	virtual std::string getName() { return "Base brush"; }

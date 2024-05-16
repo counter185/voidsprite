@@ -207,6 +207,12 @@
     <ClCompile Include="PopupTextBox.cpp">
       <Filter>Pliki źródłowe\popup</Filter>
     </ClCompile>
+    <ClCompile Include="ToolSetXSymmetry.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolSetYSymmetry.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -367,6 +373,12 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolSetXSymmetry.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolSetYSymmetry.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

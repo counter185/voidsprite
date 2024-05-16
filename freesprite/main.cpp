@@ -98,6 +98,8 @@ int main(int argc, char** argv)
     g_brushes.push_back(new BrushRectFill());
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectClone());
+    g_brushes.push_back(new ToolSetXSymmetry());
+    g_brushes.push_back(new ToolSetYSymmetry());
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
     }

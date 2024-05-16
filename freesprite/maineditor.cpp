@@ -97,6 +97,7 @@ void MainEditor::render() {
 			}
 		}
 	}
+	drawSymmetryLines();
 	if (currentBrush != NULL) {
 		currentBrush->renderOnCanvas(XY{ canvasRenderRect.x, canvasRenderRect.y }, scale);
 	}
@@ -163,6 +164,25 @@ void MainEditor::DrawBackground()
 	
 }
 
+void MainEditor::drawSymmetryLines() {
+	if (symmetryEnabled[0]) {
+		int symXPos = symmetryPositions.x / 2;
+		bool symXMiddle = symmetryPositions.x % 2;
+		int lineDrawXPoint = canvasCenterPoint.x + symXPos * scale + (symXMiddle ? scale/2 : 0);
+
+		SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+		SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
+	}
+	if (symmetryEnabled[1]) {
+		int symYPos = symmetryPositions.y / 2;
+		bool symYMiddle = symmetryPositions.y % 2;
+		int lineDrawYPoint = canvasCenterPoint.y + symYPos * scale + (symYMiddle ? scale/2 : 0);
+
+		SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+		SDL_RenderDrawLine(g_rd,0, lineDrawYPoint, g_windowW, lineDrawYPoint);
+	}
+}
+
 void MainEditor::DrawForeground()
 {
 	SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };
@@ -214,6 +234,11 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 		XY{
 			(canvasCenterPoint.x - x) / -scale,
 			(canvasCenterPoint.y - y) / -scale
+		};
+	mousePixelTargetPoint2xP =
+		XY{
+			(int)((canvasCenterPoint.x - x) / (float)(-scale) / 0.5f),
+			(int)((canvasCenterPoint.y - y) / (float)(-scale) / 0.5f)
 	};
 }
 
@@ -256,10 +281,10 @@ void MainEditor::takeInput(SDL_Event evt) {
 							if (!currentBrush->isReadOnly()) {
 								commitStateToCurrentLayer();
 							}
-							currentBrush->clickPress(this, mousePixelTargetPoint);
+							currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
 						}
 						else {
-							currentBrush->clickRelease(this, mousePixelTargetPoint);
+							currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
 						}
 					}
 					mouseHoldPosition = mousePixelTargetPoint;
@@ -272,7 +297,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 					RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
 					if (currentBrush != NULL && currentBrush->overrideRightClick()) {
 						if (evt.button.state) {
-							currentBrush->rightClickPress(this, mousePixelTargetPoint);
+							currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
 						}
 					}
 					else {
@@ -288,12 +313,12 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				else if (leftMouseHold) {
 					if (currentBrush != NULL) {
-						currentBrush->clickDrag(this, mouseHoldPosition, mousePixelTargetPoint);
+						currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
 					}
 					mouseHoldPosition = mousePixelTargetPoint;
 				}
 				if (currentBrush != NULL) {
-					currentBrush->mouseMotion(this, mousePixelTargetPoint);
+					currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
 				}
 				break;
 			case SDL_MOUSEWHEEL:
@@ -391,8 +416,20 @@ void MainEditor::FillTexture() {
 	//SDL_UnlockTexture(mainTexture);
 }
 
-void MainEditor::SetPixel(XY position, uint32_t color) {
+void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
 	getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
+	if (symmetryEnabled[0] && !(symmetry & 0b10)) {
+		int symmetryXPoint = symmetryPositions.x / 2;
+		bool symXPointIsCentered = symmetryPositions.x % 2;
+		int symmetryFlippedX = symmetryXPoint + (symmetryXPoint - position.x) - (symXPointIsCentered ? 0 : 1);
+		SetPixel(XY{symmetryFlippedX, position.y}, color, symmetry | 0b10);
+	}
+	if (symmetryEnabled[1] && !(symmetry & 0b1)) {
+		int symmetryYPoint = symmetryPositions.y / 2;
+		bool symYPointIsCentered = symmetryPositions.y % 2;
+		int symmetryFlippedY = symmetryYPoint + (symmetryYPoint - position.y) - (symYPointIsCentered ? 0 : 1);
+		SetPixel(XY{position.x, symmetryFlippedY}, color, symmetry | 0b1);
+	}
 }
 
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {

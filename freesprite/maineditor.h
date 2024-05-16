@@ -12,6 +12,8 @@
 #include "BrushRectFill.h"
 #include "ToolRectClone.h"
 #include "ToolColorPicker.h"
+#include "ToolSetXSymmetry.h"
+#include "ToolSetYSymmetry.h"
 #include "Layer.h"
 #include "SpritesheetPreviewScreen.h"
 
@@ -22,8 +24,6 @@ public:
 
 	std::vector<Layer*> layers;
 	int selLayer = 0;
-	
-	Layer* flattenImage();
 
 	int maxUndoHistory = 20;
 	std::vector<UndoStackElement> undoStack, redoStack;
@@ -33,6 +33,7 @@ public:
 	uint8_t tileGridAlpha = 0x40;
 	XY canvasCenterPoint = XY{0,0};
 	XY mousePixelTargetPoint;
+	XY mousePixelTargetPoint2xP;
 	int scale = 1;
 	XY mouseHoldPosition;
 	bool closeNextTick = false;
@@ -55,6 +56,9 @@ public:
 
 	SDL_Color backgroundColor = SDL_Color{0,0,0,255};
 
+	XY symmetryPositions = {0,0};
+	bool symmetryEnabled[2] = { false, false };
+
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);
 	MainEditor(Layer* srf);
@@ -73,11 +77,12 @@ public:
 	
 	void DrawBackground();
 	void DrawForeground();
+	void drawSymmetryLines();
 	void initLayers();
 	void SetUpWidgets();
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
-	void SetPixel(XY position, uint32_t color);
+	void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
 	void trySaveAsImage();
@@ -101,5 +106,6 @@ public:
 	void layer_flipVertically();
 	void layer_swapLayerRGBtoBGR();
 	uint32_t layer_getPixelAt(XY pos);
+	Layer* flattenImage();
 };
 

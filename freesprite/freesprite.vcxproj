@@ -189,6 +189,8 @@
     <ClCompile Include="TemplateRPG2KCharset.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="ToolRectClone.cpp" />
+    <ClCompile Include="ToolSetXSymmetry.cpp" />
+    <ClCompile Include="ToolSetYSymmetry.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UILabel.cpp" />
@@ -244,6 +246,8 @@
     <ClInclude Include="TemplateRPG2KCharset.h" />
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="ToolRectClone.h" />
+    <ClInclude Include="ToolSetXSymmetry.h" />
+    <ClInclude Include="ToolSetYSymmetry.h" />
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIColorSlider.h" />
     <ClInclude Include="UILabel.h" />
