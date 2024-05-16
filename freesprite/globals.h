@@ -10,6 +10,7 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
+#include <filesystem>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -47,6 +48,8 @@ extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
+
+extern std::vector<std::string> g_cmdlineArgs;
 
 extern SDL_Texture* g_mainlogo;
 extern SDL_Texture* g_iconLayerAdd;

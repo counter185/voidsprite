@@ -50,63 +50,68 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_DROPFILE:
 				std::string filePath = evt.drop.file;
 				//std::string extension = filePath.substr(filePath.find_last_of('.'));
-				PlatformNativePathString fPath;
-#if _WIN32
-				fPath = utf8StringToWstring(filePath);
-#else
-				fPath = filePath;
-#endif
-
-				if (stringEndsWith(filePath, ".voidsn") || stringEndsWith(filePath, ".voidsnv1")) {
-					MainEditor* session = readVOIDSN(fPath);
-					if (session == NULL) {
-						printf("voidsession load failed");
-					}
-					else {
-						g_addScreen(session);
-					}
-				}
-				else {
-
-					Layer* l = NULL;
-					for (FileImportNPath importer : g_fileImportersNPaths) {
-						if (stringEndsWith(filePath, importer.extension) && importer.canImport(fPath)) {
-							l = importer.importFunction(fPath, 0);
-							if (l != NULL) {
-								break;
-							}
-							else {
-								printf("%s : load failed\n", importer.name.c_str());
-							}
-						}
-					}
-					if (l == NULL) {
-						for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
-							if (stringEndsWith(filePath, importer.extension) && importer.canImport(filePath)) {
-								l = importer.importFunction(filePath, 0);
-								if (l != NULL) {
-									break;
-								}
-								else {
-									printf("%s : load failed\n", importer.name.c_str());
-								}
-							}
-						}
-					}
-
-					if (l != NULL) {
-						g_addScreen(new MainEditor(l));
-					}
-					else {
-						g_addPopup(new PopupMessageBox("", "Failed to load file."));
-						printf("No importer for file available\n");
-					}
-				}
+				tryLoadFile(filePath);
 				SDL_free(evt.drop.file);
 				break;
 		}
 	}
 	else {
 		wxsManager.passInputToFocused(evt);
+	}
+}
+
+void StartScreen::tryLoadFile(std::string path)
+{
+	PlatformNativePathString fPath;
+#if _WIN32
+	fPath = utf8StringToWstring(path);
+#else
+	fPath = filePath;
+#endif
+
+	if (stringEndsWith(path, ".voidsn") || stringEndsWith(path, ".voidsnv1")) {
+		MainEditor* session = readVOIDSN(fPath);
+		if (session == NULL) {
+			printf("voidsession load failed");
+		}
+		else {
+			g_addScreen(session);
+		}
+	}
+	else {
+
+		Layer* l = NULL;
+		for (FileImportNPath importer : g_fileImportersNPaths) {
+			if (stringEndsWith(path, importer.extension) && importer.canImport(fPath)) {
+				l = importer.importFunction(fPath, 0);
+				if (l != NULL) {
+					break;
+				}
+				else {
+					printf("%s : load failed\n", importer.name.c_str());
+				}
+			}
+		}
+		if (l == NULL) {
+			for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
+				if (stringEndsWith(path, importer.extension) && importer.canImport(path)) {
+					l = importer.importFunction(path, 0);
+					if (l != NULL) {
+						break;
+					}
+					else {
+						printf("%s : load failed\n", importer.name.c_str());
+					}
+				}
+			}
+		}
+
+		if (l != NULL) {
+			g_addScreen(new MainEditor(l));
+		}
+		else {
+			g_addPopup(new PopupMessageBox("", "Failed to load file."));
+			printf("No importer for file available\n");
+		}
 	}
 }

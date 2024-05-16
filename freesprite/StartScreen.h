@@ -11,6 +11,7 @@
 #include "TabbedView.h"
 #include "BaseTemplate.h"
 #include "TemplateRPG2KCharset.h"
+#include "PopupMessageBox.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -128,6 +129,19 @@ public:
 			buttonNewImage->text = "Create...";
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImage);
 		}
+
+		for (std::string& arg : g_cmdlineArgs) {
+#if _WIN32
+			if (std::filesystem::exists(utf8StringToWstring(arg))) {
+#else
+			if (std::filesystem::exists(arg)) {
+#endif
+				tryLoadFile(arg);
+			}
+			else {
+				g_addPopup(new PopupMessageBox("", std::format("Error finding file: {}", arg)));
+			}
+		}
 	}
 	~StartScreen() {
 		wxsManager.freeAllDrawables();
@@ -178,5 +192,7 @@ public:
 			g_addScreen(newMainEditor);
 		}
 	}
+
+	void tryLoadFile(std::string path);
 };
 

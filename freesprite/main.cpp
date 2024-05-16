@@ -12,6 +12,7 @@ SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
+std::vector<std::string> g_cmdlineArgs;
 
 SDL_Texture* g_mainlogo = NULL;
 SDL_Texture* g_iconLayerAdd = NULL;
@@ -76,6 +77,11 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
 
 int main(int argc, char** argv)
 {
+    for (int arg = 1; arg < argc; arg++) {
+        g_cmdlineArgs.push_back(std::string(argv[arg]));
+    }
+
+
     platformPreInit();
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
     IMG_Init(IMG_INIT_AVIF | IMG_INIT_JPG | IMG_INIT_JXL | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
