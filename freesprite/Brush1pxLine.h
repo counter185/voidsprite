@@ -5,6 +5,7 @@ class Brush1pxLine :
 {
 
 	XY startPos = XY{ 0,0 };
+	bool dragging = false;
 
 	void resetState() {
 		startPos = XY{ 0,0 };
@@ -14,5 +15,6 @@ class Brush1pxLine :
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override {}
 	void clickRelease(MainEditor* editor, XY pos) override;
+	void renderOnCanvas(XY canvasDrawPoint, int scale);
 };
 

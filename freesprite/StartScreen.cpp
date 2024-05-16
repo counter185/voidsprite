@@ -12,7 +12,7 @@ void StartScreen::render()
 {
 	SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
 	SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
-	g_fnt->RenderString("alpha05.05.2024", 2, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50});
+	g_fnt->RenderString("alpha16.05.2024", 2, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50});
 
 	SDL_Rect bgr = SDL_Rect{ 0, 35, 560, 300 };
 	SDL_SetRenderDrawColor(g_rd, 0x20, 0x20, 0x20, 0xa0);

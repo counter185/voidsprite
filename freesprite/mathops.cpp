@@ -40,6 +40,46 @@ bool stringEndsWith(std::string c, std::string endsWith)
     return c.substr(c.size() - endsWith.size()) == endsWith;
 }
 
+void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel)
+{
+    if (from.x == to.x) {
+        int yMin = from.y > to.y ? to.y : from.y;
+        int yMax = from.y > to.y ? from.y : to.y;
+        for (int y = yMin; y <= yMax; y++) {
+            //SetPixel(XY{ from.x, y }, color);
+            forEachPixel(XY{ from.x, y });
+        }
+    }
+    else {
+        int xMin = ixmin(from.x, to.x);
+        int xMax = ixmax(from.x, to.x);
+        int yMin = ixmin(from.y, to.y);
+        int yMax = ixmax(from.y, to.y);
+
+        if (xMax - xMin > yMax - yMin) {
+            float a = (float)(from.y - to.y) / (from.x - to.x);
+            float b = from.y - a * from.x;
+
+            for (int x = xMin; x <= xMax; x++) {
+                int yPos = (int)(a * x + b);
+                //SetPixel(XY{ x, yPos }, color);
+                forEachPixel(XY{ x, yPos });
+            }
+        }
+        else {
+            float a = (float)(from.x - to.x) / (from.y - to.y);
+            float b = from.x - a * from.y;
+
+            for (int x = yMin; x <= yMax; x++) {
+                int xPos = (int)(a * x + b);
+                //SetPixel(XY{ xPos, x }, color);
+                forEachPixel(XY{ xPos, x });
+            }
+        }
+    }
+    
+}
+
 hsv rgb2hsv(rgb in)
 {
     hsv         out;

@@ -31,6 +31,8 @@ XY xySubtract(XY p1, XY p2);
 std::wstring utf8StringToWstring(std::string a);
 bool stringEndsWith(std::string c, std::string endsWith);
 
+void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel);
+
 int ixmin(int a, int b);
 int ixmax(int a, int b);
 int iclamp(int vmin, int b, int vmax);

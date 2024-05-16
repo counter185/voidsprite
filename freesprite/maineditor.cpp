@@ -394,25 +394,9 @@ void MainEditor::SetPixel(XY position, uint32_t color) {
 }
 
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
-	if (from.x == to.x) {
-		int yMin = from.y > to.y ? to.y : from.y;
-		int yMax = from.y > to.y ? from.y : to.y;
-		for (int y = yMin; y <= yMax; y++) {
-			SetPixel(XY{ from.x, y }, color);
-		}
-	}
-	else {
-		float a = (float)(from.y - to.y) / (from.x - to.x);
-		float b = from.y - a * from.x;
-
-		int xMin = from.x > to.x ? to.x : from.x;
-		int xMax = from.x > to.x ? from.x : to.x;
-
-		for (int x = xMin; x <= xMax; x++) {
-			int yPos = (int)(a * x + b);
-			SetPixel(XY{ x, yPos }, color);
-		}
-	}
+	rasterizeLine(from, to, [&](XY a)->void {
+		SetPixel(a, color);
+		});
 }
 
 void MainEditor::trySaveImage()
