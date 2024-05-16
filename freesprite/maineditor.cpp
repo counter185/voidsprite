@@ -325,7 +325,9 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 		size_t extStart = name.find_last_of(L".");
 		std::wstring extension = name.substr(extStart);
 		bool result = false;
-		if (extension == L".voidsn") {
+		if (extension == L".voidsn" || extension == L".voidsnv1") {
+			result = writeVOIDSNv2(name, this);
+		} else if (extension == L".voidsnv1") {
 			result = writeVOIDSNv1(name, XY{ texW, texH }, layers);
 		}
 		else if (extension == L".ora") {

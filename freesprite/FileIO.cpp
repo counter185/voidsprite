@@ -652,6 +652,38 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     return ret;
                 }
                 break;
+            case 2:
+                {
+                    XY dimensions;
+                    fread(&dimensions.x, 4, 1, infile);
+                    fread(&dimensions.y, 4, 1, infile);
+
+                    XY tiledimensions;
+                    fread(&tiledimensions.x, 4, 1, infile);
+                    fread(&tiledimensions.y, 4, 1, infile);
+
+                    std::vector<Layer*> layers;
+                    int nlayers;
+                    fread(&nlayers, 4, 1, infile);
+                    for (int x = 0; x < nlayers; x++) {
+                        int nameLen;
+                        fread(&nameLen, 4, 1, infile);
+                        char* name = (char*)malloc(nameLen+1);
+                        memset(name, 0, nameLen + 1);
+                        fread(name, nameLen, 1, infile);
+
+                        Layer* newLayer = new Layer(dimensions.x, dimensions.y);
+                        newLayer->name = std::string(name);
+                        free(name);
+                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                        layers.push_back(newLayer);
+                    }
+                    MainEditor* ret = new MainEditor(layers);
+                    ret->tileDimensions = tiledimensions;
+                    fclose(infile);
+                    return ret;
+                }
+                break;
             default:
                 printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
                 fclose(infile);
@@ -719,6 +751,42 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
             if (lr->w * lr->h != projDimensions.x * projDimensions.y) {
                 printf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
+            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+        }
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        uint8_t voidsnVersion = 0x02;
+        fwrite(&voidsnVersion, 1, 1, outfile);
+        uint32_t nvalBuffer;
+
+        nvalBuffer = editor->texW;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+        nvalBuffer = editor->texH;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        fwrite(&editor->tileDimensions.x, 4, 1, outfile);
+        fwrite(&editor->tileDimensions.y, 4, 1, outfile);
+
+        nvalBuffer = editor->layers.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (Layer*& lr : editor->layers) {
+            if (lr->w * lr->h != editor->texW * editor->texH) {
+                printf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+            }
+            nvalBuffer = lr->name.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+
             fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
         }
 
