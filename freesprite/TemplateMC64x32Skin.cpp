@@ -1,25 +1,63 @@
 #include "TemplateMC64x32Skin.h"
 #include "Layer.h"
 
+uint8_t patternFront[] = {
+    1,1,1,
+    1,1,1,
+    1,1,1
+};
+uint8_t patternRight[] = {
+    0,0,1,
+    0,0,1,
+    0,0,1
+};
+uint8_t patternLeft[] = {
+    1,0,0,
+    1,0,0,
+    1,0,0
+};
+uint8_t patternBack[] = {
+    1,1,1,
+    1,0,1,
+    1,1,1
+};
+uint8_t patternTop[] = {
+    1,1,1,
+    0,0,0,
+    0,0,0
+};
+uint8_t patternBottom[] = {
+    0,0,0,
+    0,0,0,
+    1,1,1
+};
+
 Layer* TemplateMC64x32Skin::generate()
 {
     Layer* nlayer = new Layer(64, 32);
+    nlayer->name = "Template layer";
     memset(nlayer->pixelData, 0x00, 64 * 32 * 4);
 
     uint32_t headColors[2] = { 0xFF062608, 0xff1b591f };
-    uint32_t hatColors[2] = { 0xFF010b0a, 0xff1b3459 };
+    uint32_t hatColors[2] = { 0xFF042030, 0xff1b3459 };
     uint32_t bodyColors[2] = { 0xFF675215, 0xff232003 };
     uint32_t legColors[2] = { 0xFF82182f, 0xff380709 };
     uint32_t armColors[2] = { 0xFF3a8d28, 0xff0f3906 };
 
     //head
     nlayer->fillRect(XY{ 8,0 }, XY{ 16,8 }, headColors[0]);
+    drawPattern(nlayer, patternTop, XY{ 3,3 }, XY{ 9, 1 }, headColors[1]);
     nlayer->fillRect(XY{ 16,0 }, XY{ 23,8 }, headColors[1]);
+    drawPattern(nlayer, patternBottom, XY{ 3,3 }, XY{ 17, 1 }, headColors[0]);
 
     nlayer->fillRect(XY{ 0,8 }, XY{ 8,15 }, headColors[0]);
+    drawPattern(nlayer, patternLeft, XY{ 3,3 }, XY{ 1,9 }, headColors[1]);
     nlayer->fillRect(XY{ 8,8 }, XY{ 16,15 }, headColors[1]);
+    drawPattern(nlayer, patternFront, XY{ 3,3 }, XY{ 9, 9 }, headColors[0]);
     nlayer->fillRect(XY{ 16,8 }, XY{ 24,15 }, headColors[0]);
+    drawPattern(nlayer, patternRight, XY{ 3,3 }, XY{ 17, 9 }, headColors[1]);
     nlayer->fillRect(XY{ 24,8 }, XY{ 31,15 }, headColors[1]);
+    drawPattern(nlayer, patternBack, XY{ 3,3 }, XY{ 25, 9 }, headColors[0]);
     
     //hat
     nlayer->fillRect(XY{ 40,0 }, XY{ 48,8 }, hatColors[0]);

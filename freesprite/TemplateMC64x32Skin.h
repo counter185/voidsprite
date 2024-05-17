@@ -3,7 +3,7 @@
 class TemplateMC64x32Skin :
     public BaseTemplate
 {
-    std::string getName() override { return "MC 64x32 Skin Template"; };
+    std::string getName() override { return "Minecraft 64x32 Skin Template"; };
     Layer* generate() override;
 };
 
