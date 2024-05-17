@@ -21,8 +21,11 @@ public:
 		w = width;
 		h = height;
 		pixelData = (uint8_t*)malloc(width * height * 4);
-		tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-		SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+		if (pixelData != NULL) {
+			memset(pixelData, 0, width * height * 4);
+			tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+			SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+		}
 	}
 	Layer(SDL_Surface* from) : Layer(from->w, from->h) {
 		//pixelData = (uint8_t*)malloc(w * h * 4);
