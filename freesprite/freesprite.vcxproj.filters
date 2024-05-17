@@ -198,9 +198,6 @@
     <ClCompile Include="SpritesheetPreviewScreen.cpp">
       <Filter>Pliki źródłowe\screen</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.c">
-      <Filter>Pliki źródłowe\external\zip</Filter>
-    </ClCompile>
     <ClCompile Include="EditorSpritesheetPreview.cpp">
       <Filter>Pliki źródłowe\ui_widgets</Filter>
     </ClCompile>
@@ -215,6 +212,9 @@
     </ClCompile>
     <ClCompile Include="TemplateMC64x32Skin.cpp">
       <Filter>Pliki źródłowe\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="zip\zip.c">
+      <Filter>Pliki źródłowe\external\zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -362,12 +362,6 @@
     <ClInclude Include="SpritesheetPreviewScreen.h">
       <Filter>Pliki nagłówkowe\screen</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\zip.h">
-      <Filter>Pliki nagłówkowe\external\zip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\zip-0.3.2\src\miniz.h">
-      <Filter>Pliki nagłówkowe\external\zip</Filter>
-    </ClInclude>
     <ClInclude Include="EditorSpritesheetPreview.h">
       <Filter>Pliki nagłówkowe\ui_widgets</Filter>
     </ClInclude>
@@ -385,6 +379,12 @@
     </ClInclude>
     <ClInclude Include="TemplateMC64x32Skin.h">
       <Filter>Pliki nagłówkowe\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="zip\miniz.h">
+      <Filter>Pliki nagłówkowe\external\zip</Filter>
+    </ClInclude>
+    <ClInclude Include="zip\zip.h">
+      <Filter>Pliki nagłówkowe\external\zip</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
