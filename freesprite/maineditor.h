@@ -91,15 +91,17 @@ public:
 	void zoom(int how_much);
 
 	void checkAndDiscardEndOfUndoStack();
+	void commitStateToLayer(Layer* l);
 	void commitStateToCurrentLayer();
 	void discardRedoStack();
 	void undo();
 	void redo();
 
-	void newLayer();
+	Layer* newLayer();
 	void deleteLayer(int index);
 	void moveLayerUp(int index);
 	void moveLayerDown(int index);
+	void mergeLayerDown(int index);
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}
@@ -108,5 +110,6 @@ public:
 	void layer_swapLayerRGBtoBGR();
 	uint32_t layer_getPixelAt(XY pos);
 	Layer* flattenImage();
+	Layer* mergeLayers(Layer* bottom, Layer* top);
 };
 

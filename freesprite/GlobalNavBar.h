@@ -59,7 +59,7 @@ public:
 			SDLK_e,
 			{
 				"Edit",
-				{SDLK_z, SDLK_r},
+				{SDLK_z, SDLK_r, SDLK_x, SDLK_y},
 				{
 					{SDLK_z, { "Undo",
 							[](MainEditor* editor) {
@@ -70,6 +70,18 @@ public:
 					{SDLK_r, { "Redo",
 							[](MainEditor* editor) {
 								editor->redo();
+							}
+						}
+					},
+					{SDLK_x, { "Toggle symmetry: X",
+							[](MainEditor* editor) {
+								editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
+							}
+						}
+					},
+					{SDLK_y, { "Toggle symmetry: Y",
+							[](MainEditor* editor) {
+								editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
 							}
 						}
 					},
@@ -170,7 +182,7 @@ public:
 			sectionButton->position = { x, 1 };
 			sectionButton->text = keyBinds[editorSection].name + std::format("({})", SDL_GetKeyName(editorSection));
 			sectionButton->colorBGFocused = sectionButton->colorBGUnfocused = SDL_Color{ 0,0,0,0 };
-			sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xa0 };
+			sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
 			sectionButton->wxWidth = xDist - 10;
 			sectionButton->setCallbackListener(editorSection, this);
 			wxs.addDrawable(sectionButton);

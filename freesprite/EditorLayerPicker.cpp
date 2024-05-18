@@ -66,6 +66,9 @@ void EditorLayerPicker::eventButtonPressed(int evt_id)
     else if (evt_id == -4) {
         caller->moveLayerDown(caller->selLayer);
     }
+    else if (evt_id == -5) {
+        caller->mergeLayerDown(caller->selLayer);
+    }
     updateLayers();
 }
 
@@ -105,6 +108,14 @@ void EditorLayerPicker::updateLayers()
     //upBtn->icon = g_iconLayerDelete;
     downBtn->setCallbackListener(-4, this);
     layerButtons.addDrawable(downBtn);
+    
+    UIButton* mergeDownBtn = new UIButton();
+    mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
+    mergeDownBtn->text = "Mrg";
+    mergeDownBtn->wxWidth = 30;
+    //upBtn->icon = g_iconLayerDelete;
+    mergeDownBtn->setCallbackListener(-5, this);
+    layerButtons.addDrawable(mergeDownBtn);
 
     int yposition = 80;
     for (int lid = caller->layers.size(); lid --> 0;) {

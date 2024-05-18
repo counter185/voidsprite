@@ -69,7 +69,8 @@ public:
 
 		eraserButton = new UIButton();
 		eraserButton->position = { 20, 340 };
-		eraserButton->text = "E";
+		//eraserButton->text = "E";
+		eraserButton->icon = g_iconEraser;
 		eraserButton->wxWidth = 30;
 		eraserButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEERASER, this);
 		subWidgets.addDrawable(eraserButton);

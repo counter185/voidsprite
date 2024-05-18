@@ -17,6 +17,7 @@ std::vector<std::string> g_cmdlineArgs;
 SDL_Texture* g_mainlogo = NULL;
 SDL_Texture* g_iconLayerAdd = NULL;
 SDL_Texture* g_iconLayerDelete = NULL;
+SDL_Texture* g_iconEraser = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 
@@ -93,6 +94,7 @@ int main(int argc, char** argv)
     g_mainlogo = IMGLoadToTexture("assets/mainlogo.png");
     g_iconLayerAdd = IMGLoadToTexture("assets/icon_layer_add.png");
     g_iconLayerDelete = IMGLoadToTexture("assets/icon_layer_delete.png");
+    g_iconEraser = IMGLoadToTexture("assets/icon_eraser.png");
 
     screenStack.push_back(new StartScreen());
 

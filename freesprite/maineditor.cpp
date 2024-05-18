@@ -493,15 +493,20 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 	}
 }
 
-void MainEditor::commitStateToCurrentLayer()
+void MainEditor::commitStateToLayer(Layer* l)
 {
 	discardRedoStack();
 
 	//printf("commit undo state\n");
-	getCurrentLayer()->commitStateToUndoStack();
-	undoStack.push_back(UndoStackElement{ getCurrentLayer(), UNDOSTACK_LAYER_DATA_MODIFIED });
+	l->commitStateToUndoStack();
+	undoStack.push_back(UndoStackElement{ l, UNDOSTACK_LAYER_DATA_MODIFIED });
 	checkAndDiscardEndOfUndoStack();
 	changesSinceLastSave = true;
+}
+
+void MainEditor::commitStateToCurrentLayer()
+{
+	commitStateToLayer(getCurrentLayer());
 }
 
 void MainEditor::discardRedoStack()
@@ -589,7 +594,7 @@ void MainEditor::redo()
 	}
 }
 
-void MainEditor::newLayer()
+Layer* MainEditor::newLayer()
 {
 	Layer* nl = new Layer(texW, texH);
 	nl->name = std::format("New Layer {}", layers.size()+1);
@@ -600,6 +605,7 @@ void MainEditor::newLayer()
 	discardRedoStack();
 	checkAndDiscardEndOfUndoStack();
 	changesSinceLastSave = true;
+	return nl;
 }
 
 void MainEditor::deleteLayer(int index) {
@@ -662,6 +668,22 @@ void MainEditor::moveLayerDown(int index) {
 	changesSinceLastSave = true;
 }
 
+void MainEditor::mergeLayerDown(int index)
+{
+	if (index == 0) {
+		return;
+	}
+	Layer* topLayer = layers[index];
+	Layer* bottomLayer = layers[index - 1];
+	deleteLayer(index);
+	commitStateToLayer(bottomLayer);
+	Layer* merged = mergeLayers(bottomLayer, topLayer);
+	memcpy(bottomLayer->pixelData, merged->pixelData, bottomLayer->w * bottomLayer->h * 4);
+	bottomLayer->layerDirty = true;
+	delete merged;
+	
+}
+
 void MainEditor::layer_flipHorizontally()
 {
 	commitStateToCurrentLayer();
@@ -710,5 +732,22 @@ Layer* MainEditor::flattenImage()
 			}
 		}
 	}
+	return ret;
+}
+
+Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
+{
+	Layer* ret = new Layer(bottom->w, bottom->h);
+
+	memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);
+
+	uint32_t* ppx = (uint32_t*)top->pixelData;
+	uint32_t* retppx = (uint32_t*)ret->pixelData;
+	for (uint64_t p = 0; p < ret->w * ret->h; p++) {
+		uint32_t pixel = ppx[p];
+		uint32_t srcPixel = retppx[p];
+		retppx[p] = alphaBlend(srcPixel, pixel);
+	}
+
 	return ret;
 }

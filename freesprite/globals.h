@@ -54,6 +54,7 @@ extern std::vector<std::string> g_cmdlineArgs;
 extern SDL_Texture* g_mainlogo;
 extern SDL_Texture* g_iconLayerAdd;
 extern SDL_Texture* g_iconLayerDelete;
+extern SDL_Texture* g_iconEraser;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();
