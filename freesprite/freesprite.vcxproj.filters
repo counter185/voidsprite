@@ -216,6 +216,9 @@
     <ClCompile Include="zip\zip.c">
       <Filter>Pliki źródłowe\external\zip</Filter>
     </ClCompile>
+    <ClCompile Include="BrushFill.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -385,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="zip\zip.h">
       <Filter>Pliki nagłówkowe\external\zip</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushFill.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

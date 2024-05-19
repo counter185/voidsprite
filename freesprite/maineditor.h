@@ -89,6 +89,7 @@ public:
 	void recenterCanvas();
 	bool requestSafeClose();
 	void zoom(int how_much);
+	bool isInBounds(XY pos);
 
 	void checkAndDiscardEndOfUndoStack();
 	void commitStateToLayer(Layer* l);

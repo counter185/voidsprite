@@ -8,6 +8,15 @@ bool pointInBox(XY point, SDL_Rect rect) {
         && normalP.y >= 0 && normalP.y < rect.h;
 }
 
+double xyDistance(XY p1, XY p2)
+{
+    double ret = sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+    return ret;
+}
+
+bool xyEqual(XY p1, XY p2) {
+    return p1.x == p2.x && p1.y == p2.y;
+}
 XY xyAdd(XY p1, XY p2)
 {
     return XY{p1.x+p2.x, p1.y+p2.y};
@@ -231,7 +240,7 @@ int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
 float fxmin(float a, float b) { return a > b ? b : a; }
 float fxmax(float a, float b) { return a > b ? a : b; }
 float fclamp(float vmin, float b, float vmax) { return fxmax(vmin, fxmin(b, vmax)); }
-double dxmin(double a, double b) { return a > b ? a : b; }
+double dxmin(double a, double b) { return a > b ? b : a; }
 double dxmax(double a, double b) { return a > b ? a : b; }
 
 uint32_t BEtoLE32(uint32_t a)

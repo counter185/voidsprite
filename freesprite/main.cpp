@@ -5,6 +5,7 @@
 #include "BaseScreen.h"
 #include "StartScreen.h"
 #include "BasePopup.h"
+#include "BrushFill.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -104,6 +105,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new Brush1pxLine());
     g_brushes.push_back(new BrushRect());
     g_brushes.push_back(new BrushRectFill());
+    g_brushes.push_back(new BrushFill());
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectClone());
     g_brushes.push_back(new ToolSetXSymmetry());

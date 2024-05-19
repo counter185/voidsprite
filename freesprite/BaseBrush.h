@@ -21,16 +21,21 @@ public:
 	virtual void clickRelease(MainEditor* editor, XY pos) {}
 	virtual void rightClickPress(MainEditor* editor, XY pos) {}
 	virtual void renderOnCanvas(XY canvasDrawPoint, int scale) {}
+	virtual void renderOnCanvas(MainEditor* editor, int scale);
 
 	void drawLocalPoint(XY canvasOrigin, XY point, int scale) {
 		SDL_Rect r = { canvasOrigin.x + point.x * scale, canvasOrigin.y + point.y * scale, scale, scale };
 		SDL_RenderFillRect(g_rd, &r);
 	}	
 	
+	void drawPointStrikethrough(XY canvasOrigin, XY point, int scale) {
+		SDL_Rect r = { canvasOrigin.x + point.x * scale, canvasOrigin.y + point.y * scale, scale, scale };
+		SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + scale-1, r.y + scale-1);
+	}
 	void drawPointOutline(XY canvasOrigin, XY point, int scale) {
 		SDL_Rect r = { canvasOrigin.x + point.x * scale, canvasOrigin.y + point.y * scale, scale, scale };
 		SDL_RenderDrawRect(g_rd, &r);
-		SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + scale-1, r.y + scale-1);
+		drawPointStrikethrough(canvasOrigin, point, scale);
 		//SDL_RenderDrawLine(g_rd, r.x, r.y+scale/2, r.x + scale/2-1, r.y + scale-1);
 		//SDL_RenderDrawLine(g_rd, r.x+scale/2, r.y, r.x + scale-1, r.y + scale/2-1);
 	}

@@ -99,7 +99,7 @@ void MainEditor::render() {
 	}
 	drawSymmetryLines();
 	if (currentBrush != NULL) {
-		currentBrush->renderOnCanvas(XY{ canvasRenderRect.x, canvasRenderRect.y }, scale);
+		currentBrush->renderOnCanvas(this, scale);
 	}
 
 	if (spritesheetPreview != NULL) {
@@ -269,6 +269,11 @@ void MainEditor::zoom(int how_much)
 	};
 	XY pointDiff = xySubtract(XY{ g_windowW / 2, g_windowH / 2 }, onscreenPointNow);
 	canvasCenterPoint = xyAdd(canvasCenterPoint, pointDiff);
+}
+
+bool MainEditor::isInBounds(XY pos)
+{
+	return pos.x >= 0 && pos.x < texW && pos.y >= 0 && pos.y < texH;
 }
 
 void MainEditor::takeInput(SDL_Event evt) {

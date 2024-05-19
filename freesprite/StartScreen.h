@@ -155,35 +155,42 @@ public:
 
 	std::string getName() override { return "voidsprite Launchpad"; }
 
-	void eventTextInput(int evt_id, std::string data) override {
-		switch (evt_id) {
-			case 2:
-				newImgW = std::stoi(data);
-				break;
-			case 3:
-				newImgH = std::stoi(data);
-				break;
-		}
-	}
+	void eventTextInput(int evt_id, std::string data) override {}
 	void eventButtonPressed(int evt_id) override {
 		if (evt_id == 4) {
 			switch (newImageTabs->openTab) {
 				case 0:
 					if (!tab0TextFieldW->text.empty() && !tab0TextFieldH->text.empty()) {
-						int newImgW = std::stoi(tab0TextFieldW->text);
-						int newImgH = std::stoi(tab0TextFieldH->text);
-						g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
+						try {
+							int newImgW = std::stoi(tab0TextFieldW->text);
+							int newImgH = std::stoi(tab0TextFieldH->text);
+							g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
+						}
+						catch (std::out_of_range) {
+							g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+						}
+					}
+					else {
+						g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
 					}
 					break;
 				case 1:
 					if (!tab1TextFieldCH->text.empty() && !tab1TextFieldCW->text.empty()
 						&& !tab1TextFieldCHX->text.empty() && !tab1TextFieldCWX->text.empty()) {
-						XY cellSize = XY{ std::stoi(tab1TextFieldCW->text) , std::stoi(tab1TextFieldCH->text) };
-						int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
-						int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
-						MainEditor* newMainEditor = new MainEditor(XY{ newImgW, newImgH });
-						newMainEditor->tileDimensions = cellSize;
-						g_addScreen(newMainEditor);
+						try {
+							XY cellSize = XY{ std::stoi(tab1TextFieldCW->text) , std::stoi(tab1TextFieldCH->text) };
+							int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
+							int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
+							MainEditor* newMainEditor = new MainEditor(XY{ newImgW, newImgH });
+							newMainEditor->tileDimensions = cellSize;
+							g_addScreen(newMainEditor);
+						}
+						catch (std::out_of_range) {
+							g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+						}
+					}
+					else {
+						g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
 					}
 					break;
 			}

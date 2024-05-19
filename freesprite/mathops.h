@@ -25,6 +25,8 @@ unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
 
 bool pointInBox(XY point, SDL_Rect rect);
 
+double xyDistance(XY p1, XY p2);
+bool xyEqual(XY p1, XY p2);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
 
