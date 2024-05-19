@@ -219,6 +219,9 @@
     <ClCompile Include="BrushFill.cpp">
       <Filter>Pliki źródłowe\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="TilemapPreviewScreen.cpp">
+      <Filter>Pliki źródłowe\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -391,6 +394,9 @@
     </ClInclude>
     <ClInclude Include="BrushFill.h">
       <Filter>Pliki nagłówkowe\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="TilemapPreviewScreen.h">
+      <Filter>Pliki nagłówkowe\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
