@@ -155,6 +155,7 @@
     <ClCompile Include="BasePopup.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
     <ClCompile Include="Brush1pxLine.cpp" />
+    <ClCompile Include="Brush1pxLinePathfind.cpp" />
     <ClCompile Include="Brush1x1.cpp" />
     <ClCompile Include="Brush3pxCircle.cpp" />
     <ClCompile Include="BrushFill.cpp" />
@@ -200,6 +201,7 @@
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
+    <ClCompile Include="UtilPathfind.cpp" />
     <ClCompile Include="zip\zip.c" />
   </ItemGroup>
   <ItemGroup>
@@ -207,6 +209,7 @@
     <ClInclude Include="BasePopup.h" />
     <ClInclude Include="BaseScreen.h" />
     <ClInclude Include="Brush1pxLine.h" />
+    <ClInclude Include="Brush1pxLinePathfind.h" />
     <ClInclude Include="Brush1x1.h" />
     <ClInclude Include="Brush3pxCircle.h" />
     <ClInclude Include="BrushFill.h" />
@@ -259,6 +262,7 @@
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
+    <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="zip\miniz.h" />
     <ClInclude Include="zip\zip.h" />
   </ItemGroup>

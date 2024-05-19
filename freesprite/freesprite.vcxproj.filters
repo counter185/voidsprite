@@ -222,6 +222,12 @@
     <ClCompile Include="TilemapPreviewScreen.cpp">
       <Filter>Pliki źródłowe\screen</Filter>
     </ClCompile>
+    <ClCompile Include="UtilPathfind.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush1pxLinePathfind.cpp">
+      <Filter>Pliki źródłowe\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -397,6 +403,12 @@
     </ClInclude>
     <ClInclude Include="TilemapPreviewScreen.h">
       <Filter>Pliki nagłówkowe\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilPathfind.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush1pxLinePathfind.h">
+      <Filter>Pliki nagłówkowe\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
