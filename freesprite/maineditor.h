@@ -43,6 +43,7 @@ public:
 
 	bool changesSinceLastSave = false;
 	PlatformNativePathString lastConfirmedSavePath;
+	int lastConfirmedExporterId;
 	bool lastConfirmedSave = false;
 
 	bool eraserMode = false;
@@ -71,7 +72,7 @@ public:
 
 	std::string getName() override { return "Editor"; }
 
-	void eventFileSaved(int evt_id, PlatformNativePathString name) override;
+	void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
 	void eventPopupClosed(int evt_id, BasePopup* p) override;
 	void eventTextInputConfirm(int evt_id, std::string text) override;
 	

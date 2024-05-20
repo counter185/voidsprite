@@ -362,21 +362,38 @@ void MainEditor::takeInput(SDL_Event evt) {
 	}
 }
 
-void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
+void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)
 {
 	if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
+		exporterID--;
 		printf("eventFileSaved: got file name %ls\n", name.c_str());
 
-		size_t extStart = name.find_last_of(L".");
-		std::wstring extension = name.substr(extStart);
 		bool result = false;
+		if (exporterID >= g_fileExportersMLNPaths.size()) {
+			FileExportFlatNPath f = g_fileExportersFlatNPaths[exporterID - g_fileExportersMLNPaths.size()];
+			Layer* flat = flattenImage();
+			result = f.exportFunction(name, flat);
+			delete flat;
+		}
+		else {
+			FileExportMultiLayerNPath f = g_fileExportersMLNPaths[exporterID];
+			result = f.exportFunction(name, this);
+		}
+
+		/*
+#if _WIN32
+		size_t extStart = name.find_last_of(L".");
+#else
+		size_t extStart = name.find_last_of(".");
+#endif
+		PlatformNativePathString extension = name.substr(extStart);
 		if (extension == L".voidsn" || extension == L".voidsnv1") {
 			result = writeVOIDSNv2(name, this);
 		} else if (extension == L".voidsnv1") {
 			result = writeVOIDSNv1(name, XY{ texW, texH }, layers);
 		}
 		else if (extension == L".ora") {
-			result = writeOpenRaster(name, layers);
+			result = writeOpenRaster(name, this);
 		}
 		else {
 			Layer* flat = flattenImage();
@@ -393,11 +410,12 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name)
 				result = writePNG(name, flat);
 			}
 			delete flat;
-		}
+		}*/
 		if (result) {
 			g_addPopup(new PopupMessageBox("Saved", "Save successful"));
 			lastConfirmedSave = true;
 			lastConfirmedSavePath = name;
+			lastConfirmedExporterId = exporterID;
 			changesSinceLastSave = false;
 		}
 		else {
@@ -464,7 +482,7 @@ void MainEditor::trySaveImage()
 		trySaveAsImage();
 	}
 	else {
-		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath);
+		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId);
 	}
 }
 

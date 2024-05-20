@@ -16,7 +16,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path);
 bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
-bool writeOpenRaster(PlatformNativePathString path, std::vector<Layer*> data);
+bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
@@ -38,6 +38,48 @@ struct FileImportUTF8Path {
 		[](std::string p) {
 			return true;
 		};
+};
+
+struct FileExportMultiLayerNPath {
+	std::string name;
+	std::string extension;
+	bool (*exportFunction)(PlatformNativePathString, MainEditor*);
+	bool (*canExport)(Layer*) =
+		[](Layer* p) {
+		return true;
+		};
+};
+struct FileExportFlatNPath {
+	std::string name;
+	std::string extension;
+	bool (*exportFunction)(PlatformNativePathString, Layer*);
+	bool (*canExport)(Layer*) =
+		[](Layer* p) {
+		return true;
+		};
+};
+
+inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
+	{
+		"PNG (libpng)", ".png", &writePNG
+	},
+	{
+		"RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &writeXYZ
+	},
+	{
+		"BMP (EasyBMP)", ".bmp", &writeBMP
+	},
+	{
+		"CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM
+	}
+};
+inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
+	{
+		"voidsprite Session", ".voidsn", &writeVOIDSNv2
+	},
+	{
+		"OpenRaster", ".ora", &writeOpenRaster
+	}
 };
 
 inline std::vector<FileImportNPath> g_fileImportersNPaths = {

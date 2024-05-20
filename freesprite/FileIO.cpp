@@ -164,7 +164,8 @@ Layer* readTGA(std::string path, uint64_t seek) {
 Layer* readBMP(PlatformNativePathString path, uint64_t seek)
 {
     BMP nbmp;
-    nbmp.ReadFromFileW(path);
+    FILE* bmpf = platformOpenFile(path, PlatformFileModeRB);
+    nbmp._ReadFromFile(bmpf);
     int w = nbmp.TellWidth();
     int h = nbmp.TellHeight();
     Layer* nlayer = new Layer(w, h);
@@ -796,8 +797,9 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
     return false;
 }
 
-bool writeOpenRaster(PlatformNativePathString path, std::vector<Layer*> data)
+bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 {
+    std::vector<Layer*> data = editor->layers;
     char* zipBuffer;
     size_t zipBufferSize;
 
@@ -826,7 +828,11 @@ bool writeOpenRaster(PlatformNativePathString path, std::vector<Layer*> data)
 
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
+#if _WIN32
             if (writePNG(L"temp.bin", *l)) {
+#else
+            if (writePNG("temp.bin", *l)) {
+#endif
                 std::string fname = std::format("data/layer{}.png", i++);
                 zip_entry_open(zip, fname.c_str());
                 zip_entry_fwrite(zip, "temp.bin");

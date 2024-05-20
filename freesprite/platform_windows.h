@@ -45,7 +45,22 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
     ofna.hwndOwner = WINhWnd;
-    ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0OpenRaster Files (.ora)\0*.ora\0voidsprite Session Files v2 (.voidsn)\0*.voidsn\0BMP Files (.bmp)\0*.bmp\0CaveStory PBM Files (.pbm)\0*.pbm\0RPG2000/2003 XYZ Files (.xyz)\0*.xyz\0All files\0*.*\0\0";
+    std::wstring filterString = L"";
+    for (FileExportMultiLayerNPath f : g_fileExportersMLNPaths) {
+        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
+        filterString.push_back('\0');
+        filterString += L"*" + utf8StringToWstring(f.extension);
+        filterString.push_back('\0');
+    }
+    for (FileExportFlatNPath f : g_fileExportersFlatNPaths) {
+        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
+        filterString.push_back('\0');
+        filterString += L"*" + utf8StringToWstring(f.extension);
+        filterString.push_back('\0');
+    }
+    filterString.push_back('\0');
+    //ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0OpenRaster Files (.ora)\0*.ora\0voidsprite Session Files v2 (.voidsn)\0*.voidsn\0BMP Files (.bmp)\0*.bmp\0CaveStory PBM Files (.pbm)\0*.pbm\0RPG2000/2003 XYZ Files (.xyz)\0*.xyz\0All files\0*.*\0\0";
+    ofna.lpstrFilter = filterString.c_str();
     ofna.lpstrCustomFilter = NULL;
     ofna.nFilterIndex = 1;
     ofna.lpstrFile = fileNameBuffer;
@@ -56,7 +71,7 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.lpstrTitle = L"voidsprite: Save Image";
     ofna.lpstrDefExt = L"png";
     if (GetSaveFileNameW(&ofna)) {
-        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, std::wstring(fileNameBuffer));
+        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, std::wstring(fileNameBuffer), ofna.nFilterIndex);
     }
     else {
         printf("windows error: %i\n", GetLastError());

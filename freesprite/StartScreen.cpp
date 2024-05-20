@@ -66,7 +66,7 @@ void StartScreen::tryLoadFile(std::string path)
 #if _WIN32
 	fPath = utf8StringToWstring(path);
 #else
-	fPath = filePath;
+	fPath = path;
 #endif
 
 	if (stringEndsWith(path, ".voidsn") || stringEndsWith(path, ".voidsnv1")) {

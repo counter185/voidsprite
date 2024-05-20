@@ -19,7 +19,7 @@ public:
 	virtual void eventTextInput(int evt_id, std::string data) {}
 	virtual void eventTextInputConfirm(int evt_id, std::string data) {}
 	virtual void eventButtonPressed(int evt_id) {}
-	virtual void eventFileSaved(int evt_id, PlatformNativePathString name) {}
+	virtual void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) {}
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
 };

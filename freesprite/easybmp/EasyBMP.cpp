@@ -668,9 +668,11 @@ bool BMP::WriteToFileP( FILE* fp, bool closeOnSuccess )
  return true;
 }
 
+#if _WIN32
 bool BMP::ReadFromFileW(std::wstring FileName) {
     return _ReadFromFile(_wfopen(FileName.c_str(), L"rb"));
 }
+#endif
 
 bool BMP::ReadFromFileA(std::string FileName) {
     return _ReadFromFile(fopen(FileName.c_str(), "rb"));

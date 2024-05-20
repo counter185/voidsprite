@@ -40,6 +40,13 @@ std::wstring utf8StringToWstring(std::string a)
     }
     return ret;
 }
+PlatformNativePathString convertStringOnWin32(std::string a) {
+#if _WIN32
+    return utf8StringToWstring(a);
+#else
+    return a;
+#endif
+}
 
 bool stringEndsWith(std::string c, std::string endsWith)
 {
