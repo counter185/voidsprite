@@ -95,6 +95,44 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel)
     }
     
 }
+void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel) {
+    XY dimensions = xySubtract(posMax, posMin);
+    int b = dimensions.y / 2;
+    int a = dimensions.x / 2;
+    XY lastP1, lastP2;
+    if (a == 0) {
+        return;
+    }
+    //printf("%i\n", a);
+    //printf("a = %i  b = %i\n", a, b);
+    for (int x = 0; x <= a; x++) {
+        int xx = x - a;
+        int yysq = (b * b) - (b * b * xx * xx) / (a * a);
+        int yy = (int)sqrt(yysq);
+        int y1 = yy + b;
+        int y2 = -yy + b;
+        //printf("x %i => y %i (^2 = %i)\n", xx, yy, yysq); 
+        XY p1 = { x, y1 };
+        XY p2 = { x, y2 };
+        if (x > 0) {
+            //printf("Line from (%i,%i) => (%i,%i)\n", lastP1.x, lastP1.y, p1.x, p1.y);
+            rasterizeLine(lastP1, p1, [&](XY a) {
+                forEachPixel(xyAdd(a, posMin));
+                forEachPixel(XY{ posMax.x - a.x, posMin.y + a.y });
+                });
+            rasterizeLine(lastP2, p2, [&](XY a) {
+                forEachPixel(xyAdd(a, posMin));
+                forEachPixel(XY{ posMax.x - a.x, posMin.y + a.y });
+                });
+        }
+        lastP1 = p1;
+        lastP2 = p2;
+        //editor->SetPixel(xyAdd(p1, posMin), editor->pickedColor);
+        //editor->SetPixel(xyAdd(p2, posMin), editor->pickedColor);
+        //editor->getCurrentLayer()->setPixel(xyAdd(XY{x,y1}, posMin), editor->pickedColor);
+        //editor->getCurrentLayer()->setPixel(xyAdd(XY{x,y2}, posMin), editor->pickedColor);
+    }
+}
 
 hsv rgb2hsv(rgb in)
 {
