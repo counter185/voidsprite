@@ -52,7 +52,8 @@ public:
 							}
 						}
 					},
-				}
+				},
+				g_iconNavbarTabFile
 			}
 		},
 		{
@@ -184,6 +185,9 @@ public:
 			sectionButton->colorBGFocused = sectionButton->colorBGUnfocused = SDL_Color{ 0,0,0,0 };
 			sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
 			sectionButton->wxWidth = xDist - 10;
+			if (keyBinds[editorSection].icon != NULL) {
+				sectionButton->icon = keyBinds[editorSection].icon;
+			}
 			sectionButton->setCallbackListener(editorSection, this);
 			wxs.addDrawable(sectionButton);
 			x += xDist;

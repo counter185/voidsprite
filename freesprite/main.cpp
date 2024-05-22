@@ -26,6 +26,7 @@ SDL_Texture* g_iconLayerDownMerge = NULL;
 SDL_Texture* g_iconEraser = NULL;
 SDL_Texture* g_iconColorHSV = NULL;
 SDL_Texture* g_iconColorVisual = NULL;
+SDL_Texture* g_iconNavbarTabFile = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 
@@ -109,6 +110,7 @@ int main(int argc, char** argv)
     g_iconEraser = IMGLoadToTexture("assets/icon_eraser.png");
     g_iconColorHSV = IMGLoadToTexture("assets/icon_color_hsv.png");
     g_iconColorVisual = IMGLoadToTexture("assets/icon_color_visual.png");
+    g_iconNavbarTabFile = IMGLoadToTexture("assets/tab_file.png");
 
     screenStack.push_back(new StartScreen());
 

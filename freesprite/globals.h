@@ -61,6 +61,7 @@ extern SDL_Texture* g_iconLayerDownMerge;
 extern SDL_Texture* g_iconEraser;
 extern SDL_Texture* g_iconColorHSV;
 extern SDL_Texture* g_iconColorVisual;
+extern SDL_Texture* g_iconNavbarTabFile;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();
@@ -83,6 +84,7 @@ struct NavbarSection {
 	std::string name;
 	std::vector<SDL_Keycode> order;
 	std::map<SDL_Keycode, NamedEditorOperation> actions;
+	SDL_Texture* icon = NULL;
 };
 
 #define UNDOSTACK_LAYER_DATA_MODIFIED 0

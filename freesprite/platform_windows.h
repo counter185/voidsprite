@@ -67,7 +67,7 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.nMaxFile = MAX_PATH;
     ofna.lpstrFileTitle = NULL;
     ofna.lpstrInitialDir = NULL;
-    ofna.Flags = OFN_EXPLORER;
+    ofna.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT;
     ofna.lpstrTitle = L"voidsprite: Save Image";
     ofna.lpstrDefExt = L"png";
     if (GetSaveFileNameW(&ofna)) {
