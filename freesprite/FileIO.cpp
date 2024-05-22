@@ -949,3 +949,34 @@ bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
     }
     return false;
 }
+
+bool writeCHeader(PlatformNativePathString path, Layer* data)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+
+        fprintf(outfile, "#pragma once\n");
+        fprintf(outfile, "#include <stdint.h>\n");
+        fprintf(outfile, "#include <stdlib.h>\n");
+        fprintf(outfile, "//#include <SDL.h>\n");
+
+        fprintf(outfile, "struct voidsprite_output_image {\n");
+        fprintf(outfile, "    uint8_t imageData[] = {\n");
+        uint32_t* pxd = (uint32_t*)data->pixelData;
+        uint64_t dp = 0;
+        for (int y = 0; y < data->h; y++) {
+            for (int x = 0; x < data->w; x++) {
+                fprintf(outfile, "0x%08X,", pxd[dp++]);
+            }
+            fprintf(outfile, "\n");
+        }
+        fprintf(outfile, "    };\n");
+        fprintf(outfile, "    int w = %i;\n", data->w);
+        fprintf(outfile, "    int h = %i;\n", data->h);
+        fprintf(outfile, "};\n");
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}

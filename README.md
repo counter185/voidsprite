@@ -26,6 +26,7 @@ Free C++ sprite editor
 - RPGMaker 2000/2003 XYZ
 - BMP
 - Cave Story engine PBM
+- C header (as `uint8_t` array)
 
 ## Building
 

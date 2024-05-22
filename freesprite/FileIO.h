@@ -20,6 +20,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
+bool writeCHeader(PlatformNativePathString path, Layer* data);
 
 struct FileImportNPath {
 	std::string name;
@@ -71,6 +72,9 @@ inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
 	},
 	{
 		"CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM
+	},
+	{
+		"C Header (voidsprite custom)", ".h", &writeCHeader
 	}
 };
 inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
