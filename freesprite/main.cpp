@@ -90,6 +90,7 @@ int main(int argc, char** argv)
         g_cmdlineArgs.push_back(std::string(argv[arg]));
     }
 
+    srand(time(NULL));
 
     platformPreInit();
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);

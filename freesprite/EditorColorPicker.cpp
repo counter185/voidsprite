@@ -67,7 +67,10 @@ void EditorColorPicker::eventTextInput(int evt_id, std::string data)
 void EditorColorPicker::eventTextInputConfirm(int evt_id, std::string data)
 {
     if (evt_id == EVENT_COLORPICKER_TEXTFIELD) {
-        if (g_colors.contains(data)) {
+        if (data == "rand" || data == "random") {
+            setMainEditorColorRGB((0xFF<<24) + ((rand() % 256) << 16) + ((rand() % 256) << 8) + (rand() % 256));
+        }
+        else if (g_colors.contains(data)) {
             setMainEditorColorRGB(g_colors[data]);
         }
     }
