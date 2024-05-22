@@ -412,14 +412,14 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 			delete flat;
 		}*/
 		if (result) {
-			g_addPopup(new PopupMessageBox("Saved", "Save successful"));
+			g_addPopup(new PopupMessageBox("File saved", "Save successful!"));
 			lastConfirmedSave = true;
 			lastConfirmedSavePath = name;
 			lastConfirmedExporterId = exporterID;
 			changesSinceLastSave = false;
 		}
 		else {
-			g_addPopup(new PopupMessageBox("Save", "Save failed"));
+			g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
 		}
 		
 	}
