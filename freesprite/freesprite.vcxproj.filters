@@ -1,430 +1,430 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Pliki źródłowe">
+    <Filter Include="Source files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Pliki nagłówkowe">
+    <Filter Include="Header files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Pliki zasobów">
+    <Filter Include="Resource files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\brushes">
+    <Filter Include="Header files\brushes">
       <UniqueIdentifier>{a353a57e-2acc-47b3-bb06-f77e67cee149}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\brushes">
+    <Filter Include="Source files\brushes">
       <UniqueIdentifier>{0e62046e-5b57-4859-bf80-7c3090abe9e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\popup">
+    <Filter Include="Header files\popup">
       <UniqueIdentifier>{4de1fdf9-44f3-49f3-8112-39b6ce2460d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\popup">
+    <Filter Include="Source files\popup">
       <UniqueIdentifier>{ff4f4cf5-5d84-462f-8678-473afbe41528}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\external">
+    <Filter Include="Header files\external">
       <UniqueIdentifier>{81e8270e-1bb6-412d-806b-77e2e141642d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\external\libtga">
+    <Filter Include="Header files\external\libtga">
       <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\external">
+    <Filter Include="Source files\external">
       <UniqueIdentifier>{a32cb1a6-5407-47ab-92fe-6e5bd7c5879b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\external\libtga">
+    <Filter Include="Source files\external\libtga">
       <UniqueIdentifier>{b2b7876e-add1-40fe-a925-456b7b03a6ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\ui_widgets">
+    <Filter Include="Header files\ui_widgets">
       <UniqueIdentifier>{f690dacb-3219-4eca-9b18-d1d94a7e302c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\ui_widgets">
+    <Filter Include="Source files\ui_widgets">
       <UniqueIdentifier>{e62c2e0a-b6a8-4498-bade-9fb2bd8955a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\screen">
+    <Filter Include="Header files\screen">
       <UniqueIdentifier>{e201f46f-e0ea-479c-86b6-e5a02322eec1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\screen">
+    <Filter Include="Source files\screen">
       <UniqueIdentifier>{b42970c2-7d17-43ca-9583-d087ee0c3c22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\templates">
+    <Filter Include="Header files\templates">
       <UniqueIdentifier>{a9bd79ad-10d4-46ca-8497-7aebd9add055}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\templates">
+    <Filter Include="Source files\templates">
       <UniqueIdentifier>{61618ffa-829c-42b3-90c1-027a310b7063}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\external\easybmp">
+    <Filter Include="Header files\external\easybmp">
       <UniqueIdentifier>{7dd202aa-e86a-4bec-b121-5c24da536967}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\external\easybmp">
+    <Filter Include="Source files\external\easybmp">
       <UniqueIdentifier>{f354d5c4-bf0c-44ca-b52b-db514ccfb8c7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\external\ddspp">
+    <Filter Include="Header files\external\ddspp">
       <UniqueIdentifier>{4b6da3e0-e184-40b0-abaa-0b4cded17aaf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\external\zip">
+    <Filter Include="Header files\external\zip">
       <UniqueIdentifier>{c989d900-cced-4222-ae46-6493433bb6fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki źródłowe\external\zip">
+    <Filter Include="Source files\external\zip">
       <UniqueIdentifier>{c2afb396-8f85-4d44-bcd4-4c678580e351}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="FontRenderer.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="mathops.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="platform.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="Layer.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="FileIO.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="libtga\tga.c">
-      <Filter>Pliki źródłowe\external\libtga</Filter>
+      <Filter>Source files\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="libtga\tgaread.c">
-      <Filter>Pliki źródłowe\external\libtga</Filter>
+      <Filter>Source files\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="libtga\tgawrite.c">
-      <Filter>Pliki źródłowe\external\libtga</Filter>
+      <Filter>Source files\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="BaseBrush.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="Brush1pxLine.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="Brush1x1.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="Brush3pxCircle.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="BrushRect.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="BrushRectFill.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="ToolColorPicker.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="BasePopup.cpp">
-      <Filter>Pliki źródłowe\popup</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="EditorBrushPicker.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="EditorColorPicker.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UIButton.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UIColorSlider.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UISlider.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UISVPicker.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UITextField.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="GlobalNavBar.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="DrawableManager.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="drawable.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="BaseScreen.cpp">
-      <Filter>Pliki źródłowe\screen</Filter>
+      <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="StartScreen.cpp">
-      <Filter>Pliki źródłowe\screen</Filter>
+      <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="maineditor.cpp">
-      <Filter>Pliki źródłowe\screen</Filter>
+      <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="PopupMessageBox.cpp">
-      <Filter>Pliki źródłowe\popup</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="TabbedView.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="PopupSetEditorPixelGrid.cpp">
-      <Filter>Pliki źródłowe\popup</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="UILabel.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="ToolRectClone.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="PopupYesNo.cpp">
-      <Filter>Pliki źródłowe\popup</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="BaseTemplate.cpp">
-      <Filter>Pliki źródłowe\templates</Filter>
+      <Filter>Source files\templates</Filter>
     </ClCompile>
     <ClCompile Include="TemplateRPG2KCharset.cpp">
-      <Filter>Pliki źródłowe\templates</Filter>
+      <Filter>Source files\templates</Filter>
     </ClCompile>
     <ClCompile Include="easybmp\EasyBMP.cpp">
-      <Filter>Pliki źródłowe\external\easybmp</Filter>
+      <Filter>Source files\external\easybmp</Filter>
     </ClCompile>
     <ClCompile Include="EditorLayerPicker.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UILayerButton.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="SpritesheetPreviewScreen.cpp">
-      <Filter>Pliki źródłowe\screen</Filter>
+      <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="EditorSpritesheetPreview.cpp">
-      <Filter>Pliki źródłowe\ui_widgets</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="PopupTextBox.cpp">
-      <Filter>Pliki źródłowe\popup</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="ToolSetXSymmetry.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="ToolSetYSymmetry.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="TemplateMC64x32Skin.cpp">
-      <Filter>Pliki źródłowe\templates</Filter>
+      <Filter>Source files\templates</Filter>
     </ClCompile>
     <ClCompile Include="zip\zip.c">
-      <Filter>Pliki źródłowe\external\zip</Filter>
+      <Filter>Source files\external\zip</Filter>
     </ClCompile>
     <ClCompile Include="BrushFill.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="TilemapPreviewScreen.cpp">
-      <Filter>Pliki źródłowe\screen</Filter>
+      <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="UtilPathfind.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="Brush1pxLinePathfind.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="BrushCircle.cpp">
-      <Filter>Pliki źródłowe\brushes</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="FontRenderer.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="mathops.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="EventCallbackListener.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="platform_windows.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="Layer.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="FileIO.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="libtga\tga.h">
-      <Filter>Pliki nagłówkowe\external\libtga</Filter>
+      <Filter>Header files\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="libtga\tga_private.h">
-      <Filter>Pliki nagłówkowe\external\libtga</Filter>
+      <Filter>Header files\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="BaseBrush.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush1pxLine.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush1x1.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush3pxCircle.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushRect.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushRectFill.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ToolColorPicker.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BasePopup.h">
-      <Filter>Pliki nagłówkowe\popup</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="EditorBrushPicker.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="EditorColorPicker.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="GlobalNavBar.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UIButton.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UIColorSlider.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UISlider.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UISVPicker.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UITextField.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="DrawableManager.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="drawable.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="StartScreen.h">
-      <Filter>Pliki nagłówkowe\screen</Filter>
+      <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="maineditor.h">
-      <Filter>Pliki nagłówkowe\screen</Filter>
+      <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="BaseScreen.h">
-      <Filter>Pliki nagłówkowe\screen</Filter>
+      <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="PopupMessageBox.h">
-      <Filter>Pliki nagłówkowe\popup</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="TabbedView.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="colors.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="PopupSetEditorPixelGrid.h">
-      <Filter>Pliki nagłówkowe\popup</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="UILabel.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectClone.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="PopupYesNo.h">
-      <Filter>Pliki nagłówkowe\popup</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="BaseTemplate.h">
-      <Filter>Pliki nagłówkowe\templates</Filter>
+      <Filter>Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KCharset.h">
-      <Filter>Pliki nagłówkowe\templates</Filter>
+      <Filter>Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP.h">
-      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+      <Filter>Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_BMP.h">
-      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+      <Filter>Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_DataStructures.h">
-      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+      <Filter>Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h">
-      <Filter>Pliki nagłówkowe\external\easybmp</Filter>
+      <Filter>Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="EditorLayerPicker.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UILayerButton.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ddspp\ddspp.h">
-      <Filter>Pliki nagłówkowe\external\ddspp</Filter>
+      <Filter>Header files\external\ddspp</Filter>
     </ClInclude>
     <ClInclude Include="SpritesheetPreviewScreen.h">
-      <Filter>Pliki nagłówkowe\screen</Filter>
+      <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="EditorSpritesheetPreview.h">
-      <Filter>Pliki nagłówkowe\ui_widgets</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupTextBox.h">
-      <Filter>Pliki nagłówkowe\popup</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="ToolSetXSymmetry.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ToolSetYSymmetry.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="TemplateMC64x32Skin.h">
-      <Filter>Pliki nagłówkowe\templates</Filter>
+      <Filter>Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="zip\miniz.h">
-      <Filter>Pliki nagłówkowe\external\zip</Filter>
+      <Filter>Header files\external\zip</Filter>
     </ClInclude>
     <ClInclude Include="zip\zip.h">
-      <Filter>Pliki nagłówkowe\external\zip</Filter>
+      <Filter>Header files\external\zip</Filter>
     </ClInclude>
     <ClInclude Include="BrushFill.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="TilemapPreviewScreen.h">
-      <Filter>Pliki nagłówkowe\screen</Filter>
+      <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="UtilPathfind.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="Brush1pxLinePathfind.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushCircle.h">
-      <Filter>Pliki nagłówkowe\brushes</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
-      <Filter>Pliki zasobów</Filter>
+      <Filter>Resource files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico">
-      <Filter>Pliki zasobów</Filter>
+      <Filter>Resource files</Filter>
     </Image>
   </ItemGroup>
 </Project>
