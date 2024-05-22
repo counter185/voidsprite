@@ -95,25 +95,25 @@ void EditorLayerPicker::updateLayers()
     
     UIButton* upBtn = new UIButton();
     upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
-    upBtn->text = "Up";
+    //upBtn->text = "Up";
     upBtn->wxWidth = 30;
-    //upBtn->icon = g_iconLayerDelete;
+    upBtn->icon = g_iconLayerUp;
     upBtn->setCallbackListener(-3, this);
     layerButtons.addDrawable(upBtn);    
     
     UIButton* downBtn = new UIButton();
     downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
-    downBtn->text = "Dn.";
+    //downBtn->text = "Dn.";
     downBtn->wxWidth = 30;
-    //upBtn->icon = g_iconLayerDelete;
+    downBtn->icon = g_iconLayerDown;
     downBtn->setCallbackListener(-4, this);
     layerButtons.addDrawable(downBtn);
     
     UIButton* mergeDownBtn = new UIButton();
     mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
-    mergeDownBtn->text = "Mrg";
+    //mergeDownBtn->text = "Mrg";
     mergeDownBtn->wxWidth = 30;
-    //upBtn->icon = g_iconLayerDelete;
+    mergeDownBtn->icon = g_iconLayerDownMerge;
     mergeDownBtn->setCallbackListener(-5, this);
     layerButtons.addDrawable(mergeDownBtn);
 

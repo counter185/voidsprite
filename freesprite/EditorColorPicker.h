@@ -31,7 +31,7 @@ public:
 
 	EditorColorPicker(MainEditor* c) {
 		caller = c;
-		tbv = new TabbedView({{"Visual"}, {"HSV"}, {"RGB"}});
+		tbv = new TabbedView({{"Visual", g_iconColorVisual}, {"HSV", g_iconColorHSV}, {"RGB"}}, 90);
 		tbv->position = XY{ 20,30 };
 		subWidgets.addDrawable(tbv);
 

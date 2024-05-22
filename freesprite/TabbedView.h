@@ -7,6 +7,7 @@
 
 struct Tab {
     std::string name;
+    SDL_Texture* icon = NULL;
     DrawableManager wxs;
 };
 
@@ -29,6 +30,7 @@ public:
             nbutton->wxHeight = buttonsHeight;
             nbutton->position = XY{ buttonX, 0 };
             nbutton->text = tabN[x].name;
+            nbutton->icon = tabN[x].icon;
             buttonX += nbutton->wxWidth;
             nbutton->setCallbackListener(x, this);
             tabButtons.addDrawable(nbutton);
