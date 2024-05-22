@@ -27,6 +27,9 @@ SDL_Texture* g_iconEraser = NULL;
 SDL_Texture* g_iconColorHSV = NULL;
 SDL_Texture* g_iconColorVisual = NULL;
 SDL_Texture* g_iconNavbarTabFile = NULL;
+SDL_Texture* g_iconNavbarTabEdit = NULL;
+SDL_Texture* g_iconNavbarTabLayer = NULL;
+SDL_Texture* g_iconNavbarTabView = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 
@@ -73,6 +76,7 @@ void g_closeScreen(BaseScreen* screen) {
 }
 
 //do not use
+//what will happen if i do?
 void g_closeLastScreen() {
     delete screenStack[screenStack.size() - 1];
     screenStack.pop_back();
@@ -111,6 +115,9 @@ int main(int argc, char** argv)
     g_iconColorHSV = IMGLoadToTexture("assets/icon_color_hsv.png");
     g_iconColorVisual = IMGLoadToTexture("assets/icon_color_visual.png");
     g_iconNavbarTabFile = IMGLoadToTexture("assets/tab_file.png");
+    g_iconNavbarTabEdit = IMGLoadToTexture("assets/tab_edit.png");
+    g_iconNavbarTabLayer = IMGLoadToTexture("assets/tab_layer.png");
+    g_iconNavbarTabView = IMGLoadToTexture("assets/tab_view.png");
 
     screenStack.push_back(new StartScreen());
 

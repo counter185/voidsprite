@@ -86,7 +86,8 @@ public:
 							}
 						}
 					},
-				}
+				},
+				g_iconNavbarTabEdit
 			}
 		},
 		{
@@ -129,7 +130,8 @@ public:
 							}
 						}
 					},
-				}
+				},
+				g_iconNavbarTabLayer
 			}
 		},
 		{
@@ -168,7 +170,8 @@ public:
 							}
 						}
 					},
-				}
+				},
+				g_iconNavbarTabView
 			}
 		}
 	};

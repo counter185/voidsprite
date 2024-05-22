@@ -62,6 +62,9 @@ extern SDL_Texture* g_iconEraser;
 extern SDL_Texture* g_iconColorHSV;
 extern SDL_Texture* g_iconColorVisual;
 extern SDL_Texture* g_iconNavbarTabFile;
+extern SDL_Texture* g_iconNavbarTabEdit;
+extern SDL_Texture* g_iconNavbarTabLayer;
+extern SDL_Texture* g_iconNavbarTabView;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();
