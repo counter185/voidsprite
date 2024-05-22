@@ -7,6 +7,7 @@
 #include "BasePopup.h"
 #include "BrushFill.h"
 #include "Brush1pxLinePathfind.h"
+#include "BrushCircle.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -107,6 +108,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new Brush1pxLinePathfind());
     g_brushes.push_back(new BrushRect());
     g_brushes.push_back(new BrushRectFill());
+    g_brushes.push_back(new BrushCircle());
     g_brushes.push_back(new BrushFill());
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectClone());
