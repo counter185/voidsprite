@@ -248,7 +248,7 @@ bool MainEditor::requestSafeClose() {
 		return true;
 	}
 	else {
-		PopupYesNo* newPopup = new PopupYesNo("Confirm close", "You have unsaved changes");
+		PopupYesNo* newPopup = new PopupYesNo("Close the project?", "You have unsaved changes! ");
 		newPopup->setCallbackListener(EVENT_MAINEDITOR_CONFIRM_CLOSE, this);
 		g_addPopup(newPopup);
 	}
