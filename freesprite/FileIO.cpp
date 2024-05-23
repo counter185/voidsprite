@@ -345,6 +345,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         int seekBy =
             imageFormat == IMAGE_FORMAT_BGR888 ? w * h * 3
             : imageFormat == IMAGE_FORMAT_BGRA8888 ? w * h * 4
+            : imageFormat == IMAGE_FORMAT_RGBA8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_ARGB8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
             : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
@@ -362,6 +363,19 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
             uint32_t* pxp = (uint32_t*)ret->pixelData;
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 fread(pxp + dataP, 4, 1, infile);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_RGBA8888:
+        ret = new Layer(width, height);
+        ret->name = "VTF RGBA Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                uint8_t ch[4];
+                fread(ch, 4, 1, infile);
+
+                pxp[dataP] = PackRGBAtoARGB(ch[0], ch[1], ch[2], ch[3]);
             }
         }
         break;
@@ -972,6 +986,49 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
         fclose(infile);
     }
     return ret;
+}
+
+Layer* readGCI(PlatformNativePathString path, uint64_t seek)
+{
+    enum GCIBIFlags {
+        GCI_BANNER_NONE = 0b00,
+        GCI_BANNER_CI8 = 0b01,
+        GCI_BANNER_RGBA5A3 = 0b10,
+        GCI_BANNER_11 = 0b11
+    };
+    enum GCIIconFormat {
+        GCI_ICON_NONE = 0b00,
+        GCI_ICON_CI8_SHARED = 0b01,
+        GCI_ICON_RGB5A3 = 0b10,
+        GCI_ICON_CI8_UNIQUE = 0b11
+    };
+
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        uint8_t biFlags;
+        short iconFmt;
+        int imageOffset;
+        fseek(infile, 0x7, SEEK_SET);
+        fread(&biFlags, 1, 1, infile);
+
+        fseek(infile, 0x2c, SEEK_SET);
+        fread(&imageOffset, 4, 1, infile);
+
+        fseek(infile, 0x30, SEEK_SET);
+        fread(&iconFmt, 2, 1, infile);
+
+        if (biFlags == GCI_BANNER_CI8) {
+
+        }
+        else if (biFlags == GCI_BANNER_RGBA5A3) {
+        }
+        else {
+            // ...
+        }
+
+        fclose(infile);
+    }
+    return NULL;
 }
 
 MainEditor* readVOIDSN(PlatformNativePathString path)

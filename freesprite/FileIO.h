@@ -18,6 +18,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 bool writePNG(PlatformNativePathString path, Layer* data);

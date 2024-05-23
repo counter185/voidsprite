@@ -119,8 +119,6 @@ int main(int argc, char** argv)
     g_iconNavbarTabLayer = IMGLoadToTexture("assets/tab_layer.png");
     g_iconNavbarTabView = IMGLoadToTexture("assets/tab_view.png");
 
-    screenStack.push_back(new StartScreen());
-
     //load brushes
     g_brushes.push_back(new Brush1x1());
     g_brushes.push_back(new Brush3pxCircle());
@@ -142,6 +140,9 @@ int main(int argc, char** argv)
 
     TTF_Init();
     g_fnt = new TextRenderer();
+
+    screenStack.push_back(new StartScreen());
+
 
     platformPostInit();
 
