@@ -52,19 +52,19 @@ extern std::vector<BaseBrush*> g_brushes;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
-extern SDL_Texture* g_mainlogo;
-extern SDL_Texture* g_iconLayerAdd;
-extern SDL_Texture* g_iconLayerDelete;
-extern SDL_Texture* g_iconLayerUp;
-extern SDL_Texture* g_iconLayerDown;
-extern SDL_Texture* g_iconLayerDownMerge;
-extern SDL_Texture* g_iconEraser;
-extern SDL_Texture* g_iconColorHSV;
-extern SDL_Texture* g_iconColorVisual;
-extern SDL_Texture* g_iconNavbarTabFile;
-extern SDL_Texture* g_iconNavbarTabEdit;
-extern SDL_Texture* g_iconNavbarTabLayer;
-extern SDL_Texture* g_iconNavbarTabView;
+extern SDL_Texture* g_mainlogo,
+   *g_iconLayerAdd,
+   *g_iconLayerDelete,
+   *g_iconLayerUp,
+   *g_iconLayerDown,
+   *g_iconLayerDownMerge,
+   *g_iconEraser,
+   *g_iconColorHSV,
+   *g_iconColorVisual,
+   *g_iconNavbarTabFile,
+   *g_iconNavbarTabEdit,
+   *g_iconNavbarTabLayer,
+   *g_iconNavbarTabView;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();

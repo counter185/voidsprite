@@ -6,6 +6,398 @@
 #include "easybmp/EasyBMP.h"
 #include "zip/zip.h"
 
+enum VTFFORMAT
+{
+    IMAGE_FORMAT_NONE = -1,
+    IMAGE_FORMAT_RGBA8888 = 0,
+    IMAGE_FORMAT_ABGR8888 = 1,
+    IMAGE_FORMAT_RGB888 = 2,
+    IMAGE_FORMAT_BGR888 = 3,
+    IMAGE_FORMAT_RGB565 = 4,
+    IMAGE_FORMAT_I8 = 5,
+    IMAGE_FORMAT_IA88 = 6,
+    IMAGE_FORMAT_P8 = 7,
+    IMAGE_FORMAT_A8 = 8,
+    IMAGE_FORMAT_RGB888_BLUESCREEN = 9,
+    IMAGE_FORMAT_BGR888_BLUESCREEN = 10,
+    IMAGE_FORMAT_ARGB8888 = 11,
+    IMAGE_FORMAT_BGRA8888 = 12,
+    IMAGE_FORMAT_DXT1 = 13,
+    IMAGE_FORMAT_DXT3 = 14,
+    IMAGE_FORMAT_DXT5 = 15,
+    IMAGE_FORMAT_BGRX8888,
+    IMAGE_FORMAT_BGR565,
+    IMAGE_FORMAT_BGRX5551,
+    IMAGE_FORMAT_BGRA4444,
+    IMAGE_FORMAT_DXT1_ONEBITALPHA,
+    IMAGE_FORMAT_BGRA5551,
+    IMAGE_FORMAT_UV88,
+    IMAGE_FORMAT_UVWQ8888,
+    IMAGE_FORMAT_RGBA16161616F,
+    IMAGE_FORMAT_RGBA16161616,
+    IMAGE_FORMAT_UVLX8888
+};
+
+void DeXT1(Layer* ret, int width, int height, FILE* infile)
+{
+    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    for (int y = 0; y < height; y += 4) {
+        for (int x = 0; x < width; x += 4) {
+            // Extract color endpoints
+            uint16_t color0;
+            uint16_t color1;
+            fread(&color0, 2, 1, infile);
+            fread(&color1, 2, 1, infile);
+
+
+            //https://github.com/Benjamin-Dobell/s3tc-dxt-decompression/blob/master/s3tc.cpp
+
+            unsigned long temp = (color0 >> 11) * 255 + 16;
+            unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
+            temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
+            unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
+            temp = (color0 & 0x001F) * 255 + 16;
+            unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
+
+            temp = (color1 >> 11) * 255 + 16;
+            unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
+            temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
+            unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
+            temp = (color1 & 0x001F) * 255 + 16;
+            unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
+
+            uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
+
+            uint32_t code;
+            fread(&code, 4, 1, infile);
+
+            // Fill ARGB array
+            for (int dy = 0; dy < 4; ++dy) {
+                for (int dx = 0; dx < 4; ++dx) {
+                    unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
+                    uint32_t color = 0;
+                    if (color0 > color1)
+                    {
+                        switch (positionCode)
+                        {
+                        case 0:
+                            color = PackRGBAtoARGB(r0, g0, b0, 255);
+                            break;
+                        case 1:
+                            color = PackRGBAtoARGB(r1, g1, b1, 255);
+                            break;
+                        case 2:
+                            color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, 255);
+                            break;
+                        case 3:
+                            color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, 255);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        switch (positionCode)
+                        {
+                        case 0:
+                            color = PackRGBAtoARGB(r0, g0, b0, 255);
+                            break;
+                        case 1:
+                            color = PackRGBAtoARGB(r1, g1, b1, 255);
+                            break;
+                        case 2:
+                            color = PackRGBAtoARGB((r0 + r1) / 2, (g0 + g1) / 2, (b0 + b1) / 2, 255);
+                            break;
+                        case 3:
+                            color = PackRGBAtoARGB(0, 0, 0, 0);
+                            break;
+                        }
+                    }
+
+                    ret->setPixel(XY{ x + dx, y + dy }, color);
+                    //pxd[(y + dy) * desc.width + (x + dx)] = color;
+                }
+            }
+        }
+    }
+}
+void DeXT23(Layer* ret, int width, int height, FILE* infile) {
+    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    for (int y = 0; y < height; y += 4) {
+        for (int x = 0; x < width; x += 4) {
+            // Extract color endpoints
+
+            //this may be wrong lmao
+            uint8_t alphaData[16];
+            uint16_t alphaPtr = 0;
+            for (int z = 0; z < 4; z++) {
+                uint16_t alphaByte;
+                fread(&alphaByte, 2, 1, infile);
+                for (int q = 0; q < 4; q++) {
+                    //*0x11
+                    alphaData[alphaPtr++] = (alphaByte & 0b1111) * 0x11;
+                    alphaByte >>= 4;
+                }
+                //alphaPtr += 4;
+            }
+            alphaPtr = 0;
+            //fread(alphaData, 2, 4, infile);
+
+            uint16_t color0;
+            uint16_t color1;
+            fread(&color0, 2, 1, infile);
+            fread(&color1, 2, 1, infile);
+
+
+            //https://github.com/Benjamin-Dobell/s3tc-dxt-decompression/blob/master/s3tc.cpp
+
+            unsigned long temp = (color0 >> 11) * 255 + 16;
+            unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
+            temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
+            unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
+            temp = (color0 & 0x001F) * 255 + 16;
+            unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
+
+            temp = (color1 >> 11) * 255 + 16;
+            unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
+            temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
+            unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
+            temp = (color1 & 0x001F) * 255 + 16;
+            unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
+
+            uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
+
+            // Decode 4-bit indices
+            uint32_t code;
+            fread(&code, 4, 1, infile);
+            //Read4BitIndices(compressedData, indices);
+
+
+
+            // Fill ARGB array
+            for (int dy = 0; dy < 4; ++dy) {
+                for (int dx = 0; dx < 4; ++dx) {
+                    unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
+                    uint32_t color = 0;
+                    if (color0 > color1)
+                    {
+                        switch (positionCode)
+                        {
+                        case 0: //0b00
+                            color = PackRGBAtoARGB(r0, g0, b0, alphaData[alphaPtr++]);
+                            break;
+                        case 1: //0b01
+                            color = PackRGBAtoARGB(r1, g1, b1, alphaData[alphaPtr++]);
+                            break;
+                        case 2: //0b10
+                            color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, alphaData[alphaPtr++]);
+                            break;
+                        case 3: //0b11
+                            color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, alphaData[alphaPtr++]);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        switch (positionCode)
+                        {
+                        case 0:
+                            color = PackRGBAtoARGB(r0, g0, b0, alphaData[alphaPtr++]);
+                            break;
+                        case 1:
+                            color = PackRGBAtoARGB(r1, g1, b1, alphaData[alphaPtr++]);
+                            break;
+                        case 2:
+                            color = PackRGBAtoARGB((r0 + r1) / 2, (g0 + g1) / 2, (b0 + b1) / 2, alphaData[alphaPtr++]);
+                            break;
+                        case 3:
+                            color = PackRGBAtoARGB(0, 0, 0, alphaData[alphaPtr++]);
+                            break;
+                        }
+                    }
+
+                    ret->setPixel(XY{ x + dx, y + dy }, color);
+                    //pxd[(y + dy) * desc.width + (x + dx)] = color;
+                }
+            }
+        }
+    }
+}
+void DeXT45(Layer* ret, int width, int height, FILE* infile) {
+    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    for (int y = 0; y < height; y += 4) {
+        for (int x = 0; x < width; x += 4) {
+            //gonna be real i have no idea what's going on here
+            unsigned char alpha0;
+            unsigned char alpha1;
+            fread(&alpha0, 1, 1, infile);
+            fread(&alpha1, 1, 1, infile);
+
+            unsigned char bits[6];
+            fread(bits, 1, 6, infile);
+            unsigned long alphaCode1 = bits[2] | (bits[3] << 8) | (bits[4] << 16) | (bits[5] << 24);
+            unsigned short alphaCode2 = bits[0] | (bits[1] << 8);
+
+            unsigned short color0;
+            unsigned short color1;
+            fread(&color0, 2, 1, infile);
+            fread(&color1, 2, 1, infile);
+
+            unsigned long temp;
+
+            temp = (color0 >> 11) * 255 + 16;
+            unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
+            temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
+            unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
+            temp = (color0 & 0x001F) * 255 + 16;
+            unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
+
+            temp = (color1 >> 11) * 255 + 16;
+            unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
+            temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
+            unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
+            temp = (color1 & 0x001F) * 255 + 16;
+            unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
+
+            unsigned long code;
+            fread(&code, 4, 1, infile);
+
+            for (int j = 0; j < 4; j++)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    int alphaCodeIndex = 3 * (4 * j + i);
+                    int alphaCode;
+
+                    if (alphaCodeIndex <= 12)
+                    {
+                        alphaCode = (alphaCode2 >> alphaCodeIndex) & 0x07;
+                    }
+                    else if (alphaCodeIndex == 15)
+                    {
+                        alphaCode = (alphaCode2 >> 15) | ((alphaCode1 << 1) & 0x06);
+                    }
+                    else // alphaCodeIndex >= 18 && alphaCodeIndex <= 45
+                    {
+                        alphaCode = (alphaCode1 >> (alphaCodeIndex - 16)) & 0x07;
+                    }
+
+                    unsigned char finalAlpha;
+                    if (alphaCode == 0)
+                    {
+                        finalAlpha = alpha0;
+                    }
+                    else if (alphaCode == 1)
+                    {
+                        finalAlpha = alpha1;
+                    }
+                    else
+                    {
+                        if (alpha0 > alpha1)
+                        {
+                            finalAlpha = ((8 - alphaCode) * alpha0 + (alphaCode - 1) * alpha1) / 7;
+                        }
+                        else
+                        {
+                            if (alphaCode == 6)
+                                finalAlpha = 0;
+                            else if (alphaCode == 7)
+                                finalAlpha = 255;
+                            else
+                                finalAlpha = ((6 - alphaCode) * alpha0 + (alphaCode - 1) * alpha1) / 5;
+                        }
+                    }
+
+                    unsigned char colorCode = (code >> 2 * (4 * j + i)) & 0x03;
+
+                    uint32_t color;
+                    switch (colorCode)
+                    {
+                    case 0:
+                        color = PackRGBAtoARGB(r0, g0, b0, finalAlpha);
+                        break;
+                    case 1:
+                        color = PackRGBAtoARGB(r1, g1, b1, finalAlpha);
+                        break;
+                    case 2:
+                        color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, finalAlpha);
+                        break;
+                    case 3:
+                        color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, finalAlpha);
+                        break;
+                    }
+
+                    if (x + i < width)
+                        ret->setPixel(XY{x+i, y+j}, color);
+                }
+            }
+        }
+    }
+}
+
+Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat)
+{
+    Layer* ret = NULL;
+    int w = width ;
+    int h = height ;
+    for (int skipMMap = 0; skipMMap < mipmapCount-1; skipMMap++) {
+        w = ixmax(1, w / 2);
+        h = ixmax(1, h / 2);
+        int seekBy =
+            imageFormat == IMAGE_FORMAT_BGR888 ? w * h * 3
+            : imageFormat == IMAGE_FORMAT_BGRA8888 ? w * h * 4
+            : imageFormat == IMAGE_FORMAT_ARGB8888 ? w * h * 4
+            : imageFormat == IMAGE_FORMAT_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
+            : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+            : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+            : 0;
+        fseek(infile, seekBy * frames, SEEK_CUR);
+    }
+    //fseek(infile, 16, SEEK_CUR);
+
+    switch (imageFormat) {
+    case IMAGE_FORMAT_BGRA8888:
+        ret = new Layer(width, height);
+        ret->name = "VTF BGRA Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                fread(pxp + dataP, 4, 1, infile);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_BGR888:
+        ret = new Layer(width, height);
+        ret->name = "VTF BGR Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                fread(pxp + dataP, 3, 1, infile);
+                pxp[dataP] |= 0xFF000000;
+            }
+        }
+        break;
+    case IMAGE_FORMAT_DXT1:
+        ret = new Layer(width, height);
+        ret->name = "VTF DXT1 Layer";
+        DeXT1(ret, width, height, infile);
+        break;
+    case IMAGE_FORMAT_DXT3:
+        ret = new Layer(width, height);
+        ret->name = "VTF DXT3 Layer";
+        DeXT23(ret, width, height, infile);
+        break;
+    case IMAGE_FORMAT_DXT5:
+        ret = new Layer(width, height);
+        ret->name = "VTF DXT5 Layer";
+        DeXT45(ret, width, height, infile);
+        break;
+    default:
+        printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+        break;
+    }
+    return ret;
+}
+
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
@@ -412,196 +804,23 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
             {
                 ret = new Layer(desc.width, desc.height);
                 ret->name = "DDS DXT1 Layer";
-                uint32_t* pxd = (uint32_t*)ret->pixelData;
-                for (int y = 0; y < desc.height; y += 4) {
-                    for (int x = 0; x < desc.width; x += 4) {
-                        // Extract color endpoints
-                        uint16_t color0;
-                        uint16_t color1;
-                        fread(&color0, 2, 1, infile);
-                        fread(&color1, 2, 1, infile);
-
-
-                        //https://github.com/Benjamin-Dobell/s3tc-dxt-decompression/blob/master/s3tc.cpp
-
-                        unsigned long temp = (color0 >> 11) * 255 + 16;
-                        unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
-                        temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
-                        unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
-                        temp = (color0 & 0x001F) * 255 + 16;
-                        unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
-
-                        temp = (color1 >> 11) * 255 + 16;
-                        unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
-                        temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
-                        unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
-                        temp = (color1 & 0x001F) * 255 + 16;
-                        unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
-
-                        uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
-
-                        // Decode 4-bit indices
-                        uint32_t code;
-                        fread(&code, 4, 1, infile);
-                        //Read4BitIndices(compressedData, indices);
-
-
-
-                        // Fill ARGB array
-                        for (int dy = 0; dy < 4; ++dy) {
-                            for (int dx = 0; dx < 4; ++dx) {
-                                unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
-                                uint32_t color = 0;
-                                if (color0 > color1)
-                                {
-                                    switch (positionCode)
-                                    {
-                                    case 0:
-                                        color = PackRGBAtoARGB(r0, g0, b0, 255);
-                                        break;
-                                    case 1:
-                                        color = PackRGBAtoARGB(r1, g1, b1, 255);
-                                        break;
-                                    case 2:
-                                        color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, 255);
-                                        break;
-                                    case 3:
-                                        color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, 255);
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    switch (positionCode)
-                                    {
-                                    case 0:
-                                        color = PackRGBAtoARGB(r0, g0, b0, 255);
-                                        break;
-                                    case 1:
-                                        color = PackRGBAtoARGB(r1, g1, b1, 255);
-                                        break;
-                                    case 2:
-                                        color = PackRGBAtoARGB((r0 + r1) / 2, (g0 + g1) / 2, (b0 + b1) / 2, 255);
-                                        break;
-                                    case 3:
-                                        color = PackRGBAtoARGB(0, 0, 0, 0);
-                                        break;
-                                    }
-                                }
-
-                                ret->setPixel(XY{ x+dx, y + dy }, color);
-                                //pxd[(y + dy) * desc.width + (x + dx)] = color;
-                            }
-                        }
-                    }
-                }
+                DeXT1(ret, desc.width, desc.height, infile);
             }
                 break;
             case ddspp::BC2_UNORM:
             {
                 //todo holy fucking shit please clean this up
                 ret = new Layer(desc.width, desc.height);
-                ret->name = "DDS DXT2 Layer";
-                uint32_t* pxd = (uint32_t*)ret->pixelData;
-                for (int y = 0; y < desc.height; y += 4) {
-                    for (int x = 0; x < desc.width; x += 4) {
-                        // Extract color endpoints
-
-                        //this may be wrong lmao
-                        uint8_t alphaData[16];
-                        uint16_t alphaPtr = 0;
-                        for (int z = 0; z < 4; z++) {
-                            uint16_t alphaByte;
-                            fread(&alphaByte, 2, 1, infile);
-                            for (int q = 0; q < 4; q++) {
-                                //*0x11
-                                alphaData[alphaPtr++] = (alphaByte & 0b1111) * 0x11;
-                                alphaByte >>= 4;
-                            }
-                            //alphaPtr += 4;
-                        }
-                        alphaPtr = 0;
-                        //fread(alphaData, 2, 4, infile);
-
-                        uint16_t color0;
-                        uint16_t color1;
-                        fread(&color0, 2, 1, infile);
-                        fread(&color1, 2, 1, infile);
-
-
-                        //https://github.com/Benjamin-Dobell/s3tc-dxt-decompression/blob/master/s3tc.cpp
-
-                        unsigned long temp = (color0 >> 11) * 255 + 16;
-                        unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
-                        temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
-                        unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
-                        temp = (color0 & 0x001F) * 255 + 16;
-                        unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
-
-                        temp = (color1 >> 11) * 255 + 16;
-                        unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
-                        temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
-                        unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
-                        temp = (color1 & 0x001F) * 255 + 16;
-                        unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
-
-                        uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
-
-                        // Decode 4-bit indices
-                        uint32_t code;
-                        fread(&code, 4, 1, infile);
-                        //Read4BitIndices(compressedData, indices);
-
-
-
-                        // Fill ARGB array
-                        for (int dy = 0; dy < 4; ++dy) {
-                            for (int dx = 0; dx < 4; ++dx) {
-                                unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
-                                uint32_t color = 0;
-                                if (color0 > color1)
-                                {
-                                    switch (positionCode)
-                                    {
-                                    case 0: //0b00
-                                        color = PackRGBAtoARGB(r0, g0, b0, alphaData[alphaPtr++]);
-                                        break;
-                                    case 1: //0b01
-                                        color = PackRGBAtoARGB(r1, g1, b1, alphaData[alphaPtr++]);
-                                        break;
-                                    case 2: //0b10
-                                        color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, alphaData[alphaPtr++]);
-                                        break;
-                                    case 3: //0b11
-                                        color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, alphaData[alphaPtr++]);
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    switch (positionCode)
-                                    {
-                                    case 0:
-                                        color = PackRGBAtoARGB(r0, g0, b0, alphaData[alphaPtr++]);
-                                        break;
-                                    case 1:
-                                        color = PackRGBAtoARGB(r1, g1, b1, alphaData[alphaPtr++]);
-                                        break;
-                                    case 2:
-                                        color = PackRGBAtoARGB((r0 + r1) / 2, (g0 + g1) / 2, (b0 + b1) / 2, alphaData[alphaPtr++]);
-                                        break;
-                                    case 3:
-                                        color = PackRGBAtoARGB(0, 0, 0, alphaData[alphaPtr++]);
-                                        break;
-                                    }
-                                }
-
-                                ret->setPixel(XY{ x+dx, y + dy }, color);
-                                //pxd[(y + dy) * desc.width + (x + dx)] = color;
-                            }
-                        }
-                    }
-                }
+                ret->name = "DDS DXT2/3 Layer";
+                DeXT23(ret, desc.width, desc.width, infile);
+            }
+                break;
+            case ddspp::BC3_UNORM:
+            {
+                //todo holy fucking shit please clean this up
+                ret = new Layer(desc.width, desc.height);
+                ret->name = "DDS DXT4/5 Layer";
+                DeXT45(ret, desc.width, desc.width, infile);
             }
                 break;
             case ddspp::B8G8R8A8_UNORM:
@@ -625,6 +844,133 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
         fclose(infile);
     }
 
+    return ret;
+}
+
+Layer* readVTF(PlatformNativePathString path, uint64_t seek)
+{
+    Layer* ret = NULL;
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        struct VTFHEADER
+        {
+            char            signature[4];       // File signature ("VTF\0"). (or as little-endian integer, 0x00465456)
+            unsigned int    version[2];         // version[0].version[1] (currently 7.2).
+            unsigned int    headerSize;         // Size of the header struct  (16 byte aligned; currently 80 bytes) + size of the resources dictionary (7.3+).
+            unsigned short  width;              // Width of the largest mipmap in pixels. Must be a power of 2.
+            unsigned short  height;             // Height of the largest mipmap in pixels. Must be a power of 2.
+            unsigned int    flags;              // VTF flags.
+            unsigned short  frames;             // Number of frames, if animated (1 for no animation).
+            unsigned short  firstFrame;         // First frame in animation (0 based). Can be -1 in environment maps older than 7.5, meaning there are 7 faces, not 6.
+            unsigned char   padding0[4];        // reflectivity padding (16 byte alignment).
+            float           reflectivity[3];    // reflectivity vector.
+            unsigned char   padding1[4];        // reflectivity padding (8 byte packing).
+            float           bumpmapScale;       // Bumpmap scale.
+            int             highResImageFormat; // High resolution image format.
+            unsigned char   mipmapCount;        // Number of mipmaps.
+            int             lowResImageFormat;  // Low resolution image format (Usually DXT1).
+            unsigned char   lowResImageWidth;   // Low resolution image width.
+            unsigned char   lowResImageHeight;  // Low resolution image height.
+
+            // 7.2+
+            unsigned short  depth;              // Depth of the largest mipmap in pixels. Must be a power of 2. Is 1 for a 2D texture.
+
+            // 7.3+
+            unsigned char   padding2[3];        // depth padding (4 byte alignment).
+            unsigned int    numResources;       // Number of resources this vtf has. The max appears to be 32.
+
+            unsigned char   padding3[8];        // Necessary on certain compilers
+        };
+        struct VTF_RESOURCE_ENTRY
+        {
+            unsigned char	tag[3]; 		// A three-byte "tag" that identifies what this resource is.
+            unsigned char	flags;			// Resource entry flags. The only known flag is 0x2, which indicates that no data chunk corresponds to this resource.
+            unsigned int	offset;			// The offset of this resource's data in the file. 
+        };
+        VTFHEADER hdr;
+        fread(hdr.signature, 1, 4, infile);
+        fread(hdr.version, 4, 2, infile);
+        fread(&hdr.headerSize, 4, 1, infile);
+        int sizeofVTFHeader = sizeof(VTFHEADER);
+        int hdrSize = ixmin(hdr.headerSize - 4 - 8 - 4, sizeof(VTFHEADER) - 4 - 8 - 4);
+        fread(&hdr.width, 2, 1, infile);
+        fread(&hdr.height, 2, 1, infile);
+        fread(&hdr.flags, 4, 1, infile);
+        fread(&hdr.frames, 2, 1, infile);
+        fread(&hdr.firstFrame, 2, 1, infile);
+        fread(hdr.padding0, 4, 1, infile);
+        fread(hdr.reflectivity, 4, 3, infile);
+        fread(hdr.padding1, 4, 1, infile);
+        fread(&hdr.bumpmapScale, 4, 1, infile);
+        fread(&hdr.highResImageFormat, 4, 1, infile);
+        fread(&hdr.mipmapCount, 1, 1, infile);
+        fread(&hdr.lowResImageFormat, 4, 1, infile);
+        fread(&hdr.lowResImageWidth, 1, 1, infile);
+        fread(&hdr.lowResImageHeight, 1, 1, infile);
+
+        printf("[VTF] VERSION: %i.%i\n", hdr.version[0], hdr.version[1]);
+        printf("[VTF] LowRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.lowResImageFormat, hdr.lowResImageWidth, hdr.lowResImageHeight);
+        printf("[VTF] HiRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.highResImageFormat, hdr.width, hdr.height);
+        printf("[VTF] Mipmaps: %i\n", hdr.mipmapCount);
+
+        if (hdr.version[1] >= 2) {
+            fread(&hdr.depth, 2, 1, infile);
+        }
+        if (hdr.version[1] >= 3) {
+            fread(hdr.padding2, 1, 3, infile);
+            fread(&hdr.numResources, 4, 1, infile);
+            fread(hdr.padding3, 1, 8, infile);
+            std::vector<VTF_RESOURCE_ENTRY> resources;
+            for (int x = 0; x < hdr.numResources; x++) {
+                VTF_RESOURCE_ENTRY vtfRes;
+                fread(&vtfRes, sizeof(VTF_RESOURCE_ENTRY), 1, infile);
+                printf("[VTF] Found resource: %i %i %i  offset: %x\n", vtfRes.tag[0], vtfRes.tag[1], vtfRes.tag[2], vtfRes.offset);
+                resources.push_back(vtfRes);
+            }
+            printf("[VTF] numResources = %i\n", resources.size());
+
+            for (VTF_RESOURCE_ENTRY& res : resources) {
+                if (res.tag[0] == 0x01 && res.tag[1] == 0x00 && res.tag[2] == 0x00) {
+                    //01 00 00 : lowres image data
+                    /*
+                    fseek(infile, res.offset, SEEK_SET);
+                    switch (hdr.lowResImageFormat) {
+                    case IMAGE_FORMAT_DXT1:
+                        ret = new Layer(hdr.lowResImageWidth, hdr.lowResImageHeight);
+                        DeXT1(ret, hdr.lowResImageWidth, hdr.lowResImageHeight, infile);
+                        break;
+                    default:
+                        printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+                        break;
+                    }*/
+                }
+                else if (res.tag[0] == 0x30 && res.tag[1] == 0x00 && res.tag[2] == 0x00) {
+                    fseek(infile, res.offset, SEEK_SET);
+
+                    ret = _VTFseekToLargestMipmapAndRead(infile, hdr.width, hdr.height, hdr.mipmapCount, hdr.frames, hdr.highResImageFormat);
+                }
+            }
+        }
+        else {
+            //read low res image data by uncommenting below
+            /*switch (hdr.lowResImageFormat) {
+            case IMAGE_FORMAT_DXT1:
+                ret = new Layer(hdr.lowResImageWidth, hdr.lowResImageHeight);
+                DeXT1(ret, hdr.lowResImageWidth, hdr.lowResImageHeight, infile);
+                break;
+            default:
+                printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+                break;
+            }*/
+            fseek(infile, hdr.headerSize, SEEK_SET);
+            fseek(infile, (hdr.lowResImageWidth / 4) * (hdr.lowResImageHeight / 4) * 8, SEEK_CUR);
+
+            ret = _VTFseekToLargestMipmapAndRead(infile, hdr.width, hdr.height, hdr.mipmapCount, hdr.frames, hdr.highResImageFormat);
+        }
+        //unfortunately freading straight into the struct makes it cut off at lowResImageFormat
+
+        fclose(infile);
+    }
     return ret;
 }
 

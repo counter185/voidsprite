@@ -2,6 +2,12 @@
 #include "globals.h"
 #include "Layer.h"
 
+void DeXT1(Layer* ret, int width, int height, FILE* infile);
+void DeXT23(Layer* ret, int width, int height, FILE* infile);
+void DeXT45(Layer* ret, int width, int height, FILE* infile);
+
+Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
+
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(std::string path, uint64_t seek = 0);
@@ -11,6 +17,7 @@ Layer* readSDLImage(std::string path, uint64_t seek = 0);
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 bool writePNG(PlatformNativePathString path, Layer* data);
@@ -118,6 +125,9 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	},
 	{
 		"DDS (ddspp+s3tc open source+voidsprite custom)", ".dds", &readDDS
+	},
+	{
+		"VTF (voidsprite custom)", ".vtf", &readVTF
 	}
 };
 

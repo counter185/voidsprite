@@ -13,8 +13,9 @@ Free C++ sprite editor
 - RPGMaker 2000/2003 XYZ
 - Atrophy Engine AETEX (tga/dds)
 - Wii TPL*
-- DDS* (DXT1,DXT2/3)
+- DDS* (DXT1, DXT2/3, DXT4/5)
 - Cave Story engine PBM
+- VTF* (BGRA, BGR, DXT1, DXT2/3, DXT4/5)
 - NES (dumps CHR-ROM)
 - all other formats supported by SDL2_Image
 
