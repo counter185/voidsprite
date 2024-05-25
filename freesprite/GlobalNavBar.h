@@ -9,6 +9,7 @@
 #include "PopupSetEditorPixelGrid.h"
 #include "EventCallbackListener.h"
 #include "SpritesheetPreviewScreen.h"
+#include "TilemapPreviewScreen.h"
 
 class GlobalNavBar : public Drawable, public EventCallbackListener
 {
@@ -166,6 +167,16 @@ public:
 									SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
 									g_addScreen(newScreen);
 									editor->spritesheetPreview = newScreen;
+								}
+							}
+						}
+					},
+					{SDLK_t, { "Open tileset preview...",
+							[](MainEditor* editor) {
+								if (editor->spritesheetPreview == NULL) {
+									TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
+									g_addScreen(newScreen);
+									//editor->spritesheetPreview = newScreen;
 								}
 							}
 						}
