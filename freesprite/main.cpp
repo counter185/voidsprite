@@ -18,6 +18,8 @@ TextRenderer* g_fnt;
 std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
 
+Timer64 screenSwitchTimer;
+
 SDL_Texture* g_mainlogo = NULL;
 SDL_Texture* g_iconLayerAdd = NULL;
 SDL_Texture* g_iconLayerDelete = NULL;
@@ -58,6 +60,7 @@ std::vector<BaseScreen*> screenStack;
 void g_addScreen(BaseScreen* a) {
     screenStack.push_back(a);
     currentScreen = screenStack.size()-1;
+    screenSwitchTimer.start();
 }
 void g_closeScreen(BaseScreen* screen) {
     for (int x = 0; x < screenStack.size(); x++) {
@@ -70,6 +73,7 @@ void g_closeScreen(BaseScreen* screen) {
             screenStack.erase(screenStack.begin() + x);
             if (currentScreen >= screenStack.size()) {
                 currentScreen = screenStack.size() - 1;
+                screenSwitchTimer.start();
             }
             x--;
         }
@@ -158,16 +162,19 @@ int main(int argc, char** argv)
                     if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             currentScreen--;
+                            screenSwitchTimer.start();
                         }
                     }
                     else if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             currentScreen++;
+                            screenSwitchTimer.start();
                         }
                     }
                     else if (evt.key.keysym.sym == SDLK_F11) {
                         fullscreen = !fullscreen;
                         SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+                        screenSwitchTimer.start();
                     }
                     break;
                 case SDL_KEYUP:
@@ -212,6 +219,22 @@ int main(int argc, char** argv)
 
         for (BasePopup*& popup : popupStack) {
             popup->render();
+        }
+
+        if (screenSwitchTimer.started) {
+            double animTimer = XM1PW3P1(screenSwitchTimer.percentElapsedTime(800));
+            if (animTimer < 1) {
+                double reverseAnimTimer = 1.0 - animTimer;
+                XY windowOffset = { g_windowW / 16 , g_windowH / 16 };
+                SDL_Rect rect = {
+                    windowOffset.x * reverseAnimTimer,
+                    windowOffset.y * reverseAnimTimer,
+                    g_windowW - 2 * windowOffset.x * reverseAnimTimer,
+                    g_windowH - 2 * windowOffset.y * reverseAnimTimer,
+                };
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0 * reverseAnimTimer);
+                SDL_RenderDrawRect(g_rd, &rect);
+            }
         }
 
         /*if (!popupStack.empty()) {
