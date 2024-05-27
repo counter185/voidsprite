@@ -193,6 +193,7 @@
     <ClCompile Include="TemplateMC64x32Skin.cpp" />
     <ClCompile Include="TemplateRPG2KCharset.cpp" />
     <ClCompile Include="TilemapPreviewScreen.cpp" />
+    <ClCompile Include="Timer64.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
     <ClCompile Include="ToolRectClone.cpp" />
     <ClCompile Include="ToolSetXSymmetry.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="TemplateMC64x32Skin.h" />
     <ClInclude Include="TemplateRPG2KCharset.h" />
     <ClInclude Include="TilemapPreviewScreen.h" />
+    <ClInclude Include="Timer64.h" />
     <ClInclude Include="ToolColorPicker.h" />
     <ClInclude Include="ToolRectClone.h" />
     <ClInclude Include="ToolSetXSymmetry.h" />

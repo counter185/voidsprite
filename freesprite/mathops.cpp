@@ -134,6 +134,24 @@ void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel
     }
 }
 
+void drawLine(XY p1, XY p2, double percent)
+{
+    if (percent != 1.0f && percent >= 0.0 && percent < 1.0) {
+        p2.x = p1.x + (p2.x - p1.x) * percent;
+        p2.y = p1.y + (p2.y - p1.y) * percent;
+    }
+
+    SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
+}
+
+/// <summary>
+/// (x-1)^3 + 1
+/// </summary>
+double XM1PW3P1(double x)
+{
+    return (x - 1) * (x - 1) * (x - 1) + 1;
+}
+
 hsv rgb2hsv(rgb in)
 {
     hsv         out;

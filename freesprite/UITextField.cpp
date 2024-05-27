@@ -6,8 +6,17 @@ void UITextField::render(XY pos)
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
 	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, focused ? 0xff : 0x80);
 	SDL_RenderFillRect(g_rd, &drawrect);
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, focused ? 0x80 : 0x30);
+	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
 	SDL_RenderDrawRect(g_rd, &drawrect);
+
+	if (focused) {
+		double lineAnimPercent = XM1PW3P1(focusTimer.percentElapsedTime(500));
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
+		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
+		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
+		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
+	}
 	
 	g_fnt->RenderString(text + (focused ? "_" : ""), pos.x + 2, pos.y + 2, SDL_Color{0xff,0xff,0xff,(unsigned char)(focused ? 0xff : 0xa0)});
 }

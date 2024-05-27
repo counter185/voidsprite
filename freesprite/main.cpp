@@ -16,6 +16,7 @@ SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
 std::vector<std::string> g_cmdlineArgs;
+bool fullscreen = false;
 
 SDL_Texture* g_mainlogo = NULL;
 SDL_Texture* g_iconLayerAdd = NULL;
@@ -163,6 +164,10 @@ int main(int argc, char** argv)
                         if (currentScreen < screenStack.size() - 1) {
                             currentScreen++;
                         }
+                    }
+                    else if (evt.key.keysym.sym == SDLK_F11) {
+                        fullscreen = !fullscreen;
+                        SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
                     }
                     break;
                 case SDL_KEYUP:

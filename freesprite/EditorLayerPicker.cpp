@@ -6,6 +6,56 @@
 #include "UILayerButton.h"
 #include "maineditor.h"
 
+EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
+    caller = editor;
+
+    UIButton* addBtn = new UIButton();
+    addBtn->position = { 5, 30 };
+    //addBtn->text = "+";
+    addBtn->wxWidth = 30;
+    addBtn->setCallbackListener(-1, this);
+    addBtn->icon = g_iconLayerAdd;
+    layerControlButtons.addDrawable(addBtn);
+
+    UIButton* removeBtn = new UIButton();
+    removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
+    //removeBtn->text = "-";
+    removeBtn->wxWidth = 30;
+    removeBtn->icon = g_iconLayerDelete;
+    removeBtn->setCallbackListener(-2, this);
+    layerControlButtons.addDrawable(removeBtn);
+
+    UIButton* upBtn = new UIButton();
+    upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
+    //upBtn->text = "Up";
+    upBtn->wxWidth = 30;
+    upBtn->icon = g_iconLayerUp;
+    upBtn->setCallbackListener(-3, this);
+    layerControlButtons.addDrawable(upBtn);
+
+    UIButton* downBtn = new UIButton();
+    downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
+    //downBtn->text = "Dn.";
+    downBtn->wxWidth = 30;
+    downBtn->icon = g_iconLayerDown;
+    downBtn->setCallbackListener(-4, this);
+    layerControlButtons.addDrawable(downBtn);
+
+    UIButton* mergeDownBtn = new UIButton();
+    mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
+    //mergeDownBtn->text = "Mrg";
+    mergeDownBtn->wxWidth = 30;
+    mergeDownBtn->icon = g_iconLayerDownMerge;
+    mergeDownBtn->setCallbackListener(-5, this);
+    layerControlButtons.addDrawable(mergeDownBtn);
+}
+
+EditorLayerPicker::~EditorLayerPicker()
+{
+    layerButtons.freeAllDrawables();
+    layerControlButtons.freeAllDrawables();
+}
+
 bool EditorLayerPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
 	return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
@@ -25,18 +75,24 @@ void EditorLayerPicker::render(XY position)
     g_fnt->RenderString("LAYERS", position.x + 1, position.y + 1);
 
     layerButtons.renderAll(position);
+    layerControlButtons.renderAll(position);
 }
 
 void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
 {
     if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-        layerButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
+        if (!layerButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
+            layerControlButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
+        }
     }
-    if (!layerButtons.anyFocused()) {
-
+    if (layerButtons.anyFocused()) {
+        layerButtons.passInputToFocused(evt, gPosOffset);
+    }
+    else if (layerControlButtons.anyFocused()) {
+        layerControlButtons.passInputToFocused(evt, gPosOffset);
     }
     else {
-        layerButtons.passInputToFocused(evt, gPosOffset);
+        
     }
 }
 
@@ -76,46 +132,6 @@ void EditorLayerPicker::updateLayers()
 {
     layerButtons.forceUnfocus();
     layerButtons.freeAllDrawables();
-
-    UIButton* addBtn = new UIButton();
-    addBtn->position = { 5, 30 };
-    //addBtn->text = "+";
-    addBtn->wxWidth = 30;
-    addBtn->setCallbackListener(-1, this);
-    addBtn->icon = g_iconLayerAdd;
-    layerButtons.addDrawable(addBtn);
-    
-    UIButton* removeBtn = new UIButton();
-    removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
-    //removeBtn->text = "-";
-    removeBtn->wxWidth = 30;
-    removeBtn->icon = g_iconLayerDelete;
-    removeBtn->setCallbackListener(-2, this);
-    layerButtons.addDrawable(removeBtn);
-    
-    UIButton* upBtn = new UIButton();
-    upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
-    //upBtn->text = "Up";
-    upBtn->wxWidth = 30;
-    upBtn->icon = g_iconLayerUp;
-    upBtn->setCallbackListener(-3, this);
-    layerButtons.addDrawable(upBtn);    
-    
-    UIButton* downBtn = new UIButton();
-    downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
-    //downBtn->text = "Dn.";
-    downBtn->wxWidth = 30;
-    downBtn->icon = g_iconLayerDown;
-    downBtn->setCallbackListener(-4, this);
-    layerButtons.addDrawable(downBtn);
-    
-    UIButton* mergeDownBtn = new UIButton();
-    mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
-    //mergeDownBtn->text = "Mrg";
-    mergeDownBtn->wxWidth = 30;
-    mergeDownBtn->icon = g_iconLayerDownMerge;
-    mergeDownBtn->setCallbackListener(-5, this);
-    layerButtons.addDrawable(mergeDownBtn);
 
     int yposition = 80;
     for (int lid = caller->layers.size(); lid --> 0;) {

@@ -14,6 +14,8 @@ public:
 	SDL_Color colorTextFocused = SDL_Color{ 255,255,255,0xff };
 	SDL_Color colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
 
+	Timer64 lastClick;
+
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
 		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
 	}

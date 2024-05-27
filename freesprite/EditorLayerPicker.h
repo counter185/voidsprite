@@ -11,10 +11,10 @@ public:
 	int wxHeight = 400;
 	MainEditor* caller;
 	DrawableManager layerButtons;
+	DrawableManager layerControlButtons;
 
-	EditorLayerPicker(MainEditor* editor) {
-		caller = editor;
-	}
+	EditorLayerPicker(MainEditor* editor);
+	~EditorLayerPicker();
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
 	void render(XY position) override;

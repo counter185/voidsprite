@@ -231,6 +231,9 @@
     <ClCompile Include="BrushCircle.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="Timer64.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -415,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="BrushCircle.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer64.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
