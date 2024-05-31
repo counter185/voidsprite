@@ -1178,6 +1178,7 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
 
             ret = new MainEditor(XY{w, h});
             _parseORAStacksRecursively(ret, imgNode.child("stack"), zip);
+            ret->layerPicker->updateLayers();
         }
 
         fclose(f);
