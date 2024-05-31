@@ -65,6 +65,8 @@ public:
 		SDL_RenderCopy(g_rd, tex, NULL, &where);
 	}
 
+	void blit(Layer* sourceLayer, XY position);
+
 	void setPixel(XY position, uint32_t color) {
 		uint32_t* intpxdata = (uint32_t*)pixelData;
 		if (position.x >= 0 && position.x < w

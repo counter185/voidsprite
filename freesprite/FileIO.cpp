@@ -413,12 +413,12 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
     return ret;
 }
 
-void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0}) {
+void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0}) {
 
     for (pugi::xml_node layerNode : rootNode.children()) {
         std::string nodeName = layerNode.name();
         if (nodeName == "stack"){
-            _parseORAStacksRecursively(editor, layerNode, zip, xyAdd(offset, XY{layerNode.attribute("x").as_int(), layerNode.attribute("y").as_int()}));
+            _parseORAStacksRecursively(layers, dimensions, layerNode, zip, xyAdd(offset, XY{layerNode.attribute("x").as_int(), layerNode.attribute("y").as_int()}));
         } else if (nodeName == "layer") {
             XY layerOffset = xyAdd(offset, XY{layerNode.attribute("x").as_int(), layerNode.attribute("y").as_int()});
             const char* pngPath = layerNode.attribute("src").as_string();
@@ -427,12 +427,17 @@ void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip
             size_t pngSize;
             zip_entry_read(zip, (void**)&pngData, &pngSize);
 
-            //todo:apply offsets
             Layer* nlayer = readPNGFromMem(pngData, pngSize);
             if (nlayer != NULL) {
-                editor->layers.push_back(nlayer);
-                nlayer->hidden = std::string(layerNode.attribute("visibility").as_string()) != "visible";
-                nlayer->name = std::string(layerNode.attribute("name").as_string());
+                Layer* sizeCorrectLayer = new Layer(dimensions.x, dimensions.y);
+                sizeCorrectLayer->blit(nlayer, layerOffset);
+                delete nlayer;
+
+                sizeCorrectLayer->hidden = std::string(layerNode.attribute("visibility").as_string()) != "visible";
+                sizeCorrectLayer->name = std::string(layerNode.attribute("name").as_string());
+                layers->push_back(sizeCorrectLayer);
+            } else {
+                printf("NOOOOO LAYER IS NULL\n");
             }
 
             free(pngData);
@@ -1150,7 +1155,6 @@ Layer* readGCI(PlatformNativePathString path, uint64_t seek)
 
 MainEditor* readOpenRaster(PlatformNativePathString path)
 {
-
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
 
@@ -1176,9 +1180,9 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
             int w = imgNode.attribute("w").as_int();
             int h = imgNode.attribute("h").as_int();
 
-            ret = new MainEditor(XY{w, h});
-            _parseORAStacksRecursively(ret, imgNode.child("stack"), zip);
-            ret->layerPicker->updateLayers();
+            std::vector<Layer*> layers;
+            _parseORAStacksRecursively(&layers, XY{w,h}, imgNode.child("stack"), zip);
+            ret = new MainEditor(layers);
         }
 
         fclose(f);
