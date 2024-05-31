@@ -186,6 +186,7 @@
     <ClCompile Include="PopupSetEditorPixelGrid.cpp" />
     <ClCompile Include="PopupTextBox.cpp" />
     <ClCompile Include="PopupYesNo.cpp" />
+    <ClCompile Include="pugixml\pugixml.cpp" />
     <ClCompile Include="SpritesheetPreviewScreen.cpp" />
     <ClCompile Include="StartScreen.cpp" />
     <ClCompile Include="TabbedView.cpp" />
@@ -248,6 +249,8 @@
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
     <ClInclude Include="PopupTextBox.h" />
     <ClInclude Include="PopupYesNo.h" />
+    <ClInclude Include="pugixml\pugiconfig.hpp" />
+    <ClInclude Include="pugixml\pugixml.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SpritesheetPreviewScreen.h" />
     <ClInclude Include="StartScreen.h" />

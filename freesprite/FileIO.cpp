@@ -5,6 +5,7 @@
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
 #include "zip/zip.h"
+#include "pugixml/pugixml.hpp"
 
 enum VTFFORMAT
 {
@@ -412,6 +413,34 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
     return ret;
 }
 
+void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0}) {
+
+    for (pugi::xml_node layerNode : rootNode.children()) {
+        std::string nodeName = layerNode.name();
+        if (nodeName == "stack"){
+            _parseORAStacksRecursively(editor, layerNode, zip, xyAdd(offset, XY{layerNode.attribute("x").as_int(), layerNode.attribute("y").as_int()}));
+        } else if (nodeName == "layer") {
+            XY layerOffset = xyAdd(offset, XY{layerNode.attribute("x").as_int(), layerNode.attribute("y").as_int()});
+            const char* pngPath = layerNode.attribute("src").as_string();
+            zip_entry_open(zip, pngPath);
+            uint8_t* pngData = NULL;
+            size_t pngSize;
+            zip_entry_read(zip, (void**)&pngData, &pngSize);
+
+            //todo:apply offsets
+            Layer* nlayer = readPNGFromMem(pngData, pngSize);
+            if (nlayer != NULL) {
+                editor->layers.push_back(nlayer);
+                nlayer->hidden = std::string(layerNode.attribute("visibility").as_string()) != "visible";
+                nlayer->name = std::string(layerNode.attribute("name").as_string());
+            }
+
+            free(pngData);
+            zip_entry_close(zip);
+        }
+    }
+}
+
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
@@ -466,6 +495,94 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+
+size_t readPNGBytes = 0;   //if you promise to tell noone
+size_t PNGFileSize = 0;
+void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
+    png_voidp io_ptr = png_get_io_ptr(png_ptr);
+    if (io_ptr == NULL) {
+        printf("WHY  IS io_ptr NULL\n");
+        return;
+    }
+
+    char* inputStream = (char*)io_ptr;
+    memcpy(outBytes, inputStream + readPNGBytes, byteCountToRead);
+    readPNGBytes += byteCountToRead;
+}
+
+//todo: don't just copy code come on
+Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_infop info = png_create_info_struct(png);
+    readPNGBytes = 0;
+    PNGFileSize = dataSize;
+    png_set_read_fn(png, (void*)data, _readPNGDataFromMem);
+    //png_set_sig_bytes(png, kPngSignatureLength);
+    png_read_info(png, info);
+
+    uint32_t width = png_get_image_width(png, info);
+    uint32_t height = png_get_image_height(png, info);
+    png_byte color_type = png_get_color_type(png, info);
+    png_byte bit_depth = png_get_bit_depth(png, info);
+
+    if (color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_palette_to_rgb(png);
+    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+        png_set_expand_gray_1_2_4_to_8(png);
+    if (png_get_valid(png, info, PNG_INFO_tRNS))
+        png_set_tRNS_to_alpha(png);
+    if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+    if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+        png_set_gray_to_rgb(png);
+
+    png_read_update_info(png, info);
+
+    int numchannels = png_get_channels(png, info);
+    png_bytepp rows = new png_bytep[height];
+    for (int y = 0; y < height; y++) {
+        rows[y] = new png_byte[png_get_rowbytes(png, info)];
+    }
+    png_read_image(png, rows);
+
+    Layer* nlayer = new Layer(width, height);
+    nlayer->name = "PNG Image";
+
+    int imagePointer = 0;
+    for (uint32_t y = 0; y < height; y++) {
+        if (numchannels == 4) {
+            memcpy(nlayer->pixelData + (y * numchannels * width), rows[y], width * numchannels);
+        }
+        else if (numchannels == 3) {
+            int currentRowPointer = 0;
+            for (uint32_t x = 0; x < width; x++) {
+                nlayer->pixelData[imagePointer++] = 0xff;
+                nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+            }
+        }
+        else {
+            printf("WHAT\n");
+            exit(0);
+        }
+    }
+
+    if (numchannels == 4) {
+        SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
+        memcpy(convSrf->pixels, nlayer->pixelData, height * width * 4);
+        SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, width * 4);
+        SDL_FreeSurface(convSrf);
+    }
+
+    for (uint32_t y = 0; y < height; y++) {
+        delete[] rows[y];
+    }
+    delete[] rows;
+    png_destroy_read_struct(&png, &info, NULL);
+
+    return nlayer;
+}
 Layer* readPNG(PlatformNativePathString path, uint64_t seek)
 {
     FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
@@ -1027,6 +1144,44 @@ Layer* readGCI(PlatformNativePathString path, uint64_t seek)
         }
 
         fclose(infile);
+    }
+    return NULL;
+}
+
+MainEditor* readOpenRaster(PlatformNativePathString path)
+{
+
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+
+        MainEditor* ret = NULL;
+        //read .ora file using zip
+        zip_t *zip = zip_cstream_open(f, ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+        {
+            pugi::xml_document doc;
+
+            zip_entry_open(zip, "stack.xml");
+            {
+                char* zipBuffer;
+                size_t zipBufferSize;
+                zip_entry_read(zip, (void**)&zipBuffer, &zipBufferSize);
+
+                //read xml from zipBuffer
+                doc.load_string(zipBuffer);
+
+            }
+            zip_entry_close(zip);
+
+            pugi::xml_node imgNode = doc.child("image");
+            int w = imgNode.attribute("w").as_int();
+            int h = imgNode.attribute("h").as_int();
+
+            ret = new MainEditor(XY{w, h});
+            _parseORAStacksRecursively(ret, imgNode.child("stack"), zip);
+        }
+
+        fclose(f);
+        return ret;        
     }
     return NULL;
 }

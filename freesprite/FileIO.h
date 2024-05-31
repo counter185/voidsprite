@@ -8,6 +8,9 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile);
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 
+//void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
+Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
+
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(std::string path, uint64_t seek = 0);
@@ -19,6 +22,7 @@ Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
+MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 bool writePNG(PlatformNativePathString path, Layer* data);
@@ -30,6 +34,15 @@ bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeCHeader(PlatformNativePathString path, Layer* data);
 
+struct FileSessionImportNPath {
+	std::string name;
+	std::string extension;
+	MainEditor* (*importFunction)(PlatformNativePathString);
+	bool (*canImport)(PlatformNativePathString) =
+		[](PlatformNativePathString p) {
+			return true;
+		};
+};
 struct FileImportNPath {
 	std::string name;
 	std::string extension;
@@ -94,6 +107,20 @@ inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
 	}
 };
 
+inline std::vector<FileSessionImportNPath> g_fileSessionImportersNPaths = {
+	{
+		"voidsprite Session", ".voidsn", &readVOIDSN
+	},
+	{
+		"voidsprite Session v2", ".voidsnv2", &readVOIDSN
+	},
+	{
+		"voidsprite Session v1", ".voidsnv1", &readVOIDSN
+	},
+	{
+		"OpenRaster", ".ora", &readOpenRaster
+	}
+};
 inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	{
 		"PNG (libpng)", ".png", &readPNG

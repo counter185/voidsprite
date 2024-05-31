@@ -69,7 +69,19 @@ void StartScreen::tryLoadFile(std::string path)
 	fPath = path;
 #endif
 
-	if (stringEndsWith(path, ".voidsn") || stringEndsWith(path, ".voidsnv1")) {
+	for (FileSessionImportNPath importer : g_fileSessionImportersNPaths) {
+		if (stringEndsWith(path, importer.extension) && importer.canImport(fPath)) {
+			MainEditor* session = importer.importFunction(fPath);
+			if (session != NULL) {
+				g_addScreen(session);
+				return;
+			}
+			else {
+				printf("%s: load failed\n", importer.name.c_str());
+			}
+		}
+	}
+	/*if (stringEndsWith(path, ".voidsn") || stringEndsWith(path, ".voidsnv1")) {
 		MainEditor* session = readVOIDSN(fPath);
 		if (session == NULL) {
 			printf("voidsession load failed");
@@ -77,8 +89,8 @@ void StartScreen::tryLoadFile(std::string path)
 		else {
 			g_addScreen(session);
 		}
-	}
-	else {
+	}*/
+	{
 
 		Layer* l = NULL;
 		for (FileImportNPath importer : g_fileImportersNPaths) {
