@@ -1389,6 +1389,42 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         }
         zip_entry_close(zip);
 
+        zip_entry_open(zip, "mergedimage.png"); 
+        {
+            Layer* flat = editor->flattenImage();
+#if _WIN32
+            if (writePNG(L"temp.bin", flat)) {
+#else
+            if (writePNG("temp.bin", flat)) {
+#endif
+                zip_entry_fwrite(zip, "temp.bin");
+            }
+            else {
+                printf("OPENRASTER: PNG WRITE ERROR\n");
+            }
+            delete flat;
+        }
+        zip_entry_close(zip);
+
+        zip_entry_open(zip, "Thumbnails/thumbnail.png"); 
+        {
+            Layer* flat = editor->flattenImage();
+            Layer* flatScaled = flat->copyScaled(XY{255,255});
+            delete flat;
+#if _WIN32
+            if (writePNG(L"temp.bin", flatScaled)) {
+#else
+            if (writePNG("temp.bin", flatScaled)) {
+#endif
+                zip_entry_fwrite(zip, "temp.bin");
+            }
+            else {
+                printf("OPENRASTER: PNG WRITE ERROR\n");
+            }
+            delete flatScaled;
+        }
+        zip_entry_close(zip);
+
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
 #if _WIN32

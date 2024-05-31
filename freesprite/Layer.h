@@ -186,5 +186,7 @@ public:
 		}
 		return ret;
 	}
+
+	Layer* copyScaled(XY dimensions);
 };
 

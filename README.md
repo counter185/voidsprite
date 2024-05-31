@@ -10,6 +10,7 @@ Free C++ sprite editor
 ### Import:
 - PNG
 - BMP
+- OpenRaster ORA
 - RPGMaker 2000/2003 XYZ
 - Atrophy Engine AETEX (tga/dds)
 - Wii TPL*

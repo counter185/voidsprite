@@ -20,3 +20,16 @@ void Layer::blit(Layer* sourceLayer, XY position)
 
     layerDirty = true;
 }
+
+//i don't even know if this works
+Layer* Layer::copyScaled(XY dimensions)
+{
+    Layer* newLayer = new Layer(dimensions.x, dimensions.y);
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
+        }
+    }
+    return newLayer;
+}
