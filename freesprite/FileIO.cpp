@@ -1549,6 +1549,37 @@ bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
     return false;
 }
 
+bool writeTGA(PlatformNativePathString path, Layer* data) {
+    FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
+    if (nfile != NULL) {
+        //copilot hallucinated all of this code i don't know if it even works
+        uint8_t header[18];
+        memset(header, 0, 18);
+        header[2] = 2;  // uncompressed RGB
+        header[12] = data->w & 0xff;    // width
+        header[13] = (data->w >> 8) & 0xff;
+        header[14] = data->h & 0xff;    // height
+        header[15] = (data->h >> 8) & 0xff;
+        header[16] = 24;    // 24 bit bitmap
+        header[17] = 0x20;  // top-down, non-interlaced
+        fwrite(header, 18, 1, nfile);
+        for (int y = 0; y < data->h; y++) {
+            for (int x = 0; x < data->w; x++) {
+                uint32_t pxx = data->getPixelAt(XY{ x,y });
+                uint8_t px[3];
+                px[0] = pxx & 0xff;
+                px[1] = (pxx >> 8) & 0xff;
+                px[2] = (pxx >> 16) & 0xff;
+                fwrite(px, 3, 1, nfile);
+            }
+        }
+        
+        fclose(nfile);
+        return true;
+    }
+    return false;
+}
+
 bool writeCHeader(PlatformNativePathString path, Layer* data)
 {
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
@@ -1571,6 +1602,35 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
             fprintf(outfile, "\n");
         }
         fprintf(outfile, "};\n");
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writePythonNPArray(PlatformNativePathString path, Layer* data)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fprintf(outfile, "import numpy as np\n\n");
+        fprintf(outfile, "#from PIL import Image\n\n");
+        uint64_t dataPixelPointer = 0;
+        fprintf(outfile, "voidsprite_image = np.array([\n");
+        for (int y = 0; y < data->h; y++){
+            fprintf(outfile, "    [");
+            for (int x = 0; x < data->w; x++){
+                uint8_t b = data->pixelData[dataPixelPointer++];
+                uint8_t g = data->pixelData[dataPixelPointer++];
+                uint8_t r = data->pixelData[dataPixelPointer++];
+                uint8_t a = data->pixelData[dataPixelPointer++];
+                fprintf(outfile, "[%i,%i,%i,%i],", r,g,b,a);
+            }
+            fprintf(outfile, "],\n");
+        }
+        fprintf(outfile, "], dtype=np.uint8)\n\n\n");
+
+        fprintf(outfile, "#pilimage = Image.fromarray(voidsprite_image, mode='RGBA')");
 
         fclose(outfile);
         return true;

@@ -31,8 +31,10 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
+bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeCHeader(PlatformNativePathString path, Layer* data);
+bool writePythonNPArray(PlatformNativePathString path, Layer* data);
 
 struct FileSessionImportNPath {
 	std::string name;
@@ -92,10 +94,16 @@ inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
 		"BMP (EasyBMP)", ".bmp", &writeBMP
 	},
 	{
+		"TGA (voidsprite custom)", ".tga", &writeTGA
+	},
+	{
 		"CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM
 	},
 	{
 		"C Header (voidsprite custom)", ".h", &writeCHeader
+	},
+	{
+		"Python NumPy array (voidsprite custom)", ".py", &writePythonNPArray
 	}
 };
 inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
