@@ -1153,6 +1153,72 @@ Layer* readGCI(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+Layer* readMSP(PlatformNativePathString path, uint64_t seek)
+{
+    struct MSPHeader
+    {
+        uint16_t  Key1;             /* Magic number    */
+        uint16_t  Key2;             /* Magic number    */
+        uint16_t  Width;            /* Width of the bitmap in pixels   */
+        uint16_t  Height;           /* Height of the bitmap in pixels   */
+        uint16_t  XARBitmap;        /* X Aspect ratio of the bitmap   */
+        uint16_t  YARBitmap;        /* Y Aspect ratio of the bitmap   */
+        uint16_t  XARPrinter;       /* X Aspect ratio of the printer   */
+        uint16_t  YARPrinter;       /* Y Aspect ratio of the printer   */
+        uint16_t  PrinterWidth;     /* Width of the printer in pixels   */
+        uint16_t  PrinterHeight;    /* Height of the printer in pixels   */
+        uint16_t  XAspectCorr;      /* X aspect correction (unused)     */
+        uint16_t  YAspectCorr;      /* Y aspect correction (unused)     */
+        uint16_t  Checksum;         /* Checksum of previous 24 bytes   */
+        uint16_t  Padding[3];       /* Unused padding    */
+    };
+
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        fseek(infile, 0, SEEK_END);
+        uint64_t fileLength = ftell(infile);
+        fseek(infile, 0, SEEK_SET);
+
+        MSPHeader hdr;
+        printf("%i\n", sizeof(MSPHeader));
+        fread(&hdr, sizeof(MSPHeader), 1, infile);
+        //fseek(infile, 1, SEEK_CUR);
+        Layer* ret = new Layer(hdr.Width, hdr.Height);
+        ret->name = "MSP1.0/2.0 Layer";
+        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint64_t dataPointer = 0;
+        while (dataPointer < hdr.Width*hdr.Height && ftell(infile) < fileLength) {
+            uint8_t RunType;
+            fread(&RunType, 1, 1, infile);
+            if (RunType == 0){
+                uint8_t RunCount;
+                fread(&RunCount, 1, 1, infile);
+                uint8_t RunValue;
+                fread(&RunValue, 1, 1, infile);
+                for (int x = 0; x < RunCount; x++) {
+                    for (int bit = 0; bit < 8; bit++) {
+                        pxd[dataPointer++] = 0xFF000000 | (0xFFFFFF * ((RunValue >> (7 - bit)) & 0b1));
+                    }
+                    //pxd[dataPointer++] = 0xFF000000 | (0x010101 * RunValue);
+                }
+            } else {
+                for (int x = 0; x < RunType; x++) {
+                    uint8_t RunValue;
+                    fread(&RunValue, 1, 1, infile);
+                    for (int bit = 0; bit < 8; bit++) {
+                        pxd[dataPointer++] = 0xFF000000 | (0xFFFFFF * ((RunValue >> (7 - bit)) & 0b1));
+                    }
+                    //pxd[dataPointer++] = 0xFF000000 | (0x010101 * RunValue);
+                }   
+            }
+        }
+
+        fclose(infile);
+        return ret;
+    }
+    return NULL;
+}
+
 MainEditor* readOpenRaster(PlatformNativePathString path)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);

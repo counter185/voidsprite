@@ -48,12 +48,15 @@ PlatformNativePathString convertStringOnWin32(std::string a) {
 #endif
 }
 
-bool stringEndsWith(std::string c, std::string endsWith)
+bool stringEndsWithIgnoreCase(std::string c, std::string endsWith)
 {
     if (c.size() < endsWith.size()) {
         return false;
     }
-    return c.substr(c.size() - endsWith.size()) == endsWith;
+    std::string otherString = c.substr(c.size() - endsWith.size());
+    std::transform(otherString.begin(), otherString.end(), otherString.begin(), ::tolower);
+    std::transform(endsWith.begin(), endsWith.end(), endsWith.begin(), ::tolower);
+    return otherString == endsWith;
 }
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel)

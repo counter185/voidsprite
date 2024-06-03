@@ -70,7 +70,7 @@ void StartScreen::tryLoadFile(std::string path)
 #endif
 
 	for (FileSessionImportNPath importer : g_fileSessionImportersNPaths) {
-		if (stringEndsWith(path, importer.extension) && importer.canImport(fPath)) {
+		if (stringEndsWithIgnoreCase(path, importer.extension) && importer.canImport(fPath)) {
 			MainEditor* session = importer.importFunction(fPath);
 			if (session != NULL) {
 				g_addScreen(session);
@@ -94,7 +94,7 @@ void StartScreen::tryLoadFile(std::string path)
 
 		Layer* l = NULL;
 		for (FileImportNPath importer : g_fileImportersNPaths) {
-			if (stringEndsWith(path, importer.extension) && importer.canImport(fPath)) {
+			if (stringEndsWithIgnoreCase(path, importer.extension) && importer.canImport(fPath)) {
 				l = importer.importFunction(fPath, 0);
 				if (l != NULL) {
 					break;
@@ -106,7 +106,7 @@ void StartScreen::tryLoadFile(std::string path)
 		}
 		if (l == NULL) {
 			for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
-				if (stringEndsWith(path, importer.extension) && importer.canImport(path)) {
+				if (stringEndsWithIgnoreCase(path, importer.extension) && importer.canImport(path)) {
 					l = importer.importFunction(path, 0);
 					if (l != NULL) {
 						break;

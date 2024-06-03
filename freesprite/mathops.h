@@ -32,7 +32,7 @@ XY xySubtract(XY p1, XY p2);
 
 std::wstring utf8StringToWstring(std::string a);
 PlatformNativePathString convertStringOnWin32(std::string a);
-bool stringEndsWith(std::string c, std::string endsWith);
+bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);

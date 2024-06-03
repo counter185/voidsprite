@@ -22,6 +22,7 @@ Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readMSP(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
@@ -164,6 +165,9 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	},
 	{
 		"VTF (voidsprite custom)", ".vtf", &readVTF
+	},
+	{
+		"MSP (voidsprite custom)", ".msp", &readMSP
 	}
 };
 
