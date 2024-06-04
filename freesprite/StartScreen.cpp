@@ -48,10 +48,12 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_KEYDOWN:
 				break;
 			case SDL_DROPFILE:
+			{
 				std::string filePath = evt.drop.file;
 				//std::string extension = filePath.substr(filePath.find_last_of('.'));
 				tryLoadFile(filePath);
 				SDL_free(evt.drop.file);
+			}
 				break;
 		}
 	}
