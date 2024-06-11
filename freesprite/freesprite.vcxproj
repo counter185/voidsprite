@@ -200,6 +200,7 @@
     <ClCompile Include="ToolSetXSymmetry.cpp" />
     <ClCompile Include="ToolSetYSymmetry.cpp" />
     <ClCompile Include="UIButton.cpp" />
+    <ClCompile Include="UIColorInputField.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UILayerButton.cpp" />
@@ -265,6 +266,7 @@
     <ClInclude Include="ToolSetXSymmetry.h" />
     <ClInclude Include="ToolSetYSymmetry.h" />
     <ClInclude Include="UIButton.h" />
+    <ClInclude Include="UIColorInputField.h" />
     <ClInclude Include="UIColorSlider.h" />
     <ClInclude Include="UILabel.h" />
     <ClInclude Include="UILayerButton.h" />

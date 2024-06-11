@@ -13,6 +13,7 @@
 #include "TemplateRPG2KCharset.h"
 #include "TemplateMC64x32Skin.h"
 #include "PopupMessageBox.h"
+#include "UIColorInputField.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {

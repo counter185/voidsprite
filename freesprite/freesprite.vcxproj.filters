@@ -243,6 +243,9 @@
     <ClCompile Include="pugixml\pugixml.cpp">
       <Filter>Source files\external\pugixml</Filter>
     </ClCompile>
+    <ClCompile Include="UIColorInputField.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -436,6 +439,9 @@
     </ClInclude>
     <ClInclude Include="pugixml\pugixml.hpp">
       <Filter>Header files\external\pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="UIColorInputField.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

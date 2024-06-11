@@ -37,6 +37,9 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 					text = text.substr(0, text.size() - 1);
 				}
 				break;
+			case SDLK_DELETE:
+				text = "";
+				break;
 		}
 	}
 	else if (evt.type == SDL_TEXTINPUT) {
