@@ -11,12 +11,17 @@
 
 int g_windowW = 1280;
 int g_windowH = 720;
+XY unscaledWindowSize = {g_windowW, g_windowH};
+int renderScale = 1;
+SDL_Texture* viewport = NULL;
+
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
 std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
+bool g_ctrlModifier = false;
 
 Timer64 screenSwitchTimer;
 
@@ -92,6 +97,20 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Texture* ret = SDL_CreateTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
     return ret;
+}
+
+void UpdateViewportScaler(){
+    if (viewport != NULL) {
+        SDL_DestroyTexture(viewport);
+    }
+    g_windowW = unscaledWindowSize.x / renderScale;
+    g_windowH = unscaledWindowSize.y / renderScale;
+    if (renderScale == 1) {
+        viewport = NULL;
+        return;
+    }
+   
+    viewport = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
 }
 
 int main(int argc, char** argv)
@@ -176,13 +195,36 @@ int main(int argc, char** argv)
                         SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
                         screenSwitchTimer.start();
                     }
+                    else if (evt.key.keysym.sym == SDLK_LCTRL){
+                        g_ctrlModifier = true;
+                    }
+                    else if (evt.key.keysym.sym == SDLK_EQUALS){
+                        if (g_ctrlModifier) {
+                            renderScale++;
+                            UpdateViewportScaler();
+                        }
+                    }
+                    else if (evt.key.keysym.sym == SDLK_MINUS){
+                        if (g_ctrlModifier){
+                            if (renderScale-- <= 1){
+                                renderScale = 1;
+                            }
+                            UpdateViewportScaler();
+
+                        }
+                    }
                     break;
                 case SDL_KEYUP:
+                    if (evt.key.keysym.sym == SDLK_LCTRL){
+                        g_ctrlModifier = false;
+                    }
                     break;
                 case SDL_WINDOWEVENT:
                     if (evt.window.event == SDL_WINDOWEVENT_RESIZED) {
                         g_windowW = evt.window.data1;
                         g_windowH = evt.window.data2;
+                        unscaledWindowSize = { g_windowW, g_windowH };
+                        UpdateViewportScaler();
                     }
                     break;
                 case SDL_MOUSEMOTION:
@@ -208,6 +250,10 @@ int main(int argc, char** argv)
         }
         if (!screenStack.empty()) {
             screenStack[currentScreen]->tick();
+        }
+
+        if (viewport != NULL){
+            SDL_SetRenderTarget(g_rd, viewport);
         }
 
         SDL_SetRenderDrawColor(g_rd, 0,0,0,255);
@@ -267,6 +313,11 @@ int main(int argc, char** argv)
         SDL_RenderFillRect(g_rd, &temp);
 
         //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
+
+        if (viewport != NULL){
+            SDL_SetRenderTarget(g_rd, NULL);
+            SDL_RenderCopy(g_rd, viewport, NULL, NULL);
+        }
 
         SDL_RenderPresent(g_rd);
     }

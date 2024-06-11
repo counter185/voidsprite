@@ -43,6 +43,7 @@ class Layer;
 class MainEditor;
 class SpritesheetPreviewScreen;
 
+extern bool g_ctrlModifier;
 extern int g_windowW, g_windowH;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;
