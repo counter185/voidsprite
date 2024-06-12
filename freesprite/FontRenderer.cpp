@@ -59,7 +59,7 @@ TextRenderer::~TextRenderer() {
     }
 }
 
-void TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
+XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
     int drawX = x;
     int drawY = y;
     uint32_t currentUTF8Sym = 0;
@@ -88,6 +88,7 @@ void TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
             }
         }
     }
+    return { drawX, drawY };
 }
 
 void TextRenderer::RenderGlyph(uint32_t a) {

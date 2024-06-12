@@ -8,6 +8,7 @@ class UITextField : public Drawable
 public:
 	std::string text = "";
 	bool numeric = false;
+	bool color = false;
 	int wxWidth = 250, wxHeight = 30;
 	SDL_Color bgColor = { 0,0,0, 0xff };
 
@@ -17,5 +18,7 @@ public:
 	}
 	void render(XY pos) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
+
+	bool isValidOrPartialColor();
 };
 

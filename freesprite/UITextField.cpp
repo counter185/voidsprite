@@ -59,3 +59,14 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 		}
 	}
 }
+
+bool UITextField::isValidOrPartialColor()
+{
+	for (int x = 0; x < text.size(); x++) {
+		char c = tolower(text[x]);
+		if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c == '#' && x == 0))) {
+			return false;
+		}
+	}
+	return true;
+}
