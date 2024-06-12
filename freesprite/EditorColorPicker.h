@@ -62,6 +62,7 @@ public:
 		tbv->tabs[1].wxs.addDrawable(sliderV);
 
 		colorTextField = new UITextField();
+		colorTextField->color = true;
 		colorTextField->position = XY{ 60, 340 };
 		colorTextField->wxWidth = 140;
 		colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);

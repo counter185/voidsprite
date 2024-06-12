@@ -18,7 +18,34 @@ void UITextField::render(XY pos)
 		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
 	}
 	
-	g_fnt->RenderString(text + (focused ? "_" : ""), pos.x + 2, pos.y + 2, SDL_Color{0xff,0xff,0xff,(unsigned char)(focused ? 0xff : 0xa0)});
+	if (!color || !isValidOrPartialColor() || text.empty()) {
+		g_fnt->RenderString(text + (focused ? "_" : ""), pos.x + 2, pos.y + 2, SDL_Color{ 0xff,0xff,0xff,(unsigned char)(focused ? 0xff : 0xa0) });
+	}
+	else {
+		int textPtr = 0;
+		XY origin = xyAdd(pos, { 2,2 });
+		if (text[0] == '#') {
+			origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{0x80,0x80,0x80,255});
+			textPtr++;
+		}
+		origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{255,0x32,0x32,255});
+		textPtr += 2;
+		if (textPtr < text.size()) {
+			origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{0x50,255,0x50,255});
+			textPtr += 2;
+		}
+		if (textPtr < text.size()) {
+			origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{0x18,0x9A,255,255});
+			textPtr += 2;
+		}
+		if (textPtr < text.size()) {
+			origin = g_fnt->RenderString(text.substr(textPtr), origin.x, origin.y);
+		}
+		if (focused) {
+			g_fnt->RenderString("_", origin.x, origin.y);
+		
+		}
+	}
 }
 
 void UITextField::handleInput(SDL_Event evt, XY gPosOffset)

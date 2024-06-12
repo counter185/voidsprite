@@ -26,6 +26,15 @@ XY xySubtract(XY p1, XY p2)
     return XY{p1.x-p2.x, p1.y-p2.y};
 }
 
+std::string stringToLower(std::string a)
+{
+    std::string ret;
+	for (int i = 0; i < a.size(); i++) {
+		ret += tolower(a.at(i));
+	}
+	return ret;
+}
+
 std::wstring utf8StringToWstring(std::string a)
 {
     std::wstring ret;

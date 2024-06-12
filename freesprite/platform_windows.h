@@ -8,6 +8,7 @@
 
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
+int lastFilterIndex = 1;
 
 void platformPreInit() {
 
@@ -46,23 +47,26 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.lStructSize = sizeof(ofna);
     ofna.hwndOwner = WINhWnd;
     std::wstring filterString = L"";
+    std::vector<std::wstring> filterStrings;
     for (FileExportMultiLayerNPath f : g_fileExportersMLNPaths) {
         filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
         filterString.push_back('\0');
         filterString += L"*" + utf8StringToWstring(f.extension);
         filterString.push_back('\0');
+        filterStrings.push_back(utf8StringToWstring(f.extension));
     }
     for (FileExportFlatNPath f : g_fileExportersFlatNPaths) {
         filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
         filterString.push_back('\0');
         filterString += L"*" + utf8StringToWstring(f.extension);
         filterString.push_back('\0');
+        filterStrings.push_back(utf8StringToWstring(f.extension));
     }
     filterString.push_back('\0');
     //ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0OpenRaster Files (.ora)\0*.ora\0voidsprite Session Files v2 (.voidsn)\0*.voidsn\0BMP Files (.bmp)\0*.bmp\0CaveStory PBM Files (.pbm)\0*.pbm\0RPG2000/2003 XYZ Files (.xyz)\0*.xyz\0All files\0*.*\0\0";
     ofna.lpstrFilter = filterString.c_str();
     ofna.lpstrCustomFilter = NULL;
-    ofna.nFilterIndex = 1;
+    ofna.nFilterIndex = lastFilterIndex;
     ofna.lpstrFile = fileNameBuffer;
     ofna.nMaxFile = MAX_PATH;
     ofna.lpstrFileTitle = NULL;
@@ -71,7 +75,13 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.lpstrTitle = L"voidsprite: Save Image";
     ofna.lpstrDefExt = L"png";
     if (GetSaveFileNameW(&ofna)) {
-        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, std::wstring(fileNameBuffer), ofna.nFilterIndex);
+        lastFilterIndex = ofna.nFilterIndex;
+        std::wstring fileName = fileNameBuffer;
+        std::wstring extension = filterStrings[ofna.nFilterIndex - 1];
+        if (fileName.size() < extension.size() || fileName.substr(fileName.size() - extension.size()) != extension) {
+            fileName += extension;
+        }
+        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, fileName, ofna.nFilterIndex);
     }
     else {
         printf("windows error: %i\n", GetLastError());

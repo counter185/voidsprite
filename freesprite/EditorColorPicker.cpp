@@ -53,6 +53,9 @@ void EditorColorPicker::eventTextInput(int evt_id, std::string data)
 {
     if (evt_id == EVENT_COLORPICKER_TEXTFIELD) {
         //do something with the text i guess
+        if (data.size() == 6 && colorTextField->isValidOrPartialColor()) {
+            data = "#" + data;
+        }
         if (data.size() == 7) {
             unsigned int col;
             if (tryRgbStringToColor(data.substr(1), &col)) {

@@ -30,6 +30,7 @@ bool xyEqual(XY p1, XY p2);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
 
+std::string stringToLower(std::string a);
 std::wstring utf8StringToWstring(std::string a);
 PlatformNativePathString convertStringOnWin32(std::string a);
 bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);

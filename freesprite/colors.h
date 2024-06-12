@@ -2,6 +2,15 @@
 
 
 inline std::map<std::string, unsigned int> g_colors = {
+	{"r", 0xFFFF0000},
+	{"g", 0xFF00FF00},
+	{"b", 0xFF0000FF},
+	{"c", 0xFF00FFFF},
+	{"m", 0xFFFF00FF},
+	{"y", 0xFFFFFF00},
+	{"k", 0xFF000000},
+	{"w", 0xFFFFFFFF},
+
 	{"aliceblue", 0xFFF0F8FF},
 	{"antiquewhite", 0xFFFAEBD7},
 	{"aqua", 0xFF00FFFF},
