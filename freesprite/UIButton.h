@@ -22,5 +22,7 @@ public:
 	void render(XY pos) override;
 	void focusIn() override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
+
+	void click();
 };
 

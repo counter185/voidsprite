@@ -44,11 +44,16 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 		XY mousePos = xySubtract(XY{ evt.motion.x, evt.motion.y }, gPosOffset);
 		if (evt.button.button == 1 && evt.button.state) {
 			if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
-				lastClick.start();
-				if (callback != NULL) {
-					callback->eventButtonPressed(callback_id);
-				}
+				click();
 			}
 		}
+	}
+}
+
+void UIButton::click()
+{
+	lastClick.start();
+	if (callback != NULL) {
+		callback->eventButtonPressed(callback_id);
 	}
 }

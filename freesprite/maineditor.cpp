@@ -392,7 +392,8 @@ void MainEditor::takeInput(SDL_Event evt) {
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {
 					case SDLK_e:
-						colorPicker->toggleEraser();
+						colorPicker->eraserButton->click();
+						//colorPicker->toggleEraser();
 						break;
 					case SDLK_RCTRL:
 						middleMouseHold = !middleMouseHold;
