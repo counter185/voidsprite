@@ -54,6 +54,15 @@ public:
 		int pitch;
 		SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
 		memcpy(pixels, pixelData, w * h * 4);
+
+		if (colorKeySet) {
+			uint32_t* px32 = (uint32_t*)pixelData;
+			for (uint64_t p = 0; p < w * h; p++) {
+				if ((px32[p] & 0xffffff) == (colorKey & 0xFFFFFF)) {
+					pixels[p * 4+3] = 0;
+				}
+			}
+		}
 		SDL_UnlockTexture(tex);
 		layerDirty = false;
 	}

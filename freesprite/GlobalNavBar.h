@@ -10,6 +10,7 @@
 #include "EventCallbackListener.h"
 #include "SpritesheetPreviewScreen.h"
 #include "TilemapPreviewScreen.h"
+#include "PopupSetColorKey.h"
 
 class GlobalNavBar : public Drawable, public EventCallbackListener
 {
@@ -134,6 +135,12 @@ public:
 					{SDLK_a, { "Remove alpha channel",
 							[](MainEditor* editor) {
 								editor->layer_setAllAlpha255();
+							}
+						}
+					},
+					{SDLK_k, { "Set color key",
+							[](MainEditor* editor) {
+								g_addPopup(new PopupSetColorKey(editor->getCurrentLayer(), "Set color key", "Set the layer's color key:"));
 							}
 						}
 					},

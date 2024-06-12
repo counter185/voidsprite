@@ -183,6 +183,7 @@
     <ClCompile Include="mathops.cpp" />
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="PopupMessageBox.cpp" />
+    <ClCompile Include="PopupSetColorKey.cpp" />
     <ClCompile Include="PopupSetEditorPixelGrid.cpp" />
     <ClCompile Include="PopupTextBox.cpp" />
     <ClCompile Include="PopupYesNo.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="platform.h" />
     <ClInclude Include="platform_windows.h" />
     <ClInclude Include="PopupMessageBox.h" />
+    <ClInclude Include="PopupSetColorKey.h" />
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
     <ClInclude Include="PopupTextBox.h" />
     <ClInclude Include="PopupYesNo.h" />

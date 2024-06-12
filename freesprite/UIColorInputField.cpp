@@ -8,6 +8,7 @@ UIColorInputField::UIColorInputField()
 	textField->wxHeight = 30;
 	textField->position = XY{ 30, 0 };
 	textField->bgColor = SDL_Color{ 0,0,0,0x30 };
+	textField->color = true;
 	textField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
 	textField->text = "000000";	//lmao fix this
 	wxsManager.addDrawable(textField);

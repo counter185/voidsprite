@@ -252,6 +252,9 @@
     <ClCompile Include="ToolMeasure.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="PopupSetColorKey.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -454,6 +457,9 @@
     </ClInclude>
     <ClInclude Include="ToolMeasure.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSetColorKey.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
