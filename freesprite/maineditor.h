@@ -17,6 +17,7 @@
 #include "Layer.h"
 #include "SpritesheetPreviewScreen.h"
 #include "ToolComment.h"
+#include "ToolMeasure.h"
 
 struct CommentData {
 	XY position;

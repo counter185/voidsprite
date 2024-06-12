@@ -160,6 +160,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolSetXSymmetry());
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolComment());
+    g_brushes.push_back(new ToolMeasure());
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
     }

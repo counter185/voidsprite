@@ -249,6 +249,9 @@
     <ClCompile Include="ToolComment.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="ToolMeasure.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -447,6 +450,9 @@
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ToolComment.h">
+      <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolMeasure.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
