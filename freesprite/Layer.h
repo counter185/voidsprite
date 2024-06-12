@@ -8,7 +8,7 @@ public:
 	std::vector<uint8_t*> undoQueue;
 	std::vector<uint8_t*> redoQueue;
 	int w, h;
-	SDL_Texture* tex;
+	SDL_Texture* tex = NULL;
 	bool layerDirty = true;
 
 	std::string name = "Layer";
@@ -188,5 +188,13 @@ public:
 	}
 
 	Layer* copyScaled(XY dimensions);
+
+	void setAllAlpha255() {
+		uint32_t* px32 = (uint32_t*)pixelData;
+		for (uint64_t x = 0; x < w * h; x++) {
+			px32[x] |= 0xff000000;
+		}
+		layerDirty = true;
+	}
 };
 

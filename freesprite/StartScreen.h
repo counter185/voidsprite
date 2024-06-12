@@ -38,7 +38,7 @@ public:
 	};
 
 	StartScreen() {
-		newImageTabs = new TabbedView({ {"Pixel dimensions"}, {"Sprites/Tiles"}, {"Templates"} }, 160);
+		newImageTabs = new TabbedView({ {"Pixel dimensions", g_iconMenuPxDim}, {"Sprites/Tiles", g_iconMenuSpritesheet}, {"Templates", g_iconMenuTemplates} }, 180);
 		newImageTabs->position = XY{ 10, 110 };
 		wxsManager.addDrawable(newImageTabs);
 

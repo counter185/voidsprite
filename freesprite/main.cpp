@@ -40,6 +40,9 @@ SDL_Texture* g_iconNavbarTabEdit = NULL;
 SDL_Texture* g_iconNavbarTabLayer = NULL;
 SDL_Texture* g_iconNavbarTabView = NULL;
 SDL_Texture* g_iconComment = NULL;
+SDL_Texture* g_iconMenuPxDim = NULL;
+SDL_Texture* g_iconMenuSpritesheet = NULL;
+SDL_Texture* g_iconMenuTemplates = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 
@@ -145,6 +148,9 @@ int main(int argc, char** argv)
     g_iconNavbarTabLayer = IMGLoadToTexture("assets/tab_layer.png");
     g_iconNavbarTabView = IMGLoadToTexture("assets/tab_view.png");
     g_iconComment = IMGLoadToTexture("assets/icon_message.png");
+    g_iconMenuPxDim = IMGLoadToTexture("assets/menu_pxdim.png");
+    g_iconMenuSpritesheet = IMGLoadToTexture("assets/menu_sptl.png");
+    g_iconMenuTemplates = IMGLoadToTexture("assets/menu_templates.png");
 
     //load brushes
     g_brushes.push_back(new Brush1x1());

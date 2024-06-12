@@ -8,7 +8,8 @@ void GlobalNavBar::render(XY position)
 
 	if (focused) {
 		SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
-		SDL_RenderDrawLine(g_rd, 0, wxHeight, g_windowW, wxHeight);
+		drawLine(XY{ 0, wxHeight }, XY{ g_windowW, wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(600)));
+		//SDL_RenderDrawLine(g_rd, 0, wxHeight, g_windowW, wxHeight);
 	}
 	wxs.renderAll(position);
 	subWxs.renderAll(position);

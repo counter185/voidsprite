@@ -66,7 +66,10 @@ extern SDL_Texture* g_mainlogo,
    *g_iconNavbarTabEdit,
    *g_iconNavbarTabLayer,
    *g_iconNavbarTabView,
-   *g_iconComment;
+   *g_iconComment,
+   *g_iconMenuPxDim,
+   *g_iconMenuSpritesheet,
+   *g_iconMenuTemplates;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();

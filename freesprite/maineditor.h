@@ -124,6 +124,7 @@ public:
 	void layer_flipVertically();
 	void layer_swapLayerRGBtoBGR();
 	uint32_t layer_getPixelAt(XY pos);
+	void layer_setAllAlpha255();
 	Layer* flattenImage();
 	Layer* mergeLayers(Layer* bottom, Layer* top);
 

@@ -131,6 +131,12 @@ public:
 							}
 						}
 					},
+					{SDLK_a, { "Remove alpha channel",
+							[](MainEditor* editor) {
+								editor->layer_setAllAlpha255();
+							}
+						}
+					},
 				},
 				g_iconNavbarTabLayer
 			}
