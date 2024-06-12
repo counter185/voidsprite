@@ -196,6 +196,7 @@
     <ClCompile Include="TilemapPreviewScreen.cpp" />
     <ClCompile Include="Timer64.cpp" />
     <ClCompile Include="ToolColorPicker.cpp" />
+    <ClCompile Include="ToolComment.cpp" />
     <ClCompile Include="ToolRectClone.cpp" />
     <ClCompile Include="ToolSetXSymmetry.cpp" />
     <ClCompile Include="ToolSetYSymmetry.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="TilemapPreviewScreen.h" />
     <ClInclude Include="Timer64.h" />
     <ClInclude Include="ToolColorPicker.h" />
+    <ClInclude Include="ToolComment.h" />
     <ClInclude Include="ToolRectClone.h" />
     <ClInclude Include="ToolSetXSymmetry.h" />
     <ClInclude Include="ToolSetYSymmetry.h" />

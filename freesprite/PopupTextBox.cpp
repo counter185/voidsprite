@@ -2,7 +2,7 @@
 #include "FontRenderer.h"
 #include "UIButton.h"
 
-PopupTextBox::PopupTextBox(std::string tt, std::string tx)
+PopupTextBox::PopupTextBox(std::string tt, std::string tx, int textFieldWidth)
 {
 	wxHeight = 240;
 
@@ -25,7 +25,7 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx)
 
     tbox = new UITextField();
     tbox->position = XY{ 20, 80 };
-    tbox->wxWidth = 220;
+    tbox->wxWidth = textFieldWidth;
     wxsManager.addDrawable(tbox);
 }
 

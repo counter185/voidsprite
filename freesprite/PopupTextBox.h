@@ -11,7 +11,7 @@ public:
 
 	UITextField* tbox;
 
-	PopupTextBox(std::string tt, std::string tx);
+	PopupTextBox(std::string tt, std::string tx, int textFieldWidth = 220);
 
 	void render() override;
 

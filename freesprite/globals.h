@@ -65,7 +65,8 @@ extern SDL_Texture* g_mainlogo,
    *g_iconNavbarTabFile,
    *g_iconNavbarTabEdit,
    *g_iconNavbarTabLayer,
-   *g_iconNavbarTabView;
+   *g_iconNavbarTabView,
+   *g_iconComment;
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();
@@ -95,11 +96,14 @@ struct NavbarSection {
 #define UNDOSTACK_CREATE_LAYER 1
 #define UNDOSTACK_DELETE_LAYER 2
 #define UNDOSTACK_MOVE_LAYER 3
+#define UNDOSTACK_ADD_COMMENT 4
+#define UNDOSTACK_REMOVE_COMMENT 5
 struct UndoStackElement {
 	Layer* targetlayer;
 	uint32_t type = 0;
 	int extdata = 0;
 	int extdata2 = 0;
+	std::string extdata3 = "";
 };
 
 #include "platform.h"

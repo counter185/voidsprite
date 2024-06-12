@@ -77,6 +77,7 @@ void MainEditor::render() {
 		}
 	}
 
+	//draw tile lines
 	if (tileDimensions.x != 0) {
 		int dx = canvasRenderRect.x;
 		while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
@@ -98,6 +99,8 @@ void MainEditor::render() {
 		}
 	}
 	drawSymmetryLines();
+	renderComments();
+
 	if (currentBrush != NULL) {
 		currentBrush->renderOnCanvas(this, scale);
 	}
@@ -195,6 +198,27 @@ void MainEditor::DrawForeground()
 
 	if (currentBrush != NULL) {
 		g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? "(Erase)" : ""), 350, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+	}
+}
+
+void MainEditor::renderComments()
+{
+	XY origin = canvasCenterPoint;
+	for (CommentData& c : comments) {
+		XY onScreenPosition = xyAdd(origin, { c.position.x * scale, c.position.y * scale });
+		SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
+		SDL_SetTextureAlphaMod(g_iconComment, 0x80);
+		SDL_RenderCopy(g_rd, g_iconComment, NULL, &iconRect);
+		if (xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32) {
+			if (!c.hovered) {
+				c.animTimer.start();
+				c.hovered = true;
+			}
+			int yOffset = 16 * (1.0f- XM1PW3P1(c.animTimer.percentElapsedTime(200)));
+			g_fnt->RenderString(c.data, onScreenPosition.x + 17, onScreenPosition.y - yOffset, SDL_Color{ 255,255,255, (uint8_t)(0xff * c.animTimer.percentElapsedTime(200))});
+		} else {
+			c.hovered = false;
+		}
 	}
 }
 
@@ -352,6 +376,16 @@ void MainEditor::takeInput(SDL_Event evt) {
 						break;
 					case SDLK_RCTRL:
 						middleMouseHold = !middleMouseHold;
+						break;
+					case SDLK_z:
+						if (g_ctrlModifier) {
+							undo();
+						}
+						break;
+					case SDLK_y:
+						if (g_ctrlModifier) {
+							redo();
+						}
 						break;
 				}
 				break;
@@ -518,18 +552,21 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 
 void MainEditor::commitStateToLayer(Layer* l)
 {
-	discardRedoStack();
-
-	//printf("commit undo state\n");
 	l->commitStateToUndoStack();
-	undoStack.push_back(UndoStackElement{ l, UNDOSTACK_LAYER_DATA_MODIFIED });
-	checkAndDiscardEndOfUndoStack();
-	changesSinceLastSave = true;
+	addToUndoStack(UndoStackElement{ l, UNDOSTACK_LAYER_DATA_MODIFIED });
 }
 
 void MainEditor::commitStateToCurrentLayer()
 {
 	commitStateToLayer(getCurrentLayer());
+}
+
+void MainEditor::addToUndoStack(UndoStackElement undo)
+{
+	discardRedoStack();
+	undoStack.push_back(undo);
+	checkAndDiscardEndOfUndoStack();
+	changesSinceLastSave = true;
 }
 
 void MainEditor::discardRedoStack()
@@ -565,6 +602,9 @@ void MainEditor::undo()
 						break;
 					}
 				}
+				if (selLayer >= layers.size()) {
+					selLayer = layers.size() - 1;
+				}
 				layerPicker->updateLayers();
 				break;
 			case UNDOSTACK_DELETE_LAYER:
@@ -573,10 +613,18 @@ void MainEditor::undo()
 				layerPicker->updateLayers();
 				break;
 			case UNDOSTACK_MOVE_LAYER:
+			{
 				Layer* lr = layers[l.extdata2];
 				layers.erase(layers.begin() + l.extdata2);
 				layers.insert(layers.begin() + l.extdata, lr);
 				layerPicker->updateLayers();
+			}
+				break;
+			case UNDOSTACK_ADD_COMMENT:
+				_removeCommentAt({ l.extdata, l.extdata2 });
+				break;
+			case UNDOSTACK_REMOVE_COMMENT:
+				comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
 				break;
 		}
 	}
@@ -605,13 +653,24 @@ void MainEditor::redo()
 					break;
 				}
 			}
+			if (selLayer >= layers.size()) {
+				selLayer = layers.size() - 1;
+			}
 			layerPicker->updateLayers();
 			break;
 		case UNDOSTACK_MOVE_LAYER:
+		{
 			Layer* lr = layers[l.extdata];
 			layers.erase(layers.begin() + l.extdata);
 			layers.insert(layers.begin() + l.extdata2, lr);
 			layerPicker->updateLayers();
+		}
+			break;
+		case UNDOSTACK_ADD_COMMENT:
+			comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
+			break;
+		case UNDOSTACK_REMOVE_COMMENT:
+			_removeCommentAt({ l.extdata, l.extdata2 });
 			break;
 		}
 	}
@@ -622,12 +681,9 @@ Layer* MainEditor::newLayer()
 	Layer* nl = new Layer(texW, texH);
 	nl->name = std::format("New Layer {}", layers.size()+1);
 	layers.push_back(nl);
+	selLayer = layers.size() - 1;
 
-	UndoStackElement newUndoStack = {nl, UNDOSTACK_CREATE_LAYER};
-	undoStack.push_back(newUndoStack);
-	discardRedoStack();
-	checkAndDiscardEndOfUndoStack();
-	changesSinceLastSave = true;
+	addToUndoStack(UndoStackElement{nl, UNDOSTACK_CREATE_LAYER});
 	return nl;
 }
 
@@ -636,25 +692,18 @@ void MainEditor::deleteLayer(int index) {
 		return;
 	}
 
-	discardRedoStack();
-
 	Layer* layerAtPos = layers[index];
 	layers.erase(layers.begin() + index);
 	if (selLayer >= layers.size()) {
 		selLayer = layers.size() - 1;
 	}
 
-	UndoStackElement newUndoStack = { layerAtPos, UNDOSTACK_DELETE_LAYER, index };
-	undoStack.push_back(newUndoStack);
-	checkAndDiscardEndOfUndoStack();
-	changesSinceLastSave = true;
+	addToUndoStack(UndoStackElement{ layerAtPos, UNDOSTACK_DELETE_LAYER, index });
 }
 void MainEditor::moveLayerUp(int index) {
 	if (index >= layers.size()-1) {
 		return;
 	}
-
-	discardRedoStack();
 
 	Layer* clayer = layers[index];
 	layers.erase(layers.begin() + index);
@@ -664,18 +713,13 @@ void MainEditor::moveLayerUp(int index) {
 		selLayer++;
 	}
 
-	UndoStackElement newUndoStack = { clayer, UNDOSTACK_MOVE_LAYER, index, index+1 };
-	undoStack.push_back(newUndoStack);
-	checkAndDiscardEndOfUndoStack();
-	changesSinceLastSave = true;
+	addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_MOVE_LAYER, index, index + 1 });
 }
 
 void MainEditor::moveLayerDown(int index) {
 	if (index  <= 0) {
 		return;
 	}
-
-	discardRedoStack();
 
 	Layer* clayer = layers[index];
 	layers.erase(layers.begin() + index);
@@ -685,10 +729,7 @@ void MainEditor::moveLayerDown(int index) {
 		selLayer--;
 	}
 
-	UndoStackElement newUndoStack = { clayer, UNDOSTACK_MOVE_LAYER, index, index-1 };
-	undoStack.push_back(newUndoStack);
-	checkAndDiscardEndOfUndoStack();
-	changesSinceLastSave = true;
+	addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_MOVE_LAYER, index, index - 1 });
 }
 
 void MainEditor::mergeLayerDown(int index)
@@ -773,4 +814,44 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 	}
 
 	return ret;
+}
+
+bool MainEditor::canAddCommentAt(XY a)
+{
+	for (CommentData& c : comments) {
+		if (xyEqual(c.position, a)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void MainEditor::addCommentAt(XY a, std::string c)
+{
+	if (canAddCommentAt(a)) {
+		addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ADD_COMMENT, a.x, a.y, c });
+
+		CommentData newComment = { a, c };
+		comments.push_back(newComment);
+	}
+}
+
+void MainEditor::removeCommentAt(XY a)
+{
+	CommentData c = _removeCommentAt(a);
+
+	addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_REMOVE_COMMENT, a.x, a.y, c.data });
+}
+
+CommentData MainEditor::_removeCommentAt(XY a)
+{
+	for (int x = 0; x < comments.size(); x++) {
+		if (xyEqual(comments[x].position, a)) {
+			CommentData c = comments[x];
+			comments.erase(comments.begin() + x);
+			return c;
+		}
+	}
+	printf("_removeComment NOT FOUND");
+	return { {0,0}, "" };
 }

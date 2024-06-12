@@ -16,11 +16,21 @@
 #include "ToolSetYSymmetry.h"
 #include "Layer.h"
 #include "SpritesheetPreviewScreen.h"
+#include "ToolComment.h"
+
+struct CommentData {
+	XY position;
+	std::string data;
+	Timer64 animTimer;
+	bool hovered = false;
+};
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 public:
 	SpritesheetPreviewScreen* spritesheetPreview = NULL;
+
+	std::vector<CommentData> comments;
 
 	std::vector<Layer*> layers;
 	int selLayer = 0;
@@ -78,6 +88,7 @@ public:
 	
 	void DrawBackground();
 	void DrawForeground();
+	void renderComments();
 	void drawSymmetryLines();
 	void initLayers();
 	void SetUpWidgets();
@@ -95,6 +106,7 @@ public:
 	void checkAndDiscardEndOfUndoStack();
 	void commitStateToLayer(Layer* l);
 	void commitStateToCurrentLayer();
+	void addToUndoStack(UndoStackElement undo);
 	void discardRedoStack();
 	void undo();
 	void redo();
@@ -113,5 +125,11 @@ public:
 	uint32_t layer_getPixelAt(XY pos);
 	Layer* flattenImage();
 	Layer* mergeLayers(Layer* bottom, Layer* top);
+
+	bool canAddCommentAt(XY a);
+	void addCommentAt(XY a, std::string c);
+	void removeCommentAt(XY a);
+private:
+	CommentData _removeCommentAt(XY a);
 };
 

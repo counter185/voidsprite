@@ -38,6 +38,7 @@ SDL_Texture* g_iconNavbarTabFile = NULL;
 SDL_Texture* g_iconNavbarTabEdit = NULL;
 SDL_Texture* g_iconNavbarTabLayer = NULL;
 SDL_Texture* g_iconNavbarTabView = NULL;
+SDL_Texture* g_iconComment = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 
@@ -142,6 +143,7 @@ int main(int argc, char** argv)
     g_iconNavbarTabEdit = IMGLoadToTexture("assets/tab_edit.png");
     g_iconNavbarTabLayer = IMGLoadToTexture("assets/tab_layer.png");
     g_iconNavbarTabView = IMGLoadToTexture("assets/tab_view.png");
+    g_iconComment = IMGLoadToTexture("assets/icon_message.png");
 
     //load brushes
     g_brushes.push_back(new Brush1x1());
@@ -156,6 +158,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolRectClone());
     g_brushes.push_back(new ToolSetXSymmetry());
     g_brushes.push_back(new ToolSetYSymmetry());
+    g_brushes.push_back(new ToolComment());
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
     }

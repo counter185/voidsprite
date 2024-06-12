@@ -9,7 +9,7 @@ class EditorBrushPicker : public Drawable, public EventCallbackListener
 {
 public:
 	int wxWidth = 200;
-	int wxHeight = 100;
+	int wxHeight = 140;
 	MainEditor* caller;
 
 	DrawableManager subWidgets;

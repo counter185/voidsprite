@@ -246,6 +246,9 @@
     <ClCompile Include="UIColorInputField.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="ToolComment.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -442,6 +445,9 @@
     </ClInclude>
     <ClInclude Include="UIColorInputField.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolComment.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
