@@ -22,6 +22,7 @@ TextRenderer* g_fnt;
 std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
 bool g_ctrlModifier = false;
+bool g_shiftModifier = false;
 
 Timer64 screenSwitchTimer;
 
@@ -201,6 +202,9 @@ int main(int argc, char** argv)
                     else if (evt.key.keysym.sym == SDLK_LCTRL){
                         g_ctrlModifier = true;
                     }
+                    else if (evt.key.keysym.sym == SDLK_LSHIFT){
+                        g_shiftModifier = true;
+                    }
                     else if (evt.key.keysym.sym == SDLK_EQUALS){
                         if (g_ctrlModifier) {
                             renderScale++;
@@ -220,6 +224,9 @@ int main(int argc, char** argv)
                 case SDL_KEYUP:
                     if (evt.key.keysym.sym == SDLK_LCTRL){
                         g_ctrlModifier = false;
+                    }
+                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                        g_shiftModifier = false;
                     }
                     break;
                 case SDL_WINDOWEVENT:

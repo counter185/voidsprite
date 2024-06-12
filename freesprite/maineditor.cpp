@@ -379,7 +379,12 @@ void MainEditor::takeInput(SDL_Event evt) {
 						break;
 					case SDLK_z:
 						if (g_ctrlModifier) {
-							undo();
+							if (g_shiftModifier) {
+								redo();
+							}
+							else {
+								undo();
+							}
 						}
 						break;
 					case SDLK_y:
