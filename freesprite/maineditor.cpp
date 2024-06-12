@@ -844,8 +844,10 @@ void MainEditor::addCommentAt(XY a, std::string c)
 void MainEditor::removeCommentAt(XY a)
 {
 	CommentData c = _removeCommentAt(a);
+	if (c.data[0] != '\1') {
 
-	addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_REMOVE_COMMENT, a.x, a.y, c.data });
+		addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_REMOVE_COMMENT, a.x, a.y, c.data });
+	}
 }
 
 CommentData MainEditor::_removeCommentAt(XY a)
@@ -857,6 +859,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
 			return c;
 		}
 	}
-	printf("_removeComment NOT FOUND");
-	return { {0,0}, "" };
+	printf("_removeComment NOT FOUND\n");
+	//shitass workaround tell noone thanks
+	return { {0,0}, "\1" };
 }
