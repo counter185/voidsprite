@@ -51,7 +51,8 @@ void GlobalNavBar::tryPressHotkey(SDL_Keycode k)
 {
 	if (currentSubmenuOpen == -1) {
 		if (keyBinds.contains(k)) {
-			openSubmenu(k);
+			//openSubmenu(k);
+			keyBinds[k].button->click();
 		}
 	}
 	else {

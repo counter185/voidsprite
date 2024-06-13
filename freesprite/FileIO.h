@@ -29,6 +29,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path);
 bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
+bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
@@ -109,7 +110,10 @@ inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
 };
 inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
 	{
-		"voidsprite Session", ".voidsn", &writeVOIDSNv2
+		"voidsprite Session version 3", ".voidsn", &writeVOIDSNv3
+	},
+	{
+		"voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2
 	},
 	{
 		"OpenRaster", ".ora", &writeOpenRaster
@@ -119,6 +123,9 @@ inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
 inline std::vector<FileSessionImportNPath> g_fileSessionImportersNPaths = {
 	{
 		"voidsprite Session", ".voidsn", &readVOIDSN
+	},
+	{
+		"voidsprite Session v3", ".voidsnv3", &readVOIDSN
 	},
 	{
 		"voidsprite Session v2", ".voidsnv2", &readVOIDSN

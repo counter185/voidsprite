@@ -216,6 +216,7 @@ public:
 				sectionButton->icon = keyBinds[editorSection].icon;
 			}
 			sectionButton->setCallbackListener(editorSection, this);
+			keyBinds[editorSection].button = sectionButton;
 			wxs.addDrawable(sectionButton);
 			x += xDist;
 		}

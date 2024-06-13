@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "FileIO.h"
 #include "maineditor.h"
 #include <png.h>
@@ -1313,6 +1314,92 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     fclose(infile);
                     return ret;
                 }
+                break;       
+            case 3:
+                {
+                    XY dimensions;
+                    fread(&dimensions.x, 4, 1, infile);
+                    fread(&dimensions.y, 4, 1, infile);
+
+                    char metaHeader[13];
+                    fread(metaHeader, 13, 1, infile);
+                    // this should equal /VOIDSN.META/
+                    if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
+						printf("INVALID META HEADER\n");
+					}
+                    int nExtData;
+                    fread(&nExtData, 4, 1, infile);
+                    std::map<std::string, std::string> extData;
+                    for (int x = 0; x < nExtData; x++) {
+                        int keySize;
+                        fread(&keySize, 4, 1, infile);
+                        std::string key;
+                        key.resize(keySize);
+                        fread(&key[0], keySize, 1, infile);
+                        //WHAT
+                        //HOW DOES THIS
+                        int valSize;
+                        fread(&valSize, 4, 1, infile);
+                        std::string val;
+                        val.resize(valSize);
+                        fread(&val[0], valSize, 1, infile);
+                        extData[key] = val;
+                    }
+
+                    std::vector<Layer*> layers;
+                    int nlayers;
+                    fread(&nlayers, 4, 1, infile);
+                    for (int x = 0; x < nlayers; x++) {
+                        int nameLen;
+                        fread(&nameLen, 4, 1, infile);
+                        char* name = (char*)malloc(nameLen+1);
+                        memset(name, 0, nameLen + 1);
+                        fread(name, nameLen, 1, infile);
+
+                        Layer* newLayer = new Layer(dimensions.x, dimensions.y);
+                        newLayer->name = std::string(name);
+
+                        char colorKeySet;
+                        fread(&colorKeySet, 1, 1, infile);
+                        newLayer->colorKeySet = colorKeySet == '\1';
+                        fread(&newLayer->colorKey, 4, 1, infile);
+
+                        free(name);
+                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                        layers.push_back(newLayer);
+                    }
+                    MainEditor* ret = new MainEditor(layers);
+                    if (extData.contains("tile.dim.x")) { ret->tileDimensions.x = std::stoi(extData["tile.dim.x"]); }
+                    if (extData.contains("tile.dim.y")) { ret->tileDimensions.y = std::stoi(extData["tile.dim.y"]); }
+                    if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
+                    if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
+                    if (extData.contains("layer.selected")) { ret->selLayer = std::stoi(extData["layer.selected"]); }
+                    if (extData.contains("sym.enabled")) { 
+                        ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
+                        ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
+                    }
+                    if (extData.contains("comments")) {
+                        std::string commentsData = extData["comments"];
+                        int nextSC = commentsData.find_first_of(';');
+                        int commentsCount = std::stoi(commentsData.substr(0, nextSC));
+                        commentsData = commentsData.substr(nextSC + 1);
+                        for (int x = 0; x < commentsCount; x++) {
+                            CommentData newComment;
+                            nextSC = commentsData.find_first_of(';');
+                            newComment.position.x = std::stoi(commentsData.substr(0, nextSC));
+                            commentsData = commentsData.substr(nextSC + 1);
+                            nextSC = commentsData.find_first_of(';');
+                            newComment.position.y = std::stoi(commentsData.substr(0, nextSC));
+                            commentsData = commentsData.substr(nextSC + 1);
+                            nextSC = commentsData.find_first_of(';');
+                            newComment.data = commentsData.substr(0, nextSC);
+                            commentsData = commentsData.substr(nextSC + 1);
+                            ret->comments.push_back(newComment);
+                        }
+                    }
+                    fclose(infile);
+                    return ret;
+                }
                 break;
             default:
                 printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
@@ -1411,11 +1498,81 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->texW * editor->texH) {
-                printf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                printf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
             fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+
+            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+        }
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        uint8_t voidsnVersion = 0x03;
+        fwrite(&voidsnVersion, 1, 1, outfile);
+        uint32_t nvalBuffer;
+
+        nvalBuffer = editor->texW;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+        nvalBuffer = editor->texH;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
+        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
+
+        std::string commentsData;
+        commentsData += std::to_string(editor->comments.size()) + ';';
+        for (CommentData& c : editor->comments) {
+            commentsData += std::to_string(c.position.x) + ';';
+            commentsData += std::to_string(c.position.y) + ';';
+            commentsData += c.data + ';';
+        }
+
+        fwrite("/VOIDSN.META/", 1, 13, outfile);
+        std::map<std::string, std::string> extData = {
+            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
+            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
+            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.x", std::to_string(editor->symmetryPositions.x)},
+            {"sym.y", std::to_string(editor->symmetryPositions.y)},
+            {"comments", commentsData},
+            {"layer.selected", std::to_string(editor->selLayer)}
+        };
+
+        nvalBuffer = extData.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (auto& extDPair : extData) {
+            nvalBuffer = extDPair.first.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
+            nvalBuffer = extDPair.second.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
+        }
+
+        nvalBuffer = editor->layers.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (Layer*& lr : editor->layers) {
+            if (lr->w * lr->h != editor->texW * editor->texH) {
+                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+            }
+            nvalBuffer = lr->name.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+
+            fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
+            fwrite(&lr->colorKey, 4, 1, outfile);
 
             fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
         }

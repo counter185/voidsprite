@@ -42,6 +42,7 @@ class BaseBrush;
 class Layer;
 class MainEditor;
 class SpritesheetPreviewScreen;
+class UIButton;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
@@ -93,6 +94,7 @@ struct NavbarSection {
 	std::vector<SDL_Keycode> order;
 	std::map<SDL_Keycode, NamedEditorOperation> actions;
 	SDL_Texture* icon = NULL;
+	UIButton* button = NULL;
 };
 
 #define UNDOSTACK_LAYER_DATA_MODIFIED 0
