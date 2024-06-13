@@ -88,6 +88,14 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     }
 }
 
+void platformTryLoadImageFile(EventCallbackListener* caller) {
+
+}
+
+void platformOpenFileLocation(PlatformNativePathString path) {
+
+}
+
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode) {
     FILE* ret;
     _wfopen_s(&ret, path.c_str(), mode.c_str());

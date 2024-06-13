@@ -15,5 +15,7 @@ void platformInit();
 void platformPostInit();
 
 void platformTrySaveImageFile(EventCallbackListener* caller);
+void platformTryLoadImageFile(EventCallbackListener* caller);
+void platformOpenFileLocation(PlatformNativePathString path);
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
