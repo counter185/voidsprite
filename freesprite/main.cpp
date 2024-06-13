@@ -311,10 +311,11 @@ int main(int argc, char** argv)
         
         for (int x = 0; x < screenStack.size(); x++) {
             BaseScreen* s = screenStack[x];
+            int squareW = (int)(16 * (screenSwitchTimer.started && x == currentScreen ? XM1PW3P1(screenSwitchTimer.percentElapsedTime(300)) : 1));
             SDL_Rect r = {
                 screenIcons.x,
                 screenIcons.y,
-                16, 16
+                squareW, squareW
             };
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, x == currentScreen ? 0x80 : 0x20);
             SDL_RenderFillRect(g_rd, &r);
