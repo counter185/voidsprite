@@ -421,6 +421,16 @@ void MainEditor::takeInput(SDL_Event evt) {
 							redo();
 						}
 						break;
+					case SDLK_s:
+						if (g_ctrlModifier) {
+							if (g_shiftModifier) {
+								trySaveAsImage();
+							}
+							else {
+								trySaveImage();
+							}
+						}
+						break;
 				}
 				break;
 		}
