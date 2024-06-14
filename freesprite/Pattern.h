@@ -157,3 +157,31 @@ class PatternVertical4px : public Pattern
 	std::string getName() override { return "Vertical - 4px dist."; }
 	bool canDrawAt(XY position) { return position.x >= 0 ? (position.x % 5) == 0 : false; }
 };
+
+class PatternSquares1px : public Pattern
+{
+	std::string getIconPath() override { return "assets/pattern_sq_1x.png"; }
+	std::string getName() override { return "Squares - 1px"; }
+	bool canDrawAt(XY position) { return (position.x % 2) != 0 && (position.y % 2) != 0; }
+};
+
+class PatternSquares2px : public Pattern
+{
+	std::string getIconPath() override { return "assets/pattern_sq_2x.png"; }
+	std::string getName() override { return "Squares - 2px"; }
+	bool canDrawAt(XY position) { return (position.x % 3) != 0 && (position.y % 3) != 0; }
+};
+
+class PatternSquares3px : public Pattern
+{
+	std::string getIconPath() override { return "assets/pattern_sq_3x.png"; }
+	std::string getName() override { return "Squares - 3px"; }
+	bool canDrawAt(XY position) { return (position.x % 4) != 0 && (position.y % 4) != 0; }
+};
+
+class PatternSquares4px : public Pattern
+{
+	std::string getIconPath() override { return "assets/pattern_sq_4x.png"; }
+	std::string getName() override { return "Squares - 4px"; }
+	bool canDrawAt(XY position) { return (position.x % 5) != 0 && (position.y % 5) != 0; }
+};

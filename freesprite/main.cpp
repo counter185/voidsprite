@@ -191,6 +191,10 @@ int main(int argc, char** argv)
     g_patterns.push_back(new PatternVertical2px());
     g_patterns.push_back(new PatternVertical3px());
     g_patterns.push_back(new PatternVertical4px());
+    g_patterns.push_back(new PatternSquares1px());
+    g_patterns.push_back(new PatternSquares2px());
+    g_patterns.push_back(new PatternSquares3px());
+    g_patterns.push_back(new PatternSquares4px());
     for (Pattern*& pattern : g_patterns) {
 		pattern->cachedIcon = IMGLoadToTexture(pattern->getIconPath());
 	}
