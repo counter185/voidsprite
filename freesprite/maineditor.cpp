@@ -4,6 +4,7 @@
 #include "EditorLayerPicker.h"
 #include "GlobalNavBar.h"
 #include "PopupYesNo.h"
+#include "platform_windows.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	SetUpWidgets();
@@ -50,6 +51,7 @@ MainEditor::MainEditor(std::vector<Layer*> layers)
 	this->layers = layers;
 	recenterCanvas();
 	initLayers();
+	
 }
 
 MainEditor::~MainEditor() {
@@ -481,7 +483,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 		else {
 			g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
 		}
-		
+		platformOpenFileLocation(lastConfirmedSavePath);
 	}
 }
 
@@ -544,6 +546,7 @@ void MainEditor::trySaveImage()
 	else {
 		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId);
 	}
+	
 }
 
 void MainEditor::trySaveAsImage()
@@ -888,5 +891,6 @@ CommentData MainEditor::_removeCommentAt(XY a)
 	}
 	printf("_removeComment NOT FOUND\n");
 	//shitass workaround tell noone thanks
+	//@hirano185 hey girlie check this out!
 	return { {0,0}, "\1" };
 }

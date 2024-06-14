@@ -93,7 +93,9 @@ void platformTryLoadImageFile(EventCallbackListener* caller) {
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
-
+    std::wstring command = L"explorer /select=";
+    command += path;
+    _wsystem(command.c_str());
 }
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode) {
