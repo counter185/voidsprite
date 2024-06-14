@@ -57,6 +57,7 @@ public:
 	PlatformNativePathString lastConfirmedSavePath;
 	int lastConfirmedExporterId;
 	bool lastConfirmedSave = false;
+	bool lastWasSaveAs = false;
 
 	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;

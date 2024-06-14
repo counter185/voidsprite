@@ -4,7 +4,6 @@
 #include "EditorLayerPicker.h"
 #include "GlobalNavBar.h"
 #include "PopupYesNo.h"
-#include "platform_windows.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	setUpWidgets();
@@ -449,48 +448,19 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 			result = f.exportFunction(name, this);
 		}
 
-		/*
-#if _WIN32
-		size_t extStart = name.find_last_of(L".");
-#else
-		size_t extStart = name.find_last_of(".");
-#endif
-		PlatformNativePathString extension = name.substr(extStart);
-		if (extension == L".voidsn" || extension == L".voidsnv1") {
-			result = writeVOIDSNv2(name, this);
-		} else if (extension == L".voidsnv1") {
-			result = writeVOIDSNv1(name, XY{ texW, texH }, layers);
-		}
-		else if (extension == L".ora") {
-			result = writeOpenRaster(name, this);
-		}
-		else {
-			Layer* flat = flattenImage();
-			if (extension == L".xyz") {
-				result = writeXYZ(name, flat);
-			}
-			else if (extension == L".bmp") {
-				result = writeBMP(name, flat);
-			}
-			else if (extension == L".pbm") {
-				result = writeCaveStoryPBM(name, flat);
-			}
-			else {
-				result = writePNG(name, flat);
-			}
-			delete flat;
-		}*/
 		if (result) {
 			g_addPopup(new PopupMessageBox("File saved", "Save successful!"));
 			lastConfirmedSave = true;
 			lastConfirmedSavePath = name;
 			lastConfirmedExporterId = exporterID;
 			changesSinceLastSave = false;
+			if (lastWasSaveAs) {
+				platformOpenFileLocation(lastConfirmedSavePath);
+			}
 		}
 		else {
 			g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
 		}
-		platformOpenFileLocation(lastConfirmedSavePath);
 	}
 }
 
@@ -549,17 +519,19 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
 
 void MainEditor::trySaveImage()
 {
+	lastWasSaveAs = false;
 	if (!lastConfirmedSave) {
 		trySaveAsImage();
 	}
 	else {
-		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId);
+		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId+1);
 	}
 	
 }
 
 void MainEditor::trySaveAsImage()
 {
+	lastWasSaveAs = true;
 	platformTrySaveImageFile(this);
 }
 
