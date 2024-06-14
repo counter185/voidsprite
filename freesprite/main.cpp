@@ -8,6 +8,7 @@
 #include "BrushFill.h"
 #include "Brush1pxLinePathfind.h"
 #include "BrushCircle.h"
+#include "Pattern.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -45,6 +46,7 @@ SDL_Texture* g_iconMenuSpritesheet = NULL;
 SDL_Texture* g_iconMenuTemplates = NULL;
 
 std::vector<BaseBrush*> g_brushes;
+std::vector<Pattern*> g_patterns;
 
 std::vector<BasePopup*> popupStack;
 void g_addPopup(BasePopup* a) {
@@ -170,6 +172,28 @@ int main(int argc, char** argv)
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
     }
+
+    //load patterns
+    g_patterns.push_back(new PatternFull());
+    g_patterns.push_back(new PatternGrid());
+    g_patterns.push_back(new PatternGridReverse());
+    g_patterns.push_back(new PatternDiag2px());
+    g_patterns.push_back(new PatternDiag3px());
+    g_patterns.push_back(new PatternDiag4px());
+    g_patterns.push_back(new PatternDiag2pxReverse());
+    g_patterns.push_back(new PatternDiag3pxReverse());
+    g_patterns.push_back(new PatternDiag4pxReverse());
+    g_patterns.push_back(new PatternHorizontal1px());
+    g_patterns.push_back(new PatternHorizontal2px());
+    g_patterns.push_back(new PatternHorizontal3px());
+    g_patterns.push_back(new PatternHorizontal4px());
+    g_patterns.push_back(new PatternVertical1px());
+    g_patterns.push_back(new PatternVertical2px());
+    g_patterns.push_back(new PatternVertical3px());
+    g_patterns.push_back(new PatternVertical4px());
+    for (Pattern*& pattern : g_patterns) {
+		pattern->cachedIcon = IMGLoadToTexture(pattern->getIconPath());
+	}
 
     //MainEditor tempMainEditor(XY{ 640,480 });
 

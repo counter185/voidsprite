@@ -4,19 +4,39 @@
 #include "BaseBrush.h"
 #include "UIButton.h"
 #include "EventCallbackListener.h"
+#include "Pattern.h"
+#include "UILabel.h"
 
 class EditorBrushPicker : public Drawable, public EventCallbackListener
 {
 public:
-	int wxWidth = 200;
+	int wxWidth = 190;
 	int wxHeight = 140;
 	MainEditor* caller;
+	bool patternsMenuOpen = false;
 
-	DrawableManager subWidgets;
+	Timer64 patternMenuTimer;
+	UIButton* patternPanelBtn;
+	DrawableManager subWidgets, patternMenuWidgets;
 	std::vector<UIButton*> brushButtons;
+	std::vector<UIButton*> patternButtons;
 
 	EditorBrushPicker(MainEditor* caller) {
 		this->caller = caller;
+
+		patternPanelBtn = new UIButton();
+		patternPanelBtn->position = { 141, 10 };
+		patternPanelBtn->text = ">";
+		patternPanelBtn->wxWidth = 40;
+		patternPanelBtn->wxHeight = 24;
+		patternPanelBtn->icon = g_patterns[0]->cachedIcon;
+		patternPanelBtn->setCallbackListener(EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU, this);
+		subWidgets.addDrawable(patternPanelBtn);
+
+		UILabel* lbl = new UILabel();
+		lbl->position = { 220, 5 };
+		lbl->text = "PATTERNS";
+		patternMenuWidgets.addDrawable(lbl);
 
 		int px = 5;
 		int py = 40;
@@ -33,9 +53,29 @@ public:
 			//newBtn->text = brush->getName();
 			newBtn->wxWidth = 26;
 			newBtn->wxHeight = 26;
-			newBtn->setCallbackListener(10 + i++, this);
+			newBtn->setCallbackListener(20 + i++, this);
 			brushButtons.push_back(newBtn);
 			subWidgets.addDrawable(newBtn);
+		}
+		
+		px = 220;
+		py = 30;
+		i = 0;
+		for (Pattern*& pattern : g_patterns) {
+			UIButton* newBtn = new UIButton();
+			if (px + 26 > 210+ wxWidth) {
+				py += 26;
+				px = 220;
+			}
+			newBtn->position = XY{ px, py };
+			px += 26;
+			newBtn->icon = pattern->cachedIcon;
+			//newBtn->text = brush->getName();
+			newBtn->wxWidth = 24;
+			newBtn->wxHeight = 24;
+			newBtn->setCallbackListener(60 + i++, this);
+			patternButtons.push_back(newBtn);
+			patternMenuWidgets.addDrawable(newBtn);
 		}
 	}
 
@@ -49,5 +89,6 @@ public:
 	void eventButtonPressed(int evt_id) override;
 
 	void updateActiveBrushButton(int id);
+	void updateActivePatternButton(Pattern* p);
 };
 

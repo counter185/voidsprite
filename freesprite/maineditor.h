@@ -48,7 +48,8 @@ public:
 	int scale = 1;
 	XY mouseHoldPosition;
 	bool closeNextTick = false;
-	BaseBrush* currentBrush = new Brush1x1();
+	BaseBrush* currentBrush;
+	Pattern* currentPattern;
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
 
@@ -92,7 +93,7 @@ public:
 	void renderComments();
 	void drawSymmetryLines();
 	void initLayers();
-	void SetUpWidgets();
+	void setUpWidgets();
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
 	void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);

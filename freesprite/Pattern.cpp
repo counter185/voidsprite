@@ -1,0 +1,1 @@
+#include "Pattern.h"

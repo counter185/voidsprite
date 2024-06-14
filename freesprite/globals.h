@@ -43,6 +43,7 @@ class Layer;
 class MainEditor;
 class SpritesheetPreviewScreen;
 class UIButton;
+class Pattern;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
@@ -51,6 +52,7 @@ extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
+extern std::vector<Pattern*> g_patterns;
 
 extern std::vector<std::string> g_cmdlineArgs;
 

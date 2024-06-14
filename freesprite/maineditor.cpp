@@ -6,7 +6,7 @@
 #include "PopupYesNo.h"
 
 MainEditor::MainEditor(XY dimensions) {
-	SetUpWidgets();
+	setUpWidgets();
 
 	texW = dimensions.x;
 	texH = dimensions.y;
@@ -17,7 +17,7 @@ MainEditor::MainEditor(XY dimensions) {
 	initLayers();
 }
 MainEditor::MainEditor(SDL_Surface* srf) {
-	SetUpWidgets();
+	setUpWidgets();
 
 	//todo i mean just use MainEditor(Layer*) here
 	texW = srf->w;
@@ -32,7 +32,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
 MainEditor::MainEditor(Layer* layer)
 {
-	SetUpWidgets();
+	setUpWidgets();
 
 	texW = layer->w;
 	texH = layer->h;
@@ -44,7 +44,7 @@ MainEditor::MainEditor(Layer* layer)
 
 MainEditor::MainEditor(std::vector<Layer*> layers)
 {
-	SetUpWidgets();
+	setUpWidgets();
 	texW = layers[0]->w;
 	texH = layers[0]->h;
 	this->layers = layers;
@@ -219,6 +219,10 @@ void MainEditor::DrawForeground()
 	if (currentBrush != NULL) {
 		g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? "(Erase)" : ""), 350, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
 	}
+
+	if (currentPattern != NULL) {
+		g_fnt->RenderString(std::format("{}", currentPattern->getName()), 600, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+	}
 }
 
 void MainEditor::renderComments()
@@ -251,8 +255,11 @@ void MainEditor::initLayers()
 	layerPicker->updateLayers();
 }
 
-void MainEditor::SetUpWidgets()
+void MainEditor::setUpWidgets()
 {
+	currentBrush = g_brushes[0];
+	currentPattern = g_patterns[0];
+
 	colorPicker = new EditorColorPicker(this);
 	colorPicker->position.y = 80;
 	colorPicker->position.x = 10;
@@ -515,7 +522,9 @@ void MainEditor::FillTexture() {
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
-	getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
+	if (currentPattern->canDrawAt(position)) {
+		getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
+	}
 	if (symmetryEnabled[0] && !(symmetry & 0b10)) {
 		int symmetryXPoint = symmetryPositions.x / 2;
 		bool symXPointIsCentered = symmetryPositions.x % 2;

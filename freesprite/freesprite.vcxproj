@@ -181,6 +181,7 @@
     <ClCompile Include="libtga\tgawrite.c" />
     <ClCompile Include="maineditor.cpp" />
     <ClCompile Include="mathops.cpp" />
+    <ClCompile Include="Pattern.cpp" />
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="PopupMessageBox.cpp" />
     <ClCompile Include="PopupSetColorKey.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="libtga\tga_private.h" />
     <ClInclude Include="maineditor.h" />
     <ClInclude Include="mathops.h" />
+    <ClInclude Include="Pattern.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="platform_windows.h" />
     <ClInclude Include="PopupMessageBox.h" />
