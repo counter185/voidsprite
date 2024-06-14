@@ -20,6 +20,7 @@ public:
 	DrawableManager wxs;
 	DrawableManager subWxs;
 	SDL_Keycode currentSubmenuOpen = -1;
+	Timer64 submenuOpenTimer;
 
 	std::vector<SDL_Keycode> submenuOrder = {
 		SDLK_f,

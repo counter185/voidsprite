@@ -1393,6 +1393,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             commentsData = commentsData.substr(nextSC + 1);
                             nextSC = commentsData.find_first_of(';');
                             newComment.data = commentsData.substr(0, nextSC);
+                            std::replace(newComment.data.begin(), newComment.data.end(), '\1', ';');
                             commentsData = commentsData.substr(nextSC + 1);
                             ret->comments.push_back(newComment);
                         }
@@ -1534,7 +1535,9 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         for (CommentData& c : editor->comments) {
             commentsData += std::to_string(c.position.x) + ';';
             commentsData += std::to_string(c.position.y) + ';';
-            commentsData += c.data + ';';
+            std::string sanitizedData = c.data;
+            std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
+            commentsData += sanitizedData + ';';
         }
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);

@@ -11,8 +11,8 @@ void GlobalNavBar::render(XY position)
 		drawLine(XY{ 0, wxHeight }, XY{ g_windowW, wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(600)));
 		//SDL_RenderDrawLine(g_rd, 0, wxHeight, g_windowW, wxHeight);
 	}
+	subWxs.renderAll(xySubtract(position, { 0, (int)(30 * (1.0f - XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)))) }));
 	wxs.renderAll(position);
-	subWxs.renderAll(position);
 }
 
 void GlobalNavBar::handleInput(SDL_Event evt, XY gPosOffset)
@@ -69,6 +69,7 @@ void GlobalNavBar::openSubmenu(SDL_Keycode which)
 {
 	subWxs.forceUnfocus();
 	currentSubmenuOpen = -1;
+	submenuOpenTimer.start();
 	updateCurrentSubmenu();
 	if (which != -1) {
 		currentSubmenuOpen = which;
