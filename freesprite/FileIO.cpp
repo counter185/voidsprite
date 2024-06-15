@@ -1378,6 +1378,12 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
                         ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
                     }
+                    if (extData.contains("layer.visibility")) {
+                        std::string layerVisibilityData = extData["layer.visibility"];
+                        for (int x = 0; x < nlayers && x < layerVisibilityData.size(); x++) {
+                            ret->layers[x]->hidden = layerVisibilityData[x] == '0';
+                        }
+                    }
                     if (extData.contains("comments")) {
                         std::string commentsData = extData["comments"];
                         int nextSC = commentsData.find_first_of(';');
@@ -1540,6 +1546,11 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             commentsData += sanitizedData + ';';
         }
 
+        std::string layerVisibilityData = "";
+        for (Layer*& lr : editor->layers) {
+			layerVisibilityData += lr->hidden ? '0' : '1';
+		}
+
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
             {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
@@ -1548,7 +1559,8 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
-            {"layer.selected", std::to_string(editor->selLayer)}
+            {"layer.selected", std::to_string(editor->selLayer)},
+            {"layer.visibility", layerVisibilityData}
         };
 
         nvalBuffer = extData.size();

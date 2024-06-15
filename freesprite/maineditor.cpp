@@ -518,7 +518,7 @@ void MainEditor::FillTexture() {
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
-	if (currentPattern->canDrawAt(position)) {
+	if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
 		getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
 	}
 	if (symmetryEnabled[0] && !(symmetry & 0b10)) {

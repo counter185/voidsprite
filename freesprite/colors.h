@@ -224,4 +224,21 @@ inline std::map<std::string, unsigned int> g_colors = {
 	{"nes3d", 0xFF000000},
 	{"nes3e", 0xFF000000},
 	{"nes3f", 0xFF000000},
+
+	{"cga0", 0xFF000000},
+	{"cga1", 0xFF0000AA},
+	{"cga2", 0xFF00AA00},
+	{"cga3", 0xFF00AAAA},
+	{"cga4", 0xFFAA0000},
+	{"cga5", 0xFFAA00AA},
+	{"cga6", 0xFFAA5500},
+	{"cga7", 0xFFAAAAAA},
+	{"cga8", 0xFF555555},
+	{"cga9", 0xFF5555FF},
+	{"cga10", 0xFF55FF55},
+	{"cga11", 0xFF55FFFF},
+	{"cga12", 0xFFFF5555},
+	{"cga13", 0xFFFF55FF},
+	{"cga14", 0xFFFFFF55},
+	{"cga15", 0xFFFFFFFF}
 };

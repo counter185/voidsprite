@@ -59,6 +59,7 @@ public:
 	bool lastConfirmedSave = false;
 	bool lastWasSaveAs = false;
 
+	bool replaceAlphaMode = false;
 	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
 

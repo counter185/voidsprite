@@ -54,6 +54,10 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
         patternMenuTimer.start();
         patternPanelBtn->text = patternsMenuOpen ? "<" : ">";
     }
+    else if (evt_id == EVENT_MAINEDITOR_TOGGLEREPLACE) {
+        caller->replaceAlphaMode = !caller->replaceAlphaMode;
+        editorReplaceBtn->colorBGFocused = editorReplaceBtn->colorBGUnfocused = caller->replaceAlphaMode ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
+    }
     else if (evt_id >= 60) {
         caller->currentPattern = g_patterns[evt_id - 60];
         updateActivePatternButton(caller->currentPattern);

@@ -17,6 +17,7 @@ public:
 
 	Timer64 patternMenuTimer;
 	UIButton* patternPanelBtn;
+	UIButton* editorReplaceBtn;
 	DrawableManager subWidgets, patternMenuWidgets;
 	std::vector<UIButton*> brushButtons;
 	std::vector<UIButton*> patternButtons;
@@ -32,6 +33,14 @@ public:
 		patternPanelBtn->icon = g_patterns[0]->cachedIcon;
 		patternPanelBtn->setCallbackListener(EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU, this);
 		subWidgets.addDrawable(patternPanelBtn);
+
+		editorReplaceBtn = new UIButton();
+		editorReplaceBtn->position = { 110, 10 };
+		editorReplaceBtn->text = "R";
+		editorReplaceBtn->wxWidth = 24;
+		editorReplaceBtn->wxHeight = 24;
+		editorReplaceBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEREPLACE, this);
+		subWidgets.addDrawable(editorReplaceBtn);
 
 		UILabel* lbl = new UILabel();
 		lbl->position = { 220, 5 };
