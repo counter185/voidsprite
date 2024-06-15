@@ -119,9 +119,11 @@ public:
 	void moveLayerUp(int index);
 	void moveLayerDown(int index);
 	void mergeLayerDown(int index);
+	void duplicateLayer(int index);
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}
+	void layer_promptRename();
 	void layer_flipHorizontally();
 	void layer_flipVertically();
 	void layer_swapLayerRGBtoBGR();

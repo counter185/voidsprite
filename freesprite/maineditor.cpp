@@ -440,6 +440,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 							}
 						}
 						break;
+					case SDLK_F2:
+						layer_promptRename();
+						break;
 				}
 				break;
 		}
@@ -779,6 +782,15 @@ void MainEditor::mergeLayerDown(int index)
 	
 }
 
+void MainEditor::duplicateLayer(int index)
+{
+	Layer* currentLayer = layers[index];
+	Layer* newL = newLayer();
+	memcpy(newL->pixelData, currentLayer->pixelData, texW * texH * 4);
+	newL->name = "Copy:" + currentLayer->name;
+	newL->layerDirty = true;
+}
+
 void MainEditor::layer_flipHorizontally()
 {
 	commitStateToCurrentLayer();
@@ -799,6 +811,14 @@ void MainEditor::layer_swapLayerRGBtoBGR()
 	free(clayer->pixelData);
 	clayer->pixelData = convData;
 	clayer->layerDirty = true;
+}
+
+void MainEditor::layer_promptRename()
+{
+	PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:");
+	ninput->setCallbackListener(EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME, this);
+	ninput->tbox->text = this->getCurrentLayer()->name;
+	g_addPopup(ninput);
 }
 
 uint32_t MainEditor::layer_getPixelAt(XY pos)

@@ -126,11 +126,7 @@ public:
 					},
 					{SDLK_r, { "Rename current layer",
 							[](MainEditor* editor) {
-								PopupTextBox* ninput = new PopupTextBox("Rename layer", "Input the new layer name:");
-								ninput->setCallbackListener(EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME, editor);
-								ninput->tbox->text = editor->getCurrentLayer()->name;
-								g_addPopup(ninput);
-								printf("%i\n", editor->getCurrentLayer()->numUniqueColors(true));
+								editor->layer_promptRename();
 							}
 						}
 					},

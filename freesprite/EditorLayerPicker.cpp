@@ -48,6 +48,13 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     mergeDownBtn->icon = g_iconLayerDownMerge;
     mergeDownBtn->setCallbackListener(-5, this);
     layerControlButtons.addDrawable(mergeDownBtn);
+
+    UIButton* duplicateBtn = new UIButton();
+    duplicateBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + mergeDownBtn->wxWidth + 5 + 5 + 5 + 5 + 5 + 5, 30 };
+    duplicateBtn->wxWidth = 30;
+    duplicateBtn->icon = g_iconLayerDuplicate;
+    duplicateBtn->setCallbackListener(-6, this);
+    layerControlButtons.addDrawable(duplicateBtn);
 }
 
 EditorLayerPicker::~EditorLayerPicker()
@@ -124,6 +131,9 @@ void EditorLayerPicker::eventButtonPressed(int evt_id)
     }
     else if (evt_id == -5) {
         caller->mergeLayerDown(caller->selLayer);
+    }
+    else if (evt_id == -6) {
+        caller->duplicateLayer(caller->selLayer);
     }
     updateLayers();
 }
