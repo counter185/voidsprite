@@ -1383,6 +1383,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         for (int x = 0; x < nlayers && x < layerVisibilityData.size(); x++) {
                             ret->layers[x]->hidden = layerVisibilityData[x] == '0';
                         }
+                        ret->layerPicker->updateLayers();
                     }
                     if (extData.contains("comments")) {
                         std::string commentsData = extData["comments"];

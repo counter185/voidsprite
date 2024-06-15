@@ -65,7 +65,8 @@ EditorLayerPicker::~EditorLayerPicker()
 
 bool EditorLayerPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
-	return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
+	return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight })
+        || layerButtons.mouseInAny(thisPositionOnScreen, mousePos);
 }
 
 void EditorLayerPicker::render(XY position)
