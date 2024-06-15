@@ -372,8 +372,9 @@ int main(int argc, char** argv)
         
         tickNotifications();
         int notifY = 30;
-        int notifX = g_windowW - 450;
+        int notifOriginX = g_windowW - 450;
         for (Notification& notif : g_notifications) {
+            int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
 			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0-notif.timer.percentElapsedTime(500, notif.duration-500)))));
 			SDL_Rect r = { notifX, notifY, 400, 60 };
 			SDL_RenderFillRect(g_rd, &r);

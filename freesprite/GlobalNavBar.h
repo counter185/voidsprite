@@ -11,6 +11,7 @@
 #include "SpritesheetPreviewScreen.h"
 #include "TilemapPreviewScreen.h"
 #include "PopupSetColorKey.h"
+#include "Notification.h"
 
 class GlobalNavBar : public Drawable, public EventCallbackListener
 {
@@ -119,7 +120,7 @@ public:
 					},
 					{SDLK_x, { "Print number of colors",
 							[](MainEditor* editor) {
-								printf("%i\n", editor->getCurrentLayer()->numUniqueColors(true));
+								g_addNotification(Notification("", std::format("{} colors in current layer", editor->getCurrentLayer()->numUniqueColors(true))));
 							}
 						}
 					},
@@ -178,20 +179,25 @@ public:
 					{SDLK_s, { "Open spritesheet preview...",
 							[](MainEditor* editor) {
 								if (editor->spritesheetPreview == NULL) {
+									if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+										g_addNotification(Notification("Error", "Set the pixel grid first."));
+										return;
+									}
 									SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
 									g_addScreen(newScreen);
 									editor->spritesheetPreview = newScreen;
+								}
+								else {
+									g_addNotification(Notification("Error", "Spritesheet preview is already open."));
 								}
 							}
 						}
 					},
 					{SDLK_t, { "Open tileset preview...",
 							[](MainEditor* editor) {
-								if (editor->spritesheetPreview == NULL) {
-									TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
-									g_addScreen(newScreen);
-									//editor->spritesheetPreview = newScreen;
-								}
+								TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
+								g_addScreen(newScreen);
+								//editor->spritesheetPreview = newScreen;
 							}
 						}
 					},
