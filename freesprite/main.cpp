@@ -168,6 +168,7 @@ int main(int argc, char** argv)
     g_iconMenuPxDim = IMGLoadToTexture("assets/menu_pxdim.png");
     g_iconMenuSpritesheet = IMGLoadToTexture("assets/menu_sptl.png");
     g_iconMenuTemplates = IMGLoadToTexture("assets/menu_templates.png");
+    //SDL_Texture* the_creature = IMGLoadToTexture("assets/kaosekai.png");
 
     //load brushes
     g_brushes.push_back(new Brush1x1());
@@ -292,7 +293,7 @@ int main(int argc, char** argv)
                     g_mouseY = evt.motion.y;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    //g_addNotification(Notification("Title", "Mouse button was clicked", 5000));
+                    //g_addNotification(Notification("WARNING", "<- the creature", 5000, the_creature));
                     break;
             }
 
@@ -380,8 +381,17 @@ int main(int argc, char** argv)
             drawLine(XY{r.x, r.y}, XY{ r.x, r.y + r.h }, XM1PW3P1(notif.timer.percentElapsedTime(300)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
             drawLine(XY{ r.x + r.w, r.y + r.h }, XY{r.x+r.w, r.y}, XM1PW3P1(notif.timer.percentElapsedTime(300))* (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 
-			g_fnt->RenderString(notif.title, notifX + 10, notifY + 5, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
-			g_fnt->RenderString(notif.message, notifX + 10, notifY + 30, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
+            int textX = notifX + 10;
+            if (notif.icon != NULL) {
+				SDL_Rect iconRect = { notifX + 5, notifY + 5, 50, 50 };
+                SDL_SetTextureAlphaMod(notif.icon, (uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 200)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))));
+				SDL_RenderCopy(g_rd, notif.icon, NULL, &iconRect);
+                SDL_SetTextureAlphaMod(notif.icon, 0xff);
+				textX += 50;
+			}
+
+			g_fnt->RenderString(notif.title, textX, notifY + 5, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
+			g_fnt->RenderString(notif.message, textX, notifY + 30, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
 			notifY += 65;
 		}
 
