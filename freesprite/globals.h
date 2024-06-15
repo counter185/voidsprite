@@ -44,6 +44,7 @@ class MainEditor;
 class SpritesheetPreviewScreen;
 class UIButton;
 class Pattern;
+class Notification;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
@@ -73,6 +74,8 @@ extern SDL_Texture* g_mainlogo,
    *g_iconMenuPxDim,
    *g_iconMenuSpritesheet,
    *g_iconMenuTemplates;
+
+void g_addNotification(Notification a);
 
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();

@@ -3,6 +3,7 @@
 #include "maineditor.h"
 #include "FileIO.h"
 #include "PopupMessageBox.h"
+#include "Notification.h"
 
 void StartScreen::tick() {
 
@@ -124,7 +125,8 @@ void StartScreen::tryLoadFile(std::string path)
 			g_addScreen(new MainEditor(l));
 		}
 		else {
-			g_addPopup(new PopupMessageBox("", "Failed to load file."));
+			//g_addPopup(new PopupMessageBox("", "Failed to load file."));
+			g_addNotification(Notification("Error", "Failed to load file", 6000));
 			printf("No importer for file available\n");
 		}
 	}

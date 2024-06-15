@@ -9,6 +9,7 @@
 #include "Brush1pxLinePathfind.h"
 #include "BrushCircle.h"
 #include "Pattern.h"
+#include "Notification.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -47,6 +48,20 @@ SDL_Texture* g_iconMenuTemplates = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
+
+std::vector<Notification> g_notifications;
+
+void g_addNotification(Notification a) {
+    g_notifications.push_back(a);
+}
+void tickNotifications() {
+    for (int x = 0; x < g_notifications.size(); x++) {
+        if (g_notifications[x].timer.elapsedTime() > g_notifications[x].duration) {
+			g_notifications.erase(g_notifications.begin() + x);
+			x--;
+		}
+	}
+}
 
 std::vector<BasePopup*> popupStack;
 void g_addPopup(BasePopup* a) {
@@ -277,6 +292,7 @@ int main(int argc, char** argv)
                     g_mouseY = evt.motion.y;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
+                    //g_addNotification(Notification("Title", "Mouse button was clicked", 5000));
                     break;
             }
 
@@ -353,6 +369,22 @@ int main(int argc, char** argv)
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
         }
         
+        tickNotifications();
+        int notifY = 30;
+        int notifX = g_windowW - 450;
+        for (Notification& notif : g_notifications) {
+			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0-notif.timer.percentElapsedTime(500, notif.duration-500)))));
+			SDL_Rect r = { notifX, notifY, 400, 60 };
+			SDL_RenderFillRect(g_rd, &r);
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80 + (uint8_t)(0x60 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(500)))));
+            drawLine(XY{r.x, r.y}, XY{ r.x, r.y + r.h }, XM1PW3P1(notif.timer.percentElapsedTime(300)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
+            drawLine(XY{ r.x + r.w, r.y + r.h }, XY{r.x+r.w, r.y}, XM1PW3P1(notif.timer.percentElapsedTime(300))* (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
+
+			g_fnt->RenderString(notif.title, notifX + 10, notifY + 5, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
+			g_fnt->RenderString(notif.message, notifX + 10, notifY + 30, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
+			notifY += 65;
+		}
+
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};

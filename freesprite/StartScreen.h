@@ -14,6 +14,7 @@
 #include "TemplateMC64x32Skin.h"
 #include "PopupMessageBox.h"
 #include "UIColorInputField.h"
+#include "Notification.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -168,11 +169,13 @@ public:
 							g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
 						}
 						catch (std::out_of_range) {
-							g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+							//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range."));
 						}
 					}
 					else {
-						g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
+						//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
+						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions."));
 					}
 					break;
 				case 1:
@@ -187,11 +190,13 @@ public:
 							g_addScreen(newMainEditor);
 						}
 						catch (std::out_of_range) {
-							g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+							//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range."));
 						}
 					}
 					else {
-						g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
+						//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
+						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions."));
 					}
 					break;
 			}

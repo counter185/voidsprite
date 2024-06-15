@@ -255,6 +255,12 @@
     <ClCompile Include="PopupSetColorKey.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Pattern.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Notification.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -459,6 +465,12 @@
       <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="PopupSetColorKey.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pattern.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Notification.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

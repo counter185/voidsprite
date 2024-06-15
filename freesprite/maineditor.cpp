@@ -4,6 +4,7 @@
 #include "EditorLayerPicker.h"
 #include "GlobalNavBar.h"
 #include "PopupYesNo.h"
+#include "Notification.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	setUpWidgets();
@@ -465,7 +466,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 		}
 
 		if (result) {
-			g_addPopup(new PopupMessageBox("File saved", "Save successful!"));
+			//g_addPopup(new PopupMessageBox("File saved", "Save successful!"));
 			lastConfirmedSave = true;
 			lastConfirmedSavePath = name;
 			lastConfirmedExporterId = exporterID;
@@ -473,9 +474,11 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 			if (lastWasSaveAs) {
 				platformOpenFileLocation(lastConfirmedSavePath);
 			}
+			g_addNotification(Notification("File saved", "Save successful!", 4000));
 		}
 		else {
-			g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
+			//g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
+			g_addNotification(Notification("File not saved", "Save failed!", 6000));
 		}
 	}
 }
