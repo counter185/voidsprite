@@ -22,7 +22,7 @@ void ToolMeasure::renderOnCanvas(XY canvasDrawPoint, int scale)
 
 		SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + r.w, r.y + r.h);
 
-		g_fnt->RenderString(std::format("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1), canvasDrawPoint.x + lastMousePos.x * scale + 5, canvasDrawPoint.y + lastMousePos.y * scale + 22);
+		g_fnt->RenderString(std::format("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1), canvasDrawPoint.x + lastMousePos.x * scale + 25, canvasDrawPoint.y + lastMousePos.y * scale);
 	}
 
 	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);

@@ -10,6 +10,7 @@
 #include "BrushCircle.h"
 #include "Pattern.h"
 #include "Notification.h"
+#include "ToolRectMove.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -181,6 +182,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new BrushFill());
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectClone());
+    g_brushes.push_back(new ToolRectMove());
     g_brushes.push_back(new ToolSetXSymmetry());
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolComment());

@@ -261,6 +261,9 @@
     <ClCompile Include="Notification.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="ToolRectMove.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -472,6 +475,9 @@
     </ClInclude>
     <ClInclude Include="Notification.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolRectMove.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

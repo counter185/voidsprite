@@ -147,7 +147,9 @@ void MainEditor::render() {
 
 	if (eraserMode) {
 		SDL_Rect eraserRect = { g_mouseX + 6, g_mouseY - 30, 28, 28 };
-		SDL_SetTextureAlphaMod(g_iconEraser, 0x80);
+		SDL_SetTextureAlphaMod(g_iconEraser, 0xa0);
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
+		SDL_RenderFillRect(g_rd, &eraserRect);
 		SDL_RenderCopy(g_rd, g_iconEraser, NULL, &eraserRect);
 	}
 }

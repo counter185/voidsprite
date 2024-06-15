@@ -164,6 +164,7 @@
     <ClCompile Include="BrushFill.cpp" />
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
+    <ClCompile Include="ToolRectMove.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
     <ClCompile Include="easybmp\EasyBMP.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="BrushFill.h" />
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
+    <ClInclude Include="ToolRectMove.h" />
     <ClInclude Include="colors.h" />
     <ClInclude Include="ddspp\ddspp.h" />
     <ClInclude Include="drawable.h" />

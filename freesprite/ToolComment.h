@@ -5,8 +5,8 @@ class ToolComment :
     public BaseBrush, public EventCallbackListener
 {
 public:
-    MainEditor* clickEditor;
-    XY clickPos;
+    MainEditor* clickEditor = NULL;
+    XY clickPos = {0,0};
 
     virtual std::string getIconPath() { return "assets/tool_comment.png"; }
     bool isReadOnly() override { return true; }
