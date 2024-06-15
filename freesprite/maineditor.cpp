@@ -143,6 +143,12 @@ void MainEditor::render() {
 	DrawForeground();
 
 	wxsManager.renderAll();
+
+	if (eraserMode) {
+		SDL_Rect eraserRect = { g_mouseX + 6, g_mouseY - 30, 28, 28 };
+		SDL_SetTextureAlphaMod(g_iconEraser, 0x80);
+		SDL_RenderCopy(g_rd, g_iconEraser, NULL, &eraserRect);
+	}
 }
 
 void MainEditor::tick() {
