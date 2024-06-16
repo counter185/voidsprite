@@ -264,6 +264,9 @@
     <ClCompile Include="ToolRectMove.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="ScrollingView.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -467,9 +470,6 @@
     <ClInclude Include="ToolMeasure.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
-    <ClInclude Include="PopupSetColorKey.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="Pattern.h">
       <Filter>Header files</Filter>
     </ClInclude>
@@ -478,6 +478,12 @@
     </ClInclude>
     <ClInclude Include="ToolRectMove.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrollingView.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSetColorKey.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

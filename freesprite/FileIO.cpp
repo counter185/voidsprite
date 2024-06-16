@@ -436,7 +436,7 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
 
                 sizeCorrectLayer->hidden = std::string(layerNode.attribute("visibility").as_string()) != "visible";
                 sizeCorrectLayer->name = std::string(layerNode.attribute("name").as_string());
-                layers->push_back(sizeCorrectLayer);
+                layers->insert(layers->begin(), sizeCorrectLayer);
             } else {
                 printf("NOOOOO LAYER IS NULL\n");
             }

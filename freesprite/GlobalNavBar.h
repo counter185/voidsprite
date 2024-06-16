@@ -191,6 +191,10 @@ public:
 					},
 					{SDLK_t, { "Open tileset preview...",
 							[](MainEditor* editor) {
+								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+									g_addNotification(Notification("Error", "Set the pixel grid first."));
+									return;
+								}
 								TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
 								g_addScreen(newScreen);
 								//editor->spritesheetPreview = newScreen;
