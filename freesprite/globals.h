@@ -42,9 +42,13 @@ class BaseBrush;
 class Layer;
 class MainEditor;
 class SpritesheetPreviewScreen;
+class EditorSpritesheetPreview;
 class UIButton;
 class Pattern;
 class Notification;
+class UILabel;
+class UITextField;
+class ScrollingView;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;

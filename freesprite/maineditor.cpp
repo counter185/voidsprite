@@ -5,6 +5,8 @@
 #include "GlobalNavBar.h"
 #include "PopupYesNo.h"
 #include "Notification.h"
+#include "SpritesheetPreviewScreen.h"
+#include "EditorSpritesheetPreview.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	setUpWidgets();

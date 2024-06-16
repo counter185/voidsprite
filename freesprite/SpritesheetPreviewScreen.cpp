@@ -1,6 +1,42 @@
 #include "SpritesheetPreviewScreen.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
+#include "UILabel.h"
+#include "UITextField.h"
+#include "EditorSpritesheetPreview.h"
+#include "ScrollingView.h"
+
+SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
+	caller = parent;
+	canvasZoom = parent->scale;
+
+	previewWx = new EditorSpritesheetPreview(this);
+
+	msPerSpriteLabel = new UILabel();
+	msPerSpriteLabel->text = "MS per sprite";
+	wxsManager.addDrawable(msPerSpriteLabel);
+
+	textfieldMSPerSprite = new UITextField();
+	textfieldMSPerSprite->text = std::to_string(msPerSprite);
+	textfieldMSPerSprite->numeric = true;
+	textfieldMSPerSprite->wxWidth = 150;
+	textfieldMSPerSprite->setCallbackListener(EVENT_SPRITEPREVIEW_SET_SPRITE_TICK, this);
+	wxsManager.addDrawable(textfieldMSPerSprite);
+
+	spriteView = new ScrollingView();
+	spriteView->scrollHorizontally = true;
+	spriteView->scrollVertically = false;
+	spriteView->wxWidth = 200;
+	spriteView->wxHeight = 200;
+	spriteView->position = XY{ 0, 300 };
+	wxsManager.addDrawable(spriteView);
+
+	/*UILabel* spriteScrollerLabel = new UILabel();
+	spriteScrollerLabel->text = "Timeline";
+	spriteScrollerLabel->position = XY{ 2, 2 };
+	spriteView->tabButtons.addDrawable(spriteScrollerLabel);*/
+
+}
 
 SpritesheetPreviewScreen::~SpritesheetPreviewScreen() {
 	wxsManager.freeAllDrawables();
@@ -107,6 +143,11 @@ void SpritesheetPreviewScreen::tick()
 	spriteView->wxWidth = g_windowW;
 	spriteView->wxHeight = 30 + caller->tileDimensions.y * canvasZoom + 60;
 	spriteView->position = { 0, g_windowH - spriteView->wxHeight };
+
+	canvasDrawOrigin = XY{
+		iclamp(-caller->texW * canvasZoom + 4, canvasDrawOrigin.x, g_windowW - rightPanelWidth - 4),
+		iclamp(-caller->texH * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - spriteView->wxHeight - 4)
+	};
 }
 
 void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
