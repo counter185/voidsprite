@@ -252,9 +252,6 @@
     <ClCompile Include="ToolMeasure.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
-    <ClCompile Include="PopupSetColorKey.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="Pattern.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -264,8 +261,11 @@
     <ClCompile Include="ToolRectMove.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="PopupSetColorKey.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
     <ClCompile Include="ScrollingView.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -479,11 +479,11 @@
     <ClInclude Include="ToolRectMove.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
-    <ClInclude Include="ScrollingView.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="PopupSetColorKey.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrollingView.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

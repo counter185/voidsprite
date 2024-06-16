@@ -6,6 +6,7 @@
 #include "UILabel.h"
 #include "UITextField.h"
 #include "EditorSpritesheetPreview.h"
+#include "ScrollingView.h"
 
 class SpritesheetPreviewScreen : public BaseScreen, public EventCallbackListener
 {
@@ -25,6 +26,7 @@ public:
 
 	UILabel* msPerSpriteLabel;
 	UITextField* textfieldMSPerSprite;
+	ScrollingView* spriteView;
 
 	SpritesheetPreviewScreen(MainEditor* parent) {
 		caller = parent;
@@ -38,8 +40,23 @@ public:
 		textfieldMSPerSprite = new UITextField();
 		textfieldMSPerSprite->text = std::to_string(msPerSprite);
 		textfieldMSPerSprite->numeric = true;
+		textfieldMSPerSprite->wxWidth = 150;
 		textfieldMSPerSprite->setCallbackListener(EVENT_SPRITEPREVIEW_SET_SPRITE_TICK, this);
 		wxsManager.addDrawable(textfieldMSPerSprite);
+
+		spriteView = new ScrollingView();
+		spriteView->scrollHorizontally = true;
+		spriteView->scrollVertically = false;
+		spriteView->wxWidth = 200;
+		spriteView->wxHeight = 200;
+		spriteView->position = XY{ 0, 300 };
+		wxsManager.addDrawable(spriteView);
+
+		/*UILabel* spriteScrollerLabel = new UILabel();
+		spriteScrollerLabel->text = "Timeline";
+		spriteScrollerLabel->position = XY{ 2, 2 };
+		spriteView->tabButtons.addDrawable(spriteScrollerLabel);*/
+
 	}
 	~SpritesheetPreviewScreen();
 
@@ -52,6 +69,7 @@ public:
 
 	std::string getName() override { return "Preview sprites"; }
 
-	void drawPreview(XY at);
+	void drawPreview(XY at, int which = -1);
+	void drawBackground();
 };
 

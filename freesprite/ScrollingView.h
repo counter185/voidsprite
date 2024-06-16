@@ -11,6 +11,8 @@ public:
     bool scrollVertically = true;
     bool scrollHorizontally = true;
     XY scrollOffset = XY{ 0,0 };
+    int wxWidth = 200;
+    int wxHeight = 200;
     //std::vector<Tab> tabs;
     //int buttonsHeight = 30;
     //int openTab = 0;
@@ -39,19 +41,33 @@ public:
     }
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
-        return tabButtons.mouseInAny(xyAdd(thisPositionOnScreen, scrollOffset), mousePos);// || tabs[openTab].wxs.mouseInAny(xyAdd(XY{ 0, buttonsHeight }, thisPositionOnScreen), mousePos);
+        return pointInBox(mousePos, {thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight}) || tabButtons.mouseInAny(xyAdd(thisPositionOnScreen, scrollOffset), mousePos);// || tabs[openTab].wxs.mouseInAny(xyAdd(XY{ 0, buttonsHeight }, thisPositionOnScreen), mousePos);
     }
 
     void render(XY position) override {
+        SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
+        SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0xe0);
+        SDL_RenderFillRect(g_rd, &r);
+
         tabButtons.renderAll(xyAdd(position, scrollOffset));
         //tabs[openTab].wxs.renderAll(xyAdd(position, XY{ 0, buttonsHeight }));
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override {
         if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-            tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset);
+            tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(gPosOffset, scrollOffset));
         }
         if (tabButtons.anyFocused()) {
-            tabButtons.passInputToFocused(evt, gPosOffset);
+            tabButtons.passInputToFocused(evt, xyAdd(gPosOffset, scrollOffset));
+        }
+        else {
+            if (evt.type == SDL_MOUSEWHEEL) {
+                if (scrollVertically) {
+					scrollOffset.y += evt.wheel.y * 10;
+				}
+                else if (scrollHorizontally) {
+					scrollOffset.x += evt.wheel.y * 10;
+				}
+			}
         }
     }
 
