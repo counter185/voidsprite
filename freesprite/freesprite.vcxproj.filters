@@ -485,6 +485,9 @@
     <ClInclude Include="ScrollingView.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
+    <ClInclude Include="ee_creature.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

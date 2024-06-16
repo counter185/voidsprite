@@ -78,7 +78,8 @@ extern SDL_Texture* g_mainlogo,
    *g_iconComment,
    *g_iconMenuPxDim,
    *g_iconMenuSpritesheet,
-   *g_iconMenuTemplates;
+   *g_iconMenuTemplates,
+   *g_iconNotifTheCreature;
 
 void g_addNotification(Notification a);
 

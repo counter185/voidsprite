@@ -1831,7 +1831,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 
         fprintf(outfile, "int voidsprite_image_w = %i;\n", data->w);
         fprintf(outfile, "int voidsprite_image_h = %i;\n", data->h);
-        fprintf(outfile, "uint8_t voidsprite_image_data[] = {\n");
+        fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
         uint32_t* pxd = (uint32_t*)data->pixelData;
         uint64_t dp = 0;
         for (int y = 0; y < data->h; y++) {

@@ -229,6 +229,7 @@
     <ClInclude Include="BrushFill.h" />
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
+    <ClInclude Include="ee_creature.h" />
     <ClInclude Include="ScrollingView.h" />
     <ClInclude Include="ToolRectMove.h" />
     <ClInclude Include="colors.h" />

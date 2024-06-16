@@ -12,6 +12,8 @@
 #include "Notification.h"
 #include "ToolRectMove.h"
 
+#include "ee_creature.h"
+
 int g_windowW = 1280;
 int g_windowH = 720;
 XY unscaledWindowSize = {g_windowW, g_windowH};
@@ -47,6 +49,7 @@ SDL_Texture* g_iconComment = NULL;
 SDL_Texture* g_iconMenuPxDim = NULL;
 SDL_Texture* g_iconMenuSpritesheet = NULL;
 SDL_Texture* g_iconMenuTemplates = NULL;
+SDL_Texture* g_iconNotifTheCreature = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
@@ -171,6 +174,11 @@ int main(int argc, char** argv)
     g_iconMenuPxDim = IMGLoadToTexture("assets/menu_pxdim.png");
     g_iconMenuSpritesheet = IMGLoadToTexture("assets/menu_sptl.png");
     g_iconMenuTemplates = IMGLoadToTexture("assets/menu_templates.png");
+
+    SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
+    memcpy(srf->pixels, the_creature, 50 * 50 * 4);
+    g_iconNotifTheCreature = SDL_CreateTextureFromSurface(g_rd, srf);
+    SDL_FreeSurface(srf);
     //SDL_Texture* the_creature = IMGLoadToTexture("assets/kaosekai.png");
 
     //load brushes

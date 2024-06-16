@@ -41,6 +41,14 @@ void StartScreen::takeInput(SDL_Event evt)
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
+				if (evt.button.button == SDL_BUTTON_LEFT) {
+					if (evt.button.state) {
+						SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
+						if (pointInBox({ evt.button.x, evt.button.y }, logoRect)) {
+							g_addNotification(Notification("voidsprite alpha", "by counter185 & contributors", 6000, g_iconNotifTheCreature));
+						}
+					}
+				}
 				break;
 			case SDL_MOUSEMOTION:
 				break;
