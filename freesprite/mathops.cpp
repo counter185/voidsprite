@@ -68,7 +68,7 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith)
     return otherString == endsWith;
 }
 
-void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel)
+void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc)
 {
     if (from.x == to.x) {
         int yMin = from.y > to.y ? to.y : from.y;
@@ -84,7 +84,7 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel)
         int yMin = ixmin(from.y, to.y);
         int yMax = ixmax(from.y, to.y);
 
-        if (xMax - xMin > yMax - yMin) {
+        if ((arc == 0 && xMax - xMin > yMax - yMin) || arc == 1) {
             float a = (float)(from.y - to.y) / (from.x - to.x);
             float b = from.y - a * from.x;
 
@@ -105,7 +105,6 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel)
             }
         }
     }
-    
 }
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel) {
     XY dimensions = xySubtract(posMax, posMin);

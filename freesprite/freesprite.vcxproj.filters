@@ -267,6 +267,12 @@
     <ClCompile Include="ScrollingView.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="Brush1x1ArcX.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush1x1ArcY.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -487,6 +493,12 @@
     </ClInclude>
     <ClInclude Include="ee_creature.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush1x1ArcX.h">
+      <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush1x1ArcY.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

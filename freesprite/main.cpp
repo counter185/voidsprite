@@ -11,6 +11,8 @@
 #include "Pattern.h"
 #include "Notification.h"
 #include "ToolRectMove.h"
+#include "Brush1x1ArcX.h"
+#include "Brush1x1ArcY.h"
 
 #include "ee_creature.h"
 
@@ -183,6 +185,8 @@ int main(int argc, char** argv)
 
     //load brushes
     g_brushes.push_back(new Brush1x1());
+    g_brushes.push_back(new Brush1x1ArcX());
+    g_brushes.push_back(new Brush1x1ArcY());
     g_brushes.push_back(new Brush3pxCircle());
     g_brushes.push_back(new Brush1pxLine());
     g_brushes.push_back(new Brush1pxLinePathfind());

@@ -159,6 +159,8 @@
     <ClCompile Include="Brush1pxLine.cpp" />
     <ClCompile Include="Brush1pxLinePathfind.cpp" />
     <ClCompile Include="Brush1x1.cpp" />
+    <ClCompile Include="Brush1x1ArcX.cpp" />
+    <ClCompile Include="Brush1x1ArcY.cpp" />
     <ClCompile Include="Brush3pxCircle.cpp" />
     <ClCompile Include="BrushCircle.cpp" />
     <ClCompile Include="BrushFill.cpp" />
@@ -224,6 +226,8 @@
     <ClInclude Include="Brush1pxLine.h" />
     <ClInclude Include="Brush1pxLinePathfind.h" />
     <ClInclude Include="Brush1x1.h" />
+    <ClInclude Include="Brush1x1ArcX.h" />
+    <ClInclude Include="Brush1x1ArcY.h" />
     <ClInclude Include="Brush3pxCircle.h" />
     <ClInclude Include="BrushCircle.h" />
     <ClInclude Include="BrushFill.h" />
