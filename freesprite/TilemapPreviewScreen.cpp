@@ -1,5 +1,6 @@
 #include "TilemapPreviewScreen.h"
 #include "maineditor.h"
+#include "FontRenderer.h"
 
 void TilemapPreviewScreen::render()
 {
@@ -47,6 +48,71 @@ void TilemapPreviewScreen::render()
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0);
     SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
+    SDL_Rect panelRect = { 0,0, ixmax(400, 30 + caller->tileDimensions.x * tilemapScale * 2), ixmax(200, 110 + caller->tileDimensions.y * tilemapScale * 2)};
+    SDL_RenderFillRect(g_rd, &panelRect);
+
+    g_fnt->RenderString("Tileset preview", 5, 5);
+    g_fnt->RenderString("Selected tile: [TAB] to switch", 15, 60);
+    SDL_Rect tileDraw = {
+        15,
+        90,
+        caller->tileDimensions.x * tilemapScale*2,
+        caller->tileDimensions.y * tilemapScale*2
+    };
+
+    SDL_Rect tileClip = {
+        pickedTile.x * caller->tileDimensions.x,
+        pickedTile.y * caller->tileDimensions.y,
+        caller->tileDimensions.x,
+        caller->tileDimensions.y
+    };
+
+    for (Layer* l : caller->layers) {
+        SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
+    }
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x90);
+    SDL_RenderDrawRect(g_rd, &tileDraw);
+
+
+    if (tileSelectOpen) {
+
+        SDL_Rect tsbgRect = { 0,0, g_windowW * XM1PW3P1(tileSelectTimer.percentElapsedTime(300)), g_windowH};
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(tileSelectTimer.percentElapsedTime(300))));
+        SDL_RenderFillRect(g_rd, &tsbgRect);
+
+        int xOffset = -g_windowW * (1.0 - XM1PW3P1(tileSelectTimer.percentElapsedTime(300)));
+
+        SDL_Rect tileSelectRect = { tileSelectOffset.x + xOffset, tileSelectOffset.y,
+            caller->texW * tileSelectScale,
+            caller->texH * tileSelectScale
+        };
+
+        for (Layer* l : caller->layers) {
+			SDL_RenderCopy(g_rd, l->tex, NULL, &tileSelectRect);
+		}
+
+        SDL_Rect pickedTileRect = {
+            tileSelectRect.x + pickedTile.x * caller->tileDimensions.x * tileSelectScale,
+            tileSelectRect.y + pickedTile.y * caller->tileDimensions.y * tileSelectScale,
+            caller->tileDimensions.x * tileSelectScale,
+            caller->tileDimensions.y * tileSelectScale
+        };
+        SDL_Rect hoveredTileRect = {
+            tileSelectRect.x + tileSelectHoveredTile.x * caller->tileDimensions.x * tileSelectScale,
+            tileSelectRect.y + tileSelectHoveredTile.y * caller->tileDimensions.y * tileSelectScale,
+            caller->tileDimensions.x * tileSelectScale,
+            caller->tileDimensions.y * tileSelectScale
+        };
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xe0);
+        SDL_RenderDrawRect(g_rd, &pickedTileRect);
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+        SDL_RenderDrawRect(g_rd, &hoveredTileRect);
+
+        g_fnt->RenderString("Select tile...", 10, 10);
+    }
 }
 
 void TilemapPreviewScreen::tick()
@@ -77,7 +143,16 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                 scrollingTilemap = true;
             }
             else if (evt.button.button == SDL_BUTTON_LEFT) {
-                mouseLeftingTilemap = true;
+                if (tileSelectOpen) {
+                    if (tileSelectHoveredTile.x >= 0 && tileSelectHoveredTile.y >= 0) {
+                        pickedTile = tileSelectHoveredTile;
+                        tileSelectOpen = false;
+                        tileSelectTimer.start();
+                    }
+                }
+                else {
+                    mouseLeftingTilemap = true;
+                }
             }
             break;
         case SDL_MOUSEBUTTONUP:
@@ -89,21 +164,46 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_MOUSEMOTION:
-            if (scrollingTilemap) {
-                tilemapDrawPoint = xyAdd(tilemapDrawPoint, XY{ evt.motion.xrel, evt.motion.yrel });
-            }
+            if (tileSelectOpen) {
+                if (scrollingTilemap) {
+                    tileSelectOffset = xyAdd(tileSelectOffset, XY{ evt.motion.xrel, evt.motion.yrel });
+                }
 
-            if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
-                XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, tilemapDrawPoint);
-                
-                pos.x /= caller->tileDimensions.x * tilemapScale;
-                pos.y /= caller->tileDimensions.y * tilemapScale;
-                hoveredTilePosition = pos;
+                XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, tileSelectOffset);
+
+                pos.x /= caller->tileDimensions.x * tileSelectScale;
+                pos.y /= caller->tileDimensions.y * tileSelectScale;
+                tileSelectHoveredTile = pos;
+            }
+            else {
+                if (scrollingTilemap) {
+                    tilemapDrawPoint = xyAdd(tilemapDrawPoint, XY{ evt.motion.xrel, evt.motion.yrel });
+                }
+
+                if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
+                    XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, tilemapDrawPoint);
+
+                    pos.x /= caller->tileDimensions.x * tilemapScale;
+                    pos.y /= caller->tileDimensions.y * tilemapScale;
+                    hoveredTilePosition = pos;
+                }
             }
             break;
         case SDL_MOUSEWHEEL:
-            tilemapScale += evt.wheel.y;
-            tilemapScale = ixmax(1, tilemapScale);
+            if (tileSelectOpen) {
+                tileSelectScale += evt.wheel.y;
+                tileSelectScale = ixmax(1, tileSelectScale);
+            }
+            else {
+                tilemapScale += evt.wheel.y;
+                tilemapScale = ixmax(1, tilemapScale);
+            }
+            break;
+        case SDL_KEYDOWN:
+            if (evt.key.keysym.sym == SDLK_TAB) {
+				tileSelectOpen = !tileSelectOpen;
+                tileSelectTimer.start();
+			}
             break;
         }
     }

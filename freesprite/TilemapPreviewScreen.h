@@ -20,6 +20,12 @@ public:
 
 	DrawableManager wxsManager;
 
+	bool tileSelectOpen = false;
+	XY tileSelectOffset = XY{ 0,0 };
+	XY tileSelectHoveredTile = XY{ 0,0 };
+	int tileSelectScale = 1;
+	Timer64 tileSelectTimer;
+
 	TilemapPreviewScreen(MainEditor* parent) {
 		caller = parent;
 		resizeTilemap(32, 32);
