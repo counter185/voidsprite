@@ -170,12 +170,12 @@ public:
 						}
 						catch (std::out_of_range) {
 							//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
-							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range."));
+							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
 						}
 					}
 					else {
 						//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
-						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions."));
+						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
 					}
 					break;
 				case 1:
@@ -191,12 +191,12 @@ public:
 						}
 						catch (std::out_of_range) {
 							//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
-							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range."));
+							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
 						}
 					}
 					else {
 						//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
-						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions."));
+						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
 					}
 					break;
 			}

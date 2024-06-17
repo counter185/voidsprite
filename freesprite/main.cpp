@@ -398,7 +398,7 @@ int main(int argc, char** argv)
 			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0-notif.timer.percentElapsedTime(500, notif.duration-500)))));
 			SDL_Rect r = { notifX, notifY, 400, 60 };
 			SDL_RenderFillRect(g_rd, &r);
-            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80 + (uint8_t)(0x60 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(500)))));
+            SDL_SetRenderDrawColor(g_rd, notif.color.r, notif.color.g, notif.color.b, 0x80 + (uint8_t)(0x60 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(500)))));
             drawLine(XY{r.x, r.y}, XY{ r.x, r.y + r.h }, XM1PW3P1(notif.timer.percentElapsedTime(300)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
             drawLine(XY{ r.x + r.w, r.y + r.h }, XY{r.x+r.w, r.y}, XM1PW3P1(notif.timer.percentElapsedTime(300))* (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 

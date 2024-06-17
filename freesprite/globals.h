@@ -31,6 +31,9 @@
 #define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_JP "appfontjp-NotoSansJP-VariableFont_wght.ttf"
 
+#define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
+#define COLOR_ERROR SDL_Color{255,0,0,255}
+
 class EventCallbackListener;
 class TextRenderer;
 class GlobalNavBar;

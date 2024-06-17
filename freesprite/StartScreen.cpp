@@ -45,7 +45,7 @@ void StartScreen::takeInput(SDL_Event evt)
 					if (evt.button.state) {
 						SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
 						if (pointInBox({ evt.button.x, evt.button.y }, logoRect)) {
-							g_addNotification(Notification("voidsprite alpha", "by counter185 & contributors", 6000, g_iconNotifTheCreature));
+							g_addNotification(Notification("voidsprite alpha", "by counter185 & contributors", 6000, g_iconNotifTheCreature, COLOR_INFO));
 						}
 					}
 				}
@@ -134,7 +134,7 @@ void StartScreen::tryLoadFile(std::string path)
 		}
 		else {
 			//g_addPopup(new PopupMessageBox("", "Failed to load file."));
-			g_addNotification(Notification("Error", "Failed to load file", 6000));
+			g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
 			printf("No importer for file available\n");
 		}
 	}

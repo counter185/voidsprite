@@ -1702,7 +1702,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
 {
     std::vector<uint32_t> uniqueColors = data->getUniqueColors(true);
     if (uniqueColors.size() > 256) {
-        g_addNotification(Notification("XYZ export failed", "Your image has more than 256 colors"));
+        g_addNotification(Notification("XYZ export failed", "Your image has more than 256 colors", 5000, NULL, COLOR_ERROR));
         printf("[XYZ] Too many colors\n");
         return false;
     }

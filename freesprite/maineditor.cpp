@@ -486,7 +486,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 		}
 		else {
 			//g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
-			g_addNotification(Notification("File not saved", "Save failed!", 6000));
+			g_addNotification(Notification("File not saved", "Save failed!", 6000, NULL, COLOR_ERROR));
 		}
 	}
 }
