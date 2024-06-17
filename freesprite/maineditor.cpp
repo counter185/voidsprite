@@ -75,9 +75,10 @@ void MainEditor::render() {
 	canvasRenderRect.x = canvasCenterPoint.x;
 	canvasRenderRect.y = canvasCenterPoint.y;
 
-	for (Layer*& imgLayer : layers) {
+	for (int x = 0; x < layers.size(); x++) {
+		Layer* imgLayer = layers[x];
 		if (!imgLayer->hidden) {
-			imgLayer->render(canvasRenderRect);
+			imgLayer->render(canvasRenderRect, (layerSwitchTimer.started && x == selLayer) ? (uint8_t)(255 * XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300))) : 255);
 		}
 	}
 
@@ -385,7 +386,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 						}
 					}
 					else {
-						colorPicker->setMainEditorColorRGB(getCurrentLayer()->getPixelAt(mousePixelTargetPoint));
+						colorPicker->setMainEditorColorRGB(g_ctrlModifier ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint) : pickColorFromAllLayers(mousePixelTargetPoint));
 					}
 				}
 				break;
@@ -597,6 +598,24 @@ void MainEditor::commitStateToCurrentLayer()
 	commitStateToLayer(getCurrentLayer());
 }
 
+uint32_t MainEditor::pickColorFromAllLayers(XY pos)
+{
+	uint32_t c = 0;
+	for (int x = layers.size() - 1; x >= 0; x--) {
+		if (layers[x]->hidden) {
+			continue;
+		}
+		uint32_t nextC = layers[x]->getPixelAt(pos);
+		if ((c & 0xff000000) == 0 && (nextC & 0xff000000) == (0xff<<24)) {
+			return nextC;
+		}
+		else {
+			c = alphaBlend(nextC, c);
+		}
+	}
+	return c;
+}
+
 void MainEditor::addToUndoStack(UndoStackElement undo)
 {
 	discardRedoStack();
@@ -639,7 +658,7 @@ void MainEditor::undo()
 					}
 				}
 				if (selLayer >= layers.size()) {
-					selLayer = layers.size() - 1;
+					switchActiveLayer(layers.size() - 1);
 				}
 				layerPicker->updateLayers();
 				break;
@@ -690,7 +709,7 @@ void MainEditor::redo()
 				}
 			}
 			if (selLayer >= layers.size()) {
-				selLayer = layers.size() - 1;
+				switchActiveLayer(layers.size() - 1);
 			}
 			layerPicker->updateLayers();
 			break;
@@ -717,7 +736,7 @@ Layer* MainEditor::newLayer()
 	Layer* nl = new Layer(texW, texH);
 	nl->name = std::format("New Layer {}", layers.size()+1);
 	layers.push_back(nl);
-	selLayer = layers.size() - 1;
+	switchActiveLayer(layers.size() - 1);
 
 	addToUndoStack(UndoStackElement{nl, UNDOSTACK_CREATE_LAYER});
 	return nl;
@@ -731,7 +750,7 @@ void MainEditor::deleteLayer(int index) {
 	Layer* layerAtPos = layers[index];
 	layers.erase(layers.begin() + index);
 	if (selLayer >= layers.size()) {
-		selLayer = layers.size() - 1;
+		switchActiveLayer(layers.size() - 1);
 	}
 
 	addToUndoStack(UndoStackElement{ layerAtPos, UNDOSTACK_DELETE_LAYER, index });
@@ -746,7 +765,7 @@ void MainEditor::moveLayerUp(int index) {
 	layers.insert(layers.begin() + index + 1, clayer);
 
 	if (index == selLayer) {
-		selLayer++;
+		switchActiveLayer(selLayer + 1);
 	}
 
 	addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_MOVE_LAYER, index, index + 1 });
@@ -762,7 +781,7 @@ void MainEditor::moveLayerDown(int index) {
 	layers.insert(layers.begin() + index - 1, clayer);
 
 	if (index == selLayer) {
-		selLayer--;
+		switchActiveLayer(selLayer-1);
 	}
 
 	addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_MOVE_LAYER, index, index - 1 });
@@ -826,6 +845,12 @@ void MainEditor::layer_promptRename()
 uint32_t MainEditor::layer_getPixelAt(XY pos)
 {
 	return getCurrentLayer()->getPixelAt(pos);
+}
+
+void MainEditor::switchActiveLayer(int index)
+{
+	selLayer = index;
+	layerSwitchTimer.start();
 }
 
 void MainEditor::layer_setAllAlpha255()

@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "Notification.h"
 #include "FileIO.h"
 #include "maineditor.h"
 #include <png.h>
@@ -1701,6 +1702,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
 {
     std::vector<uint32_t> uniqueColors = data->getUniqueColors(true);
     if (uniqueColors.size() > 256) {
+        g_addNotification(Notification("XYZ export failed", "Your image has more than 256 colors"));
         printf("[XYZ] Too many colors\n");
         return false;
     }

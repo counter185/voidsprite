@@ -52,6 +52,7 @@ public:
 	Pattern* currentPattern;
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
+	Timer64 layerSwitchTimer;
 
 	bool changesSinceLastSave = false;
 	PlatformNativePathString lastConfirmedSavePath;
@@ -106,6 +107,7 @@ public:
 	bool requestSafeClose();
 	void zoom(int how_much);
 	bool isInBounds(XY pos);
+	uint32_t pickColorFromAllLayers(XY);
 
 	void checkAndDiscardEndOfUndoStack();
 	void commitStateToLayer(Layer* l);
@@ -121,6 +123,7 @@ public:
 	void moveLayerDown(int index);
 	void mergeLayerDown(int index);
 	void duplicateLayer(int index);
+	void switchActiveLayer(int index);
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}

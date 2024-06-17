@@ -107,7 +107,7 @@ void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
 void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
 {
     if (data1 == 0) {
-        caller->selLayer = evt_id;
+        caller->switchActiveLayer(evt_id);
     }
     else if (data1 == 1) {
         caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;

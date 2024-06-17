@@ -67,10 +67,11 @@ public:
 		layerDirty = false;
 	}
 
-	void render(SDL_Rect where) {
+	void render(SDL_Rect where, uint8_t alpha = 255) {
 		if (layerDirty) {
 			updateTexture();
 		}
+		SDL_SetTextureAlphaMod(tex, alpha);
 		SDL_RenderCopy(g_rd, tex, NULL, &where);
 	}
 
