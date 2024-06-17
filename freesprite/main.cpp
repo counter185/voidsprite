@@ -123,6 +123,10 @@ void g_closeLastScreen() {
 
 SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(path.c_str());
+    if (srf == NULL) {
+        g_addNotification(Notification("Error", "Can't load: " + path, 5000));
+        return NULL;
+    }
     SDL_Texture* ret = SDL_CreateTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
     return ret;
