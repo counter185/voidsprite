@@ -2,8 +2,19 @@
 #include "maineditor.h"
 #include "FontRenderer.h"
 
+TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
+    caller = parent;
+    resizeTilemap(32, 32);
+
+    tileSelectScale = caller->scale;
+    recenterTilePicker();
+    recenterTilemap();
+}
+
 void TilemapPreviewScreen::render()
 {
+    drawBackground();
+
     SDL_Rect tilemapDrawRect = { tilemapDrawPoint.x, tilemapDrawPoint.y,
         tilemapDimensions.x * caller->tileDimensions.x * tilemapScale,
         tilemapDimensions.y * caller->tileDimensions.y * tilemapScale };
@@ -117,6 +128,15 @@ void TilemapPreviewScreen::render()
 
 void TilemapPreviewScreen::tick()
 {
+    tilemapDrawPoint = XY{
+        iclamp(-tilemapDimensions.x * caller->tileDimensions.x * tilemapScale + 4, tilemapDrawPoint.x, g_windowW - 4),
+        iclamp(-tilemapDimensions.y * caller->tileDimensions.y * tilemapScale + 4, tilemapDrawPoint.y, g_windowH - 4)
+    };
+    tileSelectOffset = XY{
+        iclamp(-caller->texW * tileSelectScale + 4, tileSelectOffset.x, g_windowW - 4),
+        iclamp(-caller->texH * tileSelectScale + 4, tileSelectOffset.y, g_windowH - 4)
+    };
+
     if (mouseLeftingTilemap) {
         if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
             if (hoveredTilePosition.x >= 0 && hoveredTilePosition.y >= 0 && hoveredTilePosition.x < tilemapDimensions.x && hoveredTilePosition.y < tilemapDimensions.y) {
@@ -239,4 +259,39 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
 
     tilemap = newTilemap;
     tilemapDimensions = { w,h };
+}
+
+void TilemapPreviewScreen::drawBackground()
+{
+    uint64_t now = SDL_GetTicks64();
+    uint64_t progress = now % 120000;
+    for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {
+        if (y >= 0) {
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x22);
+            SDL_RenderDrawLine(g_rd, 0, y, g_windowW, y);
+        }
+    }
+
+    for (int x = -(1.0 - (now % 100000) / 100000.0) * g_windowW; x < g_windowW; x += 30) {
+        if (x >= 0) {
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19);
+            SDL_RenderDrawLine(g_rd, x, 0, x, g_windowH);
+        }
+    }
+}
+
+void TilemapPreviewScreen::recenterTilemap()
+{
+    tilemapDrawPoint = XY{
+        (g_windowW / 2) - (tilemapDimensions.x * caller->tileDimensions.x * tilemapScale) / 2,
+        (g_windowH / 2) - (tilemapDimensions.y * caller->tileDimensions.y * tilemapScale) / 2
+    };
+}
+
+void TilemapPreviewScreen::recenterTilePicker()
+{
+    tileSelectOffset = XY{
+        (g_windowW / 2) - (caller->texW * tileSelectScale) / 2,
+        (g_windowH / 2) - (caller->texH * tileSelectScale) / 2
+    };
 }

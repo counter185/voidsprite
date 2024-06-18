@@ -26,10 +26,7 @@ public:
 	int tileSelectScale = 1;
 	Timer64 tileSelectTimer;
 
-	TilemapPreviewScreen(MainEditor* parent) {
-		caller = parent;
-		resizeTilemap(32, 32);
-	}
+	TilemapPreviewScreen(MainEditor* parent);
 
 	void render() override;
 	void tick() override;
@@ -39,5 +36,8 @@ public:
 	std::string getName() override { return "Preview tiles"; }
 
 	void resizeTilemap(int w, int h);
+	void drawBackground();
+	void recenterTilemap();
+	void recenterTilePicker();
 };
 
