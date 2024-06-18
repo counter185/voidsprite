@@ -19,19 +19,24 @@ public:
 
 	double currentH = 0, currentS = 0, currentV = 0;
 
+	uint8_t currentR = 0, currentG = 0, currentB = 0;
+
 	UIColorSlider* hueSlider;
 	UISVPicker* satValSlider;
 	UITextField* colorTextField;
 	UISlider* sliderH;
 	UISlider* sliderS;
 	UISlider* sliderV;
+	UISlider* sliderR;
+	UISlider* sliderG;
+	UISlider* sliderB;
 	TabbedView* tbv;
 
 	UIButton* eraserButton;
 
 	EditorColorPicker(MainEditor* c) {
 		caller = c;
-		tbv = new TabbedView({{"Visual", g_iconColorVisual}, {"HSV", g_iconColorHSV}, {"RGB"}}, 90);
+		tbv = new TabbedView({{"Visual", g_iconColorVisual}, {"HSV", g_iconColorHSV}, {"RGB", g_iconColorRGB}}, 90);
 		tbv->position = XY{ 20,30 };
 		subWidgets.addDrawable(tbv);
 
@@ -60,6 +65,24 @@ public:
 		sliderV->wxWidth = 200;
 		sliderV->setCallbackListener(EVENT_COLORPICKER_SLIDERV, this);
 		tbv->tabs[1].wxs.addDrawable(sliderV);
+
+		sliderR = new UISlider();
+		sliderR->position = XY{ 70, 10 };
+		sliderR->wxWidth = 200;
+		sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
+		tbv->tabs[2].wxs.addDrawable(sliderR);
+
+		sliderG = new UISlider();
+		sliderG->position = XY{ 70, 60 };
+		sliderG->wxWidth = 200;
+		sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
+		tbv->tabs[2].wxs.addDrawable(sliderG);
+
+		sliderB = new UISlider();
+		sliderB->position = XY{ 70, 110 };
+		sliderB->wxWidth = 200;
+		sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
+		tbv->tabs[2].wxs.addDrawable(sliderB);
 
 		colorTextField = new UITextField();
 		colorTextField->color = true;
@@ -91,8 +114,9 @@ public:
 
 	void toggleEraser();
 	void updateMainEditorColor();
+	void updateMainEditorColorFromRGBSliders();
 	void setMainEditorColorRGB(unsigned int col);
-	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true);
+	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true);
 
 	void editorColorHSliderChanged(double h) {
 		currentH = h;
