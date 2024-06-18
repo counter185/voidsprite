@@ -273,6 +273,9 @@
     <ClCompile Include="Brush1x1ArcY.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="MinecraftSkinPreviewScreen.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -499,6 +502,9 @@
     </ClInclude>
     <ClInclude Include="Brush1x1ArcY.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="MinecraftSkinPreviewScreen.h">
+      <Filter>Header files\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

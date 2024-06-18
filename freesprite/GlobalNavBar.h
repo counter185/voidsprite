@@ -12,6 +12,7 @@
 #include "TilemapPreviewScreen.h"
 #include "PopupSetColorKey.h"
 #include "Notification.h"
+#include "MinecraftSkinPreviewScreen.h"
 
 class GlobalNavBar : public Drawable, public EventCallbackListener
 {
@@ -201,6 +202,20 @@ public:
 							}
 						}
 					},
+#if _DEBUG
+					{SDLK_m, { "Open Minecraft skin preview...",
+							[](MainEditor* editor) {
+								if (editor->texW != editor->texH && editor->texW/2 != editor->texH) {
+									g_addNotification(Notification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
+									return;
+								}
+								MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(editor);
+								g_addScreen(newScreen);
+								//editor->spritesheetPreview = newScreen;
+							}
+						}
+					},
+#endif
 				},
 				g_iconNavbarTabView
 			}
