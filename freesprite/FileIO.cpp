@@ -2,7 +2,7 @@
 #include "Notification.h"
 #include "FileIO.h"
 #include "maineditor.h"
-#include <png.h>
+#include "libpng/png.h"
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"

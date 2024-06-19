@@ -76,6 +76,12 @@
     <Filter Include="Header files\external\pugixml">
       <UniqueIdentifier>{126c13de-fa6f-48c2-bc9e-4e76eca2c535}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\libpng">
+      <UniqueIdentifier>{19ccb297-fd59-448e-814e-15f5a4790037}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\external\libpng">
+      <UniqueIdentifier>{215dd3a1-6faa-4ad0-9a1e-8169550ce787}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -275,6 +281,51 @@
     </ClCompile>
     <ClCompile Include="MinecraftSkinPreviewScreen.cpp">
       <Filter>Source files\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\png.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngerror.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngget.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngmem.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngpread.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngread.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngrio.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngrtran.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngrutil.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngset.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngtrans.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwio.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwrite.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwtran.c">
+      <Filter>Source files\external\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwutil.c">
+      <Filter>Source files\external\libpng</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -505,6 +556,27 @@
     </ClInclude>
     <ClInclude Include="MinecraftSkinPreviewScreen.h">
       <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\png.h">
+      <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\pngconf.h">
+      <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\pnglibconf.h">
+      <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\pngpriv.h">
+      <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\pngstruct.h">
+      <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\pngdebug.h">
+      <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="libpng\pnginfo.h">
+      <Filter>Header files\external\libpng</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
