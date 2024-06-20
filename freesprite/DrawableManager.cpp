@@ -6,8 +6,12 @@ void DrawableManager::addDrawable(Drawable* d) {
 }
 
 void DrawableManager::removeDrawable(Drawable* d) {
+	if (focused == d) {
+		forceUnfocus();
+	}
 	for (int x = 0; x < drawablesList.size(); x++) {
 		if (drawablesList[x] == d) {
+			delete drawablesList[x];
 			drawablesList.erase(drawablesList.begin() + x);
 			return;
 		}
