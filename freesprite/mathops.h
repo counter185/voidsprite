@@ -17,6 +17,8 @@ struct hsv {
 //stolen code yay
 //https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
 
+std::string pathInProgramDirectory(std::string path);
+
 hsv rgb2hsv(rgb in);
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);

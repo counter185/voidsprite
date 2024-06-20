@@ -1,4 +1,5 @@
 #include "FontRenderer.h"
+#include "mathops.h"
 
 bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out) {
     if ((ch >> 5) == 0b110) {
@@ -46,8 +47,10 @@ bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out) {
 }
 
 TextRenderer::TextRenderer() {
-    font = TTF_OpenFont(FONT_PATH, 18);
-    fontJP = TTF_OpenFont(FONT_PATH_JP, 18);
+    font = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
+    font = font == NULL ? TTF_OpenFont(FONT_PATH, 18) : font;
+    fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
+    fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
 }
 
 TextRenderer::~TextRenderer() {

@@ -163,6 +163,11 @@ double XM1PW3P1(double x)
     return (x - 1) * (x - 1) * (x - 1) + 1;
 }
 
+std::string pathInProgramDirectory(std::string path)
+{
+    return g_programDirectory + "/" + path;
+}
+
 hsv rgb2hsv(rgb in)
 {
     hsv         out;

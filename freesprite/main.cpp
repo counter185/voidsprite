@@ -21,6 +21,7 @@ int g_windowH = 720;
 XY unscaledWindowSize = {g_windowW, g_windowH};
 int renderScale = 1;
 SDL_Texture* viewport = NULL;
+std::string g_programDirectory = "";
 
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
@@ -123,7 +124,8 @@ void g_closeLastScreen() {
 }
 
 SDL_Texture* IMGLoadToTexture(std::string path) {
-    SDL_Surface* srf = IMG_Load(path.c_str());
+    SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
+    srf = srf == NULL ? IMG_Load(path.c_str()) : srf;
     if (srf == NULL) {
         g_addNotification(Notification("Error", "Can't load: " + path, 5000));
         return NULL;
@@ -152,6 +154,9 @@ int main(int argc, char** argv)
     for (int arg = 1; arg < argc; arg++) {
         g_cmdlineArgs.push_back(std::string(argv[arg]));
     }
+    g_programDirectory = std::string(argv[0]);
+    g_programDirectory = g_programDirectory.substr(0, g_programDirectory.find_last_of("/\\"));
+    //g_addNotification(Notification("", g_programDirectory));
 
     srand(time(NULL));
 

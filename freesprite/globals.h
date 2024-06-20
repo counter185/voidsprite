@@ -55,6 +55,7 @@ class ScrollingView;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
+extern std::string g_programDirectory;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
