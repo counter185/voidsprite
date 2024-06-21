@@ -1,10 +1,12 @@
 #pragma once
 
 #if _WIN32
+#define _WIDEPATHS 1
 #define PlatformNativePathString std::wstring
 #define PlatformFileModeRB L"rb"
 #define PlatformFileModeWB L"wb"
 #else
+#define _WIDEPATHS 0
 #define PlatformNativePathString std::string
 #define PlatformFileModeRB "rb"
 #define PlatformFileModeWB "wb"

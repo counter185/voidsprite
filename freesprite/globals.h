@@ -1,5 +1,10 @@
 #pragma once
 
+#ifdef _MSVC_LANG
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4267)
+#endif
+
 //#include <math.h>
 
 #include <string>
@@ -13,9 +18,15 @@
 #include <algorithm>
 #include <filesystem>
 
+#ifdef __GNUC__
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
+#else
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#endif
 
 #include <zlib.h>
 
@@ -26,6 +37,14 @@
 
 #ifndef _WIN32
 #define _WIN32 0
+#endif
+
+#ifndef WINDOWS_XP
+#define WINDOWS_XP 0
+#endif
+
+#if WINDOWS_XP
+#define SDL_GetTicks64 SDL_GetTicks
 #endif
 
 #define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"

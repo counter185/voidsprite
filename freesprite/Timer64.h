@@ -6,7 +6,7 @@ class Timer64
 {
 public:
 	double percentElapsedTime(uint64_t ticks, int ticksOffset = 0) {
-		return ticks == 0 ? 0 : dxmin(dxmax((int64_t)elapsedTime()-ticksOffset, 0.0) / (double)ticks, 1.0);
+		return ticks == 0 ? 0 : dxmin(dxmax((double)((int64_t)elapsedTime()-ticksOffset), 0.0) / (double)ticks, 1.0);
 	}
 	uint64_t elapsedTime() {
 		return started ? (SDL_GetTicks64() - startTime) : stopTime;
@@ -23,7 +23,7 @@ public:
 	}
 
 	bool started = false;
-	uint64_t startTime = NULL;
-	uint64_t stopTime = NULL;
+	uint64_t startTime = 0;
+	uint64_t stopTime = 0;
 };
 

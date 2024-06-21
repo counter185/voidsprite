@@ -74,7 +74,7 @@ void StartScreen::takeInput(SDL_Event evt)
 void StartScreen::tryLoadFile(std::string path)
 {
 	PlatformNativePathString fPath;
-#if _WIN32
+#if _WIDEPATHS
 	fPath = utf8StringToWstring(path);
 #else
 	fPath = path;

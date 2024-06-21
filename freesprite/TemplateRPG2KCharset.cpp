@@ -1,28 +1,29 @@
 #include "Layer.h"
 #include "TemplateRPG2KCharset.h"
 
-uint8_t patternUp[5][5] = {
+//this naming is required to not piss off g++ "multiple definitions of"
+uint8_t rpg2kcharset_patternUp[5][5] = {
     {0,0,1,0,0},
     {0,1,1,1,0},
     {1,0,1,0,1},
     {0,0,1,0,0},
     {0,0,1,0,0},
 };
-uint8_t patternRight[5][5] = {
+uint8_t rpg2kcharset_patternRight[5][5] = {
     {0,0,1,0,0},
     {0,0,0,1,0},
     {1,1,1,1,1},
     {0,0,0,1,0},
     {0,0,1,0,0},
 };
-uint8_t patternDown[5][5] = {
+uint8_t rpg2kcharset_patternDown[5][5] = {
     {0,0,1,0,0},
     {0,0,1,0,0},
     {1,0,1,0,1},
     {0,1,1,1,0},
     {0,0,1,0,0},
 };
-uint8_t patternLeft[5][5] = {
+uint8_t rpg2kcharset_patternLeft[5][5] = {
     {0,0,1,0,0},
     {0,1,0,0,0},
     {1,1,1,1,1},
@@ -58,7 +59,7 @@ Layer* TemplateRPG2KCharset::generate()
                     ret->fillRect(from, to, tileBGColors[index*2 + (iindex++ % 2)]);
                 }
                 XY arrowSymbolOrigin = xyAdd(base, XY{ 1, yy * 32 + 1 });
-                uint8_t* patternSymbols[] = {(uint8_t*)patternUp, (uint8_t*)patternRight, (uint8_t*)patternDown, (uint8_t*)patternLeft};
+                uint8_t* patternSymbols[] = {(uint8_t*)rpg2kcharset_patternUp, (uint8_t*)rpg2kcharset_patternRight, (uint8_t*)rpg2kcharset_patternDown, (uint8_t*)rpg2kcharset_patternLeft};
                 uint8_t* patternSymbol = patternSymbols[yy];
                 for (int yyy = 0; yyy < 5; yyy++) {
                     for (int xxx = 0; xxx < 5; xxx++) {

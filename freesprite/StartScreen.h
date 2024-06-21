@@ -137,7 +137,7 @@ public:
 		for (std::string& arg : g_cmdlineArgs) {
 
 			//g_addNotification(Notification("", arg));
-#if _WIN32
+#if _WIDEPATHS
 			if (std::filesystem::exists(utf8StringToWstring(arg))) {
 #else
 			if (std::filesystem::exists(arg)) {

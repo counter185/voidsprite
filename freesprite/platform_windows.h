@@ -1,7 +1,16 @@
 #pragma once
 
+//no dwmapi on xp
+#if WINDOWS_XP == 0
 #include <dwmapi.h>
+#endif
+
+#ifdef __GNUC__
+#include <SDL2/SDL_syswm.h>
+#else
 #include <SDL_syswm.h>
+#endif
+
 #include <d3d9.h>
 #include <windows.h>
 #include <commdlg.h>
@@ -17,15 +26,17 @@ void platformInit() {}
 void platformPostInit() {
     static bool d = false;
     if (!d) {
-        SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(g_wd, &wmInfo);
-        BOOL USE_DARK_MODE = true;
-        WINhWnd = wmInfo.info.win.window;
-        bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-            WINhWnd, 20,
-            &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
-        SDL_HideWindow(g_wd);
+		#if WINDOWS_XP == 0
+            SDL_SysWMinfo wmInfo;
+            SDL_VERSION(&wmInfo.version);
+            SDL_GetWindowWMInfo(g_wd, &wmInfo);
+            BOOL USE_DARK_MODE = true;
+            WINhWnd = wmInfo.info.win.window;
+            bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+                WINhWnd, 20,
+                &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
+            SDL_HideWindow(g_wd);
+		#endif
         SDL_ShowWindow(g_wd);
         //RedrawWindow(WINhWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
         //UpdateWindow(WINhWnd);

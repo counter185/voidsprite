@@ -822,11 +822,11 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
             nImg.imgHdr.format = BEtoLE32(nImg.imgHdr.format);
             nImg.imgHdr.imageDataAddress = BEtoLE32(nImg.imgHdr.imageDataAddress);
             printf("image: %i x %i, format: %x, address: %x\n", nImg.imgHdr.height, nImg.imgHdr.width, nImg.imgHdr.format, nImg.imgHdr.imageDataAddress);
-            if (i.paletteHeader != NULL) {
+            if (i.paletteHeader != 0) {
                 fseek(infile, i.paletteHeader, SEEK_SET);
                 fread(&nImg.pltHdr, sizeof(TPLPaletteHeader), 1, infile);
             }
-            nImg.pltHdr.set = i.paletteHeader != NULL;
+            nImg.pltHdr.set = i.paletteHeader != 0;
 
             fseek(infile, nImg.imgHdr.imageDataAddress, SEEK_SET);
             switch (nImg.imgHdr.format) {
@@ -1632,7 +1632,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "mergedimage.png"); 
         {
             Layer* flat = editor->flattenImage();
-#if _WIN32
+#if _WIDEPATHS
             if (writePNG(L"temp.bin", flat)) {
 #else
             if (writePNG("temp.bin", flat)) {
@@ -1651,7 +1651,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
             Layer* flat = editor->flattenImage();
             Layer* flatScaled = flat->copyScaled(XY{255,255});
             delete flat;
-#if _WIN32
+#if _WIDEPATHS
             if (writePNG(L"temp.bin", flatScaled)) {
 #else
             if (writePNG("temp.bin", flatScaled)) {
@@ -1667,7 +1667,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
-#if _WIN32
+#if _WIDEPATHS
             if (writePNG(L"temp.bin", *l)) {
 #else
             if (writePNG("temp.bin", *l)) {
