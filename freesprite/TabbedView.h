@@ -21,6 +21,8 @@ public:
     int openTab = 0;
     SDL_Color tabUnfocusedColor = SDL_Color{ 0,0,0,0x30 };
     SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0xe0 };
+    Timer64 tabSwitchTimer;
+    bool nextTabSlideFromTheLeft = false;
 
     TabbedView(std::vector<Tab> tabN, int buttonWidth = 60) {
         int buttonX = 0;
@@ -38,6 +40,7 @@ public:
             tabs.push_back(tabN[x]);
         }
         updateTabButtons();
+        tabSwitchTimer.start();
     }
     ~TabbedView() {
         tabButtons.freeAllDrawables();
@@ -52,7 +55,7 @@ public:
 
     void render(XY position) override {
         tabButtons.renderAll(position);
-        tabs[openTab].wxs.renderAll(xyAdd(position, XY{0, buttonsHeight}));
+        tabs[openTab].wxs.renderAll(xyAdd(position, XY{(int)(200 * (nextTabSlideFromTheLeft ? -1 : 1) * (1.0-XM1PW3P1(tabSwitchTimer.percentElapsedTime(250)))), buttonsHeight}));
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override {
         if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
@@ -72,6 +75,15 @@ public:
     }
 
     void eventButtonPressed(int evt_id) override {
+        if (openTab != evt_id) {
+            tabSwitchTimer.start();
+            if (openTab < evt_id) {
+				nextTabSlideFromTheLeft = false;
+			}
+			else {
+				nextTabSlideFromTheLeft = true;
+			}
+        }
         openTab = evt_id;
         updateTabButtons();
     }
