@@ -18,6 +18,9 @@ public:
         if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
             wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, getPopupOrigin());
         }
+        else if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_TAB) {
+            wxsManager.tryFocusOnNextTabbable();
+        }
 
         if (wxsManager.anyFocused()) {
             wxsManager.passInputToFocused(evt, getPopupOrigin());

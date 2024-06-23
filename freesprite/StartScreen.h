@@ -76,24 +76,26 @@ public:
 		tab1TextFieldCW->numeric = true;
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCW);
 
-		tab1TextFieldCH = new UITextField();
-		tab1TextFieldCH->position = xySubtract(XY{ 110,155 }, newImageTabs->position);
-		tab1TextFieldCH->wxWidth = 160;
-		tab1TextFieldCH->numeric = true;
-		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCH);
-
 		tab1TextFieldCWX = new UITextField();
-		tab1TextFieldCWX->position = xySubtract(XY{ 300,120}, newImageTabs->position);
+		tab1TextFieldCWX->position = xySubtract(XY{ 300,120 }, newImageTabs->position);
 		tab1TextFieldCWX->wxWidth = 40;
 		tab1TextFieldCWX->numeric = true;
 		tab1TextFieldCWX->text = "1";
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCWX);
+
+		tab1TextFieldCH = new UITextField();
+		tab1TextFieldCH->position = xySubtract(XY{ 110,155 }, newImageTabs->position);
+		tab1TextFieldCH->wxWidth = 160;
+		tab1TextFieldCH->numeric = true;
+		tab1TextFieldCH->setCallbackListener(3, this);
+		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCH);
 
 		tab1TextFieldCHX = new UITextField();
 		tab1TextFieldCHX->position = xySubtract(XY{ 300,155 }, newImageTabs->position);
 		tab1TextFieldCHX->wxWidth = 40;
 		tab1TextFieldCHX->numeric = true;
 		tab1TextFieldCHX->text = "1";
+		tab1TextFieldCHX->setCallbackListener(3, this);
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
 
 		UILabel* w2Label = new UILabel();
@@ -159,7 +161,12 @@ public:
 
 	std::string getName() override { return "voidsprite Launchpad"; }
 
-	void eventTextInput(int evt_id, std::string data) override {}
+	void eventTextInputConfirm(int evt_id, std::string data) {
+		if (evt_id == 3) {
+			eventButtonPressed(4);
+		}
+	}
+
 	void eventButtonPressed(int evt_id) override {
 		if (evt_id == 4) {
 			switch (newImageTabs->openTab) {

@@ -17,6 +17,7 @@ public:
 
 	virtual bool isMouseIn(XY thisPositionOnScreen, XY mousePos) { return false; }
 	virtual bool clickable() { return true; }
+	virtual bool focusableWithTab() { return false; }
 	virtual void render(XY position) {}
 	virtual void mouseHoverIn() {}
 	virtual void mouseHoverOut() {}

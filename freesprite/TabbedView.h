@@ -60,6 +60,9 @@ public:
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }
         }
+        else if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_TAB) {
+            tabs[openTab].wxs.tryFocusOnNextTabbable();
+        }
         if (tabButtons.anyFocused()) {
             tabButtons.passInputToFocused(evt, gPosOffset);
         }

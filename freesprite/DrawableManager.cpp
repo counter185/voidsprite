@@ -57,6 +57,33 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
 	return false;
 }
 
+bool DrawableManager::tryFocusOnNextTabbable()
+{
+	int currentIndex = focused == NULL ? 0 : std::find(drawablesList.begin(), drawablesList.end(), focused) - drawablesList.begin();
+	for (int xx = 0; xx < drawablesList.size(); xx++) {
+		int x = (currentIndex + xx) % drawablesList.size();
+		Drawable* a = drawablesList[x];
+		if (a == focused) {
+			continue;
+		}
+		if (a->focusable() && a->focusableWithTab()) {
+			if (focused != a) {
+				if (focused != NULL) {
+					focused->focusOut();
+				}
+				a->focusIn();
+			}
+			focused = a;
+			return true;
+		}
+	}
+	if (focused != NULL) {
+		focused->focusOut();
+	}
+	focused = NULL;
+	return false;
+}
+
 void DrawableManager::forceFocusOn(Drawable* d)
 {
 	if (focused != d && focused != NULL) {
