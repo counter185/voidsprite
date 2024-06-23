@@ -18,6 +18,7 @@
 #include "SpritesheetPreviewScreen.h"
 #include "ToolComment.h"
 #include "ToolMeasure.h"
+#include "ScreenWideNavBar.h"
 
 struct CommentData {
 	XY position;
@@ -64,7 +65,7 @@ public:
 	bool eraserMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
 
-	GlobalNavBar* navbar;
+	ScreenWideNavBar<MainEditor*>* navbar;
 	DrawableManager wxsManager;
 	EditorColorPicker* colorPicker;
 	EditorBrushPicker* brushPicker;
@@ -74,6 +75,8 @@ public:
 
 	XY symmetryPositions = {0,0};
 	bool symmetryEnabled[2] = { false, false };
+
+	std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);

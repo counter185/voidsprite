@@ -55,7 +55,6 @@
 
 class EventCallbackListener;
 class TextRenderer;
-class GlobalNavBar;
 class EditorColorPicker;
 class EditorBrushPicker;
 class BaseScreen;
@@ -71,6 +70,9 @@ class Notification;
 class UILabel;
 class UITextField;
 class ScrollingView;
+
+template <typename T>
+class ScreenWideNavBar;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
@@ -119,15 +121,17 @@ struct XY {
 	int x, y;
 };
 
-struct NamedEditorOperation {
+template <typename T>
+struct NamedOperation {
 	std::string name;
-	std::function<void(MainEditor*)> function;
+	std::function<void(T)> function;
 };
 
+template <typename T>
 struct NavbarSection {
 	std::string name;
 	std::vector<SDL_Keycode> order;
-	std::map<SDL_Keycode, NamedEditorOperation> actions;
+	std::map<SDL_Keycode, NamedOperation<T>> actions;
 	SDL_Texture* icon = NULL;
 	UIButton* button = NULL;
 };

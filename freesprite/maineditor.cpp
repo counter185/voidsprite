@@ -2,11 +2,17 @@
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
-#include "GlobalNavBar.h"
+#include "ScreenWideNavBar.h"
 #include "PopupYesNo.h"
 #include "Notification.h"
 #include "SpritesheetPreviewScreen.h"
 #include "EditorSpritesheetPreview.h"
+#include "FileIO.h"
+#include "PopupTextBox.h"
+#include "PopupSetColorKey.h"
+#include "PopupSetEditorPixelGrid.h"
+#include "TilemapPreviewScreen.h"
+#include "MinecraftSkinPreviewScreen.h"
 
 MainEditor::MainEditor(XY dimensions) {
 	setUpWidgets();
@@ -270,6 +276,196 @@ void MainEditor::initLayers()
 
 void MainEditor::setUpWidgets()
 {
+	mainEditorKeyActions = {
+		{
+			SDLK_f,
+			{
+				"File",
+				{SDLK_s, SDLK_d, SDLK_c},
+				{
+					{SDLK_d, { "Save as",
+							[](MainEditor* editor) {
+								editor->trySaveAsImage();
+							}
+						}
+					},
+					{SDLK_s, { "Save",
+							[](MainEditor* editor) {
+								editor->trySaveImage();
+							}
+						}
+					},
+					{SDLK_c, { "Close",
+							[](MainEditor* editor) {
+								editor->requestSafeClose();
+							}
+						}
+					},
+				},
+				g_iconNavbarTabFile
+			}
+		},
+		{
+			SDLK_e,
+			{
+				"Edit",
+				{SDLK_z, SDLK_r, SDLK_x, SDLK_y},
+				{
+					{SDLK_z, { "Undo",
+							[](MainEditor* editor) {
+								editor->undo();
+							}
+						}
+					},
+					{SDLK_r, { "Redo",
+							[](MainEditor* editor) {
+								editor->redo();
+							}
+						}
+					},
+					{SDLK_x, { "Toggle symmetry: X",
+							[](MainEditor* editor) {
+								editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
+							}
+						}
+					},
+					{SDLK_y, { "Toggle symmetry: Y",
+							[](MainEditor* editor) {
+								editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
+							}
+						}
+					},
+				},
+				g_iconNavbarTabEdit
+			}
+		},
+		{
+			SDLK_l,
+			{
+				"Layer",
+				{},
+				{
+					{SDLK_f, { "Flip current layer: X axis",
+							[](MainEditor* editor) {
+								editor->layer_flipHorizontally();
+							}
+						}
+					},
+					{SDLK_g, { "Flip current layer: Y axis",
+							[](MainEditor* editor) {
+								editor->layer_flipVertically();
+							}
+						}
+					},
+					{SDLK_b, { "Swap channels RGB->BGR",
+							[](MainEditor* editor) {
+								editor->layer_swapLayerRGBtoBGR();
+							}
+						}
+					},
+					{SDLK_x, { "Print number of colors",
+							[](MainEditor* editor) {
+								g_addNotification(Notification("", std::format("{} colors in current layer", editor->getCurrentLayer()->numUniqueColors(true))));
+							}
+						}
+					},
+					{SDLK_r, { "Rename current layer",
+							[](MainEditor* editor) {
+								editor->layer_promptRename();
+							}
+						}
+					},
+					{SDLK_a, { "Remove alpha channel",
+							[](MainEditor* editor) {
+								editor->layer_setAllAlpha255();
+							}
+						}
+					},
+					{SDLK_k, { "Set color key",
+							[](MainEditor* editor) {
+								g_addPopup(new PopupSetColorKey(editor->getCurrentLayer(), "Set color key", "Set the layer's color key:"));
+							}
+						}
+					},
+				},
+				g_iconNavbarTabLayer
+			}
+		},
+		{
+			SDLK_v,
+			{
+				"View",
+				{},
+				{
+					{SDLK_r, { "Recenter canvas",
+							[](MainEditor* editor) {
+								editor->recenterCanvas();
+							}
+						}
+					},
+					{SDLK_b, { "Toggle background color",
+							[](MainEditor* editor) {
+								editor->backgroundColor.r = ~editor->backgroundColor.r;
+								editor->backgroundColor.g = ~editor->backgroundColor.g;
+								editor->backgroundColor.b = ~editor->backgroundColor.b;
+							}
+						}
+					},
+					{SDLK_g, { "Set pixel grid...",
+							[](MainEditor* editor) {
+								g_addPopup(new PopupSetEditorPixelGrid(editor, "Set pixel grid", "Enter grid size <w>x<h>:"));
+							}
+						}
+					},
+					{SDLK_s, { "Open spritesheet preview...",
+							[](MainEditor* editor) {
+								if (editor->spritesheetPreview == NULL) {
+									if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+										g_addNotification(Notification("Error", "Set the pixel grid first."));
+										return;
+									}
+									SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
+									g_addScreen(newScreen);
+									editor->spritesheetPreview = newScreen;
+								}
+								else {
+									g_addNotification(Notification("Error", "Spritesheet preview is already open."));
+								}
+							}
+						}
+					},
+					{SDLK_t, { "Open tileset preview...",
+							[](MainEditor* editor) {
+								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+									g_addNotification(Notification("Error", "Set the pixel grid first."));
+									return;
+								}
+								TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
+								g_addScreen(newScreen);
+								//editor->spritesheetPreview = newScreen;
+							}
+						}
+					},
+	#if _DEBUG
+					{SDLK_m, { "Open Minecraft skin preview...",
+							[](MainEditor* editor) {
+								if (editor->texW != editor->texH && editor->texW / 2 != editor->texH) {
+									g_addNotification(Notification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
+									return;
+								}
+								MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(editor);
+								g_addScreen(newScreen);
+								//editor->spritesheetPreview = newScreen;
+							}
+						}
+					},
+	#endif
+				},
+				g_iconNavbarTabView
+			}
+		}
+	};
+
 	currentBrush = g_brushes[0];
 	currentPattern = g_patterns[0];
 
@@ -289,7 +485,7 @@ void MainEditor::setUpWidgets()
 	layerPicker->anchor = XY{ 1,0 };
 	wxsManager.addDrawable(layerPicker);
 
-	navbar = new GlobalNavBar(this);
+	navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_v });
 	wxsManager.addDrawable(navbar);
 }
 

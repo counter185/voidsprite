@@ -15,6 +15,7 @@
 #include "PopupMessageBox.h"
 #include "UIColorInputField.h"
 #include "Notification.h"
+#include "ScreenWideNavBar.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -32,6 +33,8 @@ public:
 	UITextField* tab1TextFieldCH;
 	UITextField* tab1TextFieldCWX;
 	UITextField* tab1TextFieldCHX;
+
+	ScreenWideNavBar<StartScreen*>* navbar;
 
 	BaseTemplate* tab2templates[2] = {
 		new TemplateRPG2KCharset(),
@@ -136,6 +139,28 @@ public:
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImage);
 		}
 
+		navbar = new ScreenWideNavBar<StartScreen*>(this, 
+		{
+			{
+				SDLK_f,
+				{
+					"File",
+					{},
+					{
+						{SDLK_o, { "Open",
+								[](StartScreen* screen) {
+									platformTryLoadImageFile(screen);
+								}
+							}
+						},
+					},
+					g_iconNavbarTabFile
+				}
+			}
+		}, { SDLK_f });
+		wxsManager.addDrawable(navbar);
+
+
 		for (std::string& arg : g_cmdlineArgs) {
 
 			//g_addNotification(Notification("", arg));
@@ -161,7 +186,7 @@ public:
 
 	std::string getName() override { return "voidsprite Launchpad"; }
 
-	void eventTextInputConfirm(int evt_id, std::string data) {
+	void eventTextInputConfirm(int evt_id, std::string data) override {
 		if (evt_id == 3) {
 			eventButtonPressed(4);
 		}
@@ -216,6 +241,7 @@ public:
 			g_addScreen(newMainEditor);
 		}
 	}
+	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
 	void tryLoadFile(std::string path);
 };

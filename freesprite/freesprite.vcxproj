@@ -194,7 +194,7 @@
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="FontRenderer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="GlobalNavBar.cpp" />
+    <ClCompile Include="ScreenWideNavBar.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="libtga\tga.c" />
     <ClCompile Include="libtga\tgaread.c" />
@@ -275,7 +275,7 @@
     <ClInclude Include="EventCallbackListener.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="FontRenderer.h" />
-    <ClInclude Include="GlobalNavBar.h" />
+    <ClInclude Include="ScreenWideNavBar.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="libtga\tga.h" />

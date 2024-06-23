@@ -37,6 +37,11 @@ void StartScreen::takeInput(SDL_Event evt)
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
 	}
 
+	if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_LALT) {
+		wxsManager.forceFocusOn(navbar);
+		return;
+	}
+
 	if (!wxsManager.anyFocused() || evt.type == SDL_DROPFILE) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
@@ -68,6 +73,30 @@ void StartScreen::takeInput(SDL_Event evt)
 	}
 	else {
 		wxsManager.passInputToFocused(evt);
+	}
+}
+
+void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
+	wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
+	importerIndex--;
+	if (importerIndex >= g_fileSessionImportersNPaths.size()) {
+		importerIndex -= g_fileSessionImportersNPaths.size();
+		Layer* nlayer = g_fileImportersNPaths[importerIndex].importFunction(name, 0);
+		if (nlayer != NULL) {
+			g_addScreen(new MainEditor(nlayer));
+		}
+		else {
+			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
+		}
+	}
+	else {
+		MainEditor* session = g_fileSessionImportersNPaths[importerIndex].importFunction(name);
+		if (session != NULL) {
+			g_addScreen(session);
+		}
+		else {
+			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
+		}
 	}
 }
 

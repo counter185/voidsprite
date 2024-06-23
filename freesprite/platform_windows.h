@@ -99,8 +99,51 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     }
 }
 
-void platformTryLoadImageFile(EventCallbackListener* caller) {
-
+void platformTryLoadImageFile(EventCallbackListener* listener) {
+    OPENFILENAMEW ofna;
+    ZeroMemory(&ofna, sizeof(ofna));
+    ofna.lStructSize = sizeof(ofna);
+    ofna.hwndOwner = WINhWnd;
+    std::wstring filterString = L"";
+    std::vector<std::wstring> filterStrings;
+    for (FileSessionImportNPath f : g_fileSessionImportersNPaths) {
+        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
+        filterString.push_back('\0');
+        filterString += L"*" + utf8StringToWstring(f.extension);
+        filterString.push_back('\0');
+        filterStrings.push_back(utf8StringToWstring(f.extension));
+    }
+    for (FileImportNPath f : g_fileImportersNPaths) {
+        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
+        filterString.push_back('\0');
+        filterString += L"*" + utf8StringToWstring(f.extension);
+        filterString.push_back('\0');
+        filterStrings.push_back(utf8StringToWstring(f.extension));
+    }
+    filterString.push_back('\0');
+    //ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0OpenRaster Files (.ora)\0*.ora\0voidsprite Session Files v2 (.voidsn)\0*.voidsn\0BMP Files (.bmp)\0*.bmp\0CaveStory PBM Files (.pbm)\0*.pbm\0RPG2000/2003 XYZ Files (.xyz)\0*.xyz\0All files\0*.*\0\0";
+    ofna.lpstrFilter = filterString.c_str();
+    ofna.lpstrCustomFilter = NULL;
+    ofna.nFilterIndex = lastFilterIndex;
+    ofna.lpstrFile = fileNameBuffer;
+    ofna.nMaxFile = MAX_PATH;
+    ofna.lpstrFileTitle = NULL;
+    ofna.lpstrInitialDir = NULL;
+    ofna.Flags = OFN_EXPLORER;
+    ofna.lpstrTitle = L"voidsprite: Open Image";
+    ofna.lpstrDefExt = L"png";
+    if (GetOpenFileNameW(&ofna)) {
+        lastFilterIndex = ofna.nFilterIndex;
+        std::wstring fileName = fileNameBuffer;
+        std::wstring extension = filterStrings[ofna.nFilterIndex - 1];
+        if (fileName.size() < extension.size() || fileName.substr(fileName.size() - extension.size()) != extension) {
+            fileName += extension;
+        }
+        listener->eventFileOpen(EVENT_MAINEDITOR_SAVEFILE, fileName, ofna.nFilterIndex);
+    }
+    else {
+        printf("windows error: %i\n", GetLastError());
+    }
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {

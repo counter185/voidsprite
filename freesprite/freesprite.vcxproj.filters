@@ -156,7 +156,7 @@
     <ClCompile Include="UITextField.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GlobalNavBar.cpp">
+    <ClCompile Include="ScreenWideNavBar.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="DrawableManager.cpp">
@@ -389,7 +389,7 @@
     <ClInclude Include="EditorColorPicker.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalNavBar.h">
+    <ClInclude Include="ScreenWideNavBar.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UIButton.h">
