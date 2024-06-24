@@ -2,6 +2,7 @@
 #include "drawable.h"
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
+#include "UIHueSlider.h"
 #include "UIColorSlider.h"
 #include "UISVPicker.h"
 #include "UITextField.h"
@@ -21,15 +22,15 @@ public:
 
 	uint8_t currentR = 0, currentG = 0, currentB = 0;
 
-	UIColorSlider* hueSlider;
+	UIHueSlider* hueSlider;
 	UISVPicker* satValSlider;
 	UITextField* colorTextField;
 	UISlider* sliderH;
-	UISlider* sliderS;
-	UISlider* sliderV;
-	UISlider* sliderR;
-	UISlider* sliderG;
-	UISlider* sliderB;
+	UIColorSlider* sliderS;
+	UIColorSlider* sliderV;
+	UIColorSlider* sliderR;
+	UIColorSlider* sliderG;
+	UIColorSlider* sliderB;
 	TabbedView* tbv;
 
 	UIButton* eraserButton;
@@ -40,7 +41,7 @@ public:
 		tbv->position = XY{ 20,30 };
 		subWidgets.addDrawable(tbv);
 
-		hueSlider = new UIColorSlider(this);
+		hueSlider = new UIHueSlider(this);
 		hueSlider->position = XY{0,0};
 		tbv->tabs[0].wxs.addDrawable(hueSlider);
 
@@ -54,31 +55,31 @@ public:
 		sliderH->setCallbackListener(EVENT_COLORPICKER_SLIDERH, this);
 		tbv->tabs[1].wxs.addDrawable(sliderH);	
 
-		sliderS = new UISlider();
+		sliderS = new UIColorSlider();
 		sliderS->position = XY{ 70, 60 };
 		sliderS->wxWidth = 200;
 		sliderS->setCallbackListener(EVENT_COLORPICKER_SLIDERS, this);
 		tbv->tabs[1].wxs.addDrawable(sliderS);		
 		
-		sliderV = new UISlider();
+		sliderV = new UIColorSlider();
 		sliderV->position = XY{ 70, 110 };
 		sliderV->wxWidth = 200;
 		sliderV->setCallbackListener(EVENT_COLORPICKER_SLIDERV, this);
 		tbv->tabs[1].wxs.addDrawable(sliderV);
 
-		sliderR = new UISlider();
+		sliderR = new UIColorSlider();
 		sliderR->position = XY{ 70, 10 };
 		sliderR->wxWidth = 200;
 		sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
 		tbv->tabs[2].wxs.addDrawable(sliderR);
 
-		sliderG = new UISlider();
+		sliderG = new UIColorSlider();
 		sliderG->position = XY{ 70, 60 };
 		sliderG->wxWidth = 200;
 		sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
 		tbv->tabs[2].wxs.addDrawable(sliderG);
 
-		sliderB = new UISlider();
+		sliderB = new UIColorSlider();
 		sliderB->position = XY{ 70, 110 };
 		sliderB->wxWidth = 200;
 		sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);

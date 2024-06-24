@@ -227,6 +227,7 @@
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIColorInputField.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
+    <ClCompile Include="UIHueSlider.cpp" />
     <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UILayerButton.cpp" />
     <ClCompile Include="UISlider.cpp" />
@@ -311,6 +312,7 @@
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIColorInputField.h" />
     <ClInclude Include="UIColorSlider.h" />
+    <ClInclude Include="UIHueSlider.h" />
     <ClInclude Include="UILabel.h" />
     <ClInclude Include="UILayerButton.h" />
     <ClInclude Include="UISlider.h" />
