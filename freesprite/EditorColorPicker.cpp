@@ -14,8 +14,19 @@ void EditorColorPicker::render(XY position)
     SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, currentV }));
 
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    SDL_SetRenderDrawColor(g_rd, previewCol.r/6, previewCol.g / 6, previewCol.b / 6, focused ? 0xaf : 0x30);
-    SDL_RenderFillRect(g_rd, &r);
+    SDL_Color devalColor = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmax(currentV / 6, 0.2) }));
+    SDL_Color devalColor2 = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmax(currentV / 18, 0.05) }));
+    devalColor.a = devalColor2.a = focused ? 0xaf : 0x30;
+    renderGradient(r, sdlcolorToUint32(devalColor2), sdlcolorToUint32(devalColor), sdlcolorToUint32(devalColor), sdlcolorToUint32(devalColor));
+    //SDL_SetRenderDrawColor(g_rd, previewCol.r/6, previewCol.g / 6, previewCol.b / 6, focused ? 0xaf : 0x30);
+    //SDL_RenderFillRect(g_rd, &r);
+
+    SDL_Color valCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmin(currentV + 0.8, 1.0) }));
+    if (focused) {
+        SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 255);
+        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y  }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
+    }
 
     XY tabOrigin = xyAdd(position, tbv->position);
     tabOrigin.y += tbv->buttonsHeight;
@@ -35,8 +46,10 @@ void EditorColorPicker::render(XY position)
     r = SDL_Rect{ position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35 };
     SDL_SetRenderDrawColor(g_rd, previewCol.r, previewCol.g, previewCol.b, focused ? 0xff : 0x30);
     SDL_RenderFillRect(g_rd, &r);
+    SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, focused ? 0xff : 0x30);
+    SDL_RenderDrawRect(g_rd, &r);
 
-    g_fnt->RenderString("COLOR PICKER", position.x + 1, position.y + 1);
+    g_fnt->RenderString("COLOR PICKER", position.x + 5, position.y + 1);
 
     subWidgets.renderAll(position);
 }

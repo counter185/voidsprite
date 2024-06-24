@@ -335,6 +335,11 @@ unsigned int alphaBlend(unsigned int colora, unsigned int colorb) {
     return ((rb1 + rb2) & 0xFF00FF) + ((g1 + g2) & 0x00FF00) + (anew << 24);
 }
 
+uint32_t sdlcolorToUint32(SDL_Color c)
+{
+    return (c.a << 24) + (c.r << 16) + (c.g << 8) + c.b;
+}
+
 int ixmin(int a, int b) { return a > b ? b : a; }
 int ixmax(int a, int b) { return a > b ? a : b; }
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
