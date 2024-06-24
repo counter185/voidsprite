@@ -28,18 +28,18 @@ void EditorColorPicker::render(XY position)
         drawLine({ position.x, position.y }, { position.x + wxWidth, position.y  }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
     }
 
-    XY tabOrigin = xyAdd(position, tbv->position);
-    tabOrigin.y += tbv->buttonsHeight;
-    switch (tbv->openTab) {
+    XY tabOrigin = xyAdd(position, colorTabs->position);
+    tabOrigin.y += colorTabs->buttonsHeight;
+    switch (colorTabs->openTab) {
         case 1:
-            g_fnt->RenderString(std::format("H {}", std::round(currentH * 1000.0f) / 1000.0f), tabOrigin.x, tabOrigin.y + 20);
-            g_fnt->RenderString(std::format("S {}", std::round(currentS * 1000.0f) / 1000.0f), tabOrigin.x, tabOrigin.y + 70);
-            g_fnt->RenderString(std::format("V {}", std::round(currentV * 1000.0f) / 1000.0f), tabOrigin.x, tabOrigin.y + 120);
+            labelH->text = std::format("H {}", std::round(currentH * 1000.0f) / 1000.0f);
+            labelS->text = std::format("S {}", std::round(currentS * 1000.0f) / 1000.0f);
+            labelV->text = std::format("V {}", std::round(currentV * 1000.0f) / 1000.0f);
             break;
         case 2:
-            g_fnt->RenderString(std::format("R {}", currentR), tabOrigin.x, tabOrigin.y + 20);
-            g_fnt->RenderString(std::format("G {}", currentG), tabOrigin.x, tabOrigin.y + 70);
-            g_fnt->RenderString(std::format("B {}", currentB), tabOrigin.x, tabOrigin.y + 120);
+            labelR->text = std::format("R {}", currentR);
+            labelG->text = std::format("G {}", currentG);
+            labelB->text = std::format("B {}", currentB);
             break;
     }
 
@@ -167,12 +167,12 @@ void EditorColorPicker::setMainEditorColorRGB(unsigned int col) {
 }
 void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders, bool updateRGBSliders) {
     hsv a = rgb2hsv(rgb{ col.r / 255.0f, col.g / 255.0f, col.b / 255.0f });
-    if (tbv->openTab != 1 || updateHSVSliders) {
+    if (colorTabs->openTab != 1 || updateHSVSliders) {
         sliderH->sliderPos = (float)(a.h / 360.0f);
         sliderS->sliderPos = (float)a.s;
         sliderV->sliderPos = (float)a.v;
     }
-    if (tbv->openTab != 0 || updateHSVSliders) {
+    if (colorTabs->openTab != 0 || updateHSVSliders) {
         hueSlider->sliderPos = (float)(a.h / 360.0);
         satValSlider->sPos = (float)a.s;
         satValSlider->vPos = (float)a.v;

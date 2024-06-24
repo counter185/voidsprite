@@ -8,7 +8,7 @@ public:
 
 	UIHueSlider(EditorColorPicker* parent) {
 		wxWidth = 360;
-		wxHeight = 40;
+		wxHeight = 20;
 		this->parent = parent;
 	}
 	void render(XY pos) override;
