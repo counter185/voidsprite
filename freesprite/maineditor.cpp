@@ -179,7 +179,9 @@ void MainEditor::tick() {
 
 void MainEditor::DrawBackground()
 {
-	renderGradient({ 0,0, g_windowW, g_windowH }, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF202020);
+	uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+	uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+	renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
 	int lineX = 400;
 	for (int x = 40 + (SDL_GetTicks64()%5000/5000.0 * 60); x < g_windowW + lineX; x += 60) {
