@@ -93,12 +93,15 @@ void MainEditor::render() {
 	}
 
 	//draw a separate 1x1 grid if the scale is >= 1600%
-	if (scale >= 16) {
+	if (scale >= 10) {
+
+		uint8_t tileGridAlpha = scale < 16 ? 0x10 * ((scale - 9) / 7.0) : 0x10;
+
 		int dx = canvasRenderRect.x;
 		while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
 			dx += scale;
 			if (dx >= 0) {
-				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x10);
+				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
 				SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
 			}
 		}
@@ -106,7 +109,7 @@ void MainEditor::render() {
 		while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
 			dy += scale;
 			if (dy >= 0) {
-				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x10);
+				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
 				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
 			}
 		}
