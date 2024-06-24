@@ -40,10 +40,13 @@ public:
 
 	UIButton* eraserButton;
 
+	std::vector<uint32_t> lastColors;
+	bool lastColorsChanged = true;
+
 	EditorColorPicker(MainEditor* c) {
 		caller = c;
 
-		colorModeTabs = new TabbedView({ {"Colors"}, {"Palette"}}, 75);
+		colorModeTabs = new TabbedView({ {"Colors"}, {"Last"}}, 75);
 		colorModeTabs->position = XY{ 20,30 };
 		subWidgets.addDrawable(colorModeTabs);
 
@@ -147,6 +150,9 @@ public:
 	void setMainEditorColorHSV(double h, double s, double v);
 	void setMainEditorColorRGB(unsigned int col);
 	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true);
+
+	void pushLastColor(uint32_t col);
+	void updateLastColorButtons();
 
 	void editorColorHSliderChanged(double h) {
 		currentH = h;

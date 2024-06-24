@@ -128,6 +128,7 @@ bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 
 void DrawableManager::freeAllDrawables()
 {
+	forceUnfocus();
 	for (int x = 0; x < drawablesList.size(); x++) {
 		delete drawablesList[x];
 	}

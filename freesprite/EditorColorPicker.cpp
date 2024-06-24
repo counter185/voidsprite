@@ -102,6 +102,10 @@ void EditorColorPicker::eventButtonPressed(int evt_id)
     if (evt_id == EVENT_COLORPICKER_TOGGLEERASER) {
         toggleEraser();
     }
+	else if (evt_id >= 200) {
+		uint32_t col = lastColors[evt_id - 200];
+		setMainEditorColorRGB(col);
+	}
 }
 
 void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
@@ -212,4 +216,61 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
 
     colorTextField->text = std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b);
     caller->pickedColor = rgbColor;
+}
+
+void EditorColorPicker::pushLastColor(uint32_t col)
+{
+    col |= 0xff000000;
+    auto fnd = std::find(lastColors.begin(), lastColors.end(), col);
+
+    if (fnd == lastColors.begin() && lastColors.size() > 0) {
+        return;
+    }
+
+    //printf("pushing new color!\n");
+    lastColorsChanged = true;
+
+    if (fnd != lastColors.end()) {
+		lastColors.erase(fnd);
+	}
+    lastColors.insert(lastColors.begin(), col);
+
+    while (lastColors.size() > 256) {
+        lastColors.pop_back();
+    }
+    updateLastColorButtons();
+}
+
+void EditorColorPicker::updateLastColorButtons()
+{
+    if (!lastColorsChanged) {
+        return;
+    }
+    colorModeTabs->tabs[1].wxs.freeAllDrawables();
+    int x = 0;
+    int xx = 0;
+    int y = 0;
+    int posX = 0;
+    int posY = 5;
+    for (uint32_t& col : lastColors) {
+        UIButton* colBtn = new UIButton();
+        colBtn->colorBGFocused = colBtn->colorBGUnfocused = SDL_Color{(uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff), 255};
+        colBtn->position = { posX, posY };
+        colBtn->wxHeight = 24;
+        colBtn->wxWidth = 30;
+        colBtn->setCallbackListener(200+(xx++), this);
+        colorModeTabs->tabs[1].wxs.addDrawable(colBtn);
+
+        posX += 30;
+
+        if (++x == 12) {
+            posX = 0;
+            posY += 24;
+            x = 0;
+            if (y++ == 10) {
+                break;
+            }
+        }
+    }
+    lastColorsChanged = false;
 }

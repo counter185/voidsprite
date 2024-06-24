@@ -78,6 +78,8 @@ public:
 
 	std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
+	std::vector<uint32_t> lastColors;
+
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);
 	MainEditor(Layer* srf);
@@ -111,6 +113,7 @@ public:
 	void zoom(int how_much);
 	bool isInBounds(XY pos);
 	uint32_t pickColorFromAllLayers(XY);
+	void regenerateLastColors();
 
 	void checkAndDiscardEndOfUndoStack();
 	void commitStateToLayer(Layer* l);

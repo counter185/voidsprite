@@ -15,18 +15,18 @@
 #include "MinecraftSkinPreviewScreen.h"
 
 MainEditor::MainEditor(XY dimensions) {
-	setUpWidgets();
 
 	texW = dimensions.x;
 	texH = dimensions.y;
 	//canvasCenterPoint = XY{ texW / 2, texH / 2 };
 	layers.push_back(new Layer(texW, texH));
 	FillTexture();
+
+	setUpWidgets();
 	recenterCanvas();
 	initLayers();
 }
 MainEditor::MainEditor(SDL_Surface* srf) {
-	setUpWidgets();
 
 	//todo i mean just use MainEditor(Layer*) here
 	texW = srf->w;
@@ -35,28 +35,32 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 	Layer* nlayer = new Layer(texW, texH);
 	layers.push_back(nlayer);
 	SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, texW*4);
+
+	setUpWidgets();
 	recenterCanvas();
 	initLayers();
 }
 
 MainEditor::MainEditor(Layer* layer)
 {
-	setUpWidgets();
 
 	texW = layer->w;
 	texH = layer->h;
 
 	layers.push_back(layer);
+
+	setUpWidgets();
 	recenterCanvas();
 	initLayers();
 }
 
 MainEditor::MainEditor(std::vector<Layer*> layers)
 {
-	setUpWidgets();
 	texW = layers[0]->w;
 	texH = layers[0]->h;
 	this->layers = layers;
+
+	setUpWidgets();
 	recenterCanvas();
 	initLayers();
 	
@@ -478,6 +482,7 @@ void MainEditor::setUpWidgets()
 	colorPicker->position.x = 10;
 	wxsManager.addDrawable(colorPicker);
 	colorPicker->setMainEditorColorRGB(pickedColor);
+	regenerateLastColors();
 
 	brushPicker = new EditorBrushPicker(this);
 	brushPicker->position.y = 480;
@@ -732,6 +737,7 @@ void MainEditor::FillTexture() {
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
 	if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
 		getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
+		colorPicker->pushLastColor(color);
 	}
 	if (symmetryEnabled[0] && !(symmetry & 0b10)) {
 		int symmetryXPoint = symmetryPositions.x / 2;
@@ -964,6 +970,19 @@ void MainEditor::deleteLayer(int index) {
 
 	addToUndoStack(UndoStackElement{ layerAtPos, UNDOSTACK_DELETE_LAYER, index });
 }
+
+void MainEditor::regenerateLastColors()
+{
+	colorPicker->lastColors.clear();
+	colorPicker->lastColorsChanged = true;
+	Layer* flatLayer = flattenImage();
+	auto colorPalette = flatLayer->get256MostUsedColors();
+	delete flatLayer;
+	for (auto& c : colorPalette) {
+		colorPicker->pushLastColor(c);
+	}
+}
+
 void MainEditor::moveLayerUp(int index) {
 	if (index >= layers.size()-1) {
 		return;

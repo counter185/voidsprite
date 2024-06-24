@@ -197,6 +197,41 @@ public:
 		return ret;
 	}
 
+	std::vector<uint32_t> get256MostUsedColors(bool onlyRGB = false) {
+		std::map<uint32_t, int> cols;
+		uint32_t* pixels = (uint32_t*)pixelData;
+		for (uint64_t x = 0; x < w * h; x++) {
+			uint32_t px = pixels[x];
+			if (onlyRGB) {
+				px |= 0xff000000;
+			}
+			else {
+				if ((px & 0xff000000) == 0) {
+					px = 0;
+				}
+			}
+			cols[px] = 1;
+		}
+
+		std::vector<std::pair<uint32_t, int>> colorValues(cols.size());
+		std::copy(cols.begin(), cols.end(), colorValues.begin());
+		std::sort(colorValues.begin(), colorValues.end(),
+			[](const std::pair<uint32_t, int>& a, const std::pair<uint32_t, int>& b) {
+				return a.second > b.second;
+			}
+		);
+
+		std::vector<uint32_t> ret;
+		for (auto& a : colorValues) {
+			ret.push_back(a.first);
+			if (ret.size() >= 256) {
+				break;
+			}
+		}
+		return ret;
+
+	}
+
 	Layer* copyScaled(XY dimensions);
 
 	void setAllAlpha255() {
