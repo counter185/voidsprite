@@ -26,6 +26,11 @@ XY xySubtract(XY p1, XY p2)
     return XY{p1.x-p2.x, p1.y-p2.y};
 }
 
+SDL_FPoint xytofp(XY p)
+{
+    return {(float)p.x, (float)p.y};
+}
+
 std::string stringToLower(std::string a)
 {
     std::string ret;
@@ -161,6 +166,23 @@ void drawLine(XY p1, XY p2, double percent)
 double XM1PW3P1(double x)
 {
     return (x - 1) * (x - 1) * (x - 1) + 1;
+}
+
+void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_t colorDL, uint32_t colorDR)
+{
+    SDL_Vertex verts[4];
+    verts[0].position = xytofp({ bounds.x, bounds.y });
+    verts[0].color = { (uint8_t)((colorUL & 0xFF0000) >> 16), (uint8_t)((colorUL & 0x00FF00) >> 8), (uint8_t)(colorUL & 0x0000FF), (uint8_t)((colorUL & 0xFF000000) >> 24)};
+    verts[1].position = xytofp({ bounds.x + bounds.w, bounds.y });
+    verts[1].color = { (uint8_t)((colorUR & 0xFF0000) >> 16), (uint8_t)((colorUR & 0x00FF00) >> 8), (uint8_t)(colorUR & 0x0000FF), (uint8_t)((colorUR & 0xFF000000) >> 24) };
+    verts[2].position = xytofp({ bounds.x, bounds.y + bounds.h });
+    verts[2].color = { (uint8_t)((colorDL & 0xFF0000) >> 16), (uint8_t)((colorDL & 0x00FF00) >> 8), (uint8_t)(colorDL & 0x0000FF), (uint8_t)((colorDL & 0xFF000000) >> 24) };
+    verts[3].position = xytofp({ bounds.x + bounds.w, bounds.y + bounds.h });
+    verts[3].color = { (uint8_t)((colorDR & 0xFF0000) >> 16), (uint8_t)((colorDR & 0x00FF00) >> 8), (uint8_t)(colorDR & 0x0000FF), (uint8_t)((colorDR & 0xFF000000) >> 24) };
+
+    int indices[6] = { 0, 1, 2, 1, 3, 2 };
+    SDL_RenderGeometry(g_rd, NULL, verts, 4, indices, 6);
+
 }
 
 std::string pathInProgramDirectory(std::string path)

@@ -116,6 +116,7 @@ public:
 	void toggleEraser();
 	void updateMainEditorColor();
 	void updateMainEditorColorFromRGBSliders();
+	void setMainEditorColorHSV(double h, double s, double v);
 	void setMainEditorColorRGB(unsigned int col);
 	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true);
 

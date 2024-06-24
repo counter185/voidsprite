@@ -134,6 +134,16 @@ void EditorColorPicker::updateMainEditorColor()
     setMainEditorColorRGB(col_b, false, true);
 }
 
+void EditorColorPicker::setMainEditorColorHSV(double h, double s, double v)
+{
+    currentH = h;
+    currentS = s;
+    currentV = v;
+    rgb col = hsv2rgb(hsv{ currentH, currentS, currentV });
+    SDL_Color col_b = rgb2sdlcolor(col);
+    setMainEditorColorRGB(col_b, true, true);
+}
+
 void EditorColorPicker::updateMainEditorColorFromRGBSliders()
 {
     setMainEditorColorRGB({currentR, currentG, currentB}, true, false);

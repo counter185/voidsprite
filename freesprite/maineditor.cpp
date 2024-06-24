@@ -179,6 +179,8 @@ void MainEditor::tick() {
 
 void MainEditor::DrawBackground()
 {
+	renderGradient({ 0,0, g_windowW, g_windowH }, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF202020);
+
 	int lineX = 400;
 	for (int x = 40 + (SDL_GetTicks64()%5000/5000.0 * 60); x < g_windowW + lineX; x += 60) {
 		SDL_SetRenderDrawColor(g_rd, 0xff-backgroundColor.r, 0xff-backgroundColor.g, 0xff-backgroundColor.b, 0x40);
@@ -603,7 +605,16 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				break;
 			case SDL_MOUSEWHEEL:
-				zoom(evt.wheel.y);
+				if (g_ctrlModifier) {
+					colorPicker->setMainEditorColorHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
+				}
+				else if (g_shiftModifier) {
+					double newH = dxmin(dxmax(colorPicker->currentH + (360.0 / 12) * evt.wheel.y, 0), 359);
+					colorPicker->setMainEditorColorHSV(newH, colorPicker->currentS, colorPicker->currentV);
+				}
+				else {
+					zoom(evt.wheel.y);
+				}
 				break;
 			case SDL_KEYDOWN:
 				switch (evt.key.keysym.sym) {

@@ -17,6 +17,9 @@ struct hsv {
 //stolen code yay
 //https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
 
+
+void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_t colorDL, uint32_t colorDR);
+
 std::string pathInProgramDirectory(std::string path);
 
 hsv rgb2hsv(rgb in);
@@ -31,6 +34,7 @@ double xyDistance(XY p1, XY p2);
 bool xyEqual(XY p1, XY p2);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
+SDL_FPoint xytofp(XY p);
 
 std::string stringToLower(std::string a);
 std::wstring utf8StringToWstring(std::string a);
