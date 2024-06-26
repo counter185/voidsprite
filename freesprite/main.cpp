@@ -168,6 +168,13 @@ int main(int argc, char** argv)
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
+    SDL_Surface* cursorSrf = IMG_Load("assets/app_cursor.png");
+    if (cursorSrf != NULL) {
+        SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
+        SDL_SetCursor(cur);
+        SDL_FreeSurface(cursorSrf);
+    }
+
     g_mainlogo = IMGLoadToTexture("assets/mainlogo.png");
     g_iconLayerAdd = IMGLoadToTexture("assets/icon_layer_add.png");
     g_iconLayerDelete = IMGLoadToTexture("assets/icon_layer_delete.png");
