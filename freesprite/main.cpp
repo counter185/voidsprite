@@ -76,6 +76,7 @@ void tickNotifications() {
 std::vector<BasePopup*> popupStack;
 void g_addPopup(BasePopup* a) {
     popupStack.push_back(a);
+    a->startTimer.start();
 }
 void g_popDisposeLastPopup(bool dispose) {
     if (dispose) {

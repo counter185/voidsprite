@@ -7,6 +7,8 @@ class BasePopup :
     public BaseScreen
 {
 public:
+    Timer64 startTimer;
+
     ~BasePopup() {
         //printf("[BasePopup] destructor call\n");
         wxsManager.freeAllDrawables();
@@ -40,10 +42,10 @@ protected:
     }
 
     void renderDefaultBackground(SDL_Color bgColor = SDL_Color{0,0,0,0xD0}) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, (uint8_t)(0x30 * startTimer.percentElapsedTime(300)));
         SDL_RenderFillRect(g_rd, NULL);
         XY origin = getPopupOrigin();
-        SDL_Rect bgRect = SDL_Rect{origin.x, origin.y, wxWidth, wxHeight};
+        SDL_Rect bgRect = SDL_Rect{origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300)))};
         SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
         SDL_RenderFillRect(g_rd, &bgRect);
     }
