@@ -26,6 +26,7 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, int textFieldWidth)
     tbox = new UITextField();
     tbox->position = XY{ 20, 80 };
     tbox->wxWidth = textFieldWidth;
+    tbox->setCallbackListener(0, this);
     wxsManager.addDrawable(tbox);
 }
 

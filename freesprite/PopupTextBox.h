@@ -30,7 +30,7 @@ public:
 
     }
 
-    void eventTextInputConfirm(int evt_id, std::string text) {
+    void eventTextInputConfirm(int evt_id, std::string text) override {
         eventButtonPressed(0);
     }
 };
