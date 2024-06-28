@@ -327,6 +327,12 @@
     <ClCompile Include="libpng\pngwutil.c">
       <Filter>Source files\external\libpng</Filter>
     </ClCompile>
+    <ClCompile Include="UIHueSlider.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushReplaceColor.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -577,6 +583,12 @@
     </ClInclude>
     <ClInclude Include="libpng\pnginfo.h">
       <Filter>Header files\external\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="UIHueSlider.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushReplaceColor.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

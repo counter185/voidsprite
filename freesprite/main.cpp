@@ -13,6 +13,7 @@
 #include "ToolRectMove.h"
 #include "Brush1x1ArcX.h"
 #include "Brush1x1ArcY.h"
+#include "BrushReplaceColor.h"
 
 #include "ee_creature.h"
 
@@ -212,6 +213,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new BrushRectFill());
     g_brushes.push_back(new BrushCircle());
     g_brushes.push_back(new BrushFill());
+    g_brushes.push_back(new BrushReplaceColor());
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectClone());
     g_brushes.push_back(new ToolRectMove());

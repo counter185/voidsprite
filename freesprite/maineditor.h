@@ -139,6 +139,7 @@ public:
 	void layer_swapLayerRGBtoBGR();
 	uint32_t layer_getPixelAt(XY pos);
 	void layer_setAllAlpha255();
+	void layer_replaceColor(uint32_t from, uint32_t to);
 	Layer* flattenImage();
 	Layer* mergeLayers(Layer* bottom, Layer* top);
 

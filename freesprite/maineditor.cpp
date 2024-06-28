@@ -1174,3 +1174,9 @@ CommentData MainEditor::_removeCommentAt(XY a)
 	//@hirano185 hey girlie check this out!
 	return { {0,0}, "\1" };
 }
+
+void MainEditor::layer_replaceColor(uint32_t from, uint32_t to)
+{
+	//commitStateToCurrentLayer();
+	getCurrentLayer()->replaceColor(from, to);
+}

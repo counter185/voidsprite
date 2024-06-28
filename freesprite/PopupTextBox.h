@@ -29,5 +29,9 @@ public:
         }
 
     }
+
+    void eventTextInputConfirm(int evt_id, std::string text) {
+        eventButtonPressed(0);
+    }
 };
 
