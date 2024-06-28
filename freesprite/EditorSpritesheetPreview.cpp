@@ -15,7 +15,8 @@ void EditorSpritesheetPreview::render(XY at)
 		wxHeight
 	};
 	SDL_SetRenderDrawColor(g_rd, 0xd, 0xd, 0xd, 0xd0);
-	SDL_RenderFillRect(g_rd, &drawRect);
-	g_fnt->RenderString("PREVIEW", origin.x+2, origin.y);
+	renderGradient(drawRect, 0x200d0d0d, 0x800d0d0d, 0x800d0d0d, 0xe0000000);
+	//SDL_RenderFillRect(g_rd, &drawRect);
+	g_fnt->RenderString("PREVIEW", origin.x+5, origin.y+1);
 	caller->drawPreview(xyAdd(origin, XY{ 4, 24 }));
 }
