@@ -82,6 +82,12 @@
     <Filter Include="Source files\external\libpng">
       <UniqueIdentifier>{215dd3a1-6faa-4ad0-9a1e-8169550ce787}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\astc_dec">
+      <UniqueIdentifier>{120114de-a3c4-47bc-b48f-22f7df9a7bf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\external\astc_dec">
+      <UniqueIdentifier>{55b0a71a-1a7b-43ce-846d-e40306aab9d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -332,6 +338,9 @@
     </ClCompile>
     <ClCompile Include="BrushReplaceColor.cpp">
       <Filter>Source files\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="astc_dec\astc_decomp.cpp">
+      <Filter>Source files\external\astc_dec</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -589,6 +598,9 @@
     </ClInclude>
     <ClInclude Include="BrushReplaceColor.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="astc_dec\astc_decomp.h">
+      <Filter>Header files\external\astc_dec</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

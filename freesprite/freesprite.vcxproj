@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="astc_dec\astc_decomp.cpp" />
     <ClCompile Include="BaseBrush.cpp" />
     <ClCompile Include="BasePopup.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
@@ -238,6 +239,7 @@
     <ClCompile Include="zip\zip.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="astc_dec\astc_decomp.h" />
     <ClInclude Include="BaseBrush.h" />
     <ClInclude Include="BasePopup.h" />
     <ClInclude Include="BaseScreen.h" />

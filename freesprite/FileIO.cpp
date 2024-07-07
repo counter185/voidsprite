@@ -8,6 +8,7 @@
 #include "easybmp/EasyBMP.h"
 #include "zip/zip.h"
 #include "pugixml/pugixml.hpp"
+#include "astc_dec/astc_decomp.h"
 
 enum VTFFORMAT
 {
@@ -40,6 +41,64 @@ enum VTFFORMAT
     IMAGE_FORMAT_RGBA16161616,
     IMAGE_FORMAT_UVLX8888
 };
+
+int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 4, int blockHeight = 4) {
+    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    /*int skip = 232;
+    int skipHowMany = 24;
+    int skipCounter = 0;*/
+
+    int astcErrors = 0;
+    int blocksW = ceil((float)width / blockWidth);
+    int blocksH = ceil((float)height / blockHeight);
+
+    int x = 0;
+    int y = 0;
+
+    while (y < blocksH && x < blocksW) {
+
+        uint8_t astcData[16];
+        fread(astcData, 1, 16, infile);
+        while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
+            fread(astcData, 1, 16, infile);
+        }
+        uint8_t* rgbaData = (uint8_t*)malloc(4 * blockHeight * blockWidth);
+        bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
+
+        if (!success) {
+			printf("ASTC decompression failed\n");
+            //astcErrors++;
+			//return;
+		}
+
+        int rgbaDataPointer = 0;
+
+        for (int yy = 0; yy < blockHeight; yy++) {
+            for (int xx = 0; xx < blockWidth; xx++) {
+                //uint32_t colorNow = ((uint32_t*)rgbaData)[yy * blockWidth + xx];
+
+                uint8_t r = rgbaData[rgbaDataPointer++];
+                uint8_t g = rgbaData[rgbaDataPointer++];
+                uint8_t b = rgbaData[rgbaDataPointer++];
+                uint8_t a = rgbaData[rgbaDataPointer++];
+
+                ret->setPixel({ x*blockWidth + xx,y*blockHeight + yy }, PackRGBAtoARGB(r,g,b,a));
+                //ret->setPixel({ x + xx, y + yy }, PackRGBAtoARGB(rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], 255));
+                //ret->setPixel({ x + xx,y + yy }, colorNow);
+            }
+        }
+
+        free(rgbaData);
+        
+        if (++x >= blocksW) {
+            x = 0;
+			y++;
+        }
+
+    }
+    printf("[ASTC] at %x / %x\n", ftell(infile), fileLength); 
+    return astcErrors;
+}
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile)
 {
@@ -718,6 +777,20 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
         fseek(texfile, 0, SEEK_END);
         long filesize = ftell(texfile);
 
+        fseek(texfile, 0, SEEK_SET);
+        int magicNumber = 0;
+        uint8_t a;
+        for (int x = 0; x < 4; x++) {
+			fread(&a, 1, 1, texfile);
+			magicNumber += a;
+		}
+        //according to game decomps, magicNumber must == 1 or else it's considered the wrong format
+
+        fseek(texfile, 8, SEEK_SET);
+        uint8_t formatType;
+        fread(&formatType, 1, 1, texfile);
+
+
         char ddsheader[4];
         fseek(texfile, 0x34, SEEK_SET);
         fread(&ddsheader, 4, 1, texfile);
@@ -726,17 +799,66 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
             return readDDS(path, 0x34);
         }
         else {
+            if (formatType == 0x80) {
+                printf("[AETEX] ASTC texture\n");
+                //fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
+                //uint8_t* astcData = (uint8_t*)malloc(filesize - 0x80);
+                //fread(astcData, filesize - 0x80, 1, texfile);
 
-            fseek(texfile, 0x38, SEEK_SET);
-            uint8_t* tgaData = (uint8_t*)malloc(filesize - 0x38);
-            fread(tgaData, filesize - 0x38, 1, texfile);
-            fclose(texfile);
-            SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
-            //todo: dds
-            SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
-            SDL_RWclose(tgarw);
-            free(tgaData);
-            return new Layer(tgasrf);
+                uint16_t astcWidth, astcHeight;
+                fseek(texfile, 0x10, SEEK_SET);
+                fread(&astcWidth, 2, 1, texfile);
+                fread(&astcHeight, 2, 1, texfile);
+
+                /*for (int x = 2; x < 13; x++) {
+                    for (int y = 2; y < 13; y++) {
+                        Layer* nlayer = new Layer(astcWidth, astcHeight);
+                        nlayer->name = "AETEX ASTC layer";
+
+                        uint8_t* rgbaData = (uint8_t*)malloc(astcWidth * astcHeight * 4);
+
+                        fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
+                        //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
+                        int errors = DeASTC(nlayer, astcWidth, astcHeight, texfile, x, y);
+                        //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                        //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
+                        free(rgbaData);
+                        delete nlayer;
+
+                        int totalBlocks = ceil(astcWidth / (float)x) * ceil(astcHeight / (float)y);
+                        printf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
+                    }
+                }
+
+                return NULL;*/
+
+                Layer* nlayer = new Layer(astcWidth, astcHeight);
+                nlayer->name = "AETEX ASTC layer";
+
+                uint8_t* rgbaData = (uint8_t*)malloc(astcWidth * astcHeight * 4);
+
+                fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
+                //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
+                DeASTC(nlayer, astcWidth, astcHeight, filesize, texfile);
+                //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
+                free(rgbaData);
+                //free(astcData);
+                return nlayer;
+            }
+            else {
+
+                fseek(texfile, 0x38, SEEK_SET);
+                uint8_t* tgaData = (uint8_t*)malloc(filesize - 0x38);
+                fread(tgaData, filesize - 0x38, 1, texfile);
+                fclose(texfile);
+                SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
+                //todo: dds
+                SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
+                SDL_RWclose(tgarw);
+                free(tgaData);
+                return new Layer(tgasrf);
+            }
         }
     }
     else {
