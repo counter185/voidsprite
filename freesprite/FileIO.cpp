@@ -55,47 +55,57 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
     int x = 0;
     int y = 0;
 
+    uint8_t astcData[16];
+
     while (y < blocksH && x < blocksW) {
 
-        uint8_t astcData[16];
-        fread(astcData, 1, 16, infile);
-        while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
-            fread(astcData, 1, 16, infile);
-        }
-        uint8_t* rgbaData = (uint8_t*)malloc(4 * blockHeight * blockWidth);
-        bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
+        for (int xx = 0; xx < 2; xx++) {
+            for (int yy = 0; yy < 2; yy++) {
 
-        if (!success) {
-			printf("ASTC decompression failed\n");
-            //astcErrors++;
-			//return;
-		}
+                fread(astcData, 1, 16, infile);
+                while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
+                    fread(astcData, 1, 16, infile);
+                }
+                uint8_t* rgbaData = (uint8_t*)malloc(4 * blockHeight * blockWidth);
+                bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
 
-        int rgbaDataPointer = 0;
+                if (!success) {
+                    printf("ASTC decompression failed\n");
+                    //astcErrors++;
+                    //return;
+                }
 
-        for (int yy = 0; yy < blockHeight; yy++) {
-            for (int xx = 0; xx < blockWidth; xx++) {
-                //uint32_t colorNow = ((uint32_t*)rgbaData)[yy * blockWidth + xx];
+                int rgbaDataPointer = 0;
 
-                uint8_t r = rgbaData[rgbaDataPointer++];
-                uint8_t g = rgbaData[rgbaDataPointer++];
-                uint8_t b = rgbaData[rgbaDataPointer++];
-                uint8_t a = rgbaData[rgbaDataPointer++];
+                for (int yyy = 0; yyy < blockHeight; yyy++) {
+                    for (int xxx = 0; xxx < blockWidth; xxx++) {
+                        //uint32_t colorNow = ((uint32_t*)rgbaData)[yy * blockWidth + xx];
 
-                ret->setPixel({ x*blockWidth + xx,y*blockHeight + yy }, PackRGBAtoARGB(r,g,b,a));
-                //ret->setPixel({ x + xx, y + yy }, PackRGBAtoARGB(rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], 255));
-                //ret->setPixel({ x + xx,y + yy }, colorNow);
+                        uint8_t r = rgbaData[rgbaDataPointer++];
+                        uint8_t g = rgbaData[rgbaDataPointer++];
+                        uint8_t b = rgbaData[rgbaDataPointer++];
+                        uint8_t a = rgbaData[rgbaDataPointer++];
+
+                        //if (y+yy > )
+                        ret->setPixel({ (x+xx) * blockWidth + xxx, (y+yy) * blockHeight + yyy }, PackRGBAtoARGB(r, g, b, a));
+                        //ret->setPixel({ x + xx, y + yy }, PackRGBAtoARGB(rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], 255));
+                        //ret->setPixel({ x + xx,y + yy }, colorNow);
+                    }
+                }
+                free(rgbaData);
             }
         }
 
-        free(rgbaData);
         
-        if (++x >= blocksW) {
-            x = 0;
-			y++;
+        
+        y += 2;
+        if (y >= blocksH-1) {
+            y = 0;
+            x += 2;
         }
 
     }
+
     printf("[ASTC] at %x / %x\n", ftell(infile), fileLength); 
     return astcErrors;
 }
