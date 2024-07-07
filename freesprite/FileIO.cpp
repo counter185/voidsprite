@@ -42,7 +42,7 @@ enum VTFFORMAT
     IMAGE_FORMAT_UVLX8888
 };
 
-int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 4, int blockHeight = 4) {
+int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 8, int blockHeight = 8) {
     uint32_t* pxd = (uint32_t*)ret->pixelData;
     /*int skip = 232;
     int skipHowMany = 24;
@@ -59,49 +59,57 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
     while (y < blocksH && x < blocksW) {
 
-        for (int xx = 0; xx < 2; xx++) {
-            for (int yy = 0; yy < 2; yy++) {
+        //for (int yyyyy = 0; yyyyy < 2; yyyyy++) {
+            for (int xxxxx = 0; xxxxx < 2; xxxxx++) {
 
-                fread(astcData, 1, 16, infile);
-                while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
-                    fread(astcData, 1, 16, infile);
-                }
-                uint8_t* rgbaData = (uint8_t*)malloc(4 * blockHeight * blockWidth);
-                bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
+                //1x4 vertical strip
+                for (int yyyy = 0; yyyy < 4; yyyy++) {
 
-                if (!success) {
-                    printf("ASTC decompression failed\n");
-                    //astcErrors++;
-                    //return;
-                }
+                    //2x2 deswizzle
+                    for (int xx = 0; xx < 2; xx++) {
+                        for (int yy = 0; yy < 2; yy++) {
 
-                int rgbaDataPointer = 0;
+                            fread(astcData, 1, 16, infile);
+                            /*while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
+                                fread(astcData, 1, 16, infile);
+                            }*/
+                            uint8_t* rgbaData = (uint8_t*)malloc(4 * blockHeight * blockWidth);
+                            bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
 
-                for (int yyy = 0; yyy < blockHeight; yyy++) {
-                    for (int xxx = 0; xxx < blockWidth; xxx++) {
-                        //uint32_t colorNow = ((uint32_t*)rgbaData)[yy * blockWidth + xx];
+                            if (!success) {
+                                printf("ASTC decompression failed\n");
+                                //astcErrors++;
+                                //return;
+                            }
 
-                        uint8_t r = rgbaData[rgbaDataPointer++];
-                        uint8_t g = rgbaData[rgbaDataPointer++];
-                        uint8_t b = rgbaData[rgbaDataPointer++];
-                        uint8_t a = rgbaData[rgbaDataPointer++];
+                            int rgbaDataPointer = 0;
 
-                        //if (y+yy > )
-                        ret->setPixel({ (x+xx) * blockWidth + xxx, (y+yy) * blockHeight + yyy }, PackRGBAtoARGB(r, g, b, a));
-                        //ret->setPixel({ x + xx, y + yy }, PackRGBAtoARGB(rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], 255));
-                        //ret->setPixel({ x + xx,y + yy }, colorNow);
+                            for (int yyy = 0; yyy < blockHeight; yyy++) {
+                                for (int xxx = 0; xxx < blockWidth; xxx++) {
+                                    //uint32_t colorNow = ((uint32_t*)rgbaData)[yy * blockWidth + xx];
+
+                                    uint8_t r = rgbaData[rgbaDataPointer++];
+                                    uint8_t g = rgbaData[rgbaDataPointer++];
+                                    uint8_t b = rgbaData[rgbaDataPointer++];
+                                    uint8_t a = rgbaData[rgbaDataPointer++];
+
+                                    //if (y+yy > )
+                                    ret->setPixel({ (x + xxxxx * 2 + xx) * blockWidth + xxx, (y + yyyy * 2 + yy) * blockHeight + yyy }, PackRGBAtoARGB(r, g, b, a));
+                                    //ret->setPixel({ x + xx, y + yy }, PackRGBAtoARGB(rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], 255));
+                                    //ret->setPixel({ x + xx,y + yy }, colorNow);
+                                }
+                            }
+                            free(rgbaData);
+                        }
                     }
                 }
-                free(rgbaData);
             }
-        }
-
+        //}
         
-        
-        y += 2;
-        if (y >= blocksH-1) {
+        y += 8;
+        if (y >= blocksH-8) {
             y = 0;
-            x += 2;
+            x += 4;
         }
 
     }
