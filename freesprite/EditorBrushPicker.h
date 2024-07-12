@@ -11,7 +11,7 @@ class EditorBrushPicker : public Drawable, public EventCallbackListener
 {
 public:
 	int wxWidth = 190;
-	int wxHeight = 140;
+	int wxHeight = 165;
 	MainEditor* caller;
 	bool patternsMenuOpen = false;
 

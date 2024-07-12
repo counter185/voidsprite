@@ -342,6 +342,9 @@
     <ClCompile Include="astc_dec\astc_decomp.cpp">
       <Filter>Source files\external\astc_dec</Filter>
     </ClCompile>
+    <ClCompile Include="ToolRectSwap.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -601,6 +604,9 @@
     </ClInclude>
     <ClInclude Include="astc_dec\astc_decomp.h">
       <Filter>Header files\external\astc_dec</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolRectSwap.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

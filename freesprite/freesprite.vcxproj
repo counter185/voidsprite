@@ -167,6 +167,7 @@
     <ClCompile Include="BrushFill.cpp" />
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
+    <ClCompile Include="ToolRectSwap.cpp" />
     <ClCompile Include="BrushReplaceColor.cpp" />
     <ClCompile Include="libpng\png.c" />
     <ClCompile Include="libpng\pngerror.c" />
@@ -253,6 +254,7 @@
     <ClInclude Include="BrushFill.h" />
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
+    <ClInclude Include="ToolRectSwap.h" />
     <ClInclude Include="BrushReplaceColor.h" />
     <ClInclude Include="ee_creature.h" />
     <ClInclude Include="libpng\png.h" />
