@@ -9,6 +9,7 @@
 #include "zip/zip.h"
 #include "pugixml/pugixml.hpp"
 #include "astc_dec/astc_decomp.h"
+#include "base64/base64.hpp"
 
 enum VTFFORMAT
 {
@@ -2015,6 +2016,50 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 
         fclose(outfile);
         return true;
+    }
+    return false;
+}
+
+bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+
+    if (outfile != NULL) {
+#if _WIDEPATHS
+        if (writePNG(L"temp.bin", data)) {
+#else
+        if (writePNG("temp.bin", data)) {
+#endif
+            //open temp.bin file, convert to base64, write to outfile
+            FILE* infile = platformOpenFile(L"temp.bin", PlatformFileModeRB);
+            if (infile != NULL) {
+				fseek(infile, 0, SEEK_END);
+				uint64_t fileLength = ftell(infile);
+				fseek(infile, 0, SEEK_SET);
+				//char* fileBuffer = (char*)malloc(fileLength);
+                std::string fileBuffer;
+                fileBuffer.resize(fileLength);
+                fread(fileBuffer.data(), fileLength, 1, infile);
+				//fread(fileBuffer, fileLength, 1, infile);
+				fclose(infile);
+
+                std::string base64Buffer = base64::to_base64(fileBuffer);
+
+                std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
+                std::string htmlPost = "\"></img>\n\t</body>\n</html>";
+                fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
+				fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
+                fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
+				//free(fileBuffer);
+			}
+
+
+            fclose(outfile);
+            return true;
+        }
+
+        fclose(outfile);
+        return false;
     }
     return false;
 }

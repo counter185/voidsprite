@@ -37,6 +37,7 @@ bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeCHeader(PlatformNativePathString path, Layer* data);
 bool writePythonNPArray(PlatformNativePathString path, Layer* data);
+bool writeHTMLBase64(PlatformNativePathString path, Layer* data);
 
 struct FileSessionImportNPath {
 	std::string name;
@@ -106,6 +107,9 @@ inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
 	},
 	{
 		"Python NumPy array (voidsprite custom)", ".py", &writePythonNPArray
+	},
+	{
+		"HTML Base64 image (base64)", ".html", &writeHTMLBase64
 	}
 };
 inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {

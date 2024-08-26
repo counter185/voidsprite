@@ -88,6 +88,9 @@
     <Filter Include="Source files\external\astc_dec">
       <UniqueIdentifier>{55b0a71a-1a7b-43ce-846d-e40306aab9d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\base64">
+      <UniqueIdentifier>{f4ed1a57-73df-421a-b1da-6fe92097d081}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -607,6 +610,9 @@
     </ClInclude>
     <ClInclude Include="ToolRectSwap.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="base64\base64.hpp">
+      <Filter>Header files\external\base64</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
