@@ -1,9 +1,39 @@
 #include "TilemapPreviewScreen.h"
 #include "maineditor.h"
 #include "FontRenderer.h"
+#include "ScreenWideNavBar.h"
+#include "Notification.h"
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
+
+    navbar = new ScreenWideNavBar<TilemapPreviewScreen*>(this,
+        {
+            {
+                SDLK_f,
+                {
+                    "File",
+                    {},
+                    {
+                        {SDLK_o, { "Load layout from file",
+                                [](TilemapPreviewScreen* screen) {
+                                    platformTryLoadOtherFile(screen, ".voidtile", "Load tile layout");
+                                }
+                            }
+                        },
+                        {SDLK_s, { "Save layout to file",
+                                [](TilemapPreviewScreen* screen) {
+                                    platformTrySaveOtherFile(screen, ".voidtile", "Save tile layout");
+                                }
+                            }
+                        },
+                    },
+                    g_iconNavbarTabFile
+                }
+            }
+        }, { SDLK_f });
+    wxsManager.addDrawable(navbar);
+
     resizeTilemap(32, 32);
 
     tileSelectScale = caller->scale;
@@ -61,14 +91,14 @@ void TilemapPreviewScreen::render()
     SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
 
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
-    SDL_Rect panelRect = { 0,0, ixmax(400, 30 + caller->tileDimensions.x * tilemapScale * 2), ixmax(200, 110 + caller->tileDimensions.y * tilemapScale * 2)};
+    SDL_Rect panelRect = { 0,40, ixmax(400, 30 + caller->tileDimensions.x * tilemapScale * 2), ixmax(200, 110 + caller->tileDimensions.y * tilemapScale * 2)};
     SDL_RenderFillRect(g_rd, &panelRect);
 
-    g_fnt->RenderString("Tileset preview", 5, 5);
-    g_fnt->RenderString("Selected tile: [TAB] to switch", 15, 60);
+    g_fnt->RenderString("Tileset preview", panelRect.x + 5, panelRect.y+5);
+    g_fnt->RenderString("Selected tile: [TAB] to switch", panelRect.x + 15, panelRect.y + 60);
     SDL_Rect tileDraw = {
-        15,
-        90,
+        panelRect.x + 15,
+        panelRect.y + 90,
         caller->tileDimensions.x * tilemapScale*2,
         caller->tileDimensions.y * tilemapScale*2
     };
@@ -124,6 +154,13 @@ void TilemapPreviewScreen::render()
 
         g_fnt->RenderString("Select tile...", 10, 10);
     }
+
+    if (navbar->focused) {
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+		SDL_RenderFillRect(g_rd, NULL);
+	}
+
+    wxsManager.renderAll();
 }
 
 void TilemapPreviewScreen::tick()
@@ -152,7 +189,7 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
         g_closeScreen(this);
         return;
     }
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
         wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
     }
 
@@ -224,6 +261,9 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
 				tileSelectOpen = !tileSelectOpen;
                 tileSelectTimer.start();
 			}
+            else if (evt.key.keysym.sym == SDLK_LALT) {
+                wxsManager.forceFocusOn(navbar);
+            }
             break;
         }
     }
@@ -235,6 +275,63 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
 BaseScreen* TilemapPreviewScreen::isSubscreenOf()
 {
     return caller;
+}
+
+void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
+{
+    FILE* file = platformOpenFile(name, PlatformFileModeWB);
+    if (file == NULL) {
+		g_addNotification(Notification("Error saving file", "Could not open file for writing."));
+		return;
+    }
+    else {
+        uint8_t version = 1;
+        fwrite(&version, 1, 1, file);
+        fwrite(&tilemapDimensions.x, 4, 1, file);
+        fwrite(&tilemapDimensions.y, 4, 1, file);
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+			for (int x = 0; x < tilemapDimensions.x; x++) {
+                XY td = tilemap[y][x];
+                fwrite(&td.x, 4, 1, file);
+                fwrite(&td.y, 4, 1, file);
+			}
+		}
+        fclose(file);
+        g_addNotification(Notification("File saved", "Save successful!", 4000));
+    }
+}
+
+void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
+{
+    FILE* file = platformOpenFile(name, PlatformFileModeRB);
+    if (file == NULL) {
+        g_addNotification(Notification("Error loading file", "Could not open file for writing."));
+        return;
+    }
+    else {
+        uint8_t version;
+        fread(&version, 1, 1, file);
+        switch (version) {
+            case 1:
+                XY dims;
+                fread(&dims.x, 4, 1, file);
+                fread(&dims.y, 4, 1, file);
+                resizeTilemap(dims.x, dims.y);
+                for (int y = 0; y < tilemapDimensions.y; y++) {
+					for (int x = 0; x < tilemapDimensions.x; x++) {
+                        XY td;
+						fread(&td.x, 4, 1, file);
+						fread(&td.y, 4, 1, file);
+						tilemap[y][x] = td;
+					}
+				}
+                break;
+            default:
+                g_addNotification(Notification("Error loading file", "File version not supported"));
+                break;
+        }
+        fclose(file);
+    }
 }
 
 void TilemapPreviewScreen::resizeTilemap(int w, int h)

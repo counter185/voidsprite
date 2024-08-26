@@ -146,6 +146,87 @@ void platformTryLoadImageFile(EventCallbackListener* listener) {
     }
 }
 
+
+void platformTrySaveOtherFile(EventCallbackListener* listener, std::string extension, std::string windowTitle) {
+    OPENFILENAMEW ofna;
+    ZeroMemory(&ofna, sizeof(ofna));
+    ofna.lStructSize = sizeof(ofna);
+    ofna.hwndOwner = WINhWnd;
+    std::wstring filterString = L"";
+    filterString += utf8StringToWstring(extension) + L" file";
+    filterString.push_back('\0');
+    filterString += L"*" + utf8StringToWstring(extension);
+    filterString.push_back('\0');
+    filterString.push_back('\0');
+    ofna.lpstrFilter = filterString.c_str();
+    ofna.lpstrCustomFilter = NULL;
+    ofna.nFilterIndex = lastFilterIndex;
+    ofna.lpstrFile = fileNameBuffer;
+    ofna.nMaxFile = MAX_PATH;
+    ofna.lpstrFileTitle = NULL;
+    ofna.lpstrInitialDir = NULL;
+    ofna.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT;
+
+    std::wstring windowTitleW = L"voidsprite: " + utf8StringToWstring(windowTitle);
+    ofna.lpstrTitle = windowTitleW.c_str();
+
+    std::wstring extensionW = utf8StringToWstring(extension);
+    std::wstring extensionWtr = extensionW.substr(1);
+    ofna.lpstrDefExt = extensionWtr.c_str();
+
+    if (GetSaveFileNameW(&ofna)) {
+        lastFilterIndex = ofna.nFilterIndex;
+        std::wstring fileName = fileNameBuffer;
+        if (fileName.size() < extensionW.size() || fileName.substr(fileName.size() - extensionW.size()) != extensionW) {
+            fileName += extensionW;
+        }
+        listener->eventFileSaved(EVENT_OTHERFILE_SAVEFILE, fileName, ofna.nFilterIndex);
+    }
+    else {
+        printf("windows error: %i\n", GetLastError());
+    }
+}
+
+void platformTryLoadOtherFile(EventCallbackListener* listener, std::string extension, std::string windowTitle) {
+    OPENFILENAMEW ofna;
+    ZeroMemory(&ofna, sizeof(ofna));
+    ofna.lStructSize = sizeof(ofna);
+    ofna.hwndOwner = WINhWnd;
+    std::wstring filterString = L"";
+    filterString += utf8StringToWstring(extension) + L" file";
+    filterString.push_back('\0');
+    filterString += L"*" + utf8StringToWstring(extension);
+    filterString.push_back('\0');
+    filterString.push_back('\0');
+    ofna.lpstrFilter = filterString.c_str();
+    ofna.lpstrCustomFilter = NULL;
+    ofna.nFilterIndex = lastFilterIndex;
+    ofna.lpstrFile = fileNameBuffer;
+    ofna.nMaxFile = MAX_PATH;
+    ofna.lpstrFileTitle = NULL;
+    ofna.lpstrInitialDir = NULL;
+    ofna.Flags = OFN_EXPLORER;
+
+    std::wstring windowTitleW = L"voidsprite: " + utf8StringToWstring(windowTitle);
+    ofna.lpstrTitle = windowTitleW.c_str();
+
+    std::wstring extensionW = utf8StringToWstring(extension);
+    std::wstring extensionWtr = extensionW.substr(1);
+    ofna.lpstrDefExt = extensionWtr.c_str();
+
+    if (GetOpenFileNameW(&ofna)) {
+        lastFilterIndex = ofna.nFilterIndex;
+        std::wstring fileName = fileNameBuffer;
+        if (fileName.size() < extensionW.size() || fileName.substr(fileName.size() - extensionW.size()) != extensionW) {
+            fileName += extensionW;
+        }
+        listener->eventFileOpen(EVENT_OTHERFILE_OPENFILE, fileName, ofna.nFilterIndex);
+    }
+    else {
+        printf("windows error: %i\n", GetLastError());
+    }
+}
+
 void platformOpenFileLocation(PlatformNativePathString path) {
     std::wstring command = L"explorer /select,\"";
     command += path;

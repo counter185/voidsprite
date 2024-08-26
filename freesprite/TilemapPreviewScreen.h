@@ -1,8 +1,9 @@
 #pragma once
 #include "BaseScreen.h"
 #include "DrawableManager.h"
+#include "EventCallbackListener.h"
 
-class TilemapPreviewScreen : public BaseScreen
+class TilemapPreviewScreen : public BaseScreen, EventCallbackListener
 {
 public:
 	MainEditor* caller;
@@ -26,6 +27,8 @@ public:
 	int tileSelectScale = 1;
 	Timer64 tileSelectTimer;
 
+	ScreenWideNavBar<TilemapPreviewScreen*>* navbar;
+
 	TilemapPreviewScreen(MainEditor* parent);
 
 	void render() override;
@@ -34,6 +37,9 @@ public:
 	BaseScreen* isSubscreenOf() override;
 
 	std::string getName() override { return "Preview tiles"; }
+
+	virtual void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
+	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
 	void resizeTilemap(int w, int h);
 	void drawBackground();
