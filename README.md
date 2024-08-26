@@ -30,6 +30,7 @@ Free C++ sprite editor
 - Cave Story engine PBM
 - C header (as `uint8_t` array)
 - Python file (as [R,G,B,A] `np.array`)
+- HTML document (inline Base64 image)
 
 ## Building
 
