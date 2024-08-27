@@ -53,7 +53,7 @@ jobs:
       
     - name: Copy assets
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ./copy_devlibs.bat
+      run: ./copy_assets.bat
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
