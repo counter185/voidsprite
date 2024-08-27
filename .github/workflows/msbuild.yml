@@ -41,6 +41,12 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: tar -xf freesprite/devlibs/devlibs.zip -C freesprite/devlibs
 
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
+
     - name: Make build directories and copy devlibs
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: ./copy_devlibs.bat
@@ -49,16 +55,9 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: ./copy_devlibs.bat
 
-    - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
-
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build
         path: |
           x64/Release
-          x64/Release/**
