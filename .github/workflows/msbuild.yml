@@ -43,11 +43,11 @@ jobs:
 
     - name: Make build directories and copy devlibs
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: copy_devlibs.bat
+      run: ./copy_devlibs.bat
       
     - name: Copy assets
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: copy_devlibs.bat
+      run: ./copy_devlibs.bat
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -57,7 +57,7 @@ jobs:
     
     - name: Pack build into zip
       working-directory: ${{env.GITHUB_WORKSPACE}}/x64/Release/
-      run: powershell /Command Compress-Archive . voidsprite-build.zip
+      run: Compress-Archive . voidsprite-build.zip
     
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
