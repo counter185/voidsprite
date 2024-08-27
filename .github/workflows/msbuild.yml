@@ -54,14 +54,10 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
-    
-    - name: Pack build into zip
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: Compress-Archive x64/Release voidsprite-build.zip
-    
+
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build
         path: |
-          voidsprite-build.zip
+          x64/Release/*
