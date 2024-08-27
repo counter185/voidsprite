@@ -39,7 +39,7 @@ jobs:
 
     - name: Extract voidsprite devlibs
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: tar -xf freesprite/devlibs/devlibs.7z -C freesprite/devlibs
+      run: tar -xf freesprite/devlibs/devlibs.zip -C freesprite/devlibs
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
