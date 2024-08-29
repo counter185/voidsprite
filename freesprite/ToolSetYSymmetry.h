@@ -4,6 +4,7 @@ class ToolSetYSymmetry : public BaseBrush
 {
     bool mouseHeld = false;
     XY lastPos = {0,0};
+    MainEditor* lastEditor = NULL;
 
     std::string getIconPath() { return "assets/tool_setysym.png"; }
     bool isReadOnly() override { return true; }

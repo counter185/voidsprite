@@ -8,6 +8,7 @@ void ToolSetYSymmetry::clickPress(MainEditor* editor, XY pos)
 	editor->symmetryEnabled[1] = true;
 	editor->symmetryPositions.y = pos.y;
 	mouseHeld = true;
+	lastEditor = editor;
 }
 
 void ToolSetYSymmetry::clickDrag(MainEditor* editor, XY from, XY to)
@@ -36,6 +37,9 @@ void ToolSetYSymmetry::renderOnCanvas(XY canvasDrawPoint, int scale)
 	SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
 	if (mouseHeld) {
 		g_fnt->RenderString(std::format("{}{}", symYPos, symYMiddle ? ".5" : ""), g_mouseX, g_mouseY + 20);
+		if (lastEditor != NULL && lastEditor->tileDimensions.y != 0) {
+			g_fnt->RenderString(std::format("(tile: {}{} / {})", symYPos % lastEditor->tileDimensions.y, symYMiddle ? ".5" : "", lastEditor->tileDimensions.y), g_mouseX, g_mouseY + 50);
+		}
 	}
 }
 
