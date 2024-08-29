@@ -32,7 +32,6 @@ void UISlider::handleInput(SDL_Event evt, XY gPosOffset)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			if (evt.button.button == 1) {
-				mouseHeld = evt.button.state;
 				if (evt.button.state) {
 					XY mousePos = xySubtract(XY{ evt.button.x, evt.button.y }, gPosOffset);
 					if (mousePos.y >= 0 && mousePos.y <= wxHeight) {
@@ -40,6 +39,12 @@ void UISlider::handleInput(SDL_Event evt, XY gPosOffset)
 						this->onSliderPosChanged();
 					}
 				}
+				else {
+					if (mouseHeld) {
+						this->onSliderPosFinishedChanging();
+					}
+				}
+				mouseHeld = evt.button.state;
 			}
 			break;
 		case SDL_MOUSEMOTION:

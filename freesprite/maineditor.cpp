@@ -88,7 +88,8 @@ void MainEditor::render() {
 	for (int x = 0; x < layers.size(); x++) {
 		Layer* imgLayer = layers[x];
 		if (!imgLayer->hidden) {
-			imgLayer->render(canvasRenderRect, (layerSwitchTimer.started && x == selLayer) ? (uint8_t)(255 * XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300))) : 255);
+			uint8_t alpha = imgLayer->layerAlpha;
+			imgLayer->render(canvasRenderRect, (layerSwitchTimer.started && x == selLayer) ? (uint8_t)(alpha * XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300))) : alpha);
 		}
 	}
 
@@ -899,6 +900,11 @@ void MainEditor::undo()
 			case UNDOSTACK_REMOVE_COMMENT:
 				comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
 				break;
+			case UNDOSTACK_SET_OPACITY:
+				l.targetlayer->layerAlpha = (uint8_t)l.extdata;
+				l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
+				layerPicker->updateLayers();
+				break;
 		}
 	}
 }
@@ -944,6 +950,11 @@ void MainEditor::redo()
 			break;
 		case UNDOSTACK_REMOVE_COMMENT:
 			_removeCommentAt({ l.extdata, l.extdata2 });
+			break;
+		case UNDOSTACK_SET_OPACITY:
+			l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
+			l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
+			layerPicker->updateLayers();
 			break;
 		}
 	}
@@ -1065,6 +1076,14 @@ void MainEditor::layer_swapLayerRGBtoBGR()
 	clayer->layerDirty = true;
 }
 
+void MainEditor::layer_setOpacity(uint8_t opacity) {
+	Layer* clayer = getCurrentLayer();
+	addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_SET_OPACITY, clayer->lastConfirmedlayerAlpha, opacity });
+	//printf("added to undo stack: %i, %i\n", clayer->lastConfirmedlayerAlpha, opacity);
+	clayer->layerAlpha = opacity;
+	clayer->lastConfirmedlayerAlpha = clayer->layerAlpha;
+}
+
 void MainEditor::layer_promptRename()
 {
 	PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:");
@@ -1106,7 +1125,15 @@ Layer* MainEditor::flattenImage()
 			uint32_t* retppx = (uint32_t*)ret->pixelData;
 			for (uint64_t p = 0; p < l->w * l->h; p++) {
 				uint32_t pixel = ppx[p];
+				uint8_t alpha = pixel >> 24;
+				alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
+				pixel = (pixel & 0x00ffffff) | (alpha << 24);
+
 				uint32_t srcPixel = retppx[p];
+				uint8_t alpha2 = srcPixel >> 24;
+				alpha2 = (uint8_t)((alpha2 / 255.0f) * (ret->layerAlpha / 255.0f) * 255);
+				srcPixel = (srcPixel & 0x00ffffff) | (alpha2 << 24);
+
 				retppx[p] = alphaBlend(srcPixel, pixel);
 			}
 		}

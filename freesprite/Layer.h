@@ -16,6 +16,8 @@ public:
 
 	bool colorKeySet = false;
 	uint32_t colorKey = 0;
+	uint8_t lastConfirmedlayerAlpha = 255;
+	uint8_t layerAlpha = 255;
 
 	Layer(int width, int height) {
 		w = width;
@@ -102,7 +104,10 @@ public:
 		if (position.x >= 0 && position.x < w
 			&& position.y >= 0 && position.y < h) {
 			uint32_t* intpxdata = (uint32_t*)pixelData;
-			return intpxdata[position.x + (position.y * w)];
+			uint32_t pixel = intpxdata[position.x + (position.y * w)];
+			uint8_t alpha = (((pixel >> 24) / 255.0f) * (layerAlpha / 255.0f)) * 255;
+			pixel = (pixel & 0x00ffffff) | (alpha << 24);
+			return pixel;
 		}
 		else {
 			return 0xFF000000;

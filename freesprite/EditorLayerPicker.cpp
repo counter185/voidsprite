@@ -55,6 +55,18 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     duplicateBtn->icon = g_iconLayerDuplicate;
     duplicateBtn->setCallbackListener(-6, this);
     layerControlButtons.addDrawable(duplicateBtn);
+
+    UILabel* opacityLabel = new UILabel();
+    opacityLabel->position = { 5, 65 };
+    opacityLabel->text = "Opacity";
+    layerControlButtons.addDrawable(opacityLabel);
+
+    opacitySlider = new UISlider();
+    opacitySlider->position = { 80, 70 };
+    opacitySlider->wxWidth = 165;
+    opacitySlider->wxHeight = 20;
+    opacitySlider->setCallbackListener(EVENT_LAYERPICKER_OPACITYSLIDER, this);
+    layerControlButtons.addDrawable(opacitySlider);
 }
 
 EditorLayerPicker::~EditorLayerPicker()
@@ -148,12 +160,27 @@ void EditorLayerPicker::eventButtonPressed(int evt_id)
     updateLayers();
 }
 
+void EditorLayerPicker::eventSliderPosChanged(int evt_id, float value)
+{
+    if (evt_id == EVENT_LAYERPICKER_OPACITYSLIDER) {
+        caller->getCurrentLayer()->layerAlpha = (uint8_t)(value * 255);
+    }
+}
+
+void EditorLayerPicker::eventSliderPosFinishedChanging(int evt_id, float value)
+{
+    if (evt_id == EVENT_LAYERPICKER_OPACITYSLIDER) {
+        caller->layer_setOpacity((uint8_t)(value * 255));
+        //printf("eventSliderPosFinishedChanging, %x\n", (uint8_t)(value * 255));
+    }
+}
+
 void EditorLayerPicker::updateLayers()
 {
     layerButtons.forceUnfocus();
     layerButtons.freeAllDrawables();
 
-    int yposition = 80;
+    int yposition = 100;
     for (int lid = caller->layers.size(); lid --> 0;) {
         Layer* l = caller->layers[lid];
         UILayerButton* layerButton = new UILayerButton(l->name);
@@ -164,4 +191,6 @@ void EditorLayerPicker::updateLayers()
         layerButton->setCallbackListener(lid, this);
         layerButtons.addDrawable(layerButton);
     }
+
+    opacitySlider->sliderPos = caller->getCurrentLayer()->layerAlpha / 255.0f;
 }

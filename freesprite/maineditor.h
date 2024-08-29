@@ -3,7 +3,6 @@
 #include "BaseScreen.h"
 #include "DrawableManager.h"
 #include "EditorColorPicker.h"
-#include "EditorLayerPicker.h"
 #include "BaseBrush.h"
 #include "Brush1x1.h"
 #include "Brush3pxCircle.h"
@@ -133,6 +132,7 @@ public:
 	Layer* getCurrentLayer() {
 		return layers[selLayer];
 	}
+	void layer_setOpacity(uint8_t alpha);
 	void layer_promptRename();
 	void layer_flipHorizontally();
 	void layer_flipVertically();

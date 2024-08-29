@@ -19,6 +19,7 @@
 #define EVENT_COLORPICKER_SLIDERB 16
 #define EVENT_OTHERFILE_SAVEFILE 17
 #define EVENT_OTHERFILE_OPENFILE 18
+#define EVENT_LAYERPICKER_OPACITYSLIDER 19
 
 class EventCallbackListener {
 public:
@@ -31,4 +32,5 @@ public:
 	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) {}
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
+	virtual void eventSliderPosFinishedChanging(int evt_id, float value) {}
 };

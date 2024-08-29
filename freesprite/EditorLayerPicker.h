@@ -3,6 +3,7 @@
 #include "drawable.h"
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
+#include "UISlider.h"
 
 class EditorLayerPicker : public Drawable, public EventCallbackListener
 {
@@ -12,6 +13,7 @@ public:
 	MainEditor* caller;
 	DrawableManager layerButtons;
 	DrawableManager layerControlButtons;
+	UISlider* opacitySlider;
 
 	EditorLayerPicker(MainEditor* editor);
 	~EditorLayerPicker();
@@ -23,6 +25,8 @@ public:
 
 	void eventGeneric(int evt_id, int data1, int data2) override;
 	void eventButtonPressed(int evt_id) override;
+	void eventSliderPosChanged(int evt_id, float value) override;
+	void eventSliderPosFinishedChanging(int evt_id, float value) override;
 
 	void updateLayers();
 };

@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "Notification.h"
+#include "EditorLayerPicker.h"
 #include "FileIO.h"
 #include "maineditor.h"
 #include "libpng/png.h"
@@ -1547,6 +1548,16 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             ret->comments.push_back(newComment);
                         }
                     }
+                    if (extData.contains("layer.opacity")) {
+                        std::string layerOpacityData = extData["layer.opacity"];
+						for (int x = 0; x < nlayers && x < layerOpacityData.size(); x++) {
+                            int nextSC = layerOpacityData.find_first_of(';');
+							ret->layers[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
+                            ret->layers[x]->lastConfirmedlayerAlpha = ret->layers[x]->layerAlpha;
+                            layerOpacityData = layerOpacityData.substr(nextSC + 1);
+						}
+                        ret->layerPicker->updateLayers();
+                    }
                     fclose(infile);
                     return ret;
                 }
@@ -1694,6 +1705,11 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 			layerVisibilityData += lr->hidden ? '0' : '1';
 		}
 
+        std::string layerOpacityData = "";
+        for (Layer*& lr : editor->layers) {
+            layerOpacityData += std::to_string(lr->layerAlpha) + ';';
+        }
+
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
             {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
@@ -1703,7 +1719,8 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
-            {"layer.visibility", layerVisibilityData}
+            {"layer.visibility", layerVisibilityData},
+            {"layer.opacity", layerOpacityData}
         };
 
         nvalBuffer = extData.size();
@@ -1762,7 +1779,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
             xmls += std::format(" <stack opacity=\"1\" x=\"0\" name=\"root\" y=\"0\" isolation=\"isolate\" composite-op=\"svg:src-over\" visibility=\"visible\">\n");
             int i = 0;
             for (auto l = data.rbegin(); l != data.rend(); l++) {
-                xmls += std::format("  <layer opacity=\"1\" x=\"0\" name=\"{}\" y=\"0\" src=\"data/layer{}.png\" composite-op=\"svg:src-over\" visibility=\"{}\"/>\n", (*l)->name, i++, (*l)->hidden ? "hidden" : "visible");
+                xmls += std::format("  <layer opacity=\"{}\" x=\"0\" name=\"{}\" y=\"0\" src=\"data/layer{}.png\" composite-op=\"svg:src-over\" visibility=\"{}\"/>\n", (*l)->layerAlpha / 255.0f, (*l)->name, i++, (*l)->hidden ? "hidden" : "visible");
             }
             xmls += "  </stack>\n";
             xmls += "</image>\n";

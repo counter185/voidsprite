@@ -57,6 +57,7 @@ class EventCallbackListener;
 class TextRenderer;
 class EditorColorPicker;
 class EditorBrushPicker;
+class EditorLayerPicker;
 class BaseScreen;
 class BasePopup;
 class BaseBrush;
@@ -142,6 +143,7 @@ struct NavbarSection {
 #define UNDOSTACK_MOVE_LAYER 3
 #define UNDOSTACK_ADD_COMMENT 4
 #define UNDOSTACK_REMOVE_COMMENT 5
+#define UNDOSTACK_SET_OPACITY 6
 struct UndoStackElement {
 	Layer* targetlayer;
 	uint32_t type = 0;

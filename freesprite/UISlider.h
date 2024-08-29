@@ -28,6 +28,11 @@ public:
 			callback->eventSliderPosChanged(callback_id, sliderPos);
 		}
 	}
+	virtual void onSliderPosFinishedChanging() {
+		if (callback != NULL) {
+			callback->eventSliderPosFinishedChanging(callback_id, sliderPos);
+		}
+	}
 
 };
 
