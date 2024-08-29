@@ -94,7 +94,7 @@ void MainEditor::render() {
 	}
 
 	//draw a separate 1x1 grid if the scale is >= 1600%
-	if (scale >= 10) {
+	if (scale >= 10 && !g_shiftModifier) {
 
 		uint8_t tileGridAlpha = scale < 16 ? 0x10 * ((scale - 9) / 7.0) : 0x10;
 
@@ -138,6 +138,53 @@ void MainEditor::render() {
 		}
 	}
 	drawSymmetryLines();
+
+	//draw tile repeat preview
+	if (g_shiftModifier && tileDimensions.x != 0 && tileDimensions.y != 0) {
+		XY mouseInCanvasPoint = XY{
+			(canvasCenterPoint.x - g_mouseX) / -scale,
+			(canvasCenterPoint.y - g_mouseY) / -scale
+		};
+		if (mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
+			&& mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) {
+			XY tilePosition = XY{
+				mouseInCanvasPoint.x / tileDimensions.x,
+				mouseInCanvasPoint.y / tileDimensions.y
+			};
+			SDL_Rect tileRect = {
+				canvasCenterPoint.x + tilePosition.x * tileDimensions.x * scale,
+				canvasCenterPoint.y + tilePosition.y * tileDimensions.y * scale,
+				tileDimensions.x * scale,
+				tileDimensions.y * scale
+			};
+			SDL_Rect canvasClipRect = {
+				tilePosition.x * tileDimensions.x,
+				tilePosition.y * tileDimensions.y,
+				tileDimensions.x,
+				tileDimensions.y
+			};
+
+			for (int yy = -1; yy <= 1; yy++) {
+				for (int xx = -1; xx <= 1; xx++) {
+					if (yy == 0 && xx == 0) {
+						continue;
+					}
+
+					for (int x = 0; x < layers.size(); x++) {
+						Layer* imgLayer = layers[x];
+						if (!imgLayer->hidden) {
+							uint8_t alpha = imgLayer->layerAlpha;
+							XY position = { tileRect.x + (xx * scale * tileDimensions.x), 
+								tileRect.y + (yy * scale * tileDimensions.y)};
+							SDL_Rect finalTileRect = { position.x, position.y, tileRect.w, tileRect.h };
+							imgLayer->render(finalTileRect, canvasClipRect, alpha);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	renderComments();
 
 	if (currentBrush != NULL) {

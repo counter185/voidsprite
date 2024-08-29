@@ -77,6 +77,14 @@ public:
 		SDL_RenderCopy(g_rd, tex, NULL, &where);
 	}
 
+	void render(SDL_Rect where, SDL_Rect clip, uint8_t alpha = 255) {
+		if (layerDirty) {
+			updateTexture();
+		}
+		SDL_SetTextureAlphaMod(tex, alpha);
+		SDL_RenderCopy(g_rd, tex, &clip, &where);
+	}
+
 	void blit(Layer* sourceLayer, XY position);
 
 	void setPixel(XY position, uint32_t color) {
