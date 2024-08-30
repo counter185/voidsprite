@@ -73,6 +73,7 @@ MainEditor::~MainEditor() {
 	for (Layer*& imgLayer : layers) {
 		delete imgLayer;
 	}
+	discardUndoStack();
 	discardRedoStack();
 }
 
@@ -875,9 +876,8 @@ void MainEditor::recenterCanvas()
 	};
 }
 
-void MainEditor::checkAndDiscardEndOfUndoStack()
-{
-	if (undoStack.size() > maxUndoHistory) {
+void MainEditor::discardEndOfUndoStack() {
+	if (undoStack.size() > 0) {
 		UndoStackElement l = undoStack[0];
 		switch (l.type) {
 			case UNDOSTACK_LAYER_DATA_MODIFIED:
@@ -894,8 +894,15 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 				delete resizeLayerData;
 				break;
 		}
-		
+
 		undoStack.erase(undoStack.begin());
+	}
+}
+
+void MainEditor::checkAndDiscardEndOfUndoStack()
+{
+	if (undoStack.size() > maxUndoHistory) {
+		discardEndOfUndoStack();
 	}
 }
 
@@ -934,6 +941,13 @@ void MainEditor::addToUndoStack(UndoStackElement undo)
 	undoStack.push_back(undo);
 	checkAndDiscardEndOfUndoStack();
 	changesSinceLastSave = true;
+}
+
+void MainEditor::discardUndoStack()
+{
+	while (!undoStack.empty()) {
+		discardEndOfUndoStack();
+	}
 }
 
 void MainEditor::discardRedoStack()

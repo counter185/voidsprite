@@ -114,10 +114,12 @@ public:
 	uint32_t pickColorFromAllLayers(XY);
 	void regenerateLastColors();
 
+	void discardEndOfUndoStack();
 	void checkAndDiscardEndOfUndoStack();
 	void commitStateToLayer(Layer* l);
 	void commitStateToCurrentLayer();
 	void addToUndoStack(UndoStackElement undo);
+	void discardUndoStack();
 	void discardRedoStack();
 	void undo();
 	void redo();

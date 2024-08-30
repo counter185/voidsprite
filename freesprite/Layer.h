@@ -161,8 +161,10 @@ public:
 		redoQueue.clear();
 	}
 	void discardLastUndo() {
-		free(undoQueue[0]);
-		undoQueue.erase(undoQueue.begin());
+		if (!undoQueue.empty()) {
+			free(undoQueue[0]);
+			undoQueue.erase(undoQueue.begin());
+		}
 	}
 	void commitStateToUndoStack() {
 		discardRedoStack();
