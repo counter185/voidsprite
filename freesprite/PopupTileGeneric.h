@@ -23,6 +23,7 @@ public:
 
     void render() override;
 
+    void eventTextInputConfirm(int evt_id, std::string data) override;
     void eventButtonPressed(int evt_id) override;
 };
 

@@ -1,5 +1,6 @@
 #include "PopupTileGeneric.h"
 #include "FontRenderer.h"
+#include "Notification.h"
 
 PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string tt, std::string tx, XY defaultValues, int event_id)
 {
@@ -36,6 +37,7 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     tboxY->text = std::to_string(defaultValues.y);
     tboxY->numeric = true;
     tboxY->wxWidth = 120;
+    tboxY->setCallbackListener(2, this);
     wxsManager.addDrawable(tboxY);
 }
 
@@ -52,6 +54,13 @@ void PopupTileGeneric::render()
 	renderDrawables();
 }
 
+void PopupTileGeneric::eventTextInputConfirm(int evt_id, std::string data)
+{
+    if (evt_id == 2) {
+        eventButtonPressed(0);
+    }
+}
+
 void PopupTileGeneric::eventButtonPressed(int evt_id) {
     if (evt_id == 0) {
         if (!tboxX->text.empty() && !tboxY->text.empty()) {
@@ -59,6 +68,9 @@ void PopupTileGeneric::eventButtonPressed(int evt_id) {
             result.y = std::stoi(tboxY->text);
             callback->eventPopupClosed(popupEvtID, this);
             closePopup();
+        }
+        else {
+            g_addNotification(Notification("Error", "Both dimensions must be set"));
         }
     }
     else {

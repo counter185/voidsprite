@@ -142,7 +142,7 @@ public:
 	void layer_replaceColor(uint32_t from, uint32_t to);
 	Layer* flattenImage();
 	Layer* mergeLayers(Layer* bottom, Layer* top);
-	void resizeAllLayersFromCommand(XY size);
+	void resizeAllLayersFromCommand(XY size, bool byTile = false);
 
 	bool canAddCommentAt(XY a);
 	void addCommentAt(XY a, std::string c);

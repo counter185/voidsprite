@@ -782,10 +782,10 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 		}
 	}
 	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER) {
-		resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result);
+		resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result, false);
 	}
 	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILE) {
-
+		resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result, true);
 	}
 }
 
@@ -950,7 +950,6 @@ void MainEditor::undo()
 	if (!undoStack.empty()) {
 		UndoStackElement l = undoStack[undoStack.size() - 1];
 		undoStack.pop_back();
-		redoStack.push_back(l);
 		switch (l.type) {
 			case UNDOSTACK_LAYER_DATA_MODIFIED:
 				l.targetlayer->undo();
@@ -1007,8 +1006,13 @@ void MainEditor::undo()
 				}
 				texW = layers[0]->w;
 				texH = layers[0]->h;
+				XY td = XY{ l.extdata, l.extdata2 };
+				l.extdata = tileDimensions.x;
+				l.extdata2 = tileDimensions.y;
+				tileDimensions = td;
 				break;
 		}
+		redoStack.push_back(l);
 	}
 }
 
@@ -1016,7 +1020,6 @@ void MainEditor::redo()
 {
 	if (!redoStack.empty()) {
 		UndoStackElement l = redoStack[redoStack.size() - 1];
-		undoStack.push_back(l);
 		redoStack.pop_back();
 		switch (l.type) {
 		case UNDOSTACK_LAYER_DATA_MODIFIED:
@@ -1074,8 +1077,13 @@ void MainEditor::redo()
 			}
 			texW = layers[0]->w;
 			texH = layers[0]->h;
+			XY td = XY{ l.extdata, l.extdata2 };
+			l.extdata = tileDimensions.x;
+			l.extdata2 = tileDimensions.y;
+			tileDimensions = td;
 			break;
 		}
+		undoStack.push_back(l);
 	}
 }
 
@@ -1277,20 +1285,32 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 	return ret;
 }
 
-void MainEditor::resizeAllLayersFromCommand(XY size)
+void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
 	UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
 	for (int x = 0; x < layers.size(); x++) {
 		layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-		layerResizeData[x].oldData = layers[x]->resize(size);
+		if (byTile) {
+			layerResizeData[x].oldData = layers[x]->resizeByTileSizes(tileDimensions, size);
+		}
+		else {
+			layerResizeData[x].oldData = layers[x]->resize(size);
+		}
 		layers[x]->layerDirty = true;
 	}
-	texW = size.x;
-	texH = size.y;
+	texW = layers[0]->w;
+	texH = layers[0]->h;
+	
 	UndoStackElement undoData{};
 	undoData.type = UNDOSTACK_RESIZE_LAYER;
+	undoData.extdata = tileDimensions.x;
+	undoData.extdata2 = tileDimensions.y;
 	undoData.extdata4 = layerResizeData;
 	addToUndoStack(undoData);
+
+	if (byTile) {
+		tileDimensions = size;
+	}
 }
 
 bool MainEditor::canAddCommentAt(XY a)

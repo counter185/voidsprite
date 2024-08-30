@@ -275,6 +275,6 @@ public:
 
 	//returns old pixel data
 	uint8_t* resize(XY to);
-	void resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
+	uint8_t* resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
 };
 
