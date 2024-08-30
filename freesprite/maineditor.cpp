@@ -73,6 +73,7 @@ MainEditor::~MainEditor() {
 	for (Layer*& imgLayer : layers) {
 		delete imgLayer;
 	}
+	discardRedoStack();
 }
 
 void MainEditor::render() {
@@ -369,7 +370,7 @@ void MainEditor::setUpWidgets()
 			SDLK_e,
 			{
 				"Edit",
-				{SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v},
+				{SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v, SDLK_b},
 				{
 					{SDLK_z, { "Undo",
 							[](MainEditor* editor) {
@@ -408,6 +409,17 @@ void MainEditor::setUpWidgets()
 								}
 								else {
 									g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile size", "New tile size:", XY{ editor->tileDimensions.x, editor->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
+								}
+							}
+						}
+					},
+					{SDLK_b, { "Resize canvas (per n.tiles)",
+							[](MainEditor* editor) {
+								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+									g_addNotification(Notification("Error", "Set the pixel grid first."));
+								}
+								else {
+									g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->texW / (float)editor->tileDimensions.x), (int)ceil(editor->texH / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
 								}
 							}
 						}
@@ -786,6 +798,9 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 	}
 	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILE) {
 		resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result, true);
+	}
+	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT) {
+		resizzeAllLayersByTilecountFromCommand(((PopupTileGeneric*)p)->result);
 	}
 }
 
@@ -1311,6 +1326,25 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 	if (byTile) {
 		tileDimensions = size;
 	}
+}
+
+void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
+{
+	UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
+	for (int x = 0; x < layers.size(); x++) {
+		layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
+		layerResizeData[x].oldData = layers[x]->resizeByTileCount(tileDimensions, size);
+		layers[x]->layerDirty = true;
+	}
+	texW = layers[0]->w;
+	texH = layers[0]->h;
+
+	UndoStackElement undoData{};
+	undoData.type = UNDOSTACK_RESIZE_LAYER;
+	undoData.extdata = tileDimensions.x;
+	undoData.extdata2 = tileDimensions.y;
+	undoData.extdata4 = layerResizeData;
+	addToUndoStack(undoData);
 }
 
 bool MainEditor::canAddCommentAt(XY a)

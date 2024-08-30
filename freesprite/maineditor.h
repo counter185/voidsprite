@@ -143,6 +143,7 @@ public:
 	Layer* flattenImage();
 	Layer* mergeLayers(Layer* bottom, Layer* top);
 	void resizeAllLayersFromCommand(XY size, bool byTile = false);
+	void resizzeAllLayersByTilecountFromCommand(XY size);
 
 	bool canAddCommentAt(XY a);
 	void addCommentAt(XY a, std::string c);

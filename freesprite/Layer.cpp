@@ -84,3 +84,24 @@ uint8_t* Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
     h = newSize.y;
     return (uint8_t*)oldPixelData;
 }
+
+uint8_t* Layer::resizeByTileCount(XY tileSizesNow, XY newTileCount)
+{
+    XY newSize = XY{
+        tileSizesNow.x * newTileCount.x,
+        tileSizesNow.y * newTileCount.y
+    };
+    uint32_t* newPixelData = (uint32_t*)malloc(newSize.x * newSize.y * 4);
+    uint32_t* oldPixelData = (uint32_t*)pixelData;
+    memset(newPixelData, 0, newSize.x * newSize.y * 4);
+    for (int y = 0; y < ixmin(h, newSize.y); y++) {
+        memcpy(newPixelData + (y * newSize.x), oldPixelData + (y * w), ixmin(w, newSize.x) * 4);
+		/*for (int x = 0; x < ixmin(w, newSize.x); x++) {
+			newPixelData[x + (y * newSize.x)] = oldPixelData[x + (y * w)];
+		}*/
+	}
+	pixelData = (uint8_t*)newPixelData;
+	w = newSize.x;
+	h = newSize.y;
+	return (uint8_t*)oldPixelData;
+}
