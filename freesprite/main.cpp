@@ -15,6 +15,7 @@
 #include "Brush1x1ArcY.h"
 #include "BrushReplaceColor.h"
 #include "ToolRectSwap.h"
+#include "ToolText.h"
 
 #include "ee_creature.h"
 
@@ -224,6 +225,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolComment());
     g_brushes.push_back(new ToolMeasure());
+    g_brushes.push_back(new ToolText());
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
     }

@@ -61,6 +61,7 @@ class EditorLayerPicker;
 class BaseScreen;
 class BasePopup;
 class BaseBrush;
+class ToolText;
 class Layer;
 class MainEditor;
 class SpritesheetPreviewScreen;

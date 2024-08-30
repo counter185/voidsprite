@@ -167,6 +167,7 @@
     <ClCompile Include="BrushFill.cpp" />
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
+    <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="ToolRectSwap.cpp" />
     <ClCompile Include="BrushReplaceColor.cpp" />
     <ClCompile Include="libpng\png.c" />
@@ -227,6 +228,7 @@
     <ClCompile Include="ToolRectClone.cpp" />
     <ClCompile Include="ToolSetXSymmetry.cpp" />
     <ClCompile Include="ToolSetYSymmetry.cpp" />
+    <ClCompile Include="ToolText.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIColorInputField.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
@@ -255,6 +257,7 @@
     <ClInclude Include="BrushFill.h" />
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
+    <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="ToolRectSwap.h" />
     <ClInclude Include="BrushReplaceColor.h" />
     <ClInclude Include="ee_creature.h" />
@@ -316,6 +319,7 @@
     <ClInclude Include="ToolRectClone.h" />
     <ClInclude Include="ToolSetXSymmetry.h" />
     <ClInclude Include="ToolSetYSymmetry.h" />
+    <ClInclude Include="ToolText.h" />
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIColorInputField.h" />
     <ClInclude Include="UIColorSlider.h" />
