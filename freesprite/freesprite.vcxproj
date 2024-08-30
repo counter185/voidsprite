@@ -168,6 +168,7 @@
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
+    <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="ToolRectSwap.cpp" />
     <ClCompile Include="BrushReplaceColor.cpp" />
     <ClCompile Include="libpng\png.c" />
@@ -258,6 +259,7 @@
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="PopupTextTool.h" />
+    <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="ToolRectSwap.h" />
     <ClInclude Include="BrushReplaceColor.h" />
     <ClInclude Include="ee_creature.h" />

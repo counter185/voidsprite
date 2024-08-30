@@ -13,6 +13,7 @@
 #include "PopupSetEditorPixelGrid.h"
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
+#include "PopupTileGeneric.h"
 
 MainEditor::MainEditor(XY dimensions) {
 
@@ -368,7 +369,7 @@ void MainEditor::setUpWidgets()
 			SDLK_e,
 			{
 				"Edit",
-				{SDLK_z, SDLK_r, SDLK_x, SDLK_y},
+				{SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v},
 				{
 					{SDLK_z, { "Undo",
 							[](MainEditor* editor) {
@@ -391,6 +392,23 @@ void MainEditor::setUpWidgets()
 					{SDLK_y, { "Toggle symmetry: Y",
 							[](MainEditor* editor) {
 								editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
+							}
+						}
+					},
+					{SDLK_c, { "Resize canvas",
+							[](MainEditor* editor) {
+								g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", XY{editor->texW, editor->texH}, EVENT_MAINEDITOR_RESIZELAYER));
+							}
+						}
+					},
+					{SDLK_v, { "Resize canvas (per tile)",
+							[](MainEditor* editor) {
+								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+									g_addNotification(Notification("Error", "Set the pixel grid first."));
+								}
+								else {
+									g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile size", "New tile size:", XY{ editor->tileDimensions.x, editor->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
+								}
 							}
 						}
 					},
@@ -763,6 +781,12 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 			g_closeScreen(this);
 		}
 	}
+	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER) {
+		resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result);
+	}
+	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILE) {
+
+	}
 }
 
 void MainEditor::eventTextInputConfirm(int evt_id, std::string text)
@@ -847,6 +871,13 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 			case UNDOSTACK_DELETE_LAYER:
 				delete l.targetlayer;
 				break;
+			case UNDOSTACK_RESIZE_LAYER:
+				UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
+				for (int x = 0; x < layers.size(); x++) {
+					free(resizeLayerData[x].oldData);
+				}
+				delete resizeLayerData;
+				break;
 		}
 		
 		undoStack.erase(undoStack.begin());
@@ -898,8 +929,17 @@ void MainEditor::discardRedoStack()
 
 	//clear redo stack
 	for (UndoStackElement& l : redoStack) {
-		if (l.type == UNDOSTACK_CREATE_LAYER) {
-			delete l.targetlayer;
+		switch (l.type) {
+			case UNDOSTACK_CREATE_LAYER:
+				delete l.targetlayer;
+				break;
+			case UNDOSTACK_RESIZE_LAYER:
+				UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
+				for (int x = 0; x < layers.size(); x++) {
+					free(resizeLayerData[x].oldData);
+				}
+				delete resizeLayerData;
+				break;
 		}
 	}
 	redoStack.clear();
@@ -952,6 +992,22 @@ void MainEditor::undo()
 				l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
 				layerPicker->updateLayers();
 				break;
+			case UNDOSTACK_RESIZE_LAYER:
+				UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
+				for (int x = 0; x < layers.size(); x++) {
+					//memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
+					uint8_t* oldData = layers[x]->pixelData;
+					XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
+					layers[x]->pixelData = resizeLayerData[x].oldData;
+					layers[x]->w = resizeLayerData[x].oldDimensions.x;
+					layers[x]->h = resizeLayerData[x].oldDimensions.y;
+					layers[x]->layerDirty = true;
+					resizeLayerData[x].oldData = oldData;
+					resizeLayerData[x].oldDimensions = oldDimensions;
+				}
+				texW = layers[0]->w;
+				texH = layers[0]->h;
+				break;
 		}
 	}
 }
@@ -1002,6 +1058,22 @@ void MainEditor::redo()
 			l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
 			l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
 			layerPicker->updateLayers();
+			break;
+		case UNDOSTACK_RESIZE_LAYER:
+			UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
+			for (int x = 0; x < layers.size(); x++) {
+				//memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
+				uint8_t* oldData = layers[x]->pixelData;
+				XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
+				layers[x]->pixelData = resizeLayerData[x].oldData;
+				layers[x]->w = resizeLayerData[x].oldDimensions.x;
+				layers[x]->h = resizeLayerData[x].oldDimensions.y;
+				layers[x]->layerDirty = true;
+				resizeLayerData[x].oldData = oldData;
+				resizeLayerData[x].oldDimensions = oldDimensions;
+			}
+			texW = layers[0]->w;
+			texH = layers[0]->h;
 			break;
 		}
 	}
@@ -1203,6 +1275,22 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 	}
 
 	return ret;
+}
+
+void MainEditor::resizeAllLayersFromCommand(XY size)
+{
+	UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
+	for (int x = 0; x < layers.size(); x++) {
+		layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
+		layerResizeData[x].oldData = layers[x]->resize(size);
+		layers[x]->layerDirty = true;
+	}
+	texW = size.x;
+	texH = size.y;
+	UndoStackElement undoData{};
+	undoData.type = UNDOSTACK_RESIZE_LAYER;
+	undoData.extdata4 = layerResizeData;
+	addToUndoStack(undoData);
 }
 
 bool MainEditor::canAddCommentAt(XY a)

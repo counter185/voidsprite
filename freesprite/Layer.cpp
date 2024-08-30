@@ -33,3 +33,23 @@ Layer* Layer::copyScaled(XY dimensions)
     }
     return newLayer;
 }
+
+uint8_t* Layer::resize(XY to)
+{
+    uint32_t* newPixelData = (uint32_t*)malloc(to.x * to.y * 4);
+    uint32_t* pixelDataNow = (uint32_t*)pixelData;
+    memset(newPixelData, 0, to.x * to.y * 4);
+    for (int y = 0; y < ixmin(h, to.y); y++) {
+		for (int x = 0; x < ixmin(w, to.x); x++) {
+			newPixelData[x + (y * to.x)] = pixelDataNow[x + (y * h)];
+		}
+	}
+    pixelData = (uint8_t*)newPixelData;
+    w = to.x;
+    h = to.y;
+    return (uint8_t*)pixelDataNow;
+}
+
+void Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
+{
+}

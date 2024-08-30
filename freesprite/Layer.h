@@ -9,6 +9,7 @@ public:
 	std::vector<uint8_t*> redoQueue;
 	int w, h;
 	SDL_Texture* tex = NULL;
+	XY texDimensions = {0,0};
 	bool layerDirty = true;
 
 	std::string name = "Layer";
@@ -26,6 +27,7 @@ public:
 		if (pixelData != NULL) {
 			memset(pixelData, 0, width * height * 4);
 			tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+			texDimensions = XY{ w,h };
 			SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 		}
 	}
@@ -54,6 +56,12 @@ public:
 	void updateTexture() {
 		uint8_t* pixels;
 		int pitch;
+		if (texDimensions.x != w || texDimensions.y != h) {
+			SDL_DestroyTexture(tex);
+			tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+			texDimensions = XY{ w,h };
+			SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+		}
 		SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
 		memcpy(pixels, pixelData, w * h * 4);
 
@@ -264,5 +272,9 @@ public:
 		}
 		layerDirty = true;
 	}
+
+	//returns old pixel data
+	uint8_t* resize(XY to);
+	void resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
 };
 

@@ -145,12 +145,19 @@ struct NavbarSection {
 #define UNDOSTACK_ADD_COMMENT 4
 #define UNDOSTACK_REMOVE_COMMENT 5
 #define UNDOSTACK_SET_OPACITY 6
+#define UNDOSTACK_RESIZE_LAYER 7
 struct UndoStackElement {
-	Layer* targetlayer;
+	Layer* targetlayer = NULL;
 	uint32_t type = 0;
 	int extdata = 0;
 	int extdata2 = 0;
 	std::string extdata3 = "";
+	void* extdata4 = NULL;
+};
+
+struct UndoStackResizeLayerElement {
+	XY oldDimensions;
+	uint8_t* oldData;
 };
 
 #include "platform.h"

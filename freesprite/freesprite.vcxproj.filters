@@ -354,6 +354,9 @@
     <ClCompile Include="PopupTextTool.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="PopupTileGeneric.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -625,6 +628,9 @@
     </ClInclude>
     <ClInclude Include="PopupTextTool.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupTileGeneric.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
