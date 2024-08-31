@@ -4,6 +4,103 @@
 #include "EditorColorPicker.h"
 #include "mathops.h"
 
+EditorColorPicker::EditorColorPicker(MainEditor* c) {
+    caller = c;
+
+    colorModeTabs = new TabbedView({ { "Colors" },{ "Last" } }, 75);
+    colorModeTabs->position = XY{ 20,30 };
+    subWidgets.addDrawable(colorModeTabs);
+
+    colorTabs = new TabbedView({ { "Visual", g_iconColorVisual },{ "HSV", g_iconColorHSV },{ "RGB", g_iconColorRGB } }, 90);
+    colorTabs->position = XY{ 0,5 };
+    colorModeTabs->tabs[0].wxs.addDrawable(colorTabs);
+
+    hueSlider = new UIHueSlider(this);
+    hueSlider->position = XY{ 0,10 };
+    colorTabs->tabs[0].wxs.addDrawable(hueSlider);
+
+    satValSlider = new UISVPicker(this);
+    satValSlider->position = XY{ 0,40 };
+    colorTabs->tabs[0].wxs.addDrawable(satValSlider);
+
+    sliderH = new UISlider();
+    sliderH->position = XY{ 70, 10 };
+    sliderH->wxWidth = 200;
+    sliderH->setCallbackListener(EVENT_COLORPICKER_SLIDERH, this);
+    colorTabs->tabs[1].wxs.addDrawable(sliderH);
+
+    labelH = new UILabel();
+    labelR = new UILabel();
+    labelH->position = labelR->position = XY{ 0, 20 };
+    colorTabs->tabs[1].wxs.addDrawable(labelH);
+    colorTabs->tabs[2].wxs.addDrawable(labelR);
+
+    labelS = new UILabel();
+    labelG = new UILabel();
+    labelS->position = labelG->position = XY{ 0, 70 };
+    colorTabs->tabs[1].wxs.addDrawable(labelS);
+    colorTabs->tabs[2].wxs.addDrawable(labelG);
+
+    labelV = new UILabel();
+    labelB = new UILabel();
+    labelV->position = labelB->position = XY{ 0, 120 };
+    colorTabs->tabs[1].wxs.addDrawable(labelV);
+    colorTabs->tabs[2].wxs.addDrawable(labelB);
+
+    sliderS = new UIColorSlider();
+    sliderS->position = XY{ 70, 60 };
+    sliderS->wxWidth = 200;
+    sliderS->setCallbackListener(EVENT_COLORPICKER_SLIDERS, this);
+    colorTabs->tabs[1].wxs.addDrawable(sliderS);
+
+    sliderV = new UIColorSlider();
+    sliderV->position = XY{ 70, 110 };
+    sliderV->wxWidth = 200;
+    sliderV->setCallbackListener(EVENT_COLORPICKER_SLIDERV, this);
+    colorTabs->tabs[1].wxs.addDrawable(sliderV);
+
+    sliderR = new UIColorSlider();
+    sliderR->position = XY{ 70, 10 };
+    sliderR->wxWidth = 200;
+    sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
+    colorTabs->tabs[2].wxs.addDrawable(sliderR);
+
+    sliderG = new UIColorSlider();
+    sliderG->position = XY{ 70, 60 };
+    sliderG->wxWidth = 200;
+    sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
+    colorTabs->tabs[2].wxs.addDrawable(sliderG);
+
+    sliderB = new UIColorSlider();
+    sliderB->position = XY{ 70, 110 };
+    sliderB->wxWidth = 200;
+    sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
+    colorTabs->tabs[2].wxs.addDrawable(sliderB);
+
+    colorTextField = new UITextField();
+    colorTextField->color = true;
+    colorTextField->position = XY{ 60, 350 };
+    colorTextField->wxWidth = 140;
+    colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
+    subWidgets.addDrawable(colorTextField);
+
+    eraserButton = new UIButton();
+    eraserButton->position = { 20, 350 };
+    //eraserButton->text = "E";
+    eraserButton->icon = g_iconEraser;
+    eraserButton->wxWidth = 30;
+    eraserButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEERASER, this);
+    subWidgets.addDrawable(eraserButton);
+
+    blendModeButton = new UIButton();
+    blendModeButton->position = { 215, 350 };
+    blendModeButton->icon = g_iconBlendMode;
+    blendModeButton->wxWidth = 30;
+    blendModeButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEBLENDMODE, this);
+    blendModeButton->colorBGFocused = blendModeButton->colorBGUnfocused = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+    subWidgets.addDrawable(blendModeButton);
+}
+
 bool EditorColorPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
     return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
@@ -102,6 +199,9 @@ void EditorColorPicker::eventButtonPressed(int evt_id)
     if (evt_id == EVENT_COLORPICKER_TOGGLEERASER) {
         toggleEraser();
     }
+    else if (evt_id == EVENT_COLORPICKER_TOGGLEBLENDMODE) {
+        toggleAlphaBlendMode();
+    }
 	else if (evt_id >= 200) {
 		uint32_t col = lastColors[evt_id - 200];
 		setMainEditorColorRGB(col);
@@ -142,6 +242,12 @@ void EditorColorPicker::toggleEraser()
 {
     caller->eraserMode = !caller->eraserMode;
     eraserButton->colorBGFocused = eraserButton->colorBGUnfocused = caller->eraserMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+}
+
+void EditorColorPicker::toggleAlphaBlendMode()
+{
+    caller->blendAlphaMode = !caller->blendAlphaMode;
+    blendModeButton->colorBGFocused = blendModeButton->colorBGUnfocused = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
 }
 
 void EditorColorPicker::updateMainEditorColor()

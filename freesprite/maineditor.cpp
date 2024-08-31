@@ -836,7 +836,14 @@ void MainEditor::FillTexture() {
 
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
 	if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
-		getCurrentLayer()->setPixel(position, color & (eraserMode ? 0xffffff : 0xffffffff));
+		uint32_t targetColor = color;
+		if (blendAlphaMode) {
+			if (eraserMode) {
+				targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+			}
+			targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
+		}
+		getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
 		colorPicker->pushLastColor(color);
 	}
 	if (symmetryEnabled[0] && !(symmetry & 0b10)) {

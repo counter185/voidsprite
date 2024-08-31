@@ -45,6 +45,7 @@ SDL_Texture* g_iconLayerDown = NULL;
 SDL_Texture* g_iconLayerDownMerge = NULL;
 SDL_Texture* g_iconLayerDuplicate = NULL;
 SDL_Texture* g_iconEraser = NULL;
+SDL_Texture* g_iconBlendMode = NULL;
 SDL_Texture* g_iconColorRGB = NULL;
 SDL_Texture* g_iconColorHSV = NULL;
 SDL_Texture* g_iconColorVisual = NULL;
@@ -187,6 +188,7 @@ int main(int argc, char** argv)
     g_iconLayerDownMerge = IMGLoadToTexture("assets/icon_layer_downmerge.png");
     g_iconLayerDuplicate = IMGLoadToTexture("assets/icon_layer_duplicate.png");
     g_iconEraser = IMGLoadToTexture("assets/icon_eraser.png");
+    g_iconBlendMode = IMGLoadToTexture("assets/icon_blendmode.png");
     g_iconColorRGB = IMGLoadToTexture("assets/icon_color_rgb.png");
     g_iconColorHSV = IMGLoadToTexture("assets/icon_color_hsv.png");
     g_iconColorVisual = IMGLoadToTexture("assets/icon_color_visual.png");
