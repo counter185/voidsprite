@@ -279,5 +279,6 @@ public:
 	uint8_t* resize(XY to);
 	uint8_t* resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
 	uint8_t* resizeByTileCount(XY tileSizesNow, XY newTileCount);
+	uint8_t* integerScale(XY scale);
 };
 

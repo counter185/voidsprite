@@ -371,7 +371,7 @@ void MainEditor::setUpWidgets()
 			SDLK_e,
 			{
 				"Edit",
-				{SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v, SDLK_b},
+				{SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v, SDLK_b, SDLK_n},
 				{
 					{SDLK_z, { "Undo",
 							[](MainEditor* editor) {
@@ -406,7 +406,7 @@ void MainEditor::setUpWidgets()
 					{SDLK_v, { "Resize canvas (per tile)",
 							[](MainEditor* editor) {
 								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-									g_addNotification(Notification("Error", "Set the pixel grid first."));
+									g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
 								}
 								else {
 									g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile size", "New tile size:", XY{ editor->tileDimensions.x, editor->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
@@ -417,11 +417,17 @@ void MainEditor::setUpWidgets()
 					{SDLK_b, { "Resize canvas (per n.tiles)",
 							[](MainEditor* editor) {
 								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-									g_addNotification(Notification("Error", "Set the pixel grid first."));
+									g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
 								}
 								else {
 									g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->texW / (float)editor->tileDimensions.x), (int)ceil(editor->texH / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
 								}
+							}
+						}
+					},
+					{SDLK_n, { "Integer scale canvas",
+							[](MainEditor* editor) {
+								g_addPopup(new PopupTileGeneric(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
 							}
 						}
 					},
@@ -802,6 +808,9 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 	}
 	else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT) {
 		resizzeAllLayersByTilecountFromCommand(((PopupTileGeneric*)p)->result);
+	}
+	else if (evt_id == EVENT_MAINEDITOR_INTEGERSCALE) {
+		integerScaleAllLayersFromCommand(((PopupTileGeneric*)p)->result);
 	}
 }
 
@@ -1316,6 +1325,19 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 
 void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
+	if (byTile) {
+		if (tileDimensions.x == size.x && tileDimensions.y == size.y) {
+			g_addNotification(ErrorNotification("Error", "Tile size must be different to resize."));
+			return;
+		}
+	}
+	else {
+		if (texW == size.x && texH == size.y) {
+			g_addNotification(ErrorNotification("Error", "Size must be different to resize."));
+			return;
+		}
+	}
+
 	UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
 	for (int x = 0; x < layers.size(); x++) {
 		layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
@@ -1348,6 +1370,30 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 	for (int x = 0; x < layers.size(); x++) {
 		layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
 		layerResizeData[x].oldData = layers[x]->resizeByTileCount(tileDimensions, size);
+		layers[x]->layerDirty = true;
+	}
+	texW = layers[0]->w;
+	texH = layers[0]->h;
+
+	UndoStackElement undoData{};
+	undoData.type = UNDOSTACK_RESIZE_LAYER;
+	undoData.extdata = tileDimensions.x;
+	undoData.extdata2 = tileDimensions.y;
+	undoData.extdata4 = layerResizeData;
+	addToUndoStack(undoData);
+}
+
+void MainEditor::integerScaleAllLayersFromCommand(XY scale)
+{
+	if (scale.x == 0 || scale.y == 0 || (scale.x == 1 && scale.y == 1)) {
+		g_addNotification(ErrorNotification("Error", "Invalid scale."));
+		return;
+	}
+
+	UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
+	for (int x = 0; x < layers.size(); x++) {
+		layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
+		layerResizeData[x].oldData = layers[x]->integerScale(scale);
 		layers[x]->layerDirty = true;
 	}
 	texW = layers[0]->w;

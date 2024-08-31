@@ -2,6 +2,8 @@
 #include "globals.h"
 #include "Timer64.h"
 
+#define ErrorNotification(a,b) Notification(a,b,5000,NULL,SDL_Color{255,0,0,255})
+
 class Notification
 {
 public:
