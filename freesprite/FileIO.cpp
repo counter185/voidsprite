@@ -801,9 +801,9 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
         int magicNumber = 0;
         uint8_t a;
         for (int x = 0; x < 4; x++) {
-			fread(&a, 1, 1, texfile);
-			magicNumber += a;
-		}
+            fread(&a, 1, 1, texfile);
+            magicNumber += a;
+        }
         //according to game decomps, magicNumber must == 1 or else it's considered the wrong format
 
         fseek(texfile, 8, SEEK_SET);
@@ -1468,8 +1468,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     fread(metaHeader, 13, 1, infile);
                     // this should equal /VOIDSN.META/
                     if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
-						printf("INVALID META HEADER\n");
-					}
+                        printf("INVALID META HEADER\n");
+                    }
                     int nExtData;
                     fread(&nExtData, 4, 1, infile);
                     std::map<std::string, std::string> extData;
@@ -1550,12 +1550,12 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
                     if (extData.contains("layer.opacity")) {
                         std::string layerOpacityData = extData["layer.opacity"];
-						for (int x = 0; x < nlayers && x < layerOpacityData.size(); x++) {
+                        for (int x = 0; x < nlayers && x < layerOpacityData.size(); x++) {
                             int nextSC = layerOpacityData.find_first_of(';');
-							ret->layers[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
+                            ret->layers[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
                             ret->layers[x]->lastConfirmedlayerAlpha = ret->layers[x]->layerAlpha;
                             layerOpacityData = layerOpacityData.substr(nextSC + 1);
-						}
+                        }
                         ret->layerPicker->updateLayers();
                     }
                     fclose(infile);
@@ -1702,8 +1702,8 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->layers) {
-			layerVisibilityData += lr->hidden ? '0' : '1';
-		}
+            layerVisibilityData += lr->hidden ? '0' : '1';
+        }
 
         std::string layerOpacityData = "";
         for (Layer*& lr : editor->layers) {
@@ -2037,6 +2037,49 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
     return false;
 }
 
+bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+
+        std::string javaHeader = std::format("\n\
+import java.awt.image.BufferedImage;\n\
+\n\
+public class VoidspriteImage {{\n\
+    public static int width = {};\n\
+    public static int height = {};\n\
+    // Class generated with voidsprite\n\
+    // Warning! Images exported to java classes can be too big for javac!\n\
+\n\
+    public static BufferedImage toBufferedImage() {{\n\
+        BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);\n\
+        ret.setRGB(0, 0, width, height, rgbData, 0, width);\n\
+        return ret;\n\
+    }}\n\
+\n\
+    public static int[] rgbData = {{\n\
+            ", data->w, data->h);
+
+        std::string javaFooter = "\n\
+    };\n\
+}\n\
+            ";
+        fwrite(javaHeader.c_str(), 1, javaHeader.size(), outfile);
+        for (int y = 0; y < data->h; y++) {
+            for (int x = 0; x < data->w; x++) {
+                uint32_t pxd = data->getPixelAt(XY{ x,y });
+                fprintf(outfile, "0x%08X,", pxd);
+            }
+            fprintf(outfile, "\n");
+        }
+        fwrite(javaFooter.c_str(), 1, javaFooter.size(), outfile);
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 {
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
@@ -2050,25 +2093,25 @@ bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
             //open temp.bin file, convert to base64, write to outfile
             FILE* infile = platformOpenFile(L"temp.bin", PlatformFileModeRB);
             if (infile != NULL) {
-				fseek(infile, 0, SEEK_END);
-				uint64_t fileLength = ftell(infile);
-				fseek(infile, 0, SEEK_SET);
-				//char* fileBuffer = (char*)malloc(fileLength);
+                fseek(infile, 0, SEEK_END);
+                uint64_t fileLength = ftell(infile);
+                fseek(infile, 0, SEEK_SET);
+                //char* fileBuffer = (char*)malloc(fileLength);
                 std::string fileBuffer;
                 fileBuffer.resize(fileLength);
                 fread(fileBuffer.data(), fileLength, 1, infile);
-				//fread(fileBuffer, fileLength, 1, infile);
-				fclose(infile);
+                //fread(fileBuffer, fileLength, 1, infile);
+                fclose(infile);
 
                 std::string base64Buffer = base64::to_base64(fileBuffer);
 
                 std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
                 std::string htmlPost = "\"></img>\n\t</body>\n</html>";
                 fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
-				fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
+                fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
                 fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
-				//free(fileBuffer);
-			}
+                //free(fileBuffer);
+            }
 
 
             fclose(outfile);
