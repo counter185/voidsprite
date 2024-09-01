@@ -52,14 +52,14 @@ public:
 		tab0TextFieldW->setCallbackListener(2, this);
 		tab0TextFieldW->position = xySubtract(XY{80,120}, newImageTabs->position);
 		tab0TextFieldW->wxWidth = 200;
-		tab0TextFieldW->numeric = true;
+		tab0TextFieldW->isNumericField = true;
 		newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldW);
 
 		tab0TextFieldH = new UITextField();
 		tab0TextFieldH->setCallbackListener(3, this);
 		tab0TextFieldH->position = xySubtract(XY{ 80,155 }, newImageTabs->position);
 		tab0TextFieldH->wxWidth = 200;
-		tab0TextFieldH->numeric = true;
+		tab0TextFieldH->isNumericField = true;
 		newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
 
 		UILabel* wLabel = new UILabel();
@@ -76,27 +76,27 @@ public:
 		tab1TextFieldCW = new UITextField();
 		tab1TextFieldCW->position = xySubtract(XY{ 110,120}, newImageTabs->position);
 		tab1TextFieldCW->wxWidth = 160;
-		tab1TextFieldCW->numeric = true;
+		tab1TextFieldCW->isNumericField = true;
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCW);
 
 		tab1TextFieldCWX = new UITextField();
 		tab1TextFieldCWX->position = xySubtract(XY{ 300,120 }, newImageTabs->position);
 		tab1TextFieldCWX->wxWidth = 40;
-		tab1TextFieldCWX->numeric = true;
+		tab1TextFieldCWX->isNumericField = true;
 		tab1TextFieldCWX->text = "1";
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCWX);
 
 		tab1TextFieldCH = new UITextField();
 		tab1TextFieldCH->position = xySubtract(XY{ 110,155 }, newImageTabs->position);
 		tab1TextFieldCH->wxWidth = 160;
-		tab1TextFieldCH->numeric = true;
+		tab1TextFieldCH->isNumericField = true;
 		tab1TextFieldCH->setCallbackListener(3, this);
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCH);
 
 		tab1TextFieldCHX = new UITextField();
 		tab1TextFieldCHX->position = xySubtract(XY{ 300,155 }, newImageTabs->position);
 		tab1TextFieldCHX->wxWidth = 40;
-		tab1TextFieldCHX->numeric = true;
+		tab1TextFieldCHX->isNumericField = true;
 		tab1TextFieldCHX->text = "1";
 		tab1TextFieldCHX->setCallbackListener(3, this);
 		newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);

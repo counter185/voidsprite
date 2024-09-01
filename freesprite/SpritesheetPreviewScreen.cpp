@@ -21,7 +21,7 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
 
 	textfieldMSPerSprite = new UITextField();
 	textfieldMSPerSprite->text = std::to_string(msPerSprite);
-	textfieldMSPerSprite->numeric = true;
+	textfieldMSPerSprite->isNumericField = true;
 	textfieldMSPerSprite->wxWidth = 150;
 	textfieldMSPerSprite->setCallbackListener(EVENT_SPRITEPREVIEW_SET_SPRITE_TICK, this);
 	wxsManager.addDrawable(textfieldMSPerSprite);

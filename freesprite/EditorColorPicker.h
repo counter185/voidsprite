@@ -28,7 +28,9 @@ public:
 	UITextField* colorTextField;
 	UISlider* sliderH;
 
-	UILabel* labelH,*labelS, *labelV, *labelR, *labelG, *labelB;
+	UITextField* txtR, *txtG, *txtB;
+
+	UILabel* labelH,*labelS, *labelV;
 	UIColorSlider* sliderS;
 	UIColorSlider* sliderV;
 	UIColorSlider* sliderR;
@@ -62,6 +64,7 @@ public:
 	void toggleAlphaBlendMode();
 	void updateMainEditorColor();
 	void updateMainEditorColorFromRGBSliders();
+	void updateMainEditorColorFromRGBTextBoxes();
 	void setMainEditorColorHSV(double h, double s, double v);
 	void setMainEditorColorRGB(unsigned int col);
 	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true);

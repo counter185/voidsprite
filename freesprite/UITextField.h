@@ -7,11 +7,11 @@ class UITextField : public Drawable
 {
 public:
 	std::string text = "";
-	bool numeric = false;
-	bool color = false;
+	bool isNumericField = false;
+	bool isColorField = false;
 	int wxWidth = 250, wxHeight = 30;
 	SDL_Color bgColor = { 0,0,0, 0xff };
-
+	SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
 		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });

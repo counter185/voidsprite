@@ -28,14 +28,14 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     tboxX = new UITextField();
     tboxX->position = XY{ 20, 80 };
     tboxX->text = std::to_string(defaultValues.x);
-    tboxX->numeric = true;
+    tboxX->isNumericField = true;
     tboxX->wxWidth = 120;
     wxsManager.addDrawable(tboxX);
 
     tboxY = new UITextField();
     tboxY->position = XY{ 160, 80 };
     tboxY->text = std::to_string(defaultValues.y);
-    tboxY->numeric = true;
+    tboxY->isNumericField = true;
     tboxY->wxWidth = 120;
     tboxY->setCallbackListener(2, this);
     wxsManager.addDrawable(tboxY);

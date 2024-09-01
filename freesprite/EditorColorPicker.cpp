@@ -30,22 +30,42 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     colorTabs->tabs[1].wxs.addDrawable(sliderH);
 
     labelH = new UILabel();
-    labelR = new UILabel();
+    UILabel* labelR = new UILabel();
+    labelR->text = "R";
     labelH->position = labelR->position = XY{ 0, 20 };
     colorTabs->tabs[1].wxs.addDrawable(labelH);
     colorTabs->tabs[2].wxs.addDrawable(labelR);
 
     labelS = new UILabel();
-    labelG = new UILabel();
+    UILabel* labelG = new UILabel();
+    labelG->text = "G";
     labelS->position = labelG->position = XY{ 0, 70 };
     colorTabs->tabs[1].wxs.addDrawable(labelS);
     colorTabs->tabs[2].wxs.addDrawable(labelG);
 
     labelV = new UILabel();
-    labelB = new UILabel();
+    UILabel* labelB = new UILabel();
+    labelB->text = "B";
     labelV->position = labelB->position = XY{ 0, 120 };
     colorTabs->tabs[1].wxs.addDrawable(labelV);
     colorTabs->tabs[2].wxs.addDrawable(labelB);
+
+    txtR = new UITextField();
+    txtG = new UITextField();
+    txtB = new UITextField();
+    txtR->position = XY{ 240, 15 };
+    txtR->textColor = { 0xff,0,0,0xff };
+    txtG->position = XY{ 240, 65 };
+    txtG->textColor = { 0,0xff,0,0xff };
+    txtB->position = XY{ 240, 115 };
+    txtB->textColor = { 0,0,0xff,0xff };
+    txtR->wxWidth = txtG->wxWidth = txtB->wxWidth = 60;
+    txtR->setCallbackListener(EVENT_COLORPICKER_TBOXR, this);
+    txtG->setCallbackListener(EVENT_COLORPICKER_TBOXG, this);
+    txtB->setCallbackListener(EVENT_COLORPICKER_TBOXB, this);
+    colorTabs->tabs[2].wxs.addDrawable(txtR);
+    colorTabs->tabs[2].wxs.addDrawable(txtG);
+    colorTabs->tabs[2].wxs.addDrawable(txtB);
 
     sliderS = new UIColorSlider();
     sliderS->position = XY{ 70, 60 };
@@ -60,25 +80,25 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     colorTabs->tabs[1].wxs.addDrawable(sliderV);
 
     sliderR = new UIColorSlider();
-    sliderR->position = XY{ 70, 10 };
+    sliderR->position = XY{ 30, 10 };
     sliderR->wxWidth = 200;
     sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
     colorTabs->tabs[2].wxs.addDrawable(sliderR);
 
     sliderG = new UIColorSlider();
-    sliderG->position = XY{ 70, 60 };
+    sliderG->position = XY{ 30, 60 };
     sliderG->wxWidth = 200;
     sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
     colorTabs->tabs[2].wxs.addDrawable(sliderG);
 
     sliderB = new UIColorSlider();
-    sliderB->position = XY{ 70, 110 };
+    sliderB->position = XY{ 30, 110 };
     sliderB->wxWidth = 200;
     sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
     colorTabs->tabs[2].wxs.addDrawable(sliderB);
 
     colorTextField = new UITextField();
-    colorTextField->color = true;
+    colorTextField->isColorField = true;
     colorTextField->position = XY{ 60, 350 };
     colorTextField->wxWidth = 140;
     colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
@@ -133,11 +153,11 @@ void EditorColorPicker::render(XY position)
             labelS->text = std::format("S {}", std::round(currentS * 1000.0f) / 1000.0f);
             labelV->text = std::format("V {}", std::round(currentV * 1000.0f) / 1000.0f);
             break;
-        case 2:
-            labelR->text = std::format("R {}", currentR);
-            labelG->text = std::format("G {}", currentG);
-            labelB->text = std::format("B {}", currentB);
-            break;
+        /*case 2:
+            txtR->text = std::to_string(currentR);
+            txtG->text = std::to_string(currentG);
+            txtB->text = std::to_string(currentB);
+            break;*/
     }
 
     r = SDL_Rect{ position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35 };
@@ -179,6 +199,39 @@ void EditorColorPicker::eventTextInput(int evt_id, std::string data)
             }
         }
         
+    }
+    else if (evt_id == EVENT_COLORPICKER_TBOXR) {
+        try {
+            int val = std::stoi(data);
+            if (val >= 0 && val <= 255) {
+				currentR = val;
+                updateMainEditorColorFromRGBTextBoxes();
+			}
+        }
+        catch (std::exception) {
+        }
+    }
+    else if (evt_id == EVENT_COLORPICKER_TBOXG) {
+        try {
+            int val = std::stoi(data);
+            if (val >= 0 && val <= 255) {
+				currentG = val;
+                updateMainEditorColorFromRGBTextBoxes();
+			}
+        }
+        catch (std::exception) {
+        }
+    }
+    else if (evt_id == EVENT_COLORPICKER_TBOXB) {
+        try {
+            int val = std::stoi(data);
+            if (val >= 0 && val <= 255) {
+				currentB = val;
+                updateMainEditorColorFromRGBTextBoxes();
+			}
+        }
+        catch (std::exception) {
+        }
     }
 }
 
@@ -272,6 +325,11 @@ void EditorColorPicker::updateMainEditorColorFromRGBSliders()
     setMainEditorColorRGB({currentR, currentG, currentB}, true, false);
 }
 
+void EditorColorPicker::updateMainEditorColorFromRGBTextBoxes()
+{
+    setMainEditorColorRGB({currentR, currentG, currentB}, true, true);
+}
+
 void EditorColorPicker::setMainEditorColorRGB(unsigned int col) {
     setMainEditorColorRGB(SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff) });
 }
@@ -310,6 +368,9 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
     sliderV->colorMin = (0xFF << 24) + ((int)(colorVMin.r*255) << 16) + ((int)(colorVMin.g * 255) << 8) + (int)(colorVMin.b * 255);
     sliderV->colorMax = (0xFF << 24) + ((int)(colorVMax.r*255) << 16) + ((int)(colorVMax.g * 255) << 8) + (int)(colorVMax.b * 255);
 
+    txtR->text = std::to_string(currentR);
+    txtG->text = std::to_string(currentG);
+    txtB->text = std::to_string(currentB);
 
     uint32_t rgbColor = (0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
 

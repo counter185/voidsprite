@@ -53,6 +53,11 @@ public:
         return tabButtons.mouseInAny(thisPositionOnScreen, mousePos) || tabs[openTab].wxs.mouseInAny(xyAdd(XY{0, buttonsHeight}, thisPositionOnScreen), mousePos);
     }
 
+    void focusOut() override {
+		Drawable::focusOut();
+		tabs[openTab].wxs.forceUnfocus();
+	}
+
     void render(XY position) override {
         tabButtons.renderAll(position);
         tabs[openTab].wxs.renderAll(xyAdd(position, XY{(int)(200 * (nextTabSlideFromTheLeft ? -1 : 1) * (1.0-XM1PW3P1(tabSwitchTimer.percentElapsedTime(250)))), buttonsHeight}));

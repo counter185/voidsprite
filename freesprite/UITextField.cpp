@@ -18,8 +18,8 @@ void UITextField::render(XY pos)
 		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
 	}
 	
-	if (!color || !isValidOrPartialColor() || text.empty()) {
-		g_fnt->RenderString(text + (focused ? "_" : ""), pos.x + 2, pos.y + 2, SDL_Color{ 0xff,0xff,0xff,(unsigned char)(focused ? 0xff : 0xa0) });
+	if (!isColorField || !isValidOrPartialColor() || text.empty()) {
+		g_fnt->RenderString(text + (focused ? "_" : ""), pos.x + 2, pos.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) });
 	}
 	else {
 		int textPtr = 0;
@@ -62,6 +62,9 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 			case SDLK_BACKSPACE:
 				if (!text.empty()) {
 					text = text.substr(0, text.size() - 1);
+					if (callback != NULL) {
+						callback->eventTextInput(callback_id, text);
+					}
 				}
 				break;
 			case SDLK_DELETE:
@@ -75,8 +78,8 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 			if (c == '\0') {
 				break;
 			}
-			if ((numeric && c >= '0' && c <= '9')
-				|| !numeric) {
+			if ((isNumericField && c >= '0' && c <= '9')
+				|| !isNumericField) {
 				text += c;
 				textAdded = true;
 			}

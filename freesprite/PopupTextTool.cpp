@@ -27,7 +27,7 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 	textboxSize = new UITextField();
 	textboxSize->position = XY{ 120, 120 };
 	textboxSize->text = std::to_string(parent->textSize);
-	textboxSize->numeric = true;
+	textboxSize->isNumericField = true;
 	textboxSize->wxWidth = 120;
 	wxsManager.addDrawable(textboxSize);
 
