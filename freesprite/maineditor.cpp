@@ -14,6 +14,7 @@
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
 #include "PopupTileGeneric.h"
+#include "Gamepad.h"
 
 MainEditor::MainEditor(XY dimensions) {
 
@@ -222,13 +223,23 @@ void MainEditor::render() {
 }
 
 void MainEditor::tick() {
+
+	if (abs(g_gamepad->gamepadLSX) > 0.05f || abs(g_gamepad->gamepadLSY) > 0.05f) {
+		canvasCenterPoint.x += g_gamepad->gamepadLSX * 10;
+		canvasCenterPoint.y += g_gamepad->gamepadLSY * 10;
+		RecalcMousePixelTargetPoint(g_windowW / 2, g_windowH / 2);
+		currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+	}
+
 	canvasCenterPoint = XY{
 		iclamp(-texW * scale + 4, canvasCenterPoint.x, g_windowW - 4),
-		iclamp(-texH * scale +4, canvasCenterPoint.y, g_windowH - 4)
+		iclamp(-texH * scale + 4, canvasCenterPoint.y, g_windowH - 4)
 	};
 
 	//fuck it we ball
 	layerPicker->position.x = g_windowW - 260;
+
+	g_gamepad->SetLightbar((pickedColor >> 16) & 0xff, (pickedColor >> 8) & 0xff, pickedColor & 0xff);
 
 	if (closeNextTick) {
 		g_closeScreen(this);

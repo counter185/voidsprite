@@ -16,6 +16,7 @@
 #include "BrushReplaceColor.h"
 #include "ToolRectSwap.h"
 #include "ToolText.h"
+#include "Gamepad.h"
 
 #include "ee_creature.h"
 
@@ -30,6 +31,7 @@ SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
+Gamepad* g_gamepad = NULL;
 std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
 bool g_ctrlModifier = false;
@@ -207,6 +209,9 @@ int main(int argc, char** argv)
     SDL_FreeSurface(srf);
     //SDL_Texture* the_creature = IMGLoadToTexture("assets/kaosekai.png");
 
+    g_gamepad = new Gamepad();
+    g_gamepad->TryCaptureGamepad();
+
     //load brushes
     g_brushes.push_back(new Brush1x1());
     g_brushes.push_back(new Brush1x1ArcX());
@@ -339,7 +344,7 @@ int main(int argc, char** argv)
                     //g_addNotification(Notification("WARNING", "<- the creature", 5000, the_creature));
                     break;
             }
-
+            g_gamepad->TakeEvent(evt);
             if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {
                 popupStack[popupStack.size() - 1]->takeInput(evt);
             }
