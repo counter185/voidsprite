@@ -29,8 +29,8 @@ public:
 	UISlider* sliderH;
 
 	UITextField* txtR, *txtG, *txtB;
+	UITextField* txtH, *txtS, *txtV;
 
-	UILabel* labelH,*labelS, *labelV;
 	UIColorSlider* sliderS;
 	UIColorSlider* sliderV;
 	UIColorSlider* sliderR;
@@ -65,9 +65,13 @@ public:
 	void updateMainEditorColor();
 	void updateMainEditorColorFromRGBSliders();
 	void updateMainEditorColorFromRGBTextBoxes();
+	void updateMainEditorColorFromHSVTextBoxes();
 	void setMainEditorColorHSV(double h, double s, double v);
 	void setMainEditorColorRGB(unsigned int col);
-	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true);
+	void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true);
+
+	void updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value);
+	void updateHSVTextBoxOnInputEvent(std::string data, double* value);
 
 	void pushLastColor(uint32_t col);
 	void updateLastColorButtons();
