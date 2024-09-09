@@ -144,7 +144,8 @@ void MainEditor::render() {
 	drawSymmetryLines();
 
 	//draw tile repeat preview
-	if (g_shiftModifier && tileDimensions.x != 0 && tileDimensions.y != 0) {
+	if (g_shiftModifier) {
+		XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : XY{texW, texH};
 		XY mouseInCanvasPoint = XY{
 			(canvasCenterPoint.x - g_mouseX) / -scale,
 			(canvasCenterPoint.y - g_mouseY) / -scale
@@ -152,20 +153,20 @@ void MainEditor::render() {
 		if (mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
 			&& mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) {
 			XY tilePosition = XY{
-				mouseInCanvasPoint.x / tileDimensions.x,
-				mouseInCanvasPoint.y / tileDimensions.y
+				mouseInCanvasPoint.x / tileDim.x,
+				mouseInCanvasPoint.y / tileDim.y
 			};
 			SDL_Rect tileRect = {
-				canvasCenterPoint.x + tilePosition.x * tileDimensions.x * scale,
-				canvasCenterPoint.y + tilePosition.y * tileDimensions.y * scale,
-				tileDimensions.x * scale,
-				tileDimensions.y * scale
+				canvasCenterPoint.x + tilePosition.x * tileDim.x * scale,
+				canvasCenterPoint.y + tilePosition.y * tileDim.y * scale,
+				tileDim.x * scale,
+				tileDim.y * scale
 			};
 			SDL_Rect canvasClipRect = {
-				tilePosition.x * tileDimensions.x,
-				tilePosition.y * tileDimensions.y,
-				tileDimensions.x,
-				tileDimensions.y
+				tilePosition.x * tileDim.x,
+				tilePosition.y * tileDim.y,
+				tileDim.x,
+				tileDim.y
 			};
 
 			for (int yy = -1; yy <= 1; yy++) {
@@ -178,8 +179,8 @@ void MainEditor::render() {
 						Layer* imgLayer = layers[x];
 						if (!imgLayer->hidden) {
 							uint8_t alpha = imgLayer->layerAlpha;
-							XY position = { tileRect.x + (xx * scale * tileDimensions.x), 
-								tileRect.y + (yy * scale * tileDimensions.y)};
+							XY position = { tileRect.x + (xx * scale * tileDim.x),
+								tileRect.y + (yy * scale * tileDim.y)};
 							SDL_Rect finalTileRect = { position.x, position.y, tileRect.w, tileRect.h };
 							imgLayer->render(finalTileRect, canvasClipRect, alpha);
 						}
