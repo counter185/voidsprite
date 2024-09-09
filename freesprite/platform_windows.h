@@ -239,3 +239,30 @@ FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString m
     _wfopen_s(&ret, path.c_str(), mode.c_str());
     return ret;
 }
+
+Layer* platformGetImageFromClipboard() {
+    bool res = OpenClipboard(WINhWnd);
+    HANDLE dataHandle = GetClipboardData(CF_BITMAP);
+    if (dataHandle == NULL) {
+        CloseClipboard();
+        return NULL;
+    }
+    HBITMAP bmp = (HBITMAP)dataHandle;
+    BITMAP bitmap;
+    GetObject(bmp, sizeof(BITMAP), &bitmap);
+    HDC hdc = GetDC(WINhWnd);
+    HDC memDC = CreateCompatibleDC(hdc);
+    HBITMAP oldBmp = (HBITMAP)SelectObject(memDC, bmp);
+    Layer* layer = new Layer(bitmap.bmWidth, bitmap.bmHeight);
+    for (int y = 0; y < bitmap.bmHeight; y++) {
+		for (int x = 0; x < bitmap.bmWidth; x++) {
+			COLORREF color = GetPixel(memDC, x, y);
+            layer->setPixel({ x, y }, sdlcolorToUint32(SDL_Color{ GetRValue(color), GetGValue(color), GetBValue(color), 255 }));
+		}
+	}
+    SelectObject(memDC, oldBmp);
+	DeleteDC(memDC);
+	ReleaseDC(WINhWnd, hdc);
+	CloseClipboard();
+	return layer;
+}

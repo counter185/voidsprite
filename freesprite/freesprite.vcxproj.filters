@@ -336,9 +336,6 @@
     <ClCompile Include="libpng\pngwutil.c">
       <Filter>Source files\external\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="UIHueSlider.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="BrushReplaceColor.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
@@ -351,14 +348,17 @@
     <ClCompile Include="ToolText.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
-    <ClCompile Include="PopupTextTool.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="PopupTileGeneric.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="Gamepad.cpp">
       <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UIHueSlider.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupTextTool.cpp">
+      <Filter>Source files\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -629,14 +629,14 @@
     <ClInclude Include="ToolText.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
-    <ClInclude Include="PopupTextTool.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="PopupTileGeneric.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="Gamepad.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupTextTool.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

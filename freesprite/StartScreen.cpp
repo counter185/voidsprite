@@ -60,6 +60,9 @@ void StartScreen::takeInput(SDL_Event evt)
 			case SDL_MOUSEWHEEL:
 				break;
 			case SDL_KEYDOWN:
+				if (evt.key.keysym.sym == SDLK_v && g_ctrlModifier) {
+					tryOpenImageFromClipboard();
+				}
 				break;
 			case SDL_DROPFILE:
 			{
@@ -166,5 +169,16 @@ void StartScreen::tryLoadFile(std::string path)
 			g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
 			printf("No importer for file available\n");
 		}
+	}
+}
+
+void StartScreen::tryOpenImageFromClipboard()
+{
+	Layer* l = platformGetImageFromClipboard();
+	if (l != NULL) {
+		g_addScreen(new MainEditor(l));
+	}
+	else {
+		g_addNotification(ErrorNotification("Error", "No image in clipboard"));
 	}
 }

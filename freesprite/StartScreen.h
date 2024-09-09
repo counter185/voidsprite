@@ -153,6 +153,12 @@ public:
 								}
 							}
 						},
+						{SDLK_v, { "Open from clipboard",
+								[](StartScreen* screen) {
+									screen->tryOpenImageFromClipboard();
+								}
+							}
+						},
 					},
 					g_iconNavbarTabFile
 				}
@@ -244,5 +250,6 @@ public:
 	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
 	void tryLoadFile(std::string path);
+	void tryOpenImageFromClipboard();
 };
 

@@ -22,4 +22,6 @@ void platformTrySaveOtherFile(EventCallbackListener* caller, std::string extensi
 void platformTryLoadOtherFile(EventCallbackListener* caller, std::string extension, std::string windowTitle = "Open file");
 void platformOpenFileLocation(PlatformNativePathString path);
 
+Layer* platformGetImageFromClipboard();
+
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
