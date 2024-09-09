@@ -116,12 +116,12 @@ public:
 		}
 	}
 
-	unsigned int getPixelAt(XY position) {
+	uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) {
 		if (position.x >= 0 && position.x < w
 			&& position.y >= 0 && position.y < h) {
 			uint32_t* intpxdata = (uint32_t*)pixelData;
 			uint32_t pixel = intpxdata[position.x + (position.y * w)];
-			uint8_t alpha = (((pixel >> 24) / 255.0f) * (layerAlpha / 255.0f)) * 255;
+			uint8_t alpha = (((pixel >> 24) / 255.0f) * (ignoreLayerAlpha ? 1.0f : (layerAlpha / 255.0f))) * 255;
 			pixel = (pixel & 0x00ffffff) | (alpha << 24);
 			return pixel;
 		}

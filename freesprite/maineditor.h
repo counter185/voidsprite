@@ -53,6 +53,8 @@ public:
 	bool leftMouseHold = false;
 	bool middleMouseHold = false;
 	Timer64 layerSwitchTimer;
+	Timer64 colorPickTimer;
+	bool lastColorPickWasFromWholeImage = false;
 
 	bool changesSinceLastSave = false;
 	PlatformNativePathString lastConfirmedSavePath;
@@ -62,7 +64,7 @@ public:
 
 	bool replaceAlphaMode = false;
 	bool eraserMode = false;
-	bool blendAlphaMode = true;
+	bool blendAlphaMode = false;
 	uint32_t pickedColor = 0xFFFFFF;
 
 	ScreenWideNavBar<MainEditor*>* navbar;
@@ -114,6 +116,7 @@ public:
 	bool isInBounds(XY pos);
 	uint32_t pickColorFromAllLayers(XY);
 	void regenerateLastColors();
+	void setActiveColor(uint32_t, bool animate = true);
 
 	void discardEndOfUndoStack();
 	void checkAndDiscardEndOfUndoStack();

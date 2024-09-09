@@ -41,7 +41,7 @@ uint8_t* Layer::resize(XY to)
     memset(newPixelData, 0, to.x * to.y * 4);
     for (int y = 0; y < ixmin(h, to.y); y++) {
 		for (int x = 0; x < ixmin(w, to.x); x++) {
-			newPixelData[x + (y * to.x)] = pixelDataNow[x + (y * h)];
+			newPixelData[x + (y * to.x)] = pixelDataNow[x + (y * w)];
 		}
 	}
     pixelData = (uint8_t*)newPixelData;
