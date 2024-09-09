@@ -192,6 +192,8 @@ void MainEditor::render() {
 
 	renderComments();
 
+	renderUndoStack();
+
 	if (currentBrush != NULL) {
 		currentBrush->renderOnCanvas(this, scale);
 	}
@@ -368,6 +370,27 @@ void MainEditor::renderComments()
 			c.hovered = false;
 		}
 	}
+}
+
+void MainEditor::renderUndoStack()
+{
+	XY center = { g_windowW / 2, g_windowH - 40 };
+
+	int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * 5 * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
+	center.x += xOffset;
+
+	uint8_t lineShade = backgroundColor.r == 0x00 ? 0xff : 0x00;
+
+	for (int x = 0; x < undoStack.size(); x++) {
+		SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30);
+		SDL_RenderDrawLine(g_rd, center.x - (x + 1) * 10, center.y, center.x - (x + 1) * 10, center.y - 10);
+	}
+	for (int x = 0; x < redoStack.size(); x++) {
+		SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30);
+		SDL_RenderDrawLine(g_rd, center.x + (x + 1) * 10, center.y, center.x + (x + 1) * 10, center.y - 10);
+	}
+	SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x50);
+	SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
 }
 
 void MainEditor::initLayers()
@@ -1039,6 +1062,8 @@ void MainEditor::discardRedoStack()
 void MainEditor::undo()
 {
 	if (!undoStack.empty()) {
+		undoTimer.start();
+		lastUndoWasRedo = false;
 		UndoStackElement l = undoStack[undoStack.size() - 1];
 		undoStack.pop_back();
 		switch (l.type) {
@@ -1110,6 +1135,8 @@ void MainEditor::undo()
 void MainEditor::redo()
 {
 	if (!redoStack.empty()) {
+		undoTimer.start();
+		lastUndoWasRedo = true;
 		UndoStackElement l = redoStack[redoStack.size() - 1];
 		redoStack.pop_back();
 		switch (l.type) {

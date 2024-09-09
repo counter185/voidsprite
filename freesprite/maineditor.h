@@ -55,6 +55,8 @@ public:
 	Timer64 layerSwitchTimer;
 	Timer64 colorPickTimer;
 	bool lastColorPickWasFromWholeImage = false;
+	Timer64 undoTimer;
+	bool lastUndoWasRedo = false;
 
 	bool changesSinceLastSave = false;
 	PlatformNativePathString lastConfirmedSavePath;
@@ -101,6 +103,7 @@ public:
 	void DrawBackground();
 	void DrawForeground();
 	void renderComments();
+	void renderUndoStack();
 	void drawSymmetryLines();
 	void initLayers();
 	void setUpWidgets();
