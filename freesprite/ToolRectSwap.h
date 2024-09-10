@@ -20,17 +20,7 @@ class ToolRectSwap : public BaseBrush
     bool isReadOnly() { return true; }
     void renderOnCanvas(XY canvasDrawPoint, int scale) {
         if (mouseDown) {
-            XY pointFrom = XY{ ixmin(mouseDownPoint.x, lastMouseMotionPos.x), ixmin(mouseDownPoint.y, lastMouseMotionPos.y) };
-            XY pointTo = XY{ ixmax(mouseDownPoint.x, lastMouseMotionPos.x), ixmax(mouseDownPoint.y, lastMouseMotionPos.y) };
-            pointTo = xyAdd(pointTo, XY{ 1,1 });
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50);
-            SDL_Rect cAreaRect = SDL_Rect{
-                canvasDrawPoint.x + pointFrom.x * scale,
-                canvasDrawPoint.y + pointFrom.y * scale,
-                (pointTo.x - pointFrom.x) * scale,
-                (pointTo.y - pointFrom.y) * scale
-            };
-            SDL_RenderDrawRect(g_rd, &cAreaRect);
+            drawPixelRect(mouseDownPoint, lastMouseMotionPos, canvasDrawPoint, scale);
         }
         else if (clonedArea != NULL) {
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);

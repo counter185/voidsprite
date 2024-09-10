@@ -43,17 +43,8 @@ void ToolRectRotate::renderOnCanvas(XY canvasDrawPoint, int scale)
 		point.x = dragStart.x + xdist;
 		point.y = dragStart.y + xdist;
 		XY pointFrom = XY{ ixmin(dragStart.x, point.x), ixmin(dragStart.y, point.y) };
-		XY pointTo = XY{ ixmax(dragStart.x, point.x), ixmax(dragStart.y, point.y) };
-		pointTo = xyAdd(pointTo, XY{ 1,1 });
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50);
-		SDL_Rect cAreaRect = SDL_Rect{
-			canvasDrawPoint.x + pointFrom.x * scale,
-			canvasDrawPoint.y + pointFrom.y * scale,
-			(pointTo.x - pointFrom.x) * scale,
-			(pointTo.y - pointFrom.y) * scale
-		};
-		SDL_RenderDrawRect(g_rd, &cAreaRect);
-		g_fnt->RenderString(dragRightClick ? "Rotate -90d" : "Rotate 90d", cAreaRect.x, cAreaRect.y);
+		drawPixelRect(dragStart, point, canvasDrawPoint, scale);
+		g_fnt->RenderString(dragRightClick ? "Rotate -90d" : "Rotate 90d", canvasDrawPoint.x + pointFrom.x * scale, canvasDrawPoint.y + pointFrom.y * scale);
 	}
 
 	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);

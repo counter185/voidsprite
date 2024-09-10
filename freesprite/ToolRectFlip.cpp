@@ -37,18 +37,9 @@ void ToolRectFlip::rightClickRelease(MainEditor* editor, XY pos)
 
 void ToolRectFlip::renderOnCanvas(XY canvasDrawPoint, int scale) {
 	if (dragging) {
+		drawPixelRect(dragStart, lastMouseMotionPos, canvasDrawPoint, scale);
 		XY pointFrom = XY{ ixmin(dragStart.x, lastMouseMotionPos.x), ixmin(dragStart.y, lastMouseMotionPos.y) };
-		XY pointTo = XY{ ixmax(dragStart.x, lastMouseMotionPos.x), ixmax(dragStart.y, lastMouseMotionPos.y) };
-		pointTo = xyAdd(pointTo, XY{ 1,1 });
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50);
-		SDL_Rect cAreaRect = SDL_Rect{
-			canvasDrawPoint.x + pointFrom.x * scale,
-			canvasDrawPoint.y + pointFrom.y * scale,
-			(pointTo.x - pointFrom.x) * scale,
-			(pointTo.y - pointFrom.y) * scale
-		};
-		SDL_RenderDrawRect(g_rd, &cAreaRect);
-		g_fnt->RenderString(dragRightClick ? "Flip Y" : "Flip X", cAreaRect.x, cAreaRect.y);
+		g_fnt->RenderString(dragRightClick ? "Flip Y" : "Flip X", canvasDrawPoint.x + pointFrom.x * scale, canvasDrawPoint.y + pointFrom.y * scale );
 	}
 
 	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);

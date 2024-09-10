@@ -12,15 +12,9 @@ void ToolMeasure::clickPress(MainEditor* editor, XY pos)
 void ToolMeasure::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
 	if (heldDown) {
+		drawPixelRect(startPos, lastMouseMotionPos, canvasDrawPoint, scale);
 		XY pointFrom = XY{ ixmin(startPos.x, lastMouseMotionPos.x), ixmin(startPos.y, lastMouseMotionPos.y) };
 		XY pointTo = XY{ ixmax(startPos.x, lastMouseMotionPos.x), ixmax(startPos.y, lastMouseMotionPos.y) };
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
-		SDL_Rect r = { canvasDrawPoint.x + (pointFrom.x * scale), canvasDrawPoint.y + (pointFrom.y * scale), ((pointTo.x - pointFrom.x + 1) * scale), ((pointTo.y - pointFrom.y + 1) * scale) };
-		SDL_RenderFillRect(g_rd, &r);
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-		SDL_RenderDrawRect(g_rd, &r);
-
-		SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + r.w, r.y + r.h);
 
 		g_fnt->RenderString(std::format("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1), canvasDrawPoint.x + lastMousePos.x * scale + 25, canvasDrawPoint.y + lastMousePos.y * scale);
 	}
