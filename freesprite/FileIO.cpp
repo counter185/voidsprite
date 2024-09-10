@@ -131,57 +131,28 @@ Layer* De4BPPBitplane(int width, int height, uint8_t* input)
     // X 0 0 0 bitplane
     inputPtr = input;
     colorTablePointer = 0;
-    for (uint64_t y = 0; y < height; y++) {
-        for (uint64_t i = 0; i < 32; i++) {
-            uint8_t byte = *inputPtr++;
-            for (int j = 0; j < 8; j++) {
-                colorTable[colorTablePointer++] |= (((byte >> (7 - j)) & 1) << 3);
+    for (uint64_t tileY = 0; tileY < height/8; tileY++) {
+        for (uint64_t tileX = 0; tileX < width / 8; tileX++) {
+            for (int posY = 0; posY < 8; posY++) {
+                uint8_t byteBP0 = *inputPtr;
+                uint8_t byteBP1 = *(inputPtr + 1);
+                uint8_t byteBP2 = *(inputPtr + 16);
+                uint8_t byteBP3 = *(inputPtr + 17);
+                for (int posX = 0; posX < 8; posX++) {
+                    uint8_t value0 = (((byteBP0 >> (7 - posX)) & 1) << 0);
+                    uint8_t value1 = (((byteBP1 >> (7 - posX)) & 1) << 1);
+                    uint8_t value2 = (((byteBP2 >> (7 - posX)) & 1) << 2);
+                    uint8_t value3 = (((byteBP3 >> (7 - posX)) & 1) << 3);
+                    XY pixelPosNow = {
+                        tileX * 8 + posX,
+						tileY * 8 + posY
+                    };
+                    colorTable[pixelPosNow.x + pixelPosNow.y * width] = value0 | value1 | value2 | value3;
+                }
+                inputPtr += 2;
             }
-            inputPtr += 2;
+            inputPtr += 16;
         }
-        //inputPtr += 128;
-    }
-
-    // 0 X 0 0 bitplane
-    inputPtr = input + 1;
-    colorTablePointer = 0;
-    for (uint64_t y = 0; y < height; y++) {
-        for (uint64_t i = 0; i < 32; i++) {
-            uint8_t byte = *inputPtr++;
-            for (int j = 0; j < 8; j++) {
-                colorTable[colorTablePointer++] |= (((byte >> (7 - j)) & 1) << 2);
-            }
-            inputPtr += 2;
-        }
-        //inputPtr += 128;
-    }
-
-    // 0 0 X 0 bitplane
-    inputPtr = input + (width/8 * height * 2);
-    colorTablePointer = 0;
-    for (uint64_t y = 0; y < height; y++) {
-        for (uint64_t i = 0; i < 32; i++) {
-            uint8_t byte = *inputPtr++;
-            for (int j = 0; j < 8; j++) {
-                colorTable[colorTablePointer++] |= (((byte >> (7 - j)) & 1) << 1);
-            }
-            inputPtr += 2;
-        }
-        //inputPtr += 128;
-    }
-
-    // 0 0 0 X bitplane
-    inputPtr = input + (width/8 * height * 2) + 1;
-    colorTablePointer = 0;
-    for (uint64_t y = 0; y < height; y++) {
-        for (uint64_t i = 0; i < 32; i++) {
-            uint8_t byte = *inputPtr++;
-            for (int j = 0; j < 8; j++) {
-                colorTable[colorTablePointer++] |= ((byte >> (7 - j)) & 1);
-            }
-            inputPtr += 2;
-        }
-        //inputPtr += 128;
     }
 
     uint32_t* pxd = (uint32_t*)ret->pixelData;
@@ -190,6 +161,61 @@ Layer* De4BPPBitplane(int width, int height, uint8_t* input)
 	}
 
     free(colorTable);
+    return ret;
+}
+
+uint8_t* DecompressMarioPaintSRM(FILE* f)
+{
+    // my port of that one cursed lua script
+    fseek(f, 0x7FE, SEEK_SET);
+    uint8_t shortBuffer[2];
+    fread(shortBuffer, 2, 1, f);
+    uint16_t datasize = *(uint16_t*)shortBuffer;
+
+    std::vector<uint16_t> maptable;
+    for (int i = 0; i < 0x400; i++) {
+        fread(shortBuffer, 2, 1, f);
+        maptable.push_back(*(uint16_t*)shortBuffer);
+    }
+    std::vector<uint16_t> bin;
+    for (int i = 0; i < datasize / 2 - 0x400; i++) {
+        fread(shortBuffer, 2, 1, f);
+		bin.push_back(*(uint16_t*)shortBuffer);
+    }
+
+    std::vector<uint16_t> lz;
+    int huff_ptr = 0;
+    for (int i = 0; i < bin.size(); i++) {
+        uint16_t v = bin[i];
+        for (int n = 15; n >= 0; n--) {
+            huff_ptr = maptable[huff_ptr / 2 + (((v & (1 << n)) != 0) ? 1 : 0)];
+            if (maptable[huff_ptr / 2] == 0) {
+                lz.push_back(maptable[huff_ptr / 2 + 1]);
+                huff_ptr = 0;
+            }
+        }
+    }
+
+    std::vector<uint8_t> out;
+    int lz_ptr = 0;
+    while ((lz_ptr+1) < lz.size()) {
+        uint16_t lo = lz[lz_ptr++];
+        uint16_t hi = lz[lz_ptr++];
+        if (hi >= 0x80) {
+            for (int i = 0; i < hi - 0x80; i++) {
+                out.push_back(out[out.size() - lo]);
+            }
+        }
+        else {
+            for (int i = 0; i < hi * 0x100 + lo; i++) {
+                out.push_back(lz[lz_ptr++]);
+            }
+        }
+    }
+
+    uint8_t* ret = (uint8_t*)malloc(out.size());
+    memcpy(ret, out.data(), out.size());
+
     return ret;
 }
 
@@ -1441,30 +1467,37 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
 
-        fseek(f, 0x6000, SEEK_SET);
-        uint8_t* data = (uint8_t*)malloc(0xB800 - 0x6000);
-        fread(data, 0xB800 - 0x6000, 1, f);
-        Layer* l = De4BPPBitplane(256, 174, data);
-        l->replaceColor(0xFF000000, 0x00000000);
-        l->replaceColor(0xff010101, 0xFFFF0000);
-        l->replaceColor(0xff020202, 0xffFFA500);
-        l->replaceColor(0xff030303, 0xffFFFF00);
-        l->replaceColor(0xff040404, 0xff90EE90);
-        l->replaceColor(0xff050505, 0xff006400);
-        l->replaceColor(0xff060606, 0xff00FF00);
-        l->replaceColor(0xff070707, 0xff0000FF);
-        l->replaceColor(0xff080808, 0xff800000);
-        l->replaceColor(0xff090909, 0xffA52A2A);
-        l->replaceColor(0xff0A0A0A, 0xffFFC0CB);
-        l->replaceColor(0xff0B0B0B, 0xff800080);
-        l->replaceColor(0xff0C0C0C, 0xffFFFFFF);
-        l->replaceColor(0xff0D0D0D, 0xff000000);
-        l->replaceColor(0xff0E0E0E, 0xffA9A9A9);
-        l->replaceColor(0xff0F0F0F, 0xffD3D3D3);
+        try {
+            //there is no way to differentiate an srm.....
+            uint8_t* fullDecompressedData = DecompressMarioPaintSRM(f);
 
-        free(data);
-        fclose(f);
-        return l;
+            Layer* l = De4BPPBitplane(256, 174, fullDecompressedData + 0x6000);
+            l->name = "Mario Paint Layer";
+            l->replaceColor(0xFF000000, 0x00000000); //transparent
+            l->replaceColor(0xff010101, 0xFFFF0000); //red
+            l->replaceColor(0xff020202, 0xffFF8400); //orange
+            l->replaceColor(0xff030303, 0xffFFFF00); //yellow
+            l->replaceColor(0xff040404, 0xff00FF00); //light green
+            l->replaceColor(0xff050505, 0xff00842f); //dark green
+            l->replaceColor(0xff060606, 0xff00FFFF); //cyan
+            l->replaceColor(0xff070707, 0xff0000FF); //blue
+            l->replaceColor(0xff080808, 0xffC62F10); //maroon
+            l->replaceColor(0xff090909, 0xff845700); //brown
+            l->replaceColor(0xff0A0A0A, 0xffFFC684); //pink
+            l->replaceColor(0xff0B0B0B, 0xffC600C6); //purple
+            l->replaceColor(0xff0C0C0C, 0xffFFFFFF); //white
+            l->replaceColor(0xff0D0D0D, 0xff000000); //black
+            l->replaceColor(0xff0E0E0E, 0xff848484); //dark gray
+            l->replaceColor(0xff0F0F0F, 0xffC6C6C6); //light gray
+
+            free(fullDecompressedData);
+            fclose(f);
+            return l;
+        }
+        catch (std::exception) {
+            fclose(f);
+            return NULL;
+        }
     }
     return NULL;
 }

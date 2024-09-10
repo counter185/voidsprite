@@ -18,6 +18,7 @@ Free C++ sprite editor
 - Cave Story engine PBM
 - VTF* (BGRA, BGR, DXT1, DXT2/3, DXT4/5)
 - NES (dumps CHR-ROM)
+- Mario Paint save file (SRM)
 - all other formats supported by SDL2_Image
 
 \* - not all subformats are currently implemented   

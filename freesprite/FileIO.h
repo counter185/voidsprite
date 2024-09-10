@@ -2,6 +2,8 @@
 #include "globals.h"
 #include "Layer.h"
 
+uint8_t* DecompressMarioPaintSRM(FILE* f);
+
 void DeXT1(Layer* ret, int width, int height, FILE* infile);
 void DeXT23(Layer* ret, int width, int height, FILE* infile);
 void DeXT45(Layer* ret, int width, int height, FILE* infile);
