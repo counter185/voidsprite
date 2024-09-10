@@ -6,6 +6,10 @@ void DeXT1(Layer* ret, int width, int height, FILE* infile);
 void DeXT23(Layer* ret, int width, int height, FILE* infile);
 void DeXT45(Layer* ret, int width, int height, FILE* infile);
 
+int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 8, int blockHeight = 8);
+
+Layer* De4BPPBitplane(int width, int height, uint8_t* input);
+
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 
 //void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
@@ -23,6 +27,7 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMSP(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
@@ -183,6 +188,9 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	},
 	{
 		"MSP (voidsprite custom)", ".msp", &readMSP
+	},
+	{
+		"Mario Paint save file (voidsprite custom)", ".srm", &readMarioPaintSRM
 	}
 };
 

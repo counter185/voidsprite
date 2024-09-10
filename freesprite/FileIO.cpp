@@ -44,7 +44,7 @@ enum VTFFORMAT
     IMAGE_FORMAT_UVLX8888
 };
 
-int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 8, int blockHeight = 8) {
+int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth, int blockHeight) {
     uint32_t* pxd = (uint32_t*)ret->pixelData;
     /*int skip = 232;
     int skipHowMany = 24;
@@ -118,6 +118,79 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
     printf("[ASTC] at %x / %x\n", ftell(infile), fileLength); 
     return astcErrors;
+}
+
+Layer* De4BPPBitplane(int width, int height, uint8_t* input)
+{
+    Layer* ret = new Layer(width, height);
+    uint8_t* colorTable = (uint8_t*)malloc(width * height);
+    memset(colorTable, 0, width * height);
+    uint64_t colorTablePointer = 0;
+    uint8_t* inputPtr = input;
+
+    // X 0 0 0 bitplane
+    inputPtr = input;
+    colorTablePointer = 0;
+    for (uint64_t y = 0; y < height; y++) {
+        for (uint64_t i = 0; i < 32; i++) {
+            uint8_t byte = *inputPtr++;
+            for (int j = 0; j < 8; j++) {
+                colorTable[colorTablePointer++] |= (((byte >> (7 - j)) & 1) << 3);
+            }
+            inputPtr += 2;
+        }
+        //inputPtr += 128;
+    }
+
+    // 0 X 0 0 bitplane
+    inputPtr = input + 1;
+    colorTablePointer = 0;
+    for (uint64_t y = 0; y < height; y++) {
+        for (uint64_t i = 0; i < 32; i++) {
+            uint8_t byte = *inputPtr++;
+            for (int j = 0; j < 8; j++) {
+                colorTable[colorTablePointer++] |= (((byte >> (7 - j)) & 1) << 2);
+            }
+            inputPtr += 2;
+        }
+        //inputPtr += 128;
+    }
+
+    // 0 0 X 0 bitplane
+    inputPtr = input + (width/8 * height * 2);
+    colorTablePointer = 0;
+    for (uint64_t y = 0; y < height; y++) {
+        for (uint64_t i = 0; i < 32; i++) {
+            uint8_t byte = *inputPtr++;
+            for (int j = 0; j < 8; j++) {
+                colorTable[colorTablePointer++] |= (((byte >> (7 - j)) & 1) << 1);
+            }
+            inputPtr += 2;
+        }
+        //inputPtr += 128;
+    }
+
+    // 0 0 0 X bitplane
+    inputPtr = input + (width/8 * height * 2) + 1;
+    colorTablePointer = 0;
+    for (uint64_t y = 0; y < height; y++) {
+        for (uint64_t i = 0; i < 32; i++) {
+            uint8_t byte = *inputPtr++;
+            for (int j = 0; j < 8; j++) {
+                colorTable[colorTablePointer++] |= ((byte >> (7 - j)) & 1);
+            }
+            inputPtr += 2;
+        }
+        //inputPtr += 128;
+    }
+
+    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    for (uint64_t i = 0; i < width * height; i++) {
+        pxd[i] = PackRGBAtoARGB(colorTable[i], colorTable[i], colorTable[i], 255);
+	}
+
+    free(colorTable);
+    return ret;
 }
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile)
@@ -1359,6 +1432,39 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek)
 
         fclose(infile);
         return ret;
+    }
+    return NULL;
+}
+
+Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+
+        fseek(f, 0x6000, SEEK_SET);
+        uint8_t* data = (uint8_t*)malloc(0xB800 - 0x6000);
+        fread(data, 0xB800 - 0x6000, 1, f);
+        Layer* l = De4BPPBitplane(256, 174, data);
+        l->replaceColor(0xFF000000, 0x00000000);
+        l->replaceColor(0xff010101, 0xFFFF0000);
+        l->replaceColor(0xff020202, 0xffFFA500);
+        l->replaceColor(0xff030303, 0xffFFFF00);
+        l->replaceColor(0xff040404, 0xff90EE90);
+        l->replaceColor(0xff050505, 0xff006400);
+        l->replaceColor(0xff060606, 0xff00FF00);
+        l->replaceColor(0xff070707, 0xff0000FF);
+        l->replaceColor(0xff080808, 0xff800000);
+        l->replaceColor(0xff090909, 0xffA52A2A);
+        l->replaceColor(0xff0A0A0A, 0xffFFC0CB);
+        l->replaceColor(0xff0B0B0B, 0xff800080);
+        l->replaceColor(0xff0C0C0C, 0xffFFFFFF);
+        l->replaceColor(0xff0D0D0D, 0xff000000);
+        l->replaceColor(0xff0E0E0E, 0xffA9A9A9);
+        l->replaceColor(0xff0F0F0F, 0xffD3D3D3);
+
+        free(data);
+        fclose(f);
+        return l;
     }
     return NULL;
 }
