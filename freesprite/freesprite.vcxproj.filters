@@ -363,6 +363,9 @@
     <ClCompile Include="ToolRectFlip.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="ToolRectRotate.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -642,6 +645,9 @@
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectFlip.h">
+      <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolRectRotate.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,6 +15,7 @@
 #include "Brush1x1ArcY.h"
 #include "BrushReplaceColor.h"
 #include "ToolRectFlip.h"
+#include "ToolRectRotate.h"
 #include "ToolRectSwap.h"
 #include "ToolText.h"
 #include "Gamepad.h"
@@ -230,9 +231,10 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolRectMove());
     g_brushes.push_back(new ToolRectSwap());
     g_brushes.push_back(new ToolRectFlip());
+    g_brushes.push_back(new ToolRectRotate());
+    g_brushes.push_back(new ToolComment());
     g_brushes.push_back(new ToolSetXSymmetry());
     g_brushes.push_back(new ToolSetYSymmetry());
-    g_brushes.push_back(new ToolComment());
     g_brushes.push_back(new ToolMeasure());
     g_brushes.push_back(new ToolText());
     for (BaseBrush*& brush : g_brushes) {
