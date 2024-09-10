@@ -6,7 +6,9 @@
 #include "Notification.h"
 
 void StartScreen::tick() {
-
+	if (closeNextTick) {
+		g_closeScreen(this);
+	}
 }
 
 void StartScreen::render()

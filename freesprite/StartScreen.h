@@ -36,6 +36,8 @@ public:
 
 	ScreenWideNavBar<StartScreen*>* navbar;
 
+	bool closeNextTick = false;
+
 	BaseTemplate* tab2templates[2] = {
 		new TemplateRPG2KCharset(),
 		new TemplateMC64x32Skin()
@@ -169,16 +171,25 @@ public:
 
 		for (std::string& arg : g_cmdlineArgs) {
 
-			//g_addNotification(Notification("", arg));
-#if _WIDEPATHS
-			if (std::filesystem::exists(utf8StringToWstring(arg))) {
-#else
-			if (std::filesystem::exists(arg)) {
-#endif
-				tryLoadFile(arg);
+			if (arg.substr(0,2) == "--") {
+				std::string option = arg.substr(2);
+				if (option == "no-launchpad") {
+					this->closeNextTick = true;
+				}
 			}
 			else {
-				g_addPopup(new PopupMessageBox("", std::format("Error finding file: {}", arg)));
+
+				//g_addNotification(Notification("", arg));
+#if _WIDEPATHS
+				if (std::filesystem::exists(utf8StringToWstring(arg))) {
+#else
+				if (std::filesystem::exists(arg)) {
+#endif
+					tryLoadFile(arg);
+				}
+				else {
+					g_addPopup(new PopupMessageBox("", std::format("Error finding file: {}", arg)));
+				}
 			}
 		}
 	}
