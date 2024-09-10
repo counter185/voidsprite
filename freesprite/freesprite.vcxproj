@@ -171,6 +171,7 @@
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
+    <ClCompile Include="ToolRectFlip.cpp" />
     <ClCompile Include="ToolRectSwap.cpp" />
     <ClCompile Include="BrushReplaceColor.cpp" />
     <ClCompile Include="libpng\png.c" />
@@ -263,6 +264,7 @@
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
+    <ClInclude Include="ToolRectFlip.h" />
     <ClInclude Include="ToolRectSwap.h" />
     <ClInclude Include="BrushReplaceColor.h" />
     <ClInclude Include="ee_creature.h" />

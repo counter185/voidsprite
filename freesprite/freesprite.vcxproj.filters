@@ -360,6 +360,9 @@
     <ClCompile Include="PopupTextTool.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="ToolRectFlip.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -637,6 +640,9 @@
     </ClInclude>
     <ClInclude Include="PopupTextTool.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolRectFlip.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

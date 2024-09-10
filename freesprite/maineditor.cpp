@@ -743,6 +743,9 @@ void MainEditor::takeInput(SDL_Event evt) {
 						if (evt.button.state) {
 							currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
 						}
+						else {
+							currentBrush->rightClickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+						}
 					}
 					else {
 						if (evt.button.state) {

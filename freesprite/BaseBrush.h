@@ -20,6 +20,7 @@ public:
 	virtual void clickDrag(MainEditor* editor, XY from, XY to) {}
 	virtual void clickRelease(MainEditor* editor, XY pos) {}
 	virtual void rightClickPress(MainEditor* editor, XY pos) {}
+	virtual void rightClickRelease(MainEditor* editor, XY pos) {}
 	virtual void renderOnCanvas(XY canvasDrawPoint, int scale) {}
 	virtual void renderOnCanvas(MainEditor* editor, int scale);
 
