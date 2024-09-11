@@ -28,7 +28,7 @@ public:
             wxsManager.passInputToFocused(evt, getPopupOrigin());
         }
         else {
-            defaultInputAction();
+            defaultInputAction(evt);
         }
     }
 
@@ -69,6 +69,6 @@ protected:
         delete this;
     }
 
-    void defaultInputAction() {}
+    void defaultInputAction(SDL_Event evt) {}
 };
 

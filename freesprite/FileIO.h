@@ -30,6 +30,8 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMSP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readXComSPK(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
@@ -193,6 +195,12 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 	},
 	{
 		"Mario Paint save file (voidsprite custom)", ".srm", &readMarioPaintSRM
+	},
+	{
+		"X-Com SPK file (voidsprite custom)", ".spk", &readXComSPK
+	},
+	{
+		"X-Com BDY file (voidsprite custom)", ".bdy", &readXComBDY
 	}
 };
 
