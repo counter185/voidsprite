@@ -61,14 +61,8 @@ protected:
         return xyAdd(getPopupOrigin(), XY{ 5,50 });
     }
 
-    void closePopup() {
-        g_popDisposeLastPopup(false);
-        if (callback != NULL) {
-            callback->eventPopupClosed(callback_id, this);
-        }
-        delete this;
-    }
+    void closePopup();
 
-    void defaultInputAction(SDL_Event evt) {}
+    virtual void defaultInputAction(SDL_Event evt) {}
 };
 

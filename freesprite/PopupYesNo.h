@@ -1,6 +1,7 @@
 #pragma once
 #include "BasePopup.h"
 #include "UIButton.h"
+#include "EventCallbackListener.h"
 
 class PopupYesNo :
     public BasePopup, public EventCallbackListener

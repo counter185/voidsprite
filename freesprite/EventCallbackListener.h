@@ -32,6 +32,7 @@
 #define EVENT_COLORPICKER_TBOXH 29
 #define EVENT_COLORPICKER_TBOXS 30
 #define EVENT_COLORPICKER_TBOXV 31
+#define EVENT_QUICKCONVERT_PICKFORMAT 32
 
 class EventCallbackListener {
 public:
@@ -45,4 +46,5 @@ public:
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
 	virtual void eventSliderPosFinishedChanging(int evt_id, float value) {}
+	virtual void eventDropdownItemSelected(int evt_id, int index, std::string name) {}
 };

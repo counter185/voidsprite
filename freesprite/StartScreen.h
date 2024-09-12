@@ -16,6 +16,7 @@
 #include "UIColorInputField.h"
 #include "Notification.h"
 #include "ScreenWideNavBar.h"
+#include "PopupQuickConvert.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -147,7 +148,7 @@ public:
 				SDLK_f,
 				{
 					"File",
-					{},
+					{SDLK_o, SDLK_v, SDLK_e},
 					{
 						{SDLK_o, { "Open",
 								[](StartScreen* screen) {
@@ -161,6 +162,12 @@ public:
 								}
 							}
 						},
+						{SDLK_e, { "Quick Convert",
+								[](StartScreen* screen) {
+									g_addPopup(new PopupQuickConvert("Quick Convert", "Select the format to export the image to.\nDrag a file into this window to convert to the same directory."));
+								}
+							}
+						}
 					},
 					g_iconNavbarTabFile
 				}

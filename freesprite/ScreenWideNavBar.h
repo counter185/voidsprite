@@ -4,6 +4,7 @@
 #include "DrawableManager.h"
 #include "mathops.h"
 #include "UIButton.h"
+#include "EventCallbackListener.h"
 
 template <class T>
 class ScreenWideNavBar : public Drawable, public EventCallbackListener
