@@ -12,6 +12,24 @@
 
 class EditorColorPicker : public Drawable, public EventCallbackListener
 {
+protected:
+	UIColorSlider* sliderS;
+	UIColorSlider* sliderV;
+	UIColorSlider* sliderR;
+	UIColorSlider* sliderG;
+	UIColorSlider* sliderB;
+
+	UITextField* txtR, * txtG, * txtB;
+	UITextField* txtH, * txtS, * txtV;
+
+	TabbedView* colorModeTabs;
+	TabbedView* colorTabs;
+
+	UIHueSlider* hueSlider;
+	UISVPicker* satValSlider;
+	UISlider* sliderH;
+
+	TabbedView* forcedColorPaletteTabs;
 public:
 	int wxWidth = 400;
 	int wxHeight = 390;
@@ -23,23 +41,7 @@ public:
 
 	uint8_t currentR = 0, currentG = 0, currentB = 0;
 
-	UIHueSlider* hueSlider;
-	UISVPicker* satValSlider;
 	UITextField* colorTextField;
-	UISlider* sliderH;
-
-	UITextField* txtR, *txtG, *txtB;
-	UITextField* txtH, *txtS, *txtV;
-
-	UIColorSlider* sliderS;
-	UIColorSlider* sliderV;
-	UIColorSlider* sliderR;
-	UIColorSlider* sliderG;
-	UIColorSlider* sliderB;
-
-	TabbedView* colorModeTabs;
-	TabbedView* colorTabs;
-
 	UIButton* eraserButton;
 	UIButton* blendModeButton;
 
@@ -47,6 +49,8 @@ public:
 	bool lastColorsChanged = true;
 
 	EditorColorPicker(MainEditor* c);
+
+	void initWidgets();
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
 	void render(XY position) override;
@@ -75,6 +79,7 @@ public:
 
 	void pushLastColor(uint32_t col);
 	void updateLastColorButtons();
+	void updateForcedColorPaletteButtons();
 
 	void editorColorHSliderChanged(double h) {
 		currentH = h;

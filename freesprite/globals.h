@@ -165,3 +165,4 @@ struct UndoStackResizeLayerElement {
 
 #include "platform.h"
 #include "colors.h"
+#include "palettes.h"

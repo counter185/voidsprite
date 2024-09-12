@@ -52,6 +52,15 @@ MainEditor::MainEditor(Layer* layer)
 	layers.push_back(layer);
 
 	setUpWidgets();
+
+	if (layer->suggestedEnforcedPaletteMode) {
+		enterForcedPaletteMode();
+		for (int x = 0; x < ixmin(256, layer->suggestedPalette.size()); x++) {
+			forcedColorPalette[x] = layer->suggestedPalette[x];
+		}
+		colorPicker->updateForcedColorPaletteButtons();
+	}
+
 	recenterCanvas();
 	initLayers();
 }
@@ -907,16 +916,26 @@ void MainEditor::FillTexture() {
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
-	if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
-		uint32_t targetColor = color;
-		if (blendAlphaMode) {
-			if (eraserMode) {
-				targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+	if (!forcedColorPaletteMode) {
+		if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
+			uint32_t targetColor = color;
+			if (blendAlphaMode) {
+				if (eraserMode) {
+					targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+				}
+				targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
 			}
-			targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
+			getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
+			colorPicker->pushLastColor(color);
 		}
-		getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
-		colorPicker->pushLastColor(color);
+	}
+	else {
+		//uint32_t targetColor = eraserMode ? 0x00000000 : color;
+		int colorIndex = indexInForcedPalette(color);
+		if (colorIndex != -1) {
+			getCurrentLayer()->setPixel(position, color);
+			getCurrentLayer()->setPaletteIndex(position, colorIndex);
+		}
 	}
 	if (symmetryEnabled[0] && !(symmetry & 0b10)) {
 		int symmetryXPoint = symmetryPositions.x / 2;
@@ -1525,6 +1544,41 @@ void MainEditor::removeCommentAt(XY a)
 
 		addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_REMOVE_COMMENT, a.x, a.y, c.data });
 	}
+}
+
+void MainEditor::enterForcedPaletteMode()
+{
+	forcedColorPaletteMode = true;
+	memset(forcedColorPalette, 0, 256 * 4);
+	auto colors = getCurrentLayer()->get256MostUsedColors();
+	for (int x = 0; x < ixmin(256, colors.size()); x++) {
+		forcedColorPalette[x] = colors[x];
+	}
+	colorPicker->initWidgets();
+}
+
+void MainEditor::leaveForcedPaletteMode()
+{
+}
+
+bool MainEditor::colorIsInForcedPalette(uint32_t col)
+{
+	for (int x = 0; x < 256; x++) {
+		if (forcedColorPalette[x] == col) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int MainEditor::indexInForcedPalette(uint32_t col)
+{
+	for (int x = 0; x < 256; x++) {
+		if (forcedColorPalette[x] == col) {
+			return x;
+		}
+	}
+	return -1;
 }
 
 CommentData MainEditor::_removeCommentAt(XY a)

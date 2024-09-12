@@ -20,6 +20,10 @@ public:
 	uint8_t lastConfirmedlayerAlpha = 255;
 	uint8_t layerAlpha = 255;
 
+	bool suggestedEnforcedPaletteMode = false;
+	std::vector<uint32_t> suggestedPalette;
+	uint8_t* paletteData = NULL;
+
 	Layer(int width, int height) {
 		w = width;
 		h = height;
@@ -49,6 +53,9 @@ public:
 		}
 		for (uint8_t*& r : redoQueue) {
 			free(r);
+		}
+		if (paletteData != NULL) {
+			free(paletteData);
 		}
 		SDL_DestroyTexture(tex);
 	}
@@ -101,6 +108,12 @@ public:
 			&& position.y >= 0 && position.y < h) {
 			intpxdata[position.x + (position.y * w)] = color;
 			layerDirty = true;
+		}
+	}
+	void setPaletteIndex(XY position, uint8_t color) {
+		if (position.x >= 0 && position.x < w
+			&& position.y >= 0 && position.y < h) {
+			paletteData[position.x + (position.y * w)] = color;
 		}
 	}
 	void fillRect(XY from, XY to, uint32_t color) {
@@ -273,6 +286,23 @@ public:
 			}
 		}
 		layerDirty = true;
+	}
+
+	void genPaletteData() {
+		if (paletteData != NULL) {
+			free(paletteData);
+		}
+		paletteData = (uint8_t*)malloc(w * h);
+		memset(paletteData, 0, w * h);
+		uint32_t* px32 = (uint32_t*)pixelData;
+		for (uint64_t x = 0; x < w * h; x++) {
+			for (int x = 0; x < suggestedPalette.size(); x++) {
+				if (px32[x] == suggestedPalette[x]) {
+					paletteData[x] = x;
+					break;
+				}
+			}
+		}
 	}
 
 	//returns old pixel data

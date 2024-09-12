@@ -84,6 +84,9 @@ public:
 
 	std::vector<uint32_t> lastColors;
 
+	bool forcedColorPaletteMode = false;
+	uint32_t forcedColorPalette[256];
+
 	MainEditor(XY dimensions);
 	MainEditor(SDL_Surface* srf);
 	MainEditor(Layer* srf);
@@ -158,6 +161,11 @@ public:
 	bool canAddCommentAt(XY a);
 	void addCommentAt(XY a, std::string c);
 	void removeCommentAt(XY a);
+
+	void enterForcedPaletteMode();
+	void leaveForcedPaletteMode();
+	bool colorIsInForcedPalette(uint32_t);
+	int indexInForcedPalette(uint32_t color);
 private:
 	CommentData _removeCommentAt(XY a);
 };

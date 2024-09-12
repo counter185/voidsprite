@@ -650,6 +650,9 @@
     <ClInclude Include="ToolRectRotate.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
+    <ClInclude Include="palettes.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

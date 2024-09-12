@@ -263,6 +263,7 @@
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="Gamepad.h" />
+    <ClInclude Include="palettes.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="ToolRectFlip.h" />

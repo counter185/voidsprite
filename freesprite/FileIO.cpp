@@ -1515,6 +1515,8 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
     if (f != NULL) {
         Layer* ret = new Layer(320, 200);
         ret->name = "SPK Layer";
+        ret->suggestedEnforcedPaletteMode = true;
+        ret->suggestedPalette = g_palettes["grayscale"];
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint64_t layerPointer = 0;
         uint16_t a;
@@ -1532,7 +1534,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
                 for (int x = 0; x < (int)draw*2; x++) {
                     uint8_t paletteindex;
                     fread(&paletteindex, 1, 1, f);
-                    pxd[layerPointer++] = pal4[(int)paletteindex * 3];
+                    pxd[layerPointer++] = ret->suggestedPalette[(int)paletteindex];
                     if (layerPointer >= (320 * 200)) {
                         reachedImageEnd = true;
                         break;
@@ -1567,6 +1569,8 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
     if (f != NULL) {
         Layer* ret = new Layer(320, 200);
         ret->name = "BDY Layer";
+        ret->suggestedEnforcedPaletteMode = true;
+        ret->suggestedPalette = g_palettes["grayscale"];
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint32_t* end = pxd + (320 * 200);
         bool reachedImageEnd = false;
@@ -1577,7 +1581,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
                 uint8_t pixel;
                 fread(&pixel, 1, 1, f);
                 for (int x = 0; x < 257 - a; x++) {
-                    *(pxd++) = pal2[pixel * 3];
+                    *(pxd++) = ret->suggestedPalette[pixel];
                     if (pxd >= end) {
                         reachedImageEnd = true;
                         break;
