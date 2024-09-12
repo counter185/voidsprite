@@ -28,7 +28,11 @@ struct CommentData {
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
+protected:
+	MainEditor() {}
 public:
+	bool isPalettized = false;
+
 	SpritesheetPreviewScreen* spritesheetPreview = NULL;
 
 	std::vector<CommentData> comments;
@@ -106,10 +110,10 @@ public:
 	void renderUndoStack();
 	void drawSymmetryLines();
 	void initLayers();
-	void setUpWidgets();
+	virtual void setUpWidgets();
 	void RecalcMousePixelTargetPoint(int x, int y);
 	void FillTexture();
-	void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
+	virtual void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
 	void DrawLine(XY from, XY to, uint32_t color);
 	void trySaveImage();
 	void trySaveAsImage();
@@ -119,7 +123,8 @@ public:
 	bool isInBounds(XY pos);
 	uint32_t pickColorFromAllLayers(XY);
 	void regenerateLastColors();
-	void setActiveColor(uint32_t, bool animate = true);
+	virtual void setActiveColor(uint32_t, bool animate = true);
+	virtual uint32_t getActiveColor();
 
 	void discardEndOfUndoStack();
 	void checkAndDiscardEndOfUndoStack();
@@ -149,7 +154,7 @@ public:
 	uint32_t layer_getPixelAt(XY pos);
 	void layer_setAllAlpha255();
 	void layer_replaceColor(uint32_t from, uint32_t to);
-	Layer* flattenImage();
+	virtual Layer* flattenImage();
 	Layer* mergeLayers(Layer* bottom, Layer* top);
 	void resizeAllLayersFromCommand(XY size, bool byTile = false);
 	void resizzeAllLayersByTilecountFromCommand(XY size);

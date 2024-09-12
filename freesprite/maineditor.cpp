@@ -1,4 +1,5 @@
 #include "maineditor.h"
+#include "MainEditorPalettized.h"
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
@@ -271,9 +272,21 @@ void MainEditor::tick() {
 	};
 
 	//fuck it we ball
-	layerPicker->position.x = g_windowW - 260;
+	if (layerPicker != NULL) {
+		layerPicker->position.x = g_windowW - 260;
+	}
 
-	g_gamepad->SetLightbar((pickedColor >> 16) & 0xff, (pickedColor >> 8) & 0xff, pickedColor & 0xff);
+	if (isPalettized) {
+		MainEditorPalettized* thisUpCast = (MainEditorPalettized*)this;
+		uint32_t col = 0;
+		if (thisUpCast->pickedPaletteIndex >= 0 && thisUpCast->pickedPaletteIndex < thisUpCast->palette.size()) {
+			col = thisUpCast->palette[thisUpCast->pickedPaletteIndex];
+		}
+		g_gamepad->SetLightbar((col >> 16) & 0xff, (col >> 8) & 0xff, col & 0xff);
+	}
+	else {
+		g_gamepad->SetLightbar((pickedColor >> 16) & 0xff, (pickedColor >> 8) & 0xff, pickedColor & 0xff);
+	}
 
 	if (closeNextTick) {
 		g_closeScreen(this);
@@ -1251,6 +1264,11 @@ void MainEditor::setActiveColor(uint32_t col, bool animate)
 	if (animate) {
 		colorPickTimer.start();
 	}
+}
+
+uint32_t MainEditor::getActiveColor()
+{
+	return pickedColor;
 }
 
 void MainEditor::moveLayerUp(int index) {

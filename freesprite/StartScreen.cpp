@@ -164,7 +164,7 @@ void StartScreen::tryLoadFile(std::string path)
 		}
 
 		if (l != NULL) {
-			g_addScreen(new MainEditor(l));
+			g_addScreen(l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l));
 		}
 		else {
 			//g_addPopup(new PopupMessageBox("", "Failed to load file."));

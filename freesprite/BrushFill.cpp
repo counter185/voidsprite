@@ -15,7 +15,7 @@ void BrushFill::clickPress(MainEditor* editor, XY pos)
 {
 	Layer* currentLayer = editor->getCurrentLayer();
 	uint32_t pixel = currentLayer->getPixelAt(pos);
-	uint32_t swapTo = editor->eraserMode ? 0x00000000 : editor->pickedColor;
+	uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
 
 	if (pixel == swapTo) {
 		return;
@@ -27,7 +27,7 @@ void BrushFill::clickPress(MainEditor* editor, XY pos)
 	while (!openList.empty()) {
 		for (XY& openListElement : openList) {
 			uint32_t pixelRn = currentLayer->getPixelAt(openListElement);
-			if (editor->isInBounds(openListElement) && (pixelRn == pixel || (pixelRn>>24 == 0 && pixel>>24 == 0))) {
+			if (editor->isInBounds(openListElement) && (pixelRn == pixel || (!editor->isPalettized && pixelRn>>24 == 0 && pixel>>24 == 0))) {
 				currentLayer->setPixel(openListElement, swapTo);
 				XY p[] = {
 					{0,1},
@@ -73,7 +73,7 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
 		for (XY& openListElement : previewOpenList) {
 			uint32_t pixelRn = editor->getCurrentLayer()->getPixelAt(openListElement);
 			if (editor->isInBounds(openListElement)
-				&& (pixelRn == previewSearchingColor || (pixelRn >> 24 == 0 && previewSearchingColor >> 24 == 0))
+				&& (pixelRn == previewSearchingColor || (!editor->isPalettized && pixelRn >> 24 == 0 && previewSearchingColor >> 24 == 0))
 				&& !closedListContains(openListElement)) {
 				XY p[] = {
 					{0,1},

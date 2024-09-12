@@ -3,6 +3,7 @@
 #include "FontRenderer.h"
 #include "FileIO.h"
 #include "maineditor.h"
+#include "MainEditorPalettized.h"
 #include "Notification.h"
 
 PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
@@ -77,7 +78,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 			if (session == NULL) {
 				Layer* l = loadFlat(path);
 				if (l != NULL) {
-					session = new MainEditor(l);
+					session = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
 				}
 				else {
 					g_addNotification(ErrorNotification("Error", "Failed to load file"));

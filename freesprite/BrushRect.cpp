@@ -11,10 +11,10 @@ void BrushRect::clickPress(MainEditor* editor, XY pos)
 void BrushRect::clickRelease(MainEditor* editor, XY pos)
 {
 	heldDown = false;
-	editor->DrawLine(startPos, XY{pos.x, startPos.y}, 0xFF000000 | editor->pickedColor);
-	editor->DrawLine(startPos, XY{startPos.x, pos.y}, 0xFF000000 | editor->pickedColor);
-	editor->DrawLine(pos, XY{pos.x, startPos.y}, 0xFF000000 | editor->pickedColor);
-	editor->DrawLine(pos, XY{startPos.x, pos.y}, 0xFF000000 | editor->pickedColor);
+	editor->DrawLine(startPos, XY{pos.x, startPos.y}, editor->getActiveColor());
+	editor->DrawLine(startPos, XY{startPos.x, pos.y}, editor->getActiveColor());
+	editor->DrawLine(pos, XY{pos.x, startPos.y}, editor->getActiveColor());
+	editor->DrawLine(pos, XY{startPos.x, pos.y}, editor->getActiveColor());
 }
 
 void BrushRect::renderOnCanvas(XY canvasDrawPoint, int scale)

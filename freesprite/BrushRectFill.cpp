@@ -19,7 +19,7 @@ void BrushRectFill::clickRelease(MainEditor* editor, XY pos)
 
 	for (int x = minx; x <= maxx; x++) {
 		for (int y = miny; y <= maxy; y++) {
-			editor->SetPixel(XY{ x,y }, 0xFF000000 | editor->pickedColor);
+			editor->SetPixel(XY{ x,y }, editor->getActiveColor());
 		}
 	}
 }

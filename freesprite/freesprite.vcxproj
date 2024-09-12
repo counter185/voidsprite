@@ -169,6 +169,9 @@
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="Gamepad.cpp" />
+    <ClCompile Include="LayerPalettized.cpp" />
+    <ClCompile Include="MainEditorPalettized.cpp" />
+    <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
@@ -265,6 +268,10 @@
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="Gamepad.h" />
+    <ClInclude Include="LayerPalettized.h" />
+    <ClInclude Include="MainEditorPalettized.h" />
+    <ClInclude Include="palettes.h" />
+    <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />

@@ -3,7 +3,11 @@
 #include "mathops.h"
 class Layer
 {
+protected:
+	Layer() {}
 public:
+	bool isPalettized = false;
+
 	uint8_t* pixelData;	//!!! THIS IS IN ARGB
 	std::vector<uint8_t*> undoQueue;
 	std::vector<uint8_t*> redoQueue;
@@ -53,7 +57,7 @@ public:
 		SDL_DestroyTexture(tex);
 	}
 
-	void updateTexture() {
+	virtual void updateTexture() {
 		uint8_t* pixels;
 		int pitch;
 		if (texDimensions.x != w || texDimensions.y != h) {
@@ -116,7 +120,7 @@ public:
 		}
 	}
 
-	uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) {
+	virtual uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) {
 		if (position.x >= 0 && position.x < w
 			&& position.y >= 0 && position.y < h) {
 			uint32_t* intpxdata = (uint32_t*)pixelData;
@@ -128,6 +132,10 @@ public:
 		else {
 			return 0xFF000000;
 		}
+	}
+
+	virtual uint32_t getVisualPixelAt(XY position, bool ignoreLayerAlpha = true) {
+		return getPixelAt(position, ignoreLayerAlpha);
 	}
 
 	void flipHorizontally() {

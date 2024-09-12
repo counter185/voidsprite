@@ -3,6 +3,7 @@
 #include "EditorLayerPicker.h"
 #include "FileIO.h"
 #include "maineditor.h"
+#include "LayerPalettized.h"
 #include "libpng/png.h"
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
@@ -1513,7 +1514,8 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
 
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
-        Layer* ret = new Layer(320, 200);
+        LayerPalettized* ret = new LayerPalettized(320, 200);
+        ret->palette = g_palettes["grayscale"];
         ret->name = "SPK Layer";
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint64_t layerPointer = 0;
@@ -1532,7 +1534,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
                 for (int x = 0; x < (int)draw*2; x++) {
                     uint8_t paletteindex;
                     fread(&paletteindex, 1, 1, f);
-                    pxd[layerPointer++] = pal4[(int)paletteindex * 3];
+                    pxd[layerPointer++] = (int)paletteindex;
                     if (layerPointer >= (320 * 200)) {
                         reachedImageEnd = true;
                         break;
@@ -1565,7 +1567,8 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
 
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
-        Layer* ret = new Layer(320, 200);
+        LayerPalettized* ret = new LayerPalettized(320, 200);
+        ret->palette = g_palettes["grayscale"];
         ret->name = "BDY Layer";
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint32_t* end = pxd + (320 * 200);
@@ -1577,7 +1580,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
                 uint8_t pixel;
                 fread(&pixel, 1, 1, f);
                 for (int x = 0; x < 257 - a; x++) {
-                    *(pxd++) = pal2[pixel * 3];
+                    *(pxd++) = pixel;
                     if (pxd >= end) {
                         reachedImageEnd = true;
                         break;
@@ -1814,6 +1817,11 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
 
 bool writePNG(PlatformNativePathString path, Layer* data)
 {
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     // exports png
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
@@ -1850,6 +1858,11 @@ bool writePNG(PlatformNativePathString path, Layer* data)
 
 bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
+    if (data[0]->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         uint8_t voidsnVersion = 0x01;
@@ -1879,6 +1892,11 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
 
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 {
+    if (editor->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         uint8_t voidsnVersion = 0x02;
@@ -1915,6 +1933,11 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 {
+    if (editor->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         uint8_t voidsnVersion = 0x03;
@@ -1999,6 +2022,11 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 {
+    if (editor->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     std::vector<Layer*> data = editor->layers;
     char* zipBuffer;
     size_t zipBufferSize;
@@ -2097,31 +2125,61 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 
 bool writeXYZ(PlatformNativePathString path, Layer* data)
 {
-    std::vector<uint32_t> uniqueColors = data->getUniqueColors(true);
-    if (uniqueColors.size() > 256) {
-        g_addNotification(Notification("XYZ export failed", "Your image has more than 256 colors", 5000, NULL, COLOR_ERROR));
-        printf("[XYZ] Too many colors\n");
-        return false;
+    std::vector<uint32_t> uniqueColors;
+    if (data->isPalettized) {
+        if (((LayerPalettized*)data)->palette.size() > 256) {
+            g_addNotification(Notification("XYZ export failed", "Too many colors in palette", 5000, NULL, COLOR_ERROR));
+            printf("[XYZ] Too many colors\n");
+            return false;
+        }
+    } else {
+        uniqueColors = data->getUniqueColors(true);
+        if (uniqueColors.size() > 256) {
+            g_addNotification(Notification("XYZ export failed", "Your image has more than 256 colors", 5000, NULL, COLOR_ERROR));
+            printf("[XYZ] Too many colors\n");
+            return false;
+        }
     }
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         fwrite("XYZ1", 4, 1, outfile);
         fwrite(&data->w, 2, 1, outfile);
         fwrite(&data->h, 2, 1, outfile);
+
+        //write palette data
         uint8_t paletteData[256*3];
         int p = 0;
-        for (uint32_t& a : uniqueColors) {
-            uint32_t color = a;
-            paletteData[p++] = (color >> 16) & 0xff;
-            paletteData[p++] = (color >> 8) & 0xff;
-            paletteData[p++] = color&0xff;
+        if (data->isPalettized) {
+            for (uint32_t& a : ((LayerPalettized*)data)->palette) {
+				uint32_t color = a;
+				paletteData[p++] = (color >> 16) & 0xff;
+				paletteData[p++] = (color >> 8) & 0xff;
+				paletteData[p++] = color & 0xff;
+			}
         }
+        else {
+            for (uint32_t& a : uniqueColors) {
+                uint32_t color = a;
+                paletteData[p++] = (color >> 16) & 0xff;
+                paletteData[p++] = (color >> 8) & 0xff;
+                paletteData[p++] = color & 0xff;
+            }
+        }
+
+        //write pixel data
         uint8_t* pxPalleteData = (uint8_t*)malloc(data->w * data->h);
         uint32_t* pixelData32 = (uint32_t*)data->pixelData;
-        for (uint64_t x = 0; x < data->w * data->h; x++) {
-            uint32_t pixel = pixelData32[x] | 0xff000000;
-            int index = std::find(uniqueColors.begin(), uniqueColors.end(), pixel) - uniqueColors.begin();
-            pxPalleteData[x] = (uint8_t)(index);
+        if (data->isPalettized) {
+            for (uint64_t x = 0; x < data->w * data->h; x++) {
+                pxPalleteData[x] = (uint8_t)(pixelData32[x]);
+            }
+        }
+        else {
+            for (uint64_t x = 0; x < data->w * data->h; x++) {
+                uint32_t pixel = pixelData32[x] | 0xff000000;
+                int index = std::find(uniqueColors.begin(), uniqueColors.end(), pixel) - uniqueColors.begin();
+                pxPalleteData[x] = (uint8_t)(index);
+            }
         }
         unsigned long dataLength = 256 * 3 + data->w * data->h;
         uint8_t* combined = (uint8_t*)malloc(dataLength);
@@ -2143,6 +2201,11 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
 
 bool writeBMP(PlatformNativePathString path, Layer* data) {
 
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     BMP outbmp = BMP();
     outbmp.SetBitDepth(24);
     outbmp.SetSize(data->w, data->h);
@@ -2162,6 +2225,11 @@ bool writeBMP(PlatformNativePathString path, Layer* data) {
 }
 
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
+
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
 
     BMP outbmp = BMP();
     outbmp.SetBitDepth(24);
@@ -2188,6 +2256,11 @@ bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
 }
 
 bool writeTGA(PlatformNativePathString path, Layer* data) {
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
     if (nfile != NULL) {
         //copilot hallucinated all of this code i don't know if it even works
@@ -2220,6 +2293,11 @@ bool writeTGA(PlatformNativePathString path, Layer* data) {
 
 bool writeCHeader(PlatformNativePathString path, Layer* data)
 {
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
 
@@ -2249,6 +2327,11 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 
 bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 {
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
         fprintf(outfile, "import numpy as np\n\n");
@@ -2278,6 +2361,11 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data)
 {
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
 
@@ -2321,6 +2409,11 @@ public class VoidspriteImage {{\n\
 
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 {
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        return false;
+    }
+
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
 
     if (outfile != NULL) {

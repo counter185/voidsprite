@@ -7,6 +7,7 @@
 #include "UITextField.h"
 #include "UIButton.h"
 #include "maineditor.h"
+#include "MainEditorPalettized.h"
 #include "UILabel.h"
 #include "TabbedView.h"
 #include "BaseTemplate.h"
@@ -134,12 +135,21 @@ public:
 		}
 
 		for (int x = 0; x < 2; x++) {
-			UIButton* buttonNewImage = new UIButton();
-			buttonNewImage->setCallbackListener(4, this);
-			buttonNewImage->position = XY{ 30,90 };
-			buttonNewImage->wxWidth = 100;
-			buttonNewImage->text = "Create...";
-			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImage);
+			UIButton* buttonNewImageRGB = new UIButton();
+			buttonNewImageRGB->setCallbackListener(4, this);
+			buttonNewImageRGB->position = XY{ 30,90 };
+			buttonNewImageRGB->wxWidth = 120;
+			buttonNewImageRGB->text = "Create (RGB)";
+			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
+
+#if _DEBUG
+			UIButton* buttonNewImagePalettized = new UIButton();
+			buttonNewImagePalettized->setCallbackListener(5, this);
+			buttonNewImagePalettized->position = XY{ 160,90 };
+			buttonNewImagePalettized->wxWidth = 200;
+			buttonNewImagePalettized->text = "Create (Palettized)";
+			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
+#endif
 		}
 
 		navbar = new ScreenWideNavBar<StartScreen*>(this, 
@@ -244,6 +254,48 @@ public:
 							int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
 							int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
 							MainEditor* newMainEditor = new MainEditor(XY{ newImgW, newImgH });
+							newMainEditor->tileDimensions = cellSize;
+							g_addScreen(newMainEditor);
+						}
+						catch (std::out_of_range) {
+							//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
+						}
+					}
+					else {
+						//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
+						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
+					}
+					break;
+			}
+		}
+		if (evt_id == 5) {
+			switch (newImageTabs->openTab) {
+				case 0:
+					if (!tab0TextFieldW->text.empty() && !tab0TextFieldH->text.empty()) {
+						try {
+							int newImgW = std::stoi(tab0TextFieldW->text);
+							int newImgH = std::stoi(tab0TextFieldH->text);
+							g_addScreen(new MainEditorPalettized(XY{ newImgW, newImgH }));
+						}
+						catch (std::out_of_range) {
+							//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
+							g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
+						}
+					}
+					else {
+						//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
+						g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
+					}
+					break;
+				case 1:
+					if (!tab1TextFieldCH->text.empty() && !tab1TextFieldCW->text.empty()
+						&& !tab1TextFieldCHX->text.empty() && !tab1TextFieldCWX->text.empty()) {
+						try {
+							XY cellSize = XY{ std::stoi(tab1TextFieldCW->text) , std::stoi(tab1TextFieldCH->text) };
+							int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
+							int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
+							MainEditorPalettized* newMainEditor = new MainEditorPalettized(XY{ newImgW, newImgH });
 							newMainEditor->tileDimensions = cellSize;
 							g_addScreen(newMainEditor);
 						}

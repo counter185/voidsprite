@@ -63,6 +63,7 @@ class BasePopup;
 class BaseBrush;
 class ToolText;
 class Layer;
+class LayerPalettized;
 class MainEditor;
 class SpritesheetPreviewScreen;
 class EditorSpritesheetPreview;
@@ -165,3 +166,4 @@ struct UndoStackResizeLayerElement {
 
 #include "platform.h"
 #include "colors.h"
+#include "palettes.h"
