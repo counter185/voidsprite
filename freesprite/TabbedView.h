@@ -63,7 +63,7 @@ public:
         tabs[openTab].wxs.renderAll(xyAdd(position, XY{(int)(200 * (nextTabSlideFromTheLeft ? -1 : 1) * (1.0-XM1PW3P1(tabSwitchTimer.percentElapsedTime(250)))), buttonsHeight}));
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override {
-        if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+        if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.state) {
             if (!tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset)) {
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }

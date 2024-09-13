@@ -16,6 +16,7 @@ public:
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
+    void eventColorSet(int evt_id, uint32_t color) override;
 
     void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true) override {}
     void updateLastColorButtons() override {}

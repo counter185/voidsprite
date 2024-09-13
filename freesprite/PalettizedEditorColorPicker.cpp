@@ -2,6 +2,8 @@
 #include "FontRenderer.h"
 #include "UIDropdown.h"
 #include "Notification.h"
+#include "PopupPickColor.h"
+#include "UIColorInputField.h"
 
 PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c)
 {
@@ -113,6 +115,12 @@ void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
 {
     if (evt_id >= 200) {
         //todo: open popup to edit the color
+        PopupPickColor* ppc = new PopupPickColor("Pick color", std::format("Select color for palette index {}", evt_id-200), true);
+        ppc->setCallbackListener(evt_id, this);
+        uint32_t palCol = upcastCaller->palette[evt_id - 200];
+        ppc->colorInput->setPickedColor(palCol);
+        ppc->setAlpha(palCol >> 24);
+        g_addPopup(ppc);
     }
 }
 
@@ -182,6 +190,15 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
         }
     }
 	
+}
+
+void PalettizedEditorColorPicker::eventColorSet(int evt_id, uint32_t color)
+{
+    if (evt_id >= 200) {
+        upcastCaller->palette[evt_id - 200] = color;
+        upcastCaller->setPalette(upcastCaller->palette);
+		updateForcedColorPaletteButtons();
+    }
 }
 
 void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
