@@ -68,6 +68,7 @@ class MainEditor;
 class MainEditorPalettized;
 class SpritesheetPreviewScreen;
 class EditorSpritesheetPreview;
+class UIColorInputField;
 class UIButton;
 class Pattern;
 class Notification;

@@ -173,6 +173,7 @@
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
+    <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
@@ -219,7 +220,6 @@
     <ClCompile Include="Pattern.cpp" />
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="PopupMessageBox.cpp" />
-    <ClCompile Include="PopupSetColorKey.cpp" />
     <ClCompile Include="PopupSetEditorPixelGrid.cpp" />
     <ClCompile Include="PopupTextBox.cpp" />
     <ClCompile Include="PopupYesNo.cpp" />
@@ -274,6 +274,7 @@
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
+    <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
@@ -319,7 +320,6 @@
     <ClInclude Include="platform.h" />
     <ClInclude Include="platform_windows.h" />
     <ClInclude Include="PopupMessageBox.h" />
-    <ClInclude Include="PopupSetColorKey.h" />
     <ClInclude Include="PopupSetEditorPixelGrid.h" />
     <ClInclude Include="PopupTextBox.h" />
     <ClInclude Include="PopupYesNo.h" />

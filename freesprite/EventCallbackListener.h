@@ -37,6 +37,7 @@
 #define EVENT_PALETTIZEDEDITOR_SAVEFILE 34
 #define EVENT_PALETTECOLORPICKER_SAVEPALETTE 35
 #define EVENT_PALETTECOLORPICKER_LOADPALETTE 36
+#define EVENT_MAINEDITOR_SETCOLORKEY 37
 
 class EventCallbackListener {
 public:
@@ -52,4 +53,5 @@ public:
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
 	virtual void eventSliderPosFinishedChanging(int evt_id, float value) {}
 	virtual void eventDropdownItemSelected(int evt_id, int index, std::string name) {}
+	virtual void eventColorSet(int evt_id, uint32_t color) {}
 };

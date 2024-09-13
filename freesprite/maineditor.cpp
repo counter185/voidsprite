@@ -10,12 +10,12 @@
 #include "EditorSpritesheetPreview.h"
 #include "FileIO.h"
 #include "PopupTextBox.h"
-#include "PopupSetColorKey.h"
 #include "PopupSetEditorPixelGrid.h"
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
 #include "PopupTileGeneric.h"
 #include "Gamepad.h"
+#include "PopupPickColor.h"
 
 MainEditor::MainEditor(XY dimensions) {
 
@@ -558,7 +558,9 @@ void MainEditor::setUpWidgets()
 					},
 					{SDLK_k, { "Set color key",
 							[](MainEditor* editor) {
-								g_addPopup(new PopupSetColorKey(editor->getCurrentLayer(), "Set color key", "Set the layer's color key:"));
+								PopupPickColor* newPopup = new PopupPickColor("Set color key", "Pick a color to set as the color key:");
+								newPopup->setCallbackListener(EVENT_MAINEDITOR_SETCOLORKEY, editor);
+								g_addPopup(newPopup);
 							}
 						}
 					},
@@ -904,6 +906,16 @@ void MainEditor::eventTextInputConfirm(int evt_id, std::string text)
 	if (evt_id == EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME) {
 		getCurrentLayer()->name = text;
 		layerPicker->updateLayers();
+	}
+}
+
+void MainEditor::eventColorSet(int evt_id, uint32_t color)
+{
+	if (evt_id == EVENT_MAINEDITOR_SETCOLORKEY) {
+		Layer* l = getCurrentLayer();
+		l->colorKey = color;
+		l->colorKeySet = true;
+		l->layerDirty = true;
 	}
 }
 
