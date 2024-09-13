@@ -127,6 +127,8 @@ void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathS
             fwrite("VOIDPLT", 7, 1, f);
             uint8_t fileversion = 1;
             fwrite(&fileversion, 1, 1, f);
+            uint32_t count = upcastCaller->palette.size();
+            fwrite(&count, 1, 4, f);
 			for (uint32_t col : upcastCaller->palette) {
 				fwrite(&col, 1, 4, f);
 			}
@@ -151,13 +153,16 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
                 fread(&fileversion, 1, 1, f);
                 if (fileversion == 1) {
                     std::vector<uint32_t> newPalette;
-                    while (!feof(f)) {
+                    uint32_t count;
+                    fread(&count, 1, 4, f);
+                    for (int x = 0; x < count; x++) {
                         uint32_t col;
                         fread(&col, 1, 4, f);
                         newPalette.push_back(col);
                     }
                     upcastCaller->setPalette(newPalette);
                     updateForcedColorPaletteButtons();
+                    g_addNotification(Notification("Success", "Loaded palette file", 4000, NULL, COLOR_INFO));
                 }
                 else {
                     g_addNotification(ErrorNotification("Error", "Unsupported palette file version"));
