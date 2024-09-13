@@ -142,14 +142,12 @@ public:
 			buttonNewImageRGB->text = "Create (RGB)";
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
 
-#if _DEBUG
 			UIButton* buttonNewImagePalettized = new UIButton();
 			buttonNewImagePalettized->setCallbackListener(5, this);
 			buttonNewImagePalettized->position = XY{ 160,90 };
 			buttonNewImagePalettized->wxWidth = 200;
 			buttonNewImagePalettized->text = "Create (Palettized)";
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
-#endif
 		}
 
 		navbar = new ScreenWideNavBar<StartScreen*>(this, 
