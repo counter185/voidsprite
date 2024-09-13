@@ -178,7 +178,7 @@ void MainEditorPalettized::setUpWidgets()
 			SDLK_f,
 			{
 				"File",
-				{SDLK_s, SDLK_d, SDLK_c},
+				{SDLK_s, SDLK_d, SDLK_c, SDLK_r},
 				{
 					{SDLK_d, { "Save as",
 							[](MainEditor* editor) {
@@ -195,6 +195,12 @@ void MainEditorPalettized::setUpWidgets()
 					{SDLK_c, { "Close",
 							[](MainEditor* editor) {
 								editor->requestSafeClose();
+							}
+						}
+					},
+					{SDLK_r, { "Open in RGB editor",
+							[](MainEditor* editor) {
+								((MainEditorPalettized*)editor)->openInNormalRGBEditor();
 							}
 						}
 					},
@@ -474,5 +480,12 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 		exporterID++;
 	}
 	platformTrySaveOtherFile(this, namesAndExtensions, "save palettized image", EVENT_PALETTIZEDEDITOR_SAVEFILE);
+}
+
+void MainEditorPalettized::openInNormalRGBEditor()
+{
+	Layer* l = flattenImageAndConvertToRGB();
+	MainEditor* newEditor = new MainEditor(l);
+	g_addScreen(newEditor);
 }
 

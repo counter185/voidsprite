@@ -1826,10 +1826,10 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
 
 bool writePNG(PlatformNativePathString path, Layer* data)
 {
-    if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
-        return false;
-    }
+    if (data->isPalettized && ((LayerPalettized*)data)->palette.size() > 256){
+		g_addNotification(ErrorNotification("Error", "Too many colors in palette"));
+		return false;
+	}
 
     // exports png
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
@@ -1842,23 +1842,64 @@ bool writePNG(PlatformNativePathString path, Layer* data)
         png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
         png_set_compression_buffer_size(outpng, 1024 * 1024);
         setjmp(png_jmpbuf(outpng));
-        png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-        setjmp(png_jmpbuf(outpng));
-        png_write_info(outpng, outpnginfo);
 
-        uint8_t* convertedToABGR = (uint8_t*)malloc(data->w * data->h * 4);
-        SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
+        if (!data->isPalettized) {
+            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
+            setjmp(png_jmpbuf(outpng));
+            png_write_info(outpng, outpnginfo);
 
-        png_bytepp rows = new png_bytep[data->h];
-        for (int y = 0; y < data->h; y++) {
-            rows[y] = convertedToABGR + (y * data->w*4);
+            uint8_t* convertedToABGR = (uint8_t*)malloc(data->w * data->h * 4);
+            SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
+
+            png_bytepp rows = new png_bytep[data->h];
+            for (int y = 0; y < data->h; y++) {
+                rows[y] = convertedToABGR + (y * data->w * 4);
+            }
+            png_write_image(outpng, rows);
+            delete[] rows;
+            free(convertedToABGR);
         }
-        png_write_image(outpng, rows);
-        delete[] rows;
+        else {
+            LayerPalettized* pltLayer = (LayerPalettized*)data;
+			png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
+			setjmp(png_jmpbuf(outpng));
+
+            png_colorp plt = new png_color[pltLayer->palette.size()];
+            memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
+            png_bytep trns = new png_byte[pltLayer->palette.size()];
+
+            for (int x = 0; x < pltLayer->palette.size(); x++) {
+				plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
+				plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
+				plt[x].blue = pltLayer->palette[x] & 0xff;
+                trns[x] = (pltLayer->palette[x] >> 24) & 0xff;
+			}
+
+			png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
+			png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
+			png_write_info(outpng, outpnginfo);
+
+            int32_t* pixelData32 = (int32_t*)pltLayer->pixelData;
+			png_bytepp rows = new png_bytep[data->h];
+			for (int y = 0; y < data->h; y++) {
+                png_bytep row = new png_byte[data->w];
+                for (int x = 0; x < data->w; x++) {
+					row[x] = pixelData32[x + y * data->w];
+				}
+                rows[y] = row;
+			}
+			png_write_image(outpng, rows);
+            delete[] plt;
+            delete[] trns;
+            for (int y = 0; y < data->h; y++) {
+				delete[] rows[y];
+			}
+			delete[] rows;
+
+        }
         png_write_end(outpng, outpnginfo);
 
         png_destroy_write_struct(&outpng, &outpnginfo);
-        free(convertedToABGR);
         fclose(outfile);
         return true;
     }
