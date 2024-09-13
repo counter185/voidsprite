@@ -24,5 +24,6 @@ public:
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 
 	void click();
+	void rightClick();
 };
 

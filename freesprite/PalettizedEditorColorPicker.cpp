@@ -151,7 +151,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
 
 void PalettizedEditorColorPicker::render(XY position)
 {
-    uint32_t colorNow = upcastCaller->pickedPaletteIndex == -1 ? 0x00000000 : upcastCaller->palette[upcastCaller->pickedPaletteIndex];
+    uint32_t colorNow = (upcastCaller->pickedPaletteIndex == -1 || upcastCaller->pickedPaletteIndex >= upcastCaller->palette.size()) ? 0x00000000 : upcastCaller->palette[upcastCaller->pickedPaletteIndex];
     SDL_Color colorNowB = { (colorNow >> 16) & 0xff, (colorNow >> 8) & 0xff, colorNow & 0xff, (colorNow >> 24) & 0xff };
     hsv colorNowHSV = rgb2hsv({colorNowB.r / 255.0, colorNowB.g / 255.0, colorNowB.b / 255.0});
 
@@ -211,9 +211,10 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
 {
     colorPaletteTabs->tabs[0].wxs.freeAllDrawables();
 
-    for (int y = 0; y < 16; y++) {
-        for (int x = 0; x < 16; x++) {
-            uint32_t col = upcastCaller->palette[y * 16 + x];
+    int paletteindex = 0;
+    for (int y = 0; y < 16 && paletteindex < upcastCaller->palette.size(); y++) {
+        for (int x = 0; x < 16 && paletteindex < upcastCaller->palette.size(); x++) {
+            uint32_t col = upcastCaller->palette[paletteindex++];
             UIButton* colBtn = new UIButton();
             colBtn->colorBGFocused = colBtn->colorBGUnfocused = SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff), (uint8_t)((col >> 24) & 0xff) };
             colBtn->wxHeight = 16;

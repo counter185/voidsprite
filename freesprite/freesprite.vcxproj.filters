@@ -366,6 +366,21 @@
     <ClCompile Include="ToolRectRotate.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="LayerPalettized.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UIDropdown.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupQuickConvert.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="PalettizedEditorColorPicker.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="MainEditorPalettized.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -617,9 +632,6 @@
     <ClInclude Include="libpng\pnginfo.h">
       <Filter>Header files\external\libpng</Filter>
     </ClInclude>
-    <ClInclude Include="UIHueSlider.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="BrushReplaceColor.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
@@ -649,6 +661,27 @@
     </ClInclude>
     <ClInclude Include="ToolRectRotate.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="LayerPalettized.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="palettes.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainEditorPalettized.h">
+      <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="PalettizedEditorColorPicker.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupQuickConvert.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="UIDropdown.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UIHueSlider.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

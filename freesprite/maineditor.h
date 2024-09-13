@@ -115,8 +115,8 @@ public:
 	void FillTexture();
 	virtual void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
 	void DrawLine(XY from, XY to, uint32_t color);
-	void trySaveImage();
-	void trySaveAsImage();
+	virtual void trySaveImage();
+	virtual void trySaveAsImage();
 	void recenterCanvas();
 	bool requestSafeClose();
 	void zoom(int how_much);

@@ -18,7 +18,7 @@ void platformPostInit();
 
 void platformTrySaveImageFile(EventCallbackListener* caller);
 void platformTryLoadImageFile(EventCallbackListener* caller);
-void platformTrySaveOtherFile(EventCallbackListener* caller, std::string extension, std::string windowTitle = "Save file");
+void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id);
 void platformTryLoadOtherFile(EventCallbackListener* caller, std::string extension, std::string windowTitle = "Open file");
 void platformOpenFileLocation(PlatformNativePathString path);
 

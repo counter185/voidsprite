@@ -74,7 +74,6 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
         filterStrings.push_back(utf8StringToWstring(f.extension));
     }
     filterString.push_back('\0');
-    //ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0OpenRaster Files (.ora)\0*.ora\0voidsprite Session Files v2 (.voidsn)\0*.voidsn\0BMP Files (.bmp)\0*.bmp\0CaveStory PBM Files (.pbm)\0*.pbm\0RPG2000/2003 XYZ Files (.xyz)\0*.xyz\0All files\0*.*\0\0";
     ofna.lpstrFilter = filterString.c_str();
     ofna.lpstrCustomFilter = NULL;
     ofna.nFilterIndex = lastFilterIndex;
@@ -121,7 +120,6 @@ void platformTryLoadImageFile(EventCallbackListener* listener) {
         filterStrings.push_back(utf8StringToWstring(f.extension));
     }
     filterString.push_back('\0');
-    //ofna.lpstrFilter = (LPWSTR)L"PNG Files (.png)\0*.png\0OpenRaster Files (.ora)\0*.ora\0voidsprite Session Files v2 (.voidsn)\0*.voidsn\0BMP Files (.bmp)\0*.bmp\0CaveStory PBM Files (.pbm)\0*.pbm\0RPG2000/2003 XYZ Files (.xyz)\0*.xyz\0All files\0*.*\0\0";
     ofna.lpstrFilter = filterString.c_str();
     ofna.lpstrCustomFilter = NULL;
     ofna.nFilterIndex = lastFilterIndex;
@@ -147,16 +145,19 @@ void platformTryLoadImageFile(EventCallbackListener* listener) {
 }
 
 
-void platformTrySaveOtherFile(EventCallbackListener* listener, std::string extension, std::string windowTitle) {
+//pairs in format {extension, name}
+void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id) {
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
     ofna.hwndOwner = WINhWnd;
     std::wstring filterString = L"";
-    filterString += utf8StringToWstring(extension) + L" file";
-    filterString.push_back('\0');
-    filterString += L"*" + utf8StringToWstring(extension);
-    filterString.push_back('\0');
+    for (auto& ft : filetypes) {
+        filterString += utf8StringToWstring(ft.second) + L" ("+ utf8StringToWstring(ft.first) +L")";
+        filterString.push_back('\0');
+        filterString += L"*" + utf8StringToWstring(ft.first);
+        filterString.push_back('\0');
+    }
     filterString.push_back('\0');
     ofna.lpstrFilter = filterString.c_str();
     ofna.lpstrCustomFilter = NULL;
@@ -170,17 +171,18 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::string exten
     std::wstring windowTitleW = L"voidsprite: " + utf8StringToWstring(windowTitle);
     ofna.lpstrTitle = windowTitleW.c_str();
 
-    std::wstring extensionW = utf8StringToWstring(extension);
+    std::wstring extensionW = utf8StringToWstring(filetypes[0].first);
     std::wstring extensionWtr = extensionW.substr(1);
     ofna.lpstrDefExt = extensionWtr.c_str();
 
     if (GetSaveFileNameW(&ofna)) {
         lastFilterIndex = ofna.nFilterIndex;
         std::wstring fileName = fileNameBuffer;
+        extensionW = utf8StringToWstring(filetypes[ofna.nFilterIndex-1].first);
         if (fileName.size() < extensionW.size() || fileName.substr(fileName.size() - extensionW.size()) != extensionW) {
             fileName += extensionW;
         }
-        listener->eventFileSaved(EVENT_OTHERFILE_SAVEFILE, fileName, ofna.nFilterIndex);
+        listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
         printf("windows error: %i\n", GetLastError());

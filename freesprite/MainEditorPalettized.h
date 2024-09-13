@@ -15,12 +15,24 @@ public:
     MainEditorPalettized(LayerPalettized* layer);
     MainEditorPalettized(std::vector<LayerPalettized*> layers);
 
+    void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
+
     void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0) override;
     uint32_t getActiveColor() override;
     void setActiveColor(uint32_t col, bool animate) override;
     void setPalette(std::vector<uint32_t> palette);
 
     void setUpWidgets() override;
+    void trySaveImage() override;
+    void trySaveAsImage() override;
     Layer* flattenImage() override;
+
+    int32_t* makeFlatIndicesTable();
+    Layer* flattenImageAndConvertToRGB();
+    Layer* flattenImageWithoutConvertingToRGB();
+
+    void trySavePalettizedImage();
+    void trySaveAsPalettizedImage();
+    void openInNormalRGBEditor();
 };
 

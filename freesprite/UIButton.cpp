@@ -43,9 +43,11 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 {
 	if (evt.type == SDL_MOUSEBUTTONDOWN) {
 		XY mousePos = xySubtract(XY{ evt.motion.x, evt.motion.y }, gPosOffset);
-		if (evt.button.button == 1 && evt.button.state) {
-			if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
+		if (evt.button.state && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
+			if (evt.button.button == 1) {
 				click();
+			} else if (evt.button.button == 3) {
+				rightClick();
 			}
 		}
 	}
@@ -56,5 +58,13 @@ void UIButton::click()
 	lastClick.start();
 	if (callback != NULL) {
 		callback->eventButtonPressed(callback_id);
+	}
+}
+
+void UIButton::rightClick()
+{
+	lastClick.start();
+	if (callback != NULL) {
+		callback->eventButtonRightClicked(callback_id);
 	}
 }

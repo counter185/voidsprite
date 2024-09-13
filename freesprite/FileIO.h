@@ -2,6 +2,10 @@
 #include "globals.h"
 #include "Layer.h"
 
+#define FORMAT_RGB			0b01
+#define FORMAT_PALETTIZED	0b10
+
+
 uint8_t* DecompressMarioPaintSRM(FILE* f);
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile);
@@ -81,6 +85,7 @@ struct FileExportMultiLayerNPath {
 	std::string name;
 	std::string extension;
 	bool (*exportFunction)(PlatformNativePathString, MainEditor*);
+	int exportFormats = FORMAT_RGB;
 	bool (*canExport)(Layer*) =
 		[](Layer* p) {
 		return true;
@@ -90,6 +95,7 @@ struct FileExportFlatNPath {
 	std::string name;
 	std::string extension;
 	bool (*exportFunction)(PlatformNativePathString, Layer*);
+	int exportFormats = FORMAT_RGB;
 	bool (*canExport)(Layer*) =
 		[](Layer* p) {
 		return true;
@@ -98,10 +104,10 @@ struct FileExportFlatNPath {
 
 inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
 	{
-		"PNG (libpng)", ".png", &writePNG
+		"PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED
 	},
 	{
-		"RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &writeXYZ
+		"RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED
 	},
 	{
 		"BMP (EasyBMP)", ".bmp", &writeBMP
@@ -136,6 +142,8 @@ inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
 		"OpenRaster", ".ora", &writeOpenRaster
 	}
 };
+
+
 
 inline std::vector<FileSessionImportNPath> g_fileSessionImportersNPaths = {
 	{

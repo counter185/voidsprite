@@ -8,6 +8,7 @@
 #include "TilemapPreviewScreen.h"
 #include "PalettizedEditorColorPicker.h"
 #include "EditorBrushPicker.h"
+#include "FileIO.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -60,6 +61,51 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layers)
 	setUpWidgets();
 	recenterCanvas();
 	initLayers();
+}
+
+void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId)
+{
+	if (evt_id == EVENT_PALETTIZEDEDITOR_SAVEFILE) {
+		//todo clean this shit up
+		std::vector<int> palettizedExporterIds;
+		std::vector<std::pair<std::string, std::string>> namesAndExtensions;
+		int cexporterID = 0;
+		for (auto& e : g_fileExportersMLNPaths) {
+			if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
+				palettizedExporterIds.push_back(cexporterID);
+			}
+			cexporterID++;
+		}
+		for (auto& e : g_fileExportersFlatNPaths) {
+			if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
+				palettizedExporterIds.push_back(cexporterID);
+			}
+			cexporterID++;
+		}
+
+		int actualExporterID = palettizedExporterIds[exporterId - 1];
+
+		bool result = false;
+
+		if (actualExporterID >= g_fileExportersMLNPaths.size()) {
+			actualExporterID -= g_fileExportersMLNPaths.size();
+			auto exporter = g_fileExportersFlatNPaths[actualExporterID];
+			Layer* flat = flattenImageWithoutConvertingToRGB();
+			result = exporter.exportFunction(name, flat);
+			delete flat;
+		}
+		else {
+			auto exporter = g_fileExportersMLNPaths[actualExporterID];
+			result = exporter.exportFunction(name, this);
+		}
+
+		if (result) {
+			g_addNotification(Notification("Success", "File saved successfully."));
+		}
+		else {
+			g_addNotification(ErrorNotification("Error", "Failed to save file."));
+		}
+	}
 }
 
 void MainEditorPalettized::SetPixel(XY position, uint32_t color, uint8_t symmetry)
@@ -321,7 +367,7 @@ void MainEditorPalettized::setUpWidgets()
 	colorPicker->position.x = 10;
 	wxsManager.addDrawable(colorPicker);
 	((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(pickedPaletteIndex);
-	regenerateLastColors();
+	//regenerateLastColors();
 
 	brushPicker = new EditorBrushPicker(this);
 	brushPicker->position.y = 480;
@@ -337,20 +383,43 @@ void MainEditorPalettized::setUpWidgets()
 	wxsManager.addDrawable(navbar);
 }
 
+void MainEditorPalettized::trySaveImage()
+{
+	trySavePalettizedImage();
+}
+
+void MainEditorPalettized::trySaveAsImage()
+{
+	trySaveAsPalettizedImage();
+}
+
 Layer* MainEditorPalettized::flattenImage()
 {
-	uint32_t* indices = (uint32_t*)malloc(texW * texH * 4);
+	return flattenImageAndConvertToRGB();
+}
+
+int32_t* MainEditorPalettized::makeFlatIndicesTable()
+{
+	int32_t* indices = (int32_t*)malloc(texW * texH * 4);
 	memset(indices, 0, texW * texH * 4);
 	for (Layer*& l : layers) {
-		for (int y = 0; y < texH; y++) {
-			for (int x = 0; x < texW; x++) {
-				uint32_t color = l->getPixelAt(XY{ x,y });
-				if (color != -1) {
-					indices[x + y * texW] = color;
+		if (!l->hidden) {
+			for (int y = 0; y < texH; y++) {
+				for (int x = 0; x < texW; x++) {
+					uint32_t color = l->getPixelAt(XY{ x,y });
+					if (color != -1) {
+						indices[x + y * texW] = color;
+					}
 				}
 			}
 		}
 	}
+	return indices;
+}
+
+Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
+{
+	int32_t* indices = makeFlatIndicesTable();
 
 	Layer* flatAndRGBConvertedLayer = new Layer(texW, texH);
 	uint32_t* intpxdata = (uint32_t*)flatAndRGBConvertedLayer->pixelData;
@@ -361,5 +430,49 @@ Layer* MainEditorPalettized::flattenImage()
 	}
 	free(indices);
 	return flatAndRGBConvertedLayer;
+}
+
+Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
+{
+	int32_t* indices = makeFlatIndicesTable();
+	LayerPalettized* flatLayer = new LayerPalettized(texW, texH);
+	memcpy(flatLayer->pixelData, indices, texW * texH * 4);
+	flatLayer->palette = palette;
+	free(indices);
+	return flatLayer;
+}
+
+void MainEditorPalettized::trySavePalettizedImage()
+{
+	lastWasSaveAs = false;
+	if (!lastConfirmedSave) {
+		trySaveAsImage();
+	}
+	else {
+		eventFileSaved(EVENT_PALETTIZEDEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId + 1);
+	}
+}
+
+void MainEditorPalettized::trySaveAsPalettizedImage()
+{
+	lastWasSaveAs = true;
+	std::vector<int> palettizedExporterIds;
+	std::vector<std::pair<std::string, std::string>> namesAndExtensions;
+	int exporterID = 0;
+	for (auto& e : g_fileExportersMLNPaths) {
+		if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
+			namesAndExtensions.push_back({ e.extension, e.name });
+			palettizedExporterIds.push_back(exporterID);
+		}
+		exporterID++;
+	}
+	for (auto& e : g_fileExportersFlatNPaths) {
+		if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
+			namesAndExtensions.push_back({ e.extension, e.name });
+			palettizedExporterIds.push_back(exporterID);
+		}
+		exporterID++;
+	}
+	platformTrySaveOtherFile(this, namesAndExtensions, "save palettized image", EVENT_PALETTIZEDEDITOR_SAVEFILE);
 }
 

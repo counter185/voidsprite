@@ -34,6 +34,7 @@
 #define EVENT_COLORPICKER_TBOXV 31
 #define EVENT_QUICKCONVERT_PICKFORMAT 32
 #define EVENT_PALETTECOLORPICKER_PALETTELIST 33
+#define EVENT_PALETTIZEDEDITOR_SAVEFILE 34
 
 class EventCallbackListener {
 public:
@@ -42,6 +43,7 @@ public:
 	virtual void eventTextInput(int evt_id, std::string data) {}
 	virtual void eventTextInputConfirm(int evt_id, std::string data) {}
 	virtual void eventButtonPressed(int evt_id) {}
+	virtual void eventButtonRightClicked(int evt_id) {}
 	virtual void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) {}
 	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) {}
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}

@@ -23,7 +23,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                         },
                         {SDLK_s, { "Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
-                                    platformTrySaveOtherFile(screen, ".voidtile", "Save tile layout");
+                                    platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"} }, "Save tile layout", EVENT_OTHERFILE_SAVEFILE);
                                 }
                             }
                         },

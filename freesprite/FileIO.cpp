@@ -3,6 +3,7 @@
 #include "EditorLayerPicker.h"
 #include "FileIO.h"
 #include "maineditor.h"
+#include "MainEditorPalettized.h"
 #include "LayerPalettized.h"
 #include "libpng/png.h"
 #include "libtga/tga.h"
@@ -1515,7 +1516,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_palettes["grayscale"];
+        ret->palette = g_palettes["[0]grayscale"];
         ret->name = "SPK Layer";
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint64_t layerPointer = 0;
@@ -1568,7 +1569,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_palettes["grayscale"];
+        ret->palette = g_palettes["[0]grayscale"];
         ret->name = "BDY Layer";
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint32_t* end = pxd + (320 * 200);
@@ -1753,7 +1754,15 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
                         layers.push_back(newLayer);
                     }
-                    MainEditor* ret = new MainEditor(layers);
+
+                    MainEditor* ret;
+                    if (extData.contains("palette.enabled") && extData.contains("palette.colors") && std::stoi(extData["palette.enabled"]) == 1) {
+                        //todo
+                        ret = new MainEditor(layers);
+                    }
+                    else {
+                        ret = new MainEditor(layers);
+                    }
                     if (extData.contains("tile.dim.x")) { ret->tileDimensions.x = std::stoi(extData["tile.dim.x"]); }
                     if (extData.contains("tile.dim.y")) { ret->tileDimensions.y = std::stoi(extData["tile.dim.y"]); }
                     if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
@@ -1790,7 +1799,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             ret->comments.push_back(newComment);
                         }
                     }
-                    if (extData.contains("layer.opacity")) {
+                    if (!ret->isPalettized && extData.contains("layer.opacity")) {
                         std::string layerOpacityData = extData["layer.opacity"];
                         for (int x = 0; x < nlayers && x < layerOpacityData.size(); x++) {
                             int nextSC = layerOpacityData.find_first_of(';');
