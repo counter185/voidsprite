@@ -15,7 +15,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
 	isPalettized = true;
 	texW = dimensions.x;
 	texH = dimensions.y;
-	palette = g_palettes["grayscale"];
+	palette = g_palettes[PALETTE_DEFAULT];
 	LayerPalettized* pltLayer = new LayerPalettized(texW, texH);
 	pltLayer->palette = palette;
 	layers.push_back(pltLayer);

@@ -659,16 +659,19 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
         fclose(outf);
         */
 
-        uint32_t colorPalette[256];
+        LayerPalettized* nLayer = new LayerPalettized(imgW, imgH);
+
+        //uint32_t colorPalette[256];
         int filePtr = 0;
         for (int c = 0; c < 256; c++) {
-            colorPalette[c] = 0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]);
+            //colorPalette[c] = 0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]);
+            nLayer->palette.push_back(0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]));
         }
-
-        Layer* nLayer = new Layer(imgW, imgH);
+        
         uint32_t* pxData = (uint32_t*)nLayer->pixelData;
         for (int x = 0; x < imgW * imgH; x++) {
-            pxData[x] = colorPalette[decompBytes[filePtr++]];
+            //pxData[x] = colorPalette[decompBytes[filePtr++]];
+            pxData[x] = decompBytes[filePtr++];
         }
 
         nLayer->name = "XYZ Image";
@@ -1516,7 +1519,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_palettes["[0]grayscale"];
+        ret->palette = g_palettes[PALETTE_DEFAULT];
         ret->name = "SPK Layer";
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint64_t layerPointer = 0;
@@ -1569,7 +1572,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_palettes["[0]grayscale"];
+        ret->palette = g_palettes[PALETTE_DEFAULT];
         ret->name = "BDY Layer";
         uint32_t* pxd = (uint32_t*)ret->pixelData;
         uint32_t* end = pxd + (320 * 200);

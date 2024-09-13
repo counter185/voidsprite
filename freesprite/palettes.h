@@ -1,5 +1,6 @@
 #pragma once
 
+#define PALETTE_DEFAULT "[0]grayscale"
 
 inline std::map<std::string, std::vector<uint32_t>> g_palettes = {
 	{
