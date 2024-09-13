@@ -172,6 +172,7 @@
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
+    <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
@@ -272,6 +273,7 @@
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
+    <ClInclude Include="PalettizedEditorLayerPicker.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />

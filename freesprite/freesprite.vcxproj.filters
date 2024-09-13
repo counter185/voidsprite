@@ -381,6 +381,9 @@
     <ClCompile Include="MainEditorPalettized.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="PalettizedEditorLayerPicker.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -682,6 +685,9 @@
     </ClInclude>
     <ClInclude Include="UIHueSlider.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="PalettizedEditorLayerPicker.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

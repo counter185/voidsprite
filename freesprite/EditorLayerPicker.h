@@ -7,13 +7,15 @@
 
 class EditorLayerPicker : public Drawable, public EventCallbackListener
 {
+protected:
+	EditorLayerPicker() {};
 public:
 	int wxWidth = 250;
 	int wxHeight = 400;
 	MainEditor* caller;
 	DrawableManager layerButtons;
 	DrawableManager layerControlButtons;
-	UISlider* opacitySlider;
+	UISlider* opacitySlider = NULL;
 
 	EditorLayerPicker(MainEditor* editor);
 	~EditorLayerPicker();

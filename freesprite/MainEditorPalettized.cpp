@@ -7,6 +7,7 @@
 #include "PopupSetEditorPixelGrid.h"
 #include "TilemapPreviewScreen.h"
 #include "PalettizedEditorColorPicker.h"
+#include "PalettizedEditorLayerPicker.h"
 #include "EditorBrushPicker.h"
 #include "FileIO.h"
 
@@ -26,7 +27,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
 
 	setUpWidgets();
 	recenterCanvas();
-	//initLayers();
+	initLayers();
 }
 
 MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
@@ -44,7 +45,7 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
 
 	setUpWidgets();
 	recenterCanvas();
-	//initLayers();
+	initLayers();
 }
 
 MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layers)
@@ -380,10 +381,10 @@ void MainEditorPalettized::setUpWidgets()
 	brushPicker->position.x = 10;
 	wxsManager.addDrawable(brushPicker);
 
-	/*layerPicker = new EditorLayerPicker(this);
+	layerPicker = new PalettizedEditorLayerPicker(this);
 	layerPicker->position = XY{ 440, 80 };
 	layerPicker->anchor = XY{ 1,0 };
-	wxsManager.addDrawable(layerPicker);*/
+	wxsManager.addDrawable(layerPicker);
 
 	navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_v });
 	wxsManager.addDrawable(navbar);
@@ -402,6 +403,40 @@ void MainEditorPalettized::trySaveAsImage()
 Layer* MainEditorPalettized::flattenImage()
 {
 	return flattenImageAndConvertToRGB();
+}
+
+Layer* MainEditorPalettized::newLayer()
+{
+	LayerPalettized* nl = new LayerPalettized(texW, texH);
+	nl->palette = palette;
+	nl->name = std::format("New Layer {}", layers.size() + 1);
+	layers.push_back(nl);
+	switchActiveLayer(layers.size() - 1);
+
+	addToUndoStack(UndoStackElement{ nl, UNDOSTACK_CREATE_LAYER });
+	return nl;
+}
+
+Layer* MainEditorPalettized::mergeLayers(Layer* bottom, Layer* top)
+{
+	LayerPalettized* ret = new LayerPalettized(bottom->w, bottom->h);
+	ret->palette = palette;
+
+	if (!bottom->isPalettized || !top->isPalettized) {
+		printf("UH OH\n");
+	}
+
+	memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);
+
+	uint32_t* ppx = (uint32_t*)top->pixelData;
+	uint32_t* retppx = (uint32_t*)ret->pixelData;
+	for (uint64_t p = 0; p < ret->w * ret->h; p++) {
+		uint32_t pixel = ppx[p];
+		uint32_t srcPixel = retppx[p];
+		retppx[p] = pixel == -1 ? srcPixel : pixel;
+	}
+
+	return ret;
 }
 
 int32_t* MainEditorPalettized::makeFlatIndicesTable()

@@ -192,5 +192,7 @@ void EditorLayerPicker::updateLayers()
         layerButtons.addDrawable(layerButton);
     }
 
-    opacitySlider->sliderPos = caller->getCurrentLayer()->layerAlpha / 255.0f;
+    if (opacitySlider != NULL) {
+        opacitySlider->sliderPos = caller->getCurrentLayer()->layerAlpha / 255.0f;
+    }
 }

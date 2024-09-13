@@ -26,6 +26,8 @@ public:
     void trySaveImage() override;
     void trySaveAsImage() override;
     Layer* flattenImage() override;
+    Layer* newLayer() override;
+    Layer* mergeLayers(Layer* bottom, Layer* top) override;
 
     int32_t* makeFlatIndicesTable();
     Layer* flattenImageAndConvertToRGB();

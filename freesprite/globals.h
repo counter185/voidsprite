@@ -65,6 +65,7 @@ class ToolText;
 class Layer;
 class LayerPalettized;
 class MainEditor;
+class MainEditorPalettized;
 class SpritesheetPreviewScreen;
 class EditorSpritesheetPreview;
 class UIButton;

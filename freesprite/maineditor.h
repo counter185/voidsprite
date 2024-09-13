@@ -136,7 +136,7 @@ public:
 	void undo();
 	void redo();
 
-	Layer* newLayer();
+	virtual Layer* newLayer();
 	void deleteLayer(int index);
 	void moveLayerUp(int index);
 	void moveLayerDown(int index);
@@ -155,7 +155,7 @@ public:
 	void layer_setAllAlpha255();
 	void layer_replaceColor(uint32_t from, uint32_t to);
 	virtual Layer* flattenImage();
-	Layer* mergeLayers(Layer* bottom, Layer* top);
+	virtual Layer* mergeLayers(Layer* bottom, Layer* top);
 	void resizeAllLayersFromCommand(XY size, bool byTile = false);
 	void resizzeAllLayersByTilecountFromCommand(XY size);
 	void integerScaleAllLayersFromCommand(XY scale);
