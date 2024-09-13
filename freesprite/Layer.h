@@ -276,7 +276,7 @@ public:
 	void replaceColor(uint32_t from, uint32_t to) {
 		uint32_t* px32 = (uint32_t*)pixelData;
 		for (uint64_t x = 0; x < w * h; x++) {
-			if (px32[x] == from || ((px32[x]&0xFF000000) == 0 && (from&0xFF000000) == 0)) {
+			if (px32[x] == from || (!isPalettized && (px32[x]&0xFF000000) == 0 && (from&0xFF000000) == 0)) {
 				px32[x] = to;
 			}
 		}

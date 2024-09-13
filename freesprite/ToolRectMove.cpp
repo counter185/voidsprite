@@ -30,7 +30,7 @@ void ToolRectMove::clickRelease(MainEditor* editor, XY pos)
 	for (int y = ymin; y < ymax; y++) {
 		for (int x = xmin; x < xmax; x++) {
 			clonedArea[copyIndex++] = editor->layer_getPixelAt(XY{ x,y });
-			editor->SetPixel(XY{ x,y }, 0x00000000);
+			editor->SetPixel(XY{ x,y }, !editor->isPalettized ? 0x00000000 : -1);
 		}
 	}
 	cacheClonePreview = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h);

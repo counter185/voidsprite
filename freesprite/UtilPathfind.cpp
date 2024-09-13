@@ -102,7 +102,7 @@ bool CanWalkOnMapPoint(Layer* map, int x, int y, uint32_t col1, uint32_t col2) {
         return false;
     }
     uint32_t mapPixel = map->getPixelAt(XY{ x,y });
-    return mapPixel == col1 || mapPixel == col2 || (mapPixel >> 24 == 0 && (col1 >> 24 == 0 || col2 >> 24 == 0));
+    return mapPixel == col1 || mapPixel == col2 || (!map->isPalettized && mapPixel >> 24 == 0 && (col1 >> 24 == 0 || col2 >> 24 == 0));
 }
 
 uint64_t startTime;

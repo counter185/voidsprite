@@ -17,7 +17,7 @@ void BrushCircle::clickRelease(MainEditor* editor, XY pos)
 	editor->getCurrentLayer()->setPixel({posMin.x, posMax.y}, editor->pickedColor);
 	editor->getCurrentLayer()->setPixel({posMax.x, posMin.y}, editor->pickedColor);*/
 	rasterizeEllipse(posMin, posMax, [&](XY a) {
-		editor->SetPixel(a, editor->pickedColor);
+		editor->SetPixel(a, editor->getActiveColor());
 	});
 	heldDown = false;
 }

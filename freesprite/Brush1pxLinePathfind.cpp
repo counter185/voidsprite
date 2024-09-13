@@ -12,7 +12,7 @@ void Brush1pxLinePathfind::clickRelease(MainEditor* editor, XY pos)
 {
 	std::vector<Node> pathfindResult = genAStar(editor->getCurrentLayer(), startPos, pos);
 	for (Node& n : pathfindResult) {
-		editor->SetPixel(XY{ n.x, n.y }, editor->pickedColor);
+		editor->SetPixel(XY{ n.x, n.y }, editor->getActiveColor());
 	}
 	//editor->DrawLine(startPos, pos, 0xFF000000 | editor->pickedColor);
 	dragging = false;
