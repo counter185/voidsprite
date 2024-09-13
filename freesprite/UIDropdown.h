@@ -20,6 +20,8 @@ public:
 	
 	bool isOpen = false;
 	Timer64 openTimer;
+	int menuYOffset = 0;
+	int menuHeight = 0;
 
 	DrawableManager wxs;
 

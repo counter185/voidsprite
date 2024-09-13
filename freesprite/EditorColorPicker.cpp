@@ -174,7 +174,7 @@ void EditorColorPicker::render(XY position)
 
 void EditorColorPicker::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+    if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.state) {
         subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
     }
     if (!subWidgets.anyFocused()) {

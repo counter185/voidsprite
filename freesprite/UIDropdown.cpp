@@ -10,10 +10,6 @@ UIDropdown::UIDropdown(std::vector<std::string> items)
 
 void UIDropdown::render(XY pos)
 {
-	if (isOpen) {
-		wxs.renderAll(xySubtract(pos, {0, (int)((1.0f - openTimer.percentElapsedTime(100)) * wxHeight)}));
-	}
-
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
 	SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
 	SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
@@ -41,6 +37,10 @@ void UIDropdown::render(XY pos)
 	}
 
 	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
+
+	if (isOpen) {
+		wxs.renderAll(xyAdd(xySubtract(pos, { 0, (int)((1.0f - openTimer.percentElapsedTime(100)) * wxHeight) }), XY{0, menuYOffset}));
+	}
 }
 
 void UIDropdown::focusIn()
@@ -56,7 +56,7 @@ void UIDropdown::focusOut()
 void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 {
 	if (isOpen && evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-		wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset);
+		wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(gPosOffset, XY{0,menuYOffset}));
 	}
 	if (!isOpen || !wxs.anyFocused()) {
 		if (evt.type == SDL_MOUSEBUTTONDOWN) {
@@ -67,9 +67,16 @@ void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 				}
 			}
 		}
+		else if (evt.type == SDL_MOUSEWHEEL) {
+			if (isOpen) {
+				menuYOffset += evt.wheel.y * 30;
+				if (menuYOffset > 0) menuYOffset = 0;
+				if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
+			}
+		}
 	}
 	else {
-		wxs.passInputToFocused(evt, gPosOffset);
+		wxs.passInputToFocused(evt, xyAdd(gPosOffset, XY{ 0,menuYOffset }));
 	}
 }
 
@@ -95,6 +102,8 @@ void UIDropdown::genButtons()
 		btn->setCallbackListener(y, this);
 		wxs.addDrawable(btn);
 	}
+
+	menuHeight = items.size() * wxHeight;
 }
 
 void UIDropdown::click()
@@ -102,4 +111,5 @@ void UIDropdown::click()
 	lastClick.start();
 	openTimer.start();
 	isOpen = true;
+	menuYOffset = 0;
 }

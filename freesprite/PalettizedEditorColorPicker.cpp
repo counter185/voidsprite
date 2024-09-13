@@ -24,13 +24,6 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     for (auto& pal : g_palettes) {
 		palettes.push_back(pal.first);
 	}
-    UIDropdown* defaultpalettePicker = new UIDropdown(palettes);
-    defaultpalettePicker->position = XY{ 20, 20 };
-    defaultpalettePicker->wxWidth = 300;
-    defaultpalettePicker->wxHeight = 30;
-    defaultpalettePicker->text = "Default palettes";
-    defaultpalettePicker->setCallbackListener(EVENT_PALETTECOLORPICKER_PALETTELIST, this);
-    colorPaletteTabs->tabs[1].wxs.addDrawable(defaultpalettePicker);
 
     UIButton* buttonSavePalette = new UIButton();
     buttonSavePalette->position = { 20, 60 };
@@ -47,6 +40,14 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     buttonLoadPalette->wxHeight = 30;
     buttonLoadPalette->setCallbackListener(EVENT_PALETTECOLORPICKER_LOADPALETTE, this);
     colorPaletteTabs->tabs[1].wxs.addDrawable(buttonLoadPalette);
+
+    UIDropdown* defaultpalettePicker = new UIDropdown(palettes);
+    defaultpalettePicker->position = XY{ 20, 20 };
+    defaultpalettePicker->wxWidth = 300;
+    defaultpalettePicker->wxHeight = 30;
+    defaultpalettePicker->text = "Default palettes";
+    defaultpalettePicker->setCallbackListener(EVENT_PALETTECOLORPICKER_PALETTELIST, this);
+    colorPaletteTabs->tabs[1].wxs.addDrawable(defaultpalettePicker);
 
     updateForcedColorPaletteButtons();
 }
@@ -110,6 +111,9 @@ void PalettizedEditorColorPicker::eventButtonPressed(int evt_id)
 
 void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
 {
+    if (evt_id >= 200) {
+        //todo: open popup to edit the color
+    }
 }
 
 void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int index, std::string name)
