@@ -17,7 +17,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     {
                         {SDLK_o, { "Load layout from file",
                                 [](TilemapPreviewScreen* screen) {
-                                    platformTryLoadOtherFile(screen, ".voidtile", "Load tile layout");
+                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                                 }
                             }
                         },

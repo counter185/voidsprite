@@ -1,6 +1,7 @@
 #include "PalettizedEditorColorPicker.h"
 #include "FontRenderer.h"
 #include "UIDropdown.h"
+#include "Notification.h"
 
 PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c)
 {
@@ -31,122 +32,23 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     defaultpalettePicker->setCallbackListener(EVENT_PALETTECOLORPICKER_PALETTELIST, this);
     colorPaletteTabs->tabs[1].wxs.addDrawable(defaultpalettePicker);
 
+    UIButton* buttonSavePalette = new UIButton();
+    buttonSavePalette->position = { 20, 60 };
+    buttonSavePalette->text = "Save palette";
+    buttonSavePalette->wxWidth = 120;
+    buttonSavePalette->wxHeight = 30;
+    buttonSavePalette->setCallbackListener(EVENT_PALETTECOLORPICKER_SAVEPALETTE, this);
+    colorPaletteTabs->tabs[1].wxs.addDrawable(buttonSavePalette);
+
+    UIButton* buttonLoadPalette = new UIButton();
+    buttonLoadPalette->position = { 150, 60 };
+    buttonLoadPalette->text = "Load palette";
+    buttonLoadPalette->wxWidth = 120;
+    buttonLoadPalette->wxHeight = 30;
+    buttonLoadPalette->setCallbackListener(EVENT_PALETTECOLORPICKER_LOADPALETTE, this);
+    colorPaletteTabs->tabs[1].wxs.addDrawable(buttonLoadPalette);
+
     updateForcedColorPaletteButtons();
-
-    /*colorTabs = new TabbedView({{"Visual", g_iconColorVisual},{"HSV", g_iconColorHSV},{"RGB", g_iconColorRGB}}, 90);
-    colorTabs->position = XY{ 0,5 };
-    colorModeTabs->tabs[0].wxs.addDrawable(colorTabs);
-
-    hueSlider = new UIHueSlider(this);
-    hueSlider->position = XY{ 0,10 };
-    colorTabs->tabs[0].wxs.addDrawable(hueSlider);
-
-    satValSlider = new UISVPicker(this);
-    satValSlider->position = XY{ 0,40 };
-    colorTabs->tabs[0].wxs.addDrawable(satValSlider);
-
-    sliderH = new UISlider();
-    sliderH->position = XY{ 30, 10 };
-    sliderH->wxWidth = 200;
-    sliderH->setCallbackListener(EVENT_COLORPICKER_SLIDERH, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderH);
-
-    UILabel* labelH = new UILabel();
-    UILabel* labelR = new UILabel();
-    labelR->text = "R";
-    labelH->text = "H";
-    labelH->position = labelR->position = XY{ 0, 20 };
-    colorTabs->tabs[1].wxs.addDrawable(labelH);
-    colorTabs->tabs[2].wxs.addDrawable(labelR);
-
-    UILabel* labelS = new UILabel();
-    UILabel* labelG = new UILabel();
-    labelG->text = "G";
-    labelS->text = "S";
-    labelS->position = labelG->position = XY{ 0, 70 };
-    colorTabs->tabs[1].wxs.addDrawable(labelS);
-    colorTabs->tabs[2].wxs.addDrawable(labelG);
-
-    UILabel* labelV = new UILabel();
-    UILabel* labelB = new UILabel();
-    labelB->text = "B";
-    labelV->text = "V";
-    labelV->position = labelB->position = XY{ 0, 120 };
-    colorTabs->tabs[1].wxs.addDrawable(labelV);
-    colorTabs->tabs[2].wxs.addDrawable(labelB);
-
-    txtR = new UITextField();
-    txtG = new UITextField();
-    txtB = new UITextField();
-    txtH = new UITextField();
-    txtS = new UITextField();
-    txtV = new UITextField();
-    txtR->position = txtH->position = XY{ 240, 15 };
-    txtR->textColor = { 0xff,0,0,0xff };
-    txtG->position = txtS->position = XY{ 240, 65 };
-    txtG->textColor = { 0,0xff,0,0xff };
-    txtB->position = txtV->position = XY{ 240, 115 };
-    txtB->textColor = { 0,0,0xff,0xff };
-    txtR->wxWidth = txtG->wxWidth = txtB->wxWidth = 60;
-    txtH->wxWidth = txtS->wxWidth = txtV->wxWidth = 120;
-    txtR->setCallbackListener(EVENT_COLORPICKER_TBOXR, this);
-    txtG->setCallbackListener(EVENT_COLORPICKER_TBOXG, this);
-    txtB->setCallbackListener(EVENT_COLORPICKER_TBOXB, this);
-    txtH->setCallbackListener(EVENT_COLORPICKER_TBOXH, this);
-    txtS->setCallbackListener(EVENT_COLORPICKER_TBOXS, this);
-    txtV->setCallbackListener(EVENT_COLORPICKER_TBOXV, this);
-    colorTabs->tabs[2].wxs.addDrawable(txtR);
-    colorTabs->tabs[2].wxs.addDrawable(txtG);
-    colorTabs->tabs[2].wxs.addDrawable(txtB);
-    colorTabs->tabs[1].wxs.addDrawable(txtH);
-    colorTabs->tabs[1].wxs.addDrawable(txtS);
-    colorTabs->tabs[1].wxs.addDrawable(txtV);
-
-    sliderS = new UIColorSlider();
-    sliderS->position = XY{ 30, 60 };
-    sliderS->wxWidth = 200;
-    sliderS->setCallbackListener(EVENT_COLORPICKER_SLIDERS, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderS);
-
-    sliderV = new UIColorSlider();
-    sliderV->position = XY{ 30, 110 };
-    sliderV->wxWidth = 200;
-    sliderV->setCallbackListener(EVENT_COLORPICKER_SLIDERV, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderV);
-
-    sliderR = new UIColorSlider();
-    sliderR->position = XY{ 30, 10 };
-    sliderR->wxWidth = 200;
-    sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
-    colorTabs->tabs[2].wxs.addDrawable(sliderR);
-
-    sliderG = new UIColorSlider();
-    sliderG->position = XY{ 30, 60 };
-    sliderG->wxWidth = 200;
-    sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
-    colorTabs->tabs[2].wxs.addDrawable(sliderG);
-
-    sliderB = new UIColorSlider();
-    sliderB->position = XY{ 30, 110 };
-    sliderB->wxWidth = 200;
-    sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
-    colorTabs->tabs[2].wxs.addDrawable(sliderB);
-
-    colorTextField = new UITextField();
-    colorTextField->isColorField = true;
-    colorTextField->position = XY{ 60, 350 };
-    colorTextField->wxWidth = 140;
-    colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
-    subWidgets.addDrawable(colorTextField);
-
-
-    blendModeButton = new UIButton();
-    blendModeButton->position = { 215, 350 };
-    blendModeButton->icon = g_iconBlendMode;
-    blendModeButton->wxWidth = 30;
-    blendModeButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEBLENDMODE, this);
-    blendModeButton->colorBGFocused = blendModeButton->colorBGUnfocused = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
-    subWidgets.addDrawable(blendModeButton);*/
 }
 
 void PalettizedEditorColorPicker::render(XY position)
@@ -194,10 +96,20 @@ void PalettizedEditorColorPicker::eventButtonPressed(int evt_id)
     else if (evt_id == EVENT_COLORPICKER_TOGGLEBLENDMODE) {
         toggleAlphaBlendMode();
     }
+    else if (evt_id == EVENT_PALETTECOLORPICKER_SAVEPALETTE) {
+        platformTrySaveOtherFile(this, { {".voidplt", "voidsprite palette"} }, "save palette", EVENT_PALETTECOLORPICKER_SAVEPALETTE);
+    }
+    else if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
+        platformTryLoadOtherFile(this, { {".voidplt", "voidsprite palette"} }, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
+    }
     else if (evt_id >= 200) {
         //uint32_t col = upcastCaller->palette[evt_id - 200];
         setPickedPaletteIndex(evt_id - 200);
     }
+}
+
+void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
+{
 }
 
 void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int index, std::string name)
@@ -205,6 +117,62 @@ void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int inde
     if (evt_id == EVENT_PALETTECOLORPICKER_PALETTELIST) {
 		upcastCaller->setPalette(g_palettes[name]);
 	}
+}
+
+void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
+{
+    if (evt_id == EVENT_PALETTECOLORPICKER_SAVEPALETTE) {
+        FILE* f = platformOpenFile(name, PlatformFileModeWB);
+        if (f != NULL) {
+            fwrite("VOIDPLT", 7, 1, f);
+            uint8_t fileversion = 1;
+            fwrite(&fileversion, 1, 1, f);
+			for (uint32_t col : upcastCaller->palette) {
+				fwrite(&col, 1, 4, f);
+			}
+			fclose(f);
+            g_addNotification(Notification("Success", "Palette file saved", 4000, NULL, COLOR_INFO));
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "Could not save palette file"));
+        }
+	}
+}
+
+void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int exporterIndex)
+{
+    if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
+        FILE* f = platformOpenFile(name, PlatformFileModeRB);
+        if (f != NULL) {
+            char header[7];
+            fread(header, 7, 1, f);
+            if (memcmp(header, "VOIDPLT", 7) == 0) {
+                uint8_t fileversion;
+                fread(&fileversion, 1, 1, f);
+                if (fileversion == 1) {
+                    std::vector<uint32_t> newPalette;
+                    while (!feof(f)) {
+                        uint32_t col;
+                        fread(&col, 1, 4, f);
+                        newPalette.push_back(col);
+                    }
+                    upcastCaller->setPalette(newPalette);
+                    updateForcedColorPaletteButtons();
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error", "Unsupported palette file version"));
+                }
+            }
+            else {
+                g_addNotification(ErrorNotification("Error", "Invalid palette file"));
+            }
+            fclose(f);
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "Could not open palette file"));
+        }
+    }
+	
 }
 
 void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()

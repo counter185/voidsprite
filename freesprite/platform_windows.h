@@ -189,16 +189,18 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
     }
 }
 
-void platformTryLoadOtherFile(EventCallbackListener* listener, std::string extension, std::string windowTitle) {
+void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
     ofna.hwndOwner = WINhWnd;
     std::wstring filterString = L"";
-    filterString += utf8StringToWstring(extension) + L" file";
-    filterString.push_back('\0');
-    filterString += L"*" + utf8StringToWstring(extension);
-    filterString.push_back('\0');
+    for (auto& ft : filetypes) {
+        filterString += utf8StringToWstring(ft.second) + L" (" + utf8StringToWstring(ft.first) + L")";
+        filterString.push_back('\0');
+        filterString += L"*" + utf8StringToWstring(ft.first);
+        filterString.push_back('\0');
+    }
     filterString.push_back('\0');
     ofna.lpstrFilter = filterString.c_str();
     ofna.lpstrCustomFilter = NULL;
@@ -212,17 +214,18 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::string exten
     std::wstring windowTitleW = L"voidsprite: " + utf8StringToWstring(windowTitle);
     ofna.lpstrTitle = windowTitleW.c_str();
 
-    std::wstring extensionW = utf8StringToWstring(extension);
+    std::wstring extensionW = utf8StringToWstring(filetypes[0].first);
     std::wstring extensionWtr = extensionW.substr(1);
     ofna.lpstrDefExt = extensionWtr.c_str();
 
     if (GetOpenFileNameW(&ofna)) {
         lastFilterIndex = ofna.nFilterIndex;
         std::wstring fileName = fileNameBuffer;
+        extensionW = utf8StringToWstring(filetypes[ofna.nFilterIndex - 1].first);
         if (fileName.size() < extensionW.size() || fileName.substr(fileName.size() - extensionW.size()) != extensionW) {
             fileName += extensionW;
         }
-        listener->eventFileOpen(EVENT_OTHERFILE_OPENFILE, fileName, ofna.nFilterIndex);
+        listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
         printf("windows error: %i\n", GetLastError());

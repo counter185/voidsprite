@@ -12,7 +12,10 @@ public:
 
     void render(XY position) override;
     void eventButtonPressed(int evt_id) override;
+    void eventButtonRightClicked(int evt_id) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
+    void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
+    void eventFileOpen(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
 
     void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true) override {}
     void updateLastColorButtons() override {}
