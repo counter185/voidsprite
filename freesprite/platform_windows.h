@@ -85,10 +85,14 @@ void platformTrySaveImageFile(EventCallbackListener* listener) {
     ofna.lpstrTitle = L"voidsprite: Save Image";
     ofna.lpstrDefExt = L"png";
     if (GetSaveFileNameW(&ofna)) {
+
         lastFilterIndex = ofna.nFilterIndex;
         std::wstring fileName = fileNameBuffer;
+        std::wstring fileNameLower = fileName;
+        std::transform(fileNameLower.begin(), fileNameLower.end(), fileNameLower.begin(), ::tolower);
+
         std::wstring extension = filterStrings[ofna.nFilterIndex - 1];
-        if (fileName.size() < extension.size() || fileName.substr(fileName.size() - extension.size()) != extension) {
+        if (fileNameLower.size() < extension.size() || fileNameLower.substr(fileNameLower.size() - extension.size()) != extension) {
             fileName += extension;
         }
         listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, fileName, ofna.nFilterIndex);
@@ -173,8 +177,11 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
     if (GetSaveFileNameW(&ofna)) {
         lastFilterIndex = ofna.nFilterIndex;
         std::wstring fileName = fileNameBuffer;
+        std::wstring fileNameLower = fileName;
+        std::transform(fileNameLower.begin(), fileNameLower.end(), fileNameLower.begin(), ::tolower);
+
         extensionW = utf8StringToWstring(filetypes[ofna.nFilterIndex-1].first);
-        if (fileName.size() < extensionW.size() || fileName.substr(fileName.size() - extensionW.size()) != extensionW) {
+        if (fileNameLower.size() < extensionW.size() || fileNameLower.substr(fileNameLower.size() - fileNameLower.size()) != extensionW) {
             fileName += extensionW;
         }
         listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
