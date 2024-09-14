@@ -131,12 +131,7 @@ void platformTryLoadImageFile(EventCallbackListener* listener) {
     ofna.lpstrTitle = L"voidsprite: Open Image";
     ofna.lpstrDefExt = L"png";
     if (GetOpenFileNameW(&ofna)) {
-        lastFilterIndex = ofna.nFilterIndex;
         std::wstring fileName = fileNameBuffer;
-        std::wstring extension = filterStrings[ofna.nFilterIndex - 1];
-        if (fileName.size() < extension.size() || fileName.substr(fileName.size() - extension.size()) != extension) {
-            fileName += extension;
-        }
         listener->eventFileOpen(EVENT_MAINEDITOR_SAVEFILE, fileName, ofna.nFilterIndex);
     }
     else {
@@ -219,12 +214,7 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     ofna.lpstrDefExt = extensionWtr.c_str();
 
     if (GetOpenFileNameW(&ofna)) {
-        lastFilterIndex = ofna.nFilterIndex;
         std::wstring fileName = fileNameBuffer;
-        extensionW = utf8StringToWstring(filetypes[ofna.nFilterIndex - 1].first);
-        if (fileName.size() < extensionW.size() || fileName.substr(fileName.size() - extensionW.size()) != extensionW) {
-            fileName += extensionW;
-        }
         listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
     }
     else {

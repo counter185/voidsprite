@@ -88,7 +88,7 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 		importerIndex -= g_fileSessionImportersNPaths.size();
 		Layer* nlayer = g_fileImportersNPaths[importerIndex].importFunction(name, 0);
 		if (nlayer != NULL) {
-			g_addScreen(new MainEditor(nlayer));
+			g_addScreen(!nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer));
 		}
 		else {
 			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
@@ -107,70 +107,12 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 
 void StartScreen::tryLoadFile(std::string path)
 {
-	PlatformNativePathString fPath;
-#if _WIDEPATHS
-	fPath = utf8StringToWstring(path);
-#else
-	fPath = path;
-#endif
-
-	for (FileSessionImportNPath importer : g_fileSessionImportersNPaths) {
-		if (stringEndsWithIgnoreCase(path, importer.extension) && importer.canImport(fPath)) {
-			MainEditor* session = importer.importFunction(fPath);
-			if (session != NULL) {
-				g_addScreen(session);
-				return;
-			}
-			else {
-				printf("%s: load failed\n", importer.name.c_str());
-			}
-		}
+	MainEditor* newSession = loadAnyIntoSession(path);
+	if (newSession != NULL) {
+		g_addScreen(newSession);
 	}
-	/*if (stringEndsWith(path, ".voidsn") || stringEndsWith(path, ".voidsnv1")) {
-		MainEditor* session = readVOIDSN(fPath);
-		if (session == NULL) {
-			printf("voidsession load failed");
-		}
-		else {
-			g_addScreen(session);
-		}
-	}*/
-	{
-
-		Layer* l = NULL;
-		for (FileImportNPath importer : g_fileImportersNPaths) {
-			if (stringEndsWithIgnoreCase(path, importer.extension) && importer.canImport(fPath)) {
-				l = importer.importFunction(fPath, 0);
-				if (l != NULL) {
-					break;
-				}
-				else {
-					printf("%s : load failed\n", importer.name.c_str());
-				}
-			}
-		}
-		if (l == NULL) {
-			for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
-				if (stringEndsWithIgnoreCase(path, importer.extension) && importer.canImport(path)) {
-					l = importer.importFunction(path, 0);
-					if (l != NULL) {
-						break;
-					}
-					else {
-						printf("%s : load failed\n", importer.name.c_str());
-					}
-				}
-			}
-		}
-
-		if (l != NULL) {
-			g_addScreen(l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l));
-		}
-		else {
-			//g_addPopup(new PopupMessageBox("", "Failed to load file."));
-			g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
-			printf("No importer for file available\n");
-		}
+	else {
+		g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
 	}
 }
 

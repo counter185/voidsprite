@@ -517,10 +517,17 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 	platformTrySaveOtherFile(this, namesAndExtensions, "save palettized image", EVENT_PALETTIZEDEDITOR_SAVEFILE);
 }
 
-void MainEditorPalettized::openInNormalRGBEditor()
+MainEditor* MainEditorPalettized::toRGBSession()
 {
 	Layer* l = flattenImageAndConvertToRGB();
 	MainEditor* newEditor = new MainEditor(l);
-	g_addScreen(newEditor);
+	return newEditor;
+}
+
+
+
+void MainEditorPalettized::openInNormalRGBEditor()
+{
+	g_addScreen(toRGBSession());
 }
 

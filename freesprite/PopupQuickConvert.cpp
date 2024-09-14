@@ -70,56 +70,75 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 
 		SDL_free(evt.drop.file);
 
-		if (exporterIndex >= g_fileExportersFlatNPaths.size()) {
-			int realExporterIndex = exporterIndex - g_fileExportersFlatNPaths.size();
-			FileExportMultiLayerNPath exporter = g_fileExportersMLNPaths[realExporterIndex];
+		MainEditor* session = loadAnyIntoSession(path);
+		if (session != NULL) {
+			if (exporterIndex >= g_fileExportersFlatNPaths.size()) {
+				int realExporterIndex = exporterIndex - g_fileExportersFlatNPaths.size();
+				FileExportMultiLayerNPath exporter = g_fileExportersMLNPaths[realExporterIndex];
 
-			MainEditor* session = loadSession(path);
-			if (session == NULL) {
-				Layer* l = loadFlat(path);
-				if (l != NULL) {
-					session = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
+				/*Layer* l;
+
+				if (session->isPalettized) {
+					if ((exporter.exportFormats & FORMAT_PALETTIZED) != 0) {
+						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
+						l = upcastSession->flattenImageWithoutConvertingToRGB();
+					}
+					else {
+						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
+						l = upcastSession->flattenImageAndConvertToRGB();
+					}
 				}
 				else {
-					g_addNotification(ErrorNotification("Error", "Failed to load file"));
-					return;
+					l = session->flattenImage();
+				}*/
+				if (session->isPalettized && ((exporter.exportFormats & FORMAT_PALETTIZED) == 0)) {
+					MainEditor* rgbConvEditor = ((MainEditorPalettized*)session)->toRGBSession();
+					delete session;
+					session = rgbConvEditor;
+				}
+
+				outPath += convertStringOnWin32(exporter.extension);
+
+				if (exporter.exportFunction(outPath, session)) {
+					g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
+				}
+				else {
+					g_addNotification(ErrorNotification("Error", "Failed to export file"));
 				}
 			}
-
-			outPath += convertStringOnWin32(exporter.extension);
-
-			if (exporter.exportFunction(outPath, session)) {
-				g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
-			}
 			else {
-				g_addNotification(ErrorNotification("Error", "Failed to export file"));
-			}
+				FileExportFlatNPath exporter = g_fileExportersFlatNPaths[exporterIndex];
 
+				Layer* l = NULL;
+
+				if (session->isPalettized) {
+					if ((exporter.exportFormats & FORMAT_PALETTIZED) != 0) {
+						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
+						l = upcastSession->flattenImageWithoutConvertingToRGB();
+					}
+					else {
+						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
+						l = upcastSession->flattenImageAndConvertToRGB();
+					}
+				}
+				else {
+					l = session->flattenImage();
+				}
+
+				outPath += convertStringOnWin32(exporter.extension);
+
+				if (exporter.exportFunction(outPath, l)) {
+					g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
+				}
+				else {
+					g_addNotification(ErrorNotification("Error", "Failed to export file"));
+				}
+				delete l;
+			}
 			delete session;
 		}
 		else {
-			FileExportFlatNPath exporter = g_fileExportersFlatNPaths[exporterIndex];
-
-			Layer* l = loadFlat(path);
-			if (l == NULL) {
-				MainEditor* session = loadSession(path);
-				if (session != NULL) {
-					l = session->flattenImage();
-					delete session;
-				} else {
-					g_addNotification(ErrorNotification("Error", "Failed to load file"));
-					return;
-				}
-			}
-
-			outPath += convertStringOnWin32(exporter.extension);
-
-			if (exporter.exportFunction(outPath, l)) {
-				g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
-			}
-			else {
-				g_addNotification(ErrorNotification("Error", "Failed to export file"));
-			}
+			g_addNotification(ErrorNotification("Error", "Failed to load file"));
 		}
     }
 }

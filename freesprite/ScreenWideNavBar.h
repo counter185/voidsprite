@@ -51,7 +51,7 @@ public:
 	}
 	void render(XY position) override {
 		SDL_Rect r = SDL_Rect{ 0,0,g_windowW, wxHeight };
-		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, focused ? 0xa0 : 0x30);
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, focused ? 0xa0 : 0x90);
 		SDL_RenderFillRect(g_rd, &r);
 
 		if (focused) {

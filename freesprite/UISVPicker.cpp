@@ -24,7 +24,7 @@ void UISVPicker::render(XY pos)
 	SDL_Color vtx2 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 1.0, 1.0 }));
 	SDL_Color vtx3 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 0.0, 0.0 }));
 	SDL_Color vtx4 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 1.0, 0.0 }));
-	vtx1.a = vtx2.a = vtx3.a = vtx4.a = parent->focused ? 0xff : 0x30;
+	vtx1.a = vtx2.a = vtx3.a = vtx4.a = 0xff;// parent->focused ? 0xff : 0x30;
 
 	SDL_Vertex SVpicker[4];
 	SVpicker[0].color = (vtx1);

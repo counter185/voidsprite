@@ -776,119 +776,122 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
 Layer* readPNG(PlatformNativePathString path, uint64_t seek)
 {
     FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    png_infop info = png_create_info_struct(png);
-    png_init_io(png, pngfile);
-    png_read_info(png, info);
+    if (pngfile != NULL) {
+        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_infop info = png_create_info_struct(png);
+        png_init_io(png, pngfile);
+        png_read_info(png, info);
 
-    uint32_t width = png_get_image_width(png, info);
-    uint32_t height = png_get_image_height(png, info);
-    png_byte color_type = png_get_color_type(png, info);
-    png_byte bit_depth = png_get_bit_depth(png, info);
+        uint32_t width = png_get_image_width(png, info);
+        uint32_t height = png_get_image_height(png, info);
+        png_byte color_type = png_get_color_type(png, info);
+        png_byte bit_depth = png_get_bit_depth(png, info);
 
-    Layer* ret;
+        Layer* ret;
 
-    if (color_type == PNG_COLOR_TYPE_PALETTE) {
-        LayerPalettized* ret2 = new LayerPalettized(width, height);
-        ret2->name = "PNG Image";
-        png_colorp palette;
-        int num_palette;
-        png_get_PLTE(png, info, &palette, &num_palette);
+        if (color_type == PNG_COLOR_TYPE_PALETTE) {
+            LayerPalettized* ret2 = new LayerPalettized(width, height);
+            ret2->name = "PNG Image";
+            png_colorp palette;
+            int num_palette;
+            png_get_PLTE(png, info, &palette, &num_palette);
 
-        for (int x = 0; x < num_palette; x++) {
-            ret2->palette.push_back(0xFF000000 | (palette[x].red << 16) | (palette[x].green << 8) | palette[x].blue);
-		}
-
-        if (png_get_valid(png, info, PNG_INFO_tRNS)) {
-            png_bytep trns;
-            int num_trns;
-            png_color_16p trns16p;
-            png_get_tRNS(png, info, &trns, &num_trns, &trns16p);
-
-            for (int x = 0; x < num_trns; x++) {
-                ret2->palette[x] = (ret2->palette[x] & 0x00FFFFFF) | (trns[x] << 24);
-			}
-        }
-
-        png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
-			rows[y] = new png_byte[png_get_rowbytes(png, info)];
-		}
-        png_read_image(png, rows);
-
-        uint32_t* pxData = (uint32_t*)ret2->pixelData;
-        for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				pxData[y * width + x] = rows[y][x];
-			}
-		}
-        for (int y = 0; y < height; y++) {
-            delete[] rows[y];
-        }
-        delete[] rows;
-        ret = ret2;
-    }
-    else {
-        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-            png_set_expand_gray_1_2_4_to_8(png);
-        if (png_get_valid(png, info, PNG_INFO_tRNS))
-            png_set_tRNS_to_alpha(png);
-        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY)
-            png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-            png_set_gray_to_rgb(png);
-
-        png_read_update_info(png, info);
-
-        int numchannels = png_get_channels(png, info);
-        png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
-            rows[y] = new png_byte[png_get_rowbytes(png, info)];
-        }
-        png_read_image(png, rows);
-
-        ret = new Layer(width, height);
-        ret->name = "PNG Image";
-
-        int imagePointer = 0;
-        for (uint32_t y = 0; y < height; y++) {
-            if (numchannels == 4) {
-                memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
+            for (int x = 0; x < num_palette; x++) {
+                ret2->palette.push_back(0xFF000000 | (palette[x].red << 16) | (palette[x].green << 8) | palette[x].blue);
             }
-            else if (numchannels == 3) {
-                int currentRowPointer = 0;
-                for (uint32_t x = 0; x < width; x++) {
-                    ret->pixelData[imagePointer++] = 0xff;
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+
+            if (png_get_valid(png, info, PNG_INFO_tRNS)) {
+                png_bytep trns;
+                int num_trns;
+                png_color_16p trns16p;
+                png_get_tRNS(png, info, &trns, &num_trns, &trns16p);
+
+                for (int x = 0; x < num_trns; x++) {
+                    ret2->palette[x] = (ret2->palette[x] & 0x00FFFFFF) | (trns[x] << 24);
                 }
             }
-            else {
-                printf("WHAT\n");
-                delete ret;
-                png_destroy_read_struct(&png, &info, NULL);
-                return NULL;
+
+            png_bytepp rows = new png_bytep[height];
+            for (int y = 0; y < height; y++) {
+                rows[y] = new png_byte[png_get_rowbytes(png, info)];
             }
-        }
+            png_read_image(png, rows);
 
-        if (numchannels == 4) {
-            SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
-            memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
-            SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
-            SDL_FreeSurface(convSrf);
+            uint32_t* pxData = (uint32_t*)ret2->pixelData;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    pxData[y * width + x] = rows[y][x];
+                }
+            }
+            for (int y = 0; y < height; y++) {
+                delete[] rows[y];
+            }
+            delete[] rows;
+            ret = ret2;
         }
+        else {
+            if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+                png_set_expand_gray_1_2_4_to_8(png);
+            if (png_get_valid(png, info, PNG_INFO_tRNS))
+                png_set_tRNS_to_alpha(png);
+            if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY)
+                png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+            if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+                png_set_gray_to_rgb(png);
 
-        for (uint32_t y = 0; y < height; y++) {
-            delete[] rows[y];
+            png_read_update_info(png, info);
+
+            int numchannels = png_get_channels(png, info);
+            png_bytepp rows = new png_bytep[height];
+            for (int y = 0; y < height; y++) {
+                rows[y] = new png_byte[png_get_rowbytes(png, info)];
+            }
+            png_read_image(png, rows);
+
+            ret = new Layer(width, height);
+            ret->name = "PNG Image";
+
+            int imagePointer = 0;
+            for (uint32_t y = 0; y < height; y++) {
+                if (numchannels == 4) {
+                    memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
+                }
+                else if (numchannels == 3) {
+                    int currentRowPointer = 0;
+                    for (uint32_t x = 0; x < width; x++) {
+                        ret->pixelData[imagePointer++] = 0xff;
+                        ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                        ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                        ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    }
+                }
+                else {
+                    printf("WHAT\n");
+                    delete ret;
+                    png_destroy_read_struct(&png, &info, NULL);
+                    return NULL;
+                }
+            }
+
+            if (numchannels == 4) {
+                SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
+                memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
+                SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
+                SDL_FreeSurface(convSrf);
+            }
+
+            for (uint32_t y = 0; y < height; y++) {
+                delete[] rows[y];
+            }
+            delete[] rows;
         }
-        delete[] rows;
+        png_destroy_read_struct(&png, &info, NULL);
+
+        fclose(pngfile);
+
+        return ret;
     }
-    png_destroy_read_struct(&png, &info, NULL);
-
-    fclose(pngfile);
-
-    return ret;
+    return NULL;
 }
 
 Layer* readTGA(std::string path, uint64_t seek) {
@@ -1866,6 +1869,65 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
         fclose(infile);
     }
     return NULL;
+}
+
+MainEditor* loadAnyIntoSession(std::string utf8path)
+{
+    PlatformNativePathString fPath;
+#if _WIDEPATHS
+    fPath = utf8StringToWstring(utf8path);
+#else
+    fPath = path;
+#endif
+
+    for (FileSessionImportNPath importer : g_fileSessionImportersNPaths) {
+        if (stringEndsWithIgnoreCase(utf8path, importer.extension) && importer.canImport(fPath)) {
+            MainEditor* session = importer.importFunction(fPath);
+            if (session != NULL) {
+                return session;
+            }
+            else {
+                printf("%s: load failed\n", importer.name.c_str());
+            }
+        }
+    }
+    {
+
+        Layer* l = NULL;
+        for (FileImportNPath importer : g_fileImportersNPaths) {
+            if (stringEndsWithIgnoreCase(utf8path, importer.extension) && importer.canImport(fPath)) {
+                l = importer.importFunction(fPath, 0);
+                if (l != NULL) {
+                    break;
+                }
+                else {
+                    printf("%s : load failed\n", importer.name.c_str());
+                }
+            }
+        }
+        if (l == NULL) {
+            for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
+                if (stringEndsWithIgnoreCase(utf8path, importer.extension) && importer.canImport(utf8path)) {
+                    l = importer.importFunction(utf8path, 0);
+                    if (l != NULL) {
+                        break;
+                    }
+                    else {
+                        printf("%s : load failed\n", importer.name.c_str());
+                    }
+                }
+            }
+        }
+
+        if (l != NULL) {
+            return l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
+        }
+        else {
+            //g_addPopup(new PopupMessageBox("", "Failed to load file."));
+            g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
+            printf("No importer for file available\n");
+        }
+    }
 }
 
 bool writePNG(PlatformNativePathString path, Layer* data)

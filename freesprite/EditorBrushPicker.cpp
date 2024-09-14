@@ -15,8 +15,8 @@ void EditorBrushPicker::render(XY position)
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
     //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     //SDL_RenderFillRect(g_rd, &r);
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0x80 : 0x30 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0x80 : 0x30 };
+    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
+    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
     renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
     if (focused) {
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);

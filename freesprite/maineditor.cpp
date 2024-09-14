@@ -208,7 +208,7 @@ void MainEditor::render() {
 
 	
 
-	if (wxsManager.anyFocused()) {
+	if (wxsManager.anyFocused() && navbar->focused) {
 		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
 		SDL_RenderFillRect(g_rd, NULL);
 	}

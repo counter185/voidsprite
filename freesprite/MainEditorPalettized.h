@@ -35,6 +35,7 @@ public:
 
     void trySavePalettizedImage();
     void trySaveAsPalettizedImage();
+    MainEditor* toRGBSession();
     void openInNormalRGBEditor();
 };
 

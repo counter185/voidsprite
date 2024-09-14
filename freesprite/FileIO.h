@@ -39,6 +39,8 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
+MainEditor* loadAnyIntoSession(std::string utf8path);
+
 bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
