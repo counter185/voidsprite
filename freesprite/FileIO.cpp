@@ -122,9 +122,9 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
     return astcErrors;
 }
 
-Layer* De4BPPBitplane(int width, int height, uint8_t* input)
+LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
 {
-    Layer* ret = new Layer(width, height);
+    LayerPalettized* ret = new LayerPalettized(width, height);
     uint8_t* colorTable = (uint8_t*)malloc(width * height);
     memset(colorTable, 0, width * height);
     uint64_t colorTablePointer = 0;
@@ -159,7 +159,8 @@ Layer* De4BPPBitplane(int width, int height, uint8_t* input)
 
     uint32_t* pxd = (uint32_t*)ret->pixelData;
     for (uint64_t i = 0; i < width * height; i++) {
-        pxd[i] = PackRGBAtoARGB(colorTable[i], colorTable[i], colorTable[i], 255);
+        //pxd[i] = PackRGBAtoARGB(colorTable[i], colorTable[i], colorTable[i], 255);
+        pxd[i] = colorTable[i];
 	}
 
     free(colorTable);
@@ -1520,24 +1521,9 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
             //there is no way to differentiate an srm.....
             uint8_t* fullDecompressedData = DecompressMarioPaintSRM(f);
 
-            Layer* l = De4BPPBitplane(256, 174, fullDecompressedData + 0x6000);
+            LayerPalettized* l = De4BPPBitplane(256, 174, fullDecompressedData + 0x6000);
             l->name = "Mario Paint Layer";
-            l->replaceColor(0xFF000000, 0x00000000); //transparent
-            l->replaceColor(0xff010101, 0xFFFF0000); //red
-            l->replaceColor(0xff020202, 0xffFF8400); //orange
-            l->replaceColor(0xff030303, 0xffFFFF00); //yellow
-            l->replaceColor(0xff040404, 0xff00FF00); //light green
-            l->replaceColor(0xff050505, 0xff00842f); //dark green
-            l->replaceColor(0xff060606, 0xff00FFFF); //cyan
-            l->replaceColor(0xff070707, 0xff0000FF); //blue
-            l->replaceColor(0xff080808, 0xffC62F10); //maroon
-            l->replaceColor(0xff090909, 0xff845700); //brown
-            l->replaceColor(0xff0A0A0A, 0xffFFC684); //pink
-            l->replaceColor(0xff0B0B0B, 0xffC600C6); //purple
-            l->replaceColor(0xff0C0C0C, 0xffFFFFFF); //white
-            l->replaceColor(0xff0D0D0D, 0xff000000); //black
-            l->replaceColor(0xff0E0E0E, 0xff848484); //dark gray
-            l->replaceColor(0xff0F0F0F, 0xffC6C6C6); //light gray
+            l->palette = g_palettes["Mario Paint"];
 
             free(fullDecompressedData);
             fclose(f);

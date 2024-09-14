@@ -14,7 +14,7 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile);
 
 int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 8, int blockHeight = 8);
 
-Layer* De4BPPBitplane(int width, int height, uint8_t* input);
+LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 

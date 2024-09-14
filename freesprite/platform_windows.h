@@ -181,7 +181,7 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
         std::transform(fileNameLower.begin(), fileNameLower.end(), fileNameLower.begin(), ::tolower);
 
         extensionW = utf8StringToWstring(filetypes[ofna.nFilterIndex-1].first);
-        if (fileNameLower.size() < extensionW.size() || fileNameLower.substr(fileNameLower.size() - fileNameLower.size()) != extensionW) {
+        if (fileNameLower.size() < extensionW.size() || fileNameLower.substr(fileNameLower.size() - extensionW.size()) != extensionW) {
             fileName += extensionW;
         }
         listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
