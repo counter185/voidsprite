@@ -41,6 +41,6 @@ Free C++ sprite editor
 
 ## Licenses
 
-The license for voidsprite is currently to be determined.
+voidsprite is licensed under GPLv2.
 
 Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory
