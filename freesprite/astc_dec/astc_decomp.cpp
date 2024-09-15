@@ -33,7 +33,6 @@
  * \brief ASTC Utilities.
  *//*--------------------------------------------------------------------*/
 #include "astc_decomp.h"
-#include <cstdint>
 #include <assert.h>
 #include <algorithm>
 
