@@ -21,6 +21,19 @@ void platformPostInit() {}
 void platformTrySaveImageFile(EventCallbackListener* caller) {}
 void platformTryLoadImageFile(EventCallbackListener* caller) {}
 
+int findIndexByExtension(std::vector<std::pair<std::string, std::string>>& filetypes, std::string filename){
+    std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+    for (int x = 0; x < filetypes.size(); x++) {
+        auto& p = filetypes[x];
+        if (filename.size() > p.first.size()) {
+            if (filename.substr(filename.size()-p.first.size()) == p.first) {
+                return x+1;
+            }
+        }
+    }
+    return -1;
+}
+
 void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id) 
 {
     std::vector<std::string> fileTypeStrings;
@@ -32,7 +45,7 @@ void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pa
     std::string filename = result.result();
     if (filename.length() > 0) {
         //uh oh we need to manually find the filter index
-        //listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
+        caller->eventFileSaved(evt_id, filename, findIndexByExtension(filetypes, filename));
     }
 }
 
@@ -47,7 +60,7 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     std::vector<std::string> filenames = result.result();
     if (filenames.size() > 0) {
         //uh oh we need to manually find the filter index again
-        //listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
+        listener->eventFileOpen(evt_id, filenames[0], findIndexByExtension(filetypes, filenames[0]));
     }
 }
 

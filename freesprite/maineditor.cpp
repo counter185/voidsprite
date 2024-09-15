@@ -979,10 +979,10 @@ void MainEditor::trySaveAsImage()
 	lastWasSaveAs = true;
 	std::vector<std::pair<std::string, std::string>> formats;
 	for (FileExportMultiLayerNPath f : g_fileExportersMLNPaths) {
-		formats.push_back({ f.name, f.extension });
+		formats.push_back({ f.extension, f.name });
 	}
 	for (FileExportFlatNPath f : g_fileExportersFlatNPaths) {
-		formats.push_back({ f.name, f.extension });
+		formats.push_back({ f.extension, f.name });
 	}
 	platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
 }
