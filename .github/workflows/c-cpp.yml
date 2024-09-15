@@ -21,6 +21,10 @@ jobs:
       run: make
       working-directory: gcc-build
 
+    - name: add licenses
+      run: cp -r ../OPEN_SOURCE_LICENSES ./build/
+      working-directory: gcc-build
+
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
