@@ -5,7 +5,9 @@
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "LayerPalettized.h"
+extern "C" {
 #include "libpng/png.h"
+}
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
@@ -1909,11 +1911,11 @@ MainEditor* loadAnyIntoSession(std::string utf8path)
             return l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
         }
         else {
-            //g_addPopup(new PopupMessageBox("", "Failed to load file."));
             g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
             printf("No importer for file available\n");
         }
     }
+    return NULL;
 }
 
 bool writePNG(PlatformNativePathString path, Layer* data)

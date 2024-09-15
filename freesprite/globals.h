@@ -28,7 +28,9 @@
 #include <SDL_image.h>
 #endif
 
+extern "C" {
 #include <zlib.h>
+}
 
 #ifdef __GNUC__
 #define sprintf_s snprintf

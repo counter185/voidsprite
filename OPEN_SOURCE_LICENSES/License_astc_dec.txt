@@ -1,3 +1,11 @@
+** voidsprite includes the source code of astc_dec in the VS project
+and makes modifications to work with the G++ compiler.
+
+Source code location:
+freesprite/astc_dec
+
+--------------------------
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
