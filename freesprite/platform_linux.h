@@ -9,19 +9,17 @@
 
 //Good fucking luck i can't be bothered with this shit
 
-void platformPreInit() {
+void platformPreInit() {}
+void platformInit() {}
+void platformPostInit() {}
 
-}
-void platformInit() {
-	
-}
-void platformPostInit() {
-	
-}
+void platformTrySaveImageFile(EventCallbackListener* caller) {}
+void platformTryLoadImageFile(EventCallbackListener* caller) {}
+void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id) {}
+void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {}
+void platformOpenFileLocation(PlatformNativePathString path) {}
 
-void platformTrySaveImageFile(EventCallbackListener* listener) {
-    
-}
+Layer* platformGetImageFromClipboard() { return NULL; }
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode) {
     FILE* ret = fopen(path.c_str(), mode.c_str());

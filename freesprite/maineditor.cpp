@@ -70,13 +70,12 @@ MainEditor::MainEditor(std::vector<Layer*> layers)
 }
 
 MainEditor::~MainEditor() {
-	//printf("hello from destructor\n");
 	wxsManager.freeAllDrawables();
+	discardUndoStack();
+	discardRedoStack();
 	for (Layer*& imgLayer : layers) {
 		delete imgLayer;
 	}
-	discardUndoStack();
-	discardRedoStack();
 }
 
 void MainEditor::render() {

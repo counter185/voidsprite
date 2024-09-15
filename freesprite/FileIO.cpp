@@ -1,3 +1,10 @@
+//i know how this looks but do not touch this or else linux build will break again
+#if _WIN32
+#include "libpng/png.h"
+#else
+#include <libpng/png.h>
+#endif
+
 #include "globals.h"
 #include "Notification.h"
 #include "EditorLayerPicker.h"
@@ -5,9 +12,6 @@
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "LayerPalettized.h"
-extern "C" {
-#include "libpng/png.h"
-}
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
@@ -1865,7 +1869,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path)
 #if _WIDEPATHS
     fPath = utf8StringToWstring(utf8path);
 #else
-    fPath = path;
+    fPath = utf8path;
 #endif
 
     for (FileSessionImportNPath importer : g_fileSessionImportersNPaths) {
@@ -2201,11 +2205,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "mergedimage.png"); 
         {
             Layer* flat = editor->flattenImage();
-#if _WIDEPATHS
-            if (writePNG(L"temp.bin", flat)) {
-#else
-            if (writePNG("temp.bin", flat)) {
-#endif
+            if (writePNG(convertStringOnWin32("temp.bin"), flat)) {
                 zip_entry_fwrite(zip, "temp.bin");
             }
             else {
@@ -2220,11 +2220,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
             Layer* flat = editor->flattenImage();
             Layer* flatScaled = flat->copyScaled(XY{255,255});
             delete flat;
-#if _WIDEPATHS
-            if (writePNG(L"temp.bin", flatScaled)) {
-#else
-            if (writePNG("temp.bin", flatScaled)) {
-#endif
+            if (writePNG(convertStringOnWin32("temp.bin"), flatScaled)) {
                 zip_entry_fwrite(zip, "temp.bin");
             }
             else {
@@ -2236,11 +2232,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
-#if _WIDEPATHS
-            if (writePNG(L"temp.bin", *l)) {
-#else
-            if (writePNG("temp.bin", *l)) {
-#endif
+            if (writePNG(convertStringOnWin32("temp.bin"), *l)) {
                 std::string fname = std::format("data/layer{}.png", i++);
                 zip_entry_open(zip, fname.c_str());
                 zip_entry_fwrite(zip, "temp.bin");
@@ -2561,13 +2553,9 @@ bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
 
     if (outfile != NULL) {
-#if _WIDEPATHS
-        if (writePNG(L"temp.bin", data)) {
-#else
-        if (writePNG("temp.bin", data)) {
-#endif
+        if (writePNG(convertStringOnWin32("temp.bin"), data)) {
             //open temp.bin file, convert to base64, write to outfile
-            FILE* infile = platformOpenFile(L"temp.bin", PlatformFileModeRB);
+            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
             if (infile != NULL) {
                 fseek(infile, 0, SEEK_END);
                 uint64_t fileLength = ftell(infile);
