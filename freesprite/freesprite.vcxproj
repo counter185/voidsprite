@@ -274,10 +274,12 @@
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
+    <ClInclude Include="platform_linux.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
+    <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="ToolRectFlip.h" />
     <ClInclude Include="ToolRectRotate.h" />
     <ClInclude Include="ToolRectSwap.h" />

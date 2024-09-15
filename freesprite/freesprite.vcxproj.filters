@@ -91,6 +91,9 @@
     <Filter Include="Header files\external\base64">
       <UniqueIdentifier>{f4ed1a57-73df-421a-b1da-6fe92097d081}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\portable-file-dialogs">
+      <UniqueIdentifier>{9359d52d-8b10-44d7-ae12-4fcc62fe501d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -688,6 +691,12 @@
     </ClInclude>
     <ClInclude Include="PalettizedEditorLayerPicker.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h">
+      <Filter>Header files\external\portable-file-dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_linux.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

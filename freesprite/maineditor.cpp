@@ -977,7 +977,14 @@ void MainEditor::trySaveImage()
 void MainEditor::trySaveAsImage()
 {
 	lastWasSaveAs = true;
-	platformTrySaveImageFile(this);
+	std::vector<std::pair<std::string, std::string>> formats;
+	for (FileExportMultiLayerNPath f : g_fileExportersMLNPaths) {
+		formats.push_back({ f.name, f.extension });
+	}
+	for (FileExportFlatNPath f : g_fileExportersFlatNPaths) {
+		formats.push_back({ f.name, f.extension });
+	}
+	platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
 }
 
 void MainEditor::recenterCanvas()

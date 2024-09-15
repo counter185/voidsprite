@@ -30,7 +30,7 @@ void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pa
     }
     auto result = pfd::save_file("voidsprite: " + windowTitle, pfd::path::home(), fileTypeStrings, true);
     std::string filename = result.result();
-    if (result.length() > 0) {
+    if (filename.length() > 0) {
         //uh oh we need to manually find the filter index
         //listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
     }
@@ -45,7 +45,7 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     }
     auto result = pfd::open_file("voidsprite: " + windowTitle, pfd::path::home(), fileTypeStrings, true);
     std::vector<std::string> filenames = result.result();
-    if (result.size() > 0) {
+    if (filenames.size() > 0) {
         //uh oh we need to manually find the filter index again
         //listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
     }

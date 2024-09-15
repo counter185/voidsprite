@@ -82,7 +82,7 @@ void StartScreen::takeInput(SDL_Event evt)
 }
 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
-	wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
+	//wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
 	importerIndex--;
 	if (importerIndex >= g_fileSessionImportersNPaths.size()) {
 		importerIndex -= g_fileSessionImportersNPaths.size();
@@ -103,6 +103,19 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
 		}
 	}
+}
+
+void StartScreen::openImageLoadDialog()
+{
+	std::vector<std::pair<std::string, std::string>> filetypes;
+	for (FileSessionImportNPath f : g_fileSessionImportersNPaths) {
+		filetypes.push_back({ f.extension, f.name });
+	}
+	for (FileImportNPath f : g_fileImportersNPaths) {
+		filetypes.push_back({ f.extension, f.name });
+	}
+
+	platformTryLoadOtherFile(this, filetypes, "open image", 0);
 }
 
 void StartScreen::tryLoadFile(std::string path)

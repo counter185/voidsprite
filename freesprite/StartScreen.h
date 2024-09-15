@@ -160,7 +160,7 @@ public:
 					{
 						{SDLK_o, { "Open",
 								[](StartScreen* screen) {
-									platformTryLoadImageFile(screen);
+									screen->openImageLoadDialog();
 								}
 							}
 						},
@@ -317,6 +317,7 @@ public:
 	}
 	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
+	void openImageLoadDialog();
 	void tryLoadFile(std::string path);
 	void tryOpenImageFromClipboard();
 };
