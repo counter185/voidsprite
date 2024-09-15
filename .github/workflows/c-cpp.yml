@@ -13,6 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: install devlibs
+      run: sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev zlib1g-dev libpng-dev
     
     - name: make
       run: make
