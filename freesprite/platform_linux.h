@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EventCallbackListener.h"
+#include "Notification.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
 
 //I gave up on trying to make this work
@@ -45,7 +46,13 @@ void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pa
     std::string filename = result.result();
     if (filename.length() > 0) {
         //uh oh we need to manually find the filter index
-        caller->eventFileSaved(evt_id, filename, findIndexByExtension(filetypes, filename));
+        int index = findIndexByExtension(filetypes, filename);
+        if (index != -1) {
+            caller->eventFileSaved(evt_id, filename, index);
+        }
+        else {
+            g_addNotification(ErrorNotification("Linux error", "Please add the extension to the file name"));
+        }
     }
 }
 
@@ -60,7 +67,13 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     std::vector<std::string> filenames = result.result();
     if (filenames.size() > 0) {
         //uh oh we need to manually find the filter index again
-        listener->eventFileOpen(evt_id, filenames[0], findIndexByExtension(filetypes, filenames[0]));
+        int index = findIndexByExtension(filetypes, filenames[0]);
+        if (index != -1) {
+            listener->eventFileOpen(evt_id, filenames[0], index);
+        }
+        else {
+            g_addNotification(ErrorNotification("Linux error", "File type could not be found"));
+        }
     }
 }
 
