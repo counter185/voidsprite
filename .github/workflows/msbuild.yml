@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: MSBuild
+name: Build (win64 and linux64)
 
 on:
   push:
@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-windows64:
     runs-on: windows-latest
 
     steps:
@@ -61,3 +61,31 @@ jobs:
         name: voidsprite-build
         path: |
           x64/Release
+          
+  build-linux64:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install g++13
+      run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -y && sudo apt-get install g++-13
+
+    - name: install devlibs
+      run: sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev zlib1g-dev libpng-dev
+    
+    - name: make
+      run: make
+      working-directory: gcc-build
+
+    - name: add licenses
+      run: cp -r ../OPEN_SOURCE_LICENSES ./build/
+      working-directory: gcc-build
+
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: voidsprite-build-linux
+        path: |
+          gcc-build/build

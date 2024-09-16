@@ -186,6 +186,7 @@ inline void g_setupIO() {
 	}
 }
 
+//todo: do the same to importers at some point
 inline std::vector<FileSessionImportNPath> g_fileSessionImportersNPaths = {
 	{
 		"voidsprite Session", ".voidsn", &readVOIDSN
