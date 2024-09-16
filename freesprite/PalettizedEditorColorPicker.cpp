@@ -4,6 +4,7 @@
 #include "Notification.h"
 #include "PopupPickColor.h"
 #include "UIColorInputField.h"
+#include "FileIO.h"
 
 PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c)
 {
@@ -21,6 +22,11 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     eraserButton->wxWidth = 30;
     eraserButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEERASER, this);
     subWidgets.addDrawable(eraserButton);
+
+    pickedColorLabel = new UILabel();
+    pickedColorLabel->position = { 60, 350 };
+    pickedColorLabel->text = "";
+    subWidgets.addDrawable(pickedColorLabel);
 
     std::vector<std::string> palettes;
     for (auto& pal : g_palettes) {
@@ -86,6 +92,9 @@ void PalettizedEditorColorPicker::render(XY position)
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 
+    pickedColorLabel->text = std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow);
+    pickedColorLabel->color = {valCol.r, valCol.g, valCol.b, 0xff};
+
     g_fnt->RenderString("COLOR PICKER", position.x + 5, position.y + 1);
 
     subWidgets.renderAll(position);
@@ -103,7 +112,11 @@ void PalettizedEditorColorPicker::eventButtonPressed(int evt_id)
         platformTrySaveOtherFile(this, { {".voidplt", "voidsprite palette"} }, "save palette", EVENT_PALETTECOLORPICKER_SAVEPALETTE);
     }
     else if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
-        platformTryLoadOtherFile(this, { {".voidplt", "voidsprite palette"} }, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
+        std::vector<std::pair<std::string, std::string>> filetypes;
+        for (auto& importer : g_paletteImporters) {
+			filetypes.push_back({ importer->extension(), importer->name()});
+		}
+        platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
     }
     else if (evt_id >= 200) {
         //uint32_t col = upcastCaller->palette[evt_id - 200];
@@ -153,43 +166,20 @@ void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathS
 	}
 }
 
-void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int exporterIndex)
+void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
 {
     if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
-        FILE* f = platformOpenFile(name, PlatformFileModeRB);
-        if (f != NULL) {
-            char header[7];
-            fread(header, 7, 1, f);
-            if (memcmp(header, "VOIDPLT", 7) == 0) {
-                uint8_t fileversion;
-                fread(&fileversion, 1, 1, f);
-                if (fileversion == 1) {
-                    std::vector<uint32_t> newPalette;
-                    uint32_t count;
-                    fread(&count, 1, 4, f);
-                    for (int x = 0; x < count; x++) {
-                        uint32_t col;
-                        fread(&col, 1, 4, f);
-                        newPalette.push_back(col);
-                    }
-                    upcastCaller->setPalette(newPalette);
-                    updateForcedColorPaletteButtons();
-                    g_addNotification(Notification("Success", "Loaded palette file", 4000, NULL, COLOR_INFO));
-                }
-                else {
-                    g_addNotification(ErrorNotification("Error", "Unsupported palette file version"));
-                }
-            }
-            else {
-                g_addNotification(ErrorNotification("Error", "Invalid palette file"));
-            }
-            fclose(f);
-        }
+        importerIndex--;
+        auto result = g_paletteImporters[importerIndex]->importPalette(name);
+        if (result.first) {
+			upcastCaller->setPalette(result.second);
+            updateForcedColorPaletteButtons();
+			g_addNotification(Notification("Success", "Palette file loaded", 4000, NULL, COLOR_INFO));
+		}
         else {
-            g_addNotification(ErrorNotification("Error", "Could not open palette file"));
+            g_addNotification(ErrorNotification("Error", "Could not load palette file"));
         }
     }
-	
 }
 
 void PalettizedEditorColorPicker::eventColorSet(int evt_id, uint32_t color)

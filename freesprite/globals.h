@@ -17,6 +17,7 @@
 #include <functional>
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 
 #ifdef __GNUC__
 #include <SDL2/SDL.h>

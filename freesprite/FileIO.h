@@ -36,6 +36,7 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSPK(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readXComSCR(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
@@ -54,6 +55,9 @@ bool writeCHeader(PlatformNativePathString path, Layer* data);
 bool writePythonNPArray(PlatformNativePathString path, Layer* data);
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data);
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data);
+
+std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
+std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
 
 struct FileSessionImportNPath {
 	std::string name;
@@ -83,28 +87,16 @@ struct FileImportUTF8Path {
 		};
 };
 
-struct FileExportMultiLayerNPath {
-	std::string name;
-	std::string extension;
-	bool (*exportFunction)(PlatformNativePathString, MainEditor*);
-	int exportFormats = FORMAT_RGB;
-	bool (*canExport)(Layer*) =
-		[](Layer* p) {
-		return true;
-		};
-};
-struct FileExportFlatNPath {
-	std::string name;
-	std::string extension;
-	bool (*exportFunction)(PlatformNativePathString, Layer*);
-	int exportFormats = FORMAT_RGB;
-	bool (*canExport)(Layer*) =
-		[](Layer* p) {
-		return true;
-		};
+class FileOperation {
+public:
+	virtual std::string name() { return _name; }
+	virtual std::string extension() { return _extension; }
+protected:
+	std::string _name = "Palette type";
+	std::string _extension = "";
 };
 
-class FileExporter {
+class FileExporter : public FileOperation {
 
 public:
 	static FileExporter* sessionExporter(std::string name, std::string extension, bool (*exportFunction)(PlatformNativePathString, MainEditor*), int formatflags = FORMAT_RGB, bool (*canExport)(MainEditor*) = NULL) {
@@ -129,8 +121,6 @@ public:
 	}
 
 	virtual int formatFlags() { return _formatFlags; }
-	virtual std::string name() { return _name; }
-	virtual std::string extension() { return _extension; }
 	virtual bool exportsWholeSession() { return _isSessionExporter; }
 	virtual bool canExport(void* data) { 
 		if (exportsWholeSession()) {
@@ -149,8 +139,6 @@ public:
 		}
 	}
 protected:
-	std::string _name = "File type (library)";
-	std::string _extension = "";
 	int _formatFlags = FORMAT_RGB;
 	bool _isSessionExporter = false;
 
@@ -160,9 +148,32 @@ protected:
 	bool (*_flatExportFunction)(PlatformNativePathString, Layer*) = NULL;
 	bool (*_flatCheckExportFunction)(Layer*) = NULL;
 };
+class PaletteImporter : public FileOperation {
+public:
+	static PaletteImporter* paletteImporter(std::string name, std::string extension, std::pair<bool, std::vector<uint32_t>>(*importFunction)(PlatformNativePathString), bool (*canImport)(PlatformNativePathString) = NULL) {
+		PaletteImporter* ret = new PaletteImporter();
+		ret->_name = name;
+		ret->_extension = extension;
+		ret->_importFunction = importFunction;
+		ret->_canImport = canImport;
+		return ret;
+	}
+	
+	virtual bool canImport(PlatformNativePathString path) {
+		return _canImport != NULL ? _canImport(path) : true;
+	}
+	virtual std::pair<bool, std::vector<uint32_t>> importPalette(PlatformNativePathString path) {
+		return _importFunction(path);
+	};
+protected:
+	std::pair<bool, std::vector<uint32_t>> (*_importFunction)(PlatformNativePathString) = NULL;
+	bool (*_canImport)(PlatformNativePathString) = NULL;
+};
 
 inline std::vector<FileExporter*> g_fileExporters;
 inline std::vector<FileExporter*> g_palettizedFileExporters;
+
+inline std::vector<PaletteImporter*> g_paletteImporters;
 
 inline void g_setupIO() {
 	g_fileExporters.push_back(FileExporter::sessionExporter("voidsprite Session version 3", ".voidsn", &writeVOIDSNv3));
@@ -170,14 +181,27 @@ inline void g_setupIO() {
 	g_fileExporters.push_back(FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster));
 
 	g_fileExporters.push_back(FileExporter::flatExporter("PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
-	g_fileExporters.push_back(FileExporter::flatExporter("RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
+	g_fileExporters.push_back(FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
 	g_fileExporters.push_back(FileExporter::flatExporter("BMP (EasyBMP)", ".bmp", &writeBMP));
-	g_fileExporters.push_back(FileExporter::flatExporter("TGA (voidsprite custom)", ".tga", &writeTGA));
+	g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
 	g_fileExporters.push_back(FileExporter::flatExporter("CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM));
-	g_fileExporters.push_back(FileExporter::flatExporter("C Header (voidsprite custom)", ".h", &writeCHeader));
-	g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array (voidsprite custom)", ".py", &writePythonNPArray));
+	g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader));
+	g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
 	g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
-	g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image (voidsprite custom)", ".java", &writeJavaBufferedImage));
+	g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
+
+	g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT));
+	g_paletteImporters.push_back(PaletteImporter::paletteImporter("JASC-PAL palette", ".pal", &readPltJASCPAL, 
+		[](PlatformNativePathString path) { 
+			FILE* f = platformOpenFile(path, PlatformFileModeRB);
+			char headerBytes[9];
+			memset(headerBytes, 0, 9);
+			fread(headerBytes, 8, 1, f);
+			fclose(f);
+			return std::string(headerBytes) == "JASC-PAL";
+		}));
+
+
 
 	for (auto& exporter : g_fileExporters) {
 		if (exporter->formatFlags() & FORMAT_PALETTIZED) {
@@ -223,34 +247,47 @@ inline std::vector<FileImportNPath> g_fileImportersNPaths = {
 		}
 	},
 	{
-		"RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &readXYZ
+		"RPG2000/2003 XYZ", ".xyz", &readXYZ
 	},
 	{
 		"Atrophy Engine AETEX v1/v2 (SDL_Image:tga, DDS[fallthrough])", ".aetex", &readAETEX
 	},
 	{
-		"Wii/GC TPL (voidsprite custom)", ".tpl", &readWiiGCTPL
+		"Wii/GC TPL", ".tpl", &readWiiGCTPL
 	},
 	{
-		"NES: dump CHR-ROM (voidsprite custom)", ".nes", &readNES
+		"NES: dump CHR-ROM", ".nes", &readNES
 	},
 	{
 		"DDS (ddspp+s3tc open source+voidsprite custom)", ".dds", &readDDS
 	},
 	{
-		"VTF (voidsprite custom)", ".vtf", &readVTF
+		"VTF", ".vtf", &readVTF
 	},
 	{
-		"MSP (voidsprite custom)", ".msp", &readMSP
+		"MSP", ".msp", &readMSP
 	},
 	{
-		"Mario Paint save file (voidsprite custom)", ".srm", &readMarioPaintSRM
+		"Mario Paint save file", ".srm", &readMarioPaintSRM
 	},
 	{
-		"X-Com SPK file (voidsprite custom)", ".spk", &readXComSPK
+		"X-Com SPK file", ".spk", &readXComSPK
 	},
 	{
-		"X-Com BDY file (voidsprite custom)", ".bdy", &readXComBDY
+		"X-Com BDY file", ".bdy", &readXComBDY
+	},
+	{
+		"X-Com SCR file", ".scr", &readXComSCR,
+		[](PlatformNativePathString path) {
+			FILE* f = platformOpenFile(path, PlatformFileModeRB);
+			//check if file isn't an exe
+			char c[2];
+			fread(c, 2, 1, f);
+			fseek(f, 0, SEEK_END);
+			uint64_t len = ftell(f);
+			fclose(f);
+			return !(c[0] == 'M' && c[1] == 'Z') || len == (320 * 200);
+		}
 	}
 };
 

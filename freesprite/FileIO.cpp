@@ -1620,7 +1620,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
                 uint8_t pixel;
                 fread(&pixel, 1, 1, f);
                 for (int x = 0; x < 257 - a; x++) {
-                    *(pxd++) = pixel;
+                    *(pxd++) = (uint32_t)pixel;
                     if (pxd >= end) {
                         reachedImageEnd = true;
                         break;
@@ -1628,10 +1628,10 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
                 }
             }
             else {
-                for (int x = 0; x < a+1; x++) {
+                for (uint32_t x = 0; x < a+1; x++) {
 					uint8_t pixel;
 					fread(&pixel, 1, 1, f);
-					*(pxd++) = pal2[pixel * 3];
+					*(pxd++) = (uint32_t)pixel;
                     if (pxd >= end) {
                         reachedImageEnd = true;
                         break;
@@ -1640,6 +1640,24 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
             }
         }
 
+        return ret;
+    }
+    return NULL;
+}
+
+Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        LayerPalettized* ret = new LayerPalettized(320, 200);
+        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        ret->palette = g_palettes[PALETTE_DEFAULT];
+        for (int x = 0; x < 320 * 200; x++) {
+            uint8_t pixel;
+            fread(&pixel, 1, 1, f);
+            pxd[x] = pixel;
+        }
+        fclose(f);
         return ret;
     }
     return NULL;
@@ -2541,6 +2559,64 @@ public class VoidspriteImage {{\n\
         return true;
     }
     return false;
+}
+
+std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name)
+{
+    FILE* f = platformOpenFile(name, PlatformFileModeRB);
+    if (f != NULL) {
+        char header[7];
+        fread(header, 7, 1, f);
+        if (memcmp(header, "VOIDPLT", 7) == 0) {
+            uint8_t fileversion;
+            fread(&fileversion, 1, 1, f);
+            if (fileversion == 1) {
+                std::vector<uint32_t> newPalette;
+                uint32_t count;
+                fread(&count, 1, 4, f);
+                for (int x = 0; x < count; x++) {
+                    uint32_t col;
+                    fread(&col, 1, 4, f);
+                    newPalette.push_back(col);
+                }
+                fclose(f);
+                return { true, newPalette };
+            }
+            else {
+                g_addNotification(ErrorNotification("Error", "Unsupported VOIDPLT file version"));
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "Invalid palette file"));
+        }
+        fclose(f);
+    }
+    return { false, {} };
+}
+
+std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name)
+{
+    std::ifstream f(name, std::ios::in);
+    if (f.is_open()) {
+        std::vector<uint32_t> newPalette;
+        std::string line;
+        std::getline(f, line);
+        if (line.substr(0, 8) == "JASC-PAL") {
+            f >> line;
+            //should be 0100
+            int count;
+            f >> count;
+            for (int x = 0; x < count; x++) {
+				int r, g, b;
+				f >> r >> g >> b;
+				newPalette.push_back((0xff << 24) | (r << 16) | (g << 8) | b);
+			}
+            f.close();
+            return { true, newPalette };
+        }
+        f.close();
+    }
+    return { false, {} };
 }
 
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)

@@ -3,5 +3,5 @@
 
 void UILabel::render(XY pos)
 {
-	g_fnt->RenderString(text, pos.x, pos.y);
+	g_fnt->RenderString(text, pos.x, pos.y, color);
 }
