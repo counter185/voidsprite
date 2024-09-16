@@ -67,37 +67,21 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layers)
 void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId)
 {
 	if (evt_id == EVENT_PALETTIZEDEDITOR_SAVEFILE) {
-		//todo clean this shit up
-		std::vector<int> palettizedExporterIds;
-		std::vector<std::pair<std::string, std::string>> namesAndExtensions;
-		int cexporterID = 0;
-		for (auto& e : g_fileExportersMLNPaths) {
-			if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
-				palettizedExporterIds.push_back(cexporterID);
-			}
-			cexporterID++;
-		}
-		for (auto& e : g_fileExportersFlatNPaths) {
-			if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
-				palettizedExporterIds.push_back(cexporterID);
-			}
-			cexporterID++;
-		}
 
-		int actualExporterID = palettizedExporterIds[exporterId - 1];
+		exporterId--;
 
 		bool result = false;
 
-		if (actualExporterID >= g_fileExportersMLNPaths.size()) {
-			actualExporterID -= g_fileExportersMLNPaths.size();
-			auto exporter = g_fileExportersFlatNPaths[actualExporterID];
-			Layer* flat = flattenImageWithoutConvertingToRGB();
-			result = exporter.exportFunction(name, flat);
-			delete flat;
-		}
-		else {
-			auto exporter = g_fileExportersMLNPaths[actualExporterID];
-			result = exporter.exportFunction(name, this);
+		if (exporterId < g_palettizedFileExporters.size()) {
+			FileExporter* actualExporterID = g_palettizedFileExporters[exporterId];
+			if (actualExporterID->exportsWholeSession()) {
+				result = actualExporterID->exportData(name, this);
+			}
+			else {
+				Layer* flat = flattenImageWithoutConvertingToRGB();
+				result = actualExporterID->exportData(name, flat);
+				delete flat;
+			}
 		}
 
 		if (result) {
@@ -497,22 +481,11 @@ void MainEditorPalettized::trySavePalettizedImage()
 void MainEditorPalettized::trySaveAsPalettizedImage()
 {
 	lastWasSaveAs = true;
-	std::vector<int> palettizedExporterIds;
 	std::vector<std::pair<std::string, std::string>> namesAndExtensions;
-	int exporterID = 0;
-	for (auto& e : g_fileExportersMLNPaths) {
-		if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
-			namesAndExtensions.push_back({ e.extension, e.name });
-			palettizedExporterIds.push_back(exporterID);
+	for (auto& e : g_palettizedFileExporters) {
+		if ((e->formatFlags() & FORMAT_PALETTIZED) != 0) {
+			namesAndExtensions.push_back({ e->extension(), e->name()});
 		}
-		exporterID++;
-	}
-	for (auto& e : g_fileExportersFlatNPaths) {
-		if ((e.exportFormats & FORMAT_PALETTIZED) != 0) {
-			namesAndExtensions.push_back({ e.extension, e.name });
-			palettizedExporterIds.push_back(exporterID);
-		}
-		exporterID++;
 	}
 	platformTrySaveOtherFile(this, namesAndExtensions, "save palettized image", EVENT_PALETTIZEDEDITOR_SAVEFILE);
 }

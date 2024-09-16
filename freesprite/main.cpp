@@ -19,6 +19,7 @@
 #include "ToolRectSwap.h"
 #include "ToolText.h"
 #include "Gamepad.h"
+#include "FileIO.h"
 
 #include "ee_creature.h"
 
@@ -217,6 +218,8 @@ int main(int argc, char** argv)
 
     g_gamepad = new Gamepad();
     g_gamepad->TryCaptureGamepad();
+
+    g_setupIO();
 
     //load brushes
     g_brushes.push_back(new Brush1x1());

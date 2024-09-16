@@ -104,48 +104,87 @@ struct FileExportFlatNPath {
 		};
 };
 
-inline std::vector<FileExportFlatNPath> g_fileExportersFlatNPaths = {
-	{
-		"PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED
-	},
-	{
-		"RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED
-	},
-	{
-		"BMP (EasyBMP)", ".bmp", &writeBMP
-	},
-	{
-		"TGA (voidsprite custom)", ".tga", &writeTGA
-	},
-	{
-		"CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM
-	},
-	{
-		"C Header (voidsprite custom)", ".h", &writeCHeader
-	},
-	{
-		"Python NumPy array (voidsprite custom)", ".py", &writePythonNPArray
-	},
-	{
-		"HTML Base64 image (base64)", ".html", &writeHTMLBase64
-	},
-	{
-		"Java Buffered Image (voidsprite custom)", ".java", &writeJavaBufferedImage
+class FileExporter {
+
+public:
+	static FileExporter* sessionExporter(std::string name, std::string extension, bool (*exportFunction)(PlatformNativePathString, MainEditor*), int formatflags = FORMAT_RGB, bool (*canExport)(MainEditor*) = NULL) {
+		FileExporter* ret = new FileExporter();
+		ret->_name = name;
+		ret->_extension = extension;
+		ret->_formatFlags = formatflags;
+		ret->_isSessionExporter = true;
+		ret->_sessionExportFunction = exportFunction;
+		ret->_sessionCheckExportFunction = canExport;
+		return ret;
 	}
-};
-inline std::vector<FileExportMultiLayerNPath> g_fileExportersMLNPaths = {
-	{
-		"voidsprite Session version 3", ".voidsn", &writeVOIDSNv3
-	},
-	{
-		"voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2
-	},
-	{
-		"OpenRaster", ".ora", &writeOpenRaster
+	static FileExporter* flatExporter(std::string name, std::string extension, bool (*exportFunction)(PlatformNativePathString, Layer*), int formatflags = FORMAT_RGB, bool (*canExport)(Layer*) = NULL) {
+		FileExporter* ret = new FileExporter();
+		ret->_name = name;
+		ret->_extension = extension;
+		ret->_formatFlags = formatflags;
+		ret->_isSessionExporter = false;
+		ret->_flatExportFunction = exportFunction;
+		ret->_flatCheckExportFunction = canExport;
+		return ret;
 	}
+
+	virtual int formatFlags() { return _formatFlags; }
+	virtual std::string name() { return _name; }
+	virtual std::string extension() { return _extension; }
+	virtual bool exportsWholeSession() { return _isSessionExporter; }
+	virtual bool canExport(void* data) { 
+		if (exportsWholeSession()) {
+			return _sessionCheckExportFunction != NULL ? _sessionCheckExportFunction((MainEditor*)data) : true;
+		}
+		else {
+			return _flatCheckExportFunction != NULL ? _flatCheckExportFunction((Layer*)data) : true;
+		}
+	}
+	virtual bool exportData(PlatformNativePathString path, void* data) { 
+		if (exportsWholeSession()) {
+			return _sessionExportFunction(path, (MainEditor*)data);
+		}
+		else {
+			return _flatExportFunction(path, (Layer*)data);
+		}
+	}
+protected:
+	std::string _name = "File type (library)";
+	std::string _extension = "";
+	int _formatFlags = FORMAT_RGB;
+	bool _isSessionExporter = false;
+
+	bool (*_sessionExportFunction)(PlatformNativePathString, MainEditor*) = NULL;
+	bool (*_sessionCheckExportFunction)(MainEditor*) = NULL;
+
+	bool (*_flatExportFunction)(PlatformNativePathString, Layer*) = NULL;
+	bool (*_flatCheckExportFunction)(Layer*) = NULL;
 };
 
+inline std::vector<FileExporter*> g_fileExporters;
+inline std::vector<FileExporter*> g_palettizedFileExporters;
 
+inline void g_setupIO() {
+	g_fileExporters.push_back(FileExporter::sessionExporter("voidsprite Session version 3", ".voidsn", &writeVOIDSNv3));
+	g_fileExporters.push_back(FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2));
+	g_fileExporters.push_back(FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster));
+
+	g_fileExporters.push_back(FileExporter::flatExporter("PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
+	g_fileExporters.push_back(FileExporter::flatExporter("RPG2000/2003 XYZ (voidsprite custom)", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
+	g_fileExporters.push_back(FileExporter::flatExporter("BMP (EasyBMP)", ".bmp", &writeBMP));
+	g_fileExporters.push_back(FileExporter::flatExporter("TGA (voidsprite custom)", ".tga", &writeTGA));
+	g_fileExporters.push_back(FileExporter::flatExporter("CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM));
+	g_fileExporters.push_back(FileExporter::flatExporter("C Header (voidsprite custom)", ".h", &writeCHeader));
+	g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array (voidsprite custom)", ".py", &writePythonNPArray));
+	g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
+	g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image (voidsprite custom)", ".java", &writeJavaBufferedImage));
+
+	for (auto& exporter : g_fileExporters) {
+		if (exporter->formatFlags() & FORMAT_PALETTIZED) {
+			g_palettizedFileExporters.push_back(exporter);
+		}
+	}
+}
 
 inline std::vector<FileSessionImportNPath> g_fileSessionImportersNPaths = {
 	{

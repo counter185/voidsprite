@@ -19,11 +19,8 @@ PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
     wxsManager.addDrawable(nbutton);
 
     std::vector<std::string> formats;
-    for (auto& fmt : g_fileExportersFlatNPaths) {
-        formats.push_back(fmt.name);
-    }
-    for (auto& fmt : g_fileExportersMLNPaths) {
-        formats.push_back(fmt.name);
+    for (auto& fmt : g_fileExporters) {
+        formats.push_back(fmt->name());
     }
 
 	exporterIndex = 0;
@@ -72,34 +69,20 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 
 		MainEditor* session = loadAnyIntoSession(path);
 		if (session != NULL) {
-			if (exporterIndex >= g_fileExportersFlatNPaths.size()) {
-				int realExporterIndex = exporterIndex - g_fileExportersFlatNPaths.size();
-				FileExportMultiLayerNPath exporter = g_fileExportersMLNPaths[realExporterIndex];
 
-				/*Layer* l;
+			FileExporter* exporter = g_fileExporters[exporterIndex];
 
-				if (session->isPalettized) {
-					if ((exporter.exportFormats & FORMAT_PALETTIZED) != 0) {
-						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
-						l = upcastSession->flattenImageWithoutConvertingToRGB();
-					}
-					else {
-						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
-						l = upcastSession->flattenImageAndConvertToRGB();
-					}
-				}
-				else {
-					l = session->flattenImage();
-				}*/
-				if (session->isPalettized && ((exporter.exportFormats & FORMAT_PALETTIZED) == 0)) {
+			if (exporter->exportsWholeSession()) {
+
+				if (session->isPalettized && ((exporter->formatFlags() & FORMAT_PALETTIZED) == 0)) {
 					MainEditor* rgbConvEditor = ((MainEditorPalettized*)session)->toRGBSession();
 					delete session;
 					session = rgbConvEditor;
 				}
 
-				outPath += convertStringOnWin32(exporter.extension);
+				outPath += convertStringOnWin32(exporter->extension());
 
-				if (exporter.exportFunction(outPath, session)) {
+				if (exporter->exportData(outPath, session)) {
 					g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
 				}
 				else {
@@ -107,12 +90,10 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 				}
 			}
 			else {
-				FileExportFlatNPath exporter = g_fileExportersFlatNPaths[exporterIndex];
-
 				Layer* l = NULL;
 
 				if (session->isPalettized) {
-					if ((exporter.exportFormats & FORMAT_PALETTIZED) != 0) {
+					if ((exporter->formatFlags() & FORMAT_PALETTIZED) != 0) {
 						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
 						l = upcastSession->flattenImageWithoutConvertingToRGB();
 					}
@@ -125,9 +106,9 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 					l = session->flattenImage();
 				}
 
-				outPath += convertStringOnWin32(exporter.extension);
+				outPath += convertStringOnWin32(exporter->extension());
 
-				if (exporter.exportFunction(outPath, l)) {
+				if (exporter->exportData(outPath, l)) {
 					g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
 				}
 				else {

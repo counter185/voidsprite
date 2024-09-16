@@ -25,25 +25,25 @@ public:
 
 	uint8_t currentR = 0, currentG = 0, currentB = 0;
 
-	UIHueSlider* hueSlider;
-	UISVPicker* satValSlider;
-	UITextField* colorTextField;
-	UISlider* sliderH;
+	UIHueSlider* hueSlider = NULL;
+	UISVPicker* satValSlider = NULL;
+	UITextField* colorTextField = NULL;
+	UISlider* sliderH = NULL;
 
 	UITextField* txtR, *txtG, *txtB;
 	UITextField* txtH, *txtS, *txtV;
 
-	UIColorSlider* sliderS;
-	UIColorSlider* sliderV;
-	UIColorSlider* sliderR;
-	UIColorSlider* sliderG;
-	UIColorSlider* sliderB;
+	UIColorSlider* sliderS = NULL;
+	UIColorSlider* sliderV = NULL;
+	UIColorSlider* sliderR = NULL;
+	UIColorSlider* sliderG = NULL;
+	UIColorSlider* sliderB = NULL;
 
-	TabbedView* colorModeTabs;
-	TabbedView* colorTabs;
+	TabbedView* colorModeTabs = NULL;
+	TabbedView* colorTabs = NULL;
 
-	UIButton* eraserButton;
-	UIButton* blendModeButton;
+	UIButton* eraserButton = NULL;
+	UIButton* blendModeButton = NULL;
 
 	std::vector<uint32_t> lastColors;
 	bool lastColorsChanged = true;

@@ -52,96 +52,9 @@ void platformPostInit() {
     d3dobject->Release();
 }
 
-void platformTrySaveImageFile(EventCallbackListener* listener) {
-    OPENFILENAMEW ofna;
-    ZeroMemory(&ofna, sizeof(ofna));
-    ofna.lStructSize = sizeof(ofna);
-    ofna.hwndOwner = WINhWnd;
-    std::wstring filterString = L"";
-    std::vector<std::wstring> filterStrings;
-    for (FileExportMultiLayerNPath f : g_fileExportersMLNPaths) {
-        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
-        filterString.push_back('\0');
-        filterString += L"*" + utf8StringToWstring(f.extension);
-        filterString.push_back('\0');
-        filterStrings.push_back(utf8StringToWstring(f.extension));
-    }
-    for (FileExportFlatNPath f : g_fileExportersFlatNPaths) {
-        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
-        filterString.push_back('\0');
-        filterString += L"*" + utf8StringToWstring(f.extension);
-        filterString.push_back('\0');
-        filterStrings.push_back(utf8StringToWstring(f.extension));
-    }
-    filterString.push_back('\0');
-    ofna.lpstrFilter = filterString.c_str();
-    ofna.lpstrCustomFilter = NULL;
-    ofna.nFilterIndex = lastFilterIndex;
-    ofna.lpstrFile = fileNameBuffer;
-    ofna.nMaxFile = MAX_PATH;
-    ofna.lpstrFileTitle = NULL;
-    ofna.lpstrInitialDir = NULL;
-    ofna.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT;
-    ofna.lpstrTitle = L"voidsprite: Save Image";
-    ofna.lpstrDefExt = L"png";
-    if (GetSaveFileNameW(&ofna)) {
+void platformTrySaveImageFile(EventCallbackListener* listener) {}
 
-        lastFilterIndex = ofna.nFilterIndex;
-        std::wstring fileName = fileNameBuffer;
-        std::wstring fileNameLower = fileName;
-        std::transform(fileNameLower.begin(), fileNameLower.end(), fileNameLower.begin(), ::tolower);
-
-        std::wstring extension = filterStrings[ofna.nFilterIndex - 1];
-        if (fileNameLower.size() < extension.size() || fileNameLower.substr(fileNameLower.size() - extension.size()) != extension) {
-            fileName += extension;
-        }
-        listener->eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, fileName, ofna.nFilterIndex);
-    }
-    else {
-        printf("windows error: %i\n", GetLastError());
-    }
-}
-
-void platformTryLoadImageFile(EventCallbackListener* listener) {
-    OPENFILENAMEW ofna;
-    ZeroMemory(&ofna, sizeof(ofna));
-    ofna.lStructSize = sizeof(ofna);
-    ofna.hwndOwner = WINhWnd;
-    std::wstring filterString = L"";
-    std::vector<std::wstring> filterStrings;
-    for (FileSessionImportNPath f : g_fileSessionImportersNPaths) {
-        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
-        filterString.push_back('\0');
-        filterString += L"*" + utf8StringToWstring(f.extension);
-        filterString.push_back('\0');
-        filterStrings.push_back(utf8StringToWstring(f.extension));
-    }
-    for (FileImportNPath f : g_fileImportersNPaths) {
-        filterString += utf8StringToWstring(f.name) + std::format(L"({})", utf8StringToWstring(f.extension));
-        filterString.push_back('\0');
-        filterString += L"*" + utf8StringToWstring(f.extension);
-        filterString.push_back('\0');
-        filterStrings.push_back(utf8StringToWstring(f.extension));
-    }
-    filterString.push_back('\0');
-    ofna.lpstrFilter = filterString.c_str();
-    ofna.lpstrCustomFilter = NULL;
-    ofna.nFilterIndex = lastFilterIndex;
-    ofna.lpstrFile = fileNameBuffer;
-    ofna.nMaxFile = MAX_PATH;
-    ofna.lpstrFileTitle = NULL;
-    ofna.lpstrInitialDir = NULL;
-    ofna.Flags = OFN_EXPLORER;
-    ofna.lpstrTitle = L"voidsprite: Open Image";
-    ofna.lpstrDefExt = L"png";
-    if (GetOpenFileNameW(&ofna)) {
-        std::wstring fileName = fileNameBuffer;
-        listener->eventFileOpen(EVENT_MAINEDITOR_SAVEFILE, fileName, ofna.nFilterIndex);
-    }
-    else {
-        printf("windows error: %i\n", GetLastError());
-    }
-}
+void platformTryLoadImageFile(EventCallbackListener* listener) {}
 
 
 //pairs in format {extension, name}

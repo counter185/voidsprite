@@ -850,15 +850,18 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 		printf("eventFileSaved: got file name %ls\n", name.c_str());
 
 		bool result = false;
-		if (exporterID >= g_fileExportersMLNPaths.size()) {
-			FileExportFlatNPath f = g_fileExportersFlatNPaths[exporterID - g_fileExportersMLNPaths.size()];
-			Layer* flat = flattenImage();
-			result = f.exportFunction(name, flat);
-			delete flat;
-		}
-		else {
-			FileExportMultiLayerNPath f = g_fileExportersMLNPaths[exporterID];
-			result = f.exportFunction(name, this);
+
+		if (exporterID < g_fileExporters.size()) {
+			FileExporter* exporter = g_fileExporters[exporterID];
+
+			if (exporter->exportsWholeSession()) {
+				result = exporter->exportData(name, this);
+			}
+			else {
+				Layer* flat = flattenImage();
+				result = exporter->exportData(name, flat);
+				delete flat;
+			}
 		}
 
 		if (result) {
@@ -978,11 +981,8 @@ void MainEditor::trySaveAsImage()
 {
 	lastWasSaveAs = true;
 	std::vector<std::pair<std::string, std::string>> formats;
-	for (FileExportMultiLayerNPath f : g_fileExportersMLNPaths) {
-		formats.push_back({ f.extension, f.name });
-	}
-	for (FileExportFlatNPath f : g_fileExportersFlatNPaths) {
-		formats.push_back({ f.extension, f.name });
+	for (auto f : g_fileExporters) {
+		formats.push_back({ f->extension(), f->name()});
 	}
 	platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
 }
