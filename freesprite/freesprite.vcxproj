@@ -177,6 +177,7 @@
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
+    <ClCompile Include="TilemapEditorLayerPicker.cpp" />
     <ClCompile Include="ToolRectFlip.cpp" />
     <ClCompile Include="ToolRectRotate.cpp" />
     <ClCompile Include="ToolRectSwap.cpp" />
@@ -280,6 +281,7 @@
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
+    <ClInclude Include="TilemapEditorLayerPicker.h" />
     <ClInclude Include="ToolRectFlip.h" />
     <ClInclude Include="ToolRectRotate.h" />
     <ClInclude Include="ToolRectSwap.h" />

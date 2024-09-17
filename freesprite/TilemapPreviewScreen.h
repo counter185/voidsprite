@@ -1,4 +1,5 @@
 #pragma once
+#include "globals.h"
 #include "BaseScreen.h"
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
@@ -10,7 +11,10 @@ public:
 
 	XY tilemapDrawPoint = XY{ 0,0 };
 
-	XY** tilemap = NULL;
+	std::vector<XY**> tilemap;
+	XY** activeTilemap = NULL;
+	Timer64 layerSelectTimer;
+
 	XY tilemapDimensions = XY{-1,-1};
 	int tilemapScale = 1;
 	bool scrollingTilemap = false;
@@ -27,9 +31,11 @@ public:
 	int tileSelectScale = 1;
 	Timer64 tileSelectTimer;
 
+	TilemapEditorLayerPicker* layerPicker = NULL;
 	ScreenWideNavBar<TilemapPreviewScreen*>* navbar;
 
 	TilemapPreviewScreen(MainEditor* parent);
+	~TilemapPreviewScreen();
 
 	void render() override;
 	void tick() override;
@@ -45,5 +51,15 @@ public:
 	void drawBackground();
 	void recenterTilemap();
 	void recenterTilePicker();
+
+	int activeLayerIndex();
+	void switchActiveLayer(int layerIndex);
+	void freeAllLayers();
+	XY** newLayer();
+	void deleteLayer(int index);
+	void moveLayerUp(int index);
+	void moveLayerDown(int index);
+	void mergeLayerDown(int index);
+	void duplicateLayer(int index);
 };
 

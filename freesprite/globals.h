@@ -79,6 +79,7 @@ class UILabel;
 class UITextField;
 class ScrollingView;
 class Gamepad;
+class TilemapEditorLayerPicker;
 
 template <typename T>
 class ScreenWideNavBar;

@@ -3,6 +3,7 @@
 #include "FontRenderer.h"
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
+#include "TilemapEditorLayerPicker.h"
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
@@ -36,9 +37,26 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
 
     resizeTilemap(32, 32);
 
+    layerPicker = new TilemapEditorLayerPicker(this);
+    wxsManager.addDrawable(layerPicker);
+
     tileSelectScale = caller->scale;
     recenterTilePicker();
     recenterTilemap();
+}
+
+TilemapPreviewScreen::~TilemapPreviewScreen()
+{
+    for (int l = 0; l < tilemap.size(); l++) {
+		XY**& tilemapLayer = tilemap.at(l);
+		if (tilemapLayer != NULL) {
+			for (int y = 0; y < tilemapDimensions.y; y++) {
+				free(tilemapLayer[y]);
+			}
+			free(tilemapLayer);
+		}
+	}
+	tilemap.clear();
 }
 
 void TilemapPreviewScreen::render()
@@ -49,30 +67,34 @@ void TilemapPreviewScreen::render()
         tilemapDimensions.x * caller->tileDimensions.x * tilemapScale,
         tilemapDimensions.y * caller->tileDimensions.y * tilemapScale };
 
-    for (int y = 0; y < tilemapDimensions.y; y++) {
-        for (int x = 0; x < tilemapDimensions.x; x++) {
+    for (int l = 0; l < tilemap.size(); l++) {
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+            for (int x = 0; x < tilemapDimensions.x; x++) {
 
-            XY tilePos = tilemap[y][x];
-            if (tilePos.x < 0 || tilePos.y < 0) {
-                continue;
-            }
+                XY tilePos = tilemap[l][y][x];
+                if (tilePos.x < 0 || tilePos.y < 0) {
+                    continue;
+                }
 
-            SDL_Rect tileDraw = {
-                tilemapDrawRect.x + caller->tileDimensions.x * tilemapScale * x,
-                tilemapDrawRect.y + caller->tileDimensions.y * tilemapScale * y,
-                caller->tileDimensions.x * tilemapScale,
-                caller->tileDimensions.y * tilemapScale
-            };
+                SDL_Rect tileDraw = {
+                    tilemapDrawRect.x + caller->tileDimensions.x * tilemapScale * x,
+                    tilemapDrawRect.y + caller->tileDimensions.y * tilemapScale * y,
+                    caller->tileDimensions.x * tilemapScale,
+                    caller->tileDimensions.y * tilemapScale
+                };
 
-            SDL_Rect tileClip = {
-                tilePos.x * caller->tileDimensions.x,
-                tilePos.y * caller->tileDimensions.y,
-                caller->tileDimensions.x,
-                caller->tileDimensions.y
-            };
+                SDL_Rect tileClip = {
+                    tilePos.x * caller->tileDimensions.x,
+                    tilePos.y * caller->tileDimensions.y,
+                    caller->tileDimensions.x,
+                    caller->tileDimensions.y
+                };
 
-            for (Layer* l : caller->layers) {
-                SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
+                uint8_t alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? (uint8_t)(0xff * XM1PW3P1(layerSelectTimer.percentElapsedTime(1300))) : 0xff;
+                for (Layer* l : caller->layers) {
+                    SDL_SetTextureAlphaMod(l->tex, alpha);
+                    SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
+                }
             }
         }
     }
@@ -131,8 +153,8 @@ void TilemapPreviewScreen::render()
         };
 
         for (Layer* l : caller->layers) {
-			SDL_RenderCopy(g_rd, l->tex, NULL, &tileSelectRect);
-		}
+            SDL_RenderCopy(g_rd, l->tex, NULL, &tileSelectRect);
+        }
 
         SDL_Rect pickedTileRect = {
             tileSelectRect.x + pickedTile.x * caller->tileDimensions.x * tileSelectScale,
@@ -156,9 +178,9 @@ void TilemapPreviewScreen::render()
     }
 
     if (navbar->focused) {
-		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-		SDL_RenderFillRect(g_rd, NULL);
-	}
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+        SDL_RenderFillRect(g_rd, NULL);
+    }
 
     wxsManager.renderAll();
 }
@@ -177,9 +199,13 @@ void TilemapPreviewScreen::tick()
     if (mouseLeftingTilemap) {
         if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
             if (hoveredTilePosition.x >= 0 && hoveredTilePosition.y >= 0 && hoveredTilePosition.x < tilemapDimensions.x && hoveredTilePosition.y < tilemapDimensions.y) {
-                tilemap[hoveredTilePosition.y][hoveredTilePosition.x] = pickedTile;
+                activeTilemap[hoveredTilePosition.y][hoveredTilePosition.x] = pickedTile;
             }
         }
+    }
+
+    if (layerPicker != NULL) {
+        layerPicker->position.x = g_windowW - 260;
     }
 }
 
@@ -258,9 +284,9 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             break;
         case SDL_KEYDOWN:
             if (evt.key.keysym.sym == SDLK_TAB) {
-				tileSelectOpen = !tileSelectOpen;
+                tileSelectOpen = !tileSelectOpen;
                 tileSelectTimer.start();
-			}
+            }
             else if (evt.key.keysym.sym == SDLK_LALT) {
                 wxsManager.forceFocusOn(navbar);
             }
@@ -281,21 +307,25 @@ void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString n
 {
     FILE* file = platformOpenFile(name, PlatformFileModeWB);
     if (file == NULL) {
-		g_addNotification(Notification("Error saving file", "Could not open file for writing."));
-		return;
+        g_addNotification(Notification("Error saving file", "Could not open file for writing."));
+        return;
     }
     else {
-        uint8_t version = 1;
+        uint8_t version = 2;
         fwrite(&version, 1, 1, file);
         fwrite(&tilemapDimensions.x, 4, 1, file);
         fwrite(&tilemapDimensions.y, 4, 1, file);
-        for (int y = 0; y < tilemapDimensions.y; y++) {
-			for (int x = 0; x < tilemapDimensions.x; x++) {
-                XY td = tilemap[y][x];
-                fwrite(&td.x, 4, 1, file);
-                fwrite(&td.y, 4, 1, file);
-			}
-		}
+        int layerCount = tilemap.size();
+        fwrite(&layerCount, 4, 1, file);
+        for (XY**& l : tilemap) {
+            for (int y = 0; y < tilemapDimensions.y; y++) {
+                for (int x = 0; x < tilemapDimensions.x; x++) {
+                    XY td = l[y][x];
+                    fwrite(&td.x, 4, 1, file);
+                    fwrite(&td.y, 4, 1, file);
+                }
+            }
+        }
         fclose(file);
         g_addNotification(Notification("File saved", "Save successful!", 4000));
     }
@@ -318,44 +348,84 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                 fread(&dims.y, 4, 1, file);
                 resizeTilemap(dims.x, dims.y);
                 for (int y = 0; y < tilemapDimensions.y; y++) {
-					for (int x = 0; x < tilemapDimensions.x; x++) {
+                    for (int x = 0; x < tilemapDimensions.x; x++) {
                         XY td;
-						fread(&td.x, 4, 1, file);
-						fread(&td.y, 4, 1, file);
-						tilemap[y][x] = td;
+                        fread(&td.x, 4, 1, file);
+                        fread(&td.y, 4, 1, file);
+                        activeTilemap[y][x] = td;
+                    }
+                }
+                break;
+            case 2:
+                freeAllLayers();
+                fread(&tilemapDimensions.x, 4, 1, file);
+                fread(&tilemapDimensions.y, 4, 1, file);
+                int layerCount;
+                fread(&layerCount, 4, 1, file);
+                for (int l = 0; l < layerCount; l++) {
+                    XY** newTilemap = newLayer();
+                    for (int y = 0; y < tilemapDimensions.y; y++) {
+						for (int x = 0; x < tilemapDimensions.x; x++) {
+							XY td;
+							fread(&td.x, 4, 1, file);
+							fread(&td.y, 4, 1, file);
+							newTilemap[y][x] = td;
+						}
 					}
 				}
+                activeTilemap = tilemap[0];
                 break;
             default:
                 g_addNotification(Notification("Error loading file", "File version not supported"));
                 break;
         }
         fclose(file);
+        layerPicker->updateLayers();
     }
 }
 
 void TilemapPreviewScreen::resizeTilemap(int w, int h)
 {
-    XY** newTilemap = (XY**)malloc(h * sizeof(XY*));
-    for (int y = 0; y < h; y++) {
-        newTilemap[y] = (XY*)malloc(w * sizeof(XY));
-        for (int x = 0; x < w; x++) {
-            newTilemap[y][x] = XY{ -1,-1 };
-        }
-    }
+    if (tilemap.size() > 0) {
+        for (int l = 0; l < tilemap.size(); l++) {
+            XY**& tilemapLayer = tilemap.at(l);
 
-    if (tilemap != NULL) {
-        for (int y = 0; y < tilemapDimensions.y; y++) {
-            if (y < h) {
-                memcpy(newTilemap[y], tilemap[y], sizeof(XY) * ixmin(w, tilemapDimensions.x));
+            XY** newTilemap = (XY**)malloc(h * sizeof(XY*));
+            for (int y = 0; y < h; y++) {
+                newTilemap[y] = (XY*)malloc(w * sizeof(XY));
+                for (int x = 0; x < w; x++) {
+                    newTilemap[y][x] = XY{ -1,-1 };
+                }
             }
-            free(tilemap[y]);
-        }
-        free(tilemap);
-    }
 
-    tilemap = newTilemap;
+            if (tilemapLayer != NULL) {
+                for (int y = 0; y < tilemapDimensions.y; y++) {
+                    if (y < h) {
+                        memcpy(newTilemap[y], tilemapLayer[y], sizeof(XY) * ixmin(w, tilemapDimensions.x));
+                    }
+                    free(tilemapLayer[y]);
+                }
+                free(tilemapLayer);
+            }
+
+            tilemap[l] = newTilemap;
+        }
+    }
+    else {
+        XY** newTilemap = (XY**)malloc(h * sizeof(XY*));
+        for (int y = 0; y < h; y++) {
+            newTilemap[y] = (XY*)malloc(w * sizeof(XY));
+            for (int x = 0; x < w; x++) {
+                newTilemap[y][x] = XY{ -1,-1 };
+            }
+        }
+        tilemap.push_back(newTilemap);
+    }
+    
     tilemapDimensions = { w,h };
+    if (activeTilemap == NULL) {
+        activeTilemap = tilemap[0];
+    }
 }
 
 void TilemapPreviewScreen::drawBackground()
@@ -391,4 +461,116 @@ void TilemapPreviewScreen::recenterTilePicker()
         (g_windowW / 2) - (caller->texW * tileSelectScale) / 2,
         (g_windowH / 2) - (caller->texH * tileSelectScale) / 2
     };
+}
+
+int TilemapPreviewScreen::activeLayerIndex()
+{
+    if (activeTilemap == NULL) {
+        return -1;
+    }
+    for (int i = 0; i < tilemap.size(); i++) {
+		if (tilemap[i] == activeTilemap) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void TilemapPreviewScreen::switchActiveLayer(int layerIndex)
+{
+    if (layerIndex >= 0 && layerIndex < tilemap.size()) {
+		activeTilemap = tilemap[layerIndex];
+        layerSelectTimer.start();
+	}
+}
+
+void TilemapPreviewScreen::freeAllLayers()
+{
+    for (int l = 0; l < tilemap.size(); l++) {
+		XY**& tilemapLayer = tilemap.at(l);
+		if (tilemapLayer != NULL) {
+			for (int y = 0; y < tilemapDimensions.y; y++) {
+				free(tilemapLayer[y]);
+			}
+			free(tilemapLayer);
+		}
+	}
+	tilemap.clear();
+	activeTilemap = NULL;
+}
+
+XY** TilemapPreviewScreen::newLayer()
+{
+    XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
+	for (int y = 0; y < tilemapDimensions.y; y++) {
+		newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
+		for (int x = 0; x < tilemapDimensions.x; x++) {
+			newTilemap[y][x] = XY{ -1,-1 };
+		}
+	}
+	tilemap.push_back(newTilemap);
+	switchActiveLayer(tilemap.size() - 1);
+    return newTilemap;
+}
+
+void TilemapPreviewScreen::deleteLayer(int index)
+{
+    if (tilemap.size() > 1) {
+        XY** tilemapLayer = tilemap.at(index);
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+			free(tilemapLayer[y]);
+		}
+        free(tilemapLayer);
+        tilemap.erase(tilemap.begin() + index);
+        if (activeTilemap == tilemapLayer) {
+			activeTilemap = tilemap[index < tilemap.size() ? index : tilemap.size()-1];
+		}
+    }
+}
+
+void TilemapPreviewScreen::moveLayerUp(int index)
+{
+    if (index != tilemap.size() - 1) {
+        XY** tmp = tilemap[index];
+		tilemap[index] = tilemap[index + 1];
+		tilemap[index + 1] = tmp;
+    }
+}
+
+void TilemapPreviewScreen::moveLayerDown(int index)
+{
+    if (index != 0) {
+		XY** tmp = tilemap[index];
+		tilemap[index] = tilemap[index - 1];
+		tilemap[index - 1] = tmp;
+	}
+}
+
+void TilemapPreviewScreen::mergeLayerDown(int index)
+{
+    if (index != 0) {
+		XY**& tilemapLayer = tilemap.at(index);
+		XY**& tilemapLayerBelow = tilemap.at(index - 1);
+		for (int y = 0; y < tilemapDimensions.y; y++) {
+			for (int x = 0; x < tilemapDimensions.x; x++) {
+				if (tilemapLayer[y][x].x >= 0 && tilemapLayer[y][x].y >= 0) {
+					tilemapLayerBelow[y][x] = tilemapLayer[y][x];
+				}
+			}
+		}
+		deleteLayer(index);
+	}
+}
+
+void TilemapPreviewScreen::duplicateLayer(int index)
+{
+    XY**& tilemapLayer = tilemap.at(index);
+	XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
+	for (int y = 0; y < tilemapDimensions.y; y++) {
+		newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
+		for (int x = 0; x < tilemapDimensions.x; x++) {
+			newTilemap[y][x] = tilemapLayer[y][x];
+		}
+	}
+	tilemap.insert(tilemap.begin() + index, newTilemap);
 }

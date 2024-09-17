@@ -387,6 +387,9 @@
     <ClCompile Include="PopupPickColor.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="TilemapEditorLayerPicker.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -697,6 +700,9 @@
     </ClInclude>
     <ClInclude Include="platform_linux.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="TilemapEditorLayerPicker.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
