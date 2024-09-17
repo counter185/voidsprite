@@ -40,7 +40,7 @@ public:
 
 	bool closeNextTick = false;
 
-	BaseTemplate* tab2templates[2] = {
+	std::vector<BaseTemplate*> tab2templates = {
 		new TemplateRPG2KCharset(),
 		new TemplateMC64x32Skin()
 	};
@@ -125,7 +125,7 @@ public:
 		h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
 		newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
-		for (int x = 0; x < 2; x++) {
+		for (int x = 0; x < tab2templates.size(); x++) {
 			UIButton* buttonTemplate = new UIButton();
 			buttonTemplate->position = XY{ 40, 5 + x * 30 };
 			buttonTemplate->text = tab2templates[x]->getName();
