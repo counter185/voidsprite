@@ -4,6 +4,9 @@
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
 #include "TilemapEditorLayerPicker.h"
+#include <lcf/lmu/reader.h>
+#include <lcf/rpg/map.h>
+#include <lcf/reader_lcf.h>
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
@@ -18,7 +21,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     {
                         {SDLK_o, { "Load layout from file",
                                 [](TilemapPreviewScreen* screen) {
-                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
+                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                                 }
                             }
                         },
@@ -333,15 +336,72 @@ void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString n
 
 void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
 {
-    FILE* file = platformOpenFile(name, PlatformFileModeRB);
-    if (file == NULL) {
-        g_addNotification(Notification("Error loading file", "Could not open file for writing."));
-        return;
+    //
+    //if (name.find(utf8StringToWstring(".lmu")) == name.size() - 4) {
+    if (importerIndex == 2) {
+        PlatformNativePathString directoryOfFile = name.substr(0, name.find_last_of({'/', '\\'}) + 1);
+        std::ifstream file(name, std::ios::binary);
+        if (file.is_open()) {
+            std::unique_ptr<lcf::rpg::Map> map(lcf::LMU_Reader::Load(file));
+
+            //freeAllLayers();
+            //tilemapDimensions = { map->width, map->height };
+            XY** lowerLayer = newLayer();
+            int dataPointer = 0;
+            for (int y = 0; y < map->height; y++) {
+				for (int x = 0; x < map->width; x++) {
+					uint16_t index = map->lower_layer[dataPointer++];
+                    char type = '-';
+                    if (index >= 0x2710) {   //upper layer
+                        index -= 0x2710;
+                        type = 'u';
+                    }
+                    else if (index >= 0x1388) { //lower layer
+                        index -= 0x1388;
+                        type = 'l';
+                    }
+                    else if (index >= 0x0FA0) { //autotiles
+                        index -= 0x0FA0;
+                        type = 'a';
+                    }
+                    else if (index >= 0x0BB8) { //animated tiles
+                        int frame = 0;
+                        index = 0x0207 + (((index - 0x0BB8) / 50) << 2) + frame;
+                        type = 'n';
+                    }
+                    else {  //water tiles
+                        int frame = 0;
+                        int watertile = index % 50;
+                        int watertype = index / 50 / 20;
+                        index = watertype * 141 + watertile + frame * 47;
+                        type = 'w';
+                    }
+
+                    uint8_t tileDirection = index & 0x1F;
+                    uint16_t tileIndex = index >> 5;
+                    printf("(%02x;%04x),", tileDirection, tileIndex);
+                    //printf("%c:%04x,", type, index);
+                    
+				}
+                printf("\n");
+			}
+
+            file.close();
+        }
+		else {
+			g_addNotification(Notification("Error loading file", "Could not open file for reading."));
+		}
     }
     else {
-        uint8_t version;
-        fread(&version, 1, 1, file);
-        switch (version) {
+        FILE* file = platformOpenFile(name, PlatformFileModeRB);
+        if (file == NULL) {
+            g_addNotification(Notification("Error loading file", "Could not open file for writing."));
+            return;
+        }
+        else {
+            uint8_t version;
+            fread(&version, 1, 1, file);
+            switch (version) {
             case 1:
                 XY dims;
                 fread(&dims.x, 4, 1, file);
@@ -365,22 +425,23 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                 for (int l = 0; l < layerCount; l++) {
                     XY** newTilemap = newLayer();
                     for (int y = 0; y < tilemapDimensions.y; y++) {
-						for (int x = 0; x < tilemapDimensions.x; x++) {
-							XY td;
-							fread(&td.x, 4, 1, file);
-							fread(&td.y, 4, 1, file);
-							newTilemap[y][x] = td;
-						}
-					}
-				}
+                        for (int x = 0; x < tilemapDimensions.x; x++) {
+                            XY td;
+                            fread(&td.x, 4, 1, file);
+                            fread(&td.y, 4, 1, file);
+                            newTilemap[y][x] = td;
+                        }
+                    }
+                }
                 activeTilemap = tilemap[0];
                 break;
             default:
                 g_addNotification(Notification("Error loading file", "File version not supported"));
                 break;
+            }
+            fclose(file);
+            layerPicker->updateLayers();
         }
-        fclose(file);
-        layerPicker->updateLayers();
     }
 }
 

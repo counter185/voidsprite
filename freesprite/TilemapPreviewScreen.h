@@ -4,7 +4,7 @@
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
 
-class TilemapPreviewScreen : public BaseScreen, EventCallbackListener
+class TilemapPreviewScreen : public BaseScreen, public EventCallbackListener
 {
 public:
 	MainEditor* caller;
@@ -47,7 +47,7 @@ public:
 	virtual void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
 	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
-	void resizeTilemap(int w, int h);
+	virtual void resizeTilemap(int w, int h);
 	void drawBackground();
 	void recenterTilemap();
 	void recenterTilePicker();
