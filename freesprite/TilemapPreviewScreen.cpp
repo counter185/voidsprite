@@ -362,6 +362,7 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                     }
                     else if (index >= 0x0FA0) { //autotiles
                         index -= 0x0FA0;
+                        int autotileIndex = index / 50;
                         type = 'a';
                     }
                     else if (index >= 0x0BB8) { //animated tiles
@@ -373,13 +374,22 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                         int frame = 0;
                         int watertile = index % 50;
                         int watertype = index / 50 / 20;
-                        index = watertype * 141 + watertile + frame * 47;
+                        //index = watertype * 141 + watertile + frame * 47;
                         type = 'w';
                     }
 
-                    uint8_t tileDirection = index & 0x1F;
-                    uint16_t tileIndex = index >> 5;
-                    printf("(%02x;%04x),", tileDirection, tileIndex);
+                    uint8_t tileDirection = 0;
+                    uint16_t tileIndex = index;
+                    if (type == 'a') {
+                        tileDirection = index % 50;
+                        tileIndex = index / 50;
+                    }
+                    else if (type == 'w') {
+                        tileDirection = index % 50;
+                        tileIndex = index / 50 / 20;
+                    }
+
+                    printf("%c:(%02x;%04x),", type, tileDirection, tileIndex);
                     //printf("%c:%04x,", type, index);
                     
 				}
