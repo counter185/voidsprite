@@ -48,7 +48,7 @@ public:
 	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
 	virtual void resizeTilemap(int w, int h);
-	void drawBackground();
+	static void drawBackground();
 	void recenterTilemap();
 	void recenterTilePicker();
 

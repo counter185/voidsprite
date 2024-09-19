@@ -8,15 +8,26 @@ class RPG2KTilemapPreviewScreen :
 {
 public:
     MainEditor* caller = NULL;
-    int16_t* lowerLayerData = NULL;
-    int16_t* upperLayerData = NULL;
+    XY dimensions = XY{ 20,15 };
+    uint16_t* lowerLayerData = NULL;
+    uint16_t* upperLayerData = NULL;
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
     DrawableManager wxsManager;
+
+    int scale = 1;
+    XY canvasDrawPoint = { 40,40 };
 
     RPG2KTilemapPreviewScreen(MainEditor* parent);
     ~RPG2KTilemapPreviewScreen();
 
     void render() override;
     void tick() override;
+    void takeInput(SDL_Event evt) override;
+    std::string getName() override { return "Preview RPG2K map"; }
+
+    void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
+
+    void RenderRPG2KTile(uint16_t tile, SDL_Rect dst);
+    void LoadLMU(PlatformNativePathString path);
 };
 

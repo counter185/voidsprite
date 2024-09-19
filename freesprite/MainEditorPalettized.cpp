@@ -9,6 +9,7 @@
 #include "PalettizedEditorColorPicker.h"
 #include "PalettizedEditorLayerPicker.h"
 #include "EditorBrushPicker.h"
+#include "RPG2KTilemapPreviewScreen.h"
 #include "FileIO.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
@@ -339,6 +340,18 @@ void MainEditorPalettized::setUpWidgets()
 									return;
 								}
 								TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
+								g_addScreen(newScreen);
+								//editor->spritesheetPreview = newScreen;
+							}
+						}
+					},
+					{SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
+							[](MainEditor* editor) {
+								if (editor->texW != 480 || editor->texH != 256) {
+									g_addNotification(Notification("Error", "Dimensions must be 480x256"));
+									return;
+								}
+								RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
 								g_addScreen(newScreen);
 								//editor->spritesheetPreview = newScreen;
 							}
