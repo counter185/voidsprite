@@ -113,6 +113,268 @@ void RPG2KTilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathStri
 	}
 }
 
+void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex)
+{
+    XY autotileOrigin = { 0,0 };
+    if (autotileIndex < 4) {
+        autotileOrigin.y += 8 * 16;
+    }
+    else {
+        autotileIndex -= 4;
+        autotileOrigin.x += 6 * 16;
+    }
+    autotileOrigin.x += (autotileIndex % 2) * 3 * 16;
+    autotileOrigin.y += (autotileIndex / 2) * 4 * 16;
+
+    //caveman code
+    if (connection <= 0b1111) {
+        SDL_Rect centerTile = { autotileOrigin.x + 16, autotileOrigin.y + 32, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &centerTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y};
+        SDL_Rect cornerPiece;
+        if (connection & 0b0001) {
+            // top left
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y, dst.w/2, dst.h/2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+		} 
+        if (connection & 0b0010) {
+            // top right
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+        if (connection & 0b0100) {
+            // bottom right
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+        if (connection & 0b1000) {
+            // bottom left
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+    }
+    else if (connection <= 0b010011) {
+        SDL_Rect leftBorderTile = { autotileOrigin.x, autotileOrigin.y + 32, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &leftBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b01) {
+            // top right corner
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+        if (connection & 0b10) {
+            // bottom right corner
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+    }
+    else if (connection <= 0b10111) {
+		SDL_Rect topBorderTile = { autotileOrigin.x + 16, autotileOrigin.y + 16, 16, 16 };
+		SDL_RenderCopy(g_rd, tex, &topBorderTile, &dst);
+		XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+		SDL_Rect cornerPiece;
+        if (connection & 0b01) {
+            // bottom right corner
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+        if (connection & 0b10) {
+            // bottom left corner
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+	}
+    else if (connection <= 0b11011) {
+        SDL_Rect rightBorderTile = { autotileOrigin.x + 32, autotileOrigin.y + 32, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &rightBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b01) {
+            //bottom left corner
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+        if (connection & 0b10) {
+            //top left corner
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+    }
+    else if (connection <= 0b11111) {
+        SDL_Rect bottomBorderTile = { autotileOrigin.x + 16, autotileOrigin.y + 48, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &bottomBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b01) {
+            //top left corner
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+        if (connection & 0b10) {
+            //top right corner
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+    }
+    else if (connection == 0b100000) {
+        // left + right border tile
+        SDL_Rect leftBorderTile = { autotileOrigin.x, autotileOrigin.y + 32, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &leftBorderTile, &dst);
+        SDL_Rect rightBorderTileFragment = { autotileOrigin.x + 40, autotileOrigin.y + 32, 8, 16 };
+        SDL_Rect rightBorderTileDst = { dst.x + dst.w/2, dst.y, dst.w/2, dst.h };
+        SDL_RenderCopy(g_rd, tex, &rightBorderTileFragment, &rightBorderTileDst);
+    }
+    else if (connection == 0b100001) {
+        // top + bottom border tile
+        SDL_Rect topBorderTile = { autotileOrigin.x + 16, autotileOrigin.y + 16, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &topBorderTile, &dst);
+        SDL_Rect bottomBorderTileFragment = { autotileOrigin.x + 16, autotileOrigin.y + 56, 16, 8 };
+        SDL_Rect bottomBorderTileDst = { dst.x, dst.y + dst.h / 2, dst.w, dst.h / 2 };
+        SDL_RenderCopy(g_rd, tex, &bottomBorderTileFragment, &bottomBorderTileDst);
+    }
+    else if (connection <= 0b100011) {
+        // top left border tile
+        SDL_Rect topLeftBorderTile = { autotileOrigin.x, autotileOrigin.y + 16, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &topLeftBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b1) {
+            // bottom right corner
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+    }
+    else if (connection <= 0b100101) {
+        // top right border tile
+        SDL_Rect topRightBorderTile = { autotileOrigin.x + 32, autotileOrigin.y + 16, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &topRightBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b1) {
+			// bottom left corner
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y + 8, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+		}
+    }
+    else if (connection <= 0b100111) {
+        // bottom right border tile
+        SDL_Rect bottomRightBorderTile = { autotileOrigin.x + 32, autotileOrigin.y + 48, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &bottomRightBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b1) {
+            // top left corner
+            cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+        }
+    }
+    else if (connection <= 0b101001) {
+        // bottom left border tile
+        SDL_Rect bottomLeftBorderTile = { autotileOrigin.x, autotileOrigin.y + 48, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &bottomLeftBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
+        if (connection & 0b1) {
+			// top right corner
+            cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y, 8, 8 };
+            SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
+		}
+    }
+    else if (connection <= 0b101110) {
+        switch (connection & 0b111) {
+        case 0b010:
+        {
+            //top left + top right border tiles
+            SDL_Rect topLeftBorderTile = { autotileOrigin.x, autotileOrigin.y + 16, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &topLeftBorderTile, &dst);
+            SDL_Rect topRightBorderPiece = { autotileOrigin.x + 32 + 8, autotileOrigin.y + 16, 8, 16 };
+            SDL_Rect topRightBorderDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h };
+            SDL_RenderCopy(g_rd, tex, &topRightBorderPiece, &topRightBorderDst);
+        }
+            break;
+        case 0b011:
+        {
+            //top left + bottom left border tiles
+            SDL_Rect topLeftBorderTile = { autotileOrigin.x, autotileOrigin.y + 16, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &topLeftBorderTile, &dst);
+            SDL_Rect bottomLeftBorderPiece = { autotileOrigin.x, autotileOrigin.y + 48 + 8, 16, 8 };
+            SDL_Rect bottomLeftBorderDst = { dst.x, dst.y + dst.h / 2, dst.w, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &bottomLeftBorderPiece, &bottomLeftBorderDst);
+        }
+            break;
+        case 0b100:
+        {
+            //bottom left + bottom right border tiles
+            SDL_Rect bottomLeftBorderTile = { autotileOrigin.x, autotileOrigin.y + 48, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &bottomLeftBorderTile, &dst);
+            SDL_Rect bottomRightBorderPiece = { autotileOrigin.x + 32 + 8, autotileOrigin.y + 48, 8, 16 };
+            SDL_Rect bottomRightBorderDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h };
+            SDL_RenderCopy(g_rd, tex, &bottomRightBorderPiece, &bottomRightBorderDst);
+        }
+            break;
+        case 0b101:
+        {
+            //top right + bottom right border tiles
+            SDL_Rect topRightBorderTile = { autotileOrigin.x + 32, autotileOrigin.y + 16, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &topRightBorderTile, &dst);
+            SDL_Rect bottomRightBorderPiece = { autotileOrigin.x + 32, autotileOrigin.y + 48 + 8, 16, 8 };
+            SDL_Rect bottomRightBorderDst = { dst.x, dst.y + dst.h / 2, dst.w, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &bottomRightBorderPiece, &bottomRightBorderDst);
+        }
+			break;
+        case 0b110:
+        {
+            //8x8: top left + top right + bottom left + bottom right border tiles
+            SDL_Rect topLeftBorderTile = { autotileOrigin.x, autotileOrigin.y + 16, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &topLeftBorderTile, &dst);
+            SDL_Rect topRightBorderPiece = { autotileOrigin.x + 32 + 8, autotileOrigin.y + 16, 8, 8 };
+            SDL_Rect topRightBorderDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &topRightBorderPiece, &topRightBorderDst);
+            SDL_Rect bottomLeftBorderPiece = { autotileOrigin.x, autotileOrigin.y + 48 + 8, 8, 8 };
+            SDL_Rect bottomLeftBorderDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &bottomLeftBorderPiece, &bottomLeftBorderDst);
+            SDL_Rect bottomRightBorderPiece = { autotileOrigin.x + 32 + 8, autotileOrigin.y + 48 + 8, 8, 8 };
+            SDL_Rect bottomRightBorderDst = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &bottomRightBorderPiece, &bottomRightBorderDst);
+        }
+            break;
+        }
+    }
+    else if (connection <= 0b110000) {
+        //just the center piece
+        SDL_Rect centerTile = { autotileOrigin.x + 16, autotileOrigin.y + 32, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &centerTile, &dst);
+    }
+    else if (connection == 0b110001) {
+        //x0 y0 tile
+        SDL_Rect centerTile = { autotileOrigin.x, autotileOrigin.y, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &centerTile, &dst);
+    }
+    else {
+        g_fnt->RenderString(std::format("a{}\n{}", connection, autotileIndex), dst.x, dst.y);
+
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+        SDL_RenderDrawRect(g_rd, &dst);
+    }
+}
+
 void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, SDL_Rect dst)
 {
     if (tile == 0) {
@@ -157,10 +419,7 @@ void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, SDL_Rect dst)
         index -= 0x0FA0;
         int autotileIndex = index / 50;
         int autotileConnectionType = index % 50;
-        g_fnt->RenderString(std::format("a{}\n{}", autotileConnectionType, autotileIndex), dst.x, dst.y);
-
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-        SDL_RenderDrawRect(g_rd, &dst);
+        RenderAutoTile(autotileConnectionType, autotileIndex, dst, draw);
         type = 'a';
     }
     else if (index >= 0x0BB8) { //animated tiles

@@ -440,6 +440,10 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
 
 void TilemapPreviewScreen::drawBackground()
 {
+    uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+
     uint64_t now = SDL_GetTicks64();
     uint64_t progress = now % 120000;
     for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {

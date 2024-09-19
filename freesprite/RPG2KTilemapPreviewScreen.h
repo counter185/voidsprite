@@ -27,6 +27,7 @@ public:
 
     void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
 
+    void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);
     void RenderRPG2KTile(uint16_t tile, SDL_Rect dst);
     void LoadLMU(PlatformNativePathString path);
 };
