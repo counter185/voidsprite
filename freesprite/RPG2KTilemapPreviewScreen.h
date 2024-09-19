@@ -27,8 +27,12 @@ public:
 
     void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
 
+    uint16_t lowerLayerTileAt(XY position);
+    bool isDeepWaterTileAt(XY position);
+
+    void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex);
     void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);
-    void RenderRPG2KTile(uint16_t tile, SDL_Rect dst);
+    void RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst);
     void LoadLMU(PlatformNativePathString path);
 };
 

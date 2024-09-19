@@ -48,12 +48,12 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
 {
     wxsManager.freeAllDrawables();
-	if (lowerLayerData != NULL) {
-		delete[] lowerLayerData;
-	}
-	if (upperLayerData != NULL) {
-		delete[] upperLayerData;
-	}
+    if (lowerLayerData != NULL) {
+        delete[] lowerLayerData;
+    }
+    if (upperLayerData != NULL) {
+        delete[] upperLayerData;
+    }
 }
 
 void RPG2KTilemapPreviewScreen::render()
@@ -61,14 +61,14 @@ void RPG2KTilemapPreviewScreen::render()
     TilemapPreviewScreen::drawBackground();
 
     for (int y = 0; y < dimensions.y; y++) {
-		for (int x = 0; x < dimensions.x; x++) {
-			SDL_Rect dst = { canvasDrawPoint.x + x * 16 * scale, canvasDrawPoint.y + y * 16 * scale, 16 * scale, 16 * scale };
-			uint16_t lowerTile = lowerLayerData[y * dimensions.x + x];
-			uint16_t upperTile = upperLayerData[y * dimensions.x + x];
-			RenderRPG2KTile(lowerTile, dst);
-			RenderRPG2KTile(upperTile, dst);
-		}
-	}
+        for (int x = 0; x < dimensions.x; x++) {
+            SDL_Rect dst = { canvasDrawPoint.x + x * 16 * scale, canvasDrawPoint.y + y * 16 * scale, 16 * scale, 16 * scale };
+            uint16_t lowerTile = lowerLayerData[y * dimensions.x + x];
+            uint16_t upperTile = upperLayerData[y * dimensions.x + x];
+            RenderRPG2KTile(lowerTile, {x, y}, dst);
+            RenderRPG2KTile(upperTile, {x, y}, dst);
+        }
+    }
     SDL_Rect overallRect = { canvasDrawPoint.x-1, canvasDrawPoint.y-1, dimensions.x * 16 * scale + 2, dimensions.y * 16 * scale + 2 };
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
     SDL_RenderDrawRect(g_rd, &overallRect);
@@ -90,7 +90,7 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
         wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
     }
     if (wxsManager.anyFocused()) {
-		wxsManager.passInputToFocused(evt);
+        wxsManager.passInputToFocused(evt);
     }
     else {
         if (evt.type == SDL_MOUSEWHEEL) {
@@ -99,8 +99,8 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             else {
                 if (scale-- <= 1) {
-					scale = 1;
-				}
+                    scale = 1;
+                }
             }
         }
     }
@@ -109,8 +109,208 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
 void RPG2KTilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index)
 {
     if (evt_id == EVENT_OTHERFILE_OPENFILE && importer_index == 1) {
-		LoadLMU(path);
-	}
+        LoadLMU(path);
+    }
+}
+
+uint16_t RPG2KTilemapPreviewScreen::lowerLayerTileAt(XY position)
+{
+    if (position.x > 0 && position.x < dimensions.x && position.y > 0 && position.y < dimensions.y) {
+        return lowerLayerData[position.y * dimensions.x + position.x];
+    }
+    else {
+        return -1;
+    }
+}
+
+bool RPG2KTilemapPreviewScreen::isDeepWaterTileAt(XY position)
+{
+    uint16_t tile = lowerLayerTileAt(position);
+    if (tile < 0x0BB8) {
+        int watertile = tile % 50;
+        int watertype = tile / 50 / 20;
+        return watertype == 2;
+    }
+    else {
+        return false;
+    }
+}
+
+void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex)
+{
+    int waterAnimLength = 500;
+    int animState = SDL_GetTicks64() % (waterAnimLength*4) / waterAnimLength;
+    if (animState == 3) {
+        animState = 1;
+    }
+
+    XY waterTileOrigin = { 16 * animState, 64 };
+
+    bool dwUp = isDeepWaterTileAt({ position.x, position.y - 1 });
+    bool dwRight = isDeepWaterTileAt({ position.x + 1, position.y });
+    bool dwLeft = isDeepWaterTileAt({ position.x - 1, position.y });
+    bool dwDown = isDeepWaterTileAt({ position.x, position.y + 1 });
+
+    if (watertileIndex <= 1) {
+        XY origin = { 16 * 3 * watertileIndex + 16 * animState, 0 };
+        if (connection == 0x00) {
+            //x00 - full tile
+            SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &src, &dst);
+        }
+        else if (connection <= 0b1111) {
+            //corners
+            SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &src, &dst);
+
+            if (connection & 0b0001) {
+                //top left
+                SDL_Rect src2 = { origin.x, origin.y + 48, 8, 8 };
+                SDL_Rect dst2 = { dst.x, dst.y, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            if (connection & 0b0010) {
+                //top right
+                SDL_Rect src2 = { origin.x + 8, origin.y + 48, 8, 8 };
+                SDL_Rect dst2 = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            if (connection & 0b0100) {
+                //bottom right
+                SDL_Rect src2 = { origin.x + 8, origin.y + 48 + 8, 8, 8 };
+                SDL_Rect dst2 = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            if (connection & 0b1000) {
+                //bottom left
+                SDL_Rect src2 = { origin.x, origin.y + 48 + 8, 8, 8 };
+                SDL_Rect dst2 = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+        }
+        else if (connection <= 0b10011) {
+            //left side
+            SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &src, &dst);
+
+            SDL_Rect src2 = { origin.x, origin.y + 16, 8, 16 };
+            SDL_Rect dst2 = { dst.x, dst.y, dst.w / 2, dst.h };
+            SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+
+            if (connection & 0b01) {
+                //top right corner
+                SDL_Rect src2 = { origin.x + 8, origin.y + 48, 8, 8 };
+                SDL_Rect dst2 = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            if (connection & 0b10) {
+                //bottom right corner
+                SDL_Rect src2 = { origin.x + 8, origin.y + 48 + 8, 8, 8 };
+                SDL_Rect dst2 = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+        }
+        else if (connection <= 0b10111) {
+            //border top
+            SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
+            SDL_RenderCopy(g_rd, tex, &src, &dst);
+
+            SDL_Rect src2 = { origin.x, origin.y + 32, 16, 8 };
+            SDL_Rect dst2 = { dst.x, dst.y, dst.w, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+
+            if (connection & 0b01) {
+                //bottom right corner
+                SDL_Rect src2 = { origin.x + 8, origin.y + 48 + 8, 8, 8 };
+                SDL_Rect dst2 = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            if (connection & 0b10) {
+                //bottom left corner
+                SDL_Rect src2 = { origin.x, origin.y + 48 + 8, 8, 8 };
+                SDL_Rect dst2 = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+        }
+        else {
+            switch (connection) {
+            case 0x2E:
+            {
+                //x2E - center tile
+                SDL_Rect src = { origin.x, origin.y, 16, 16 };
+                SDL_RenderCopy(g_rd, tex, &src, &dst);
+            }
+            break;
+            case 0x20:
+            {
+                //x20 - vertical tile
+                SDL_Rect src = { origin.x, origin.y + 16, 16, 16 };
+                SDL_RenderCopy(g_rd, tex, &src, &dst);
+            }
+            break;
+            case 0x21:
+            {
+                //x21 - horizontal tile
+                SDL_Rect src = { origin.x, origin.y + 32, 16, 16 };
+                SDL_RenderCopy(g_rd, tex, &src, &dst);
+            }
+            break;
+            case 0x1c:
+            {
+                //border bottom
+                SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
+                SDL_RenderCopy(g_rd, tex, &src, &dst);
+                SDL_Rect src2 = { origin.x, origin.y + 32 + 8, 16, 8 };
+                SDL_Rect dst2 = { dst.x, dst.y + dst.h / 2, dst.w, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            break;
+            case 0x18:
+            {
+                //border right
+                SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
+                SDL_RenderCopy(g_rd, tex, &src, &dst);
+                SDL_Rect src2 = { origin.x + 8, origin.y + 16, 8, 16 };
+                SDL_Rect dst2 = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h };
+                SDL_RenderCopy(g_rd, tex, &src2, &dst2);
+            }
+            break;
+            default:
+                g_fnt->RenderString(std::format("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
+
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+                SDL_RenderDrawRect(g_rd, &dst);
+                break;
+            }
+        }
+
+        SDL_Rect partialDWChunk = {waterTileOrigin.x, waterTileOrigin.y + 16, 8, 8};
+        if (dwLeft && dwUp) {
+            SDL_Rect src = { partialDWChunk.x, partialDWChunk.y, 8, 8 };
+            SDL_Rect dstPartial = { dst.x, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &src, &dstPartial);
+        }
+        if (dwRight && dwUp) {
+            SDL_Rect src = { partialDWChunk.x + 8, partialDWChunk.y, 8, 8 };
+            SDL_Rect dstPartial = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &src, &dstPartial);
+        }
+        if (dwLeft && dwDown) {
+            SDL_Rect src = { partialDWChunk.x, partialDWChunk.y + 8, 8, 8 };
+            SDL_Rect dstPartial = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &src, &dstPartial);
+        }
+        if (dwRight && dwDown) {
+            SDL_Rect src = { partialDWChunk.x + 8, partialDWChunk.y + 8, 8, 8 };
+            SDL_Rect dstPartial = { dst.x + dst.w / 2, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+            SDL_RenderCopy(g_rd, tex, &src, &dstPartial);
+        }
+    } else {
+        g_fnt->RenderString(std::format("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
+
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+        SDL_RenderDrawRect(g_rd, &dst);
+    }
 }
 
 void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex)
@@ -137,7 +337,7 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
             cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y, 8, 8 };
             SDL_Rect cornerDst = { dst.x, dst.y, dst.w/2, dst.h/2 };
             SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
-		} 
+        } 
         if (connection & 0b0010) {
             // top right
             cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y, 8, 8 };
@@ -176,10 +376,10 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
         }
     }
     else if (connection <= 0b10111) {
-		SDL_Rect topBorderTile = { autotileOrigin.x + 16, autotileOrigin.y + 16, 16, 16 };
-		SDL_RenderCopy(g_rd, tex, &topBorderTile, &dst);
-		XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
-		SDL_Rect cornerPiece;
+        SDL_Rect topBorderTile = { autotileOrigin.x + 16, autotileOrigin.y + 16, 16, 16 };
+        SDL_RenderCopy(g_rd, tex, &topBorderTile, &dst);
+        XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
+        SDL_Rect cornerPiece;
         if (connection & 0b01) {
             // bottom right corner
             cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y + 8, 8, 8 };
@@ -192,7 +392,7 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
             SDL_Rect cornerDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
             SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
         }
-	}
+    }
     else if (connection <= 0b11011) {
         SDL_Rect rightBorderTile = { autotileOrigin.x + 32, autotileOrigin.y + 32, 16, 16 };
         SDL_RenderCopy(g_rd, tex, &rightBorderTile, &dst);
@@ -265,11 +465,11 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
         XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
         SDL_Rect cornerPiece;
         if (connection & 0b1) {
-			// bottom left corner
+            // bottom left corner
             cornerPiece = { cornerPieceOrigin.x, cornerPieceOrigin.y + 8, 8, 8 };
             SDL_Rect cornerDst = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
             SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
-		}
+        }
     }
     else if (connection <= 0b100111) {
         // bottom right border tile
@@ -291,11 +491,11 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
         XY cornerPieceOrigin = { autotileOrigin.x + 32, autotileOrigin.y };
         SDL_Rect cornerPiece;
         if (connection & 0b1) {
-			// top right corner
+            // top right corner
             cornerPiece = { cornerPieceOrigin.x + 8, cornerPieceOrigin.y, 8, 8 };
             SDL_Rect cornerDst = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
             SDL_RenderCopy(g_rd, tex, &cornerPiece, &cornerDst);
-		}
+        }
     }
     else if (connection <= 0b101110) {
         switch (connection & 0b111) {
@@ -338,7 +538,7 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
             SDL_Rect bottomRightBorderDst = { dst.x, dst.y + dst.h / 2, dst.w, dst.h / 2 };
             SDL_RenderCopy(g_rd, tex, &bottomRightBorderPiece, &bottomRightBorderDst);
         }
-			break;
+            break;
         case 0b110:
         {
             //8x8: top left + top right + bottom left + bottom right border tiles
@@ -375,11 +575,8 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
     }
 }
 
-void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, SDL_Rect dst)
+void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst)
 {
-    if (tile == 0) {
-        return;
-    }
 
     //TODO PLEASE CHANGE THIS
     SDL_Texture* draw = caller->getCurrentLayer()->tex;
@@ -442,8 +639,8 @@ void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, SDL_Rect dst)
         int watertile = index % 50;
         int watertype = index / 50 / 20;
         //index = watertype * 141 + watertile + frame * 47;
+        RenderWaterTile(watertile, watertype, position, dst, draw);
         type = 'w';
-        g_fnt->RenderString(std::format("W{}", watertile), dst.x, dst.y);
     }
 }
 
@@ -465,54 +662,13 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                 lowerLayer[y * map->width + x] = map->lower_layer[dataPointer];
                 upperLayer[y * map->width + x] = map->upper_layer[dataPointer];
                 dataPointer++;
-                /*char type = '-';
-                if (index >= 0x2710) {   //upper layer
-                    index -= 0x2710;
-                    type = 'u';
-                }
-                else if (index >= 0x1388) { //lower layer
-                    index -= 0x1388;
-                    type = 'l';
-                }
-                else if (index >= 0x0FA0) { //autotiles
-                    index -= 0x0FA0;
-                    int autotileIndex = index / 50;
-                    type = 'a';
-                }
-                else if (index >= 0x0BB8) { //animated tiles
-                    int frame = 0;
-                    index = 0x0207 + (((index - 0x0BB8) / 50) << 2) + frame;
-                    type = 'n';
-                }
-                else {  //water tiles
-                    int frame = 0;
-                    int watertile = index % 50;
-                    int watertype = index / 50 / 20;
-                    //index = watertype * 141 + watertile + frame * 47;
-                    type = 'w';
-                }
-
-                uint8_t tileDirection = 0;
-                uint16_t tileIndex = index;
-                if (type == 'a') {
-                    tileDirection = index % 50;
-                    tileIndex = index / 50;
-                }
-                else if (type == 'w') {
-                    tileDirection = index % 50;
-                    tileIndex = index / 50 / 20;
-                }
-
-                printf("%c:(%02x;%04x),", type, tileDirection, tileIndex);
-                //printf("%c:%04x,", type, index);*/
 
             }
-            //printf("\n");
         }
 
         if (lowerLayerData != NULL) {
-			delete[] lowerLayerData;
-		}
+            delete[] lowerLayerData;
+        }
         if (upperLayerData != NULL) {
             delete[] upperLayerData;
         }
