@@ -8,6 +8,7 @@
 #include "Notification.h"
 #include "SpritesheetPreviewScreen.h"
 #include "EditorSpritesheetPreview.h"
+#include "RPG2KTilemapPreviewScreen.h"
 #include "FileIO.h"
 #include "PopupTextBox.h"
 #include "PopupSetEditorPixelGrid.h"
@@ -617,6 +618,18 @@ void MainEditor::setUpWidgets()
 									return;
 								}
 								TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
+								g_addScreen(newScreen);
+								//editor->spritesheetPreview = newScreen;
+							}
+						}
+					},
+					{SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
+							[](MainEditor* editor) {
+								if (editor->texW != 480 || editor->texH != 256) {
+									g_addNotification(Notification("Error", "Dimensions must be 480x256"));
+									return;
+								}
+								RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
 								g_addScreen(newScreen);
 								//editor->spritesheetPreview = newScreen;
 							}

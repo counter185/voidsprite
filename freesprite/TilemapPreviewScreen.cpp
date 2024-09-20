@@ -4,6 +4,9 @@
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
 #include "TilemapEditorLayerPicker.h"
+#include <lcf/lmu/reader.h>
+#include <lcf/rpg/map.h>
+#include <lcf/reader_lcf.h>
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
@@ -18,7 +21,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     {
                         {SDLK_o, { "Load layout from file",
                                 [](TilemapPreviewScreen* screen) {
-                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
+                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                                 }
                             }
                         },
@@ -333,15 +336,21 @@ void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString n
 
 void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
 {
-    FILE* file = platformOpenFile(name, PlatformFileModeRB);
-    if (file == NULL) {
-        g_addNotification(Notification("Error loading file", "Could not open file for writing."));
-        return;
+    //
+    //if (name.find(utf8StringToWstring(".lmu")) == name.size() - 4) {
+    if (importerIndex == 2) {
+        
     }
     else {
-        uint8_t version;
-        fread(&version, 1, 1, file);
-        switch (version) {
+        FILE* file = platformOpenFile(name, PlatformFileModeRB);
+        if (file == NULL) {
+            g_addNotification(Notification("Error loading file", "Could not open file for writing."));
+            return;
+        }
+        else {
+            uint8_t version;
+            fread(&version, 1, 1, file);
+            switch (version) {
             case 1:
                 XY dims;
                 fread(&dims.x, 4, 1, file);
@@ -365,22 +374,23 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                 for (int l = 0; l < layerCount; l++) {
                     XY** newTilemap = newLayer();
                     for (int y = 0; y < tilemapDimensions.y; y++) {
-						for (int x = 0; x < tilemapDimensions.x; x++) {
-							XY td;
-							fread(&td.x, 4, 1, file);
-							fread(&td.y, 4, 1, file);
-							newTilemap[y][x] = td;
-						}
-					}
-				}
+                        for (int x = 0; x < tilemapDimensions.x; x++) {
+                            XY td;
+                            fread(&td.x, 4, 1, file);
+                            fread(&td.y, 4, 1, file);
+                            newTilemap[y][x] = td;
+                        }
+                    }
+                }
                 activeTilemap = tilemap[0];
                 break;
             default:
                 g_addNotification(Notification("Error loading file", "File version not supported"));
                 break;
+            }
+            fclose(file);
+            layerPicker->updateLayers();
         }
-        fclose(file);
-        layerPicker->updateLayers();
     }
 }
 
@@ -430,19 +440,23 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
 
 void TilemapPreviewScreen::drawBackground()
 {
+    uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+
     uint64_t now = SDL_GetTicks64();
     uint64_t progress = now % 120000;
     for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {
         if (y >= 0) {
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x22);
-            SDL_RenderDrawLine(g_rd, 0, y, g_windowW, y);
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x13);
+            SDL_RenderDrawLine(g_rd, 0, y, g_windowW, y - 50);
         }
     }
 
     for (int x = -(1.0 - (now % 100000) / 100000.0) * g_windowW; x < g_windowW; x += 30) {
         if (x >= 0) {
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19);
-            SDL_RenderDrawLine(g_rd, x, 0, x, g_windowH);
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x13);
+            SDL_RenderDrawLine(g_rd, x, 0, x - 30, g_windowH);
         }
     }
 }

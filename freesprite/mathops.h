@@ -40,6 +40,8 @@ SDL_FPoint xytofp(XY p);
 std::string stringToLower(std::string a);
 std::wstring utf8StringToWstring(std::string a);
 PlatformNativePathString convertStringOnWin32(std::string a);
+
+bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith);
 bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0);

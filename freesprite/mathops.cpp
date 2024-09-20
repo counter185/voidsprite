@@ -62,12 +62,23 @@ PlatformNativePathString convertStringOnWin32(std::string a) {
 #endif
 }
 
+//can't do this with templates
+bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith)
+{
+    if (c.size() < endsWith.size()) {
+        return false;
+    }
+    auto otherString = c.substr(c.size() - endsWith.size());
+    std::transform(otherString.begin(), otherString.end(), otherString.begin(), ::tolower);
+    std::transform(endsWith.begin(), endsWith.end(), endsWith.begin(), ::tolower);
+    return otherString == endsWith;
+}
 bool stringEndsWithIgnoreCase(std::string c, std::string endsWith)
 {
     if (c.size() < endsWith.size()) {
         return false;
     }
-    std::string otherString = c.substr(c.size() - endsWith.size());
+    auto otherString = c.substr(c.size() - endsWith.size());
     std::transform(otherString.begin(), otherString.end(), otherString.begin(), ::tolower);
     std::transform(endsWith.begin(), endsWith.end(), endsWith.begin(), ::tolower);
     return otherString == endsWith;

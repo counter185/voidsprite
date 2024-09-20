@@ -1,6 +1,6 @@
  CXX = g++-13
- CPPFLAGS = -std=c++20 -Wl,-rpath,. -Wl,-Bstatic -lpthread -lz -lpng -Wl,-Bdynamic -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -static-libstdc++ -static-libgcc
- CPPFILES = ../freesprite/*.cpp ../freesprite/pugixml/*.cpp ../freesprite/zip/*.c ../freesprite/easybmp/*.cpp ../freesprite/astc_dec/*.cpp
+ CPPFLAGS = -I../freesprite/liblcf -I../freesprite/liblcf/generated -std=c++20 -Wl,-rpath,. -Wl,-Bstatic -lpthread -lz -lpng -Wl,-Bdynamic -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -static-libstdc++ -static-libgcc
+ CPPFILES = ../freesprite/*.cpp ../freesprite/pugixml/*.cpp ../freesprite/zip/*.c ../freesprite/easybmp/*.cpp ../freesprite/astc_dec/*.cpp ../freesprite/liblcf/*.cpp ../freesprite/liblcf/generated/*.cpp
  CPPOUTNAME = ./build/voidsprite.x86_64
 
 build: make_build_dir unzip_devlibs copy_assets
