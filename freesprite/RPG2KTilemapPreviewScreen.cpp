@@ -86,6 +86,10 @@ void RPG2KTilemapPreviewScreen::render()
 
 void RPG2KTilemapPreviewScreen::tick()
 {
+    if (caller->texW != 480 || caller->texH != 256) {
+        g_closeScreen(this);
+        return;
+    }
 }
 
 void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)

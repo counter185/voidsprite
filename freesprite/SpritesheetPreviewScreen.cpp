@@ -56,23 +56,24 @@ void SpritesheetPreviewScreen::render()
 		SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
 	}
 
+	if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
 
-	int dx = canvasRenderRect.x;
-	while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
-		dx += caller->tileDimensions.x * canvasZoom;
-		if (dx >= 0) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-			SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
+		int dx = canvasRenderRect.x;
+		while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
+			dx += caller->tileDimensions.x * canvasZoom;
+			if (dx >= 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+				SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
+			}
 		}
-	}
-	
 
-	int dy = canvasRenderRect.y;
-	while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
-		dy += caller->tileDimensions.y * canvasZoom;
-		if (dy >= 0) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-			SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
+		int dy = canvasRenderRect.y;
+		while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
+			dy += caller->tileDimensions.y * canvasZoom;
+			if (dy >= 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
+			}
 		}
 	}
 	
@@ -139,6 +140,11 @@ void SpritesheetPreviewScreen::render()
 
 void SpritesheetPreviewScreen::tick()
 {
+	if (caller->tileDimensions.x == 0 || caller->tileDimensions.y == 0) {
+		g_closeScreen(this);
+		return;
+	}
+
 	int rightPanelWidth = ixmax(300, canvasZoom * caller->tileDimensions.x);
 	XY origin = { g_windowW - rightPanelWidth, 20 };
 	msPerSpriteLabel->position = { origin.x + 5, origin.y + 20 };
