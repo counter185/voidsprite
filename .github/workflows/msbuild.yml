@@ -73,19 +73,17 @@ jobs:
       run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -y && sudo apt-get install g++-13
 
     - name: install devlibs
-      run: sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev zlib1g-dev libpng-dev
+      run: sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev zlib1g-dev libpng-dev meson
     
-    - name: make
-      run: make
-      working-directory: gcc-build
+    - name: run build
+      run: ./linux_build.sh
 
     - name: add licenses
       run: cp -r ../OPEN_SOURCE_LICENSES ./build/
-      working-directory: gcc-build
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build-linux
         path: |
-          gcc-build/build
+          build
