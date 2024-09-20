@@ -14,8 +14,10 @@ public:
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
     DrawableManager wxsManager;
 
+    uint8_t gridOpacity = 0x18;
     int scale = 1;
     XY canvasDrawPoint = { 40,40 };
+    bool scrollingTilemap = false;
 
     RPG2KTilemapPreviewScreen(MainEditor* parent);
     ~RPG2KTilemapPreviewScreen();
