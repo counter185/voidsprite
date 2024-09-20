@@ -1,4 +1,5 @@
 #include <lcf/lmu/reader.h>
+#include <lcf/writer_lcf.h>
 
 #include "RPG2KTilemapPreviewScreen.h"
 #include "ScreenWideNavBar.h"
@@ -42,6 +43,8 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     memset(lowerLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
     memset(upperLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
 
+    callerCanvas = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
+
     //resizeTilemap(32, 32);
 }
 
@@ -54,11 +57,15 @@ RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
     if (upperLayerData != NULL) {
         delete[] upperLayerData;
     }
+    if (callerCanvas) {
+        SDL_DestroyTexture(callerCanvas);
+    }
 }
 
 void RPG2KTilemapPreviewScreen::render()
 {
     TilemapPreviewScreen::drawBackground();
+    PrerenderCanvas();
 
     for (int y = 0; y < dimensions.y; y++) {
         for (int x = 0; x < dimensions.x; x++) {
@@ -131,6 +138,11 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
     }
 }
 
+BaseScreen* RPG2KTilemapPreviewScreen::isSubscreenOf()
+{
+    return caller;
+}
+
 void RPG2KTilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index)
 {
     if (evt_id == EVENT_OTHERFILE_OPENFILE && importer_index == 1) {
@@ -159,6 +171,23 @@ bool RPG2KTilemapPreviewScreen::isDeepWaterTileAt(XY position)
     else {
         return false;
     }
+}
+
+void RPG2KTilemapPreviewScreen::PrerenderCanvas()
+{
+    SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_NONE);
+    SDL_SetRenderTarget(g_rd, callerCanvas);
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+    SDL_RenderClear(g_rd);
+    for (Layer*& l : caller->layers) {
+        if (!l->hidden) {
+            l->render({ 0,0, 480, 256 }, 255);
+            //SDL_RenderCopy(g_rd, l->tex, NULL, NULL);
+        }
+    }
+    SDL_SetRenderTarget(g_rd, NULL);
+    SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_BLEND);
+	
 }
 
 void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex)
@@ -809,9 +838,7 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
 
 void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst)
 {
-
-    //TODO PLEASE CHANGE THIS
-    SDL_Texture* draw = caller->getCurrentLayer()->tex;
+    SDL_Texture* draw = callerCanvas;
 
     char type = 'o';
     uint16_t index = tile;
@@ -894,7 +921,6 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                 lowerLayer[y * map->width + x] = map->lower_layer[dataPointer];
                 upperLayer[y * map->width + x] = map->upper_layer[dataPointer];
                 dataPointer++;
-
             }
         }
 

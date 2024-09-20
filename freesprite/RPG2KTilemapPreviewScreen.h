@@ -14,6 +14,8 @@ public:
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
     DrawableManager wxsManager;
 
+    SDL_Texture* callerCanvas = NULL;
+
     uint8_t gridOpacity = 0x18;
     int scale = 1;
     XY canvasDrawPoint = { 40,40 };
@@ -26,12 +28,14 @@ public:
     void tick() override;
     void takeInput(SDL_Event evt) override;
     std::string getName() override { return "Preview RPG2K map"; }
+    BaseScreen* isSubscreenOf() override;
 
     void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
 
     uint16_t lowerLayerTileAt(XY position);
     bool isDeepWaterTileAt(XY position);
 
+    void PrerenderCanvas();
     void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex);
     void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);
     void RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst);
