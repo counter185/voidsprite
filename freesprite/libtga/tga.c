@@ -63,7 +63,7 @@ TGAOpen(const char *file,
 	}
 
 	FILE* fd = NULL;
-	fopen_s(&fd, file, mode);
+	fd = fopen(file, mode);
 	if (!fd) {
 		TGA_ERROR(tga, TGA_OPEN_FAIL);
 		free(tga);
