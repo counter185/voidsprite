@@ -13,8 +13,9 @@ for param in $*; do
 done
 
 set -e
-if [ "$no_setup" != "1" ]; then
-	meson setup --wipe --prefix=/tmp/voidsprite build
+if [ "$no_setup" != "1" || ! -e 'build' ]; then
+	if [ -e 'build' ]; then rm -r 'build'; fi
+	meson setup --prefix=/tmp/voidsprite build
 fi
 meson compile -C build
 meson install --skip-subprojects -C build
