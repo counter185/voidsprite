@@ -25,7 +25,7 @@ uint8_t rpg2kcharset_patternDown[5][5] = {
 };
 uint8_t rpg2kcharset_patternLeft[5][5] = {
     {0,0,1,0,0},
-    {0,1,0,0,0},
+    {0,1,0,0,0},    
     {1,1,1,1,1},
     {0,1,0,0,0},
     {0,0,1,0,0},

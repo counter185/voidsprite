@@ -12,6 +12,7 @@
 #include "TabbedView.h"
 #include "BaseTemplate.h"
 #include "TemplateRPG2KCharset.h"
+#include "TemplateRPG2KFaceset.h"
 #include "TemplateMC64x32Skin.h"
 #include "PopupMessageBox.h"
 #include "UIColorInputField.h"
@@ -42,6 +43,7 @@ public:
 
 	std::vector<BaseTemplate*> tab2templates = {
 		new TemplateRPG2KCharset(),
+		new TemplateRPG2KFaceset(),
 		new TemplateMC64x32Skin()
 	};
 
