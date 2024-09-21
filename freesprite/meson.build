@@ -138,3 +138,6 @@ install_dir = join_paths(get_option('prefix'), 'bin')
 
 install_subdir('assets', install_dir: install_dir)
 install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-VariableFont_wght.ttf', install_dir: install_dir)
+if host_machine.system() == 'linux'
+  subdir('linux')
+endif
