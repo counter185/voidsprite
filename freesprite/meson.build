@@ -96,9 +96,9 @@ voidsprite_sources = files(
 thread_dep = dependency('threads')
 
 # We use WrapDB wraps for these dependencies (see subprojects/*.wrap in root):
-libpng_dep = dependency('libpng', fallback: ['libpng', 'libpng_dep'], static: true)
-pugixml_dep = dependency('pugixml', fallback: ['pugixml', 'pugixml_dep'], static: true)
-zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'], static: true)
+libpng_dep = dependency('libpng', fallback: ['libpng', 'libpng_dep'])
+pugixml_dep = dependency('pugixml', fallback: ['pugixml', 'pugixml_dep'])
+zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'])
 
 # These deps are vendored in our source code; we manually add meson.build files
 # to build them as static libraries, see the subfolders for these libraries
