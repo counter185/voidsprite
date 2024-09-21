@@ -31,6 +31,7 @@ voidsprite_sources = files(
   'PopupTextTool.cpp',
   'PopupTileGeneric.cpp',
   'RPG2KTilemapPreviewScreen.cpp',
+  'TemplateRPG2KFaceset.cpp',
   'TilemapEditorLayerPicker.cpp',
   'ToolRectFlip.cpp',
   'ToolRectRotate.cpp',
