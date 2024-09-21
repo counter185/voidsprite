@@ -68,7 +68,7 @@ void ToolText::renderText()
 
 	if (font == NULL) {
 		//return;
-		font = TTF_OpenFont("appfont-MPLUSRounded1c-Medium.ttf", 20);
+		font = TTF_OpenFont(FONT_PATH, 20);
 		//todo
 	}
 

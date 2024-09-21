@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <name>voidsprite</name>
+  <summary>Free C++ sprite editor</summary>
+  <id>com.github.counter185.voidsprite</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0-or-later</project_license>
+
+  <developer_name translatable="no">counter185</developer_name>
+  <developer id="io.github.counter185">
+    <name translatable="no">counter185</name>
+  </developer>
+
+  <launchable type="desktop-id">com.github.counter185.voidsprite.desktop</launchable>
+
+  <!--<translation type="gettext">com.github.counter185.voidsprite</translation>-->
+
+  <content_rating type="oars-1.1"/>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
+  <url type="homepage">https://github.com/counter185/voidsprite</url>
+  <url type="bugtracker">https://github.com/counter185/voidsprite/issues</url>
+  <url type="contribute">https://github.com/counter185/voidsprite</url>
+  <url type="vcs-browser">https://github.com/counter185/voidsprite</url>
+
+  <description>
+    <p>Free C++ sprite editor</p>
+    <p>Supported file formats</p>
+    <p>Import:</p>
+    <ul>
+      <li>PNG</li>
+      <li>BMP</li>
+      <li>OpenRaster ORA</li>
+      <li>RPGMaker 2000/2003 XYZ</li>
+      <li>Atrophy Engine AETEX (tga/dds)</li>
+      <li>Wii TPL*</li>
+      <li>DDS* (DXT1, DXT2/3, DXT4/5)</li>
+      <li>Cave Story engine PBM</li>
+      <li>VTF* (BGRA, BGR, DXT1, DXT2/3, DXT4/5)</li>
+      <li>NES (dumps CHR-ROM)</li>
+      <li>Mario Paint save file (SRM)</li>
+      <li>All other formats supported by SDL2_Image</li>
+    </ul>
+    <p>* - not all subformats are currently implemented</p>
+    <p>Export:</p>
+    <ul>
+      <li>PNG</li>
+      <li>OpenRaster ORA</li>
+      <li>RPGMaker 2000/2003 XYZ</li>
+      <li>BMP</li>
+      <li>Cave Story engine PBM</li>
+      <li>C header (as uint8_t array)</li>
+      <li>Python file (as [R,G,B,A] np.array)</li>
+      <li>HTML document (inline Base64 image)</li>
+    </ul>
+  </description>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/counter185/voidsprite/refs/heads/main/img_preview_1.png</image>
+    </screenshot>
+  </screenshots>
+</component>

@@ -7,7 +7,7 @@ class ToolMeasure :
     bool heldDown = false;
     XY lastMousePos = XY{ 0,0 };
 
-    virtual std::string getIconPath() { return "assets/tool_measure.png"; }
+    virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_measure.png"; }
     bool isReadOnly() override { return true; }
     std::string getName() { return "Measure"; }
     void clickPress(MainEditor* editor, XY pos) override;

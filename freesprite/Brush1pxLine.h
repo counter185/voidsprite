@@ -11,7 +11,7 @@ class Brush1pxLine :
 		startPos = XY{ 0,0 };
 	}
 	std::string getName() override { return "1px Line"; };
-	std::string getIconPath() override { return "assets/brush_1pxline.png"; }
+	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxline.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override {}
 	void clickRelease(MainEditor* editor, XY pos) override;

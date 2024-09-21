@@ -16,7 +16,7 @@ public:
 	MainEditor* lastEditor = NULL;
 
 	std::string getName() override { return "Fill"; }
-	std::string getIconPath() override { return "assets/brush_fill.png"; }
+	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_fill.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}

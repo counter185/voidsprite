@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="image/x-voidsn">
+    <comment xml:lang="en">voidsprite Session</comment>
+    <!-- note: only works for v3 format and above. older formats are handled with the filename glob -->
+    <magic priority="50">
+      <match type="string" value="/VOIDSN.META/" offset="9"/>
+    </magic>
+    <glob pattern="*.voidsn"/>
+    <icon name="com.github.counter185.voidsprite"/>
+  </mime-type>
+</mime-info>

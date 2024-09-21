@@ -50,8 +50,12 @@ extern "C" {
 #define SDL_GetTicks64 SDL_GetTicks
 #endif
 
-#define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
-#define FONT_PATH_JP "appfontjp-NotoSansJP-VariableFont_wght.ttf"
+#ifndef VOIDSPRITE_ASSETS_PATH
+#define VOIDSPRITE_ASSETS_PATH ""
+#endif
+
+#define FONT_PATH VOIDSPRITE_ASSETS_PATH "appfont-MPLUSRounded1c-Medium.ttf"
+#define FONT_PATH_JP VOIDSPRITE_ASSETS_PATH "appfontjp-NotoSansJP-VariableFont_wght.ttf"
 
 #define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
 #define COLOR_ERROR SDL_Color{255,0,0,255}
