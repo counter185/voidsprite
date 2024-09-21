@@ -6,7 +6,7 @@ class ToolSetXSymmetry : public BaseBrush
     XY lastPos = { 0,0 };
     MainEditor* lastEditor = NULL;
 
-    std::string getIconPath() { return "assets/tool_setxsym.png"; }
+    std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_setxsym.png"; }
     bool isReadOnly() override { return true; }
     bool wantDoublePosPrecision() override { return true; }
     bool overrideRightClick() override { return true; }

@@ -182,39 +182,39 @@ int main(int argc, char** argv)
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
-    SDL_Surface* cursorSrf = IMG_Load("assets/app_cursor.png");
+    SDL_Surface* cursorSrf = IMG_Load(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
     if (cursorSrf != NULL) {
         SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
         SDL_SetCursor(cur);
         SDL_FreeSurface(cursorSrf);
     }
 
-    g_mainlogo = IMGLoadToTexture("assets/mainlogo.png");
-    g_iconLayerAdd = IMGLoadToTexture("assets/icon_layer_add.png");
-    g_iconLayerDelete = IMGLoadToTexture("assets/icon_layer_delete.png");
-    g_iconLayerUp = IMGLoadToTexture("assets/icon_layer_up.png");
-    g_iconLayerDown = IMGLoadToTexture("assets/icon_layer_down.png");
-    g_iconLayerDownMerge = IMGLoadToTexture("assets/icon_layer_downmerge.png");
-    g_iconLayerDuplicate = IMGLoadToTexture("assets/icon_layer_duplicate.png");
-    g_iconEraser = IMGLoadToTexture("assets/icon_eraser.png");
-    g_iconBlendMode = IMGLoadToTexture("assets/icon_blendmode.png");
-    g_iconColorRGB = IMGLoadToTexture("assets/icon_color_rgb.png");
-    g_iconColorHSV = IMGLoadToTexture("assets/icon_color_hsv.png");
-    g_iconColorVisual = IMGLoadToTexture("assets/icon_color_visual.png");
-    g_iconNavbarTabFile = IMGLoadToTexture("assets/tab_file.png");
-    g_iconNavbarTabEdit = IMGLoadToTexture("assets/tab_edit.png");
-    g_iconNavbarTabLayer = IMGLoadToTexture("assets/tab_layer.png");
-    g_iconNavbarTabView = IMGLoadToTexture("assets/tab_view.png");
-    g_iconComment = IMGLoadToTexture("assets/icon_message.png");
-    g_iconMenuPxDim = IMGLoadToTexture("assets/menu_pxdim.png");
-    g_iconMenuSpritesheet = IMGLoadToTexture("assets/menu_sptl.png");
-    g_iconMenuTemplates = IMGLoadToTexture("assets/menu_templates.png");
+    g_mainlogo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/mainlogo.png");
+    g_iconLayerAdd = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_add.png");
+    g_iconLayerDelete = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_delete.png");
+    g_iconLayerUp = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_up.png");
+    g_iconLayerDown = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_down.png");
+    g_iconLayerDownMerge = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_downmerge.png");
+    g_iconLayerDuplicate = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_duplicate.png");
+    g_iconEraser = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_eraser.png");
+    g_iconBlendMode = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_blendmode.png");
+    g_iconColorRGB = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_rgb.png");
+    g_iconColorHSV = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_hsv.png");
+    g_iconColorVisual = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_visual.png");
+    g_iconNavbarTabFile = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_file.png");
+    g_iconNavbarTabEdit = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_edit.png");
+    g_iconNavbarTabLayer = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_layer.png");
+    g_iconNavbarTabView = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_view.png");
+    g_iconComment = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_message.png");
+    g_iconMenuPxDim = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_pxdim.png");
+    g_iconMenuSpritesheet = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_sptl.png");
+    g_iconMenuTemplates = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_templates.png");
 
     SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);
     g_iconNotifTheCreature = SDL_CreateTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
-    //SDL_Texture* the_creature = IMGLoadToTexture("assets/kaosekai.png");
+    //SDL_Texture* the_creature = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/kaosekai.png");
 
     g_gamepad = new Gamepad();
     g_gamepad->TryCaptureGamepad();

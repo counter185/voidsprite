@@ -128,16 +128,22 @@ if host_machine.system() == 'windows'
   dependencies += sdl2main_dep
 endif
 
-executable('voidsprite', voidsprite_sources,
-  install: true,
-  dependencies: dependencies)
-
 # Install assets
-# TODO: Allow for an install directory for the assets (/usr/share/voidsprite?)
-install_dir = join_paths(get_option('prefix'), 'bin')
+if get_option('portable') 
+  assets_dir = join_paths(get_option('prefix'), 'bin')
+  cpp_args = '-DVOIDSPRITE_ASSETS_PATH='
+else
+  assets_dir = join_paths(get_option('prefix'), get_option('datadir'), 'voidsprite')
+  cpp_args = '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
+endif
 
-install_subdir('assets', install_dir: install_dir)
-install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-VariableFont_wght.ttf', install_dir: install_dir)
+install_subdir('assets', install_dir: assets_dir)
+install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-VariableFont_wght.ttf', install_dir: assets_dir)
 if host_machine.system() == 'linux'
   subdir('linux')
 endif
+
+executable('voidsprite', voidsprite_sources,
+  install: true,
+  dependencies: dependencies,
+  cpp_args: cpp_args)

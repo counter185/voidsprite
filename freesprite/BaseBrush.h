@@ -11,7 +11,7 @@ public:
 	virtual bool isReadOnly() { return false; }
 	virtual bool wantDoublePosPrecision() { return false; }
 	virtual bool overrideRightClick() { return false; }
-	virtual std::string getIconPath() { return "assets/brush_default.png"; }
+	virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/brush_default.png"; }
 	virtual std::string getName() { return "Base brush"; }
 	virtual void mouseMotion(MainEditor* editor, XY pos) {
 		lastMouseMotionPos = pos;

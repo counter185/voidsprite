@@ -1,0 +1,2 @@
+option('portable', type : 'boolean', value : false,
+       description : 'Make a portable build (store assets in the same directory as the binary)')
