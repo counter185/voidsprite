@@ -409,3 +409,11 @@ gcc-build/libSDL2-2.0.so.0
 gcc-build/libSDL2_image-2.0.so.0
 gcc-build/libSDL2_ttf-2.0.so.0
 gcc-build/libz.so.1
+
+/build
+
+/subprojects/*
+!/subprojects/*.wrap
+!/subprojects/liblcf
+!/subprojects/easybmp
+!/subprojects/libtga

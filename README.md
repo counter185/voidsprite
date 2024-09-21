@@ -35,9 +35,21 @@ Free C++ sprite editor
 
 ## Building
 
+### Windows
+
 1. Go to `freesprite/devlibs` and extract `devlibs.7z` to the current directory (right click `devlibs.7z` and `Extract here`).
 2. Go back to the repository root and run the `copy_devlibs.bat` script
 3. Open `freesprite.sln` with Visual Studio and build/run like any other C++ program
+
+### Linux
+
+1. Install the development dependencies and their base packages: sdl2, sdl2_ttf, sdl2_image, libpng, pugixml, zlib, liblcf
+1.1. Some dependencies (libpng, pugixml, zlib, liblcf) will be automatically downloaded and built during the build step if not installed
+2. Install meson (note that version 0.62.2 or higher is required; Ubuntu 22.04 users will want to install a newer version directly from pip with `pip3 install --user meson`)
+3. Run `./linux_build.sh`
+3.1. You can also pass the `--run` flag to automatically run the built binary
+
+The output binary will be placed in `/tmp/voidsprite`.
 
 ## Licenses
 
