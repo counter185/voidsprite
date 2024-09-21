@@ -13,7 +13,7 @@ for param in $*; do
 done
 
 set -e
-if [ "$no_setup" != "1" || ! -e 'build' ]; then
+if [ "$no_setup" != "1" ] || [ ! -e 'build' ]; then
 	if [ -e 'build' ]; then rm -r 'build'; fi
 	meson setup --prefix=/tmp/voidsprite build
 fi
