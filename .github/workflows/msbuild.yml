@@ -82,7 +82,7 @@ jobs:
       run: CC=gcc-13 CXX=g++-13 ./linux_build.sh
 
     - name: add licenses
-      run: cp -r ../OPEN_SOURCE_LICENSES /tmp/voidsprite
+      run: cp -r OPEN_SOURCE_LICENSES /tmp/voidsprite
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
