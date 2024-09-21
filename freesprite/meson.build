@@ -41,6 +41,7 @@ voidsprite_sources = files(
   'ToolRectMove.cpp',
   'drawable.cpp',
   'DrawableManager.cpp',
+  join_paths('easybmp', 'EasyBMP.cpp'),
   'EditorBrushPicker.cpp',
   'EditorColorPicker.cpp',
   'EditorLayerPicker.cpp',
@@ -102,7 +103,6 @@ zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'], static: true)
 # These deps are vendored in our source code; we manually add meson.build files
 # to build them as static libraries, see the subfolders for these libraries
 # under the source folder.
-easybmp_dep = dependency('easybmp', fallback: ['easybmp', 'easybmp_dep'])
 liblcf_dep = dependency('liblcf', fallback: ['liblcf', 'liblcf_dep'])
 libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'])
 
@@ -116,7 +116,6 @@ dependencies = [
   libpng_dep,
   liblcf_dep,
   pugixml_dep,
-  easybmp_dep,
   libtga_dep,
   sdl2_dep,
   sdl2_ttf_dep,
