@@ -82,11 +82,11 @@ jobs:
       run: CC=gcc-13 CXX=g++-13 ./linux_build.sh --portable
 
     - name: add licenses
-      run: cp -r OPEN_SOURCE_LICENSES /tmp/voidsprite
+      run: cp -r OPEN_SOURCE_LICENSES target/debug
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build-linux
         path: |
-          /tmp/voidsprite
+          target/debug
