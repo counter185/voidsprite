@@ -79,7 +79,7 @@ jobs:
       run: pip3 install --user meson
 
     - name: run build
-      run: ./linux_build.sh
+      run: CC=gcc-13 CXX=g++-13 ./linux_build.sh
 
     - name: add licenses
       run: cp -r ../OPEN_SOURCE_LICENSES /tmp/voidsprite
