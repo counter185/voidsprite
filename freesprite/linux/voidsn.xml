@@ -7,6 +7,6 @@
       <match type="string" value="/VOIDSN.META/" offset="9"/>
     </magic>
     <glob pattern="*.voidsn"/>
-    <icon name="com.github.counter185.voidsprite"/>
+    <icon name="voidsprite"/>
   </mime-type>
 </mime-info>
