@@ -12,15 +12,14 @@ void DraggablePanel::render(XY position)
 
 void DraggablePanel::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-        subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
-    }
-    if (subWidgets.anyFocused()) {
-        subWidgets.passInputToFocused(evt, gPosOffset);
-    }
-    else {
+    if (!DrawableManager::processInputEventInMultiple({ subWidgets }, evt, gPosOffset)) {
         processDrag(evt);
     }
+}
+
+void DraggablePanel::mouseHoverMotion(XY mousePos, XY gPosOffset)
+{
+    subWidgets.processHoverEvent(xyAdd(gPosOffset, position), mousePos);
 }
 
 void DraggablePanel::processDrag(SDL_Event evt)

@@ -14,6 +14,7 @@ public:
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     void render(XY position) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
+    void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
     void focusOut() override {
         Drawable::focusOut();
         subWidgets.forceUnfocus();
