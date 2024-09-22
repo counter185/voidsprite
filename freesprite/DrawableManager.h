@@ -8,6 +8,13 @@ class DrawableManager
 public:
 	std::vector<Drawable*> drawablesList;
 
+	~DrawableManager() {
+		if (drawablesList.size() == 0) {
+			//printf("[DrawableManager] duplicate destructor\n");
+		}
+		freeAllDrawables(); 
+	}
+
 	void addDrawable(Drawable* d);
 	void removeDrawable(Drawable* d);
 	void renderAll(XY offset = XY{0,0});

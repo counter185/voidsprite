@@ -9,13 +9,16 @@
 EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     caller = editor;
 
+    wxWidth = 250;
+    wxHeight = 400;
+
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
     //addBtn->text = "+";
     addBtn->wxWidth = 30;
     addBtn->setCallbackListener(-1, this);
     addBtn->icon = g_iconLayerAdd;
-    layerControlButtons.addDrawable(addBtn);
+    subWidgets.addDrawable(addBtn);
 
     UIButton* removeBtn = new UIButton();
     removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
@@ -23,7 +26,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     removeBtn->wxWidth = 30;
     removeBtn->icon = g_iconLayerDelete;
     removeBtn->setCallbackListener(-2, this);
-    layerControlButtons.addDrawable(removeBtn);
+    subWidgets.addDrawable(removeBtn);
 
     UIButton* upBtn = new UIButton();
     upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
@@ -31,7 +34,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     upBtn->wxWidth = 30;
     upBtn->icon = g_iconLayerUp;
     upBtn->setCallbackListener(-3, this);
-    layerControlButtons.addDrawable(upBtn);
+    subWidgets.addDrawable(upBtn);
 
     UIButton* downBtn = new UIButton();
     downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
@@ -39,7 +42,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     downBtn->wxWidth = 30;
     downBtn->icon = g_iconLayerDown;
     downBtn->setCallbackListener(-4, this);
-    layerControlButtons.addDrawable(downBtn);
+    subWidgets.addDrawable(downBtn);
 
     UIButton* mergeDownBtn = new UIButton();
     mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
@@ -47,37 +50,31 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     mergeDownBtn->wxWidth = 30;
     mergeDownBtn->icon = g_iconLayerDownMerge;
     mergeDownBtn->setCallbackListener(-5, this);
-    layerControlButtons.addDrawable(mergeDownBtn);
+    subWidgets.addDrawable(mergeDownBtn);
 
     UIButton* duplicateBtn = new UIButton();
     duplicateBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + mergeDownBtn->wxWidth + 5 + 5 + 5 + 5 + 5 + 5, 30 };
     duplicateBtn->wxWidth = 30;
     duplicateBtn->icon = g_iconLayerDuplicate;
     duplicateBtn->setCallbackListener(-6, this);
-    layerControlButtons.addDrawable(duplicateBtn);
+    subWidgets.addDrawable(duplicateBtn);
 
     UILabel* opacityLabel = new UILabel();
     opacityLabel->position = { 5, 65 };
     opacityLabel->text = "Opacity";
-    layerControlButtons.addDrawable(opacityLabel);
+    subWidgets.addDrawable(opacityLabel);
 
     opacitySlider = new UISlider();
     opacitySlider->position = { 80, 70 };
     opacitySlider->wxWidth = 165;
     opacitySlider->wxHeight = 20;
     opacitySlider->setCallbackListener(EVENT_LAYERPICKER_OPACITYSLIDER, this);
-    layerControlButtons.addDrawable(opacitySlider);
-}
-
-EditorLayerPicker::~EditorLayerPicker()
-{
-    layerButtons.freeAllDrawables();
-    layerControlButtons.freeAllDrawables();
+    subWidgets.addDrawable(opacitySlider);
 }
 
 bool EditorLayerPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
-	return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight })
+	return DraggablePanel::isMouseIn(thisPositionOnScreen, mousePos)
         || layerButtons.mouseInAny(thisPositionOnScreen, mousePos);
 }
 
@@ -104,24 +101,25 @@ void EditorLayerPicker::render(XY position)
     g_fnt->RenderString("LAYERS", position.x + 4, position.y + 1);
 
     layerButtons.renderAll(position);
-    layerControlButtons.renderAll(position);
+    
+    DraggablePanel::render(position);
 }
 
 void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
 {
     if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
         if (!layerButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
-            layerControlButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
+            subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
         }
     }
     if (layerButtons.anyFocused()) {
         layerButtons.passInputToFocused(evt, gPosOffset);
     }
-    else if (layerControlButtons.anyFocused()) {
-        layerControlButtons.passInputToFocused(evt, gPosOffset);
+    else if (subWidgets.anyFocused()) {
+        subWidgets.passInputToFocused(evt, gPosOffset);
     }
     else {
-        
+        processDrag(evt);
     }
 }
 

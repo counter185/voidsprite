@@ -396,6 +396,9 @@
     <ClCompile Include="TemplateRPG2KFaceset.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
+    <ClCompile Include="DraggablePanel.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -715,6 +718,9 @@
     </ClInclude>
     <ClInclude Include="TemplateRPG2KFaceset.h">
       <Filter>Header files\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="DraggablePanel.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

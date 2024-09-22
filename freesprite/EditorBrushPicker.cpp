@@ -4,17 +4,14 @@
 
 bool EditorBrushPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
-	return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight })
+	return DraggablePanel::isMouseIn(thisPositionOnScreen, mousePos)
         || (patternsMenuOpen && patternMenuWidgets.mouseInAny(thisPositionOnScreen, mousePos));
 }
 
 void EditorBrushPicker::render(XY position)
 {
-    //SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, currentV }));
-
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
-    //SDL_RenderFillRect(g_rd, &r);
+
     SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
     SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
     renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
@@ -24,13 +21,9 @@ void EditorBrushPicker::render(XY position)
         drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
     }
 
-    /*r = SDL_Rect{position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35};
-    SDL_SetRenderDrawColor(g_rd, previewCol.r, previewCol.g, previewCol.b, focused ? 0xff : 0x30);
-    SDL_RenderFillRect(g_rd, &r);*/
-
     g_fnt->RenderString("TOOLS", position.x + 3, position.y + 1);
 
-    subWidgets.renderAll(position);
+    DraggablePanel::render(position);
 
     if (patternsMenuOpen) {
         patternMenuWidgets.renderAll(xySubtract(position, XY{(int)(30 * (1.0- XM1PW3P1(patternMenuTimer.percentElapsedTime(200)))) , 0}));
@@ -39,7 +32,7 @@ void EditorBrushPicker::render(XY position)
 
 void EditorBrushPicker::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
         if (!patternMenuWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
             subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
         }
@@ -51,7 +44,7 @@ void EditorBrushPicker::handleInput(SDL_Event evt, XY gPosOffset)
         subWidgets.passInputToFocused(evt, gPosOffset);
     }
     else {
-        
+        processDrag(evt);
     }
 }
 

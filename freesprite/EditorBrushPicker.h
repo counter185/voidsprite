@@ -1,29 +1,31 @@
 #pragma once
 #include "drawable.h"
 #include "DrawableManager.h"
+#include "DraggablePanel.h"
 #include "BaseBrush.h"
 #include "UIButton.h"
 #include "EventCallbackListener.h"
 #include "Pattern.h"
 #include "UILabel.h"
 
-class EditorBrushPicker : public Drawable, public EventCallbackListener
+class EditorBrushPicker : public DraggablePanel, public EventCallbackListener
 {
 public:
-	int wxWidth = 190;
-	int wxHeight = 165;
 	MainEditor* caller;
 	bool patternsMenuOpen = false;
 
 	Timer64 patternMenuTimer;
 	UIButton* patternPanelBtn;
 	UIButton* editorReplaceBtn;
-	DrawableManager subWidgets, patternMenuWidgets;
+	DrawableManager patternMenuWidgets;
 	std::vector<UIButton*> brushButtons;
 	std::vector<UIButton*> patternButtons;
 
 	EditorBrushPicker(MainEditor* caller) {
 		this->caller = caller;
+
+		wxWidth = 190;
+		wxHeight = 165;
 
 		patternPanelBtn = new UIButton();
 		patternPanelBtn->position = { 141, 10 };

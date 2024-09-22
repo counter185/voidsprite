@@ -9,17 +9,14 @@
 #include "UIButton.h"
 #include "TabbedView.h"
 #include "UILabel.h"
+#include "DraggablePanel.h"
 
-class EditorColorPicker : public Drawable, public EventCallbackListener
+class EditorColorPicker : public DraggablePanel, public EventCallbackListener
 {
 protected:
 	EditorColorPicker() {}
 public:
-	int wxWidth = 400;
-	int wxHeight = 390;
 	MainEditor* caller;
-
-	DrawableManager subWidgets;
 
 	double currentH = 0, currentS = 0, currentV = 0;
 
@@ -50,13 +47,8 @@ public:
 
 	EditorColorPicker(MainEditor* c);
 
-	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
 	void render(XY position) override;
-	void handleInput(SDL_Event evt, XY gPosOffset) override;
-	void focusOut() override {
-		Drawable::focusOut();
-		subWidgets.forceUnfocus();
-	}
+
 	void eventTextInput(int evt_id, std::string data) override;
 	void eventTextInputConfirm(int evt_id, std::string data) override;
 	void eventButtonPressed(int evt_id) override;

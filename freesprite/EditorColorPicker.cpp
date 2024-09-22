@@ -7,6 +7,9 @@
 EditorColorPicker::EditorColorPicker(MainEditor* c) {
     caller = c;
 
+    wxWidth = 400;
+    wxHeight = 390;
+
     colorModeTabs = new TabbedView({ { "Colors" },{ "Last" } }, 75);
     colorModeTabs->position = XY{ 20,30 };
     subWidgets.addDrawable(colorModeTabs);
@@ -134,11 +137,6 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     subWidgets.addDrawable(blendModeButton);
 }
 
-bool EditorColorPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
-{
-    return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
-}
-
 void EditorColorPicker::render(XY position)
 {
     SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, currentV }));
@@ -169,20 +167,7 @@ void EditorColorPicker::render(XY position)
 
     g_fnt->RenderString("COLOR PICKER", position.x + 5, position.y + 1);
 
-    subWidgets.renderAll(position);
-}
-
-void EditorColorPicker::handleInput(SDL_Event evt, XY gPosOffset)
-{
-    if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.state) {
-        subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
-    }
-    if (!subWidgets.anyFocused()) {
-        
-    }
-    else {
-        subWidgets.passInputToFocused(evt, gPosOffset);
-    }
+    DraggablePanel::render(position);
 }
 
 void EditorColorPicker::eventTextInput(int evt_id, std::string data)
