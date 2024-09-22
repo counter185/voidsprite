@@ -8,7 +8,6 @@ class MinecraftSkinPreviewScreen :
 {
 public:
     MainEditor* caller;
-    DrawableManager wxsManager;
 
     MinecraftSkinPreviewScreen(MainEditor* parent) {
         caller = parent;

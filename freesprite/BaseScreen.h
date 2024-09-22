@@ -1,11 +1,13 @@
 #pragma once
 #include "globals.h"
+#include "DrawableManager.h"
 
 class BaseScreen
 {
 protected:
 	int callback_id = -1;
 	EventCallbackListener* callback = NULL;
+	DrawableManager wxsManager;
 public:
 
 	virtual ~BaseScreen() {}

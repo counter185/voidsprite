@@ -23,8 +23,6 @@
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
 public:
-	DrawableManager wxsManager;
-
 	TabbedView* newImageTabs;
 
 	int newImgW = 0, newImgH = 0;
@@ -209,9 +207,6 @@ public:
 				}
 			}
 		}
-	}
-	~StartScreen() {
-		wxsManager.freeAllDrawables();
 	}
 
 	void render() override;

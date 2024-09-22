@@ -10,7 +10,6 @@ public:
 	MainEditor* caller;
 	EditorSpritesheetPreview* previewWx;
 
-	DrawableManager wxsManager;
 	std::vector<XY> sprites;
 	int spritesProgress = 0;
 	int msPerSprite = 128;

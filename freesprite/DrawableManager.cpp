@@ -1,6 +1,45 @@
 #include "DrawableManager.h"
 #include "mathops.h"
 
+void DrawableManager::processHoverEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
+{
+	if (evt.type != SDL_MOUSEMOTION) {
+		return;
+	}
+	bool found = false;
+	for (auto& wxsw : wxss)
+	{
+		auto& wxs = wxsw.get();
+		if (found) {
+			wxs.forceUnhover();
+		}
+		else {
+			found = wxs.processHoverEvent(parentOffset, { evt.motion.x, evt.motion.y });
+		}
+	}
+}
+
+bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
+{
+	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
+		for (auto& wxsw : wxss) {
+			auto& wxs = wxsw.get();
+			if (wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, parentOffset)) {
+				break;
+			}
+		}
+	}
+
+	for (auto& wxsw : wxss) {
+		auto& wxs = wxsw.get();
+		if (wxs.anyFocused()) {
+			wxs.passInputToFocused(evt, parentOffset);
+			return true;
+		}
+	}
+	return false;
+}
+
 void DrawableManager::addDrawable(Drawable* d) {
 	drawablesList.push_back(d);
 }
@@ -102,6 +141,14 @@ void DrawableManager::forceUnfocus() {
 	}
 }
 
+void DrawableManager::forceUnhover()
+{
+	if (hoverTarget != NULL) {
+		hoverTarget->mouseHoverOut();
+		hoverTarget = NULL;
+	}
+}
+
 bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 {
 	for (Drawable*& d : drawablesList) {
@@ -112,6 +159,32 @@ bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 		}
 	}
 	return false;
+}
+
+bool DrawableManager::processHoverEvent(XY thisPositionOnScreen, XY mousePos)
+{
+	Drawable* newHoverTarget = NULL;
+	for (Drawable*& d : drawablesList) {
+		//XY anchorPosition = d->anchorPos(thisPositionOnScreen, XY{ g_windowW, g_windowH }, d->position, d->getDimensions(), d->anchor);
+		XY renderPoint = xyAdd(d->position, thisPositionOnScreen);
+		if (d->isMouseIn(renderPoint, mousePos)) {
+			newHoverTarget = d;
+			break;
+		}
+	}
+	if (hoverTarget != newHoverTarget) {
+		if (hoverTarget != NULL) {
+			hoverTarget->mouseHoverOut();
+		}
+		if (newHoverTarget != NULL) {
+			newHoverTarget->mouseHoverIn();
+		}
+		hoverTarget = newHoverTarget;
+	}
+	if (hoverTarget != NULL) {
+		hoverTarget->mouseHoverMotion(mousePos, thisPositionOnScreen);
+	}
+	return hoverTarget != NULL;
 }
 
 /*void DrawableManager::tickAnchors()
@@ -129,6 +202,7 @@ bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 void DrawableManager::freeAllDrawables()
 {
 	forceUnfocus();
+	forceUnhover();
 	for (int x = 0; x < drawablesList.size(); x++) {
 		delete drawablesList[x];
 	}

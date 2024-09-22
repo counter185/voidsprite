@@ -63,12 +63,21 @@ public:
 		wxs.renderAll(position);
 	}
 	void handleInput(SDL_Event evt, XY gPosOffset) override {
+
+		DrawableManager::processHoverEventInMultiple({ wxs, subWxs }, evt, position);
+
 		//special case here
 		if (evt.type == SDL_KEYDOWN) {
 			tryPressHotkey(evt.key.keysym.sym);
 		}
 
-		if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+		std::vector<std::reference_wrapper<DrawableManager>> inputTargets = {wxs};
+		if (currentSubmenuOpen != -1) {
+			inputTargets.push_back(subWxs);
+		}
+		DrawableManager::processInputEventInMultiple(inputTargets, evt, position);
+
+		/*if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
 			if (!wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position) && currentSubmenuOpen != -1) {
 				subWxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
 			}
@@ -78,7 +87,7 @@ public:
 		}
 		else if (subWxs.anyFocused()) {
 			subWxs.passInputToFocused(evt, gPosOffset);
-		}
+		}*/
 	}
 
 	void focusOut() override {

@@ -15,6 +15,9 @@ public:
 		freeAllDrawables(); 
 	}
 
+	static void processHoverEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset = XY{ 0,0 });
+	static bool processInputEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset = XY{0,0});
+
 	void addDrawable(Drawable* d);
 	void removeDrawable(Drawable* d);
 	void renderAll(XY offset = XY{0,0});
@@ -25,11 +28,14 @@ public:
 	bool tryFocusOnNextTabbable();
 	void forceFocusOn(Drawable* d);
 	void forceUnfocus();
+	void forceUnhover();
 	bool mouseInAny(XY thisPositionOnScreen, XY mousePos);
+	bool processHoverEvent(XY thisPositionOnScreen, XY mousePos);
 	//void tickAnchors();
 
 	void freeAllDrawables();
 private:
 	Drawable* focused = NULL;
+	Drawable* hoverTarget = NULL;
 };
 

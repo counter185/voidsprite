@@ -31,6 +31,10 @@ void UIButton::render(XY pos)
 		textX += iconRect.w;
 	}
 
+	if (hovered) {
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
+		SDL_RenderFillRect(g_rd, &drawrect);
+	}
 	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
 }
 

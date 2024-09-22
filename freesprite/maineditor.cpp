@@ -743,6 +743,10 @@ bool MainEditor::isInBounds(XY pos)
 
 void MainEditor::takeInput(SDL_Event evt) {
 
+	if (evt.type == SDL_MOUSEMOTION) {
+		wxsManager.processHoverEvent(XY{0,0}, XY{ evt.motion.x, evt.motion.y });
+	}
+
 	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
 		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
 	}

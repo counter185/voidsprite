@@ -81,7 +81,6 @@ public:
     uint32_t pickedColor = 0xFFFFFF;
 
     ScreenWideNavBar<MainEditor*>* navbar;
-    DrawableManager wxsManager;
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;

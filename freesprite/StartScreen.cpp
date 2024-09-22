@@ -30,13 +30,11 @@ void StartScreen::render()
 
 void StartScreen::takeInput(SDL_Event evt)
 {
+	DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+
 	if (evt.type == SDL_QUIT) {
 		g_closeScreen(this);
 		return;
-	}
-
-	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
 	}
 
 	if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_LALT) {
@@ -44,7 +42,7 @@ void StartScreen::takeInput(SDL_Event evt)
 		return;
 	}
 
-	if (!wxsManager.anyFocused() || evt.type == SDL_DROPFILE) {
+	if (evt.type == SDL_DROPFILE || !DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
@@ -75,9 +73,6 @@ void StartScreen::takeInput(SDL_Event evt)
 			}
 				break;
 		}
-	}
-	else {
-		wxsManager.passInputToFocused(evt);
 	}
 }
 

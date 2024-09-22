@@ -12,7 +12,6 @@ public:
     uint16_t* lowerLayerData = NULL;
     uint16_t* upperLayerData = NULL;
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
-    DrawableManager wxsManager;
 
     SDL_Texture* callerCanvas = NULL;
 

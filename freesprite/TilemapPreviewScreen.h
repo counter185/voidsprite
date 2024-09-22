@@ -23,8 +23,6 @@ public:
 	XY pickedTile = XY{ 0,0 };
 	XY hoveredTilePosition = XY{ 0,0 };
 
-	DrawableManager wxsManager;
-
 	bool tileSelectOpen = false;
 	XY tileSelectOffset = XY{ 0,0 };
 	XY tileSelectHoveredTile = XY{ 0,0 };

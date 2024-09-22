@@ -57,12 +57,35 @@ public:
 		Drawable::focusOut();
 		tabs[openTab].wxs.forceUnfocus();
 	}
+    void mouseHoverOut() override {
+        Drawable::mouseHoverOut();
+        tabButtons.forceUnhover();
+		tabs[openTab].wxs.forceUnhover();
+    }
 
     void render(XY position) override {
         tabButtons.renderAll(position);
         tabs[openTab].wxs.renderAll(xyAdd(position, XY{(int)(200 * (nextTabSlideFromTheLeft ? -1 : 1) * (1.0-XM1PW3P1(tabSwitchTimer.percentElapsedTime(250)))), buttonsHeight}));
     }
+
+    void mouseHoverMotion(XY mousePos, XY gPosOffset) override {
+        //todo clean this up.....
+        std::vector<std::reference_wrapper<DrawableManager>> wxss = { tabButtons, tabs[openTab].wxs };
+        bool hoverEventAtBar = false;
+        gPosOffset = xyAdd(gPosOffset, position);
+        if (tabButtons.processHoverEvent(gPosOffset, mousePos)) {
+            hoverEventAtBar = true;
+        }
+        if (hoverEventAtBar) {
+            tabs[openTab].wxs.forceUnhover();
+        }
+        else {
+            tabs[openTab].wxs.processHoverEvent(xyAdd(gPosOffset, XY{ 0,buttonsHeight }), mousePos);
+        }
+    }
+
     void handleInput(SDL_Event evt, XY gPosOffset) override {
+
         if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.state) {
             if (!tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset)) {
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));

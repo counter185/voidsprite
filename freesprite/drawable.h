@@ -5,11 +5,13 @@
 
 class Drawable
 {
+protected:
+	bool hovered = false;
+	Timer64 focusTimer, hoverTimer;
 public:
 	bool focused = false;
 	XY position = XY{ 50,50 };
 	XY anchor = XY{ 0,0 };
-	Timer64 focusTimer;
 
 	int callback_id = -1;
 	EventCallbackListener* callback = NULL;
@@ -18,15 +20,22 @@ public:
 	virtual bool clickable() { return true; }
 	virtual bool focusableWithTab() { return false; }
 	virtual void render(XY position) {}
-	virtual void mouseHoverIn() {}
-	virtual void mouseHoverOut() {}
+	virtual void mouseHoverIn() {
+		hovered = true;
+		hoverTimer.start();
+	}
+	virtual void mouseHoverOut() {
+		hovered = false;
+		hoverTimer.start();
+	}
+	virtual void mouseHoverMotion(XY mousePos, XY gPosOffset = {0,0}) {}
 	virtual void focusIn() { 
 		focused = true;
 		focusTimer.start();
 	}
 	virtual void focusOut() { 
 		focused = false; 
-		focusTimer.stop();
+		focusTimer.start();
 	}
 	virtual bool focusable() { return true; }
 	virtual void handleInput(SDL_Event evt, XY gPosOffset = {0,0}) {}
