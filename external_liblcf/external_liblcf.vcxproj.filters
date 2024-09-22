@@ -1,0 +1,828 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Pliki źródłowe">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Pliki zasobów">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Pliki źródłowe\generated">
+      <UniqueIdentifier>{5e1ca541-60a3-4095-9b89-7cfa3b8df6d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\generated">
+      <UniqueIdentifier>{cb31a177-7476-4513-ae17-efbd2bbd4f22}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="reader_struct.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="reader_struct_impl.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\config.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\context.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\dbarray.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\dbarrayalloc.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\dbbitarray.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\dbstring.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\encoder.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\enum_tags.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\flag_set.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\inireader.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\ldb\reader.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\lmt\reader.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\lmu\reader.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\log_handler.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\lsd\reader.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\reader_lcf.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\reader_util.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\reader_xml.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\saveopt.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\scope_guard.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\span.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\string_view.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\third_party\span.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\third_party\string_view.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\writer_lcf.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="lcf\writer_xml.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\fwd_struct_impl.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\ldb_terrain_flags.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\ldb_trooppagecondition_flags.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lmu_eventpagecondition_flags.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lsd_saveeasyrpgtext_flags.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lsd_saveeasyrpgwindow_flags.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lsd_savepicture_flags.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\ldb\chunks.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\lmt\chunks.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\lmu\chunks.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\lsd\chunks.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\actor.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\animation.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\animationcelldata.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\animationframe.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\animationtiming.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\attribute.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\battlecommand.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\battlecommands.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\battleranimation.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\battleranimationitemskill.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\battleranimationpose.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\battleranimationweapon.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\chipset.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\class.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\commonevent.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\database.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\encounter.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\enemy.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\enemyaction.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\equipment.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\event.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\eventcommand.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\eventpage.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\eventpagecondition.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\fwd.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\item.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\learning.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\map.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\mapinfo.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\movecommand.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\moveroute.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\music.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\parameters.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\rect.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\save.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveactor.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savecommonevent.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveeasyrpgdata.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveeasyrpgtext.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveeasyrpgwindow.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveeventexecframe.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveeventexecstate.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\saveinventory.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savemapevent.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savemapeventbase.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savemapinfo.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savepanorama.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savepartylocation.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savepicture.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savescreen.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savesystem.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savetarget.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savetitle.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\savevehiclelocation.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\skill.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\sound.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\start.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\state.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\switch.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\system.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\terms.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\terrain.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\testbattler.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\treemap.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\troop.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\troopmember.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\trooppage.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\trooppagecondition.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\lcf\rpg\variable.h">
+      <Filter>Pliki nagłówkowe\generated</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="dbstring_struct.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="encoder.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ldb_equipment.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ldb_eventcommand.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ldb_parameters.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="ldb_reader.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="lmt_reader.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="lmt_rect.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="lmt_treemap.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="lmu_movecommand.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="lmu_reader.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="log_handler.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="lsd_reader.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="reader_flags.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="reader_lcf.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="reader_util.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="reader_xml.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="rpg_setup.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="rpg_terms_generated.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="saveopt.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="writer_lcf.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="writer_xml.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="dbarray.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_variable.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_actor.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_animation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_animationcelldata.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_animationframe.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_animationtiming.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_attribute.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_battlecommand.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_battlecommands.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_battleranimation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_battleranimationitemskill.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_battleranimationpose.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_battleranimationweapon.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_chipset.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_class.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_commonevent.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_database.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_enemy.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_enemyaction.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_item.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_learning.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_music.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_skill.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_sound.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_state.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_switch.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_system.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_terms.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_terrain.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_testbattler.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_troop.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_troopmember.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_trooppage.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_trooppagecondition.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\ldb_variable.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmt_encounter.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmt_mapinfo.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmt_start.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmu_event.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmu_eventpage.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmu_eventpagecondition.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmu_map.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lmu_moveroute.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_save.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveactor.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savecommonevent.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveeasyrpgdata.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveeasyrpgtext.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveeasyrpgwindow.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveeventexecframe.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveeventexecstate.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_saveinventory.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savemapevent.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savemapeventbase.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savemapinfo.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savepanorama.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savepartylocation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savepicture.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savescreen.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savesystem.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savetarget.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savetitle.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\lsd_savevehiclelocation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_actor.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_animation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_animationcelldata.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_animationframe.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_animationtiming.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_attribute.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_battlecommand.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_battlecommands.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_battleranimation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_battleranimationitemskill.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_battleranimationpose.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_battleranimationweapon.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_chipset.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_class.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_commonevent.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_database.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_encounter.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_enemy.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_enemyaction.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_enums.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_equipment.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_event.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_eventcommand.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_eventpage.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_eventpagecondition.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_item.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_learning.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_map.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_mapinfo.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_movecommand.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_moveroute.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_music.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_parameters.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_rect.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_save.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveactor.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savecommonevent.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveeasyrpgdata.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveeasyrpgtext.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveeasyrpgwindow.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveeventexecframe.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveeventexecstate.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_saveinventory.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savemapevent.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savemapeventbase.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savemapinfo.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savepanorama.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savepartylocation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savepicture.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savescreen.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savesystem.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savetarget.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savetitle.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_savevehiclelocation.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_skill.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_sound.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_start.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_state.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_switch.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_system.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_terms.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_terrain.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_testbattler.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_treemap.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_troop.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_troopmember.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_trooppage.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\rpg_trooppagecondition.cpp">
+      <Filter>Pliki źródłowe\generated</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

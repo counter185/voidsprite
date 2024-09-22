@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{3c90328f-6187-47d7-9b0e-1499aea684af}</ProjectGuid>
+    <RootNamespace>externalliblcf</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x86</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x86</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x64</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
+    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x64</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;EXTERNALLIBLCF_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>MinSpace</Optimization>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;EXTERNALLIBLCF_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>MinSpace</Optimization>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;EXTERNALLIBLCF_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>MinSpace</Optimization>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;EXTERNALLIBLCF_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>MinSpace</Optimization>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="generated\fwd_struct_impl.h" />
+    <ClInclude Include="generated\lcf\ldb\chunks.h" />
+    <ClInclude Include="generated\lcf\lmt\chunks.h" />
+    <ClInclude Include="generated\lcf\lmu\chunks.h" />
+    <ClInclude Include="generated\lcf\lsd\chunks.h" />
+    <ClInclude Include="generated\lcf\rpg\actor.h" />
+    <ClInclude Include="generated\lcf\rpg\animation.h" />
+    <ClInclude Include="generated\lcf\rpg\animationcelldata.h" />
+    <ClInclude Include="generated\lcf\rpg\animationframe.h" />
+    <ClInclude Include="generated\lcf\rpg\animationtiming.h" />
+    <ClInclude Include="generated\lcf\rpg\attribute.h" />
+    <ClInclude Include="generated\lcf\rpg\battlecommand.h" />
+    <ClInclude Include="generated\lcf\rpg\battlecommands.h" />
+    <ClInclude Include="generated\lcf\rpg\battleranimation.h" />
+    <ClInclude Include="generated\lcf\rpg\battleranimationitemskill.h" />
+    <ClInclude Include="generated\lcf\rpg\battleranimationpose.h" />
+    <ClInclude Include="generated\lcf\rpg\battleranimationweapon.h" />
+    <ClInclude Include="generated\lcf\rpg\chipset.h" />
+    <ClInclude Include="generated\lcf\rpg\class.h" />
+    <ClInclude Include="generated\lcf\rpg\commonevent.h" />
+    <ClInclude Include="generated\lcf\rpg\database.h" />
+    <ClInclude Include="generated\lcf\rpg\encounter.h" />
+    <ClInclude Include="generated\lcf\rpg\enemy.h" />
+    <ClInclude Include="generated\lcf\rpg\enemyaction.h" />
+    <ClInclude Include="generated\lcf\rpg\equipment.h" />
+    <ClInclude Include="generated\lcf\rpg\event.h" />
+    <ClInclude Include="generated\lcf\rpg\eventcommand.h" />
+    <ClInclude Include="generated\lcf\rpg\eventpage.h" />
+    <ClInclude Include="generated\lcf\rpg\eventpagecondition.h" />
+    <ClInclude Include="generated\lcf\rpg\fwd.h" />
+    <ClInclude Include="generated\lcf\rpg\item.h" />
+    <ClInclude Include="generated\lcf\rpg\learning.h" />
+    <ClInclude Include="generated\lcf\rpg\map.h" />
+    <ClInclude Include="generated\lcf\rpg\mapinfo.h" />
+    <ClInclude Include="generated\lcf\rpg\movecommand.h" />
+    <ClInclude Include="generated\lcf\rpg\moveroute.h" />
+    <ClInclude Include="generated\lcf\rpg\music.h" />
+    <ClInclude Include="generated\lcf\rpg\parameters.h" />
+    <ClInclude Include="generated\lcf\rpg\rect.h" />
+    <ClInclude Include="generated\lcf\rpg\save.h" />
+    <ClInclude Include="generated\lcf\rpg\saveactor.h" />
+    <ClInclude Include="generated\lcf\rpg\savecommonevent.h" />
+    <ClInclude Include="generated\lcf\rpg\saveeasyrpgdata.h" />
+    <ClInclude Include="generated\lcf\rpg\saveeasyrpgtext.h" />
+    <ClInclude Include="generated\lcf\rpg\saveeasyrpgwindow.h" />
+    <ClInclude Include="generated\lcf\rpg\saveeventexecframe.h" />
+    <ClInclude Include="generated\lcf\rpg\saveeventexecstate.h" />
+    <ClInclude Include="generated\lcf\rpg\saveinventory.h" />
+    <ClInclude Include="generated\lcf\rpg\savemapevent.h" />
+    <ClInclude Include="generated\lcf\rpg\savemapeventbase.h" />
+    <ClInclude Include="generated\lcf\rpg\savemapinfo.h" />
+    <ClInclude Include="generated\lcf\rpg\savepanorama.h" />
+    <ClInclude Include="generated\lcf\rpg\savepartylocation.h" />
+    <ClInclude Include="generated\lcf\rpg\savepicture.h" />
+    <ClInclude Include="generated\lcf\rpg\savescreen.h" />
+    <ClInclude Include="generated\lcf\rpg\savesystem.h" />
+    <ClInclude Include="generated\lcf\rpg\savetarget.h" />
+    <ClInclude Include="generated\lcf\rpg\savetitle.h" />
+    <ClInclude Include="generated\lcf\rpg\savevehiclelocation.h" />
+    <ClInclude Include="generated\lcf\rpg\skill.h" />
+    <ClInclude Include="generated\lcf\rpg\sound.h" />
+    <ClInclude Include="generated\lcf\rpg\start.h" />
+    <ClInclude Include="generated\lcf\rpg\state.h" />
+    <ClInclude Include="generated\lcf\rpg\switch.h" />
+    <ClInclude Include="generated\lcf\rpg\system.h" />
+    <ClInclude Include="generated\lcf\rpg\terms.h" />
+    <ClInclude Include="generated\lcf\rpg\terrain.h" />
+    <ClInclude Include="generated\lcf\rpg\testbattler.h" />
+    <ClInclude Include="generated\lcf\rpg\treemap.h" />
+    <ClInclude Include="generated\lcf\rpg\troop.h" />
+    <ClInclude Include="generated\lcf\rpg\troopmember.h" />
+    <ClInclude Include="generated\lcf\rpg\trooppage.h" />
+    <ClInclude Include="generated\lcf\rpg\trooppagecondition.h" />
+    <ClInclude Include="generated\lcf\rpg\variable.h" />
+    <ClInclude Include="generated\ldb_terrain_flags.h" />
+    <ClInclude Include="generated\ldb_trooppagecondition_flags.h" />
+    <ClInclude Include="generated\lmu_eventpagecondition_flags.h" />
+    <ClInclude Include="generated\lsd_saveeasyrpgtext_flags.h" />
+    <ClInclude Include="generated\lsd_saveeasyrpgwindow_flags.h" />
+    <ClInclude Include="generated\lsd_savepicture_flags.h" />
+    <ClInclude Include="lcf\config.h" />
+    <ClInclude Include="lcf\context.h" />
+    <ClInclude Include="lcf\dbarray.h" />
+    <ClInclude Include="lcf\dbarrayalloc.h" />
+    <ClInclude Include="lcf\dbbitarray.h" />
+    <ClInclude Include="lcf\dbstring.h" />
+    <ClInclude Include="lcf\encoder.h" />
+    <ClInclude Include="lcf\enum_tags.h" />
+    <ClInclude Include="lcf\flag_set.h" />
+    <ClInclude Include="lcf\inireader.h" />
+    <ClInclude Include="lcf\ldb\reader.h" />
+    <ClInclude Include="lcf\lmt\reader.h" />
+    <ClInclude Include="lcf\lmu\reader.h" />
+    <ClInclude Include="lcf\log_handler.h" />
+    <ClInclude Include="lcf\lsd\reader.h" />
+    <ClInclude Include="lcf\reader_lcf.h" />
+    <ClInclude Include="lcf\reader_util.h" />
+    <ClInclude Include="lcf\reader_xml.h" />
+    <ClInclude Include="lcf\saveopt.h" />
+    <ClInclude Include="lcf\scope_guard.h" />
+    <ClInclude Include="lcf\span.h" />
+    <ClInclude Include="lcf\string_view.h" />
+    <ClInclude Include="lcf\third_party\span.h" />
+    <ClInclude Include="lcf\third_party\string_view.h" />
+    <ClInclude Include="lcf\writer_lcf.h" />
+    <ClInclude Include="lcf\writer_xml.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="reader_struct.h" />
+    <ClInclude Include="reader_struct_impl.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dbarray.cpp" />
+    <ClCompile Include="dbstring_struct.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="encoder.cpp" />
+    <ClCompile Include="generated\ldb_actor.cpp" />
+    <ClCompile Include="generated\ldb_animation.cpp" />
+    <ClCompile Include="generated\ldb_animationcelldata.cpp" />
+    <ClCompile Include="generated\ldb_animationframe.cpp" />
+    <ClCompile Include="generated\ldb_animationtiming.cpp" />
+    <ClCompile Include="generated\ldb_attribute.cpp" />
+    <ClCompile Include="generated\ldb_battlecommand.cpp" />
+    <ClCompile Include="generated\ldb_battlecommands.cpp" />
+    <ClCompile Include="generated\ldb_battleranimation.cpp" />
+    <ClCompile Include="generated\ldb_battleranimationitemskill.cpp" />
+    <ClCompile Include="generated\ldb_battleranimationpose.cpp" />
+    <ClCompile Include="generated\ldb_battleranimationweapon.cpp" />
+    <ClCompile Include="generated\ldb_chipset.cpp" />
+    <ClCompile Include="generated\ldb_class.cpp" />
+    <ClCompile Include="generated\ldb_commonevent.cpp" />
+    <ClCompile Include="generated\ldb_database.cpp" />
+    <ClCompile Include="generated\ldb_enemy.cpp" />
+    <ClCompile Include="generated\ldb_enemyaction.cpp" />
+    <ClCompile Include="generated\ldb_item.cpp" />
+    <ClCompile Include="generated\ldb_learning.cpp" />
+    <ClCompile Include="generated\ldb_music.cpp" />
+    <ClCompile Include="generated\ldb_skill.cpp" />
+    <ClCompile Include="generated\ldb_sound.cpp" />
+    <ClCompile Include="generated\ldb_state.cpp" />
+    <ClCompile Include="generated\ldb_switch.cpp" />
+    <ClCompile Include="generated\ldb_system.cpp" />
+    <ClCompile Include="generated\ldb_terms.cpp" />
+    <ClCompile Include="generated\ldb_terrain.cpp" />
+    <ClCompile Include="generated\ldb_testbattler.cpp" />
+    <ClCompile Include="generated\ldb_troop.cpp" />
+    <ClCompile Include="generated\ldb_troopmember.cpp" />
+    <ClCompile Include="generated\ldb_trooppage.cpp" />
+    <ClCompile Include="generated\ldb_trooppagecondition.cpp" />
+    <ClCompile Include="generated\ldb_variable.cpp" />
+    <ClCompile Include="generated\lmt_encounter.cpp" />
+    <ClCompile Include="generated\lmt_mapinfo.cpp" />
+    <ClCompile Include="generated\lmt_start.cpp" />
+    <ClCompile Include="generated\lmu_event.cpp" />
+    <ClCompile Include="generated\lmu_eventpage.cpp" />
+    <ClCompile Include="generated\lmu_eventpagecondition.cpp" />
+    <ClCompile Include="generated\lmu_map.cpp" />
+    <ClCompile Include="generated\lmu_moveroute.cpp" />
+    <ClCompile Include="generated\lsd_save.cpp" />
+    <ClCompile Include="generated\lsd_saveactor.cpp" />
+    <ClCompile Include="generated\lsd_savecommonevent.cpp" />
+    <ClCompile Include="generated\lsd_saveeasyrpgdata.cpp" />
+    <ClCompile Include="generated\lsd_saveeasyrpgtext.cpp" />
+    <ClCompile Include="generated\lsd_saveeasyrpgwindow.cpp" />
+    <ClCompile Include="generated\lsd_saveeventexecframe.cpp" />
+    <ClCompile Include="generated\lsd_saveeventexecstate.cpp" />
+    <ClCompile Include="generated\lsd_saveinventory.cpp" />
+    <ClCompile Include="generated\lsd_savemapevent.cpp" />
+    <ClCompile Include="generated\lsd_savemapeventbase.cpp" />
+    <ClCompile Include="generated\lsd_savemapinfo.cpp" />
+    <ClCompile Include="generated\lsd_savepanorama.cpp" />
+    <ClCompile Include="generated\lsd_savepartylocation.cpp" />
+    <ClCompile Include="generated\lsd_savepicture.cpp" />
+    <ClCompile Include="generated\lsd_savescreen.cpp" />
+    <ClCompile Include="generated\lsd_savesystem.cpp" />
+    <ClCompile Include="generated\lsd_savetarget.cpp" />
+    <ClCompile Include="generated\lsd_savetitle.cpp" />
+    <ClCompile Include="generated\lsd_savevehiclelocation.cpp" />
+    <ClCompile Include="generated\rpg_actor.cpp" />
+    <ClCompile Include="generated\rpg_animation.cpp" />
+    <ClCompile Include="generated\rpg_animationcelldata.cpp" />
+    <ClCompile Include="generated\rpg_animationframe.cpp" />
+    <ClCompile Include="generated\rpg_animationtiming.cpp" />
+    <ClCompile Include="generated\rpg_attribute.cpp" />
+    <ClCompile Include="generated\rpg_battlecommand.cpp" />
+    <ClCompile Include="generated\rpg_battlecommands.cpp" />
+    <ClCompile Include="generated\rpg_battleranimation.cpp" />
+    <ClCompile Include="generated\rpg_battleranimationitemskill.cpp" />
+    <ClCompile Include="generated\rpg_battleranimationpose.cpp" />
+    <ClCompile Include="generated\rpg_battleranimationweapon.cpp" />
+    <ClCompile Include="generated\rpg_chipset.cpp" />
+    <ClCompile Include="generated\rpg_class.cpp" />
+    <ClCompile Include="generated\rpg_commonevent.cpp" />
+    <ClCompile Include="generated\rpg_database.cpp" />
+    <ClCompile Include="generated\rpg_encounter.cpp" />
+    <ClCompile Include="generated\rpg_enemy.cpp" />
+    <ClCompile Include="generated\rpg_enemyaction.cpp" />
+    <ClCompile Include="generated\rpg_enums.cpp" />
+    <ClCompile Include="generated\rpg_equipment.cpp" />
+    <ClCompile Include="generated\rpg_event.cpp" />
+    <ClCompile Include="generated\rpg_eventcommand.cpp" />
+    <ClCompile Include="generated\rpg_eventpage.cpp" />
+    <ClCompile Include="generated\rpg_eventpagecondition.cpp" />
+    <ClCompile Include="generated\rpg_item.cpp" />
+    <ClCompile Include="generated\rpg_learning.cpp" />
+    <ClCompile Include="generated\rpg_map.cpp" />
+    <ClCompile Include="generated\rpg_mapinfo.cpp" />
+    <ClCompile Include="generated\rpg_movecommand.cpp" />
+    <ClCompile Include="generated\rpg_moveroute.cpp" />
+    <ClCompile Include="generated\rpg_music.cpp" />
+    <ClCompile Include="generated\rpg_parameters.cpp" />
+    <ClCompile Include="generated\rpg_rect.cpp" />
+    <ClCompile Include="generated\rpg_save.cpp" />
+    <ClCompile Include="generated\rpg_saveactor.cpp" />
+    <ClCompile Include="generated\rpg_savecommonevent.cpp" />
+    <ClCompile Include="generated\rpg_saveeasyrpgdata.cpp" />
+    <ClCompile Include="generated\rpg_saveeasyrpgtext.cpp" />
+    <ClCompile Include="generated\rpg_saveeasyrpgwindow.cpp" />
+    <ClCompile Include="generated\rpg_saveeventexecframe.cpp" />
+    <ClCompile Include="generated\rpg_saveeventexecstate.cpp" />
+    <ClCompile Include="generated\rpg_saveinventory.cpp" />
+    <ClCompile Include="generated\rpg_savemapevent.cpp" />
+    <ClCompile Include="generated\rpg_savemapeventbase.cpp" />
+    <ClCompile Include="generated\rpg_savemapinfo.cpp" />
+    <ClCompile Include="generated\rpg_savepanorama.cpp" />
+    <ClCompile Include="generated\rpg_savepartylocation.cpp" />
+    <ClCompile Include="generated\rpg_savepicture.cpp" />
+    <ClCompile Include="generated\rpg_savescreen.cpp" />
+    <ClCompile Include="generated\rpg_savesystem.cpp" />
+    <ClCompile Include="generated\rpg_savetarget.cpp" />
+    <ClCompile Include="generated\rpg_savetitle.cpp" />
+    <ClCompile Include="generated\rpg_savevehiclelocation.cpp" />
+    <ClCompile Include="generated\rpg_skill.cpp" />
+    <ClCompile Include="generated\rpg_sound.cpp" />
+    <ClCompile Include="generated\rpg_start.cpp" />
+    <ClCompile Include="generated\rpg_state.cpp" />
+    <ClCompile Include="generated\rpg_switch.cpp" />
+    <ClCompile Include="generated\rpg_system.cpp" />
+    <ClCompile Include="generated\rpg_terms.cpp" />
+    <ClCompile Include="generated\rpg_terrain.cpp" />
+    <ClCompile Include="generated\rpg_testbattler.cpp" />
+    <ClCompile Include="generated\rpg_treemap.cpp" />
+    <ClCompile Include="generated\rpg_troop.cpp" />
+    <ClCompile Include="generated\rpg_troopmember.cpp" />
+    <ClCompile Include="generated\rpg_trooppage.cpp" />
+    <ClCompile Include="generated\rpg_trooppagecondition.cpp" />
+    <ClCompile Include="generated\rpg_variable.cpp" />
+    <ClCompile Include="ldb_equipment.cpp" />
+    <ClCompile Include="ldb_eventcommand.cpp" />
+    <ClCompile Include="ldb_parameters.cpp" />
+    <ClCompile Include="ldb_reader.cpp" />
+    <ClCompile Include="lmt_reader.cpp" />
+    <ClCompile Include="lmt_rect.cpp" />
+    <ClCompile Include="lmt_treemap.cpp" />
+    <ClCompile Include="lmu_movecommand.cpp" />
+    <ClCompile Include="lmu_reader.cpp" />
+    <ClCompile Include="log_handler.cpp" />
+    <ClCompile Include="lsd_reader.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="reader_flags.cpp" />
+    <ClCompile Include="reader_lcf.cpp" />
+    <ClCompile Include="reader_util.cpp" />
+    <ClCompile Include="reader_xml.cpp" />
+    <ClCompile Include="rpg_setup.cpp" />
+    <ClCompile Include="rpg_terms_generated.cpp" />
+    <ClCompile Include="saveopt.cpp" />
+    <ClCompile Include="writer_lcf.cpp" />
+    <ClCompile Include="writer_xml.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
