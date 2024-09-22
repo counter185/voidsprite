@@ -74,22 +74,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>./devlibs/lib/x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>./liblcf/generated;./liblcf;$(IncludePath)</IncludePath>
+    <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>./devlibs/lib/x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>./liblcf/generated;./liblcf;$(IncludePath)</IncludePath>
+    <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>./devlibs/lib/x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>./liblcf/generated;./liblcf;$(IncludePath)</IncludePath>
+    <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>./devlibs/lib/x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>./liblcf/generated;./liblcf;$(IncludePath)</IncludePath>
+    <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -103,7 +103,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,7 +121,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,7 +136,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,7 +154,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -174,160 +174,6 @@
     <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
-    <ClCompile Include="liblcf\dbarray.cpp" />
-    <ClCompile Include="liblcf\dbstring_struct.cpp" />
-    <ClCompile Include="liblcf\encoder.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_actor.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_animation.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_animationcelldata.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_animationframe.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_animationtiming.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_attribute.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_battlecommand.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_battlecommands.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_battleranimation.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_battleranimationitemskill.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_battleranimationpose.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_battleranimationweapon.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_chipset.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_class.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_commonevent.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_database.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_enemy.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_enemyaction.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_item.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_learning.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_music.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_skill.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_sound.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_state.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_switch.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_system.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_terms.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_terrain.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_testbattler.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_troop.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_troopmember.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_trooppage.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_trooppagecondition.cpp" />
-    <ClCompile Include="liblcf\generated\ldb_variable.cpp" />
-    <ClCompile Include="liblcf\generated\lmt_encounter.cpp" />
-    <ClCompile Include="liblcf\generated\lmt_mapinfo.cpp" />
-    <ClCompile Include="liblcf\generated\lmt_start.cpp" />
-    <ClCompile Include="liblcf\generated\lmu_event.cpp" />
-    <ClCompile Include="liblcf\generated\lmu_eventpage.cpp" />
-    <ClCompile Include="liblcf\generated\lmu_eventpagecondition.cpp" />
-    <ClCompile Include="liblcf\generated\lmu_map.cpp" />
-    <ClCompile Include="liblcf\generated\lmu_moveroute.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_save.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveactor.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savecommonevent.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveeasyrpgdata.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveeasyrpgtext.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveeasyrpgwindow.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveeventexecframe.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveeventexecstate.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_saveinventory.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savemapevent.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savemapeventbase.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savemapinfo.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savepanorama.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savepartylocation.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savepicture.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savescreen.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savesystem.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savetarget.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savetitle.cpp" />
-    <ClCompile Include="liblcf\generated\lsd_savevehiclelocation.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_actor.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_animation.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_animationcelldata.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_animationframe.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_animationtiming.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_attribute.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_battlecommand.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_battlecommands.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_battleranimation.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_battleranimationitemskill.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_battleranimationpose.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_battleranimationweapon.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_chipset.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_class.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_commonevent.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_database.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_encounter.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_enemy.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_enemyaction.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_enums.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_equipment.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_event.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_eventcommand.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_eventpage.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_eventpagecondition.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_item.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_learning.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_map.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_mapinfo.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_movecommand.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_moveroute.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_music.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_parameters.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_rect.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_save.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveactor.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savecommonevent.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveeasyrpgdata.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveeasyrpgtext.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveeasyrpgwindow.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveeventexecframe.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveeventexecstate.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_saveinventory.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savemapevent.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savemapeventbase.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savemapinfo.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savepanorama.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savepartylocation.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savepicture.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savescreen.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savesystem.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savetarget.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savetitle.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_savevehiclelocation.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_skill.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_sound.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_start.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_state.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_switch.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_system.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_terms.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_terrain.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_testbattler.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_treemap.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_troop.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_troopmember.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_trooppage.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_trooppagecondition.cpp" />
-    <ClCompile Include="liblcf\generated\rpg_variable.cpp" />
-    <ClCompile Include="liblcf\ldb_equipment.cpp" />
-    <ClCompile Include="liblcf\ldb_eventcommand.cpp" />
-    <ClCompile Include="liblcf\ldb_parameters.cpp" />
-    <ClCompile Include="liblcf\ldb_reader.cpp" />
-    <ClCompile Include="liblcf\lmt_reader.cpp" />
-    <ClCompile Include="liblcf\lmt_rect.cpp" />
-    <ClCompile Include="liblcf\lmt_treemap.cpp" />
-    <ClCompile Include="liblcf\lmu_movecommand.cpp" />
-    <ClCompile Include="liblcf\lmu_reader.cpp" />
-    <ClCompile Include="liblcf\log_handler.cpp" />
-    <ClCompile Include="liblcf\lsd_reader.cpp" />
-    <ClCompile Include="liblcf\reader_flags.cpp" />
-    <ClCompile Include="liblcf\reader_lcf.cpp" />
-    <ClCompile Include="liblcf\reader_util.cpp" />
-    <ClCompile Include="liblcf\reader_xml.cpp" />
-    <ClCompile Include="liblcf\rpg_setup.cpp" />
-    <ClCompile Include="liblcf\rpg_terms_generated.cpp" />
-    <ClCompile Include="liblcf\saveopt.cpp" />
-    <ClCompile Include="liblcf\writer_lcf.cpp" />
-    <ClCompile Include="liblcf\writer_xml.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
@@ -431,115 +277,6 @@
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="LayerPalettized.h" />
-    <ClInclude Include="liblcf\generated\fwd_struct_impl.h" />
-    <ClInclude Include="liblcf\generated\lcf\ldb\chunks.h" />
-    <ClInclude Include="liblcf\generated\lcf\lmt\chunks.h" />
-    <ClInclude Include="liblcf\generated\lcf\lmu\chunks.h" />
-    <ClInclude Include="liblcf\generated\lcf\lsd\chunks.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\actor.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\animation.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\animationcelldata.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\animationframe.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\animationtiming.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\attribute.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\battlecommand.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\battlecommands.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\battleranimation.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\battleranimationitemskill.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\battleranimationpose.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\battleranimationweapon.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\chipset.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\class.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\commonevent.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\database.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\encounter.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\enemy.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\enemyaction.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\equipment.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\event.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\eventcommand.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\eventpage.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\eventpagecondition.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\fwd.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\item.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\learning.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\map.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\mapinfo.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\movecommand.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\moveroute.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\music.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\parameters.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\rect.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\save.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveactor.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savecommonevent.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveeasyrpgdata.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveeasyrpgtext.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveeasyrpgwindow.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveeventexecframe.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveeventexecstate.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\saveinventory.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savemapevent.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savemapeventbase.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savemapinfo.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savepanorama.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savepartylocation.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savepicture.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savescreen.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savesystem.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savetarget.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savetitle.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\savevehiclelocation.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\skill.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\sound.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\start.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\state.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\switch.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\system.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\terms.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\terrain.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\testbattler.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\treemap.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\troop.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\troopmember.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\trooppage.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\trooppagecondition.h" />
-    <ClInclude Include="liblcf\generated\lcf\rpg\variable.h" />
-    <ClInclude Include="liblcf\generated\ldb_terrain_flags.h" />
-    <ClInclude Include="liblcf\generated\ldb_trooppagecondition_flags.h" />
-    <ClInclude Include="liblcf\generated\lmu_eventpagecondition_flags.h" />
-    <ClInclude Include="liblcf\generated\lsd_saveeasyrpgtext_flags.h" />
-    <ClInclude Include="liblcf\generated\lsd_saveeasyrpgwindow_flags.h" />
-    <ClInclude Include="liblcf\generated\lsd_savepicture_flags.h" />
-    <ClInclude Include="liblcf\lcf\config.h" />
-    <ClInclude Include="liblcf\lcf\context.h" />
-    <ClInclude Include="liblcf\lcf\dbarray.h" />
-    <ClInclude Include="liblcf\lcf\dbarrayalloc.h" />
-    <ClInclude Include="liblcf\lcf\dbbitarray.h" />
-    <ClInclude Include="liblcf\lcf\dbstring.h" />
-    <ClInclude Include="liblcf\lcf\encoder.h" />
-    <ClInclude Include="liblcf\lcf\enum_tags.h" />
-    <ClInclude Include="liblcf\lcf\flag_set.h" />
-    <ClInclude Include="liblcf\lcf\inireader.h" />
-    <ClInclude Include="liblcf\lcf\ldb\reader.h" />
-    <ClInclude Include="liblcf\lcf\lmt\reader.h" />
-    <ClInclude Include="liblcf\lcf\lmu\reader.h" />
-    <ClInclude Include="liblcf\lcf\log_handler.h" />
-    <ClInclude Include="liblcf\lcf\lsd\reader.h" />
-    <ClInclude Include="liblcf\lcf\reader_lcf.h" />
-    <ClInclude Include="liblcf\lcf\reader_util.h" />
-    <ClInclude Include="liblcf\lcf\reader_xml.h" />
-    <ClInclude Include="liblcf\lcf\saveopt.h" />
-    <ClInclude Include="liblcf\lcf\scope_guard.h" />
-    <ClInclude Include="liblcf\lcf\span.h" />
-    <ClInclude Include="liblcf\lcf\string_view.h" />
-    <ClInclude Include="liblcf\lcf\third_party\span.h" />
-    <ClInclude Include="liblcf\lcf\third_party\string_view.h" />
-    <ClInclude Include="liblcf\lcf\writer_lcf.h" />
-    <ClInclude Include="liblcf\lcf\writer_xml.h" />
-    <ClInclude Include="liblcf\log.h" />
-    <ClInclude Include="liblcf\reader_struct.h" />
-    <ClInclude Include="liblcf\reader_struct_impl.h" />
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
