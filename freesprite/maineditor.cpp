@@ -366,13 +366,16 @@ void MainEditor::DrawForeground()
 
 void MainEditor::renderComments()
 {
+	if (commentViewMode == COMMENTMODE_HIDE_ALL) {
+		return;
+	}
 	XY origin = canvasCenterPoint;
 	for (CommentData& c : comments) {
 		XY onScreenPosition = xyAdd(origin, { c.position.x * scale, c.position.y * scale });
 		SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
 		SDL_SetTextureAlphaMod(g_iconComment, 0x80);
 		SDL_RenderCopy(g_rd, g_iconComment, NULL, &iconRect);
-		if (xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32) {
+		if (commentViewMode == COMMENTMODE_SHOW_ALL || (commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32)) {
 			if (!c.hovered) {
 				c.animTimer.start();
 				c.hovered = true;
@@ -585,6 +588,18 @@ void MainEditor::setUpWidgets()
 								editor->backgroundColor.r = ~editor->backgroundColor.r;
 								editor->backgroundColor.g = ~editor->backgroundColor.g;
 								editor->backgroundColor.b = ~editor->backgroundColor.b;
+							}
+						}
+					},
+					{SDLK_c, { "Toggle comments",
+							[](MainEditor* editor) {
+								(*(int*)&editor->commentViewMode)++;
+								(*(int*)&editor->commentViewMode) %= 3;
+								g_addNotification(Notification(std::format("{}",
+									editor->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
+									editor->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
+									"All comments shown"), "", 1500
+								));
 							}
 						}
 					},
@@ -1555,6 +1570,14 @@ bool MainEditor::canAddCommentAt(XY a)
 		}
 	}
 	return true;
+}
+
+void MainEditor::addComment(CommentData c)
+{
+	if (canAddCommentAt(c.position)) {
+		addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ADD_COMMENT, c.position.x, c.position.y, c.data });
+		comments.push_back(c);
+	}
 }
 
 void MainEditor::addCommentAt(XY a, std::string c)

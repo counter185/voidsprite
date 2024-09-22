@@ -83,6 +83,7 @@ class UILabel;
 class UITextField;
 class ScrollingView;
 class Gamepad;
+class Timer64;
 class TilemapEditorLayerPicker;
 
 template <typename T>

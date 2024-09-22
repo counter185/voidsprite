@@ -119,6 +119,15 @@ public:
 			}
 		}
 	}
+	void drawLine(XY from, XY to, uint32_t color) {
+		rasterizeLine(from, to, [this, color](XY p) { setPixel(p, color); });
+	}
+	void drawRect(XY from, XY to, uint32_t color) {
+		drawLine(from, XY{ to.x, from.y }, color);
+		drawLine(from, XY{ from.x, to.y }, color);
+		drawLine(XY{ to.x, from.y }, to, color);
+		drawLine(XY{ from.x, to.y }, to, color);
+	}
 
 	virtual uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) {
 		if (position.x >= 0 && position.x < w

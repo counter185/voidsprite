@@ -394,7 +394,7 @@
       <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="TemplateRPG2KFaceset.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\templates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -714,7 +714,7 @@
       <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KFaceset.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

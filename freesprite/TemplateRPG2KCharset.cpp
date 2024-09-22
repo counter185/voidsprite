@@ -74,3 +74,12 @@ Layer* TemplateRPG2KCharset::generate()
     }
     return ret;
 }
+
+std::vector<CommentData> TemplateRPG2KCharset::placeComments()
+{
+    return { 
+        { {0,0}, "Animation frame 2" },
+        { {24,0}, "Idle" },
+        { {48,0}, "Animation frame 1" },
+    };
+}
