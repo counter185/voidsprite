@@ -72,19 +72,21 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
-    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x86</OutDir>
+    <OutDir>$(ProjectDir)build\lib\$(PlatformName)</OutDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
-    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x86</OutDir>
+    <OutDir>$(ProjectDir)build\lib\$(PlatformName)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
-    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x64</OutDir>
+    <OutDir>$(ProjectDir)build\lib\$(PlatformName)</OutDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExternalIncludePath>./generated;.;$(ExternalIncludePath)</ExternalIncludePath>
-    <OutDir>$(SolutionDir)freesprite/devlibs/lib/x64</OutDir>
+    <OutDir>$(ProjectDir)build\lib\$(PlatformName)</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,8 +97,8 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <Optimization>MinSpace</Optimization>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <Optimization>Disabled</Optimization>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,8 +138,8 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <Optimization>MinSpace</Optimization>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <Optimization>Disabled</Optimization>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

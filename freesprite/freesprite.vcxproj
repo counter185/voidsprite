@@ -73,22 +73,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>./devlibs/lib/x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./devlibs/lib/x86;../external_liblcf/build/lib/$(PlatformName);$(LibraryPath)</LibraryPath>
     <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>./devlibs/lib/x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./devlibs/lib/x86;../external_liblcf/build/lib/$(PlatformName);$(LibraryPath)</LibraryPath>
     <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>./devlibs/lib/x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./devlibs/lib/x64;../external_liblcf/build/lib/$(PlatformName);$(LibraryPath)</LibraryPath>
     <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExternalIncludePath>./devlibs/include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>./devlibs/lib/x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>./devlibs/lib/x64;../external_liblcf/build/lib/$(PlatformName);$(LibraryPath)</LibraryPath>
     <IncludePath>../external_liblcf/generated;../external_liblcf;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -103,7 +103,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -136,7 +136,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
