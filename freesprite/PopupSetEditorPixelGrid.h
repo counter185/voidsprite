@@ -11,6 +11,13 @@ class PopupSetEditorPixelGrid :
 public:
     std::string title = "";
     std::string text = "";
+    std::vector<XY> predefinedTileSizes = {
+        {8,8},
+        {16,16},
+        {32,32},
+        {48,48},
+        {64,64}
+    };
 
     UITextField* tboxX;
     UITextField* tboxY;
@@ -21,6 +28,18 @@ public:
     PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx);
 
     void render() override;
+
+    void eventDropdownItemSelected(int evt_id, int index, std::string name) {
+    if (evt_id == 39) {   
+        XY newTileSize = predefinedTileSizes[index];
+       
+        caller->tileDimensions = newTileSize;
+        
+        caller->tileGridAlpha = (uint8_t)(opacitySlider->sliderPos * 255);
+       
+        closePopup();
+    }
+}
 
     void eventButtonPressed(int evt_id) override {
         if (evt_id == 0) {

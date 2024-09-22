@@ -9,6 +9,7 @@ class PopupQuickConvert :
 public:
     std::string title = "";
     std::string text = "";
+    
 
     UIDropdown* pickExportFormat;
     int exporterIndex = 0;

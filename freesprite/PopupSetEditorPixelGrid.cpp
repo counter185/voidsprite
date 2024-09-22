@@ -1,10 +1,15 @@
 #include "PopupSetEditorPixelGrid.h"
 #include "FontRenderer.h"
+#include "UIDropdown.h"
 
 PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx) 
 {
 
     wxHeight = 240;
+    std::vector<std::string> names;
+    for (XY& tileSize : predefinedTileSizes) {  
+        names.push_back(std::format("{}x{}", tileSize.x, tileSize.y));
+    }
 
     this->caller = parent;
     this->title = tt;
@@ -40,6 +45,12 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     opacitySlider->wxHeight = 40;
     opacitySlider->sliderPos = caller->tileGridAlpha / 255.0f;
     wxsManager.addDrawable(opacitySlider);
+
+    UIDropdown* dropdown = new UIDropdown(names);
+    dropdown->position = XY{ 300, 80 }; 
+    dropdown->text = "Presets";
+    dropdown->setCallbackListener(39, this);
+    wxsManager.addDrawable(dropdown);
 }
 
 void PopupSetEditorPixelGrid::render()
@@ -55,3 +66,4 @@ void PopupSetEditorPixelGrid::render()
     g_fnt->RenderString("Opacity", opacityTextPos.x, opacityTextPos.y);
 	renderDrawables();
 }
+
