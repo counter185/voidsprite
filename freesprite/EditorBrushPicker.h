@@ -32,6 +32,7 @@ public:
 		patternPanelBtn->text = ">";
 		patternPanelBtn->wxWidth = 40;
 		patternPanelBtn->wxHeight = 24;
+		patternPanelBtn->tooltip = "Open pattern menu";
 		patternPanelBtn->icon = g_patterns[0]->cachedIcon;
 		patternPanelBtn->setCallbackListener(EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU, this);
 		subWidgets.addDrawable(patternPanelBtn);
@@ -41,6 +42,7 @@ public:
 		editorReplaceBtn->text = "R";
 		editorReplaceBtn->wxWidth = 24;
 		editorReplaceBtn->wxHeight = 24;
+		editorReplaceBtn->tooltip = "Replace mode\nPixels will only be drawn on opaque areas";
 		editorReplaceBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEREPLACE, this);
 		subWidgets.addDrawable(editorReplaceBtn);
 

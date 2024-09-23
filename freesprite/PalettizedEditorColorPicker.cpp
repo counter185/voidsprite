@@ -11,6 +11,9 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     caller = c;
     upcastCaller = c;
 
+    wxWidth = 400;
+    wxHeight = 390;
+
     colorPaletteTabs = new TabbedView({ {"Palette"}, {"Options"} }, 75);
     colorPaletteTabs->position = { 20,30 };
     subWidgets.addDrawable(colorPaletteTabs);

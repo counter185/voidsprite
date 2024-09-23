@@ -143,6 +143,7 @@ public:
 			buttonNewImageRGB->position = XY{ 30,90 };
 			buttonNewImageRGB->wxWidth = 120;
 			buttonNewImageRGB->text = "Create (RGB)";
+			buttonNewImageRGB->tooltip = "Create a new image with full color support.";
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
 
 			UIButton* buttonNewImagePalettized = new UIButton();
@@ -150,6 +151,7 @@ public:
 			buttonNewImagePalettized->position = XY{ 160,90 };
 			buttonNewImagePalettized->wxWidth = 200;
 			buttonNewImagePalettized->text = "Create (Palettized)";
+			buttonNewImagePalettized->tooltip = "Create a new image with a limited color palette.\nExporting to palette-only formats will keep the color order as it is in the editor.";
 			newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
 		}
 

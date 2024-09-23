@@ -13,6 +13,7 @@ public:
     PalettizedEditorColorPicker(MainEditorPalettized* caller);
 
     void render(XY position) override;
+
     void eventButtonPressed(int evt_id) override;
     void eventButtonRightClicked(int evt_id) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;

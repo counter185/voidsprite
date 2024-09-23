@@ -6,11 +6,15 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     caller = editor;
     upcastCaller = editor;
 
+    wxWidth = 250;
+    wxHeight = 400;
+
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
     //addBtn->text = "+";
     addBtn->wxWidth = 30;
     addBtn->setCallbackListener(-1, this);
+    addBtn->tooltip = "New layer";
     addBtn->icon = g_iconLayerAdd;
     subWidgets.addDrawable(addBtn);
 
@@ -19,6 +23,7 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     //removeBtn->text = "-";
     removeBtn->wxWidth = 30;
     removeBtn->icon = g_iconLayerDelete;
+    removeBtn->tooltip = "Delete layer";
     removeBtn->setCallbackListener(-2, this);
     subWidgets.addDrawable(removeBtn);
 
@@ -27,6 +32,7 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     //upBtn->text = "Up";
     upBtn->wxWidth = 30;
     upBtn->icon = g_iconLayerUp;
+    upBtn->tooltip = "Move layer up";
     upBtn->setCallbackListener(-3, this);
     subWidgets.addDrawable(upBtn);
 
@@ -35,6 +41,7 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     //downBtn->text = "Dn.";
     downBtn->wxWidth = 30;
     downBtn->icon = g_iconLayerDown;
+    downBtn->tooltip = "Move layer down";
     downBtn->setCallbackListener(-4, this);
     subWidgets.addDrawable(downBtn);
 
@@ -43,6 +50,7 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     //mergeDownBtn->text = "Mrg";
     mergeDownBtn->wxWidth = 30;
     mergeDownBtn->icon = g_iconLayerDownMerge;
+    mergeDownBtn->tooltip = "Merge down";
     mergeDownBtn->setCallbackListener(-5, this);
     subWidgets.addDrawable(mergeDownBtn);
 
@@ -50,6 +58,7 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     duplicateBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + mergeDownBtn->wxWidth + 5 + 5 + 5 + 5 + 5 + 5, 30 };
     duplicateBtn->wxWidth = 30;
     duplicateBtn->icon = g_iconLayerDuplicate;
+    duplicateBtn->tooltip = "Duplicate layer";
     duplicateBtn->setCallbackListener(-6, this);
     subWidgets.addDrawable(duplicateBtn);
 
