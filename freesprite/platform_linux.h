@@ -102,6 +102,10 @@ void platformOpenFileLocation(PlatformNativePathString path) {
     }
 }
 
+PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
+    return "";
+}
+
 Layer *platformGetImageFromClipboard() { return NULL; }
 
 FILE *platformOpenFile(PlatformNativePathString path,

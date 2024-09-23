@@ -179,6 +179,7 @@
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />
+    <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
@@ -250,6 +251,7 @@
     <ClCompile Include="ToolText.cpp" />
     <ClCompile Include="TooltipsLayer.cpp" />
     <ClCompile Include="UIButton.cpp" />
+    <ClCompile Include="UICheckbox.cpp" />
     <ClCompile Include="UIColorInputField.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UIDropdown.cpp" />
@@ -287,12 +289,14 @@
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
     <ClInclude Include="Panel.h" />
     <ClInclude Include="platform_linux.h" />
+    <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />
     <ClInclude Include="TilemapEditorLayerPicker.h" />
     <ClInclude Include="ToolRectFlip.h" />
@@ -360,6 +364,7 @@
     <ClInclude Include="ToolText.h" />
     <ClInclude Include="TooltipsLayer.h" />
     <ClInclude Include="UIButton.h" />
+    <ClInclude Include="UICheckbox.h" />
     <ClInclude Include="UIColorInputField.h" />
     <ClInclude Include="UIColorSlider.h" />
     <ClInclude Include="UIDropdown.h" />

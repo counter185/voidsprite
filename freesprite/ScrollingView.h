@@ -36,9 +36,6 @@ public:
         }
         updateTabButtons();*/
     }
-    ~ScrollingView() {
-        tabButtons.freeAllDrawables();
-    }
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
         return pointInBox(mousePos, {thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight}) || tabButtons.mouseInAny(xyAdd(thisPositionOnScreen, scrollOffset), mousePos);// || tabs[openTab].wxs.mouseInAny(xyAdd(XY{ 0, buttonsHeight }, thisPositionOnScreen), mousePos);
@@ -69,11 +66,6 @@ public:
 				}
 			}
         }
-    }
-
-    void eventButtonPressed(int evt_id) override {
-        //openTab = evt_id;
-        //updateTabButtons();
     }
 
 };

@@ -405,6 +405,12 @@
     <ClCompile Include="Panel.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="UICheckbox.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupGlobalConfig.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -733,6 +739,15 @@
     </ClInclude>
     <ClInclude Include="Panel.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="UICheckbox.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupGlobalConfig.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

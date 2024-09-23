@@ -2,11 +2,11 @@
 #include "UIButton.h"
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
+#include "Panel.h"
 
-class UILayerButton : public Drawable, public EventCallbackListener
+class UILayerButton : public Panel, public EventCallbackListener
 {
 public:
-	DrawableManager subButtons;
 	UIButton* mainButton;
 	UIButton* hideButton;
 	
@@ -16,22 +16,15 @@ public:
 		mainButton->position = XY{ 0,0 };
 		mainButton->wxWidth = 200;
 		mainButton->setCallbackListener(0, this);
-		subButtons.addDrawable(mainButton);
+		subWidgets.addDrawable(mainButton);
 
 		hideButton = new UIButton();
 		hideButton->text = "H";
 		hideButton->position = XY{ mainButton->wxWidth + 10,0 };
 		hideButton->wxWidth = 30;
 		hideButton->setCallbackListener(1, this);
-		subButtons.addDrawable(hideButton);
+		subWidgets.addDrawable(hideButton);
 	}
-	~UILayerButton() {
-		subButtons.freeAllDrawables();
-	}
-
-	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
-	void render(XY position) override;
-	void handleInput(SDL_Event evt, XY gPosOffset = { 0,0 }) override;
 
 	void eventButtonPressed(int evt_id) override;
 };

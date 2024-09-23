@@ -2,15 +2,17 @@
 #include "LayerPalettized.h"
 #include "Pattern.h"
 #include "Notification.h"
-#include "PopupMessageBox.h"
-#include "PopupTileGeneric.h"
-#include "PopupSetEditorPixelGrid.h"
 #include "TilemapPreviewScreen.h"
 #include "PalettizedEditorColorPicker.h"
 #include "PalettizedEditorLayerPicker.h"
 #include "EditorBrushPicker.h"
 #include "RPG2KTilemapPreviewScreen.h"
 #include "FileIO.h"
+
+#include "PopupMessageBox.h"
+#include "PopupTileGeneric.h"
+#include "PopupSetEditorPixelGrid.h"
+#include "PopupGlobalConfig.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -164,7 +166,7 @@ void MainEditorPalettized::setUpWidgets()
             SDLK_f,
             {
                 "File",
-                {SDLK_s, SDLK_d, SDLK_c, SDLK_r},
+                {SDLK_s, SDLK_d, SDLK_c, SDLK_r, SDLK_p},
                 {
                     {SDLK_d, { "Save as",
                             [](MainEditor* editor) {
@@ -190,6 +192,12 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDLK_p, { "Preferences",
+                            [](MainEditor* screen) {
+                                g_addPopup(new PopupGlobalConfig());
+                            }
+                        }
+                    }
                 },
                 g_iconNavbarTabFile
             }

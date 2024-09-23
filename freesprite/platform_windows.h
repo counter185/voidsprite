@@ -155,6 +155,18 @@ FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString m
     return ret;
 }
 
+PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
+    wchar_t fileNameBuffer[MAX_PATH+1];
+    memset(fileNameBuffer, 0, (MAX_PATH+1) * sizeof(wchar_t));
+    GetEnvironmentVariableW(L"APPDATA", fileNameBuffer, MAX_PATH);
+
+    std::wstring appdataDir = fileNameBuffer;
+    appdataDir += L"\\voidsprite\\";
+    CreateDirectoryW(appdataDir.c_str(), NULL);
+
+    return appdataDir;
+}
+
 Layer* platformGetImageFromClipboard() {
     bool res = OpenClipboard(WINhWnd);
     HANDLE dataHandle = GetClipboardData(CF_BITMAP);

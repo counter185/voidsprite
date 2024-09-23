@@ -24,7 +24,7 @@ public:
 	void focusIn() override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 
-	void click();
-	void rightClick();
+	virtual void click();
+	virtual void rightClick();
 };
 

@@ -54,5 +54,6 @@ public:
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
 	virtual void eventSliderPosFinishedChanging(int evt_id, float value) {}
 	virtual void eventDropdownItemSelected(int evt_id, int index, std::string name) {}
+	virtual void eventCheckboxToggled(int evt_id, bool newState) {}
 	virtual void eventColorSet(int evt_id, uint32_t color) {}
 };

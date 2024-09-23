@@ -163,6 +163,10 @@ void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel
 
 void drawLine(XY p1, XY p2, double percent)
 {
+    if (percent == 0.0) {
+        return;
+    }
+
     if (percent != 1.0f && percent >= 0.0 && percent < 1.0) {
         p2.x = p1.x + (p2.x - p1.x) * percent;
         p2.y = p1.y + (p2.y - p1.y) * percent;

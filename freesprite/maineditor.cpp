@@ -4,18 +4,20 @@
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
 #include "ScreenWideNavBar.h"
-#include "PopupYesNo.h"
 #include "Notification.h"
 #include "SpritesheetPreviewScreen.h"
 #include "EditorSpritesheetPreview.h"
 #include "RPG2KTilemapPreviewScreen.h"
 #include "FileIO.h"
-#include "PopupTextBox.h"
-#include "PopupSetEditorPixelGrid.h"
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
-#include "PopupTileGeneric.h"
 #include "Gamepad.h"
+
+#include "PopupTextBox.h"
+#include "PopupSetEditorPixelGrid.h"
+#include "PopupTileGeneric.h"
+#include "PopupYesNo.h"
+#include "PopupGlobalConfig.h"
 #include "PopupPickColor.h"
 
 MainEditor::MainEditor(XY dimensions) {
@@ -425,7 +427,7 @@ void MainEditor::setUpWidgets()
 			SDLK_f,
 			{
 				"File",
-				{SDLK_s, SDLK_d, SDLK_c},
+				{SDLK_s, SDLK_d, SDLK_c, SDLK_p},
 				{
 					{SDLK_d, { "Save as",
 							[](MainEditor* editor) {
@@ -445,6 +447,12 @@ void MainEditor::setUpWidgets()
 							}
 						}
 					},
+					{SDLK_p, { "Preferences",
+							[](MainEditor* screen) {
+								g_addPopup(new PopupGlobalConfig());
+							}
+						}
+					}
 				},
 				g_iconNavbarTabFile
 			}
@@ -894,7 +902,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 			lastConfirmedSavePath = name;
 			lastConfirmedExporterId = exporterID;
 			changesSinceLastSave = false;
-			if (lastWasSaveAs) {
+			if (lastWasSaveAs && g_config.openSavedPath) {
 				platformOpenFileLocation(lastConfirmedSavePath);
 			}
 			g_addNotification(Notification("File saved", "Save successful!", 4000));

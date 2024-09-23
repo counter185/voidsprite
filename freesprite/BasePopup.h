@@ -18,8 +18,11 @@ public:
 		}
     }
 
+    void render() override {
+        renderDrawables();
+    }
+
 protected:
-    DrawableManager wxsManager;
     int wxWidth = 600;
     int wxHeight = 400;
 

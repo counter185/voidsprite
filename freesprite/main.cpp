@@ -276,7 +276,7 @@ int main(int argc, char** argv)
 		pattern->cachedIcon = IMGLoadToTexture(pattern->getIconPath());
 	}
 
-    //MainEditor tempMainEditor(XY{ 640,480 });
+    g_loadConfig();
 
     TTF_Init();
     g_fnt = new TextRenderer();

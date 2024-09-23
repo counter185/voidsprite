@@ -22,6 +22,8 @@ void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pa
 void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id);
 void platformOpenFileLocation(PlatformNativePathString path);
 
+PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
+
 Layer* platformGetImageFromClipboard();
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
