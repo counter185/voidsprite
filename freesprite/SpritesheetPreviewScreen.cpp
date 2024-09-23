@@ -174,11 +174,9 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
 		g_closeScreen(this);
 		return;
 	}
-	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
-		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
-	}
 
-	if (!wxsManager.anyFocused()) {
+	DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+	if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
 				if (evt.button.button == SDL_BUTTON_MIDDLE) {
@@ -211,9 +209,6 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
 				canvasZoom = ixmax(1, canvasZoom);
 				break;
 		}
-	}
-	else {
-		wxsManager.passInputToFocused(evt);
 	}
 }
 

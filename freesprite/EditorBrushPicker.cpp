@@ -2,12 +2,6 @@
 #include "maineditor.h"
 #include "FontRenderer.h"
 
-bool EditorBrushPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
-{
-	return DraggablePanel::isMouseIn(thisPositionOnScreen, mousePos)
-        || (patternsMenuOpen && patternMenuWidgets.mouseInAny(thisPositionOnScreen, mousePos));
-}
-
 void EditorBrushPicker::render(XY position)
 {
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
@@ -23,37 +17,17 @@ void EditorBrushPicker::render(XY position)
 
     g_fnt->RenderString("TOOLS", position.x + 3, position.y + 1);
 
+    patternMenu->position = xyAdd({ 180, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
+
     DraggablePanel::render(position);
-
-    if (patternsMenuOpen) {
-        patternMenuWidgets.renderAll(xySubtract(position, XY{(int)(30 * (1.0- XM1PW3P1(patternMenuTimer.percentElapsedTime(200)))) , 0}));
-    }
-}
-
-void EditorBrushPicker::handleInput(SDL_Event evt, XY gPosOffset)
-{
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
-        if (!patternMenuWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
-            subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
-        }
-    }
-    if (patternMenuWidgets.anyFocused()) {
-        patternMenuWidgets.passInputToFocused(evt, gPosOffset);
-    }
-    else if (subWidgets.anyFocused()) {
-        subWidgets.passInputToFocused(evt, gPosOffset);
-    }
-    else {
-        processDrag(evt);
-    }
 }
 
 void EditorBrushPicker::eventButtonPressed(int evt_id)
 {
     if (evt_id == EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU) {
-        patternsMenuOpen = !patternsMenuOpen;
+        patternMenu->enabled = !patternMenu->enabled;
         patternMenuTimer.start();
-        patternPanelBtn->text = patternsMenuOpen ? "<" : ">";
+        patternPanelBtn->text = patternMenu->enabled ? "<" : ">";
     }
     else if (evt_id == EVENT_MAINEDITOR_TOGGLEREPLACE) {
         caller->replaceAlphaMode = !caller->replaceAlphaMode;

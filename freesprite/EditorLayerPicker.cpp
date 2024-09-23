@@ -97,33 +97,9 @@ void EditorLayerPicker::render(XY position)
         drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
     }
 
-    /*r = SDL_Rect{position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35};
-    SDL_SetRenderDrawColor(g_rd, previewCol.r, previewCol.g, previewCol.b, focused ? 0xff : 0x30);
-    SDL_RenderFillRect(g_rd, &r);*/
-
     g_fnt->RenderString("LAYERS", position.x + 4, position.y + 1);
 
     DraggablePanel::render(position);
-}
-
-void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
-{
-    DraggablePanel::handleInput(evt, gPosOffset);
-
-    /*if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-        if (!layerButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
-            subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
-        }
-    }
-    if (layerButtons.anyFocused()) {
-        layerButtons.passInputToFocused(evt, gPosOffset);
-    }
-    else if (subWidgets.anyFocused()) {
-        subWidgets.passInputToFocused(evt, gPosOffset);
-    }
-    else {
-        processDrag(evt);
-    }*/
 }
 
 void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)

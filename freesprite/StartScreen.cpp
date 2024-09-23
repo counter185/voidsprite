@@ -41,8 +41,14 @@ void StartScreen::takeInput(SDL_Event evt)
 		wxsManager.forceFocusOn(navbar);
 		return;
 	}
+	if (evt.type == SDL_DROPFILE) {
+		std::string filePath = evt.drop.file;
+		tryLoadFile(filePath);
+		SDL_free(evt.drop.file);
+		return;
+	}
 
-	if (evt.type == SDL_DROPFILE || !DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
+	if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
@@ -63,14 +69,6 @@ void StartScreen::takeInput(SDL_Event evt)
 				if (evt.key.keysym.sym == SDLK_v && g_ctrlModifier) {
 					tryOpenImageFromClipboard();
 				}
-				break;
-			case SDL_DROPFILE:
-			{
-				std::string filePath = evt.drop.file;
-				//std::string extension = filePath.substr(filePath.find_last_of('.'));
-				tryLoadFile(filePath);
-				SDL_free(evt.drop.file);
-			}
 				break;
 		}
 	}

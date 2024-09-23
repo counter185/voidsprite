@@ -745,9 +745,6 @@ void MainEditor::takeInput(SDL_Event evt) {
 
 	DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
 
-	if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
-		wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
-	}
 	if (evt.type == SDL_QUIT) {
 		if (requestSafeClose()) {
 			return;
@@ -758,7 +755,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 		return;
 	}
 
-	if (!wxsManager.anyFocused()) {
+	if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
@@ -867,9 +864,6 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				break;
 		}
-	}
-	else {
-		wxsManager.passInputToFocused(evt);
 	}
 }
 

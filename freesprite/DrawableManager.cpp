@@ -29,6 +29,15 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
 			}
 		}
 	}
+	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_TAB) {
+		for (auto& wxsw : wxss) {
+			auto& wxs = wxsw.get();
+			if (wxs.anyFocused()) {
+				wxs.tryFocusOnNextTabbable();
+				break;
+			}
+		}
+	}
 
 	for (auto& wxsw : wxss) {
 		auto& wxs = wxsw.get();
@@ -164,7 +173,9 @@ bool DrawableManager::mouseInAny(XY origin, XY mousePos)
 bool DrawableManager::processHoverEvent(XY thisPositionOnScreen, XY mousePos)
 {
 	Drawable* newHoverTarget = NULL;
-	for (Drawable*& d : drawablesList) {
+	for (auto dd = drawablesList.rbegin(); dd != drawablesList.rend(); dd++) {
+		Drawable* d = *dd;
+	//for (Drawable*& d : drawablesList) {
 		//XY anchorPosition = d->anchorPos(thisPositionOnScreen, XY{ g_windowW, g_windowH }, d->position, d->getDimensions(), d->anchor);
 		XY renderPoint = xyAdd(d->position, thisPositionOnScreen);
 		if (d->isMouseIn(renderPoint, mousePos)) {

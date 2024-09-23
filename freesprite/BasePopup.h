@@ -9,27 +9,13 @@ class BasePopup :
 public:
     Timer64 startTimer;
 
-    ~BasePopup() {
-        //printf("[BasePopup] destructor call\n");
-        wxsManager.freeAllDrawables();
-    }
-
     virtual bool takesInput() { return true; }
 
     void takeInput(SDL_Event evt) override {
-        if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-            wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, getPopupOrigin());
-        }
-        else if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_TAB) {
-            wxsManager.tryFocusOnNextTabbable();
-        }
-
-        if (wxsManager.anyFocused()) {
-            wxsManager.passInputToFocused(evt, getPopupOrigin());
-        }
-        else {
-            defaultInputAction(evt);
-        }
+        DrawableManager::processHoverEventInMultiple({ wxsManager }, evt, getPopupOrigin());
+        if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt, getPopupOrigin())) {
+			defaultInputAction(evt);
+		}
     }
 
 protected:

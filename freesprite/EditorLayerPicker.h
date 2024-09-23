@@ -17,7 +17,6 @@ public:
 	EditorLayerPicker(MainEditor* editor);
 
 	void render(XY position) override;
-	void handleInput(SDL_Event evt, XY gPosOffset) override;
 
 	void eventGeneric(int evt_id, int data1, int data2) override;
 	void eventButtonPressed(int evt_id) override;

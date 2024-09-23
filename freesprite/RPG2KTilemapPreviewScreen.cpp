@@ -101,17 +101,13 @@ void RPG2KTilemapPreviewScreen::tick()
 
 void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
 {
+    DrawableManager::processInputEventInMultiple({ wxsManager }, evt);
+
     if (evt.type == SDL_QUIT) {
         g_closeScreen(this);
         return;
     }
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
-        wxsManager.tryFocusOnPoint(XY{ evt.button.x, evt.button.y });
-    }
-    if (wxsManager.anyFocused()) {
-        wxsManager.passInputToFocused(evt);
-    }
-    else {
+    if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
         switch (evt.type) {
         case SDL_MOUSEWHEEL:
             if (evt.wheel.y > 0) {

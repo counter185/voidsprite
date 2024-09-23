@@ -65,10 +65,15 @@ void UIDropdown::focusOut()
 	wxs.forceUnfocus();
 }
 
+void UIDropdown::mouseHoverOut()
+{
+	wxs.forceUnhover();
+}
+
 void UIDropdown::mouseHoverMotion(XY mousePos, XY gPosOffset)
 {
 	if (isOpen) {
-		wxs.processHoverEvent(xyAdd(gPosOffset, position), mousePos);
+		wxs.processHoverEvent(xyAdd({0, menuYOffset}, xyAdd(gPosOffset, position)), mousePos);
 	}
 }
 

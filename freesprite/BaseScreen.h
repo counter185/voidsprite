@@ -10,10 +10,18 @@ protected:
 	DrawableManager wxsManager;
 public:
 
-	virtual ~BaseScreen() {}
-
-	virtual void render() {}
-	virtual void takeInput(SDL_Event evt) {}
+	virtual void render() {
+		wxsManager.renderAll();
+	}
+	virtual void takeInput(SDL_Event evt) 
+	{
+		if (evt.type == SDL_QUIT) {
+			g_closeScreen(this);
+			return;
+		}
+		DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+		DrawableManager::processInputEventInMultiple({ wxsManager }, evt);
+	}
 	virtual void tick() {}
 	virtual BaseScreen* isSubscreenOf() { return NULL; }
 

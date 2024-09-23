@@ -32,11 +32,12 @@ public:
 	UIDropdown(std::vector<std::pair<std::string, std::string>> items);
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
-		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight }) || (isOpen && wxs.mouseInAny(thisPositionOnScreen, mousePos));
+		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight }) || (isOpen && wxs.mouseInAny(xyAdd({0, menuYOffset}, thisPositionOnScreen), mousePos));
 	}
 	void render(XY pos) override;
 	void focusIn() override;
 	void focusOut() override;
+	void mouseHoverOut() override;
 	void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 
