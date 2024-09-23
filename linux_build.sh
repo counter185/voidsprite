@@ -8,7 +8,7 @@ _prefix="${PWD}/target/debug"
 portable=false
 buildtype=debug
 keep=false
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
 	case $1 in
 		"--no-setup") no_setup=1; shift;;
 		"--run") run=1; shift;;
@@ -23,7 +23,7 @@ done
 prefix="${prefix:-${_prefix}}"
 
 if [ ! -e "freesprite" ]; then echo "Not in source directory"; exit 1; fi
-if [ "$keep" == "false" ]; then if [ -e "$prefix" ]; then rm -r "$prefix"; fi; fi
+if [ "$keep" = "false" ]; then if [ -e "$prefix" ]; then rm -r "$prefix"; fi; fi
 
 set -e
 if [ "$no_setup" != "1" ] || [ ! -e 'build' ]; then
