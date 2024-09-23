@@ -62,6 +62,8 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     txtH = new UITextField();
     txtS = new UITextField();
     txtV = new UITextField();
+    txtH->tooltip = txtS->tooltip = txtV->tooltip = "Must be a floating point number";
+    txtR->tooltip = txtG->tooltip = txtB->tooltip = "Must be a whole number from 0 to 255.\nFor hex numbers, enter x<number>";
     txtR->position = txtH->position = XY{ 240, 15 };
     txtR->textColor = { 0xff,0,0,0xff };
     txtG->position = txtS->position = XY{ 240, 65 };
@@ -117,6 +119,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     colorTextField->isColorField = true;
     colorTextField->position = XY{ 60, 350 };
     colorTextField->wxWidth = 140;
+    colorTextField->tooltip = "Enter the color here in #RRGGBB format.\nPredefined color names are also supported.";
     colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
     subWidgets.addDrawable(colorTextField);
 
@@ -125,6 +128,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     //eraserButton->text = "E";
     eraserButton->icon = g_iconEraser;
     eraserButton->wxWidth = 30;
+    eraserButton->tooltip = "Eraser";
     eraserButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEERASER, this);
     subWidgets.addDrawable(eraserButton);
 
@@ -132,6 +136,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     blendModeButton->position = { 215, 350 };
     blendModeButton->icon = g_iconBlendMode;
     blendModeButton->wxWidth = 30;
+    blendModeButton->tooltip = "Alpha blend";
     blendModeButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEBLENDMODE, this);
     blendModeButton->colorBGFocused = blendModeButton->colorBGUnfocused = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
     subWidgets.addDrawable(blendModeButton);

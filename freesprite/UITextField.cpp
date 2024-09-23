@@ -1,6 +1,7 @@
 #include "UITextField.h"
 #include "FontRenderer.h"
 #include "EventCallbackListener.h"
+#include "TooltipsLayer.h"
 
 void UITextField::render(XY pos)
 {
@@ -17,6 +18,16 @@ void UITextField::render(XY pos)
 		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
 		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
 		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
+	}
+
+	if (hovered) {
+		renderGradient(drawrect, 0x08FFFFFF, 0x08FFFFFF, 0x20D3F4FF, 0x20D3F4FF);
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
+		SDL_RenderDrawRect(g_rd, &drawrect);
+
+		if (!tooltip.empty() && hoverTimer.percentElapsedTime(1000) == 1.0f) {
+			g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, 1000) });
+		}
 	}
 	
 	if (!isColorField || !isValidOrPartialColor() || text.empty()) {

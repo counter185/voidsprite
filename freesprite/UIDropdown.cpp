@@ -61,6 +61,7 @@ void UIDropdown::focusIn()
 void UIDropdown::focusOut()
 {
 	isOpen = false;
+	wxs.forceUnhover();
 	wxs.forceUnfocus();
 }
 

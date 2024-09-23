@@ -7,6 +7,7 @@ class UITextField : public Drawable
 {
 public:
 	std::string text = "";
+	std::string tooltip = "";
 	bool isNumericField = false;
 	bool isColorField = false;
 	int wxWidth = 250, wxHeight = 30;

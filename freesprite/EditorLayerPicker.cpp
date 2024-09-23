@@ -18,6 +18,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     addBtn->wxWidth = 30;
     addBtn->setCallbackListener(-1, this);
     addBtn->icon = g_iconLayerAdd;
+    addBtn->tooltip = "New layer";
     subWidgets.addDrawable(addBtn);
 
     UIButton* removeBtn = new UIButton();
@@ -25,22 +26,23 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     //removeBtn->text = "-";
     removeBtn->wxWidth = 30;
     removeBtn->icon = g_iconLayerDelete;
+    removeBtn->tooltip = "Delete layer";
     removeBtn->setCallbackListener(-2, this);
     subWidgets.addDrawable(removeBtn);
 
     UIButton* upBtn = new UIButton();
     upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
-    //upBtn->text = "Up";
     upBtn->wxWidth = 30;
     upBtn->icon = g_iconLayerUp;
+    upBtn->tooltip = "Move layer up";
     upBtn->setCallbackListener(-3, this);
     subWidgets.addDrawable(upBtn);
 
     UIButton* downBtn = new UIButton();
     downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
-    //downBtn->text = "Dn.";
     downBtn->wxWidth = 30;
     downBtn->icon = g_iconLayerDown;
+    downBtn->tooltip = "Move layer down";
     downBtn->setCallbackListener(-4, this);
     subWidgets.addDrawable(downBtn);
 
@@ -49,6 +51,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     //mergeDownBtn->text = "Mrg";
     mergeDownBtn->wxWidth = 30;
     mergeDownBtn->icon = g_iconLayerDownMerge;
+    mergeDownBtn->tooltip = "Merge down";
     mergeDownBtn->setCallbackListener(-5, this);
     subWidgets.addDrawable(mergeDownBtn);
 
@@ -56,6 +59,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     duplicateBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + mergeDownBtn->wxWidth + 5 + 5 + 5 + 5 + 5 + 5, 30 };
     duplicateBtn->wxWidth = 30;
     duplicateBtn->icon = g_iconLayerDuplicate;
+    duplicateBtn->tooltip = "Duplicate layer";
     duplicateBtn->setCallbackListener(-6, this);
     subWidgets.addDrawable(duplicateBtn);
 

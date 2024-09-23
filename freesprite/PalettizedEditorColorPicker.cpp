@@ -20,6 +20,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     //eraserButton->text = "E";
     eraserButton->icon = g_iconEraser;
     eraserButton->wxWidth = 30;
+    eraserButton->tooltip = "Eraser";
     eraserButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEERASER, this);
     subWidgets.addDrawable(eraserButton);
 

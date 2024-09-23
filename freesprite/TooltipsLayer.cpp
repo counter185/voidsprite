@@ -19,19 +19,34 @@ void TooltipsLayer::renderAll()
 		XY dim = g_fnt->StatStringDimensions(t.text);
 		double timer = XM1PW3P1(t.timer);
 		SDL_Rect rect = { t.position.x, t.position.y, dim.x + 8, (dim.y + 12) * timer };
+
+		if ((rect.x + rect.w) > g_windowW)
+		{
+			rect.x = g_windowW - rect.w;
+		}
+		if ((rect.y + rect.h) > g_windowH)
+		{
+			rect.y = g_windowH - rect.h;
+		}
+		XY rectPos = { rect.x, rect.y };
+
 		renderGradient(rect, 0xFF000000, 0xFF000000, 0xD0000000, 0xD0000000);
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x90);
-		drawLine(t.position, xyAdd(t.position, { rect.w, 0 }), timer);
-		drawLine(t.position, xyAdd(t.position, { 0, rect.h }), timer);
+		drawLine(rectPos, xyAdd(rectPos, { rect.w, 0 }), timer);
+		drawLine(rectPos, xyAdd(rectPos, { 0, rect.h }), timer);
 
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x40);
-		drawLine(xyAdd(t.position, {rect.w, rect.h}), xyAdd(t.position, { rect.w, 0 }), timer);
-		drawLine(xyAdd(t.position, { rect.w, rect.h }), xyAdd(t.position, { 0, rect.h }), timer);
+		drawLine(xyAdd(rectPos, {rect.w, rect.h}), xyAdd(rectPos, { rect.w, 0 }), timer);
+		drawLine(xyAdd(rectPos, { rect.w, rect.h }), xyAdd(rectPos, { 0, rect.h }), timer);
 
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x10);
-		drawLine(t.position, xyAdd(t.position, { rect.w, rect.h }), timer);
+		drawLine(rectPos, xyAdd(rectPos, { rect.w, rect.h }), timer);
 
-		g_fnt->RenderString(t.text, t.position.x + 4, t.position.y + 2, t.textColor);
+		uint8_t alpha = (uint8_t)(t.textColor.a * timer);
+		SDL_Color textCol = t.textColor;
+		textCol.a = alpha;
+
+		g_fnt->RenderString(t.text, rectPos.x + 4, rectPos.y + 2 - (20 * (1.0-timer)), textCol);
 	}
 	clearTooltips();
 }

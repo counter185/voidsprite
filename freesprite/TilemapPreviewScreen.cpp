@@ -51,15 +51,15 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
 TilemapPreviewScreen::~TilemapPreviewScreen()
 {
     for (int l = 0; l < tilemap.size(); l++) {
-		XY**& tilemapLayer = tilemap.at(l);
-		if (tilemapLayer != NULL) {
-			for (int y = 0; y < tilemapDimensions.y; y++) {
-				free(tilemapLayer[y]);
-			}
-			free(tilemapLayer);
-		}
-	}
-	tilemap.clear();
+        XY**& tilemapLayer = tilemap.at(l);
+        if (tilemapLayer != NULL) {
+            for (int y = 0; y < tilemapDimensions.y; y++) {
+                free(tilemapLayer[y]);
+            }
+            free(tilemapLayer);
+        }
+    }
+    tilemap.clear();
 }
 
 void TilemapPreviewScreen::render()
@@ -483,47 +483,47 @@ int TilemapPreviewScreen::activeLayerIndex()
         return -1;
     }
     for (int i = 0; i < tilemap.size(); i++) {
-		if (tilemap[i] == activeTilemap) {
-			return i;
-		}
-	}
-	return -1;
+        if (tilemap[i] == activeTilemap) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void TilemapPreviewScreen::switchActiveLayer(int layerIndex)
 {
     if (layerIndex >= 0 && layerIndex < tilemap.size()) {
-		activeTilemap = tilemap[layerIndex];
+        activeTilemap = tilemap[layerIndex];
         layerSelectTimer.start();
-	}
+    }
 }
 
 void TilemapPreviewScreen::freeAllLayers()
 {
     for (int l = 0; l < tilemap.size(); l++) {
-		XY**& tilemapLayer = tilemap.at(l);
-		if (tilemapLayer != NULL) {
-			for (int y = 0; y < tilemapDimensions.y; y++) {
-				free(tilemapLayer[y]);
-			}
-			free(tilemapLayer);
-		}
-	}
-	tilemap.clear();
-	activeTilemap = NULL;
+        XY**& tilemapLayer = tilemap.at(l);
+        if (tilemapLayer != NULL) {
+            for (int y = 0; y < tilemapDimensions.y; y++) {
+                free(tilemapLayer[y]);
+            }
+            free(tilemapLayer);
+        }
+    }
+    tilemap.clear();
+    activeTilemap = NULL;
 }
 
 XY** TilemapPreviewScreen::newLayer()
 {
     XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
-	for (int y = 0; y < tilemapDimensions.y; y++) {
-		newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
-		for (int x = 0; x < tilemapDimensions.x; x++) {
-			newTilemap[y][x] = XY{ -1,-1 };
-		}
-	}
-	tilemap.push_back(newTilemap);
-	switchActiveLayer(tilemap.size() - 1);
+    for (int y = 0; y < tilemapDimensions.y; y++) {
+        newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
+        for (int x = 0; x < tilemapDimensions.x; x++) {
+            newTilemap[y][x] = XY{ -1,-1 };
+        }
+    }
+    tilemap.push_back(newTilemap);
+    switchActiveLayer(tilemap.size() - 1);
     return newTilemap;
 }
 
@@ -532,13 +532,13 @@ void TilemapPreviewScreen::deleteLayer(int index)
     if (tilemap.size() > 1) {
         XY** tilemapLayer = tilemap.at(index);
         for (int y = 0; y < tilemapDimensions.y; y++) {
-			free(tilemapLayer[y]);
-		}
+            free(tilemapLayer[y]);
+        }
         free(tilemapLayer);
         tilemap.erase(tilemap.begin() + index);
         if (activeTilemap == tilemapLayer) {
-			activeTilemap = tilemap[index < tilemap.size() ? index : tilemap.size()-1];
-		}
+            activeTilemap = tilemap[index < tilemap.size() ? index : tilemap.size()-1];
+        }
     }
 }
 
@@ -546,45 +546,45 @@ void TilemapPreviewScreen::moveLayerUp(int index)
 {
     if (index != tilemap.size() - 1) {
         XY** tmp = tilemap[index];
-		tilemap[index] = tilemap[index + 1];
-		tilemap[index + 1] = tmp;
+        tilemap[index] = tilemap[index + 1];
+        tilemap[index + 1] = tmp;
     }
 }
 
 void TilemapPreviewScreen::moveLayerDown(int index)
 {
     if (index != 0) {
-		XY** tmp = tilemap[index];
-		tilemap[index] = tilemap[index - 1];
-		tilemap[index - 1] = tmp;
-	}
+        XY** tmp = tilemap[index];
+        tilemap[index] = tilemap[index - 1];
+        tilemap[index - 1] = tmp;
+    }
 }
 
 void TilemapPreviewScreen::mergeLayerDown(int index)
 {
     if (index != 0) {
-		XY**& tilemapLayer = tilemap.at(index);
-		XY**& tilemapLayerBelow = tilemap.at(index - 1);
-		for (int y = 0; y < tilemapDimensions.y; y++) {
-			for (int x = 0; x < tilemapDimensions.x; x++) {
-				if (tilemapLayer[y][x].x >= 0 && tilemapLayer[y][x].y >= 0) {
-					tilemapLayerBelow[y][x] = tilemapLayer[y][x];
-				}
-			}
-		}
-		deleteLayer(index);
-	}
+        XY**& tilemapLayer = tilemap.at(index);
+        XY**& tilemapLayerBelow = tilemap.at(index - 1);
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+            for (int x = 0; x < tilemapDimensions.x; x++) {
+                if (tilemapLayer[y][x].x >= 0 && tilemapLayer[y][x].y >= 0) {
+                    tilemapLayerBelow[y][x] = tilemapLayer[y][x];
+                }
+            }
+        }
+        deleteLayer(index);
+    }
 }
 
 void TilemapPreviewScreen::duplicateLayer(int index)
 {
     XY**& tilemapLayer = tilemap.at(index);
-	XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
-	for (int y = 0; y < tilemapDimensions.y; y++) {
-		newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
-		for (int x = 0; x < tilemapDimensions.x; x++) {
-			newTilemap[y][x] = tilemapLayer[y][x];
-		}
-	}
-	tilemap.insert(tilemap.begin() + index, newTilemap);
+    XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
+    for (int y = 0; y < tilemapDimensions.y; y++) {
+        newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
+        for (int x = 0; x < tilemapDimensions.x; x++) {
+            newTilemap[y][x] = tilemapLayer[y][x];
+        }
+    }
+    tilemap.insert(tilemap.begin() + index, newTilemap);
 }
