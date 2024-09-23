@@ -52,4 +52,8 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     duplicateBtn->icon = g_iconLayerDuplicate;
     duplicateBtn->setCallbackListener(-6, this);
     subWidgets.addDrawable(duplicateBtn);
+
+    layerListPanel = new Panel();
+    layerListPanel->position = { 5, 100 };
+    subWidgets.addDrawable(layerListPanel);
 }

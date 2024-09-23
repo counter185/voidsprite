@@ -1,25 +1,10 @@
 #include "DraggablePanel.h"
 
-bool DraggablePanel::isMouseIn(XY thisPositionOnScreen, XY mousePos)
-{
-    return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight }) || subWidgets.mouseInAny(thisPositionOnScreen, mousePos);
-}
-
-void DraggablePanel::render(XY position)
-{
-    subWidgets.renderAll(position);
-}
-
 void DraggablePanel::handleInput(SDL_Event evt, XY gPosOffset)
 {
     if (!DrawableManager::processInputEventInMultiple({ subWidgets }, evt, gPosOffset)) {
         processDrag(evt);
     }
-}
-
-void DraggablePanel::mouseHoverMotion(XY mousePos, XY gPosOffset)
-{
-    subWidgets.processHoverEvent(xyAdd(gPosOffset, position), mousePos);
 }
 
 void DraggablePanel::processDrag(SDL_Event evt)

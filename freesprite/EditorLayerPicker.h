@@ -4,7 +4,6 @@
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
 #include "DraggablePanel.h"
-#include "UISlider.h"
 
 class EditorLayerPicker : public DraggablePanel, public EventCallbackListener
 {
@@ -12,12 +11,11 @@ protected:
 	EditorLayerPicker() {};
 public:
 	MainEditor* caller;
-	DrawableManager layerButtons;
+	Panel* layerListPanel;
 	UISlider* opacitySlider = NULL;
 
 	EditorLayerPicker(MainEditor* editor);
 
-	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
 	void render(XY position) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 

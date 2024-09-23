@@ -5,6 +5,8 @@
 #include "EditorLayerPicker.h"
 #include "UILayerButton.h"
 #include "maineditor.h"
+#include "Panel.h"
+#include "UISlider.h"
 
 EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     caller = editor;
@@ -74,17 +76,14 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     opacitySlider->wxHeight = 20;
     opacitySlider->setCallbackListener(EVENT_LAYERPICKER_OPACITYSLIDER, this);
     subWidgets.addDrawable(opacitySlider);
-}
 
-bool EditorLayerPicker::isMouseIn(XY thisPositionOnScreen, XY mousePos)
-{
-	return DraggablePanel::isMouseIn(thisPositionOnScreen, mousePos)
-        || layerButtons.mouseInAny(thisPositionOnScreen, mousePos);
+    layerListPanel = new Panel();
+    layerListPanel->position = { 5, 100 };
+    subWidgets.addDrawable(layerListPanel);
 }
 
 void EditorLayerPicker::render(XY position)
 {
-
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
     //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     //SDL_RenderFillRect(g_rd, &r);
@@ -104,14 +103,14 @@ void EditorLayerPicker::render(XY position)
 
     g_fnt->RenderString("LAYERS", position.x + 4, position.y + 1);
 
-    layerButtons.renderAll(position);
-    
     DraggablePanel::render(position);
 }
 
 void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
+    DraggablePanel::handleInput(evt, gPosOffset);
+
+    /*if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
         if (!layerButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
             subWidgets.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
         }
@@ -124,7 +123,7 @@ void EditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
     }
     else {
         processDrag(evt);
-    }
+    }*/
 }
 
 void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
@@ -135,7 +134,6 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     else if (data1 == 1) {
         caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;
     }
-    layerButtons.forceUnfocus();
     updateLayers();
 }
 
@@ -179,19 +177,18 @@ void EditorLayerPicker::eventSliderPosFinishedChanging(int evt_id, float value)
 
 void EditorLayerPicker::updateLayers()
 {
-    layerButtons.forceUnfocus();
-    layerButtons.freeAllDrawables();
+    layerListPanel->subWidgets.freeAllDrawables();
 
-    int yposition = 100;
+    int yposition = 0;
     for (int lid = caller->layers.size(); lid --> 0;) {
         Layer* l = caller->layers[lid];
         UILayerButton* layerButton = new UILayerButton(l->name);
         layerButton->hideButton->colorBGFocused = layerButton->hideButton->colorBGUnfocused = (l->hidden ? SDL_Color{ 255,255,255,0x80 } : SDL_Color{0,0,0,0x80});
-        layerButton->position = { 5, yposition };
+        layerButton->position = { 0, yposition };
         layerButton->mainButton->colorBGFocused = layerButton->mainButton->colorBGUnfocused = (caller->selLayer == lid ? SDL_Color{ 255,255,255,0x60 } : SDL_Color{ 0,0,0,0x80 });
         yposition += 30;
         layerButton->setCallbackListener(lid, this);
-        layerButtons.addDrawable(layerButton);
+        layerListPanel->subWidgets.addDrawable(layerButton);
     }
 
     if (opacitySlider != NULL) {

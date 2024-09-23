@@ -402,6 +402,9 @@
     <ClCompile Include="TooltipsLayer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Panel.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -727,6 +730,9 @@
     </ClInclude>
     <ClInclude Include="TooltipsLayer.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Panel.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
