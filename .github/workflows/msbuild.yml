@@ -84,6 +84,9 @@ jobs:
     - name: add licenses
       run: cp -r OPEN_SOURCE_LICENSES target/debug
 
+    - name: add assets
+      run: cp -r freesprite/assets target/debug/bin
+
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
