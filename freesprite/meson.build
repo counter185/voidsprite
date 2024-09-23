@@ -14,19 +14,19 @@ voidsprite_sources = c.stdout().strip().split('\n')
 thread_dep = dependency('threads')
 
 # We use WrapDB wraps for these dependencies (see subprojects/*.wrap in root):
-libpng_dep = dependency('libpng', fallback: ['libpng', 'libpng_dep'])
-pugixml_dep = dependency('pugixml', fallback: ['pugixml', 'pugixml_dep'])
-zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'])
+libpng_dep = dependency('libpng', fallback: ['libpng', 'libpng_dep'], static: get_option('portable'))
+pugixml_dep = dependency('pugixml', fallback: ['pugixml', 'pugixml_dep'], static: get_option('portable'))
+zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'], static: get_option('portable'))
 
 # These deps are vendored in our source code; we manually add meson.build files
 # to build them as static libraries, see the subfolders for these libraries
 # under the source folder.
-liblcf_dep = dependency('liblcf', fallback: ['liblcf', 'liblcf_dep'])
-libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'])
+liblcf_dep = dependency('liblcf', fallback: ['liblcf', 'liblcf_dep'], static: get_option('portable'))
+libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'], static: get_option('portable'))
 
-sdl2_dep = dependency('sdl2')
-sdl2_ttf_dep = dependency('SDL2_ttf')
-sdl2_image_dep = dependency('SDL2_image')
+sdl2_dep = dependency('sdl2', fallback: ['sdl2', 'sdl2_dep'])
+sdl2_ttf_dep = dependency('SDL2_ttf', fallback: ['sdl2_ttf', 'sdl2_ttf_dep'])
+sdl2_image_dep = dependency('SDL2_image', fallback: ['sdl2_image', 'sdl2_image_dep'])
 
 dependencies = [
   thread_dep,
@@ -42,7 +42,7 @@ dependencies = [
 
 # Windows requires sdl2main dependency
 if host_machine.system() == 'windows'
-  sdl2main_dep = dependency('sdl2main')
+  sdl2main_dep = dependency('sdl2main', fallback: ['sdl2main', 'sdl2main_dep'])
   dependencies += sdl2main_dep
 endif
 
