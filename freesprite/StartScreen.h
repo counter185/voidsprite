@@ -125,14 +125,17 @@ public:
 		h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
 		newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
-		for (int x = 0; x < tab2templates.size(); x++) {
-			UIButton* buttonTemplate = new UIButton();
-			buttonTemplate->position = XY{ 40, 5 + x * 30 };
-			buttonTemplate->text = tab2templates[x]->getName();
-			buttonTemplate->setCallbackListener(10 + x, this);
-			buttonTemplate->wxWidth = 400;
-			newImageTabs->tabs[2].wxs.addDrawable(buttonTemplate);
+		std::vector<std::pair<std::string, std::string>> templates;
+		for (BaseTemplate*& templ : tab2templates) {
+			templates.push_back({ templ->getName(), templ->getTooltip() });
 		}
+		UIDropdown* templatesDropdown = new UIDropdown(templates);
+		templatesDropdown->position = XY{ 40, 5 };
+		templatesDropdown->text = "Select template...";
+		templatesDropdown->setCallbackListener(EVENT_STARTSCREEN_TEMPLATEPICKED, this);
+		templatesDropdown->wxWidth = 400;
+		templatesDropdown->genButtons();
+		newImageTabs->tabs[2].wxs.addDrawable(templatesDropdown);
 
 		for (int x = 0; x < 2; x++) {
 			UIButton* buttonNewImageRGB = new UIButton();
@@ -223,6 +226,7 @@ public:
 
 	void eventButtonPressed(int evt_id) override;
 	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
+	void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
 	void openImageLoadDialog();
 	void tryLoadFile(std::string path);

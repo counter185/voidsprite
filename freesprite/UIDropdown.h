@@ -26,8 +26,10 @@ public:
 	DrawableManager wxs;
 
 	std::vector<std::string> items;
+	std::vector<std::string> tooltips;
 
 	UIDropdown(std::vector<std::string> items);
+	UIDropdown(std::vector<std::pair<std::string, std::string>> items);
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
 		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight }) || (isOpen && wxs.mouseInAny(thisPositionOnScreen, mousePos));
@@ -35,11 +37,12 @@ public:
 	void render(XY pos) override;
 	void focusIn() override;
 	void focusOut() override;
+	void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 
 	void eventButtonPressed(int evt_id) override;
 
-	void genButtons();
+	void genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item) = NULL);
 
 	void click();
 };

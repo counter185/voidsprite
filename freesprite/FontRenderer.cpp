@@ -94,6 +94,40 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
     return { drawX, drawY };
 }
 
+XY TextRenderer::StatStringDimensions(std::string text)
+{
+    int drawX = 0;
+    int drawY = 0;
+
+    XY maxDraw = { 0,0 };
+
+    uint32_t currentUTF8Sym = 0;
+    int nextUTFBytes = 0;
+    for (int chx = 0; chx != text.size(); chx++) {
+        char target = text.at(chx);
+        if (target == '\n') {
+            drawX = 0;
+            drawY += 18;
+        }
+        else {
+            bool shouldDraw = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);
+            if (shouldDraw) {
+                if (!renderedGlyphs.contains(currentUTF8Sym)) {
+                    RenderGlyph(currentUTF8Sym);
+                }
+                GlyphData glyphData = renderedGlyphs[currentUTF8Sym];
+                drawX += glyphData.advance;
+                if (drawX > maxDraw.x) {
+					maxDraw.x = drawX;
+				}
+            }
+        }
+    }
+    drawY += 18;
+    maxDraw.y = drawY;
+    return maxDraw;
+}
+
 void TextRenderer::RenderGlyph(uint32_t a) {
     TTF_Font* usedFont =
         (a >= 0x3000 && a <= 0x30ff) || (a >= 0xff00 && a <= 0xffef) || (a >= 0x4e00 && a <= 0x9faf) ? fontJP

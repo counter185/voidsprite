@@ -84,6 +84,7 @@ class UITextField;
 class ScrollingView;
 class Gamepad;
 class Timer64;
+class TooltipsLayer;
 class TilemapEditorLayerPicker;
 
 template <typename T>
@@ -95,6 +96,7 @@ extern std::string g_programDirectory;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
+extern TooltipsLayer* g_ttp;
 extern Gamepad* g_gamepad;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;

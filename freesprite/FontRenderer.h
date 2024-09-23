@@ -13,6 +13,7 @@ public:
     ~TextRenderer();
 
     XY RenderString(std::string text, int x, int y, SDL_Color col = { 255,255,255,255 });
+    XY StatStringDimensions(std::string text);
 private:
     TTF_Font* font = NULL;
     TTF_Font* fontJP = NULL;

@@ -6,6 +6,7 @@ class UIButton : public Drawable
 {
 public:
 	std::string text;
+	std::string tooltip;
 	int wxWidth = 250, wxHeight = 30;
 	SDL_Texture* icon = NULL;
 	

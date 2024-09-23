@@ -161,16 +161,6 @@ void StartScreen::eventButtonPressed(int evt_id) {
 			break;
 		}
 	}
-	else if (evt_id >= 10) {
-		BaseTemplate* templ = tab2templates[evt_id - 10];
-		MainEditor* newMainEditor = new MainEditor(templ->generate());
-		std::vector<CommentData> templateComments = templ->placeComments();
-		for (CommentData& comment : templateComments) {
-			newMainEditor->addComment(comment);
-		}
-		newMainEditor->tileDimensions = tab2templates[evt_id - 10]->tileSize();
-		g_addScreen(newMainEditor);
-	}
 }
 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
@@ -194,6 +184,20 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 		else {
 			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
 		}
+	}
+}
+
+void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string name)
+{
+	if (evt_id == EVENT_STARTSCREEN_TEMPLATEPICKED) {
+		BaseTemplate* templ = tab2templates[index];
+		MainEditor* newMainEditor = new MainEditor(templ->generate());
+		std::vector<CommentData> templateComments = templ->placeComments();
+		for (CommentData& comment : templateComments) {
+			newMainEditor->comments.push_back(comment);
+		}
+		newMainEditor->tileDimensions = tab2templates[index]->tileSize();
+		g_addScreen(newMainEditor);
 	}
 }
 

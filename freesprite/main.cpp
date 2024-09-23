@@ -20,6 +20,7 @@
 #include "ToolText.h"
 #include "Gamepad.h"
 #include "FileIO.h"
+#include "TooltipsLayer.h"
 
 #include "ee_creature.h"
 
@@ -34,6 +35,7 @@ SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
 TextRenderer* g_fnt;
+TooltipsLayer* g_ttp;
 Gamepad* g_gamepad = NULL;
 std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
@@ -279,6 +281,8 @@ int main(int argc, char** argv)
     TTF_Init();
     g_fnt = new TextRenderer();
 
+    g_ttp = new TooltipsLayer();
+
     screenStack.push_back(new StartScreen());
 
 
@@ -455,6 +459,7 @@ int main(int argc, char** argv)
 			notifY += 65;
 		}
 
+        g_ttp->renderAll();
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};

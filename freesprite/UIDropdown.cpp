@@ -8,6 +8,15 @@ UIDropdown::UIDropdown(std::vector<std::string> items)
 	genButtons();
 }
 
+UIDropdown::UIDropdown(std::vector<std::pair<std::string, std::string>> items)
+{
+	this->items.resize(items.size());
+	this->tooltips.resize(items.size());
+	std::transform(items.begin(), items.end(), this->items.begin(), [](std::pair<std::string, std::string> p) { return p.first; });
+	std::transform(items.begin(), items.end(), this->tooltips.begin(), [](std::pair<std::string, std::string> p) { return p.second; });
+	genButtons();
+}
+
 void UIDropdown::render(XY pos)
 {
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
@@ -39,6 +48,8 @@ void UIDropdown::render(XY pos)
 	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
 
 	if (isOpen) {
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xa0 * openTimer.percentElapsedTime(100)));
+		SDL_RenderFillRect(g_rd, &drawrect);
 		wxs.renderAll(xyAdd(xySubtract(pos, { 0, (int)((1.0f - openTimer.percentElapsedTime(100)) * wxHeight) }), XY{0, menuYOffset}));
 	}
 }
@@ -51,6 +62,13 @@ void UIDropdown::focusOut()
 {
 	isOpen = false;
 	wxs.forceUnfocus();
+}
+
+void UIDropdown::mouseHoverMotion(XY mousePos, XY gPosOffset)
+{
+	if (isOpen) {
+		wxs.processHoverEvent(xyAdd(gPosOffset, position), mousePos);
+	}
 }
 
 void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
@@ -88,19 +106,28 @@ void UIDropdown::eventButtonPressed(int evt_id)
 	isOpen = false;
 }
 
-void UIDropdown::genButtons()
+void UIDropdown::genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item))
 {
 	wxs.freeAllDrawables();
 
 	for (int y = 0; y < items.size(); y++) {
-		UIButton* btn = new UIButton();
-		btn->text = items[y];
-		btn->wxWidth = wxWidth;
-		btn->wxHeight = wxHeight;
-		btn->colorBGFocused = btn->colorBGUnfocused = colorBGFocused;
-		btn->position = { 0, wxHeight + y * btn->wxHeight };
-		btn->setCallbackListener(y, this);
-		wxs.addDrawable(btn);
+		if (customButtonGenFunction == NULL) {
+			UIButton* btn = new UIButton();
+			btn->text = items[y];
+			btn->wxWidth = wxWidth;
+			btn->wxHeight = wxHeight;
+			btn->colorBGFocused = btn->colorBGUnfocused = colorBGFocused;
+			btn->position = { 0, wxHeight + y * btn->wxHeight };
+			btn->tooltip = tooltips.size() > y ? tooltips[y] : "";
+			btn->setCallbackListener(y, this);
+			wxs.addDrawable(btn);
+		}
+		else {
+			UIButton* btn = customButtonGenFunction(items[y], items[y]);
+			btn->position = { 0, wxHeight + y * btn->wxHeight };
+			btn->setCallbackListener(y, this);
+			wxs.addDrawable(btn);
+		}
 	}
 
 	menuHeight = items.size() * wxHeight;

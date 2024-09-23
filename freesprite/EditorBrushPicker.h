@@ -61,6 +61,7 @@ public:
 			newBtn->position = XY{ px, py };
 			px += 30;
 			newBtn->icon = brush->cachedIcon;
+			newBtn->tooltip = brush->getName();
 			//newBtn->text = brush->getName();
 			newBtn->wxWidth = 26;
 			newBtn->wxHeight = 26;
@@ -81,6 +82,7 @@ public:
 			newBtn->position = XY{ px, py };
 			px += 26;
 			newBtn->icon = pattern->cachedIcon;
+			newBtn->tooltip = pattern->getName();
 			//newBtn->text = brush->getName();
 			newBtn->wxWidth = 24;
 			newBtn->wxHeight = 24;

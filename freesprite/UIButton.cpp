@@ -1,6 +1,7 @@
 #include "UIButton.h"
 #include "FontRenderer.h"
 #include "mathops.h"
+#include "TooltipsLayer.h"
 #include "EventCallbackListener.h"
 
 void UIButton::render(XY pos)
@@ -34,6 +35,11 @@ void UIButton::render(XY pos)
 	if (hovered) {
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
 		renderGradient(drawrect, 0x10FFFFFF, 0x10FFFFFF, 0x40D3F4FF, 0x40D3F4FF);
+
+		if (!tooltip.empty() && hoverTimer.percentElapsedTime(1000) == 1.0f) {
+			g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, 1000) });
+		}
+
 		//SDL_RenderFillRect(g_rd, &drawrect);
 	}
 	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
