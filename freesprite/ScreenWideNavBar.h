@@ -5,15 +5,14 @@
 #include "mathops.h"
 #include "UIButton.h"
 #include "EventCallbackListener.h"
+#include "Panel.h"
 
 template <class T>
-class ScreenWideNavBar : public Drawable, public EventCallbackListener
+class ScreenWideNavBar : public Panel, public EventCallbackListener
 {
 public:
 	T parent;
-	int wxHeight = 30;
-	DrawableManager wxs;
-	DrawableManager subWxs;
+	Panel* submenuPanel;
 	SDL_Keycode currentSubmenuOpen = -1;
 	Timer64 submenuOpenTimer;
 
@@ -21,9 +20,14 @@ public:
 	std::map<SDL_Keycode, NavbarSection<T>> keyBinds;
 
 	ScreenWideNavBar(T caller, std::map<SDL_Keycode, NavbarSection<T>> actions, std::vector<SDL_Keycode> order) {
+		wxHeight = 30;
 		parent = caller;
 		submenuOrder = order;
 		keyBinds = actions;
+
+		submenuPanel = new Panel();
+		submenuPanel->enabled = false;
+		subWidgets.addDrawable(submenuPanel);
 
 		int x = 10;
 		int xDist = 120;
@@ -40,16 +44,14 @@ public:
 			}
 			sectionButton->setCallbackListener(editorSection, this);
 			keyBinds[editorSection].button = sectionButton;
-			wxs.addDrawable(sectionButton);
+			subWidgets.addDrawable(sectionButton);
 			x += xDist;
 		}
 	}
 
-	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override
-	{ 
-		return mousePos.y <= wxHeight || subWxs.mouseInAny(thisPositionOnScreen, mousePos);
-	}
 	void render(XY position) override {
+		wxWidth = g_windowW;
+
 		SDL_Rect r = SDL_Rect{ 0,0,g_windowW, wxHeight };
 		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, focused ? 0xa0 : 0x90);
 		SDL_RenderFillRect(g_rd, &r);
@@ -59,39 +61,25 @@ public:
 			drawLine(XY{ 0, wxHeight }, XY{ g_windowW, wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(600)));
 			//SDL_RenderDrawLine(g_rd, 0, wxHeight, g_windowW, wxHeight);
 		}
-		subWxs.renderAll(xySubtract(position, { 0, (int)(30 * (1.0f - XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)))) }));
-		wxs.renderAll(position);
+		submenuPanel->position.y = (int)( 30 * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)));
+		//subWxs.renderAll(xySubtract(position, { 0,  }));
+		subWidgets.renderAll(position);
 	}
 	void handleInput(SDL_Event evt, XY gPosOffset) override {
 
-		DrawableManager::processHoverEventInMultiple({ wxs, subWxs }, evt, position);
+		DrawableManager::processHoverEventInMultiple({ subWidgets }, evt, position);
 
 		//special case here
 		if (evt.type == SDL_KEYDOWN) {
 			tryPressHotkey(evt.key.keysym.sym);
 		}
 
-		std::vector<std::reference_wrapper<DrawableManager>> inputTargets = {wxs};
-		if (currentSubmenuOpen != -1) {
-			inputTargets.push_back(subWxs);
-		}
-		DrawableManager::processInputEventInMultiple(inputTargets, evt, position);
+		DrawableManager::processInputEventInMultiple({ subWidgets }, evt, position);
 
-		/*if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-			if (!wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position) && currentSubmenuOpen != -1) {
-				subWxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
-			}
-		}
-		if (wxs.anyFocused()) {
-			wxs.passInputToFocused(evt, gPosOffset);
-		}
-		else if (subWxs.anyFocused()) {
-			subWxs.passInputToFocused(evt, gPosOffset);
-		}*/
 	}
 
 	void focusOut() override {
-		Drawable::focusOut();
+		Panel::focusOut();
 		openSubmenu(-1);
 	}
 	void eventButtonPressed(int evt_id) override {
@@ -122,7 +110,6 @@ public:
 		}
 	}
 	void openSubmenu(SDL_Keycode which) {
-		subWxs.forceUnfocus();
 		currentSubmenuOpen = -1;
 		submenuOpenTimer.start();
 		updateCurrentSubmenu();
@@ -139,22 +126,25 @@ public:
 	}
 	void updateCurrentSubmenu() {
 		if (currentSubmenuOpen == -1) {
-			subWxs.freeAllDrawables();
+			submenuPanel->subWidgets.freeAllDrawables();
+			submenuPanel->enabled = false;
 		}
 		else {
-			int y = wxHeight;
+			submenuPanel->enabled = true;
+			int y = 0;
 			int x = 10 + (std::find(submenuOrder.begin(), submenuOrder.end(), currentSubmenuOpen) - submenuOrder.begin()) * 120;
+			submenuPanel->position = { x, 0 };
 
 			for (auto& option : keyBinds[currentSubmenuOpen].actions) {
 				UIButton* newBtn = new UIButton();
 				std::vector<SDL_Keycode> order = keyBinds[currentSubmenuOpen].order;
-				newBtn->position = XY{ x, order.empty() ? y : (int)(wxHeight + (std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight) };
+				newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight) };
 				y += newBtn->wxHeight;
 				newBtn->wxWidth = 280;
 				newBtn->colorBGFocused = newBtn->colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
 				newBtn->text = option.second.name + std::format(" ({})", SDL_GetKeyName(option.first));
 				newBtn->setCallbackListener(-1 - option.first, this);
-				subWxs.addDrawable(newBtn);
+				submenuPanel->subWidgets.addDrawable(newBtn);
 			}
 		}
 	}
