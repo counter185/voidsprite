@@ -45,22 +45,22 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                     {
                         {SDLK_e, { "Toggle Event display",
                                 [](RPG2KTilemapPreviewScreen* screen) {
-									screen->eventViewMode = (LMUEventViewMode)(((int)screen->eventViewMode + 1) % 4);
+                                    screen->eventViewMode = (LMUEventViewMode)(((int)screen->eventViewMode + 1) % 4);
                                     switch (screen->eventViewMode) {
                                         case LMUEVENTS_HIDE_ALL:
                                             g_addNotification(Notification("All Events hidden","", 1500, NULL, COLOR_INFO));
-											break;
-										case LMUEVENTS_SHOW_INGAME:
-											g_addNotification(Notification("Events shown as ingame", "", 1500, NULL, COLOR_INFO));
+                                            break;
+                                        case LMUEVENTS_SHOW_INGAME:
+                                            g_addNotification(Notification("Events shown as ingame", "", 1500, NULL, COLOR_INFO));
                                             break;
                                         case LMUEVENTS_SHOW_RECTS:
                                             g_addNotification(Notification("Events shown as in editor", "", 1500, NULL, COLOR_INFO));
-											break;
+                                            break;
                                         case LMUEVENTS_SHOW_INGAME_AND_RECTS:
                                             g_addNotification(Notification("Events shown as ingame and in editor", "", 1500, NULL, COLOR_INFO));
                                             break;
                                     }
-								}
+                                }
                             }
                         }
                     },
@@ -90,6 +90,9 @@ RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
     }
     if (callerCanvas) {
         SDL_DestroyTexture(callerCanvas);
+    }
+    for (auto& tex : texturesLoaded) {
+        SDL_DestroyTexture(tex.second);
     }
 }
 
@@ -946,7 +949,7 @@ void RPG2KTilemapPreviewScreen::RenderEvents()
                 32 * scale};
             XY srcCharsetOrigin = { (evt.charsetIndex % 4) * (24 * 3) , (evt.charsetIndex / 4) * (32 * 4) };
             SDL_Rect srcCharset = { 
-                srcCharsetOrigin.x + 24, srcCharsetOrigin.y + (32 * evt.charsetDirection),
+                srcCharsetOrigin.x + (24 * evt.charsetPattern), srcCharsetOrigin.y + (32 * evt.charsetDirection),
                 24, 32 
             };
             SDL_RenderCopy(g_rd, evt.tex, &srcCharset, &dst);
@@ -966,6 +969,11 @@ void RPG2KTilemapPreviewScreen::RenderEvents()
 
 void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 {
+    for (auto& tx : texturesLoaded) {
+        SDL_DestroyTexture(tx.second);
+    }
+    texturesLoaded.clear();
+
     PlatformNativePathString directoryOfFile = path.substr(0, path.find_last_of({ '/', '\\' }) + 1);
     std::ifstream file(path, std::ios::binary);
     if (file.is_open()) {
@@ -992,36 +1000,47 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
             //todo: convert name from shift-jis to utf8
             newEvt.name = std::string(evt.name);
             if (evt.pages.size() > 0) {
-                newEvt.texFileName = std::string(evt.pages[0].character_name);
+                newEvt.texFileName = shiftJIStoUTF8(std::string(evt.pages[0].character_name));
                 newEvt.charsetIndex = evt.pages[0].character_index;
                 newEvt.charsetDirection = evt.pages[0].character_direction;
+                newEvt.charsetPattern = evt.pages[0].character_pattern;
                 //todo: convert texFile from shift-jis to utf8
                 //or even better try to find it from the [EasyRPG] section in the ini file
+
                 if (newEvt.texFileName != "") {
 
-                    PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".xyz");
-                    if (std::filesystem::exists(charsetPath)) {
-                        //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
-                        LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
-                        nl->palette[0] &= 0xffffff;
-                        nl->updateTexture();
-                        
-                        if (nl != NULL) {
-                            newEvt.tex = nl->renderToTexture();
-                            delete nl;
-                        }
-                    }
+                    if (!texturesLoaded.contains(newEvt.texFileName)) {
 
-                    if (newEvt.tex == NULL) {
-                        charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".png");
+                        PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".xyz");
                         if (std::filesystem::exists(charsetPath)) {
-                            Layer* nl = readPNG(charsetPath);
+                            //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
+                            LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
+                            nl->palette[0] &= 0xffffff;
+                            nl->updateTexture();
+
                             if (nl != NULL) {
-                                newEvt.tex = nl->renderToTexture();
+                                texturesLoaded[newEvt.texFileName] = nl->renderToTexture();
                                 delete nl;
                             }
                         }
+
+                        if (newEvt.tex == NULL) {
+                            charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".png");
+                            if (std::filesystem::exists(charsetPath)) {
+                                Layer* nl = readPNG(charsetPath);
+                                if (nl->isPalettized) {
+                                    ((LayerPalettized*)nl)->palette[0] &= 0xffffff;
+                                    ((LayerPalettized*)nl)->updateTexture();
+                                }
+                                if (nl != NULL) {
+                                    texturesLoaded[newEvt.texFileName] = nl->renderToTexture();
+                                    delete nl;
+                                }
+                            }
+                        }
                     }
+
+                    newEvt.tex = texturesLoaded[newEvt.texFileName];
 
                     if (newEvt.tex == NULL) {
                         charsetLoadFails += 1;
@@ -1032,11 +1051,11 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
             }
 
             events.push_back(newEvt);
-            /*std::cout << "-----lmu event\n";
+            std::cout << "-----lmu event\n";
             std::cout << " - position: " << evt.x << ", " << evt.y << "\n";
             std::cout << " - event name: " << evt.name << "\n";
             std::cout << " - pages[0].name: " << newEvt.texFileName << "\n";
-            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << "\n";*/
+            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << ", pattern: " << evt.pages[0].character_pattern << "\n";
         }
         if (charsetLoadFails > 0) {
             g_addNotification(ErrorNotification("Error", std::format("Failed to load charsets for {} images", charsetLoadFails)));

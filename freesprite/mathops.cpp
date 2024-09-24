@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "mathops.h"
 #include "FontRenderer.h"
+#include "shiftjis.h"
 
 bool pointInBox(XY point, SDL_Rect rect) {
     XY normalP = { point.x - rect.x, point.y - rect.y };
@@ -38,6 +39,29 @@ std::string stringToLower(std::string a)
 		ret += tolower(a.at(i));
 	}
 	return ret;
+}
+
+std::string shiftJIStoUTF8(std::string a)
+{
+    std::string ret;
+
+    int stringPtr = 0;
+    while (stringPtr < a.size()) {
+        uint16_t sjisChar = a[stringPtr++];
+        if (shiftjisToUTF8Map.contains(sjisChar)) {
+            ret += shiftjisToUTF8Map[sjisChar];
+        }
+        else {
+            sjisChar = (sjisChar << 8) + (uint8_t)a[stringPtr++];
+            if (shiftjisToUTF8Map.contains(sjisChar)) {
+                ret += shiftjisToUTF8Map[sjisChar];
+            }
+            else {
+                ret += '?';
+            }
+        }
+    }
+    return ret;
 }
 
 std::wstring utf8StringToWstring(std::string a)

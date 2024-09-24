@@ -749,6 +749,9 @@
     <ClInclude Include="settings.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="shiftjis.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

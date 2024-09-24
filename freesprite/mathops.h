@@ -39,6 +39,7 @@ XY xySubtract(XY p1, XY p2);
 SDL_FPoint xytofp(XY p);
 
 std::string stringToLower(std::string a);
+std::string shiftJIStoUTF8(std::string a);
 std::wstring utf8StringToWstring(std::string a);
 PlatformNativePathString convertStringOnWin32(std::string a);
 

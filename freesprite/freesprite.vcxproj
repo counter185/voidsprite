@@ -297,6 +297,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
     <ClInclude Include="settings.h" />
+    <ClInclude Include="shiftjis.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />
     <ClInclude Include="TilemapEditorLayerPicker.h" />
     <ClInclude Include="ToolRectFlip.h" />

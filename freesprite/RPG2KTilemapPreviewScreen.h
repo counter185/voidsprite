@@ -7,7 +7,7 @@ struct LMUEvent {
     XY pos;
     std::string name = "";
     std::string texFileName = "";
-    int charsetIndex = 0, charsetDirection = 0;
+    int charsetIndex = 0, charsetDirection = 0, charsetPattern = 1;
     SDL_Texture* tex = NULL;
 };
 
@@ -29,6 +29,7 @@ public:
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
     std::vector<LMUEvent> events;
 
+    std::map<std::string, SDL_Texture*> texturesLoaded;
     SDL_Texture* callerCanvas = NULL;
 
     uint8_t gridOpacity = 0x18;
