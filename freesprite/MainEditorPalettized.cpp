@@ -88,7 +88,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
         }
 
         if (result) {
-            g_addNotification(Notification("Success", "File saved successfully."));
+            g_addNotification(SuccessNotification("Success", "File saved successfully."));
         }
         else {
             g_addNotification(ErrorNotification("Error", "Failed to save file."));
@@ -340,7 +340,7 @@ void MainEditorPalettized::setUpWidgets()
                             [](MainEditor* editor) {
                                 if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                        g_addNotification(Notification("Error", "Set the pixel grid first."));
+                                        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
                                         return;
                                     }
                                     SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
@@ -348,7 +348,7 @@ void MainEditorPalettized::setUpWidgets()
                                     editor->spritesheetPreview = newScreen;
                                 }
                                 else {
-                                    g_addNotification(Notification("Error", "Spritesheet preview is already open."));
+                                    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
                                 }
                             }
                         }
@@ -356,7 +356,7 @@ void MainEditorPalettized::setUpWidgets()
                     {SDLK_t, { "Open tileset preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(Notification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
                                     return;
                                 }
                                 TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
@@ -368,7 +368,7 @@ void MainEditorPalettized::setUpWidgets()
                     {SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
                                 if (editor->texW != 480 || editor->texH != 256) {
-                                    g_addNotification(Notification("Error", "Dimensions must be 480x256"));
+                                    g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
                                     return;
                                 }
                                 RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);

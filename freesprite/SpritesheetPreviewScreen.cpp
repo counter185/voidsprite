@@ -290,19 +290,21 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
 
 void SpritesheetPreviewScreen::drawBackground()
 {
-	uint64_t now = SDL_GetTicks64();
-	uint64_t progress = now % 120000;
-	for (int y = -(1.0 - progress/120000.0)*g_windowH; y < g_windowH; y += 50) {
-		if (y >= 0) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x22);
-			SDL_RenderDrawLine(g_rd, 0, y, g_windowW, y);
+	if (g_config.animatedBackground) {
+		uint64_t now = SDL_GetTicks64();
+		uint64_t progress = now % 120000;
+		for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {
+			if (y >= 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x22);
+				SDL_RenderDrawLine(g_rd, 0, y, g_windowW, y);
+			}
 		}
-	}
 
-	for (int x = -(1.0 - (now % 100000) / 100000.0) * g_windowW; x < g_windowW; x += 30) {
-		if (x >= 0) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19);
-			SDL_RenderDrawLine(g_rd, x, 0, x, g_windowH);
+		for (int x = -(1.0 - (now % 100000) / 100000.0) * g_windowW; x < g_windowW; x += 30) {
+			if (x >= 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19);
+				SDL_RenderDrawLine(g_rd, x, 0, x, g_windowH);
+			}
 		}
 	}
 }

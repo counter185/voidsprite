@@ -83,7 +83,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 				outPath += convertStringOnWin32(exporter->extension());
 
 				if (exporter->exportData(outPath, session)) {
-					g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
+					g_addNotification(SuccessNotification("Success", "Exported file", 4000, NULL, COLOR_INFO));
 				}
 				else {
 					g_addNotification(ErrorNotification("Error", "Failed to export file"));
@@ -109,7 +109,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 				outPath += convertStringOnWin32(exporter->extension());
 
 				if (exporter->exportData(outPath, l)) {
-					g_addNotification(Notification("Success", "Exported file", 4000, NULL, COLOR_INFO));
+					g_addNotification(SuccessNotification("Success", "Exported file", 4000, NULL, COLOR_INFO));
 				}
 				else {
 					g_addNotification(ErrorNotification("Error", "Failed to export file"));
@@ -194,8 +194,6 @@ Layer* PopupQuickConvert::loadFlat(std::string path)
 			return l;
 		}
 		else {
-			//g_addPopup(new PopupMessageBox("", "Failed to load file."));
-			//g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
 			printf("No importer for file available\n");
 		}
 	}

@@ -206,7 +206,6 @@ public:
 			}
 			else {
 
-				//g_addNotification(Notification("", arg));
 #if _WIDEPATHS
 				if (std::filesystem::exists(utf8StringToWstring(arg))) {
 #else

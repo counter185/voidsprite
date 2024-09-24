@@ -85,13 +85,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
 					g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
 				}
 				catch (std::out_of_range) {
-					//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
-					g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
+					g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
 				}
 			}
 			else {
-				//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
-				g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
+				g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
 			}
 			break;
 		case 1:
@@ -106,13 +104,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
 					g_addScreen(newMainEditor);
 				}
 				catch (std::out_of_range) {
-					//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
-					g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
+					g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
 				}
 			}
 			else {
-				//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
-				g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
+				g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
 			}
 			break;
 		}
@@ -127,13 +123,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
 					g_addScreen(new MainEditorPalettized(XY{ newImgW, newImgH }));
 				}
 				catch (std::out_of_range) {
-					//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
-					g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
+					g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
 				}
 			}
 			else {
-				//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
-				g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
+				g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
 			}
 			break;
 		case 1:
@@ -148,13 +142,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
 					g_addScreen(newMainEditor);
 				}
 				catch (std::out_of_range) {
-					//g_addPopup(new PopupMessageBox("Error starting editor", "Invalid dimensions. Number is out of range."));
-					g_addNotification(Notification("Error starting editor", "Invalid dimensions. Number out of range.", 5000, NULL, COLOR_ERROR));
+					g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
 				}
 			}
 			else {
-				//g_addPopup(new PopupMessageBox("Error starting editor", "Input the canvas dimensions."));
-				g_addNotification(Notification("Error starting editor", "Input the canvas dimensions.", 5000, NULL, COLOR_ERROR));
+				g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
 			}
 			break;
 		}
@@ -171,7 +163,7 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 			g_addScreen(!nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer));
 		}
 		else {
-			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
+			g_addNotification(ErrorNotification("Error", "Failed to load file"));
 		}
 	}
 	else {
@@ -180,7 +172,7 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 			g_addScreen(session);
 		}
 		else {
-			g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
+			g_addNotification(ErrorNotification("Error", "Failed to load file"));
 		}
 	}
 }
@@ -219,7 +211,7 @@ void StartScreen::tryLoadFile(std::string path)
 		g_addScreen(newSession);
 	}
 	else {
-		g_addNotification(Notification("Error", "Failed to load file", 5000, NULL, COLOR_ERROR));
+		g_addNotification(ErrorNotification("Error", "Failed to load file"));
 	}
 }
 

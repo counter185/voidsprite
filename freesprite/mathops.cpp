@@ -161,16 +161,21 @@ void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel
     }
 }
 
+XY statLineEndpoint(XY p1, XY p2, double percent) {
+    if (percent != 1.0 && percent >= 0.0 && percent < 1.0) {
+        p2.x = p1.x + (p2.x - p1.x) * percent;
+        p2.y = p1.y + (p2.y - p1.y) * percent;
+    }
+    return p2;
+}
+
 void drawLine(XY p1, XY p2, double percent)
 {
     if (percent == 0.0) {
         return;
     }
 
-    if (percent != 1.0f && percent >= 0.0 && percent < 1.0) {
-        p2.x = p1.x + (p2.x - p1.x) * percent;
-        p2.y = p1.y + (p2.y - p1.y) * percent;
-    }
+    p2 = statLineEndpoint(p1, p2, percent);
 
     SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
 }
@@ -353,6 +358,11 @@ unsigned int alphaBlend(unsigned int colora, unsigned int colorb) {
 uint32_t sdlcolorToUint32(SDL_Color c)
 {
     return (c.a << 24) + (c.r << 16) + (c.g << 8) + c.b;
+}
+
+uint32_t modAlpha(uint32_t color, uint8_t alpha)
+{
+    return (color & 0x00FFFFFF) + (alpha << 24);
 }
 
 int ixmin(int a, int b) { return a > b ? b : a; }

@@ -70,7 +70,7 @@ void PopupTileGeneric::eventButtonPressed(int evt_id) {
             closePopup();
         }
         else {
-            g_addNotification(Notification("Error", "Both dimensions must be set"));
+            g_addNotification(ErrorNotification("Error", "Both dimensions must be set"));
         }
     }
     else {

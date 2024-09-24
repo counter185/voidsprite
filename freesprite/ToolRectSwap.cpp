@@ -23,7 +23,7 @@ void ToolRectSwap::clickRelease(MainEditor* editor, XY pos)
 	}
 	clonedArea = (uint32_t*)malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4);
 	if (clonedArea == NULL) {
-		g_addNotification(Notification("Error", "malloc failed"));
+		g_addNotification(ErrorNotification("Error", "malloc failed"));
 		return;
 	}
 	uint64_t copyIndex = 0;

@@ -14,5 +14,6 @@ public:
 
     void eventButtonPressed(int evt_id) override;
     void eventCheckboxToggled(int evt_id, bool checked) override;
+    void eventTextInput(int evt_id, std::string text) override;
 };
 

@@ -1933,7 +1933,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path)
             return l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
         }
         else {
-            g_addNotification(Notification("Error", "Failed to load file", 6000, NULL, COLOR_ERROR));
+            g_addNotification(ErrorNotification("Error", "Failed to load file"));
             printf("No importer for file available\n");
         }
     }
@@ -2282,14 +2282,14 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
     std::vector<uint32_t> uniqueColors;
     if (data->isPalettized) {
         if (((LayerPalettized*)data)->palette.size() > 256) {
-            g_addNotification(Notification("XYZ export failed", "Too many colors in palette", 5000, NULL, COLOR_ERROR));
+            g_addNotification(ErrorNotification("XYZ export failed", "Too many colors in palette"));
             printf("[XYZ] Too many colors\n");
             return false;
         }
     } else {
         uniqueColors = data->getUniqueColors(true);
         if (uniqueColors.size() > 256) {
-            g_addNotification(Notification("XYZ export failed", "Your image has more than 256 colors", 5000, NULL, COLOR_ERROR));
+            g_addNotification(ErrorNotification("XYZ export failed", "Your image has more than 256 colors"));
             printf("[XYZ] Too many colors\n");
             return false;
         }

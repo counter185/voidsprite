@@ -126,7 +126,9 @@ extern SDL_Texture* g_mainlogo,
    *g_iconMenuPxDim,
    *g_iconMenuSpritesheet,
    *g_iconMenuTemplates,
-   *g_iconNotifTheCreature;
+   *g_iconNotifTheCreature,
+   *g_iconNotifError,
+   *g_iconNotifSuccess;
 
 void g_addNotification(Notification a);
 
@@ -139,22 +141,22 @@ void g_popDisposeLastPopup(bool dispose = true);
 void g_closePopup(BasePopup* a);
 
 struct XY {
-	int x, y;
+    int x, y;
 };
 
 template <typename T>
 struct NamedOperation {
-	std::string name;
-	std::function<void(T)> function;
+    std::string name;
+    std::function<void(T)> function;
 };
 
 template <typename T>
 struct NavbarSection {
-	std::string name;
-	std::vector<SDL_Keycode> order;
-	std::map<SDL_Keycode, NamedOperation<T>> actions;
-	SDL_Texture* icon = NULL;
-	UIButton* button = NULL;
+    std::string name;
+    std::vector<SDL_Keycode> order;
+    std::map<SDL_Keycode, NamedOperation<T>> actions;
+    SDL_Texture* icon = NULL;
+    UIButton* button = NULL;
 };
 
 #define UNDOSTACK_LAYER_DATA_MODIFIED 0
@@ -166,17 +168,17 @@ struct NavbarSection {
 #define UNDOSTACK_SET_OPACITY 6
 #define UNDOSTACK_RESIZE_LAYER 7
 struct UndoStackElement {
-	Layer* targetlayer = NULL;
-	uint32_t type = 0;
-	int extdata = 0;
-	int extdata2 = 0;
-	std::string extdata3 = "";
-	void* extdata4 = NULL;
+    Layer* targetlayer = NULL;
+    uint32_t type = 0;
+    int extdata = 0;
+    int extdata2 = 0;
+    std::string extdata3 = "";
+    void* extdata4 = NULL;
 };
 
 struct UndoStackResizeLayerElement {
-	XY oldDimensions;
-	uint8_t* oldData;
+    XY oldDimensions;
+    uint8_t* oldData;
 };
 
 #include "platform.h"

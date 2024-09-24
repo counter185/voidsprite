@@ -28,6 +28,7 @@ bool tryRgbStringToColor(std::string str, unsigned int* ret);
 rgb hsv2rgb(hsv in);
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
 uint32_t sdlcolorToUint32(SDL_Color c);
+uint32_t modAlpha(uint32_t color, uint8_t alpha);
 
 bool pointInBox(XY point, SDL_Rect rect);
 
@@ -47,7 +48,8 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
 
-void drawLine(XY p1, XY p2, double percent);
+XY statLineEndpoint(XY p1, XY p2, double percent);
+void drawLine(XY p1, XY p2, double percent = 1.0);
 double XM1PW3P1(double x);
 
 int ixmin(int a, int b);

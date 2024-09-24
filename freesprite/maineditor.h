@@ -47,7 +47,6 @@ public:
     std::vector<Layer*> layers;
     int selLayer = 0;
 
-    int maxUndoHistory = 20;
     std::vector<UndoStackElement> undoStack, redoStack;
 
     int texW = -1, texH = -1;

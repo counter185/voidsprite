@@ -65,6 +65,8 @@ SDL_Texture* g_iconMenuPxDim = NULL;
 SDL_Texture* g_iconMenuSpritesheet = NULL;
 SDL_Texture* g_iconMenuTemplates = NULL;
 SDL_Texture* g_iconNotifTheCreature = NULL;
+SDL_Texture* g_iconNotifError = NULL;
+SDL_Texture* g_iconNotifSuccess = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
@@ -139,7 +141,7 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
     srf = srf == NULL ? IMG_Load(path.c_str()) : srf;
     if (srf == NULL) {
-        g_addNotification(Notification("Error", "Can't load: " + path, 5000));
+        g_addNotification(ErrorNotification("Error", "Can't load: " + path));
         return NULL;
     }
     SDL_Texture* ret = SDL_CreateTextureFromSurface(g_rd, srf);
@@ -211,6 +213,8 @@ int main(int argc, char** argv)
     g_iconMenuPxDim = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_pxdim.png");
     g_iconMenuSpritesheet = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_sptl.png");
     g_iconMenuTemplates = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_templates.png");
+    g_iconNotifError = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_error.png");
+    g_iconNotifSuccess = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_success.png");
 
     SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);
@@ -433,18 +437,30 @@ int main(int argc, char** argv)
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
         }
         
+        //render notifications
         tickNotifications();
         int notifY = 30;
         int notifOriginX = g_windowW - 450;
         for (Notification& notif : g_notifications) {
+            //background
             int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
 			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0-notif.timer.percentElapsedTime(500, notif.duration-500)))));
 			SDL_Rect r = { notifX, notifY, 400, 60 };
 			SDL_RenderFillRect(g_rd, &r);
+
+            //animated border lines
+            //gradient
+            uint32_t color = sdlcolorToUint32(notif.color);
+            XY leftEP = statLineEndpoint(XY{ r.x, r.y }, XY{ r.x, r.y + r.h }, XM1PW3P1(notif.timer.percentElapsedTime(300)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
+            renderGradient({ r.x, r.y, r.w / 4, leftEP.y - r.y }, modAlpha(color, 0x40), modAlpha(color, 0), modAlpha(color,0x40), modAlpha(color,0));
+
             SDL_SetRenderDrawColor(g_rd, notif.color.r, notif.color.g, notif.color.b, 0x80 + (uint8_t)(0x60 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(500)))));
-            drawLine(XY{r.x, r.y}, XY{ r.x, r.y + r.h }, XM1PW3P1(notif.timer.percentElapsedTime(300)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
+            //left line
+            drawLine(XY{r.x, r.y}, leftEP);
+            //right line
             drawLine(XY{ r.x + r.w, r.y + r.h }, XY{r.x+r.w, r.y}, XM1PW3P1(notif.timer.percentElapsedTime(300))* (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 
+            //icon
             int textX = notifX + 10;
             if (notif.icon != NULL) {
 				SDL_Rect iconRect = { notifX + 5, notifY + 5, 50, 50 };
@@ -454,8 +470,9 @@ int main(int argc, char** argv)
 				textX += 50;
 			}
 
-			g_fnt->RenderString(notif.title, textX, notifY + 5, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
-			g_fnt->RenderString(notif.message, textX, notifY + 30, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
+            //text
+			g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
+			g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
 			notifY += 65;
 		}
 

@@ -301,15 +301,18 @@ void MainEditor::DrawBackground()
 	uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
 	renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
-	int lineX = 400;
-	for (int x = 40 + (SDL_GetTicks64()%5000/5000.0 * 60); x < g_windowW + lineX; x += 60) {
-		SDL_SetRenderDrawColor(g_rd, 0xff-backgroundColor.r, 0xff-backgroundColor.g, 0xff-backgroundColor.b, 0x40);
-		SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
-		SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d);
-		SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX/4*6, g_windowH);
+	if (g_config.animatedBackground) {
+		//draw lines in the background
+		int lineX = 400;
+		for (int x = 40 + (SDL_GetTicks64() % 5000 / 5000.0 * 60); x < g_windowW + lineX; x += 60) {
+			SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40);
+			SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
+			SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d);
+			SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX / 4 * 6, g_windowH);
+		}
 	}
 
-
+	//draw border around canvas
 	int lw = texW * scale + 2;
 	int lh = texH * scale + 2;
 	SDL_Rect r = { canvasCenterPoint.x - 1, canvasCenterPoint.y - 1, lw, lh };
@@ -325,7 +328,6 @@ void MainEditor::DrawBackground()
 		SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, a);
 		SDL_RenderDrawRect(g_rd, &r);
 	}
-	
 }
 
 void MainEditor::drawSymmetryLines() {
@@ -621,7 +623,7 @@ void MainEditor::setUpWidgets()
 							[](MainEditor* editor) {
 								if (editor->spritesheetPreview == NULL) {
 									if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-										g_addNotification(Notification("Error", "Set the pixel grid first."));
+										g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
 										return;
 									}
 									SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
@@ -629,7 +631,7 @@ void MainEditor::setUpWidgets()
 									editor->spritesheetPreview = newScreen;
 								}
 								else {
-									g_addNotification(Notification("Error", "Spritesheet preview is already open."));
+									g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
 								}
 							}
 						}
@@ -637,7 +639,7 @@ void MainEditor::setUpWidgets()
 					{SDLK_t, { "Open tileset preview...",
 							[](MainEditor* editor) {
 								if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-									g_addNotification(Notification("Error", "Set the pixel grid first."));
+									g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
 									return;
 								}
 								TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
@@ -649,7 +651,7 @@ void MainEditor::setUpWidgets()
 					{SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
 							[](MainEditor* editor) {
 								if (editor->texW != 480 || editor->texH != 256) {
-									g_addNotification(Notification("Error", "Dimensions must be 480x256"));
+									g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
 									return;
 								}
 								RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
@@ -662,7 +664,7 @@ void MainEditor::setUpWidgets()
 					{SDLK_m, { "Open Minecraft skin preview...",
 							[](MainEditor* editor) {
 								if (editor->texW != editor->texH && editor->texW / 2 != editor->texH) {
-									g_addNotification(Notification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
+									g_addNotification(ErrorNotification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
 									return;
 								}
 								MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(editor);
@@ -897,7 +899,6 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 		}
 
 		if (result) {
-			//g_addPopup(new PopupMessageBox("File saved", "Save successful!"));
 			lastConfirmedSave = true;
 			lastConfirmedSavePath = name;
 			lastConfirmedExporterId = exporterID;
@@ -905,11 +906,10 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 			if (lastWasSaveAs && g_config.openSavedPath) {
 				platformOpenFileLocation(lastConfirmedSavePath);
 			}
-			g_addNotification(Notification("File saved", "Save successful!", 4000));
+			g_addNotification(SuccessNotification("File saved", "Save successful!"));
 		}
 		else {
-			//g_addPopup(new PopupMessageBox("File not saved", "Save failed!"));
-			g_addNotification(Notification("File not saved", "Save failed!", 6000, NULL, COLOR_ERROR));
+			g_addNotification(ErrorNotification("File not saved", "Save failed!"));
 		}
 	}
 }
@@ -1052,7 +1052,7 @@ void MainEditor::discardEndOfUndoStack() {
 
 void MainEditor::checkAndDiscardEndOfUndoStack()
 {
-	if (undoStack.size() > maxUndoHistory) {
+	while (undoStack.size() > g_config.maxUndoHistory) {
 		discardEndOfUndoStack();
 	}
 }
