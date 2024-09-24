@@ -1,6 +1,8 @@
 #pragma once
 
+#include <pwd.h>
 #include <spawn.h>
+#include <unistd.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
@@ -103,7 +105,47 @@ void platformOpenFileLocation(PlatformNativePathString path) {
 }
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
-    return "";
+    char *path = getenv("XDG_CONFIG_HOME");
+    if (path != NULL) {
+        std::string sp = std::string(path);
+        if (!sp.ends_with("/"))
+            sp.push_back('/');
+        sp.append("voidsprite/");
+        return sp;
+    }
+    path = getenv("HOME");
+    if (path != NULL) {
+        std::string sp = std::string(path);
+        if (!sp.ends_with("/"))
+            sp.push_back('/');
+        sp.append(".config/voidsprite/");
+        return sp;
+    }
+
+    int buf_max = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if (buf_max == -1) {
+        g_addNotification(ErrorNotification("Linux error", strerror(errno)));
+        return "";
+    }
+    int uid = getuid();
+    char *buf = new char[buf_max];
+
+    passwd passwd_;
+    passwd *passwdp = &passwd_;
+
+    int res = getpwuid_r(uid, passwdp, buf, buf_max, &passwdp);
+    if (res != 0) {
+        g_addNotification(ErrorNotification("Linux error", strerror(errno)));
+        delete[] buf;
+        return "";
+    }
+
+    std::string cpppath = std::string(passwd_.pw_dir);
+    if (!cpppath.ends_with("/"))
+        cpppath.push_back('/');
+    cpppath.append(".config/voidsprite/");
+    delete[] buf;
+    return cpppath;
 }
 
 Layer *platformGetImageFromClipboard() { return NULL; }
