@@ -83,7 +83,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 				outPath += convertStringOnWin32(exporter->extension());
 
 				if (exporter->exportData(outPath, session)) {
-					g_addNotification(SuccessNotification("Success", "Exported file", 4000, NULL, COLOR_INFO));
+					g_addNotification(SuccessNotification("Success", "Exported file"));
 				}
 				else {
 					g_addNotification(ErrorNotification("Error", "Failed to export file"));
@@ -109,7 +109,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 				outPath += convertStringOnWin32(exporter->extension());
 
 				if (exporter->exportData(outPath, l)) {
-					g_addNotification(SuccessNotification("Success", "Exported file", 4000, NULL, COLOR_INFO));
+					g_addNotification(SuccessNotification("Success", "Exported file"));
 				}
 				else {
 					g_addNotification(ErrorNotification("Error", "Failed to export file"));
