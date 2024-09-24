@@ -125,6 +125,13 @@ void RPG2KTilemapPreviewScreen::render()
     SDL_RenderDrawRect(g_rd, &overallRect);
 
     wxsManager.renderAll();
+
+    //bottom bar
+    SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
+    SDL_RenderFillRect(g_rd, &r);
+
+    g_fnt->RenderString(std::format("{}x{} tiles", dimensions.x, dimensions.y), 2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
 }
 
 void RPG2KTilemapPreviewScreen::tick()
@@ -973,10 +980,12 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
         SDL_DestroyTexture(tx.second);
     }
     texturesLoaded.clear();
+    events.clear();
 
     PlatformNativePathString directoryOfFile = path.substr(0, path.find_last_of({ '/', '\\' }) + 1);
     std::ifstream file(path, std::ios::binary);
     if (file.is_open()) {
+
         std::unique_ptr<lcf::rpg::Map> map(lcf::LMU_Reader::Load(file));
 
         //freeAllLayers();
@@ -1015,10 +1024,9 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                         if (std::filesystem::exists(charsetPath)) {
                             //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
                             LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
-                            nl->palette[0] &= 0xffffff;
-                            nl->updateTexture();
-
                             if (nl != NULL) {
+                                nl->palette[0] &= 0xffffff;
+                                nl->updateTexture();
                                 texturesLoaded[newEvt.texFileName] = nl->renderToTexture();
                                 delete nl;
                             }
@@ -1028,11 +1036,11 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                             charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".png");
                             if (std::filesystem::exists(charsetPath)) {
                                 Layer* nl = readPNG(charsetPath);
-                                if (nl->isPalettized) {
-                                    ((LayerPalettized*)nl)->palette[0] &= 0xffffff;
-                                    ((LayerPalettized*)nl)->updateTexture();
-                                }
                                 if (nl != NULL) {
+                                    if (nl->isPalettized) {
+                                        ((LayerPalettized*)nl)->palette[0] &= 0xffffff;
+                                        ((LayerPalettized*)nl)->updateTexture();
+                                    }
                                     texturesLoaded[newEvt.texFileName] = nl->renderToTexture();
                                     delete nl;
                                 }
@@ -1051,14 +1059,14 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
             }
 
             events.push_back(newEvt);
-            std::cout << "-----lmu event\n";
+            /*std::cout << "-----lmu event\n";
             std::cout << " - position: " << evt.x << ", " << evt.y << "\n";
             std::cout << " - event name: " << evt.name << "\n";
             std::cout << " - pages[0].name: " << newEvt.texFileName << "\n";
-            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << ", pattern: " << evt.pages[0].character_pattern << "\n";
+            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << ", pattern: " << evt.pages[0].character_pattern << "\n";*/
         }
         if (charsetLoadFails > 0) {
-            g_addNotification(ErrorNotification("Error", std::format("Failed to load charsets for {} images", charsetLoadFails)));
+            g_addNotification(ErrorNotification("Error", std::format("Failed to load charsets for {} Events", charsetLoadFails)));
         }
 
         if (lowerLayerData != NULL) {
