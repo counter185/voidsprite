@@ -413,6 +413,8 @@ gcc-build/libz.so.1
 /build
 /target
 
+*.DS_Store
+
 /subprojects/*
 !/subprojects/*.wrap
 !/subprojects/liblcf

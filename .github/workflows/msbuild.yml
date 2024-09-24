@@ -58,7 +58,7 @@ jobs:
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: voidsprite-build
+        name: voidsprite-build-win64
         path: |
           x64/Release
           
@@ -88,5 +88,31 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build-linux
+        path: |
+          target/debug
+
+  build-mac-x64:
+
+    runs-on: macos-12
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install g++13
+      run: brew install gcc@13
+
+    - name: install devlibs
+      run: brew install meson sdl2 sdl2_image sdl2_ttf
+
+    - name: run build
+      run: CC=gcc-13 CXX=g++-13 ./linux_build.sh --portable
+
+    - name: add licenses
+      run: cp -r OPEN_SOURCE_LICENSES target/debug
+
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: voidsprite-build-macx64
         path: |
           target/debug

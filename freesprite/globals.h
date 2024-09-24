@@ -20,6 +20,11 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef __APPLE__
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <SDL_image.h>
+#else 
 #ifdef __GNUC__
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -28,6 +33,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#endif
 #endif
 
 extern "C" {
