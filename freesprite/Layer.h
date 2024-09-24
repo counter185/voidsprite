@@ -46,7 +46,7 @@ public:
 		}
 	}
 
-	~Layer() {
+	virtual ~Layer() {
 		free(pixelData);
 		for (uint8_t*& u : undoQueue) {
 			free(u);

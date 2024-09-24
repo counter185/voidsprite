@@ -7,6 +7,7 @@ class BasePopup :
     public BaseScreen
 {
 public:
+    virtual ~BasePopup() = default;
     Timer64 startTimer;
 
     virtual bool takesInput() { return true; }

@@ -162,7 +162,7 @@ void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathS
 				fwrite(&col, 1, 4, f);
 			}
 			fclose(f);
-            g_addNotification(SuccessNotification("Success", "Palette file saved", 4000, NULL, COLOR_INFO));
+            g_addNotification(SuccessNotification("Success", "Palette file saved"));
         }
         else {
             g_addNotification(ErrorNotification("Error", "Could not save palette file"));
@@ -178,7 +178,7 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
         if (result.first) {
 			upcastCaller->setPalette(result.second);
             updateForcedColorPaletteButtons();
-			g_addNotification(SuccessNotification("Success", "Palette file loaded", 4000, NULL, COLOR_INFO));
+			g_addNotification(SuccessNotification("Success", "Palette file loaded"));
 		}
         else {
             g_addNotification(ErrorNotification("Error", "Could not load palette file"));
