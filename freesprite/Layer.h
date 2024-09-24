@@ -97,6 +97,18 @@ public:
 		SDL_RenderCopy(g_rd, tex, &clip, &where);
 	}
 
+	SDL_Texture* renderToTexture() {
+		//if this doesn't work, change it into a SDL_TEXTUREACCESS_STREAMING and just set the pixels
+		SDL_Texture* ret = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, w, h);
+		SDL_SetTextureBlendMode(ret, SDL_BLENDMODE_BLEND);
+		SDL_SetRenderTarget(g_rd, ret);
+		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+		SDL_RenderClear(g_rd);
+		render(SDL_Rect{ 0,0,w,h }, SDL_Rect{ 0,0,w,h });
+		SDL_SetRenderTarget(g_rd, NULL);
+		return ret;
+	}
+
 	void blit(Layer* sourceLayer, XY position);
 
 	void setPixel(XY position, uint32_t color) {

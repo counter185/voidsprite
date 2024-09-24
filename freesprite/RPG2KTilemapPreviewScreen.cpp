@@ -6,6 +6,8 @@
 #include "maineditor.h"
 #include "Notification.h"
 #include "FontRenderer.h"
+#include "FileIO.h"
+#include "LayerPalettized.h"
 
 RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 {
@@ -76,10 +78,12 @@ void RPG2KTilemapPreviewScreen::render()
             RenderRPG2KTile(upperTile, {x, y}, dst);
         }
     }
+    RenderEvents();
+
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, gridOpacity);
     for (int y = 0; y < dimensions.y; y++ ) {
         SDL_RenderDrawLine(g_rd, canvasDrawPoint.x, canvasDrawPoint.y + y * 16 * scale, canvasDrawPoint.x + dimensions.x * 16 * scale, canvasDrawPoint.y + y * 16 * scale);
-	}
+    }
     for (int x = 0; x < dimensions.x; x++) {
         SDL_RenderDrawLine(g_rd, canvasDrawPoint.x + x * 16 * scale, canvasDrawPoint.y, canvasDrawPoint.x + x * 16 * scale, canvasDrawPoint.y + dimensions.y * 16 * scale);
     }
@@ -183,7 +187,7 @@ void RPG2KTilemapPreviewScreen::PrerenderCanvas()
     }
     SDL_SetRenderTarget(g_rd, NULL);
     SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_BLEND);
-	
+    
 }
 
 void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex)
@@ -390,11 +394,11 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
             SDL_RenderCopy(g_rd, tex, &chunkUL, &dstUL);
 
             if (connection & 0b1) {
-				//bottom left corner
-				SDL_Rect chunkDL = { origin.x, origin.y + 48 + 8, 8, 8 };
-				SDL_Rect dstDL = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
-				SDL_RenderCopy(g_rd, tex, &chunkDL, &dstDL);
-			}
+                //bottom left corner
+                SDL_Rect chunkDL = { origin.x, origin.y + 48 + 8, 8, 8 };
+                SDL_Rect dstDL = { dst.x, dst.y + dst.h / 2, dst.w / 2, dst.h / 2 };
+                SDL_RenderCopy(g_rd, tex, &chunkDL, &dstDL);
+            }
         }
         else if (connection <= 0b100111) {
             SDL_Rect src = { waterTileOrigin.x, waterTileOrigin.y, 16, 16 };
@@ -439,7 +443,7 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
                 SDL_Rect dstUR = { dst.x + dst.w / 2, dst.y, dst.w / 2, dst.h / 2 };
                 SDL_RenderCopy(g_rd, tex, &chunkUR, &dstUR);
             }
-			
+            
         }
         else if (connection <= 0b101110) {
             switch (connection & 0b111) {
@@ -899,6 +903,32 @@ void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_
     }
 }
 
+void RPG2KTilemapPreviewScreen::RenderEvents()
+{
+    for (LMUEvent& evt : events) {
+        if (evt.tex != NULL) {
+            SDL_Rect dst = { 
+                canvasDrawPoint.x + evt.pos.x * 16 * scale - 4 * scale, 
+                canvasDrawPoint.y + evt.pos.y * 16 * scale - 16 * scale, 
+                24 * scale, 
+                32 * scale};
+            XY srcCharsetOrigin = { (evt.charsetIndex % 4) * (24 * 3) , (evt.charsetIndex / 4) * (32 * 4) };
+            SDL_Rect srcCharset = { 
+                srcCharsetOrigin.x + 24, srcCharsetOrigin.y + (32 * evt.charsetDirection),
+                24, 32 
+            };
+            SDL_RenderCopy(g_rd, evt.tex, &srcCharset, &dst);
+        }
+        SDL_Rect evtRect = { canvasDrawPoint.x + evt.pos.x * 16 * scale, canvasDrawPoint.y + evt.pos.y * 16 * scale, 16 * scale, 16 * scale };
+        evtRect.x += 4;
+        evtRect.y += 4;
+        evtRect.w -= 8;
+        evtRect.h -= 8;
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, evt.tex != NULL ? 0x40 : 0x80);
+        SDL_RenderDrawRect(g_rd, &evtRect);
+    }
+}
+
 void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 {
     PlatformNativePathString directoryOfFile = path.substr(0, path.find_last_of({ '/', '\\' }) + 1);
@@ -918,6 +948,63 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                 upperLayer[y * map->width + x] = map->upper_layer[dataPointer];
                 dataPointer++;
             }
+        }
+
+        int charsetLoadFails = 0;
+        for (lcf::rpg::Event& evt : map->events) {
+            LMUEvent newEvt;
+            newEvt.pos = { evt.x, evt.y };
+            //todo: convert name from shift-jis to utf8
+            newEvt.name = std::string(evt.name);
+            if (evt.pages.size() > 0) {
+                newEvt.texFileName = std::string(evt.pages[0].character_name);
+                newEvt.charsetIndex = evt.pages[0].character_index;
+                newEvt.charsetDirection = evt.pages[0].character_direction;
+                //todo: convert texFile from shift-jis to utf8
+                //or even better try to find it from the [EasyRPG] section in the ini file
+                if (newEvt.texFileName != "") {
+
+                    PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".xyz");
+                    if (std::filesystem::exists(charsetPath)) {
+                        //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
+                        LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
+                        nl->palette[0] &= 0xffffff;
+                        nl->updateTexture();
+                        
+                        if (nl != NULL) {
+                            newEvt.tex = nl->renderToTexture();
+                            delete nl;
+                        }
+                    }
+
+                    if (newEvt.tex == NULL) {
+                        charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".png");
+                        if (std::filesystem::exists(charsetPath)) {
+                            Layer* nl = readPNG(charsetPath);
+                            if (nl != NULL) {
+                                newEvt.tex = nl->renderToTexture();
+                                delete nl;
+                            }
+                        }
+                    }
+
+                    if (newEvt.tex == NULL) {
+                        charsetLoadFails += 1;
+                        std::cout << "charset load failed: " << newEvt.texFileName << "\n";
+                    }
+                }
+                
+            }
+
+            events.push_back(newEvt);
+            std::cout << "-----lmu event\n";
+            std::cout << " - position: " << evt.x << ", " << evt.y << "\n";
+            std::cout << " - event name: " << evt.name << "\n";
+            std::cout << " - pages[0].name: " << newEvt.texFileName << "\n";
+            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << "\n";
+        }
+        if (charsetLoadFails > 0) {
+            g_addNotification(ErrorNotification("Error", std::format("Failed to load charsets for {} images", charsetLoadFails)));
         }
 
         if (lowerLayerData != NULL) {

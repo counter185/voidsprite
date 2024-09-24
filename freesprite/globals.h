@@ -17,6 +17,7 @@
 #include <functional>
 #include <algorithm>
 #include <filesystem>
+#include <iostream>
 #include <fstream>
 
 #ifdef __GNUC__

@@ -3,6 +3,14 @@
 #include "EventCallbackListener.h"
 #include "ScreenWideNavBar.h"
 
+struct LMUEvent {
+    XY pos;
+    std::string name = "";
+    std::string texFileName = "";
+    int charsetIndex = 0, charsetDirection = 0;
+    SDL_Texture* tex = NULL;
+};
+
 class RPG2KTilemapPreviewScreen :
     public BaseScreen, EventCallbackListener
 {
@@ -12,6 +20,7 @@ public:
     uint16_t* lowerLayerData = NULL;
     uint16_t* upperLayerData = NULL;
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
+    std::vector<LMUEvent> events;
 
     SDL_Texture* callerCanvas = NULL;
 
@@ -38,6 +47,7 @@ public:
     void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex);
     void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);
     void RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst);
+    void RenderEvents();
     void LoadLMU(PlatformNativePathString path);
 };
 
