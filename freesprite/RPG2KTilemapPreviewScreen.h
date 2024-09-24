@@ -11,6 +11,13 @@ struct LMUEvent {
     SDL_Texture* tex = NULL;
 };
 
+enum LMUEventViewMode : int {
+    LMUEVENTS_HIDE_ALL = 0,
+    LMUEVENTS_SHOW_INGAME = 1,
+    LMUEVENTS_SHOW_RECTS = 2,
+    LMUEVENTS_SHOW_INGAME_AND_RECTS = 3
+};
+
 class RPG2KTilemapPreviewScreen :
     public BaseScreen, EventCallbackListener
 {
@@ -28,6 +35,7 @@ public:
     int scale = 1;
     XY canvasDrawPoint = { 40,40 };
     bool scrollingTilemap = false;
+    LMUEventViewMode eventViewMode = LMUEVENTS_SHOW_INGAME_AND_RECTS;
 
     RPG2KTilemapPreviewScreen(MainEditor* parent);
     ~RPG2KTilemapPreviewScreen();

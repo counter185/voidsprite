@@ -760,10 +760,8 @@ void MainEditor::takeInput(SDL_Event evt) {
 			return;
 		}
 	}
-	if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_LALT) {
-		wxsManager.forceFocusOn(navbar);
-		return;
-	}
+
+	LALT_TO_SUMMON_NAVBAR;
 
 	if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 		switch (evt.type) {

@@ -36,8 +36,38 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                     },
                     g_iconNavbarTabFile
                 }
+            },
+            {
+                SDLK_v,
+                {
+                    "View",
+                    {},
+                    {
+                        {SDLK_e, { "Toggle Event display",
+                                [](RPG2KTilemapPreviewScreen* screen) {
+									screen->eventViewMode = (LMUEventViewMode)(((int)screen->eventViewMode + 1) % 4);
+                                    switch (screen->eventViewMode) {
+                                        case LMUEVENTS_HIDE_ALL:
+                                            g_addNotification(Notification("All Events hidden","", 1500, NULL, COLOR_INFO));
+											break;
+										case LMUEVENTS_SHOW_INGAME:
+											g_addNotification(Notification("Events shown as ingame", "", 1500, NULL, COLOR_INFO));
+                                            break;
+                                        case LMUEVENTS_SHOW_RECTS:
+                                            g_addNotification(Notification("Events shown as in editor", "", 1500, NULL, COLOR_INFO));
+											break;
+                                        case LMUEVENTS_SHOW_INGAME_AND_RECTS:
+                                            g_addNotification(Notification("Events shown as ingame and in editor", "", 1500, NULL, COLOR_INFO));
+                                            break;
+                                    }
+								}
+                            }
+                        }
+                    },
+                    g_iconNavbarTabView 
+                }
             }
-        }, { SDLK_f });
+        }, { SDLK_f, SDLK_v });
     wxsManager.addDrawable(navbar);
 
     lowerLayerData = new uint16_t[dimensions.x * dimensions.y];
@@ -52,7 +82,6 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 
 RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
 {
-    wxsManager.freeAllDrawables();
     if (lowerLayerData != NULL) {
         delete[] lowerLayerData;
     }
@@ -105,12 +134,15 @@ void RPG2KTilemapPreviewScreen::tick()
 
 void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
 {
-    DrawableManager::processInputEventInMultiple({ wxsManager }, evt);
+    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
 
     if (evt.type == SDL_QUIT) {
         g_closeScreen(this);
         return;
     }
+
+    LALT_TO_SUMMON_NAVBAR;
+
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
         switch (evt.type) {
         case SDL_MOUSEWHEEL:
@@ -906,7 +938,7 @@ void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_
 void RPG2KTilemapPreviewScreen::RenderEvents()
 {
     for (LMUEvent& evt : events) {
-        if (evt.tex != NULL) {
+        if ((eventViewMode == LMUEVENTS_SHOW_INGAME || eventViewMode == LMUEVENTS_SHOW_INGAME_AND_RECTS) && evt.tex != NULL) {
             SDL_Rect dst = { 
                 canvasDrawPoint.x + evt.pos.x * 16 * scale - 4 * scale, 
                 canvasDrawPoint.y + evt.pos.y * 16 * scale - 16 * scale, 
@@ -919,13 +951,16 @@ void RPG2KTilemapPreviewScreen::RenderEvents()
             };
             SDL_RenderCopy(g_rd, evt.tex, &srcCharset, &dst);
         }
-        SDL_Rect evtRect = { canvasDrawPoint.x + evt.pos.x * 16 * scale, canvasDrawPoint.y + evt.pos.y * 16 * scale, 16 * scale, 16 * scale };
-        evtRect.x += 4;
-        evtRect.y += 4;
-        evtRect.w -= 8;
-        evtRect.h -= 8;
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, evt.tex != NULL ? 0x40 : 0x80);
-        SDL_RenderDrawRect(g_rd, &evtRect);
+
+        if (eventViewMode == LMUEVENTS_SHOW_RECTS || eventViewMode == LMUEVENTS_SHOW_INGAME_AND_RECTS) {
+            SDL_Rect evtRect = { canvasDrawPoint.x + evt.pos.x * 16 * scale, canvasDrawPoint.y + evt.pos.y * 16 * scale, 16 * scale, 16 * scale };
+            evtRect.x += 4;
+            evtRect.y += 4;
+            evtRect.w -= 8;
+            evtRect.h -= 8;
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, evt.tex != NULL ? 0x40 : 0x80);
+            SDL_RenderDrawRect(g_rd, &evtRect);
+        }
     }
 }
 
@@ -997,11 +1032,11 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
             }
 
             events.push_back(newEvt);
-            std::cout << "-----lmu event\n";
+            /*std::cout << "-----lmu event\n";
             std::cout << " - position: " << evt.x << ", " << evt.y << "\n";
             std::cout << " - event name: " << evt.name << "\n";
             std::cout << " - pages[0].name: " << newEvt.texFileName << "\n";
-            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << "\n";
+            std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << "\n";*/
         }
         if (charsetLoadFails > 0) {
             g_addNotification(ErrorNotification("Error", std::format("Failed to load charsets for {} images", charsetLoadFails)));

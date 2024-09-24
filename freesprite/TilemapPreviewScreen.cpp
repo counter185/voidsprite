@@ -219,6 +219,8 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
         return;
     }
 
+    LALT_TO_SUMMON_NAVBAR;
+
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
         switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:

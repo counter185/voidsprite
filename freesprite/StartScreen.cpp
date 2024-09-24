@@ -37,10 +37,8 @@ void StartScreen::takeInput(SDL_Event evt)
 		return;
 	}
 
-	if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_LALT) {
-		wxsManager.forceFocusOn(navbar);
-		return;
-	}
+	LALT_TO_SUMMON_NAVBAR;
+
 	if (evt.type == SDL_DROPFILE) {
 		std::string filePath = evt.drop.file;
 		tryLoadFile(filePath);
