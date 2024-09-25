@@ -23,7 +23,7 @@ Layer* TemplateRPG2KSystem::generate()
         0xff004243, 0xff002122,
     };
      uint32_t tileBGColorsText[] = {
-        0x99d0de,0xffffff00,
+        0xff99d0de,0xffffff00,
         0xff0fff00,0xff0757575,
         0xffff0000,0xffff380000,
               0xff1e0000, 0xff380000,
