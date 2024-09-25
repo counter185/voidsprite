@@ -22,6 +22,6 @@ install_data(
 
 # Icon
 install_data(
-  'voidsprite.png',
+  'com.github.counter185.voidsprite.png',
   install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'apps')
 )
