@@ -411,6 +411,9 @@
     <ClCompile Include="PopupGlobalConfig.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="PanelRPG2KTilemapPreview.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -751,6 +754,9 @@
     </ClInclude>
     <ClInclude Include="shiftjis.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelRPG2KTilemapPreview.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

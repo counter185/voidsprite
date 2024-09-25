@@ -8,10 +8,15 @@
 #include "FontRenderer.h"
 #include "FileIO.h"
 #include "LayerPalettized.h"
+#include "PanelRPG2KTilemapPreview.h"
 
 RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 {
     caller = parent;
+
+    PanelRPG2KTilemapPreview* layersPanel = new PanelRPG2KTilemapPreview(this);
+    layersPanel->position = { 20, 80 };
+    wxsManager.addDrawable(layersPanel);
 
     navbar = new ScreenWideNavBar<RPG2KTilemapPreviewScreen*>(this,
         {
@@ -72,6 +77,12 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                                     }
                                 }
                             }
+                        },
+                        {SDLK_r, { "Recenter canvas",
+                                [](RPG2KTilemapPreviewScreen* screen) {
+                                    screen->RecenterCanvas();
+                                }
+                            }
                         }
                     },
                     g_iconNavbarTabView 
@@ -86,6 +97,8 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     memset(upperLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
 
     callerCanvas = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
+
+    RecenterCanvas();
 
     //resizeTilemap(32, 32);
 }
@@ -109,7 +122,7 @@ RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
 void RPG2KTilemapPreviewScreen::render()
 {
     TilemapPreviewScreen::drawBackground();
-    RenderWholeMap(canvasDrawPoint, scale);
+    RenderWholeMap(canvasDrawPoint, scale, rdLowerLayer, rdUpperLayer, rdEventLayer);
 
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, gridOpacity);
     for (int y = 0; y < dimensions.y; y++ ) {
@@ -139,6 +152,11 @@ void RPG2KTilemapPreviewScreen::tick()
         g_closeScreen(this);
         return;
     }
+
+    canvasDrawPoint = XY{
+        iclamp(-(16 * dimensions.x) * scale + 4, canvasDrawPoint.x, g_windowW - 4),
+        iclamp(-(16 * dimensions.y) * scale + 4, canvasDrawPoint.y, g_windowH - 4)
+    };
 }
 
 void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
@@ -229,7 +247,7 @@ void RPG2KTilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathStr
         else {
             g_addNotification(ErrorNotification("Error", "Failed to save rendered image"));
         }
-		
+        
     }
     else {
         g_addNotification(ErrorNotification("Error", "Failed to render map to image"));
@@ -257,6 +275,14 @@ bool RPG2KTilemapPreviewScreen::isDeepWaterTileAt(XY position)
     else {
         return false;
     }
+}
+
+void RPG2KTilemapPreviewScreen::RecenterCanvas()
+{
+    canvasDrawPoint = XY{
+        (g_windowW / 2) - ((16 * dimensions.x) * scale) / 2,
+        (g_windowH / 2) - ((16 * dimensions.y) * scale) / 2
+    };
 }
 
 void RPG2KTilemapPreviewScreen::PrerenderCanvas()
@@ -1023,6 +1049,8 @@ void RPG2KTilemapPreviewScreen::RenderEvents(XY originPoint, int canvasScale)
 void RPG2KTilemapPreviewScreen::RenderWholeMap(XY at, int sscale, bool rdLowerLayer, bool rdUpperLayer, bool rdEvents)
 {
     PrerenderCanvas();
+
+    //todo: make this work on raw pixel data instead of sdl textures
 
     for (int y = 0; y < dimensions.y; y++) {
         for (int x = 0; x < dimensions.x; x++) {

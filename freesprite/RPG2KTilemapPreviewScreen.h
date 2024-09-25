@@ -32,6 +32,7 @@ public:
     std::map<std::string, SDL_Texture*> texturesLoaded;
     SDL_Texture* callerCanvas = NULL;
 
+    bool rdLowerLayer = true, rdUpperLayer = true, rdEventLayer = true;
     uint8_t gridOpacity = 0x18;
     int scale = 1;
     XY canvasDrawPoint = { 40,40 };
@@ -53,6 +54,7 @@ public:
     uint16_t lowerLayerTileAt(XY position);
     bool isDeepWaterTileAt(XY position);
 
+    void RecenterCanvas();
     void PrerenderCanvas();
     void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState = -1);
     void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);

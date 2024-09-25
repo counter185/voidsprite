@@ -78,6 +78,7 @@ class SpritesheetPreviewScreen;
 class EditorSpritesheetPreview;
 class Panel;
 class UIColorInputField;
+class UILayerButton;
 class UIButton;
 class Pattern;
 class Notification;
