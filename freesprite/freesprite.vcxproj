@@ -187,6 +187,7 @@
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
     <ClCompile Include="TemplateRPG2KFaceset.cpp" />
+    <ClCompile Include="TemplateRPG2KSystem.cpp" />
     <ClCompile Include="TilemapEditorLayerPicker.cpp" />
     <ClCompile Include="ToolRectFlip.cpp" />
     <ClCompile Include="ToolRectRotate.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />
+    <ClInclude Include="TemplateRPG2KSystem.h" />
     <ClInclude Include="TilemapEditorLayerPicker.h" />
     <ClInclude Include="ToolRectFlip.h" />
     <ClInclude Include="ToolRectRotate.h" />
