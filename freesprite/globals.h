@@ -84,6 +84,7 @@ class Gamepad;
 class Timer64;
 class TooltipsLayer;
 class TilemapEditorLayerPicker;
+class FileExporter;
 
 template <typename T>
 class ScreenWideNavBar;

@@ -41,6 +41,8 @@ SDL_FPoint xytofp(XY p);
 std::string stringToLower(std::string a);
 std::string shiftJIStoUTF8(std::string a);
 std::wstring utf8StringToWstring(std::string a);
+std::string wstringToUTF8String(std::wstring a);
+std::string convertStringToUTF8OnWin32(PlatformNativePathString a);
 PlatformNativePathString convertStringOnWin32(std::string a);
 
 bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith);

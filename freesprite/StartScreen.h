@@ -207,16 +207,11 @@ public:
 				}
 			}
 			else {
-
-#if _WIDEPATHS
-				if (std::filesystem::exists(utf8StringToWstring(arg))) {
-#else
-				if (std::filesystem::exists(arg)) {
-#endif
+				if (std::filesystem::exists(convertStringOnWin32(arg))) {
 					tryLoadFile(arg);
 				}
 				else {
-					g_addPopup(new PopupMessageBox("", std::format("Error finding file: {}", arg)));
+					g_addNotification(ErrorNotification("Error", std::format("Could not find file:\n {}", arg)));
 				}
 			}
 		}

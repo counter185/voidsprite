@@ -77,21 +77,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
 
         if (exporterId < g_palettizedFileExporters.size()) {
             FileExporter* actualExporterID = g_palettizedFileExporters[exporterId];
-            if (actualExporterID->exportsWholeSession()) {
-                result = actualExporterID->exportData(name, this);
-            }
-            else {
-                Layer* flat = flattenImageWithoutConvertingToRGB();
-                result = actualExporterID->exportData(name, flat);
-                delete flat;
-            }
-        }
-
-        if (result) {
-            g_addNotification(SuccessNotification("Success", "File saved successfully."));
-        }
-        else {
-            g_addNotification(ErrorNotification("Error", "Failed to save file."));
+            trySaveWithExporter(name, actualExporterID);
         }
     }
 }
@@ -412,6 +398,34 @@ void MainEditorPalettized::trySaveImage()
     trySavePalettizedImage();
 }
 
+bool MainEditorPalettized::trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter)
+{
+    bool result = false;
+    if (exporter->exportsWholeSession()) {
+        result = exporter->exportData(name, this);
+    }
+    else {
+        Layer* flat = flattenImageWithoutConvertingToRGB();
+        result = exporter->exportData(name, flat);
+        delete flat;
+    }
+    if (result) {
+        lastConfirmedSave = true;
+        lastConfirmedSavePath = name;
+        lastConfirmedExporter = exporter;
+        changesSinceLastSave = false;
+        if (lastWasSaveAs && g_config.openSavedPath) {
+            platformOpenFileLocation(lastConfirmedSavePath);
+        }
+        g_addNotification(SuccessNotification("Success", "File saved successfully."));
+    }
+    else {
+        g_addNotification(ErrorNotification("Error", "Failed to save file."));
+    }
+
+    return result;
+}
+
 void MainEditorPalettized::trySaveAsImage()
 {
     trySaveAsPalettizedImage();
@@ -507,7 +521,7 @@ void MainEditorPalettized::trySavePalettizedImage()
         trySaveAsImage();
     }
     else {
-        eventFileSaved(EVENT_PALETTIZEDEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId + 1);
+        trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
     }
 }
 

@@ -901,10 +901,9 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
-Layer* readTGA(std::string path, uint64_t seek) {
-    SDL_Surface* tgasrf = IMG_Load(path.c_str());
-    
-    return new Layer(tgasrf);
+Layer* readTGA(PlatformNativePathString path, uint64_t seek) {
+
+    return readSDLImage(path, seek);
     /*TGA* tga = TGAOpen(path.c_str(), "r");
     TGAData data;
     data.flags = TGA_IMAGE_DATA;
@@ -1041,9 +1040,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
     }
 }
 
-Layer* readSDLImage(std::string path, uint64_t seek)
+Layer* readSDLImage(PlatformNativePathString path, uint64_t seek)
 {
-    SDL_Surface* img = IMG_Load(path.c_str());
+    std::string p = convertStringToUTF8OnWin32(path);
+    SDL_Surface* img = IMG_Load(p.c_str());
 
     return img == NULL ? NULL : new Layer(img);
 }
@@ -1883,60 +1883,34 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
 
 MainEditor* loadAnyIntoSession(std::string utf8path)
 {
-    PlatformNativePathString fPath;
-#if _WIDEPATHS
-    fPath = utf8StringToWstring(utf8path);
-#else
-    fPath = utf8path;
-#endif
+    PlatformNativePathString fPath = convertStringOnWin32(utf8path);
 
-    for (FileSessionImportNPath importer : g_fileSessionImportersNPaths) {
-        if (stringEndsWithIgnoreCase(utf8path, importer.extension) && importer.canImport(fPath)) {
-            MainEditor* session = importer.importFunction(fPath);
-            if (session != NULL) {
+    for (FileImporter*& importer : g_fileImporters) {
+        if (stringEndsWithIgnoreCase(utf8path, importer->extension()) && importer->canImport(fPath)) {
+            void* data = importer->importData(fPath);
+            if (data != NULL) {
+                MainEditor* session = NULL;
+                if (importer->importsWholeSession()) {
+                    session = (MainEditor*)data;
+                }
+                else {
+                    Layer* l = (Layer*)data;
+                    session = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
+                }
+                if (importer->getCorrespondingExporter() != NULL) {
+                    session->lastWasSaveAs = false;
+                    session->lastConfirmedSave = true;
+                    session->lastConfirmedSavePath = fPath;
+                    session->lastConfirmedExporter = importer->getCorrespondingExporter();
+                }
                 return session;
             }
             else {
-                printf("%s: load failed\n", importer.name.c_str());
+                printf("%s : load failed\n", importer->name().c_str());
             }
         }
     }
-    {
-
-        Layer* l = NULL;
-        for (FileImportNPath importer : g_fileImportersNPaths) {
-            if (stringEndsWithIgnoreCase(utf8path, importer.extension) && importer.canImport(fPath)) {
-                l = importer.importFunction(fPath, 0);
-                if (l != NULL) {
-                    break;
-                }
-                else {
-                    printf("%s : load failed\n", importer.name.c_str());
-                }
-            }
-        }
-        if (l == NULL) {
-            for (FileImportUTF8Path importer : g_fileImportersU8Paths) {
-                if (stringEndsWithIgnoreCase(utf8path, importer.extension) && importer.canImport(utf8path)) {
-                    l = importer.importFunction(utf8path, 0);
-                    if (l != NULL) {
-                        break;
-                    }
-                    else {
-                        printf("%s : load failed\n", importer.name.c_str());
-                    }
-                }
-            }
-        }
-
-        if (l != NULL) {
-            return l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
-        }
-        else {
-            g_addNotification(ErrorNotification("Error", "Failed to load file"));
-            printf("No importer for file available\n");
-        }
-    }
+    g_addNotification(ErrorNotification("Error", "Failed to load file"));
     return NULL;
 }
 

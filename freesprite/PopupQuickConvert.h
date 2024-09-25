@@ -25,8 +25,5 @@ public:
 
     void onDropFileEvent(SDL_Event evt);
     void eventDropdownItemSelected(int evt_id, int index, std::string name);
-
-    MainEditor* loadSession(std::string path);
-    Layer* loadFlat(std::string path);
 };
 
