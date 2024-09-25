@@ -37,6 +37,10 @@ Free C++ sprite editor
 
 You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
 
+For Windows, get the `voidsprite-build.zip` file.
+
+For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed. You can also try the portable binary from `voidsprite-build-linux.zip`, but this might not work on all systems.
+
 ## Building
 
 ### Windows
