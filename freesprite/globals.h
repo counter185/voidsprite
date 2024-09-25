@@ -20,15 +20,9 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef __GNUC__
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_image.h>
-#else
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
-#endif
 
 extern "C" {
 #include <zlib.h>
