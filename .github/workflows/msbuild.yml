@@ -106,6 +106,6 @@ jobs:
     - uses: actions/checkout@v4
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       with:
-        bundle: voidsprite.flatpak
+        bundle: voidsprite-linux-flatpak.flatpak
         manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
         cache-key: flatpak-builder-${{ github.sha }}
