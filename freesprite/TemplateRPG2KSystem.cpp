@@ -6,14 +6,14 @@ Layer* TemplateRPG2KSystem::generate()
     Layer* ret = new Layer(160, 80);
     ret->name = "Template Layer";
     uint32_t tileBGColors[] = {
-              0xff1e0000, 0xff380000,
+        0xff1e0000, 0xff380000,
         0xff0d0d15, 0xff382338,
         0xff233923, 0xff0d150d,
         0xff001f0e, 0xff00431e,
         0xff004243, 0xff002122,
         0xff000a22, 0xff001443,
         0xff100022, 0xff200043,
-        0xff220019,  0xff480036
+        0xff220019, 0xff480036
     };
      uint32_t tileBGColors8x8[] = {
         0xff002338, 0xff000d15,
@@ -23,26 +23,26 @@ Layer* TemplateRPG2KSystem::generate()
         0xff004243, 0xff002122,
     };
      uint32_t tileBGColorsText[] = {
-        0xff99d0de,0xff757500,
-        0xff0fff00,0xff0757575,
-        0xffff0000,0xffff380000,
-              0xff1e0000, 0xff380000,
+        0xff99d0de, 0xff757500,
+        0xff0fff00, 0xff757575,
+        0xffff0000, 0xff380000,
+        0xff1e0000, 0xff380000,
         0xff0d0d15, 0xff382338,
         0xff233923, 0xff0d150d,
         0xff00431e, 0xff001f0e,
         0xff004243, 0xff002122,
         0xff001443, 0xff000a22,
         0xff100022, 0xff200043,
-        0xff480036,  0xff220019
+        0xff480036, 0xff220019
     };
     int index = 0;
     int iindex = 0;
     int x = 0;
     int y = 0;
     XY base = XY{ 32 * x, y * 32 };
-    XY base2 = XY{ 129 + (8 * x), y * 8 };
-    XY base3 = XY{8 * x, 33 + (y * 8) };
-    XY base4 = XY{16 * x, 49 + (y * 16) };
+    XY base2 = XY{ 128 + (8 * x), y * 8 };
+    XY base3 = XY{8 * x, 32 + (y * 8) };
+    XY base4 = XY{16 * x, 48 + (y * 16) };
 
 
     for (int xx = 0; xx < 4; xx++) {
@@ -109,18 +109,18 @@ std::vector<CommentData> TemplateRPG2KSystem::placeComments()
         { {44,7}, "UP Arrow" },
         { {44,17}, "DOWN Arrow" },
         { {64,0}, "Selection Frames (Animated)" },
-        { {129,0}, "Shop Arrow (Stat Up)" },
-        { {129,8}, "Shop Arrow (Can't Equip)" },
-        { {129,16}, "Shop Arrow (Stat Down)" },
-        { {129,24}, "Shop Arrow (Equipped)" },
-        { {0,33}, "Fill Colour" },
-        { {17,33}, "Text Shadow" },
-        { {32,33}, "Timer Digits" },
-        { {129,32}, "Airship Shadow" },
-        { {0,49}, "Text Colour" },
-        { {16,49}, "Stat Colour" },
-        { {32,49}, "Stat Up Colour" },
-        { {48,49}, "Stat Down Colour" },
-        { {64,49}, "Health Down Colour" }
+        { {128,0}, "Shop Arrow (Stat Up)" },
+        { {128,8}, "Shop Arrow (Can't Equip)" },
+        { {128,16}, "Shop Arrow (Stat Down)" },
+        { {128,24}, "Shop Arrow (Equipped)" },
+        { {0,32}, "Fill Colour" },
+        { {17,32}, "Text Shadow" },
+        { {32,32}, "Timer Digits" },
+        { {128,32}, "Airship Shadow" },
+        { {0,48}, "Text Colour" },
+        { {16,48}, "Stat Colour" },
+        { {32,48}, "Stat Up Colour" },
+        { {48,48}, "Stat Down Colour" },
+        { {64,48}, "Health Down Colour" }
     };
 }
