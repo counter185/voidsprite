@@ -24,9 +24,9 @@ zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'], static: get_option
 liblcf_dep = dependency('liblcf', fallback: ['liblcf', 'liblcf_dep'], static: get_option('portable'))
 libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'], static: get_option('portable'))
 
-sdl2_dep = dependency('sdl2', fallback: ['sdl2', 'sdl2_dep'])
-sdl2_ttf_dep = dependency('SDL2_ttf', fallback: ['sdl2_ttf', 'sdl2_ttf_dep'])
-sdl2_image_dep = dependency('SDL2_image', fallback: ['sdl2_image', 'sdl2_image_dep'])
+sdl2_dep = dependency('sdl2', version: '>=2.0.22', fallback: ['sdl2', 'sdl2_dep'], static: get_option('portable'))
+sdl2_ttf_dep = dependency('SDL2_ttf', version: '>=2.0.18', fallback: ['sdl2_ttf', 'sdl2_ttf_dep'], static: get_option('portable'))
+sdl2_image_dep = dependency('SDL2_image', version: '>=2.6.0', fallback: ['sdl2_image', 'sdl2_image_dep'], static: get_option('portable'))
 
 dependencies = [
   thread_dep,
@@ -42,7 +42,7 @@ dependencies = [
 
 # Windows requires sdl2main dependency
 if host_machine.system() == 'windows'
-  sdl2main_dep = dependency('sdl2main', fallback: ['sdl2main', 'sdl2main_dep'])
+  sdl2main_dep = dependency('sdl2main', version: '>=2.0.22', fallback: ['sdl2main', 'sdl2main_dep'], static: get_option('portable'))
   dependencies += sdl2main_dep
 endif
 

@@ -418,3 +418,7 @@ gcc-build/libz.so.1
 !/subprojects/liblcf
 !/subprojects/easybmp
 !/subprojects/libtga
+
+.flatpak-builder
+flatpak-repo/
+*.flatpak
