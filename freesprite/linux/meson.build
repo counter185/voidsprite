@@ -29,12 +29,10 @@ else
 endif
 
 # Icon
-install_data(
-  'com.github.counter185.voidsprite.png',
-  install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'apps')
-)
-
-install_data(
-  'com.github.counter185.voidsprite.png',
-  install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '256x256', 'apps')
-)
+foreach size : ['16x16', '32x32', '64x64', '128x128', '256x256', '512x512']
+  install_data(
+    'icons' / size + '.png',
+    rename: 'com.github.counter185.voidsprite.png',
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', size, 'apps')
+  )
+endforeach
