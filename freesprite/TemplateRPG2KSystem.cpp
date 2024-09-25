@@ -23,7 +23,7 @@ Layer* TemplateRPG2KSystem::generate()
         0xff004243, 0xff002122,
     };
      uint32_t tileBGColorsText[] = {
-        0xff99d0de,0xffffff00,
+        0xff99d0de,0xff757500,
         0xff0fff00,0xff0757575,
         0xffff0000,0xffff380000,
               0xff1e0000, 0xff380000,
@@ -119,8 +119,8 @@ std::vector<CommentData> TemplateRPG2KSystem::placeComments()
         { {129,32}, "Airship Shadow" },
         { {0,49}, "Text Colour" },
         { {16,49}, "Stat Colour" },
-        { {32,49}, "Stat UpColour" },
-        { {48,49}, "Stat DownColour" },
+        { {32,49}, "Stat Up Colour" },
+        { {48,49}, "Stat Down Colour" },
         { {64,49}, "Health Down Colour" }
     };
 }
