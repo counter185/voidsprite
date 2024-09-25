@@ -96,3 +96,16 @@ jobs:
         name: voidsprite-build-linux
         path: |
           target/debug
+
+  build-linux64-flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-23.08
+      options: --privileged
+    steps:
+    - uses: actions/checkout@v4
+    - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      with:
+        bundle: voidsprite.flatpak
+        manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
+        cache-key: flatpak-builder-${{ github.sha }}
