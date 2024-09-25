@@ -33,6 +33,14 @@ Free C++ sprite editor
 - Python file (as [R,G,B,A] `np.array`)
 - HTML document (inline Base64 image)
 
+## Installing
+
+You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
+
+For Windows, get the `voidsprite-build.zip` file.
+
+For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed. You can also try the portable binary from `voidsprite-build-linux.zip`, but this might not work on all systems.
+
 ## Building
 
 ### Windows
@@ -52,6 +60,10 @@ Free C++ sprite editor
    * If you installed a separate version of GCC to use alongside your system install, you can specify a different compiler by setting the `CC` and `CXX` variables while calling `linux_build.sh`, e.g. `CC=gcc-13 CXX=g++-13 ./linux_build.sh`
 
 By default, the generated output files will be placed in `/tmp/voidsprite`. When `--global` is passed, they will be installed to `/usr/local` instead.
+
+#### Flatpak
+
+You can also build the program as a Flatpak, see [Flatpak README](https://github.com/counter185/voidsprite/blob/main/freesprite/linux/flatpak/README.md).
 
 ## Licenses
 

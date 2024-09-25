@@ -23,7 +23,7 @@ done
 prefix="${prefix:-${_prefix}}"
 
 if [ ! -e "freesprite" ]; then echo "Not in source directory"; exit 1; fi
-if [ "$keep" = "false" ]; then if [ -e "$prefix" ]; then rm -r "$prefix"; fi; fi
+if [ "$keep" = "false" ] && [ ! "$prefix" ] && [ "$prefix" != "/usr" ]; then if [ -e "$prefix" ]; then rm -r "$prefix"; fi; fi
 
 set -e
 if [ "$no_setup" != "1" ] || [ ! -e 'build' ]; then
