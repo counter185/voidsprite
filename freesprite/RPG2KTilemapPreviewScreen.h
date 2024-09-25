@@ -48,15 +48,18 @@ public:
     BaseScreen* isSubscreenOf() override;
 
     void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
+    void eventFileSaved(int evt_id, PlatformNativePathString path, int exporter_index) override;
 
     uint16_t lowerLayerTileAt(XY position);
     bool isDeepWaterTileAt(XY position);
 
     void PrerenderCanvas();
-    void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex);
+    void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState = -1);
     void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);
-    void RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst);
-    void RenderEvents();
+    void RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst, int animState = -1);
+    void RenderEvents(XY originPoint, int canvasScale);
+    void RenderWholeMap(XY at, int scale, bool rdLowerLayer = true, bool rdUpperLayer = true, bool rdEvents = true);
+    Layer* RenderWholeMapToTexture();
     void LoadLMU(PlatformNativePathString path);
 };
 
