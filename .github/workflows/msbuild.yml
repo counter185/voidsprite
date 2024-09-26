@@ -123,7 +123,7 @@ jobs:
       run: brew install meson sdl2 sdl2_image sdl2_ttf
 
     - name: run build
-      run: CC=gcc-13 CXX=g++-13 ./mac_build.sh
+      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
 
     - name: add licenses
       run: cp -r OPEN_SOURCE_LICENSES target/debug
