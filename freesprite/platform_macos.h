@@ -4,11 +4,11 @@
 #include "Notification.h"
 
 //i hope i never have to use this language again
-std::string loadFileAppleScript =
+constexpr const char* loadFileAppleScript =
 "set outfile to POSIX path of (choose file with prompt \\\"voidsprite: {}\\\" of type {})\n"
 "copy \\\"OK:\\\" & (outfile as string) to stdout";
 
-std::string saveFileAppleScript = 
+constexpr const char* saveFileAppleScript = 
 "set ftypes to {}\n"
 "set fnames to {{}}\n"
 "set fexts to {{}}\n"
