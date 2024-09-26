@@ -20,9 +20,15 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef __APPLE__
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#else 
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <SDL_image.h>
+#endif
 
 extern "C" {
 #include <zlib.h>

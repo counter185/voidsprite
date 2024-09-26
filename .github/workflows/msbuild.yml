@@ -58,7 +58,7 @@ jobs:
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: voidsprite-build
+        name: voidsprite-build-win64
         path: |
           x64/Release
           
@@ -96,7 +96,7 @@ jobs:
         name: voidsprite-build-linux
         path: |
           target/debug
-
+          
   build-linux64-flatpak:
     runs-on: ubuntu-latest
     container:
@@ -109,3 +109,28 @@ jobs:
         bundle: voidsprite-build-linux64-flatpak.flatpak
         manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
         cache-key: flatpak-builder-${{ github.sha }}
+        
+  build-mac-x64:
+    runs-on: macos-12
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install g++13
+      run: brew install gcc@13
+
+    - name: install devlibs
+      run: brew install meson sdl2 sdl2_image sdl2_ttf
+
+    - name: run build
+      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
+
+    - name: workaround gh actions artifact file permissions
+      run: tar -cvf voidsprite.app.tar -C target/mac_release .
+
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: voidsprite-build-mac-intel64
+        path: |
+          voidsprite.app.tar
