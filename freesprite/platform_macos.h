@@ -6,7 +6,7 @@
 //i hope i never have to use this language again
 constexpr const char* loadFileAppleScript =
 "set outfile to POSIX path of (choose file with prompt \\\"voidsprite: {}\\\" of type {})\n"
-"copy \\\"OK:\\\" & (outfile as string) to stdout";
+"copy \\\"OK:\\\" & (outfile as string) to stdout\n";
 
 constexpr const char* saveFileAppleScript = 
 "set ftypes to {}\n"
@@ -31,10 +31,10 @@ constexpr const char* saveFileAppleScript =
 "if not fp ends with fext then\n"
 "set fp to fp& fext\n"
 "end if\n"
-"copy(fext_index as string) & \\\"; \\\" & (fp as string) to stdout\n"
-"else"
+"copy(fext_index as string) & \\\";\\\" & (fp as string) to stdout\n"
+"else\n"
 "copy \\\"err\\\" to stdout\n"
-"end if";
+"end if\n";
 
 
 void platformPreInit() {}
@@ -94,10 +94,13 @@ void platformTrySaveOtherFile(
         char b;
         while (!feof(pipe)) {
             if (fread(&b, 1, 1, pipe) > 0) {
-                output += b;
+                if (b != '\n' && b != '\r') {
+                    output += b;
+                }
             }
         }
         pclose(pipe);
+        std::cout << output;
         if (output.find(';') != std::string::npos) {
             std::string indexStr = output.substr(0, output.find(';'));
             std::string filename = output.substr(output.find(';') + 1);
@@ -151,10 +154,13 @@ void platformTryLoadOtherFile(
         char b;
         while (!feof(pipe)) {
             if (fread(&b, 1, 1, pipe) > 0) {
-                output += b;
+                if (b != '\n' && b != '\r') {
+                    output += b;
+                }
             }
         }
         pclose(pipe);
+        std::cout << output;
         if (output.find("OK:") != std::string::npos) {
             std::string filename = output.substr(3);
             int index = findIndexByExtension(filetypes, filename);
@@ -173,8 +179,11 @@ void platformTryLoadOtherFile(
 
 void platformOpenFileLocation(PlatformNativePathString path) {
     std::string fullOpenCommand = "open ";
-    fullOpenCommand += '\"' + path + '\"';
-    system(fullOpenCommand.c_str());
+    auto pos = path.find_last_of('/');
+    if (pos != std::string::npos){
+        fullOpenCommand += '\"' + path.substr(0, pos) + '\"';
+        system(fullOpenCommand.c_str());
+    }
 }
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
