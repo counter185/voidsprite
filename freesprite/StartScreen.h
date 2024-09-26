@@ -21,6 +21,7 @@
 #include "PopupQuickConvert.h"
 #include "PopupGlobalConfig.h"
 #include "TemplateRPG2KSystem.h"
+#include "TemplateRPG2KChipset.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -43,6 +44,7 @@ public:
 
 	std::vector<BaseTemplate*> tab2templates = {
 		new TemplateRPG2KCharset(),
+		new TemplateRPG2KChipset(),
 		new TemplateRPG2KFaceset(),
 		new TemplateRPG2KSystem(),
 		new TemplateMC64x32Skin()

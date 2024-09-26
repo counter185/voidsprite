@@ -417,6 +417,9 @@
     <ClCompile Include="TemplateRPG2KSystem.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
+    <ClCompile Include="TemplateRPG2KChipset.cpp">
+      <Filter>Source files\templates</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -766,6 +769,9 @@
     </ClInclude>
     <ClInclude Include="platform_macos.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="TemplateRPG2KChipset.h">
+      <Filter>Header files\templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
