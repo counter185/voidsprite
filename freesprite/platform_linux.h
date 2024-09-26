@@ -53,7 +53,7 @@ void platformTrySaveOtherFile(
         fileTypeStrings.push_back("*" + p.first);
     }
     auto result = pfd::save_file("voidsprite: " + windowTitle,
-                                 pfd::path::home(), fileTypeStrings, true);
+                                 pfd::path::home(), fileTypeStrings, pfd::opt::none);
     std::string filename = result.result();
     if (filename.length() > 0) {
         // uh oh we need to manually find the filter index

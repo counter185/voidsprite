@@ -764,6 +764,9 @@
     <ClInclude Include="TemplateRPG2KSystem.h">
       <Filter>Header files\templates</Filter>
     </ClInclude>
+    <ClInclude Include="platform_macos.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

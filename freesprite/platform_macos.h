@@ -38,8 +38,10 @@ void platformTrySaveOtherFile(
         fileTypeStrings.push_back(p.second);
         fileTypeStrings.push_back("*" + p.first);
     }
-    auto result = pfd::save_file("voidsprite: " + windowTitle,
-                                 pfd::path::home(), fileTypeStrings, true);
+    std::string windowTitle2 = "voidsprite: ";
+    windowTitle2 += windowTitle;
+    pfd::save_file result = pfd::save_file(windowTitle2,
+                                 pfd::path::home(), fileTypeStrings, pfd::opt::none);
     std::string filename = result.result();
     if (filename.length() > 0) {
         // uh oh we need to manually find the filter index
@@ -62,8 +64,10 @@ void platformTryLoadOtherFile(
         fileTypeStrings.push_back(p.second);
         fileTypeStrings.push_back("*" + p.first);
     }
-    auto result =
-        pfd::open_file("voidsprite: " + windowTitle, pfd::path::home(),
+    std::string windowTitle2 = "voidsprite: ";
+    windowTitle2 += windowTitle;
+    pfd::open_file result =
+        pfd::open_file(windowTitle2, pfd::path::home(),
                        fileTypeStrings, pfd::opt::multiselect);
     std::vector<std::string> filenames = result.result();
     if (filenames.size() > 0) {
@@ -79,6 +83,9 @@ void platformTryLoadOtherFile(
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
+    std::string fullOpenCommand = "open ";
+    fullOpenCommand += '\"' + path + '\"';
+    system(fullOpenCommand.c_str());
 }
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
