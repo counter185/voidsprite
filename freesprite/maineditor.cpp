@@ -883,31 +883,11 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 
 		bool result = false;
 
+		FileExporter* exporter = NULL;
 		if (exporterID < g_fileExporters.size()) {
-			FileExporter* exporter = g_fileExporters[exporterID];
+			exporter = g_fileExporters[exporterID];
 
-			if (exporter->exportsWholeSession()) {
-				result = exporter->exportData(name, this);
-			}
-			else {
-				Layer* flat = flattenImage();
-				result = exporter->exportData(name, flat);
-				delete flat;
-			}
-		}
-
-		if (result) {
-			lastConfirmedSave = true;
-			lastConfirmedSavePath = name;
-			lastConfirmedExporterId = exporterID;
-			changesSinceLastSave = false;
-			if (lastWasSaveAs && g_config.openSavedPath) {
-				platformOpenFileLocation(lastConfirmedSavePath);
-			}
-			g_addNotification(SuccessNotification("File saved", "Save successful!"));
-		}
-		else {
-			g_addNotification(ErrorNotification("File not saved", "Save failed!"));
+			result = trySaveWithExporter(name, exporter);
 		}
 	}
 }
@@ -1002,9 +982,38 @@ void MainEditor::trySaveImage()
 		trySaveAsImage();
 	}
 	else {
-		eventFileSaved(EVENT_MAINEDITOR_SAVEFILE, lastConfirmedSavePath, lastConfirmedExporterId+1);
+		trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
 	}
 	
+}
+
+bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter)
+{
+	bool result = false;
+	if (exporter->exportsWholeSession()) {
+		result = exporter->exportData(name, this);
+	}
+	else {
+		Layer* flat = flattenImage();
+		result = exporter->exportData(name, flat);
+		delete flat;
+	}
+
+	if (result) {
+		lastConfirmedSave = true;
+		lastConfirmedSavePath = name;
+		lastConfirmedExporter = exporter;
+		changesSinceLastSave = false;
+		if (lastWasSaveAs && g_config.openSavedPath) {
+			platformOpenFileLocation(lastConfirmedSavePath);
+		}
+		g_addNotification(SuccessNotification("File saved", "Save successful!"));
+	}
+	else {
+		g_addNotification(ErrorNotification("File not saved", "Save failed!"));
+	}
+
+	return result;
 }
 
 void MainEditor::trySaveAsImage()

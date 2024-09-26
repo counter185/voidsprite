@@ -35,10 +35,10 @@ SDL_FPoint xytofp(XY p)
 std::string stringToLower(std::string a)
 {
     std::string ret;
-	for (int i = 0; i < a.size(); i++) {
-		ret += tolower(a.at(i));
-	}
-	return ret;
+    for (int i = 0; i < a.size(); i++) {
+        ret += tolower(a.at(i));
+    }
+    return ret;
 }
 
 std::string shiftJIStoUTF8(std::string a)
@@ -78,6 +78,55 @@ std::wstring utf8StringToWstring(std::string a)
     }
     return ret;
 }
+std::string wstringToUTF8String(std::wstring a)
+{
+    std::string ret = "";
+
+    for (wchar_t& c : a) {
+        if (c <= 0x7f) {
+            ret += (char)c;
+        }
+        else if (c <= 0x7FF) {
+            char c1 = 0b11000000 + (c >> 6);
+            char c2 = 0b10000000 + (c & 0b111111);
+            ret += c1;
+            ret += c2;
+        }
+        else if (c <= 0xFFFF) {
+            char c1 = 0b11100000 + (c >> 12);
+            char c2 = 0b10000000 + ((c >> 6) & 0b111111);
+            char c3 = 0b10000000 + (c & 0b111111);
+            ret += c1;
+            ret += c2;
+            ret += c3;
+        }
+        else if (c <= 0x10FFFF) {
+            char c1 = 0b11110000 + (c >> 18);
+            char c2 = 0b10000000 + ((c >> 12) & 0b111111);
+            char c3 = 0b10000000 + ((c >> 6) & 0b111111);
+            char c4 = 0b10000000 + (c & 0b111111);
+            ret += c1;
+            ret += c2;
+            ret += c3;
+            ret += c4;
+        }
+        else {
+            ret += '?';
+        }
+    }
+
+    return ret;
+}
+
+std::string convertStringToUTF8OnWin32(PlatformNativePathString a)
+{
+#if _WIDEPATHS
+    return wstringToUTF8String(a);
+#else
+    return a;
+#endif
+}
+
 PlatformNativePathString convertStringOnWin32(std::string a) {
 #if _WIDEPATHS
     return utf8StringToWstring(a);

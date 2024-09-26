@@ -70,7 +70,7 @@ public:
 
     bool changesSinceLastSave = false;
     PlatformNativePathString lastConfirmedSavePath;
-    int lastConfirmedExporterId;
+    FileExporter* lastConfirmedExporter = NULL;
     bool lastConfirmedSave = false;
     bool lastWasSaveAs = false;
 
@@ -122,6 +122,7 @@ public:
     virtual void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
     void DrawLine(XY from, XY to, uint32_t color);
     virtual void trySaveImage();
+    virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);
     virtual void trySaveAsImage();
     void recenterCanvas();
     bool requestSafeClose();

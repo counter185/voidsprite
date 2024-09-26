@@ -20,6 +20,7 @@
 #include "ScreenWideNavBar.h"
 #include "PopupQuickConvert.h"
 #include "PopupGlobalConfig.h"
+#include "TemplateRPG2KSystem.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -43,6 +44,7 @@ public:
 	std::vector<BaseTemplate*> tab2templates = {
 		new TemplateRPG2KCharset(),
 		new TemplateRPG2KFaceset(),
+		new TemplateRPG2KSystem(),
 		new TemplateMC64x32Skin()
 	};
 
@@ -205,16 +207,11 @@ public:
 				}
 			}
 			else {
-
-#if _WIDEPATHS
-				if (std::filesystem::exists(utf8StringToWstring(arg))) {
-#else
-				if (std::filesystem::exists(arg)) {
-#endif
+				if (std::filesystem::exists(convertStringOnWin32(arg))) {
 					tryLoadFile(arg);
 				}
 				else {
-					g_addPopup(new PopupMessageBox("", std::format("Error finding file: {}", arg)));
+					g_addNotification(ErrorNotification("Error", std::format("Could not find file:\n {}", arg)));
 				}
 			}
 		}

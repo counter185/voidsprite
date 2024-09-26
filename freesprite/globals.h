@@ -25,16 +25,9 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 #else 
-#ifdef __GNUC__
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_image.h>
-#else
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
-#endif
-#endif
 
 extern "C" {
 #include <zlib.h>
@@ -84,6 +77,7 @@ class SpritesheetPreviewScreen;
 class EditorSpritesheetPreview;
 class Panel;
 class UIColorInputField;
+class UILayerButton;
 class UIButton;
 class Pattern;
 class Notification;
@@ -95,6 +89,7 @@ class Gamepad;
 class Timer64;
 class TooltipsLayer;
 class TilemapEditorLayerPicker;
+class FileExporter;
 
 template <typename T>
 class ScreenWideNavBar;

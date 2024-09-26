@@ -99,13 +99,33 @@ public:
 
 	SDL_Texture* renderToTexture() {
 		//if this doesn't work, change it into a SDL_TEXTUREACCESS_STREAMING and just set the pixels
+		/*
 		SDL_Texture* ret = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, w, h);
 		SDL_SetTextureBlendMode(ret, SDL_BLENDMODE_BLEND);
 		SDL_SetRenderTarget(g_rd, ret);
 		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
 		SDL_RenderClear(g_rd);
 		render(SDL_Rect{ 0,0,w,h }, SDL_Rect{ 0,0,w,h });
-		SDL_SetRenderTarget(g_rd, NULL);
+		SDL_SetRenderTarget(g_rd, NULL);*/
+
+		SDL_Texture* ret = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+		SDL_SetTextureBlendMode(ret, SDL_BLENDMODE_BLEND);
+		uint8_t* pixels;
+		int pitch;
+		SDL_LockTexture(ret, NULL, (void**)&pixels, &pitch);
+		if (!isPalettized) {
+			memcpy(pixels, pixelData, w * h * 4);
+		}
+		else {
+			uint32_t* px32 = (uint32_t*)pixels;
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++) {
+					px32[x + (y * w)] = getVisualPixelAt(XY{ x,y });
+				}
+			}
+		}
+		SDL_UnlockTexture(ret);
+
 		return ret;
 	}
 

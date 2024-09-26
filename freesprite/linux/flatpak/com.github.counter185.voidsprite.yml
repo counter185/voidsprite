@@ -1,0 +1,74 @@
+id: com.github.counter185.voidsprite
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: voidsprite
+
+# TODO: filesystem=host should be possible to drop.
+# sandboxed opening and saving works fine, but "save as" opens a new
+# window and errors out saying the file is missing (the path is to the
+# sandbox-loaded file in /run/user/...)
+# for now, to make for a smooth experience, it's set, but we should
+# get rid of it someday :)
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --filesystem=host
+
+cleanup:
+  - /include
+  - /lib.*.la
+  - /lib/*.a
+  - /lib/pkgconfig
+  - /lib/cmake
+
+modules:
+  - name: pugixml
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+    cleanup:
+      - /include
+      - /lib/cmake
+      - /lib/pkgconfig
+    sources:
+      - type: archive
+        url: https://github.com/zeux/pugixml/releases/download/v1.14/pugixml-1.14.tar.gz
+        sha256: 2f10e276870c64b1db6809050a75e11a897a8d7456c4be5c6b2e35a11168a015
+        x-checker-data:
+          type: anitya
+          project-id: 3728
+          url-template: https://github.com/zeux/pugixml/releases/download/v$version/pugixml-$version.tar.gz
+
+  - name: liblcf
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DLIBLCF_ENABLE_TOOLS=OFF
+      - -DLIBLCF_WITH_XML=OFF
+      - -DLIBLCF_ENABLE_TESTS=OFF
+      - -DLIBLCF_UPDATE_MIMEDB=OFF
+    sources:
+      - type: git
+        url: https://github.com/EasyRPG/liblcf.git
+        tag: '0.8'
+        commit: 9c09529e3de0a4106470082ef48a00d4c3593c33
+        x-checker-data:
+          is-main-source: true
+          type: git
+          tag-pattern: ^([\d.]+)$
+    cleanup:
+      - /include
+      - /lib/pkgconfig
+      - /lib/cmake
+      - /share
+
+  - name: voidsprite
+    buildsystem: meson
+    sources:
+      - type: dir
+        path: "../../.."
+    config-opts:
+      - -Dflatpak=true

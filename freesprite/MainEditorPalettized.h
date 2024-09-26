@@ -24,6 +24,7 @@ public:
 
     void setUpWidgets() override;
     void trySaveImage() override;
+    bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter) override;
     void trySaveAsImage() override;
     Layer* flattenImage() override;
     Layer* newLayer() override;
