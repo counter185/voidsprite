@@ -29,5 +29,6 @@ mkdir voidsprite.app/Contents/MacOS/assets
 cp -R freesprite/assets voidsprite.app/Contents/MacOS
 cp freesprite/*.ttf voidsprite.app/Contents/MacOS/
 cp -R OPEN_SOURCE_LICENSES voidsprite.app
+chmod +x voidsprite.app
 mkdir target/mac_release
 mv voidsprite.app target/mac_release/voidsprite.app
