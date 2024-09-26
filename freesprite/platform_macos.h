@@ -7,7 +7,7 @@
 void platformPreInit() {}
 void platformInit() {}
 void platformPostInit() {
-    g_addNotification(ErrorNotification("Good luck", ""));
+    g_addNotification(Notification("macOS Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
 }
 
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
