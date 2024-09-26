@@ -37,6 +37,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSPK(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSCR(PlatformNativePathString path, uint64_t seek = 0);
+MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
@@ -236,6 +237,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
+    g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 
     g_fileImporters.push_back(FileImporter::flatImporter("PNG (libpng)", ".png", &readPNG, exPNG));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP (EasyBMP)", ".bmp", &readBMP, exBMP));

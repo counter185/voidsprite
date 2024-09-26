@@ -19,6 +19,8 @@
 #include "pugixml/pugixml.hpp"
 #include "astc_dec/astc_decomp.h"
 #include "base64/base64.hpp"
+#include "lcf/lmu/reader.h"
+#include "lcf/ldb/reader.h"
 
 enum VTFFORMAT
 {
@@ -153,7 +155,7 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
                     uint8_t value3 = (((byteBP3 >> (7 - posX)) & 1) << 3);
                     XY pixelPosNow = {
                         tileX * 8 + posX,
-						tileY * 8 + posY
+                        tileY * 8 + posY
                     };
                     colorTable[pixelPosNow.x + pixelPosNow.y * width] = value0 | value1 | value2 | value3;
                 }
@@ -167,7 +169,7 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
     for (uint64_t i = 0; i < width * height; i++) {
         //pxd[i] = PackRGBAtoARGB(colorTable[i], colorTable[i], colorTable[i], 255);
         pxd[i] = colorTable[i];
-	}
+    }
 
     free(colorTable);
     return ret;
@@ -189,7 +191,7 @@ uint8_t* DecompressMarioPaintSRM(FILE* f)
     std::vector<uint16_t> bin;
     for (int i = 0; i < datasize / 2 - 0x400; i++) {
         fread(shortBuffer, 2, 1, f);
-		bin.push_back(*(uint16_t*)shortBuffer);
+        bin.push_back(*(uint16_t*)shortBuffer);
     }
 
     std::vector<uint16_t> lz;
@@ -1629,14 +1631,14 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
             }
             else {
                 for (uint32_t x = 0; x < a+1; x++) {
-					uint8_t pixel;
-					fread(&pixel, 1, 1, f);
-					*(pxd++) = (uint32_t)pixel;
+                    uint8_t pixel;
+                    fread(&pixel, 1, 1, f);
+                    *(pxd++) = (uint32_t)pixel;
                     if (pxd >= end) {
                         reachedImageEnd = true;
                         break;
                     }
-				}
+                }
             }
         }
 
@@ -1661,6 +1663,64 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
         return ret;
     }
     return NULL;
+}
+
+MainEditor* readLMU(PlatformNativePathString path)
+{
+    MainEditor* ret = NULL;
+
+    std::ifstream lmuFile(path, std::ios::binary);
+    if (lmuFile.is_open()) {
+        std::unique_ptr<lcf::rpg::Map> a = lcf::LMU_Reader::Load(lmuFile);
+        int chipsetIndex = a.get()->chipset_id;
+        PlatformNativePathString pathDir = path.substr(0, path.find_last_of(convertStringOnWin32("/\\")));
+        PlatformNativePathString ldbPath = pathDir + convertStringOnWin32("/RPG_RT.ldb");
+
+        if (std::filesystem::exists(ldbPath)) {
+            std::ifstream ldbFile(ldbPath, std::ios::binary);
+            if (ldbFile.is_open()) {
+                std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
+                if (db.get()->chipsets.size() > chipsetIndex) {
+                    //chipset_name is the file name
+                    std::cout << "chipset_name = " << db.get()->chipsets[chipsetIndex].chipset_name << "\n";
+                    std::cout << "name = " << db.get()->chipsets[chipsetIndex].name << "\n";
+
+                    PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex].chipset_name)));
+                    Layer* l = NULL;
+                    l = readXYZ(chipsetPath + convertStringOnWin32(".xyz"));
+                    if (l == NULL) {
+                        l = readPNG(chipsetPath + convertStringOnWin32(".png"));
+                    }
+
+                    if (l != NULL) {
+                        l->name = shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex].name));
+                        ret = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
+
+                        //todo: load a rpg2ktilemappreviewscreen along with it too
+                    }
+                    else {
+                        g_addNotification(ErrorNotification("Error", "Failed to load Chipset"));
+                    }
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error", "Chipset index not in database"));
+                }
+                ldbFile.close();
+            }
+            else {
+                g_addNotification(ErrorNotification("Error", "Failed to read LDB"));
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "LDB not found"));
+        }
+        lmuFile.close();
+    }
+    else {
+        g_addNotification(ErrorNotification("Error", "Failed to read LMU"));
+    }
+
+    return ret;
 }
 
 MainEditor* readOpenRaster(PlatformNativePathString path)
@@ -1917,9 +1977,9 @@ MainEditor* loadAnyIntoSession(std::string utf8path)
 bool writePNG(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized && ((LayerPalettized*)data)->palette.size() > 256){
-		g_addNotification(ErrorNotification("Error", "Too many colors in palette"));
-		return false;
-	}
+        g_addNotification(ErrorNotification("Error", "Too many colors in palette"));
+        return false;
+    }
 
     // exports png
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
@@ -1951,40 +2011,40 @@ bool writePNG(PlatformNativePathString path, Layer* data)
         }
         else {
             LayerPalettized* pltLayer = (LayerPalettized*)data;
-			png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-			setjmp(png_jmpbuf(outpng));
+            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
+            setjmp(png_jmpbuf(outpng));
 
             png_colorp plt = new png_color[pltLayer->palette.size()];
             memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
             png_bytep trns = new png_byte[pltLayer->palette.size()];
 
             for (int x = 0; x < pltLayer->palette.size(); x++) {
-				plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
-				plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
-				plt[x].blue = pltLayer->palette[x] & 0xff;
+                plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
+                plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
+                plt[x].blue = pltLayer->palette[x] & 0xff;
                 trns[x] = (pltLayer->palette[x] >> 24) & 0xff;
-			}
+            }
 
-			png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
-			png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
-			png_write_info(outpng, outpnginfo);
+            png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
+            png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
+            png_write_info(outpng, outpnginfo);
 
             int32_t* pixelData32 = (int32_t*)pltLayer->pixelData;
-			png_bytepp rows = new png_bytep[data->h];
-			for (int y = 0; y < data->h; y++) {
+            png_bytepp rows = new png_bytep[data->h];
+            for (int y = 0; y < data->h; y++) {
                 png_bytep row = new png_byte[data->w];
                 for (int x = 0; x < data->w; x++) {
-					row[x] = pixelData32[x + y * data->w];
-				}
+                    row[x] = pixelData32[x + y * data->w];
+                }
                 rows[y] = row;
-			}
-			png_write_image(outpng, rows);
+            }
+            png_write_image(outpng, rows);
             delete[] plt;
             delete[] trns;
             for (int y = 0; y < data->h; y++) {
-				delete[] rows[y];
-			}
-			delete[] rows;
+                delete[] rows[y];
+            }
+            delete[] rows;
 
         }
         png_write_end(outpng, outpnginfo);
@@ -2279,11 +2339,11 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
         int p = 0;
         if (data->isPalettized) {
             for (uint32_t& a : ((LayerPalettized*)data)->palette) {
-				uint32_t color = a;
-				paletteData[p++] = (color >> 16) & 0xff;
-				paletteData[p++] = (color >> 8) & 0xff;
-				paletteData[p++] = color & 0xff;
-			}
+                uint32_t color = a;
+                paletteData[p++] = (color >> 16) & 0xff;
+                paletteData[p++] = (color >> 8) & 0xff;
+                paletteData[p++] = color & 0xff;
+            }
         }
         else {
             for (uint32_t& a : uniqueColors) {
@@ -2581,10 +2641,10 @@ std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString n
             int count;
             f >> count;
             for (int x = 0; x < count; x++) {
-				int r, g, b;
-				f >> r >> g >> b;
-				newPalette.push_back((0xff << 24) | (r << 16) | (g << 8) | b);
-			}
+                int r, g, b;
+                f >> r >> g >> b;
+                newPalette.push_back((0xff << 24) | (r << 16) | (g << 8) | b);
+            }
             f.close();
             return { true, newPalette };
         }

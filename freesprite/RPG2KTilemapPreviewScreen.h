@@ -38,6 +38,7 @@ public:
     XY canvasDrawPoint = { 40,40 };
     bool scrollingTilemap = false;
     LMUEventViewMode eventViewMode = LMUEVENTS_SHOW_INGAME_AND_RECTS;
+    bool forceOptimizationsOff = false;
 
     RPG2KTilemapPreviewScreen(MainEditor* parent);
     ~RPG2KTilemapPreviewScreen();

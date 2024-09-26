@@ -1053,7 +1053,19 @@ void RPG2KTilemapPreviewScreen::RenderWholeMap(XY at, int sscale, bool rdLowerLa
     //todo: make this work on raw pixel data instead of sdl textures
 
     for (int y = 0; y < dimensions.y; y++) {
+        if (!forceOptimizationsOff && at.y + y * 16 * sscale > g_windowH) {
+            break;
+        }
+        if (!forceOptimizationsOff && at.y + (y + 1) * 16 * sscale < 0) {
+            continue;
+        }
         for (int x = 0; x < dimensions.x; x++) {
+            if (!forceOptimizationsOff && at.x + x * 16 * sscale > g_windowW) {
+                break;
+            }
+            if (!forceOptimizationsOff && at.x + (x + 1) * 16 * sscale < 0) {
+                continue;
+            }
             SDL_Rect dst = { at.x + x * 16 * sscale, at.y + y * 16 * sscale, 16 * sscale, 16 * sscale };
             uint16_t lowerTile = lowerLayerData[y * dimensions.x + x];
             uint16_t upperTile = upperLayerData[y * dimensions.x + x];
@@ -1073,7 +1085,7 @@ void RPG2KTilemapPreviewScreen::RenderWholeMap(XY at, int sscale, bool rdLowerLa
 Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
 {
     Layer* newLayer = new Layer(dimensions.x * 16, dimensions.y * 16);
-
+    forceOptimizationsOff = true;
     bool failed = false;
     for (int y = 0; y < dimensions.y * 16 && !failed; y += g_windowH) {
         for (int x = 0; x < dimensions.x * 16 && !failed; x += g_windowW) {
@@ -1095,6 +1107,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
             delete blitLayer;
         }
     }
+    forceOptimizationsOff = false;
     if (!failed) {
         newLayer->updateTexture();
         return newLayer;
