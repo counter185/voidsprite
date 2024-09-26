@@ -424,3 +424,5 @@ gcc-build/libz.so.1
 .flatpak-builder
 flatpak-repo/
 *.flatpak
+
+mac-build-resources/generated*
