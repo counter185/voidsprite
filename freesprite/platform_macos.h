@@ -17,7 +17,7 @@ constexpr const char* saveFileAppleScript =
 "copy item 2 of item x of ftypes to end of fnames\n"
 "end repeat\n"
 "set extch to choose from list fnames with prompt \\\"voidsprite: pick extension\\\"\n"
-"if extch is not false then"
+"if extch is not false then\n"
 "set fext_index to - 1\n"
 "set fext to \\\"\\\"\n"
 "repeat with x from 1 to length of fexts\n"
@@ -130,9 +130,9 @@ void platformTryLoadOtherFile(
     fileTypesString += '{';
     for (int fileIdx = 0; fileIdx < filetypes.size(); fileIdx++) {
         auto& p = filetypes[fileIdx];
-        fileTypesString += "{\\\"";
-        fileTypesString += p.first;
-        fileTypesString += "\\\"}";
+        fileTypesString += "\\\"";
+        fileTypesString += p.first.empty() ? "*" : p.first.substr(1);
+        fileTypesString += "\\\"";
 
         if (fileIdx != filetypes.size() - 1) {
             fileTypesString += ',';
