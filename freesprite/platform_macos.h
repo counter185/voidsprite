@@ -2,7 +2,40 @@
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
-#include "portable-file-dialogs/portable-file-dialogs.h"
+
+//i hope i never have to use this language again
+std::string loadFileAppleScript =
+"set outfile to POSIX path of (choose file with prompt \\\"voidsprite: {}\\\" of type {})\n"
+"copy \\\"OK:\\\" & (outfile as string) to stdout";
+
+std::string saveFileAppleScript = 
+"set ftypes to {}\n"
+"set fnames to {{}}\n"
+"set fexts to {{}}\n"
+"repeat with x from 1 to length of ftypes\n"
+"copy item 1 of item x of ftypes to end of fexts\n"
+"copy item 2 of item x of ftypes to end of fnames\n"
+"end repeat\n"
+"set extch to choose from list fnames with prompt \\\"voidsprite: pick extension\\\"\n"
+"if extch is not false then"
+"set fext_index to - 1\n"
+"set fext to \\\"\\\"\n"
+"repeat with x from 1 to length of fexts\n"
+"if (item x of fnames) starts with extch then\n"
+"set fext to item x of fexts\n"
+"set fext_index to x\n"
+"exit repeat\n"
+"end if\n"
+"end repeat\n"
+"set fp to POSIX path of(choose file name with prompt \\\"voidsprite: {}\\\")\n"
+"if not fp ends with fext then\n"
+"set fp to fp& fext\n"
+"end if\n"
+"copy(fext_index as string) & \\\"; \\\" & (fp as string) to stdout\n"
+"else"
+"copy \\\"err\\\" to stdout\n"
+"end if";
+
 
 void platformPreInit() {}
 void platformInit() {}
@@ -33,24 +66,57 @@ void platformTrySaveOtherFile(
     EventCallbackListener *caller,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
-    std::vector<std::string> fileTypeStrings;
-    for (auto &p : filetypes) {
-        fileTypeStrings.push_back(p.second);
-        fileTypeStrings.push_back("*" + p.first);
+
+    std::string fileTypesString = "";
+    fileTypesString += '{';
+    for (int fileIdx = 0; fileIdx < filetypes.size(); fileIdx++) {
+        auto& p = filetypes[fileIdx];
+		fileTypesString += "{\\\"";
+		fileTypesString += p.first;
+        fileTypesString += "\\\",\\\"";
+		fileTypesString += p.second;
+		fileTypesString += "\\\"}";
+
+        if (fileIdx != filetypes.size() - 1) {
+			fileTypesString += ',';
+		}
+	}
+    fileTypesString += '}';
+    std::string terminalCode = "printf \"" + std::format(saveFileAppleScript, fileTypesString, windowTitle) + "\" | osascript";
+
+    FILE* pipe = popen(terminalCode.c_str(), "r");
+    if (!pipe) {
+		g_addNotification(ErrorNotification("macOS error", "Failed to open file dialog"));
+		return;
     }
-    std::string windowTitle2 = "voidsprite: ";
-    windowTitle2 += windowTitle;
-    pfd::save_file result = pfd::save_file(windowTitle2,
-                                 pfd::path::home(), fileTypeStrings, pfd::opt::none);
-    std::string filename = result.result();
-    if (filename.length() > 0) {
-        // uh oh we need to manually find the filter index
-        int index = findIndexByExtension(filetypes, filename);
-        if (index != -1) {
-            caller->eventFileSaved(evt_id, filename, index);
-        } else {
-            g_addNotification(ErrorNotification(
-                "macOS error", "Please add the extension to the file name"));
+    else {
+        std::string output;
+        char b;
+        while (!feof(pipe)) {
+            if (fread(&b, 1, 1, pipe) > 0) {
+				output += b;
+			}
+		}
+        pclose(pipe);
+        if (output.find(';') != std::string::npos) {
+            std::string indexStr = output.substr(0, output.find(';'));
+            std::string filename = output.substr(output.find(';') + 1);
+            
+            try {
+                int index = std::stoi(indexStr);
+                if (index != -1) {
+                    caller->eventFileSaved(evt_id, filename, indexStr);
+                }
+                else {
+                    g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
+                }
+            }
+            catch (std::exception) {
+                g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification("macOS error", "Operation cancelled"));
         }
     }
 }
@@ -59,27 +125,50 @@ void platformTryLoadOtherFile(
     EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
-    std::vector<std::string> fileTypeStrings;
-    for (auto &p : filetypes) {
-        fileTypeStrings.push_back(p.second);
-        fileTypeStrings.push_back("*" + p.first);
-    }
-    std::string windowTitle2 = "voidsprite: ";
-    windowTitle2 += windowTitle;
-    pfd::open_file result =
-        pfd::open_file(windowTitle2, pfd::path::home(),
-                       fileTypeStrings, pfd::opt::multiselect);
-    std::vector<std::string> filenames = result.result();
-    if (filenames.size() > 0) {
-        // uh oh we need to manually find the filter index again
-        int index = findIndexByExtension(filetypes, filenames[0]);
-        if (index != -1) {
-            listener->eventFileOpen(evt_id, filenames[0], index);
-        } else {
-            g_addNotification(ErrorNotification(
-                "macOS error", "File type could not be found"));
+    
+    std::string fileTypesString = "";
+    fileTypesString += '{';
+    for (int fileIdx = 0; fileIdx < filetypes.size(); fileIdx++) {
+        auto& p = filetypes[fileIdx];
+        fileTypesString += "{\\\"";
+        fileTypesString += p.first;
+        fileTypesString += "\\\"}";
+
+        if (fileIdx != filetypes.size() - 1) {
+            fileTypesString += ',';
         }
     }
+    fileTypesString += '}';
+    std::string terminalCode = "printf \"" + std::format(loadFileAppleScript, windowTitle, fileTypesString) + "\" | osascript";
+
+    FILE* pipe = popen(terminalCode.c_str(), "r");
+    if (!pipe) {
+		g_addNotification(ErrorNotification("macOS error", "Failed to open file dialog"));
+		return;
+	}
+	else {
+		std::string output;
+		char b;
+		while (!feof(pipe)) {
+			if (fread(&b, 1, 1, pipe) > 0) {
+				output += b;
+			}
+		}
+        pclose(pipe);
+		if (output.find("OK:") != std::string::npos) {
+			std::string filename = output.substr(3);
+			int index = findIndexByExtension(filetypes, filename);
+			if (index != -1) {
+				listener->eventFileOpen(evt_id, filename, index);
+			}
+			else {
+				g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
+			}
+		}
+		else {
+			g_addNotification(ErrorNotification("macOS error", "Operation cancelled"));
+		}
+	}
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
