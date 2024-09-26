@@ -71,32 +71,32 @@ void platformTrySaveOtherFile(
     fileTypesString += '{';
     for (int fileIdx = 0; fileIdx < filetypes.size(); fileIdx++) {
         auto& p = filetypes[fileIdx];
-		fileTypesString += "{\\\"";
-		fileTypesString += p.first;
+        fileTypesString += "{\\\"";
+        fileTypesString += p.first;
         fileTypesString += "\\\",\\\"";
-		fileTypesString += p.second;
-		fileTypesString += "\\\"}";
+        fileTypesString += p.second;
+        fileTypesString += "\\\"}";
 
         if (fileIdx != filetypes.size() - 1) {
-			fileTypesString += ',';
-		}
-	}
+            fileTypesString += ',';
+        }
+    }
     fileTypesString += '}';
     std::string terminalCode = "printf \"" + std::format(saveFileAppleScript, fileTypesString, windowTitle) + "\" | osascript";
 
     FILE* pipe = popen(terminalCode.c_str(), "r");
     if (!pipe) {
-		g_addNotification(ErrorNotification("macOS error", "Failed to open file dialog"));
-		return;
+        g_addNotification(ErrorNotification("macOS error", "Failed to open file dialog"));
+        return;
     }
     else {
         std::string output;
         char b;
         while (!feof(pipe)) {
             if (fread(&b, 1, 1, pipe) > 0) {
-				output += b;
-			}
-		}
+                output += b;
+            }
+        }
         pclose(pipe);
         if (output.find(';') != std::string::npos) {
             std::string indexStr = output.substr(0, output.find(';'));
@@ -105,7 +105,7 @@ void platformTrySaveOtherFile(
             try {
                 int index = std::stoi(indexStr);
                 if (index != -1) {
-                    caller->eventFileSaved(evt_id, filename, indexStr);
+                    caller->eventFileSaved(evt_id, filename, index);
                 }
                 else {
                     g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
@@ -143,32 +143,32 @@ void platformTryLoadOtherFile(
 
     FILE* pipe = popen(terminalCode.c_str(), "r");
     if (!pipe) {
-		g_addNotification(ErrorNotification("macOS error", "Failed to open file dialog"));
-		return;
-	}
-	else {
-		std::string output;
-		char b;
-		while (!feof(pipe)) {
-			if (fread(&b, 1, 1, pipe) > 0) {
-				output += b;
-			}
-		}
+        g_addNotification(ErrorNotification("macOS error", "Failed to open file dialog"));
+        return;
+    }
+    else {
+        std::string output;
+        char b;
+        while (!feof(pipe)) {
+            if (fread(&b, 1, 1, pipe) > 0) {
+                output += b;
+            }
+        }
         pclose(pipe);
-		if (output.find("OK:") != std::string::npos) {
-			std::string filename = output.substr(3);
-			int index = findIndexByExtension(filetypes, filename);
-			if (index != -1) {
-				listener->eventFileOpen(evt_id, filename, index);
-			}
-			else {
-				g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
-			}
-		}
-		else {
-			g_addNotification(ErrorNotification("macOS error", "Operation cancelled"));
-		}
-	}
+        if (output.find("OK:") != std::string::npos) {
+            std::string filename = output.substr(3);
+            int index = findIndexByExtension(filetypes, filename);
+            if (index != -1) {
+                listener->eventFileOpen(evt_id, filename, index);
+            }
+            else {
+                g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification("macOS error", "Operation cancelled"));
+        }
+    }
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
