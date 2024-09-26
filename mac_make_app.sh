@@ -6,6 +6,7 @@ mkdir voidsprite.app/Contents/MacOS
 mkdir voidsprite.app/Contents/Resources
 cp mac-build-resources/Info.plist voidsprite.app/Contents/Info.plist
 cp target/release/bin/voidsprite voidsprite.app/Contents/MacOS/voidsprite
+chmod +x voidsprite.app/Contents/MacOS/voidsprite
 
 mkdir mac-build-resources/generated
 mkdir mac-build-resources/generated/voidsprite.iconset
