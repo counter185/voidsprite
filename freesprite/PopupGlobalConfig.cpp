@@ -10,7 +10,8 @@
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
     CHECKBOX_ANIMATED_BACKGROUND = 2,
-    TEXTFIELD_MAX_UNDO_HISTORY_SIZE = 3
+    TEXTFIELD_MAX_UNDO_HISTORY_SIZE = 3,
+    CHECKBOX_SCROLL_WITH_TOUCHPAD = 4
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -36,6 +37,12 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb2->position = posInTab;
     cb2->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
     configTabs->tabs[0].wxs.addDrawable(cb2);
+    posInTab.y += 35;
+
+    UICheckbox* cb3 = new UICheckbox("Pan canvas with touchpad", g_config.scrollWithTouchpad);
+    cb3->position = posInTab;
+    cb3->setCallbackListener(CHECKBOX_SCROLL_WITH_TOUCHPAD, this);
+    configTabs->tabs[0].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
     UILabel* lbl2 = new UILabel("Max undo history");
@@ -104,6 +111,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_ANIMATED_BACKGROUND:
             g_config.animatedBackground = checked;
+            break;
+        case CHECKBOX_SCROLL_WITH_TOUCHPAD:
+            g_config.scrollWithTouchpad = checked;
             break;
     }
 }

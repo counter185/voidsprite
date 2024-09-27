@@ -821,7 +821,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 				}
 				break;
 			case SDL_MOUSEWHEEL:
-				if (g_ctrlModifier) {
+				if (g_ctrlModifier && !g_config.scrollWithTouchpad) {
 					colorPicker->setMainEditorColorHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
 				}
 				else if (g_shiftModifier) {
@@ -829,7 +829,13 @@ void MainEditor::takeInput(SDL_Event evt) {
 					colorPicker->setMainEditorColorHSV(newH, colorPicker->currentS, colorPicker->currentV);
 				}
 				else {
-					zoom(evt.wheel.y);
+					if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
+						canvasCenterPoint.x -= evt.wheel.x * 20;
+						canvasCenterPoint.y += evt.wheel.y * 20;
+					}
+					else {
+						zoom(evt.wheel.y);
+					}
 				}
 				break;
 			case SDL_KEYDOWN:
