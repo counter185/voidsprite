@@ -114,7 +114,9 @@ public:
     void DrawForeground();
     void renderComments();
     void renderUndoStack();
+    virtual void renderColorPickerAnim();
     void drawSymmetryLines();
+
     void initLayers();
     virtual void setUpWidgets();
     void RecalcMousePixelTargetPoint(int x, int y);

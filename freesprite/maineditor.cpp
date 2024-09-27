@@ -226,37 +226,7 @@ void MainEditor::render() {
 		SDL_RenderFillRect(g_rd, &eraserRect);
 		SDL_RenderCopy(g_rd, g_iconEraser, NULL, &eraserRect);
 	}
-	if (colorPickTimer.started && colorPickTimer.percentElapsedTime(500) <= 1.0f) {
-		float progress = colorPickTimer.percentElapsedTime(500);
-		int pxDistance = 40 * (lastColorPickWasFromWholeImage ? XM1PW3P1(progress) : (1.0 - XM1PW3P1(progress)));
-
-		SDL_Rect colRect2 = { g_mouseX, g_mouseY, 1,1 };
-		int pxDistance2 = pxDistance + 1;
-		colRect2.x -= pxDistance2;
-		colRect2.w = pxDistance2 * 2;
-		colRect2.y -= pxDistance2;
-		colRect2.h = pxDistance2 * 2;
-		
-		//SDL_SetRenderDrawColor(g_rd, 255,255,255, (uint8_t)(127 * XM1PW3P1(1.0f - progress)));
-		//SDL_RenderDrawRect(g_rd, &colRect2);
-
-		for (int x = 3; x >= 1; x--) {
-			SDL_Rect colRect = { g_mouseX, g_mouseY, 1,1 };
-			int nowPxDistance = pxDistance / x;
-			colRect.x -= nowPxDistance;
-			colRect.w = nowPxDistance * 2;
-			colRect.y -= nowPxDistance;
-			colRect.h = nowPxDistance * 2;
-			hsv thsv = rgb2hsv(rgb{ ((pickedColor >> 16) & 0xff) / 255.0f, ((pickedColor >> 8) & 0xff) / 255.0f, (pickedColor & 0xff) / 255.0f });
-			thsv.s /= 3;
-			thsv.v += 0.4;
-			thsv.v = dxmin(1.0, thsv.v);
-			rgb trgb = hsv2rgb(thsv);
-			SDL_Color trgbColor = SDL_Color{ (uint8_t)(trgb.r * 255.0), (uint8_t)(trgb.g * 255.0), (uint8_t)(trgb.b * 255.0), 255 };
-			SDL_SetRenderDrawColor(g_rd, trgbColor.r, trgbColor.g, trgbColor.b, (uint8_t)(255 * XM1PW3P1(1.0f - progress)));
-			SDL_RenderDrawRect(g_rd, &colRect);
-		}
-	}
+	renderColorPickerAnim();
 }
 
 void MainEditor::tick() {
@@ -411,6 +381,41 @@ void MainEditor::renderUndoStack()
 	}
 	SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x50);
 	SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
+}
+
+void MainEditor::renderColorPickerAnim()
+{
+	if (colorPickTimer.started && colorPickTimer.percentElapsedTime(500) <= 1.0f) {
+		float progress = colorPickTimer.percentElapsedTime(500);
+		int pxDistance = 40 * (lastColorPickWasFromWholeImage ? XM1PW3P1(progress) : (1.0 - XM1PW3P1(progress)));
+
+		SDL_Rect colRect2 = { g_mouseX, g_mouseY, 1,1 };
+		int pxDistance2 = pxDistance + 1;
+		colRect2.x -= pxDistance2;
+		colRect2.w = pxDistance2 * 2;
+		colRect2.y -= pxDistance2;
+		colRect2.h = pxDistance2 * 2;
+
+		//SDL_SetRenderDrawColor(g_rd, 255,255,255, (uint8_t)(127 * XM1PW3P1(1.0f - progress)));
+		//SDL_RenderDrawRect(g_rd, &colRect2);
+
+		for (int x = 3; x >= 1; x--) {
+			SDL_Rect colRect = { g_mouseX, g_mouseY, 1,1 };
+			int nowPxDistance = pxDistance / x;
+			colRect.x -= nowPxDistance;
+			colRect.w = nowPxDistance * 2;
+			colRect.y -= nowPxDistance;
+			colRect.h = nowPxDistance * 2;
+			hsv thsv = rgb2hsv(rgb{ ((pickedColor >> 16) & 0xff) / 255.0f, ((pickedColor >> 8) & 0xff) / 255.0f, (pickedColor & 0xff) / 255.0f });
+			thsv.s /= 3;
+			thsv.v += 0.4;
+			thsv.v = dxmin(1.0, thsv.v);
+			rgb trgb = hsv2rgb(thsv);
+			SDL_Color trgbColor = SDL_Color{ (uint8_t)(trgb.r * 255.0), (uint8_t)(trgb.g * 255.0), (uint8_t)(trgb.b * 255.0), 255 };
+			SDL_SetRenderDrawColor(g_rd, trgbColor.r, trgbColor.g, trgbColor.b, (uint8_t)(255 * XM1PW3P1(1.0f - progress)));
+			SDL_RenderDrawRect(g_rd, &colRect);
+		}
+	}
 }
 
 void MainEditor::initLayers()

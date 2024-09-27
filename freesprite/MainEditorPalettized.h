@@ -23,6 +23,8 @@ public:
     uint32_t pickColorFromAllLayers(XY) override;
     void setPalette(std::vector<uint32_t> palette);
 
+    void renderColorPickerAnim() override;
+
     void setUpWidgets() override;
     void trySaveImage() override;
     bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter) override;
