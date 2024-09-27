@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sys/stat.h>
+
 #include "EventCallbackListener.h"
 #include "Notification.h"
 
@@ -187,6 +189,13 @@ void platformOpenFileLocation(PlatformNativePathString path) {
 }
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
+    const char* homeDir = getenv("HOME");
+    if (homeDir != NULL) {
+		std::string configDir = std::string(homeDir) + "/Library/Application Support/voidsprite/";
+	    mkdir(configDir.c_str(), 0777);
+        return configDir;
+	}
+    g_addNotification(ErrorNotification("macOS error", "Failed to create config directory"));
     return "";
 }
 
