@@ -47,6 +47,7 @@ bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);
+bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
@@ -217,7 +218,8 @@ inline void g_setupIO() {
         *exXYZ
         ;
 
-    g_fileExporters.push_back( exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsn", &writeVOIDSNv3) );
+    g_fileExporters.push_back( exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", &writeVOIDSNv3) );
     g_fileExporters.push_back( exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2) );
     g_fileExporters.push_back( exORA = FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster) );
 
@@ -232,8 +234,9 @@ inline void g_setupIO() {
     g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
 
 
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv3));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v4", ".voidsnv4", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));

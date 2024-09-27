@@ -1,5 +1,6 @@
 #include "DrawableManager.h"
 #include "mathops.h"
+#include "Panel.h"
 
 void DrawableManager::processHoverEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
 {
@@ -107,6 +108,9 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
 
 bool DrawableManager::tryFocusOnNextTabbable()
 {
+	if (focused != NULL && focused->isPanel()) {
+		return ((Panel*)focused)->subWidgets.tryFocusOnNextTabbable();
+	}
 	int currentIndex = focused == NULL ? 0 : std::find(drawablesList.begin(), drawablesList.end(), focused) - drawablesList.begin();
 	for (int xx = 0; xx < drawablesList.size(); xx++) {
 		int x = (currentIndex + xx) % drawablesList.size();

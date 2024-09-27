@@ -42,10 +42,6 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
     layers.push_back(layer);
     palette = layer->palette;
 
-#if not _DEBUG
-    g_addPopup(new PopupMessageBox("Palettized editor", "Palettized editor is currently a work in progress.\nSome features will be unfinished.\nReport all bugs and crashes in itchio comments in github issues."));
-#endif
-
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -124,6 +120,20 @@ void MainEditorPalettized::setActiveColor(uint32_t col, bool animate)
     if (animate) {
         colorPickTimer.start();
     }
+}
+
+uint32_t MainEditorPalettized::pickColorFromAllLayers(XY pos)
+{
+    for (int x = layers.size() - 1; x >= 0; x--) {
+        if (layers[x]->hidden) {
+            continue;
+        }
+        uint32_t nextC = layers[x]->getPixelAt(pos, false);
+        if (nextC != -1) {
+            return nextC;
+        }
+    }
+    return 0;
 }
 
 void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
@@ -539,8 +549,11 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 
 MainEditor* MainEditorPalettized::toRGBSession()
 {
-    Layer* l = flattenImageAndConvertToRGB();
-    MainEditor* newEditor = new MainEditor(l);
+    std::vector<Layer*> rgbLayers;
+    for (Layer*& ll : layers) {
+        rgbLayers.push_back(((LayerPalettized*)ll)->toRGB());
+    }
+    MainEditor* newEditor = new MainEditor(rgbLayers);
     return newEditor;
 }
 

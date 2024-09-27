@@ -10,7 +10,7 @@ public:
     std::string title = "";
     std::string text = "";
     
-
+    UICheckbox* checkForceRGB;
     UIDropdown* pickExportFormat;
     int exporterIndex = 0;
 

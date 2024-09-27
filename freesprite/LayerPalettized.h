@@ -66,5 +66,22 @@ public:
 		int32_t paletteIndex = getPixelAt(position, ignoreLayerAlpha);
 		return (paletteIndex >= 0 && paletteIndex < palette.size()) ? palette[paletteIndex] : 0x00000000;
 	}
+
+	Layer* toRGB() {
+		Layer* rgbLayer = new Layer(w, h);
+		rgbLayer->name = name;
+		rgbLayer->hidden = hidden;
+		uint32_t* rgbData = (uint32_t*)rgbLayer->pixelData;
+		int32_t* pxd2 = (int32_t*)pixelData;
+		for (uint64_t index = 0; index < w * h; index++) {
+			if (pxd2[index] == -1 || pxd2[index] >= palette.size()) {
+				rgbData[index] = 0;
+			}
+			else {
+				rgbData[index] = palette[pxd2[index]];
+			}
+		}
+		return rgbLayer;
+	}
 };
 

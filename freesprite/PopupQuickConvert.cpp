@@ -5,6 +5,7 @@
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "Notification.h"
+#include "UICheckbox.h"
 
 PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
     this->title = tt;
@@ -17,6 +18,11 @@ PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
     nbutton->wxWidth = 120;
     nbutton->setCallbackListener(0, this);
     wxsManager.addDrawable(nbutton);
+
+    checkForceRGB = new UICheckbox("Always convert palettized formats to RGB", false);
+	checkForceRGB->position = XY{ 20, 140 };
+	checkForceRGB->setCallbackListener(EVENT_QUICKCONVERT_FORCE_RGB, this);
+	wxsManager.addDrawable(checkForceRGB);
 
     std::vector<std::string> formats;
     for (auto& fmt : g_fileExporters) {
@@ -74,7 +80,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 
 			if (exporter->exportsWholeSession()) {
 
-				if (session->isPalettized && ((exporter->formatFlags() & FORMAT_PALETTIZED) == 0)) {
+				if (session->isPalettized && (checkForceRGB->isChecked() || (exporter->formatFlags() & FORMAT_PALETTIZED) == 0)) {
 					MainEditor* rgbConvEditor = ((MainEditorPalettized*)session)->toRGBSession();
 					delete session;
 					session = rgbConvEditor;
@@ -93,7 +99,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 				Layer* l = NULL;
 
 				if (session->isPalettized) {
-					if ((exporter->formatFlags() & FORMAT_PALETTIZED) != 0) {
+					if (!checkForceRGB->isChecked() && (exporter->formatFlags() & FORMAT_PALETTIZED) != 0) {
 						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
 						l = upcastSession->flattenImageWithoutConvertingToRGB();
 					}

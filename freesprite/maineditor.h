@@ -128,7 +128,7 @@ public:
     bool requestSafeClose();
     void zoom(int how_much);
     bool isInBounds(XY pos);
-    uint32_t pickColorFromAllLayers(XY);
+    virtual uint32_t pickColorFromAllLayers(XY);
     void regenerateLastColors();
     virtual void setActiveColor(uint32_t, bool animate = true);
     virtual uint32_t getActiveColor();

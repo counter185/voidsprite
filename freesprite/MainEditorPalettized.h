@@ -20,6 +20,7 @@ public:
     void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0) override;
     uint32_t getActiveColor() override;
     void setActiveColor(uint32_t col, bool animate) override;
+    uint32_t pickColorFromAllLayers(XY) override;
     void setPalette(std::vector<uint32_t> palette);
 
     void setUpWidgets() override;

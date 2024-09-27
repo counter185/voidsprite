@@ -41,6 +41,7 @@ public:
 	virtual void handleInput(SDL_Event evt, XY gPosOffset = {0,0}) {}
 	virtual void setCallbackListener(int cb_id,  EventCallbackListener* callback) { callback_id = cb_id; this->callback = callback; }
 	virtual XY getDimensions() { return XY{ 0,0 }; };
+	virtual bool isPanel() { return false; }
 
 	XY anchorPos(XY origin, XY originDimensions, XY thisPositionLocal, XY thisDimensions, XY anchor) {
 		XY ret;

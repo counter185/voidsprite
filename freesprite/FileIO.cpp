@@ -1819,6 +1819,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 }
                 break;       
             case 3:
+            case 4:
                 {
                     XY dimensions;
                     fread(&dimensions.x, 4, 1, infile);
@@ -1849,37 +1850,73 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         extData[key] = val;
                     }
 
-                    std::vector<Layer*> layers;
+                    bool isPalettized = extData.contains("palette.enabled") && extData.contains("palette.colors") && std::stoi(extData["palette.enabled"]) == 1;
+
                     int nlayers;
                     fread(&nlayers, 4, 1, infile);
-                    for (int x = 0; x < nlayers; x++) {
-                        int nameLen;
-                        fread(&nameLen, 4, 1, infile);
-                        char* name = (char*)malloc(nameLen+1);
-                        memset(name, 0, nameLen + 1);
-                        fread(name, nameLen, 1, infile);
-
-                        Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-                        newLayer->name = std::string(name);
-
-                        char colorKeySet;
-                        fread(&colorKeySet, 1, 1, infile);
-                        newLayer->colorKeySet = colorKeySet == '\1';
-                        fread(&newLayer->colorKey, 4, 1, infile);
-
-                        free(name);
-                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
-                        layers.push_back(newLayer);
-                    }
 
                     MainEditor* ret;
-                    if (extData.contains("palette.enabled") && extData.contains("palette.colors") && std::stoi(extData["palette.enabled"]) == 1) {
-                        //todo
+                    if (!isPalettized) {
+                        std::vector<Layer*> layers;
+                        for (int x = 0; x < nlayers; x++) {
+                            int nameLen;
+                            fread(&nameLen, 4, 1, infile);
+                            char* name = (char*)malloc(nameLen + 1);
+                            memset(name, 0, nameLen + 1);
+                            fread(name, nameLen, 1, infile);
+
+                            Layer* newLayer = new Layer(dimensions.x, dimensions.y);
+                            newLayer->name = std::string(name);
+
+                            char colorKeySet;
+                            fread(&colorKeySet, 1, 1, infile);
+                            newLayer->colorKeySet = colorKeySet == '\1';
+                            fread(&newLayer->colorKey, 4, 1, infile);
+
+                            free(name);
+                            fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                            layers.push_back(newLayer);
+                        }
                         ret = new MainEditor(layers);
                     }
                     else {
-                        ret = new MainEditor(layers);
+                        std::vector<uint32_t> palette;
+                        std::string paletteString = extData["palette.colors"];
+                        int nextSC = paletteString.find_first_of(';');
+                        int paletteColors = std::stoi(paletteString.substr(0, nextSC));
+                        paletteString = paletteString.substr(nextSC + 1);
+                        for (int x = 0; x < paletteColors; x++) {
+							nextSC = paletteString.find_first_of(';');
+							palette.push_back(std::stoul(paletteString.substr(0, nextSC), NULL, 16));
+							paletteString = paletteString.substr(nextSC + 1);
+						}
+
+                        std::vector<LayerPalettized*> layers;
+                        for (int x = 0; x < nlayers; x++) {
+                            int nameLen;
+                            fread(&nameLen, 4, 1, infile);
+                            char* name = (char*)malloc(nameLen + 1);
+                            memset(name, 0, nameLen + 1);
+                            fread(name, nameLen, 1, infile);
+
+                            LayerPalettized* newLayer = new LayerPalettized(dimensions.x, dimensions.y);
+                            newLayer->name = std::string(name);
+
+                            char colorKeySet;
+                            fread(&colorKeySet, 1, 1, infile);
+                            newLayer->colorKeySet = colorKeySet == '\1';
+                            fread(&newLayer->colorKey, 4, 1, infile);
+
+                            free(name);
+                            fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+
+                            newLayer->palette = palette;
+                            layers.push_back(newLayer);
+                        }
+
+                        ret = new MainEditorPalettized(layers);
                     }
+
                     if (extData.contains("tile.dim.x")) { ret->tileDimensions.x = std::stoi(extData["tile.dim.x"]); }
                     if (extData.contains("tile.dim.y")) { ret->tileDimensions.y = std::stoi(extData["tile.dim.y"]); }
                     if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
@@ -1925,6 +1962,13 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             layerOpacityData = layerOpacityData.substr(nextSC + 1);
                         }
                         ret->layerPicker->updateLayers();
+                    }
+                    if (!ret->isPalettized && extData.contains("activecolor")) {
+                        uint32_t c = std::stoul(extData["activecolor"], NULL, 16);
+                        ret->setActiveColor(c, false);
+                    }
+                    if (ret->isPalettized && extData.contains("palette.index")) {
+                        ((MainEditorPalettized*)ret)->pickedPaletteIndex = std::stoi(extData["palette.index"]);
                     }
                     fclose(infile);
                     return ret;
@@ -2184,6 +2228,105 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             {"layer.visibility", layerVisibilityData},
             {"layer.opacity", layerOpacityData}
         };
+
+        nvalBuffer = extData.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (auto& extDPair : extData) {
+            nvalBuffer = extDPair.first.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
+            nvalBuffer = extDPair.second.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
+        }
+
+        nvalBuffer = editor->layers.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (Layer*& lr : editor->layers) {
+            if (lr->w * lr->h != editor->texW * editor->texH) {
+                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+            }
+            nvalBuffer = lr->name.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+
+            fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
+            fwrite(&lr->colorKey, 4, 1, outfile);
+
+            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+        }
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        uint8_t voidsnVersion = 0x04;
+        fwrite(&voidsnVersion, 1, 1, outfile);
+        uint32_t nvalBuffer;
+
+        nvalBuffer = editor->texW;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+        nvalBuffer = editor->texH;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
+        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
+
+        std::string commentsData;
+        commentsData += std::to_string(editor->comments.size()) + ';';
+        for (CommentData& c : editor->comments) {
+            commentsData += std::to_string(c.position.x) + ';';
+            commentsData += std::to_string(c.position.y) + ';';
+            std::string sanitizedData = c.data;
+            std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
+            commentsData += sanitizedData + ';';
+        }
+
+        std::string layerVisibilityData = "";
+        for (Layer*& lr : editor->layers) {
+            layerVisibilityData += lr->hidden ? '0' : '1';
+        }
+
+        fwrite("/VOIDSN.META/", 1, 13, outfile);
+        std::map<std::string, std::string> extData = {
+            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
+            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
+            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.x", std::to_string(editor->symmetryPositions.x)},
+            {"sym.y", std::to_string(editor->symmetryPositions.y)},
+            {"comments", commentsData},
+            {"layer.selected", std::to_string(editor->selLayer)},
+            {"layer.visibility", layerVisibilityData},
+            {"palette.enabled", editor->isPalettized ? "1" : "0"}
+        };
+
+        if (editor->isPalettized) {
+            MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
+            std::string paletteData = "";
+            paletteData += std::format("{};", upcastEditor->palette.size());
+            for (uint32_t& c : upcastEditor->palette) {
+                paletteData += std::format("{:08X};", c);
+			}
+            extData["palette.colors"] = paletteData;
+
+            extData["palette.index"] = std::to_string(upcastEditor->pickedPaletteIndex);
+        }
+        else {
+            std::string layerOpacityData = "";
+            for (Layer*& lr : editor->layers) {
+                layerOpacityData += std::to_string(lr->layerAlpha) + ';';
+            }
+            extData["layer.opacity"] = layerOpacityData;
+            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
+        }
 
         nvalBuffer = extData.size();
         fwrite(&nvalBuffer, 4, 1, outfile);

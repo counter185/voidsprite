@@ -61,36 +61,47 @@ extern "C" {
 #define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
 #define COLOR_ERROR SDL_Color{255,0,0,255}
 
+//util classes
 class EventCallbackListener;
 class TextRenderer;
-class EditorColorPicker;
-class EditorBrushPicker;
-class EditorLayerPicker;
-class BaseScreen;
-class BasePopup;
-class BaseBrush;
-class ToolText;
 class Layer;
 class LayerPalettized;
-class MainEditor;
-class MainEditorPalettized;
-class SpritesheetPreviewScreen;
-class EditorSpritesheetPreview;
-class Panel;
-class UIColorInputField;
-class UILayerButton;
-class UIButton;
 class Pattern;
 class Notification;
-class UILabel;
-class UISlider;
-class UITextField;
-class ScrollingView;
 class Gamepad;
 class Timer64;
 class TooltipsLayer;
-class TilemapEditorLayerPicker;
 class FileExporter;
+
+//screens/popups
+class BaseScreen;
+class BasePopup;
+class MainEditor;
+class MainEditorPalettized;
+class SpritesheetPreviewScreen;
+
+//specialized ui elements
+class EditorColorPicker;
+class EditorBrushPicker;
+class EditorLayerPicker;
+class EditorSpritesheetPreview;
+class TilemapEditorLayerPicker;
+
+//brushes/tools
+class BaseBrush;
+class ToolText;
+
+//standard ui elements
+class UIColorInputField;
+class UILayerButton;
+class UIButton;
+class UILabel;
+class UISlider;
+class UITextField;
+class UICheckbox;
+class Panel;
+class ScrollingView;
+
 
 template <typename T>
 class ScreenWideNavBar;

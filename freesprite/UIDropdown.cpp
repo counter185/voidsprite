@@ -143,6 +143,6 @@ void UIDropdown::click()
 {
 	lastClick.start();
 	openTimer.start();
-	isOpen = true;
+	isOpen = !isOpen;
 	menuYOffset = 0;
 }
