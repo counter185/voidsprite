@@ -1886,10 +1886,10 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         int paletteColors = std::stoi(paletteString.substr(0, nextSC));
                         paletteString = paletteString.substr(nextSC + 1);
                         for (int x = 0; x < paletteColors; x++) {
-							nextSC = paletteString.find_first_of(';');
-							palette.push_back(std::stoul(paletteString.substr(0, nextSC), NULL, 16));
-							paletteString = paletteString.substr(nextSC + 1);
-						}
+                            nextSC = paletteString.find_first_of(';');
+                            palette.push_back(std::stoul(paletteString.substr(0, nextSC), NULL, 16));
+                            paletteString = paletteString.substr(nextSC + 1);
+                        }
 
                         std::vector<LayerPalettized*> layers;
                         for (int x = 0; x < nlayers; x++) {
@@ -2314,7 +2314,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             paletteData += std::format("{};", upcastEditor->palette.size());
             for (uint32_t& c : upcastEditor->palette) {
                 paletteData += std::format("{:08X};", c);
-			}
+            }
             extData["palette.colors"] = paletteData;
 
             extData["palette.index"] = std::to_string(upcastEditor->pickedPaletteIndex);
@@ -2624,11 +2624,6 @@ bool writeTGA(PlatformNativePathString path, Layer* data) {
 
 bool writeCHeader(PlatformNativePathString path, Layer* data)
 {
-    if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
-        return false;
-    }
-
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
 
@@ -2639,17 +2634,42 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 
         fprintf(outfile, "int voidsprite_image_w = %i;\n", data->w);
         fprintf(outfile, "int voidsprite_image_h = %i;\n", data->h);
-        fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
-        uint32_t* pxd = (uint32_t*)data->pixelData;
-        uint64_t dp = 0;
-        for (int y = 0; y < data->h; y++) {
-            for (int x = 0; x < data->w; x++) {
-                fprintf(outfile, "0x%08X,", pxd[dp++]);
-            }
-            fprintf(outfile, "\n");
-        }
-        fprintf(outfile, "};\n");
 
+        if (!data->isPalettized) {
+            fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
+            uint32_t* pxd = (uint32_t*)data->pixelData;
+            uint64_t dp = 0;
+            for (int y = 0; y < data->h; y++) {
+                for (int x = 0; x < data->w; x++) {
+                    fprintf(outfile, "0x%08X,", pxd[dp++]);
+                }
+                fprintf(outfile, "\n");
+            }
+            fprintf(outfile, "};\n");
+        }
+        else {
+            LayerPalettized* upcast = (LayerPalettized*)data;
+            fprintf(outfile, "uint32_t voidsprite_palette data[%i] = {\n", upcast->palette.size());
+            int x = 0;
+            for (uint32_t& col : upcast->palette) {
+                fprintf(outfile, "0x%08X,", col);
+                if (x++ % 16 == 0) {
+                    fprintf(outfile, "\n");
+                }
+            }
+            fprintf(outfile, "\n};\n\n");
+
+            fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
+            uint32_t* pxd = (uint32_t*)data->pixelData;
+            uint64_t dp = 0;
+            for (int y = 0; y < data->h; y++) {
+                for (int x = 0; x < data->w; x++) {
+                    fprintf(outfile, "%i,", pxd[dp++]);
+                }
+                fprintf(outfile, "\n");
+            }
+            fprintf(outfile, "};\n");
+        }
         fclose(outfile);
         return true;
     }

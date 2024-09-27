@@ -37,6 +37,7 @@ public:
     Layer* flattenImageAndConvertToRGB();
     Layer* flattenImageWithoutConvertingToRGB();
 
+    void tryExportRGB();
     void trySavePalettizedImage();
     void trySaveAsPalettizedImage();
     MainEditor* toRGBSession();

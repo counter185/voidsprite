@@ -76,6 +76,39 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
             trySaveWithExporter(name, actualExporterID);
         }
     }
+    else if (evt_id == EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE) {
+        exporterId--;
+
+        FileExporter* exporter = NULL;
+        if (exporterId < g_fileExporters.size()) {
+            bool result = false;
+            exporter = g_fileExporters[exporterId];
+
+            if (exporter->exportsWholeSession()) {
+                MainEditor* rgbConvEditor = toRGBSession();
+                result = exporter->exportData(name, rgbConvEditor);
+                delete rgbConvEditor;
+            }
+            else {
+                Layer* l = flattenImageAndConvertToRGB();
+				result = exporter->exportData(name, l);
+				delete l;
+            }
+
+            if (result) {
+				if (lastWasSaveAs && g_config.openSavedPath) {
+					platformOpenFileLocation(lastConfirmedSavePath);
+				}
+				g_addNotification(SuccessNotification("Success", "File exported successfully."));
+			}
+            else {
+                g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "Invalid exporter"));
+        }
+    }
 }
 
 void MainEditorPalettized::SetPixel(XY position, uint32_t color, uint8_t symmetry)
@@ -201,7 +234,7 @@ void MainEditorPalettized::setUpWidgets()
             SDLK_f,
             {
                 "File",
-                {SDLK_s, SDLK_d, SDLK_c, SDLK_r, SDLK_p},
+                {SDLK_s, SDLK_d, SDLK_e, SDLK_r, SDLK_p, SDLK_c},
                 {
                     {SDLK_d, { "Save as",
                             [](MainEditor* editor) {
@@ -212,6 +245,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDLK_s, { "Save",
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDLK_e, { "Export as RGB",
+                            [](MainEditor* editor) {
+                                ((MainEditorPalettized*)editor)->tryExportRGB();
                             }
                         }
                     },
@@ -561,6 +600,15 @@ Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
     flatLayer->palette = palette;
     free(indices);
     return flatLayer;
+}
+
+void MainEditorPalettized::tryExportRGB()
+{
+    std::vector<std::pair<std::string, std::string>> formats;
+    for (auto f : g_fileExporters) {
+        formats.push_back({ f->extension(), f->name() });
+    }
+    platformTrySaveOtherFile(this, formats, "save image", EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE);
 }
 
 void MainEditorPalettized::trySavePalettizedImage()
