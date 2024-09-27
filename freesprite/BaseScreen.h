@@ -11,6 +11,7 @@ protected:
 	EventCallbackListener* callback = NULL;
 	DrawableManager wxsManager;
 public:
+	virtual ~BaseScreen() = default;
 
 	virtual void render() {
 		wxsManager.renderAll();
