@@ -11,3 +11,14 @@ void BaseTemplate::drawPattern(Layer* layer, uint8_t* pattern, XY patternDimensi
 		}
 	}
 }
+
+void BaseTemplate::drawCheckerboard(Layer* layer, XY at, XY tileSize, XY tileCount, uint32_t color1, uint32_t color2, bool reverse)
+{
+	for (int tileY = 0; tileY < tileCount.y; tileY++) {
+		for (int tileX = 0; tileX < tileCount.x; tileX++) {
+			uint32_t color = (tileY + tileX + (reverse?1:0)) % 2 == 0 ? color1 : color2;
+			XY ulc = xyAdd(at, { tileSize.x * tileX, tileSize.y * tileY });
+			layer->fillRect(ulc, xyAdd(ulc, tileSize), color);
+		}
+	}
+}

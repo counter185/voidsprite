@@ -52,22 +52,14 @@ Layer* TemplateRPG2KCharset::generate()
         for (int x = 0; x < 4; x++) {
             XY base = XY{ 72 * x, y * 128 };
 
+            int tileBGColorIndex = (x + y * 4) * 2;
+            drawCheckerboard(ret, base, { 24, 32 }, { 3,4 }, tileBGColors[tileBGColorIndex], tileBGColors[tileBGColorIndex + 1]);
+
             for (int yy = 0; yy < 4; yy++) {
-                for (int xx = 0; xx < 3; xx++) {
-                    XY from = xyAdd(base, XY{ xx * 24, yy * 32 });
-                    XY to = xyAdd(from, XY{ 24,32 });
-                    ret->fillRect(from, to, tileBGColors[index*2 + (iindex++ % 2)]);
-                }
                 XY arrowSymbolOrigin = xyAdd(base, XY{ 1, yy * 32 + 1 });
                 uint8_t* patternSymbols[] = {(uint8_t*)rpg2kcharset_patternUp, (uint8_t*)rpg2kcharset_patternRight, (uint8_t*)rpg2kcharset_patternDown, (uint8_t*)rpg2kcharset_patternLeft};
                 uint8_t* patternSymbol = patternSymbols[yy];
-                for (int yyy = 0; yyy < 5; yyy++) {
-                    for (int xxx = 0; xxx < 5; xxx++) {
-                        if (patternSymbol[yyy*5 + xxx] == 1) {
-                            ret->setPixel(xyAdd(arrowSymbolOrigin, XY{ xxx,yyy }), tileBGColors[index * 2 + (iindex % 2)]);
-                        }
-                    }
-                }
+                drawPattern(ret, patternSymbol, { 5,5 }, arrowSymbolOrigin, tileBGColors[tileBGColorIndex + (yy+1)%2]);
             }
             index++;
         }
