@@ -47,7 +47,6 @@ Layer* TemplateRPG2KChipset::generate()
         0xff240b00,0xff3d1300,
         0xff3d1300,0xff240b00,
         0xff240b00,0xff3d1300,
-        0xff1a0024,0xff2a003b,
         0xff2a003b,0xff1a0024,
         0xff1a0024,0xff2a003b,
         0xff2a003b,0xff1a0024,
@@ -59,6 +58,7 @@ Layer* TemplateRPG2KChipset::generate()
         0xff2a003b,0xff1a0024,
         0xff1a0024,0xff2a003b,
         0xff2a003b,0xff1a0024,
+        0xff1a0024,0xff2a003b,
     };
     int index = 0;
     int iindex = 0;
