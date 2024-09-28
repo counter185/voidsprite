@@ -14,6 +14,7 @@
 #include "TemplateRPG2KCharset.h"
 #include "TemplateRPG2KFaceset.h"
 #include "TemplateMC64x32Skin.h"
+#include "TemplateRPG2KBattleAnim.h"
 #include "PopupMessageBox.h"
 #include "UIColorInputField.h"
 #include "Notification.h"
@@ -47,6 +48,7 @@ public:
         new TemplateRPG2KChipset(),
         new TemplateRPG2KFaceset(),
         new TemplateRPG2KSystem(),
+        new TemplateRPG2KBattleAnim(),
         new TemplateMC64x32Skin()
     };
 

@@ -420,11 +420,14 @@
     <ClCompile Include="TemplateRPG2KChipset.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
-    <ClCompile Include="PanelSpritesheetPreview.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="NotifSound.cpp">
       <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelSpritesheetPreview.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="TemplateRPG2KBattleAnim.cpp">
+      <Filter>Source files\templates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -780,7 +783,10 @@
       <Filter>Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="PanelSpritesheetPreview.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="TemplateRPG2KBattleAnim.h">
+      <Filter>Header files\templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
