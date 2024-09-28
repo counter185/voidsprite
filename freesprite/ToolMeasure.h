@@ -1,11 +1,13 @@
 #pragma once
 #include "BaseBrush.h"
+#include "Timer64.h"
 class ToolMeasure :
     public BaseBrush
 {
     XY startPos = XY{ 0,0 };
     bool heldDown = false;
     XY lastMousePos = XY{ 0,0 };
+    Timer64 clickTimer;
 
     virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_measure.png"; }
     bool isReadOnly() override { return true; }

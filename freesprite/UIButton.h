@@ -9,6 +9,7 @@ public:
 	std::string tooltip;
 	int wxWidth = 250, wxHeight = 30;
 	SDL_Texture* icon = NULL;
+	bool fullWidthIcon = false;
 	
 	SDL_Color colorBGFocused = SDL_Color{ 0,0,0,0xff };
 	SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };

@@ -67,6 +67,7 @@ SDL_Texture* g_iconMenuTemplates = NULL;
 SDL_Texture* g_iconNotifTheCreature = NULL;
 SDL_Texture* g_iconNotifError = NULL;
 SDL_Texture* g_iconNotifSuccess = NULL;
+SDL_Texture* g_iconNewColor = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
@@ -215,6 +216,7 @@ int main(int argc, char** argv)
     g_iconMenuTemplates = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_templates.png");
     g_iconNotifError = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_error.png");
     g_iconNotifSuccess = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_success.png");
+    g_iconNewColor = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_newcolor.png");
 
     SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);

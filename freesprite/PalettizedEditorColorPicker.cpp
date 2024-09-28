@@ -122,6 +122,12 @@ void PalettizedEditorColorPicker::eventButtonPressed(int evt_id)
 		}
         platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
     }
+    else if (evt_id == EVENT_PALETTECOLORPICKER_NEWCOLOR) {
+        auto paletteCopy = upcastCaller->palette;
+        paletteCopy.push_back(0xFF000000);
+        upcastCaller->setPalette(paletteCopy);
+        updateForcedColorPaletteButtons();
+    }
     else if (evt_id >= 200) {
         //uint32_t col = upcastCaller->palette[evt_id - 200];
         setPickedPaletteIndex(evt_id - 200);
@@ -212,6 +218,19 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
             colorPaletteTabs->tabs[0].wxs.addDrawable(colBtn);
         }
     }
+
+    int paletteCount = upcastCaller->palette.size();
+    if (paletteCount < 256) {
+		UIButton* newColorButton = new UIButton();
+		newColorButton->wxWidth = 22;
+		newColorButton->wxHeight = 16;
+        newColorButton->fullWidthIcon = true;
+        newColorButton->icon = g_iconNewColor;
+        newColorButton->position = { newColorButton->wxWidth * (paletteCount%16), 10 + newColorButton->wxHeight * (paletteCount /16)};
+		newColorButton->setCallbackListener(EVENT_PALETTECOLORPICKER_NEWCOLOR, this);
+		colorPaletteTabs->tabs[0].wxs.addDrawable(newColorButton);
+	}
+
 }
 
 void PalettizedEditorColorPicker::setPickedPaletteIndex(int32_t index)

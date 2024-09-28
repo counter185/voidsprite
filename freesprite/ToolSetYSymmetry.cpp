@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "maineditor.h"
 #include "FontRenderer.h"
+#include "TooltipsLayer.h"
 
 void ToolSetYSymmetry::clickPress(MainEditor* editor, XY pos)
 {
@@ -9,6 +10,7 @@ void ToolSetYSymmetry::clickPress(MainEditor* editor, XY pos)
 	editor->symmetryPositions.y = pos.y;
 	mouseHeld = true;
 	lastEditor = editor;
+	clickTimer.start();
 }
 
 void ToolSetYSymmetry::clickDrag(MainEditor* editor, XY from, XY to)
@@ -36,10 +38,16 @@ void ToolSetYSymmetry::renderOnCanvas(XY canvasDrawPoint, int scale)
 	SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x20);
 	SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
 	if (mouseHeld) {
-		g_fnt->RenderString(std::format("{}{}", symYPos, symYMiddle ? ".5" : ""), g_mouseX, g_mouseY + 20);
+		std::string tooltipString = std::format("{}{}", symYPos, symYMiddle ? ".5" : "");
 		if (lastEditor != NULL && lastEditor->tileDimensions.y != 0) {
-			g_fnt->RenderString(std::format("(tile: {}{} / {})", symYPos % lastEditor->tileDimensions.y, symYMiddle ? ".5" : "", lastEditor->tileDimensions.y), g_mouseX, g_mouseY + 50);
+			tooltipString += std::format("\n(tile: {}{} / {})", symYPos % lastEditor->tileDimensions.y, symYMiddle ? ".5" : "", lastEditor->tileDimensions.y);
 		}
+		g_ttp->addTooltip({
+			g_mouseX, g_mouseY + 20,
+			tooltipString,
+			{ 0xff,0xff,0xff,0xff },
+			clickTimer.percentElapsedTime(200)
+		});
 	}
 }
 

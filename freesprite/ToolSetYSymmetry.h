@@ -1,10 +1,12 @@
 #pragma once
 #include "BaseBrush.h"
+#include "Timer64.h"
 class ToolSetYSymmetry : public BaseBrush
 {
     bool mouseHeld = false;
     XY lastPos = {0,0};
     MainEditor* lastEditor = NULL;
+    Timer64 clickTimer;
 
     std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_setysym.png"; }
     bool isReadOnly() override { return true; }

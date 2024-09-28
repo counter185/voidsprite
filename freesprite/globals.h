@@ -142,7 +142,8 @@ extern SDL_Texture* g_mainlogo,
    *g_iconMenuTemplates,
    *g_iconNotifTheCreature,
    *g_iconNotifError,
-   *g_iconNotifSuccess;
+   *g_iconNotifSuccess,
+   *g_iconNewColor;
 
 void g_addNotification(Notification a);
 

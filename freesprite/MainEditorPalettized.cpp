@@ -608,7 +608,7 @@ void MainEditorPalettized::tryExportRGB()
     for (auto f : g_fileExporters) {
         formats.push_back({ f->extension(), f->name() });
     }
-    platformTrySaveOtherFile(this, formats, "save image", EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE);
+    platformTrySaveOtherFile(this, formats, "export image as RGB", EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE);
 }
 
 void MainEditorPalettized::trySavePalettizedImage()

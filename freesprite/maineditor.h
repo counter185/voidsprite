@@ -168,6 +168,8 @@ public:
     void resizeAllLayersFromCommand(XY size, bool byTile = false);
     void resizzeAllLayersByTilecountFromCommand(XY size);
     void integerScaleAllLayersFromCommand(XY scale);
+    MainEditorPalettized* toPalettizedSession();
+    void tryExportPalettizedImage();
 
     bool canAddCommentAt(XY a);
     void addComment(CommentData c);
