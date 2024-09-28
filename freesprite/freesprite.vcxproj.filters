@@ -423,6 +423,9 @@
     <ClCompile Include="PanelSpritesheetPreview.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="NotifSound.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">

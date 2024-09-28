@@ -176,6 +176,7 @@
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
+    <ClCompile Include="NotifSound.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />
