@@ -420,6 +420,9 @@
     <ClCompile Include="TemplateRPG2KChipset.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
+    <ClCompile Include="PanelSpritesheetPreview.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -772,6 +775,9 @@
     </ClInclude>
     <ClInclude Include="TemplateRPG2KChipset.h">
       <Filter>Header files\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelSpritesheetPreview.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

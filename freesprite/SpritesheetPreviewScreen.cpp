@@ -5,6 +5,7 @@
 #include "UITextField.h"
 #include "EditorSpritesheetPreview.h"
 #include "ScrollingView.h"
+#include "PanelSpritesheetPreview.h"
 
 #define N_BUTTONS_ADDED_TO_TIMELINE 3
 #define MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES 120
@@ -13,18 +14,35 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
 	caller = parent;
 	canvasZoom = parent->scale;
 
+	canvasDrawOrigin = { 60, 60 };
+
 	previewWx = new EditorSpritesheetPreview(this);
 
-	msPerSpriteLabel = new UILabel();
-	msPerSpriteLabel->text = "MS per sprite";
-	wxsManager.addDrawable(msPerSpriteLabel);
+	panel = new PanelSpritesheetPreview(this);
+	panel->position = { 5, 40 };
+	wxsManager.addDrawable(panel);
 
-	textfieldMSPerSprite = new UITextField();
-	textfieldMSPerSprite->text = std::to_string(msPerSprite);
-	textfieldMSPerSprite->isNumericField = true;
-	textfieldMSPerSprite->wxWidth = 150;
-	textfieldMSPerSprite->setCallbackListener(EVENT_SPRITEPREVIEW_SET_SPRITE_TICK, this);
-	wxsManager.addDrawable(textfieldMSPerSprite);
+	navbar = new ScreenWideNavBar<SpritesheetPreviewScreen*>(this,
+		{
+			{
+				SDLK_f,
+				{
+					"File",
+					{},
+					{
+						{SDLK_c, { "Close",
+								[](SpritesheetPreviewScreen* screen) {
+									screen->closeNextTick = true;
+								}
+							}
+						},
+					},
+					g_iconNavbarTabFile
+				}
+			},
+		}, { SDLK_f });
+	wxsManager.addDrawable(navbar);
+
 
 	spriteView = new ScrollingView();
 	spriteView->scrollHorizontally = true;
@@ -102,13 +120,11 @@ void SpritesheetPreviewScreen::render()
 
 	int rightPanelWidth = ixmax(300, canvasZoom * tileSize.x);
 
-	SDL_Rect rightPanelRect = { g_windowW - rightPanelWidth, 0, rightPanelWidth, g_windowH };
+	/*SDL_Rect rightPanelRect = {g_windowW - rightPanelWidth, 0, rightPanelWidth, g_windowH};
 	SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0xe0);
-	SDL_RenderFillRect(g_rd, &rightPanelRect);
+	SDL_RenderFillRect(g_rd, &rightPanelRect);*/
 
-	g_fnt->RenderString("Preview sprites", rightPanelRect.x + 3, 4);
-
-	drawPreview(XY{ rightPanelRect.x + 10, 100 });
+	//drawPreview(XY{ rightPanelRect.x + 10, 100 });
 
 	wxsManager.renderAll();
 
@@ -140,15 +156,17 @@ void SpritesheetPreviewScreen::render()
 
 void SpritesheetPreviewScreen::tick()
 {
-	if (caller->tileDimensions.x == 0 || caller->tileDimensions.y == 0) {
+	if (closeNextTick || caller->tileDimensions.x == 0 || caller->tileDimensions.y == 0) {
 		g_closeScreen(this);
 		return;
 	}
 
+	panel->position.x = g_windowW - 10 - panel->wxWidth;
+
 	int rightPanelWidth = ixmax(300, canvasZoom * caller->tileDimensions.x);
 	XY origin = { g_windowW - rightPanelWidth, 20 };
-	msPerSpriteLabel->position = { origin.x + 5, origin.y + 20 };
-	textfieldMSPerSprite->position = { origin.x + 130, origin.y + 20 };
+	//msPerSpriteLabel->position = { origin.x + 5, origin.y + 20 };
+	//textfieldMSPerSprite->position = { origin.x + 130, origin.y + 20 };
 
 	spriteView->wxWidth = g_windowW;
 	spriteView->wxHeight = 30 + caller->tileDimensions.y * canvasZoom + 60;
@@ -159,23 +177,26 @@ void SpritesheetPreviewScreen::tick()
 		iclamp(-caller->texH * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - spriteView->wxHeight - 4)
 	};
 
-	for (int x = 0; x < spriteView->tabButtons.drawablesList.size(); x++) {
+	for (int x = 0; x < spriteView->subWidgets.drawablesList.size(); x++) {
 		int timelineIndex = x / N_BUTTONS_ADDED_TO_TIMELINE;
 		int timelineAction = x % N_BUTTONS_ADDED_TO_TIMELINE;
 
 		int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * canvasZoom);
-		spriteView->tabButtons.drawablesList[x]->position = XY{ timelineIndex * elementWidth + timelineIndex * 5 + 30 + (24 * timelineAction), 24 };
+		spriteView->subWidgets.drawablesList[x]->position = XY{ timelineIndex * elementWidth + timelineIndex * 5 + 30 + (24 * timelineAction), 24 };
 	}
 }
 
 void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
 {
+	DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+
 	if (evt.type == SDL_QUIT) {
 		g_closeScreen(this);
 		return;
 	}
 
-	DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+	LALT_TO_SUMMON_NAVBAR;
+
 	if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 		switch (evt.type) {
 			case SDL_MOUSEBUTTONDOWN:
@@ -218,16 +239,6 @@ BaseScreen* SpritesheetPreviewScreen::isSubscreenOf() {
 
 void SpritesheetPreviewScreen::eventTextInput(int evt_id, std::string data)
 {
-	if (evt_id == EVENT_SPRITEPREVIEW_SET_SPRITE_TICK) {
-		try {
-			msPerSprite = std::stoi(data);
-			textfieldMSPerSprite->bgColor = { 0,0,0,0xff };
-		}
-		catch (std::exception) {
-			msPerSprite = -1;
-			textfieldMSPerSprite->bgColor = { 80,0,0,0xff };
-		}
-	}
 }
 
 void SpritesheetPreviewScreen::eventButtonPressed(int evt_id)
@@ -311,7 +322,7 @@ void SpritesheetPreviewScreen::drawBackground()
 
 void SpritesheetPreviewScreen::genTimelineButtons()
 {
-	spriteView->tabButtons.freeAllDrawables();
+	spriteView->subWidgets.freeAllDrawables();
 	for (int x = 0; x < sprites.size(); x++) {
 		addTimelineButton();
 	}
@@ -319,30 +330,30 @@ void SpritesheetPreviewScreen::genTimelineButtons()
 
 void SpritesheetPreviewScreen::addTimelineButton()
 {
-	int newIndex = spriteView->tabButtons.drawablesList.size() / N_BUTTONS_ADDED_TO_TIMELINE;
+	int newIndex = spriteView->subWidgets.drawablesList.size() / N_BUTTONS_ADDED_TO_TIMELINE;
 	UIButton* deleteButton = new UIButton();
 	deleteButton->text = "-";
 	deleteButton->wxWidth = deleteButton->wxHeight = 24;
 	deleteButton->setCallbackListener(newIndex * N_BUTTONS_ADDED_TO_TIMELINE, this);
-	spriteView->tabButtons.addDrawable(deleteButton);
+	spriteView->subWidgets.addDrawable(deleteButton);
 
 	UIButton* moveLeftButton = new UIButton();
 	moveLeftButton->text = "<";
 	moveLeftButton->wxWidth = moveLeftButton->wxHeight = 24;
 	moveLeftButton->setCallbackListener(newIndex * N_BUTTONS_ADDED_TO_TIMELINE + 1, this);
-	spriteView->tabButtons.addDrawable(moveLeftButton);
+	spriteView->subWidgets.addDrawable(moveLeftButton);
 
 	UIButton* moveRightButton = new UIButton();
 	moveRightButton->text = ">";
 	moveRightButton->wxWidth = moveRightButton->wxHeight = 24;
 	moveRightButton->setCallbackListener(newIndex * N_BUTTONS_ADDED_TO_TIMELINE + 2, this);
-	spriteView->tabButtons.addDrawable(moveRightButton);
+	spriteView->subWidgets.addDrawable(moveRightButton);
 }
 
 void SpritesheetPreviewScreen::popTimelineButton()
 {
 	for (int x = 0; x < N_BUTTONS_ADDED_TO_TIMELINE; x++) {
-		Drawable* d = spriteView->tabButtons.drawablesList.back();
-		spriteView->tabButtons.removeDrawable(d);
+		Drawable* d = spriteView->subWidgets.drawablesList.back();
+		spriteView->subWidgets.removeDrawable(d);
 	}
 }

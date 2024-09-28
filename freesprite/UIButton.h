@@ -24,6 +24,7 @@ public:
 	void render(XY pos) override;
 	void focusIn() override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
+	XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
 
 	virtual void click();
 	virtual void rightClick();

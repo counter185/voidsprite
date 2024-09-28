@@ -86,6 +86,7 @@ class EditorBrushPicker;
 class EditorLayerPicker;
 class EditorSpritesheetPreview;
 class TilemapEditorLayerPicker;
+class PanelSpritesheetPreview;
 
 //brushes/tools
 class BaseBrush;
@@ -117,6 +118,7 @@ extern Gamepad* g_gamepad;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
 extern std::vector<Pattern*> g_patterns;
+inline double g_deltaTime = 1.0;
 
 extern std::vector<std::string> g_cmdlineArgs;
 

@@ -296,6 +296,7 @@ int main(int argc, char** argv)
 
     SDL_Event evt;
     while (!screenStack.empty()) {
+        uint64_t ticksBegin = SDL_GetTicks64();
         while (SDL_PollEvent(&evt)) {
             switch (evt.type) {
                 case SDL_QUIT:
@@ -492,6 +493,9 @@ int main(int argc, char** argv)
         }
 
         SDL_RenderPresent(g_rd);
+        uint64_t ticksEnd = SDL_GetTicks64();
+
+        g_deltaTime = dxmax(0.001, ticksEnd - ticksBegin);
     }
 
     return 0;

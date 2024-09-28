@@ -180,6 +180,7 @@
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />
     <ClCompile Include="PanelRPG2KTilemapPreview.cpp" />
+    <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
@@ -292,6 +293,7 @@
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
     <ClInclude Include="Panel.h" />
     <ClInclude Include="PanelRPG2KTilemapPreview.h" />
+    <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="PopupGlobalConfig.h" />

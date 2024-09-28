@@ -3,6 +3,7 @@
 #include "BaseScreen.h"
 #include "EventCallbackListener.h"
 #include "DrawableManager.h"
+#include "ScreenWideNavBar.h"
 
 class SpritesheetPreviewScreen : public BaseScreen, public EventCallbackListener
 {
@@ -10,18 +11,20 @@ public:
     MainEditor* caller;
     EditorSpritesheetPreview* previewWx;
 
+    PanelSpritesheetPreview* panel;
+
     std::vector<XY> sprites;
     int spritesProgress = 0;
     int msPerSprite = 128;
-
 
     XY canvasDrawOrigin = {0,0};
     int canvasZoom = 1;
     bool scrollingCanvas = false;
 
-    UILabel* msPerSpriteLabel;
-    UITextField* textfieldMSPerSprite;
+    bool closeNextTick = false;
+
     ScrollingView* spriteView;
+    ScreenWideNavBar<SpritesheetPreviewScreen*>* navbar = NULL;
 
     SpritesheetPreviewScreen(MainEditor* parent);
     ~SpritesheetPreviewScreen();
