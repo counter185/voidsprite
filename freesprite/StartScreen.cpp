@@ -206,7 +206,7 @@ void StartScreen::renderBackground()
 #ifdef _MSC_VER
     localtime_s(&tmNow, &timeNowT);
 #else
-    *tmNow = *localtime(&timeNowT);
+    tmNow = *localtime(&timeNowT);
 #endif
 
     int yearNow = tmNow.tm_year + 1900;
