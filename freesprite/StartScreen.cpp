@@ -207,6 +207,10 @@ void StartScreen::renderBackground()
     };
     static std::vector<StartScreenEffect> effects;
 
+    if (!g_config.animatedBackground) {
+        return;
+    }
+
     while (effects.size() < 15) {
         StartScreenEffect e;
         e.type = rand() % 7;
