@@ -307,53 +307,43 @@ int main(int argc, char** argv)
                 case SDL_KEYDOWN:
                     if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
                         if (currentScreen != 0) {
-                            currentScreen--;
-                            screenSwitchTimer.start();
-                        }
-                    }
-                    if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
-                        if (currentScreen != 0) {
                             if (g_ctrlModifier) {
                                 currentScreen = 0;
+                                screenSwitchTimer.start();
+                            }
+                            else {
+                                currentScreen--;
                                 screenSwitchTimer.start();
                             }
                         }
                     }
                     else if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
-                            currentScreen++;
-                            screenSwitchTimer.start();
-                        }
-                    }
-                    if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
-                        if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
                                 currentScreen = screenStack.size() - 1;
                                 screenSwitchTimer.start();
                             }
-                        }
-                    }
-                    if (evt.key.keysym.sym == SDLK_w) {
-                            if (g_ctrlModifier) {
-                                fav_screen = currentScreen;
-                                if (favourite == false) {
-                                    favourite = true;
-                                }
-                                else {
-                                    favourite = false;
-                                }
+                            else {
+                                currentScreen++;
                                 screenSwitchTimer.start();
                             }
                         }
-                    
-                    if (evt.key.keysym.sym == SDLK_w ) {
+                    }
+                    else if (evt.key.keysym.sym == SDLK_w) {
+                        if (g_ctrlModifier) {
                             if (g_shiftModifier) {
+                                if (favourite && fav_screen < screenStack.size()) {
                                     currentScreen = fav_screen;
                                     screenSwitchTimer.start();
-                                
+                                }
+                            }
+                            else {
+                                fav_screen = currentScreen;
+                                favourite = !favourite;
+                                //screenSwitchTimer.start();
                             }
                         }
-                    
+                    }
                     else if (evt.key.keysym.sym == SDLK_F11) {
                         fullscreen = !fullscreen;
                         SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
@@ -449,9 +439,7 @@ int main(int argc, char** argv)
                     g_windowW - 2 * windowOffset.x * reverseAnimTimer,
                     g_windowH - 2 * windowOffset.y * reverseAnimTimer,
                 };
-
-                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255,  0xd0 * reverseAnimTimer);
-                
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255,  0xd0 * reverseAnimTimer);
                 SDL_RenderDrawRect(g_rd, &rect);
             }
         }
@@ -475,7 +463,7 @@ int main(int argc, char** argv)
             };
 
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, x == currentScreen ? 0x80 : 0x20);
-            if (favourite == true && x == fav_screen) {
+            if (favourite && x == fav_screen) {
                 SDL_SetRenderDrawColor(g_rd, 0, 255, 0, x == currentScreen ? 0x80 : 0x20);
 
             }
@@ -485,7 +473,6 @@ int main(int argc, char** argv)
         if (!screenStack.empty()) {
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
         }
-
 
         
         //render notifications
