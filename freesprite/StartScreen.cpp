@@ -200,6 +200,110 @@ void StartScreen::renderBackground()
     uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
     renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
+    struct StartScreenEffect {
+        int type;
+        XY pos;
+        Timer64 timer;
+    };
+    static std::vector<StartScreenEffect> effects;
+
+    while (effects.size() < 15) {
+        StartScreenEffect e;
+        e.type = rand() % 7;
+        e.pos = { rand() % 960, rand() % 960 };
+        e.timer.start();
+        effects.push_back(e);
+    }
+
+    for (int x = 0; x < effects.size(); x++) {
+        bool remove = false;
+        XY normPosition = { g_windowW * (effects[x].pos.x / 960.0), g_windowH * (effects[x].pos.y / 960.0) };
+        switch (effects[x].type) {
+            case 0:
+            {
+                //long 2s line
+                remove = effects[x].timer.percentElapsedTime(2000) == 1.0;
+                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 120) / 960.0), g_windowH * ((effects[x].pos.y - 120) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30 * (1.0 - effects[x].timer.percentElapsedTime(2000)));
+                drawLine(normPosition, normPosition2, 1.0);
+            }
+            break;
+            case 1:
+            {
+                //long 0.7s trail
+                remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
+                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 500) / 960.0), g_windowH * ((effects[x].pos.y - 500) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30 - 0x20 * effects[x].timer.percentElapsedTime(700));
+                drawLine(normPosition, normPosition2, 1.0-XM1PW3P1(effects[x].timer.percentElapsedTime(700)));
+            }
+                break;
+            case 2:
+            {
+                //short 3s line
+                remove = effects[x].timer.percentElapsedTime(3000) == 1.0;
+                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 40) / 960.0), g_windowH * ((effects[x].pos.y - 40) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(3000)));
+                drawLine(normPosition, normPosition2, 1.0);
+            }
+                break;
+            case 3:
+            {
+                //mid length 2.5s line
+                remove = effects[x].timer.percentElapsedTime(2500) == 1.0;
+                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 90) / 960.0), g_windowH * ((effects[x].pos.y - 90) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(2500)));
+                drawLine(normPosition, normPosition2, 1.0);
+            }
+                break;
+            case 4:
+            {
+                //short 1s star
+                remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
+                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 15) / 960.0) };
+                XY normPosition3 = { g_windowW * ((effects[x].pos.x - 15) / 960.0), g_windowH * ((effects[x].pos.y + 15) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50 - 0x50 * effects[x].timer.percentElapsedTime(1000));
+                drawLine(normPosition, normPosition2, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
+                drawLine(normPosition, normPosition3, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
+            }
+                break;
+            case 5:
+            {
+                //short 0.6s diamond
+                remove = effects[x].timer.percentElapsedTime(600) == 1.0;
+                XY posLeft = normPosition;
+                XY posRight = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y) / 960.0) };
+                XY posUp = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 12) / 960.0) };
+                XY posDown = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y + 12) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x24 - 0x24 * effects[x].timer.percentElapsedTime(600));
+                drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawLine(posRight, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+            }
+                break;
+            case 6:
+            {
+                //long 1.3s big diamond
+                remove = effects[x].timer.percentElapsedTime(1300) == 1.0;
+                XY posLeft = normPosition;
+                XY posRight = { g_windowW * ((effects[x].pos.x + 60) / 960.0), g_windowH * ((effects[x].pos.y) / 960.0) };
+                XY posUp = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y - 24) / 960.0) };
+                XY posDown = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y + 24) / 960.0) };
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19 - 0x19 * effects[x].timer.percentElapsedTime(1300));
+                drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawLine(posRight, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+            }
+                break;
+        }
+        if (remove) {
+            effects.erase(effects.begin() + x);
+            x--;
+            continue;
+        }
+    }
+
     auto timeNow = std::chrono::system_clock::now();
     std::time_t timeNowT = std::chrono::system_clock::to_time_t(timeNow);
     std::tm tmNow;
