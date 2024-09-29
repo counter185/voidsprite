@@ -1682,10 +1682,10 @@ MainEditor* readLMU(PlatformNativePathString path)
                 std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
                 if (db.get()->chipsets.size() > chipsetIndex) {
                     //chipset_name is the file name
-                    std::cout << "chipset_name = " << db.get()->chipsets[chipsetIndex].chipset_name << "\n";
-                    std::cout << "name = " << db.get()->chipsets[chipsetIndex].name << "\n";
+                    std::cout << "chipset_name = " << db.get()->chipsets[chipsetIndex-1].chipset_name << "\n";
+                    std::cout << "name = " << db.get()->chipsets[chipsetIndex-1].name << "\n";
 
-                    PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex].chipset_name)));
+                    PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex-1].chipset_name)));
                     Layer* l = NULL;
                     l = readXYZ(chipsetPath + convertStringOnWin32(".xyz"));
                     if (l == NULL) {
@@ -1693,7 +1693,7 @@ MainEditor* readLMU(PlatformNativePathString path)
                     }
 
                     if (l != NULL) {
-                        l->name = shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex].name));
+                        l->name = shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex-1].name));
                         ret = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
 
                         //todo: load a rpg2ktilemappreviewscreen along with it too
