@@ -1552,6 +1552,7 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
     for (uint64_t p = 0; p < ret->w * ret->h; p++) {
         uint32_t pixel = ppx[p];
         uint32_t srcPixel = retppx[p];
+        pixel = modAlpha(pixel, (uint8_t)(((pixel>>24)/255.0f) * (top->layerAlpha / 255.0f) * 255));
         retppx[p] = alphaBlend(srcPixel, pixel);
     }
 
