@@ -21,8 +21,11 @@
 #include "Gamepad.h"
 #include "FileIO.h"
 #include "TooltipsLayer.h"
+#include "ButtonStartScreenSession.h"
 
 #include "ee_creature.h"
+
+#include "main.h"
 
 int g_windowW = 1280;
 int g_windowH = 720;
@@ -41,10 +44,7 @@ std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
 bool g_ctrlModifier = false;
 bool g_shiftModifier = false;
-int fav_screen = 0;
-bool favourite = false;
 
-Timer64 screenSwitchTimer;
 
 SDL_Texture* g_mainlogo = NULL;
 SDL_Texture* g_iconLayerAdd = NULL;
@@ -108,12 +108,14 @@ void g_closePopup(BasePopup* a) {
     }
 }
 
-int currentScreen = 0;
-std::vector<BaseScreen*> screenStack;
+
 void g_addScreen(BaseScreen* a) {
     screenStack.push_back(a);
     currentScreen = screenStack.size()-1;
     screenSwitchTimer.start();
+    ButtonStartScreenSession* screenButton = new ButtonStartScreenSession(screenStack.size() - 1);
+    screenButtons.push_back(screenButton);
+    overlayWidgets.addDrawable(screenButton);
 }
 void g_closeScreen(BaseScreen* screen) {
     for (int x = 0; x < screenStack.size(); x++) {
@@ -124,9 +126,10 @@ void g_closeScreen(BaseScreen* screen) {
         if (screenStack[x] == screen) {
             delete screenStack[x];
             screenStack.erase(screenStack.begin() + x);
+            overlayWidgets.removeDrawable(screenButtons[screenButtons.size() - 1]);
+            screenButtons.pop_back();
             if (currentScreen >= screenStack.size()) {
-                currentScreen = screenStack.size() - 1;
-                screenSwitchTimer.start();
+                g_switchScreen(currentScreen - 1);
             }
             x--;
         }
@@ -136,9 +139,21 @@ void g_closeScreen(BaseScreen* screen) {
 //do not use
 //what will happen if i do?
 void g_closeLastScreen() {
-    delete screenStack[screenStack.size() - 1];
-    screenStack.pop_back();
+    g_closeScreen(screenStack[screenStack.size()-1]);
+    //delete screenStack[screenStack.size() - 1];
+    //screenStack.pop_back();
 }
+
+void g_switchScreen(int index) {
+    if (index >= 0 && index < screenStack.size()) {
+        if (index != currentScreen) {
+            currentScreen = index;
+            screenSwitchTimer.start();
+        }
+        overlayWidgets.forceUnfocus();
+    }
+}
+
 
 SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
@@ -291,8 +306,7 @@ int main(int argc, char** argv)
 
     g_ttp = new TooltipsLayer();
 
-    screenStack.push_back(new StartScreen());
-
+    g_addScreen(new StartScreen());
 
     platformPostInit();
 
@@ -300,6 +314,8 @@ int main(int argc, char** argv)
     while (!screenStack.empty()) {
         uint64_t ticksBegin = SDL_GetTicks64();
         while (SDL_PollEvent(&evt)) {
+            DrawableManager::processHoverEventInMultiple({ overlayWidgets }, evt);
+
             switch (evt.type) {
                 case SDL_QUIT:
                     //return 0;
@@ -308,24 +324,20 @@ int main(int argc, char** argv)
                     if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             if (g_ctrlModifier) {
-                                currentScreen = 0;
-                                screenSwitchTimer.start();
+                                g_switchScreen(0);
                             }
                             else {
-                                currentScreen--;
-                                screenSwitchTimer.start();
+                                g_switchScreen(currentScreen - 1);
                             }
                         }
                     }
                     else if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
-                                currentScreen = screenStack.size() - 1;
-                                screenSwitchTimer.start();
+                                g_switchScreen(screenStack.size() - 1);
                             }
                             else {
-                                currentScreen++;
-                                screenSwitchTimer.start();
+                                g_switchScreen(currentScreen + 1);
                             }
                         }
                     }
@@ -333,8 +345,7 @@ int main(int argc, char** argv)
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 if (favourite && fav_screen < screenStack.size()) {
-                                    currentScreen = fav_screen;
-                                    screenSwitchTimer.start();
+                                    g_switchScreen(fav_screen);
                                 }
                             }
                             else {
@@ -396,12 +407,14 @@ int main(int argc, char** argv)
                     break;
             }
             g_gamepad->TakeEvent(evt);
-            if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {
-                popupStack[popupStack.size() - 1]->takeInput(evt);
-            }
-            else {
-                if (!screenStack.empty()) {
-                    screenStack[currentScreen]->takeInput(evt);
+            if (!DrawableManager::processInputEventInMultiple({ overlayWidgets }, evt)) {
+                if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {
+                    popupStack[popupStack.size() - 1]->takeInput(evt);
+                }
+                else {
+                    if (!screenStack.empty()) {
+                        screenStack[currentScreen]->takeInput(evt);
+                    }
                 }
             }
         }
@@ -428,6 +441,7 @@ int main(int argc, char** argv)
             popup->render();
         }
 
+        //screen switching animation
         if (screenSwitchTimer.started) {
             double animTimer = XM1PW3P1(screenSwitchTimer.percentElapsedTime(800));
             if (animTimer < 1) {
@@ -455,21 +469,12 @@ int main(int argc, char** argv)
         
         for (int x = 0; x < screenStack.size(); x++) {
             BaseScreen* s = screenStack[x];
-            int squareW = (int)(16 * (screenSwitchTimer.started && x == currentScreen ? XM1PW3P1(screenSwitchTimer.percentElapsedTime(300)) : 1));
-            SDL_Rect r = {
-                screenIcons.x,
-                screenIcons.y,
-                squareW, squareW
-            };
-
-            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, x == currentScreen ? 0x80 : 0x20);
-            if (favourite && x == fav_screen) {
-                SDL_SetRenderDrawColor(g_rd, 0, 255, 0, x == currentScreen ? 0x80 : 0x20);
-
-            }
-            SDL_RenderFillRect(g_rd, &r);
+            //this is where screen icons were rendered
+            screenButtons[x]->position = screenIcons;
             screenIcons.x += 26;
         }
+        overlayWidgets.renderAll();
+        //todo: make this a uilabel
         if (!screenStack.empty()) {
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
         }
@@ -521,6 +526,7 @@ int main(int argc, char** argv)
         SDL_RenderFillRect(g_rd, &temp);
 
         //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
+
 
         if (viewport != NULL){
             SDL_SetRenderTarget(g_rd, NULL);

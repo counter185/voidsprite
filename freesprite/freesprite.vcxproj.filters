@@ -429,6 +429,9 @@
     <ClCompile Include="TemplateRPG2KBattleAnim.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
+    <ClCompile Include="ButtonStartScreenSession.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -787,6 +790,12 @@
     </ClInclude>
     <ClInclude Include="TemplateRPG2KBattleAnim.h">
       <Filter>Header files\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonStartScreenSession.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,6 +10,7 @@ public:
 	int wxWidth = 250, wxHeight = 30;
 	SDL_Texture* icon = NULL;
 	bool fullWidthIcon = false;
+	bool instantTooltip = false;
 	
 	SDL_Color colorBGFocused = SDL_Color{ 0,0,0,0xff };
 	SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
@@ -25,6 +26,9 @@ public:
 	void focusIn() override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 	XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
+
+	void renderAnimations(XY pos);
+	virtual void renderTooltip(XY pos);
 
 	virtual void click();
 	virtual void rightClick();

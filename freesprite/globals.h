@@ -88,6 +88,7 @@ class EditorLayerPicker;
 class EditorSpritesheetPreview;
 class TilemapEditorLayerPicker;
 class PanelSpritesheetPreview;
+class ButtonStartScreenSession;
 
 //brushes/tools
 class BaseBrush;
@@ -153,6 +154,7 @@ void g_addNotification(Notification a);
 void g_addScreen(BaseScreen* a);
 void g_closeLastScreen();
 void g_closeScreen(BaseScreen* screen);
+void g_switchScreen(int index);
 
 void g_addPopup(BasePopup* a);
 void g_popDisposeLastPopup(bool dispose = true);
