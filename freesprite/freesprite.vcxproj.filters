@@ -432,6 +432,9 @@
     <ClCompile Include="ButtonStartScreenSession.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="PopupIntegerScale.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -796,6 +799,9 @@
     </ClInclude>
     <ClInclude Include="ButtonStartScreenSession.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupIntegerScale.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

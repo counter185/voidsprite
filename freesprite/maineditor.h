@@ -167,7 +167,7 @@ public:
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void resizeAllLayersFromCommand(XY size, bool byTile = false);
     void resizzeAllLayersByTilecountFromCommand(XY size);
-    void integerScaleAllLayersFromCommand(XY scale);
+    void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();
 

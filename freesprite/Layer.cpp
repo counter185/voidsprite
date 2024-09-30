@@ -122,3 +122,25 @@ uint8_t* Layer::integerScale(XY scale)
     h = newSize.y;
     return (uint8_t*)oldPixelData;
 }
+
+uint8_t* Layer::integerDownscale(XY scale)
+{
+    if (w % scale.x == 0 && h % scale.y == 0) {
+        XY newSize = { w / scale.x, h / scale.y };
+        uint32_t* newPixelData = (uint32_t*)malloc(newSize.x * newSize.y * 4);
+        uint32_t* oldPixelData = (uint32_t*)pixelData;
+        memset(newPixelData, 0, newSize.x * newSize.y * 4);
+        for (int y = 0; y < newSize.y; y++) {
+            for (int x = 0; x < newSize.x; x++) {
+                newPixelData[x + (y * newSize.x)] = oldPixelData[(x * scale.x) + ((y * scale.y) * w)];
+            }
+        }
+        pixelData = (uint8_t*)newPixelData;
+        w = newSize.x;
+        h = newSize.y;
+        return (uint8_t*)oldPixelData;
+    }
+    else {
+        return NULL;
+    }
+}

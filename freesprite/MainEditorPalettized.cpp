@@ -9,6 +9,7 @@
 #include "RPG2KTilemapPreviewScreen.h"
 #include "FileIO.h"
 
+#include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
 #include "PopupTileGeneric.h"
 #include "PopupSetEditorPixelGrid.h"
@@ -336,7 +337,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDLK_n, { "Integer scale canvas",
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },

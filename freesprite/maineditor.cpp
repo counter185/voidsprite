@@ -13,7 +13,9 @@
 #include "MinecraftSkinPreviewScreen.h"
 #include "Gamepad.h"
 #include "LayerPalettized.h"
+#include "UICheckbox.h"
 
+#include "PopupIntegerScale.h"
 #include "PopupTextBox.h"
 #include "PopupSetEditorPixelGrid.h"
 #include "PopupTileGeneric.h"
@@ -544,7 +546,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDLK_n, { "Integer scale canvas",
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
@@ -978,7 +980,7 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
         resizzeAllLayersByTilecountFromCommand(((PopupTileGeneric*)p)->result);
     }
     else if (evt_id == EVENT_MAINEDITOR_INTEGERSCALE) {
-        integerScaleAllLayersFromCommand(((PopupTileGeneric*)p)->result);
+        integerScaleAllLayersFromCommand(((PopupIntegerScale*)p)->result, ((PopupIntegerScale*)p)->downscaleCheckbox->isChecked());
     }
 }
 
@@ -1619,17 +1621,21 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
     addToUndoStack(undoData);
 }
 
-void MainEditor::integerScaleAllLayersFromCommand(XY scale)
+void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
 {
     if (scale.x == 0 || scale.y == 0 || (scale.x == 1 && scale.y == 1)) {
         g_addNotification(ErrorNotification("Error", "Invalid scale."));
+        return;
+    }
+    else if (downscale && (texW % scale.x != 0 || texH % scale.y != 0)) {
+        g_addNotification(ErrorNotification("Error", "Dimensions not divisible."));
         return;
     }
 
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldData = layers[x]->integerScale(scale);
+        layerResizeData[x].oldData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
         layers[x]->layerDirty = true;
     }
     texW = layers[0]->w;
@@ -1641,6 +1647,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale)
     undoData.extdata2 = tileDimensions.y;
     undoData.extdata4 = layerResizeData;
     addToUndoStack(undoData);
+    tileDimensions = downscale ? XY{tileDimensions.x / scale.x, tileDimensions.y / scale.y} : XY{tileDimensions.x * scale.x, tileDimensions.y * scale.y};
 }
 
 MainEditorPalettized* MainEditor::toPalettizedSession()

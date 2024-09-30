@@ -184,6 +184,7 @@
     <ClCompile Include="PanelRPG2KTilemapPreview.cpp" />
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
+    <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
@@ -302,6 +303,7 @@
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
+    <ClInclude Include="PopupIntegerScale.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupTextTool.h" />
