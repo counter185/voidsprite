@@ -111,8 +111,7 @@ void g_closePopup(BasePopup* a) {
 
 void g_addScreen(BaseScreen* a) {
     screenStack.push_back(a);
-    currentScreen = screenStack.size()-1;
-    screenSwitchTimer.start();
+    g_switchScreen(screenStack.size() - 1);
     ButtonStartScreenSession* screenButton = new ButtonStartScreenSession(screenStack.size() - 1);
     screenButtons.push_back(screenButton);
     overlayWidgets.addDrawable(screenButton);

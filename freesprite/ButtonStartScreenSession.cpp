@@ -37,6 +37,7 @@ void ButtonStartScreenSession::click()
     else {
         g_addNotification(ErrorNotification("Error", "this should never happen"));
     }
+    UIButton::click();
 }
 
 void ButtonStartScreenSession::renderTooltip(XY pos)
