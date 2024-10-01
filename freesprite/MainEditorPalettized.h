@@ -32,6 +32,7 @@ public:
     Layer* flattenImage() override;
     Layer* newLayer() override;
     Layer* mergeLayers(Layer* bottom, Layer* top) override;
+    void exportTilesIndividually() override;
 
     int32_t* makeFlatIndicesTable();
     Layer* flattenImageAndConvertToRGB();

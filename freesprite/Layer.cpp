@@ -1,4 +1,5 @@
 #include "Layer.h"
+#include "LayerPalettized.h"
 #include "mathops.h"
 
 void Layer::blit(Layer* sourceLayer, XY position)
@@ -34,16 +35,38 @@ Layer* Layer::copyScaled(XY dimensions)
     return newLayer;
 }
 
+Layer* Layer::trim(SDL_Rect r)
+{
+    if (r.x + r.w > w || r.y + r.h > h) {
+        return NULL;
+    }
+    Layer* newLayer;
+    if (isPalettized) {
+        newLayer = new LayerPalettized(r.w, r.h);
+        ((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
+    }
+    else {
+        newLayer = new Layer(r.w, r.h);
+    }
+
+    for (int y = 0; y < r.h; y++) {
+        for (int x = 0; x < r.w; x++) {
+            newLayer->setPixel(XY{x, y}, getPixelAt(XY{x + r.x, y + r.y}, false));
+        }
+    }
+    return newLayer;
+}
+
 uint8_t* Layer::resize(XY to)
 {
     uint32_t* newPixelData = (uint32_t*)malloc(to.x * to.y * 4);
     uint32_t* pixelDataNow = (uint32_t*)pixelData;
     memset(newPixelData, 0, to.x * to.y * 4);
     for (int y = 0; y < ixmin(h, to.y); y++) {
-		for (int x = 0; x < ixmin(w, to.x); x++) {
-			newPixelData[x + (y * to.x)] = pixelDataNow[x + (y * w)];
-		}
-	}
+        for (int x = 0; x < ixmin(w, to.x); x++) {
+            newPixelData[x + (y * to.x)] = pixelDataNow[x + (y * w)];
+        }
+    }
     pixelData = (uint8_t*)newPixelData;
     w = to.x;
     h = to.y;
@@ -54,9 +77,9 @@ uint8_t* Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
 {
     XY sizeNow = XY{w, h};
     XY newTilesCount = XY{
-		(int)ceil(w / (float)tileSizesNow.x),
-		(int)ceil(h / (float)tileSizesNow.y)
-	};
+        (int)ceil(w / (float)tileSizesNow.x),
+        (int)ceil(h / (float)tileSizesNow.y)
+    };
     XY newSize = XY{
         targetTileSize.x * newTilesCount.x,
         targetTileSize.y * newTilesCount.y
@@ -96,14 +119,14 @@ uint8_t* Layer::resizeByTileCount(XY tileSizesNow, XY newTileCount)
     memset(newPixelData, 0, newSize.x * newSize.y * 4);
     for (int y = 0; y < ixmin(h, newSize.y); y++) {
         memcpy(newPixelData + (y * newSize.x), oldPixelData + (y * w), ixmin(w, newSize.x) * 4);
-		/*for (int x = 0; x < ixmin(w, newSize.x); x++) {
-			newPixelData[x + (y * newSize.x)] = oldPixelData[x + (y * w)];
-		}*/
-	}
-	pixelData = (uint8_t*)newPixelData;
-	w = newSize.x;
-	h = newSize.y;
-	return (uint8_t*)oldPixelData;
+        /*for (int x = 0; x < ixmin(w, newSize.x); x++) {
+            newPixelData[x + (y * newSize.x)] = oldPixelData[x + (y * w)];
+        }*/
+    }
+    pixelData = (uint8_t*)newPixelData;
+    w = newSize.x;
+    h = newSize.y;
+    return (uint8_t*)oldPixelData;
 }
 
 uint8_t* Layer::integerScale(XY scale)

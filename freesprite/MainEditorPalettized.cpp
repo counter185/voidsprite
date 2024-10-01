@@ -110,6 +110,38 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
             g_addNotification(ErrorNotification("Error", "Invalid exporter"));
         }
     }
+    else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
+        exporterId--;
+
+        FileExporter* exporter = g_palettizedFileExporters[exporterId];
+        XY tileCounts = { texW / tileDimensions.x, texH / tileDimensions.y };
+        PlatformNativePathString pathOfFile = name.substr(0, name.find_last_of(convertStringOnWin32("/\\")));
+
+        Layer* flatImage = flattenImageWithoutConvertingToRGB();
+        for (int y = 0; y < tileCounts.y; y++) {
+            for (int x = 0; x < tileCounts.x; x++) {
+                SDL_Rect clipRect = { x * tileDimensions.x, y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
+                Layer* clip = flatImage->trim(clipRect);
+                if (clip != NULL) {
+                    PlatformNativePathString tileName = name.substr(0, name.find_last_of(convertStringOnWin32("."))) + convertStringOnWin32(std::format("_{}_{}{}", x, y, exporter->extension()));
+                    if (!exporter->exportsWholeSession()) {
+                        exporter->exportData(tileName, clip);
+                        delete clip;
+                    }
+                    else {
+                        MainEditorPalettized* session = new MainEditorPalettized((LayerPalettized*)clip);
+                        session->trySaveWithExporter(tileName, exporter);
+                        delete session;
+                    }
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error", std::format("Failed to export tile {}:{}", x, y)));
+                }
+            }
+        }
+        delete flatImage;
+        g_addNotification(SuccessNotification("Success", "Tiles exported"));
+    }
 }
 
 void MainEditorPalettized::SetPixel(XY position, uint32_t color, uint8_t symmetry)
@@ -235,7 +267,7 @@ void MainEditorPalettized::setUpWidgets()
             SDLK_f,
             {
                 "File",
-                {SDLK_s, SDLK_d, SDLK_e, SDLK_r, SDLK_p, SDLK_c},
+                {SDLK_s, SDLK_d, SDLK_e, SDLK_a, SDLK_r, SDLK_p, SDLK_c},
                 {
                     {SDLK_d, { "Save as",
                             [](MainEditor* editor) {
@@ -252,6 +284,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDLK_e, { "Export as RGB",
                             [](MainEditor* editor) {
                                 ((MainEditorPalettized*)editor)->tryExportRGB();
+                            }
+                        }
+                    },
+                    {SDLK_a, { "Export tiles individually",
+                            [](MainEditor* editor) {
+                                editor->exportTilesIndividually();
                             }
                         }
                     },
@@ -557,6 +595,20 @@ Layer* MainEditorPalettized::mergeLayers(Layer* bottom, Layer* top)
     }
 
     return ret;
+}
+
+void MainEditorPalettized::exportTilesIndividually()
+{
+    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+        std::vector<std::pair<std::string, std::string>> formats;
+        for (auto f : g_palettizedFileExporters) {
+            formats.push_back({ f->extension(), f->name() });
+        }
+        platformTrySaveOtherFile(this, formats, "export tiles", EVENT_MAINEDITOR_EXPORTTILES);
+    }
+    else {
+        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+    }
 }
 
 int32_t* MainEditorPalettized::makeFlatIndicesTable()

@@ -441,7 +441,7 @@ void MainEditor::setUpWidgets()
             SDLK_f,
             {
                 "File",
-                {SDLK_s, SDLK_d, SDLK_e, SDLK_r, SDLK_p, SDLK_c},
+                {SDLK_s, SDLK_d, SDLK_e, SDLK_a, SDLK_r, SDLK_p, SDLK_c},
                 {
                     {SDLK_d, { "Save as",
                             [](MainEditor* editor) {
@@ -458,6 +458,12 @@ void MainEditor::setUpWidgets()
                     {SDLK_e, { "Export as palettized",
                             [](MainEditor* editor) {
                                 editor->tryExportPalettizedImage();
+                            }
+                        }
+                    },
+                    {SDLK_a, { "Export tiles individually",
+                            [](MainEditor* editor) {
+                                editor->exportTilesIndividually();
                             }
                         }
                     },
@@ -960,6 +966,38 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
         else {
             g_addNotification(ErrorNotification("Error", "Invalid exporter"));
         }
+    }
+    else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
+        exporterID--;
+
+        FileExporter* exporter = g_fileExporters[exporterID];
+        XY tileCounts = { texW / tileDimensions.x, texH / tileDimensions.y };
+        PlatformNativePathString pathOfFile = name.substr(0, name.find_last_of(convertStringOnWin32("/\\")));
+
+        Layer* flatImage = flattenImage();
+        for (int y = 0; y < tileCounts.y; y++) {
+            for (int x = 0; x < tileCounts.x; x++) {
+                SDL_Rect clipRect = { x * tileDimensions.x, y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
+                Layer* clip = flatImage->trim(clipRect);
+                if (clip != NULL) {
+                    PlatformNativePathString tileName = name + convertStringOnWin32(std::format("_{}_{}{}", x, y, exporter->extension()));
+                    if (!exporter->exportsWholeSession()) {
+                        exporter->exportData(tileName, clip);
+                        delete clip;
+                    }
+                    else {
+                        MainEditor* session = new MainEditor(clip);
+                        session->trySaveWithExporter(tileName, exporter);
+                        delete session;
+                    }
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error", std::format("Failed to export tile {}:{}", x,y)));
+                }
+            }
+        }
+        delete flatImage;
+        g_addNotification(SuccessNotification("Success", "Tiles exported"));
     }
 }
 
@@ -1515,16 +1553,28 @@ Layer* MainEditor::flattenImage()
 {
     Layer* ret = new Layer(texW, texH);
     int x = 0;
+    uint32_t* retppx = (uint32_t*)ret->pixelData;
     for (Layer*& l : layers) {
         if (l->hidden) {
             continue;
         }
+        uint32_t* ppx = (uint32_t*)l->pixelData;
         if (x++ == 0) {
-            memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+            if (l->layerAlpha == 255) {
+                memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+            }
+            else {
+                for (uint64_t p = 0; p < l->w * l->h; p++) {
+                    uint32_t pixel = ppx[p];
+                    uint8_t alpha = pixel >> 24;
+                    alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
+                    pixel = (pixel & 0x00ffffff) | (alpha << 24);
+
+                    retppx[p] = pixel;
+                }
+            }
         }
         else {
-            uint32_t* ppx = (uint32_t*)l->pixelData;
-            uint32_t* retppx = (uint32_t*)ret->pixelData;
             for (uint64_t p = 0; p < l->w * l->h; p++) {
                 uint32_t pixel = ppx[p];
                 uint8_t alpha = pixel >> 24;
@@ -1688,6 +1738,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
             }
             MainEditorPalettized* ret = new MainEditorPalettized(outlayers);
             ret->palette = palette;
+            ret->tileDimensions = tileDimensions;
             return ret;
         }
         else {
@@ -1704,6 +1755,20 @@ void MainEditor::tryExportPalettizedImage()
         formats.push_back({ f->extension(), f->name() });
     }
     platformTrySaveOtherFile(this, formats, "export image as palettized", EVENT_MAINEDITOR_EXPORTPALETTIZED);
+}
+
+void MainEditor::exportTilesIndividually()
+{
+    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+        std::vector<std::pair<std::string, std::string>> formats;
+        for (auto f : g_fileExporters) {
+            formats.push_back({ f->extension(), f->name() });
+        }
+        platformTrySaveOtherFile(this, formats, "export tiles", EVENT_MAINEDITOR_EXPORTTILES);
+    }
+    else {
+        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+    }
 }
 
 bool MainEditor::canAddCommentAt(XY a)

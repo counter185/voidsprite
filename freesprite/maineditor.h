@@ -170,6 +170,7 @@ public:
     void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();
+    virtual void exportTilesIndividually();
 
     bool canAddCommentAt(XY a);
     void addComment(CommentData c);
