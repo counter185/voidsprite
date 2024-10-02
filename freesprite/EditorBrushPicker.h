@@ -68,7 +68,7 @@ public:
 			newBtn->position = XY{ px, py };
 			px += 30;
 			newBtn->icon = brush->cachedIcon;
-			newBtn->tooltip = brush->getName();
+			newBtn->tooltip = brush->getName() + (brush->getTooltip() != "" ? ("\n" + brush->getTooltip()) : "");
 			//newBtn->text = brush->getName();
 			newBtn->wxWidth = 26;
 			newBtn->wxHeight = 26;

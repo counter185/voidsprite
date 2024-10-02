@@ -13,6 +13,7 @@ public:
 	virtual bool overrideRightClick() { return false; }
 	virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/brush_default.png"; }
 	virtual std::string getName() { return "Base brush"; }
+	virtual std::string getTooltip() { return ""; }
 	virtual void mouseMotion(MainEditor* editor, XY pos) {
 		lastMouseMotionPos = pos;
 	}
