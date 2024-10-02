@@ -19,7 +19,7 @@ public:
 	static bool processInputEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset = XY{0,0});
 
 	void addDrawable(Drawable* d);
-	void removeDrawable(Drawable* d);
+	void removeDrawable(Drawable* d, bool free = true);
 	void renderAll(XY offset = XY{0,0});
 	void moveToFront(Drawable* d);
 	void passInputToFocused(SDL_Event evt, XY parentOffset = XY{0,0}) { focused->handleInput(evt, xyAdd(parentOffset, focused->position)); }

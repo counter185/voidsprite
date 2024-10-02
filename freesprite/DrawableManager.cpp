@@ -54,7 +54,7 @@ void DrawableManager::addDrawable(Drawable* d) {
     drawablesList.push_back(d);
 }
 
-void DrawableManager::removeDrawable(Drawable* d) {
+void DrawableManager::removeDrawable(Drawable* d, bool free) {
     if (focused == d) {
         forceUnfocus();
     }
@@ -63,7 +63,9 @@ void DrawableManager::removeDrawable(Drawable* d) {
     }
     for (int x = 0; x < drawablesList.size(); x++) {
         if (drawablesList[x] == d) {
-            delete drawablesList[x];
+            if (free) {
+                delete drawablesList[x];
+            }
             drawablesList.erase(drawablesList.begin() + x);
             return;
         }
@@ -82,7 +84,7 @@ void DrawableManager::renderAll(XY offset) {
 }
 
 void DrawableManager::moveToFront(Drawable* d) {
-    removeDrawable(d);
+    removeDrawable(d, false);
     addDrawable(d);
 }
 
@@ -95,6 +97,9 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
             if (focused != a) {
                 if (focused != NULL) {
                     focused->focusOut();
+                }
+                if (a->shouldMoveToFrontOnFocus()) {
+                    moveToFront(a);
                 }
                 a->focusIn();
             }
@@ -126,6 +131,9 @@ bool DrawableManager::tryFocusOnNextTabbable()
                 if (focused != NULL) {
                     focused->focusOut();
                 }
+                if (a->shouldMoveToFrontOnFocus()) {
+                    moveToFront(a);
+                }
                 a->focusIn();
             }
             focused = a;
@@ -145,6 +153,9 @@ void DrawableManager::forceFocusOn(Drawable* d)
         focused->focusOut();
     }
     if (d != NULL) {
+        if (d->shouldMoveToFrontOnFocus()) {
+            moveToFront(d);
+        }
         d->focusIn();
     }
     focused = d;

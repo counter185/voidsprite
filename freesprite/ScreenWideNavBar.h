@@ -82,6 +82,7 @@ public:
         Panel::focusOut();
         openSubmenu(-1);
     }
+    bool shouldMoveToFrontOnFocus() override { return true; }
     void eventButtonPressed(int evt_id) override {
         if (evt_id < 0) {
             SDL_Keycode subBtnID = -evt_id - 1;

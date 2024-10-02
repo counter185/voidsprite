@@ -213,9 +213,9 @@ void MainEditor::render() {
         currentBrush->renderOnCanvas(this, scale);
     }
 
-    if (spritesheetPreview != NULL) {
+    /*if (spritesheetPreview != NULL) {
         spritesheetPreview->previewWx->render(XY{ 0,0 });
-    }
+    }*/
 
     //g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
     //g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
@@ -663,18 +663,18 @@ void MainEditor::setUpWidgets()
                     },
                     {SDLK_s, { "Open spritesheet preview...",
                             [](MainEditor* editor) {
-                                if (editor->spritesheetPreview == NULL) {
+                                //if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                         g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
                                         return;
                                     }
                                     SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
                                     g_addScreen(newScreen);
-                                    editor->spritesheetPreview = newScreen;
-                                }
-                                else {
-                                    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
-                                }
+                                    //editor->spritesheetPreview = newScreen;
+                                //}
+                                //else {
+                                //    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
+                                //}
                             }
                         }
                     },
@@ -744,6 +744,16 @@ void MainEditor::setUpWidgets()
 
     navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_v });
     wxsManager.addDrawable(navbar);
+}
+
+void MainEditor::addWidget(Drawable* wx)
+{
+    wxsManager.addDrawable(wx);
+}
+
+void MainEditor::removeWidget(Drawable* wx)
+{
+    wxsManager.removeDrawable(wx);
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {

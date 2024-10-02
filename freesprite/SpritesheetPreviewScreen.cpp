@@ -17,6 +17,7 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     canvasDrawOrigin = { 60, 60 };
 
     previewWx = new EditorSpritesheetPreview(this);
+    caller->addWidget(previewWx);
 
     panel = new PanelSpritesheetPreview(this);
     panel->position = { 5, 40 };
@@ -61,8 +62,8 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
 
 SpritesheetPreviewScreen::~SpritesheetPreviewScreen() {
     wxsManager.freeAllDrawables();
-    delete previewWx;
-    caller->spritesheetPreview = NULL;
+    caller->removeWidget(previewWx);
+    //delete previewWx;
 }
 
 void SpritesheetPreviewScreen::render()

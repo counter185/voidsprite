@@ -5,9 +5,11 @@
 void EditorSpritesheetPreview::render(XY at)
 {
 	XY tileSize = caller->caller->tileDimensions;
-	int wxWidth = ixmax(80, tileSize.x * caller->canvasZoom) + 8;
-	int wxHeight = ixmax(30, tileSize.y * caller->canvasZoom) + 20 + 8;
-	XY origin = { g_windowW - wxWidth - 4, g_windowH - wxHeight - 4 - 40 };
+	wxWidth = ixmax(80, tileSize.x * caller->canvasZoom) + 8;
+	wxHeight = ixmax(30, tileSize.y * caller->canvasZoom) + 20 + 8;
+
+	//XY origin = { g_windowW - wxWidth - 4, g_windowH - wxHeight - 4 - 40 };
+	XY origin = { at.x,at.y };
 	SDL_Rect drawRect = {
 		origin.x,
 		origin.y,

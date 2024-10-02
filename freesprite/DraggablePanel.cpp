@@ -18,22 +18,28 @@ void DraggablePanel::processDrag(SDL_Event evt)
         break;
     case SDL_MOUSEMOTION:
         if (dragging) {
+            wasDragged = true;
             position.x += evt.motion.xrel;
             position.y += evt.motion.yrel;
 
-            if (position.x < 0) {
-                position.x = 0;
-            }
-            if (position.y < 0) {
-                position.y = 0;
-            }
-            if (position.x + wxWidth > g_windowW) {
-                position.x = g_windowW - wxWidth;
-            }
-            if (position.y + wxHeight > g_windowH) {
-                position.y = g_windowH - wxHeight;
-            }
+            tryMoveOutOfOOB();
         }
         break;
+    }
+}
+
+void DraggablePanel::tryMoveOutOfOOB()
+{
+    if (position.x < 0) {
+        position.x = 0;
+    }
+    if (position.y < 0) {
+        position.y = 0;
+    }
+    if (position.x + wxWidth > g_windowW) {
+        position.x = g_windowW - wxWidth;
+    }
+    if (position.y + wxHeight > g_windowH) {
+        position.y = g_windowH - wxHeight;
     }
 }

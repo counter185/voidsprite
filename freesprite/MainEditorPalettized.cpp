@@ -451,18 +451,17 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDLK_s, { "Open spritesheet preview...",
                             [](MainEditor* editor) {
-                                if (editor->spritesheetPreview == NULL) {
+                                //if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                         g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
                                         return;
                                     }
                                     SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
                                     g_addScreen(newScreen);
-                                    editor->spritesheetPreview = newScreen;
-                                }
-                                else {
-                                    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
-                                }
+                                //}
+                                //else {
+                                //    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
+                                //}
                             }
                         }
                     },

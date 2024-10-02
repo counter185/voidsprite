@@ -39,8 +39,6 @@ protected:
 public:
     bool isPalettized = false;
 
-    SpritesheetPreviewScreen* spritesheetPreview = NULL;
-
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
     std::vector<CommentData> comments;
 
@@ -123,6 +121,8 @@ public:
 
     void initLayers();
     virtual void setUpWidgets();
+    void addWidget(Drawable* wx);
+    void removeWidget(Drawable* wx);
     void RecalcMousePixelTargetPoint(int x, int y);
     void FillTexture();
     virtual void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
