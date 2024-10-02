@@ -79,6 +79,10 @@ public:
     bool blendAlphaMode = false;
     uint32_t pickedColor = 0xFFFFFF;
 
+    bool qModifier = false;
+    XY lockedTilePreview = { -1,-1 };
+    Timer64 tileLockTimer;
+
     ScreenWideNavBar<MainEditor*>* navbar;
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;

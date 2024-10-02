@@ -150,18 +150,19 @@ void MainEditor::render() {
     drawSymmetryLines();
 
     //draw tile repeat preview
-    if (g_shiftModifier) {
+    if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
         XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : XY{texW, texH};
         XY mouseInCanvasPoint = XY{
             (canvasCenterPoint.x - g_mouseX) / -scale,
             (canvasCenterPoint.y - g_mouseY) / -scale
         };
-        if (mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
-            && mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) {
-            XY tilePosition = XY{
-                mouseInCanvasPoint.x / tileDim.x,
-                mouseInCanvasPoint.y / tileDim.y
-            };
+        if ((qModifier && mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
+            && mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) || !qModifier) {
+            XY tilePosition = !qModifier ? lockedTilePreview :
+                XY{
+                    mouseInCanvasPoint.x / tileDim.x,
+                    mouseInCanvasPoint.y / tileDim.y
+                };
             SDL_Rect tileRect = {
                 canvasCenterPoint.x + tilePosition.x * tileDim.x * scale,
                 canvasCenterPoint.y + tilePosition.y * tileDim.y * scale,
@@ -193,6 +194,14 @@ void MainEditor::render() {
                     }
                 }
             }
+
+            //lock animation
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+            double anim = 1.0 - XM1PW3P1(tileLockTimer.percentElapsedTime(300));
+            drawLine(XY{ tileRect.x, tileRect.y }, XY{ tileRect.x + tileRect.w, tileRect.y }, anim);
+            drawLine(XY{ tileRect.x, tileRect.y }, XY{ tileRect.x, tileRect.y + tileRect.h }, anim);
+            drawLine(XY{ tileRect.x + tileRect.w, tileRect.y + tileRect.h }, XY{ tileRect.x, tileRect.y + tileRect.h }, anim);
+            drawLine(XY{ tileRect.x + tileRect.w, tileRect.y + tileRect.h }, XY{ tileRect.x + tileRect.w, tileRect.y }, anim);
         }
     }
 
@@ -796,6 +805,10 @@ void MainEditor::takeInput(SDL_Event evt) {
 
     LALT_TO_SUMMON_NAVBAR;
 
+    if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.keysym.sym == SDLK_q) {
+        qModifier = evt.key.state;
+    }
+
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
         switch (evt.type) {
             case SDL_MOUSEBUTTONDOWN:
@@ -840,8 +853,8 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_MOUSEMOTION:
                 RecalcMousePixelTargetPoint(evt.motion.x, evt.motion.y);
                 if (middleMouseHold) {
-                    canvasCenterPoint.x += evt.motion.xrel;
-                    canvasCenterPoint.y += evt.motion.yrel;
+                    canvasCenterPoint.x += evt.motion.xrel * (g_shiftModifier ? 2 : 1);
+                    canvasCenterPoint.y += evt.motion.yrel * (g_shiftModifier ? 2 : 1);
                 }
                 else if (leftMouseHold) {
                     if (currentBrush != NULL) {
@@ -857,14 +870,14 @@ void MainEditor::takeInput(SDL_Event evt) {
                 if (g_ctrlModifier && !g_config.scrollWithTouchpad) {
                     colorPicker->setMainEditorColorHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
                 }
-                else if (g_shiftModifier) {
+                else if (g_shiftModifier && !g_config.scrollWithTouchpad) {
                     double newH = dxmin(dxmax(colorPicker->currentH + (360.0 / 12) * evt.wheel.y, 0), 359);
                     colorPicker->setMainEditorColorHSV(newH, colorPicker->currentS, colorPicker->currentV);
                 }
                 else {
                     if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
-                        canvasCenterPoint.x -= evt.wheel.x * 20;
-                        canvasCenterPoint.y += evt.wheel.y * 20;
+                        canvasCenterPoint.x -= evt.wheel.x * 20 * (g_shiftModifier ? 2 : 1);
+                        canvasCenterPoint.y += evt.wheel.y * 20 * (g_shiftModifier ? 2 : 1);
                     }
                     else {
                         zoom(evt.wheel.y);
@@ -902,6 +915,37 @@ void MainEditor::takeInput(SDL_Event evt) {
                             }
                             else {
                                 trySaveImage();
+                            }
+                        }
+                        break;
+                    case SDLK_q:
+                        if (g_ctrlModifier) {
+                            if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
+                                lockedTilePreview = { -1,-1 };
+                            }
+                            else {
+                                
+                                if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+                                    XY mouseInCanvasPoint = XY{
+                                        (canvasCenterPoint.x - g_mouseX) / -scale,
+                                        (canvasCenterPoint.y - g_mouseY) / -scale
+                                    };
+                                    XY tileToLock = XY{
+                                        mouseInCanvasPoint.x / tileDimensions.x,
+                                        mouseInCanvasPoint.y / tileDimensions.y
+                                    };
+                                    if (tileToLock.x >= 0 && tileToLock.y >= 0) {
+                                        lockedTilePreview = tileToLock;
+                                        tileLockTimer.start();
+                                    }
+                                    else {
+                                        g_addNotification(ErrorNotification("Error", "Tile position out of bounds"));
+                                    }
+                                }
+                                else {
+                                    lockedTilePreview = { 0,0 };
+                                    tileLockTimer.start();
+                                }
                             }
                         }
                         break;
