@@ -11,6 +11,7 @@ public:
     virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_comment.png"; }
     bool isReadOnly() override { return true; }
     std::string getName() { return "Add comment"; }
+    std::string getTooltip() override { return "Mouse Left to add a comment.\nMouse Left in Eraser mode to delete a comment."; }
     void clickPress(MainEditor* editor, XY pos) override;
     void eventTextInputConfirm(int evt_id, std::string data) override;
     //void clickDrag(MainEditor* editor, XY from, XY to) override;

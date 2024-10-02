@@ -13,6 +13,7 @@ class ToolRectMove :
     SDL_Texture* cacheClonePreview = NULL;
 
     std::string getName() override { return "Move rect"; }
+    std::string getTooltip() override { return "Select an area with Mouse Left to cut it.\nPaste it at a different location with Mouse Right."; }
     std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_mover.png"; }
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;

@@ -12,6 +12,7 @@ class ToolRectSwap : public BaseBrush
     SDL_Texture* cacheClonePreview = NULL;
 
     std::string getName() override { return "Swap rect"; }
+    std::string getTooltip() override { return "Select an area with Mouse Left.\nSwap the source and selected destination areas with Mouse Right."; }
     std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_swapr.png"; }
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;

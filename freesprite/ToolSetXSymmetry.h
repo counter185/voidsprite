@@ -9,6 +9,7 @@ class ToolSetXSymmetry : public BaseBrush
     Timer64 clickTimer;
 
     std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_setxsym.png"; }
+    std::string getTooltip() override { return "Mouse Left to enable and set the position of the X symmetry line.\nMouse Right to toggle X symmetry off/on."; }
     bool isReadOnly() override { return true; }
     bool wantDoublePosPrecision() override { return true; }
     bool overrideRightClick() override { return true; }

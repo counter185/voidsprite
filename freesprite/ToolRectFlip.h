@@ -9,6 +9,7 @@ public:
     bool dragRightClick = false;
 
     std::string getName() override { return "Flip rect"; }
+    std::string getTooltip() override { return "Select an area with Mouse Left to flip it horizontally.\nSelect an area with Mouse Right to flip it vertically."; }
     std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_fliprect.png"; }
     bool overrideRightClick() override { return true; }
     bool isReadOnly() override { return true; }
