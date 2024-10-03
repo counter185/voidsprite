@@ -147,18 +147,19 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
 void MainEditorPalettized::SetPixel(XY position, uint32_t color, uint8_t symmetry)
 {
     if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && layer_getPixelAt(position) != -1))) {
-        int32_t targetColor = (int32_t)color;
-        /*if (blendAlphaMode) {
-            if (eraserMode) {
-                targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+        if (!isolateEnabled || (isolateEnabled && pointInBox(position, isolateRect))) {
+            int32_t targetColor = (int32_t)color;
+            /*if (blendAlphaMode) {
+                if (eraserMode) {
+                    targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+                }
+                targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
+            }*/
+            if (targetColor < -1 || targetColor >= palette.size()) {
+                targetColor = -1;
             }
-            targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
-        }*/
-        if (targetColor < -1 || targetColor >= palette.size()) {
-            targetColor = -1;
+            getCurrentLayer()->setPixel(position, eraserMode ? -1 : targetColor);
         }
-        getCurrentLayer()->setPixel(position, eraserMode ? -1 : targetColor);
-
         //colorPicker->pushLastColor(color);
     }
     if (symmetryEnabled[0] && !(symmetry & 0b10)) {

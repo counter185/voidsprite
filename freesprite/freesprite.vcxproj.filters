@@ -435,6 +435,9 @@
     <ClCompile Include="PopupIntegerScale.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="ToolRectIsolate.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -802,6 +805,9 @@
     </ClInclude>
     <ClInclude Include="PopupIntegerScale.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolRectIsolate.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

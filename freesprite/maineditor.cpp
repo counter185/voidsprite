@@ -147,6 +147,7 @@ void MainEditor::render() {
             }
         }
     }
+    drawIsolatedRect();
     drawSymmetryLines();
 
     //draw tile repeat preview
@@ -328,6 +329,29 @@ void MainEditor::drawSymmetryLines() {
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
         SDL_RenderDrawLine(g_rd,0, lineDrawYPoint, g_windowW, lineDrawYPoint);
+    }
+}
+
+void MainEditor::drawIsolatedRect()
+{
+    if (isolateEnabled) {
+        SDL_Rect r = { 
+            canvasCenterPoint.x + isolateRect.x * scale, 
+            canvasCenterPoint.y + isolateRect.y * scale,
+            isolateRect.w * scale,
+            isolateRect.h * scale
+        };
+
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+        SDL_RenderDrawRect(g_rd, &r);
+
+        r.x += 1;
+        r.y += 1;
+        r.w -= 2;
+        r.h -= 2;
+
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+        SDL_RenderDrawRect(g_rd, &r);
     }
 }
 
@@ -1108,15 +1132,17 @@ void MainEditor::FillTexture() {
 
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
     if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
-        uint32_t targetColor = color;
-        if (blendAlphaMode) {
-            if (eraserMode) {
-                targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+        if (!isolateEnabled || (isolateEnabled && pointInBox(position, isolateRect))) {
+            uint32_t targetColor = color;
+            if (blendAlphaMode) {
+                if (eraserMode) {
+                    targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
+                }
+                targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
             }
-            targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
+            getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
+            colorPicker->pushLastColor(color);
         }
-        getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
-        colorPicker->pushLastColor(color);
     }
     if (symmetryEnabled[0] && !(symmetry & 0b10)) {
         int symmetryXPoint = symmetryPositions.x / 2;
@@ -1880,5 +1906,5 @@ CommentData MainEditor::_removeCommentAt(XY a)
 void MainEditor::layer_replaceColor(uint32_t from, uint32_t to)
 {
     //commitStateToCurrentLayer();
-    getCurrentLayer()->replaceColor(from, to);
+    getCurrentLayer()->replaceColor(from, to, isolateEnabled ? isolateRect : SDL_Rect{-1,-1,-1,-1});
 }

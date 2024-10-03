@@ -18,6 +18,7 @@
 #include "ToolRectRotate.h"
 #include "ToolRectSwap.h"
 #include "ToolText.h"
+#include "ToolRectIsolate.h"
 #include "Gamepad.h"
 #include "FileIO.h"
 #include "TooltipsLayer.h"
@@ -258,6 +259,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new BrushFill());
     g_brushes.push_back(new BrushReplaceColor());
     g_brushes.push_back(new ToolColorPicker());
+    g_brushes.push_back(new ToolRectIsolate());
     g_brushes.push_back(new ToolRectClone());
     g_brushes.push_back(new ToolRectMove());
     g_brushes.push_back(new ToolRectSwap());

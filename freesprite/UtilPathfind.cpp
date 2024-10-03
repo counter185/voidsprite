@@ -7,6 +7,7 @@
 
 #include "UtilPathfind.h"
 #include "Layer.h"
+#include "Notification.h"
 
 template <typename T>
 void vector_remove(std::vector<T>& vec, int index) {
@@ -154,8 +155,8 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
                 delete pathN;
                 pathN = npathN;
             }
+            g_addNotification(SuccessShortNotification(std::format("A* finished in {} steps", step), ""));
             printf("genAStar finished in %i steps\n", step);
-            printf("path found\n");
             return nodePath;
         }
         else {
@@ -186,6 +187,7 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
                     for (Node*& n : openList) {
                         delete n;
                     }
+                    g_addNotification(ErrorNotification("A* took too long", ""));
                     return std::vector<Node>();
                 }
 
@@ -205,6 +207,7 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
 
         }
     }
-    printf("no path\n");
+    g_addNotification(ErrorNotification("A* could not find a path", ""));
+    //printf("no path\n");
     return std::vector<Node>();
 }

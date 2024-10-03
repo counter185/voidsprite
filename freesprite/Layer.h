@@ -314,11 +314,13 @@ public:
 		layerDirty = true;
 	}
 
-	void replaceColor(uint32_t from, uint32_t to) {
+	void replaceColor(uint32_t from, uint32_t to, SDL_Rect clip = {-1,-1,-1,-1}) {
 		uint32_t* px32 = (uint32_t*)pixelData;
 		for (uint64_t x = 0; x < w * h; x++) {
-			if (px32[x] == from || (!isPalettized && (px32[x]&0xFF000000) == 0 && (from&0xFF000000) == 0)) {
-				px32[x] = to;
+			if (clip.w == -1 || pointInBox(XY{ (int)(x % w), (int)(x / w) }, clip)) {
+				if (px32[x] == from || (!isPalettized && (px32[x] & 0xFF000000) == 0 && (from & 0xFF000000) == 0)) {
+					px32[x] = to;
+				}
 			}
 		}
 		layerDirty = true;

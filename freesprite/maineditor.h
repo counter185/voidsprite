@@ -91,6 +91,9 @@ public:
     XY symmetryPositions = {0,0};
     bool symmetryEnabled[2] = { false, false };
 
+    bool isolateEnabled = false;
+    SDL_Rect isolateRect = { 10,10,50,40 };
+
     std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
     std::vector<uint32_t> lastColors;
@@ -118,6 +121,7 @@ public:
     void renderUndoStack();
     virtual void renderColorPickerAnim();
     void drawSymmetryLines();
+    void drawIsolatedRect();
 
     void initLayers();
     virtual void setUpWidgets();
