@@ -104,7 +104,7 @@ void MainEditor::render() {
     }
 
     //draw a separate 1x1 grid if the scale is >= 1600%
-    if (scale >= 10 && !g_shiftModifier) {
+    if (scale >= 10) {
 
         uint8_t tileGridAlpha = scale < 16 ? 0x10 * ((scale - 9) / 7.0) : 0x10;
 

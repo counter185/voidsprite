@@ -14,9 +14,10 @@ void ToolMeasure::clickPress(MainEditor* editor, XY pos)
 void ToolMeasure::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
 	if (heldDown) {
-		drawPixelRect(startPos, lastMouseMotionPos, canvasDrawPoint, scale);
-		XY pointFrom = XY{ ixmin(startPos.x, lastMouseMotionPos.x), ixmin(startPos.y, lastMouseMotionPos.y) };
-		XY pointTo = XY{ ixmax(startPos.x, lastMouseMotionPos.x), ixmax(startPos.y, lastMouseMotionPos.y) };
+		XY measureEndPoint = g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos;
+		drawPixelRect(startPos, measureEndPoint, canvasDrawPoint, scale);
+		XY pointFrom = XY{ ixmin(startPos.x, measureEndPoint.x), ixmin(startPos.y, measureEndPoint.y) };
+		XY pointTo = XY{ ixmax(startPos.x, measureEndPoint.x), ixmax(startPos.y, measureEndPoint.y) };
 
 		g_ttp->addTooltip(Tooltip{
 			canvasDrawPoint.x + lastMousePos.x * scale + 25, canvasDrawPoint.y + lastMousePos.y * scale,

@@ -11,6 +11,7 @@ void BrushRect::clickPress(MainEditor* editor, XY pos)
 void BrushRect::clickRelease(MainEditor* editor, XY pos)
 {
 	heldDown = false;
+	pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
 	editor->DrawLine(startPos, XY{pos.x, startPos.y}, editor->getActiveColor());
 	editor->DrawLine(startPos, XY{startPos.x, pos.y}, editor->getActiveColor());
 	editor->DrawLine(pos, XY{pos.x, startPos.y}, editor->getActiveColor());
@@ -20,7 +21,7 @@ void BrushRect::clickRelease(MainEditor* editor, XY pos)
 void BrushRect::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
 	if (heldDown) {
-		drawPixelRect(startPos, lastMouseMotionPos, canvasDrawPoint, scale);
+		drawPixelRect(startPos, g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos, canvasDrawPoint, scale);
 	}
 
 	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);

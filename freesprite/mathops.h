@@ -37,6 +37,8 @@ bool xyEqual(XY p1, XY p2);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
 SDL_FPoint xytofp(XY p);
+double angleBetweenTwoPoints(XY a, XY b);
+XY getSnappedPoint(XY from, XY to);
 
 std::string stringToLower(std::string a);
 std::string shiftJIStoUTF8(std::string a);

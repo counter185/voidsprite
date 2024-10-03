@@ -32,6 +32,11 @@ SDL_FPoint xytofp(XY p)
     return {(float)p.x, (float)p.y};
 }
 
+double angleBetweenTwoPoints(XY a, XY b)
+{
+    return atan2(b.y - a.y, b.x - a.x) / M_PI * 180 + 180;
+}
+
 std::string stringToLower(std::string a)
 {
     std::string ret;
@@ -155,6 +160,32 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith)
     std::transform(otherString.begin(), otherString.end(), otherString.begin(), ::tolower);
     std::transform(endsWith.begin(), endsWith.end(), endsWith.begin(), ::tolower);
     return otherString == endsWith;
+}
+
+XY getSnappedPoint(XY from, XY to) {
+    double ang = angleBetweenTwoPoints(from, to);
+    if ((ang > 70 && ang < 110) || (ang > 250 && ang < 290)) {
+        return { from.x, to.y };
+    }
+    else if ((ang < 20 || ang > 340) || (ang > 160 && ang < 200)) {
+        return { to.x, from.y };
+    }
+    else {
+        if ((ang > 90 && ang < 180) || (ang < 360 && ang > 270)) {
+            //x+b
+            XY pdiff = { to.x - from.x, from.y - to.y };
+            int diffs[2] = { pdiff.x, pdiff.y };
+            int diff = abs(diffs[0]) > abs(diffs[1]) ? diffs[0] : diffs[1];
+            return { from.x + diff, from.y - diff };
+        }
+        else {
+            //-x+b
+            XY pdiff = { to.x - from.x, to.y - from.y };
+            int diffs[2] = { pdiff.x, pdiff.y };
+            int diff = abs(diffs[0]) > abs(diffs[1]) ? diffs[0] : diffs[1];
+            return { from.x + diff, from.y + diff };
+        }
+    }
 }
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc)

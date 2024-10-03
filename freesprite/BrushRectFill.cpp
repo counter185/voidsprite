@@ -12,6 +12,7 @@ void BrushRectFill::clickPress(MainEditor* editor, XY pos)
 void BrushRectFill::clickRelease(MainEditor* editor, XY pos)
 {
 	heldDown = false;
+	pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
 	int minx = ixmin(pos.x, startPos.x);
 	int maxx = ixmax(pos.x, startPos.x);
 	int miny = ixmin(pos.y, startPos.y);
@@ -27,7 +28,7 @@ void BrushRectFill::clickRelease(MainEditor* editor, XY pos)
 void BrushRectFill::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
 	if (heldDown) {
-		drawPixelRect(startPos, lastMouseMotionPos, canvasDrawPoint, scale);
+		drawPixelRect(startPos, g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos, canvasDrawPoint, scale);
 	}
 
 	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
