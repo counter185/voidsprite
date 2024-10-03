@@ -8,18 +8,37 @@ void UISVPicker::drawPosIndicator(XY origin)
 {
 	//g_fnt->RenderString(std::string("vpos:") + std::to_string(vPos), origin.x + 10, origin.y + wxHeight / 4);
 
+	SDL_Color colorNow = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, parent->currentS, parent->currentV }));
+	SDL_Color colorDesat = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, parent->currentS /6, dxmin(1.0, parent->currentV + 0.2) }));
+
 	XY centerPoint = xyAdd(origin, XY{ (int)(wxWidth * sPos), (int)(wxHeight * (1.0f - vPos))});
-	int xdist = 3;
-	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
-	for (int x = 0; x < 2; x++) {
-		int fxdist = xdist + x;
-		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x - fxdist, centerPoint.y + fxdist);
-		SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y + fxdist);
-	}
+	int xdist = 8;
+	SDL_Rect rectAround = SDL_Rect{ centerPoint.x - xdist, centerPoint.y - xdist, xdist * 2, xdist * 2 };
+	SDL_SetRenderDrawColor(g_rd, colorNow.r, colorNow.g, colorNow.b, 0xff);
+	SDL_RenderDrawRect(g_rd, &rectAround);
+
+	SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x90);
+	SDL_Rect rectAround2 = rectAround;
+	rectAround2.x -= 1;
+	rectAround2.y -= 1;
+	rectAround2.w += 2;
+	rectAround2.h += 2;
+	SDL_RenderDrawRect(g_rd, &rectAround2);
+	SDL_RenderDrawPoint(g_rd, centerPoint.x, centerPoint.y);
+
+	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x90);
+	rectAround2 = rectAround;
+	rectAround2.x += 1;
+	rectAround2.y += 1;
+	rectAround2.w -= 2;
+	rectAround2.h -= 2;
+	SDL_RenderDrawRect(g_rd, &rectAround2);
+	SDL_RenderDrawPoint(g_rd, centerPoint.x - 1, centerPoint.y);
 }
 
 void UISVPicker::render(XY pos)
 {
+	//we gotta do something about this
 	SDL_Color vtx1 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 0.0, 1.0 }));
 	SDL_Color vtx2 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 1.0, 1.0 }));
 	SDL_Color vtx3 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 0.0, 0.0 }));
