@@ -1695,7 +1695,7 @@ Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek)
                     }
                     char c;
                     f >> c;
-                    ret->setPixel({ x,y }, c == '1' ? 1 : 0);
+                    ret->setPixel({ x,y }, c == '1' ? 0 : 1);
                 }
             }
         }
@@ -2824,7 +2824,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
                 if (!data->isPalettized && (c & 0xFF000000) == 0) {
                     c = 0;
                 }
-                fprintf(f, "%u ", std::find(uqColors.begin(), uqColors.end(), c) - uqColors.begin());
+                fprintf(f, "%u ", 1 - (std::find(uqColors.begin(), uqColors.end(), c) - uqColors.begin()));
             }
             fprintf(f, "\n");
         }
