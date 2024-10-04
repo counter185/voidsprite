@@ -309,6 +309,23 @@ void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_
 
 }
 
+void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t colorUR, uint32_t colorDL, uint32_t colorDR)
+{
+    SDL_Vertex verts[4];
+    verts[0].position = xytofp(ul);
+    verts[0].color = { (uint8_t)((colorUL & 0xFF0000) >> 16), (uint8_t)((colorUL & 0x00FF00) >> 8), (uint8_t)(colorUL & 0x0000FF), (uint8_t)((colorUL & 0xFF000000) >> 24)};
+    verts[1].position = xytofp(ur);
+    verts[1].color = { (uint8_t)((colorUR & 0xFF0000) >> 16), (uint8_t)((colorUR & 0x00FF00) >> 8), (uint8_t)(colorUR & 0x0000FF), (uint8_t)((colorUR & 0xFF000000) >> 24) };
+    verts[2].position = xytofp(dl);
+    verts[2].color = { (uint8_t)((colorDL & 0xFF0000) >> 16), (uint8_t)((colorDL & 0x00FF00) >> 8), (uint8_t)(colorDL & 0x0000FF), (uint8_t)((colorDL & 0xFF000000) >> 24) };
+    verts[3].position = xytofp(dr);
+    verts[3].color = { (uint8_t)((colorDR & 0xFF0000) >> 16), (uint8_t)((colorDR & 0x00FF00) >> 8), (uint8_t)(colorDR & 0x0000FF), (uint8_t)((colorDR & 0xFF000000) >> 24) };
+
+    int indices[6] = { 0, 1, 2, 1, 3, 2 };
+    SDL_RenderGeometry(g_rd, NULL, verts, 4, indices, 6);
+
+}
+
 std::string pathInProgramDirectory(std::string path)
 {
     return g_programDirectory + "/" + path;

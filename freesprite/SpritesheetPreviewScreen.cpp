@@ -303,7 +303,7 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
 void SpritesheetPreviewScreen::drawBackground()
 {
     if (g_config.animatedBackground) {
-        uint64_t now = SDL_GetTicks64();
+        uint64_t now = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
         uint64_t progress = now % 120000;
         for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {
             if (y >= 0) {

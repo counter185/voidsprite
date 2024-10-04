@@ -19,6 +19,7 @@ public:
 	Timer64 lastClick;
 	
 	bool isOpen = false;
+	bool setTextToSelectedItem = false;
 	Timer64 openTimer;
 	int menuYOffset = 0;
 	int menuHeight = 0;
@@ -40,6 +41,7 @@ public:
 	void mouseHoverOut() override;
 	void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
+	bool shouldMoveToFrontOnFocus() override { return true; }
 
 	void eventButtonPressed(int evt_id) override;
 

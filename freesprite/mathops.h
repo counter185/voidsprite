@@ -19,6 +19,7 @@ struct hsv {
 
 
 void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_t colorDL, uint32_t colorDR);
+void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t colorUR, uint32_t colorDL, uint32_t colorDR);
 
 std::string pathInProgramDirectory(std::string path);
 
