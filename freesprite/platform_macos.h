@@ -39,7 +39,10 @@ constexpr const char* saveFileAppleScript =
 "end if\n";
 
 
-void platformPreInit() {}
+void platformPreInit() {
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
+}
 void platformInit() {}
 void platformPostInit() {
     g_addNotification(Notification("macOS Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
