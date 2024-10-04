@@ -149,8 +149,13 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
 }
 
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension) {
-    //todo :))
-    return {};
+    std::vector<PlatformNativePathString> ret;
+    for (const auto& file : std::filesystem::directory_iterator(path)) {
+        if (filterExtension == "" || stringEndsWithIgnoreCase(file.path(), convertStringOnWin32(filterExtension))) {
+            ret.push_back(file.path());
+        }
+    }
+    return ret;
 }
 
 Layer *platformGetImageFromClipboard() { return NULL; }
