@@ -7,12 +7,22 @@ void UISlider::drawPosIndicator(XY origin) {
 
 	XY centerPoint = xyAdd(origin, XY{ (int)(wxWidth * sliderPos), 0});
 	int xdist = 3;
-	SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
+	
 	for (int x = 0; x < 2; x++) {
-		int fxdist = xdist + x;
+		int fxdist = xdist + x;	
 		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist);
 		SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
-		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xd0);
+		//draws first triangle
+		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
+		SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
+		//draws top/bottom bars
+		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
+		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y - fxdist);
+		//draws second triangle
+		SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
+		SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
+		SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
 	}
 }
 
