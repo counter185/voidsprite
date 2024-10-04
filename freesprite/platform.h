@@ -23,6 +23,7 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
 void platformOpenFileLocation(PlatformNativePathString path);
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
+std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");
 
 Layer* platformGetImageFromClipboard();
 

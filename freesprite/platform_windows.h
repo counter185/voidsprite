@@ -164,7 +164,26 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     appdataDir += L"\\voidsprite\\";
     CreateDirectoryW(appdataDir.c_str(), NULL);
 
+    std::wstring subDir = appdataDir + L"patterns\\";
+    CreateDirectoryW(subDir.c_str(), NULL);
+
     return appdataDir;
+}
+
+std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension) {
+    std::vector<PlatformNativePathString> ret;
+    WIN32_FIND_DATAW findData;
+    HANDLE hFind = filterExtension == "" ? FindFirstFileW((path + L"\\*").c_str(), &findData) : FindFirstFileW((path + L"\\*" + convertStringOnWin32(filterExtension)).c_str(), &findData);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                continue;
+            }
+            ret.push_back(path + findData.cFileName);
+        } while (FindNextFileW(hFind, &findData));
+        FindClose(hFind);
+    }
+    return ret;
 }
 
 Layer* platformGetImageFromClipboard() {

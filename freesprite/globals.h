@@ -160,6 +160,8 @@ void g_addPopup(BasePopup* a);
 void g_popDisposeLastPopup(bool dispose = true);
 void g_closePopup(BasePopup* a);
 
+SDL_Texture* IMGLoadToTexture(std::string path);
+
 struct XY {
     int x, y;
 };

@@ -1,1 +1,61 @@
 #include "Pattern.h"
+#include "globals.h"
+#include "Notification.h"
+#include "LayerPalettized.h"
+#include "FileIO.h"
+
+void Pattern::tryLoadIcon()
+{
+	cachedIcon = IMGLoadToTexture(getIconPath());
+}
+
+CustomPattern* CustomPattern::load(PlatformNativePathString path)
+{
+    LayerPalettized* loadPBM = (LayerPalettized*)readAnymapPBM(path);
+    if (loadPBM != NULL) {
+        CustomPattern* ret = new CustomPattern(loadPBM);
+        delete loadPBM;
+        return ret;
+    }
+    g_addNotification(ErrorNotification("Error", "Can't load: " + convertStringToUTF8OnWin32(path)));
+    std::string err = "Can't load: " + convertStringToUTF8OnWin32(path);
+    printf("%s\n", err.c_str());
+    return NULL;
+}
+
+CustomPattern::CustomPattern(LayerPalettized* from)
+{
+    if (from != NULL) {
+        bitmap = (uint8_t*)malloc(from->w * from->h);
+        for (uint64_t p = 0; p < from->w * from->h; p++) {
+			bitmap[p] = ((uint32_t*)from->pixelData)[p] == 0 ? 0 : 1;
+		}
+        bitmapDimensions = XY{ from->w, from->h };
+    }
+}
+
+bool CustomPattern::canDrawAt(XY position)
+{
+    if (bitmap != NULL) {
+        if (position.x >= 0 && position.y >= 0) {
+			return bitmap[(position.x % bitmapDimensions.x) + (position.y % bitmapDimensions.y) * bitmapDimensions.x] == 1;
+		}
+    }
+    return true;
+}
+
+void CustomPattern::tryLoadIcon()
+{
+    if (bitmap != NULL) {
+        cachedIcon = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
+        int bitmapPitch;
+        uint32_t* iconBitmap;
+        SDL_LockTexture(cachedIcon, NULL, (void**)&iconBitmap, &bitmapPitch);
+        for (int y = 0; y < 22; y++) {
+            for (int x = 0; x < 22; x++) {
+                iconBitmap[x + y * 22] = canDrawAt({x/2,y/2}) ? 0xffffffff : 0x00000000;
+            }
+        }
+        SDL_UnlockTexture(cachedIcon);
+    }
+}

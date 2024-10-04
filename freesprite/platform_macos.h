@@ -193,10 +193,19 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     if (homeDir != NULL) {
 		std::string configDir = std::string(homeDir) + "/Library/Application Support/voidsprite/";
 	    mkdir(configDir.c_str(), 0777);
+
+        std::string subDir = configDir + "patterns/";
+        mkdir(subDir.c_str(), 0777);
+
         return configDir;
 	}
     g_addNotification(ErrorNotification("macOS error", "Failed to create config directory"));
     return "";
+}
+
+std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension) {
+    //todo :))
+    return {};
 }
 
 Layer *platformGetImageFromClipboard() { return NULL; }

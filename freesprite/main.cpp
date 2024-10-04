@@ -296,8 +296,15 @@ int main(int argc, char** argv)
     g_patterns.push_back(new PatternSquares2px());
     g_patterns.push_back(new PatternSquares3px());
     g_patterns.push_back(new PatternSquares4px());
+    auto customPatternPaths = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm");
+    for (auto& cpattern : customPatternPaths) {
+        CustomPattern* p = CustomPattern::load(cpattern);
+        if (p != NULL) {
+            g_patterns.push_back(p);
+        }
+    }
     for (Pattern*& pattern : g_patterns) {
-		pattern->cachedIcon = IMGLoadToTexture(pattern->getIconPath());
+        pattern->tryLoadIcon();
 	}
 
     g_loadConfig();

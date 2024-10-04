@@ -37,6 +37,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSPK(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSCR(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
@@ -57,6 +58,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data);
 bool writePythonNPArray(PlatformNativePathString path, Layer* data);
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data);
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data);
+bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
@@ -216,7 +218,8 @@ inline void g_setupIO() {
         *exPNG,
         *exBMP,
         *exCaveStoryPBM,
-        *exXYZ
+        *exXYZ,
+        *exAnymapPBM
         ;
 
     g_fileExporters.push_back( exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -229,6 +232,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exBMP = FileExporter::flatExporter("BMP (EasyBMP)", ".bmp", &writeBMP) );
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
     g_fileExporters.push_back( exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM) );
+    g_fileExporters.push_back( exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
@@ -261,6 +265,15 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("DDS (ddspp+s3tc open source+voidsprite custom)", ".dds", &readDDS));
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
+    g_fileImporters.push_back(FileImporter::flatImporter("Portable anymap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            //check if file starts with P1 or P4
+            char c[2];
+            fread(c, 2, 1, f);
+            fclose(f);
+            return c[0] == 'P' && (c[1] == '1' || c[1] == '4');
+        }));
     g_fileImporters.push_back(FileImporter::flatImporter("Mario Paint save file", ".srm", &readMarioPaintSRM, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com SPK file", ".spk", &readXComSPK, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com BDY file", ".bdy", &readXComBDY, NULL, FORMAT_PALETTIZED));

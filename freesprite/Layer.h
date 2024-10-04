@@ -247,7 +247,7 @@ public:
 		return (unsigned int)getUniqueColors(onlyRGB).size();
 	}
 
-	std::vector<uint32_t> getUniqueColors(bool onlyRGB = false) {
+	virtual std::vector<uint32_t> getUniqueColors(bool onlyRGB = false) {
 		std::map<uint32_t, int> cols;
 		uint32_t* pixels = (uint32_t*)pixelData;
 		for (uint64_t x = 0; x < w * h; x++) {

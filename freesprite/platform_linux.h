@@ -148,6 +148,11 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     return cpppath;
 }
 
+std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension) {
+    //todo :))
+    return {};
+}
+
 Layer *platformGetImageFromClipboard() { return NULL; }
 
 FILE *platformOpenFile(PlatformNativePathString path,

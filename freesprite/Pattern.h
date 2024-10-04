@@ -4,10 +4,12 @@
 class Pattern
 {
 public:
-	SDL_Texture* cachedIcon;
+	SDL_Texture* cachedIcon = NULL;
+
 	virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/pattern_default.png"; }
 	virtual std::string getName() { return "Pattern"; }
 	virtual bool canDrawAt(XY position) { return true; }
+	virtual void tryLoadIcon();
 };
 
 class PatternFull : public Pattern
@@ -184,4 +186,21 @@ class PatternSquares4px : public Pattern
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/pattern_sq_4x.png"; }
 	std::string getName() override { return "Squares - 4px"; }
 	bool canDrawAt(XY position) { return (position.x % 5) != 0 && (position.y % 5) != 0; }
+};
+
+class CustomPattern : public Pattern
+{
+public:
+	static CustomPattern* load(PlatformNativePathString path);
+
+	bool valid = false;
+	uint8_t* bitmap = NULL;
+	XY bitmapDimensions = { 0,0 };
+	std::string name = "Custom pattern";
+
+	CustomPattern(LayerPalettized* from);
+	std::string getName() override { return name; }
+	bool canDrawAt(XY position) override;
+	void tryLoadIcon() override;
+
 };
