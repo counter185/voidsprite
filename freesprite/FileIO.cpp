@@ -1667,7 +1667,7 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
 
 Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek)
 {
-    std::ifstream f(path);
+    std::ifstream f(path, std::ios::binary);
     if (f.is_open()) {
         LayerPalettized* ret = NULL;
         std::vector<uint32_t> palette = { 0xFF000000, 0xFFFFFFFF };
@@ -1701,7 +1701,87 @@ Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek)
         }
         else if (line == "P4") {
             //binary pbm
-            g_addNotification(ErrorNotification("Error", "Binary PBM not supported"));
+            int w, h;
+            while (f.peek() == '#') {
+                std::getline(f, line);
+            }
+            f >> w >> h;
+            ret = new LayerPalettized(w, h);
+            ((LayerPalettized*)ret)->palette = palette;
+            ret->name = "Anymap PBM layer";
+            uint64_t dataPointer = 0;
+            while (!f.eof() && dataPointer < w * h) {
+                uint8_t b;
+                f.read((char*)&b, 1);
+                for (int x = 0; x < 8; x++) {
+                    ret->setPixel({ (int)(dataPointer % w), (int)(dataPointer / w) }, (b & (1 << (7 - x))) ? 0 : 1);
+                    dataPointer++;
+                    if (dataPointer >= w * h) {
+                        break;
+                    }
+                }
+            }
+        }
+        f.close();
+        return ret;
+    }
+    return NULL;
+}
+
+Layer* readXBM(PlatformNativePathString path, uint64_t seek) {
+    std::ifstream f(path);
+    if (f.is_open()) {
+        int w = -1, h = -1;
+        LayerPalettized* ret = NULL;
+        while (ret == NULL && !f.eof()) {
+            std::string line;
+            std::getline(f, line);
+
+            if (line.find("#define") == 0) {
+                line = line.substr(line.find(' ')+1);
+                std::string defname = line.substr(0, line.find(' '));
+                std::string value = line.substr(line.find(' ')+1);
+                if (stringEndsWithIgnoreCase(defname, "_width")) {
+                    w = std::stoi(value);
+                }
+                else if (stringEndsWithIgnoreCase(defname, "_height")) {
+                    h = std::stoi(value);
+                }
+                else {
+                    printf("[XBM] invalid define: %s\n", defname.c_str());
+                }
+
+                if (w >= 0 && h >= 0) {
+                    ret = new LayerPalettized(w, h);
+                    ret->name = "XBM Layer";
+                    ret->palette = { 0xFF000000, 0xFFFFFFFF };
+                }
+            }
+        }
+        if (ret != NULL) {
+            uint64_t dataPointer = 0;
+            while (!f.eof() && dataPointer < w * h) {
+                std::string nextData;
+                f >> nextData;
+                while (nextData.find("0x") == 0) {
+                    uint8_t b = std::stoi(nextData, 0, 16);
+                    for (int x = 0; x < 8; x++) {
+                        ret->setPixel({ (int)(dataPointer % w), (int)(dataPointer / w) }, (b&1) ? 0 : 1);
+                        b >>= 1;
+                        dataPointer++;
+                        if (dataPointer >= w * h) {
+                            break;
+                        }
+                    }
+
+                    if (nextData.find(",") != std::string::npos) {
+                        nextData = nextData.substr(nextData.find(",")+1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
         }
         f.close();
         return ret;
@@ -2627,6 +2707,48 @@ bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
         fclose(nfile);
         return true;
     }
+    return false;
+}
+
+bool writeXBM(PlatformNativePathString path, Layer* data)
+{
+    auto uqColors = data->getUniqueColors();
+    if (uqColors.size() > 2) {
+        g_addNotification(ErrorNotification("Error", "Too many colors. X Bitmap requires 2."));
+        return false;
+    }
+
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+        fprintf(f, "#define voidsprite_export_width %i\n", data->w);
+        fprintf(f, "#define voidsprite_export_height %i\n", data->h);
+        fprintf(f, "static unsigned char voidsprite_export_bits[] = {\n");
+
+        uint32_t* pxd = (uint32_t*)data->pixelData;
+        for (uint64_t dataPointer = 0; dataPointer < data->w * data->h; dataPointer += 8) {
+            uint8_t byte = 0;
+            for (int bit = 0; bit < 8; bit++) {
+                if (dataPointer + bit < data->w * data->h) {
+                    uint32_t pxx = pxd[dataPointer + bit];
+                    if ((pxx & 0xFF000000) == 0) {
+                        pxx = 0;
+                    }
+                    if (pxx == uqColors[0]) {
+                        byte |= 1 << bit;
+                    }
+                }
+            }
+            fprintf(f, "0x%02X,", byte);
+            if ((dataPointer + 8) % data->w == 0) {
+                fprintf(f, "\n");
+            }
+        }
+
+        fprintf(f, "};\n");
+        fclose(f);
+        return true;
+    }
+
     return false;
 }
 

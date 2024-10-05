@@ -11,10 +11,17 @@ void Pattern::tryLoadIcon()
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)
 {
-    LayerPalettized* loadPBM = (LayerPalettized*)readAnymapPBM(path);
-    if (loadPBM != NULL) {
-        CustomPattern* ret = new CustomPattern(loadPBM);
-        delete loadPBM;
+    LayerPalettized* loadImage = NULL;
+    if (stringEndsWithIgnoreCase(path, convertStringOnWin32(".pbm"))) {
+        loadImage = (LayerPalettized*)readAnymapPBM(path);
+    }
+    else if (stringEndsWithIgnoreCase(path, convertStringOnWin32(".xbm"))) {
+        loadImage = (LayerPalettized*)readXBM(path);
+    }
+    
+    if (loadImage != NULL) {
+        CustomPattern* ret = new CustomPattern(loadImage);
+        delete loadImage;
         return ret;
     }
     g_addNotification(ErrorNotification("Error", "Can't load: " + convertStringToUTF8OnWin32(path)));

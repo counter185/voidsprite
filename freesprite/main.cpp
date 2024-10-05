@@ -296,7 +296,10 @@ int main(int argc, char** argv)
     g_patterns.push_back(new PatternSquares2px());
     g_patterns.push_back(new PatternSquares3px());
     g_patterns.push_back(new PatternSquares4px());
-    auto customPatternPaths = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm");
+    auto customPatternPaths = joinVectors({
+        platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm"),
+        platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".xbm")
+    });
     for (auto& cpattern : customPatternPaths) {
         CustomPattern* p = CustomPattern::load(cpattern);
         if (p != NULL) {
