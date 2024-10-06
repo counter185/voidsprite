@@ -17,7 +17,7 @@ void EditorBrushPicker::render(XY position)
 
     g_fnt->RenderString("TOOLS", position.x + 3, position.y + 1);
 
-    patternMenu->position = xyAdd({ 180, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
+    patternMenuPanel->position = xyAdd({ 180, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
 
     DraggablePanel::render(position);
 }
@@ -25,7 +25,7 @@ void EditorBrushPicker::render(XY position)
 void EditorBrushPicker::eventButtonPressed(int evt_id)
 {
     if (evt_id == EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU) {
-        patternMenu->enabled = !patternMenu->enabled;
+        patternMenuPanel->enabled = !patternMenuPanel->enabled;
         patternMenuTimer.start();
         patternPanelBtn->text = patternMenu->enabled ? "<" : ">";
     }
@@ -35,6 +35,7 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
     }
     else if (evt_id >= 60) {
         caller->currentPattern = g_patterns[evt_id - 60];
+        patternMenu->subWidgets.forceUnfocus();
         updateActivePatternButton(caller->currentPattern);
     }
 	else if (evt_id >= 20) {

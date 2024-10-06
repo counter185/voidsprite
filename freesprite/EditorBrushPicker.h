@@ -8,6 +8,7 @@
 #include "Pattern.h"
 #include "UILabel.h"
 #include "Panel.h"
+#include "ScrollingView.h"
 
 class EditorBrushPicker : public DraggablePanel, public EventCallbackListener
 {
@@ -17,7 +18,8 @@ public:
 	Timer64 patternMenuTimer;
 	UIButton* patternPanelBtn;
 	UIButton* editorReplaceBtn;
-	Panel* patternMenu;
+	Panel* patternMenuPanel;
+	ScrollingView* patternMenu;
 	std::vector<UIButton*> brushButtons;
 	std::vector<UIButton*> patternButtons;
 
@@ -46,15 +48,24 @@ public:
 		editorReplaceBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEREPLACE, this);
 		subWidgets.addDrawable(editorReplaceBtn);
 
-		patternMenu = new Panel();
-		patternMenu->enabled = false;
-		patternMenu->position = { 180, 0 };
-		subWidgets.addDrawable(patternMenu);
+		patternMenuPanel = new Panel();
+		patternMenuPanel->enabled = false;
+		patternMenuPanel->position = { 180, 0 };
+		subWidgets.addDrawable(patternMenuPanel);
 
 		UILabel* lbl = new UILabel();
 		lbl->position = { 0, 5 };
 		lbl->text = "PATTERNS";
-		patternMenu->subWidgets.addDrawable(lbl);
+		patternMenuPanel->subWidgets.addDrawable(lbl);
+
+		patternMenu = new ScrollingView();
+		patternMenu->scrollHorizontally = false;
+		patternMenu->scrollVertically = true;
+		patternMenu->wxWidth = 30 * 6 + 20;
+		patternMenu->wxHeight = 130;
+		patternMenu->position = { 0,30 };
+		patternMenu->bgColor = { 0,0,0,0x80 };
+		patternMenuPanel->subWidgets.addDrawable(patternMenu);
 
 		int px = 5;
 		int py = 40;
@@ -77,14 +88,14 @@ public:
 			subWidgets.addDrawable(newBtn);
 		}
 		
-		px = 0;
-		py = 30;
+		px = 5;
+		py = 0;
 		i = 0;
 		for (Pattern*& pattern : g_patterns) {
 			UIButton* newBtn = new UIButton();
 			if (px + 26 > wxWidth) {
 				py += 26;
-				px = 0;
+				px = 5;
 			}
 			newBtn->position = XY{ px, py };
 			px += 26;

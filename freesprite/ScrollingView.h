@@ -12,6 +12,7 @@ public:
     XY scrollOffset = XY{ 0,0 };
     int wxWidth = 200;
     int wxHeight = 200;
+    SDL_Color bgColor = { 0,0,0,0xe0 };
 
     ScrollingView() {
     }
@@ -24,7 +25,7 @@ public:
         updateBounds();
 
         SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-        SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0xe0);
+        SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
         SDL_RenderFillRect(g_rd, &r);
 
         //DEBUG: show bounds
@@ -33,7 +34,9 @@ public:
         SDL_Rect r2 = { position.x + scrollOffset.x, position.y + scrollOffset.y, endpoint.x, endpoint.y };
         SDL_RenderDrawRect(g_rd, &r2);*/
 
+        g_pushClip(r);
         subWidgets.renderAll(xyAdd(position, scrollOffset));
+        g_popClip();
         //tabs[openTab].wxs.renderAll(xyAdd(position, XY{ 0, buttonsHeight }));
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override {

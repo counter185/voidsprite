@@ -154,6 +154,16 @@ void g_switchScreen(int index) {
     }
 }
 
+std::vector<SDL_Rect> clips;
+void g_pushClip(SDL_Rect r) {
+    clips.push_back(r);
+    SDL_RenderSetClipRect(g_rd, &r);
+}
+void g_popClip() {
+    clips.pop_back();
+    SDL_RenderSetClipRect(g_rd, clips.size() == 0 ? NULL : &clips[clips.size() - 1]);
+}
+
 
 SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());

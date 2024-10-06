@@ -20,9 +20,11 @@ CustomPattern* CustomPattern::load(PlatformNativePathString path)
     }
     
     if (loadImage != NULL) {
-        CustomPattern* ret = new CustomPattern(loadImage);
-        delete loadImage;
-        return ret;
+        if (loadImage->w != 0 && loadImage->h != 0) {
+            CustomPattern* ret = new CustomPattern(loadImage);
+            delete loadImage;
+            return ret;
+        }
     }
     g_addNotification(ErrorNotification("Error", "Can't load: " + convertStringToUTF8OnWin32(path)));
     std::string err = "Can't load: " + convertStringToUTF8OnWin32(path);
