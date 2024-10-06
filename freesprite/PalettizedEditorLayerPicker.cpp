@@ -62,7 +62,11 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     duplicateBtn->setCallbackListener(-6, this);
     subWidgets.addDrawable(duplicateBtn);
 
-    layerListPanel = new Panel();
-    layerListPanel->position = { 5, 100 };
+    layerListPanel = new ScrollingPanel();
+    layerListPanel->position = { 5, 80 };
+    layerListPanel->scrollHorizontally = false;
+    layerListPanel->scrollVertically = true;
+    layerListPanel->wxWidth = wxWidth - 10;
+    layerListPanel->wxHeight = wxHeight - layerListPanel->position.y - 5;
     subWidgets.addDrawable(layerListPanel);
 }

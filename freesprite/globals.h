@@ -103,7 +103,7 @@ class UISlider;
 class UITextField;
 class UICheckbox;
 class Panel;
-class ScrollingView;
+class ScrollingPanel;
 
 
 template <typename T>

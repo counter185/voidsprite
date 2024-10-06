@@ -23,7 +23,7 @@ public:
 
     bool closeNextTick = false;
 
-    ScrollingView* spriteView;
+    ScrollingPanel* spriteView;
     ScreenWideNavBar<SpritesheetPreviewScreen*>* navbar = NULL;
 
     SpritesheetPreviewScreen(MainEditor* parent);

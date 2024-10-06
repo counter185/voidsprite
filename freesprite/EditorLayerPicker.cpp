@@ -77,8 +77,12 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     opacitySlider->setCallbackListener(EVENT_LAYERPICKER_OPACITYSLIDER, this);
     subWidgets.addDrawable(opacitySlider);
 
-    layerListPanel = new Panel();
+    layerListPanel = new ScrollingPanel();
     layerListPanel->position = { 5, 100 };
+    layerListPanel->scrollHorizontally = false;
+    layerListPanel->scrollVertically = true;
+    layerListPanel->wxWidth = wxWidth - 10;
+    layerListPanel->wxHeight = wxHeight - layerListPanel->position.y - 5;
     subWidgets.addDrawable(layerListPanel);
 }
 

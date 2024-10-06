@@ -216,7 +216,7 @@
     <ClCompile Include="libpng\pngwtran.c" />
     <ClCompile Include="libpng\pngwutil.c" />
     <ClCompile Include="MinecraftSkinPreviewScreen.cpp" />
-    <ClCompile Include="ScrollingView.cpp" />
+    <ClCompile Include="ScrollingPanel.cpp" />
     <ClCompile Include="ToolRectMove.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
@@ -332,7 +332,7 @@
     <ClInclude Include="libpng\pngpriv.h" />
     <ClInclude Include="libpng\pngstruct.h" />
     <ClInclude Include="MinecraftSkinPreviewScreen.h" />
-    <ClInclude Include="ScrollingView.h" />
+    <ClInclude Include="ScrollingPanel.h" />
     <ClInclude Include="ToolRectMove.h" />
     <ClInclude Include="colors.h" />
     <ClInclude Include="ddspp\ddspp.h" />

@@ -8,7 +8,7 @@
 #include "Pattern.h"
 #include "UILabel.h"
 #include "Panel.h"
-#include "ScrollingView.h"
+#include "ScrollingPanel.h"
 
 class EditorBrushPicker : public DraggablePanel, public EventCallbackListener
 {
@@ -19,7 +19,7 @@ public:
 	UIButton* patternPanelBtn;
 	UIButton* editorReplaceBtn;
 	Panel* patternMenuPanel;
-	ScrollingView* patternMenu;
+	ScrollingPanel* patternMenu;
 	std::vector<UIButton*> brushButtons;
 	std::vector<UIButton*> patternButtons;
 
@@ -58,7 +58,7 @@ public:
 		lbl->text = "PATTERNS";
 		patternMenuPanel->subWidgets.addDrawable(lbl);
 
-		patternMenu = new ScrollingView();
+		patternMenu = new ScrollingPanel();
 		patternMenu->scrollHorizontally = false;
 		patternMenu->scrollVertically = true;
 		patternMenu->wxWidth = 30 * 6 + 20;

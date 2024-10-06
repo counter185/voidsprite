@@ -4,6 +4,7 @@
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
 #include "DraggablePanel.h"
+#include "ScrollingPanel.h"
 
 class EditorLayerPicker : public DraggablePanel, public EventCallbackListener
 {
@@ -11,7 +12,7 @@ protected:
 	EditorLayerPicker() {};
 public:
 	MainEditor* caller;
-	Panel* layerListPanel;
+	ScrollingPanel* layerListPanel;
 	UISlider* opacitySlider = NULL;
 
 	EditorLayerPicker(MainEditor* editor);

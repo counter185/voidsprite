@@ -3,7 +3,7 @@
 #include "EventCallbackListener.h"
 #include "Panel.h"
 
-class ScrollingView :
+class ScrollingPanel :
     public Panel, public EventCallbackListener
 {
 public:
@@ -14,7 +14,7 @@ public:
     int wxHeight = 200;
     SDL_Color bgColor = { 0,0,0,0xe0 };
 
-    ScrollingView() {
+    ScrollingPanel() {
     }
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
@@ -42,15 +42,17 @@ public:
     void handleInput(SDL_Event evt, XY gPosOffset) override {
         DrawableManager::processHoverEventInMultiple({ subWidgets }, evt, xyAdd(gPosOffset, scrollOffset));
 
-        if (!DrawableManager::processInputEventInMultiple({subWidgets}, evt, xyAdd(gPosOffset, scrollOffset))) {
-            if (evt.type == SDL_MOUSEWHEEL) {
-                if (scrollVertically) {
-                    scrollOffset.y += evt.wheel.y * 20;
-                }
-                else if (scrollHorizontally) {
-                    scrollOffset.x += evt.wheel.y * 20;
-                }
+        if (evt.type == SDL_MOUSEWHEEL) {
+            if (scrollVertically) {
+                scrollOffset.y += evt.wheel.y * 20;
             }
+            else if (scrollHorizontally) {
+                scrollOffset.x += evt.wheel.y * 20;
+            }
+        }
+
+        if (!DrawableManager::processInputEventInMultiple({subWidgets}, evt, xyAdd(gPosOffset, scrollOffset))) {
+            
         }
     }
 

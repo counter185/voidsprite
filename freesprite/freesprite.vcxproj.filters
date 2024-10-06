@@ -279,7 +279,7 @@
     <ClCompile Include="ToolRectMove.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
-    <ClCompile Include="ScrollingView.cpp">
+    <ClCompile Include="ScrollingPanel.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="Brush1x1ArcX.cpp">
@@ -650,7 +650,7 @@
     <ClInclude Include="ToolRectMove.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
-    <ClInclude Include="ScrollingView.h">
+    <ClInclude Include="ScrollingPanel.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ee_creature.h">

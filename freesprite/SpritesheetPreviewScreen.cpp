@@ -4,7 +4,7 @@
 #include "UILabel.h"
 #include "UITextField.h"
 #include "EditorSpritesheetPreview.h"
-#include "ScrollingView.h"
+#include "ScrollingPanel.h"
 #include "PanelSpritesheetPreview.h"
 
 #define N_BUTTONS_ADDED_TO_TIMELINE 3
@@ -45,7 +45,7 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     wxsManager.addDrawable(navbar);
 
 
-    spriteView = new ScrollingView();
+    spriteView = new ScrollingPanel();
     spriteView->scrollHorizontally = true;
     spriteView->scrollVertically = false;
     spriteView->wxWidth = 200;
