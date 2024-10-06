@@ -6,6 +6,7 @@ struct GlobalConfig {
     int animatedBackground = 1; //0:off, 1:sharp, 2:smooth, 3:sharp(static), 4:smooth(static)
     int maxUndoHistory = 20;
     bool scrollWithTouchpad = false;
+    bool isolateRectOnLockTile = false;
 };
 
 inline GlobalConfig g_config;
@@ -18,6 +19,7 @@ inline bool g_saveConfig() {
         file << "animatedBackground=" << std::to_string(g_config.animatedBackground) << std::endl;
         file << "maxUndoHistory=" << std::to_string(g_config.maxUndoHistory) << std::endl;
         file << "scrollWithTouchpad=" << (g_config.scrollWithTouchpad ? "1" : "0") << std::endl;
+        file << "isolateRectOnLockTile=" << (g_config.isolateRectOnLockTile ? "1" : "0") << std::endl;
         file.close();
         return true;
     }
@@ -42,6 +44,7 @@ inline void g_loadConfig() {
         if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception) {} }
         if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception) {} }
         if (config.contains("scrollWithTouchpad")) { g_config.scrollWithTouchpad = config["scrollWithTouchpad"] == "1"; }
+        if (config.contains("isolateRectOnLockTile")) { g_config.isolateRectOnLockTile = config["isolateRectOnLockTile"] == "1"; }
 
         file.close();
     }

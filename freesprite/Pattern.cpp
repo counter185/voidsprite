@@ -22,6 +22,8 @@ CustomPattern* CustomPattern::load(PlatformNativePathString path)
     if (loadImage != NULL) {
         if (loadImage->w != 0 && loadImage->h != 0) {
             CustomPattern* ret = new CustomPattern(loadImage);
+            PlatformNativePathString fileNameWithNoPathAndExtension = path.substr(path.find_last_of(convertStringOnWin32("/\\")) + 1);
+            ret->name = convertStringToUTF8OnWin32(fileNameWithNoPathAndExtension.substr(0, fileNameWithNoPathAndExtension.find_last_of(convertStringOnWin32("."))));
             delete loadImage;
             return ret;
         }

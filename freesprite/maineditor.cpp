@@ -992,6 +992,10 @@ void MainEditor::takeInput(SDL_Event evt) {
                                         mouseInCanvasPoint.x / tileDimensions.x,
                                         mouseInCanvasPoint.y / tileDimensions.y
                                     };
+                                    if (g_config.isolateRectOnLockTile) {
+                                        isolateEnabled = true;
+                                        isolateRect = { tileToLock.x * tileDimensions.x, tileToLock.y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
+                                    }
                                     if (tileToLock.x >= 0 && tileToLock.y >= 0) {
                                         lockedTilePreview = tileToLock;
                                         tileLockTimer.start();

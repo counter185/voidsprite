@@ -12,7 +12,8 @@ enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
     CHECKBOX_ANIMATED_BACKGROUND = 2,
     TEXTFIELD_MAX_UNDO_HISTORY_SIZE = 3,
-    CHECKBOX_SCROLL_WITH_TOUCHPAD = 4
+    CHECKBOX_SCROLL_WITH_TOUCHPAD = 4,
+    CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE = 5
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -62,6 +63,13 @@ PopupGlobalConfig::PopupGlobalConfig()
     tf2->text = std::to_string(g_config.maxUndoHistory);
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
     configTabs->tabs[0].wxs.addDrawable(tf2);
+    posInTab.y += 35;
+
+    UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", g_config.isolateRectOnLockTile);
+    cb4->position = posInTab;
+    cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
+    cb4->setCallbackListener(CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE, this);
+    configTabs->tabs[0].wxs.addDrawable(cb4);
     posInTab.y += 35;
 
     UIButton* closeButton = new UIButton();
@@ -118,6 +126,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_SCROLL_WITH_TOUCHPAD:
             g_config.scrollWithTouchpad = checked;
+            break;
+        case CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE:
+            g_config.isolateRectOnLockTile = checked;
             break;
     }
 }
