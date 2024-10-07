@@ -194,7 +194,7 @@ class PatternRandom : public Pattern
 public:
 	PatternRandom(int randomDiv) { d = randomDiv; }
 
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH + std::format("assets/pattern_rand_{}.png", d); }
+	std::string getIconPath() override { return std::string(VOIDSPRITE_ASSETS_PATH) + std::format("assets/pattern_rand_{}.png", d); }
 	std::string getName() override { return std::format("Random ({}%)", (int)((1.0/d) * 100)); }
 	bool canDrawAt(XY position) { return (rand() % d) == 0; }
 };
