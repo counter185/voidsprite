@@ -553,7 +553,7 @@ void MainEditor::setUpWidgets()
             SDLK_e,
             {
                 "Edit",
-                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v, SDLK_b, SDLK_n},
+                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_s, SDLK_c, SDLK_v, SDLK_b, SDLK_n},
                 {
                     {SDLK_z, { "Undo",
                             [](MainEditor* editor) {
@@ -582,6 +582,12 @@ void MainEditor::setUpWidgets()
                     {SDLK_c, { "Resize canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", XY{editor->texW, editor->texH}, EVENT_MAINEDITOR_RESIZELAYER));
+                            }
+                        }
+                    },
+                    {SDLK_s, { "Deselect",
+                            [](MainEditor* editor) {
+                                editor->isolateEnabled = false;
                             }
                         }
                     },

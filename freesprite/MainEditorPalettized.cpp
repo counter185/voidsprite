@@ -320,7 +320,7 @@ void MainEditorPalettized::setUpWidgets()
             SDLK_e,
             {
                 "Edit",
-                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_c, SDLK_v, SDLK_b, SDLK_n},
+                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_s, SDLK_c, SDLK_v, SDLK_b, SDLK_n},
                 {
                     {SDLK_z, { "Undo",
                             [](MainEditor* editor) {
@@ -343,6 +343,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDLK_y, { "Toggle symmetry: Y",
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
+                            }
+                        }
+                    },
+                    {SDLK_s, { "Deselect",
+                            [](MainEditor* editor) {
+                                editor->isolateEnabled = false;
                             }
                         }
                     },
