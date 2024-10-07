@@ -106,13 +106,13 @@ void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 
 void UIDropdown::eventButtonPressed(int evt_id)
 {
-	if (callback != NULL) {
-		callback->eventDropdownItemSelected(callback_id, evt_id, items[evt_id]);
-	}
 	if (setTextToSelectedItem) {
 		text = items[evt_id];
 	}
 	isOpen = false;
+	if (callback != NULL) {
+		callback->eventDropdownItemSelected(callback_id, evt_id, items[evt_id]);
+	}
 }
 
 void UIDropdown::genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item))
