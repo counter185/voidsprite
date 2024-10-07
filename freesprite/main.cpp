@@ -327,6 +327,10 @@ int main(int argc, char** argv)
     g_patterns.push_back(new PatternSquares2px());
     g_patterns.push_back(new PatternSquares3px());
     g_patterns.push_back(new PatternSquares4px());
+    g_patterns.push_back(new PatternRandom(2));
+    g_patterns.push_back(new PatternRandom(4));
+    g_patterns.push_back(new PatternRandom(8));
+    g_patterns.push_back(new PatternRandom(16));
     auto customPatternPaths = joinVectors({
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm"),
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".xbm")

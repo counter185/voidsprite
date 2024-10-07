@@ -13,7 +13,9 @@ enum ConfigOptions : int {
     CHECKBOX_ANIMATED_BACKGROUND = 2,
     TEXTFIELD_MAX_UNDO_HISTORY_SIZE = 3,
     CHECKBOX_SCROLL_WITH_TOUCHPAD = 4,
-    CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE = 5
+    CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE = 5,
+    BUTTON_OPEN_CONFIG_DIR,
+
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -27,6 +29,12 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
 
+
+    /*
+        -------------------------
+        EDITOR TAB
+        -------------------------
+    */
     XY posInTab = { 0,10 };
 
     UICheckbox* cb1 = new UICheckbox("Open saved file location", g_config.openSavedPath);
@@ -72,6 +80,22 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].wxs.addDrawable(cb4);
     posInTab.y += 35;
 
+    /*
+        -------------------------
+        MISC TAB
+        -------------------------
+    */
+    posInTab = { 0,10 };
+    UIButton* btn = new UIButton();
+    btn->text = "Open app data directory";
+    btn->tooltip = "Open the directory where voidsprite stores its data.";
+    btn->position = posInTab;
+    btn->wxWidth = 230;
+    btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
+    configTabs->tabs[1].wxs.addDrawable(btn);
+    posInTab.y += 35;
+
+
     UIButton* closeButton = new UIButton();
     closeButton->text = "Close";
     closeButton->position = XY{ wxWidth - 140, wxHeight - 40 };
@@ -115,6 +139,9 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
         else {
             g_addNotification(ErrorNotification("Error", "Failed to save preferences"));
         }
+    }
+    else if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
+        platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
     }
 }
 

@@ -188,6 +188,17 @@ class PatternSquares4px : public Pattern
 	bool canDrawAt(XY position) { return (position.x % 5) != 0 && (position.y % 5) != 0; }
 };
 
+class PatternRandom : public Pattern
+{
+	int d;
+public:
+	PatternRandom(int randomDiv) { d = randomDiv; }
+
+	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH + std::format("assets/pattern_rand_{}.png", d); }
+	std::string getName() override { return std::format("Random ({}%)", (int)((1.0/d) * 100)); }
+	bool canDrawAt(XY position) { return (rand() % d) == 0; }
+};
+
 class CustomPattern : public Pattern
 {
 public:
