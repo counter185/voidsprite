@@ -65,6 +65,13 @@ By default, the generated output files will be placed in `/tmp/voidsprite`. When
 
 You can also build the program as a Flatpak, see [Flatpak README](https://github.com/counter185/voidsprite/blob/main/freesprite/linux/flatpak/README.md).
 
+## Community
+
+You may find the [Official Discord server](https://discord.gg/c5SndMJKj2)here.
+
+[Itch.io page](https://cntrpl.itch.io/voidsprite)
+
+
 ## Licenses
 
 voidsprite is licensed under GPLv2.
