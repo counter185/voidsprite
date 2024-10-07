@@ -12,6 +12,7 @@ public:
     std::string title = "";
     std::string text = "";
     std::vector<XY> predefinedTileSizes = {
+        {0,0},
         {8,8},
         {16,16},
         {32,32},
