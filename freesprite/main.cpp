@@ -282,6 +282,7 @@ int main(int argc, char** argv)
     //load brushes
     g_brushes.push_back(new Brush1x1());
     g_brushes.push_back(new Brush1x1PixelPerfect());
+    g_brushes.push_back(new Brush1x1Burst());
     g_brushes.push_back(new Brush1x1ArcX());
     g_brushes.push_back(new Brush1x1ArcY());
     g_brushes.push_back(new Brush3pxCircle());

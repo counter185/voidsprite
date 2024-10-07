@@ -27,7 +27,7 @@ public:
 		this->caller = caller;
 
 		wxWidth = 190;
-		wxHeight = 165;
+		wxHeight = 195;
 
 		patternPanelBtn = new UIButton();
 		patternPanelBtn->position = { 141, 10 };
