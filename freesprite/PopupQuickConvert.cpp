@@ -74,59 +74,8 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 		SDL_free(evt.drop.file);
 
 		MainEditor* session = loadAnyIntoSession(path);
-		if (session != NULL) {
-
-			FileExporter* exporter = g_fileExporters[exporterIndex];
-
-			if (exporter->exportsWholeSession()) {
-
-				if (session->isPalettized && (checkForceRGB->isChecked() || (exporter->formatFlags() & FORMAT_PALETTIZED) == 0)) {
-					MainEditor* rgbConvEditor = ((MainEditorPalettized*)session)->toRGBSession();
-					delete session;
-					session = rgbConvEditor;
-				}
-
-				outPath += convertStringOnWin32(exporter->extension());
-
-				if (exporter->exportData(outPath, session)) {
-					g_addNotification(SuccessNotification("Success", "Exported file"));
-				}
-				else {
-					g_addNotification(ErrorNotification("Error", "Failed to export file"));
-				}
-			}
-			else {
-				Layer* l = NULL;
-
-				if (session->isPalettized) {
-					if (!checkForceRGB->isChecked() && (exporter->formatFlags() & FORMAT_PALETTIZED) != 0) {
-						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
-						l = upcastSession->flattenImageWithoutConvertingToRGB();
-					}
-					else {
-						MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
-						l = upcastSession->flattenImageAndConvertToRGB();
-					}
-				}
-				else {
-					l = session->flattenImage();
-				}
-
-				outPath += convertStringOnWin32(exporter->extension());
-
-				if (exporter->exportData(outPath, l)) {
-					g_addNotification(SuccessNotification("Success", "Exported file"));
-				}
-				else {
-					g_addNotification(ErrorNotification("Error", "Failed to export file"));
-				}
-				delete l;
-			}
-			delete session;
-		}
-		else {
-			g_addNotification(ErrorNotification("Error", "Failed to load file"));
-		}
+		FileExporter* exporter = g_fileExporters[exporterIndex];
+		doQuickConvert(session, outPath, exporter, checkForceRGB->isChecked());
     }
 }
 
@@ -134,4 +83,76 @@ void PopupQuickConvert::eventDropdownItemSelected(int evt_id, int index, std::st
 {
 	exporterIndex = index;
 	pickExportFormat->text = name;
+}
+
+void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathString outPath, FileExporter* exporter, bool forceConvertRGB)
+{
+	if (exporter == NULL) {
+		for (FileExporter*& e : g_fileExporters) {
+			if (stringEndsWithIgnoreCase(outPath, convertStringOnWin32(e->extension()))) {
+				exporter = e;
+				break;
+			}
+		}
+	}
+	if (exporter == NULL) {
+		g_addNotification(ErrorNotification("Error", "No exporter found for this file"));
+		printf("No exporter found for file %s\n", convertStringToUTF8OnWin32(outPath).c_str());
+		delete session;
+		return;
+	}
+
+	if (session != NULL) {
+
+		if (exporter->exportsWholeSession()) {
+
+			if (session->isPalettized && (forceConvertRGB || (exporter->formatFlags() & FORMAT_PALETTIZED) == 0)) {
+				MainEditor* rgbConvEditor = ((MainEditorPalettized*)session)->toRGBSession();
+				delete session;
+				session = rgbConvEditor;
+			}
+
+			outPath += convertStringOnWin32(exporter->extension());
+
+			if (exporter->exportData(outPath, session)) {
+				g_addNotification(SuccessNotification("Success", "Exported file"));
+			}
+			else {
+				g_addNotification(ErrorNotification("Error", "Failed to export file"));
+			}
+		}
+		else {
+			Layer* l = NULL;
+
+			if (session->isPalettized) {
+				if (!forceConvertRGB && (exporter->formatFlags() & FORMAT_PALETTIZED) != 0) {
+					MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
+					l = upcastSession->flattenImageWithoutConvertingToRGB();
+				}
+				else {
+					MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
+					l = upcastSession->flattenImageAndConvertToRGB();
+				}
+			}
+			else {
+				l = session->flattenImage();
+			}
+
+			if (!stringEndsWithIgnoreCase(outPath, convertStringOnWin32(exporter->extension()))) {
+				outPath += convertStringOnWin32(exporter->extension());
+			}
+
+			if (exporter->exportData(outPath, l)) {
+				g_addNotification(SuccessNotification("Success", "Exported file"));
+			}
+			else {
+				g_addNotification(ErrorNotification("Error", "Failed to export file"));
+			}
+			delete l;
+		}
+		delete session;
+	}
+	else {
+		g_addNotification(ErrorNotification("Error", "Failed to load file"));
+	}
 }

@@ -193,8 +193,29 @@ void UpdateViewportScaler(){
 
 int main(int argc, char** argv)
 {
+    bool convert = false, convertReadingSrc = false;
+    std::vector<std::pair<std::string, std::string>> convertTargets;
+
     for (int arg = 1; arg < argc; arg++) {
-        g_cmdlineArgs.push_back(std::string(argv[arg]));
+        std::string a = std::string(argv[arg]);
+        if (a == "--convert") {
+            convert = true;
+            convertReadingSrc = true;
+        }
+        else if (convert) {
+            if (convertReadingSrc) {
+                convertTargets.push_back({ a, "" });
+				convertReadingSrc = false;
+			}
+			else {
+				convertTargets[convertTargets.size() - 1].second = a;
+				convertReadingSrc = false;
+                convert = false;
+			}
+        }
+        else {
+            g_cmdlineArgs.push_back(a);
+        }
     }
     g_programDirectory = std::string(argv[0]);
     g_programDirectory = g_programDirectory.substr(0, g_programDirectory.find_last_of("/\\"));
@@ -330,6 +351,12 @@ int main(int argc, char** argv)
     g_addScreen(new StartScreen());
 
     platformPostInit();
+
+    //run conversions
+    for (auto& c : convertTargets) {
+        MainEditor* sn = loadAnyIntoSession(c.first);
+        PopupQuickConvert::doQuickConvert(sn, convertStringOnWin32(c.second));
+    }
 
     SDL_Event evt;
     while (!screenStack.empty()) {

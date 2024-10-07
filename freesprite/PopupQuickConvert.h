@@ -25,5 +25,7 @@ public:
 
     void onDropFileEvent(SDL_Event evt);
     void eventDropdownItemSelected(int evt_id, int index, std::string name);
+
+    static void doQuickConvert(MainEditor* session, PlatformNativePathString outPath, FileExporter* exporter = NULL, bool forceConvertRGB = false);
 };
 
