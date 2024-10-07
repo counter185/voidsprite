@@ -1765,14 +1765,16 @@ Layer* readXBM(PlatformNativePathString path, uint64_t seek) {
                 f >> nextData;
                 while (nextData.find("0x") == 0) {
                     uint8_t b = std::stoi(nextData, 0, 16);
-                    for (int x = 0; x < 8; x++) {
-                        ret->setPixel({ (int)(dataPointer % w), (int)(dataPointer / w) }, (b&1) ? 0 : 1);
+                    for (int x = 0; x < ixmin(w, 8); x++) {
+                        XY position = { dataPointer % w + x, dataPointer / w };
+                        ret->setPixel(position, (b & 1) ? 0 : 1);
                         b >>= 1;
-                        dataPointer++;
+
                         if (dataPointer >= w * h) {
                             break;
                         }
                     }
+                    dataPointer += ixmin(w, 8);
 
                     if (nextData.find(",") != std::string::npos) {
                         nextData = nextData.substr(nextData.find(",")+1);
@@ -2725,23 +2727,27 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
         fprintf(f, "static unsigned char voidsprite_export_bits[] = {\n");
 
         uint32_t* pxd = (uint32_t*)data->pixelData;
-        for (uint64_t dataPointer = 0; dataPointer < data->w * data->h; dataPointer += 8) {
-            uint8_t byte = 0;
-            for (int bit = 0; bit < 8; bit++) {
-                if (dataPointer + bit < data->w * data->h) {
-                    uint32_t pxx = pxd[dataPointer + bit];
-                    if ((pxx & 0xFF000000) == 0) {
-                        pxx = 0;
-                    }
-                    if (pxx == uqColors[0]) {
-                        byte |= 1 << bit;
+        for (int y = 0; y < data->h; y++) {
+            for (int x = 0; x < (int)ceil(ixmax(data->w, 8) / 8.0); x++) {
+                XY origin = { x * 8, y };
+                uint8_t byte = 0;
+
+                for (int bit = 0; bit < 8; bit++) {
+                    XY position = xyAdd(origin, { bit, 0 });
+                    if (pointInBox(position, {0,0,data->w, data->h})) {
+                        uint32_t pxx = pxd[position.y * data->w + position.x];
+                        /*if ((pxx & 0xFF000000) == 0) {
+                            pxx = 0;
+                        }*/
+                        //1 - black, 0 - white
+                        if (pxx != uqColors[1]) {
+                            byte |= 1 << bit;
+                        }
                     }
                 }
+                fprintf(f, "0x%02X,", byte);
             }
-            fprintf(f, "0x%02X,", byte);
-            if ((dataPointer + 8) % data->w == 0) {
-                fprintf(f, "\n");
-            }
+            fprintf(f, "\n");
         }
 
         fprintf(f, "};\n");
