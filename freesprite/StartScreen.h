@@ -43,15 +43,6 @@ public:
 
     bool closeNextTick = false;
 
-    std::vector<BaseTemplate*> tab2templates = {
-        new TemplateRPG2KCharset(),
-        new TemplateRPG2KChipset(),
-        new TemplateRPG2KFaceset(),
-        new TemplateRPG2KSystem(),
-        new TemplateRPG2KBattleAnim(),
-        new TemplateMC64x32Skin()
-    };
-
     StartScreen() {
         newImageTabs = new TabbedView({ {"Pixel dimensions", g_iconMenuPxDim}, {"Sprites/Tiles", g_iconMenuSpritesheet}, {"Templates", g_iconMenuTemplates} }, 180);
         newImageTabs->position = XY{ 10, 110 };
@@ -133,7 +124,7 @@ public:
         newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
         std::vector<std::pair<std::string, std::string>> templates;
-        for (BaseTemplate*& templ : tab2templates) {
+        for (BaseTemplate*& templ : g_templates) {
             templates.push_back({ templ->getName(), templ->getTooltip() });
         }
         UIDropdown* templatesDropdown = new UIDropdown(templates);
@@ -236,7 +227,8 @@ public:
     void eventButtonPressed(int evt_id) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
-
+    
+    void loadCustomTemplates();
     void renderBackground();
     void openImageLoadDialog();
     void tryLoadFile(std::string path);

@@ -4,6 +4,7 @@
 #include "FileIO.h"
 #include "PopupMessageBox.h"
 #include "Notification.h"
+#include "CustomTemplate.h"
 
 void StartScreen::tick() {
     if (closeNextTick) {
@@ -183,13 +184,13 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
     if (evt_id == EVENT_STARTSCREEN_TEMPLATEPICKED) {
-        BaseTemplate* templ = tab2templates[index];
+        BaseTemplate* templ = g_templates[index];
         MainEditor* newMainEditor = new MainEditor(templ->generate());
         std::vector<CommentData> templateComments = templ->placeComments();
         for (CommentData& comment : templateComments) {
             newMainEditor->comments.push_back(comment);
         }
-        newMainEditor->tileDimensions = tab2templates[index]->tileSize();
+        newMainEditor->tileDimensions = g_templates[index]->tileSize();
         g_addScreen(newMainEditor);
     }
 }

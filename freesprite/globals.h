@@ -83,6 +83,9 @@ class Timer64;
 class TooltipsLayer;
 class FileExporter;
 
+//templates
+class BaseTemplate;
+
 //screens/popups
 class BaseScreen;
 class BasePopup;
@@ -129,6 +132,7 @@ extern Gamepad* g_gamepad;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
 extern std::vector<Pattern*> g_patterns;
+extern std::vector<BaseTemplate*> g_templates;
 inline double g_deltaTime = 1.0;
 
 extern std::vector<std::string> g_cmdlineArgs;

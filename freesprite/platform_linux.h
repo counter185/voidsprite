@@ -23,6 +23,7 @@ extern char **environ;
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/templates");
 }
 void platformInit() {}
 void platformPostInit() {}

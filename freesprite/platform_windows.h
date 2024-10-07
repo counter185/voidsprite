@@ -167,6 +167,9 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     std::wstring subDir = appdataDir + L"patterns\\";
     CreateDirectoryW(subDir.c_str(), NULL);
 
+    subDir = appdataDir + L"templates\\";
+    CreateDirectoryW(subDir.c_str(), NULL);
+
     return appdataDir;
 }
 

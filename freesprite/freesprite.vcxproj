@@ -173,6 +173,7 @@
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="ButtonStartScreenSession.cpp" />
+    <ClCompile Include="CustomTemplate.cpp" />
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
@@ -290,6 +291,7 @@
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="ButtonStartScreenSession.h" />
+    <ClInclude Include="CustomTemplate.h" />
     <ClInclude Include="DraggablePanel.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="LayerPalettized.h" />

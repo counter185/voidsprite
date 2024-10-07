@@ -854,7 +854,9 @@ void MainEditor::zoom(int how_much)
 
 bool MainEditor::isInBounds(XY pos)
 {
-    return pos.x >= 0 && pos.x < texW && pos.y >= 0 && pos.y < texH;
+    return
+        pointInBox(pos, { 0,0,texW,texH })
+        && (!isolateEnabled || (isolateEnabled && pointInBox(pos, isolateRect)));
 }
 
 void MainEditor::takeInput(SDL_Event evt) {

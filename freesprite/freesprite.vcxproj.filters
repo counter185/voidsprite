@@ -438,6 +438,9 @@
     <ClCompile Include="ToolRectIsolate.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="CustomTemplate.cpp">
+      <Filter>Source files\templates</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -808,6 +811,9 @@
     </ClInclude>
     <ClInclude Include="ToolRectIsolate.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomTemplate.h">
+      <Filter>Header files\templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

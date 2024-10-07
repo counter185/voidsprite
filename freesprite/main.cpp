@@ -23,6 +23,7 @@
 #include "FileIO.h"
 #include "TooltipsLayer.h"
 #include "ButtonStartScreenSession.h"
+#include "CustomTemplate.h"
 
 #include "ee_creature.h"
 
@@ -74,6 +75,7 @@ SDL_Texture* g_iconNewColor = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
+std::vector<BaseTemplate*> g_templates;
 
 std::vector<Notification> g_notifications;
 
@@ -344,6 +346,25 @@ int main(int argc, char** argv)
     for (Pattern*& pattern : g_patterns) {
         pattern->tryLoadIcon();
 	}
+
+    g_templates = {
+        new TemplateRPG2KCharset(),
+        new TemplateRPG2KChipset(),
+        new TemplateRPG2KFaceset(),
+        new TemplateRPG2KSystem(),
+        new TemplateRPG2KBattleAnim(),
+        new TemplateMC64x32Skin()
+    };
+    auto customTemplatePaths = joinVectors({
+        platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".png"),
+        platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".voidsn")
+        });
+    for (auto& t : customTemplatePaths) {
+        CustomTemplate* tt = CustomTemplate::tryLoad(t);
+        if (tt != NULL) {
+            g_templates.push_back(tt);
+        }
+    }
 
     g_loadConfig();
 
