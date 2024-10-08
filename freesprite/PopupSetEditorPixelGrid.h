@@ -15,6 +15,7 @@ public:
         {0,0},
         {8,8},
         {16,16},
+        {24,32},
         {32,32},
         {48,48},
         {64,64}
@@ -54,6 +55,11 @@ public:
             closePopup();
         }
         
+    }
+    void eventTextInputConfirm(int evt_id, std::string data) override {
+        if (evt_id == 1) {
+            eventButtonPressed(0);
+        }
     }
 };
 

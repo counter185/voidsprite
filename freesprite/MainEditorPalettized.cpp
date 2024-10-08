@@ -700,6 +700,7 @@ MainEditor* MainEditorPalettized::toRGBSession()
         rgbLayers.push_back(((LayerPalettized*)ll)->toRGB());
     }
     MainEditor* newEditor = new MainEditor(rgbLayers);
+    newEditor->tileDimensions = tileDimensions;
     return newEditor;
 }
 

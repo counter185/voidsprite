@@ -28,6 +28,8 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, int textFieldWidth)
     tbox->wxWidth = textFieldWidth;
     tbox->setCallbackListener(0, this);
     wxsManager.addDrawable(tbox);
+
+    wxsManager.forceFocusOn(tbox);
 }
 
 void PopupTextBox::render()
