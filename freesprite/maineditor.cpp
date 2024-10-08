@@ -14,6 +14,7 @@
 #include "Gamepad.h"
 #include "LayerPalettized.h"
 #include "UICheckbox.h"
+#include "TooltipsLayer.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupTextBox.h"
@@ -407,6 +408,11 @@ void MainEditor::renderComments()
     if (commentViewMode == COMMENTMODE_HIDE_ALL) {
         return;
     }
+    TooltipsLayer localTtp;
+    localTtp.border = false;
+    localTtp.gradientUL = localTtp.gradientUR = 0x80000000;
+    localTtp.gradientLL = localTtp.gradientLR = 0x40000000;
+
     XY origin = canvasCenterPoint;
     for (CommentData& c : comments) {
         XY onScreenPosition = xyAdd(origin, { c.position.x * scale, c.position.y * scale });
@@ -418,12 +424,14 @@ void MainEditor::renderComments()
                 c.animTimer.start();
                 c.hovered = true;
             }
-            int yOffset = 16 * (1.0f- XM1PW3P1(c.animTimer.percentElapsedTime(200)));
-            g_fnt->RenderString(c.data, onScreenPosition.x + 17, onScreenPosition.y - yOffset, SDL_Color{ 255,255,255, (uint8_t)(0xff * c.animTimer.percentElapsedTime(200))});
+            //int yOffset = 16 * (1.0f- XM1PW3P1(c.animTimer.percentElapsedTime(200)));
+            //g_fnt->RenderString(c.data, onScreenPosition.x + 17, onScreenPosition.y + yOffset, SDL_Color{ 255,255,255, (uint8_t)(0xff * c.animTimer.percentElapsedTime(200))});
+            localTtp.addTooltip(Tooltip{ XY{onScreenPosition.x + 17, onScreenPosition.y}, c.data, {0xff,0xff,0xff,0xff}, c.animTimer.percentElapsedTime(200) });
         } else {
             c.hovered = false;
         }
     }
+    localTtp.renderAll();
 }
 
 void MainEditor::renderUndoStack()

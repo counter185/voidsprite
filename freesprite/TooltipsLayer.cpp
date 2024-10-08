@@ -30,17 +30,20 @@ void TooltipsLayer::renderAll()
 		}
 		XY rectPos = { rect.x, rect.y };
 
-		renderGradient(rect, 0xFF000000, 0xFF000000, 0xD0000000, 0xD0000000);
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x90);
-		drawLine(rectPos, xyAdd(rectPos, { rect.w, 0 }), timer);
-		drawLine(rectPos, xyAdd(rectPos, { 0, rect.h }), timer);
+		renderGradient(rect, gradientUL, gradientUR, gradientLL, gradientLR);
+		
+		if (border) {
+			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x90);
+			drawLine(rectPos, xyAdd(rectPos, { rect.w, 0 }), timer);
+			drawLine(rectPos, xyAdd(rectPos, { 0, rect.h }), timer);
 
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x40);
-		drawLine(xyAdd(rectPos, {rect.w, rect.h}), xyAdd(rectPos, { rect.w, 0 }), timer);
-		drawLine(xyAdd(rectPos, { rect.w, rect.h }), xyAdd(rectPos, { 0, rect.h }), timer);
+			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x40);
+			drawLine(xyAdd(rectPos, { rect.w, rect.h }), xyAdd(rectPos, { rect.w, 0 }), timer);
+			drawLine(xyAdd(rectPos, { rect.w, rect.h }), xyAdd(rectPos, { 0, rect.h }), timer);
 
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x10);
-		drawLine(rectPos, xyAdd(rectPos, { rect.w, rect.h }), timer);
+			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x10);
+			drawLine(rectPos, xyAdd(rectPos, { rect.w, rect.h }), timer);
+		}
 
 		uint8_t alpha = (uint8_t)(t.textColor.a * timer);
 		SDL_Color textCol = t.textColor;
