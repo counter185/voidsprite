@@ -1946,6 +1946,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 break;       
             case 3:
             case 4:
+            case 5:
                 {
                     XY dimensions;
                     fread(&dimensions.x, 4, 1, infile);
@@ -2000,7 +2001,20 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             fread(&newLayer->colorKey, 4, 1, infile);
 
                             free(name);
-                            fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+
+                            if (voidsnversion < 5) {
+                                fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                            }
+                            else {
+                                uint64_t compressedLength = 0;
+                                fread(&compressedLength, 8, 1, infile);
+                                uint8_t* compressedData = new uint8_t[compressedLength];
+                                fread(compressedData, compressedLength, 1, infile);
+                                uint64_t dstLength = newLayer->w * newLayer->h * 4;
+                                uncompress(newLayer->pixelData, (uLongf*)&dstLength, compressedData, compressedLength);
+                                delete[] compressedData;
+                            }
+
                             layers.push_back(newLayer);
                         }
                         ret = new MainEditor(layers);
@@ -2034,7 +2048,19 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             fread(&newLayer->colorKey, 4, 1, infile);
 
                             free(name);
-                            fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+
+                            if (voidsnversion < 5) {
+                                fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                            }
+                            else {
+                                uint64_t compressedLength = 0;
+                                fread(&compressedLength, 8, 1, infile);
+                                uint8_t* compressedData = new uint8_t[compressedLength];
+                                fread(compressedData, compressedLength, 1, infile);
+                                uint64_t dstLength = newLayer->w * newLayer->h * 4;
+                                uncompress(newLayer->pixelData, (uLongf*)&dstLength, compressedData, compressedLength);
+                                delete[] compressedData;
+                            }
 
                             newLayer->palette = palette;
                             layers.push_back(newLayer);
@@ -2481,6 +2507,112 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             fwrite(&lr->colorKey, 4, 1, outfile);
 
             fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+        }
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        uint8_t voidsnVersion = 0x05;
+        fwrite(&voidsnVersion, 1, 1, outfile);
+        uint32_t nvalBuffer;
+
+        nvalBuffer = editor->texW;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+        nvalBuffer = editor->texH;
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
+        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
+
+        std::string commentsData;
+        commentsData += std::to_string(editor->comments.size()) + ';';
+        for (CommentData& c : editor->comments) {
+            commentsData += std::to_string(c.position.x) + ';';
+            commentsData += std::to_string(c.position.y) + ';';
+            std::string sanitizedData = c.data;
+            std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
+            commentsData += sanitizedData + ';';
+        }
+
+        std::string layerVisibilityData = "";
+        for (Layer*& lr : editor->layers) {
+            layerVisibilityData += lr->hidden ? '0' : '1';
+        }
+
+        fwrite("/VOIDSN.META/", 1, 13, outfile);
+        std::map<std::string, std::string> extData = {
+            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
+            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
+            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.x", std::to_string(editor->symmetryPositions.x)},
+            {"sym.y", std::to_string(editor->symmetryPositions.y)},
+            {"comments", commentsData},
+            {"layer.selected", std::to_string(editor->selLayer)},
+            {"layer.visibility", layerVisibilityData},
+            {"palette.enabled", editor->isPalettized ? "1" : "0"}
+        };
+
+        if (editor->isPalettized) {
+            MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
+            std::string paletteData = "";
+            paletteData += std::format("{};", upcastEditor->palette.size());
+            for (uint32_t& c : upcastEditor->palette) {
+                paletteData += std::format("{:08X};", c);
+            }
+            extData["palette.colors"] = paletteData;
+
+            extData["palette.index"] = std::to_string(upcastEditor->pickedPaletteIndex);
+        }
+        else {
+            std::string layerOpacityData = "";
+            for (Layer*& lr : editor->layers) {
+                layerOpacityData += std::to_string(lr->layerAlpha) + ';';
+            }
+            extData["layer.opacity"] = layerOpacityData;
+            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
+        }
+
+        nvalBuffer = extData.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (auto& extDPair : extData) {
+            nvalBuffer = extDPair.first.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
+            nvalBuffer = extDPair.second.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
+        }
+
+        nvalBuffer = editor->layers.size();
+        fwrite(&nvalBuffer, 4, 1, outfile);
+
+        for (Layer*& lr : editor->layers) {
+            if (lr->w * lr->h != editor->texW * editor->texH) {
+                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+            }
+            nvalBuffer = lr->name.size();
+            fwrite(&nvalBuffer, 4, 1, outfile);
+            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+
+            fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
+            fwrite(&lr->colorKey, 4, 1, outfile);
+
+            uint64_t maxCompressedDataSize = compressBound(lr->w * lr->h * 4);
+            uint64_t compressedDataSize = maxCompressedDataSize;
+            uint8_t* compressedData = new uint8_t[maxCompressedDataSize];
+            int res = compress(compressedData, (uLongf*)&compressedDataSize, lr->pixelData, lr->w * lr->h * 4);
+
+            fwrite(&compressedDataSize, 8, 1, outfile);
+            fwrite(compressedData, compressedDataSize, 1, outfile);
+            delete[] compressedData;
         }
 
         fclose(outfile);
