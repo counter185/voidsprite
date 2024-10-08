@@ -112,9 +112,11 @@ void g_closePopup(BasePopup* a) {
 }
 
 
-void g_addScreen(BaseScreen* a) {
+void g_addScreen(BaseScreen* a, bool switchTo) {
     screenStack.push_back(a);
-    g_switchScreen(screenStack.size() - 1);
+    if (switchTo) {
+        g_switchScreen(screenStack.size() - 1);
+    }
     ButtonStartScreenSession* screenButton = new ButtonStartScreenSession(screenStack.size() - 1);
     screenButtons.push_back(screenButton);
     overlayWidgets.addDrawable(screenButton);
@@ -375,7 +377,8 @@ int main(int argc, char** argv)
 
     g_ttp = new TooltipsLayer();
 
-    g_addScreen(new StartScreen());
+    StartScreen* launchpad = new StartScreen();
+    g_addScreen(launchpad, screenStack.empty());
 
     platformPostInit();
 
