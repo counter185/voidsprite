@@ -55,6 +55,13 @@ public:
             
         }
     }
+    void mouseHoverMotion(XY mousePos, XY gPosOffset) override
+    {
+        if (enabled) {
+            subWidgets.processHoverEvent(xyAdd(scrollOffset, xyAdd(gPosOffset, position)), mousePos);
+        }
+    }
+
 
     void updateBounds() {
         XY insideArea = getInsideAreaWH();
