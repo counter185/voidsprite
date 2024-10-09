@@ -1800,7 +1800,7 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
     if (f != NULL) {
         LayerPalettized* l = new LayerPalettized(16, 16);
         l->name = "SR8 Layer";
-        std::vector<u32> pal;
+        /*std::vector<u32> pal;
         for (int renderColor = 0; renderColor < 256; renderColor++) {
             uint8_t byte = renderColor;
             uint8_t a, i, r, g, b;
@@ -1811,7 +1811,8 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
             b = ((byte >> 4) & 0b11) * 74 + i;
             pal.push_back((a << 24) + (r << 16) + (g << 8) + b);
         }
-        l->palette = pal;
+        l->palette = pal;*/
+        l->palette = g_palettes["Slim Render (8-bit)"];
 
         u32* ppx = (u32*)l->pixelData;
         for (int dataPointer = 0; dataPointer < l->w * l->h; dataPointer++) {

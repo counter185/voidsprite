@@ -25,10 +25,6 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
     pltLayer->palette = palette;
     layers.push_back(pltLayer);
 
-#if not _DEBUG
-    g_addPopup(new PopupMessageBox("Palettized editor", "Palettized editor is currently a work in progress.\nSome features will be unfinished.\nReport all bugs and crashes in itchio comments or github issues."));
-#endif
-
     setUpWidgets();
     recenterCanvas();
     initLayers();
