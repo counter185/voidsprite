@@ -1791,6 +1791,41 @@ Layer* readXBM(PlatformNativePathString path, uint64_t seek) {
     return NULL;
 }
 
+Layer* readSR8(PlatformNativePathString path, uint64_t seek)
+{
+    //16x16
+    //bytes are sequential
+    //bytes are in format AIBBGGRR
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        LayerPalettized* l = new LayerPalettized(16, 16);
+        l->name = "SR8 Layer";
+        std::vector<u32> pal;
+        for (int renderColor = 0; renderColor < 256; renderColor++) {
+            uint8_t byte = renderColor;
+            uint8_t a, i, r, g, b;
+            a = (byte & 0b10000000) != 0 ? 255 : 0;
+            i = (byte & 0b01000000) != 0 ? 33 : 0;
+            r = (byte & 0b11) * 74 + i;
+            g = ((byte >> 2) & 0b11) * 74 + i;
+            b = ((byte >> 4) & 0b11) * 74 + i;
+            pal.push_back((a << 24) + (r << 16) + (g << 8) + b);
+        }
+        l->palette = pal;
+
+        u32* ppx = (u32*)l->pixelData;
+        for (int dataPointer = 0; dataPointer < l->w * l->h; dataPointer++) {
+            uint8_t byte;
+            fread(&byte, 1, 1, f);
+            ppx[dataPointer] = byte;
+        }
+
+        fclose(f);
+        return l;
+    }
+    return NULL;
+}
+
 MainEditor* readLMU(PlatformNativePathString path)
 {
     MainEditor* ret = NULL;
@@ -3088,6 +3123,35 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
             }
             fprintf(f, "\n");
         }
+        fclose(f);
+        return true;
+    }
+    return false;
+}
+
+bool writeSR8(PlatformNativePathString path, Layer* data)
+{
+    if (data->w != 16 || data->h != 16) {
+        g_addNotification(ErrorNotification("Error exporting SR8", "Image size must be 16x16."));
+        return false;
+    }
+    if (!data->isPalettized) {
+        g_addNotification(ErrorNotification("Error exporting SR8", "RGB export not supported."));
+        return false;
+    }
+    if (!((LayerPalettized*)data)->palette.size() > 256) {
+        g_addNotification(ErrorNotification("Error exporting SR8", "Invalid palette size. Must be 256 colors."));
+        return false;
+    }
+
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+        u32* ppx = (u32*)data->pixelData;
+        for (int x = 0; x < 16 * 16; x++) {
+            u8 byte = ppx[x];
+            fwrite(&byte, 1, 1, f);
+        }
+
         fclose(f);
         return true;
     }

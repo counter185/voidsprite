@@ -39,6 +39,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSCR(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
@@ -62,6 +63,7 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data);
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data);
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data);
 bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data);
+bool writeSR8(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
@@ -224,7 +226,8 @@ inline void g_setupIO() {
         *exCaveStoryPBM,
         *exXYZ,
         *exAnymapPBM,
-        *exXBM
+        *exXBM,
+        *exSR8
         ;
 
     g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -240,6 +243,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM) );
     g_fileExporters.push_back( exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED) );
     g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
@@ -274,6 +278,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit)", ".sr8", &readSR8, exSR8, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable anymap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
