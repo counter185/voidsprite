@@ -38,6 +38,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSCR(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
@@ -63,6 +64,7 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data);
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data);
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data);
 bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data);
+bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
@@ -226,6 +228,7 @@ inline void g_setupIO() {
         *exCaveStoryPBM,
         *exXYZ,
         *exAnymapPBM,
+        *exAnymapPGM,
         *exXBM,
         *exSR8
         ;
@@ -242,6 +245,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
     g_fileExporters.push_back( exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM) );
     g_fileExporters.push_back( exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exAnymapPGM = FileExporter::flatExporter("Portable Graymap (text) PGM", ".pgm", &writeAnymapTextPGM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED) );
     g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -278,8 +282,8 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
-    g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit)", ".sr8", &readSR8, exSR8, FORMAT_RGB));
-    g_fileImporters.push_back(FileImporter::flatImporter("Portable anymap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
+    g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
             //check if file starts with P1 or P4
@@ -288,7 +292,16 @@ inline void g_setupIO() {
             fclose(f);
             return c[0] == 'P' && (c[1] == '1' || c[1] == '4');
         }));
-    g_fileImporters.push_back(FileImporter::flatImporter("Mario Paint save file", ".srm", &readMarioPaintSRM, NULL, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Portable graymap PGM", ".pgm", &readAnymapPGM, exAnymapPGM, FORMAT_PALETTIZED,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            //check if file starts with P2 or P5
+            char c[2];
+            fread(c, 2, 1, f);
+            fclose(f);
+            return c[0] == 'P' && (c[1] == '2' || c[1] == '5');
+        }));
+    g_fileImporters.push_back(FileImporter::flatImporter("Mario Paint save file SRM", ".srm", &readMarioPaintSRM, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com SPK file", ".spk", &readXComSPK, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com BDY file", ".bdy", &readXComBDY, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com SCR file", ".scr", &readXComSCR, NULL, FORMAT_PALETTIZED,
