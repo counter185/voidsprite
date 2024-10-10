@@ -85,6 +85,7 @@ MainEditor::~MainEditor() {
     }
 }
 
+
 void MainEditor::render() {
     SDL_SetRenderDrawColor(g_rd, backgroundColor.r/6*5, backgroundColor.g/6*5, backgroundColor.b/6*5, 255);
     SDL_RenderClear(g_rd);
@@ -95,7 +96,7 @@ void MainEditor::render() {
     canvasRenderRect.h = texH * scale;
     canvasRenderRect.x = canvasCenterPoint.x;
     canvasRenderRect.y = canvasCenterPoint.y;
-
+    int orient = 0;
     for (int x = 0; x < layers.size(); x++) {
         Layer* imgLayer = layers[x];
         if (!imgLayer->hidden) {
@@ -150,6 +151,7 @@ void MainEditor::render() {
     }
     drawIsolatedRect();
     drawSymmetryLines();
+    renderGuidelines(orient);
 
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
@@ -378,6 +380,37 @@ void MainEditor::drawIsolatedRect()
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
         SDL_RenderDrawRect(g_rd, &r);
     }
+}
+
+void MainEditor::renderGuidelines(int o) {
+
+        int gYPos = guidelinePosition.y / 2;
+        bool gYMiddle = guidelinePosition.y % 2;
+        int lineDrawYPoint = canvasCenterPoint.y + gYPos * scale + (gYMiddle ? scale/2 : 0);
+
+        int gXPos = guidelinePosition.x / 2;
+        bool gXMiddle = guidelinePosition.x % 2;
+        int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale/2 : 0);
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+        switch (o) {
+        case 0:
+            //horizontal
+            SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
+            break;
+        case 1:
+            //vertical
+            SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
+            break;
+        case 2:
+            //todo let me do the math (DIAGONAL TL-BR)
+            break;
+        case 3:
+            //todo let me do the math (DIAGONAL TR-BL)
+            break;
+        }
+        
+    
 }
 
 void MainEditor::DrawForeground()

@@ -32,6 +32,11 @@ struct CommentData {
     bool hovered = false;
 };
 
+struct Guideline {
+    bool vertical;
+    int position;
+};
+
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 protected:
@@ -89,6 +94,9 @@ public:
     SDL_Color backgroundColor = SDL_Color{0,0,0,255};
 
     XY symmetryPositions = {0,0};
+    XY guidelinePosition = {0,0};
+    int orient = 0;
+
     bool symmetryEnabled[2] = { false, false };
 
     bool isolateEnabled = false;
@@ -122,6 +130,7 @@ public:
     virtual void renderColorPickerAnim();
     void drawSymmetryLines();
     void drawIsolatedRect();
+    void renderGuidelines(int orient);
 
     void initLayers();
     virtual void setUpWidgets();
