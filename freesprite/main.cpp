@@ -11,6 +11,7 @@
 #include "Pattern.h"
 #include "Notification.h"
 #include "ToolRectMove.h"
+#include "Brush9SegmentRect.h"
 #include "Brush1x1ArcX.h"
 #include "Brush1x1ArcY.h"
 #include "BrushReplaceColor.h"
@@ -85,10 +86,10 @@ void g_addNotification(Notification a) {
 void tickNotifications() {
     for (int x = 0; x < g_notifications.size(); x++) {
         if (g_notifications[x].timer.elapsedTime() > g_notifications[x].duration) {
-			g_notifications.erase(g_notifications.begin() + x);
-			x--;
-		}
-	}
+            g_notifications.erase(g_notifications.begin() + x);
+            x--;
+        }
+    }
 }
 
 std::vector<BasePopup*> popupStack;
@@ -209,13 +210,13 @@ int main(int argc, char** argv)
         else if (convert) {
             if (convertReadingSrc) {
                 convertTargets.push_back({ a, "" });
-				convertReadingSrc = false;
-			}
-			else {
-				convertTargets[convertTargets.size() - 1].second = a;
-				convertReadingSrc = false;
+                convertReadingSrc = false;
+            }
+            else {
+                convertTargets[convertTargets.size() - 1].second = a;
+                convertReadingSrc = false;
                 convert = false;
-			}
+            }
         }
         else {
             g_cmdlineArgs.push_back(a);
@@ -292,6 +293,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new Brush1pxLinePathfind());
     g_brushes.push_back(new BrushRect());
     g_brushes.push_back(new BrushRectFill());
+    g_brushes.push_back(new Brush9SegmentRect());
     g_brushes.push_back(new BrushCircle());
     g_brushes.push_back(new BrushFill());
     g_brushes.push_back(new BrushReplaceColor());
@@ -349,7 +351,7 @@ int main(int argc, char** argv)
     }
     for (Pattern*& pattern : g_patterns) {
         pattern->tryLoadIcon();
-	}
+    }
 
     g_templates = {
         new TemplateRPG2KCharset(),
@@ -565,9 +567,9 @@ int main(int argc, char** argv)
         for (Notification& notif : g_notifications) {
             //background
             int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
-			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0-notif.timer.percentElapsedTime(500, notif.duration-500)))));
-			SDL_Rect r = { notifX, notifY, 400, 60 };
-			SDL_RenderFillRect(g_rd, &r);
+            SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0-notif.timer.percentElapsedTime(500, notif.duration-500)))));
+            SDL_Rect r = { notifX, notifY, 400, 60 };
+            SDL_RenderFillRect(g_rd, &r);
 
             //animated border lines
             //gradient
@@ -584,18 +586,18 @@ int main(int argc, char** argv)
             //icon
             int textX = notifX + 10;
             if (notif.icon != NULL) {
-				SDL_Rect iconRect = { notifX + 5, notifY + 5, 50, 50 };
+                SDL_Rect iconRect = { notifX + 5, notifY + 5, 50, 50 };
                 SDL_SetTextureAlphaMod(notif.icon, (uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 200)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))));
-				SDL_RenderCopy(g_rd, notif.icon, NULL, &iconRect);
+                SDL_RenderCopy(g_rd, notif.icon, NULL, &iconRect);
                 SDL_SetTextureAlphaMod(notif.icon, 0xff);
-				textX += 50;
-			}
+                textX += 50;
+            }
 
             //text
-			g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
-			g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
-			notifY += 65;
-		}
+            g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
+            g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
+            notifY += 65;
+        }
 
         g_ttp->renderAll();
 

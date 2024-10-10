@@ -441,6 +441,9 @@
     <ClCompile Include="CustomTemplate.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
+    <ClCompile Include="Brush9SegmentRect.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -814,6 +817,9 @@
     </ClInclude>
     <ClInclude Include="CustomTemplate.h">
       <Filter>Header files\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush9SegmentRect.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
