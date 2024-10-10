@@ -5,10 +5,15 @@ This folder contains **custom patterns** made by voidsprite contributors / maint
 ## installation
 
 In order to install a custom pattern, close voidsprite and navigate to the following directories:
+
 **Windows**:
+
 ```DISK:\Users\USER\AppData\Roaming\voidsprite\patterns```
+
 **Linux**:
+
 ```~/.config/voidsprite/patterns```
+
 After that, move the bitmap files into the **patterns** folder. The newly installed patterns should appear in the pattern menu on next launch.
 
 ## creation
