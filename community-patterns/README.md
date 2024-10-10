@@ -1,5 +1,3 @@
-![voidsprite logo](freesprite/assets/mainlogo.png)
-
 # voidsprite custom pattern collection
 
 This folder contains **custom patterns** made by voidsprite contributors / maintainers. 
