@@ -392,7 +392,12 @@ void MainEditor::renderGuidelines(int o) {
         bool gXMiddle = guidelinePosition.x % 2;
         int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale/2 : 0);
 
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+        u8  a8 = (pickedColor >> 24) & 0xff,
+            r8 = (pickedColor >> 16) & 0xff,
+            g8 = (pickedColor >> 8) & 0xff,
+            b8 = pickedColor & 0xff;
+
+        SDL_SetRenderDrawColor(g_rd, r8, g8, b8, a8);
         switch (o) {
         case 0:
             //horizontal
