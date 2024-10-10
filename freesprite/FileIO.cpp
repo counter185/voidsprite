@@ -2281,7 +2281,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
                     if (!ret->isPalettized && extData.contains("layer.opacity")) {
                         std::string layerOpacityData = extData["layer.opacity"];
-                        for (int x = 0; x < nlayers && x < layerOpacityData.size(); x++) {
+                        for (int x = 0; x < nlayers; x++) {
                             int nextSC = layerOpacityData.find_first_of(';');
                             ret->layers[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
                             ret->layers[x]->lastConfirmedlayerAlpha = ret->layers[x]->layerAlpha;
@@ -2302,6 +2302,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 break;
             default:
                 printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
+                g_addNotification(ErrorNotification("Error", std::format("VOIDSN file v{} not supported", voidsnversion)));
                 fclose(infile);
                 return NULL;
         }
