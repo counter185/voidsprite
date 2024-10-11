@@ -1,6 +1,7 @@
 #include "Brush9SegmentRect.h"
 #include "maineditor.h"
 #include "Notification.h"
+#include "PopupSet9SPattern.h"
 
 void Brush9SegmentRect::clickPress(MainEditor* editor, XY pos)
 {
@@ -11,6 +12,9 @@ void Brush9SegmentRect::clickPress(MainEditor* editor, XY pos)
 
 void Brush9SegmentRect::clickRelease(MainEditor* editor, XY pos)
 {
+    if (!heldDown) {
+        return;
+    }
     heldDown = false;
     pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
     int minx = ixmin(pos.x, startPos.x);
@@ -61,8 +65,10 @@ void Brush9SegmentRect::clickRelease(MainEditor* editor, XY pos)
 
 void Brush9SegmentRect::rightClickPress(MainEditor* editor, XY pos)
 {
-    //open config popup here
-    if (pickedPattern == NULL) {
+    PopupSet9SPattern* p = new PopupSet9SPattern();
+    p->setCallbackListener(EVENT_9SPPICKER_POPUP , this);
+    g_addPopup(p);
+    /*if (pickedPattern == NULL) {
         pickedPattern = g_9spatterns[0];
     }
     else {
@@ -70,7 +76,7 @@ void Brush9SegmentRect::rightClickPress(MainEditor* editor, XY pos)
         f++;
         f %= g_9spatterns.size();
         pickedPattern = g_9spatterns[f];
-    }
+    }*/
 }
 
 void Brush9SegmentRect::renderOnCanvas(XY canvasDrawPoint, int scale)
@@ -83,4 +89,16 @@ void Brush9SegmentRect::renderOnCanvas(XY canvasDrawPoint, int scale)
     drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
     drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+}
+
+void Brush9SegmentRect::eventGeneric(int evt_id, int data1, int data2)
+{
+    if (evt_id == EVENT_9SPPICKER_POPUP) {
+        if (data1 >= 0 && data1 < g_9spatterns.size()) {
+            pickedPattern = g_9spatterns[data1];
+        }
+        else {
+            g_addNotification(ErrorNotification("Error","Invalid pattern"));
+        }
+    }
 }

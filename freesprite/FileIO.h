@@ -42,6 +42,7 @@ Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAnymapPPM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
@@ -270,6 +271,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 
+    g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG (libpng)", ".png", &readPNG, exPNG));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP (EasyBMP)", ".bmp", &readBMP, exBMP));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM (EasyBMP)", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,

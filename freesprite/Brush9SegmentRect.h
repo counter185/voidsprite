@@ -1,9 +1,10 @@
 #pragma once
 #include "globals.h"
 #include "BaseBrush.h"
+#include "EventCallbackListener.h"
 
 class Brush9SegmentRect :
-    public BaseBrush
+    public BaseBrush, public EventCallbackListener
 {
     XY startPos = XY{ 0,0 };
     bool heldDown = false;
@@ -23,5 +24,7 @@ class Brush9SegmentRect :
     void clickRelease(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
     void renderOnCanvas(XY canvasDrawPoint, int scale) override;
+
+    void eventGeneric(int evt_id, int data1, int data2) override;
 };
 

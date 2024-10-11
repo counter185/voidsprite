@@ -447,6 +447,9 @@
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="PopupSet9SPattern.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -829,6 +832,9 @@
     </ClInclude>
     <ClInclude Include="Brush9SegmentRect.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSet9SPattern.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

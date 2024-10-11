@@ -105,6 +105,7 @@ class ButtonStartScreenSession;
 
 //brushes/tools
 class BaseBrush;
+class Brush9SegmentRect;
 class ToolText;
 
 //standard ui elements

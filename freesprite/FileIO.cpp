@@ -1965,6 +1965,19 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
+{
+    auto nsp = read9SegmentPattern(path);
+    if (nsp.first) {
+        Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
+        memcpy(nlayer->pixelData, nsp.second.pixelData, nlayer->w * nlayer->h * 4);
+        free(nsp.second.pixelData);
+        nlayer->name = "Pattern Layer";
+        return nlayer;
+    }
+    return NULL;
+}
+
 MainEditor* readLMU(PlatformNativePathString path)
 {
     MainEditor* ret = NULL;
