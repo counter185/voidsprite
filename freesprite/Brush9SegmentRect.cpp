@@ -24,15 +24,19 @@ void Brush9SegmentRect::clickRelease(MainEditor* editor, XY pos)
         g_addNotification(ErrorNotification("Error", "Tool not supported in palettized editor."));
         return;
     }
+    if (pickedPattern == NULL) {
+        g_addNotification(ErrorNotification("Error", "No pattern selected."));
+        return;
+    }
 
     XY wh = XY{ maxx - minx, maxy - miny };
     for (int x = 0; x < wh.x; x++) {
         for (int y = 0; y < wh.y; y++) {
             XY fragment;
-            int segXLineInRect1 = ixmin(wh.x / 2, segXLine1);
-            int segXLineInRect2 = ixmax(wh.x / 2, wh.x - segXLine2) - 1;
-            int segYLineInRect1 = ixmin(wh.y / 2, segYLine1);
-            int segYLineInRect2 = ixmax(wh.y / 2, wh.y - segYLine2) - 1;
+            int segXLineInRect1 = ixmin(wh.x / 2, pickedPattern->point1.x);
+            int segXLineInRect2 = ixmax(wh.x / 2, wh.x - pickedPattern->point2.x) - 1;
+            int segYLineInRect1 = ixmin(wh.y / 2, pickedPattern->point1.y);
+            int segYLineInRect2 = ixmax(wh.y / 2, wh.y - pickedPattern->point2.y) - 1;
             fragment.y = y < segYLineInRect1 ? 0
                 : y >= segYLineInRect2 ? 2
                 : 1;
@@ -41,13 +45,13 @@ void Brush9SegmentRect::clickRelease(MainEditor* editor, XY pos)
                 : 1;
             XY inPatternPos = {
                 fragment.x == 0 ? x
-                : fragment.x == 2 ? fullPatternDims.x - (wh.x - x)
-                : segXLine1 + (x - segXLine1) % (fullPatternDims.x - segXLine2 - segXLine1 - 1),
+                : fragment.x == 2 ? pickedPattern->dimensions.x - (wh.x - x)
+                : pickedPattern->point1.x + (x - pickedPattern->point1.x) % (pickedPattern->dimensions.x - pickedPattern->point2.x - pickedPattern->point1.x - 1),
                 fragment.y == 0 ? y
-                : fragment.y == 2 ? fullPatternDims.y - (wh.y - y)
-                : segYLine1 + (y - segYLine1) % (fullPatternDims.y - segYLine2 - segYLine1 - 1)
+                : fragment.y == 2 ? pickedPattern->dimensions.y - (wh.y - y)
+                : pickedPattern->point1.y + (y - pickedPattern->point1.y) % (pickedPattern->dimensions.y - pickedPattern->point2.y - pickedPattern->point1.y - 1)
             };
-            editor->SetPixel(XY{ minx + x, miny + y }, patternPixels[inPatternPos.y * fullPatternDims.x + inPatternPos.x]);
+            editor->SetPixel(XY{ minx + x, miny + y }, pickedPattern->pixelData[inPatternPos.y * pickedPattern->dimensions.x + inPatternPos.x]);
             /*editor->SetPixel(XY{minx + x, miny + y},
                 0xFF000000 + ((0x7F * fragment.x) << 16) + (0x7F * fragment.y)
                 );*/
@@ -58,6 +62,15 @@ void Brush9SegmentRect::clickRelease(MainEditor* editor, XY pos)
 void Brush9SegmentRect::rightClickPress(MainEditor* editor, XY pos)
 {
     //open config popup here
+    if (pickedPattern == NULL) {
+        pickedPattern = g_9spatterns[0];
+    }
+    else {
+        int f = std::find(g_9spatterns.begin(), g_9spatterns.end(), pickedPattern) - g_9spatterns.begin();
+        f++;
+        f %= g_9spatterns.size();
+        pickedPattern = g_9spatterns[f];
+    }
 }
 
 void Brush9SegmentRect::renderOnCanvas(XY canvasDrawPoint, int scale)

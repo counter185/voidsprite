@@ -170,6 +170,9 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     subDir = appdataDir + L"templates\\";
     CreateDirectoryW(subDir.c_str(), NULL);
 
+    subDir = appdataDir + L"9segmentpatterns\\";
+    CreateDirectoryW(subDir.c_str(), NULL);
+
     return appdataDir;
 }
 
