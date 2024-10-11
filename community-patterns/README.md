@@ -25,6 +25,7 @@ The pattern may be of any size or shape.
 
 * patterns (Mario Paint) - cntrpl (Maintainer)
 * OfficialPatterns - ZLD1 (Maintainer)
+* Drewee's Slop Pack - AndrewIdot (Maintainer)
 * MSPatternsRow1 - AndrewIdot (Maintainer)
 * bricks - cicada (Contributor)
 * kidpix brushes - cicada (Contributor)
