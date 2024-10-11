@@ -5,16 +5,18 @@
 #include "EditorLayerPicker.h"
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
-#include "SpritesheetPreviewScreen.h"
 #include "EditorSpritesheetPreview.h"
-#include "RPG2KTilemapPreviewScreen.h"
 #include "FileIO.h"
-#include "TilemapPreviewScreen.h"
-#include "MinecraftSkinPreviewScreen.h"
 #include "Gamepad.h"
 #include "LayerPalettized.h"
 #include "UICheckbox.h"
 #include "TooltipsLayer.h"
+
+#include "TilemapPreviewScreen.h"
+#include "MinecraftSkinPreviewScreen.h"
+#include "RPG2KTilemapPreviewScreen.h"
+#include "SpritesheetPreviewScreen.h"
+#include "NineSegmentPatternEditorScreen.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupTextBox.h"
@@ -660,6 +662,12 @@ void MainEditor::setUpWidgets()
                     {SDLK_n, { "Integer scale canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                            }
+                        }
+                    },
+                    {SDLK_p, { "Open in 9-segment pattern editor",
+                            [](MainEditor* editor) {
+                                g_addScreen(new NineSegmentPatternEditorScreen(editor));
                             }
                         }
                     },

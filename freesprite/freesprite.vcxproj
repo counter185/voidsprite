@@ -179,6 +179,7 @@
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
+    <ClCompile Include="NineSegmentPatternEditorScreen.cpp" />
     <ClCompile Include="NotifSound.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
@@ -299,6 +300,7 @@
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainEditorPalettized.h" />
+    <ClInclude Include="NineSegmentPatternEditorScreen.h" />
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PalettizedEditorLayerPicker.h" />

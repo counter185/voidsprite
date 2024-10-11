@@ -46,9 +46,6 @@
     <Filter Include="Header files\screen">
       <UniqueIdentifier>{e201f46f-e0ea-479c-86b6-e5a02322eec1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\screen">
-      <UniqueIdentifier>{b42970c2-7d17-43ca-9583-d087ee0c3c22}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header files\templates">
       <UniqueIdentifier>{a9bd79ad-10d4-46ca-8497-7aebd9add055}</UniqueIdentifier>
     </Filter>
@@ -93,6 +90,9 @@
     </Filter>
     <Filter Include="Header files\external\portable-file-dialogs">
       <UniqueIdentifier>{9359d52d-8b10-44d7-ae12-4fcc62fe501d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\screen">
+      <UniqueIdentifier>{b42970c2-7d17-43ca-9583-d087ee0c3c22}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -442,6 +442,9 @@
       <Filter>Source files\templates</Filter>
     </ClCompile>
     <ClCompile Include="Brush9SegmentRect.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="NineSegmentPatternEditorScreen.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -819,6 +822,9 @@
       <Filter>Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="Brush9SegmentRect.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="NineSegmentPatternEditorScreen.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

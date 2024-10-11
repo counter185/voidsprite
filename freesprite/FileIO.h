@@ -72,6 +72,9 @@ bool writeSR8(PlatformNativePathString path, Layer* data);
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
 
+std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
+bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
+
 class FileOperation {
 public:
     virtual std::string name() { return _name; }

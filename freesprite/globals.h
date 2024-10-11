@@ -219,6 +219,13 @@ struct UndoStackResizeLayerElement {
     uint8_t* oldData;
 };
 
+struct NineSegmentPattern {
+    XY dimensions;
+    uint32_t* pixelData;
+    XY point1, point2;
+    SDL_Texture* cachedTexture = NULL;
+};
+
 #include "platform.h"
 #include "colors.h"
 #include "palettes.h"

@@ -3423,6 +3423,61 @@ std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString n
     return { false, {} };
 }
 
+std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+
+        char header[7];
+        fread(header, 7, 1, f);
+        if (strcmp(header, "VOID9SP") == 0) {
+
+            NineSegmentPattern ret;
+            int* reads[] = {
+                &ret.point1.x, &ret.point1.y, &ret.point2.x, &ret.point2.y, &ret.dimensions.x, &ret.dimensions.y
+            };
+            for (int*& r : reads) {
+                u32 buffer;
+                fread(&buffer, 4, 1, f);
+                *r = buffer;
+            }
+            if (ret.dimensions.x > 0 && ret.dimensions.y > 0) {
+                ret.pixelData = (u32*)malloc(4 * ret.dimensions.x * ret.dimensions.y);
+            }
+
+            if (ret.pixelData != NULL) {
+                fread(ret.pixelData, 4, ret.dimensions.x * ret.dimensions.y, f);
+                fclose(f);
+                ret.cachedTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, ret.dimensions.x, ret.dimensions.y);
+                SDL_UpdateTexture(ret.cachedTexture, NULL, ret.pixelData, 4 * ret.dimensions.x);
+                return { true, ret };
+            }
+        }
+
+        fclose(f);
+    }
+    return { false,{} };
+}
+
+bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fwrite("VOID9SP", 7, 1, outfile);
+        u32 writes[] = {
+            point1.x, point1.y, point2.x, point2.y, data->w, data->h
+        };
+        for (u32& w : writes) {
+            fwrite(&w, 4, 1, outfile);
+        }
+        fwrite(data->pixelData, data->w * data->h, 4, outfile);
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
