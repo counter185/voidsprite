@@ -26,6 +26,7 @@
 #include "ButtonStartScreenSession.h"
 #include "CustomTemplate.h"
 #include "ninesegmentpatterns.h"
+#include "ToolGuideline.h"
 
 #include "ee_creature.h"
 
@@ -306,6 +307,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolRectFlip());
     g_brushes.push_back(new ToolRectRotate());
     g_brushes.push_back(new ToolComment());
+    g_brushes.push_back(new ToolGuideline());
     g_brushes.push_back(new ToolSetXSymmetry());
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolMeasure());

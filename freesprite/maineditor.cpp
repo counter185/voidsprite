@@ -391,27 +391,32 @@ void MainEditor::renderGuidelines() {
     * [3] "breakpoint" system : shift-lmb to create a "point" on a guideline if a grid is present. the guideline may alter direction after that point
     * [4] option to stop rendering / render specific colour / render all like comments?
     */
-    for (Guideline& g : guidelines) {
-        int gYPos = guidelinePosition.y / 2;
-        bool gYMiddle = guidelinePosition.y % 2;
-        int lineDrawYPoint = canvasCenterPoint.y + gYPos * scale + (gYMiddle ? scale / 2 : 0);
+    for (Guideline& guide : guidelines) {
 
-        int gXPos = guidelinePosition.x / 2;
-        bool gXMiddle = guidelinePosition.x % 2;
-        int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale / 2 : 0);
+        u8  a = (pickedColor >> 24) & 0xff,
+            r = (pickedColor >> 16) & 0xff,
+            g = (pickedColor >> 8) & 0xff,
+            b = pickedColor & 0xff;
 
-        u8  a8 = (pickedColor >> 24) & 0xff,
-            r8 = (pickedColor >> 16) & 0xff,
-            g8 = (pickedColor >> 8) & 0xff,
-            b8 = pickedColor & 0xff;
+        hsv h = rgb2hsv({ r / 255.0, g / 255.0, b / 255.0 });
+        h.v = dxmax(0.2, h.v);
+        h.s /= 2;
+        rgb rgbval = hsv2rgb(h);
+        SDL_Color c = rgb2sdlcolor(rgbval);
 
-        SDL_SetRenderDrawColor(g_rd, r8, g8, b8, a8);
-        if (g.vertical = false) {
+        SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, 120);
+        if (!guide.vertical) {
             //horizontal
+            int gYPos = guide.position / 2;
+            bool gYMiddle = guide.position % 2;
+            int lineDrawYPoint = canvasCenterPoint.y + gYPos * scale + (gYMiddle ? scale / 2 : 0);
             SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
         }
-        if (g.vertical = true) {
+        if (guide.vertical) {
             //vertical
+            int gXPos = guide.position / 2;
+            bool gXMiddle = guide.position % 2;
+            int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale / 2 : 0);
             SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
 
         }

@@ -2292,6 +2292,25 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             ret->comments.push_back(newComment);
                         }
                     }
+                    if (extData.contains("guidelines")) {
+                        std::string guidelinesData = extData["guidelines"];
+                        try {
+                            int nextSC = guidelinesData.find_first_of(';');
+                            int guidelinesCount = std::stoi(guidelinesData.substr(0, nextSC));
+                            guidelinesData = guidelinesData.substr(nextSC + 1);
+                            for (int x = 0; x < guidelinesCount; x++) {
+                                Guideline newGD;
+                                nextSC = guidelinesData.find_first_of(';');
+                                std::string gdString = guidelinesData.substr(0, nextSC);
+                                newGD.vertical = guidelinesData.substr(0, guidelinesData.find_first_of('-')) == "v";
+                                newGD.position = std::stoi(guidelinesData.substr(guidelinesData.find_first_of('-') + 1));
+                                ret->guidelines.push_back(newGD);
+                                guidelinesData = guidelinesData.substr(nextSC + 1);
+                            }
+                        }
+                        catch (std::exception) {
+                        }
+                    }
                     if (!ret->isPalettized && extData.contains("layer.opacity")) {
                         std::string layerOpacityData = extData["layer.opacity"];
                         for (int x = 0; x < nlayers; x++) {
@@ -2729,6 +2748,12 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             commentsData += sanitizedData + ';';
         }
 
+        std::string guidelinesData;
+        guidelinesData += std::format("{};", editor->guidelines.size());
+        for (Guideline& g : editor->guidelines) {
+            guidelinesData += std::format("{}-{};", g.vertical ? "v" : "h", g.position);
+        }
+
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->layers) {
             layerVisibilityData += lr->hidden ? '0' : '1';
@@ -2744,7 +2769,8 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
-            {"palette.enabled", editor->isPalettized ? "1" : "0"}
+            {"palette.enabled", editor->isPalettized ? "1" : "0"},
+            {"guidelines", guidelinesData}
         };
 
         if (editor->isPalettized) {

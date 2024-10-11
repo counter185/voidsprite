@@ -450,6 +450,9 @@
     <ClCompile Include="PopupSet9SPattern.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="ToolGuideline.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -835,6 +838,9 @@
     </ClInclude>
     <ClInclude Include="PopupSet9SPattern.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolGuideline.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
