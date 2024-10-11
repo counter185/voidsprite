@@ -96,7 +96,6 @@ void MainEditor::render() {
     canvasRenderRect.h = texH * scale;
     canvasRenderRect.x = canvasCenterPoint.x;
     canvasRenderRect.y = canvasCenterPoint.y;
-    int orient = 0;
     for (int x = 0; x < layers.size(); x++) {
         Layer* imgLayer = layers[x];
         if (!imgLayer->hidden) {
@@ -151,7 +150,7 @@ void MainEditor::render() {
     }
     drawIsolatedRect();
     drawSymmetryLines();
-    renderGuidelines(orient);
+    renderGuidelines();
 
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
@@ -382,15 +381,21 @@ void MainEditor::drawIsolatedRect()
     }
 }
 
-void MainEditor::renderGuidelines(int o) {
-
+void MainEditor::renderGuidelines() {
+    /*README - FUNCTIONALITY DOCUMENTATION
+    * [1] Draw / place vertical or horizontal / diagonal ones at any point
+    * [2] Snap to grid lines 
+    * [3] "breakpoint" system : shift-lmb to create a "point" on a guideline if a grid is present. the guideline may alter direction after that point
+    * [4] option to stop rendering / render specific colour / render all like comments?
+    */
+    for (Guideline& g : guidelines) {
         int gYPos = guidelinePosition.y / 2;
         bool gYMiddle = guidelinePosition.y % 2;
-        int lineDrawYPoint = canvasCenterPoint.y + gYPos * scale + (gYMiddle ? scale/2 : 0);
+        int lineDrawYPoint = canvasCenterPoint.y + gYPos * scale + (gYMiddle ? scale / 2 : 0);
 
         int gXPos = guidelinePosition.x / 2;
         bool gXMiddle = guidelinePosition.x % 2;
-        int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale/2 : 0);
+        int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale / 2 : 0);
 
         u8  a8 = (pickedColor >> 24) & 0xff,
             r8 = (pickedColor >> 16) & 0xff,
@@ -398,24 +403,17 @@ void MainEditor::renderGuidelines(int o) {
             b8 = pickedColor & 0xff;
 
         SDL_SetRenderDrawColor(g_rd, r8, g8, b8, a8);
-        switch (o) {
-        case 0:
+        if (g.vertical = false) {
             //horizontal
             SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
-            break;
-        case 1:
+        }
+        if (g.vertical = true) {
             //vertical
             SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
-            break;
-        case 2:
-            //todo let me do the math (DIAGONAL TL-BR)
-            break;
-        case 3:
-            //todo let me do the math (DIAGONAL TR-BL)
-            break;
+
         }
-        
-    
+    }
+
 }
 
 void MainEditor::DrawForeground()

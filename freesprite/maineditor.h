@@ -95,7 +95,7 @@ public:
 
     XY symmetryPositions = {0,0};
     XY guidelinePosition = {0,0};
-    int orient = 0;
+    std::vector<Guideline>guidelines;
 
     bool symmetryEnabled[2] = { false, false };
 
@@ -130,7 +130,7 @@ public:
     virtual void renderColorPickerAnim();
     void drawSymmetryLines();
     void drawIsolatedRect();
-    void renderGuidelines(int orient);
+    void renderGuidelines();
 
     void initLayers();
     virtual void setUpWidgets();
