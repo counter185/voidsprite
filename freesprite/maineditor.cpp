@@ -11,6 +11,7 @@
 #include "LayerPalettized.h"
 #include "UICheckbox.h"
 #include "TooltipsLayer.h"
+#include "ee_creature.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1004,6 +1005,17 @@ void MainEditor::takeInput(SDL_Event evt) {
                 break;
             case SDL_KEYDOWN:
                 switch (evt.key.keysym.sym) {
+                    case SDLK_k:
+                        if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
+                            commitStateToCurrentLayer();
+                            for (int x = 0; x < voidsprite_image_w; x++) {
+                                for (int y = 0; y < voidsprite_image_h; y++) {
+                                    SetPixel({ x,y }, the_creature[x + y * voidsprite_image_w]);
+                                }
+                            }
+                            g_addNotification(Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
+                        }
+                        break;
                     case SDLK_e:
                         colorPicker->eraserButton->click();
                         //colorPicker->toggleEraser();
