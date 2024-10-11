@@ -190,6 +190,7 @@
     <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
+    <ClCompile Include="PopupSet9SPattern.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="NineSegmentPatternEditorScreen.h" />
+    <ClInclude Include="ninesegmentpatterns.h" />
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
@@ -313,6 +315,7 @@
     <ClInclude Include="PopupIntegerScale.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
+    <ClInclude Include="PopupSet9SPattern.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />

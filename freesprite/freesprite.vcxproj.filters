@@ -442,10 +442,13 @@
       <Filter>Source files\templates</Filter>
     </ClCompile>
     <ClCompile Include="Brush9SegmentRect.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupSet9SPattern.cpp">
+      <Filter>Source files\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -821,11 +824,17 @@
     <ClInclude Include="CustomTemplate.h">
       <Filter>Header files\templates</Filter>
     </ClInclude>
-    <ClInclude Include="Brush9SegmentRect.h">
+    <ClInclude Include="ninesegmentpatterns.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="NineSegmentPatternEditorScreen.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush9SegmentRect.h">
+      <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSet9SPattern.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

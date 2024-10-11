@@ -25,6 +25,7 @@
 #include "TooltipsLayer.h"
 #include "ButtonStartScreenSession.h"
 #include "CustomTemplate.h"
+#include "ninesegmentpatterns.h"
 
 #include "ee_creature.h"
 
@@ -339,6 +340,7 @@ int main(int argc, char** argv)
     g_patterns.push_back(new PatternRandom(4));
     g_patterns.push_back(new PatternRandom(8));
     g_patterns.push_back(new PatternRandom(16));
+    int customPatterns = 0;
     auto customPatternPaths = joinVectors({
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm"),
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".xbm")
@@ -347,6 +349,7 @@ int main(int argc, char** argv)
         CustomPattern* p = CustomPattern::load(cpattern);
         if (p != NULL) {
             g_patterns.push_back(p);
+            customPatterns++;
         }
     }
     for (Pattern*& pattern : g_patterns) {
@@ -361,6 +364,7 @@ int main(int argc, char** argv)
         new TemplateRPG2KBattleAnim(),
         new TemplateMC64x32Skin()
     };
+    int customTemplates = 0;
     auto customTemplatePaths = joinVectors({
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".png"),
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".voidsn")
@@ -369,7 +373,26 @@ int main(int argc, char** argv)
         CustomTemplate* tt = CustomTemplate::tryLoad(t);
         if (tt != NULL) {
             g_templates.push_back(tt);
+            customTemplates++;
         }
+    }
+
+    g_9spatterns = {
+        new NineSegmentPattern(nspattern1),
+    };
+    auto nineSegmentPatternPaths = joinVectors({
+		platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("9segmentpatterns/"), ".void9sp")
+		});
+    int custom9SPatterns = 0;
+    for (auto& t : nineSegmentPatternPaths) {
+        auto result = read9SegmentPattern(t);
+        if (result.first) {
+            g_9spatterns.push_back(new NineSegmentPattern(result.second));
+            custom9SPatterns++;
+        }
+	}
+    for (NineSegmentPattern*& pattern : g_9spatterns) {
+        cacheTexture(*pattern);
     }
 
     g_loadConfig();
@@ -388,6 +411,16 @@ int main(int argc, char** argv)
     for (auto& c : convertTargets) {
         MainEditor* sn = loadAnyIntoSession(c.first);
         PopupQuickConvert::doQuickConvert(sn, convertStringOnWin32(c.second));
+    }
+
+    if (customPatterns > 0) {
+        g_addNotification(Notification(std::format("Loaded {} custom patterns", customPatterns), "", 4000, NULL, COLOR_INFO));
+    }
+    if (customTemplates > 0) {
+        g_addNotification(Notification(std::format("Loaded {} custom templates", customTemplates), "", 4000, NULL, COLOR_INFO));
+    }
+    if (custom9SPatterns > 0) {
+        g_addNotification(Notification(std::format("Loaded {} custom 9seg. patterns", custom9SPatterns), "", 4000, NULL, COLOR_INFO));
     }
 
     SDL_Event evt;

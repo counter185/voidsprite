@@ -82,6 +82,7 @@ class Gamepad;
 class Timer64;
 class TooltipsLayer;
 class FileExporter;
+struct NineSegmentPattern;
 
 //templates
 class BaseTemplate;
@@ -104,6 +105,7 @@ class ButtonStartScreenSession;
 
 //brushes/tools
 class BaseBrush;
+class Brush9SegmentRect;
 class ToolText;
 
 //standard ui elements
@@ -134,6 +136,7 @@ extern std::vector<BaseBrush*> g_brushes;
 extern std::vector<Pattern*> g_patterns;
 extern std::vector<BaseTemplate*> g_templates;
 inline double g_deltaTime = 1.0;
+inline std::vector<NineSegmentPattern*> g_9spatterns;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
@@ -221,8 +224,9 @@ struct UndoStackResizeLayerElement {
 
 struct NineSegmentPattern {
     XY dimensions;
-    uint32_t* pixelData;
+    u32* pixelData;
     XY point1, point2;
+    std::string name = "Default pattern";
     SDL_Texture* cachedTexture = NULL;
 };
 

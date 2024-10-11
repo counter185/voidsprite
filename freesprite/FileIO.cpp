@@ -1965,6 +1965,19 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
+{
+    auto nsp = read9SegmentPattern(path);
+    if (nsp.first) {
+        Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
+        memcpy(nlayer->pixelData, nsp.second.pixelData, nlayer->w * nlayer->h * 4);
+        free(nsp.second.pixelData);
+        nlayer->name = "Pattern Layer";
+        return nlayer;
+    }
+    return NULL;
+}
+
 MainEditor* readLMU(PlatformNativePathString path)
 {
     MainEditor* ret = NULL;
@@ -3430,7 +3443,7 @@ std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString
 
         char header[7];
         fread(header, 7, 1, f);
-        if (strcmp(header, "VOID9SP") == 0) {
+        if (strncmp(header, "VOID9SP", 7) == 0) {
 
             NineSegmentPattern ret;
             int* reads[] = {
@@ -3448,8 +3461,8 @@ std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString
             if (ret.pixelData != NULL) {
                 fread(ret.pixelData, 4, ret.dimensions.x * ret.dimensions.y, f);
                 fclose(f);
-                ret.cachedTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, ret.dimensions.x, ret.dimensions.y);
-                SDL_UpdateTexture(ret.cachedTexture, NULL, ret.pixelData, 4 * ret.dimensions.x);
+                /*ret.cachedTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, ret.dimensions.x, ret.dimensions.y);
+                SDL_UpdateTexture(ret.cachedTexture, NULL, ret.pixelData, 4 * ret.dimensions.x);*/
                 return { true, ret };
             }
         }
