@@ -159,8 +159,8 @@ void MainEditor::render() {
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
         XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : XY{texW, texH};
         XY mouseInCanvasPoint = XY{
-            (canvasCenterPoint.x - g_mouseX) / -scale,
-            (canvasCenterPoint.y - g_mouseY) / -scale
+            (canvasCenterPoint.x - g_mouseX) / -scale - (canvasCenterPoint.x > g_mouseX ? 1 : 0),
+            (canvasCenterPoint.y - g_mouseY) / -scale - (canvasCenterPoint.y > g_mouseY ? 1 : 0),
         };
         if ((qModifier && mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
             && mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) || !qModifier) {
@@ -418,7 +418,6 @@ void MainEditor::renderGuidelines() {
             bool gXMiddle = guide.position % 2;
             int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale / 2 : 0);
             SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
-
         }
     }
 
@@ -871,13 +870,13 @@ void MainEditor::removeWidget(Drawable* wx)
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
     mousePixelTargetPoint =
         XY{
-            (canvasCenterPoint.x - x) / -scale,
-            (canvasCenterPoint.y - y) / -scale
+            (canvasCenterPoint.x - x) / -scale - (canvasCenterPoint.x > x ? 1 : 0),
+            (canvasCenterPoint.y - y) / -scale - (canvasCenterPoint.y > y ? 1 : 0),
         };
     mousePixelTargetPoint2xP =
         XY{
             (int)((canvasCenterPoint.x - x) / (float)(-scale) / 0.5f),
-            (int)((canvasCenterPoint.y - y) / (float)(-scale) / 0.5f)
+            (int)((canvasCenterPoint.y - y) / (float)(-scale) / 0.5f),
     };
 }
 
