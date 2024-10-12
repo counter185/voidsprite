@@ -27,6 +27,7 @@
 #include "CustomTemplate.h"
 #include "ninesegmentpatterns.h"
 #include "ToolGuideline.h"
+#include "BrushBezierLine.h"
 
 #include "ee_creature.h"
 
@@ -293,6 +294,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new Brush3pxCircle());
     g_brushes.push_back(new Brush1pxLine());
     g_brushes.push_back(new Brush1pxLinePathfind());
+    g_brushes.push_back(new BrushBezierLine());
     g_brushes.push_back(new BrushRect());
     g_brushes.push_back(new BrushRectFill());
     g_brushes.push_back(new Brush9SegmentRect());

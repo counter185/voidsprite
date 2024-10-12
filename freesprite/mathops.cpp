@@ -265,6 +265,29 @@ void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel
     }
 }
 
+void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEachPixel)
+{
+    const double accuracy = 0.05;
+    if (points.size() >= 2) {
+        XY prev;
+        for (double i = 0; i < 1; i += accuracy) {
+            XY p = evalBezierPoint(points, i);
+            if (i != 0) {
+                rasterizeLine(prev, p, [&](XY a) {
+                    forEachPixel(a);
+                });
+                //forEachPixel(p);
+            }
+            prev = p;
+        }
+        if (points.size() > 2) {
+            rasterizeLine(prev, points[points.size()-1], [&](XY a) {
+                forEachPixel(a);
+            });
+        }
+    }
+}
+
 XY statLineEndpoint(XY p1, XY p2, double percent) {
     if (percent != 1.0 && percent >= 0.0 && percent < 1.0) {
         p2.x = p1.x + (p2.x - p1.x) * percent;
@@ -282,6 +305,24 @@ void drawLine(XY p1, XY p2, double percent)
     p2 = statLineEndpoint(p1, p2, percent);
 
     SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
+}
+
+XY evalBezierPoint(std::vector<XY> vtx, double percent)
+{
+    if (vtx.size() < 2) {
+        // ???
+        return { 0, 0 };
+    }
+    if (vtx.size() == 2) {
+        return statLineEndpoint(vtx[0], vtx[1], percent);
+    }
+    else {
+        std::vector<XY> vtxm1;
+        for (int x = 0; x < vtx.size() - 1; x++) {
+            vtxm1.push_back(statLineEndpoint(vtx[x], vtx[x + 1], percent));
+        }
+        return evalBezierPoint(vtxm1, percent);
+    }
 }
 
 /// <summary>

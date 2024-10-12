@@ -53,9 +53,11 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
+void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEachPixel);
 
 XY statLineEndpoint(XY p1, XY p2, double percent);
 void drawLine(XY p1, XY p2, double percent = 1.0);
+XY evalBezierPoint(std::vector<XY> vtx, double percent);
 double XM1PW3P1(double x);
 
 int ixmin(int a, int b);

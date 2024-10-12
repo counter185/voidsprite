@@ -453,6 +453,9 @@
     <ClCompile Include="ToolGuideline.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="BrushBezierLine.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -841,6 +844,9 @@
     </ClInclude>
     <ClInclude Include="ToolGuideline.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushBezierLine.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
