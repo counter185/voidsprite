@@ -2,7 +2,7 @@
 
 unset prefix
 
-no_setup=
+init=$([ -f build/build.ninja ]; echo $?)
 run=
 _prefix="${PWD}/target/debug"
 portable=false
@@ -10,13 +10,14 @@ buildtype=debug
 keep=false
 while [ $# -gt 0 ]; do
 	case $1 in
-		"--no-setup") no_setup=1; shift;;
+		"--no-setup") init=0; shift;;
 		"--run") run=1; shift;;
 		"--global") prefix="/usr/local"; shift;;
 		"--portable") portable=true; shift;;
 		"--prefix") prefix="$2"; shift; shift;;
 		"--release") buildtype=release; _prefix="${PWD}/target/release"; shift;;
 		"--keep") keep=true; shift;;
+		"--init") init=1; shift;;
 	esac
 done
 
@@ -26,7 +27,7 @@ if [ ! -e "freesprite" ]; then echo "Not in source directory"; exit 1; fi
 if [ "$keep" = "false" ] && [ ! "$prefix" ] && [ "$prefix" != "/usr" ]; then if [ -e "$prefix" ]; then rm -r "$prefix"; fi; fi
 
 set -e
-if [ "$no_setup" != "1" ] || [ ! -e 'build' ]; then
+if [ "$init" == "1" ] || [ ! -e 'build' ]; then
 	if [ -e 'build' ]; then rm -r 'build'; fi
 	meson setup --prefix="$prefix" -Dportable="$portable" --buildtype="$buildtype" build
 fi
