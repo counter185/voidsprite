@@ -43,6 +43,7 @@ Layer* readAnymapPPM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
@@ -285,13 +286,23 @@ inline void g_setupIO() {
         }));
     g_fileImporters.push_back(FileImporter::flatImporter("RPG2000/2003 XYZ", ".xyz", &readXYZ, exXYZ, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Atrophy Engine AETEX v1/v2 (SDL_Image, DDS)", ".aetex", &readAETEX));
+    g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICN", ".icn", &readPS2ICN));
+    g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICO", ".ico", &readPS2ICN, NULL, FORMAT_RGB, 
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            fseek(f, 12, SEEK_SET);
+            u32 num;
+            fread(&num, 4, 1, f);
+            fclose(f);
+            return num == 0x3f800000;
+        }));
     g_fileImporters.push_back(FileImporter::flatImporter("Wii/GC TPL", ".tpl", &readWiiGCTPL));
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
-    g_fileImporters.push_back(FileImporter::flatImporter("DDS (ddspp+s3tc open source+voidsprite custom)", ".dds", &readDDS));
+    g_fileImporters.push_back(FileImporter::flatImporter("DDS (ddspp+s3tc open source)", ".dds", &readDDS));
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
-    g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);

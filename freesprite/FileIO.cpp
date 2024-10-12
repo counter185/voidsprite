@@ -1978,6 +1978,113 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
+{
+    struct PS2IcnHeader {
+        u32 iconFileID; // == 0x010000
+        u32 animShapes;
+        u32 textureType; // 0x07 is uncompressed
+        u32 unknown;    // should be 0x3f800000
+        u32 verts;
+    };
+
+    struct PS2IcnAnimationHeader {
+        u32 idTag;
+        u32 frameLength;
+        u32 animSpeed;
+        u32 playOffset;
+        u32 numberOfFrames;
+    };
+
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        Layer* ret = NULL;
+        PS2IcnHeader header;
+        fread(&header, sizeof(PS2IcnHeader), 1, f);
+        //std::reverse(&header.textureType, &header.textureType + 1);
+        //std::reverse(&header.verts, &header.verts + 1);
+        printf("[PS2ICN] texture type: %x\n", header.textureType);
+        printf("[PS2ICN] verts: %x\n", header.verts);
+        
+        int sizeofVertexStruct =
+            header.animShapes * 8   //vertex coordinates
+            + 8 // normal coordinates
+            + 8; // texture coordinates+color
+        fseek(f, header.verts * sizeofVertexStruct, SEEK_CUR);
+
+        PS2IcnAnimationHeader animHeader;
+        fread(&animHeader, sizeof(PS2IcnAnimationHeader), 1, f);
+        printf("[PS2ICN] num. anim frames: %x\n", animHeader.numberOfFrames);
+        for (int x = 0; x < animHeader.numberOfFrames; x++) {
+            fseek(f, 4, SEEK_CUR);
+            u32 numberOfKeys;
+            fread(&numberOfKeys, 4, 1, f);
+            fseek(f, 8 + 8 * numberOfKeys, SEEK_CUR);
+        }
+
+        printf("[PS2ICN] texture segment start: %x\n", ftell(f));
+        //aand we have arrived at the `Texture segment` just look at that view
+        ret = new Layer(128, 128);
+        ret->name = "PS2 ICN Layer";
+        u32* ppx = (u32*)ret->pixelData;
+
+        if (header.textureType == 0x07) {
+            
+            u16 px16;
+            for (u64 pxPtr = 0; pxPtr < 128 * 128; pxPtr++) {
+				fread(&px16, 2, 1, f);
+                //std::reverse(&px16, &px16 + 1);
+                u8 r = 8 * (px16 & 0x1f);
+                u8 g = 8 * ((px16 >> 5) & 0x1f);
+                u8 b = 8 * (px16 >> 10);
+                u8 a = 255;
+                ppx[pxPtr] = PackRGBAtoARGB(r, g, b, a);
+			}
+        }
+        else {
+            //g_addNotification(ErrorNotification("PS2 ICN error", std::format("Unsupported compression type: {}", header.textureType)));
+
+            u16 sizeOfCompressedTextureData;
+            u64 pxPtr = 0;
+            fread(&sizeOfCompressedTextureData, 2, 1, f);
+            sizeOfCompressedTextureData = BEtoLE16(sizeOfCompressedTextureData);
+            printf("[PS2ICN] texture size: %x\n", sizeOfCompressedTextureData);
+            while (pxPtr < 128 * 128 && !feof(f)) {
+                u16 code;
+                fread(&code, 2,1, f);
+                code = BEtoLE16(code);
+                if (code < 0xFF00) {
+                    u16 data;
+                    fread(&data, 2, 1, f);
+                    data = BEtoLE16(data);
+                    u8 r = 8 * (data & 0x1f);
+                    u8 g = 8 * ((data >> 5) & 0x1f);
+                    u8 b = 8 * (data >> 10);
+                    for (u32 x = 0; x < data && pxPtr < 128 * 128; x++) {
+                        ppx[pxPtr++] = PackRGBAtoARGB(r, g, b, 255);
+                    }
+                }
+                else {
+                    u16 dataLength = 0xFFFF - code;
+                    for (u32 x = 0; x < dataLength && pxPtr < 128 * 128; x++) {
+                        u16 data;
+                        fread(&data, 2, 1, f);
+                        data = BEtoLE16(data);
+                        u8 r = 8 * (data & 0x1f);
+                        u8 g = 8 * ((data >> 5) & 0x1f);
+                        u8 b = 8 * (data >> 10);
+                        ppx[pxPtr++] = PackRGBAtoARGB(r, g, b, 255);
+                    }
+                }
+            }
+        }
+
+        fclose(f);
+        return ret;
+    }
+    return NULL;
+}
+
 MainEditor* readLMU(PlatformNativePathString path)
 {
     MainEditor* ret = NULL;
