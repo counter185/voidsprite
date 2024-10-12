@@ -1,0 +1,9 @@
+root = true
+
+[*]
+charset = utf-8
+
+[.{c,cpp,h,hpp,cxx,hxx}]
+indent_style = space
+indent_size = 4
+
