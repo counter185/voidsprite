@@ -14,8 +14,8 @@ enum ConfigOptions : int {
     TEXTFIELD_MAX_UNDO_HISTORY_SIZE = 3,
     CHECKBOX_SCROLL_WITH_TOUCHPAD = 4,
     CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE = 5,
+    CHECKBOX_FILL_TOOL_TILE_BOUND = 6,
     BUTTON_OPEN_CONFIG_DIR,
-
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -78,6 +78,13 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
     cb4->setCallbackListener(CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE, this);
     configTabs->tabs[0].wxs.addDrawable(cb4);
+    posInTab.y += 35;
+
+    UICheckbox* cb5 = new UICheckbox("Bound fill tool to current tile", g_config.fillToolTileBound);
+    cb5->position = posInTab;
+    cb5->checkbox->tooltip = "When using fill tool in tile editor, do not flow past the tile";
+    cb5->setCallbackListener(CHECKBOX_FILL_TOOL_TILE_BOUND, this);
+    configTabs->tabs[0].wxs.addDrawable(cb5);
     posInTab.y += 35;
 
     /*
@@ -156,6 +163,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE:
             g_config.isolateRectOnLockTile = checked;
+            break;
+        case CHECKBOX_FILL_TOOL_TILE_BOUND:
+            g_config.fillToolTileBound = checked;
             break;
     }
 }
