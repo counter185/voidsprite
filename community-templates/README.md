@@ -14,7 +14,7 @@ In order to install a custom template, close voidsprite and navigate to the foll
 
 ```~/.config/voidsprite/templates```
 
-After that, move the voidsn files into the **templates** folder. The newly installed patterns should appear in the template drop-down menu on the launchpad next launch.
+After that, move the voidsn files into the **templates** folder. The newly installed templates should appear in the template drop-down menu on the launchpad next launch.
 
 ## creation
 
