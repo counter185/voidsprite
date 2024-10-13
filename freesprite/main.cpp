@@ -1,4 +1,4 @@
-﻿
+
 #include "globals.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
@@ -232,6 +232,9 @@ int main(int argc, char** argv)
     srand(time(NULL));
 
     platformPreInit();
+
+    g_loadConfig();
+
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
 #if SDL_IMAGE_MINOR_VERSION <= 5
 #define IMG_INIT_AVIF 0
@@ -239,7 +242,7 @@ int main(int argc, char** argv)
 #endif
     IMG_Init(IMG_INIT_AVIF | IMG_INIT_JPG | IMG_INIT_JXL | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
     g_wd = SDL_CreateWindow("void\xE2\x97\x86sprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
-    g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | (g_config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
 
@@ -398,8 +401,6 @@ int main(int argc, char** argv)
     for (NineSegmentPattern*& pattern : g_9spatterns) {
         cacheTexture(*pattern);
     }
-
-    g_loadConfig();
 
     TTF_Init();
     g_fnt = new TextRenderer();
@@ -651,6 +652,9 @@ int main(int argc, char** argv)
         }
 
         SDL_RenderPresent(g_rd);
+        if (!g_config.vsync) {
+            SDL_Delay(3);
+        }
         uint64_t ticksEnd = SDL_GetTicks64();
 
         g_deltaTime = dxmax(0.001, ticksEnd - ticksBegin);

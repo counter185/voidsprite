@@ -8,6 +8,7 @@ struct GlobalConfig {
     bool scrollWithTouchpad = false;
     bool isolateRectOnLockTile = false;
     bool fillToolTileBound = true;
+    bool vsync = true;
 };
 
 inline GlobalConfig g_config;
@@ -22,6 +23,7 @@ inline bool g_saveConfig() {
         file << "scrollWithTouchpad=" << (g_config.scrollWithTouchpad ? "1" : "0") << std::endl;
         file << "isolateRectOnLockTile=" << (g_config.isolateRectOnLockTile ? "1" : "0") << std::endl;
         file << "fillToolTileBound=" << (g_config.fillToolTileBound ? "1" : "0") << std::endl;
+        file << "vsync=" << (g_config.vsync ? "1" : "0") << std::endl;
         file.close();
         return true;
     }
@@ -48,6 +50,7 @@ inline void g_loadConfig() {
         if (config.contains("scrollWithTouchpad")) { g_config.scrollWithTouchpad = config["scrollWithTouchpad"] == "1"; }
         if (config.contains("isolateRectOnLockTile")) { g_config.isolateRectOnLockTile = config["isolateRectOnLockTile"] == "1"; }
         if (config.contains("fillToolTileBound")) { g_config.fillToolTileBound = config["fillToolTileBound"] == "1"; }
+        if (config.contains("vsync")) { g_config.vsync = config["vsync"] == "1"; }
 
         file.close();
     }

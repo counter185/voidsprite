@@ -7,6 +7,8 @@
 #include "UITextField.h"
 #include "Notification.h"
 #include "UIDropdown.h"
+#include "ScrollingPanel.h"
+#include "BaseBrush.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -16,6 +18,7 @@ enum ConfigOptions : int {
     CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE = 5,
     CHECKBOX_FILL_TOOL_TILE_BOUND = 6,
     BUTTON_OPEN_CONFIG_DIR,
+    CHECKBOX_VSYNC,
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -25,9 +28,22 @@ PopupGlobalConfig::PopupGlobalConfig()
     wxHeight = 400;
     wxWidth = 600;
 
-    TabbedView* configTabs = new TabbedView({ {"Editor"}, {"Misc."}}, 90);
+    TabbedView* configTabs = new TabbedView({ {"General"}, {"Editor"}, {"Keybinds"}, {"Misc."}}, 90);
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
+
+    /*
+        -------------------------
+        GENERAL TAB
+        -------------------------
+    */
+    XY posInTab = { 0,10 };
+    UICheckbox* cb6 = new UICheckbox("Vertical sync", g_config.vsync);
+    cb6->position = posInTab;
+    cb6->checkbox->tooltip = "When enabled, voidsprite will lock the framerate to your display's refresh rate.\nThis will make brushes smoother but also increase energy consumption.\nThe program must be restarted for this change to take effect.";
+    cb6->setCallbackListener(CHECKBOX_VSYNC, this);
+    configTabs->tabs[0].wxs.addDrawable(cb6);
+    posInTab.y += 35;
 
 
     /*
@@ -35,57 +51,96 @@ PopupGlobalConfig::PopupGlobalConfig()
         EDITOR TAB
         -------------------------
     */
-    XY posInTab = { 0,10 };
+    posInTab = { 0,10 };
 
     UICheckbox* cb1 = new UICheckbox("Open saved file location", g_config.openSavedPath);
     cb1->position = posInTab;
     cb1->setCallbackListener(CHECKBOX_OPEN_SAVED_PATH, this);
-    configTabs->tabs[0].wxs.addDrawable(cb1);
+    configTabs->tabs[1].wxs.addDrawable(cb1);
     posInTab.y += 35;
 
     UILabel* lbl3 = new UILabel("Animated background");
     lbl3->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl3);
+    configTabs->tabs[1].wxs.addDrawable(lbl3);
     UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
     dd1->position = xyAdd(posInTab, { 200, 0 });
     dd1->wxWidth = 120;
     dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
     dd1->setTextToSelectedItem = true;
     dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
-    configTabs->tabs[0].wxs.addDrawable(dd1);
+    configTabs->tabs[1].wxs.addDrawable(dd1);
     posInTab.y += 35;
 
     UICheckbox* cb3 = new UICheckbox("Pan canvas with touchpad", g_config.scrollWithTouchpad);
     cb3->position = posInTab;
     cb3->setCallbackListener(CHECKBOX_SCROLL_WITH_TOUCHPAD, this);
-    configTabs->tabs[0].wxs.addDrawable(cb3);
+    configTabs->tabs[1].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
     UILabel* lbl2 = new UILabel("Max undo history");
     lbl2->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl2);
+    configTabs->tabs[1].wxs.addDrawable(lbl2);
     UITextField* tf2 = new UITextField();
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y};
     tf2->wxWidth = 80;
     tf2->text = std::to_string(g_config.maxUndoHistory);
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
-    configTabs->tabs[0].wxs.addDrawable(tf2);
+    configTabs->tabs[1].wxs.addDrawable(tf2);
     posInTab.y += 35;
 
     UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", g_config.isolateRectOnLockTile);
     cb4->position = posInTab;
     cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
     cb4->setCallbackListener(CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE, this);
-    configTabs->tabs[0].wxs.addDrawable(cb4);
+    configTabs->tabs[1].wxs.addDrawable(cb4);
     posInTab.y += 35;
 
-    UICheckbox* cb5 = new UICheckbox("Bound fill tool to current tile", g_config.fillToolTileBound);
+    UICheckbox* cb5 = new UICheckbox("Lock Fill tool to tile size", g_config.fillToolTileBound);
     cb5->position = posInTab;
-    cb5->checkbox->tooltip = "When using fill tool in tile editor, do not flow past the tile";
+    cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
     cb5->setCallbackListener(CHECKBOX_FILL_TOOL_TILE_BOUND, this);
-    configTabs->tabs[0].wxs.addDrawable(cb5);
+    configTabs->tabs[1].wxs.addDrawable(cb5);
     posInTab.y += 35;
+
+    /*
+        -------------------------
+        KEYBINDS TAB
+        -------------------------
+    */
+    posInTab = { 0,10 };
+    ScrollingPanel* keybindsPanel = new ScrollingPanel();
+    keybindsPanel->position = posInTab;
+    keybindsPanel->wxWidth = wxWidth - 20;
+    keybindsPanel->wxHeight = wxHeight - 140;
+    keybindsPanel->scrollVertically = true;
+    keybindsPanel->scrollHorizontally = false;
+    configTabs->tabs[2].wxs.addDrawable(keybindsPanel);
+
+
+    std::vector<KeybindConf> keybindsWithIcons = {
+    };
+    for (BaseBrush* b : g_brushes) {
+        keybindsWithIcons.push_back({ b->getName(), &b->keybind, b->cachedIcon });
+    }
+
+    XY scrollPanelPos = { 0,0 };
+    int x = 1000;
+    for (KeybindConf& kk : keybindsWithIcons) {
+        UIButton* b = new UIButton();
+        b->wxWidth = keybindsPanel->wxWidth - 20;
+        b->wxHeight = 30;
+        //b->text = std::format("{} ({})", kk.name, SDL_GetKeyName(*kk.target));
+        b->icon = kk.icon;
+        b->position = scrollPanelPos;
+        b->setCallbackListener(x++, this);
+
+        keybindButtons.push_back({kk, b});
+        updateKeybindButtonText(keybindButtons.back());
+        scrollPanelPos.y += 30;
+        keybindsPanel->subWidgets.addDrawable(b);
+    }
+
 
     /*
         -------------------------
@@ -99,7 +154,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->position = posInTab;
     btn->wxWidth = 230;
     btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
-    configTabs->tabs[1].wxs.addDrawable(btn);
+    configTabs->tabs[3].wxs.addDrawable(btn);
     posInTab.y += 35;
 
 
@@ -130,6 +185,29 @@ void PopupGlobalConfig::render()
     renderDrawables();
 }
 
+void PopupGlobalConfig::takeInput(SDL_Event evt)
+{
+    if (bindingKeyIndex != -1) {
+        if (evt.type == SDL_KEYDOWN) {
+            if (evt.key.keysym.sym != SDLK_ESCAPE) {
+                //find any other keybinds that use this key and reset them
+                for (auto& kb : keybindButtons) {
+					if (kb.first.target != keybindButtons[bindingKeyIndex].first.target && *kb.first.target == evt.key.keysym.sym) {
+						*kb.first.target = SDLK_UNKNOWN;
+                        updateKeybindButtonText(kb);
+					}
+				}
+                *keybindButtons[bindingKeyIndex].first.target = evt.key.keysym.sym;
+            }
+            updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
+            bindingKeyIndex = -1;
+        }
+    }
+    else {
+        BasePopup::takeInput(evt);
+    }
+}
+
 void PopupGlobalConfig::eventButtonPressed(int evt_id)
 {
     if (evt_id == 0) {
@@ -150,6 +228,11 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
     else if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
         platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
     }
+    else if (evt_id >= 1000) {
+        bindingKey = true;
+        bindingKeyIndex = evt_id - 1000;
+        keybindButtons[bindingKeyIndex].second->text = std::format("{} [SET KEY... (ESC: cancel)]", keybindButtons[bindingKeyIndex].first.name);
+    }
 }
 
 void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
@@ -166,6 +249,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_FILL_TOOL_TILE_BOUND:
             g_config.fillToolTileBound = checked;
+            break;
+        case CHECKBOX_VSYNC:
+            g_config.vsync = checked;
             break;
     }
 }
@@ -189,4 +275,9 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
     if (evt_id == CHECKBOX_ANIMATED_BACKGROUND) {
         g_config.animatedBackground = index;
     }
+}
+
+void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t)
+{
+    t.second->text = std::format("{}    ({})", t.first.name, SDL_GetKeyName(*t.first.target));
 }

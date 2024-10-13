@@ -5,31 +5,15 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header files\brushes">
-      <UniqueIdentifier>{a353a57e-2acc-47b3-bb06-f77e67cee149}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\brushes">
       <UniqueIdentifier>{0e62046e-5b57-4859-bf80-7c3090abe9e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\popup">
-      <UniqueIdentifier>{4de1fdf9-44f3-49f3-8112-39b6ce2460d4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\popup">
       <UniqueIdentifier>{ff4f4cf5-5d84-462f-8678-473afbe41528}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external">
-      <UniqueIdentifier>{81e8270e-1bb6-412d-806b-77e2e141642d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\libtga">
-      <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\external">
       <UniqueIdentifier>{a32cb1a6-5407-47ab-92fe-6e5bd7c5879b}</UniqueIdentifier>
@@ -37,32 +21,14 @@
     <Filter Include="Source files\external\libtga">
       <UniqueIdentifier>{b2b7876e-add1-40fe-a925-456b7b03a6ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\ui_widgets">
-      <UniqueIdentifier>{f690dacb-3219-4eca-9b18-d1d94a7e302c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\ui_widgets">
       <UniqueIdentifier>{e62c2e0a-b6a8-4498-bade-9fb2bd8955a9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\screen">
-      <UniqueIdentifier>{e201f46f-e0ea-479c-86b6-e5a02322eec1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\templates">
-      <UniqueIdentifier>{a9bd79ad-10d4-46ca-8497-7aebd9add055}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\templates">
       <UniqueIdentifier>{61618ffa-829c-42b3-90c1-027a310b7063}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\external\easybmp">
-      <UniqueIdentifier>{7dd202aa-e86a-4bec-b121-5c24da536967}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\external\easybmp">
       <UniqueIdentifier>{f354d5c4-bf0c-44ca-b52b-db514ccfb8c7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\ddspp">
-      <UniqueIdentifier>{4b6da3e0-e184-40b0-abaa-0b4cded17aaf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\zip">
-      <UniqueIdentifier>{c989d900-cced-4222-ae46-6493433bb6fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\external\zip">
       <UniqueIdentifier>{c2afb396-8f85-4d44-bcd4-4c678580e351}</UniqueIdentifier>
@@ -70,29 +36,63 @@
     <Filter Include="Source files\external\pugixml">
       <UniqueIdentifier>{6b807443-ff01-4c35-bd0e-6702e51112b1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\external\pugixml">
-      <UniqueIdentifier>{126c13de-fa6f-48c2-bc9e-4e76eca2c535}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\libpng">
-      <UniqueIdentifier>{19ccb297-fd59-448e-814e-15f5a4790037}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\external\libpng">
       <UniqueIdentifier>{215dd3a1-6faa-4ad0-9a1e-8169550ce787}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\astc_dec">
-      <UniqueIdentifier>{120114de-a3c4-47bc-b48f-22f7df9a7bf0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\external\astc_dec">
       <UniqueIdentifier>{55b0a71a-1a7b-43ce-846d-e40306aab9d0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\external\base64">
-      <UniqueIdentifier>{f4ed1a57-73df-421a-b1da-6fe92097d081}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\portable-file-dialogs">
-      <UniqueIdentifier>{9359d52d-8b10-44d7-ae12-4fcc62fe501d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\screen">
       <UniqueIdentifier>{b42970c2-7d17-43ca-9583-d087ee0c3c22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files\Header files\brushes">
+      <UniqueIdentifier>{a353a57e-2acc-47b3-bb06-f77e67cee149}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\popup">
+      <UniqueIdentifier>{4de1fdf9-44f3-49f3-8112-39b6ce2460d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external">
+      <UniqueIdentifier>{81e8270e-1bb6-412d-806b-77e2e141642d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\libtga">
+      <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\easybmp">
+      <UniqueIdentifier>{7dd202aa-e86a-4bec-b121-5c24da536967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\ddspp">
+      <UniqueIdentifier>{4b6da3e0-e184-40b0-abaa-0b4cded17aaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\zip">
+      <UniqueIdentifier>{c989d900-cced-4222-ae46-6493433bb6fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\pugixml">
+      <UniqueIdentifier>{126c13de-fa6f-48c2-bc9e-4e76eca2c535}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\libpng">
+      <UniqueIdentifier>{19ccb297-fd59-448e-814e-15f5a4790037}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\astc_dec">
+      <UniqueIdentifier>{120114de-a3c4-47bc-b48f-22f7df9a7bf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\base64">
+      <UniqueIdentifier>{f4ed1a57-73df-421a-b1da-6fe92097d081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\external\portable-file-dialogs">
+      <UniqueIdentifier>{9359d52d-8b10-44d7-ae12-4fcc62fe501d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\ui_widgets">
+      <UniqueIdentifier>{f690dacb-3219-4eca-9b18-d1d94a7e302c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\screen">
+      <UniqueIdentifier>{e201f46f-e0ea-479c-86b6-e5a02322eec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource files\Header files\templates">
+      <UniqueIdentifier>{a9bd79ad-10d4-46ca-8497-7aebd9add055}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -459,394 +459,394 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="FontRenderer.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="mathops.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="EventCallbackListener.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="platform_windows.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="Layer.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="FileIO.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="libtga\tga.h">
-      <Filter>Header files\external\libtga</Filter>
+      <Filter>Resource files\Header files\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="libtga\tga_private.h">
-      <Filter>Header files\external\libtga</Filter>
+      <Filter>Resource files\Header files\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="BaseBrush.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush1pxLine.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush1x1.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush3pxCircle.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushRect.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushRectFill.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ToolColorPicker.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BasePopup.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="EditorBrushPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="EditorColorPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ScreenWideNavBar.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UIButton.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UIColorSlider.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UISlider.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UISVPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UITextField.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="DrawableManager.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="drawable.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="StartScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="maineditor.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="BaseScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="PopupMessageBox.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="TabbedView.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="colors.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="PopupSetEditorPixelGrid.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="UILabel.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectClone.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="PopupYesNo.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="BaseTemplate.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KCharset.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP.h">
-      <Filter>Header files\external\easybmp</Filter>
+      <Filter>Resource files\Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_BMP.h">
-      <Filter>Header files\external\easybmp</Filter>
+      <Filter>Resource files\Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_DataStructures.h">
-      <Filter>Header files\external\easybmp</Filter>
+      <Filter>Resource files\Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h">
-      <Filter>Header files\external\easybmp</Filter>
+      <Filter>Resource files\Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="EditorLayerPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UILayerButton.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ddspp\ddspp.h">
-      <Filter>Header files\external\ddspp</Filter>
+      <Filter>Resource files\Header files\external\ddspp</Filter>
     </ClInclude>
     <ClInclude Include="SpritesheetPreviewScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="EditorSpritesheetPreview.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupTextBox.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="ToolSetXSymmetry.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ToolSetYSymmetry.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="TemplateMC64x32Skin.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="zip\miniz.h">
-      <Filter>Header files\external\zip</Filter>
+      <Filter>Resource files\Header files\external\zip</Filter>
     </ClInclude>
     <ClInclude Include="zip\zip.h">
-      <Filter>Header files\external\zip</Filter>
+      <Filter>Resource files\Header files\external\zip</Filter>
     </ClInclude>
     <ClInclude Include="BrushFill.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="TilemapPreviewScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="UtilPathfind.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="Brush1pxLinePathfind.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushCircle.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Timer64.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="pugixml\pugiconfig.hpp">
-      <Filter>Header files\external\pugixml</Filter>
+      <Filter>Resource files\Header files\external\pugixml</Filter>
     </ClInclude>
     <ClInclude Include="pugixml\pugixml.hpp">
-      <Filter>Header files\external\pugixml</Filter>
+      <Filter>Resource files\Header files\external\pugixml</Filter>
     </ClInclude>
     <ClInclude Include="UIColorInputField.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ToolComment.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ToolMeasure.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Pattern.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="Notification.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectMove.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ScrollingPanel.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ee_creature.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="Brush1x1ArcX.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="Brush1x1ArcY.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="MinecraftSkinPreviewScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="libpng\png.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="libpng\pngconf.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="libpng\pnglibconf.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="libpng\pngpriv.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="libpng\pngstruct.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="libpng\pngdebug.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="libpng\pnginfo.h">
-      <Filter>Header files\external\libpng</Filter>
+      <Filter>Resource files\Header files\external\libpng</Filter>
     </ClInclude>
     <ClInclude Include="BrushReplaceColor.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="astc_dec\astc_decomp.h">
-      <Filter>Header files\external\astc_dec</Filter>
+      <Filter>Resource files\Header files\external\astc_dec</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectSwap.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="base64\base64.hpp">
-      <Filter>Header files\external\base64</Filter>
+      <Filter>Resource files\Header files\external\base64</Filter>
     </ClInclude>
     <ClInclude Include="ToolText.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="PopupTileGeneric.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="Gamepad.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="PopupTextTool.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectFlip.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectRotate.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="LayerPalettized.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="palettes.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="MainEditorPalettized.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="PalettizedEditorColorPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupQuickConvert.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="UIDropdown.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UIHueSlider.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupPickColor.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="PalettizedEditorLayerPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h">
-      <Filter>Header files\external\portable-file-dialogs</Filter>
+      <Filter>Resource files\Header files\external\portable-file-dialogs</Filter>
     </ClInclude>
     <ClInclude Include="platform_linux.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="TilemapEditorLayerPicker.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="RPG2KTilemapPreviewScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KFaceset.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="DraggablePanel.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="TooltipsLayer.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="Panel.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="UICheckbox.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupGlobalConfig.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="settings.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="shiftjis.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="PanelRPG2KTilemapPreview.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KSystem.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="platform_macos.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KChipset.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="PanelSpritesheetPreview.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KBattleAnim.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="main.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="ButtonStartScreenSession.h">
-      <Filter>Header files\ui_widgets</Filter>
+      <Filter>Resource files\Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupIntegerScale.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectIsolate.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="CustomTemplate.h">
-      <Filter>Header files\templates</Filter>
+      <Filter>Resource files\Header files\templates</Filter>
     </ClInclude>
     <ClInclude Include="ninesegmentpatterns.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
     <ClInclude Include="NineSegmentPatternEditorScreen.h">
-      <Filter>Header files\screen</Filter>
+      <Filter>Resource files\Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="Brush9SegmentRect.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="PopupSet9SPattern.h">
-      <Filter>Header files\popup</Filter>
+      <Filter>Resource files\Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="ToolGuideline.h">
-      <Filter>Header files\brushes</Filter>
+      <Filter>Resource files\Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushBezierLine.h">
-      <Filter>Header files</Filter>
+      <Filter>Resource files\Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

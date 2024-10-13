@@ -6,6 +6,7 @@ class BaseBrush
 public:
 	SDL_Texture* cachedIcon = NULL;
 	XY lastMouseMotionPos = XY{ 0,0 };
+	SDL_Keycode keybind = SDLK_UNKNOWN;
 
 	virtual void resetState() {}
 	virtual bool isReadOnly() { return false; }
