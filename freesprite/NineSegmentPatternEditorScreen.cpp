@@ -53,16 +53,44 @@ void NineSegmentPatternEditorScreen::render()
     r2.h += 2;
     SDL_RenderDrawRect(g_rd, &r2);
 
-    SDL_SetRenderDrawColor(g_rd, 255,255,255, 0x80);
+    XY dragHover = { -1,-1 };
+    if (abs(mousePixelPos.x - pointUL.x) < 2) {
+        dragHover.x = 0;
+    }
+    else if (abs(mousePixelPos.x - pointUR.x) < 2) {
+        dragHover.x = 1;
+    }
+    if (abs(mousePixelPos.y - pointUL.y) < 2) {
+        dragHover.y = 0;
+    }
+    else if (abs(mousePixelPos.y - pointUR.y) < 2) {
+        dragHover.y = 1;
+    }
+
+    SDL_Color norm = {255,255,255,0x7f};
+    SDL_Color drag = { 0xff, 0x6f, 0x28, 0x7f };
+
     //vlines
+    SDL_Color c;
+    c = dragHover.x == 0 ? drag : norm;
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.x == 0 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x + pointUL.x * canvasZoom, canvasRenderRect.y,
         canvasRenderRect.x + pointUL.x * canvasZoom, canvasRenderRect.y + caller->texH * canvasZoom);
+
+    c = dragHover.x == 1 ? drag : norm;
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.x == 1 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x + pointUR.x * canvasZoom, canvasRenderRect.y,
         canvasRenderRect.x + pointUR.x * canvasZoom, canvasRenderRect.y + caller->texH * canvasZoom);
 
+
     //hlines
+    c = dragHover.y == 0 ? drag : norm;
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.y == 0 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x, canvasRenderRect.y + pointUL.y * canvasZoom,
-		canvasRenderRect.x + caller->texW * canvasZoom, canvasRenderRect.y + pointUL.y * canvasZoom);
+        canvasRenderRect.x + caller->texW * canvasZoom, canvasRenderRect.y + pointUL.y * canvasZoom);
+
+    c = dragHover.y == 1 ? drag : norm;
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.y == 1 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x, canvasRenderRect.y + pointUR.y * canvasZoom,
         canvasRenderRect.x + caller->texW * canvasZoom, canvasRenderRect.y + pointUR.y * canvasZoom);
 
@@ -100,17 +128,40 @@ void NineSegmentPatternEditorScreen::takeInput(SDL_Event evt)
                 scrollingCanvas = true;
             }
             else if (evt.button.button == SDL_BUTTON_LEFT) {
-
+                if (abs(mousePixelPos.x - pointUL.x) < 2) {
+                    dragging.x = 0;
+                }
+                else if (abs(mousePixelPos.x - pointUR.x) < 2) {
+                    dragging.x = 1;
+                }
+                if (abs(mousePixelPos.y - pointUL.y) < 2) {
+                    dragging.y = 0;
+                }
+                else if (abs(mousePixelPos.y - pointUR.y) < 2) {
+                    dragging.y = 1;
+                }
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
                 scrollingCanvas = false;
             }
+            else if (evt.button.button == SDL_BUTTON_LEFT) {
+                dragging = { -1,-1 };
+            }
             break;
         case SDL_MOUSEMOTION:
+            calcMousePixelPos({evt.motion.x, evt.motion.y});
             if (scrollingCanvas) {
                 canvasDrawOrigin = xyAdd(canvasDrawOrigin, XY{ evt.motion.xrel, evt.motion.yrel });
+            }
+            if (dragging.x != -1) {
+                int* targets[] = {&pointUL.x, &pointUR.x};
+                *targets[dragging.x] = mousePixelPos.x;
+            }
+            if (dragging.y != -1) {
+                int* targets[] = {&pointUL.y, &pointUR.y};
+                *targets[dragging.y] = mousePixelPos.y;
             }
             break;
         case SDL_MOUSEWHEEL:
@@ -164,4 +215,10 @@ void NineSegmentPatternEditorScreen::drawBackground()
             }
         }
     }
+}
+
+void NineSegmentPatternEditorScreen::calcMousePixelPos(XY onScreenPos)
+{
+    XY posInCanvas = xySubtract(onScreenPos, canvasDrawOrigin);
+    mousePixelPos = XY{ posInCanvas.x / canvasZoom, posInCanvas.y / canvasZoom };
 }

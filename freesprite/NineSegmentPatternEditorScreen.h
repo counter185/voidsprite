@@ -8,8 +8,8 @@ class NineSegmentPatternEditorScreen :
 protected:
     MainEditor* caller;
 
-    XY canvasDrawOrigin = { 10,10 };
-    int canvasZoom = 1;
+    XY canvasDrawOrigin = { 10,40 };
+    int canvasZoom = 2;
     bool scrollingCanvas = false;
 
     XY pointUL;
@@ -18,6 +18,10 @@ protected:
     ScreenWideNavBar<NineSegmentPatternEditorScreen*>* navbar = NULL;
 
     bool closeNextTick = false;
+
+    XY dragging = { -1,-1 };
+
+    XY mousePixelPos = { 0,0 };
 
 public:
     NineSegmentPatternEditorScreen(MainEditor* parent);
@@ -31,5 +35,6 @@ public:
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) override;
 
     void drawBackground();
+    void calcMousePixelPos(XY onScreenPos);
 };
 
