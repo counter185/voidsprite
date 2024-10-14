@@ -29,6 +29,13 @@
 #include "ToolGuideline.h"
 #include "BrushBezierLine.h"
 
+#include "TemplateMC64x32Skin.h"
+#include "TemplateRPG2KBattleAnim.h"
+#include "TemplateRPG2KCharset.h"
+#include "TemplateRPG2KChipset.h"
+#include "TemplateRPG2KFaceset.h"
+#include "TemplateRPG2KSystem.h"
+
 #include "ee_creature.h"
 
 #include "main.h"

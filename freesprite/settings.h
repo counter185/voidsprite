@@ -13,6 +13,7 @@ struct GlobalConfig {
     std::map<std::string, SDL_Keycode> keybinds;
 };
 
+inline bool g_configWasLoaded = false;
 inline GlobalConfig g_config;
 
 bool g_saveConfig();

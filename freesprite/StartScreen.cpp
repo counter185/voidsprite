@@ -36,6 +36,8 @@ void StartScreen::render()
     g_fnt->RenderString("New image", 10, 80);
 
     wxsManager.renderAll();
+
+    renderStartupAnim();
 }
 
 void StartScreen::takeInput(SDL_Event evt)
@@ -192,6 +194,38 @@ void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string n
         }
         newMainEditor->tileDimensions = g_templates[index]->tileSize();
         g_addScreen(newMainEditor);
+    }
+}
+
+void StartScreen::renderStartupAnim()
+{
+    if (startupAnimTimer.started) {
+        double textAnimTime = startupAnimTimer.percentElapsedTime(4000, 200);
+        double animTime = startupAnimTimer.percentElapsedTime(1300, 200);
+        if (textAnimTime > 1.0) {
+            startupAnimTimer.stop();
+        }
+        else {
+            SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255 * (1.0 - animTime));
+            SDL_Rect bgRect = { 0, 0, g_windowW, g_windowH * (1.0 - XM1PW3P1(animTime)) };
+            SDL_RenderFillRect(g_rd, &bgRect);
+            //SDL_RenderFillRect(g_rd, NULL);
+
+            if (animTime < 0.5) {
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+                drawLine({ 0, 30 }, { g_windowW, 30 }, XM1PW3P1(animTime / 0.5));
+            }
+            else {
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+                drawLine({ g_windowW, 30 }, { 0, 30 }, 1.0-XM1PW3P1((animTime - 0.5) / 0.5));
+            }
+
+            if (textAnimTime > 0.05) {
+                std::string s = g_configWasLoaded ? "Welcome back" : "Welcome to voidsprite";
+                XY fd = g_fnt->StatStringDimensions(s);
+                g_fnt->RenderString(s, g_windowW - fd.x - 2, 0, { 255,255,255, (u8)(255 * (1.0 - XM1PW3P1((textAnimTime - 0.05) / 0.95))) });
+            }
+        }
     }
 }
 

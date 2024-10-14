@@ -55,6 +55,7 @@ void g_loadConfig() {
         if (config.contains("fillToolTileBound")) { g_config.fillToolTileBound = config["fillToolTileBound"] == "1"; }
         if (config.contains("vsync")) { g_config.vsync = config["vsync"] == "1"; }
 
+        g_configWasLoaded = true;
         file.close();
     }
 }

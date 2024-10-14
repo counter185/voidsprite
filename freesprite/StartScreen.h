@@ -11,18 +11,13 @@
 #include "UILabel.h"
 #include "TabbedView.h"
 #include "BaseTemplate.h"
-#include "TemplateRPG2KCharset.h"
-#include "TemplateRPG2KFaceset.h"
-#include "TemplateMC64x32Skin.h"
-#include "TemplateRPG2KBattleAnim.h"
 #include "PopupMessageBox.h"
 #include "UIColorInputField.h"
 #include "Notification.h"
 #include "ScreenWideNavBar.h"
 #include "PopupQuickConvert.h"
 #include "PopupGlobalConfig.h"
-#include "TemplateRPG2KSystem.h"
-#include "TemplateRPG2KChipset.h"
+#include "Timer64.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -40,6 +35,8 @@ public:
     UITextField* tab1TextFieldCHX;
 
     ScreenWideNavBar<StartScreen*>* navbar;
+
+    Timer64 startupAnimTimer;
 
     bool closeNextTick = false;
 
@@ -210,6 +207,8 @@ public:
                 }
             }
         }
+
+        startupAnimTimer.start();
     }
 
     void render() override;
@@ -228,7 +227,7 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
     
-    void loadCustomTemplates();
+    void renderStartupAnim();
     void renderBackground();
     void openImageLoadDialog();
     void tryLoadFile(std::string path);
