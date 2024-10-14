@@ -11,7 +11,7 @@ void UIButton::render(XY pos)
 	SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
 	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 	SDL_RenderFillRect(g_rd, &drawrect);
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+	SDL_SetRenderDrawColor(g_rd, colorBorder.r, colorBorder.g, colorBorder.b, colorBorder.a);
 	SDL_RenderDrawRect(g_rd, &drawrect);
 
 	renderAnimations(pos);

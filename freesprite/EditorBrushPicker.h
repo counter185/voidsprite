@@ -83,6 +83,7 @@ public:
 			//newBtn->text = brush->getName();
 			newBtn->wxWidth = 26;
 			newBtn->wxHeight = 26;
+			newBtn->colorBorder = brush->overrideRightClick() ? SDL_Color{0x00,0xae,0xff,0x80} : SDL_Color{ 0xff, 0xff, 0xff, 0x50 };
 			newBtn->setCallbackListener(20 + i++, this);
 			brushButtons.push_back(newBtn);
 			subWidgets.addDrawable(newBtn);
