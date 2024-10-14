@@ -63,6 +63,18 @@ void BrushFill::clickDrag(MainEditor*, XY, XY)
 {
 }
 
+void BrushFill::rightClickPress(MainEditor* editor, XY pos)
+{
+    editor->commitStateToCurrentLayer();
+    uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
+    for (XY& t : previewClosedList) {
+        editor->SetPixel({ t }, swapTo);
+    }
+    for (XY& t : previewOpenList) {
+        editor->SetPixel({ t }, swapTo);
+    }
+}
+
 void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
 
     XY canvasDrawPoint = editor->canvasCenterPoint;
