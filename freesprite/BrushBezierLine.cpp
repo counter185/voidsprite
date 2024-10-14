@@ -57,6 +57,17 @@ void BrushBezierLine::renderOnCanvas(XY canvasDrawPoint, int scale)
         drawPointOutline(canvasDrawPoint, p, scale);
     }
 
+    for (int x = 0; x < (int)points.size() - 1; x++) {
+        XY osp1 = xyAdd(canvasDrawPoint, { points[x].x * scale, points[x].y * scale});
+        osp1 = xyAdd(osp1, { scale / 2,scale / 2 });
+
+        XY osp2 = xyAdd(canvasDrawPoint, { points[x + 1].x * scale, points[x + 1].y * scale});
+        osp2 = xyAdd(osp2, { scale / 2,scale / 2 });
+
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0xa0);
+        SDL_RenderDrawLine(g_rd, osp1.x, osp1.y, osp2.x, osp2.y);
+    }
+
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
     drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);

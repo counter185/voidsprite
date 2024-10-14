@@ -453,11 +453,11 @@
     <ClCompile Include="ToolGuideline.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
-    <ClCompile Include="BrushBezierLine.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="settings.cpp">
       <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushBezierLine.cpp">
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -849,7 +849,7 @@
       <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="BrushBezierLine.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
