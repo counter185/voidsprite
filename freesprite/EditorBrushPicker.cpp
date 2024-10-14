@@ -37,12 +37,21 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	lbl->text = "PATTERNS";
 	patternMenuPanel->subWidgets.addDrawable(lbl);
 
+	editorInvPatternBtn = new UIButton();
+	editorInvPatternBtn->position = { 160, 5 };
+	editorInvPatternBtn->text = "I";
+	editorInvPatternBtn->wxWidth = 24;
+	editorInvPatternBtn->wxHeight = 24;
+	editorInvPatternBtn->tooltip = "Invert pattern\nThe pattern will be inverted.";
+	editorInvPatternBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEINVERTPATTERN, this);
+	patternMenuPanel->subWidgets.addDrawable(editorInvPatternBtn);
+
 	patternMenu = new ScrollingPanel();
 	patternMenu->scrollHorizontally = false;
 	patternMenu->scrollVertically = true;
 	patternMenu->wxWidth = 30 * 6 + 20;
 	patternMenu->wxHeight = 130;
-	patternMenu->position = { 0,30 };
+	patternMenu->position = { 0,35 };
 	patternMenu->bgColor = { 0,0,0,0x80 };
 	patternMenuPanel->subWidgets.addDrawable(patternMenu);
 
@@ -116,12 +125,16 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
     if (evt_id == EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU) {
         patternMenuPanel->enabled = !patternMenuPanel->enabled;
         patternMenuTimer.start();
-        patternPanelBtn->text = patternMenu->enabled ? "<" : ">";
+        patternPanelBtn->text = patternMenuPanel->enabled ? "<" : ">";
     }
     else if (evt_id == EVENT_MAINEDITOR_TOGGLEREPLACE) {
         caller->replaceAlphaMode = !caller->replaceAlphaMode;
         editorReplaceBtn->colorBGFocused = editorReplaceBtn->colorBGUnfocused = caller->replaceAlphaMode ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
     }
+	else if (evt_id == EVENT_MAINEDITOR_TOGGLEINVERTPATTERN) {
+		caller->invertPattern = !caller->invertPattern;
+		editorInvPatternBtn->colorBGFocused = editorInvPatternBtn->colorBGUnfocused = caller->invertPattern ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
+	}
     else if (evt_id >= 60) {
         caller->currentPattern = g_patterns[evt_id - 60];
         patternMenu->subWidgets.forceUnfocus();

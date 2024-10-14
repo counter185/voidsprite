@@ -62,6 +62,7 @@ public:
     XY mouseHoldPosition;
     bool closeNextTick = false;
     BaseBrush* currentBrush;
+    bool invertPattern = false;
     Pattern* currentPattern;
     bool leftMouseHold = false;
     bool middleMouseHold = false;
@@ -95,7 +96,7 @@ public:
 
     XY symmetryPositions = {0,0};
     XY guidelinePosition = {0,0};
-    std::vector<Guideline>guidelines;
+    std::vector<Guideline> guidelines;
 
     bool symmetryEnabled[2] = { false, false };
 

@@ -18,6 +18,7 @@ public:
 	Timer64 patternMenuTimer;
 	UIButton* patternPanelBtn;
 	UIButton* editorReplaceBtn;
+	UIButton* editorInvPatternBtn;
 	Panel* patternMenuPanel;
 	ScrollingPanel* patternMenu;
 	std::vector<UIButton*> brushButtons;

@@ -1245,8 +1245,8 @@ void MainEditor::FillTexture() {
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
-    if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && ((layer_getPixelAt(position) & 0xFF000000) != 0)))) {
-        if (!isolateEnabled || (isolateEnabled && pointInBox(position, isolateRect))) {
+    if ((currentPattern->canDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
+        if (!isolateEnabled || pointInBox(position, isolateRect)) {
             uint32_t targetColor = color;
             if (blendAlphaMode) {
                 if (eraserMode) {
