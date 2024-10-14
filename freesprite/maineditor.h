@@ -151,6 +151,7 @@ public:
     void regenerateLastColors();
     virtual void setActiveColor(uint32_t, bool animate = true);
     virtual uint32_t getActiveColor();
+    void setActiveBrush(BaseBrush* b);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

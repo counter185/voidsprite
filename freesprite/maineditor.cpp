@@ -1090,6 +1090,16 @@ void MainEditor::takeInput(SDL_Event evt) {
                     case SDLK_F2:
                         layer_promptRename();
                         break;
+                    default:
+                        if (evt.key.keysym.sym != SDLK_UNKNOWN) {
+                            for (BaseBrush* b : g_brushes) {
+                                if (b->keybind == evt.key.keysym.sym) {
+                                    setActiveBrush(b);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
                 }
                 break;
         }
@@ -1619,6 +1629,12 @@ void MainEditor::setActiveColor(uint32_t col, bool animate)
 uint32_t MainEditor::getActiveColor()
 {
     return pickedColor;
+}
+
+void MainEditor::setActiveBrush(BaseBrush* b)
+{
+    currentBrush = b;
+	brushPicker->updateActiveBrushButton(b);
 }
 
 void MainEditor::moveLayerUp(int index) {

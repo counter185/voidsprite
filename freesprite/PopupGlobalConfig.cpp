@@ -26,7 +26,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     previousConfig = g_config;
 
     wxHeight = 400;
-    wxWidth = 600;
+    wxWidth = 700;
 
     TabbedView* configTabs = new TabbedView({ {"General"}, {"Editor"}, {"Keybinds"}, {"Misc."}}, 90);
     configTabs->position = XY{ 10,50 };
@@ -189,15 +189,21 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
     if (bindingKeyIndex != -1) {
         if (evt.type == SDL_KEYDOWN) {
-            if (evt.key.keysym.sym != SDLK_ESCAPE) {
+            int targetKey = evt.key.keysym.sym == SDLK_LSHIFT ? SDLK_UNKNOWN : evt.key.keysym.sym;
+            if (targetKey != SDLK_ESCAPE) {
                 //find any other keybinds that use this key and reset them
-                for (auto& kb : keybindButtons) {
-					if (kb.first.target != keybindButtons[bindingKeyIndex].first.target && *kb.first.target == evt.key.keysym.sym) {
-						*kb.first.target = SDLK_UNKNOWN;
-                        updateKeybindButtonText(kb);
-					}
-				}
-                *keybindButtons[bindingKeyIndex].first.target = evt.key.keysym.sym;
+                if (targetKey != SDLK_UNKNOWN && std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) == reservedKeys.end()) {
+                    for (auto& kb : keybindButtons) {
+                        if (kb.first.target != keybindButtons[bindingKeyIndex].first.target && *kb.first.target == targetKey) {
+                            *kb.first.target = SDLK_UNKNOWN;
+                            updateKeybindButtonText(kb);
+                        }
+                    }
+                    *keybindButtons[bindingKeyIndex].first.target = targetKey;
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetKeyName(targetKey)))));
+                }
             }
             updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
             bindingKeyIndex = -1;
@@ -231,7 +237,7 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
     else if (evt_id >= 1000) {
         bindingKey = true;
         bindingKeyIndex = evt_id - 1000;
-        keybindButtons[bindingKeyIndex].second->text = std::format("{} [SET KEY... (ESC: cancel)]", keybindButtons[bindingKeyIndex].first.name);
+        keybindButtons[bindingKeyIndex].second->text = std::format("{} [SET KEY... (ESC: cancel, LShift: clear)]", keybindButtons[bindingKeyIndex].first.name);
     }
 }
 

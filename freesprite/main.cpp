@@ -317,8 +317,13 @@ int main(int argc, char** argv)
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolMeasure());
     g_brushes.push_back(new ToolText());
+    int i = 0;
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
+        std::string keybindKey = std::format("brush:{}", i++);
+        if (g_config.keybinds.contains(keybindKey)) {
+            brush->keybind = g_config.keybinds[keybindKey];
+        }
     }
 
     //load patterns

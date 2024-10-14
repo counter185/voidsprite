@@ -140,6 +140,17 @@ PlatformNativePathString convertStringOnWin32(std::string a) {
 #endif
 }
 
+bool stringStartsWithIgnoreCase(std::string c, std::string startsWith)
+{
+    if (c.size() < startsWith.size()) {
+        return false;
+    }
+    auto otherString = c.substr(0, startsWith.size());
+    std::transform(otherString.begin(), otherString.end(), otherString.begin(), ::tolower);
+    std::transform(startsWith.begin(), startsWith.end(), startsWith.begin(), ::tolower);
+    return otherString == startsWith;
+}
+
 //can't do this with templates
 bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith)
 {
@@ -579,4 +590,23 @@ uint32_t RGB565toARGB8888(uint16_t rgb565)
 uint32_t PackRGBAtoARGB(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     return (a << 24) + (r << 16) + (g << 8) + b;
+}
+
+std::vector<std::string> split(std::string a, char b)
+{
+    std::vector<std::string> ret;
+
+    std::string current = "";
+    for (char& c : a) {
+		if (c == b) {
+			ret.push_back(current);
+			current = "";
+		}
+		else {
+			current += c;
+		}
+	}
+    ret.push_back(current);
+
+    return ret;
 }

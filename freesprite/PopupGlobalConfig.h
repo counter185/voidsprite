@@ -16,6 +16,16 @@ private:
     std::vector<std::pair<KeybindConf, UIButton*>> keybindButtons;
     bool bindingKey = false;
     int bindingKeyIndex = -1;
+    std::vector<SDL_Keycode> reservedKeys = {
+        SDLK_LCTRL,
+        SDLK_RCTRL,
+        SDLK_LALT,
+        SDLK_LEFTBRACKET,
+        SDLK_RIGHTBRACKET,
+        SDLK_q,
+        SDLK_e,
+        SDLK_F2
+    };
 public:
     PopupGlobalConfig();
 
