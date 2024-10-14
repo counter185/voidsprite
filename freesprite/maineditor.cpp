@@ -1000,7 +1000,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 else {
                     if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
                         canvasCenterPoint.x -= (g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20;
-                        canvasCenterPoint.y += (g_shiftModifier ? evt.wheel.x : evt.wheel.y) * 20;
+                        canvasCenterPoint.y += (g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20;
                     }
                     else {
                         zoom(evt.wheel.y);
