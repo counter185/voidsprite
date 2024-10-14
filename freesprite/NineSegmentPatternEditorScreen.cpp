@@ -182,7 +182,7 @@ void NineSegmentPatternEditorScreen::eventFileSaved(int evt_id, PlatformNativePa
     if (evt_id == EVENT_9SPEDITOR_SAVE) {
         Layer* l = caller->flattenImage();
         if (l != NULL) {
-            if (write9SegmentPattern(name, l, pointUL, pointUR)) {
+            if (write9SegmentPattern(name, l, pointUL, xySubtract({caller->texW, caller->texH}, pointUR))) {
                 g_addNotification(SuccessNotification("Success", "9-segment pattern saved"));
             }
             else {
