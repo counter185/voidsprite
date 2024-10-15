@@ -4,9 +4,7 @@
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
 #include "TilemapEditorLayerPicker.h"
-#include <lcf/lmu/reader.h>
-#include <lcf/rpg/map.h>
-#include <lcf/reader_lcf.h>
+#include "PanelTilemapPreview.h"
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
@@ -37,6 +35,9 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
             }
         }, { SDLK_f });
     wxsManager.addDrawable(navbar);
+
+    PanelTilemapPreview* panel = new PanelTilemapPreview(this);
+    wxsManager.addDrawable(panel);
 
     resizeTilemap(32, 32);
 
@@ -118,34 +119,6 @@ void TilemapPreviewScreen::render()
     //tilemap current hovered tile
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0);
     SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
-
-
-    //current tile panel
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
-    SDL_Rect panelRect = { 0,40, ixmax(400, 30 + caller->tileDimensions.x * tilemapScale * 2), ixmax(200, 110 + caller->tileDimensions.y * tilemapScale * 2)};
-    SDL_RenderFillRect(g_rd, &panelRect);
-
-    g_fnt->RenderString("Tileset preview", panelRect.x + 5, panelRect.y+5);
-    g_fnt->RenderString("Selected tile: [TAB] to switch", panelRect.x + 15, panelRect.y + 60);
-    SDL_Rect tileDraw = {
-        panelRect.x + 15,
-        panelRect.y + 90,
-        caller->tileDimensions.x * tilemapScale*2,
-        caller->tileDimensions.y * tilemapScale*2
-    };
-
-    SDL_Rect tileClip = {
-        pickedTile.x * caller->tileDimensions.x,
-        pickedTile.y * caller->tileDimensions.y,
-        caller->tileDimensions.x,
-        caller->tileDimensions.y
-    };
-
-    for (Layer* l : caller->layers) {
-        SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
-    }
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x90);
-    SDL_RenderDrawRect(g_rd, &tileDraw);
 
 
     //render tile select menu

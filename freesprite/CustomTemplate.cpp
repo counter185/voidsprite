@@ -14,6 +14,7 @@ CustomTemplate* CustomTemplate::tryLoad(PlatformNativePathString path)
         t->name = convertStringToUTF8OnWin32(fileNameWithNoPathAndExtension.substr(0, fileNameWithNoPathAndExtension.find_last_of(convertStringOnWin32("."))));
         t->image = ssn->flattenImage();
         t->tilesize = ssn->tileDimensions;
+        t->tilepadding = ssn->tileGridPaddingBottomRight;
         t->comments = ssn->comments;
         delete ssn;
         return t;

@@ -193,6 +193,7 @@ void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string n
             newMainEditor->comments.push_back(comment);
         }
         newMainEditor->tileDimensions = g_templates[index]->tileSize();
+        newMainEditor->tileGridPaddingBottomRight = g_templates[index]->tilePadding();
         g_addScreen(newMainEditor);
     }
 }

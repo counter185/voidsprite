@@ -459,6 +459,9 @@
     <ClCompile Include="BrushBezierLine.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="PanelTilemapPreview.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -850,6 +853,9 @@
     </ClInclude>
     <ClInclude Include="BrushBezierLine.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelTilemapPreview.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -93,6 +93,7 @@ class BasePopup;
 class MainEditor;
 class MainEditorPalettized;
 class SpritesheetPreviewScreen;
+class TilemapPreviewScreen;
 
 //specialized ui elements
 class EditorColorPicker;
