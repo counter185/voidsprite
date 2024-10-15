@@ -53,8 +53,13 @@ public:
     std::vector<UndoStackElement> undoStack, redoStack;
 
     int texW = -1, texH = -1;
+
     XY tileDimensions = XY{ 0,0 };
     uint8_t tileGridAlpha = 0x40;
+    XY tileGridPaddingBottomRight = XY{ 0,0 };
+    SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
+    XY getPaddedTileDimensions();
+
     XY canvasCenterPoint = XY{0,0};
     XY mousePixelTargetPoint;
     XY mousePixelTargetPoint2xP;
@@ -131,6 +136,7 @@ public:
     virtual void renderColorPickerAnim();
     void drawSymmetryLines();
     void drawIsolatedRect();
+    void drawTileGrid();
     void renderGuidelines();
 
     void initLayers();

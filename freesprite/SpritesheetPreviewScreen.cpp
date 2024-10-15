@@ -75,6 +75,7 @@ void SpritesheetPreviewScreen::render()
         SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
     }
 
+    // lines between tiles
     if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
 
         int dx = canvasRenderRect.x;
@@ -96,6 +97,7 @@ void SpritesheetPreviewScreen::render()
         }
     }
     
+    //canvas border
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
     SDL_RenderDrawRect(g_rd, &canvasRenderRect);
 
@@ -278,21 +280,17 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
     }
 
     if (!sprites.empty()) {
+        XY callerPaddedTileSize = caller->getPaddedTileDimensions();
         SDL_Rect spriteDrawArea = { at.x, at.y,
-            caller->tileDimensions.x * canvasZoom,
-            caller->tileDimensions.y * canvasZoom
+            callerPaddedTileSize.x * canvasZoom,
+            callerPaddedTileSize.y * canvasZoom
         };
         if (spritesProgress >= sprites.size()) {
             spritesProgress = 0;
         }
         XY currentSprite = sprites[which == -1 ? spritesProgress : which];
 
-        SDL_Rect layersClipArea = {
-            currentSprite.x * caller->tileDimensions.x,
-            currentSprite.y * caller->tileDimensions.y,
-            caller->tileDimensions.x,
-            caller->tileDimensions.y
-        };
+        SDL_Rect layersClipArea = caller->getPaddedTilePosAndDimensions(currentSprite);
 
         for (Layer*& l : caller->layers) {
             SDL_RenderCopy(g_rd, l->tex, &layersClipArea, &spriteDrawArea);

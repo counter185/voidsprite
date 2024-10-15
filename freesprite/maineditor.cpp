@@ -27,6 +27,34 @@
 #include "PopupGlobalConfig.h"
 #include "PopupPickColor.h"
 
+SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
+{
+    XY tileDim = xyEqual(tileDimensions, { 0,0 }) ? XY{texW, texH} : tileDimensions;
+
+    XY origin = {
+        tilePos.x * tileDim.x,
+        tilePos.y * tileDim.y
+    };
+    return SDL_Rect{
+		origin.x,
+		origin.y,
+        tileDim.x - ixmax(0,tileGridPaddingBottomRight.x),
+        tileDim.y - ixmax(0,tileGridPaddingBottomRight.y)
+	};
+}
+
+XY MainEditor::getPaddedTileDimensions()
+{
+    XY ret = XY{
+        tileDimensions.x - ixmax(0,tileGridPaddingBottomRight.x),
+        tileDimensions.y - ixmax(0,tileGridPaddingBottomRight.y)
+    };
+    return { 
+        ret.x <= 0 ? tileDimensions.x : ret.x,
+        ret.y <= 0 ? tileDimensions.y : ret.y
+    };
+}
+
 MainEditor::MainEditor(XY dimensions) {
 
     texW = dimensions.x;
@@ -130,57 +158,42 @@ void MainEditor::render() {
         }
     }
 
-    //draw tile lines
-    if (tileDimensions.x != 0) {
-        int dx = canvasRenderRect.x;
-        while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
-            dx += tileDimensions.x * scale;
-            if (dx >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
-                SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
-            }
-        }
-    }
-    if (tileDimensions.y != 0) {
-        int dy = canvasRenderRect.y;
-        while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
-            dy += tileDimensions.y * scale;
-            if (dy >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff-backgroundColor.r, 0xff-backgroundColor.g, 0xff-backgroundColor.b, tileGridAlpha);
-                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
-            }
-        }
-    }
+    drawTileGrid();
     drawIsolatedRect();
     drawSymmetryLines();
     renderGuidelines();
 
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
-        XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : XY{texW, texH};
+        
         XY mouseInCanvasPoint = XY{
             (canvasCenterPoint.x - g_mouseX) / -scale - (canvasCenterPoint.x > g_mouseX ? 1 : 0),
             (canvasCenterPoint.y - g_mouseY) / -scale - (canvasCenterPoint.y > g_mouseY ? 1 : 0),
         };
         if ((qModifier && mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
             && mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) || !qModifier) {
+
+            XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : XY{ texW, texH };
+
             XY tilePosition = !qModifier ? lockedTilePreview :
                 XY{
                     mouseInCanvasPoint.x / tileDim.x,
                     mouseInCanvasPoint.y / tileDim.y
                 };
+
+            SDL_Rect paddedTileRect = getPaddedTilePosAndDimensions(tilePosition);
             SDL_Rect tileRect = {
-                canvasCenterPoint.x + tilePosition.x * tileDim.x * scale,
-                canvasCenterPoint.y + tilePosition.y * tileDim.y * scale,
-                tileDim.x * scale,
-                tileDim.y * scale
+                canvasCenterPoint.x + paddedTileRect.x * scale,
+                canvasCenterPoint.y + paddedTileRect.y * scale,
+                paddedTileRect.w * scale,
+                paddedTileRect.h * scale
             };
-            SDL_Rect canvasClipRect = {
+            SDL_Rect canvasClipRect = paddedTileRect;/*{
                 tilePosition.x * tileDim.x,
                 tilePosition.y * tileDim.y,
-                tileDim.x,
-                tileDim.y
-            };
+                tileRect.w,
+                tileRect.h
+            };*/
 
             for (int yy = -1; yy <= 1; yy++) {
                 for (int xx = -1; xx <= 1; xx++) {
@@ -192,8 +205,8 @@ void MainEditor::render() {
                         Layer* imgLayer = layers[x];
                         if (!imgLayer->hidden) {
                             uint8_t alpha = imgLayer->layerAlpha;
-                            XY position = { tileRect.x + (xx * scale * tileDim.x),
-                                tileRect.y + (yy * scale * tileDim.y)};
+                            XY position = { tileRect.x + (xx * scale * paddedTileRect.w),
+                                tileRect.y + (yy * scale * paddedTileRect.h)};
                             SDL_Rect finalTileRect = { position.x, position.y, tileRect.w, tileRect.h };
                             imgLayer->render(finalTileRect, canvasClipRect, alpha);
                         }
@@ -202,12 +215,14 @@ void MainEditor::render() {
             }
 
             //lock animation
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-            double anim = 1.0 - XM1PW3P1(tileLockTimer.percentElapsedTime(300));
-            drawLine(XY{ tileRect.x, tileRect.y }, XY{ tileRect.x + tileRect.w, tileRect.y }, anim);
-            drawLine(XY{ tileRect.x, tileRect.y }, XY{ tileRect.x, tileRect.y + tileRect.h }, anim);
-            drawLine(XY{ tileRect.x + tileRect.w, tileRect.y + tileRect.h }, XY{ tileRect.x, tileRect.y + tileRect.h }, anim);
-            drawLine(XY{ tileRect.x + tileRect.w, tileRect.y + tileRect.h }, XY{ tileRect.x + tileRect.w, tileRect.y }, anim);
+            if (tileLockTimer.started && (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
+                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+                double anim = 1.0 - XM1PW3P1(tileLockTimer.percentElapsedTime(300));
+                drawLine(XY{ tileRect.x, tileRect.y }, XY{ tileRect.x + tileRect.w, tileRect.y }, anim);
+                drawLine(XY{ tileRect.x, tileRect.y }, XY{ tileRect.x, tileRect.y + tileRect.h }, anim);
+                drawLine(XY{ tileRect.x + tileRect.w, tileRect.y + tileRect.h }, XY{ tileRect.x, tileRect.y + tileRect.h }, anim);
+                drawLine(XY{ tileRect.x + tileRect.w, tileRect.y + tileRect.h }, XY{ tileRect.x + tileRect.w, tileRect.y }, anim);
+            }
         }
     }
 
@@ -381,6 +396,45 @@ void MainEditor::drawIsolatedRect()
 
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
         SDL_RenderDrawRect(g_rd, &r);
+    }
+}
+
+void MainEditor::drawTileGrid()
+{
+    SDL_Rect canvasRenderRect;
+    canvasRenderRect.w = texW * scale;
+    canvasRenderRect.h = texH * scale;
+    canvasRenderRect.x = canvasCenterPoint.x;
+    canvasRenderRect.y = canvasCenterPoint.y;
+
+    //draw tile lines
+    if (tileDimensions.x != 0) {
+        int dx = canvasRenderRect.x;
+        while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
+            dx += tileDimensions.x * scale;
+            if (dx >= 0) {
+                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
+                SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
+            }
+            if (tileGridPaddingBottomRight.x > 0) {
+                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha/3*2);
+                SDL_RenderDrawLine(g_rd, dx - tileGridPaddingBottomRight.x * scale , canvasRenderRect.y, dx - tileGridPaddingBottomRight.x * scale, canvasRenderRect.y + canvasRenderRect.h);
+            }
+        }
+    }
+    if (tileDimensions.y != 0) {
+        int dy = canvasRenderRect.y;
+        while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
+            dy += tileDimensions.y * scale;
+            if (dy >= 0) {
+                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
+                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
+            }
+            if (tileGridPaddingBottomRight.y > 0) {
+				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha/3*2);
+				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - tileGridPaddingBottomRight.y * scale, canvasRenderRect.x + canvasRenderRect.w, dy - tileGridPaddingBottomRight.y * scale);
+			}
+        }
     }
 }
 

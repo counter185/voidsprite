@@ -4,6 +4,7 @@
 #include "UITextField.h"
 #include "UIButton.h"
 #include "maineditor.h"
+#include "Notification.h"
 
 class PopupSetEditorPixelGrid :
     public BasePopup, public EventCallbackListener
@@ -23,6 +24,8 @@ public:
 
     UITextField* tboxX;
     UITextField* tboxY;
+    UITextField* tboxPadRX;
+    UITextField* tboxPadBY;
     UISlider* opacitySlider;
 
     MainEditor* caller;
@@ -45,8 +48,18 @@ public:
 
     void eventButtonPressed(int evt_id) override {
         if (evt_id == 0) {
-            if (!tboxX->text.empty() && !tboxY->text.empty()) {
+            if (!tboxX->text.empty() && !tboxY->text.empty() && !tboxPadRX->text.empty() && !tboxPadBY->text.empty()) {
                 caller->tileDimensions = XY{ std::stoi(tboxX->text), std::stoi(tboxY->text) };
+                XY newTileGridPaddingBottomRight = XY{ std::stoi(tboxPadRX->text), std::stoi(tboxPadBY->text) };
+                if (newTileGridPaddingBottomRight.x >= caller->tileDimensions.x && newTileGridPaddingBottomRight.x != 0) {
+                    newTileGridPaddingBottomRight.x = 0;
+                    g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
+                }
+                if (newTileGridPaddingBottomRight.y >= caller->tileDimensions.y && newTileGridPaddingBottomRight.y != 0) {
+                    newTileGridPaddingBottomRight.y = 0;
+                    g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
+                }
+                caller->tileGridPaddingBottomRight = newTileGridPaddingBottomRight;
                 caller->tileGridAlpha = (uint8_t)(opacitySlider->sliderPos * 255);
                 closePopup();
             }

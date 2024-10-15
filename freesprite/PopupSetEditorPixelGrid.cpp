@@ -5,7 +5,7 @@
 PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx) 
 {
 
-    wxHeight = 240;
+    wxHeight = 280;
     std::vector<std::string> names;
     for (XY& tileSize : predefinedTileSizes) {  
         names.push_back(xyEqual(tileSize, { 0,0 }) ? std::string("No grid") : std::format("{}x{}", tileSize.x, tileSize.y));
@@ -40,8 +40,41 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     tboxY->wxWidth = 120;
     wxsManager.addDrawable(tboxY);
 
+    UILabel* paddingLabel = new UILabel();
+    paddingLabel->position = XY{ 20, 125 };
+    paddingLabel->text = "Padding";
+    wxsManager.addDrawable(paddingLabel);
+
+
+    UILabel* ll = new UILabel();
+    ll->position = XY{ 120, 125 };
+    ll->text = "Right";
+    wxsManager.addDrawable(ll);
+
+    tboxPadRX = new UITextField();
+    tboxPadRX->position = XY{ 175, 125 };
+    tboxPadRX->text = std::to_string(caller->tileGridPaddingBottomRight.x);
+    tboxPadRX->wxWidth = 60;
+    wxsManager.addDrawable(tboxPadRX);
+
+    ll = new UILabel();
+    ll->position = XY{ 250, 125 };
+    ll->text = "Bottom";
+    wxsManager.addDrawable(ll);
+
+    tboxPadBY = new UITextField();
+    tboxPadBY->position = XY{ 320, 125 };
+    tboxPadBY->text = std::to_string(caller->tileGridPaddingBottomRight.y);
+    tboxPadBY->wxWidth = 60;
+    wxsManager.addDrawable(tboxPadBY);
+
+    UILabel* opacityLabel = new UILabel();
+    opacityLabel->position = XY{ 20, 185 };
+    opacityLabel->text = "Opacity";
+    wxsManager.addDrawable(opacityLabel);
+
     opacitySlider = new UISlider();
-    opacitySlider->position = XY{100, 140};
+    opacitySlider->position = XY{100, 180};
     opacitySlider->wxHeight = 40;
     opacitySlider->sliderPos = caller->tileGridAlpha / 255.0f;
     wxsManager.addDrawable(opacitySlider);
@@ -62,8 +95,8 @@ void PopupSetEditorPixelGrid::render()
 
 	g_fnt->RenderString(title, titlePos.x, titlePos.y);
 	g_fnt->RenderString(text, contentPos.x, contentPos.y);
-    XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
-    g_fnt->RenderString("Opacity", opacityTextPos.x, opacityTextPos.y);
+    //XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
+    //g_fnt->RenderString("Opacity", opacityTextPos.x, opacityTextPos.y);
 	renderDrawables();
 }
 

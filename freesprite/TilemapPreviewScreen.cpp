@@ -66,9 +66,11 @@ void TilemapPreviewScreen::render()
 {
     drawBackground();
 
+    XY callerTileSize = caller->getPaddedTileDimensions();
+
     SDL_Rect tilemapDrawRect = { tilemapDrawPoint.x, tilemapDrawPoint.y,
-        tilemapDimensions.x * caller->tileDimensions.x * tilemapScale,
-        tilemapDimensions.y * caller->tileDimensions.y * tilemapScale };
+        tilemapDimensions.x * callerTileSize.x * tilemapScale,
+        tilemapDimensions.y * callerTileSize.y * tilemapScale };
 
     for (int l = 0; l < tilemap.size(); l++) {
         for (int y = 0; y < tilemapDimensions.y; y++) {
@@ -80,18 +82,18 @@ void TilemapPreviewScreen::render()
                 }
 
                 SDL_Rect tileDraw = {
-                    tilemapDrawRect.x + caller->tileDimensions.x * tilemapScale * x,
-                    tilemapDrawRect.y + caller->tileDimensions.y * tilemapScale * y,
-                    caller->tileDimensions.x * tilemapScale,
-                    caller->tileDimensions.y * tilemapScale
+                    tilemapDrawRect.x + callerTileSize.x * tilemapScale * x,
+                    tilemapDrawRect.y + callerTileSize.y * tilemapScale * y,
+                    callerTileSize.x * tilemapScale,
+                    callerTileSize.y * tilemapScale
                 };
 
-                SDL_Rect tileClip = {
+                SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos); /*{
                     tilePos.x * caller->tileDimensions.x,
                     tilePos.y * caller->tileDimensions.y,
                     caller->tileDimensions.x,
                     caller->tileDimensions.y
-                };
+                };*/
 
                 uint8_t alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? (uint8_t)(0xff * XM1PW3P1(layerSelectTimer.percentElapsedTime(1300))) : 0xff;
                 for (Layer* l : caller->layers) {
@@ -102,19 +104,23 @@ void TilemapPreviewScreen::render()
         }
     }
 
+    //tilemap border
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
     SDL_RenderDrawRect(g_rd, &tilemapDrawRect);
 
     SDL_Rect tilemapSelectedTile = {
-        tilemapDrawRect.x + caller->tileDimensions.x * tilemapScale * hoveredTilePosition.x,
-        tilemapDrawRect.y + caller->tileDimensions.y * tilemapScale * hoveredTilePosition.y,
-        caller->tileDimensions.x * tilemapScale,
-        caller->tileDimensions.y * tilemapScale
+        tilemapDrawRect.x + callerTileSize.x * tilemapScale * hoveredTilePosition.x,
+        tilemapDrawRect.y + callerTileSize.y * tilemapScale * hoveredTilePosition.y,
+        callerTileSize.x * tilemapScale,
+        callerTileSize.y * tilemapScale
     };
 
+    //tilemap current hovered tile
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0);
     SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
 
+
+    //current tile panel
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
     SDL_Rect panelRect = { 0,40, ixmax(400, 30 + caller->tileDimensions.x * tilemapScale * 2), ixmax(200, 110 + caller->tileDimensions.y * tilemapScale * 2)};
     SDL_RenderFillRect(g_rd, &panelRect);
@@ -142,6 +148,7 @@ void TilemapPreviewScreen::render()
     SDL_RenderDrawRect(g_rd, &tileDraw);
 
 
+    //render tile select menu
     if (tileSelectOpen) {
 
         SDL_Rect tsbgRect = { 0,0, g_windowW * XM1PW3P1(tileSelectTimer.percentElapsedTime(300)), g_windowH};
@@ -214,6 +221,8 @@ void TilemapPreviewScreen::tick()
 
 void TilemapPreviewScreen::takeInput(SDL_Event evt)
 {
+    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+
     if (evt.type == SDL_QUIT) {
         g_closeScreen(this);
         return;
@@ -267,9 +276,10 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
 
                 if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
                     XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, tilemapDrawPoint);
+                    XY callerTileSize = caller->getPaddedTileDimensions();
 
-                    pos.x /= caller->tileDimensions.x * tilemapScale;
-                    pos.y /= caller->tileDimensions.y * tilemapScale;
+                    pos.x /= callerTileSize.x * tilemapScale;
+                    pos.y /= callerTileSize.y * tilemapScale;
                     hoveredTilePosition = pos;
                 }
             }

@@ -2365,6 +2365,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
 
                     if (extData.contains("tile.dim.x")) { ret->tileDimensions.x = std::stoi(extData["tile.dim.x"]); }
                     if (extData.contains("tile.dim.y")) { ret->tileDimensions.y = std::stoi(extData["tile.dim.y"]); }
+                    if (extData.contains("tile.dim.padrx")) { ret->tileGridPaddingBottomRight.x = std::stoi(extData["tile.dim.padrx"]); }
+                    if (extData.contains("tile.dim.padby")) { ret->tileGridPaddingBottomRight.y = std::stoi(extData["tile.dim.padby"]); }
                     if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
                     if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
                     if (extData.contains("layer.selected")) { ret->selLayer = std::stoi(extData["layer.selected"]); }
@@ -2870,6 +2872,8 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         std::map<std::string, std::string> extData = {
             {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
             {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
+            {"tile.dim.padrx", std::to_string(editor->tileGridPaddingBottomRight.x)},
+            {"tile.dim.padby", std::to_string(editor->tileGridPaddingBottomRight.y)},
             {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
