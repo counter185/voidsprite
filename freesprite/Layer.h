@@ -130,6 +130,7 @@ public:
 	}
 
 	void blit(Layer* sourceLayer, XY position);
+	void blit(Layer* sourceLayer, XY position, SDL_Rect clip, bool fast = false);
 
 	void setPixel(XY position, uint32_t color) {
 		uint32_t* intpxdata = (uint32_t*)pixelData;

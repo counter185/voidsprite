@@ -44,6 +44,7 @@ public:
 
 	virtual void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
 	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
+	virtual void eventPopupClosed(int evt_id, BasePopup* p) override;
 
 	virtual void resizeTilemap(int w, int h);
 	static void drawBackground();
@@ -59,5 +60,9 @@ public:
 	void moveLayerDown(int index);
 	void mergeLayerDown(int index);
 	void duplicateLayer(int index);
+
+	void promptRenderMap(int type);
+	void doRenderMap(PlatformNativePathString path, int type, int exporterIndex);
+	Layer* renderLayer(XY** layer);
 };
 

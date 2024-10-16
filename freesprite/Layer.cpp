@@ -2,6 +2,7 @@
 #include "LayerPalettized.h"
 #include "mathops.h"
 
+// Blits source layer onto this layer at position
 void Layer::blit(Layer* sourceLayer, XY position)
 {
     if (position.x >= w || position.y >= h){
@@ -20,6 +21,30 @@ void Layer::blit(Layer* sourceLayer, XY position)
     }
 
     layerDirty = true;
+}
+
+void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast)
+{
+    if (position.x >= w || position.y >= h) {
+        return;
+    }
+
+    for (int y = 0; y < clipSource.h; y++) {
+        if (!fast) {
+            for (int x = 0; x < clipSource.w; x++) {
+                setPixel(XY{ x + position.x, y + position.y }, sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y }));
+            }
+        }
+        else {
+            int nPixels = ixmin(clipSource.w, w - position.x) * 4;
+            memcpy(
+                pixelData + ((y + position.y) * w * 4) + (position.x * 4),
+                sourceLayer->pixelData + ((y + clipSource.y) * sourceLayer->w * 4) + (clipSource.x * 4),
+                nPixels
+            );
+        }
+    }
+        
 }
 
 //i don't even know if this works

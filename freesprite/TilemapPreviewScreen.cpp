@@ -5,6 +5,8 @@
 #include "Notification.h"
 #include "TilemapEditorLayerPicker.h"
 #include "PanelTilemapPreview.h"
+#include "FileIO.h"
+#include "PopupTileGeneric.h"
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
@@ -15,25 +17,59 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                 SDLK_f,
                 {
                     "File",
-                    {},
+                    {SDLK_o, SDLK_s, SDLK_z, SDLK_x, SDLK_c},
                     {
                         {SDLK_o, { "Load layout from file",
                                 [](TilemapPreviewScreen* screen) {
-                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
+                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "load tile layout", EVENT_TILEMAP_LOADLAYOUT);
                                 }
                             }
                         },
                         {SDLK_s, { "Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
-                                    platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "Save tile layout", EVENT_OTHERFILE_SAVEFILE);
+                                    platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "save tile layout", EVENT_TILEMAP_SAVELAYOUT);
+                                }
+                            }
+                        },
+                        {SDLK_z, { "Render all layers to image",
+                                [](TilemapPreviewScreen* screen) {
+                                    screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE);
+                                }
+                            }
+                        },
+                        {SDLK_x, { "Render all layers to separate images",
+                                [](TilemapPreviewScreen* screen) {
+                                    screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES);
+                                }
+                            }
+                        },
+                        {SDLK_c, { "Render current layer to image",
+                                [](TilemapPreviewScreen* screen) {
+                                    screen->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE);
                                 }
                             }
                         },
                     },
                     g_iconNavbarTabFile
                 }
+            }, 
+            {
+                SDLK_e,
+                {
+                    "Edit",
+                    {},
+                    {
+                        {SDLK_r, { "Resize tilemap",
+                                [](TilemapPreviewScreen* screen) {
+                                    g_addPopup(new PopupTileGeneric(screen, "Resize tilemap", "Enter the new size of the tilemap (in tiles)", screen->tilemapDimensions, EVENT_TILEMAP_RESIZE));
+                                }
+                            }
+                        }
+                    },
+                    g_iconNavbarTabEdit
+                }
             }
-        }, { SDLK_f });
+        }, { SDLK_f, SDLK_e });
     wxsManager.addDrawable(navbar);
 
     PanelTilemapPreview* panel = new PanelTilemapPreview(this);
@@ -287,150 +323,166 @@ BaseScreen* TilemapPreviewScreen::isSubscreenOf()
 
 void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
 {
-    if (exporterIndex == 2) {
-        //pxm
-        FILE* file = platformOpenFile(name, PlatformFileModeWB);
-        if (file == NULL) {
-            g_addNotification(ErrorNotification("Error saving file", "Could not open file for writing."));
-            return;
-        }
-        else {
-            u8 header[4] = { 'P', 'X', 'M', 0x10 };
-            fwrite(&header, 1, 4, file);
-            u16 w = tilemapDimensions.x;
-            u16 h = tilemapDimensions.y;
-            fwrite(&w, 2, 1, file);
-            fwrite(&h, 2, 1, file);
-
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    XY tile = tilemap[0][y][x];
-                    u8 byte = (tile.x < 0 || tile.y < 0 || tile.x >= 16) ? 0 : (u8)(tile.y * 16 + tile.x);
-                    fwrite(&byte, 1, 1, file);
-                }
-            }
-
-            fclose(file);
-            g_addNotification(SuccessNotification("File saved", "Save successful!"));
-        }
+    if (evt_id == EVENT_TILEMAP_RENDERALLLTOIMAGE
+        || evt_id == EVENT_TILEMAP_RENDERALLLTOIMAGES
+        || evt_id == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
+        doRenderMap(name, evt_id, exporterIndex);
     }
-    else {
-        FILE* file = platformOpenFile(name, PlatformFileModeWB);
-        if (file == NULL) {
-            g_addNotification(ErrorNotification("Error saving file", "Could not open file for writing."));
-            return;
-        }
-        else {
-            uint8_t version = 2;
-            fwrite(&version, 1, 1, file);
-            fwrite(&tilemapDimensions.x, 4, 1, file);
-            fwrite(&tilemapDimensions.y, 4, 1, file);
-            int layerCount = tilemap.size();
-            fwrite(&layerCount, 4, 1, file);
-            for (XY**& l : tilemap) {
-                for (int y = 0; y < tilemapDimensions.y; y++) {
-                    for (int x = 0; x < tilemapDimensions.x; x++) {
-                        XY td = l[y][x];
-                        fwrite(&td.x, 4, 1, file);
-                        fwrite(&td.y, 4, 1, file);
+    else if (evt_id == EVENT_TILEMAP_SAVELAYOUT) {
+        if (exporterIndex == 2) {
+            //pxm
+            FILE* file = platformOpenFile(name, PlatformFileModeWB);
+            if (file == NULL) {
+                g_addNotification(ErrorNotification("Error saving file", "Could not open file for writing."));
+                return;
+            }
+            else {
+                u8 header[4] = { 'P', 'X', 'M', 0x10 };
+                fwrite(&header, 1, 4, file);
+                u16 w = tilemapDimensions.x;
+                u16 h = tilemapDimensions.y;
+                fwrite(&w, 2, 1, file);
+                fwrite(&h, 2, 1, file);
+
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+                        XY tile = tilemap[0][y][x];
+                        u8 byte = (tile.x < 0 || tile.y < 0 || tile.x >= 16) ? 0 : (u8)(tile.y * 16 + tile.x);
+                        fwrite(&byte, 1, 1, file);
                     }
                 }
+
+                fclose(file);
+                g_addNotification(SuccessNotification("File saved", "Save successful!"));
             }
-            fclose(file);
-            g_addNotification(SuccessNotification("File saved", "Save successful!"));
+        }
+        else {
+            FILE* file = platformOpenFile(name, PlatformFileModeWB);
+            if (file == NULL) {
+                g_addNotification(ErrorNotification("Error saving file", "Could not open file for writing."));
+                return;
+            }
+            else {
+                uint8_t version = 2;
+                fwrite(&version, 1, 1, file);
+                fwrite(&tilemapDimensions.x, 4, 1, file);
+                fwrite(&tilemapDimensions.y, 4, 1, file);
+                int layerCount = tilemap.size();
+                fwrite(&layerCount, 4, 1, file);
+                for (XY**& l : tilemap) {
+                    for (int y = 0; y < tilemapDimensions.y; y++) {
+                        for (int x = 0; x < tilemapDimensions.x; x++) {
+                            XY td = l[y][x];
+                            fwrite(&td.x, 4, 1, file);
+                            fwrite(&td.y, 4, 1, file);
+                        }
+                    }
+                }
+                fclose(file);
+                g_addNotification(SuccessNotification("File saved", "Save successful!"));
+            }
         }
     }
 }
 
 void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
 {
-    //
-    //if (name.find(utf8StringToWstring(".lmu")) == name.size() - 4) {
-    if (importerIndex == 2) {
-        //pxm
-        FILE* file = platformOpenFile(name, PlatformFileModeRB);
-        if (file == NULL) {
-            g_addNotification(ErrorNotification("Error loading file", "Could not open file for writing."));
-            return;
-        }
-        else {
-            u8 header[3];
-            fread(&header, 1, 3, file);
-            if (header[0] == 'P' && header[1] == 'X' && header[2] == 'M') {
-                u8 zerox10Byte;
-                fread(&zerox10Byte, 1, 1, file);
-
-                u16 mapLength, mapHeight;
-                fread(&mapLength, 2, 1, file);
-                fread(&mapHeight, 2, 1, file);
-                printf("[PXE] mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
-                resizeTilemap(mapLength, mapHeight);
-                freeAllLayers();
-                XY** newTilemap = newLayer();
-                for (u64 tile = 0; tile < mapLength * mapHeight; tile++) {
-                    u8 byte;
-                    fread(&byte, 1, 1, file);
-                    newTilemap[tile / mapLength][tile % mapLength] = XY{ byte % 16, byte / 16 };
-                }
-                activeTilemap = tilemap[0];
+    if (evt_id == EVENT_TILEMAP_LOADLAYOUT) {
+        //
+        //if (name.find(utf8StringToWstring(".lmu")) == name.size() - 4) {
+        if (importerIndex == 2) {
+            //pxm
+            FILE* file = platformOpenFile(name, PlatformFileModeRB);
+            if (file == NULL) {
+                g_addNotification(ErrorNotification("Error loading file", "Could not open file for writing."));
+                return;
             }
             else {
-                g_addNotification(ErrorNotification("Error loading file", "PXM header invalid."));
+                u8 header[3];
+                fread(&header, 1, 3, file);
+                if (header[0] == 'P' && header[1] == 'X' && header[2] == 'M') {
+                    u8 zerox10Byte;
+                    fread(&zerox10Byte, 1, 1, file);
+
+                    u16 mapLength, mapHeight;
+                    fread(&mapLength, 2, 1, file);
+                    fread(&mapHeight, 2, 1, file);
+                    printf("[PXE] mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
+                    resizeTilemap(mapLength, mapHeight);
+                    freeAllLayers();
+                    XY** newTilemap = newLayer();
+                    for (u64 tile = 0; tile < mapLength * mapHeight; tile++) {
+                        u8 byte;
+                        fread(&byte, 1, 1, file);
+                        newTilemap[tile / mapLength][tile % mapLength] = XY{ byte % 16, byte / 16 };
+                    }
+                    activeTilemap = tilemap[0];
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error loading file", "PXM header invalid."));
+                }
             }
-        }
-        fclose(file);
-        layerPicker->updateLayers();
-    }
-    else {
-        FILE* file = platformOpenFile(name, PlatformFileModeRB);
-        if (file == NULL) {
-            g_addNotification(ErrorNotification("Error loading file", "Could not open file for writing."));
-            return;
+            fclose(file);
+            layerPicker->updateLayers();
         }
         else {
-            uint8_t version;
-            fread(&version, 1, 1, file);
-            switch (version) {
-            case 1:
-                XY dims;
-                fread(&dims.x, 4, 1, file);
-                fread(&dims.y, 4, 1, file);
-                resizeTilemap(dims.x, dims.y);
-                for (int y = 0; y < tilemapDimensions.y; y++) {
-                    for (int x = 0; x < tilemapDimensions.x; x++) {
-                        XY td;
-                        fread(&td.x, 4, 1, file);
-                        fread(&td.y, 4, 1, file);
-                        activeTilemap[y][x] = td;
-                    }
-                }
-                break;
-            case 2:
-                freeAllLayers();
-                fread(&tilemapDimensions.x, 4, 1, file);
-                fread(&tilemapDimensions.y, 4, 1, file);
-                int layerCount;
-                fread(&layerCount, 4, 1, file);
-                for (int l = 0; l < layerCount; l++) {
-                    XY** newTilemap = newLayer();
+            FILE* file = platformOpenFile(name, PlatformFileModeRB);
+            if (file == NULL) {
+                g_addNotification(ErrorNotification("Error loading file", "Could not open file for writing."));
+                return;
+            }
+            else {
+                uint8_t version;
+                fread(&version, 1, 1, file);
+                switch (version) {
+                case 1:
+                    XY dims;
+                    fread(&dims.x, 4, 1, file);
+                    fread(&dims.y, 4, 1, file);
+                    resizeTilemap(dims.x, dims.y);
                     for (int y = 0; y < tilemapDimensions.y; y++) {
                         for (int x = 0; x < tilemapDimensions.x; x++) {
                             XY td;
                             fread(&td.x, 4, 1, file);
                             fread(&td.y, 4, 1, file);
-                            newTilemap[y][x] = td;
+                            activeTilemap[y][x] = td;
                         }
                     }
+                    break;
+                case 2:
+                    freeAllLayers();
+                    fread(&tilemapDimensions.x, 4, 1, file);
+                    fread(&tilemapDimensions.y, 4, 1, file);
+                    int layerCount;
+                    fread(&layerCount, 4, 1, file);
+                    for (int l = 0; l < layerCount; l++) {
+                        XY** newTilemap = newLayer();
+                        for (int y = 0; y < tilemapDimensions.y; y++) {
+                            for (int x = 0; x < tilemapDimensions.x; x++) {
+                                XY td;
+                                fread(&td.x, 4, 1, file);
+                                fread(&td.y, 4, 1, file);
+                                newTilemap[y][x] = td;
+                            }
+                        }
+                    }
+                    activeTilemap = tilemap[0];
+                    break;
+                default:
+                    g_addNotification(ErrorNotification("Error loading file", "File version not supported"));
+                    break;
                 }
-                activeTilemap = tilemap[0];
-                break;
-            default:
-                g_addNotification(ErrorNotification("Error loading file", "File version not supported"));
-                break;
+                fclose(file);
+                layerPicker->updateLayers();
             }
-            fclose(file);
-            layerPicker->updateLayers();
         }
+    }
+}
+
+void TilemapPreviewScreen::eventPopupClosed(int evt_id, BasePopup* p)
+{
+    if (evt_id == EVENT_TILEMAP_RESIZE) {
+        resizeTilemap(std::stoi(((PopupTileGeneric*)p)->tboxX->text), std::stoi(((PopupTileGeneric*)p)->tboxY->text));
     }
 }
 
@@ -473,9 +525,7 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
     }
     
     tilemapDimensions = { w,h };
-    if (activeTilemap == NULL) {
-        activeTilemap = tilemap[0];
-    }
+    activeTilemap = tilemap[0];
 }
 
 void TilemapPreviewScreen::drawBackground()
@@ -629,4 +679,110 @@ void TilemapPreviewScreen::duplicateLayer(int index)
         }
     }
     tilemap.insert(tilemap.begin() + index, newTilemap);
+}
+
+void TilemapPreviewScreen::promptRenderMap(int type)
+{
+    if (type == EVENT_TILEMAP_RENDERALLLTOIMAGE
+        || type == EVENT_TILEMAP_RENDERALLLTOIMAGES
+        || type == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
+        
+        std::vector<std::pair<std::string, std::string>> formats;
+        for (auto f : g_fileExporters) {
+            formats.push_back({ f->extension(), f->name() });
+        }
+        platformTrySaveOtherFile(this, formats, "render image", type);
+    }
+}
+
+void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, int exporterIndex)
+{
+    FileExporter* exporter = g_fileExporters[exporterIndex - 1];
+    XY tileSize = caller->getPaddedTileDimensions();
+    bool success = false;
+    if (type == EVENT_TILEMAP_RENDERALLLTOIMAGE) {
+
+        std::vector<Layer*> layers;
+        int x = 0;
+        for (XY**& tileLayer : tilemap) {
+            Layer* ll = renderLayer(tileLayer);
+            ll->name += std::format(" {}", x++);
+            layers.push_back(ll);
+        }
+        MainEditor* newSession = new MainEditor(layers);
+        newSession->tileDimensions = tileSize;
+
+        if (exporter->exportsWholeSession()) {
+            success = exporter->exportData(path, newSession);
+            delete newSession;
+        }
+        else {
+            Layer* l = newSession->flattenImage();
+            success = exporter->exportData(path, l);
+            delete l;
+        }
+        delete newSession;
+    }
+    else if (type == EVENT_TILEMAP_RENDERALLLTOIMAGES) {
+        int exports = 0;
+        int x = 0;
+        for (XY**& tileLayer : tilemap) {
+            Layer* ll = renderLayer(tileLayer);
+            ll->name += std::format(" {}", x+1);
+            bool ss = false;
+            PlatformNativePathString filename = path + convertStringOnWin32(std::format("-{}{}", x++, exporter->extension()));
+            if (exporter->exportsWholeSession()) {
+                MainEditor* ssn = new MainEditor({ ll });
+                ssn->tileDimensions = tileSize;
+                ss = exporter->exportData(filename, ssn);
+                delete ssn;
+            }
+            else {
+                ss = exporter->exportData(filename, ll);
+                delete ll;
+            }
+            exports += ss ? 1 : 0;
+        }
+        success = exports == tilemap.size();
+    }
+    else if (type == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
+        Layer* ll = renderLayer(activeTilemap);
+        if (exporter->exportsWholeSession()) {
+            MainEditor* ssn = new MainEditor({ ll });
+            success = exporter->exportData(path, ssn);
+            delete ssn;
+        }
+        else {
+            success = exporter->exportData(path, ll);
+            delete ll;
+        }
+    }
+    else {
+        g_addNotification(ErrorNotification("Error", "Not implemented"));
+    }
+
+    g_addNotification(
+        success ? SuccessNotification("Success", "Rendered map to image")
+        : ErrorNotification("Error", "Error rendering map to image")
+    );
+}
+
+Layer* TilemapPreviewScreen::renderLayer(XY** layer)
+{
+    XY tileSize = caller->getPaddedTileDimensions();
+    Layer* l = new Layer(tileSize.x * tilemapDimensions.x, tileSize.y * tilemapDimensions.y);
+    l->name = "Tilemap layer";
+    for (int y = 0; y < tilemapDimensions.y; y++) {
+        for (int x = 0; x < tilemapDimensions.x; x++) {
+            XY currentTile = layer[y][x];
+            if (currentTile.x >= 0 && currentTile.y >= 0) {
+                SDL_Rect clip = caller->getPaddedTilePosAndDimensions(currentTile);
+                int lIndex = 0;
+                for (Layer*& ll : caller->layers) {
+                    l->blit(ll, XY{ x * tileSize.x, y * tileSize.y }, clip, lIndex++ == 0);
+                }
+            }
+        }
+    }
+    return l;
 }
