@@ -462,6 +462,9 @@
     <ClCompile Include="PanelTilemapPreview.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="Canvas.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -856,6 +859,9 @@
     </ClInclude>
     <ClInclude Include="PanelTilemapPreview.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Canvas.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

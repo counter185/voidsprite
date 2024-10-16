@@ -663,13 +663,17 @@ int main(int argc, char** argv)
             SDL_RenderCopy(g_rd, viewport, NULL, NULL);
         }
 
+        //g_fnt->RenderString(std::format("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
+
+        uint64_t ticksNonRenderEnd = SDL_GetTicks64();
         SDL_RenderPresent(g_rd);
         if (!g_config.vsync) {
             SDL_Delay(3);
         }
         uint64_t ticksEnd = SDL_GetTicks64();
 
-        g_deltaTime = dxmax(0.001, ticksEnd - ticksBegin);
+        g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
+        g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
     }
 
     return 0;

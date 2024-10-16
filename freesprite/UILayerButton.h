@@ -11,6 +11,9 @@ public:
 	UIButton* hideButton;
 	
 	UILayerButton(std::string mainName) {
+		wxWidth = 240;
+		wxHeight = 30;
+
 		mainButton = new UIButton();
 		mainButton->text = mainName;
 		mainButton->position = XY{ 0,0 };

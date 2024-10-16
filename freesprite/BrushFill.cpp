@@ -92,7 +92,7 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
     }
     if (editor != NULL 
         && editor->isInBounds(previewLastPosition) 
-        && previewClosedList.size() < 18000
+        && g_deltaTime < 0.018
         && SDL_GetTicks64() > timeNextIter + 16) {
         timeNextIter = SDL_GetTicks64();
         XY tilePos = editor->tileDimensions.x == 0
@@ -101,6 +101,7 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
                 lastMouseMotionPos.x / editor->tileDimensions.x,
                 lastMouseMotionPos.y / editor->tileDimensions.y,
             };
+
         std::vector<XY> nextList;
         for (XY& openListElement : previewOpenList) {
             uint32_t pixelRn = editor->getCurrentLayer()->getPixelAt(openListElement);
@@ -129,11 +130,12 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
         previewOpenList = nextList;
         previewIterations++;
     }
+    uint64_t distanceTicks = SDL_GetTicks64() - timeStarted;
+    double distanceTime = dxmax(1, distanceTicks / 16.0);
     for (XY& cle : previewClosedList) {
-        uint64_t distanceTicks = SDL_GetTicks64() - timeStarted;
         //double alphaModifier = dxmin((distanceTicks / 32.0) / dxmax(xyDistance(cle, previewLastPosition), 1), 1);
-        double alphaModifier = xyDistance(cle, previewLastPosition) / dxmax(1, distanceTicks / 16.0);
-        uint8_t alpha = 0xd0 * dxmax(0, dxmin(alphaModifier, 1));
+        double alphaModifier = xyDistance(cle, previewLastPosition) / distanceTime;
+        uint8_t alpha = ixmax(0, 0xd0 * dxmin(alphaModifier, 1));
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, alpha);
         drawLocalPoint(canvasDrawPoint, cle, scale);
