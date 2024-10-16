@@ -259,6 +259,13 @@ void MainEditor::render() {
         SDL_RenderFillRect(g_rd, &eraserRect);
         SDL_RenderCopy(g_rd, g_iconEraser, NULL, &eraserRect);
     }
+    if (currentPattern != NULL && currentPattern != g_patterns[0]) {
+        SDL_Rect patternRect = { g_mouseX + 38, g_mouseY - 30, 22, 22 };
+        SDL_SetTextureAlphaMod(currentPattern->cachedIcon, 0xa0);
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
+        SDL_RenderFillRect(g_rd, &patternRect);
+        SDL_RenderCopy(g_rd, currentPattern->cachedIcon, NULL, &patternRect);
+    }
     renderColorPickerAnim();
 }
 
