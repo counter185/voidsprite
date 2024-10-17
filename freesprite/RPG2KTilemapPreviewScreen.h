@@ -2,6 +2,7 @@
 #include "TilemapPreviewScreen.h"
 #include "EventCallbackListener.h"
 #include "ScreenWideNavBar.h"
+#include "Canvas.h"
 
 struct LMUEvent {
     XY pos;
@@ -32,10 +33,10 @@ public:
     std::map<std::string, SDL_Texture*> texturesLoaded;
     SDL_Texture* callerCanvas = NULL;
 
+    Canvas canvas;
+
     bool rdLowerLayer = true, rdUpperLayer = true, rdEventLayer = true;
     uint8_t gridOpacity = 0x18;
-    int scale = 1;
-    XY canvasDrawPoint = { 40,40 };
     bool scrollingTilemap = false;
     LMUEventViewMode eventViewMode = LMUEVENTS_SHOW_INGAME_AND_RECTS;
     bool forceOptimizationsOff = false;

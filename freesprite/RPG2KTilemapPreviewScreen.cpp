@@ -121,20 +121,15 @@ RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
 
 void RPG2KTilemapPreviewScreen::render()
 {
+    canvas.dimensions = { dimensions.x * 16, dimensions.y * 16 };
+
     TilemapPreviewScreen::drawBackground();
-    RenderWholeMap(canvasDrawPoint, scale, rdLowerLayer, rdUpperLayer, rdEventLayer);
+    RenderWholeMap(canvas.currentDrawPoint, canvas.scale, rdLowerLayer, rdUpperLayer, rdEventLayer);
 
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, gridOpacity);
-    for (int y = 0; y < dimensions.y; y++ ) {
-        SDL_RenderDrawLine(g_rd, canvasDrawPoint.x, canvasDrawPoint.y + y * 16 * scale, canvasDrawPoint.x + dimensions.x * 16 * scale, canvasDrawPoint.y + y * 16 * scale);
-    }
-    for (int x = 0; x < dimensions.x; x++) {
-        SDL_RenderDrawLine(g_rd, canvasDrawPoint.x + x * 16 * scale, canvasDrawPoint.y, canvasDrawPoint.x + x * 16 * scale, canvasDrawPoint.y + dimensions.y * 16 * scale);
-    }
+    canvas.drawTileGrid({ 16,16 });
 
-    SDL_Rect overallRect = { canvasDrawPoint.x-1, canvasDrawPoint.y-1, dimensions.x * 16 * scale + 2, dimensions.y * 16 * scale + 2 };
-    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-    SDL_RenderDrawRect(g_rd, &overallRect);
+    canvas.drawCanvasOutline(5, { 255,255,255,0x90 });
 
     wxsManager.renderAll();
 
@@ -153,10 +148,7 @@ void RPG2KTilemapPreviewScreen::tick()
         return;
     }
 
-    canvasDrawPoint = XY{
-        iclamp(-(16 * dimensions.x) * scale + 4, canvasDrawPoint.x, g_windowW - 4),
-        iclamp(-(16 * dimensions.y) * scale + 4, canvasDrawPoint.y, g_windowH - 4)
-    };
+    canvas.lockToScreenBounds();
 }
 
 void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
@@ -183,14 +175,7 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
         switch (evt.type) {
         case SDL_MOUSEWHEEL:
-            if (evt.wheel.y > 0) {
-                scale++;
-            }
-            else {
-                if (scale-- <= 1) {
-                    scale = 1;
-                }
-            }
+            canvas.zoom(evt.wheel.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
@@ -200,7 +185,7 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
             break;
         case SDL_MOUSEMOTION:
             if (scrollingTilemap) {
-                canvasDrawPoint = xyAdd(canvasDrawPoint, XY{ evt.motion.xrel, evt.motion.yrel });
+                canvas.panCanvas(XY{ evt.motion.xrel, evt.motion.yrel });
             }
             break;
         }
@@ -279,10 +264,7 @@ bool RPG2KTilemapPreviewScreen::isDeepWaterTileAt(XY position)
 
 void RPG2KTilemapPreviewScreen::RecenterCanvas()
 {
-    canvasDrawPoint = XY{
-        (g_windowW / 2) - ((16 * dimensions.x) * scale) / 2,
-        (g_windowH / 2) - ((16 * dimensions.y) * scale) / 2
-    };
+    canvas.recenter();
 }
 
 void RPG2KTilemapPreviewScreen::PrerenderCanvas()
@@ -1135,6 +1117,8 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
         //freeAllLayers();
         //tilemapDimensions = { map->width, map->height };
         dimensions = { map->width, map->height };
+        canvas.dimensions = { dimensions.x * 16, dimensions.y * 16 };
+        RecenterCanvas();
         uint16_t* lowerLayer = new uint16_t[map->width * map->height];
         uint16_t* upperLayer = new uint16_t[map->width * map->height];
         int dataPointer = 0;

@@ -51,12 +51,7 @@ void PanelTilemapPreview::render(XY position)
         callerTileDims.y * caller->canvas.scale * 2
     };
 
-    SDL_Rect tileClip = caller->caller->getPaddedTilePosAndDimensions(caller->pickedTile); /*{
-        caller->pickedTile.x * caller->caller->tileDimensions.x,
-        caller->pickedTile.y * caller->caller->tileDimensions.y,
-        caller->caller->tileDimensions.x,
-        caller->caller->tileDimensions.y
-    };*/
+    SDL_Rect tileClip = caller->caller->getPaddedTilePosAndDimensions(caller->pickedTile); 
 
     for (Layer* l : caller->caller->layers) {
         SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
