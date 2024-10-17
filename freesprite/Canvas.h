@@ -25,5 +25,6 @@ public:
 	SDL_Rect canvasRectToScreenRect(SDL_Rect canvasRect);
 	XY screenPointToCanvasPoint(XY screenPoint);
 	XY getTilePosAt(XY screenPoint, XY tileSize = {0,0});
+	SDL_Rect getTileScreenRectAt(XY canvasTileIndex, XY tileSize);
 };
 

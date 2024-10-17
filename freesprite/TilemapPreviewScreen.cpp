@@ -105,9 +105,9 @@ void TilemapPreviewScreen::render()
 
     XY callerTileSize = caller->getPaddedTileDimensions();
 
-    SDL_Rect tilemapDrawRect = { tilemapDrawPoint.x, tilemapDrawPoint.y,
-        tilemapDimensions.x * callerTileSize.x * tilemapScale,
-        tilemapDimensions.y * callerTileSize.y * tilemapScale };
+    canvas.dimensions = { tilemapDimensions.x * callerTileSize.x, tilemapDimensions.y * callerTileSize.y };
+
+    SDL_Rect tilemapDrawRect = canvas.getCanvasOnScreenRect();
 
     for (int l = 0; l < tilemap.size(); l++) {
         for (int y = 0; y < tilemapDimensions.y; y++) {
@@ -118,19 +118,14 @@ void TilemapPreviewScreen::render()
                     continue;
                 }
 
-                SDL_Rect tileDraw = {
+                SDL_Rect tileDraw = canvas.getTileScreenRectAt({ x,y }, callerTileSize);/* {
                     tilemapDrawRect.x + callerTileSize.x * tilemapScale * x,
                     tilemapDrawRect.y + callerTileSize.y * tilemapScale * y,
                     callerTileSize.x * tilemapScale,
                     callerTileSize.y * tilemapScale
-                };
-
-                SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos); /*{
-                    tilePos.x * caller->tileDimensions.x,
-                    tilePos.y * caller->tileDimensions.y,
-                    caller->tileDimensions.x,
-                    caller->tileDimensions.y
                 };*/
+
+                SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos);
 
                 uint8_t alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? (uint8_t)(0xff * XM1PW3P1(layerSelectTimer.percentElapsedTime(1300))) : 0xff;
                 for (Layer* l : caller->layers) {
@@ -140,19 +135,13 @@ void TilemapPreviewScreen::render()
             }
         }
     }
+    canvas.drawTileGrid(callerTileSize);
 
     //tilemap border
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
-    SDL_RenderDrawRect(g_rd, &tilemapDrawRect);
-
-    SDL_Rect tilemapSelectedTile = {
-        tilemapDrawRect.x + callerTileSize.x * tilemapScale * hoveredTilePosition.x,
-        tilemapDrawRect.y + callerTileSize.y * tilemapScale * hoveredTilePosition.y,
-        callerTileSize.x * tilemapScale,
-        callerTileSize.y * tilemapScale
-    };
+    canvas.drawCanvasOutline(5, { 255,255,255,0xa0 });
 
     //tilemap current hovered tile
+    SDL_Rect tilemapSelectedTile = canvas.getTileScreenRectAt(hoveredTilePosition, callerTileSize);
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0);
     SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
 
@@ -206,10 +195,8 @@ void TilemapPreviewScreen::render()
 
 void TilemapPreviewScreen::tick()
 {
-    tilemapDrawPoint = XY{
-        iclamp(-tilemapDimensions.x * caller->tileDimensions.x * tilemapScale + 4, tilemapDrawPoint.x, g_windowW - 4),
-        iclamp(-tilemapDimensions.y * caller->tileDimensions.y * tilemapScale + 4, tilemapDrawPoint.y, g_windowH - 4)
-    };
+    canvas.lockToScreenBounds();
+
     tileSelectOffset = XY{
         iclamp(-caller->canvas.dimensions.x * tileSelectScale + 4, tileSelectOffset.x, g_windowW - 4),
         iclamp(-caller->canvas.dimensions.y * tileSelectScale + 4, tileSelectOffset.y, g_windowH - 4)
@@ -280,16 +267,12 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             else {
                 if (scrollingTilemap) {
-                    tilemapDrawPoint = xyAdd(tilemapDrawPoint, XY{ evt.motion.xrel, evt.motion.yrel });
+                    canvas.panCanvas( XY{ evt.motion.xrel, evt.motion.yrel });
                 }
 
                 if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
-                    XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, tilemapDrawPoint);
                     XY callerTileSize = caller->getPaddedTileDimensions();
-
-                    pos.x /= callerTileSize.x * tilemapScale;
-                    pos.y /= callerTileSize.y * tilemapScale;
-                    hoveredTilePosition = pos;
+                    hoveredTilePosition = canvas.getTilePosAt(XY{ evt.motion.x, evt.motion.y }, callerTileSize);
                 }
             }
             break;
@@ -299,8 +282,7 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                 tileSelectScale = ixmax(1, tileSelectScale);
             }
             else {
-                tilemapScale += evt.wheel.y;
-                tilemapScale = ixmax(1, tilemapScale);
+                canvas.zoom(evt.wheel.y);
             }
             break;
         case SDL_KEYDOWN:
@@ -555,10 +537,7 @@ void TilemapPreviewScreen::drawBackground()
 
 void TilemapPreviewScreen::recenterTilemap()
 {
-    tilemapDrawPoint = XY{
-        (g_windowW / 2) - (tilemapDimensions.x * caller->tileDimensions.x * tilemapScale) / 2,
-        (g_windowH / 2) - (tilemapDimensions.y * caller->tileDimensions.y * tilemapScale) / 2
-    };
+    canvas.recenter();
 }
 
 void TilemapPreviewScreen::recenterTilePicker()

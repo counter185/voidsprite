@@ -3,20 +3,19 @@
 #include "BaseScreen.h"
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
+#include "Canvas.h"
 
 class TilemapPreviewScreen : public BaseScreen, public EventCallbackListener
 {
 public:
 	MainEditor* caller;
 
-	XY tilemapDrawPoint = XY{ 0,0 };
-
 	std::vector<XY**> tilemap;
 	XY** activeTilemap = NULL;
 	Timer64 layerSelectTimer;
 
-	XY tilemapDimensions = XY{-1,-1};
-	int tilemapScale = 1;
+	Canvas canvas;
+	XY tilemapDimensions = {-1,-1};
 	bool scrollingTilemap = false;
 	bool mouseLeftingTilemap = false;
 

@@ -140,3 +140,13 @@ XY Canvas::getTilePosAt(XY screenPoint, XY tileSize)
     canvasPoint = { canvasPoint.x / tileSize.x, canvasPoint.y / tileSize.y };
     return canvasPoint;
 }
+
+SDL_Rect Canvas::getTileScreenRectAt(XY canvasTileIndex, XY tileSize)
+{
+    return {
+        currentDrawPoint.x + canvasTileIndex.x * tileSize.x * scale,
+		currentDrawPoint.y + canvasTileIndex.y * tileSize.y * scale,
+		tileSize.x * scale,
+		tileSize.y * scale
+    };
+}
