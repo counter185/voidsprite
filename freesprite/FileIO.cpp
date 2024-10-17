@@ -2841,7 +2841,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         nvalBuffer = editor->canvas.dimensions.x;
         fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->canvas.dimensions.x;
+        nvalBuffer = editor->canvas.dimensions.y;
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
