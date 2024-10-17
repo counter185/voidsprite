@@ -18,10 +18,9 @@
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
     isPalettized = true;
-    texW = dimensions.x;
-    texH = dimensions.y;
+    canvas.dimensions = dimensions;
     palette = g_palettes[PALETTE_DEFAULT];
-    LayerPalettized* pltLayer = new LayerPalettized(texW, texH);
+    LayerPalettized* pltLayer = new LayerPalettized(dimensions.x, dimensions.y);
     pltLayer->palette = palette;
     layers.push_back(pltLayer);
 
@@ -33,8 +32,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
 MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
 {
     isPalettized = true;
-    texW = layer->w;
-    texH = layer->h;
+    canvas.dimensions = { layer->w, layer->h };
 
     layers.push_back(layer);
     palette = layer->palette;
@@ -48,8 +46,7 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layers)
 {
     //all layers must have the same palette assigned!!!
     isPalettized = true;
-    texW = layers[0]->w;
-    texH = layers[0]->h;
+    canvas.dimensions = { layers[0]->w, layers[0]->h };
     for (auto& l : layers) {
         this->layers.push_back(l);
     }
@@ -110,7 +107,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
         exporterId--;
 
         FileExporter* exporter = g_palettizedFileExporters[exporterId];
-        XY tileCounts = { texW / tileDimensions.x, texH / tileDimensions.y };
+        XY tileCounts = { canvas.dimensions.x / tileDimensions.x, canvas.dimensions.y / tileDimensions.y };
         PlatformNativePathString pathOfFile = name.substr(0, name.find_last_of(convertStringOnWin32("/\\")));
 
         Layer* flatImage = flattenImageWithoutConvertingToRGB();
@@ -350,7 +347,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDLK_c, { "Resize canvas",
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", XY{editor->texW, editor->texH}, EVENT_MAINEDITOR_RESIZELAYER));
+                                g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
@@ -371,7 +368,7 @@ void MainEditorPalettized::setUpWidgets()
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->texW / (float)editor->tileDimensions.x), (int)ceil(editor->texH / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
+                                    g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->canvas.dimensions.x / (float)editor->tileDimensions.x), (int)ceil(editor->canvas.dimensions.y / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
                                 }
                             }
                         }
@@ -482,7 +479,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
-                                if (editor->texW != 480 || editor->texH != 256) {
+                                if (!xyEqual(editor->canvas.dimensions, {480,256})) {
                                     g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
                                     return;
                                 }
@@ -567,7 +564,7 @@ Layer* MainEditorPalettized::flattenImage()
 
 Layer* MainEditorPalettized::newLayer()
 {
-    LayerPalettized* nl = new LayerPalettized(texW, texH);
+    LayerPalettized* nl = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
     nl->palette = palette;
     nl->name = std::format("New Layer {}", layers.size() + 1);
     layers.push_back(nl);
@@ -615,15 +612,15 @@ void MainEditorPalettized::exportTilesIndividually()
 
 int32_t* MainEditorPalettized::makeFlatIndicesTable()
 {
-    int32_t* indices = (int32_t*)malloc(texW * texH * 4);
-    memset(indices, 0, texW * texH * 4);
+    int32_t* indices = (int32_t*)malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
+    memset(indices, 0, canvas.dimensions.x * canvas.dimensions.y * 4);
     for (Layer*& l : layers) {
         if (!l->hidden) {
-            for (int y = 0; y < texH; y++) {
-                for (int x = 0; x < texW; x++) {
+            for (int y = 0; y < canvas.dimensions.y; y++) {
+                for (int x = 0; x < canvas.dimensions.x; x++) {
                     uint32_t color = l->getPixelAt(XY{ x,y });
                     if (color != -1) {
-                        indices[x + y * texW] = color;
+                        indices[x + y * canvas.dimensions.x] = color;
                     }
                 }
             }
@@ -636,11 +633,11 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
 {
     int32_t* indices = makeFlatIndicesTable();
 
-    Layer* flatAndRGBConvertedLayer = new Layer(texW, texH);
+    Layer* flatAndRGBConvertedLayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     uint32_t* intpxdata = (uint32_t*)flatAndRGBConvertedLayer->pixelData;
-    for (int y = 0; y < texH; y++) {
-        for (int x = 0; x < texW; x++) {
-            intpxdata[x + y * texW] = palette[indices[x + y * texW]];
+    for (int y = 0; y < canvas.dimensions.y; y++) {
+        for (int x = 0; x < canvas.dimensions.x; x++) {
+            intpxdata[x + y * canvas.dimensions.x] = palette[indices[x + y * canvas.dimensions.x]];
         }
     }
     free(indices);
@@ -650,8 +647,8 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
 Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
 {
     int32_t* indices = makeFlatIndicesTable();
-    LayerPalettized* flatLayer = new LayerPalettized(texW, texH);
-    memcpy(flatLayer->pixelData, indices, texW * texH * 4);
+    LayerPalettized* flatLayer = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
+    memcpy(flatLayer->pixelData, indices, canvas.dimensions.x * canvas.dimensions.y * 4);
     flatLayer->palette = palette;
     free(indices);
     return flatLayer;

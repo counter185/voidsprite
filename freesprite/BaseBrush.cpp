@@ -3,7 +3,7 @@
 
 void BaseBrush::renderOnCanvas(MainEditor* editor, int scale)
 {
-	renderOnCanvas(editor->canvasCenterPoint, scale);
+	renderOnCanvas(editor->canvas.currentDrawPoint, scale);
 }
 
 void BaseBrush::drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale)

@@ -30,8 +30,8 @@ void MinecraftSkinPreviewScreen::renderBox(XY positionOnScreen, XY wholeSkinDime
 
 void MinecraftSkinPreviewScreen::render()
 {
-	int texW = caller->texW;
-	int texH = caller->texH;
+	int texW = caller->canvas.dimensions.x;
+	int texH = caller->canvas.dimensions.y;
 
 	XY orthoFrontPosition = { g_windowW / 12, g_windowH / 8 };
 	int previewHeight = g_windowH / 3;    //32 texture pixels height

@@ -77,7 +77,7 @@ void BrushFill::rightClickPress(MainEditor* editor, XY pos)
 
 void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
 
-    XY canvasDrawPoint = editor->canvasCenterPoint;
+    XY canvasDrawPoint = editor->canvas.currentDrawPoint;
     if (editor != lastEditor || !xyEqual(lastMouseMotionPos, previewLastPosition)) {
         lastEditor = editor;
         previewLastPosition = lastMouseMotionPos;

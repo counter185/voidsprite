@@ -148,7 +148,7 @@ void RPG2KTilemapPreviewScreen::render()
 
 void RPG2KTilemapPreviewScreen::tick()
 {
-    if (caller->texW != 480 || caller->texH != 256) {
+    if (!xyEqual(caller->canvas.dimensions, {480, 256})) {
         g_closeScreen(this);
         return;
     }

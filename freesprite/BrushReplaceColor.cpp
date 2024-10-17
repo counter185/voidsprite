@@ -8,8 +8,9 @@ void BrushReplaceColor::clickPress(MainEditor* editor, XY pos)
 
 void BrushReplaceColor::renderOnCanvas(MainEditor* editor, int scale)
 {
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-	drawLocalPoint(editor->canvasCenterPoint, lastMouseMotionPos, scale);
+	XY canvasDrawPoint = editor->canvas.currentDrawPoint;
+	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+	drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
 	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-	drawPointOutline(editor->canvasCenterPoint, lastMouseMotionPos, scale);
+	drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
 }

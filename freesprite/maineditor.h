@@ -18,6 +18,7 @@
 #include "ToolComment.h"
 #include "ToolMeasure.h"
 #include "ScreenWideNavBar.h"
+#include "Canvas.h"
 
 enum MainEditorCommentMode : int {
     COMMENTMODE_HIDE_ALL = 0,
@@ -52,18 +53,16 @@ public:
 
     std::vector<UndoStackElement> undoStack, redoStack;
 
-    int texW = -1, texH = -1;
-
     XY tileDimensions = XY{ 0,0 };
     uint8_t tileGridAlpha = 0x40;
     XY tileGridPaddingBottomRight = XY{ 0,0 };
     SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
     XY getPaddedTileDimensions();
 
-    XY canvasCenterPoint = XY{0,0};
+    Canvas canvas;
+
     XY mousePixelTargetPoint;
     XY mousePixelTargetPoint2xP;
-    int scale = 1;
     XY mouseHoldPosition;
     bool closeNextTick = false;
     BaseBrush* currentBrush;

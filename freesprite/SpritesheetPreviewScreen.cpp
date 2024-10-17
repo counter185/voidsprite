@@ -12,7 +12,7 @@
 
 SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     caller = parent;
-    canvasZoom = parent->scale;
+    canvasZoom = parent->canvas.scale;
 
     canvasDrawOrigin = { 60, 60 };
 
@@ -70,7 +70,7 @@ void SpritesheetPreviewScreen::render()
 {
     drawBackground();
 
-    SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->texW * canvasZoom, caller->texH * canvasZoom };
+    SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x * canvasZoom, caller->canvas.dimensions.y * canvasZoom };
     for (Layer*& l : caller->layers) {
         SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
     }
@@ -176,8 +176,8 @@ void SpritesheetPreviewScreen::tick()
     spriteView->position = { 0, g_windowH - spriteView->wxHeight };
 
     canvasDrawOrigin = XY{
-        iclamp(-caller->texW * canvasZoom + 4, canvasDrawOrigin.x, g_windowW - rightPanelWidth - 4),
-        iclamp(-caller->texH * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - spriteView->wxHeight - 4)
+        iclamp(-caller->canvas.dimensions.x * canvasZoom + 4, canvasDrawOrigin.x, g_windowW - rightPanelWidth - 4),
+        iclamp(-caller->canvas.dimensions.y * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - spriteView->wxHeight - 4)
     };
 
     for (int x = 0; x < spriteView->subWidgets.drawablesList.size(); x++) {
@@ -209,7 +209,7 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
                 else if (evt.button.button == SDL_BUTTON_LEFT) {
                     if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
                         XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, canvasDrawOrigin);
-                        if (pos.x >= 0 && pos.y >= 0 && pos.x < (caller->texW * canvasZoom) && pos.y < (caller->texH * canvasZoom)) {
+                        if (pos.x >= 0 && pos.y >= 0 && pos.x < (caller->canvas.dimensions.x * canvasZoom) && pos.y < (caller->canvas.dimensions.y * canvasZoom)) {
                             pos.x /= caller->tileDimensions.x * canvasZoom;
                             pos.y /= caller->tileDimensions.y * canvasZoom;
                             sprites.push_back(pos);

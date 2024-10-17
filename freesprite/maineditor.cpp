@@ -29,7 +29,7 @@
 
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
 {
-    XY tileDim = xyEqual(tileDimensions, { 0,0 }) ? XY{texW, texH} : tileDimensions;
+    XY tileDim = xyEqual(tileDimensions, { 0,0 }) ? canvas.dimensions : tileDimensions;
 
     XY origin = {
         tilePos.x * tileDim.x,
@@ -57,10 +57,9 @@ XY MainEditor::getPaddedTileDimensions()
 
 MainEditor::MainEditor(XY dimensions) {
 
-    texW = dimensions.x;
-    texH = dimensions.y;
+    canvas.dimensions = { dimensions.x, dimensions.y };
     //canvasCenterPoint = XY{ texW / 2, texH / 2 };
-    layers.push_back(new Layer(texW, texH));
+    layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
     FillTexture();
 
     setUpWidgets();
@@ -70,12 +69,11 @@ MainEditor::MainEditor(XY dimensions) {
 MainEditor::MainEditor(SDL_Surface* srf) {
 
     //todo i mean just use MainEditor(Layer*) here
-    texW = srf->w;
-    texH = srf->h;
+    canvas.dimensions = { srf->w, srf->h };
 
-    Layer* nlayer = new Layer(texW, texH);
+    Layer* nlayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     layers.push_back(nlayer);
-    SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, texW*4);
+    SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, canvas.dimensions.x*4);
 
     setUpWidgets();
     recenterCanvas();
@@ -84,9 +82,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
 MainEditor::MainEditor(Layer* layer)
 {
-
-    texW = layer->w;
-    texH = layer->h;
+    canvas.dimensions = { layer->w, layer->h };
 
     layers.push_back(layer);
 
@@ -97,8 +93,7 @@ MainEditor::MainEditor(Layer* layer)
 
 MainEditor::MainEditor(std::vector<Layer*> layers)
 {
-    texW = layers[0]->w;
-    texH = layers[0]->h;
+    canvas.dimensions = { layers[0]->w, layers[0]->h };
     this->layers = layers;
 
     setUpWidgets();
@@ -122,11 +117,7 @@ void MainEditor::render() {
     SDL_RenderClear(g_rd);
     DrawBackground();
 
-    SDL_Rect canvasRenderRect;
-    canvasRenderRect.w = texW * scale;
-    canvasRenderRect.h = texH * scale;
-    canvasRenderRect.x = canvasCenterPoint.x;
-    canvasRenderRect.y = canvasCenterPoint.y;
+    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
     for (int x = 0; x < layers.size(); x++) {
         Layer* imgLayer = layers[x];
         if (!imgLayer->hidden) {
@@ -136,26 +127,12 @@ void MainEditor::render() {
     }
 
     //draw a separate 1x1 grid if the scale is >= 1600%
-    if (scale >= 10) {
+    if (canvas.scale >= 10) {
 
-        uint8_t tileGridAlpha = scale < 16 ? 0x10 * ((scale - 9) / 7.0) : 0x10;
+        uint8_t tileGridAlpha = canvas.scale < 16 ? 0x10 * ((canvas.scale - 9) / 7.0) : 0x10;
+        SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
+        canvas.drawTileGrid({ 1,1 });
 
-        int dx = canvasRenderRect.x;
-        while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
-            dx += scale;
-            if (dx >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
-                SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
-            }
-        }
-        int dy = canvasRenderRect.y;
-        while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
-            dy += scale;
-            if (dy >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
-                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
-            }
-        }
     }
 
     drawTileGrid();
@@ -166,14 +143,10 @@ void MainEditor::render() {
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
         
-        XY mouseInCanvasPoint = XY{
-            (canvasCenterPoint.x - g_mouseX) / -scale - (canvasCenterPoint.x > g_mouseX ? 1 : 0),
-            (canvasCenterPoint.y - g_mouseY) / -scale - (canvasCenterPoint.y > g_mouseY ? 1 : 0),
-        };
-        if ((qModifier && mouseInCanvasPoint.x >= 0 && mouseInCanvasPoint.y >= 0
-            && mouseInCanvasPoint.x < texW && mouseInCanvasPoint.y < texH) || !qModifier) {
+        XY mouseInCanvasPoint = canvas.screenPointToCanvasPoint({ g_mouseX, g_mouseY });
+        if (!qModifier || (qModifier && canvas.pointInCanvasBounds(mouseInCanvasPoint))) {
 
-            XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : XY{ texW, texH };
+            XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : canvas.dimensions;
 
             XY tilePosition = !qModifier ? lockedTilePreview :
                 XY{
@@ -183,17 +156,12 @@ void MainEditor::render() {
 
             SDL_Rect paddedTileRect = getPaddedTilePosAndDimensions(tilePosition);
             SDL_Rect tileRect = {
-                canvasCenterPoint.x + paddedTileRect.x * scale,
-                canvasCenterPoint.y + paddedTileRect.y * scale,
-                paddedTileRect.w * scale,
-                paddedTileRect.h * scale
+                canvas.currentDrawPoint.x + paddedTileRect.x * canvas.scale,
+                canvas.currentDrawPoint.y + paddedTileRect.y * canvas.scale,
+                paddedTileRect.w * canvas.scale,
+                paddedTileRect.h * canvas.scale
             };
-            SDL_Rect canvasClipRect = paddedTileRect;/*{
-                tilePosition.x * tileDim.x,
-                tilePosition.y * tileDim.y,
-                tileRect.w,
-                tileRect.h
-            };*/
+            SDL_Rect canvasClipRect = paddedTileRect;
 
             for (int yy = -1; yy <= 1; yy++) {
                 for (int xx = -1; xx <= 1; xx++) {
@@ -205,8 +173,8 @@ void MainEditor::render() {
                         Layer* imgLayer = layers[x];
                         if (!imgLayer->hidden) {
                             uint8_t alpha = imgLayer->layerAlpha;
-                            XY position = { tileRect.x + (xx * scale * paddedTileRect.w),
-                                tileRect.y + (yy * scale * paddedTileRect.h)};
+                            XY position = { tileRect.x + (xx * canvas.scale * paddedTileRect.w),
+                                tileRect.y + (yy * canvas.scale * paddedTileRect.h)};
                             SDL_Rect finalTileRect = { position.x, position.y, tileRect.w, tileRect.h };
                             imgLayer->render(finalTileRect, canvasClipRect, alpha);
                         }
@@ -231,7 +199,7 @@ void MainEditor::render() {
     renderUndoStack();
 
     if (currentBrush != NULL) {
-        currentBrush->renderOnCanvas(this, scale);
+        currentBrush->renderOnCanvas(this, canvas.scale);
     }
 
     /*if (spritesheetPreview != NULL) {
@@ -272,16 +240,15 @@ void MainEditor::render() {
 void MainEditor::tick() {
 
     if (abs(g_gamepad->gamepadLSX) > 0.05f || abs(g_gamepad->gamepadLSY) > 0.05f) {
-        canvasCenterPoint.x += g_gamepad->gamepadLSX * 10;
-        canvasCenterPoint.y += g_gamepad->gamepadLSY * 10;
+        canvas.panCanvas({
+            (int)(g_gamepad->gamepadLSX * 10),
+            (int)(g_gamepad->gamepadLSY * 10)
+        });
         RecalcMousePixelTargetPoint(g_windowW / 2, g_windowH / 2);
         currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
     }
 
-    canvasCenterPoint = XY{
-        iclamp(-texW * scale + 4, canvasCenterPoint.x, g_windowW - 4),
-        iclamp(-texH * scale + 4, canvasCenterPoint.y, g_windowH - 4)
-    };
+    canvas.lockToScreenBounds();
 
     //fuck it we ball
     if (layerPicker != NULL) {
@@ -347,28 +314,15 @@ void MainEditor::DrawBackground()
     }
 
     //draw border around canvas
-    int lw = texW * scale + 2;
-    int lh = texH * scale + 2;
-    SDL_Rect r = { canvasCenterPoint.x - 1, canvasCenterPoint.y - 1, lw, lh };
-    uint8_t a = 0xff;
-    SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, a);
-    SDL_RenderDrawRect(g_rd, &r);
-    for (int x = 0; x < 6; x++) {
-        r.w += 2;
-        r.h += 2;
-        r.x -= 1;
-        r.y -= 1;
-        a /= 2;
-        SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, a);
-        SDL_RenderDrawRect(g_rd, &r);
-    }
+    SDL_Color borderColor = {0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0xff};
+    canvas.drawCanvasOutline(6, borderColor);
 }
 
 void MainEditor::drawSymmetryLines() {
     if (symmetryEnabled[0]) {
         int symXPos = symmetryPositions.x / 2;
         bool symXMiddle = symmetryPositions.x % 2;
-        int lineDrawXPoint = canvasCenterPoint.x + symXPos * scale + (symXMiddle ? scale/2 : 0);
+        int lineDrawXPoint = canvas.currentDrawPoint.x + symXPos * canvas.scale + (symXMiddle ? canvas.scale /2 : 0);
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
         SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
@@ -376,7 +330,7 @@ void MainEditor::drawSymmetryLines() {
     if (symmetryEnabled[1]) {
         int symYPos = symmetryPositions.y / 2;
         bool symYMiddle = symmetryPositions.y % 2;
-        int lineDrawYPoint = canvasCenterPoint.y + symYPos * scale + (symYMiddle ? scale/2 : 0);
+        int lineDrawYPoint = canvas.currentDrawPoint.y + symYPos * canvas.scale + (symYMiddle ? canvas.scale /2 : 0);
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
         SDL_RenderDrawLine(g_rd,0, lineDrawYPoint, g_windowW, lineDrawYPoint);
@@ -386,12 +340,12 @@ void MainEditor::drawSymmetryLines() {
 void MainEditor::drawIsolatedRect()
 {
     if (isolateEnabled) {
-        SDL_Rect r = { 
+        SDL_Rect r = canvas.canvasRectToScreenRect(isolateRect);/* {
             canvasCenterPoint.x + isolateRect.x * scale, 
             canvasCenterPoint.y + isolateRect.y * scale,
             isolateRect.w * scale,
             isolateRect.h * scale
-        };
+        };*/
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
         SDL_RenderDrawRect(g_rd, &r);
@@ -408,38 +362,34 @@ void MainEditor::drawIsolatedRect()
 
 void MainEditor::drawTileGrid()
 {
-    SDL_Rect canvasRenderRect;
-    canvasRenderRect.w = texW * scale;
+    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
+    /*canvasRenderRect.w = texW * scale;
     canvasRenderRect.h = texH * scale;
     canvasRenderRect.x = canvasCenterPoint.x;
-    canvasRenderRect.y = canvasCenterPoint.y;
+    canvasRenderRect.y = canvasCenterPoint.y;*/
 
     //draw tile lines
+    SDL_Color c = { 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha };
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, c.a);
+    canvas.drawTileGrid(tileDimensions);
+
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, c.a / 3 * 2);
+    //draw tile grid padding
     if (tileDimensions.x != 0) {
         int dx = canvasRenderRect.x;
         while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
-            dx += tileDimensions.x * scale;
-            if (dx >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
-                SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
-            }
+            dx += tileDimensions.x * canvas.scale;
             if (tileGridPaddingBottomRight.x > 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha/3*2);
-                SDL_RenderDrawLine(g_rd, dx - tileGridPaddingBottomRight.x * scale , canvasRenderRect.y, dx - tileGridPaddingBottomRight.x * scale, canvasRenderRect.y + canvasRenderRect.h);
+                SDL_RenderDrawLine(g_rd, dx - tileGridPaddingBottomRight.x * canvas.scale , canvasRenderRect.y, dx - tileGridPaddingBottomRight.x * canvas.scale, canvasRenderRect.y + canvasRenderRect.h);
             }
         }
     }
     if (tileDimensions.y != 0) {
         int dy = canvasRenderRect.y;
         while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
-            dy += tileDimensions.y * scale;
-            if (dy >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
-                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
-            }
+            dy += tileDimensions.y * canvas.scale;
             if (tileGridPaddingBottomRight.y > 0) {
-				SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha/3*2);
-				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - tileGridPaddingBottomRight.y * scale, canvasRenderRect.x + canvasRenderRect.w, dy - tileGridPaddingBottomRight.y * scale);
+				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - tileGridPaddingBottomRight.y * canvas.scale, canvasRenderRect.x + canvasRenderRect.w, dy - tileGridPaddingBottomRight.y * canvas.scale);
 			}
         }
     }
@@ -470,14 +420,14 @@ void MainEditor::renderGuidelines() {
             //horizontal
             int gYPos = guide.position / 2;
             bool gYMiddle = guide.position % 2;
-            int lineDrawYPoint = canvasCenterPoint.y + gYPos * scale + (gYMiddle ? scale / 2 : 0);
+            int lineDrawYPoint = canvas.currentDrawPoint.y + gYPos * canvas.scale + (gYMiddle ? canvas.scale / 2 : 0);
             SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
         }
         if (guide.vertical) {
             //vertical
             int gXPos = guide.position / 2;
             bool gXMiddle = guide.position % 2;
-            int lineDrawXPoint = canvasCenterPoint.x + gXPos * scale + (gXMiddle ? scale / 2 : 0);
+            int lineDrawXPoint = canvas.currentDrawPoint.x + gXPos * canvas.scale + (gXMiddle ? canvas.scale / 2 : 0);
             SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
         }
     }
@@ -490,7 +440,7 @@ void MainEditor::DrawForeground()
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
     SDL_RenderFillRect(g_rd, &r);
 
-    g_fnt->RenderString(std::format("{}x{} ({}%)", texW, texH, scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+    g_fnt->RenderString(std::format("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
 
     XY endpoint = g_fnt->RenderString(std::format("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
     if (tileDimensions.x != 0 && tileDimensions.y != 0) {
@@ -517,9 +467,9 @@ void MainEditor::renderComments()
     localTtp.gradientUL = localTtp.gradientUR = 0x80000000;
     localTtp.gradientLL = localTtp.gradientLR = 0x40000000;
 
-    XY origin = canvasCenterPoint;
+    XY origin = canvas.currentDrawPoint;
     for (CommentData& c : comments) {
-        XY onScreenPosition = xyAdd(origin, { c.position.x * scale, c.position.y * scale });
+        XY onScreenPosition = canvas.canvasPointToScreenPoint(c.position); //xyAdd(origin, { c.position.x * scale, c.position.y * scale });
         SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
         SDL_SetTextureAlphaMod(g_iconComment, 0x80);
         SDL_RenderCopy(g_rd, g_iconComment, NULL, &iconRect);
@@ -693,7 +643,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDLK_c, { "Resize canvas",
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", XY{editor->texW, editor->texH}, EVENT_MAINEDITOR_RESIZELAYER));
+                                g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
@@ -720,7 +670,7 @@ void MainEditor::setUpWidgets()
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->texW / (float)editor->tileDimensions.x), (int)ceil(editor->texH / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
+                                    g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->canvas.dimensions.x / (float)editor->tileDimensions.x), (int)ceil(editor->canvas.dimensions.y / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
                                 }
                             }
                         }
@@ -864,7 +814,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
-                                if (editor->texW != 480 || editor->texH != 256) {
+                                if (!xyEqual(editor->canvas.dimensions, {480, 256})) {
                                     g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
                                     return;
                                 }
@@ -877,7 +827,7 @@ void MainEditor::setUpWidgets()
     #if _DEBUG
                     {SDLK_m, { "Open Minecraft skin preview...",
                             [](MainEditor* editor) {
-                                if (editor->texW != editor->texH && editor->texW / 2 != editor->texH) {
+                                if (editor->canvas.dimensions.x != editor->canvas.dimensions.y && editor->canvas.dimensions.x / 2 != editor->canvas.dimensions.y) {
                                     g_addNotification(ErrorNotification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
                                     return;
                                 }
@@ -929,16 +879,12 @@ void MainEditor::removeWidget(Drawable* wx)
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
-    mousePixelTargetPoint =
-        XY{
-            (canvasCenterPoint.x - x) / -scale - (canvasCenterPoint.x > x ? 1 : 0),
-            (canvasCenterPoint.y - y) / -scale - (canvasCenterPoint.y > y ? 1 : 0),
-        };
+    mousePixelTargetPoint = canvas.screenPointToCanvasPoint({ x,y });
     mousePixelTargetPoint2xP =
         XY{
-            (int)((canvasCenterPoint.x - x) / (float)(-scale) / 0.5f),
-            (int)((canvasCenterPoint.y - y) / (float)(-scale) / 0.5f),
-    };
+            (int)((canvas.currentDrawPoint.x - x) / (float)(-canvas.scale) / 0.5f),
+            (int)((canvas.currentDrawPoint.y - y) / (float)(-canvas.scale) / 0.5f),
+        };
 }
 
 bool MainEditor::requestSafeClose() {
@@ -956,24 +902,13 @@ bool MainEditor::requestSafeClose() {
 
 void MainEditor::zoom(int how_much)
 {
-    XY screenCenterPoint = XY{
-            (canvasCenterPoint.x - g_windowW/2) / -scale,
-            (canvasCenterPoint.y - g_windowH/2) / -scale
-    };
-    scale += how_much;
-    scale = scale < 1 ? 1 : scale;
-    XY onscreenPointNow = XY{
-        canvasCenterPoint.x + screenCenterPoint.x * scale,
-        canvasCenterPoint.y + screenCenterPoint.y * scale
-    };
-    XY pointDiff = xySubtract(XY{ g_windowW / 2, g_windowH / 2 }, onscreenPointNow);
-    canvasCenterPoint = xyAdd(canvasCenterPoint, pointDiff);
+    canvas.zoom(how_much);
 }
 
 bool MainEditor::isInBounds(XY pos)
 {
     return
-        pointInBox(pos, { 0,0,texW,texH })
+        canvas.pointInCanvasBounds(pos)
         && (!isolateEnabled || (isolateEnabled && pointInBox(pos, isolateRect)));
 }
 
@@ -1037,8 +972,10 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_MOUSEMOTION:
                 RecalcMousePixelTargetPoint(evt.motion.x, evt.motion.y);
                 if (middleMouseHold) {
-                    canvasCenterPoint.x += evt.motion.xrel * (g_shiftModifier ? 2 : 1);
-                    canvasCenterPoint.y += evt.motion.yrel * (g_shiftModifier ? 2 : 1);
+                    canvas.panCanvas({
+                        evt.motion.xrel * (g_shiftModifier ? 2 : 1),
+                        evt.motion.yrel * (g_shiftModifier ? 2 : 1)
+                    });
                 }
                 else if (leftMouseHold) {
                     if (currentBrush != NULL) {
@@ -1060,8 +997,10 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 else {
                     if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
-                        canvasCenterPoint.x -= (g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20;
-                        canvasCenterPoint.y += (g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20;
+                        canvas.panCanvas({
+                            -(g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20,
+                            (g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20
+                        });
                     }
                     else {
                         zoom(evt.wheel.y);
@@ -1121,14 +1060,11 @@ void MainEditor::takeInput(SDL_Event evt) {
                             else {
                                 
                                 if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-                                    XY mouseInCanvasPoint = XY{
-                                        (canvasCenterPoint.x - g_mouseX) / -scale,
-                                        (canvasCenterPoint.y - g_mouseY) / -scale
-                                    };
-                                    XY tileToLock = XY{
+                                    XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
+                                    /* XY{
                                         mouseInCanvasPoint.x / tileDimensions.x,
                                         mouseInCanvasPoint.y / tileDimensions.y
-                                    };
+                                    };*/
                                     if (g_config.isolateRectOnLockTile) {
                                         isolateEnabled = true;
                                         isolateRect = { tileToLock.x * tileDimensions.x, tileToLock.y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
@@ -1224,7 +1160,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
         exporterID--;
 
         FileExporter* exporter = g_fileExporters[exporterID];
-        XY tileCounts = { texW / tileDimensions.x, texH / tileDimensions.y };
+        XY tileCounts = { canvas.dimensions.x / tileDimensions.x, canvas.dimensions.y / tileDimensions.y };
         PlatformNativePathString pathOfFile = name.substr(0, name.find_last_of(convertStringOnWin32("/\\")));
 
         Layer* flatImage = flattenImage();
@@ -1294,12 +1230,13 @@ void MainEditor::eventColorSet(int evt_id, uint32_t color)
 }
 
 void MainEditor::FillTexture() {
-    int* pixels = (int*)getCurrentLayer()->pixelData;
+    Layer* l = getCurrentLayer();
+    int* pixels = (int*)l->pixelData;
     //int pitch;
     //SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
-    for (int x = 0; x < texW; x++) {
-        for (int y = 0; y < texH; y++) {
-            pixels[x + (y * texW)] = 0x00000000;
+    for (int x = 0; x < l->w; x++) {
+        for (int y = 0; y < l->h; y++) {
+            pixels[x + (y * l->w)] = 0x00000000;
         }
     }
     //SDL_UnlockTexture(mainTexture);
@@ -1392,10 +1329,7 @@ void MainEditor::trySaveAsImage()
 
 void MainEditor::recenterCanvas()
 {
-    canvasCenterPoint = XY{
-        (g_windowW / 2) - (texW*scale)/2,
-        (g_windowH / 2) - (texH*scale)/2
-    };
+    canvas.recenter();
 }
 
 void MainEditor::discardEndOfUndoStack() {
@@ -1557,8 +1491,7 @@ void MainEditor::undo()
                     resizeLayerData[x].oldData = oldData;
                     resizeLayerData[x].oldDimensions = oldDimensions;
                 }
-                texW = layers[0]->w;
-                texH = layers[0]->h;
+                canvas.dimensions = { layers[0]->w, layers[0]->h };
                 XY td = XY{ l.extdata, l.extdata2 };
                 l.extdata = tileDimensions.x;
                 l.extdata2 = tileDimensions.y;
@@ -1630,8 +1563,7 @@ void MainEditor::redo()
                 resizeLayerData[x].oldData = oldData;
                 resizeLayerData[x].oldDimensions = oldDimensions;
             }
-            texW = layers[0]->w;
-            texH = layers[0]->h;
+            canvas.dimensions = { layers[0]->w, layers[0]->h };
             XY td = XY{ l.extdata, l.extdata2 };
             l.extdata = tileDimensions.x;
             l.extdata2 = tileDimensions.y;
@@ -1644,7 +1576,7 @@ void MainEditor::redo()
 
 Layer* MainEditor::newLayer()
 {
-    Layer* nl = new Layer(texW, texH);
+    Layer* nl = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     nl->name = std::format("New Layer {}", layers.size()+1);
     layers.push_back(nl);
     switchActiveLayer(layers.size() - 1);
@@ -1750,7 +1682,7 @@ void MainEditor::duplicateLayer(int index)
 {
     Layer* currentLayer = layers[index];
     Layer* newL = newLayer();
-    memcpy(newL->pixelData, currentLayer->pixelData, texW * texH * 4);
+    memcpy(newL->pixelData, currentLayer->pixelData, currentLayer->w * currentLayer->h * 4);
     newL->name = "Copy:" + currentLayer->name;
     newL->layerDirty = true;
 }
@@ -1812,7 +1744,7 @@ void MainEditor::layer_setAllAlpha255()
 
 Layer* MainEditor::flattenImage()
 {
-    Layer* ret = new Layer(texW, texH);
+    Layer* ret = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     int x = 0;
     uint32_t* retppx = (uint32_t*)ret->pixelData;
     for (Layer*& l : layers) {
@@ -1875,13 +1807,13 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
     if (byTile) {
-        if (tileDimensions.x == size.x && tileDimensions.y == size.y) {
+        if (xyEqual(tileDimensions, size)) {
             g_addNotification(ErrorNotification("Error", "Tile size must be different to resize."));
             return;
         }
     }
     else {
-        if (texW == size.x && texH == size.y) {
+        if (xyEqual(canvas.dimensions, size)) {
             g_addNotification(ErrorNotification("Error", "Size must be different to resize."));
             return;
         }
@@ -1898,8 +1830,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
         }
         layers[x]->layerDirty = true;
     }
-    texW = layers[0]->w;
-    texH = layers[0]->h;
+    canvas.dimensions = { layers[0]->w, layers[0]->h };
     
     UndoStackElement undoData{};
     undoData.type = UNDOSTACK_RESIZE_LAYER;
@@ -1921,8 +1852,7 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
         layerResizeData[x].oldData = layers[x]->resizeByTileCount(tileDimensions, size);
         layers[x]->layerDirty = true;
     }
-    texW = layers[0]->w;
-    texH = layers[0]->h;
+    canvas.dimensions = { layers[0]->w, layers[0]->h };
 
     UndoStackElement undoData{};
     undoData.type = UNDOSTACK_RESIZE_LAYER;
@@ -1938,7 +1868,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         g_addNotification(ErrorNotification("Error", "Invalid scale."));
         return;
     }
-    else if (downscale && (texW % scale.x != 0 || texH % scale.y != 0)) {
+    else if (downscale && (canvas.dimensions.x % scale.x != 0 || canvas.dimensions.y % scale.y != 0)) {
         g_addNotification(ErrorNotification("Error", "Dimensions not divisible."));
         return;
     }
@@ -1949,8 +1879,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         layerResizeData[x].oldData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
         layers[x]->layerDirty = true;
     }
-    texW = layers[0]->w;
-    texH = layers[0]->h;
+    canvas.dimensions = { layers[0]->w, layers[0]->h };
 
     UndoStackElement undoData{};
     undoData.type = UNDOSTACK_RESIZE_LAYER;

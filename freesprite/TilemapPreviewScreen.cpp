@@ -80,7 +80,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     layerPicker = new TilemapEditorLayerPicker(this);
     wxsManager.addDrawable(layerPicker);
 
-    tileSelectScale = caller->scale;
+    tileSelectScale = caller->canvas.scale;
     recenterTilePicker();
     recenterTilemap();
 }
@@ -167,8 +167,8 @@ void TilemapPreviewScreen::render()
         int xOffset = -g_windowW * (1.0 - XM1PW3P1(tileSelectTimer.percentElapsedTime(300)));
 
         SDL_Rect tileSelectRect = { tileSelectOffset.x + xOffset, tileSelectOffset.y,
-            caller->texW * tileSelectScale,
-            caller->texH * tileSelectScale
+            caller->canvas.dimensions.x * tileSelectScale,
+            caller->canvas.dimensions.y * tileSelectScale
         };
 
         for (Layer* l : caller->layers) {
@@ -211,8 +211,8 @@ void TilemapPreviewScreen::tick()
         iclamp(-tilemapDimensions.y * caller->tileDimensions.y * tilemapScale + 4, tilemapDrawPoint.y, g_windowH - 4)
     };
     tileSelectOffset = XY{
-        iclamp(-caller->texW * tileSelectScale + 4, tileSelectOffset.x, g_windowW - 4),
-        iclamp(-caller->texH * tileSelectScale + 4, tileSelectOffset.y, g_windowH - 4)
+        iclamp(-caller->canvas.dimensions.x * tileSelectScale + 4, tileSelectOffset.x, g_windowW - 4),
+        iclamp(-caller->canvas.dimensions.y * tileSelectScale + 4, tileSelectOffset.y, g_windowH - 4)
     };
 
     if (mouseLeftingTilemap) {
@@ -564,8 +564,8 @@ void TilemapPreviewScreen::recenterTilemap()
 void TilemapPreviewScreen::recenterTilePicker()
 {
     tileSelectOffset = XY{
-        (g_windowW / 2) - (caller->texW * tileSelectScale) / 2,
-        (g_windowH / 2) - (caller->texH * tileSelectScale) / 2
+        (g_windowW / 2) - (caller->canvas.dimensions.x * tileSelectScale) / 2,
+        (g_windowH / 2) - (caller->canvas.dimensions.y * tileSelectScale) / 2
     };
 }
 

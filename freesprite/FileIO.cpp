@@ -2615,9 +2615,9 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
         fwrite(&voidsnVersion, 1, 1, outfile);
         uint32_t nvalBuffer;
 
-        nvalBuffer = editor->texW;
+        nvalBuffer = editor->canvas.dimensions.x;
         fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->texH;
+        nvalBuffer = editor->canvas.dimensions.y;
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         fwrite(&editor->tileDimensions.x, 4, 1, outfile);
@@ -2627,7 +2627,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->texW * editor->texH) {
+            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 printf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
@@ -2656,9 +2656,9 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         fwrite(&voidsnVersion, 1, 1, outfile);
         uint32_t nvalBuffer;
 
-        nvalBuffer = editor->texW;
+        nvalBuffer = editor->canvas.dimensions.x;
         fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->texH;
+        nvalBuffer = editor->canvas.dimensions.y;
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
@@ -2713,7 +2713,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->texW * editor->texH) {
+            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
@@ -2740,9 +2740,9 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         fwrite(&voidsnVersion, 1, 1, outfile);
         uint32_t nvalBuffer;
 
-        nvalBuffer = editor->texW;
+        nvalBuffer = editor->canvas.dimensions.x;
         fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->texH;
+        nvalBuffer = editor->canvas.dimensions.y;
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
@@ -2812,7 +2812,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->texW * editor->texH) {
+            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
@@ -2839,9 +2839,9 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         fwrite(&voidsnVersion, 1, 1, outfile);
         uint32_t nvalBuffer;
 
-        nvalBuffer = editor->texW;
+        nvalBuffer = editor->canvas.dimensions.x;
         fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->texH;
+        nvalBuffer = editor->canvas.dimensions.x;
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
@@ -2920,7 +2920,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         fwrite(&nvalBuffer, 4, 1, outfile);
 
         for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->texW * editor->texH) {
+            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();

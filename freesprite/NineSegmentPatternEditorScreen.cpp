@@ -6,8 +6,8 @@
 NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* parent) {
     caller = parent;
 
-    pointUL = { caller->texW / 3, caller->texH / 3 };
-    pointUR = { caller->texW / 3 * 2, caller->texH / 3 * 2 };
+    pointUL = { caller->canvas.dimensions.x / 3, caller->canvas.dimensions.y / 3 };
+    pointUR = { caller->canvas.dimensions.x / 3 * 2, caller->canvas.dimensions.y / 3 * 2 };
 
     navbar = new ScreenWideNavBar<NineSegmentPatternEditorScreen*>(this,
         {
@@ -41,7 +41,7 @@ void NineSegmentPatternEditorScreen::render()
 {
     drawBackground();
 
-    SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->texW * canvasZoom, caller->texH * canvasZoom };
+    SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x * canvasZoom, caller->canvas.dimensions.y * canvasZoom };
     for (Layer*& l : caller->layers) {
         SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
     }
@@ -75,24 +75,24 @@ void NineSegmentPatternEditorScreen::render()
     c = dragHover.x == 0 ? drag : norm;
     SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.x == 0 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x + pointUL.x * canvasZoom, canvasRenderRect.y,
-        canvasRenderRect.x + pointUL.x * canvasZoom, canvasRenderRect.y + caller->texH * canvasZoom);
+        canvasRenderRect.x + pointUL.x * canvasZoom, canvasRenderRect.y + caller->canvas.dimensions.x * canvasZoom);
 
     c = dragHover.x == 1 ? drag : norm;
     SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.x == 1 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x + pointUR.x * canvasZoom, canvasRenderRect.y,
-        canvasRenderRect.x + pointUR.x * canvasZoom, canvasRenderRect.y + caller->texH * canvasZoom);
+        canvasRenderRect.x + pointUR.x * canvasZoom, canvasRenderRect.y + caller->canvas.dimensions.y * canvasZoom);
 
 
     //hlines
     c = dragHover.y == 0 ? drag : norm;
     SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.y == 0 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x, canvasRenderRect.y + pointUL.y * canvasZoom,
-        canvasRenderRect.x + caller->texW * canvasZoom, canvasRenderRect.y + pointUL.y * canvasZoom);
+        canvasRenderRect.x + caller->canvas.dimensions.x * canvasZoom, canvasRenderRect.y + pointUL.y * canvasZoom);
 
     c = dragHover.y == 1 ? drag : norm;
     SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, dragging.y == 1 ? 0xD0 : c.a);
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x, canvasRenderRect.y + pointUR.y * canvasZoom,
-        canvasRenderRect.x + caller->texW * canvasZoom, canvasRenderRect.y + pointUR.y * canvasZoom);
+        canvasRenderRect.x + caller->canvas.dimensions.y * canvasZoom, canvasRenderRect.y + pointUR.y * canvasZoom);
 
     BaseScreen::render();
 }
@@ -105,8 +105,8 @@ void NineSegmentPatternEditorScreen::tick()
     }
 
     canvasDrawOrigin = XY{
-        iclamp(-caller->texW * canvasZoom + 4, canvasDrawOrigin.x, g_windowW - 4),
-        iclamp(-caller->texH * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - 4)
+        iclamp(-caller->canvas.dimensions.x * canvasZoom + 4, canvasDrawOrigin.x, g_windowW - 4),
+        iclamp(-caller->canvas.dimensions.y * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - 4)
     };
 }
 
@@ -182,7 +182,7 @@ void NineSegmentPatternEditorScreen::eventFileSaved(int evt_id, PlatformNativePa
     if (evt_id == EVENT_9SPEDITOR_SAVE) {
         Layer* l = caller->flattenImage();
         if (l != NULL) {
-            if (write9SegmentPattern(name, l, pointUL, xySubtract({caller->texW, caller->texH}, pointUR))) {
+            if (write9SegmentPattern(name, l, pointUL, xySubtract(caller->canvas.dimensions, pointUR))) {
                 g_addNotification(SuccessNotification("Success", "9-segment pattern saved"));
             }
             else {
