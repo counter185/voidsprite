@@ -326,23 +326,51 @@ void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString n
                 return;
             }
             else {
-                u8 header[4] = { 'P', 'X', 'M', 0x10 };
-                fwrite(&header, 1, 4, file);
-                u16 w = tilemapDimensions.x;
-                u16 h = tilemapDimensions.y;
-                fwrite(&w, 2, 1, file);
-                fwrite(&h, 2, 1, file);
+                bool success = false;
+                if (tilemap.size() == 1) {
+                    u8 header[4] = { 'P', 'X', 'M', 0x10 };
+                    fwrite(&header, 1, 4, file);
+                    u16 w = tilemapDimensions.x;
+                    u16 h = tilemapDimensions.y;
+                    fwrite(&w, 2, 1, file);
+                    fwrite(&h, 2, 1, file);
 
-                for (int y = 0; y < h; y++) {
-                    for (int x = 0; x < w; x++) {
-                        XY tile = tilemap[0][y][x];
-                        u8 byte = (tile.x < 0 || tile.y < 0 || tile.x >= 16) ? 0 : (u8)(tile.y * 16 + tile.x);
-                        fwrite(&byte, 1, 1, file);
+                    for (int y = 0; y < h; y++) {
+                        for (int x = 0; x < w; x++) {
+                            XY tile = tilemap[0][y][x];
+                            u8 byte = (tile.x < 0 || tile.y < 0 || tile.x >= 16) ? 0 : (u8)(tile.y * 16 + tile.x);
+                            fwrite(&byte, 1, 1, file);
+                        }
                     }
+                    success = true;
+                }
+                else if (tilemap.size() == 4) {
+                    u8 header[4] = { 'P', 'X', 'M', 0x21 };
+                    fwrite(&header, 1, 4, file);
+                    u16 w = tilemapDimensions.x;
+                    u16 h = tilemapDimensions.y;
+                    fwrite(&w, 2, 1, file);
+                    fwrite(&h, 2, 1, file);
+
+                    for (XY**& layer : tilemap) {
+                        for (int y = 0; y < h; y++) {
+                            for (int x = 0; x < w; x++) {
+                                XY tile = layer[y][x];
+                                u16 byte = (tile.x < 0 || tile.y < 0 || tile.x >= 16) ? 0 : (u16)(tile.y * 16 + tile.x);
+                                fwrite(&byte, 2, 1, file);
+                            }
+                        }
+                    }
+                    success = true;
+                }
+                else {
+                    g_addNotification(ErrorNotification("Error", "PXM requires either 1 or 4 layers."));
                 }
 
                 fclose(file);
-                g_addNotification(SuccessNotification("File saved", "Save successful!"));
+                if (success) {
+                    g_addNotification(SuccessNotification("File saved", "Save successful!"));
+                }
             }
         }
         else {
