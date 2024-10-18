@@ -30,9 +30,14 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
     }
 
     for (int y = 0; y < clipSource.h; y++) {
-        if (!fast) {
+        if (!fast || sourceLayer->colorKeySet) {
             for (int x = 0; x < clipSource.w; x++) {
-                setPixel(XY{ x + position.x, y + position.y }, sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y }));
+                u32 px = sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y}, false);
+                if (sourceLayer->colorKeySet && px == sourceLayer->colorKey) {
+					continue;
+				}
+                u32 blendedPixel = alphaBlend(getPixelAt(XY{ x + position.x, y + position.y }), px);
+                setPixel(XY{ x + position.x, y + position.y }, blendedPixel);
             }
         }
         else {
@@ -42,6 +47,9 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
                 sourceLayer->pixelData + ((y + clipSource.y) * sourceLayer->w * 4) + (clipSource.x * 4),
                 nPixels
             );
+            /*if (sourceLayer->colorKeySet) {
+                replaceColor(sourceLayer->colorKey, 0x000000);
+            }*/
         }
     }
         

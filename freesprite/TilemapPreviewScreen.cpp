@@ -244,6 +244,13 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                     mouseLeftingTilemap = true;
                 }
             }
+            else if (evt.button.button == SDL_BUTTON_RIGHT) {
+                XY rel = canvas.screenPointToCanvasPoint({ evt.button.x, evt.button.y });
+                if (canvas.pointInCanvasBounds(rel)) {
+                    XY tile = canvas.getTilePosAt({ evt.button.x, evt.button.y }, caller->getPaddedTileDimensions());
+                    pickedTile = activeTilemap[tile.y][tile.x];
+                }
+            }
             break;
         case SDL_MOUSEBUTTONUP:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
@@ -385,18 +392,33 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                 if (header[0] == 'P' && header[1] == 'X' && header[2] == 'M') {
                     u8 zerox10Byte;
                     fread(&zerox10Byte, 1, 1, file);
-
                     u16 mapLength, mapHeight;
                     fread(&mapLength, 2, 1, file);
                     fread(&mapHeight, 2, 1, file);
-                    printf("[PXE] mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
-                    resizeTilemap(mapLength, mapHeight);
-                    freeAllLayers();
-                    XY** newTilemap = newLayer();
-                    for (u64 tile = 0; tile < mapLength * mapHeight; tile++) {
-                        u8 byte;
-                        fread(&byte, 1, 1, file);
-                        newTilemap[tile / mapLength][tile % mapLength] = XY{ byte % 16, byte / 16 };
+
+                    if (zerox10Byte == 0x10) {
+                        printf("[PXE] mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
+                        resizeTilemap(mapLength, mapHeight);
+                        freeAllLayers();
+                        XY** newTilemap = newLayer();
+                        for (u64 tile = 0; tile < mapLength * mapHeight; tile++) {
+                            u8 byte;
+                            fread(&byte, 1, 1, file);
+                            newTilemap[tile / mapLength][tile % mapLength] = XY{ byte % 16, byte / 16 };
+                        }
+                    }
+                    else if (zerox10Byte == 0x21) {
+                        printf("[PXE] multi layer, mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
+                        resizeTilemap(mapLength, mapHeight);
+                        freeAllLayers();
+                        for (int lidx = 0; lidx < 4; lidx++) {
+                            XY** newTilemap = newLayer();
+                            for (u64 tile = 0; tile < mapLength * mapHeight; tile++) {
+                                u16 byte;
+                                fread(&byte, 2, 1, file);
+                                newTilemap[tile / mapLength][tile % mapLength] = XY{ byte % 16, byte / 16 };
+                            }
+                        }
                     }
                     activeTilemap = tilemap[0];
                 }
