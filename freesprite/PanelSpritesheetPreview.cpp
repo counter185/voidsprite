@@ -34,8 +34,8 @@ void PanelSpritesheetPreview::render(XY position)
     XY previewPos = { 5,90 };
     XY callerPaddedTileSize = caller->caller->getPaddedTileDimensions();
     XY tileSize = { 
-        caller->canvasZoom * callerPaddedTileSize.x,
-        caller->canvasZoom * callerPaddedTileSize.y,
+        caller->canvas.scale * callerPaddedTileSize.x,
+        caller->canvas.scale * callerPaddedTileSize.y,
     };
     wxWidth = ixmax(320, previewPos.x + tileSize.x + 10);
     wxHeight = ixmax(200, previewPos.y + tileSize.y + 10);

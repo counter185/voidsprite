@@ -12,9 +12,9 @@
 
 SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     caller = parent;
-    canvasZoom = parent->canvas.scale;
-
-    canvasDrawOrigin = { 60, 60 };
+    canvas.scale = parent->canvas.scale;
+    canvas.dimensions = parent->canvas.dimensions;
+    canvas.recenter();
 
     previewWx = new EditorSpritesheetPreview(this);
     caller->addWidget(previewWx);
@@ -70,47 +70,27 @@ void SpritesheetPreviewScreen::render()
 {
     drawBackground();
 
-    SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x * canvasZoom, caller->canvas.dimensions.y * canvasZoom };
+    canvas.dimensions = caller->canvas.dimensions;
+    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();// { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x* canvasZoom, caller->canvas.dimensions.y* canvasZoom };
     for (Layer*& l : caller->layers) {
         SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
     }
 
     // lines between tiles
-    if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
-
-        int dx = canvasRenderRect.x;
-        while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
-            dx += caller->tileDimensions.x * canvasZoom;
-            if (dx >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-                SDL_RenderDrawLine(g_rd, dx, canvasRenderRect.y, dx, canvasRenderRect.y + canvasRenderRect.h);
-            }
-        }
-
-        int dy = canvasRenderRect.y;
-        while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
-            dy += caller->tileDimensions.y * canvasZoom;
-            if (dy >= 0) {
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy, canvasRenderRect.x + canvasRenderRect.w, dy);
-            }
-        }
-    }
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+    canvas.drawTileGrid(caller->tileDimensions);
     
     //canvas border
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
-    SDL_RenderDrawRect(g_rd, &canvasRenderRect);
+    canvas.drawCanvasOutline(5, SDL_Color{ 255,255,255,0x80 });
 
     XY tileSize = caller->tileDimensions;
 
+    //sprite rects
+    std::map<u64, int> drawnRects;
     int i = 0;
     for (XY& sprite : sprites) {
-        SDL_Rect spriteArea = {
-            canvasDrawOrigin.x + (sprite.x * tileSize.x * canvasZoom),
-            canvasDrawOrigin.y + (sprite.y * tileSize.y * canvasZoom),
-            tileSize.x * canvasZoom,
-            tileSize.y * canvasZoom
-        };
+        SDL_Rect spriteArea = canvas.getTileScreenRectAt(sprite, tileSize);
+
         if (spritesProgress == i) {
             SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 0xa0);
         }
@@ -118,14 +98,11 @@ void SpritesheetPreviewScreen::render()
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
         }
         SDL_RenderDrawRect(g_rd, &spriteArea);
-        g_fnt->RenderString(std::to_string(i++), spriteArea.x, spriteArea.y, SDL_Color{255,255,255,0xa0});
+        u64 key = sprite.x + (sprite.y << 32);
+        g_fnt->RenderString(std::to_string(i++), spriteArea.x, spriteArea.y + (25 * drawnRects[key]++), SDL_Color{255,255,255,0xa0});
     }
 
-    int rightPanelWidth = ixmax(300, canvasZoom * tileSize.x);
-
-    /*SDL_Rect rightPanelRect = {g_windowW - rightPanelWidth, 0, rightPanelWidth, g_windowH};
-    SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0xe0);
-    SDL_RenderFillRect(g_rd, &rightPanelRect);*/
+    int rightPanelWidth = ixmax(300, canvas.scale * tileSize.x);
 
     //drawPreview(XY{ rightPanelRect.x + 10, 100 });
 
@@ -135,14 +112,14 @@ void SpritesheetPreviewScreen::render()
 
     if (sprites.size() > 0) {
         for (int x = 0; x < sprites.size(); x++) {
-            int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * canvasZoom);
+            int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * canvas.scale);
             XY spritePos = xyAdd(spriteListOrigin, XY{ x * elementWidth + x * 5 , 50 });
             drawPreview(spritePos, x);
             SDL_Rect spriteArea = {
                 spritePos.x,
                 spritePos.y,
-                caller->tileDimensions.x * canvasZoom,
-                caller->tileDimensions.y * canvasZoom
+                caller->tileDimensions.x * canvas.scale,
+                caller->tileDimensions.y * canvas.scale
             };
             SDL_SetRenderDrawColor(g_rd, spritesProgress == x ? 0 : 255, 255, spritesProgress == x ? 0 : 255, 0x80);
             SDL_RenderDrawRect(g_rd, &spriteArea);
@@ -166,25 +143,20 @@ void SpritesheetPreviewScreen::tick()
 
     panel->position.x = g_windowW - 10 - panel->wxWidth;
 
-    int rightPanelWidth = ixmax(300, canvasZoom * caller->tileDimensions.x);
+    int rightPanelWidth = ixmax(300, canvas.scale * caller->tileDimensions.x);
     XY origin = { g_windowW - rightPanelWidth, 20 };
-    //msPerSpriteLabel->position = { origin.x + 5, origin.y + 20 };
-    //textfieldMSPerSprite->position = { origin.x + 130, origin.y + 20 };
 
     spriteView->wxWidth = g_windowW;
-    spriteView->wxHeight = 30 + caller->tileDimensions.y * canvasZoom + 60;
+    spriteView->wxHeight = 30 + caller->tileDimensions.y * canvas.scale + 60;
     spriteView->position = { 0, g_windowH - spriteView->wxHeight };
 
-    canvasDrawOrigin = XY{
-        iclamp(-caller->canvas.dimensions.x * canvasZoom + 4, canvasDrawOrigin.x, g_windowW - rightPanelWidth - 4),
-        iclamp(-caller->canvas.dimensions.y * canvasZoom + 4, canvasDrawOrigin.y, g_windowH - spriteView->wxHeight - 4)
-    };
+    canvas.lockToScreenBounds(0, 0, spriteView->wxHeight, rightPanelWidth);
 
     for (int x = 0; x < spriteView->subWidgets.drawablesList.size(); x++) {
         int timelineIndex = x / N_BUTTONS_ADDED_TO_TIMELINE;
         int timelineAction = x % N_BUTTONS_ADDED_TO_TIMELINE;
 
-        int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * canvasZoom);
+        int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * canvas.scale);
         spriteView->subWidgets.drawablesList[x]->position = XY{ timelineIndex * elementWidth + timelineIndex * 5 + 30 + (24 * timelineAction), 24 };
     }
 }
@@ -207,14 +179,12 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
                     scrollingCanvas = true;
                 }
                 else if (evt.button.button == SDL_BUTTON_LEFT) {
-                    if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
-                        XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, canvasDrawOrigin);
-                        if (pos.x >= 0 && pos.y >= 0 && pos.x < (caller->canvas.dimensions.x * canvasZoom) && pos.y < (caller->canvas.dimensions.y * canvasZoom)) {
-                            pos.x /= caller->tileDimensions.x * canvasZoom;
-                            pos.y /= caller->tileDimensions.y * canvasZoom;
-                            sprites.push_back(pos);
-                            addTimelineButton();
-                        }
+                    if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0
+                        && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({evt.button.x, evt.button.y}))) 
+                    {
+                        XY tile = canvas.getTilePosAt(XY{ evt.button.x, evt.button.y }, caller->tileDimensions);
+                        sprites.push_back(tile);
+                        addTimelineButton();
                     }
                 }
                 break;
@@ -225,12 +195,11 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
                 break;
             case SDL_MOUSEMOTION:
                 if (scrollingCanvas) {
-                    canvasDrawOrigin = xyAdd(canvasDrawOrigin, XY{ evt.motion.xrel, evt.motion.yrel });
+                    canvas.panCanvas(XY{ evt.motion.xrel, evt.motion.yrel });
                 }
                 break;
             case SDL_MOUSEWHEEL:
-                canvasZoom += evt.wheel.y;
-                canvasZoom = ixmax(1, canvasZoom);
+                canvas.zoom(evt.wheel.y);
                 break;
         }
     }
@@ -282,8 +251,8 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
     if (!sprites.empty()) {
         XY callerPaddedTileSize = caller->getPaddedTileDimensions();
         SDL_Rect spriteDrawArea = { at.x, at.y,
-            callerPaddedTileSize.x * canvasZoom,
-            callerPaddedTileSize.y * canvasZoom
+            callerPaddedTileSize.x * canvas.scale,
+            callerPaddedTileSize.y * canvas.scale
         };
         if (spritesProgress >= sprites.size()) {
             spritesProgress = 0;

@@ -12,7 +12,7 @@ public:
 	//okay actually LET'S NOT USE THIS
 	bool takeInput(SDL_Event evt);
 
-	void lockToScreenBounds();
+	void lockToScreenBounds(int top = 0, int left = 0, int bottom = 0, int right = 0);
 	bool pointInCanvasBounds(XY point);
 	void drawCanvasOutline(int shades = 1, SDL_Color c = { 255,255,255,255 });
 	SDL_Rect getCanvasOnScreenRect();

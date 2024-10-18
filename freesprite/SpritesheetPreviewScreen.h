@@ -4,6 +4,7 @@
 #include "EventCallbackListener.h"
 #include "DrawableManager.h"
 #include "ScreenWideNavBar.h"
+#include "Canvas.h"
 
 class SpritesheetPreviewScreen : public BaseScreen, public EventCallbackListener
 {
@@ -17,8 +18,7 @@ public:
     int spritesProgress = 0;
     int msPerSprite = 128;
 
-    XY canvasDrawOrigin = {0,0};
-    int canvasZoom = 1;
+    Canvas canvas;
     bool scrollingCanvas = false;
 
     bool closeNextTick = false;

@@ -5,8 +5,8 @@
 void EditorSpritesheetPreview::render(XY at)
 {
 	XY tileSize = caller->caller->tileDimensions;
-	wxWidth = ixmax(80, tileSize.x * caller->canvasZoom) + 8;
-	wxHeight = ixmax(30, tileSize.y * caller->canvasZoom) + 20 + 8;
+	wxWidth = ixmax(80, tileSize.x * caller->canvas.scale) + 8;
+	wxHeight = ixmax(30, tileSize.y * caller->canvas.scale) + 20 + 8;
 
 	//XY origin = { g_windowW - wxWidth - 4, g_windowH - wxHeight - 4 - 40 };
 	XY origin = { at.x,at.y };

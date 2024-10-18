@@ -25,11 +25,11 @@ bool Canvas::takeInput(SDL_Event evt)
     return false;
 }
 
-void Canvas::lockToScreenBounds()
+void Canvas::lockToScreenBounds(int top, int left, int bottom, int right)
 {
     currentDrawPoint = XY{
-        iclamp(-dimensions.x * scale + 4, currentDrawPoint.x, g_windowW - 4),
-        iclamp(-dimensions.y * scale + 4, currentDrawPoint.y, g_windowH - 4)
+        iclamp(-dimensions.x * scale + 4 + left, currentDrawPoint.x, g_windowW - 4 - right),
+        iclamp(-dimensions.y * scale + 4 + top, currentDrawPoint.y, g_windowH - 4 - bottom)
     };
 }
 
@@ -127,9 +127,9 @@ SDL_Rect Canvas::canvasRectToScreenRect(SDL_Rect canvasRect)
 
 XY Canvas::screenPointToCanvasPoint(XY screenPoint)
 {
-    XY canvasPoint = xySubtract(screenPoint, currentDrawPoint);
-    canvasPoint = { canvasPoint.x / scale, canvasPoint.y / scale };
-    return xySubtract(canvasPoint, { canvasPoint.x < 0 ? 1 : 0, canvasPoint.y < 0 ? 1 : 0 });
+    XY relPoint = xySubtract(screenPoint, currentDrawPoint);
+    XY canvasPoint = { relPoint.x / scale, relPoint.y / scale };
+    return xySubtract(canvasPoint, { relPoint.x < 0 ? 1 : 0, relPoint.y < 0 ? 1 : 0 });
 }
 
 XY Canvas::getTilePosAt(XY screenPoint, XY tileSize)
