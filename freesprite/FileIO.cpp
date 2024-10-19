@@ -2227,7 +2227,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                 for (json& action : actions) {
                     int tool = action["Tool"];
 
-                    std::string colorsB64 = base64::from_base64(action["Colors"]);
+                    std::string colorsB64 = base64::from_base64(std::string(action["Colors"]));
                     std::vector<u32> colors;
                     for (int c = 0; c < colorsB64.size() / 4; c++) {
                         u32 color = 0;
@@ -2239,7 +2239,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                         colors.push_back(color);
                     }
 
-                    std::string positionsB64 = base64::from_base64(action["Positions"]);
+                    std::string positionsB64 = base64::from_base64(std::string(action["Positions"]));
                     std::vector<XY> positions;
                     for (int p = 0; p < positionsB64.size() / 4; p++) {
                         u16 x = *(u16*)(positionsB64.c_str() + (p * 4));
