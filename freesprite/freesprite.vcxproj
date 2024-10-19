@@ -305,6 +305,7 @@
     <ClInclude Include="CustomTemplate.h" />
     <ClInclude Include="DraggablePanel.h" />
     <ClInclude Include="Gamepad.h" />
+    <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainEditorPalettized.h" />

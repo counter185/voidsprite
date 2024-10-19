@@ -94,6 +94,9 @@
     <Filter Include="Header files\templates">
       <UniqueIdentifier>{a9bd79ad-10d4-46ca-8497-7aebd9add055}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\json">
+      <UniqueIdentifier>{9812c616-232b-44c1-83dd-ac960d53e31b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -862,6 +865,9 @@
     </ClInclude>
     <ClInclude Include="Canvas.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json.hpp">
+      <Filter>Header files\external\json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

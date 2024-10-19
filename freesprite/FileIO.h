@@ -46,6 +46,7 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
+MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 MainEditor* loadAnyIntoSession(std::string utf8path);
@@ -270,6 +271,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));

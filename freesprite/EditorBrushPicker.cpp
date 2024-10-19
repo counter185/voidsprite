@@ -72,7 +72,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 		newBtn->wxWidth = 26;
 		newBtn->wxHeight = 26;
 		newBtn->colorBorder = brush->overrideRightClick() ? SDL_Color{ 0x00,0xae,0xff,0x80 } : SDL_Color{ 0xff, 0xff, 0xff, 0x50 };
-		newBtn->setCallbackListener(20 + i++, this);
+		newBtn->setCallbackListener(100 + i++, this);
 		brushButtons.push_back(newBtn);
 		subWidgets.addDrawable(newBtn);
 	}
@@ -94,7 +94,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 		//newBtn->text = brush->getName();
 		newBtn->wxWidth = 24;
 		newBtn->wxHeight = 24;
-		newBtn->setCallbackListener(60 + i++, this);
+		newBtn->setCallbackListener(200 + i++, this);
 		patternButtons.push_back(newBtn);
 		patternMenu->subWidgets.addDrawable(newBtn);
 	}
@@ -135,14 +135,14 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
 		caller->invertPattern = !caller->invertPattern;
 		editorInvPatternBtn->colorBGFocused = editorInvPatternBtn->colorBGUnfocused = caller->invertPattern ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
 	}
-    else if (evt_id >= 60) {
-        caller->currentPattern = g_patterns[evt_id - 60];
+    else if (evt_id >= 200) {
+        caller->currentPattern = g_patterns[evt_id - 200];
         patternMenu->subWidgets.forceUnfocus();
         updateActivePatternButton(caller->currentPattern);
     }
-	else if (evt_id >= 20) {
-		caller->currentBrush = g_brushes[evt_id-20];
-        updateActiveBrushButton(evt_id - 20);
+	else if (evt_id >= 100) {
+		caller->currentBrush = g_brushes[evt_id-100];
+        updateActiveBrushButton(evt_id - 100);
 	}
 }
 

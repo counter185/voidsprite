@@ -21,6 +21,8 @@
 #include "base64/base64.hpp"
 #include "lcf/lmu/reader.h"
 #include "lcf/ldb/reader.h"
+#include "json/json.hpp"
+using json = nlohmann::json;
 
 enum VTFFORMAT
 {
@@ -2181,6 +2183,106 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
     return NULL;
 }
 
+MainEditor* readPixelStudioPSP(PlatformNativePathString path)
+{
+    std::ifstream f(path);
+    if (f.is_open()) {
+        json j = json::parse(f);
+        f.close();
+
+        int pspversion = j["Version"].get<int>();
+        printf("Version: %i\n", pspversion);
+
+        if (pspversion != 2) {
+            g_addNotification(ErrorNotification("Error", "Unsupported Pixel Studio file version"));
+			return NULL;
+        }
+
+        XY dimensions = { j["Width"].get<int>(), j["Height"].get<int>() };
+
+        json clips = j["Clips"];
+        json clip0 = clips[0];
+        std::string name = clip0["Name"];
+        printf("Clip Name: %s\n", name.c_str());
+        int activeFrameIndex = clip0["ActiveFrameIndex"].get<int>();
+        printf("Active Frame Index: %i\n", activeFrameIndex);
+
+        json frames = clip0["Frames"][0]["Layers"];
+        std::vector<Layer*> layers;
+        for (json& frame : frames) {
+            std::string id = frame["Id"];
+            bool hidden = frame["Hidden"];
+            std::string history = frame["_historyJson"];
+
+            json subJson = json::parse(history);
+            std::string source = subJson["_source"];
+            std::string base64ImageData = base64::from_base64(source);
+            uint8_t* imageData = (uint8_t*)base64ImageData.c_str();
+            Layer* nlayer = readPNGFromMem(imageData, base64ImageData.size());
+            if (nlayer != NULL) {
+
+                nlayer->name = "Pixel Studio Layer";
+                //std::cout << subJson.dump(4) << std::endl;
+                json actions = subJson["Actions"];
+                for (json& action : actions) {
+                    int tool = action["Tool"];
+
+                    std::string colorsB64 = base64::from_base64(action["Colors"]);
+                    std::vector<u32> colors;
+                    for (int c = 0; c < colorsB64.size() / 4; c++) {
+                        u32 color = 0;
+                        u8 r = colorsB64[c * 4];
+                        u8 g = colorsB64[c * 4 + 1];
+                        u8 b = colorsB64[c * 4 + 2];
+                        u8 a = colorsB64[c * 4 + 3];
+                        color = PackRGBAtoARGB(r, g, b, a);
+                        colors.push_back(color);
+                    }
+
+                    std::string positionsB64 = base64::from_base64(action["Positions"]);
+                    std::vector<XY> positions;
+                    for (int p = 0; p < positionsB64.size() / 4; p++) {
+                        u16 x = *(u16*)(positionsB64.c_str() + (p * 4));
+                        u16 y = dimensions.y - 1 - *(u16*)(positionsB64.c_str() + (p * 4 + 2));
+                        positions.push_back(XY{ x,y });
+                    }
+
+                    switch (tool) {
+                        //1px pencil
+                        case 0:
+                            for (XY& p : positions) {
+                                nlayer->setPixel(p, colors[0]);
+                            }
+                            break;
+                        //eraser
+                        case 2:
+                            for (XY& p : positions) {
+                                nlayer->setPixel(p, modAlpha(colors[0], 0));
+                            }
+                            break;
+                        //paint bucket
+                        case 3:
+                        default:
+                            g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
+                            printf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
+                            break;
+                    }
+                }
+
+                layers.push_back(nlayer);
+            }
+
+            /*FILE* tempf = platformOpenFile(convertStringOnWin32(id + "temp.bin"), PlatformFileModeWB);
+            fwrite(base64ImageData.c_str(), base64ImageData.size(), 1, tempf);
+            fclose(tempf);*/
+        }
+        MainEditor* ret = new MainEditor(layers);
+        return ret;
+
+    }
+    return NULL;
+}
+
 MainEditor* readVOIDSN(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
@@ -2296,6 +2398,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
 
                             free(name);
 
+                            //voidsn version 5+ uses zlib compression
                             if (voidsnversion < 5) {
                                 fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
                             }
