@@ -3140,6 +3140,88 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
     return false;
 }
 
+bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data)
+{
+    std::ofstream outfile(path);
+
+    if (outfile.is_open()) {
+        json o = json::object();
+        o["Version"] = 2;
+        o["Id"] = randomUUID();
+        o["Name"] = "voidsprite Image";
+        o["Width"] = data->canvas.dimensions.x;
+        o["Height"] = data->canvas.dimensions.y;
+        o["Type"] = 0;
+        o["Background"] = true;
+        o["BackgroundColor"] = { {"r", 0}, {"g", 0}, {"b", 0}, {"a", 0}};
+        o["TileMode"] = false;
+        o["TileFade"] = data->tileGridAlpha;
+        o["ActiveClipIndex"] = 0;
+        o["Clips"] = json::array();
+
+        json clip = json::object();
+        clip["Name"] = "Untitled";
+        clip["LayerTypes"] = json::array();
+        clip["ActiveFrameIndex"] = 0;
+        clip["Frames"] = json::array();
+
+        json frame = json::object();
+        frame["Id"] = randomUUID();
+        frame["Delay"] = 0.3;
+        frame["ActiveLayerIndex"] = data->selLayer;
+        frame["Layers"] = json::array();
+
+        for (Layer*& l : data->layers) {
+            json layer = json::object();
+            layer["Id"] = randomUUID();
+            layer["Transparency"] = l->layerAlpha / 255.0;
+            layer["Hidden"] = l->hidden;
+            layer["Linked"] = false;
+            layer["Outline"] = 0;
+            layer["Lock"] = 0;
+            layer["Sx"] = 0;
+            layer["Sy"] = 0;
+            layer["Version"] = 1;
+
+            json historyJson;
+            historyJson["Actions"] = json::array();
+            historyJson["Index"] = 0;
+            std::string pixelDataPNGAsBase64 = "";
+            if (writePNG(convertStringOnWin32("temp.bin"), l)) {
+                FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
+                fseek(infile, 0, SEEK_END);
+                uint64_t fileLength = ftell(infile);
+                fseek(infile, 0, SEEK_SET);
+                //char* fileBuffer = (char*)malloc(fileLength);
+                std::string fileBuffer;
+                fileBuffer.resize(fileLength);
+                fread(fileBuffer.data(), fileLength, 1, infile);
+                //fread(fileBuffer, fileLength, 1, infile);
+                fclose(infile);
+
+                pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
+            }
+            else {
+                printf("WRITEPNG FAILED\n");
+            }
+            historyJson["_source"] = pixelDataPNGAsBase64;
+
+            layer["_historyJson"] = historyJson.dump();
+
+            frame["Layers"].push_back(layer);
+        }
+
+        clip["Frames"].push_back(frame);
+
+        o["Clips"].push_back(clip);
+
+        outfile << o.dump();
+        outfile.close();
+        return true;
+    }
+    return false;
+}
+
 bool writeXYZ(PlatformNativePathString path, Layer* data)
 {
     std::vector<uint32_t> uniqueColors;

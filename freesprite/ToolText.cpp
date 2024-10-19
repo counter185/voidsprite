@@ -77,16 +77,21 @@ void ToolText::renderText()
 		//todo
 	}
 
-	TTF_SetFontSize(font, textSize);
-	textSurface = TTF_RenderUTF8_Solid(font, text.c_str(), { 255, 255, 255, 255 });
-	if (textSurface != NULL) {
-		SDL_Surface* converted = SDL_ConvertSurfaceFormat(textSurface, SDL_PIXELFORMAT_ARGB8888, 0);
-		SDL_FreeSurface(textSurface);
-		textSurface = converted;
-		cachedTextTexture = SDL_CreateTextureFromSurface(g_rd, textSurface);
+	if (font != NULL) {
+		TTF_SetFontSize(font, textSize);
+		textSurface = TTF_RenderUTF8_Solid(font, text.c_str(), { 255, 255, 255, 255 });
+		if (textSurface != NULL) {
+			SDL_Surface* converted = SDL_ConvertSurfaceFormat(textSurface, SDL_PIXELFORMAT_ARGB8888, 0);
+			SDL_FreeSurface(textSurface);
+			textSurface = converted;
+			cachedTextTexture = SDL_CreateTextureFromSurface(g_rd, textSurface);
+		}
+		else {
+			g_addNotification(ErrorNotification("Error", "Failed to render text"));
+		}
 	}
 	else {
-		g_addNotification(ErrorNotification("Error", "Failed to render text"));
+		g_addNotification(ErrorNotification("TTF Error", "Error loading font"));
 	}
 
 }

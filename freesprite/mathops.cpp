@@ -610,3 +610,17 @@ std::vector<std::string> split(std::string a, char b)
 
     return ret;
 }
+
+std::string randomUUID()
+{
+    std::string chars = "0123456789abcdef";
+    std::string ret = "";
+    for (int i = 0; i < 32; i++) {
+		ret += chars[rand() % 16];
+	}
+    ret.insert(8, "-");
+    ret.insert(13, "-");
+    ret.insert(18, "-");
+    ret.insert(23, "-");
+	return ret;
+}

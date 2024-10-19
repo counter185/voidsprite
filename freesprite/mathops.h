@@ -79,6 +79,8 @@ uint32_t PackRGBAtoARGB(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 std::vector<std::string> split(std::string a, char b);
 
+std::string randomUUID();
+
 template<typename T>
 inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
 {
