@@ -19,6 +19,9 @@ Free C++ sprite editor
 - VTF* (BGRA, BGR, DXT1, DXT2/3, DXT4/5)
 - NES (dumps CHR-ROM)
 - Mario Paint save file (SRM)
+- SR8 
+- PXM Cave Story Map File
+- LMU RPGMaker2000/3 Map File
 - all other formats supported by SDL2_Image
 
 \* - not all subformats are currently implemented   
@@ -29,6 +32,8 @@ Free C++ sprite editor
 - RPGMaker 2000/2003 XYZ
 - BMP
 - Cave Story engine PBM
+- PXM Cave Story Map File
+- PSP Pixel Studio Project File
 - C header (as `uint8_t` array)
 - Python file (as [R,G,B,A] `np.array`)
 - HTML document (inline Base64 image)
@@ -70,6 +75,8 @@ You can also build the program as a Flatpak, see [Flatpak README](https://github
 You may find the [Official Discord server](https://discord.gg/c5SndMJKj2) here.
 
 [Itch.io page](https://cntrpl.itch.io/voidsprite)
+
+[BlueSky page](https://voidsprite.bsky.social/)
 
 
 ## Licenses
