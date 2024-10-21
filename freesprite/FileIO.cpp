@@ -2034,14 +2034,14 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
             
             u16 px16;
             for (u64 pxPtr = 0; pxPtr < 128 * 128; pxPtr++) {
-				fread(&px16, 2, 1, f);
+                fread(&px16, 2, 1, f);
                 //std::reverse(&px16, &px16 + 1);
                 u8 r = 8 * (px16 & 0x1f);
                 u8 g = 8 * ((px16 >> 5) & 0x1f);
                 u8 b = 8 * (px16 >> 10);
                 u8 a = 255;
                 ppx[pxPtr] = PackRGBAtoARGB(r, g, b, a);
-			}
+            }
         }
         else {
             //g_addNotification(ErrorNotification("PS2 ICN error", std::format("Unsupported compression type: {}", header.textureType)));
@@ -2083,6 +2083,219 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
 
         fclose(f);
         return ret;
+    }
+    return NULL;
+}
+
+Layer* readGIF(PlatformNativePathString path, u64 seek)
+{
+    u8 IMAGE_SEPERATOR_MAGIC = 0x2C;
+    u8 EXTENSION_INTRODUCER_MAGIC = 0x21;
+    u8 GIF_TRAILER_MAGIC = 0x3B;
+
+    const u8 LABEL_GC = 0xF9;
+    const u8 LABEL_COMMENT = 0xFE;
+    const u8 LABEL_APPLICATION = 0xFF;
+    const u8 LABEL_PLAINTEXT = 0x01;
+
+    struct GIFGCTFlags {
+        u8 size : 3;
+        u8 sort : 1;
+        u8 colorRes : 3;
+        u8 enabled : 1;
+    };
+    struct GIFLogicalScreenDescriptor {
+        u16 width;
+        u16 height;
+        GIFGCTFlags gctFlags;
+        u8 bgColorIndex;
+        u8 pixelAspect;
+    };
+    struct GIFImageDescriptorFlags{
+        u8 lctSize : 3;
+        u8 reserved : 2;
+        u8 lctSort : 1;
+        u8 interlaceFlag : 1;
+        u8 lctEnable : 1;
+    };
+    struct GIFImageDescriptor {
+        u16 imageLeftPosition;
+        u16 imageTopPosition;
+        u16 imageWidth;
+        u16 imageHeight;
+        GIFImageDescriptorFlags flags;
+    };
+
+    struct GCE_Flags {
+        u8 transparent : 1;
+        u8 userInput : 1;
+        u8 disposalMode : 3;
+        u8 reserved : 3;
+    };
+
+    struct GIFGraphicControlExtension {
+        u8 blockSize;
+        GCE_Flags flags;
+        u16 delay;
+        u8 transparentColorIndex;
+    };
+    
+    struct GIFApplicationExtension {
+        u8 blockSize;
+        char identifier[8];
+        char authenticationCode[3];
+    };
+
+    struct GIFPlainTextExtension {
+        u8 blockSize;
+        u16 textGridLeftPos;
+        u16 textGridTopPos;
+        u16 textGridWidth;
+        u16 textGridHeight;
+        u8 charCellWidth;
+        u8 charCellHeight;
+        u8 textForegroundColorIndex;
+        u8 textBackgroundColorIndex;
+    };
+
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+
+        u8 magic[3];
+        u8 version[3];
+        fread(magic, 1, 3, f);
+        fread(version, 1, 3, f);
+
+        //magic should == "GIF"
+        GIFLogicalScreenDescriptor lsd;
+        fread(&lsd, sizeof(GIFLogicalScreenDescriptor), 1, f);
+        std::vector<u32> gctColors;
+        if (lsd.gctFlags.enabled) {
+            int nColors = pow(2, lsd.gctFlags.size + 1);
+            for (int x = 0; x < nColors; x++) {
+                u8 color[3];
+                fread(color, 1, 3, f);
+                gctColors.push_back(PackRGBAtoARGB(color[0], color[1], color[2], 255));
+            }
+        }
+
+        std::vector <GIFGraphicControlExtension> gces;
+        std::vector <GIFApplicationExtension> gaes;
+        std::vector <GIFPlainTextExtension> gptes;
+
+        while (!feof(f)) {
+            u8 blockIdentifier;
+            fread(&blockIdentifier, 1, 1, f);
+            if (blockIdentifier == IMAGE_SEPERATOR_MAGIC) {
+                GIFImageDescriptor imgDesc;
+                fread(&imgDesc, sizeof(GIFImageDescriptor), 1, f);
+                std::vector<u32> lctColors;
+                if (imgDesc.flags.lctEnable) {
+                    int nColors = pow(2, imgDesc.flags.lctSize + 1);
+                    for (int x = 0; x < nColors; x++) {
+                        u8 color[3];
+                        fread(color, 1, 3, f);
+                        lctColors.push_back(PackRGBAtoARGB(color[0], color[1], color[2], 255));
+                    }
+                }
+                u8 lzwMinCode;
+                fread(&lzwMinCode, 1, 1, f);
+
+                std::vector<std::vector<u8>> lzwCompressedData;
+                //read subblocks
+                while (true) {
+                    u8 subBlockSize = 0;
+                    fread(&subBlockSize, 1, 1, f);
+                    if (subBlockSize == 0) {
+                        break;
+                    }
+                    std::vector<u8> data;
+                    data.resize(subBlockSize);
+                    fread(data.data(), 1, subBlockSize, f);
+                    lzwCompressedData.push_back(data);
+                };
+
+            }
+            else if (blockIdentifier == EXTENSION_INTRODUCER_MAGIC) {
+                u8 label;
+                fread(&label, 1, 1, f);
+                switch (label) {
+                    case LABEL_GC:
+                        GIFGraphicControlExtension gce;
+                        fread(&gce, sizeof(GIFGraphicControlExtension), 1, f);
+                        gces.push_back(gce);
+                        break;
+                    case LABEL_COMMENT: 
+                        {
+                            std::vector<std::vector<u8>> commentData;
+                            //read subblocks
+                            while (true) {
+                                u8 subBlockSize = 0;
+                                fread(&subBlockSize, 1, 1, f);
+                                if (subBlockSize == 0) {
+                                    break;
+                                }
+                                std::vector<u8> data;
+                                data.resize(subBlockSize);
+                                fread(data.data(), 1, subBlockSize, f);
+                                commentData.push_back(data);
+                            };
+                        }
+                        break;
+                    case LABEL_APPLICATION: 
+                        {
+                            GIFApplicationExtension gae;
+                            fread(&gae, sizeof(GIFApplicationExtension), 1, f);
+                            std::vector<std::vector<u8>> applicationData;
+                            //read subblocks
+                            while (true) {
+                                u8 subBlockSize = 0;
+                                fread(&subBlockSize, 1, 1, f);
+                                if (subBlockSize == 0) {
+                                    break;
+                                }
+                                std::vector<u8> data;
+                                data.resize(subBlockSize);
+                                fread(data.data(), 1, subBlockSize, f);
+                                applicationData.push_back(data);
+                            };
+                            gaes.push_back(gae);
+                        }
+                        break;
+                    case LABEL_PLAINTEXT:
+                        {
+                            GIFPlainTextExtension gpe;
+                            fread(&gpe, sizeof(GIFPlainTextExtension), 1, f);
+                            std::vector<std::vector<u8>> ptd;
+                            //read subblocks
+                            while (true) {
+                                u8 subBlockSize = 0;
+                                fread(&subBlockSize, 1, 1, f);
+                                if (subBlockSize == 0) {
+                                    break;
+                                }
+                                std::vector<u8> data;
+                                data.resize(subBlockSize);
+                                fread(data.data(), 1, subBlockSize, f);
+                                ptd.push_back(data);
+                            };
+                            gptes.push_back(gpe);
+                        }
+                        break;
+                    default:
+                        printf("UNKNOWN EXTENSION: %i\n", label);
+                        break;
+                }
+            }
+            else if (blockIdentifier == GIF_TRAILER_MAGIC) {
+                break;
+            }
+            u8 blockTerminator;
+            fread(&blockTerminator, 1, 1, f);
+        }
+
+
+        fclose(f);
     }
     return NULL;
 }
@@ -2195,7 +2408,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
 
         if (pspversion != 2) {
             g_addNotification(ErrorNotification("Error", "Unsupported Pixel Studio file version"));
-			return NULL;
+            return NULL;
         }
 
         XY dimensions = { j["Width"].get<int>(), j["Height"].get<int>() };
@@ -3754,6 +3967,61 @@ std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString n
             return { true, newPalette };
         }
         f.close();
+    }
+    return { false, {} };
+}
+
+std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name)
+{
+    std::ifstream f(name, std::ios::in);
+    if (f.is_open()) {
+        std::string magic = "";
+        std::string name = "";
+        int columns = 0;
+        int columnNow = 0;
+        int lineN = 0;
+        bool oldFormat = false;
+        std::vector<u32> ret;
+
+        while (!f.eof()) {
+            std::string line;
+            std::getline(f, line);
+
+            if (line.substr(0, 1) == "#") {
+                continue;
+            }
+            lineN++;
+            if (lineN == 1) {
+                magic = line;
+                if (magic != "GIMP Palette") {
+                    g_addNotification(ErrorNotification("Error", "Invalid GIMP palette file"));
+                    f.close();
+                    return { false, {} };
+                }
+            }
+            else if (lineN == 2) {
+                if (stringStartsWithIgnoreCase(line, "name: ")) {
+                    name = line.substr(6);
+                }
+                else {
+                    oldFormat = true;
+                    columns = std::stoi(line);
+                }
+            }
+            else {
+                if (lineN == 3 && stringStartsWithIgnoreCase(line, "columns: ")) {
+                    columns = std::stoi(line.substr(9));
+                }
+                else {
+                    int r, g, b;
+                    std::istringstream iss(line);
+                    iss >> r >> g >> b;
+                    ret.push_back(PackRGBAtoARGB(r, g, b, 255));
+                }
+            }
+        }
+        f.close();
+        return { true, ret };
     }
     return { false, {} };
 }

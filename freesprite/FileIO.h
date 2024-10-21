@@ -44,6 +44,7 @@ Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
@@ -75,6 +76,7 @@ bool writeSR8(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
+std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name);
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
 bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
@@ -280,6 +282,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG (libpng)", ".png", &readPNG, exPNG));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP (EasyBMP)", ".bmp", &readBMP, exBMP));
+    //g_fileImporters.push_back(FileImporter::flatImporter("GIF", ".gif", &readGIF, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM (EasyBMP)", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
@@ -361,6 +364,15 @@ inline void g_setupIO() {
             fread(headerBytes, 8, 1, f);
             fclose(f);
             return std::string(headerBytes) == "JASC-PAL";
+        }));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("GIMP GPL palette", ".gpl", &readPltGIMPGPL, 
+        [](PlatformNativePathString path) { 
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            char headerBytes[13];
+            memset(headerBytes, 0, 13);
+            fread(headerBytes, 12, 1, f);
+            fclose(f);
+            return std::string(headerBytes) == "GIMP Palette";
         }));
 
 
