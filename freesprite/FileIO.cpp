@@ -3917,9 +3917,9 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
 {
     std::vector<u32> palette = data->isPalettized ? ((LayerPalettized*)data)->palette : data->getUniqueColors();
     if (palette.size() > 256) {
-		g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires up to 256."));
-		return false;
-	}
+        g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires up to 256."));
+        return false;
+    }
 
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
@@ -3956,7 +3956,7 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
         h.dibWidth = data->w;
         h.dibHeight = data->h * 2;
         h.numBpp = 8;
-        u32 imgSizeInb = data->w * data->h * 3 + data->h * (int)ceil(data->w / 8.0) * 8 + 40;
+        u32 imgSizeInb = 4 * 256 + data->w * data->h + data->h * (int)ceil(data->w / 8.0) + 40;
         h.imgSizeInBytes = imgSizeInb;
         fwrite(&h, sizeof(CURHeader), 1, f);
 
@@ -3986,16 +3986,17 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
         for (int y = data->h; y-- > 0; ) {
             for (int x = 0; x < data->w; x++) {
                 u32 px = data->getPixelAt(XY{ x,y });
-                u8 a = px >> 24 & 0xff;
+                u32 pxx = data->isPalettized ? palette[px] : px;
+                u8 a = pxx >> 24 & 0xff;
                 if (a == 0) {
-					currentByte |= 1 << currentBit;
-				}
+                    currentByte |= 1 << currentBit;
+                }
                 currentBit--;
                 if (currentBit < 0) {
                     fwrite(&currentByte, 1, 1, f);
-					currentByte = 0;
-					currentBit = 7;
-				}
+                    currentByte = 0;
+                    currentBit = 7;
+                }
             }
             if (currentBit != 7) {
                 fwrite(&currentByte, 1, 1, f);
