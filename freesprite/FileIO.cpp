@@ -3913,6 +3913,103 @@ bool writeSR8(PlatformNativePathString path, Layer* data)
     return false;
 }
 
+bool writeCUR(PlatformNativePathString path, Layer* data)
+{
+    std::vector<u32> palette = data->isPalettized ? ((LayerPalettized*)data)->palette : data->getUniqueColors();
+    if (palette.size() > 256) {
+		g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires up to 256."));
+		return false;
+	}
+
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+#pragma pack(push, 1)
+        struct CURHeader {
+            u16 reserved = 0;
+            u16 imageType = 2;
+            u16 numImages = 1;
+            u8 width;
+            u8 height;
+            u8 numPaletteColors = 0;
+            u8 reserved2 = 0;
+            u16 hotLeft = 0;
+            u16 hotRight = 0;
+            u32 imgSizeInBytes = 0;
+            u32 imgDataOffset = 22;
+            u32 numHeaderBytes = 40;
+            u32 dibWidth;
+            u32 dibHeight;
+            u16 numColorPlanes = 1;
+            u16 numBpp;
+            u32 compression = 0;
+            u32 sizeOfRawBitmap = 0;
+            u32 printResW = 0;
+            u32 printResH = 0;
+            u32 dibNumPaletteColors = 0;
+            u32 numImportantColors = 0;
+        };
+#pragma pack(pop)
+
+        CURHeader h;
+        h.width = data->w;
+        h.height = data->h;
+        h.dibWidth = data->w;
+        h.dibHeight = data->h * 2;
+        h.numBpp = 8;
+        u32 imgSizeInb = data->w * data->h * 3 + data->h * (int)ceil(data->w / 8.0) * 8 + 40;
+        h.imgSizeInBytes = imgSizeInb;
+        fwrite(&h, sizeof(CURHeader), 1, f);
+
+        for (int p = 0; p < 256; p++) {
+            u32 c = p < palette.size() ? palette[p] : 0;
+            u8 r = c >> 16 & 0xff;
+            u8 g = c >> 8 & 0xff;
+            u8 b = c & 0xff;
+            u8 aPlaceHolder = 0x00;
+            fwrite(&b, 1, 1, f);
+            fwrite(&g, 1, 1, f);
+            fwrite(&r, 1, 1, f);
+            fwrite(&aPlaceHolder, 1, 1, f);
+        }
+
+        for (int y = data->h; y-->0; ) {
+            for (int x = 0; x < data->w; x++) {
+                u32 px = data->getPixelAt(XY{ x,y });
+                
+                u8 index = data->isPalettized ? px : ( std::find(palette.begin(), palette.end(), px) - palette.begin());
+                fwrite(&index, 1, 1, f);
+            }
+        }
+
+        u32 currentByte = 0;
+        int currentBit = 7;
+        for (int y = data->h; y-- > 0; ) {
+            for (int x = 0; x < data->w; x++) {
+                u32 px = data->getPixelAt(XY{ x,y });
+                u8 a = px >> 24 & 0xff;
+                if (a == 0) {
+					currentByte |= 1 << currentBit;
+				}
+                currentBit--;
+                if (currentBit < 0) {
+                    fwrite(&currentByte, 1, 1, f);
+					currentByte = 0;
+					currentBit = 7;
+				}
+            }
+            if (currentBit != 7) {
+                fwrite(&currentByte, 1, 1, f);
+                currentByte = 0;
+                currentBit = 7;
+            }
+        }
+
+        fclose(f);
+        return true;
+    }
+    return false;
+}
+
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name)
 {
     FILE* f = platformOpenFile(name, PlatformFileModeRB);
