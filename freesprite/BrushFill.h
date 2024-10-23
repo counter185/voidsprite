@@ -18,6 +18,8 @@ public:
 	std::string getName() override { return "Fill"; }
 	std::string getTooltip() override { return "Mouse Left to fill an area with the current color.\nMouse Right to fill only the currently selected area."; }
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_fill.png"; }
+	XY getSection() override { return XY{ 0,1 }; }
+
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}

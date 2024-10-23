@@ -848,14 +848,14 @@ void MainEditor::setUpWidgets()
     currentPattern = g_patterns[0];
 
     colorPicker = new EditorColorPicker(this);
-    colorPicker->position.y = 80;
+    colorPicker->position.y = 50;
     colorPicker->position.x = 10;
     wxsManager.addDrawable(colorPicker);
     colorPicker->setMainEditorColorRGB(pickedColor);
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 480;
+    brushPicker->position.y = 450;
     brushPicker->position.x = 10;
     wxsManager.addDrawable(brushPicker);
 

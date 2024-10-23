@@ -2798,7 +2798,6 @@ MainEditor* loadAnyIntoSession(std::string utf8path)
             }
         }
     }
-    g_addNotification(ErrorNotification("Error", "Failed to load file"));
     return NULL;
 }
 
@@ -3917,7 +3916,7 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
 {
     std::vector<u32> palette = data->isPalettized ? ((LayerPalettized*)data)->palette : data->getUniqueColors();
     if (palette.size() > 256) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires up to 256."));
+        g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires max. 256."));
         return false;
     }
 

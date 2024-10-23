@@ -499,14 +499,14 @@ void MainEditorPalettized::setUpWidgets()
     currentPattern = g_patterns[0];
 
     colorPicker = new PalettizedEditorColorPicker(this);
-    colorPicker->position.y = 80;
+    colorPicker->position.y = 50;
     colorPicker->position.x = 10;
     wxsManager.addDrawable(colorPicker);
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(pickedPaletteIndex);
     //regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 480;
+    brushPicker->position.y = 450;
     brushPicker->position.x = 10;
     wxsManager.addDrawable(brushPicker);
 

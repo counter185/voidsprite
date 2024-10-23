@@ -13,6 +13,8 @@ class Brush1pxLine :
 	std::string getName() override { return "1px Line"; };
 	std::string getTooltip() override { return "Hold Mouse Left at the beginning of the line, then release at the end point"; }
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxline.png"; }
+	XY getSection() override { return XY{ 0,2 }; }
+
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override {}
 	void clickRelease(MainEditor* editor, XY pos) override;

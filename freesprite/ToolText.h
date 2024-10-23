@@ -15,6 +15,8 @@ public:
 
     std::string getName() override { return "Text"; }
     std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_text.png"; }
+    XY getSection() override { return XY{ 0,2 }; }
+
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;

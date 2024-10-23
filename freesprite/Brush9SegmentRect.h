@@ -18,6 +18,8 @@ class Brush9SegmentRect :
     std::string getName() override { return "9-segment Rectangle [WIP]"; };
     std::string getTooltip() override { return "Mouse Right to select a 9-segment pattern.\nSelect a rectangle with Mouse Left to place it."; }
     std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_9srect.png"; }
+    XY getSection() override { return XY{ 0,2 }; }
+
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override { lastMousePos = to; }

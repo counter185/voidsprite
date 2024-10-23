@@ -16,6 +16,8 @@ public:
     bool overrideRightClick() override { return true; }
     std::string getName() { return "Isolate rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left to lock all other brushes to this area.\nDeselect this area with Mouse Right."; }
+    XY getSection() override { return XY{ 1,0 }; }
+
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override { lastMousePos = to; }
     void clickRelease(MainEditor* editor, XY pos) override;

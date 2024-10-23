@@ -10,6 +10,8 @@ public:
 
     std::string getName() override { return "Rotate rect"; }
     std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_rotrect.png"; }
+    XY getSection() override { return XY{ 1,0 }; }
+
     bool overrideRightClick() override { return true; }
     bool isReadOnly() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;

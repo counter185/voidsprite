@@ -13,6 +13,8 @@ class ToolMeasure :
     bool isReadOnly() override { return true; }
     std::string getName() { return "Measure"; }
     std::string getTooltip() override { return "Select an area with Mouse Left to measure its size in pixels"; }
+    XY getSection() override { return XY{ 1,1 }; }
+
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override { lastMousePos = to; }
     void clickRelease(MainEditor* editor, XY pos) override { heldDown = false; }

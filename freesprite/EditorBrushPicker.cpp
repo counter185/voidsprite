@@ -5,11 +5,11 @@
 EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	this->caller = caller;
 
-	wxWidth = 190;
-	wxHeight = 195;
+	wxWidth = 260;
+	wxHeight = 210;
 
 	patternPanelBtn = new UIButton();
-	patternPanelBtn->position = { 141, 10 };
+	patternPanelBtn->position = { wxWidth - 40 - 10, 10 };
 	patternPanelBtn->text = ">";
 	patternPanelBtn->wxWidth = 40;
 	patternPanelBtn->wxHeight = 24;
@@ -19,7 +19,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	subWidgets.addDrawable(patternPanelBtn);
 
 	editorReplaceBtn = new UIButton();
-	editorReplaceBtn->position = { 110, 10 };
+	editorReplaceBtn->position = { wxWidth - 20 - 24 - patternPanelBtn->wxWidth, 10 };
 	editorReplaceBtn->text = "R";
 	editorReplaceBtn->wxWidth = 24;
 	editorReplaceBtn->wxHeight = 24;
@@ -29,7 +29,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 
 	patternMenuPanel = new Panel();
 	patternMenuPanel->enabled = false;
-	patternMenuPanel->position = { 180, 0 };
+	patternMenuPanel->position = { wxWidth + 30, 0 };
 	subWidgets.addDrawable(patternMenuPanel);
 
 	UILabel* lbl = new UILabel();
@@ -55,35 +55,70 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	patternMenu->bgColor = { 0,0,0,0x80 };
 	patternMenuPanel->subWidgets.addDrawable(patternMenu);
 
-	int px = 5;
-	int py = 40;
+
+	//create brush buttons
+	XY origin = { 5,40 };
+	XY current = origin;
+	XY currentSection = { 0,0 };
+	int horizontalToolsPerSection = 4;
+
+	std::map<u16, std::vector<std::pair<int, BaseBrush*>>> sectionMap;
+	for (int x = 0; x < g_brushes.size(); x++) {
+		BaseBrush* brush = g_brushes[x];
+		XY sec = brush->getSection();
+		u16 sectionCode = (sec.x << 8) + sec.y;
+		sectionMap[sectionCode].push_back({ x, brush });
+	}
+	brushButtons.resize(g_brushes.size());
+
 	int i = 0;
-	for (BaseBrush*& brush : g_brushes) {
-		UIButton* newBtn = new UIButton();
-		if (px + 26 > wxWidth) {
-			py += 30;
-			px = 5;
+	for (auto& section : sectionMap) {
+		for (auto& indexAndBrush : section.second) {
+			int toolIndex = indexAndBrush.first;
+			BaseBrush* brush = indexAndBrush.second;
+
+			UIButton* newBtn = new UIButton();
+			XY nextSection = brush->getSection();
+			if (!xyEqual(currentSection, nextSection)) {
+				if (currentSection.x != nextSection.x) {
+					current.y = origin.y;
+					current.x = (30 * horizontalToolsPerSection + 10) * nextSection.x + origin.x;
+				}
+				else {
+					current.x = (30 * horizontalToolsPerSection + 10) * currentSection.x + origin.x;
+					current.y += 38;
+				}
+				currentSection = brush->getSection();
+				i = 0;
+			}
+			if (i++ >= horizontalToolsPerSection) {
+				current.x = (30 * horizontalToolsPerSection + 10) * currentSection.x + origin.x;
+				current.y += 30;
+				i = 0;
+			}
+
+			newBtn->position = current;
+			current.x += 30;
+			newBtn->icon = brush->cachedIcon;
+			newBtn->tooltip = brush->getName() + (brush->getTooltip() != "" ? ("\n" + brush->getTooltip()) : "");
+			//newBtn->text = brush->getName();
+			newBtn->wxWidth = 26;
+			newBtn->wxHeight = 26;
+			newBtn->colorBorder = brush->overrideRightClick() ? SDL_Color{ 0x00,0xae,0xff,0x80 } : SDL_Color{ 0xff, 0xff, 0xff, 0x50 };
+			newBtn->setCallbackListener(100 + toolIndex, this);
+			brushButtons[toolIndex] = newBtn;
+			subWidgets.addDrawable(newBtn);
 		}
-		newBtn->position = XY{ px, py };
-		px += 30;
-		newBtn->icon = brush->cachedIcon;
-		newBtn->tooltip = brush->getName() + (brush->getTooltip() != "" ? ("\n" + brush->getTooltip()) : "");
-		//newBtn->text = brush->getName();
-		newBtn->wxWidth = 26;
-		newBtn->wxHeight = 26;
-		newBtn->colorBorder = brush->overrideRightClick() ? SDL_Color{ 0x00,0xae,0xff,0x80 } : SDL_Color{ 0xff, 0xff, 0xff, 0x50 };
-		newBtn->setCallbackListener(100 + i++, this);
-		brushButtons.push_back(newBtn);
-		subWidgets.addDrawable(newBtn);
 	}
 	updateActiveBrushButton(caller->currentBrush);
 
-	px = 5;
-	py = 0;
+	//create pattern buttons
+	int px = 5;
+	int py = 0;
 	i = 0;
 	for (Pattern*& pattern : g_patterns) {
 		UIButton* newBtn = new UIButton();
-		if (px + 26 > wxWidth) {
+		if (px + 26 > patternMenu->wxWidth) {
 			py += 26;
 			px = 5;
 		}
@@ -115,7 +150,7 @@ void EditorBrushPicker::render(XY position)
 
     g_fnt->RenderString("TOOLS", position.x + 3, position.y + 1);
 
-    patternMenuPanel->position = xyAdd({ 180, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
+    patternMenuPanel->position = xyAdd({ wxWidth, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
 
     DraggablePanel::render(position);
 }

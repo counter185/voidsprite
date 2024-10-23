@@ -7,6 +7,8 @@ class ToolColorPicker :
     bool isReadOnly() override { return true; }
     std::string getName() { return "Color Picker"; }
     std::string getTooltip() override { return "Mouse Left to pick a color from the current layer."; }
+    XY getSection() override { return XY{ 1,2 }; }
+
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override;
     void renderOnCanvas(XY canvasDrawPoint, int scale) {

@@ -12,6 +12,8 @@ class BrushRect :
 	}
 	std::string getName() override { return "1px Rectangle"; };
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxrect.png"; }
+	XY getSection() override { return XY{ 0,2 }; }
+
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override { lastMousePos = to; }
 	void clickRelease(MainEditor* editor, XY pos) override;
