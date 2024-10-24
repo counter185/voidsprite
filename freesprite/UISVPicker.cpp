@@ -37,25 +37,15 @@ void UISVPicker::drawPosIndicator(XY origin)
 }
 
 void UISVPicker::render(XY pos)
-{
-	//we gotta do something about this
-	SDL_Color vtx1 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 0.0, 1.0 }));
-	SDL_Color vtx2 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 1.0, 1.0 }));
-	SDL_Color vtx3 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 0.0, 0.0 }));
-	SDL_Color vtx4 = rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 1.0, 0.0 }));
-	vtx1.a = vtx2.a = vtx3.a = vtx4.a = 0xff;// parent->focused ? 0xff : 0x30;
+{	
+	u32 c = sdlcolorToUint32(rgb2sdlcolor(hsv2rgb(hsv{ parent->currentH, 1.0, 1.0 })));
 
-	SDL_Vertex SVpicker[4];
-	SVpicker[0].color = (vtx1);
-	SVpicker[0].position = SDL_FPoint{ (float)(pos.x), (float)(pos.y) };
-	SVpicker[1].color = (vtx2);
-	SVpicker[1].position = SDL_FPoint{ (float)(pos.x + wxWidth), (float)(pos.y) };
-	SVpicker[2].color = (vtx3);
-	SVpicker[2].position = SDL_FPoint{ (float)(pos.x), (float)(pos.y + wxHeight) };
-	SVpicker[3].color = (vtx4);
-	SVpicker[3].position = SDL_FPoint{ (float)(pos.x + wxWidth), (float)(pos.y + wxHeight) };
-	int idx[] = { 0,1,2,1,2,3 };
-	SDL_RenderGeometry(g_rd, NULL, SVpicker, 4, idx, 6);
+	SDL_Rect pickerRect = { pos.x, pos.y, wxWidth, wxHeight };
+	SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+	SDL_RenderFillRect(g_rd, &pickerRect);
+	renderGradient(pickerRect, modAlpha(c, 0), modAlpha(c, 255), modAlpha(c,0), modAlpha(c,255));
+	renderGradient(pickerRect, 0x00000000, 0x00000000, 0xFF000000, 0xFF000000);
+
 	drawPosIndicator(pos);
 }
 
