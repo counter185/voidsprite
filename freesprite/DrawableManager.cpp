@@ -22,10 +22,11 @@ void DrawableManager::processHoverEventInMultiple(std::vector<std::reference_wra
 
 bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.state) {
+    SDL_Event convEvent = convertTouchToMouseEvent(evt);
+    if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.state) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
-            if (wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, parentOffset)) {
+            if (wxs.tryFocusOnPoint(XY{ convEvent.button.x, convEvent.button.y }, parentOffset)) {
                 break;
             }
         }
@@ -86,6 +87,12 @@ void DrawableManager::renderAll(XY offset) {
 void DrawableManager::moveToFront(Drawable* d) {
     removeDrawable(d, false);
     addDrawable(d);
+}
+
+void DrawableManager::passInputToFocused(SDL_Event evt, XY parentOffset) { 
+    if (focused != NULL) {
+        focused->handleInput(focused->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt), xyAdd(parentOffset, focused->position));
+    }
 }
 
 bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {

@@ -624,3 +624,36 @@ std::string randomUUID()
     ret.insert(23, "-");
 	return ret;
 }
+
+SDL_Event convertTouchToMouseEvent(SDL_Event src)
+{
+    SDL_Event ret = src;
+    switch (src.type) {
+    case SDL_FINGERDOWN:
+    case SDL_FINGERUP:
+        ret.type = src.type == SDL_FINGERDOWN ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
+        ret.button.button = SDL_BUTTON_LEFT;
+        ret.button.clicks = 1;
+        ret.button.timestamp = src.tfinger.timestamp;
+        ret.button.windowID = src.tfinger.windowID;
+        ret.button.which = src.tfinger.touchId;
+        ret.button.state = src.type == SDL_FINGERDOWN ? SDL_PRESSED : SDL_RELEASED;
+        ret.button.x = src.tfinger.x * g_windowW;
+        ret.button.y = src.tfinger.y * g_windowH;
+        break;
+    case SDL_FINGERMOTION:
+        ret.type = SDL_MOUSEMOTION;
+        ret.motion.timestamp = src.tfinger.timestamp;
+        ret.motion.windowID = src.tfinger.windowID;
+        ret.motion.x = src.tfinger.x * g_windowW;
+        ret.motion.y = src.tfinger.y * g_windowH;
+        ret.motion.which = src.tfinger.touchId;
+        ret.motion.state = 0;
+        ret.motion.xrel = src.tfinger.dx * g_windowW;
+        ret.motion.yrel = src.tfinger.dy * g_windowH;
+        break;
+    default:
+        return src;
+    }
+    return ret;
+}

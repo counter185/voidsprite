@@ -37,6 +37,7 @@ public:
 		focused = false; 
 		focusTimer.start();
 	}
+	virtual bool takesTouchEvents() { return false; }
 	virtual bool focusable() { return true; }
 	virtual void handleInput(SDL_Event evt, XY gPosOffset = {0,0}) {}
 	virtual void setCallbackListener(int cb_id,  EventCallbackListener* callback) { callback_id = cb_id; this->callback = callback; }

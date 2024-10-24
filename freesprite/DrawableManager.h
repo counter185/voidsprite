@@ -22,7 +22,7 @@ public:
 	void removeDrawable(Drawable* d, bool free = true);
 	void renderAll(XY offset = XY{0,0});
 	void moveToFront(Drawable* d);
-	void passInputToFocused(SDL_Event evt, XY parentOffset = XY{0,0}) { focused->handleInput(evt, xyAdd(parentOffset, focused->position)); }
+	void passInputToFocused(SDL_Event evt, XY parentOffset = XY{0,0});
 	bool anyFocused() { return focused != NULL; }
 	bool tryFocusOnPoint(XY screenPoint, XY parentOffset = XY{0,0});
 	bool tryFocusOnNextTabbable();

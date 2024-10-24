@@ -122,6 +122,7 @@ public:
     void takeInput(SDL_Event evt) override;
 
     std::string getName() override { return "Editor"; }
+    bool takesTouchEvents() override { return true; }
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
     void eventPopupClosed(int evt_id, BasePopup* p) override;

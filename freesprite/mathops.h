@@ -81,6 +81,8 @@ std::vector<std::string> split(std::string a, char b);
 
 std::string randomUUID();
 
+SDL_Event convertTouchToMouseEvent(SDL_Event src);
+
 template<typename T>
 inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
 {

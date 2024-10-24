@@ -1099,6 +1099,10 @@ void MainEditor::takeInput(SDL_Event evt) {
                         break;
                 }
                 break;
+            case SDL_FINGERMOTION:
+                XY rel = { evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH };
+                canvas.panCanvas(rel);
+                break;
         }
     }
 }

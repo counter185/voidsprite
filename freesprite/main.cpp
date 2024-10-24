@@ -252,6 +252,8 @@ int main(int argc, char** argv)
     g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | (g_config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
+    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 
     SDL_Surface* cursorSrf = IMG_Load(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
     if (cursorSrf != NULL) {
@@ -539,11 +541,12 @@ int main(int argc, char** argv)
             g_gamepad->TakeEvent(evt);
             if (!DrawableManager::processInputEventInMultiple({ overlayWidgets }, evt)) {
                 if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {
-                    popupStack[popupStack.size() - 1]->takeInput(evt);
+                    BasePopup* popup = popupStack[popupStack.size() - 1];
+                    popup->takeInput(popup->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
                 }
                 else {
                     if (!screenStack.empty()) {
-                        screenStack[currentScreen]->takeInput(evt);
+                        screenStack[currentScreen]->takeInput(screenStack[currentScreen]->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
                     }
                 }
             }
