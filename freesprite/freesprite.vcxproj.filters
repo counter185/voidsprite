@@ -468,6 +468,9 @@
     <ClCompile Include="Canvas.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="PopupAdjustHSV.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -869,6 +872,9 @@
     <ClInclude Include="json\json.hpp">
       <Filter>Header files\external\json</Filter>
     </ClInclude>
+    <ClInclude Include="PopupAdjustHSV.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
@@ -879,5 +885,8 @@
     <Image Include="icon1.ico">
       <Filter>Resource files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

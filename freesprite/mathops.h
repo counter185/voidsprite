@@ -14,8 +14,11 @@ struct hsv {
     double v;       // a fraction between 0 and 1
 };
 
-//stolen code yay
-//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
+struct hsl {
+    double h;
+    double s;
+    double l;
+};
 
 
 void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_t colorDL, uint32_t colorDR);
@@ -23,13 +26,24 @@ void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t color
 
 std::string pathInProgramDirectory(std::string path);
 
+//stolen code yay
+//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
 hsv rgb2hsv(rgb in);
+rgb hsv2rgb(hsv in);
+
+//https://gist.github.com/ciembor/1494530
+hsl rgb2hsl(rgb c);
+rgb hsl2rgb(hsl c);
+
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
-rgb hsv2rgb(hsv in);
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
 uint32_t sdlcolorToUint32(SDL_Color c);
 uint32_t modAlpha(uint32_t color, uint8_t alpha);
+
+u32 hsvShift(u32 color, hsv shift);
+u32 hslShift(u32 color, hsl shift);
+u32 hslShiftPixelStudioCompat(u32 color, hsl shift);
 
 bool pointInBox(XY point, SDL_Rect rect);
 
@@ -88,7 +102,7 @@ inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
 {
     std::vector<T> ret;
     for (const auto& vec : vecs) {
-		ret.insert(ret.end(), vec.begin(), vec.end());
-	}
+        ret.insert(ret.end(), vec.begin(), vec.end());
+    }
     return ret;
 }

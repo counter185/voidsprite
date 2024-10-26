@@ -2437,7 +2437,13 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                 nlayer->name = "Pixel Studio Layer";
                 //std::cout << subJson.dump(4) << std::endl;
                 json actions = subJson["Actions"];
+                int actionIndex = subJson["Index"];
+                int nAction = 0;
                 for (json& action : actions) {
+                    if (nAction++ >= actionIndex) {
+                        break;
+                    }
+
                     bool invalid = action["Invalid"];
                     if (invalid) {
 						continue;
@@ -2463,13 +2469,18 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                         u16 y = dimensions.y - 1 - *(u16*)(positionsB64.c_str() + (p * 4 + 2));
                         positions.push_back(XY{ x,y });
                     }
-
+                    std::cout << action.dump(4) << std::endl;
                     switch (tool) {
                         //1px pencil
                         case 0:
+                        {
+                            json colorIndexes = action["ColorIndexes"];
+                            int colIndex = 0;
                             for (XY& p : positions) {
-                                nlayer->setPixel(p, colors[0]);
+                                nlayer->setPixel(p, colors[colorIndexes.size() > colIndex ? (int)colorIndexes[colIndex] : 0]);
+                                colIndex++;
                             }
+                        }
                             break;
                         //color picker, has no values at all attached to it
                         case 1:
@@ -2493,6 +2504,14 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                             for (XY& p : positions) {
                                 nlayer->setPixel(p, 0x00000000);
                             }
+                            break;
+                        //flip x
+                        case 13:
+                            nlayer->flipHorizontally();
+                            break;
+                        //flip y
+                        case 14:
+                            nlayer->flipVertically();
                             break;
                         //replace color
                         case 18:
@@ -2541,10 +2560,30 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                         }
                             break;
                         case 24:
-                            //adjust HSV,
+                            //adjust HSL,
                             //data is in `"Meta": "[-15660,0,0]",`
                             //hue: max is 32400
                             //saturation, min is -10000
+                        {
+                            std::cout << action.dump(4) << std::endl;
+                            std::string metaStr = action["Meta"];
+                            json meta = json::parse(metaStr);
+                            int hue = meta[0];
+                            int saturation = meta[1];
+                            int lightness = meta[2];
+                            hsl shift = {
+                                hue / 32400.0f * 180.0f,
+                                saturation / 10000.0f,
+                                lightness / 10000.0f
+                            };
+                            printf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
+                            u32* px32 = (u32*)nlayer->pixelData;
+                            for (u64 dataPtr = 0; dataPtr < nlayer->w * nlayer->h; dataPtr++) {
+                                px32[dataPtr] = hslShiftPixelStudioCompat(px32[dataPtr], shift);
+                            }
+                            //nlayer->shiftLayerHSL(shift);
+
+                        }
                             break;
                         default:
                             g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));

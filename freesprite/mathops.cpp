@@ -538,6 +538,86 @@ uint32_t modAlpha(uint32_t color, uint8_t alpha)
     return (color & 0x00FFFFFF) + (alpha << 24);
 }
 
+u32 hsvShift(u32 color, hsv shift)
+{
+    rgb colorRGB = { (float)((color & 0xFF0000) >> 16) / 255.0f, (float)((color & 0x00FF00) >> 8) / 255.0f, (float)(color & 0x0000FF) / 255.0f };
+    hsv colorHSV = rgb2hsv(colorRGB);
+    colorHSV.h += shift.h;
+    colorHSV.s += shift.s;
+    colorHSV.v += shift.v;
+    if (colorHSV.h > 360) { colorHSV.h -= 360; }
+    if (colorHSV.s > 1) { colorHSV.s = 1; }
+    if (colorHSV.v > 1) { colorHSV.v = 1; }
+    if (colorHSV.h < 0) { colorHSV.h += 360; }
+    if (colorHSV.s < 0) { colorHSV.s = 0; }
+    if (colorHSV.v < 0) { colorHSV.v = 0; }
+    rgb outRGB = hsv2rgb(colorHSV);
+    return PackRGBAtoARGB((uint8_t)(outRGB.r * 255), (uint8_t)(outRGB.g * 255), (uint8_t)(outRGB.b * 255), (color & 0xFF000000) >> 24);
+}
+
+u32 hslShift(u32 color, hsl shift)
+{
+    rgb colorRGB = { (float)((color & 0xFF0000) >> 16) / 255.0f, (float)((color & 0x00FF00) >> 8) / 255.0f, (float)(color & 0x0000FF) / 255.0f };
+    hsl colorHSL = rgb2hsl(colorRGB);
+    colorHSL.h += shift.h;
+    colorHSL.s += shift.s;
+    colorHSL.l += shift.l;
+    if (colorHSL.h > 360) { colorHSL.h -= 360; }
+    if (colorHSL.s > 1) { colorHSL.s = 1; }
+    if (colorHSL.l > 1) { colorHSL.l = 1; }
+    if (colorHSL.h < 0) { colorHSL.h += 360; }
+    if (colorHSL.s < 0) { colorHSL.s = 0; }
+    if (colorHSL.l < 0) { colorHSL.l = 0; }
+    rgb outRGB = hsl2rgb(colorHSL);
+    return PackRGBAtoARGB((uint8_t)(outRGB.r * 255), (uint8_t)(outRGB.g * 255), (uint8_t)(outRGB.b * 255), (color & 0xFF000000) >> 24);
+}
+
+u32 hslShiftPixelStudioCompat(u32 ccolor, hsl shift)
+{
+    rgb color = { (float)((ccolor & 0xFF0000) >> 16) / 255.0f, (float)((ccolor & 0x00FF00) >> 8) / 255.0f, (float)(ccolor & 0x0000FF) / 255.0f };
+    float hue = shift.h / 180.0f;
+    float saturation = shift.s;
+    float lightness = shift.l;
+    hsv nnum = rgb2hsv(color);
+    float num = nnum.h / 360;
+    float num2 = nnum.s;
+    float num3 = nnum.v;
+    num += hue / 2;
+    if (num > 1)
+    {
+        num -= 1;
+    }
+    else if (num < 0)
+    {
+        num += 1;
+    }
+    color = hsv2rgb(hsv{ num * 360, num2, num3 });
+    float num4 = 0.3f * color.r + 0.59f * color.g + 0.11f * color.b;
+    color.r = num4 + (color.r - num4) * (saturation + 1);
+    color.g = num4 + (color.g - num4) * (saturation + 1);
+    color.b = num4 + (color.b - num4) * (saturation + 1);
+    if (color.r < 0)
+    {
+        color.r = 0;
+    }
+    if (color.g < 0)
+    {
+        color.g = 0;
+    }
+    if (color.b < 0)
+    {
+        color.b = 0;
+    }
+    color.r += lightness;
+    color.g += lightness;
+    color.b += lightness;
+    color.r = dxmin(1, color.r);
+    color.g = dxmin(1, color.g);
+    color.b = dxmin(1, color.b);
+
+    return PackRGBAtoARGB((uint8_t)(color.r * 255), (uint8_t)(color.g * 255), (uint8_t)(color.b * 255), (ccolor & 0xFF000000) >> 24);
+}
+
 int ixmin(int a, int b) { return a > b ? b : a; }
 int ixmax(int a, int b) { return a > b ? a : b; }
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
@@ -656,4 +736,74 @@ SDL_Event convertTouchToMouseEvent(SDL_Event src)
         return src;
     }
     return ret;
+}
+
+hsl rgb2hsl(rgb c) {
+
+    hsl result;
+
+    double max = dxmax(dxmax(c.r, c.g), c.b);
+    double min = dxmin(dxmin(c.r, c.g), c.b);
+
+    result.h = result.s = result.l = (max + min) / 2;
+
+    if (max == min) {
+        result.h = result.s = 0; // achromatic
+    }
+    else {
+        double d = max - min;
+        result.s = (result.l > 0.5) ? d / (2 - max - min) : d / (max + min);
+
+        if (max == c.r) {
+            result.h = (c.g - c.b) / d + (c.g < c.b ? 6 : 0);
+        }
+        else if (max == c.g) {
+            result.h = (c.b - c.r) / d + 2;
+        }
+        else if (max == c.b) {
+            result.h = (c.r - c.g) / d + 4;
+        }
+
+        result.h /= 6;
+    }
+
+    return result;
+
+}
+
+//i have 0 idea what this even does
+double hue2rgb(double p, double q, double t) {
+
+    if (t < 0)
+        t += 1;
+    if (t > 1)
+        t -= 1;
+    if (t < 1. / 6)
+        return p + (q - p) * 6 * t;
+    if (t < 1. / 2)
+        return q;
+    if (t < 2. / 3)
+        return p + (q - p) * (2. / 3 - t) * 6;
+
+    return p;
+
+}
+
+rgb hsl2rgb(hsl c) {
+
+    rgb result;
+
+    if (0 == c.s) {
+        result.r = result.g = result.b = c.l; // achromatic
+    }
+    else {
+        float q = c.l < 0.5 ? c.l * (1 + c.s) : c.l + c.s - c.l * c.s;
+        float p = 2 * c.l - q;
+        result.r = hue2rgb(p, q, c.h + 1. / 3);
+        result.g = hue2rgb(p, q, c.h);
+        result.b = hue2rgb(p, q, c.h - 1. / 3);
+    }
+
+    return result;
+
 }

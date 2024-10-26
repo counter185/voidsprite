@@ -329,6 +329,28 @@ public:
 
 	void paintBucket(XY at, u32 color);
 
+	void shiftLayerHSV(hsv shift) {
+		if (isPalettized) {
+			return;
+		}
+		u32* px32 = (u32*)pixelData;
+		for (u64 dataPtr = 0; dataPtr < w * h; dataPtr++) {
+			px32[dataPtr] = hsvShift(px32[dataPtr], shift);
+		}
+		layerDirty = true;
+	}
+
+	void shiftLayerHSL(hsl shift) {
+		if (isPalettized) {
+			return;
+		}
+		u32* px32 = (u32*)pixelData;
+		for (u64 dataPtr = 0; dataPtr < w * h; dataPtr++) {
+			px32[dataPtr] = hslShift(px32[dataPtr], shift);
+		}
+		layerDirty = true;
+	}
+
 	virtual Layer* trim(SDL_Rect r);
 
 	//returns old pixel data
