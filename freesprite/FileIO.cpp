@@ -2515,8 +2515,8 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                         {
                             std::string metaString = action["Meta"];
                             json meta = json::parse(metaString);
-                            XY from = { meta["From"]["X"], dimensions.y - 1 - meta["From"]["Y"] };
-                            XY to = { meta["To"]["X"],  dimensions.y - 1 - meta["To"]["Y"] };
+                            XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                            XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
 
                             SDL_Rect rect = {
 								ixmin(from.x, to.x),
@@ -2576,8 +2576,8 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                             uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
                             Layer* nnlayer = readPNGFromMem(imageData, pixelsb64.size());
 
-                            XY rectFrom = { subsubJsonJ["Rect"]["From"]["X"], dimensions.y - 1 - subsubJsonJ["Rect"]["From"]["Y"] };
-                            XY rectTo = { subsubJsonJ["Rect"]["To"]["X"], dimensions.y - 1 - subsubJsonJ["Rect"]["To"]["Y"] };
+                            XY rectFrom = { subsubJsonJ["Rect"]["From"]["X"], dimensions.y - 1 - (int)subsubJsonJ["Rect"]["From"]["Y"] };
+                            XY rectTo = { subsubJsonJ["Rect"]["To"]["X"], dimensions.y - 1 - (int)subsubJsonJ["Rect"]["To"]["Y"] };
 
                             SDL_Rect dstRect = {
                                 ixmin(rectFrom.x, rectTo.x),
