@@ -535,7 +535,7 @@ int main(int argc, char** argv)
                     g_mouseY = evt.motion.y;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    //g_addNotification(Notification("WARNING", "<- the creature", 5000, the_creature));
+                    //g_addNotification(Notification(std::string("hi!!"), std::string("please leave review <3"), 5000, g_iconNotifTheCreature));
                     break;
             }
             g_gamepad->TakeEvent(evt);

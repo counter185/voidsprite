@@ -327,6 +327,8 @@ public:
 		layerDirty = true;
 	}
 
+	void paintBucket(XY at, u32 color);
+
 	virtual Layer* trim(SDL_Rect r);
 
 	//returns old pixel data

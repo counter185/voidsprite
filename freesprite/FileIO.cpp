@@ -2438,6 +2438,10 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                 //std::cout << subJson.dump(4) << std::endl;
                 json actions = subJson["Actions"];
                 for (json& action : actions) {
+                    bool invalid = action["Invalid"];
+                    if (invalid) {
+						continue;
+					}
                     int tool = action["Tool"];
 
                     std::string colorsB64 = base64::from_base64(std::string(action["Colors"]));
@@ -2467,17 +2471,93 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                                 nlayer->setPixel(p, colors[0]);
                             }
                             break;
+                        //color picker, has no values at all attached to it
+                        case 1:
+                            break;
                         //eraser
                         case 2:
+                        //"eraser pen"
+                        case 19:
                             for (XY& p : positions) {
                                 nlayer->setPixel(p, modAlpha(colors[0], 0));
                             }
                             break;
                         //paint bucket
                         case 3:
+                            for (XY& p : positions) {
+                                nlayer->paintBucket(p, colors[0]);
+                            }
+                            break;
+                        //erase selection
+                        case 6:
+                            for (XY& p : positions) {
+                                nlayer->setPixel(p, 0x00000000);
+                            }
+                            break;
+                        //replace color
+                        case 18:
+                            for (XY& p : positions) {
+                                nlayer->replaceColor(nlayer->getPixelAt(p), colors[0]);
+                            }
+                            break;
+                        //gradient
+                        case 20:
+                        {
+                            std::string subsubJson = action["Meta"];
+                            json subsubJsonJ = json::parse(subsubJson);
+                            //std::cout << subsubJsonJ.dump(4) << std::endl;
+                            std::string pixels = subsubJsonJ["Pixels"];
+                            std::string pixelsb64 = base64::from_base64(pixels);
+                            uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
+                            Layer* nnlayer = readPNGFromMem(imageData, pixelsb64.size());
+
+                            XY rectFrom = { subsubJsonJ["Rect"]["From"]["X"], subsubJsonJ["Rect"]["From"]["Y"] };
+                            XY rectTo = { subsubJsonJ["Rect"]["To"]["X"], subsubJsonJ["Rect"]["To"]["Y"] };
+
+                            SDL_Rect dstRect = {
+                                ixmin(rectFrom.x, rectTo.x),
+                                ixmin(dimensions.y - 1 - rectFrom.y, dimensions.y - 1 - rectTo.y),
+                                abs(rectFrom.x - rectTo.x),
+                                abs(rectFrom.y - rectTo.y)
+                            };
+
+                            XY rectSourceFrom = { subsubJsonJ["RectSource"]["From"]["X"], subsubJsonJ["RectSource"]["From"]["Y"] };
+                            XY rectSourceTo = { subsubJsonJ["RectSource"]["To"]["X"], subsubJsonJ["RectSource"]["To"]["Y"] };
+
+                            SDL_Rect srcRect = {
+								ixmin(rectSourceFrom.x, rectSourceTo.x),
+								ixmin(rectSourceFrom.y, rectSourceTo.y),
+								abs(rectSourceFrom.x - rectSourceTo.x),
+								abs(rectSourceFrom.y - rectSourceTo.y)
+							};
+                            if (srcRect.w == 0 || srcRect.h == 0) {
+								srcRect.w = nnlayer->w;
+								srcRect.h = nnlayer->h;
+							}
+
+                            nlayer->blit(nnlayer, { dstRect.x, dstRect.y }, srcRect);
+
+                            delete nnlayer;
+                        }
+                            break;
+                        case 24:
+                            //adjust HSV,
+                            //data is in `"Meta": "[-15660,0,0]",`
+                            //hue: max is 32400
+                            //saturation, min is -10000
+                            break;
                         default:
                             g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
                             printf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
+                            printf("\trelevant position data:\n");
+                            for (XY& p : positions) {
+                                printf("\t%i, %i\n", p.x, p.y);
+                            }
+                            printf("\trelevant color data:\n");
+                            for (u32& c : colors) {
+                                printf("\t%x\n", c);
+                            }
+                            std::cout << action.dump(4) << std::endl;
                             break;
                     }
                 }
