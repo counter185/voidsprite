@@ -15,12 +15,17 @@ public:
     void takeInput(SDL_Event evt) override {
         DrawableManager::processHoverEventInMultiple({ wxsManager }, evt, getPopupOrigin());
         if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt, getPopupOrigin())) {
-			defaultInputAction(evt);
-		}
+            defaultInputAction(evt);
+        }
     }
 
     void render() override {
         renderDrawables();
+    }
+
+    void setSize(XY size) {
+        wxWidth = size.x;
+        wxHeight = size.y;
     }
 
 protected:

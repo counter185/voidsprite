@@ -10,10 +10,10 @@ public:
     std::string title = "";
     std::string text = "";
 
-    PopupMessageBox(std::string tt, std::string tx) {
+    PopupMessageBox(std::string tt, std::string tx, XY size = {600, 200}) {
         this->title = tt;
         this->text = tx;
-        wxHeight = 200;
+        setSize(size);
         UIButton* nbutton = new UIButton();
         nbutton->text = "OK";
         nbutton->position = XY{ wxWidth - 130, wxHeight - 40 };

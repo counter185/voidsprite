@@ -12,6 +12,7 @@
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "LayerPalettized.h"
+#include "PopupMessageBox.h"
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
@@ -2420,6 +2421,8 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
         int activeFrameIndex = clip0["ActiveFrameIndex"].get<int>();
         printf("Active Frame Index: %i\n", activeFrameIndex);
 
+        bool showWarning = false;
+
         json frames = clip0["Frames"][0]["Layers"];
         std::vector<Layer*> layers;
         for (json& frame : frames) {
@@ -2469,7 +2472,9 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                         u16 y = dimensions.y - 1 - *(u16*)(positionsB64.c_str() + (p * 4 + 2));
                         positions.push_back(XY{ x,y });
                     }
-                    std::cout << action.dump(4) << std::endl;
+#if _DEBUG
+                    //std::cout << action.dump(4) << std::endl;
+#endif
                     switch (tool) {
                         //1px pencil
                         case 0:
@@ -2505,6 +2510,47 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                                 nlayer->setPixel(p, 0x00000000);
                             }
                             break;
+                        //move
+                        case 10:
+                        {
+                            std::string metaString = action["Meta"];
+                            json meta = json::parse(metaString);
+                            XY from = { meta["From"]["X"], dimensions.y - 1 - meta["From"]["Y"] };
+                            XY to = { meta["To"]["X"],  dimensions.y - 1 - meta["To"]["Y"] };
+
+                            SDL_Rect rect = {
+								ixmin(from.x, to.x),
+								ixmin(from.y, to.y),
+								abs(from.x - to.x) + 1,
+								abs(from.y - to.y) + 1
+							};
+
+                            XY blitAt = positions[1];
+                            u32* pixelData = (u32*)malloc(rect.w * rect.h * 4);
+                            for (int y = 0; y < rect.h; y++) {
+								for (int x = 0; x < rect.w; x++) {
+									pixelData[y * rect.w + x] = nlayer->getPixelAt({ rect.x + x, rect.y + y });
+								}
+							}
+
+                            for (int y = 0; y < rect.h; y++) {
+                                for (int x = 0; x < rect.w; x++) {
+                                    nlayer->setPixel({ rect.x + x, rect.y + y }, 0);
+                                }
+                            }
+
+                            for (int y = 0; y < rect.h; y++) {
+                                for (int x = 0; x < rect.w; x++) {
+                                    u32 srcColor = pixelData[y * rect.w + x];
+                                    if (srcColor >> 24 != 0) {
+                                        nlayer->setPixel({ blitAt.x + x, blitAt.y + y }, srcColor);
+                                    }
+                                }
+                            }
+                            showWarning = true;
+                            free(pixelData);
+                        }
+                            break;
                         //flip x
                         case 13:
                             nlayer->flipHorizontally();
@@ -2519,7 +2565,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                                 nlayer->replaceColor(nlayer->getPixelAt(p), colors[0]);
                             }
                             break;
-                        //gradient
+                        //image paste
                         case 20:
                         {
                             std::string subsubJson = action["Meta"];
@@ -2530,12 +2576,12 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                             uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
                             Layer* nnlayer = readPNGFromMem(imageData, pixelsb64.size());
 
-                            XY rectFrom = { subsubJsonJ["Rect"]["From"]["X"], subsubJsonJ["Rect"]["From"]["Y"] };
-                            XY rectTo = { subsubJsonJ["Rect"]["To"]["X"], subsubJsonJ["Rect"]["To"]["Y"] };
+                            XY rectFrom = { subsubJsonJ["Rect"]["From"]["X"], dimensions.y - 1 - subsubJsonJ["Rect"]["From"]["Y"] };
+                            XY rectTo = { subsubJsonJ["Rect"]["To"]["X"], dimensions.y - 1 - subsubJsonJ["Rect"]["To"]["Y"] };
 
                             SDL_Rect dstRect = {
                                 ixmin(rectFrom.x, rectTo.x),
-                                ixmin(dimensions.y - 1 - rectFrom.y, dimensions.y - 1 - rectTo.y),
+                                ixmin(rectFrom.y, rectTo.y),
                                 abs(rectFrom.x - rectTo.x),
                                 abs(rectFrom.y - rectTo.y)
                             };
@@ -2555,7 +2601,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
 							}
 
                             nlayer->blit(nnlayer, { dstRect.x, dstRect.y }, srcRect);
-
+                            showWarning = true;
                             delete nnlayer;
                         }
                             break;
@@ -2597,6 +2643,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                                 printf("\t%x\n", c);
                             }
                             std::cout << action.dump(4) << std::endl;
+                            showWarning = true;
                             break;
                     }
                 }
@@ -2609,6 +2656,18 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
             fclose(tempf);*/
         }
         MainEditor* ret = new MainEditor(layers);
+        if (showWarning) {
+            PopupMessageBox* warningPopup = new PopupMessageBox("Warning", 
+                "This is a file in a Pixel Studio Pro format.\n"
+                "This format requires the whole undo history to be reenacted,\nso importing may not work directly.\n"
+                "If anything looks incorrect, we suggest you do the following: \n\n"
+                "  1. Load the file with Pixel Studio Pro\n"
+                "  2. Open the Functions menu [F key]\n"
+                "  3. Click \"Resize canvas\"\n"
+                "  4. Click \"Resize\" without changing any values.\n"
+                "  5. Export this file again and load it with voidsprite.", {700, 290});
+            g_addPopup(warningPopup);
+        }
         return ret;
 
     }
