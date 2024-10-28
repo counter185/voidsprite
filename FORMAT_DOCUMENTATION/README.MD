@@ -95,20 +95,20 @@ For each layer:
 `extendedDataHeader` should be the string `/VOIDSN.META/`
 
 #### Extended data keys:
-`tile.dim.x`: Width of the tile grid. 0 if disabled.
-`tile.dim.y`: Height of the tile grid. 0 if disabled.
-`tile.dim.padrx`: Right padding of the tile grid. 0 if disabled.
-`tile.dim.padby`: Bottom padding of the tile grid. 0 if disabled.
-`sym.enabled`: Formatted string signifying what kind of symmetry is currently enabled. The format is `"XY"`, where both characters can be either `'0'` or `'1'`, for example `"01"` will mean that X symmetry is disabled and Y symmetry is enabled.
-`sym.x`: Current X symmetry position. Can be placed at 0.5 subpixel positions, so needs to be divided by 2 when reading.
-`sym.y`: Current Y symmetry position. Can be placed at 0.5 subpixel positions, so needs to be divided by 2 when reading.
-`layer.selected`: Index of the current active layer.
-`layer.visibility`: A string with a `'0'` or `'1'` character for every layer. `'0'` means the layer is hidden, `'1'` means it is not. 
-`layer.opacity`: A formatted string in the format: `"<Layer 1 opacity>;<Layer 2 opacity>;<Layer 3 opacity>;..."`. The layer opacity is a number from 0 to 255.
-`comments`: Comment data in the following format:
-`(Num. comments);` then for every comment: `(Pos. X);(Pos. Y);(Comment string);`
-`guidelines`: Guidelines data in the following format:
-`(Num. guidelines);` then for every guideline: `(Orientation)-(Position);`, where orientation is either `v` or `h` indicating vertical or horizontal, and `Position` is its position on the canvas. Like symmetry lines, the position needs to be divided by 2 when reading.
+`tile.dim.x`: Width of the tile grid. 0 if disabled.  
+`tile.dim.y`: Height of the tile grid. 0 if disabled.  
+`tile.dim.padrx`: Right padding of the tile grid. 0 if disabled.  
+`tile.dim.padby`: Bottom padding of the tile grid. 0 if disabled.  
+`sym.enabled`: Formatted string signifying what kind of symmetry is currently enabled. The format is `"XY"`, where both characters can be either `'0'` or `'1'`, for example `"01"` will mean that X symmetry is disabled and Y symmetry is enabled.  
+`sym.x`: Current X symmetry position. Can be placed at 0.5 subpixel positions, so needs to be divided by 2 when reading.  
+`sym.y`: Current Y symmetry position. Can be placed at 0.5 subpixel positions, so needs to be divided by 2 when reading.  
+`layer.selected`: Index of the current active layer.  
+`layer.visibility`: A string with a `'0'` or `'1'` character for every layer. `'0'` means the layer is hidden, `'1'` means it is not.  
+`layer.opacity`: A formatted string in the format: `"<Layer 1 opacity>;<Layer 2 opacity>;<Layer 3 opacity>;..."`. The layer opacity is a number from 0 to 255.  
+`comments`: Comment data in the following format:  
+`(Num. comments);` then for every comment: `(Pos. X);(Pos. Y);(Comment string);`  
+`guidelines`: Guidelines data in the following format:  
+`(Num. guidelines);` then for every guideline: `(Orientation)-(Position);`, where orientation is either `v` or `h` indicating vertical or horizontal, and `Position` is its position on the canvas. Like symmetry lines, the position needs to be divided by 2 when reading.  
 
 ### voidsprite Session v4 (.voidsnv4)
 
