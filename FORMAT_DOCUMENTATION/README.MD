@@ -14,6 +14,7 @@ The first byte will always be the version number.
 | :--------: | :---------: | :--- |
 | 1 | uint8_t | `versionNumber` |
 
+> All strings use UTF-8, but only data input by the user (layer names, comments) will contain UTF-8 characters.
 
 ### voidsprite Session v1 (.voidsnv1)
 
