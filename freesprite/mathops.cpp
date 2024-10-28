@@ -667,6 +667,22 @@ uint32_t RGB565toARGB8888(uint16_t rgb565)
     return 0;
 }
 
+uint32_t RGB555toARGB8888(uint16_t rgb555) 
+{
+    uint8_t r = ((rgb555 >> 10) & 0b11111) * 0x8;
+	uint8_t g = ((rgb555 >> 5) & 0b11111) * 0x8;
+	uint8_t b = (rgb555 & 0b11111) * 0x8;
+	return 0xFF000000 + (r << 16) + (g << 8) + b;
+}
+
+uint32_t BGR555toARGB8888(uint16_t bgr555)
+{
+    uint8_t b = ((bgr555 >> 10) & 0b11111) * 0x8;
+    uint8_t g = ((bgr555 >> 5) & 0b11111) * 0x8;
+    uint8_t r = (bgr555 & 0b11111) * 0x8;
+    return 0xFF000000 + (r << 16) + (g << 8) + b;
+}
+
 uint32_t PackRGBAtoARGB(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     return (a << 24) + (r << 16) + (g << 8) + b;

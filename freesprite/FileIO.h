@@ -44,6 +44,7 @@ Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
+Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
@@ -341,6 +342,7 @@ inline void g_setupIO() {
             return c[0] == 'P' && (c[1] == '3' || c[1] == '6');
         }));
     g_fileImporters.push_back(FileImporter::flatImporter("Mario Paint save file SRM", ".srm", &readMarioPaintSRM, NULL, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Nintendo DS rom (dump banner)", ".nds", &readNDSBanner, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com SPK file", ".spk", &readXComSPK, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com BDY file", ".bdy", &readXComBDY, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com SCR file", ".scr", &readXComSCR, NULL, FORMAT_PALETTIZED,

@@ -2088,6 +2088,67 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        u32 iconOffsetAddress = 0x68;
+        fseek(f, iconOffsetAddress, SEEK_SET);
+        u32 iconOffset = 0;
+        //24-byte big endian
+        fread(&iconOffset, 4, 1, f);
+        //iconOffset = BEtoLE32(iconOffset);
+
+        printf("[NDS] icon offset: %x\n", iconOffset);
+        u32 bitmapStart = 0x20 + iconOffset;
+
+        u8* pixelData = (u8*)malloc(32 * 32);
+
+        fseek(f, bitmapStart, SEEK_SET);
+        //u32* pxd = (u32*)ret->pixelData;
+        for (int x = 0; x < 0x200; x++) {
+            u8 pixel;
+			fread(&pixel, 1, 1, f);
+            pixelData[x] = pixel;
+        }
+
+        std::vector<u32> colorPalette;
+        fseek(f, iconOffset + 0x220, SEEK_SET);
+        for (int x = 0; x < 16; x++) {
+            u16 color;
+            fread(&color, 2, 1, f);
+            u32 color32 = BGR555toARGB8888(color);
+            colorPalette.push_back(color32);
+        }
+        colorPalette[0] &= 0x00FFFFFF;
+
+        LayerPalettized* ret = new LayerPalettized(32, 32);
+        ret->palette = colorPalette;
+        ret->name = "NDS Banner Layer";
+
+        for (int chunk = 0; chunk < 16; chunk++) {
+            for (int pixelIndex = 0; pixelIndex < 32; pixelIndex++) {
+                u8 pixel = pixelData[chunk * 32 + pixelIndex];
+                XY position = {
+                    ((chunk * 8) % 32) + ((pixelIndex * 2) % 8),
+                    (chunk / 4) * 8 + (pixelIndex / 4)
+                };
+
+                u8 pxLow = pixel & 0xF;
+                u8 pxHigh = (pixel >> 4) & 0xF;
+
+                ret->setPixel(position, pxLow);
+                ret->setPixel({ position.x + 1, position.y }, pxHigh);
+            }
+        }
+
+        free(pixelData);
+        fclose(f);
+        return ret;
+    }
+    return NULL;
+}
+
 Layer* readGIF(PlatformNativePathString path, u64 seek)
 {
     u8 IMAGE_SEPERATOR_MAGIC = 0x2C;
