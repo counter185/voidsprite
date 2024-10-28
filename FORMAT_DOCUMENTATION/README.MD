@@ -117,13 +117,13 @@ For each layer:
 `versionNumber` will be equal to `0x04`  
 VOIDSNv4 is identical to v3, but adds support for palettized images.  
 The image is palettized if the extended data key `palette.enabled` == `"1"`  
-The palette colors can then be found in the ext. data key `palette.colors`, which is a formatted string:
-`"<num colors>;<HEX COLOR 1>;<HEX COLOR 2>;<HEX COLOR 3>;..."`
+The palette colors can then be found in the ext. data key `palette.colors`, which is a formatted string:  
+`"<num colors>;<HEX COLOR 1>;<HEX COLOR 2>;<HEX COLOR 3>;..."`  
 `pixelData` becomes an array of int32 indexes. An index can be `-1`, meaning it's fully transparent.
 
 ### voidsprite Session v5 (.voidsnv5)
 
-`versionNumber` will be equal to `0x05`
+`versionNumber` will be equal to `0x05`  
 VOIDSNv5 is identical to v4, but changes the structure of the individual layers to accomodate for pixel data compression.  
 The pixel data gets compressed with zlib.
 
