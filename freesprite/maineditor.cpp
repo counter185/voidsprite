@@ -37,11 +37,11 @@ SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
         tilePos.y * tileDim.y
     };
     return SDL_Rect{
-		origin.x,
-		origin.y,
+        origin.x,
+        origin.y,
         tileDim.x - ixmax(0,tileGridPaddingBottomRight.x),
         tileDim.y - ixmax(0,tileGridPaddingBottomRight.y)
-	};
+    };
 }
 
 XY MainEditor::getPaddedTileDimensions()
@@ -390,8 +390,8 @@ void MainEditor::drawTileGrid()
         while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
             dy += tileDimensions.y * canvas.scale;
             if (tileGridPaddingBottomRight.y > 0) {
-				SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - tileGridPaddingBottomRight.y * canvas.scale, canvasRenderRect.x + canvasRenderRect.w, dy - tileGridPaddingBottomRight.y * canvas.scale);
-			}
+                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - tileGridPaddingBottomRight.y * canvas.scale, canvasRenderRect.x + canvasRenderRect.w, dy - tileGridPaddingBottomRight.y * canvas.scale);
+            }
         }
     }
 }
@@ -591,8 +591,8 @@ void MainEditor::setUpWidgets()
                             [](MainEditor* editor) {
                                 MainEditorPalettized* newEditor = editor->toPalettizedSession();
                                 if (newEditor != NULL) {
-									g_addScreen(newEditor);
-								}
+                                    g_addScreen(newEditor);
+                                }
                             }
                         }
                     },
@@ -750,6 +750,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDLK_o, { "Outline current layer",
+                            [](MainEditor* editor) {
+                                editor->layer_outline(false);
+                            }
+                        }
+                    }
                 },
                 g_iconNavbarTabLayer
             }
@@ -1644,7 +1650,7 @@ uint32_t MainEditor::getActiveColor()
 void MainEditor::setActiveBrush(BaseBrush* b)
 {
     currentBrush = b;
-	brushPicker->updateActiveBrushButton(b);
+    brushPicker->updateActiveBrushButton(b);
 }
 
 void MainEditor::moveLayerUp(int index) {
@@ -1926,8 +1932,8 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
 
             std::vector<uint32_t> palette;
             for (auto& c : usedColors) {
-				palette.push_back(c.first);
-			}
+                palette.push_back(c.first);
+            }
 
             std::vector<LayerPalettized*> outlayers;
             for (Layer*& l : layers) {
@@ -1940,7 +1946,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
                 uint32_t* outpx = (uint32_t*)newLayer->pixelData;
                 for (uint64_t p = 0; p < l->w * l->h; p++) {
                     outpx[p] = std::find(palette.begin(), palette.end(), ppx[p]) - palette.begin();
-				}
+                }
                 outlayers.push_back(newLayer);
             }
             MainEditorPalettized* ret = new MainEditorPalettized(outlayers);
@@ -2040,4 +2046,50 @@ void MainEditor::layer_hsvShift(hsv shift)
 {
     commitStateToCurrentLayer();
     getCurrentLayer()->shiftLayerHSV(shift);
+}
+
+void MainEditor::layer_outline(bool wholeImage)
+{
+    
+    Layer* l = getCurrentLayer();
+    uint8_t* placePixelData = (uint8_t*)malloc(l->w * l->h);
+    if (placePixelData == NULL) {
+		g_addNotification(ErrorNotification("Error", "malloc failed"));
+		return;
+	}
+    commitStateToCurrentLayer();
+
+    for (int y = 0; y < l->h; y++) {
+        for (int x = 0; x < l->w; x++) {
+            ARRAY2DPOINT(placePixelData, x, y, l->w) = 
+                wholeImage ? 0
+                : ((l->isPalettized ? (l->getPixelAt({ x,y }) == -1) : (l->getPixelAt({ x,y }) & 0xFF000000) == 0) ? 0 : 1);
+        }
+    }
+
+    XY neighbors[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+
+    for (int y = 0; y < l->h; y++) {
+        for (int x = 0; x < l->w; x++) {
+            XY newPos = { x,y };
+            if (ARRAY2DPOINT(placePixelData, newPos.x, newPos.y, l->w) == 1) {
+                continue;
+            }
+
+            int neighborCount = 0;
+            for (XY& neighbor : neighbors) {
+                XY checkPos = xyAdd(newPos, neighbor);
+                if (pointInBox(checkPos, { 0,0,l->w,l->h })) {
+                    if (ARRAY2DPOINT(placePixelData, checkPos.x, checkPos.y, l->w)) {
+                        neighborCount++;
+                    }
+                }
+            }
+            if (neighborCount > 0 && neighborCount != 4) {
+				l->setPixel(newPos, getActiveColor());
+			}
+        }
+    }
+
+    free(placePixelData);
 }

@@ -65,6 +65,8 @@ extern "C" {
 #define VOIDSPRITE_ASSETS_PATH ""
 #endif
 
+#define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]
+
 #define FONT_PATH VOIDSPRITE_ASSETS_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_JP VOIDSPRITE_ASSETS_PATH "appfontjp-NotoSansJP-VariableFont_wght.ttf"
 

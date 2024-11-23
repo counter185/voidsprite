@@ -189,6 +189,7 @@ public:
     void layer_setAllAlpha255();
     void layer_replaceColor(uint32_t from, uint32_t to);
     void layer_hsvShift(hsv shift);
+    void layer_outline(bool wholeImage = false);
     virtual Layer* flattenImage();
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void resizeAllLayersFromCommand(XY size, bool byTile = false);
