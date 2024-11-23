@@ -406,6 +406,12 @@ void MainEditorPalettized::setUpWidgets()
                                 editor->layer_promptRename();
                             }
                         }
+                    },
+                    {SDLK_o, { "Outline current layer",
+                            [](MainEditor* editor) {
+                                editor->layer_outline(false);
+                            }
+                        }
                     }
                 },
                 g_iconNavbarTabLayer
