@@ -111,7 +111,7 @@ jobs:
         cache-key: flatpak-builder-${{ github.sha }}
         
   build-mac-x64:
-    runs-on: macos-12
+    runs-on: macos-13
 
     steps:
     - uses: actions/checkout@v4
