@@ -4390,6 +4390,8 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
         basic_info.uses_original_profile = JXL_FALSE;
         JxlEncoderSetBasicInfo(encoder.get(), &basic_info);
 
+        JxlEncoderSetFrameDistance(frame_settings, 0);
+
         // Set the pixel data format.
         JxlPixelFormat pixel_format = { 4, JXL_TYPE_UINT8, JXL_LITTLE_ENDIAN, 0 }; // RGBA
 
