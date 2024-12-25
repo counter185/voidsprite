@@ -73,7 +73,10 @@ jobs:
       run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -y && sudo apt-get install g++-13
 
     - name: install devlibs
-      run: sudo apt-get install -y python3 python3-pip zlib1g-dev libpng-dev libpugixml-dev libjxl-tools ninja-build python3-distutils python3-pkg-resources
+      run: sudo apt-get install -y python3 python3-pip zlib1g-dev libpng-dev libhwy-dev libpugixml-dev ninja-build python3-distutils python3-pkg-resources
+
+    - name: manually install jxl
+      run: wget https://github.com/libjxl/libjxl/releases/download/v0.11.1/jxl-debs-amd64-ubuntu-22.04-v0.11.1.tar.gz && tar -xvzf jxl-debs-amd64-ubuntu-22.04-v0.11.1.tar.gz && sudo dpkg -i libjxl_0.11.1_amd64.deb && sudo dpkg -i libjxl-dev_0.11.1_amd64.deb
 
     - name: install sdl2 build deps
       run: |
