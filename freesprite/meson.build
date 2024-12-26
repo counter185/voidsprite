@@ -28,10 +28,13 @@ sdl2_dep = dependency('sdl2', version: '>=2.0.22', fallback: ['sdl2', 'sdl2_dep'
 sdl2_ttf_dep = dependency('SDL2_ttf', version: '>=2.0.18', fallback: ['sdl2_ttf', 'sdl2_ttf_dep'], static: get_option('portable'))
 sdl2_image_dep = dependency('SDL2_image', version: '>=2.6.0', fallback: ['sdl2_image', 'sdl2_image_dep'], static: get_option('portable'))
 
+libjxl_dep = dependency('libjxl')
+
 dependencies = [
   thread_dep,
   zlib_dep,
   libpng_dep,
+  libjxl_dep,
   liblcf_dep,
   pugixml_dep,
   libtga_dep,

@@ -285,8 +285,15 @@ void MainEditor::DrawBackground()
         for (int x = 40 + (bgtimer % 5000 / 5000.0 * 60); x < g_windowW + lineX; x += 60) {
             SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40);
             SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
+            SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40/2);
+            SDL_RenderDrawLine(g_rd, x - 1, 0, x - lineX - 1, g_windowH);
+            SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40/3);
+            SDL_RenderDrawLine(g_rd, x - 2, 0, x - lineX - 2, g_windowH);
+
             SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d);
             SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX / 4 * 6, g_windowH);
+            SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d/2);
+            SDL_RenderDrawLine(g_rd, g_windowW - x - 1, 0, g_windowW - x + lineX / 4 * 6 - 1, g_windowH);
         }
     }
     else if (g_config.animatedBackground == 2 || g_config.animatedBackground == 4) {

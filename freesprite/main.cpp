@@ -247,7 +247,7 @@ int main(int argc, char** argv)
 #define IMG_INIT_AVIF 0
 #define IMG_INIT_JXL 0
 #endif
-    IMG_Init(IMG_INIT_AVIF | IMG_INIT_JPG | IMG_INIT_JXL | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
+    IMG_Init(-1);
     g_wd = SDL_CreateWindow("void\xE2\x97\x86sprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
     g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | (g_config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
     platformInit();

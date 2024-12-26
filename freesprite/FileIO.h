@@ -46,6 +46,7 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
+Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
@@ -75,6 +76,7 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data);
 bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
+bool writeJpegXL(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
@@ -245,7 +247,8 @@ inline void g_setupIO() {
         *exAnymapPGM,
         *exAnymapPPM,
         *exXBM,
-        *exSR8
+        *exSR8,
+        *exJXL
         ;
 
     g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -256,6 +259,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", &writePixelStudioPSP) );
 
     g_fileExporters.push_back( exPNG = FileExporter::flatExporter("PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB) );
     g_fileExporters.push_back( exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exBMP = FileExporter::flatExporter("BMP (EasyBMP)", ".bmp", &writeBMP) );
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
@@ -284,6 +288,7 @@ inline void g_setupIO() {
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG (libpng)", ".png", &readPNG, exPNG));
+    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL (libjxl)", ".jxl", &readJpegXL, exJXL));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP (EasyBMP)", ".bmp", &readBMP, exBMP));
     //g_fileImporters.push_back(FileImporter::flatImporter("GIF", ".gif", &readGIF, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM (EasyBMP)", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,

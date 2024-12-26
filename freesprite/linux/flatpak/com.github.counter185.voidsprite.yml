@@ -65,6 +65,18 @@ modules:
       - /lib/cmake
       - /share
 
+  - name: libjxl
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/libjxl/libjxl.git
+        tag: 'v0.11.1'
+        commit: 794a5dcf0d54f9f0b20d288a12e87afb91d20dfc
+        x-checker-data:
+          is-main-source: true
+          type: git
+          tag-pattern: ^v([\d.]+)$
+
   - name: voidsprite
     buildsystem: meson
     sources:
