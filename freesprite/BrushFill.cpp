@@ -1,5 +1,6 @@
 #include "BrushFill.h"
 #include "maineditor.h"
+#include <algorithm>
 
 bool BrushFill::closedListContains(XY a)
 {
@@ -78,7 +79,9 @@ void BrushFill::rightClickPress(MainEditor* editor, XY pos)
 void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
 
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
-    if (editor != lastEditor || !xyEqual(lastMouseMotionPos, previewLastPosition)) {
+    if ((editor != lastEditor || !xyEqual(lastMouseMotionPos, previewLastPosition))
+        && std::find_if(previewClosedList.begin(), previewClosedList.end(), [this](XY a){ return xyEqual(a, lastMouseMotionPos); })
+            == previewClosedList.end()) {
         lastEditor = editor;
         previewLastPosition = lastMouseMotionPos;
         previewSearchingColor = editor->getCurrentLayer()->getPixelAt(previewLastPosition);
