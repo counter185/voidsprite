@@ -967,17 +967,75 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
         }
         //according to game decomps, magicNumber must == 1 or else it's considered the wrong format
 
+        fseek(texfile, 4, SEEK_SET);
+        uint8_t gameIDMaybe;
+        fread(&gameIDMaybe, 1, 1, texfile);
+
         fseek(texfile, 8, SEEK_SET);
         uint8_t formatType;
         fread(&formatType, 1, 1, texfile);
 
+        fseek(texfile, 0x2c, SEEK_SET);
+        u32 r2dataStart;
+        fread(&r2dataStart, 4, 1, texfile);
 
-        char ddsheader[4];
-        fseek(texfile, 0x34, SEEK_SET);
-        fread(&ddsheader, 4, 1, texfile);
-        if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
-            fclose(texfile);
-            return readDDS(path, 0x34);
+        u8 compressionMethod;
+        fseek(texfile, 0x0C, SEEK_SET);
+        fread(&compressionMethod, 1, 1, texfile);
+
+        u16 imgW, imgH;
+        fseek(texfile, 0x10, SEEK_SET);
+        fread(&imgW, 2, 1, texfile);
+        fread(&imgH, 2, 1, texfile);
+
+        if (gameIDMaybe == 0x0a) {
+            //only for runner2
+            char ddsheader[4];
+            fseek(texfile, r2dataStart, SEEK_SET);
+            fread(&ddsheader, 4, 1, texfile);
+            printf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
+
+            if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
+                printf("[AETEX] DDS found\n");
+                fclose(texfile);
+                return readDDS(path, 0x34);
+            }
+            else {
+                fseek(texfile, r2dataStart, SEEK_SET);
+                Layer* ret = NULL;
+
+                if (compressionMethod == 0x81) {
+                    uint8_t* rawData = (uint8_t*)malloc(filesize - r2dataStart);
+                    fread(rawData, filesize - r2dataStart, 1, texfile);
+                    SDL_RWops* tgarw =
+                        SDL_RWFromMem(rawData, filesize - r2dataStart);
+                    SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
+                    SDL_RWclose(tgarw);
+                    if (tgasrf != NULL) {
+                        ret = new Layer(tgasrf);
+                        ret->name = "AETEX TGA Layer";
+                    }
+                    free(rawData);
+                }
+                else if (compressionMethod == 0x8B) {
+                    ret = new Layer(imgW, imgH);
+                    ret->name = "AETEX DXT1 Layer";
+                    fseek(texfile, r2dataStart, SEEK_SET);
+                    DeXT1(ret, imgW, imgH, texfile);
+                }
+                else if (compressionMethod == 0x8C) {
+                    ret = new Layer(imgW, imgH);
+                    ret->name = "AETEX DXT2/3 Layer";
+                    fseek(texfile, r2dataStart, SEEK_SET);
+                    DeXT23(ret, imgW, imgH, texfile);
+                }
+                else {
+                    g_addNotification(ErrorNotification("AETEX error", std::format("Compression method {} unsupported", compressionMethod)));
+                }
+                fclose(texfile);
+                
+                return ret;
+            }
         }
         else {
             if (formatType == 0x80) {
@@ -1038,7 +1096,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
                 SDL_RWclose(tgarw);
                 free(tgaData);
-                return new Layer(tgasrf);
+                return tgasrf == NULL ? NULL : new Layer(tgasrf);
             }
         }
     }

@@ -301,8 +301,8 @@ void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEac
 
 XY statLineEndpoint(XY p1, XY p2, double percent) {
     if (percent != 1.0 && percent >= 0.0 && percent < 1.0) {
-        p2.x = p1.x + (p2.x - p1.x) * percent;
-        p2.y = p1.y + (p2.y - p1.y) * percent;
+        p2.x = p1.x + round((p2.x - p1.x) * percent);
+        p2.y = p1.y + round((p2.y - p1.y) * percent);
     }
     return p2;
 }

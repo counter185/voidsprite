@@ -108,3 +108,40 @@ inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
     }
     return ret;
 }
+
+class Bitblock {
+private:
+    u8* data;
+    u64 size;
+    u64 sizeBytes;
+public:
+    Bitblock(u64 size) {
+        this->size = size;
+        this->sizeBytes = (u64)ceill(size / 8.0);
+        data = (u8*)malloc(sizeBytes);
+        if (data == NULL) {
+            throw std::bad_alloc();
+        }
+    }
+    ~Bitblock() { free(data); }
+    void set(u64 index, bool value) {
+        u64 byteIndex = index / 8;
+        u32 bitIndex = index % 8;
+        u8 mask = 1 << bitIndex;
+        if (value) {
+            data[byteIndex] |= mask;
+        } else {
+            data[byteIndex] &= ~mask;
+        }
+    }
+    bool get(u64 index) {
+        if (size <= index) {
+            throw std::out_of_range("index out of range");
+        }
+        u64 byteIndex = index / 8;
+        u32 bitIndex = index % 8;
+        u8 mask = 1 << bitIndex;
+        return (data[byteIndex] & mask) != 0;
+    }
+    void setAll(bool value) { memset(data, value ? 0xFF : 0x00, sizeBytes); }
+};
