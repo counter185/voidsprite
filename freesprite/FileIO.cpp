@@ -59,6 +59,18 @@ enum VTFFORMAT
     IMAGE_FORMAT_UVLX8888
 };
 
+
+
+void detile(Layer* ret, XY tileSize) {
+
+    Layer* t = new Layer(ret->w, ret->h);
+    memcpy(t->pixelData, ret->pixelData, 4 * t->w * t->h);
+    //t->blitTile(ret, { 0,1 }, { 1,0 }, tileSize);
+    
+    memcpy(ret->pixelData, t->pixelData, 4 * t->w * t->h);
+    delete t;
+}
+
 int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth, int blockHeight) {
     uint32_t* pxd = (uint32_t*)ret->pixelData;
     /*int skip = 232;
@@ -2520,6 +2532,99 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
         fclose(f);
         return ret;
     }
+    return NULL;
+}
+
+Layer* readGXT(PlatformNativePathString path, u64 seek)
+{
+    struct GXTHeader {
+        u32 magic;
+        u16 versionMajor;
+        u16 versionMinor;
+        u32 embeddedTextureCount;
+        u32 textureDataOffset;
+        u32 totalTextureSize;
+        u32 p4EntryPalettes;
+        u32 p8EntryPalettes;
+        u32 padding;
+    };
+
+    struct GXTTextureSpec {
+        u32 textureOffset;
+        u32 textureSize;
+        u32 paletteIndex;
+        u32 flagsUnused;
+        u32 textureType;
+        u32 textureBaseFormat;
+        u16 width;
+        u16 height;
+        u16 mipmaps;
+        u16 padding;
+    };
+
+    enum GXTTextureFormat {
+        PVRT2BPP = 0x80000000,
+        PVRT4BPP = 0x81000000,
+        PVRTII2BPP = 0x82000000,
+        PVRTII4BPP = 0x83000000,
+        UBC1 = 0x85000000,
+        UBC2 = 0x86000000,
+        UBC3 = 0x87000000,
+        PX1555 = 0x00040010,
+        ARGB4444 = 0x10000000,
+        ARGB8888 = 0x0C001000,
+        XRGB888 = 0x0C005000,
+        RGB888 = 0x98001000,
+        RGB565 = 0x05001000,
+        RGB555 = 0x04005000,
+        RGB4444 = 0x02001000
+    };
+
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        Layer* ret = NULL;
+
+        GXTHeader header;
+        std::vector<GXTTextureSpec> textures;
+
+        printf("%i\n", sizeof(GXTHeader));
+        printf("%i\n", sizeof(GXTTextureSpec));
+
+        fread(&header, sizeof(GXTHeader), 1, f);
+        for (int x = 0; x < header.embeddedTextureCount; x++) {
+            GXTTextureSpec spec;
+            fread(&spec, sizeof(GXTTextureSpec), 1, f);
+            textures.push_back(spec);
+
+            printf("Texture %i\n", x);
+            printf("Offset: %x\n", spec.textureOffset);
+            printf("Size: %x\n", spec.textureSize);
+            printf("Dimensions: %i %i\n", spec.width, spec.height);
+            printf("Format: %x\n", spec.textureBaseFormat);
+            printf("------------\n");
+        }
+
+        if (textures.size() > 0) {
+            GXTTextureSpec firstTex = textures[0];
+            ret = new Layer(firstTex.width, firstTex.height);
+            fseek(f, firstTex.textureOffset, SEEK_SET);
+            switch (firstTex.textureBaseFormat) {
+                case UBC1:
+                    DeXT1(ret, firstTex.width, firstTex.height, f);
+                    detile(ret, {4,4});
+                    break;
+                case UBC2:
+                    DeXT23(ret, firstTex.width, firstTex.height, f);
+                    detile(ret, {4,4});
+                    break;
+            }
+        }
+        
+
+        fclose(f);
+        return ret;
+    }
+
     return NULL;
 }
 

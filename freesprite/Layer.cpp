@@ -55,6 +55,24 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
         
 }
 
+void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
+{
+    u32* px32 = (u32*)pixelData;
+    u32* srcpx32 = (u32*)sourceLayer->pixelData;
+    XY originSrc = XY{sourceTile.x * tileSize.x, sourceTile.y * tileSize.y};
+    XY originDst = XY{dstTile.x * tileSize.x, dstTile.y * tileSize.y};
+    for (int y = 0; y < tileSize.y; y++) {
+        XY srcPos = XY{originSrc.x, originSrc.y + y};
+        XY dstPos = XY{originDst.x, originDst.y + y};
+        if (pointInBox(dstPos, { 0,0,w,h }) && pointInBox(srcPos, {0,0,sourceLayer->w,sourceLayer->h})) {
+            int clippedXSize = ixmin(ixmin(tileSize.x, w - dstPos.x), sourceLayer->w - srcPos.x);
+            u64 srcIndex = srcPos.x + (srcPos.y * sourceLayer->w);
+            u64 dstIndex = dstPos.x + (dstPos.y * w);
+            memcpy(px32 + dstIndex, srcpx32 + srcIndex, clippedXSize * 4);
+        }
+    }
+}
+
 //i don't even know if this works
 Layer* Layer::copyScaled(XY dimensions)
 {

@@ -47,6 +47,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
+Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
@@ -361,6 +362,7 @@ inline void g_setupIO() {
             fclose(f);
             return !(c[0] == 'M' && c[1] == 'Z') || len == (320 * 200);
         }));
+    g_fileImporters.push_back(FileImporter::flatImporter("PSP/Vita GXT", ".gxt", &readGXT, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("SDL_Image", "", &readSDLImage));
 
 

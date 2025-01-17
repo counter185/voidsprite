@@ -145,3 +145,26 @@ public:
     }
     void setAll(bool value) { memset(data, value ? 0xFF : 0x00, sizeBytes); }
 };
+
+class Detiler {
+private:
+    int tileSquareDimension;
+    int index = -1;
+    bool vertical = true;
+public:
+    Detiler(int tileSquareDimension) {
+        this->tileSquareDimension = tileSquareDimension;
+    }
+    XY next() {
+        index++;
+        if (vertical) {
+            return XY{ index / tileSquareDimension, index % tileSquareDimension };
+        } else {
+            return XY{ index % tileSquareDimension, index / tileSquareDimension};
+        }
+
+        if (index == tileSquareDimension * tileSquareDimension) {
+            index = -1;
+        }
+    }
+};
