@@ -96,6 +96,7 @@ class MainEditor;
 class MainEditorPalettized;
 class SpritesheetPreviewScreen;
 class TilemapPreviewScreen;
+class MinecraftBlockPreviewScreen;
 
 //specialized ui elements
 class EditorColorPicker;
@@ -105,6 +106,7 @@ class EditorSpritesheetPreview;
 class TilemapEditorLayerPicker;
 class PanelSpritesheetPreview;
 class ButtonStartScreenSession;
+class PanelMCBlockPreview;
 
 //brushes/tools
 class BaseBrush;

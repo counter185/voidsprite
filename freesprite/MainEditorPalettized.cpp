@@ -7,6 +7,7 @@
 #include "PalettizedEditorLayerPicker.h"
 #include "EditorBrushPicker.h"
 #include "RPG2KTilemapPreviewScreen.h"
+#include "MinecraftBlockPreviewScreen.h"
 #include "FileIO.h"
 
 #include "PopupIntegerScale.h"
@@ -492,6 +493,17 @@ void MainEditorPalettized::setUpWidgets()
                                 RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
                                 g_addScreen(newScreen);
                                 //editor->spritesheetPreview = newScreen;
+                            }
+                        }
+                    },
+                    {SDLK_n, { "Open cube preview...",
+                            [](MainEditor* editor) {
+                                if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+                                    g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
+                                    return;
+                                }
+                                MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
+                                g_addScreen(newScreen);
                             }
                         }
                     },

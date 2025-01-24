@@ -152,3 +152,13 @@ SDL_Rect Canvas::getTileScreenRectAt(XY canvasTileIndex, XY tileSize)
 		tileSize.y * scale
     };
 }
+
+SDL_Rect Canvas::getTileRectAt(XY canvasTileIndex, XY tileSize)
+{
+    return {
+        canvasTileIndex.x * tileSize.x,
+        canvasTileIndex.y * tileSize.y,
+        tileSize.x,
+        tileSize.y
+    };
+}

@@ -31,6 +31,12 @@ public:
 
     virtual std::string getName() { return "Base screen"; }
 
+    void drawBottomBar() {
+        SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
+        SDL_RenderFillRect(g_rd, &r);
+    }
+
     void setCallbackListener(int evt_id, EventCallbackListener* callback) {
         this->callback = callback;
         this->callback_id = evt_id;

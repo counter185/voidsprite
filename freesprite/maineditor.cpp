@@ -18,6 +18,7 @@
 #include "RPG2KTilemapPreviewScreen.h"
 #include "SpritesheetPreviewScreen.h"
 #include "NineSegmentPatternEditorScreen.h"
+#include "MinecraftBlockPreviewScreen.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupTextBox.h"
@@ -444,9 +445,7 @@ void MainEditor::renderGuidelines() {
 
 void MainEditor::DrawForeground()
 {
-    SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
-    SDL_RenderFillRect(g_rd, &r);
+    drawBottomBar();
 
     g_fnt->RenderString(std::format("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
 
@@ -843,6 +842,17 @@ void MainEditor::setUpWidgets()
                                 RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
                                 g_addScreen(newScreen);
                                 //editor->spritesheetPreview = newScreen;
+                            }
+                        }
+                    },
+                    {SDLK_n, { "Open cube preview...",
+                            [](MainEditor* editor) {
+                                if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+                                    g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
+                                    return;
+                                }
+                                MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
+                                g_addScreen(newScreen);
                             }
                         }
                     },

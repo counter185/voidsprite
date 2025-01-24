@@ -94,6 +94,7 @@ void NineSegmentPatternEditorScreen::render()
     SDL_RenderDrawLine(g_rd, canvasRenderRect.x, canvasRenderRect.y + pointUR.y * canvasZoom,
         canvasRenderRect.x + caller->canvas.dimensions.y * canvasZoom, canvasRenderRect.y + pointUR.y * canvasZoom);
 
+    drawBottomBar();
     BaseScreen::render();
 }
 

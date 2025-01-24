@@ -471,6 +471,12 @@
     <ClCompile Include="PopupAdjustHSV.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="MinecraftBlockPreviewScreen.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelMCBlockPreview.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -874,6 +880,12 @@
     </ClInclude>
     <ClInclude Include="PopupAdjustHSV.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="MinecraftBlockPreviewScreen.h">
+      <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelMCBlockPreview.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
