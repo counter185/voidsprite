@@ -2,6 +2,7 @@
 #include "maineditor.h"
 #include "PanelMCBlockPreview.h"
 #include "FontRenderer.h"
+#include "PopupTileGeneric.h"
 
 MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
 {
@@ -26,6 +27,12 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
                     "File",
                     {},
                     {
+                        {SDLK_r, { "Render to separate workspace",
+                                [](MinecraftBlockPreviewScreen* screen) {
+                                    g_addPopup(new PopupTileGeneric(screen, "Render to workspace", "Image dimensions:", {512,512}, 3));
+                                }
+                            }
+                        },
                         {SDLK_c, { "Close",
                                 [](MinecraftBlockPreviewScreen* screen) {
                                     screen->closeNextTick = true;
@@ -152,6 +159,30 @@ void MinecraftBlockPreviewScreen::tick()
 BaseScreen* MinecraftBlockPreviewScreen::isSubscreenOf()
 {
     return caller;
+}
+
+void MinecraftBlockPreviewScreen::eventPopupClosed(int evt_id, BasePopup* target)
+{
+    if (evt_id == 3) {
+        renderToWorkspace(((PopupTileGeneric*)target)->result);
+    }
+}
+
+void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
+{
+    SDL_Texture* renderTarget = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wh.x, wh.y);
+    SDL_SetRenderTarget(g_rd, renderTarget);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+    SDL_RenderClear(g_rd);
+    drawIsometricBlock({0, 0, wh.x, wh.y});
+    Layer* l = new Layer(wh.x, wh.y);
+    SDL_RenderReadPixels(g_rd, NULL, SDL_PIXELFORMAT_ARGB8888, l->pixelData, wh.x * 4);
+
+    SDL_SetRenderTarget(g_rd, NULL);
+
+    MainEditor *newSession = new MainEditor(l);
+    g_addScreen(newSession);
 }
 
 void MinecraftBlockPreviewScreen::drawBackground()

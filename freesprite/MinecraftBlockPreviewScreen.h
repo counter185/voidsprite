@@ -38,6 +38,9 @@ public:
 
     std::string getName() override { return "Preview cube"; }
 
+    void eventPopupClosed(int evt_id, BasePopup* target) override;
+
+    void renderToWorkspace(XY wh);
     void drawBackground();
     void drawIsometricBlock(SDL_Rect at);
 };
