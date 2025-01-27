@@ -97,6 +97,12 @@
     <Filter Include="Header files\external\json">
       <UniqueIdentifier>{9812c616-232b-44c1-83dd-ac960d53e31b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\filters">
+      <UniqueIdentifier>{7fcafd71-e589-49db-80ad-831cadb75789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\filters">
+      <UniqueIdentifier>{3a15a644-d040-4c21-b539-443866e5d2e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -476,6 +482,9 @@
     </ClCompile>
     <ClCompile Include="PanelMCBlockPreview.cpp">
       <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseFilter.cpp">
+      <Filter>Source files\filters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -886,6 +895,9 @@
     </ClInclude>
     <ClInclude Include="PanelMCBlockPreview.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFilter.h">
+      <Filter>Header files\filters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

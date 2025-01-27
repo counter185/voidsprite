@@ -138,6 +138,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -156,10 +159,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="astc_dec\astc_decomp.cpp" />
     <ClCompile Include="BaseBrush.cpp" />
+    <ClCompile Include="BaseFilter.cpp" />
     <ClCompile Include="BasePopup.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
     <ClCompile Include="Brush1pxLine.cpp" />
@@ -289,6 +296,7 @@
     <ClInclude Include="astc_dec\astc_decomp.h" />
     <ClInclude Include="base64\base64.hpp" />
     <ClInclude Include="BaseBrush.h" />
+    <ClInclude Include="BaseFilter.h" />
     <ClInclude Include="BasePopup.h" />
     <ClInclude Include="BaseScreen.h" />
     <ClInclude Include="Brush1pxLine.h" />
