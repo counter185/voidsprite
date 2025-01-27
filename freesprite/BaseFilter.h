@@ -30,7 +30,7 @@ public:
 	/// <param name="src">source layer to run the filter on</param>
 	/// <param name="options">options</param>
 	/// <returns>new layer</returns>
-	virtual Layer* run(Layer* src, std::map<std::string, std::string> options);
+	virtual Layer* run(Layer* src, std::map<std::string, std::string> options) { return NULL; };
 	virtual std::vector<FilterParameter> getParameters() { return {}; }
 protected:
 	Layer* copy(Layer* src);
