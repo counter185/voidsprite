@@ -36,6 +36,8 @@
 #include "TemplateRPG2KFaceset.h"
 #include "TemplateRPG2KSystem.h"
 
+#include "BaseFilter.h"
+
 #include "ee_creature.h"
 
 #include "main.h"
@@ -377,6 +379,7 @@ int main(int argc, char** argv)
         pattern->tryLoadIcon();
     }
 
+    // load templates
     g_templates = {
         new TemplateRPG2KCharset(),
         new TemplateRPG2KChipset(),
@@ -398,6 +401,7 @@ int main(int argc, char** argv)
         }
     }
 
+    // load 9segment patterns
     g_9spatterns = {
         new NineSegmentPattern(nspattern1),
     };
@@ -415,6 +419,9 @@ int main(int argc, char** argv)
     for (NineSegmentPattern*& pattern : g_9spatterns) {
         cacheTexture(*pattern);
     }
+
+    //load filters
+    g_filters.push_back(new FilterBlur());
 
     TTF_Init();
     g_fnt = new TextRenderer();

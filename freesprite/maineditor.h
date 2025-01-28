@@ -111,6 +111,8 @@ public:
 
     std::vector<uint32_t> lastColors;
 
+    SplitSessionData splitSessionData = { false };
+
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);

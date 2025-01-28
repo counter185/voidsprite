@@ -3,14 +3,16 @@
 
 #define INT_PARAM(name,min,max,def) (FilterParameter{name,min,max,def,PT_INT})
 #define FLOAT_PARAM(name,min,max,def) (FilterParameter{name,min,max,def,PT_FLOAT})
-#define COLORRGB_PARAM(name, def) (FilterParameter{name,min,max,def,PT_COLOR_RGB})
+#define COLORRGB_PARAM(name,def) (FilterParameter{name,min,max,def,PT_COLOR_RGB})
 #define COLORL_PARAM(name) (FilterParameter{name,0,255,127,PT_COLOR_L})
+#define BOOL_PARAM(name,def) (FilterParameter{name,0,1,def,PT_BOOL})
 
 enum ParameterType {
 	PT_INT = 0,
 	PT_FLOAT = 1,
 	PT_COLOR_RGB = 2,
 	PT_COLOR_L = 3,
+	PT_BOOL = 4,
 };
 
 struct FilterParameter {
@@ -24,6 +26,8 @@ struct FilterParameter {
 class BaseFilter
 {
 public:
+	virtual std::string name() { return "Filter"; }
+
 	/// <summary>
 	/// Allocates a new layer, copies the source pixels to it and runs the filter on it.
 	/// </summary>
@@ -40,6 +44,8 @@ protected:
 class FilterBlur : public BaseFilter
 {
 public:
+	std::string name() override { return "Blur"; }
+
 	Layer* run(Layer* src, std::map<std::string, std::string> options) override;
 	std::vector<FilterParameter> getParameters() override {
 		return {

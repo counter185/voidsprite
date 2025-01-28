@@ -53,7 +53,7 @@ MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
-MainEditor* loadAnyIntoSession(std::string utf8path);
+MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
 bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
@@ -85,6 +85,9 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
 bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
+
+MainEditor* loadSplitSession(PlatformNativePathString path);
+bool saveSplitSession(PlatformNativePathString path, MainEditor* data);
 
 class FileOperation {
 public:
@@ -283,6 +286,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Split Session", ".voidspsn", &loadSplitSession, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));

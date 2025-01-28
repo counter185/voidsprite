@@ -3274,7 +3274,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
     return NULL;
 }
 
-MainEditor* loadAnyIntoSession(std::string utf8path)
+MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter)
 {
     PlatformNativePathString fPath = convertStringOnWin32(utf8path);
 
@@ -3295,6 +3295,9 @@ MainEditor* loadAnyIntoSession(std::string utf8path)
                     session->lastConfirmedSave = true;
                     session->lastConfirmedSavePath = fPath;
                     session->lastConfirmedExporter = importer->getCorrespondingExporter();
+                }
+                if (outputFoundImporter != NULL) {
+                    *outputFoundImporter = importer;
                 }
                 return session;
             }
@@ -4761,6 +4764,151 @@ bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1,
         return true;
     }
     return false;
+}
+
+MainEditor* loadSplitSession(PlatformNativePathString path)
+{
+    std::string utf8path = wstringToUTF8String(path);
+    std::string fullDirectory = (utf8path.find('/') != std::string::npos || utf8path.find('\\') != std::string::npos) ? utf8path.substr(0, utf8path.find_last_of("\\/")) : "";
+    if (fullDirectory.length() > 0) {
+        fullDirectory += "/";
+    }
+
+    std::ifstream f(path);
+    if (f.good() && f.is_open()) {
+        SplitSessionData ssn;
+        ssn.set = true;
+
+        std::vector<Layer*> layers;
+        XY minImageDimensions = { 0,0 };
+
+        std::string line;
+        std::getline(f, line);
+        if (stringStartsWithIgnoreCase(line, "voidsprite split session file v")){
+            int version;
+            try {
+                version = std::stoi(line.substr(31));
+            }
+            catch (std::exception) {
+                g_addNotification(ErrorNotification("Error", "Invalid split session file"));
+               f.close();   //not needed apparently
+                return NULL;
+            }
+
+            switch (version) {
+                case 0:
+                {
+                    while (!f.eof()) {
+                        std::getline(f, line);
+                        if (stringStartsWithIgnoreCase(line, "#:")) {
+                            //image properties in format: #:filename|x|y
+                            try {
+                                std::string originalFileName = line.substr(2, line.find('|') - 2);
+                                std::string filename = fullDirectory + originalFileName;
+                                int x = std::stoi(line.substr(line.find('|') + 1, line.find('|', line.find('|') + 1) - line.find('|') - 1));
+                                int y = std::stoi(line.substr(line.find('|', line.find('|') + 1) + 1));
+                                SplitSessionImage ssi;
+                                ssi.fileName = filename;
+                                ssi.originalFileName = originalFileName;
+                                ssi.positionInOverallImage = XY{ x,y };
+                                ssi.exporter = NULL;    //todo
+                                
+                                FileImporter* foundImporter = NULL;
+                                MainEditor* subsn = loadAnyIntoSession(filename, &foundImporter);
+                                if (subsn != NULL) {
+                                    ssi.exporter = foundImporter->getCorrespondingExporter();
+                                    Layer* nlayer = subsn->flattenImage();
+                                    ssi.dimensions = {nlayer->w, nlayer->h};
+                                    layers.push_back(nlayer);
+                                    ssn.images.push_back(ssi);
+                                    if (x + nlayer->w > minImageDimensions.x) {
+                                        minImageDimensions.x = x + nlayer->w;
+                                    }
+                                    if (y + nlayer->h > minImageDimensions.y) {
+                                        minImageDimensions.y = y + nlayer->h;
+                                    }
+                                    delete subsn;
+                                }
+                                else {
+                                    g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
+                                }
+                                
+                            }
+                            catch (std::exception) {
+                                g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
+                            }
+                        }
+                        else if (line.find(':')) {
+                            std::string argName = line.substr(0, line.find(':'));
+                            std::string argValue = line.substr(line.find(':') + 1);
+
+                            if (argName == "tiledim.x") {
+                                ssn.tileDimensions.x = std::stoi(argValue);
+                            }
+                            else if (argName == "tiledim.y") {
+                                ssn.tileDimensions.y = std::stoi(argValue);
+                            }
+                        }
+                    }
+                    if (layers.size() > 0) {
+                        ssn.overallDimensions = minImageDimensions;
+                        Layer* imageLayer = new Layer(minImageDimensions.x, minImageDimensions.y);
+                        for (int i = 0; i < layers.size(); i++) {
+                            SplitSessionImage ssi = ssn.images[i];
+                            Layer* layer = layers[i];
+                            imageLayer->blit(layer, ssi.positionInOverallImage, {0,0,layer->w, layer->h}, true);
+                            delete layer;
+                        }
+                        MainEditor* newEditor = new MainEditor(imageLayer);
+                        newEditor->splitSessionData = ssn;
+                        newEditor->tileDimensions = ssn.tileDimensions;
+                        newEditor->lastConfirmedSavePath = path;
+                        return newEditor;
+                    }
+
+                }
+                    break;
+                default:
+                    g_addNotification(ErrorNotification("Error", "Unsupported split session file version"));
+                    f.close();
+                    return NULL;
+            }
+        }
+    }
+    return NULL;
+}
+
+bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
+{
+    if (!data->splitSessionData.set) {
+        g_addNotification(ErrorNotification("Error", "No split session data."));
+        return false;
+    }
+    std::ofstream f(path);
+    f << "voidsprite split session file v0\n";
+    f << "tiledim.x:" << data->tileDimensions.x << "\n";
+    f << "tiledim.y:" << data->tileDimensions.y << "\n";
+    SplitSessionData ssn = data->splitSessionData;
+    Layer* flat = data->flattenImage();
+    for (SplitSessionImage& separateImage : ssn.images) {
+        f << "#:"
+          << separateImage.originalFileName
+          << "|" << separateImage.positionInOverallImage.x << "|"
+          << separateImage.positionInOverallImage.y << "\n";
+        PlatformNativePathString subImageFile = utf8StringToWstring(separateImage.fileName);
+        if (separateImage.exporter != NULL) {
+            Layer* trimmed = flat->trim({separateImage.positionInOverallImage.x, separateImage.positionInOverallImage.y, 
+                separateImage.dimensions.x, separateImage.dimensions.y});
+            separateImage.exporter->exportData(subImageFile, trimmed);
+            delete trimmed;
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "No exporter for split session image"));
+        }
+    }
+    delete flat;
+    g_addNotification(SuccessNotification("Success", "Saved split session."));
+    return true;
 }
 
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)

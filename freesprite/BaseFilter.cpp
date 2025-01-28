@@ -22,27 +22,27 @@ Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
         for (int x = 0; x < c->w; x++) {
 
             u32 pxnow = src->getPixelAt({ x,y }, true);
-            u64 r = pxnow & 0xFF;
+            u64 r = (pxnow >> 16) & 0xFF;
             u64 g = (pxnow >> 8) & 0xFF;
-            u64 b = (pxnow >> 16) & 0xFF;
+            u64 b = pxnow & 0xFF;
             u64 a = (pxnow >> 24) & 0xFF;
             int measures = 1;
 
             for (int rx = 1; rx < radiusX; rx++) {
                 if (x + rx < c->w) {
 					u32 px = src->getPixelAt({ x + rx,y }, true);
-					r += px & 0xFF;
+					r += (px >> 16) & 0xFF;
 					g += (px >> 8) & 0xFF;
-					b += (px >> 16) & 0xFF;
+					b += px & 0xFF;
                     a += (px >> 24) & 0xFF;
 					measures++;
 				}
 				if (x - rx >= 0) {
 					u32 px = src->getPixelAt({ x - rx,y }, true);
-					r += px & 0xFF;
-					g += (px >> 8) & 0xFF;
-					b += (px >> 16) & 0xFF;
-					a += (px >> 24) & 0xFF;
+                    r += (px >> 16) & 0xFF;
+                    g += (px >> 8) & 0xFF;
+                    b += px & 0xFF;
+                    a += (px >> 24) & 0xFF;
 					measures++;
 				}
             }
@@ -50,17 +50,17 @@ Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
             for (int ry = 1; ry < radiusY; ry++) {
                 if (y + ry < c->h) {
                     u32 px = src->getPixelAt({ x,y + ry }, true);
-                    r += px & 0xFF;
+                    r += (px >> 16) & 0xFF;
                     g += (px >> 8) & 0xFF;
-                    b += (px >> 16) & 0xFF;
+                    b += px & 0xFF;
                     a += (px >> 24) & 0xFF;
                     measures++;
                 }
                 if (y - ry >= 0) {
 					u32 px = src->getPixelAt({ x,y - ry }, true);
-					r += px & 0xFF;
-					g += (px >> 8) & 0xFF;
-					b += (px >> 16) & 0xFF;
+                    r += (px >> 16) & 0xFF;
+                    g += (px >> 8) & 0xFF;
+                    b += px & 0xFF;
                     a += (px >> 24) & 0xFF;
 					measures++;
 				}

@@ -12,6 +12,7 @@
 #include "UICheckbox.h"
 #include "TooltipsLayer.h"
 #include "ee_creature.h"
+#include "BaseFilter.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -767,6 +768,16 @@ void MainEditor::setUpWidgets()
             }
         },
         {
+            SDLK_q,
+            {
+                "Filters",
+                {},
+                {
+                },
+                NULL
+            }
+        },
+        {
             SDLK_v,
             {
                 "View",
@@ -876,6 +887,21 @@ void MainEditor::setUpWidgets()
         }
     };
 
+    SDL_Keycode keyorder[] = { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i, SDLK_o, SDLK_p };
+    int i = 0;
+    for (auto& filter : g_filters) {
+        mainEditorKeyActions[SDLK_q].actions[keyorder[i++]] = {
+            filter->name(), [filter](MainEditor* editor) {
+                Layer* layerNow = editor->getCurrentLayer();
+                Layer* copy = filter->run(layerNow, {});
+                editor->commitStateToCurrentLayer();
+                memcpy(layerNow->pixelData, copy->pixelData, 4 * layerNow->w * layerNow->h);
+                layerNow->layerDirty = true;
+                delete copy;
+            }
+        };
+    }
+
     currentBrush = g_brushes[0];
     currentPattern = g_patterns[0];
 
@@ -896,7 +922,7 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
-    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_v });
+    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_q, SDLK_v });
     wxsManager.addDrawable(navbar);
 }
 
@@ -1318,12 +1344,17 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
 
 void MainEditor::trySaveImage()
 {
-    lastWasSaveAs = false;
-    if (!lastConfirmedSave) {
-        trySaveAsImage();
+    if (splitSessionData.set) {
+        saveSplitSession(lastConfirmedSavePath, this);
     }
     else {
-        trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
+        lastWasSaveAs = false;
+        if (!lastConfirmedSave) {
+            trySaveAsImage();
+        }
+        else {
+            trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
+        }
     }
     
 }
@@ -1359,12 +1390,17 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
 
 void MainEditor::trySaveAsImage()
 {
-    lastWasSaveAs = true;
-    std::vector<std::pair<std::string, std::string>> formats;
-    for (auto f : g_fileExporters) {
-        formats.push_back({ f->extension(), f->name()});
+    if (splitSessionData.set) {
+        saveSplitSession(lastConfirmedSavePath, this);
     }
-    platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
+    else {
+        lastWasSaveAs = true;
+        std::vector<std::pair<std::string, std::string>> formats;
+        for (auto f : g_fileExporters) {
+            formats.push_back({ f->extension(), f->name() });
+        }
+        platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
+    }
 }
 
 void MainEditor::recenterCanvas()

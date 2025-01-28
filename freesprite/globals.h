@@ -83,6 +83,7 @@ class Notification;
 class Gamepad;
 class Timer64;
 class TooltipsLayer;
+class FileImporter;
 class FileExporter;
 struct NineSegmentPattern;
 
@@ -124,6 +125,8 @@ class UICheckbox;
 class Panel;
 class ScrollingPanel;
 
+//filters
+class BaseFilter;
 
 template <typename T>
 class ScreenWideNavBar;
@@ -143,6 +146,7 @@ extern std::vector<BaseTemplate*> g_templates;
 inline double g_deltaTime = 1.0;
 inline double g_frameDeltaTime = 0.001;
 inline std::vector<NineSegmentPattern*> g_9spatterns;
+inline std::vector<BaseFilter*> g_filters;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
@@ -234,6 +238,21 @@ struct NineSegmentPattern {
     XY point1, point2;
     std::string name = "Default pattern";
     SDL_Texture* cachedTexture = NULL;
+};
+
+struct SplitSessionImage {
+    std::string fileName;
+    std::string originalFileName;
+    XY positionInOverallImage = {0,0};
+    XY dimensions = {0, 0};
+    FileExporter* exporter = NULL;
+};
+
+struct SplitSessionData {
+    bool set = false;
+    XY overallDimensions;
+    XY tileDimensions = { 0,0 };
+    std::vector<SplitSessionImage> images;
 };
 
 #include "platform.h"
