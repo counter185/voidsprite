@@ -4768,7 +4768,7 @@ bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1,
 
 MainEditor* loadSplitSession(PlatformNativePathString path)
 {
-    std::string utf8path = wstringToUTF8String(path);
+    std::string utf8path = convertStringToUTF8OnWin32(path);
     std::string fullDirectory = (utf8path.find('/') != std::string::npos || utf8path.find('\\') != std::string::npos) ? utf8path.substr(0, utf8path.find_last_of("\\/")) : "";
     if (fullDirectory.length() > 0) {
         fullDirectory += "/";
@@ -4895,7 +4895,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
           << separateImage.originalFileName
           << "|" << separateImage.positionInOverallImage.x << "|"
           << separateImage.positionInOverallImage.y << "\n";
-        PlatformNativePathString subImageFile = utf8StringToWstring(separateImage.fileName);
+        PlatformNativePathString subImageFile = convertStringOnWin32(separateImage.fileName);
         if (separateImage.exporter != NULL) {
             Layer* trimmed = flat->trim({separateImage.positionInOverallImage.x, separateImage.positionInOverallImage.y, 
                 separateImage.dimensions.x, separateImage.dimensions.y});
