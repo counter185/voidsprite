@@ -849,7 +849,9 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
             uint32_t* pxData = (uint32_t*)ret2->pixelData;
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    pxData[y * width + x] = rows[y][x];
+                    pxData[y * width + x] = 
+                        bit_depth == 4 ? (rows[y][x / 2] >> (x % 2 == 0 ? 4 : 0)) & 0b1111
+                        : rows[y][x];   //todo, more bit depths
                 }
             }
             for (int y = 0; y < height; y++) {
