@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "BaseScreen.h"
+#include "splitsession.h"
 #include "DrawableManager.h"
 #include "EditorColorPicker.h"
 #include "BaseBrush.h"
@@ -140,6 +141,7 @@ public:
     void drawIsolatedRect();
     void drawTileGrid();
     void renderGuidelines();
+    void drawSplitSessionFragments();
 
     void initLayers();
     virtual void setUpWidgets();

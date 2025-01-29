@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "Notification.h"
 #include "EditorLayerPicker.h"
+#include "splitsession.h"
 #include "FileIO.h"
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
@@ -25,6 +26,8 @@
 #include "json/json.hpp"
 #include <jxl/encode_cxx.h>
 #include <jxl/decode_cxx.h>
+
+
 using json = nlohmann::json;
 
 enum VTFFORMAT

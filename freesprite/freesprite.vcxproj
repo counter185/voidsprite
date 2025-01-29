@@ -345,6 +345,7 @@
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />
+    <ClInclude Include="splitsession.h" />
     <ClInclude Include="TemplateRPG2KBattleAnim.h" />
     <ClInclude Include="TemplateRPG2KChipset.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />

@@ -899,6 +899,9 @@
     <ClInclude Include="BaseFilter.h">
       <Filter>Header files\filters</Filter>
     </ClInclude>
+    <ClInclude Include="splitsession.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

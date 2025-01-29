@@ -142,6 +142,7 @@ void MainEditor::render() {
     drawIsolatedRect();
     drawSymmetryLines();
     renderGuidelines();
+    drawSplitSessionFragments();
 
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
@@ -442,6 +443,33 @@ void MainEditor::renderGuidelines() {
         }
     }
 
+}
+
+void MainEditor::drawSplitSessionFragments()
+{
+    TooltipsLayer localTtp;
+    if (splitSessionData.set) {
+        for (SplitSessionImage& img : splitSessionData.images) {
+            SDL_Rect r = canvas.canvasRectToScreenRect({
+                img.positionInOverallImage.x, img.positionInOverallImage.y,
+                img.dimensions.x, img.dimensions.y
+                });
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+            SDL_RenderDrawRect(g_rd, &r);
+
+            if (pointInBox({ g_mouseX, g_mouseY }, r)) {
+                img.animTimer.startIfNotStarted();
+                localTtp.addTooltip(Tooltip{ {ixmax(0,r.x), ixmax(30, r.y - 30)},
+                                          img.originalFileName,
+                                          {0xff, 0xff, 0xff, 0xff},
+                                          img.animTimer.percentElapsedTime(300)});
+            }
+            else {
+                img.animTimer.stop();
+            }
+        }
+    }
+    localTtp.renderAll();
 }
 
 void MainEditor::DrawForeground()

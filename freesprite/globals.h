@@ -240,21 +240,6 @@ struct NineSegmentPattern {
     SDL_Texture* cachedTexture = NULL;
 };
 
-struct SplitSessionImage {
-    std::string fileName;
-    std::string originalFileName;
-    XY positionInOverallImage = {0,0};
-    XY dimensions = {0, 0};
-    FileExporter* exporter = NULL;
-};
-
-struct SplitSessionData {
-    bool set = false;
-    XY overallDimensions;
-    XY tileDimensions = { 0,0 };
-    std::vector<SplitSessionImage> images;
-};
-
 #include "platform.h"
 #include "colors.h"
 #include "palettes.h"

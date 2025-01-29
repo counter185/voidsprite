@@ -21,6 +21,11 @@ public:
 			stopTime = elapsedTime();
 		}
 	}
+	void startIfNotStarted() {
+		if (!started) {
+			start();
+		}
+	}
 
 	bool started = false;
 	uint64_t startTime = 0;
