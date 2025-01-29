@@ -45,6 +45,8 @@ public:
 
 	void eventButtonPressed(int evt_id) override;
 
+	void renderDropdownIcon(XY pos);
+
 	void genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item) = NULL);
 
 	void click();

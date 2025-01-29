@@ -50,7 +50,11 @@ void UIDropdown::render(XY pos)
     if (isOpen) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xa0 * openTimer.percentElapsedTime(100)));
         SDL_RenderFillRect(g_rd, &drawrect);
+        renderDropdownIcon(pos);
         wxs.renderAll(xyAdd(xySubtract(pos, { 0, (int)((1.0f - openTimer.percentElapsedTime(100)) * wxHeight) }), XY{0, menuYOffset}));
+    }
+    else {
+        renderDropdownIcon(pos);
     }
 }
 
@@ -115,6 +119,34 @@ void UIDropdown::eventButtonPressed(int evt_id)
     }
 }
 
+void UIDropdown::renderDropdownIcon(XY pos)
+{
+    int iconW = 20;
+    int iconPad = 5;
+    XY origin = { pos.x + wxWidth - iconW/2 - iconPad, pos.y + wxHeight / 2 };
+
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+    drawLine(xyAdd(origin, { -iconW / 2 - iconPad, -wxHeight / 3 }), xyAdd(origin, { -iconW / 2 - iconPad, wxHeight / 3 }));
+
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0xff);
+
+    XY cbPoint = xyAdd(origin, { 0, wxHeight / 6 });
+    XY ctPoint = xyAdd(origin, { 0, -wxHeight / 6 });
+
+    double animTime = XM1PW3P1(openTimer.started ? openTimer.percentElapsedTime(300) : 1.0f);
+
+    if (!isOpen) {
+        XY bPoint = statLineEndpoint(ctPoint, cbPoint, animTime);
+        drawLine(bPoint, xyAdd(origin, { -iconW / 2, -wxHeight / 6 }), animTime);
+        drawLine(bPoint, xyAdd(origin, { iconW / 2, -wxHeight / 6 }), animTime);
+    }
+    else {
+        XY bPoint = statLineEndpoint(cbPoint, ctPoint, animTime);
+        drawLine(xyAdd(origin, { -iconW / 2, wxHeight / 6 }), bPoint, animTime);
+        drawLine(xyAdd(origin, { iconW / 2, wxHeight / 6 }), bPoint, animTime);
+    }
+}
+
 void UIDropdown::genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item))
 {
     wxs.freeAllDrawables();
@@ -147,5 +179,8 @@ void UIDropdown::click()
     lastClick.start();
     openTimer.start();
     isOpen = !isOpen;
+    if (isOpen) {
+        wxs.forceUnfocus();
+    }
     menuYOffset = 0;
 }
