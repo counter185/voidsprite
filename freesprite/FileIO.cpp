@@ -4785,6 +4785,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
         ssn.set = true;
 
         std::vector<Layer*> layers;
+        std::vector<CommentData> comments;
         XY minImageDimensions = { 0,0 };
 
         std::string line;
@@ -4843,6 +4844,23 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                 g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
                             }
                         }
+                        else if (stringStartsWithIgnoreCase(line, "comment:")) {
+                            try {
+                                std::string fullData = line.substr(8);
+                                std::regex split("(;([0-9]+);([0-9]+))$");
+                                std::smatch match;
+                                std::regex_search(fullData, match, split);
+                                if (match.size() == 4) {
+                                    std::string comment = fullData.substr(0, fullData.size() - match[0].str().size());
+                                    int x = std::stoi(match[2].str());
+                                    int y = std::stoi(match[3].str());
+                                    comments.push_back(CommentData{ XY{x,y}, comment });
+                                }
+                            }
+                            catch (std::exception) {
+                                printf("error reading comment\n");
+                            }
+                        }
                         else if (line.find(':')) {
                             std::string argName = line.substr(0, line.find(':'));
                             std::string argValue = line.substr(line.find(':') + 1);
@@ -4858,6 +4876,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                     if (layers.size() > 0) {
                         ssn.overallDimensions = minImageDimensions;
                         Layer* imageLayer = new Layer(minImageDimensions.x, minImageDimensions.y);
+                        imageLayer->name = "Split session layer";
                         for (int i = 0; i < layers.size(); i++) {
                             SplitSessionImage ssi = ssn.images[i];
                             Layer* layer = layers[i];
@@ -4868,6 +4887,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                         newEditor->splitSessionData = ssn;
                         newEditor->tileDimensions = ssn.tileDimensions;
                         newEditor->lastConfirmedSavePath = path;
+                        newEditor->comments = comments;
                         return newEditor;
                     }
 
@@ -4893,6 +4913,9 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
     f << "voidsprite split session file v0\n";
     f << "tiledim.x:" << data->tileDimensions.x << "\n";
     f << "tiledim.y:" << data->tileDimensions.y << "\n";
+    for (CommentData& comment : data->comments) {
+        f << "comment:" << comment.data << ";" << comment.position.x << ";" << comment.position.y << "\n";
+    }
     SplitSessionData ssn = data->splitSessionData;
     Layer* flat = data->flattenImage();
     for (SplitSessionImage& separateImage : ssn.images) {

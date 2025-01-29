@@ -500,8 +500,8 @@ void MainEditor::renderComments()
     }
     TooltipsLayer localTtp;
     localTtp.border = false;
-    localTtp.gradientUL = localTtp.gradientUR = 0x80000000;
-    localTtp.gradientLL = localTtp.gradientLR = 0x40000000;
+    localTtp.gradientUL = localTtp.gradientUR = 0xA0000000;
+    localTtp.gradientLL = localTtp.gradientLR = 0x70000000;
 
     XY origin = canvas.currentDrawPoint;
     for (CommentData& c : comments) {

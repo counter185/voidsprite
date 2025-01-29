@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 #ifdef __APPLE__
 #include <SDL.h>
