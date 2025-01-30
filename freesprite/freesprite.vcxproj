@@ -208,6 +208,7 @@
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="SplitSessionEditor.cpp" />
     <ClCompile Include="TemplateRPG2KBattleAnim.cpp" />
     <ClCompile Include="TemplateRPG2KChipset.cpp" />
     <ClCompile Include="TemplateRPG2KFaceset.cpp" />
@@ -346,6 +347,7 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />
     <ClInclude Include="splitsession.h" />
+    <ClInclude Include="SplitSessionEditor.h" />
     <ClInclude Include="TemplateRPG2KBattleAnim.h" />
     <ClInclude Include="TemplateRPG2KChipset.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />

@@ -486,6 +486,9 @@
     <ClCompile Include="BaseFilter.cpp">
       <Filter>Source files\filters</Filter>
     </ClCompile>
+    <ClCompile Include="SplitSessionEditor.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -901,6 +904,9 @@
     </ClInclude>
     <ClInclude Include="splitsession.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitSessionEditor.h">
+      <Filter>Header files\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
