@@ -179,6 +179,7 @@ void SplitSessionEditor::eventPopupClosed(int evt_id, BasePopup* popup)
                 delete tssi.loadedLayer;
             }
             loadedImgs.erase(loadedImgs.begin() + index);
+            populateSubImagesList();
         }
     }
 }
@@ -304,19 +305,8 @@ void SplitSessionEditor::recalcCanvasDimensions()
 void SplitSessionEditor::recalcRelativePaths()
 {
     guideLabel->text = outputSPSNFilePath.size() > 0 ? outputSPSNFilePath : "No output file set.";
-    std::string basePath = outputSPSNFilePath.size() > 0 ? outputSPSNFilePath.substr(0, outputSPSNFilePath.find_last_of("/\\") + 1)
-        : "";
     for (tempSplitSessionImage& tssi : loadedImgs) {
-        std::string commonPath = "";
-        for (int x = 0; x < ixmin(basePath.size(), tssi.fullOriginalPath.size()); x++) {
-            if (basePath[x] == tssi.fullOriginalPath[x]) {
-                commonPath += basePath[x];
-            }
-            else {
-                break;
-            }
-        }
-        tssi.calcRelativePath = tssi.fullOriginalPath.substr(commonPath.size());
+        tssi.calcRelativePath = evalRelativePath(outputSPSNFilePath, tssi.fullOriginalPath);
     }
 
     populateSubImagesList();

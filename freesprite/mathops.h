@@ -66,6 +66,8 @@ bool stringStartsWithIgnoreCase(std::string c, std::string startsWith);
 bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith);
 bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 
+std::string evalRelativePath(std::string directory, std::string file);
+
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
 void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEachPixel);

@@ -140,6 +140,13 @@ PlatformNativePathString convertStringOnWin32(std::string a) {
 #endif
 }
 
+bool stringStartsWith(std::string c, std::string startsWith) {
+    if (c.size() < startsWith.size()) {
+        return false;
+    }
+    return c.substr(0, startsWith.size()) == startsWith;
+}
+
 bool stringStartsWithIgnoreCase(std::string c, std::string startsWith)
 {
     if (c.size() < startsWith.size()) {
@@ -171,6 +178,17 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith)
     std::transform(otherString.begin(), otherString.end(), otherString.begin(), ::tolower);
     std::transform(endsWith.begin(), endsWith.end(), endsWith.begin(), ::tolower);
     return otherString == endsWith;
+}
+
+std::string evalRelativePath(std::string directory, std::string file) {
+    std::string basePath = directory.substr(0, directory.find_last_of("/\\") + 1);
+    std::string output = "";
+    std::string commonPath = basePath.substr(0, basePath.size() - 1);
+    while (commonPath.find_last_of("/\\") != std::string::npos && !stringStartsWith(file, commonPath)) {
+        commonPath = commonPath.substr(0, commonPath.find_last_of("/\\"));
+        output += "../";
+    }
+    return output + file.substr(1 + commonPath.size());
 }
 
 XY getSnappedPoint(XY from, XY to) {
