@@ -307,6 +307,7 @@ void SplitSessionEditor::recalcRelativePaths()
     guideLabel->text = outputSPSNFilePath.size() > 0 ? outputSPSNFilePath : "No output file set.";
     for (tempSplitSessionImage& tssi : loadedImgs) {
         tssi.calcRelativePath = evalRelativePath(outputSPSNFilePath, tssi.fullOriginalPath);
+        std::replace(tssi.calcRelativePath.begin(), tssi.calcRelativePath.end(), '\\', '/');
     }
 
     populateSubImagesList();
