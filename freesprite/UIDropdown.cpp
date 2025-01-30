@@ -102,6 +102,15 @@ void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
                 if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
             }
         }
+        else if (evt.type == SDL_KEYDOWN) {
+            if (evt.key.keysym.sym == SDLK_ESCAPE) {
+                isOpen = false;
+                openTimer.start();
+            }
+            else if (evt.key.keysym.sym == SDLK_SPACE) {
+                click();
+            }
+        }
     }
     else {
         wxs.passInputToFocused(evt, xyAdd(gPosOffset, XY{ 0,menuYOffset }));

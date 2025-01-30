@@ -163,6 +163,13 @@ void StartScreen::eventButtonPressed(int evt_id) {
     }
 }
 
+void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex)
+{
+    if (evt_id == 0) {
+        g_addScreen(new SplitSessionEditor(name));
+    }
+}
+
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
     importerIndex--;

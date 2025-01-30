@@ -13,6 +13,7 @@ public:
     int wxWidth = 200;
     int wxHeight = 200;
     SDL_Color bgColor = { 0,0,0,0xe0 };
+    bool clipElementsToSize = true;
 
     ScrollingPanel() {
     }
@@ -34,9 +35,13 @@ public:
         SDL_Rect r2 = { position.x + scrollOffset.x, position.y + scrollOffset.y, endpoint.x, endpoint.y };
         SDL_RenderDrawRect(g_rd, &r2);*/
 
-        g_pushClip(r);
+        if (clipElementsToSize) {
+            g_pushClip(r);
+        }
         subWidgets.renderAll(xyAdd(position, scrollOffset));
-        g_popClip();
+        if (clipElementsToSize) {
+            g_popClip();
+        }
         //tabs[openTab].wxs.renderAll(xyAdd(position, XY{ 0, buttonsHeight }));
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override {

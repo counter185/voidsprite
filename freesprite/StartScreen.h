@@ -17,6 +17,7 @@
 #include "ScreenWideNavBar.h"
 #include "PopupQuickConvert.h"
 #include "PopupGlobalConfig.h"
+#include "SplitSessionEditor.h"
 #include "Timer64.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
@@ -156,7 +157,7 @@ public:
                 SDLK_f,
                 {
                     "File",
-                    {SDLK_o, SDLK_v, SDLK_e, SDLK_p},
+                    {SDLK_o, SDLK_v, SDLK_e, SDLK_s, SDLK_p},
                     {
                         {SDLK_o, { "Open",
                                 [](StartScreen* screen) {
@@ -173,6 +174,12 @@ public:
                         {SDLK_e, { "Quick Convert",
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupQuickConvert("Quick Convert", "Select the format to export the image to.\nDrag a file into this window to convert to the same directory."));
+                                }
+                            }
+                        },
+                        {SDLK_s, { "New split session...",
+                                [](StartScreen* screen) {
+                                    platformTrySaveOtherFile(screen, {{".voidspsn", "Split session file"}}, "create new split session", 0);
                                 }
                             }
                         },
@@ -224,6 +231,7 @@ public:
     }
 
     void eventButtonPressed(int evt_id) override;
+    void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
     

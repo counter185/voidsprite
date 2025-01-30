@@ -24,10 +24,12 @@ void TooltipsLayer::renderAll()
 		{
 			rect.x = g_windowW - rect.w;
 		}
+		rect.x = ixmax(rect.x, 0);
 		if ((rect.y + rect.h) > g_windowH)
 		{
 			rect.y = g_windowH - rect.h;
 		}
+		rect.y = ixmax(rect.y, 0);
 		XY rectPos = { rect.x, rect.y };
 
 		renderGradient(rect, gradientUL, gradientUR, gradientLL, gradientLR);
