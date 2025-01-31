@@ -28,6 +28,7 @@
 #include "ninesegmentpatterns.h"
 #include "ToolGuideline.h"
 #include "BrushBezierLine.h"
+#include "background_operation.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -207,6 +208,19 @@ void UpdateViewportScaler(){
     }
    
     viewport = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+}
+
+void renderbgOpInProgressScreen() {
+
+    SDL_Rect r = { 0, 0, g_windowW, g_windowH };
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80 * g_bgOpStartTimer.percentElapsedTime(600));
+    SDL_RenderFillRect(g_rd, &r);
+
+    TooltipsLayer localttp;
+
+    localttp.addTooltip(Tooltip{ {0,g_windowH - 30 }, "Operation in progress. Please wait...", {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
+    localttp.renderAll();
+    //g_fnt->RenderString("Operation in progress...", 5, 10, {255,255,255,(u8)(255* g_bgOpStartTimer.percentElapsedTime(600)) });
 }
 
 int main(int argc, char** argv)
@@ -456,6 +470,43 @@ int main(int argc, char** argv)
         while (SDL_PollEvent(&evt)) {
             DrawableManager::processHoverEventInMultiple({ overlayWidgets }, evt);
 
+            //events that can fire during bg operation
+            switch (evt.type) {
+                case SDL_KEYDOWN:
+                    if (evt.key.keysym.sym == SDLK_LCTRL) {
+                        g_ctrlModifier = true;
+                    }
+                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                        g_shiftModifier = true;
+                    }
+                    break;
+                case SDL_KEYUP:
+                    if (evt.key.keysym.sym == SDLK_LCTRL) {
+                        g_ctrlModifier = false;
+                    }
+                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                        g_shiftModifier = false;
+                    }
+                    break;
+                case SDL_WINDOWEVENT:
+                    if (evt.window.event == SDL_WINDOWEVENT_RESIZED) {
+                        g_windowW = evt.window.data1;
+                        g_windowH = evt.window.data2;
+                        unscaledWindowSize = { g_windowW, g_windowH };
+                        UpdateViewportScaler();
+                    }
+                    break;
+                case SDL_MOUSEMOTION:
+                    g_mouseX = evt.motion.x;
+                    g_mouseY = evt.motion.y;
+                    break;
+            }
+
+            if (g_bgOpRunning) {
+                continue;
+            }
+
+            //events that can't fire during bg operation
             switch (evt.type) {
                 case SDL_QUIT:
                     //return 0;
@@ -500,12 +551,6 @@ int main(int argc, char** argv)
                         SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
                         screenSwitchTimer.start();
                     }
-                    else if (evt.key.keysym.sym == SDLK_LCTRL){
-                        g_ctrlModifier = true;
-                    }
-                    else if (evt.key.keysym.sym == SDLK_LSHIFT){
-                        g_shiftModifier = true;
-                    }
                     else if (evt.key.keysym.sym == SDLK_EQUALS){
                         if (g_ctrlModifier) {
                             renderScale++;
@@ -522,32 +567,9 @@ int main(int argc, char** argv)
                         }
                     }
                     break;
-                case SDL_KEYUP:
-                    if (evt.key.keysym.sym == SDLK_LCTRL){
-                        g_ctrlModifier = false;
-                    }
-                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
-                        g_shiftModifier = false;
-                    }
-                    break;
-                case SDL_WINDOWEVENT:
-                    if (evt.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        g_windowW = evt.window.data1;
-                        g_windowH = evt.window.data2;
-                        unscaledWindowSize = { g_windowW, g_windowH };
-                        UpdateViewportScaler();
-                    }
-                    break;
-                case SDL_MOUSEMOTION:
-                    g_mouseX = evt.motion.x;
-                    g_mouseY = evt.motion.y;
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    //g_addNotification(Notification(std::string("hi!!"), std::string("please leave review <3"), 5000, g_iconNotifTheCreature));
-                    break;
             }
             g_gamepad->TakeEvent(evt);
-            if (!DrawableManager::processInputEventInMultiple({ overlayWidgets }, evt)) {
+            if (!g_bgOpRunning && !DrawableManager::processInputEventInMultiple({ overlayWidgets }, evt)) {
                 if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {
                     BasePopup* popup = popupStack[popupStack.size() - 1];
                     popup->takeInput(popup->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
@@ -670,9 +692,15 @@ int main(int argc, char** argv)
 
         g_ttp->renderAll();
 
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-        SDL_Rect temp = {g_mouseX, g_mouseY, 4, 4};
-        SDL_RenderFillRect(g_rd, &temp);
+        if (g_bgOpRunning) {
+            renderbgOpInProgressScreen();
+        }
+        else {
+            //draw the mouse position 4x4 square
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+            SDL_Rect temp = { g_mouseX, g_mouseY, 4, 4 };
+            SDL_RenderFillRect(g_rd, &temp);
+        }
 
         //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
 
@@ -693,6 +721,10 @@ int main(int argc, char** argv)
 
         g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
         g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
+    }
+
+    if (threadSet) {
+        g_bgOpThread.join();
     }
 
     return 0;

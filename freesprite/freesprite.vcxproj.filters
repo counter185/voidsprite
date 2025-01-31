@@ -911,6 +911,9 @@
     <ClInclude Include="memory_tracker.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="background_operation.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

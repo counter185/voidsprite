@@ -295,6 +295,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="astc_dec\astc_decomp.h" />
+    <ClInclude Include="background_operation.h" />
     <ClInclude Include="base64\base64.hpp" />
     <ClInclude Include="BaseBrush.h" />
     <ClInclude Include="BaseFilter.h" />

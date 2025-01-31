@@ -1340,7 +1340,7 @@ void MainEditor::FillTexture() {
     //SDL_UnlockTexture(mainTexture);
 }
 
-void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
+void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry) {
     if ((currentPattern->canDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
         if (!isolateEnabled || pointInBox(position, isolateRect)) {
             uint32_t targetColor = color;
@@ -1351,20 +1351,22 @@ void MainEditor::SetPixel(XY position, uint32_t color, uint8_t symmetry) {
                 targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
             }
             getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
-            colorPicker->pushLastColor(color);
+            if (pushToLastColors) {
+                colorPicker->pushLastColor(color);
+            }
         }
     }
     if (symmetryEnabled[0] && !(symmetry & 0b10)) {
         int symmetryXPoint = symmetryPositions.x / 2;
         bool symXPointIsCentered = symmetryPositions.x % 2;
         int symmetryFlippedX = symmetryXPoint + (symmetryXPoint - position.x) - (symXPointIsCentered ? 0 : 1);
-        SetPixel(XY{symmetryFlippedX, position.y}, color, symmetry | 0b10);
+        SetPixel(XY{symmetryFlippedX, position.y}, color, pushToLastColors, symmetry | 0b10);
     }
     if (symmetryEnabled[1] && !(symmetry & 0b1)) {
         int symmetryYPoint = symmetryPositions.y / 2;
         bool symYPointIsCentered = symmetryPositions.y % 2;
         int symmetryFlippedY = symmetryYPoint + (symmetryYPoint - position.y) - (symYPointIsCentered ? 0 : 1);
-        SetPixel(XY{position.x, symmetryFlippedY}, color, symmetry | 0b1);
+        SetPixel(XY{position.x, symmetryFlippedY}, color, pushToLastColors, symmetry | 0b1);
     }
 }
 

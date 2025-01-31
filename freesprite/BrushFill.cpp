@@ -1,6 +1,7 @@
 #include "BrushFill.h"
 #include "maineditor.h"
 #include <algorithm>
+#include "background_operation.h"
 
 bool BrushFill::closedListContains(XY a)
 {
@@ -14,50 +15,52 @@ bool BrushFill::closedListContains(XY a)
 
 void BrushFill::clickPress(MainEditor* editor, XY pos)
 {
-    Layer* currentLayer = editor->getCurrentLayer();
-    uint32_t pixel = currentLayer->getPixelAt(pos);
-    uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
+    g_startNewOperation([this, editor, pos]() {
+        Layer* currentLayer = editor->getCurrentLayer();
+        uint32_t pixel = currentLayer->getPixelAt(pos);
+        uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
 
-    if (pixel == swapTo) {
-        return;
-    }
+        if (pixel == swapTo) {
+            return;
+        }
 
-    XY tilePos = editor->tileDimensions.x == 0
-        ? XY{0,0}
-        : XY{
-            pos.x / editor->tileDimensions.x,
-            pos.y / editor->tileDimensions.y,
+        XY tilePos = editor->tileDimensions.x == 0
+            ? XY{ 0,0 }
+            : XY{
+                pos.x / editor->tileDimensions.x,
+                pos.y / editor->tileDimensions.y,
         };
 
-    std::vector<XY> openList;
-    openList.push_back(pos);
-    std::vector<XY> nextList;
-    while (!openList.empty()) {
-        for (XY& openListElement : openList) {
-            uint32_t pixelRn = currentLayer->getPixelAt(openListElement);
-            XY tilePosSelected = editor->tileDimensions.x == 0
-                ? XY{0,0}
-                : XY{
-                    openListElement.x / editor->tileDimensions.x,
-                    openListElement.y / editor->tileDimensions.y,
+        std::vector<XY> openList;
+        openList.push_back(pos);
+        std::vector<XY> nextList;
+        while (!openList.empty()) {
+            for (XY& openListElement : openList) {
+                uint32_t pixelRn = currentLayer->getPixelAt(openListElement);
+                XY tilePosSelected = editor->tileDimensions.x == 0
+                    ? XY{ 0,0 }
+                    : XY{
+                        openListElement.x / editor->tileDimensions.x,
+                        openListElement.y / editor->tileDimensions.y,
                 };
-            if (editor->isInBounds(openListElement) && (pixelRn == pixel || (!editor->isPalettized && pixelRn>>24 == 0 && pixel>>24 == 0))
-                && (editor->tileDimensions.x == 0 || !g_config.fillToolTileBound || xyEqual(tilePosSelected, tilePos))) {
-                currentLayer->setPixel(openListElement, swapTo);
-                XY p[] = {
-                    {0,1},
-                    {0,-1},
-                    {1,0},
-                    {-1,0}
-                };
-                for (XY& pp : p) {
-                    nextList.push_back(xyAdd(openListElement, pp));
+                if (editor->isInBounds(openListElement) && (pixelRn == pixel || (!editor->isPalettized && pixelRn >> 24 == 0 && pixel >> 24 == 0))
+                    && (editor->tileDimensions.x == 0 || !g_config.fillToolTileBound || xyEqual(tilePosSelected, tilePos))) {
+                    currentLayer->setPixel(openListElement, swapTo);
+                    XY p[] = {
+                        {0,1},
+                        {0,-1},
+                        {1,0},
+                        {-1,0}
+                    };
+                    for (XY& pp : p) {
+                        nextList.push_back(xyAdd(openListElement, pp));
+                    }
                 }
             }
+            openList = nextList;
+            nextList.clear();
         }
-        openList = nextList;
-        nextList.clear();
-    }
+    });
 }
 
 void BrushFill::clickDrag(MainEditor*, XY, XY)

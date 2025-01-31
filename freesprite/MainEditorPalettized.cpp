@@ -140,7 +140,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
     }
 }
 
-void MainEditorPalettized::SetPixel(XY position, uint32_t color, uint8_t symmetry)
+void MainEditorPalettized::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry)
 {
     if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && layer_getPixelAt(position) != -1))) {
         if (!isolateEnabled || (isolateEnabled && pointInBox(position, isolateRect))) {

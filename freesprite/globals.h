@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <thread>
+#include <atomic>
 
 #ifdef __APPLE__
 #include <SDL.h>

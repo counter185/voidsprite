@@ -50,7 +50,7 @@ void ToolRectMove::rightClickPress(MainEditor* editor, XY pos)
 		uint64_t dataPointer = 0;
 		for (int y = 0; y < clonedAreaPointAndDimensions.h; y++) {
 			for (int x = 0; x < clonedAreaPointAndDimensions.w; x++) {
-				editor->SetPixel(xyAdd(pos, XY{ x,y }), clonedArea[dataPointer++]);
+				editor->SetPixel(xyAdd(pos, XY{ x,y }), clonedArea[dataPointer++], false);
 			}
 		}
 	}

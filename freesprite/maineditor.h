@@ -149,7 +149,7 @@ public:
     void removeWidget(Drawable* wx);
     void RecalcMousePixelTargetPoint(int x, int y);
     void FillTexture();
-    virtual void SetPixel(XY position, uint32_t color, uint8_t symmetry = 0);
+    virtual void SetPixel(XY position, uint32_t color, bool pushToLastColors = true, uint8_t symmetry = 0);
     void DrawLine(XY from, XY to, uint32_t color);
     virtual void trySaveImage();
     virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);

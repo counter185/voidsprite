@@ -50,8 +50,8 @@ void ToolRectSwap::rightClickPress(MainEditor* editor, XY pos)
 		for (int y = 0; y < clonedAreaPointAndDimensions.h; y++) {
 			for (int x = 0; x < clonedAreaPointAndDimensions.w; x++) {
 				XY targetPos = xyAdd(pos, XY{ x,y });
-				editor->SetPixel(xyAdd({ clonedAreaPointAndDimensions.x, clonedAreaPointAndDimensions.y }, { x,y }), editor->layer_getPixelAt(targetPos));
-				editor->SetPixel(targetPos, clonedArea[dataPointer++]);
+				editor->SetPixel(xyAdd({ clonedAreaPointAndDimensions.x, clonedAreaPointAndDimensions.y }, { x,y }), editor->layer_getPixelAt(targetPos), false);
+				editor->SetPixel(targetPos, clonedArea[dataPointer++], false);
 			}
 		}
 	}
