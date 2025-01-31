@@ -1,6 +1,7 @@
 #include "Brush1pxLinePathfind.h"
 #include "maineditor.h"
 #include "UtilPathfind.h"
+#include "background_operation.h"
 
 void Brush1pxLinePathfind::clickPress(MainEditor* editor, XY pos)
 {
@@ -10,12 +11,14 @@ void Brush1pxLinePathfind::clickPress(MainEditor* editor, XY pos)
 
 void Brush1pxLinePathfind::clickRelease(MainEditor* editor, XY pos)
 {
-	std::vector<Node> pathfindResult = genAStar(editor->getCurrentLayer(), startPos, pos);
-	for (Node& n : pathfindResult) {
-		editor->SetPixel(XY{ n.x, n.y }, editor->getActiveColor());
-	}
-	//editor->DrawLine(startPos, pos, 0xFF000000 | editor->pickedColor);
-	dragging = false;
+	g_startNewOperation([this, editor, pos]() {
+		std::vector<Node> pathfindResult = genAStar(editor->getCurrentLayer(), startPos, pos);
+		for (Node& n : pathfindResult) {
+			editor->SetPixel(XY{ n.x, n.y }, editor->getActiveColor());
+		}
+		//editor->DrawLine(startPos, pos, 0xFF000000 | editor->pickedColor);
+		dragging = false;
+	});
 }
 
 void Brush1pxLinePathfind::renderOnCanvas(XY canvasDrawPoint, int scale)

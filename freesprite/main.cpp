@@ -213,8 +213,14 @@ void UpdateViewportScaler(){
 void renderbgOpInProgressScreen() {
 
     SDL_Rect r = { 0, 0, g_windowW, g_windowH };
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80 * g_bgOpStartTimer.percentElapsedTime(600));
-    SDL_RenderFillRect(g_rd, &r);
+    //SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80 * g_bgOpStartTimer.percentElapsedTime(600));
+    //SDL_RenderFillRect(g_rd, &r);
+
+    u32 colFB = PackRGBAtoARGB(0, 0, 0, (u8)(0xd0 * g_bgOpStartTimer.percentElapsedTime(600)));
+    u32 colHB = PackRGBAtoARGB(0, 0, 0, (u8)(0x80 * g_bgOpStartTimer.percentElapsedTime(600)));
+
+    renderGradient({ 0,0,g_windowW,g_windowH / 2 }, colFB, colFB, colHB, colHB);
+    renderGradient({ 0,g_windowH/2,g_windowW,g_windowH / 2 + 1 }, colHB, colHB, colFB, colFB);
 
     TooltipsLayer localttp;
 
