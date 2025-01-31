@@ -65,7 +65,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(lbl3);
     UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
     dd1->position = xyAdd(posInTab, { 200, 0 });
-    dd1->wxWidth = 120;
+    dd1->wxWidth = 180;
     dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
     dd1->setTextToSelectedItem = true;
     dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";

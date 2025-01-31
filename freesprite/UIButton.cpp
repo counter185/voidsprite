@@ -16,7 +16,7 @@ void UIButton::render(XY pos)
 
 	renderAnimations(pos);
 
-	int textX = pos.x + 2;
+	int textX = pos.x + 5;
 	if (icon != NULL) {
 		SDL_SetTextureAlphaMod(icon, 0xff);
 		SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
