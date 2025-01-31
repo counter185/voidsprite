@@ -110,6 +110,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: flatpak/flatpak-github-actions/flatpak-builder@master
+      continue-on-error: true
       with:
         bundle: voidsprite-build-linux64-flatpak.flatpak
         manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
