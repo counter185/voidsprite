@@ -165,6 +165,7 @@ void g_switchScreen(int index) {
     if (index >= 0 && index < screenStack.size()) {
         if (index != currentScreen) {
             currentScreen = index;
+            screenStack[currentScreen]->onReturnToScreen();
             screenSwitchTimer.start();
         }
         overlayWidgets.forceUnfocus();

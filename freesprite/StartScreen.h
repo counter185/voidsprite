@@ -19,6 +19,7 @@
 #include "PopupGlobalConfig.h"
 #include "SplitSessionEditor.h"
 #include "Timer64.h"
+#include "Panel.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -36,6 +37,8 @@ public:
     UITextField* tab1TextFieldCHX;
 
     ScreenWideNavBar<StartScreen*>* navbar;
+
+    Panel* lastOpenFilesPanel;
 
     Timer64 startupAnimTimer;
 
@@ -151,6 +154,12 @@ public:
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
         }
 
+        lastOpenFilesPanel = new Panel();
+        lastOpenFilesPanel->wxWidth = 560;
+        lastOpenFilesPanel->wxHeight = 520;
+        lastOpenFilesPanel->position = {570, 75};
+        wxsManager.addDrawable(lastOpenFilesPanel);
+
         navbar = new ScreenWideNavBar<StartScreen*>(this, 
         {
             {
@@ -215,12 +224,17 @@ public:
             }
         }
 
+        populateLastOpenFiles();
         startupAnimTimer.start();
     }
 
     void render() override;
     void tick() override;
     void takeInput(SDL_Event evt) override;
+
+    void onReturnToScreen() override {
+        populateLastOpenFiles();
+    }
 
     std::string getName() override { return "voidsprite Launchpad"; }
 
@@ -235,6 +249,7 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
     
+    void populateLastOpenFiles();
     void renderStartupAnim();
     void renderBackground();
     void openImageLoadDialog();

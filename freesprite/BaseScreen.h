@@ -28,6 +28,7 @@ public:
     virtual void tick() {}
     virtual BaseScreen* isSubscreenOf() { return NULL; }
     virtual bool takesTouchEvents() { return false; }
+    virtual void onReturnToScreen() {}
 
     virtual std::string getName() { return "Base screen"; }
 

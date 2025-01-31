@@ -68,7 +68,9 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
 
         if (exporterId < g_palettizedFileExporters.size()) {
             FileExporter* actualExporterID = g_palettizedFileExporters[exporterId];
-            trySaveWithExporter(name, actualExporterID);
+            if (trySaveWithExporter(name, actualExporterID)) {
+                g_tryPushLastFilePath(convertStringToUTF8OnWin32(name));
+            }
         }
     }
     else if (evt_id == EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE) {
@@ -688,7 +690,9 @@ void MainEditorPalettized::trySavePalettizedImage()
         trySaveAsImage();
     }
     else {
-        trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
+        if (trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter)) {
+            g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
+        }
     }
 }
 

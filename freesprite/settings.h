@@ -9,6 +9,8 @@ struct GlobalConfig {
     bool fillToolTileBound = true;
     bool vsync = true;
 
+    std::vector<std::string> lastOpenFiles;
+
     //this is used only during initial load. not updated at runtime.
     std::map<std::string, SDL_Keycode> keybinds;
 };
@@ -18,3 +20,5 @@ inline GlobalConfig g_config;
 
 bool g_saveConfig();
 void g_loadConfig();
+
+void g_tryPushLastFilePath(std::string a);

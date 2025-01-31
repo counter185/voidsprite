@@ -14,6 +14,10 @@ bool g_saveConfig() {
         file << "fillToolTileBound=" << (g_config.fillToolTileBound ? "1" : "0") << std::endl;
         file << "vsync=" << (g_config.vsync ? "1" : "0") << std::endl;
 
+        for (std::string& p : g_config.lastOpenFiles) {
+            file << "lastfile=" << p << std::endl;
+        }
+
         int x = 0;
         for (BaseBrush* brush : g_brushes) {
 			file << "keybind:brush:" << x++ << "=" << std::to_string(brush->keybind) << std::endl;
@@ -33,16 +37,22 @@ void g_loadConfig() {
         std::map<std::string, std::string> config;
         std::string line;
         while (std::getline(file, line)) {
-            std::string key = line.substr(0, line.find("="));
-            std::string value = line.substr(line.find("=") + 1);
-            config[key] = value;
+            if (line.find("=") != std::string::npos) {
+                std::string key = line.substr(0, line.find("="));
+                std::string value = line.substr(line.find("=") + 1);
+                config[key] = value;
 
-            if (stringStartsWithIgnoreCase(key, "keybind:")) {
-                try {
-                    int keybind = std::stoi(value);
-                    g_config.keybinds[key.substr(key.find(':') + 1)] = keybind;
-                } catch (std::exception){
-                    printf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
+                if (stringStartsWithIgnoreCase(key, "keybind:")) {
+                    try {
+                        int keybind = std::stoi(value);
+                        g_config.keybinds[key.substr(key.find(':') + 1)] = keybind;
+                    }
+                    catch (std::exception) {
+                        printf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
+                    }
+                }
+                else if (key == "lastfile") {
+                    g_config.lastOpenFiles.push_back(value);
                 }
             }
         }
@@ -57,5 +67,19 @@ void g_loadConfig() {
 
         g_configWasLoaded = true;
         file.close();
+    }
+}
+
+void g_tryPushLastFilePath(std::string a) {
+    auto pos = std::find(g_config.lastOpenFiles.begin(),g_config.lastOpenFiles.end(), a);
+    if (pos != g_config.lastOpenFiles.begin() && g_config.lastOpenFiles.size() > 0) {
+        if (pos != g_config.lastOpenFiles.end()) {
+            g_config.lastOpenFiles.erase(pos);
+        }
+        g_config.lastOpenFiles.insert(g_config.lastOpenFiles.begin(), a);
+        while (g_config.lastOpenFiles.size() > 7) {
+            g_config.lastOpenFiles.pop_back();
+        }
+        g_saveConfig();
     }
 }

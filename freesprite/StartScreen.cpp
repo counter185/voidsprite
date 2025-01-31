@@ -35,6 +35,11 @@ void StartScreen::render()
 
     g_fnt->RenderString("New image", 10, 80);
 
+    bgr.x += bgr.w + 10;
+    bgr.y += 40;
+    bgr.h -= 40;
+    renderGradient(bgr, sdlcolorToUint32(colorBG3), 0, sdlcolorToUint32(colorBG2), 0);
+
     wxsManager.renderAll();
 
     renderStartupAnim();
@@ -161,6 +166,12 @@ void StartScreen::eventButtonPressed(int evt_id) {
             break;
         }
     }
+    else if (evt_id >= 20) {
+        int index = evt_id - 20;
+        if (index < g_config.lastOpenFiles.size()) {
+            tryLoadFile(g_config.lastOpenFiles[index]);
+        }
+    }
 }
 
 void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex)
@@ -202,6 +213,30 @@ void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string n
         newMainEditor->tileDimensions = g_templates[index]->tileSize();
         newMainEditor->tileGridPaddingBottomRight = g_templates[index]->tilePadding();
         g_addScreen(newMainEditor);
+    }
+}
+
+void StartScreen::populateLastOpenFiles()
+{
+    lastOpenFilesPanel->subWidgets.freeAllDrawables();
+
+    UILabel* lbl = new UILabel();
+    lbl->text = "Last open files";
+    lbl->position = {5, 2};
+    lastOpenFilesPanel->subWidgets.addDrawable(lbl);
+
+    XY origin = { 10, 35 };
+
+    int i = 0;
+    for (std::string& lastPath : g_config.lastOpenFiles) {
+        UIButton* button = new UIButton();
+        button->text = lastPath;
+        button->position = origin;
+        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(lastPath));
+        button->wxWidth = textDim.x;
+        button->setCallbackListener((i++) + 20, this);
+        origin.y += 30;
+        lastOpenFilesPanel->subWidgets.addDrawable(button);
     }
 }
 
@@ -468,6 +503,7 @@ void StartScreen::tryLoadFile(std::string path)
     MainEditor* newSession = loadAnyIntoSession(path);
     if (newSession != NULL) {
         g_addScreen(newSession);
+        g_tryPushLastFilePath(path);
     }
     else {
         g_addNotification(ErrorNotification("Error", "Failed to load file"));

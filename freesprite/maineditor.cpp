@@ -1207,6 +1207,10 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 
             result = trySaveWithExporter(name, exporter);
         }
+
+        if (result) {
+            g_tryPushLastFilePath(convertStringToUTF8OnWin32(name));
+        }
     }
     else if (evt_id == EVENT_MAINEDITOR_EXPORTPALETTIZED) {
         exporterID--;
@@ -1372,8 +1376,9 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
 
 void MainEditor::trySaveImage()
 {
+    bool result = false;
     if (splitSessionData.set) {
-        saveSplitSession(lastConfirmedSavePath, this);
+        result = saveSplitSession(lastConfirmedSavePath, this);
     }
     else {
         lastWasSaveAs = false;
@@ -1381,10 +1386,12 @@ void MainEditor::trySaveImage()
             trySaveAsImage();
         }
         else {
-            trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
+            result = trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
         }
     }
-    
+    if (result) {
+        g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
+    }
 }
 
 bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter)
@@ -1419,7 +1426,9 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
 void MainEditor::trySaveAsImage()
 {
     if (splitSessionData.set) {
-        saveSplitSession(lastConfirmedSavePath, this);
+        if (saveSplitSession(lastConfirmedSavePath, this)) {
+            g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
+        }
     }
     else {
         lastWasSaveAs = true;
