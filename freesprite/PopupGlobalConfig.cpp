@@ -23,7 +23,8 @@ enum ConfigOptions : int {
 
 PopupGlobalConfig::PopupGlobalConfig()
 {
-    previousConfig = g_config;
+    //do not do   previousConfig = g_config  it will crash 
+    previousConfig = GlobalConfig(g_config);
 
     wxHeight = 400;
     wxWidth = 700;

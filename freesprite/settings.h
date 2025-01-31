@@ -1,6 +1,7 @@
 #pragma once
 
-struct GlobalConfig {
+class GlobalConfig {
+public:
     bool openSavedPath = true;
     int animatedBackground = 1; //0:off, 1:sharp, 2:smooth, 3:sharp(static), 4:smooth(static)
     int maxUndoHistory = 20;
