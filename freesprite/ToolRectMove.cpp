@@ -18,10 +18,10 @@ void ToolRectMove::clickRelease(MainEditor* editor, XY pos)
 	int ymax = ixmax(pos.y, mouseDownPoint.y) + 1;
 	clonedAreaPointAndDimensions = SDL_Rect{ xmin, ymin, xmax - xmin, ymax - ymin };
 	if (clonedArea != NULL) {
-		free(clonedArea);
+		tracked_free(clonedArea);
 		SDL_DestroyTexture(cacheClonePreview);
 	}
-	clonedArea = (uint32_t*)malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4);
+	clonedArea = (uint32_t*)tracked_malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4, "Temp. mem.");
 	if (clonedArea == NULL) {
 		g_addNotification(ErrorNotification("Error", "malloc failed"));
 		return;

@@ -8,7 +8,7 @@
 void ToolText::clickPress(MainEditor* editor, XY pos)
 {
 	if (textSurface != NULL) {
-		uint8_t* pixels = (uint8_t*)textSurface->pixels;//(uint8_t*)malloc(textSurface->w * textSurface->h * 4);
+		uint8_t* pixels = (uint8_t*)textSurface->pixels;//(uint8_t*)tracked_malloc(textSurface->w * textSurface->h * 4);
 		int pitch = textSurface->w * 4;
 		//SDL_ConvertPixels(textSurface->w, textSurface->h, SDL_PIXELFORMAT_ARGB8888, textSurface->pixels, textSurface->pitch, SDL_PIXELFORMAT_ARGB8888, pixels, pitch);
 		for (int y = 0; y < textSurface->h; y++) {
@@ -24,7 +24,7 @@ void ToolText::clickPress(MainEditor* editor, XY pos)
 				editor->SetPixel(XY{ pos.x + x, pos.y + y }, editor->isPalettized ? ((MainEditorPalettized*)editor)->pickedPaletteIndex : editor->pickedColor);
 			}
 		}
-		//free(pixels);
+		//tracked_free(pixels);
 	}
 }
 

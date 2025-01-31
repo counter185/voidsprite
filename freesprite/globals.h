@@ -241,6 +241,7 @@ struct NineSegmentPattern {
     SDL_Texture* cachedTexture = NULL;
 };
 
+#include "memory_tracker.h"
 #include "platform.h"
 #include "colors.h"
 #include "palettes.h"

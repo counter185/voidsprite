@@ -632,7 +632,7 @@ void MainEditorPalettized::exportTilesIndividually()
 
 int32_t* MainEditorPalettized::makeFlatIndicesTable()
 {
-    int32_t* indices = (int32_t*)malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
+    int32_t* indices = (int32_t*)tracked_malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
     memset(indices, 0, canvas.dimensions.x * canvas.dimensions.y * 4);
     for (Layer*& l : layers) {
         if (!l->hidden) {
@@ -660,7 +660,7 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
             intpxdata[x + y * canvas.dimensions.x] = palette[indices[x + y * canvas.dimensions.x]];
         }
     }
-    free(indices);
+    tracked_free(indices);
     return flatAndRGBConvertedLayer;
 }
 
@@ -670,7 +670,7 @@ Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
     LayerPalettized* flatLayer = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
     memcpy(flatLayer->pixelData, indices, canvas.dimensions.x * canvas.dimensions.y * 4);
     flatLayer->palette = palette;
-    free(indices);
+    tracked_free(indices);
     return flatLayer;
 }
 

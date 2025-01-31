@@ -1458,7 +1458,7 @@ void MainEditor::discardEndOfUndoStack() {
             case UNDOSTACK_RESIZE_LAYER:
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
-                    free(resizeLayerData[x].oldData);
+                    tracked_free(resizeLayerData[x].oldData);
                 }
                 delete resizeLayerData;
                 break;
@@ -1534,7 +1534,7 @@ void MainEditor::discardRedoStack()
             case UNDOSTACK_RESIZE_LAYER:
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
-                    free(resizeLayerData[x].oldData);
+                    tracked_free(resizeLayerData[x].oldData);
                 }
                 delete resizeLayerData;
                 break;
@@ -1815,9 +1815,9 @@ void MainEditor::layer_swapLayerRGBtoBGR()
 {
     commitStateToCurrentLayer();
     Layer* clayer = getCurrentLayer();
-    uint8_t* convData = (uint8_t*)malloc(clayer->w * clayer->h * 4);
+    uint8_t* convData = (uint8_t*)tracked_malloc(clayer->w * clayer->h * 4);
     SDL_ConvertPixels(clayer->w, clayer->h, SDL_PIXELFORMAT_ARGB8888, clayer->pixelData, clayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, clayer->w * 4);
-    free(clayer->pixelData);
+    tracked_free(clayer->pixelData);
     clayer->pixelData = convData;
     clayer->layerDirty = true;
 }
@@ -2142,7 +2142,7 @@ void MainEditor::layer_outline(bool wholeImage)
 {
     
     Layer* l = getCurrentLayer();
-    uint8_t* placePixelData = (uint8_t*)malloc(l->w * l->h);
+    uint8_t* placePixelData = (uint8_t*)tracked_malloc(l->w * l->h);
     if (placePixelData == NULL) {
 		g_addNotification(ErrorNotification("Error", "malloc failed"));
 		return;
@@ -2181,5 +2181,5 @@ void MainEditor::layer_outline(bool wholeImage)
         }
     }
 
-    free(placePixelData);
+    tracked_free(placePixelData);
 }

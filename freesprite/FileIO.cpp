@@ -105,7 +105,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
                             /*while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
                                 fread(astcData, 1, 16, infile);
                             }*/
-                            uint8_t* rgbaData = (uint8_t*)malloc(4 * blockHeight * blockWidth);
+                            uint8_t* rgbaData = (uint8_t*)tracked_malloc(4 * blockHeight * blockWidth);
                             bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
 
                             if (!success) {
@@ -131,7 +131,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
                                     //ret->setPixel({ x + xx,y + yy }, colorNow);
                                 }
                             }
-                            free(rgbaData);
+                            tracked_free(rgbaData);
                         }
                     }
                 }
@@ -153,7 +153,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
 {
     LayerPalettized* ret = new LayerPalettized(width, height);
-    uint8_t* colorTable = (uint8_t*)malloc(width * height);
+    uint8_t* colorTable = (uint8_t*)tracked_malloc(width * height);
     memset(colorTable, 0, width * height);
     uint64_t colorTablePointer = 0;
     uint8_t* inputPtr = input;
@@ -191,7 +191,7 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
         pxd[i] = colorTable[i];
     }
 
-    free(colorTable);
+    tracked_free(colorTable);
     return ret;
 }
 
@@ -244,7 +244,7 @@ uint8_t* DecompressMarioPaintSRM(FILE* f)
         }
     }
 
-    uint8_t* ret = (uint8_t*)malloc(out.size());
+    uint8_t* ret = (uint8_t*)tracked_malloc(out.size());
     memcpy(ret, out.data(), out.size());
 
     return ret;
@@ -651,7 +651,7 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
                 printf("NOOOOO LAYER IS NULL\n");
             }
 
-            free(pngData);
+            tracked_free(pngData);
             zip_entry_close(zip);
         }
     }
@@ -673,11 +673,11 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
         fread(&imgH, 2, 1, f);
         
         long cDataSize = filesize - (4 + 2 + 2);
-        Bytef* compressedData = (Bytef*)malloc(cDataSize);
+        Bytef* compressedData = (Bytef*)tracked_malloc(cDataSize);
         fread(compressedData, 1, cDataSize, f);
 
         uLongf decompressedSize = 768 + imgW * imgH;
-        Bytef* decompBytes = (Bytef*)malloc(decompressedSize);
+        Bytef* decompBytes = (Bytef*)tracked_malloc(decompressedSize);
         int res = uncompress(decompBytes, &decompressedSize, compressedData, cDataSize);
         //hopefully res == Z_OK
 
@@ -705,8 +705,8 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 
         nLayer->name = "XYZ Image";
 
-        free(compressedData);
-        free(decompBytes);
+        tracked_free(compressedData);
+        tracked_free(decompBytes);
 
         fclose(f);
         return nLayer;
@@ -1022,7 +1022,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 Layer* ret = NULL;
 
                 if (compressionMethod == 0x81) {
-                    uint8_t* rawData = (uint8_t*)malloc(filesize - r2dataStart);
+                    uint8_t* rawData = (uint8_t*)tracked_malloc(filesize - r2dataStart);
                     fread(rawData, filesize - r2dataStart, 1, texfile);
                     SDL_RWops* tgarw =
                         SDL_RWFromMem(rawData, filesize - r2dataStart);
@@ -1032,7 +1032,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                         ret = new Layer(tgasrf);
                         ret->name = "AETEX TGA Layer";
                     }
-                    free(rawData);
+                    tracked_free(rawData);
                 }
                 else if (compressionMethod == 0x8B) {
                     ret = new Layer(imgW, imgH);
@@ -1058,7 +1058,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
             if (formatType == 0x80) {
                 printf("[AETEX] ASTC texture\n");
                 //fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
-                //uint8_t* astcData = (uint8_t*)malloc(filesize - 0x80);
+                //uint8_t* astcData = (uint8_t*)tracked_malloc(filesize - 0x80);
                 //fread(astcData, filesize - 0x80, 1, texfile);
 
                 uint16_t astcWidth, astcHeight;
@@ -1071,14 +1071,14 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                         Layer* nlayer = new Layer(astcWidth, astcHeight);
                         nlayer->name = "AETEX ASTC layer";
 
-                        uint8_t* rgbaData = (uint8_t*)malloc(astcWidth * astcHeight * 4);
+                        uint8_t* rgbaData = (uint8_t*)tracked_malloc(astcWidth * astcHeight * 4);
 
                         fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                         //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
                         int errors = DeASTC(nlayer, astcWidth, astcHeight, texfile, x, y);
                         //printf("[AETEX] astc %s\n", success ? "success" : "failed");
                         //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
-                        free(rgbaData);
+                        tracked_free(rgbaData);
                         delete nlayer;
 
                         int totalBlocks = ceil(astcWidth / (float)x) * ceil(astcHeight / (float)y);
@@ -1091,28 +1091,28 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 Layer* nlayer = new Layer(astcWidth, astcHeight);
                 nlayer->name = "AETEX ASTC layer";
 
-                uint8_t* rgbaData = (uint8_t*)malloc(astcWidth * astcHeight * 4);
+                uint8_t* rgbaData = (uint8_t*)tracked_malloc(astcWidth * astcHeight * 4);
 
                 fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                 //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
                 DeASTC(nlayer, astcWidth, astcHeight, filesize, texfile);
                 //printf("[AETEX] astc %s\n", success ? "success" : "failed");
                 //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
-                free(rgbaData);
-                //free(astcData);
+                tracked_free(rgbaData);
+                //tracked_free(astcData);
                 return nlayer;
             }
             else {
 
                 fseek(texfile, 0x38, SEEK_SET);
-                uint8_t* tgaData = (uint8_t*)malloc(filesize - 0x38);
+                uint8_t* tgaData = (uint8_t*)tracked_malloc(filesize - 0x38);
                 fread(tgaData, filesize - 0x38, 1, texfile);
                 fclose(texfile);
                 SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
                 //todo: dds
                 SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
                 SDL_RWclose(tgarw);
-                free(tgaData);
+                tracked_free(tgaData);
                 return tgasrf == NULL ? NULL : new Layer(tgasrf);
             }
         }
@@ -1267,7 +1267,7 @@ Layer* readNES(PlatformNativePathString path, uint64_t seek)
             fseek(infile, 512, SEEK_CUR);
         }
         fseek(infile, 16384 * header.prgRoms, SEEK_CUR);
-        uint8_t* chrRomData = (uint8_t*)malloc(8192 * (int)header.chrRoms);
+        uint8_t* chrRomData = (uint8_t*)tracked_malloc(8192 * (int)header.chrRoms);
         fread(chrRomData, 8192, header.chrRoms, infile);
 
         ret = new Layer(32 * 8, 16 * 8 * header.chrRoms);
@@ -1297,7 +1297,7 @@ Layer* readNES(PlatformNativePathString path, uint64_t seek)
         fwrite(chrRomData, 8192, header.chrRoms, f2);
         fclose(f2);*/
 
-        free(chrRomData);
+        tracked_free(chrRomData);
         fclose(infile);
     }
     return ret;
@@ -1613,7 +1613,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
             l->name = "Mario Paint Layer";
             l->palette = g_palettes["Mario Paint"];
 
-            free(fullDecompressedData);
+            tracked_free(fullDecompressedData);
             fclose(f);
             return l;
         }
@@ -2051,7 +2051,7 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
     if (nsp.first) {
         Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
         memcpy(nlayer->pixelData, nsp.second.pixelData, nlayer->w * nlayer->h * 4);
-        free(nsp.second.pixelData);
+        tracked_free(nsp.second.pixelData);
         nlayer->name = "Pattern Layer";
         return nlayer;
     }
@@ -2179,7 +2179,7 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
         printf("[NDS] icon offset: %x\n", iconOffset);
         u32 bitmapStart = 0x20 + iconOffset;
 
-        u8* pixelData = (u8*)malloc(32 * 32);
+        u8* pixelData = (u8*)tracked_malloc(32 * 32);
 
         fseek(f, bitmapStart, SEEK_SET);
         //u32* pxd = (u32*)ret->pixelData;
@@ -2219,7 +2219,7 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
             }
         }
 
-        free(pixelData);
+        tracked_free(pixelData);
         fclose(f);
         return ret;
     }
@@ -2454,7 +2454,7 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
         u64 jxlSize = ftell(f);
         fseek(f, 0, SEEK_SET);
 
-        u8* jxlData = (u8*)malloc(jxlSize);
+        u8* jxlData = (u8*)tracked_malloc(jxlSize);
         if (jxlData == NULL) {
             g_addNotification(ErrorNotification("Error", "malloc failed"));
             fclose(f);
@@ -2499,7 +2499,7 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
 
                 // Allocate buffer for pixel data
                 size_t buffer_size = w * h * 4; // RGBA
-                pixelData = (u8*)malloc(buffer_size);
+                pixelData = (u8*)tracked_malloc(buffer_size);
             }
             else if (status == JXL_DEC_NEED_IMAGE_OUT_BUFFER) {
                 // Set the output buffer for pixel data
@@ -2533,7 +2533,7 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
             ret->name = "JPEG XL Layer";
             SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ABGR8888, pixelData, 4 * w, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, 4 * w);
         }
-        free(pixelData);
+        tracked_free(pixelData);
         fclose(f);
         return ret;
     }
@@ -2858,7 +2858,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
 							};
 
                             XY blitAt = positions[1];
-                            u32* pixelData = (u32*)malloc(rect.w * rect.h * 4);
+                            u32* pixelData = (u32*)tracked_malloc(rect.w * rect.h * 4);
                             for (int y = 0; y < rect.h; y++) {
 								for (int x = 0; x < rect.w; x++) {
 									pixelData[y * rect.w + x] = nlayer->getPixelAt({ rect.x + x, rect.y + y });
@@ -2880,7 +2880,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path)
                                 }
                             }
                             showWarning = true;
-                            free(pixelData);
+                            tracked_free(pixelData);
                         }
                             break;
                         //flip x
@@ -3047,13 +3047,13 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     for (int x = 0; x < nlayers; x++) {
                         int nameLen;
                         fread(&nameLen, 4, 1, infile);
-                        char* name = (char*)malloc(nameLen+1);
+                        char* name = (char*)tracked_malloc(nameLen+1);
                         memset(name, 0, nameLen + 1);
                         fread(name, nameLen, 1, infile);
 
                         Layer* newLayer = new Layer(dimensions.x, dimensions.y);
                         newLayer->name = std::string(name);
-                        free(name);
+                        tracked_free(name);
                         fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
                         layers.push_back(newLayer);
                     }
@@ -3107,7 +3107,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         for (int x = 0; x < nlayers; x++) {
                             int nameLen;
                             fread(&nameLen, 4, 1, infile);
-                            char* name = (char*)malloc(nameLen + 1);
+                            char* name = (char*)tracked_malloc(nameLen + 1);
                             memset(name, 0, nameLen + 1);
                             fread(name, nameLen, 1, infile);
 
@@ -3119,7 +3119,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             newLayer->colorKeySet = colorKeySet == '\1';
                             fread(&newLayer->colorKey, 4, 1, infile);
 
-                            free(name);
+                            tracked_free(name);
 
                             //voidsn version 5+ uses zlib compression
                             if (voidsnversion < 5) {
@@ -3155,7 +3155,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         for (int x = 0; x < nlayers; x++) {
                             int nameLen;
                             fread(&nameLen, 4, 1, infile);
-                            char* name = (char*)malloc(nameLen + 1);
+                            char* name = (char*)tracked_malloc(nameLen + 1);
                             memset(name, 0, nameLen + 1);
                             fread(name, nameLen, 1, infile);
 
@@ -3167,7 +3167,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             newLayer->colorKeySet = colorKeySet == '\1';
                             fread(&newLayer->colorKey, 4, 1, infile);
 
-                            free(name);
+                            tracked_free(name);
 
                             if (voidsnversion < 5) {
                                 fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
@@ -3338,7 +3338,7 @@ bool writePNG(PlatformNativePathString path, Layer* data)
             setjmp(png_jmpbuf(outpng));
             png_write_info(outpng, outpnginfo);
 
-            uint8_t* convertedToABGR = (uint8_t*)malloc(data->w * data->h * 4);
+            uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
             SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
 
             png_bytepp rows = new png_bytep[data->h];
@@ -3347,7 +3347,7 @@ bool writePNG(PlatformNativePathString path, Layer* data)
             }
             png_write_image(outpng, rows);
             delete[] rows;
-            free(convertedToABGR);
+            tracked_free(convertedToABGR);
         }
         else {
             LayerPalettized* pltLayer = (LayerPalettized*)data;
@@ -3858,10 +3858,10 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 
         fwrite(zipBuffer, zipBufferSize, 1, f);
         fclose(f);
-        free(zipBuffer);
+        tracked_free(zipBuffer);
         return true;
     }
-    free(zipBuffer);
+    tracked_free(zipBuffer);
     return false;
 }
 
@@ -3917,7 +3917,7 @@ bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data)
                 fseek(infile, 0, SEEK_END);
                 uint64_t fileLength = ftell(infile);
                 fseek(infile, 0, SEEK_SET);
-                //char* fileBuffer = (char*)malloc(fileLength);
+                //char* fileBuffer = (char*)tracked_malloc(fileLength);
                 std::string fileBuffer;
                 fileBuffer.resize(fileLength);
                 fread(fileBuffer.data(), fileLength, 1, infile);
@@ -3991,7 +3991,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
         }
 
         //write pixel data
-        uint8_t* pxPalleteData = (uint8_t*)malloc(data->w * data->h);
+        uint8_t* pxPalleteData = (uint8_t*)tracked_malloc(data->w * data->h);
         uint32_t* pixelData32 = (uint32_t*)data->pixelData;
         if (data->isPalettized) {
             for (uint64_t x = 0; x < data->w * data->h; x++) {
@@ -4006,16 +4006,16 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
             }
         }
         unsigned long dataLength = 256 * 3 + data->w * data->h;
-        uint8_t* combined = (uint8_t*)malloc(dataLength);
+        uint8_t* combined = (uint8_t*)tracked_malloc(dataLength);
         memcpy(combined, paletteData, 256 * 3);
         memcpy(combined+(256*3), pxPalleteData, data->w * data->h);
-        uint8_t* dst = (uint8_t*)malloc(dataLength);
+        uint8_t* dst = (uint8_t*)tracked_malloc(dataLength);
         compress((Bytef*)dst, &dataLength, combined, dataLength);
         fwrite(dst, dataLength, 1, outfile);
 
-        free(combined);
-        free(dst);
-        free(pxPalleteData);
+        tracked_free(combined);
+        tracked_free(dst);
+        tracked_free(pxPalleteData);
         fclose(outfile);
         return true;
     }
@@ -4528,7 +4528,7 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
 
-        u8* abgrPixels = (u8*)malloc(data->w * data->h * 4);
+        u8* abgrPixels = (u8*)tracked_malloc(data->w * data->h * 4);
         if (abgrPixels == NULL) {
             fclose(f);
             g_addNotification(ErrorNotification("Error", "malloc failed"));
@@ -4596,7 +4596,7 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
         if (jxlCompressResult) {
             fwrite(outputData.data(), outputData.size(), 1, f);
         }
-        free(abgrPixels);
+        tracked_free(abgrPixels);
         fclose(f);
         return jxlCompressResult;
     }
@@ -4735,7 +4735,7 @@ std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString
                 *r = buffer;
             }
             if (ret.dimensions.x > 0 && ret.dimensions.y > 0) {
-                ret.pixelData = (u32*)malloc(4 * ret.dimensions.x * ret.dimensions.y);
+                ret.pixelData = (u32*)tracked_malloc(4 * ret.dimensions.x * ret.dimensions.y);
             }
 
             if (ret.pixelData != NULL) {
@@ -4956,7 +4956,7 @@ bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
                 fseek(infile, 0, SEEK_END);
                 uint64_t fileLength = ftell(infile);
                 fseek(infile, 0, SEEK_SET);
-                //char* fileBuffer = (char*)malloc(fileLength);
+                //char* fileBuffer = (char*)tracked_malloc(fileLength);
                 std::string fileBuffer;
                 fileBuffer.resize(fileLength);
                 fread(fileBuffer.data(), fileLength, 1, infile);
@@ -4970,7 +4970,7 @@ bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
                 fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
                 fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
                 fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
-                //free(fileBuffer);
+                //tracked_free(fileBuffer);
             }
 
 

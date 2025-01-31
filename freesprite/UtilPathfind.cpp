@@ -56,9 +56,9 @@ bool __util_anyEqualsAndGGreater(Node* val, std::vector<Node*> list) {
 }
 
 /*char** ReadMapFromFile(std::string filepath, int w, int h) {
-    char** outmap = (char**)malloc(sizeof(char*) * h);
+    char** outmap = (char**)tracked_malloc(sizeof(char*) * h);
     for (int x = 0; x < h; x++) {
-        outmap[x] = (char*)malloc(sizeof(char) * w);
+        outmap[x] = (char*)tracked_malloc(sizeof(char) * w);
     }
     std::ifstream infile(filepath);
     if (!infile.good()) {

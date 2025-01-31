@@ -620,6 +620,14 @@ int main(int argc, char** argv)
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
         }
 
+#if _DEBUG
+        XY origin = { g_windowW - 240, g_windowH - 90 };
+        for (auto& mem : g_named_memmap) {
+            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x, origin.y, {255,255,255,100});
+            origin.y -= 20;
+        }
+#endif
+
         
         //render notifications
         tickNotifications();

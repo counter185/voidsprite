@@ -91,9 +91,9 @@ TilemapPreviewScreen::~TilemapPreviewScreen()
         XY**& tilemapLayer = tilemap.at(l);
         if (tilemapLayer != NULL) {
             for (int y = 0; y < tilemapDimensions.y; y++) {
-                free(tilemapLayer[y]);
+                tracked_free(tilemapLayer[y]);
             }
-            free(tilemapLayer);
+            tracked_free(tilemapLayer);
         }
     }
     tilemap.clear();
@@ -524,9 +524,9 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
         for (int l = 0; l < tilemap.size(); l++) {
             XY**& tilemapLayer = tilemap.at(l);
 
-            XY** newTilemap = (XY**)malloc(h * sizeof(XY*));
+            XY** newTilemap = (XY**)tracked_malloc(h * sizeof(XY*), "Tilemap");
             for (int y = 0; y < h; y++) {
-                newTilemap[y] = (XY*)malloc(w * sizeof(XY));
+                newTilemap[y] = (XY*)tracked_malloc(w * sizeof(XY), "Tilemap");
                 for (int x = 0; x < w; x++) {
                     newTilemap[y][x] = XY{ -1,-1 };
                 }
@@ -537,18 +537,18 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
                     if (y < h) {
                         memcpy(newTilemap[y], tilemapLayer[y], sizeof(XY) * ixmin(w, tilemapDimensions.x));
                     }
-                    free(tilemapLayer[y]);
+                    tracked_free(tilemapLayer[y]);
                 }
-                free(tilemapLayer);
+                tracked_free(tilemapLayer);
             }
 
             tilemap[l] = newTilemap;
         }
     }
     else {
-        XY** newTilemap = (XY**)malloc(h * sizeof(XY*));
+        XY** newTilemap = (XY**)tracked_malloc(h * sizeof(XY*), "Tilemap");
         for (int y = 0; y < h; y++) {
-            newTilemap[y] = (XY*)malloc(w * sizeof(XY));
+            newTilemap[y] = (XY*)tracked_malloc(w * sizeof(XY), "Tilemap");
             for (int x = 0; x < w; x++) {
                 newTilemap[y][x] = XY{ -1,-1 };
             }
@@ -625,9 +625,9 @@ void TilemapPreviewScreen::freeAllLayers()
         XY**& tilemapLayer = tilemap.at(l);
         if (tilemapLayer != NULL) {
             for (int y = 0; y < tilemapDimensions.y; y++) {
-                free(tilemapLayer[y]);
+                tracked_free(tilemapLayer[y]);
             }
-            free(tilemapLayer);
+            tracked_free(tilemapLayer);
         }
     }
     tilemap.clear();
@@ -636,9 +636,9 @@ void TilemapPreviewScreen::freeAllLayers()
 
 XY** TilemapPreviewScreen::newLayer()
 {
-    XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
+    XY** newTilemap = (XY**)tracked_malloc(tilemapDimensions.y * sizeof(XY*), "Tilemap");
     for (int y = 0; y < tilemapDimensions.y; y++) {
-        newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
+        newTilemap[y] = (XY*)tracked_malloc(tilemapDimensions.x * sizeof(XY), "Tilemap");
         for (int x = 0; x < tilemapDimensions.x; x++) {
             newTilemap[y][x] = XY{ -1,-1 };
         }
@@ -653,9 +653,9 @@ void TilemapPreviewScreen::deleteLayer(int index)
     if (tilemap.size() > 1) {
         XY** tilemapLayer = tilemap.at(index);
         for (int y = 0; y < tilemapDimensions.y; y++) {
-            free(tilemapLayer[y]);
+            tracked_free(tilemapLayer[y]);
         }
-        free(tilemapLayer);
+        tracked_free(tilemapLayer);
         tilemap.erase(tilemap.begin() + index);
         if (activeTilemap == tilemapLayer) {
             activeTilemap = tilemap[index < tilemap.size() ? index : tilemap.size()-1];
@@ -700,9 +700,9 @@ void TilemapPreviewScreen::mergeLayerDown(int index)
 void TilemapPreviewScreen::duplicateLayer(int index)
 {
     XY**& tilemapLayer = tilemap.at(index);
-    XY** newTilemap = (XY**)malloc(tilemapDimensions.y * sizeof(XY*));
+    XY** newTilemap = (XY**)tracked_malloc(tilemapDimensions.y * sizeof(XY*), "Tilemap");
     for (int y = 0; y < tilemapDimensions.y; y++) {
-        newTilemap[y] = (XY*)malloc(tilemapDimensions.x * sizeof(XY));
+        newTilemap[y] = (XY*)tracked_malloc(tilemapDimensions.x * sizeof(XY), "Tilemap");
         for (int x = 0; x < tilemapDimensions.x; x++) {
             newTilemap[y][x] = tilemapLayer[y][x];
         }

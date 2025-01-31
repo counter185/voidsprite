@@ -142,7 +142,7 @@ Layer* Layer::trim(SDL_Rect r)
 
 uint8_t* Layer::resize(XY to)
 {
-    uint32_t* newPixelData = (uint32_t*)malloc(to.x * to.y * 4);
+    uint32_t* newPixelData = (uint32_t*)tracked_malloc(to.x * to.y * 4, "Layers");
     uint32_t* pixelDataNow = (uint32_t*)pixelData;
     memset(newPixelData, 0, to.x * to.y * 4);
     for (int y = 0; y < ixmin(h, to.y); y++) {
@@ -168,7 +168,7 @@ uint8_t* Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
         targetTileSize.y * newTilesCount.y
     };
 
-    uint32_t* newPixelData = (uint32_t*)malloc(newSize.x * newSize.y * 4);
+    uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
     uint32_t* oldPixelData = (uint32_t*)pixelData;
     memset(newPixelData, 0, newSize.x * newSize.y * 4);
     for (int tileY = 0; tileY < newTilesCount.y; tileY++) {
@@ -197,7 +197,7 @@ uint8_t* Layer::resizeByTileCount(XY tileSizesNow, XY newTileCount)
         tileSizesNow.x * newTileCount.x,
         tileSizesNow.y * newTileCount.y
     };
-    uint32_t* newPixelData = (uint32_t*)malloc(newSize.x * newSize.y * 4);
+    uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
     uint32_t* oldPixelData = (uint32_t*)pixelData;
     memset(newPixelData, 0, newSize.x * newSize.y * 4);
     for (int y = 0; y < ixmin(h, newSize.y); y++) {
@@ -215,7 +215,7 @@ uint8_t* Layer::resizeByTileCount(XY tileSizesNow, XY newTileCount)
 uint8_t* Layer::integerScale(XY scale)
 {
     XY newSize = { w * scale.x, h * scale.y };
-    uint32_t* newPixelData = (uint32_t*)malloc(newSize.x * newSize.y * 4);
+    uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
     uint32_t* oldPixelData = (uint32_t*)pixelData;
     memset(newPixelData, 0, newSize.x * newSize.y * 4);
     for (int y = 0; y < newSize.y; y++) {
@@ -233,7 +233,7 @@ uint8_t* Layer::integerDownscale(XY scale)
 {
     if (w % scale.x == 0 && h % scale.y == 0) {
         XY newSize = { w / scale.x, h / scale.y };
-        uint32_t* newPixelData = (uint32_t*)malloc(newSize.x * newSize.y * 4);
+        uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
         uint32_t* oldPixelData = (uint32_t*)pixelData;
         memset(newPixelData, 0, newSize.x * newSize.y * 4);
         for (int y = 0; y < newSize.y; y++) {

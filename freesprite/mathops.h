@@ -120,12 +120,12 @@ public:
     Bitblock(u64 size) {
         this->size = size;
         this->sizeBytes = (u64)ceill(size / 8.0);
-        data = (u8*)malloc(sizeBytes);
+        data = (u8*)tracked_malloc(sizeBytes);
         if (data == NULL) {
             throw std::bad_alloc();
         }
     }
-    ~Bitblock() { free(data); }
+    ~Bitblock() { tracked_free(data); }
     void set(u64 index, bool value) {
         u64 byteIndex = index / 8;
         u32 bitIndex = index % 8;

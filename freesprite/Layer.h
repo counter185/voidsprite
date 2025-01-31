@@ -27,7 +27,7 @@ public:
 	Layer(int width, int height) {
 		w = width;
 		h = height;
-		pixelData = (uint8_t*)malloc(width * height * 4);
+		pixelData = (uint8_t*)tracked_malloc(width * height * 4, "Layers");
 		if (pixelData != NULL) {
 			memset(pixelData, 0, width * height * 4);
 			tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
@@ -36,7 +36,7 @@ public:
 		}
 	}
 	Layer(SDL_Surface* from) : Layer(from->w, from->h) {
-		//pixelData = (uint8_t*)malloc(w * h * 4);
+		//pixelData = (uint8_t*)tracked_malloc(w * h * 4);
 		if (from->format->format == SDL_PIXELFORMAT_ARGB8888) {
 			memcpy(pixelData, from->pixels, w * h * 4);
 		}
@@ -47,12 +47,12 @@ public:
 	}
 
 	virtual ~Layer() {
-		free(pixelData);
+		tracked_free(pixelData);
 		for (uint8_t*& u : undoQueue) {
-			free(u);
+			tracked_free(u);
 		}
 		for (uint8_t*& r : redoQueue) {
-			free(r);
+			tracked_free(r);
 		}
 		SDL_DestroyTexture(tex);
 	}
@@ -207,19 +207,19 @@ public:
 
 	void discardRedoStack() {
 		for (uint8_t*& redoD : redoQueue) {
-			free(redoD);
+			tracked_free(redoD);
 		}
 		redoQueue.clear();
 	}
 	void discardLastUndo() {
 		if (!undoQueue.empty()) {
-			free(undoQueue[0]);
+			tracked_free(undoQueue[0]);
 			undoQueue.erase(undoQueue.begin());
 		}
 	}
 	void commitStateToUndoStack() {
 		discardRedoStack();
-		uint8_t* copiedPixelData = (uint8_t*)malloc(w * h * 4);
+		uint8_t* copiedPixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
 		if (copiedPixelData != NULL) {
 			memcpy(copiedPixelData, pixelData, w * h * 4);
 			undoQueue.push_back(copiedPixelData);
