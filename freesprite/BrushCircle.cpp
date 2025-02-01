@@ -57,7 +57,7 @@ void BrushCircleArc::clickRelease(MainEditor* editor, XY pos)
 
 void BrushCircleArc::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
-	printf("held down: %i right clicked: %i\n", heldDown, rightClicked);
+	//printf("held down: %i right clicked: %i\n", heldDown, rightClicked);
 	if (heldDown) {
 		XY posMin = { ixmin(lastMouseMotionPos.x, startPos.x), ixmin(lastMouseMotionPos.y, startPos.y) };
 		XY posMax = { ixmax(lastMouseMotionPos.x, startPos.x), ixmax(lastMouseMotionPos.y, startPos.y) };
