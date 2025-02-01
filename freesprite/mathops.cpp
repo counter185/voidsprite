@@ -230,7 +230,7 @@ XY getSnappedPoint(XY from, XY to) {
     }
 }
 
-void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc)
+void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc, bool ceilLine)
 {
     if (from.x == to.x) {
         int yMin = from.y > to.y ? to.y : from.y;
@@ -251,7 +251,7 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc
             float b = from.y - a * from.x;
 
             for (int x = xMin; x <= xMax; x++) {
-                int yPos = (int)(a * x + b);
+                int yPos = (int)round(a * x + b);
                 //SetPixel(XY{ x, yPos }, color);
                 forEachPixel(XY{ x, yPos });
             }
@@ -261,7 +261,7 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc
             float b = from.x - a * from.y;
 
             for (int x = yMin; x <= yMax; x++) {
-                int xPos = (int)(a * x + b);
+                int xPos = (int)round(a * x + b);
                 //SetPixel(XY{ xPos, x }, color);
                 forEachPixel(XY{ xPos, x });
             }
@@ -275,7 +275,7 @@ void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel
     int a = dimensions.x / 2;
     bool xEven = dimensions.x % 2 == 0;
     bool yEven = dimensions.y % 2 == 0;
-    g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}", posMin.x, posMin.y, posMax.x, posMax.y, a, b, xEven, yEven), 50, 50);
+    //g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}", posMin.x, posMin.y, posMax.x, posMax.y, a, b, xEven, yEven), 50, 50);
 
     XY lastPTL, lastPTR, lastPBL, lastPBR;
     bool lastPointsSet = false;
@@ -383,7 +383,7 @@ void rasterizeSplitEllipseByY(XY posMin, XY posMax, std::function<void(XY)> forE
     int a = dimensions.x / 2;
     bool xEven = dimensions.x % 2 == 0;
     bool yEven = dimensions.y % 2 == 0;
-    g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
+    //g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
 
     if (a == 0) {
         return;

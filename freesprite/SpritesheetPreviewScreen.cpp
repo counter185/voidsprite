@@ -98,7 +98,7 @@ void SpritesheetPreviewScreen::render()
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
         }
         SDL_RenderDrawRect(g_rd, &spriteArea);
-        u64 key = sprite.x + (sprite.y << 32);
+        u64 key = encodeXY(sprite);
         g_fnt->RenderString(std::to_string(i++), spriteArea.x, spriteArea.y + (25 * drawnRects[key]++), SDL_Color{255,255,255,0xa0});
     }
 
