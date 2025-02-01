@@ -1,14 +1,17 @@
 #pragma once
 #include "BaseBrush.h"
 #include "mathops.h"
+#include "Timer64.h"
 
 class ToolRectClone :
     public BaseBrush
 {
     bool mouseDown = false;
     XY mouseDownPoint = XY{ 0,0 };
+    Timer64 lastClickTimer;
+    XY prevReleasePoint = XY{0, 0};
 
-    uint32_t* clonedArea = NULL;
+    u32* clonedArea = NULL;
     SDL_Rect clonedAreaPointAndDimensions;
     SDL_Texture* cacheClonePreview = NULL;
 

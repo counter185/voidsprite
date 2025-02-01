@@ -3,6 +3,7 @@
 #ifdef _MSVC_LANG
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
+#pragma warning(disable : 4838)
 #endif
 
 //#include <math.h>

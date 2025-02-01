@@ -13,6 +13,20 @@ void ToolRectClone::clickPress(MainEditor* editor, XY pos)
 void ToolRectClone::clickRelease(MainEditor* editor, XY pos)
 {
 	mouseDown = false;
+
+	if (xyEqual(prevReleasePoint, pos) && pointInBox(pos, {0,0,editor->canvas.dimensions.x, editor->canvas.dimensions.y})
+		&& lastClickTimer.started && lastClickTimer.elapsedTime() < 1000) {
+		XY tileDim = editor->tileDimensions;
+		tileDim.x = tileDim.x == 0 ? editor->canvas.dimensions.x : tileDim.x;
+		tileDim.y = tileDim.y == 0 ? editor->canvas.dimensions.y : tileDim.y;
+        XY tileOrigin = {pos.x / tileDim.x * tileDim.x, pos.y / tileDim.y * tileDim.y};
+		mouseDownPoint = tileOrigin;
+		pos = xyAdd(tileOrigin, xySubtract(tileDim, {1,1}));
+
+	}
+    prevReleasePoint = pos;
+	lastClickTimer.start();
+
 	int xmin = ixmin(pos.x, mouseDownPoint.x);
 	int xmax = ixmax(pos.x, mouseDownPoint.x)+1;
 	int ymin = ixmin(pos.y, mouseDownPoint.y);
