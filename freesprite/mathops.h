@@ -51,6 +51,8 @@ double xyDistance(XY p1, XY p2);
 bool xyEqual(XY p1, XY p2);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);
+u64 encodeXY(XY a);
+XY decodeXY(u64 enc);
 SDL_FPoint xytofp(XY p);
 double angleBetweenTwoPoints(XY a, XY b);
 XY getSnappedPoint(XY from, XY to);
@@ -70,6 +72,8 @@ std::string evalRelativePath(std::string directory, std::string file);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
+void rasterizeSplitEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
+void rasterizeSplitEllipseByY(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
 void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEachPixel);
 
 XY statLineEndpoint(XY p1, XY p2, double percent);

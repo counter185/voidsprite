@@ -26,6 +26,19 @@ XY xySubtract(XY p1, XY p2)
 {
     return XY{p1.x-p2.x, p1.y-p2.y};
 }
+u64 encodeXY(XY a) {
+    u64 ret = 0;
+    ret |= a.x;
+    ret <<= 32;
+    ret |= a.y;
+    return ret;
+}
+XY decodeXY(u64 enc) {
+    XY ret;
+    ret.y = enc & 0xFFFFFFFF;
+    ret.x = enc >> 32;
+    return ret;
+}
 
 SDL_FPoint xytofp(XY p)
 {
@@ -256,42 +269,138 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc
     }
 }
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel) {
-    XY dimensions = xySubtract(posMax, posMin);
+    XY calcPosMax = xyAdd(posMax, { 1,1 });
+    XY dimensions = xySubtract(calcPosMax, posMin);
     int b = dimensions.y / 2;
     int a = dimensions.x / 2;
-    XY lastP1, lastP2;
+    bool xEven = dimensions.x % 2 == 0;
+    bool yEven = dimensions.y % 2 == 0;
+    g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}", posMin.x, posMin.y, posMax.x, posMax.y, a, b, xEven, yEven), 50, 50);
+
+    XY lastPTL, lastPTR, lastPBL, lastPBR;
+    bool lastPointsSet = false;
     if (a == 0) {
         return;
     }
-    //printf("%i\n", a);
-    //printf("a = %i  b = %i\n", a, b);
-    for (int x = 0; x <= a; x++) {
-        int xx = x - a;
-        int yysq = (b * b) - (b * b * xx * xx) / (a * a);
-        int yy = (int)sqrt(yysq);
-        int y1 = yy + b;
-        int y2 = -yy + b;
-        //printf("x %i => y %i (^2 = %i)\n", xx, yy, yysq); 
-        XY p1 = { x, y1 };
-        XY p2 = { x, y2 };
-        if (x > 0) {
-            //printf("Line from (%i,%i) => (%i,%i)\n", lastP1.x, lastP1.y, p1.x, p1.y);
-            rasterizeLine(lastP1, p1, [&](XY a) {
-                forEachPixel(xyAdd(a, posMin));
-                forEachPixel(XY{ posMax.x - a.x, posMin.y + a.y });
-                });
-            rasterizeLine(lastP2, p2, [&](XY a) {
-                forEachPixel(xyAdd(a, posMin));
-                forEachPixel(XY{ posMax.x - a.x, posMin.y + a.y });
-                });
+
+    std::map<u64, bool> pixelsToPlace;
+
+    
+    for (int ap = 0; xEven ? (ap < a) : (ap <= a); ap++) {
+        double ySq = (b * b) * ((double)(ap * ap) / pow(a + (xEven ? -1 : 0), 2) - 1) * -1;
+        double y = sqrt(ySq);
+        //std::cout << ap << ":  " << ySq << "  " << y << std::endl;
+        XY finalPxPositionTopRight = {posMin.x + a + ap, posMin.y + b - (int)y};
+
+        int rdy = (int)round(y);
+
+        XY pTL = { posMin.x + a - (xEven ? 1 : 0) - ap, posMin.y + b - rdy };
+        XY pTR = { posMin.x + a + ap, posMin.y + b - rdy };
+        XY pBL = { posMin.x + a - (xEven ? 1 : 0) - ap, posMin.y + b - (yEven ? 1 : 0) + rdy };
+        XY pBR = { posMin.x + a + ap, posMin.y + b - (yEven ? 1 : 0) + rdy };
+
+        if (ap > 0) {
+            rasterizeLine(lastPTL, pTL, [&](XY px) { 
+                pixelsToPlace[encodeXY(px)] = true;
+            });
+            rasterizeLine(lastPTR, pTR, [&](XY px) { 
+                pixelsToPlace[encodeXY(px)] = true;
+            });
+            rasterizeLine(lastPBL, pBL, [&](XY px) { 
+                pixelsToPlace[encodeXY(px)] = true;
+            });
+            rasterizeLine(lastPBR, pBR, [&](XY px) { 
+                pixelsToPlace[encodeXY(px)] = true;
+            });
         }
-        lastP1 = p1;
-        lastP2 = p2;
-        //editor->SetPixel(xyAdd(p1, posMin), editor->pickedColor);
-        //editor->SetPixel(xyAdd(p2, posMin), editor->pickedColor);
-        //editor->getCurrentLayer()->setPixel(xyAdd(XY{x,y1}, posMin), editor->pickedColor);
-        //editor->getCurrentLayer()->setPixel(xyAdd(XY{x,y2}, posMin), editor->pickedColor);
+        lastPTL = pTL;
+        lastPTR = pTR;
+        lastPBL = pBL;
+        lastPBR = pBR;
+        lastPointsSet = true;
     }
+
+    if (lastPointsSet) {
+        rasterizeLine(lastPTL, lastPBL, [&](XY px) {
+            pixelsToPlace[encodeXY(px)] = true;
+        });
+        rasterizeLine(lastPTR, lastPBR, [&](XY px) {
+            pixelsToPlace[encodeXY(px)] = true;
+        });
+    }
+    /*std::map<int, bool> xPositions;
+    rasterizeSplitEllipseByY(posMin, posMax,
+        [&](XY px) { 
+            pixelsToPlace[encodeXY(px)] = true; 
+            //forEachPixel(px);
+            xPositions[px.x] = true;
+        });
+    rasterizeSplitEllipse(posMin, posMax,
+        [&](XY px) { 
+            if (!xPositions.contains(px.x)) {
+                pixelsToPlace[encodeXY(px)] = true;
+                //forEachPixel(px);
+            }
+        });*/
+
+    for (auto& px : pixelsToPlace) {
+        forEachPixel(decodeXY(px.first));
+    }
+    
+}
+void rasterizeSplitEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel) {
+    XY calcPosMax = xyAdd(posMax, { 1,1 });
+    XY dimensions = xySubtract(calcPosMax, posMin);
+    int b = dimensions.y / 2;
+    int a = dimensions.x / 2;
+    bool xEven = dimensions.x % 2 == 0;
+    bool yEven = dimensions.y % 2 == 0;
+    //g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
+
+    if (a == 0) {
+        return;
+    }
+
+    for (int ap = 0; xEven ? (ap < a) : (ap <= a); ap++) {
+        double ySq = (b * b) * ((double)(ap * ap) / (a * a) - 1) * -1;
+        double y = sqrt(ySq);
+        //std::cout << ap << ":  " << ySq << "  " << y << std::endl;
+        int yy = (int)round(y);
+
+        forEachPixel({ posMin.x + a + ap, posMin.y + b - (yEven ? 1 : 0) + yy });
+        forEachPixel({ posMin.x + a - (xEven ? 1 : 0) - ap, posMin.y + b - (yEven ? 1 : 0) + yy});
+
+        forEachPixel({ posMin.x + a + ap, posMin.y + b - yy});
+        forEachPixel({ posMin.x + a - (xEven ? 1 : 0) - ap, posMin.y + b - yy });
+    }
+}
+
+void rasterizeSplitEllipseByY(XY posMin, XY posMax, std::function<void(XY)> forEachPixel) {
+    XY calcPosMax = xyAdd(posMax, { 1,1 });
+    XY dimensions = xySubtract(calcPosMax, posMin);
+    dimensions = { dimensions.y, dimensions.x };
+    int b = dimensions.y / 2;
+    int a = dimensions.x / 2;
+    bool xEven = dimensions.x % 2 == 0;
+    bool yEven = dimensions.y % 2 == 0;
+    g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
+
+    if (a == 0) {
+        return;
+    }
+
+    for (int ap = 0; xEven ? (ap < a) : (ap <= a); ap++) {
+        double ySq = (b * b) * ((double)(ap * ap) / (a * a) - 1) * -1;
+        double y = sqrt(ySq);
+        int yy = (int)round(y);
+
+        forEachPixel({ posMin.x + b - (yEven ? 1 : 0) + yy,  posMin.y + a + ap });
+        forEachPixel({ posMin.x + b - (yEven ? 1 : 0) + yy,  posMin.y + a - (xEven ? 1 : 0) - ap});
+
+        forEachPixel({ posMin.x + b - yy,                    posMin.y + a + ap, });
+        forEachPixel({ posMin.x + b - yy,                    posMin.y + a - (xEven ? 1 : 0) - ap });
+    }
+    
 }
 
 void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEachPixel)
