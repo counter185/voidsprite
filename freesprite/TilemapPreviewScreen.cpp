@@ -127,10 +127,9 @@ void TilemapPreviewScreen::render()
 
                 SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos);
 
-                uint8_t alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? (uint8_t)(0xff * XM1PW3P1(layerSelectTimer.percentElapsedTime(1300))) : 0xff;
+                double alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? XM1PW3P1(layerSelectTimer.percentElapsedTime(1300)) : 1.0;
                 for (Layer* l : caller->layers) {
-                    SDL_SetTextureAlphaMod(l->tex, alpha);
-                    SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
+                    l->render(tileDraw, tileClip, l->layerAlpha * alpha);
                 }
             }
         }
@@ -161,7 +160,7 @@ void TilemapPreviewScreen::render()
         };
 
         for (Layer* l : caller->layers) {
-            SDL_RenderCopy(g_rd, l->tex, NULL, &tileSelectRect);
+            l->render(tileSelectRect, l->layerAlpha);
         }
 
         SDL_Rect pickedTileRect = {

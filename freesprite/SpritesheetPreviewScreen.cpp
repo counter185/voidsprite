@@ -73,7 +73,7 @@ void SpritesheetPreviewScreen::render()
     canvas.dimensions = caller->canvas.dimensions;
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();// { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x* canvasZoom, caller->canvas.dimensions.y* canvasZoom };
     for (Layer*& l : caller->layers) {
-        SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
+        l->render(canvasRenderRect, l->layerAlpha);
     }
 
     // lines between tiles

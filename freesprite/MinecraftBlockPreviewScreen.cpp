@@ -60,7 +60,8 @@ void MinecraftBlockPreviewScreen::render()
     canvas.dimensions = caller->canvas.dimensions;
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();// { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x* canvasZoom, caller->canvas.dimensions.y* canvasZoom };
     for (Layer*& l : caller->layers) {
-        SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
+        l->render(canvasRenderRect, l->layerAlpha);
+        //SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
     }
 
     // lines between tiles
@@ -258,6 +259,9 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
+            for (int i = 0; i < 7; i++) {
+                vertices[i].color.a = l->layerAlpha;
+            }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesTop, 6);
         }
     }
@@ -286,6 +290,9 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
+            for (int i = 0; i < 7; i++) {
+                vertices[i].color.a = l->layerAlpha;
+            }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesSideLeft, 6);
         }
     }
@@ -314,6 +321,9 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
+            for (int i = 0; i < 7; i++) {
+                vertices[i].color.a = l->layerAlpha;
+            }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesSideRight, 6);
         }
     }
