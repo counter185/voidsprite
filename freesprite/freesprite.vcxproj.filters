@@ -489,6 +489,9 @@
     <ClCompile Include="SplitSessionEditor.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="PopupApplyFilter.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -913,6 +916,9 @@
     </ClInclude>
     <ClInclude Include="background_operation.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupApplyFilter.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

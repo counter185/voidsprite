@@ -199,6 +199,7 @@
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
     <ClCompile Include="PopupAdjustHSV.cpp" />
+    <ClCompile Include="PopupApplyFilter.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
@@ -337,6 +338,7 @@
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="PopupAdjustHSV.h" />
+    <ClInclude Include="PopupApplyFilter.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupIntegerScale.h" />
     <ClInclude Include="PopupPickColor.h" />

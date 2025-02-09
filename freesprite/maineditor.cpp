@@ -29,6 +29,7 @@
 #include "PopupGlobalConfig.h"
 #include "PopupPickColor.h"
 #include "PopupAdjustHSV.h"
+#include "PopupApplyFilter.h"
 
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
 {
@@ -920,12 +921,13 @@ void MainEditor::setUpWidgets()
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDLK_q].actions[keyorder[i++]] = {
             filter->name(), [filter](MainEditor* editor) {
-                Layer* layerNow = editor->getCurrentLayer();
-                Layer* copy = filter->run(layerNow, {});
-                editor->commitStateToCurrentLayer();
-                memcpy(layerNow->pixelData, copy->pixelData, 4 * layerNow->w * layerNow->h);
-                layerNow->layerDirty = true;
-                delete copy;
+                g_addPopup(new PopupApplyFilter(editor, editor->getCurrentLayer(), filter));
+                //Layer* layerNow = editor->getCurrentLayer();
+                //Layer* copy = filter->run(layerNow, {});
+                //editor->commitStateToCurrentLayer();
+                //memcpy(layerNow->pixelData, copy->pixelData, 4 * layerNow->w * layerNow->h);
+                //layerNow->layerDirty = true;
+                //delete copy;
             }
         };
     }
