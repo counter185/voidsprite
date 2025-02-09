@@ -48,6 +48,7 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
+Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
@@ -324,6 +325,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Windows Shell Scrap SHS", ".shs", &readWinSHS, NULL, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);

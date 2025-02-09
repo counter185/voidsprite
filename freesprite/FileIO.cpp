@@ -1,6 +1,7 @@
 //i know how this looks but do not touch this or else linux build will break again
 #if _WIN32
 #include "libpng/png.h"
+#include <windows.h>
 #else
 #include <libpng/png.h>
 #endif
@@ -2631,6 +2632,92 @@ Layer* readGXT(PlatformNativePathString path, u64 seek)
     }
 
     return NULL;
+}
+
+Layer* readWinSHS(PlatformNativePathString path, u64 seek)
+{
+#if _WIN32
+    IStorage* pStorage = nullptr;
+    HRESULT hr = StgOpenStorage(path.c_str(), nullptr, STGM_READ | STGM_SHARE_EXCLUSIVE, nullptr, 0, &pStorage);
+    if (FAILED(hr)) {
+        g_addNotification(ErrorNotification("Win32 error", "StgOpenStorage failed"));
+        return NULL;
+    }
+
+    // list all streams
+    IEnumSTATSTG* pEnum = nullptr;
+    hr = pStorage->EnumElements(0, nullptr, 0, &pEnum);
+    if (FAILED(hr)) {
+        pStorage->Release();
+        g_addNotification(ErrorNotification("Win32 error", "EnumElements failed"));
+        return NULL;
+    }
+    // find the stream with the image
+    STATSTG stat2;
+    while (pEnum->Next(1, &stat2, nullptr) == S_OK) {
+        if (stat2.type == STGTY_STORAGE) {
+            GUID bitmapImageGuid = { 0x0003000A, 0000, 0000, {0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46} };
+            if (IsEqualGUID(stat2.clsid, bitmapImageGuid)) {
+                break;
+            }
+        }
+    }
+    IStorage* pStorage2;
+    hr = pStorage->OpenStorage(stat2.pwcsName, nullptr, STGM_READ | STGM_SHARE_EXCLUSIVE, nullptr, 0, &pStorage2);
+    if (FAILED(hr)) {
+        pStorage->Release();
+        g_addNotification(ErrorNotification("Win32 error", "OpenStorage failed"));
+        return NULL;
+    }
+    IEnumSTATSTG* pEnum2 = nullptr;
+    hr = pStorage2->EnumElements(0, nullptr, 0, &pEnum2);
+    STATSTG stat3;
+    while (pEnum2->Next(1, &stat3, nullptr) == S_OK) {
+        if (stat3.type == STGTY_STREAM && std::wstring(stat3.pwcsName).find(L"Ole10Native") != std::wstring::npos) {
+            break;
+        }
+    }
+
+    IStream* pStream = nullptr;
+    hr = pStorage2->OpenStream(stat3.pwcsName, nullptr, STGM_READ | STGM_SHARE_EXCLUSIVE, 0, &pStream);
+
+    if (FAILED(hr)) {
+        pStorage->Release();
+        pStorage2->Release();
+        g_addNotification(ErrorNotification("Win32 error", "OpenStream failed"));
+        return NULL;
+    }
+
+    STATSTG stat;
+    pStream->Stat(&stat, STATFLAG_NONAME);
+    ULONG size = stat.cbSize.LowPart;
+
+    u8* buffer = (u8*)tracked_malloc(size);
+    ULONG bytesRead;
+    hr = pStream->Read(buffer, size, &bytesRead);
+
+    pStream->Release();
+    pStorage->Release();
+    pStorage2->Release();
+
+    if (FAILED(hr)) {
+        g_addNotification(ErrorNotification("Win32 error", "Failed to read stream"));
+        tracked_free(buffer);
+        return NULL;
+    }
+    FILE* temp = platformOpenFile(L"temp.bin", L"wb");
+    fwrite(buffer + 4, 1, size - 4, temp);
+    fclose(temp);
+    tracked_free(buffer);
+    Layer* l = readBMP(L"temp.bin", 0);
+    l->name = "Windows Scrap Layer";
+    std::filesystem::remove(L"temp.bin");
+    return l;
+
+#else
+    g_addNotification(ErrorNotification("Error", "Format not supported on this platform"));
+    return NULL;
+#endif
 }
 
 MainEditor* readLMU(PlatformNativePathString path)
