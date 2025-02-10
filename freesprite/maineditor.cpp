@@ -746,12 +746,6 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_b, { "Swap channels RGB->BGR",
-                            [](MainEditor* editor) {
-                                editor->layer_swapLayerRGBtoBGR();
-                            }
-                        }
-                    },
                     {SDLK_x, { "Print number of colors",
                             [](MainEditor* editor) {
                                 g_addNotification(Notification("", std::format("{} colors in current layer", editor->getCurrentLayer()->numUniqueColors(true))));
@@ -916,18 +910,18 @@ void MainEditor::setUpWidgets()
         }
     };
 
-    SDL_Keycode keyorder[] = { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i, SDLK_o, SDLK_p };
+    SDL_Keycode keyorder[] = { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i, SDLK_o, SDLK_p,
+                               SDLK_a, SDLK_s, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l,
+                               SDLK_z, SDLK_x, SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m };
     int i = 0;
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDLK_q].actions[keyorder[i++]] = {
             filter->name(), [filter](MainEditor* editor) {
-                g_addPopup(new PopupApplyFilter(editor, editor->getCurrentLayer(), filter));
-                //Layer* layerNow = editor->getCurrentLayer();
-                //Layer* copy = filter->run(layerNow, {});
-                //editor->commitStateToCurrentLayer();
-                //memcpy(layerNow->pixelData, copy->pixelData, 4 * layerNow->w * layerNow->h);
-                //layerNow->layerDirty = true;
-                //delete copy;
+                PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
+                g_addPopup(newPopup);
+                if (filter->getParameters().size() == 0) {
+                    newPopup->applyAndClose();
+                }
             }
         };
     }
@@ -1813,17 +1807,6 @@ void MainEditor::layer_flipVertically()
 {
     commitStateToCurrentLayer();
     getCurrentLayer()->flipVertically();
-}
-
-void MainEditor::layer_swapLayerRGBtoBGR()
-{
-    commitStateToCurrentLayer();
-    Layer* clayer = getCurrentLayer();
-    uint8_t* convData = (uint8_t*)tracked_malloc(clayer->w * clayer->h * 4);
-    SDL_ConvertPixels(clayer->w, clayer->h, SDL_PIXELFORMAT_ARGB8888, clayer->pixelData, clayer->w * 4, SDL_PIXELFORMAT_ABGR8888, convData, clayer->w * 4);
-    tracked_free(clayer->pixelData);
-    clayer->pixelData = convData;
-    clayer->layerDirty = true;
 }
 
 void MainEditor::layer_setOpacity(uint8_t opacity) {

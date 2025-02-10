@@ -75,3 +75,22 @@ Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
     }
     return c;
 }
+
+Layer* FilterForEachPixel::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    for (int y = 0; y < c->h; y++) {
+        for (int x = 0; x < c->w; x++) {
+            u32 px = src->getPixelAt({x, y}, true);
+            c->setPixel({ x,y }, f({ x,y }, src, px));
+        }
+    }
+    return c;
+}
+
+Layer* FilterSwapRGBToBGR::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    SDL_ConvertPixels(c->w, c->h, SDL_PIXELFORMAT_ARGB8888, src->pixelData, c->w * 4, SDL_PIXELFORMAT_ABGR8888, c->pixelData, c->w * 4);
+    return c;
+}

@@ -40,6 +40,22 @@ protected:
 	Layer* copy(Layer* src);
 };
 
+class FilterForEachPixel : public BaseFilter {
+protected:
+	std::string fName = "";
+	std::function<u32(XY, Layer*, u32)> f;
+	std::vector<FilterParameter> fParams;
+public:
+	FilterForEachPixel(std::string name, std::function<u32(XY, Layer*, u32)> f, std::vector<FilterParameter> fParams = {}) {
+        this->fName = name;
+        this->f = f;
+        this->fParams = fParams;
+    }
+
+    std::string name() override { return fName; }
+	Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override { return fParams; }
+};
 
 class FilterBlur : public BaseFilter
 {
@@ -53,4 +69,10 @@ public:
 			INT_PARAM("radius.y", 1, 100, 4),
 		};
 	}
+};
+
+class FilterSwapRGBToBGR : public BaseFilter {
+public:
+    std::string name() override { return "Swap channels RGB->BGR"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
 };

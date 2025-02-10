@@ -188,7 +188,6 @@ public:
     void layer_promptRename();
     void layer_flipHorizontally();
     void layer_flipVertically();
-    void layer_swapLayerRGBtoBGR();
     uint32_t layer_getPixelAt(XY pos);
     void layer_setAllAlpha255();
     void layer_replaceColor(uint32_t from, uint32_t to);
