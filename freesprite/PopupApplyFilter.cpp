@@ -36,6 +36,7 @@ void PopupApplyFilter::eventSliderPosChanged(int evt_id, float value)
                 p.defaultValue = p.minValue + (p.maxValue - p.minValue) * value;
                 break;
         }
+        updateLabels();
     }
 }
 
@@ -60,16 +61,22 @@ void PopupApplyFilter::setupWidgets()
             case PT_FLOAT:
                 float v = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
                 UISlider* slider = new UISlider();
-                slider->position = XY{200, y};
+                slider->position = XY{250, y};
                 slider->sliderPos = v;
                 slider->wxHeight = 25;
                 slider->setCallbackListener(i, this);
                 wxsManager.addDrawable(slider);
+
+                UILabel* valueLabel = new UILabel();
+                valueLabel->position = xySubtract(slider->position, { 50, 0 });
+                paramLabels.push_back(valueLabel);
+                wxsManager.addDrawable(valueLabel);
                 break;
         }
         i++;
         y += 40;
 	}
+    updateLabels();
 
     UIButton* btnApply = new UIButton();
     btnApply->text = "Apply";
@@ -100,4 +107,21 @@ void PopupApplyFilter::applyAndClose()
     target->layerDirty = true;
     delete copy;
     closePopup();
+}
+
+void PopupApplyFilter::updateLabels()
+{
+    for (int i = 0; i < paramLabels.size(); i++) {
+        FilterParameter& p = params[i];
+        UILabel* label = paramLabels[i];
+        switch (p.paramType) {
+            case PT_INT:
+                label->text = std::to_string((int)p.defaultValue);
+                break;
+            case PT_FLOAT:
+            default:
+                label->text = std::to_string(p.defaultValue);
+                break;
+        }
+    }
 }

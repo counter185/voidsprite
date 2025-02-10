@@ -11,6 +11,7 @@ protected:
     Layer* target;
     BaseFilter* targetFilter;
     std::vector<FilterParameter> params;
+    std::vector<UILabel*> paramLabels;
 public:
     PopupApplyFilter(MainEditor* session, Layer* target, BaseFilter* targetFilter) {
         this->session = session;
@@ -31,5 +32,6 @@ public:
 
     void setupWidgets();
     void applyAndClose();
+    void updateLabels();
 };
 
