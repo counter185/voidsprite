@@ -22,14 +22,18 @@ public:
     }
 
     void render() override {
-        renderDefaultBackground();
+        renderFilterPopupBackground();
         BasePopup::render();
     }
     void defaultInputAction(SDL_Event evt) override;
+    XY getPopupOrigin() override {
+        return XY{ 20, BasePopup::getPopupOrigin().y };
+    }
 
     void eventButtonPressed(int evt_id) override;
     void eventSliderPosChanged(int evt_id, float value) override;
 
+    void renderFilterPopupBackground();
     void setupWidgets();
     void applyAndClose();
     void updateLabels();

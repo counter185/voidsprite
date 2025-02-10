@@ -90,6 +90,7 @@ class TooltipsLayer;
 class FileImporter;
 class FileExporter;
 struct NineSegmentPattern;
+class DrawableManager;
 
 //templates
 class BaseTemplate;

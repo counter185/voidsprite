@@ -36,9 +36,9 @@ protected:
         wxsManager.renderAll(getPopupOrigin());
     }
 
-    void renderDefaultBackground(SDL_Color bgColor = SDL_Color{0,0,0,0xD0});
+    virtual void renderDefaultBackground(SDL_Color bgColor = SDL_Color{0,0,0,0xD0});
 
-    XY getPopupOrigin() {
+    virtual XY getPopupOrigin() {
         return XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };
     }
 

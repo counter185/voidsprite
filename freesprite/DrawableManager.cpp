@@ -52,7 +52,10 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
 }
 
 void DrawableManager::addDrawable(Drawable* d) {
-    drawablesList.push_back(d);
+    if (d != NULL) {
+        d->parentManager = this;
+        drawablesList.push_back(d);
+    }
 }
 
 void DrawableManager::removeDrawable(Drawable* d, bool free) {

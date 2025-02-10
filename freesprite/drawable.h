@@ -9,6 +9,7 @@ protected:
 	bool hovered = false;
 	Timer64 focusTimer, hoverTimer;
 public:
+	DrawableManager* parentManager = NULL;
 	bool focused = false;
 	XY position = XY{ 50,50 };
 	XY anchor = XY{ 0,0 };

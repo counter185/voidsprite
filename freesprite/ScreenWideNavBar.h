@@ -99,6 +99,7 @@ public:
             if (keyBinds.contains(k)) {
                 //openSubmenu(k);
                 keyBinds[k].button->click();
+                
             }
         }
         else {
@@ -123,6 +124,7 @@ public:
         if (currentSubmenuOpen != -1 && keyBinds[currentSubmenuOpen].actions.contains(which)) {
             keyBinds[currentSubmenuOpen].actions[which].function(parent);
             openSubmenu(-1);
+            parentManager->forceUnfocus();
         }
     }
     void updateCurrentSubmenu() {
