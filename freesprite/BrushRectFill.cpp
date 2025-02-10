@@ -11,16 +11,18 @@ void BrushRectFill::clickPress(MainEditor* editor, XY pos)
 
 void BrushRectFill::clickRelease(MainEditor* editor, XY pos)
 {
-	heldDown = false;
-	pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
-	int minx = ixmin(pos.x, startPos.x);
-	int maxx = ixmax(pos.x, startPos.x);
-	int miny = ixmin(pos.y, startPos.y);
-	int maxy = ixmax(pos.y, startPos.y);
+	if (heldDown) {
+		heldDown = false;
+		pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
+		int minx = ixmin(pos.x, startPos.x);
+		int maxx = ixmax(pos.x, startPos.x);
+		int miny = ixmin(pos.y, startPos.y);
+		int maxy = ixmax(pos.y, startPos.y);
 
-	for (int x = minx; x <= maxx; x++) {
-		for (int y = miny; y <= maxy; y++) {
-			editor->SetPixel(XY{ x,y }, editor->getActiveColor());
+		for (int x = minx; x <= maxx; x++) {
+			for (int y = miny; y <= maxy; y++) {
+				editor->SetPixel(XY{ x,y }, editor->getActiveColor());
+			}
 		}
 	}
 }
