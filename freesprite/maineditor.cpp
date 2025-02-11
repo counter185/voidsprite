@@ -28,7 +28,6 @@
 #include "PopupYesNo.h"
 #include "PopupGlobalConfig.h"
 #include "PopupPickColor.h"
-#include "PopupAdjustHSV.h"
 #include "PopupApplyFilter.h"
 
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
@@ -772,14 +771,6 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_h, { "Adjust HSV",
-                            [](MainEditor* editor) {
-                                PopupAdjustHSV* newPopup = new PopupAdjustHSV("Adjust layer HSV", "");
-                                newPopup->setCallbackListener(EVENT_MAINEDITOR_ADJHSV, editor);
-                                g_addPopup(newPopup);
-                            }
-                        }
-                    },
                     {SDLK_o, { "Outline current layer",
                             [](MainEditor* editor) {
                                 editor->layer_outline(false);
@@ -1298,10 +1289,6 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
     }
     else if (evt_id == EVENT_MAINEDITOR_INTEGERSCALE) {
         integerScaleAllLayersFromCommand(((PopupIntegerScale*)p)->result, ((PopupIntegerScale*)p)->downscaleCheckbox->isChecked());
-    }
-    else if (evt_id == EVENT_MAINEDITOR_ADJHSV) {
-        PopupAdjustHSV* pp = (PopupAdjustHSV*)p;
-        layer_hsvShift({ pp->adjH, pp->adjS, pp->adjV });
     }
 }
 

@@ -38,6 +38,11 @@ public:
 	virtual Layer* run(Layer* src, std::map<std::string, std::string> options) { return NULL; };
 	virtual std::vector<FilterParameter> getParameters() { return {}; }
 protected:
+	/// <summary>
+	/// Use this instead of Layer::copy in your filter function. Calls Layer::copyWithNoTextureInit so that it's thread-safe.
+	/// </summary>
+	/// <param name="src">source layer to be copied</param>
+	/// <returns>a copy of the layer</returns>
 	Layer* copy(Layer* src);
 };
 
@@ -76,4 +81,17 @@ class FilterSwapRGBToBGR : public BaseFilter {
 public:
     std::string name() override { return "Swap channels RGB->BGR"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+};
+
+class FilterAdjustHSV : public BaseFilter {
+public:
+    std::string name() override { return "Adjust HSV"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+	std::vector<FilterParameter> getParameters() override {
+		return {
+			FLOAT_PARAM("hue", -360, 360, 0),
+			FLOAT_PARAM("saturation", -100, 100, 0),
+			FLOAT_PARAM("value", -100, 100, 0),
+		};
+	}
 };

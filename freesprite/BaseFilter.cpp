@@ -90,3 +90,19 @@ Layer* FilterSwapRGBToBGR::run(Layer* src, std::map<std::string, std::string> op
     SDL_ConvertPixels(c->w, c->h, SDL_PIXELFORMAT_ARGB8888, src->pixelData, c->w * 4, SDL_PIXELFORMAT_ABGR8888, c->pixelData, c->w * 4);
     return c;
 }
+
+Layer* FilterAdjustHSV::run(Layer* src, std::map<std::string, std::string> options)
+{
+    double h = std::stod(options["hue"]);
+    double s = std::stod(options["saturation"]) / 100.0;
+    double v = std::stod(options["value"]) / 100.0;
+    hsv hsvv = { h,s,v };
+    Layer* c = copy(src);
+    for (int y = 0; y < c->h; y++) {
+        for (int x = 0; x < c->w; x++) {
+            u32 px = src->getPixelAt({ x, y }, true);
+            c->setPixel({ x,y }, hsvShift(px, hsvv));
+        }
+    }
+    return c;
+}

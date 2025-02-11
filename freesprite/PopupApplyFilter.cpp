@@ -130,14 +130,14 @@ void PopupApplyFilter::setupWidgets()
             {
                 float v = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
                 UISlider* slider = new UISlider();
-                slider->position = XY{ 250, y };
+                slider->position = XY{ 285, y };
                 slider->sliderPos = v;
                 slider->wxHeight = 25;
                 slider->setCallbackListener(i, this);
                 wxsManager.addDrawable(slider);
 
                 UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 50, 0 });
+                valueLabel->position = xySubtract(slider->position, { 70, 0 });
                 paramLabels.push_back(valueLabel);
                 wxsManager.addDrawable(valueLabel);
             }
@@ -202,7 +202,7 @@ void PopupApplyFilter::updateLabels()
                 break;
             case PT_FLOAT:
             default:
-                label->text = std::to_string(p.defaultValue);
+                label->text = std::format("{:.1f}", p.defaultValue);
                 break;
         }
     }
@@ -249,5 +249,6 @@ void PopupApplyFilter::previewRenderThread()
             pixelDataDirty = true;
             delete l;
         }
+        SDL_Delay(1);
     }
 }

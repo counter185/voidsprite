@@ -474,9 +474,6 @@
     <ClCompile Include="Canvas.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="PopupAdjustHSV.cpp">
-      <Filter>Source files\popup</Filter>
-    </ClCompile>
     <ClCompile Include="MinecraftBlockPreviewScreen.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
@@ -892,9 +889,6 @@
     </ClInclude>
     <ClInclude Include="json\json.hpp">
       <Filter>Header files\external\json</Filter>
-    </ClInclude>
-    <ClInclude Include="PopupAdjustHSV.h">
-      <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="MinecraftBlockPreviewScreen.h">
       <Filter>Header files\screen</Filter>

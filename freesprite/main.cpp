@@ -445,6 +445,7 @@ int main(int argc, char** argv)
     //load filters
     g_filters.push_back(new FilterBlur());
     g_filters.push_back(new FilterSwapRGBToBGR());
+    g_filters.push_back(new FilterAdjustHSV());
 
     TTF_Init();
     g_fnt = new TextRenderer();
