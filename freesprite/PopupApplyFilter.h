@@ -13,6 +13,7 @@ protected:
     std::thread previewRenderThreadObj;
     std::atomic<bool> previewRenderThreadShouldRun = true;
     std::atomic<bool> threadHasNewParameters = true;
+    std::atomic<bool> nowRendering = false;
 
     MainEditor* session;
     Layer* target;
@@ -30,11 +31,7 @@ public:
     }
     ~PopupApplyFilter();
 
-    void render() override {
-        updatePreview();
-        renderFilterPopupBackground();
-        BasePopup::render();
-    }
+    void render() override;
     void defaultInputAction(SDL_Event evt) override;
     XY getPopupOrigin() override {
         return XY{ 20, BasePopup::getPopupOrigin().y };

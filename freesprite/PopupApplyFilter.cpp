@@ -6,6 +6,7 @@
 #include "UIColorInputField.h"
 #include "maineditor.h"
 #include "background_operation.h"
+#include "FontRenderer.h"
 
 PopupApplyFilter::~PopupApplyFilter() {
     if (previewRenderThreadObj.joinable()) {
@@ -18,6 +19,15 @@ PopupApplyFilter::~PopupApplyFilter() {
     if (previewTexture != NULL) {
         target->effectPreviewTexture = NULL;
         SDL_DestroyTexture(previewTexture);
+    }
+}
+
+void PopupApplyFilter::render() {
+    updatePreview();
+    renderFilterPopupBackground();
+    BasePopup::render();
+    if (nowRendering) {
+        g_fnt->RenderString("Rendering preview...", 2, g_windowH - 30, {255,255,255,200});
     }
 }
 
@@ -242,12 +252,14 @@ void PopupApplyFilter::previewRenderThread()
 {
     while (previewRenderThreadShouldRun) {
         if (threadHasNewParameters) {
+            nowRendering = true;
             std::map<std::string, std::string> parameterMap = makeParameterMap();
             threadHasNewParameters = false;
             Layer* l = targetFilter->run(target, parameterMap);
             memcpy(previewPixelData, l->pixelData, 4 * target->w * target->h);
             pixelDataDirty = true;
             delete l;
+            nowRendering = false;
         }
         SDL_Delay(1);
     }
