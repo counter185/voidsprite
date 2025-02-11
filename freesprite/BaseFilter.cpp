@@ -6,11 +6,7 @@ Layer* BaseFilter::copy(Layer* src)
     if (src == NULL) {
         return NULL;
     }
-    Layer* ret = new Layer(src->w, src->h);
-    ret->name = src->name;
-    ret->colorKey = src->colorKey;
-    memcpy(ret->pixelData, src->pixelData, src->w * src->h * 4);
-    return ret;
+    return src->copyWithNoTextureInit();
 }
 
 Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)

@@ -3,7 +3,7 @@
 
 #define INT_PARAM(name,min,max,def) (FilterParameter{name,min,max,def,PT_INT})
 #define FLOAT_PARAM(name,min,max,def) (FilterParameter{name,min,max,def,PT_FLOAT})
-#define COLORRGB_PARAM(name,def) (FilterParameter{name,min,max,def,PT_COLOR_RGB})
+#define COLORRGB_PARAM(name,def) (FilterParameter{name,0,0,0,PT_COLOR_RGB,def})
 #define COLORL_PARAM(name) (FilterParameter{name,0,255,127,PT_COLOR_L})
 #define BOOL_PARAM(name,def) (FilterParameter{name,0,1,def,PT_BOOL})
 
@@ -21,6 +21,7 @@ struct FilterParameter {
 	double maxValue = 1;
 	double defaultValue = 0.5;
 	ParameterType paramType;
+	u32 vU32 = 0;
 };
 
 class BaseFilter

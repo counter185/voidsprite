@@ -73,6 +73,28 @@ void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
     }
 }
 
+Layer* Layer::copy()
+{
+    Layer* ret = new Layer(w, h);
+    ret->name = name;
+    ret->colorKey = colorKey;
+    ret->layerDirty = true;
+    memcpy(ret->pixelData, pixelData, w * h * 4);
+    return ret;
+}
+
+Layer* Layer::copyWithNoTextureInit()
+{
+    Layer* ret = new Layer();
+    ret->w = w;
+    ret->h = h;
+    ret->pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
+    ret->name = name;
+    ret->colorKey = colorKey;
+    memcpy(ret->pixelData, pixelData, w * h * 4);
+    return ret;
+}
+
 //i don't even know if this works
 Layer* Layer::copyScaled(XY dimensions)
 {

@@ -7,6 +7,13 @@ class PopupApplyFilter :
     public BasePopup, public EventCallbackListener
 {
 protected:
+    u8* previewPixelData = NULL;
+    std::atomic<bool> pixelDataDirty = true;
+    SDL_Texture* previewTexture = NULL;
+    std::thread previewRenderThreadObj;
+    std::atomic<bool> previewRenderThreadShouldRun = true;
+    std::atomic<bool> threadHasNewParameters = true;
+
     MainEditor* session;
     Layer* target;
     BaseFilter* targetFilter;
@@ -19,9 +26,12 @@ public:
         this->targetFilter = targetFilter;
 
         setupWidgets();
+        setupPreview();
     }
+    ~PopupApplyFilter();
 
     void render() override {
+        updatePreview();
         renderFilterPopupBackground();
         BasePopup::render();
     }
@@ -37,5 +47,10 @@ public:
     void setupWidgets();
     void applyAndClose();
     void updateLabels();
+    void setupPreview();
+    void updatePreview();
+    std::map<std::string, std::string> makeParameterMap();
+
+    void previewRenderThread();
 };
 

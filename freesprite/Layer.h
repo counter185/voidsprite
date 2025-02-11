@@ -8,7 +8,7 @@ protected:
 public:
 	bool isPalettized = false;
 
-	uint8_t* pixelData;	//!!! THIS IS IN ARGB
+	u8* pixelData;	//!!! THIS IS IN ARGB
 	std::vector<uint8_t*> undoQueue;
 	std::vector<uint8_t*> redoQueue;
 	int w, h;
@@ -23,6 +23,8 @@ public:
 	uint32_t colorKey = 0;
 	uint8_t lastConfirmedlayerAlpha = 255;
 	uint8_t layerAlpha = 255;
+
+	SDL_Texture* effectPreviewTexture = NULL;
 
 	Layer(int width, int height) {
 		w = width;
@@ -82,11 +84,12 @@ public:
 	}
 
 	void render(SDL_Rect where, uint8_t alpha = 255) {
+        SDL_Texture* target = effectPreviewTexture ? effectPreviewTexture : tex;
 		if (layerDirty) {
 			updateTexture();
 		}
-		SDL_SetTextureAlphaMod(tex, alpha);
-		SDL_RenderCopy(g_rd, tex, NULL, &where);
+		SDL_SetTextureAlphaMod(target, alpha);
+		SDL_RenderCopy(g_rd, target, NULL, &where);
 	}
 
 	void render(SDL_Rect where, SDL_Rect clip, uint8_t alpha = 255) {
@@ -306,6 +309,8 @@ public:
 
 	}
 
+	Layer* copy();
+	Layer* copyWithNoTextureInit();
 	Layer* copyScaled(XY dimensions);
 
 	void setAllAlpha255() {

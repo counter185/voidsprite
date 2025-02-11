@@ -1792,10 +1792,8 @@ void MainEditor::mergeLayerDown(int index)
 void MainEditor::duplicateLayer(int index)
 {
     Layer* currentLayer = layers[index];
-    Layer* newL = newLayer();
-    memcpy(newL->pixelData, currentLayer->pixelData, currentLayer->w * currentLayer->h * 4);
+    Layer* newL = currentLayer->copy();
     newL->name = "Copy:" + currentLayer->name;
-    newL->layerDirty = true;
 }
 
 void MainEditor::layer_flipHorizontally()

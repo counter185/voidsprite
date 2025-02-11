@@ -3,8 +3,23 @@
 #include "UILabel.h"
 #include "UISlider.h"
 #include "UIButton.h"
+#include "UIColorInputField.h"
 #include "maineditor.h"
 #include "background_operation.h"
+
+PopupApplyFilter::~PopupApplyFilter() {
+    if (previewRenderThreadObj.joinable()) {
+        previewRenderThreadShouldRun = false;
+        previewRenderThreadObj.join();
+    }
+    if (previewPixelData != NULL) {
+        tracked_free(previewPixelData);
+    }
+    if (previewTexture != NULL) {
+        target->effectPreviewTexture = NULL;
+        SDL_DestroyTexture(previewTexture);
+    }
+}
 
 void PopupApplyFilter::defaultInputAction(SDL_Event evt)
 {
@@ -38,6 +53,7 @@ void PopupApplyFilter::eventSliderPosChanged(int evt_id, float value)
                 break;
         }
         updateLabels();
+        threadHasNewParameters = true;
     }
 }
 
@@ -111,9 +127,10 @@ void PopupApplyFilter::setupWidgets()
         switch (p.paramType) {
             case PT_INT:
             case PT_FLOAT:
+            {
                 float v = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
                 UISlider* slider = new UISlider();
-                slider->position = XY{250, y};
+                slider->position = XY{ 250, y };
                 slider->sliderPos = v;
                 slider->wxHeight = 25;
                 slider->setCallbackListener(i, this);
@@ -123,6 +140,16 @@ void PopupApplyFilter::setupWidgets()
                 valueLabel->position = xySubtract(slider->position, { 50, 0 });
                 paramLabels.push_back(valueLabel);
                 wxsManager.addDrawable(valueLabel);
+            }
+                break;
+            case PT_COLOR_RGB:
+            {
+                UIColorInputField* colorInput = new UIColorInputField();
+                colorInput->position = XY{ 250, y };
+                colorInput->wxHeight = 25;
+                colorInput->setCallbackListener(i, this);
+                wxsManager.addDrawable(colorInput);
+            }
                 break;
         }
         i++;
@@ -150,10 +177,7 @@ void PopupApplyFilter::setupWidgets()
 
 void PopupApplyFilter::applyAndClose()
 {
-    std::map<std::string, std::string> parameterMap;
-    for (auto& p : params) {
-        parameterMap[p.name] = std::to_string(p.defaultValue);
-    }
+    std::map<std::string, std::string> parameterMap = makeParameterMap();
     auto target = this->target;
     auto session = this->session;
     auto targetFilter = this->targetFilter;
@@ -180,6 +204,50 @@ void PopupApplyFilter::updateLabels()
             default:
                 label->text = std::to_string(p.defaultValue);
                 break;
+        }
+    }
+}
+
+void PopupApplyFilter::setupPreview()
+{
+    previewPixelData = (u8*)tracked_malloc(4 * target->w * target->h);
+    previewTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, target->w, target->h);
+    target->effectPreviewTexture = previewTexture;
+
+    previewRenderThreadObj = std::thread(&PopupApplyFilter::previewRenderThread, this);
+}
+
+void PopupApplyFilter::updatePreview()
+{
+    if (pixelDataDirty) {
+        u8* ppx;
+        int pitch;
+        SDL_LockTexture(previewTexture, NULL, (void**)&ppx, &pitch);
+        memcpy(ppx, previewPixelData, 4 * target->w * target->h);
+        SDL_UnlockTexture(previewTexture);
+        pixelDataDirty = false;
+    }
+}
+
+std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
+{
+    std::map<std::string, std::string> parameterMap;
+    for (auto& p : params) {
+        parameterMap[p.name] = std::to_string(p.defaultValue);
+    }
+    return parameterMap;
+}
+
+void PopupApplyFilter::previewRenderThread()
+{
+    while (previewRenderThreadShouldRun) {
+        if (threadHasNewParameters) {
+            std::map<std::string, std::string> parameterMap = makeParameterMap();
+            threadHasNewParameters = false;
+            Layer* l = targetFilter->run(target, parameterMap);
+            memcpy(previewPixelData, l->pixelData, 4 * target->w * target->h);
+            pixelDataDirty = true;
+            delete l;
         }
     }
 }
