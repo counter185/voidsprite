@@ -28,3 +28,5 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
 Layer* platformGetImageFromClipboard();
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
+
+int platformRunProgramAndGetExitCode(PlatformNativePathString path, PlatformNativePathString args, PlatformNativePathString cwd);

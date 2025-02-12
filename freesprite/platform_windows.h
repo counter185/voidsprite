@@ -226,3 +226,16 @@ Layer* platformGetImageFromClipboard() {
 	CloseClipboard();
 	return layer;
 }
+
+int platformRunProgramAndGetExitCode(PlatformNativePathString path, PlatformNativePathString args, PlatformNativePathString cwd) {
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si = { 0 };
+    CreateProcessW(path.c_str(), (wchar_t*)args.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, cwd.c_str(), &si, &pi);
+
+    //_wsystem(command.c_str());
+    char* b;
+    size_t s;
+    _dupenv_s(&b, &s, "ERRORLEVEL");
+    std::string ec = std::string(b);
+    return std::stoi(ec);
+}

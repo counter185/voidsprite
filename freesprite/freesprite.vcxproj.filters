@@ -914,6 +914,9 @@
     <ClInclude Include="PopupApplyFilter.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
+    <ClInclude Include="update_check.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

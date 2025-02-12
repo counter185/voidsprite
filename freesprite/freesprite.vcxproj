@@ -432,6 +432,7 @@
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
+    <ClInclude Include="update_check.h" />
     <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="zip\miniz.h" />
     <ClInclude Include="zip\zip.h" />

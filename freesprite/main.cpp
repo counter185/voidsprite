@@ -29,6 +29,7 @@
 #include "ToolGuideline.h"
 #include "BrushBezierLine.h"
 #include "background_operation.h"
+#include "update_check.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -472,6 +473,8 @@ int main(int argc, char** argv)
     if (custom9SPatterns > 0) {
         g_addNotification(Notification(std::format("Loaded {} custom 9seg. patterns", custom9SPatterns), "", 4000, NULL, COLOR_INFO));
     }
+
+    checkUpdates();
 
     SDL_Event evt;
     while (!screenStack.empty()) {
