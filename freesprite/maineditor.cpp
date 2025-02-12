@@ -1013,9 +1013,14 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 commitStateToCurrentLayer();
                             }
                             currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                            currentBrushMouseDowned = true;
                         }
                         else {
-                            currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                            if (currentBrushMouseDowned) {
+                                currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                currentBrushMouseDowned = false;
+                            }
+
                         }
                     }
                     mouseHoldPosition = mousePixelTargetPoint;

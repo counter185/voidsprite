@@ -67,6 +67,7 @@ public:
     XY mouseHoldPosition;
     bool closeNextTick = false;
     BaseBrush* currentBrush;
+    bool currentBrushMouseDowned = false;
     bool invertPattern = false;
     Pattern* currentPattern;
     bool leftMouseHold = false;
