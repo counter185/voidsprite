@@ -1,6 +1,6 @@
 id: com.github.counter185.voidsprite
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
 command: voidsprite
 
