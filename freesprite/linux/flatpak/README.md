@@ -4,7 +4,7 @@ To build:
 
 - `git clone https://github.com/counter185/voidsprite`
 - `cd voidsprite`
-- `cd freesprite/linux/flatpack`
+- `cd freesprite/linux/flatpak`
 - `flatpak-builder --repo flatpak-repo .flatpak-builder com.github.counter185.voidsprite.yml --force-clean`
 - `flatpak build-bundle flatpak-repo voidsprite.flatpak com.github.counter185.voidsprite`
 
