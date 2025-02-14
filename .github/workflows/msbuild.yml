@@ -105,11 +105,11 @@ jobs:
   build-linux64-flatpak:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:freedesktop-23.08
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-23.08
       options: --privileged
     steps:
     - uses: actions/checkout@v4
-    - uses: flatpak/flatpak-github-actions/flatpak-builder@master
+    - uses: flathub-infra/flatpak-github-actions/flatpak-builder@master
       continue-on-error: true
       with:
         bundle: voidsprite-build-linux64-flatpak.flatpak
