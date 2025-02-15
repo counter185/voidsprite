@@ -14,6 +14,15 @@ public:
 	SDL_Color bgColor = { 0,0,0, 0xff };
 	SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
 
+	void focusIn() override {
+		Drawable::focusIn();
+		SDL_StartTextInput();
+	}
+	void focusOut() override {
+		Drawable::focusOut();
+		SDL_StopTextInput();
+	}
+
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
 		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
 	}

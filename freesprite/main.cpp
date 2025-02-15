@@ -270,6 +270,7 @@ int main(int argc, char** argv)
 #define IMG_INIT_AVIF 0
 #define IMG_INIT_JXL 0
 #endif
+    SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
     IMG_Init(-1);
     g_wd = SDL_CreateWindow("void\xE2\x97\x86sprite", 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
     g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | (g_config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
