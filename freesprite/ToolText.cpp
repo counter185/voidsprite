@@ -54,7 +54,7 @@ void ToolText::eventPopupClosed(int evt_id, BasePopup* target)
 {
 	if (evt_id == EVENT_TOOLTEXT_POSTCONFIG) {
 		PopupTextTool* popup = (PopupTextTool*)target;
-		text = popup->textbox->text;
+		text = popup->textbox->getText();
 		textSize = popup->textSize;
 		renderText();
 	}

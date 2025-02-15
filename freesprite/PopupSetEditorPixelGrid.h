@@ -48,9 +48,13 @@ public:
 
     void eventButtonPressed(int evt_id) override {
         if (evt_id == 0) {
-            if (!tboxX->text.empty() && !tboxY->text.empty() && !tboxPadRX->text.empty() && !tboxPadBY->text.empty()) {
-                caller->tileDimensions = XY{ std::stoi(tboxX->text), std::stoi(tboxY->text) };
-                XY newTileGridPaddingBottomRight = XY{ std::stoi(tboxPadRX->text), std::stoi(tboxPadBY->text) };
+            std::string tboxXtx = tboxX->getText();
+            std::string tboxYtx = tboxY->getText();
+            std::string tboxPadRXtx = tboxPadRX->getText();
+            std::string tboxPadBYtx = tboxPadBY->getText();
+            if (!tboxXtx.empty() && !tboxYtx.empty() && !tboxPadRXtx.empty() && !tboxPadBYtx.empty()) {
+                caller->tileDimensions = XY{ std::stoi(tboxX->getText()), std::stoi(tboxY->getText()) };
+                XY newTileGridPaddingBottomRight = XY{ std::stoi(tboxPadRXtx), std::stoi(tboxPadBYtx) };
                 if (newTileGridPaddingBottomRight.x >= caller->tileDimensions.x && newTileGridPaddingBottomRight.x != 0) {
                     newTileGridPaddingBottomRight.x = 0;
                     g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));

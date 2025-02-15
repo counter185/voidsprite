@@ -1811,9 +1811,8 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
 
 void MainEditor::layer_promptRename()
 {
-    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:");
+    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", this->getCurrentLayer()->name);
     ninput->setCallbackListener(EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME, this);
-    ninput->tbox->text = this->getCurrentLayer()->name;
     g_addPopup(ninput);
 }
 

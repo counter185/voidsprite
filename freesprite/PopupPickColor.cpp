@@ -74,7 +74,7 @@ void PopupPickColor::updateRGBTextBoxOnInputEvent(std::string data, uint8_t* val
         }
         if (val >= 0 && val <= 255) {
             *value = val;
-            alphaInput->text = std::to_string(alpha);
+            alphaInput->setText(std::to_string(alpha));
         }
     }
     catch (std::exception) {
@@ -86,7 +86,7 @@ void PopupPickColor::setAlpha(uint8_t a)
 {
     if (acceptAlpha) {
         alpha = a;
-        alphaInput->text = std::to_string(alpha);
+        alphaInput->setText(std::to_string(alpha));
     }
 }
 

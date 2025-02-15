@@ -85,7 +85,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y};
     tf2->wxWidth = 80;
-    tf2->text = std::to_string(g_config.maxUndoHistory);
+    tf2->setText(std::to_string(g_config.maxUndoHistory));
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
     configTabs->tabs[1].wxs.addDrawable(tf2);
     posInTab.y += 35;

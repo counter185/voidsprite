@@ -364,13 +364,13 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
     sliderV->colorMin = (0xFF << 24) + ((int)(colorVMin.r*255) << 16) + ((int)(colorVMin.g * 255) << 8) + (int)(colorVMin.b * 255);
     sliderV->colorMax = (0xFF << 24) + ((int)(colorVMax.r*255) << 16) + ((int)(colorVMax.g * 255) << 8) + (int)(colorVMax.b * 255);
 
-    txtR->text = std::to_string(currentR);
-    txtG->text = std::to_string(currentG);
-    txtB->text = std::to_string(currentB);
+    txtR->setText(std::to_string(currentR));
+    txtG->setText(std::to_string(currentG));
+    txtB->setText(std::to_string(currentB));
     if (updateHSVTextBoxes) {
-        txtH->text = std::to_string(currentH);
-        txtS->text = std::to_string(currentS);
-        txtV->text = std::to_string(currentV);
+        txtH->setText(std::to_string(currentH));
+        txtS->setText(std::to_string(currentS));
+        txtV->setText(std::to_string(currentV));
     }
 
     uint32_t rgbColor = (0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
@@ -382,7 +382,7 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
     sliderB->colorMin = rgbColor & 0xFFFF00;
     sliderB->colorMax = rgbColor | 0x0000FF;
 
-    colorTextField->text = std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b);
+    colorTextField->setText(std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
     caller->pickedColor = rgbColor;
 }
 

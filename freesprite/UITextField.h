@@ -5,11 +5,13 @@
 
 class UITextField : public Drawable
 {
-public:
+protected:
 	std::string text = "";
+public:
 	std::string tooltip = "";
 	bool isNumericField = false;
 	bool isColorField = false;
+	int insertPosition = 0;
 	int wxWidth = 250, wxHeight = 30;
 	SDL_Color bgColor = { 0,0,0, 0xff };
 	SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
@@ -30,6 +32,17 @@ public:
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
 	bool focusableWithTab() override { return true; }
 
+	bool textEmpty() { return text.empty(); }
+	std::string getText() { return text; }
+	void setText(std::string t) 
+	{
+		text = t;
+		insertPosition = text.size();
+	}
+	void concatToText(std::string t) {
+		text += t;
+		insertPosition = text.size();
+	}
 	bool isValidOrPartialColor();
 };
 

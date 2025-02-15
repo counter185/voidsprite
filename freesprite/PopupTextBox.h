@@ -11,15 +11,15 @@ public:
 
 	UITextField* tbox;
 
-	PopupTextBox(std::string tt, std::string tx, int textFieldWidth = 220);
+	PopupTextBox(std::string tt, std::string tx, std::string defaultValue = "", int textFieldWidth = 220);
 
 	void render() override;
 
     void eventButtonPressed(int evt_id) override {
         if (evt_id == 0) {
-            if (!tbox->text.empty()) {
+            if (!tbox->textEmpty()) {
                 if (callback != NULL) {
-                    callback->eventTextInputConfirm(callback_id, tbox->text);
+                    callback->eventTextInputConfirm(callback_id, tbox->getText());
                 }
                 closePopup();
             }

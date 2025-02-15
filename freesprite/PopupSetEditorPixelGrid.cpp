@@ -30,13 +30,13 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
     tboxX = new UITextField();
     tboxX->position = XY{ 20, 80 };
-    tboxX->text = std::to_string(caller->tileDimensions.x);
+    tboxX->setText(std::to_string(caller->tileDimensions.x));
     tboxX->wxWidth = 120;
     wxsManager.addDrawable(tboxX);
 
     tboxY = new UITextField();
     tboxY->position = XY{ 160, 80 };
-    tboxY->text = std::to_string(caller->tileDimensions.y);
+    tboxY->setText(std::to_string(caller->tileDimensions.y));
     tboxY->wxWidth = 120;
     wxsManager.addDrawable(tboxY);
 
@@ -53,7 +53,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
     tboxPadRX = new UITextField();
     tboxPadRX->position = XY{ 175, 125 };
-    tboxPadRX->text = std::to_string(caller->tileGridPaddingBottomRight.x);
+    tboxPadRX->setText(std::to_string(caller->tileGridPaddingBottomRight.x));
     tboxPadRX->wxWidth = 60;
     wxsManager.addDrawable(tboxPadRX);
 
@@ -64,7 +64,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
     tboxPadBY = new UITextField();
     tboxPadBY->position = XY{ 320, 125 };
-    tboxPadBY->text = std::to_string(caller->tileGridPaddingBottomRight.y);
+    tboxPadBY->setText(std::to_string(caller->tileGridPaddingBottomRight.y));
     tboxPadBY->wxWidth = 60;
     wxsManager.addDrawable(tboxPadBY);
 

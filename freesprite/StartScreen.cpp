@@ -93,10 +93,10 @@ void StartScreen::eventButtonPressed(int evt_id) {
     if (evt_id == 4) {
         switch (newImageTabs->openTab) {
         case 0:
-            if (!tab0TextFieldW->text.empty() && !tab0TextFieldH->text.empty()) {
+            if (!tab0TextFieldW->textEmpty() && !tab0TextFieldH->textEmpty()) {
                 try {
-                    int newImgW = std::stoi(tab0TextFieldW->text);
-                    int newImgH = std::stoi(tab0TextFieldH->text);
+                    int newImgW = std::stoi(tab0TextFieldW->getText());
+                    int newImgH = std::stoi(tab0TextFieldH->getText());
                     g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
                 }
                 catch (std::out_of_range) {
@@ -108,12 +108,12 @@ void StartScreen::eventButtonPressed(int evt_id) {
             }
             break;
         case 1:
-            if (!tab1TextFieldCH->text.empty() && !tab1TextFieldCW->text.empty()
-                && !tab1TextFieldCHX->text.empty() && !tab1TextFieldCWX->text.empty()) {
+            if (!tab1TextFieldCH->textEmpty() && !tab1TextFieldCW->textEmpty()
+                && !tab1TextFieldCHX->textEmpty() && !tab1TextFieldCWX->textEmpty()) {
                 try {
-                    XY cellSize = XY{ std::stoi(tab1TextFieldCW->text) , std::stoi(tab1TextFieldCH->text) };
-                    int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
-                    int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
+                    XY cellSize = XY{ std::stoi(tab1TextFieldCW->getText()) , std::stoi(tab1TextFieldCH->getText()) };
+                    int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->getText());
+                    int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
                     MainEditor* newMainEditor = new MainEditor(XY{ newImgW, newImgH });
                     newMainEditor->tileDimensions = cellSize;
                     g_addScreen(newMainEditor);
@@ -131,10 +131,10 @@ void StartScreen::eventButtonPressed(int evt_id) {
     if (evt_id == 5) {
         switch (newImageTabs->openTab) {
         case 0:
-            if (!tab0TextFieldW->text.empty() && !tab0TextFieldH->text.empty()) {
+            if (!tab0TextFieldW->textEmpty() && !tab0TextFieldH->textEmpty()) {
                 try {
-                    int newImgW = std::stoi(tab0TextFieldW->text);
-                    int newImgH = std::stoi(tab0TextFieldH->text);
+                    int newImgW = std::stoi(tab0TextFieldW->getText());
+                    int newImgH = std::stoi(tab0TextFieldH->getText());
                     g_addScreen(new MainEditorPalettized(XY{ newImgW, newImgH }));
                 }
                 catch (std::out_of_range) {
@@ -146,12 +146,12 @@ void StartScreen::eventButtonPressed(int evt_id) {
             }
             break;
         case 1:
-            if (!tab1TextFieldCH->text.empty() && !tab1TextFieldCW->text.empty()
-                && !tab1TextFieldCHX->text.empty() && !tab1TextFieldCWX->text.empty()) {
+            if (!tab1TextFieldCH->textEmpty() && !tab1TextFieldCW->textEmpty()
+                && !tab1TextFieldCHX->textEmpty() && !tab1TextFieldCWX->textEmpty()) {
                 try {
-                    XY cellSize = XY{ std::stoi(tab1TextFieldCW->text) , std::stoi(tab1TextFieldCH->text) };
-                    int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->text);
-                    int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->text);
+                    XY cellSize = XY{ std::stoi(tab1TextFieldCW->getText()) , std::stoi(tab1TextFieldCH->getText()) };
+                    int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->getText());
+                    int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
                     MainEditorPalettized* newMainEditor = new MainEditorPalettized(XY{ newImgW, newImgH });
                     newMainEditor->tileDimensions = cellSize;
                     g_addScreen(newMainEditor);

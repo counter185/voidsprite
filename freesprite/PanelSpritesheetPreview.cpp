@@ -21,7 +21,7 @@ PanelSpritesheetPreview::PanelSpritesheetPreview(SpritesheetPreviewScreen* calle
 	subWidgets.addDrawable(msPerSpriteLabel);
 
 	textfieldMSPerSprite = new UITextField();
-	textfieldMSPerSprite->text = std::to_string(caller->msPerSprite);
+	textfieldMSPerSprite->setText(std::to_string(caller->msPerSprite));
 	textfieldMSPerSprite->isNumericField = true;
 	textfieldMSPerSprite->wxWidth = 150;
     textfieldMSPerSprite->position = { 140, 40 };

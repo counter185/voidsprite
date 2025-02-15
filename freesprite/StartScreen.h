@@ -86,7 +86,7 @@ public:
         tab1TextFieldCWX->position = xySubtract(XY{ 300,120 }, newImageTabs->position);
         tab1TextFieldCWX->wxWidth = 40;
         tab1TextFieldCWX->isNumericField = true;
-        tab1TextFieldCWX->text = "1";
+        tab1TextFieldCWX->setText("1");
         newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCWX);
 
         tab1TextFieldCH = new UITextField();
@@ -100,7 +100,7 @@ public:
         tab1TextFieldCHX->position = xySubtract(XY{ 300,155 }, newImageTabs->position);
         tab1TextFieldCHX->wxWidth = 40;
         tab1TextFieldCHX->isNumericField = true;
-        tab1TextFieldCHX->text = "1";
+        tab1TextFieldCHX->setText("1");
         tab1TextFieldCHX->setCallbackListener(3, this);
         newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
 

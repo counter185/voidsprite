@@ -15,7 +15,7 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 
 	textbox = new UITextField();
 	textbox->position = XY{ 20, 80 };
-	textbox->text = parent->text;
+	textbox->setText(parent->text);
 	textbox->wxWidth = 260;
 	wxsManager.addDrawable(textbox);
 
@@ -26,7 +26,7 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 
 	textboxSize = new UITextField();
 	textboxSize->position = XY{ 120, 120 };
-	textboxSize->text = std::to_string(parent->textSize);
+	textboxSize->setText(std::to_string(parent->textSize));
 	textboxSize->isNumericField = true;
 	textboxSize->wxWidth = 120;
 	wxsManager.addDrawable(textboxSize);
@@ -62,7 +62,7 @@ void PopupTextTool::render()
 
 void PopupTextTool::eventButtonPressed(int evt_id) {
 	if (evt_id == 0) {
-		textSize = std::stoi(textboxSize->text);
+		textSize = std::stoi(textboxSize->getText());
 		caller->eventPopupClosed(EVENT_TOOLTEXT_POSTCONFIG, this);
 		closePopup();
 	}

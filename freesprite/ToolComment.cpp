@@ -11,7 +11,7 @@ void ToolComment::clickPress(MainEditor* editor, XY pos)
 		if (editor->canAddCommentAt(pos)) {
 			clickPos = pos;
 			clickEditor = editor;
-			PopupTextBox* textInput = new PopupTextBox("Add comment", std::format("Set comment text at {}:{}:", pos.x, pos.y), 440);
+			PopupTextBox* textInput = new PopupTextBox("Add comment", std::format("Set comment text at {}:{}:", pos.x, pos.y), "", 440);
 			textInput->setCallbackListener(EVENT_MAINEDITOR_ADD_COMMENT, this);
 			g_addPopup(textInput);
 		}

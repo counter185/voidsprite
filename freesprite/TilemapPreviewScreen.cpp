@@ -513,7 +513,7 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
 void TilemapPreviewScreen::eventPopupClosed(int evt_id, BasePopup* p)
 {
     if (evt_id == EVENT_TILEMAP_RESIZE) {
-        resizeTilemap(std::stoi(((PopupTileGeneric*)p)->tboxX->text), std::stoi(((PopupTileGeneric*)p)->tboxY->text));
+        resizeTilemap(std::stoi(((PopupTileGeneric*)p)->tboxX->getText()), std::stoi(((PopupTileGeneric*)p)->tboxY->getText()));
     }
 }
 

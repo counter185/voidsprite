@@ -34,7 +34,7 @@ public:
 	}
 
 	void setPickedColor(uint32_t c) {
-		textField->text = std::format("{:06X}", c&0xFFFFFF);
+		textField->setText(std::format("{:06X}", c & 0xFFFFFF));
 		c |= 0xFF000000;
 		pickedColor = c;
 	}

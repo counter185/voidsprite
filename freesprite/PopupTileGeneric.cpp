@@ -27,14 +27,14 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
 
     tboxX = new UITextField();
     tboxX->position = XY{ 20, 80 };
-    tboxX->text = std::to_string(defaultValues.x);
+    tboxX->setText(std::to_string(defaultValues.x));
     tboxX->isNumericField = true;
     tboxX->wxWidth = 120;
     wxsManager.addDrawable(tboxX);
 
     tboxY = new UITextField();
     tboxY->position = XY{ 160, 80 };
-    tboxY->text = std::to_string(defaultValues.y);
+    tboxY->setText(std::to_string(defaultValues.y));
     tboxY->isNumericField = true;
     tboxY->wxWidth = 120;
     tboxY->setCallbackListener(2, this);
@@ -63,9 +63,9 @@ void PopupTileGeneric::eventTextInputConfirm(int evt_id, std::string data)
 
 void PopupTileGeneric::eventButtonPressed(int evt_id) {
     if (evt_id == 0) {
-        if (!tboxX->text.empty() && !tboxY->text.empty()) {
-            result.x = std::stoi(tboxX->text);
-            result.y = std::stoi(tboxY->text);
+        if (!tboxX->textEmpty() && !tboxY->textEmpty()) {
+            result.x = std::stoi(tboxX->getText());
+            result.y = std::stoi(tboxY->getText());
             callback->eventPopupClosed(popupEvtID, this);
             closePopup();
         }
