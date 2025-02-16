@@ -243,10 +243,12 @@ void MainEditor::render() {
 
 void MainEditor::tick() {
 
-    u64 timestampNow = SDL_GetTicks64() / 1000;
-    if (lastTimestamp != timestampNow) {
-        lastTimestamp = timestampNow;
-        editTime++;
+    if (g_windowFocused) {
+        u64 timestampNow = SDL_GetTicks64() / 1000;
+        if (lastTimestamp != timestampNow) {
+            lastTimestamp = timestampNow;
+            editTime++;
+        }
     }
 
     if (abs(g_gamepad->gamepadLSX) > 0.05f || abs(g_gamepad->gamepadLSY) > 0.05f) {
@@ -500,7 +502,7 @@ void MainEditor::DrawForeground()
         g_fnt->RenderString(std::format("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
-    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{255,255,255,0x40});
+    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ 255,255,255, (u8)(g_windowFocused ? 0x40 : 0x30) });
 }
 
 void MainEditor::renderComments()
