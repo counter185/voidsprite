@@ -745,6 +745,12 @@ u32 hslShiftPixelStudioCompat(u32 ccolor, hsl shift)
     return PackRGBAtoARGB((uint8_t)(color.r * 255), (uint8_t)(color.g * 255), (uint8_t)(color.b * 255), (ccolor & 0xFF000000) >> 24);
 }
 
+u32 invertColor(u32 color)
+{
+    return PackRGBAtoARGB(255 - ((color & 0xFF0000) >> 16), 255 - ((color & 0x00FF00) >> 8), 255 - (color & 0x0000FF),
+                          (color & 0xFF000000) >> 24);
+}
+
 int ixmin(int a, int b) { return a > b ? b : a; }
 int ixmax(int a, int b) { return a > b ? a : b; }
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
@@ -949,4 +955,10 @@ rgb hsl2rgb(hsl c) {
 
     return result;
 
+}
+
+rgb u32ToRGB(u32 color)
+{
+    return {(float)((color & 0xFF0000) >> 16) / 255.0f, (float)((color & 0x00FF00) >> 8) / 255.0f,
+            (float)(color & 0x0000FF) / 255.0f};
 }

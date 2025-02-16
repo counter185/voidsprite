@@ -2,15 +2,17 @@
 #include "maineditor.h"
 #include <algorithm>
 #include "background_operation.h"
+#include "FontRenderer.h"
 
 bool BrushFill::closedListContains(XY a)
 {
-    for (int x = previewClosedList.size(); x --> 0;) {
+    return previewClosedList.pointExists(a);
+    /*for (int x = previewClosedList.size(); x--> 0;) {
         if (xyEqual(a, previewClosedList[x])) {
             return true;
         }
     }
-    return false;
+    return false;*/
 }
 
 void BrushFill::clickPress(MainEditor* editor, XY pos)
@@ -71,9 +73,14 @@ void BrushFill::rightClickPress(MainEditor* editor, XY pos)
 {
     editor->commitStateToCurrentLayer();
     uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
-    for (XY& t : previewClosedList) {
+    previewClosedList.forEachScanline([editor, swapTo](ScanlineMapElement sme) {
+        for (int x = 0; x < sme.size.x; x++) {
+            editor->SetPixel(xyAdd(sme.origin, {x,0}), swapTo);
+        }
+    });
+    /*for (XY& t : previewClosedList) {
         editor->SetPixel({ t }, swapTo);
-    }
+    }*/
     for (XY& t : previewOpenList) {
         editor->SetPixel({ t }, swapTo);
     }
@@ -81,10 +88,11 @@ void BrushFill::rightClickPress(MainEditor* editor, XY pos)
 
 void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
 
+    previewXBList.iPromiseNotToPutDuplicatePoints = true;
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
     if ((editor != lastEditor || !xyEqual(lastMouseMotionPos, previewLastPosition))
-        && std::find_if(previewClosedList.begin(), previewClosedList.end(), [this](XY a){ return xyEqual(a, lastMouseMotionPos); })
-            == previewClosedList.end()) {
+        && !previewClosedList.pointExists(lastMouseMotionPos) /*&&  std::find_if(previewClosedList.begin(), previewClosedList.end(), [this](XY a) { return xyEqual(a, lastMouseMotionPos); })
+            == previewClosedList.end()*/) {
         lastEditor = editor;
         previewLastPosition = lastMouseMotionPos;
         previewSearchingColor = editor->getCurrentLayer()->getPixelAt(previewLastPosition);
@@ -94,6 +102,7 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
         previewIterations = 0;
         previewOpenList.clear();
         previewClosedList.clear();
+        previewXBList.clear();
         previewOpenList.push_back(previewLastPosition);
     }
     if (editor != NULL 
@@ -130,24 +139,113 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
                 for (XY& pp : p) {
                     nextList.push_back(xyAdd(openListElement, pp));
                 }
-                previewClosedList.push_back(openListElement);
+                previewClosedList.addPoint(openListElement);
+                
+                if (previewXBList.pointCount < 256000) {
+                    previewXBList.addPoint(openListElement.x, openListElement.y - openListElement.x);
+                }
             }
         }
         previewOpenList = nextList;
         previewIterations++;
     }
+    //g_fnt->RenderString(std::to_string(previewXBList.pointCount), 50, 50);
+    hsl hslC = rgb2hsl(u32ToRGB(previewSearchingColor));
+    u32 previewColor = hslC.l > 0.7 ? 0x000000 : 0xFFFFFF;
     uint64_t distanceTicks = SDL_GetTicks64() - timeStarted;
     double distanceTime = dxmax(1, distanceTicks / 16.0);
-    for (XY& cle : previewClosedList) {
-        //double alphaModifier = dxmin((distanceTicks / 32.0) / dxmax(xyDistance(cle, previewLastPosition), 1), 1);
-        double alphaModifier = xyDistance(cle, previewLastPosition) / distanceTime;
-        uint8_t alpha = ixmax(0, 0xd0 * dxmin(alphaModifier, 1));
 
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, alpha);
-        drawLocalPoint(canvasDrawPoint, cle, scale);
+    previewClosedList.forEachScanline([this, editor, canvasDrawPoint, scale, distanceTime, previewColor](ScanlineMapElement sme) {
+
+        SDL_Rect r = { canvasDrawPoint.x + sme.origin.x * scale, canvasDrawPoint.y + sme.origin.y * scale, scale * sme.size.x, scale };
+        if (!((r.y < g_windowH || (r.y + r.h) > 0))) {
+            return;
+        }
+
+        //double alphaModifier = xyDistance(statLineEndpoint({0,1}, sme.size, 0.5), previewLastPosition) / distanceTime;
+        double alphaModifierAtLeft = xyDistance(sme.origin, previewLastPosition) / distanceTime;
+        double alphaModifierAtCenter = xyDistance(xyAdd(sme.origin, {sme.size.x/2, sme.size.y/2}), previewLastPosition) / distanceTime;
+        double alphaModifierAtRight = xyDistance(xyAdd(sme.origin, sme.size), previewLastPosition) / distanceTime;
+        uint8_t alphaL = ixmax(0, 0xd0 * dxmin(alphaModifierAtLeft, 1));
+        uint8_t alphaC = ixmax(0, 0xd0 * dxmin(alphaModifierAtCenter, 1));
+        uint8_t alphaR = ixmax(0, 0xd0 * dxmin(alphaModifierAtRight, 1));
+        
+        //u32 baseColor = scale > 5 ? 0xFFFFFF : 0x707070;
+        u32 colL = (alphaL << 24) | previewColor;
+        u32 colC = (alphaC << 24) | previewColor;
+        u32 colR = (alphaR << 24) | previewColor;
+
+        //SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, alpha);
+        
+        if (sme.size.x >= 2) {
+            SDL_Rect r1 = { r.x, r.y, r.w / 2, r.h };
+            SDL_Rect r2 = { r.x + r.w / 2, r.y, r.w / 2, r.h };
+            renderGradient(r1, colL, colC, colL, colC);
+            renderGradient(r2, colC, colR, colC, colR);
+        }
+        else {
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, alphaC);
+            SDL_RenderFillRect(g_rd, &r);
+        }
+        if (scale > 5) {
+            //SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x40);
+            
+            for (int x = 0; x < sme.size.x; x++) {
+                XY point = xyAdd(sme.origin, { x,0 });
+
+                int b = point.y - point.x;
+                //xbmapPtr->addPoint(point.x, b);
+
+                /*SDL_Rect r = {canvasDrawPoint.x + point.x * scale, canvasDrawPoint.y + point.y * scale, scale, scale};
+                bool cPre = r.x + r.w >= 0;
+                bool cPost = r.x < g_windowW;
+                if (!cPost) {
+                    break;  // stop because we're outside the window
+                }
+                if (cPre) {
+                    SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + scale - 1, r.y + scale - 1);
+                }*/
+            }
+        }
+    });
+    int lineDrawcalls = 0;
+    int* ll = &lineDrawcalls;
+    if (scale >= 2) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x40);
-        drawPointStrikethrough(canvasDrawPoint, cle, scale);
+        previewXBList.forEachScanline([canvasDrawPoint, scale, ll](IntLineMapElement ilme, int b) {
+            if (scale <= 4 && ((b & 0b11) != 0)) {
+                return;
+            }
+            else if (scale < 9 && ((b & 1) != 0)) {
+                return;
+            }
+            XY pointOrigin = { ilme.x, b + ilme.x };
+            SDL_Rect r = { canvasDrawPoint.x + pointOrigin.x * scale, canvasDrawPoint.y + pointOrigin.y * scale, scale * ilme.w, scale * ilme.w };
+            
+            //test bottom left and top right intersect
+            int bb = r.y - r.x;
+
+            XY origin = { r.x, r.y };
+            if (origin.y < g_windowH && bb < g_windowH && (g_windowW + bb) >= 0) {
+                XY endpoint = { r.x + r.w - 1 , r.y + r.w - 1 };
+
+                if (endpoint.y > g_windowH) {
+                    int diff = endpoint.y - g_windowH;
+                    endpoint.y -= diff;
+                    endpoint.x -= diff;
+                }
+                if (origin.x < 0) {
+                    int diff = 0 - origin.x;
+                    origin.x += diff;
+                    origin.y += diff;
+                }
+
+                SDL_RenderDrawLine(g_rd, origin.x, origin.y, endpoint.x, endpoint.y);
+                (*ll)++;
+            }
+        });
     }
+    //g_fnt->RenderString(std::format("Line DCs {}", lineDrawcalls), 50, 50);
 
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
     drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);

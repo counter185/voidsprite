@@ -35,10 +35,13 @@ public:
 	
 	void drawPointStrikethrough(XY canvasOrigin, XY point, int scale) {
 		SDL_Rect r = { canvasOrigin.x + point.x * scale, canvasOrigin.y + point.y * scale, scale, scale };
-		SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + scale-1, r.y + scale-1);
+		if (r.x < g_windowW && r.x + r.w >= 0) {
+			SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + scale - 1, r.y + scale - 1);
+		}
 	}
 	void drawPointOutline(XY canvasOrigin, XY point, int scale) {
 		SDL_Rect r = { canvasOrigin.x + point.x * scale, canvasOrigin.y + point.y * scale, scale, scale };
+		
 		SDL_RenderDrawRect(g_rd, &r);
 		drawPointStrikethrough(canvasOrigin, point, scale);
 		//SDL_RenderDrawLine(g_rd, r.x, r.y+scale/2, r.x + scale/2-1, r.y + scale-1);

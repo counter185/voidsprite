@@ -35,6 +35,8 @@ rgb hsv2rgb(hsv in);
 hsl rgb2hsl(rgb c);
 rgb hsl2rgb(hsl c);
 
+rgb u32ToRGB(u32 color);
+
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
@@ -44,6 +46,7 @@ uint32_t modAlpha(uint32_t color, uint8_t alpha);
 u32 hsvShift(u32 color, hsv shift);
 u32 hslShift(u32 color, hsl shift);
 u32 hslShiftPixelStudioCompat(u32 color, hsl shift);
+u32 invertColor(u32 color);
 
 bool pointInBox(XY point, SDL_Rect rect);
 
@@ -150,6 +153,113 @@ public:
         return (data[byteIndex] & mask) != 0;
     }
     void setAll(bool value) { memset(data, value ? 0xFF : 0x00, sizeBytes); }
+};
+
+struct ScanlineMapElement {
+    XY origin;
+    XY size;
+};
+class ScanlineMap {
+public:
+    bool iPromiseNotToPutDuplicatePoints = false;
+    std::map<int, std::vector<ScanlineMapElement>> scanlineMap;
+
+    void mergeScanline(int p) {
+        std::vector<ScanlineMapElement>& smm = scanlineMap[p];
+        if (smm.size() <= 1) {
+            return;
+        }
+        std::sort(smm.begin(), smm.end(), [](ScanlineMapElement a, ScanlineMapElement b) { return a.origin.x < b.origin.x; });
+        for (int x = 0; x < smm.size() - 1; x++) {
+            if ((smm[x].origin.x + smm[x].size.x) == (smm[x + 1].origin.x)) {
+                smm[x].size.x += smm[x + 1].size.x;
+                smm.erase(smm.begin() + x + 1);
+                x--;
+            }
+        }
+    }
+    void addPoint(XY point) {
+        if (iPromiseNotToPutDuplicatePoints || !pointExists(point)) {
+            int p = point.y;
+            scanlineMap[p].push_back({ point, {1,1} });
+            mergeScanline(p);
+        }
+    }
+    bool pointExists(XY point) {
+        std::vector<ScanlineMapElement>& r = scanlineMap[point.y];
+        for (ScanlineMapElement& sme : r) {
+            if (sme.origin.x <= point.x && (sme.origin.x + sme.size.x) > point.x) {
+                return true;
+            }
+        }
+        return false;
+    }
+    void forEachScanline(std::function<void(ScanlineMapElement)> f) {
+        for (auto& me : scanlineMap) {
+            for (auto& mm : me.second) {
+                f(mm);
+            }
+        }
+    }
+    void clear() {
+        scanlineMap.clear();
+    }
+};
+//todo ^ make the above into an intlinemap too
+
+struct IntLineMapElement {
+    int x;
+    int w;
+};
+class IntLineMap {
+public:
+    int pointCount = 0;
+    bool iPromiseNotToPutDuplicatePoints = false;
+    std::map<int, std::vector<IntLineMapElement>> intlineMap;
+
+    void mergeIntLine(int y) {
+        std::vector<IntLineMapElement>& smm = intlineMap[y];
+        if (smm.size() <= 1) {
+            return;
+        }
+        std::sort(smm.begin(), smm.end(), [](IntLineMapElement a, IntLineMapElement b) { return a.x < b.x; });
+        for (int x = 0; x < smm.size() - 1; x++) {
+            if ((smm[x].x + smm[x].w) == (smm[x + 1].x)) {
+                smm[x].w += smm[x + 1].w;
+                smm.erase(smm.begin() + x + 1);
+                x--;
+            }
+        }
+    }
+    void addPoint(int x, int y) {
+        if (iPromiseNotToPutDuplicatePoints || !pointExists(x,y)) {
+            intlineMap[y].push_back({ x, 1 });
+            pointCount++;
+            mergeIntLine(y);
+        }
+    }
+    bool pointExists(int x, int y) {
+        std::vector<IntLineMapElement>& r = intlineMap[y];
+        for (IntLineMapElement& sme : r) {
+            if (sme.x <= x && (sme.x + sme.w) > x) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    void forEachScanline(std::function<void(IntLineMapElement, int)> f) {
+        for (auto& me : intlineMap) {
+            for (auto& mm : me.second) {
+                f(mm, me.first);
+            }
+        }
+    }
+
+    void clear() {
+        intlineMap.clear();
+        pointCount = 0;
+    }
 };
 
 class Detiler {

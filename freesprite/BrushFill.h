@@ -1,12 +1,16 @@
 #pragma once
 #include "BaseBrush.h"
+#include "mathops.h"
+
 class BrushFill : public BaseBrush
 {
 private:
 	XY previewLastPosition;
 	uint32_t previewSearchingColor;
 	std::vector<XY> previewOpenList;
-	std::vector<XY> previewClosedList;
+	ScanlineMap previewClosedList;
+	IntLineMap previewXBList;
+	//std::vector<XY> previewClosedList;
 	int previewIterations = 0;
 	uint64_t timeStarted;
 	uint64_t timeNextIter;
@@ -20,6 +24,7 @@ public:
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_fill.png"; }
 	XY getSection() override { return XY{ 0,1 }; }
 
+	void resetState() override { printf("RESET STATE\n"); };
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}
