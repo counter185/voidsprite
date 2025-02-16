@@ -115,6 +115,9 @@ public:
 
     SplitSessionData splitSessionData = { false };
 
+    u64 editTime = 0;
+    u64 lastTimestamp = -1;
+
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);

@@ -854,6 +854,23 @@ std::string randomUUID()
 	return ret;
 }
 
+std::string secondsTimeToHumanReadable(u64 seconds)
+{
+    u64 s = seconds % 60;
+    seconds /= 60;
+    u64 m = seconds % 60;
+    seconds /= 60;
+    u64 h = seconds % 24;
+    seconds /= 24;
+    std::string ret = std::format("{:02}:{:02}:{:02}", h, m, s);
+
+    if (seconds > 0) {
+        u64 d = seconds;
+        ret = std::format("{}d {}", d, ret);
+    }
+    return ret;
+}
+
 SDL_Event convertTouchToMouseEvent(SDL_Event src)
 {
     SDL_Event ret = src;

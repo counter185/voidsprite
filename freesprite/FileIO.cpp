@@ -3283,6 +3283,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
                     if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
                     if (extData.contains("layer.selected")) { ret->selLayer = std::stoi(extData["layer.selected"]); }
+                    if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
                     if (extData.contains("sym.enabled")) { 
                         ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
                         ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
@@ -3796,7 +3797,8 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"guidelines", guidelinesData}
+            {"guidelines", guidelinesData},
+            {"edit.time", std::to_string(editor->editTime)}
         };
 
         if (editor->isPalettized) {
