@@ -152,6 +152,7 @@ inline double g_deltaTime = 1.0;
 inline double g_frameDeltaTime = 0.001;
 inline std::vector<NineSegmentPattern*> g_9spatterns;
 inline std::vector<BaseFilter*> g_filters;
+inline bool g_windowFocused = true;
 
 extern std::vector<std::string> g_cmdlineArgs;
 

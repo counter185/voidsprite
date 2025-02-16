@@ -597,6 +597,8 @@ int main(int argc, char** argv)
             }
         }
 
+        g_windowFocused = (SDL_GetWindowFlags(g_wd) & SDL_WINDOW_INPUT_FOCUS) != 0;
+
         if (!popupStack.empty()) {
             popupStack[popupStack.size() - 1]->tick();
         }
@@ -731,6 +733,9 @@ int main(int argc, char** argv)
         SDL_RenderPresent(g_rd);
         if (!g_config.vsync) {
             SDL_Delay(3);
+        }
+        if (!g_windowFocused) {
+            SDL_Delay(45);
         }
         uint64_t ticksEnd = SDL_GetTicks64();
 
