@@ -1729,6 +1729,9 @@ uint32_t MainEditor::getActiveColor()
 
 void MainEditor::setActiveBrush(BaseBrush* b)
 {
+    if (currentBrush != NULL) {
+        currentBrush->resetState();
+    }
     currentBrush = b;
     brushPicker->updateActiveBrushButton(b);
 }

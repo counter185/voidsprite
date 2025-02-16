@@ -176,7 +176,7 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
         updateActivePatternButton(caller->currentPattern);
     }
 	else if (evt_id >= 100) {
-		caller->currentBrush = g_brushes[evt_id-100];
+		caller->setActiveBrush(g_brushes[evt_id - 100]);
         updateActiveBrushButton(evt_id - 100);
 	}
 }

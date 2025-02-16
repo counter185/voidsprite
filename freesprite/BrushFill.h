@@ -24,7 +24,7 @@ public:
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_fill.png"; }
 	XY getSection() override { return XY{ 0,1 }; }
 
-	void resetState() override { printf("RESET STATE\n"); };
+	void resetState() override;;
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}

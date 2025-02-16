@@ -15,6 +15,16 @@ bool BrushFill::closedListContains(XY a)
     return false;*/
 }
 
+void BrushFill::resetState() 
+{ 
+    timeStarted = SDL_GetTicks64();
+    timeNextIter = timeStarted;
+    previewIterations = 0;
+    previewOpenList.clear();
+    previewClosedList.clear();
+    previewXBList.clear();
+}
+
 void BrushFill::clickPress(MainEditor* editor, XY pos)
 {
     g_startNewOperation([this, editor, pos]() {
