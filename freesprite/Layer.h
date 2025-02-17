@@ -8,6 +8,8 @@ protected:
 public:
     bool isPalettized = false;
 
+    std::map<std::string, std::string> importExportExtdata;
+
     u8* pixelData;	//!!! THIS IS IN ARGB
     std::vector<uint8_t*> undoQueue;
     std::vector<uint8_t*> redoQueue;

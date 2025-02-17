@@ -9,6 +9,7 @@ public:
     bool isolateRectOnLockTile = false;
     bool fillToolTileBound = true;
     bool vsync = true;
+    bool saveLoadFlatImageExtData = true;
 
     std::vector<std::string> lastOpenFiles;
 

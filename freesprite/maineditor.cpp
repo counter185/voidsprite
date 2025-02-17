@@ -86,8 +86,8 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 MainEditor::MainEditor(Layer* layer)
 {
     canvas.dimensions = { layer->w, layer->h };
-
     layers.push_back(layer);
+    loadSingleLayerExtdata(layer);
 
     setUpWidgets();
     recenterCanvas();
@@ -1404,6 +1404,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
     }
     else {
         Layer* flat = flattenImage();
+        flat->importExportExtdata = makeSingleLayerExtdata();
         result = exporter->exportData(name, flat);
         delete flat;
     }
@@ -1440,6 +1441,75 @@ void MainEditor::trySaveAsImage()
         }
         platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
     }
+}
+
+std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
+{
+    std::map<std::string, std::string> ret;
+    ret["TileX"] = std::to_string(tileDimensions.x);
+    ret["TileY"] = std::to_string(tileDimensions.y);
+    ret["TilePadRX"] = std::to_string(tileGridPaddingBottomRight.x);
+    ret["TilePadBY"] = std::to_string(tileGridPaddingBottomRight.y);
+    ret["SymX"] = std::to_string(symmetryPositions.x);
+    ret["SymY"] = std::to_string(symmetryPositions.y);
+    ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
+    ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
+    ret["CommentData"] = makeCommentDataString();
+    return ret;
+}
+
+void MainEditor::loadSingleLayerExtdata(Layer* l) {
+    try {
+        auto kvmap = l->importExportExtdata;
+        if (kvmap.contains("TileX")) { tileDimensions.x = std::stoi(kvmap["TileX"]); }
+        if (kvmap.contains("TileY")) { tileDimensions.y = std::stoi(kvmap["TileY"]); }
+        if (kvmap.contains("TilePadRX")) { tileGridPaddingBottomRight.x = std::stoi(kvmap["TilePadRX"]); }
+        if (kvmap.contains("TilePadBY")) { tileGridPaddingBottomRight.y = std::stoi(kvmap["TilePadBY"]); }
+        if (kvmap.contains("SymX")) { symmetryPositions.x = std::stoi(kvmap["SymX"]); }
+        if (kvmap.contains("SymY")) { symmetryPositions.y = std::stoi(kvmap["SymY"]); }
+        if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
+        if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
+        if (kvmap.contains("CommentData")) { comments = parseCommentDataString(kvmap["CommentData"]); }
+    }
+    catch (std::exception e) {}
+}
+
+std::string MainEditor::makeCommentDataString()
+{
+    std::string commentsData = "";
+    commentsData += std::to_string(comments.size()) + ';';
+    for (CommentData& c : comments) {
+        commentsData += std::to_string(c.position.x) + ';';
+        commentsData += std::to_string(c.position.y) + ';';
+        std::string sanitizedData = c.data;
+        std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
+        commentsData += sanitizedData + ';';
+    }
+    return commentsData;
+}
+
+std::vector<CommentData> MainEditor::parseCommentDataString(std::string data)
+{
+    std::vector<CommentData> ret;
+    std::string commentsData = data;
+    int nextSC = commentsData.find_first_of(';');
+    int commentsCount = std::stoi(commentsData.substr(0, nextSC));
+    commentsData = commentsData.substr(nextSC + 1);
+    for (int x = 0; x < commentsCount; x++) {
+        CommentData newComment;
+        nextSC = commentsData.find_first_of(';');
+        newComment.position.x = std::stoi(commentsData.substr(0, nextSC));
+        commentsData = commentsData.substr(nextSC + 1);
+        nextSC = commentsData.find_first_of(';');
+        newComment.position.y = std::stoi(commentsData.substr(0, nextSC));
+        commentsData = commentsData.substr(nextSC + 1);
+        nextSC = commentsData.find_first_of(';');
+        newComment.data = commentsData.substr(0, nextSC);
+        std::replace(newComment.data.begin(), newComment.data.end(), '\1', ';');
+        commentsData = commentsData.substr(nextSC + 1);
+        ret.push_back(newComment);
+    }
+    return ret;
 }
 
 void MainEditor::recenterCanvas()

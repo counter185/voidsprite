@@ -715,6 +715,13 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
+void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::string text) {
+    png_text pngt;
+    pngt.key = (char*)key.c_str();
+    pngt.text = (char*)text.c_str();
+    pngt.compression = PNG_TEXT_COMPRESSION_NONE;
+    png_set_text(outpng, outpnginfo, &pngt, 1);
+}
 
 size_t readPNGBytes = 0;   //if you promise to tell noone
 size_t PNGFileSize = 0;
@@ -917,6 +924,20 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
             }
             delete[] rows;
         }
+        if (g_config.saveLoadFlatImageExtData) {
+            png_textp text_ptr;
+            int num_text;
+            png_get_text(png, info, &text_ptr, &num_text);
+            std::map<std::string, std::string> extdata;
+            for (int x = 0; x < num_text; x++) {
+                std::string key = text_ptr[x].key;
+                if (stringStartsWithIgnoreCase(key, "vsp/")) {
+                    extdata[key.substr(4)] = text_ptr[x].text;
+                }
+            }
+            ret->importExportExtdata = extdata;
+        }
+
         png_destroy_read_struct(&png, &info, NULL);
 
         fclose(pngfile);
@@ -3297,23 +3318,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
                     if (extData.contains("comments")) {
                         std::string commentsData = extData["comments"];
-                        int nextSC = commentsData.find_first_of(';');
-                        int commentsCount = std::stoi(commentsData.substr(0, nextSC));
-                        commentsData = commentsData.substr(nextSC + 1);
-                        for (int x = 0; x < commentsCount; x++) {
-                            CommentData newComment;
-                            nextSC = commentsData.find_first_of(';');
-                            newComment.position.x = std::stoi(commentsData.substr(0, nextSC));
-                            commentsData = commentsData.substr(nextSC + 1);
-                            nextSC = commentsData.find_first_of(';');
-                            newComment.position.y = std::stoi(commentsData.substr(0, nextSC));
-                            commentsData = commentsData.substr(nextSC + 1);
-                            nextSC = commentsData.find_first_of(';');
-                            newComment.data = commentsData.substr(0, nextSC);
-                            std::replace(newComment.data.begin(), newComment.data.end(), '\1', ';');
-                            commentsData = commentsData.substr(nextSC + 1);
-                            ret->comments.push_back(newComment);
-                        }
+                        ret->comments = ret->parseCommentDataString(commentsData);
                     }
                     if (extData.contains("guidelines")) {
                         std::string guidelinesData = extData["guidelines"];
@@ -3419,6 +3424,15 @@ bool writePNG(PlatformNativePathString path, Layer* data)
         png_set_compression_level(outpng, Z_BEST_COMPRESSION);
         png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
         png_set_compression_buffer_size(outpng, 1024 * 1024);
+
+        if (g_config.saveLoadFlatImageExtData) {
+            addPNGText(outpng, outpnginfo, "Software", "voidsprite - libpng " PNG_LIBPNG_VER_STRING);
+            auto extmap = data->importExportExtdata;
+            for (auto& kv : extmap) {
+                addPNGText(outpng, outpnginfo, "vsp/" + kv.first, kv.second);
+            }
+        }
+
         setjmp(png_jmpbuf(outpng));
 
         if (!data->isPalettized) {
@@ -3580,15 +3594,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData;
-        commentsData += std::to_string(editor->comments.size()) + ';';
-        for (CommentData& c : editor->comments) {
-            commentsData += std::to_string(c.position.x) + ';';
-            commentsData += std::to_string(c.position.y) + ';';
-            std::string sanitizedData = c.data;
-            std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
-            commentsData += sanitizedData + ';';
-        }
+        std::string commentsData = commentsData = editor->makeCommentDataString();
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->layers) {
@@ -3664,15 +3670,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData;
-        commentsData += std::to_string(editor->comments.size()) + ';';
-        for (CommentData& c : editor->comments) {
-            commentsData += std::to_string(c.position.x) + ';';
-            commentsData += std::to_string(c.position.y) + ';';
-            std::string sanitizedData = c.data;
-            std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
-            commentsData += sanitizedData + ';';
-        }
+        std::string commentsData = commentsData = editor->makeCommentDataString();
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->layers) {
@@ -3763,15 +3761,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData;
-        commentsData += std::to_string(editor->comments.size()) + ';';
-        for (CommentData& c : editor->comments) {
-            commentsData += std::to_string(c.position.x) + ';';
-            commentsData += std::to_string(c.position.y) + ';';
-            std::string sanitizedData = c.data;
-            std::replace(sanitizedData.begin(), sanitizedData.end(), ';', '\1');
-            commentsData += sanitizedData + ';';
-        }
+        std::string commentsData = editor->makeCommentDataString();
 
         std::string guidelinesData;
         guidelinesData += std::format("{};", editor->guidelines.size());

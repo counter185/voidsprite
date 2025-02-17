@@ -19,6 +19,7 @@ enum ConfigOptions : int {
     CHECKBOX_FILL_TOOL_TILE_BOUND = 6,
     BUTTON_OPEN_CONFIG_DIR,
     CHECKBOX_VSYNC,
+    CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -39,11 +40,19 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     XY posInTab = { 0,10 };
+
     UICheckbox* cb6 = new UICheckbox("Vertical sync", g_config.vsync);
     cb6->position = posInTab;
-    cb6->checkbox->tooltip = "When enabled, voidsprite will lock the framerate to your display's refresh rate.\nThis will make brushes smoother but also increase energy consumption.\nThe program must be restarted for this change to take effect.";
+    cb6->checkbox->tooltip = "When enabled, the framerate will be locked to your display's refresh rate.\nDisabling this will make brushes smoother but also increase energy consumption.\nvoidsprite must be restarted for this change to take effect.";
     cb6->setCallbackListener(CHECKBOX_VSYNC, this);
     configTabs->tabs[0].wxs.addDrawable(cb6);
+    posInTab.y += 35;
+
+    UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", g_config.saveLoadFlatImageExtData);
+    cb7->position = posInTab;
+    cb7->checkbox->tooltip = "When enabled, voidsprite will load and save extra data such as canvas comments,\n tile grid and symmetry to PNGs.";
+    cb7->setCallbackListener(CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA, this);
+    configTabs->tabs[0].wxs.addDrawable(cb7);
     posInTab.y += 35;
 
 
@@ -259,6 +268,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_VSYNC:
             g_config.vsync = checked;
+            break;
+        case CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA:
+            g_config.saveLoadFlatImageExtData = checked;
             break;
     }
 }

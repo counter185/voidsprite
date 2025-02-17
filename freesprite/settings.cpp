@@ -13,6 +13,7 @@ bool g_saveConfig() {
         file << "isolateRectOnLockTile=" << (g_config.isolateRectOnLockTile ? "1" : "0") << std::endl;
         file << "fillToolTileBound=" << (g_config.fillToolTileBound ? "1" : "0") << std::endl;
         file << "vsync=" << (g_config.vsync ? "1" : "0") << std::endl;
+        file << "saveLoadFlatImageExtData=" << (g_config.saveLoadFlatImageExtData ? "1" : "0") << std::endl;
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -64,6 +65,7 @@ void g_loadConfig() {
         if (config.contains("isolateRectOnLockTile")) { g_config.isolateRectOnLockTile = config["isolateRectOnLockTile"] == "1"; }
         if (config.contains("fillToolTileBound")) { g_config.fillToolTileBound = config["fillToolTileBound"] == "1"; }
         if (config.contains("vsync")) { g_config.vsync = config["vsync"] == "1"; }
+        if (config.contains("saveLoadFlatImageExtData")) { g_config.saveLoadFlatImageExtData = config["saveLoadFlatImageExtData"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();

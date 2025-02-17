@@ -158,6 +158,10 @@ public:
     virtual void trySaveImage();
     virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);
     virtual void trySaveAsImage();
+    std::map<std::string,std::string> makeSingleLayerExtdata();
+    void loadSingleLayerExtdata(Layer* l);
+    std::string makeCommentDataString();
+    static std::vector<CommentData> parseCommentDataString(std::string data);
     void recenterCanvas();
     bool requestSafeClose();
     void zoom(int how_much);
