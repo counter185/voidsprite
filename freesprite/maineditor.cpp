@@ -1194,6 +1194,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                 canvas.panCanvas(rel);
                 break;
         }
+    } else {
+        leftMouseHold = false;
     }
 }
 
@@ -2207,9 +2209,9 @@ void MainEditor::layer_outline(bool wholeImage)
     Layer* l = getCurrentLayer();
     uint8_t* placePixelData = (uint8_t*)tracked_malloc(l->w * l->h);
     if (placePixelData == NULL) {
-		g_addNotification(ErrorNotification("Error", "malloc failed"));
-		return;
-	}
+        g_addNotification(ErrorNotification("Error", "malloc failed"));
+        return;
+    }
     commitStateToCurrentLayer();
 
     for (int y = 0; y < l->h; y++) {
@@ -2239,8 +2241,8 @@ void MainEditor::layer_outline(bool wholeImage)
                 }
             }
             if (neighborCount > 0 && neighborCount != 4) {
-				l->setPixel(newPos, getActiveColor());
-			}
+                l->setPixel(newPos, getActiveColor());
+            }
         }
     }
 
