@@ -37,7 +37,7 @@ CustomPattern* CustomPattern::load(PlatformNativePathString path)
 CustomPattern::CustomPattern(LayerPalettized* from)
 {
     if (from != NULL) {
-        bitmap = (uint8_t*)tracked_malloc(from->w * from->h), "Patterns";
+        bitmap = (uint8_t*)tracked_malloc(from->w * from->h, "Patterns");
         for (uint64_t p = 0; p < from->w * from->h; p++) {
 			bitmap[p] = ((uint32_t*)from->pixelData)[p] == 0 ? 0 : 1;
 		}
