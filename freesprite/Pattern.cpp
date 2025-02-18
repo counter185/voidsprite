@@ -6,7 +6,7 @@
 
 void Pattern::tryLoadIcon()
 {
-	cachedIcon = IMGLoadToTexture(getIconPath());
+    cachedIcon = IMGLoadToTexture(getIconPath());
 }
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)
@@ -39,8 +39,8 @@ CustomPattern::CustomPattern(LayerPalettized* from)
     if (from != NULL) {
         bitmap = (uint8_t*)tracked_malloc(from->w * from->h, "Patterns");
         for (uint64_t p = 0; p < from->w * from->h; p++) {
-			bitmap[p] = ((uint32_t*)from->pixelData)[p] == 0 ? 0 : 1;
-		}
+            bitmap[p] = ((uint32_t*)from->pixelData)[p] == 0 ? 0 : 1;
+        }
         bitmapDimensions = XY{ from->w, from->h };
     }
 }
@@ -49,8 +49,8 @@ bool CustomPattern::canDrawAt(XY position)
 {
     if (bitmap != NULL) {
         if (position.x >= 0 && position.y >= 0) {
-			return bitmap[(position.x % bitmapDimensions.x) + (position.y % bitmapDimensions.y) * bitmapDimensions.x] == 1;
-		}
+            return bitmap[(position.x % bitmapDimensions.x) + (position.y % bitmapDimensions.y) * bitmapDimensions.x] == 1;
+        }
     }
     return true;
 }

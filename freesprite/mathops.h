@@ -41,6 +41,7 @@ SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
 uint32_t sdlcolorToUint32(SDL_Color c);
+SDL_Color uint32ToSDLColor(u32 c);
 uint32_t modAlpha(uint32_t color, uint8_t alpha);
 
 u32 hsvShift(u32 color, hsv shift);

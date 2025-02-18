@@ -659,6 +659,10 @@ uint32_t sdlcolorToUint32(SDL_Color c)
 {
     return (c.a << 24) + (c.r << 16) + (c.g << 8) + c.b;
 }
+SDL_Color uint32ToSDLColor(u32 c) {
+    return SDL_Color{ (uint8_t)((c & 0xFF0000) >> 16), (uint8_t)((c & 0x00FF00) >> 8), (uint8_t)(c & 0x0000FF),
+                     (uint8_t)((c & 0xFF000000) >> 24) };
+}
 
 uint32_t modAlpha(uint32_t color, uint8_t alpha)
 {

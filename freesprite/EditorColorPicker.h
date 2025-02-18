@@ -11,6 +11,15 @@
 #include "UILabel.h"
 #include "DraggablePanel.h"
 
+class ColorPickerColorButton : public UIButton {
+public:
+	EditorColorPicker* parent = NULL;
+	u32 color = 0;
+
+	ColorPickerColorButton(EditorColorPicker* parent, u32 color);
+	void click() override;
+};
+
 class EditorColorPicker : public DraggablePanel, public EventCallbackListener
 {
 protected:

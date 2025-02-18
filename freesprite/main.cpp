@@ -263,6 +263,7 @@ int main(int argc, char** argv)
 
     platformPreInit();
 
+    g_generateColorMap();
     g_loadConfig();
 
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);

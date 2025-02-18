@@ -3,6 +3,7 @@
 #include "maineditor.h"
 #include "EditorColorPicker.h"
 #include "mathops.h"
+#include "ScrollingPanel.h"
 
 EditorColorPicker::EditorColorPicker(MainEditor* c) {
     caller = c;
@@ -10,13 +11,19 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     wxWidth = 400;
     wxHeight = 390;
 
-    colorModeTabs = new TabbedView({ { "Colors" },{ "Last" } }, 75);
+    colorModeTabs = new TabbedView({ { "Colors" },{ "Last" }, { "Palettes"} }, 85);
     colorModeTabs->position = XY{ 20,30 };
     subWidgets.addDrawable(colorModeTabs);
 
-    colorTabs = new TabbedView({ { "Visual", g_iconColorVisual },{ "Sliders", g_iconColorHSV } }, 90);
+    //-----------------
+    //| Colors tab
+
+    colorTabs = new TabbedView({ { "Visual", g_iconColorVisual },{ "Sliders", g_iconColorHSV } }, 100);
     colorTabs->position = XY{ 0,5 };
     colorModeTabs->tabs[0].wxs.addDrawable(colorTabs);
+
+    //   -------------------
+    //   | Visual tab
 
     hueSlider = new UIHueSlider(this);
     hueSlider->position = XY{ 0,10 };
@@ -25,6 +32,9 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     satValSlider = new UISVPicker(this);
     satValSlider->position = XY{ 0,40 };
     colorTabs->tabs[0].wxs.addDrawable(satValSlider);
+
+    //   -------------------
+    //   | Sliders tab 
 
     UILabel* labelH = new UILabel();
     UILabel* labelR = new UILabel();
@@ -127,6 +137,47 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     sliderB->wxHeight = 25;
     sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
     colorTabs->tabs[1].wxs.addDrawable(sliderB);
+
+    //-----------------
+    //| Palettes tab
+    ScrollingPanel* palettePanel = new ScrollingPanel();
+    palettePanel->position = XY{ 0,5 };
+    palettePanel->scrollHorizontally = false;
+    palettePanel->scrollVertically = true;
+    palettePanel->wxWidth = 370;
+    palettePanel->wxHeight = 270;
+    int yNow = 5;
+    for (auto& p : g_namedColorMap) {
+        UILabel* nameLabel = new UILabel(p.name);
+        nameLabel->position = XY{5, yNow};
+        palettePanel->subWidgets.addDrawable(nameLabel);
+        yNow += 30;
+        int xNow = 0;
+        for (auto& color : p.colorMap) {
+            if (color.first == HINT_NEXT_LINE) {
+                xNow = 0;
+                yNow += 20;
+                continue;
+            }
+
+            ColorPickerColorButton* b = new ColorPickerColorButton(this, color.second);
+            b->position = XY{xNow, yNow};
+            b->tooltip = color.first;
+            b->wxWidth = 24;
+            b->wxHeight = 20;
+            palettePanel->subWidgets.addDrawable(b);
+            xNow += b->wxWidth;
+            if (xNow + b->wxWidth >= palettePanel->wxWidth) {
+                xNow = 0;
+                yNow += b->wxHeight;
+            }
+        }
+        yNow += 30;
+    }
+    colorModeTabs->tabs[2].wxs.addDrawable(palettePanel);
+
+
+    //widgets outside of tabs
 
     colorTextField = new UITextField();
     colorTextField->isColorField = true;
@@ -243,10 +294,6 @@ void EditorColorPicker::eventButtonPressed(int evt_id)
     }
     else if (evt_id == EVENT_COLORPICKER_TOGGLEBLENDMODE) {
         toggleAlphaBlendMode();
-    }
-    else if (evt_id >= 200) {
-        uint32_t col = lastColors[evt_id - 200];
-        setMainEditorColorRGB(col);
     }
 }
 
@@ -454,12 +501,10 @@ void EditorColorPicker::updateLastColorButtons()
     int posX = 0;
     int posY = 5;
     for (uint32_t& col : lastColors) {
-        UIButton* colBtn = new UIButton();
-        colBtn->colorBGFocused = colBtn->colorBGUnfocused = SDL_Color{(uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff), 255};
+        ColorPickerColorButton* colBtn = new ColorPickerColorButton(this, col);
         colBtn->position = { posX, posY };
         colBtn->wxHeight = 24;
         colBtn->wxWidth = 30;
-        colBtn->setCallbackListener(200+(xx++), this);
         colorModeTabs->tabs[1].wxs.addDrawable(colBtn);
 
         posX += 30;
@@ -474,4 +519,17 @@ void EditorColorPicker::updateLastColorButtons()
         }
     }
     lastColorsChanged = false;
+}
+
+ColorPickerColorButton::ColorPickerColorButton(EditorColorPicker* parent, u32 color) : UIButton()
+{
+    this->parent = parent;
+    this->color = color;
+    this->colorBGUnfocused = this->colorBGFocused = uint32ToSDLColor(color);
+}
+
+void ColorPickerColorButton::click()
+{
+    UIButton::click();
+    parent->setMainEditorColorRGB(color);
 }
