@@ -44,22 +44,17 @@ public:
         }
         //tabs[openTab].wxs.renderAll(xyAdd(position, XY{ 0, buttonsHeight }));
     }
-    void handleInput(SDL_Event evt, XY gPosOffset) override {
+    /*void handleInput(SDL_Event evt, XY gPosOffset) override {
         DrawableManager::processHoverEventInMultiple({ subWidgets }, evt, xyAdd(gPosOffset, scrollOffset));
 
         if (evt.type == SDL_MOUSEWHEEL) {
-            if (scrollVertically) {
-                scrollOffset.y += evt.wheel.y * 20;
-            }
-            else if (scrollHorizontally) {
-                scrollOffset.x += evt.wheel.y * 20;
-            }
+            
         }
 
         if (!DrawableManager::processInputEventInMultiple({subWidgets}, evt, xyAdd(gPosOffset, scrollOffset))) {
             
         }
-    }
+    }*/
     void mouseHoverMotion(XY mousePos, XY gPosOffset) override
     {
         if (enabled) {
@@ -67,6 +62,19 @@ public:
         }
     }
 
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) override
+    {
+        if (enabled) {
+            if (!subWidgets.processMouseWheelEvent(xyAdd(gPosOffset, position), mousePos, direction)) {
+                if (scrollVertically) {
+                    scrollOffset.y += direction.y * 20;
+                }
+                else if (scrollHorizontally) {
+                    scrollOffset.x += direction.y * 20;
+                }
+            }
+        }
+    }
 
     void updateBounds() {
         XY insideArea = getInsideAreaWH();

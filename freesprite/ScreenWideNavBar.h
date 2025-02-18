@@ -151,4 +151,6 @@ public:
             }
         }
     }
+
+    bool takesMouseWheelEvents() override { return false; }
 };

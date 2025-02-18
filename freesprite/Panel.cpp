@@ -28,3 +28,10 @@ void Panel::mouseHoverMotion(XY mousePos, XY gPosOffset)
         subWidgets.processHoverEvent(xyAdd(gPosOffset, position), mousePos);
     }
 }
+
+void Panel::mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction)
+{
+    if (enabled) {
+        subWidgets.processMouseWheelEvent(xyAdd(gPosOffset, position), mousePos, direction);
+    }
+}

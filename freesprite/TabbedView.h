@@ -84,6 +84,12 @@ public:
         }
     }
 
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) override {
+        std::vector<std::reference_wrapper<DrawableManager>> wxss = { tabButtons, tabs[openTab].wxs };
+        gPosOffset = xyAdd(gPosOffset, position);
+        tabs[openTab].wxs.processMouseWheelEvent(xyAdd(gPosOffset, XY{ 0,buttonsHeight }), mousePos, direction);
+    }
+
     void handleInput(SDL_Event evt, XY gPosOffset) override {
 
         if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.state) {
@@ -122,5 +128,7 @@ public:
             btn->colorBGFocused = btn->colorBGUnfocused = openTab == x ? tabFocusedColor : tabUnfocusedColor;
         }
     }
+
+    bool takesMouseWheelEvents() override { return true; }
 };
 

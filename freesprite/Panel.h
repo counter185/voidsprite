@@ -23,7 +23,10 @@ public:
         subWidgets.forceUnhover();
     }
     void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) override;
     bool isPanel() override { return true; }
+
+    bool takesMouseWheelEvents() override { return true; }
 
     XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
 };

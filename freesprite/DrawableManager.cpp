@@ -20,8 +20,28 @@ void DrawableManager::processHoverEventInMultiple(std::vector<std::reference_wra
     }
 }
 
+bool DrawableManager::processMouseWheelEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
+{
+    if (evt.type != SDL_MOUSEWHEEL) {
+        return false;
+    }
+    XY scrollDirection = {evt.wheel.x, evt.wheel.y};
+
+    for (auto& wxsw : wxss)
+    {
+        auto& wxs = wxsw.get();
+        if (wxs.processMouseWheelEvent(parentOffset, {g_mouseX, g_mouseY}, scrollDirection)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
 {
+    if (evt.type == SDL_MOUSEWHEEL) {
+        return processMouseWheelEventInMultiple(wxss, evt, parentOffset);
+    }
     SDL_Event convEvent = convertTouchToMouseEvent(evt);
     if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.state) {
         for (auto& wxsw : wxss) {
@@ -224,6 +244,24 @@ bool DrawableManager::processHoverEvent(XY thisPositionOnScreen, XY mousePos)
         hoverTarget->mouseHoverMotion(mousePos, thisPositionOnScreen);
     }
     return hoverTarget != NULL;
+}
+bool DrawableManager::processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XY scrollDirection)
+{
+    Drawable* mouseTarget = NULL;
+    for (auto dd = drawablesList.rbegin(); dd != drawablesList.rend(); dd++) {
+        Drawable* d = *dd;
+        //for (Drawable*& d : drawablesList) {
+            //XY anchorPosition = d->anchorPos(thisPositionOnScreen, XY{ g_windowW, g_windowH }, d->position, d->getDimensions(), d->anchor);
+        XY renderPoint = xyAdd(d->position, thisPositionOnScreen);
+        if (d->takesMouseWheelEvents() && d->isMouseIn(renderPoint, mousePos)) {
+            mouseTarget = d;
+            break;
+        }
+    }
+    if (mouseTarget != NULL) {
+        mouseTarget->mouseWheelEvent(mousePos, thisPositionOnScreen, scrollDirection);
+    }
+    return mouseTarget != NULL;
 }
 
 /*void DrawableManager::tickAnchors()

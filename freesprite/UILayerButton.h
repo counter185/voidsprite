@@ -30,5 +30,6 @@ public:
 	}
 
 	void eventButtonPressed(int evt_id) override;
+	bool takesMouseWheelEvents() override { return false; }
 };
 

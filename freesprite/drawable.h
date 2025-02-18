@@ -20,6 +20,7 @@ public:
 	virtual bool isMouseIn(XY thisPositionOnScreen, XY mousePos) { return false; }
 	virtual bool clickable() { return true; }
 	virtual bool focusableWithTab() { return false; }
+	virtual bool takesMouseWheelEvents() { return false; }
 	virtual void render(XY position) {}
 	virtual void mouseHoverIn() {
 		hovered = true;
@@ -30,6 +31,7 @@ public:
 		hoverTimer.start();
 	}
 	virtual void mouseHoverMotion(XY mousePos, XY gPosOffset = {0,0}) {}
+	virtual void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) {}
 	virtual void focusIn() { 
 		focused = true;
 		focusTimer.start();

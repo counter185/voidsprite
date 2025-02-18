@@ -81,6 +81,17 @@ void UIDropdown::mouseHoverMotion(XY mousePos, XY gPosOffset)
     }
 }
 
+void UIDropdown::mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction)
+{
+    if (isOpen) {
+        if (!wxs.processMouseWheelEvent(xyAdd({ 0, menuYOffset }, xyAdd(gPosOffset, position)), mousePos, direction)) {
+            menuYOffset += direction.y * 30;
+            if (menuYOffset > 0) menuYOffset = 0;
+            if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
+        }
+    }
+}
+
 void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 {
     if (isOpen && evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
@@ -93,13 +104,6 @@ void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
                 if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
                     click();
                 }
-            }
-        }
-        else if (evt.type == SDL_MOUSEWHEEL) {
-            if (isOpen) {
-                menuYOffset += evt.wheel.y * 30;
-                if (menuYOffset > 0) menuYOffset = 0;
-                if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
             }
         }
         else if (evt.type == SDL_KEYDOWN) {

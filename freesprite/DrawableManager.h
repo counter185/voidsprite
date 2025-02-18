@@ -17,6 +17,7 @@ public:
 
 	static void processHoverEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset = XY{ 0,0 });
 	static bool processInputEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset = XY{0,0});
+	static bool processMouseWheelEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset = XY{0,0});
 
 	void addDrawable(Drawable* d);
 	void removeDrawable(Drawable* d, bool free = true);
@@ -31,6 +32,7 @@ public:
 	void forceUnhover();
 	bool mouseInAny(XY thisPositionOnScreen, XY mousePos);
 	bool processHoverEvent(XY thisPositionOnScreen, XY mousePos);
+	bool processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XY scrollDirection);
 	//void tickAnchors();
 
 	void freeAllDrawables();
