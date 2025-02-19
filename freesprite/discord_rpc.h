@@ -1,8 +1,8 @@
 #pragma once
 
+#if _WIN32
 #include "discord_game_sdk/discord.h"
 
-#if _WIN32
 inline bool discordInit = false;
 inline discord::Core* core;
 inline discord::Activity currentActivity{};
