@@ -35,6 +35,7 @@ rgb hsv2rgb(hsv in);
 hsl rgb2hsl(rgb c);
 rgb hsl2rgb(hsl c);
 
+rgb sdlColorToRGB(SDL_Color c);
 rgb u32ToRGB(u32 color);
 
 SDL_Color rgb2sdlcolor(rgb a);

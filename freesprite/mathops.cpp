@@ -646,7 +646,7 @@ rgb hsv2rgb(hsv in)
 }
 
 SDL_Color rgb2sdlcolor(rgb a) {
-    return SDL_Color{ (unsigned char)(a.r * 255), (unsigned char)(a.g * 255), (unsigned char)(a.b * 255), 255 };
+    return SDL_Color{ (u8)(a.r * 255), (u8)(a.g * 255), (u8)(a.b * 255), 255 };
 }
 
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb) {
@@ -986,6 +986,11 @@ rgb hsl2rgb(hsl c) {
 
     return result;
 
+}
+
+rgb sdlColorToRGB(SDL_Color c)
+{
+    return u32ToRGB(PackRGBAtoARGB(c.r, c.g, c.b, c.a));
 }
 
 rgb u32ToRGB(u32 color)

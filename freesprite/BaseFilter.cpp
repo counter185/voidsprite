@@ -17,56 +17,55 @@ Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
     for (int y = 0; y < c->h; y++) {
         for (int x = 0; x < c->w; x++) {
 
-            u32 pxnow = src->getPixelAt({ x,y }, true);
-            u64 r = (pxnow >> 16) & 0xFF;
-            u64 g = (pxnow >> 8) & 0xFF;
-            u64 b = pxnow & 0xFF;
-            u64 a = (pxnow >> 24) & 0xFF;
+            SDL_Color pxnow = uint32ToSDLColor(src->getPixelAt({ x,y }, true));
+            double r = pxnow.r;
+            double g = pxnow.g;
+            double b = pxnow.b;
+            u64 a = pxnow.a;
             int measures = 1;
+            double aSum = pxnow.a / 255.0f;
 
             for (int rx = 1; rx < radiusX; rx++) {
-                if (x + rx < c->w) {
-					u32 px = src->getPixelAt({ x + rx,y }, true);
-					r += (px >> 16) & 0xFF;
-					g += (px >> 8) & 0xFF;
-					b += px & 0xFF;
-                    a += (px >> 24) & 0xFF;
-					measures++;
-				}
-				if (x - rx >= 0) {
-					u32 px = src->getPixelAt({ x - rx,y }, true);
-                    r += (px >> 16) & 0xFF;
-                    g += (px >> 8) & 0xFF;
-                    b += px & 0xFF;
-                    a += (px >> 24) & 0xFF;
-					measures++;
-				}
+                for (const int& m : { -1,1 }) {
+                    if ((x + rx * m < c->w) && (x + rx*m >= 0)) {
+                        SDL_Color px = uint32ToSDLColor(src->getPixelAt({ x + rx*m,y }, true));
+                        double alpha = px.a / 255.0;
+                        r += px.r * alpha;
+                        g += px.g * alpha;
+                        b += px.b * alpha;
+                        a += px.a;
+                        aSum += alpha;
+                        measures++;
+                    }
+                }
             }
 
             for (int ry = 1; ry < radiusY; ry++) {
-                if (y + ry < c->h) {
-                    u32 px = src->getPixelAt({ x,y + ry }, true);
-                    r += (px >> 16) & 0xFF;
-                    g += (px >> 8) & 0xFF;
-                    b += px & 0xFF;
-                    a += (px >> 24) & 0xFF;
-                    measures++;
+                for (const int& m : { -1,1 }) {
+                    if ((y + ry * m < c->h) && (y + ry*m >= 0)) {
+                        SDL_Color px = uint32ToSDLColor(src->getPixelAt({ x,y + ry*m }, true));
+                        double alpha = px.a / 255.0;
+                        r += px.r * alpha;
+                        g += px.g * alpha;
+                        b += px.b * alpha;
+                        a += px.a;
+                        aSum += alpha;
+                        measures++;
+                    }
                 }
-                if (y - ry >= 0) {
-					u32 px = src->getPixelAt({ x,y - ry }, true);
-                    r += (px >> 16) & 0xFF;
-                    g += (px >> 8) & 0xFF;
-                    b += px & 0xFF;
-                    a += (px >> 24) & 0xFF;
-					measures++;
-				}
             }
-
-            r /= measures;
-            g /= measures;
-            b /= measures;
+            if (aSum > 0) {
+                r /= aSum;
+                g /= aSum;
+                b /= aSum;
+            }
+            else {
+                r = 0;
+                g = 0;
+                b = 0;
+            }
             a /= measures;
-            c->setPixel({ x,y }, PackRGBAtoARGB(r, g, b, a));
+            c->setPixel({ x,y }, PackRGBAtoARGB((u8)r, (u8)g, (u8)b, a));
         }
     }
     return c;
