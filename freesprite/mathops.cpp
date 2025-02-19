@@ -204,6 +204,16 @@ std::string evalRelativePath(std::string directory, std::string file) {
     return output + file.substr(1 + commonPath.size());
 }
 
+std::string fileNameFromPath(std::string fullPath)
+{
+    if (fullPath.find_last_of("/\\") == std::string::npos) {
+        return fullPath;
+    }
+    else {
+        return fullPath.substr(fullPath.find_last_of("/\\") + 1);
+    }
+}
+
 XY getSnappedPoint(XY from, XY to) {
     double ang = angleBetweenTwoPoints(from, to);
     if ((ang > 70 && ang < 110) || (ang > 250 && ang < 290)) {
@@ -807,9 +817,9 @@ uint32_t RGB565toARGB8888(uint16_t rgb565)
 uint32_t RGB555toARGB8888(uint16_t rgb555) 
 {
     uint8_t r = ((rgb555 >> 10) & 0b11111) * 0x8;
-	uint8_t g = ((rgb555 >> 5) & 0b11111) * 0x8;
-	uint8_t b = (rgb555 & 0b11111) * 0x8;
-	return 0xFF000000 + (r << 16) + (g << 8) + b;
+    uint8_t g = ((rgb555 >> 5) & 0b11111) * 0x8;
+    uint8_t b = (rgb555 & 0b11111) * 0x8;
+    return 0xFF000000 + (r << 16) + (g << 8) + b;
 }
 
 uint32_t BGR555toARGB8888(uint16_t bgr555)
@@ -831,14 +841,14 @@ std::vector<std::string> split(std::string a, char b)
 
     std::string current = "";
     for (char& c : a) {
-		if (c == b) {
-			ret.push_back(current);
-			current = "";
-		}
-		else {
-			current += c;
-		}
-	}
+        if (c == b) {
+            ret.push_back(current);
+            current = "";
+        }
+        else {
+            current += c;
+        }
+    }
     ret.push_back(current);
 
     return ret;
@@ -849,13 +859,13 @@ std::string randomUUID()
     std::string chars = "0123456789abcdef";
     std::string ret = "";
     for (int i = 0; i < 32; i++) {
-		ret += chars[rand() % 16];
-	}
+        ret += chars[rand() % 16];
+    }
     ret.insert(8, "-");
     ret.insert(13, "-");
     ret.insert(18, "-");
     ret.insert(23, "-");
-	return ret;
+    return ret;
 }
 
 std::string secondsTimeToHumanReadable(u64 seconds)

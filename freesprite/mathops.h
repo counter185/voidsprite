@@ -73,6 +73,7 @@ bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith);
 bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 
 std::string evalRelativePath(std::string directory, std::string file);
+std::string fileNameFromPath(std::string fullPath);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0, bool ceilLine = false);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);

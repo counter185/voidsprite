@@ -31,6 +31,7 @@ public:
     virtual void onReturnToScreen() {}
 
     virtual std::string getName() { return "Base screen"; }
+    virtual std::string getRPCString() { return getName(); }
 
     void drawBottomBar() {
         SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };

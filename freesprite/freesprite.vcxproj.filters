@@ -103,6 +103,12 @@
     <Filter Include="Source files\filters">
       <UniqueIdentifier>{3a15a644-d040-4c21-b539-443866e5d2e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\discord_game_sdk">
+      <UniqueIdentifier>{a223a32e-302a-4a13-ae72-fb5d9c2a3687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\external\discord_game_sdk">
+      <UniqueIdentifier>{180db67a-855d-41da-9b30-46bc2dc4ae20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -488,6 +494,48 @@
     </ClCompile>
     <ClCompile Include="PopupApplyFilter.cpp">
       <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\lobby_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\network_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\overlay_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\relationship_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\storage_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\store_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\types.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\user_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\voice_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\achievement_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\activity_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\application_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\core.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="discord_game_sdk\image_manager.cpp">
+      <Filter>Source files\external\discord_game_sdk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -913,6 +961,60 @@
     </ClInclude>
     <ClInclude Include="PopupApplyFilter.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\image_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\lobby_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\network_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\overlay_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\relationship_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\storage_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\store_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\types.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\user_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\voice_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\achievement_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\activity_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\application_manager.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\core.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\discord.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\event.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_game_sdk\ffi.h">
+      <Filter>Header files\external\discord_game_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_rpc.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
