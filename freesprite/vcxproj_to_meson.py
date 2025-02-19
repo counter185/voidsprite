@@ -9,7 +9,7 @@ from typing import List
 MESON_PROJECT = "voidsprite"
 # we ignore vendored library sources since we build them with subprojects
 # (or don't build them at all, if we use system libraries or meson wraps)
-IGNORED_SUBDIRS = ["libpng", "pugixml", "liblcf", "libtga"]
+IGNORED_SUBDIRS = ["libpng", "pugixml", "liblcf", "libtga", "discord_game_sdk"]
 
 # --- CONFIGURATION VARIABLES END ---
 

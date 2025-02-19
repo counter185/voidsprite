@@ -29,6 +29,7 @@
 #include "ToolGuideline.h"
 #include "BrushBezierLine.h"
 #include "background_operation.h"
+#include "discord_rpc.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -435,8 +436,8 @@ int main(int argc, char** argv)
         new NineSegmentPattern(nspattern1),
     };
     auto nineSegmentPatternPaths = joinVectors({
-		platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("9segmentpatterns/"), ".void9sp")
-		});
+        platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("9segmentpatterns/"), ".void9sp")
+        });
     int custom9SPatterns = 0;
     for (auto& t : nineSegmentPatternPaths) {
         auto result = read9SegmentPattern(t);
@@ -444,7 +445,7 @@ int main(int argc, char** argv)
             g_9spatterns.push_back(new NineSegmentPattern(result.second));
             custom9SPatterns++;
         }
-	}
+    }
     for (NineSegmentPattern*& pattern : g_9spatterns) {
         cacheTexture(*pattern);
     }
@@ -461,6 +462,10 @@ int main(int argc, char** argv)
 
     StartScreen* launchpad = new StartScreen();
     g_addScreen(launchpad, screenStack.empty());
+
+    if (g_config.useDiscordRPC) {
+        g_initRPC();
+    }
 
     platformPostInit();
 
@@ -657,7 +662,9 @@ int main(int argc, char** argv)
         overlayWidgets.renderAll();
         //todo: make this a uilabel
         if (!screenStack.empty()) {
-            g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - 200, g_windowH - 52);
+            std::string screenName = screenStack[currentScreen]->getName();
+            int statW = g_fnt->StatStringDimensions(screenName).x;
+            g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - ixmax(200, 10 + statW), g_windowH - 55);
         }
 
 #if _DEBUG
@@ -742,11 +749,18 @@ int main(int argc, char** argv)
 
         g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
         g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
+
+        g_updateRPC(
+            screenStack.size() == 1 ? "1 active workspace" : std::format("{} active workspaces", screenStack.size()),
+            screenStack.size() > 0 ? screenStack[currentScreen]->getRPCString() : "-"
+        );
     }
 
     if (threadSet) {
         g_bgOpThread.join();
     }
+
+    g_deinitRPC();
 
     return 0;
 }

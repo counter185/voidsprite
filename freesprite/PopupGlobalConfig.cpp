@@ -9,6 +9,7 @@
 #include "UIDropdown.h"
 #include "ScrollingPanel.h"
 #include "BaseBrush.h"
+#include "discord_rpc.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -19,7 +20,8 @@ enum ConfigOptions : int {
     CHECKBOX_FILL_TOOL_TILE_BOUND = 6,
     BUTTON_OPEN_CONFIG_DIR,
     CHECKBOX_VSYNC,
-    CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA
+    CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA,
+    CHECKBOX_DISCORD_RPC,
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -50,9 +52,16 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", g_config.saveLoadFlatImageExtData);
     cb7->position = posInTab;
-    cb7->checkbox->tooltip = "When enabled, voidsprite will load and save extra data such as canvas comments,\n tile grid and symmetry to PNGs.";
+    cb7->checkbox->tooltip = "When enabled, voidsprite will load and save extra data such as canvas comments,\ntile grid and symmetry to PNGs.";
     cb7->setCallbackListener(CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA, this);
     configTabs->tabs[0].wxs.addDrawable(cb7);
+    posInTab.y += 35;
+
+    UICheckbox* cb8 = new UICheckbox("Discord Rich Presence", g_config.useDiscordRPC);
+    cb8->position = posInTab;
+    cb8->checkbox->tooltip = "When enabled, your activity will be shared as your Discord status.\nSupported only on Windows.";
+    cb8->setCallbackListener(CHECKBOX_DISCORD_RPC, this);
+    configTabs->tabs[0].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
 
@@ -235,6 +244,7 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
         //save and close
         if (g_saveConfig()) {
             g_addNotification(SuccessShortNotification("Success", "Preferences saved"));
+            g_initOrDeinitRPCBasedOnConfig();
             closePopup();
         }
         else {
@@ -271,6 +281,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA:
             g_config.saveLoadFlatImageExtData = checked;
+            break;
+        case CHECKBOX_DISCORD_RPC:
+            g_config.useDiscordRPC = checked;
             break;
     }
 }

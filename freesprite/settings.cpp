@@ -14,6 +14,7 @@ bool g_saveConfig() {
         file << "fillToolTileBound=" << (g_config.fillToolTileBound ? "1" : "0") << std::endl;
         file << "vsync=" << (g_config.vsync ? "1" : "0") << std::endl;
         file << "saveLoadFlatImageExtData=" << (g_config.saveLoadFlatImageExtData ? "1" : "0") << std::endl;
+        file << "discordRPC=" << (g_config.useDiscordRPC ? "1" : "0") << std::endl;
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -21,8 +22,8 @@ bool g_saveConfig() {
 
         int x = 0;
         for (BaseBrush* brush : g_brushes) {
-			file << "keybind:brush:" << x++ << "=" << std::to_string(brush->keybind) << std::endl;
-		}
+            file << "keybind:brush:" << x++ << "=" << std::to_string(brush->keybind) << std::endl;
+        }
         file.close();
         return true;
     }
@@ -66,6 +67,7 @@ void g_loadConfig() {
         if (config.contains("fillToolTileBound")) { g_config.fillToolTileBound = config["fillToolTileBound"] == "1"; }
         if (config.contains("vsync")) { g_config.vsync = config["vsync"] == "1"; }
         if (config.contains("saveLoadFlatImageExtData")) { g_config.saveLoadFlatImageExtData = config["saveLoadFlatImageExtData"] == "1"; }
+        if (config.contains("discordRPC")) { g_config.useDiscordRPC = config["discordRPC"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();

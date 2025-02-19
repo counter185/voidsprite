@@ -10,6 +10,7 @@ public:
     bool fillToolTileBound = true;
     bool vsync = true;
     bool saveLoadFlatImageExtData = true;
+    bool useDiscordRPC = false;
 
     std::vector<std::string> lastOpenFiles;
 
