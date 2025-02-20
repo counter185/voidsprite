@@ -4,6 +4,7 @@
 #include "UISlider.h"
 #include "UIButton.h"
 #include "UIColorInputField.h"
+#include "UICheckbox.h"
 #include "maineditor.h"
 #include "background_operation.h"
 #include "FontRenderer.h"
@@ -64,6 +65,17 @@ void PopupApplyFilter::eventSliderPosChanged(int evt_id, float value)
         }
         updateLabels();
         threadHasNewParameters = true;
+    }
+}
+
+void PopupApplyFilter::eventCheckboxToggled(int evt_id, bool newState)
+{
+    if (evt_id < params.size()) {
+        FilterParameter& p = params[evt_id];
+        if (p.paramType == PT_BOOL) {
+            p.defaultValue = newState ? 1 : 0;
+            threadHasNewParameters = true;
+        }
     }
 }
 
@@ -135,6 +147,14 @@ void PopupApplyFilter::setupWidgets()
         wxsManager.addDrawable(label);
 
         switch (p.paramType) {
+            case PT_BOOL:
+            {
+                UICheckbox* checkbox = new UICheckbox("", p.defaultValue == 1);
+                checkbox->position = XY{ 250, y };
+                checkbox->setCallbackListener(i, this);
+                wxsManager.addDrawable(checkbox);
+            }
+                break;
             case PT_INT:
             case PT_FLOAT:
             {

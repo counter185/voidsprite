@@ -220,6 +220,7 @@
     <ClCompile Include="PopupSet9SPattern.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
+    <ClCompile Include="RenderFilter.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="SplitSessionEditor.cpp" />
@@ -377,6 +378,7 @@
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
+    <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />

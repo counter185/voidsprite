@@ -537,6 +537,9 @@
     <ClCompile Include="discord_game_sdk\image_manager.cpp">
       <Filter>Source files\external\discord_game_sdk</Filter>
     </ClCompile>
+    <ClCompile Include="RenderFilter.cpp">
+      <Filter>Source files\filters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1015,6 +1018,9 @@
     </ClInclude>
     <ClInclude Include="discord_rpc.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderFilter.h">
+      <Filter>Header files\filters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

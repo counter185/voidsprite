@@ -24,6 +24,8 @@ struct FilterParameter {
 	u32 vU32 = 0;
 };
 
+void g_loadFilters();
+
 class BaseFilter
 {
 public:
@@ -92,6 +94,19 @@ public:
 			FLOAT_PARAM("hue", -360, 360, 0),
 			FLOAT_PARAM("saturation", -100, 100, 0),
 			FLOAT_PARAM("value", -100, 100, 0),
+		};
+	}
+};
+
+class FilterStrideGlitch : public BaseFilter {
+public:
+	std::string name() override { return "Stride glitch"; }
+	Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+	std::vector<FilterParameter> getParameters() override {
+		return {
+			INT_PARAM("splits", 1, 100, 4),
+			INT_PARAM("length.min", 1, 100, 3),
+			INT_PARAM("length.max", 1, 100, 8),
 		};
 	}
 };

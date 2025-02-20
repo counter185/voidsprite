@@ -1,5 +1,21 @@
 #include "BaseFilter.h"
+#include "RenderFilter.h"
 #include "Layer.h"
+
+void g_loadFilters()
+{
+    g_filters.push_back(new FilterBlur());
+    g_filters.push_back(new FilterSwapRGBToBGR());
+    g_filters.push_back(new FilterAdjustHSV());
+    g_filters.push_back(new FilterForEachPixel("Invert", [](XY, Layer*, u32 px) {
+        SDL_Color pxnow = uint32ToSDLColor(px);
+        return PackRGBAtoARGB(255 - pxnow.r, 255 - pxnow.g, 255 - pxnow.b, pxnow.a);
+    }));
+    g_filters.push_back(new FilterStrideGlitch());
+
+
+    g_renderFilters.push_back(new GenNoiseFilter());
+}
 
 Layer* BaseFilter::copy(Layer* src)
 {
@@ -103,5 +119,53 @@ Layer* FilterAdjustHSV::run(Layer* src, std::map<std::string, std::string> optio
             c->setPixel({ x,y }, hsvShift(px, hsvv));
         }
     }
+    return c;
+}
+
+Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> options)
+{
+    int splits = ixmax(1, ixmin(std::stod(options["splits"]), src->h));
+    int lengthMin = std::stoi(options["length.min"]);
+    int lengthMax = std::stoi(options["length.max"]);
+    Layer* c = copy(src);
+    int h = c->h;
+    std::stack<int> splitPoints;
+    int ch = h;
+    int hFragment = h / splits;
+    ch -= hFragment;
+    for (int i = 0; i < splits; i++) {
+        int splitDistance = randomInt(0, hFragment);
+        int wDistance = randomInt(0, c->w);
+        int hPoint = ch + splitDistance;
+        ch -= hFragment;
+        splitPoints.push(c->w * hPoint + wDistance);
+    }
+    u32* ppx = (u32*)c->pixelData;
+    u32* srcPpx = (u32*)src->pixelData;
+    u64 dataPtr = 0;
+    u64 srcDataPtr = 0;
+    int currentRepeats = 0;
+    int strideShiftSum = 0;
+    int lastRepeats = 0;
+    while (dataPtr < c->w * c->h && srcDataPtr < c->w * c->h) {
+        if (!splitPoints.empty() && dataPtr == splitPoints.top()) {
+            splitPoints.pop();
+            currentRepeats += randomInt(lengthMin, lengthMax);
+            lastRepeats += currentRepeats;
+        }
+        if (dataPtr % c->w == 0) {
+            srcDataPtr += lastRepeats;
+            lastRepeats = 0;
+        }
+        ppx[dataPtr] = srcPpx[srcDataPtr];
+        dataPtr++;
+        if (currentRepeats == 0) {
+            srcDataPtr++;
+        }
+        else {
+            currentRepeats--;
+        }
+    }
+
     return c;
 }

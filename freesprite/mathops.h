@@ -107,6 +107,7 @@ uint32_t PackRGBAtoARGB(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 std::vector<std::string> split(std::string a, char b);
 
+int randomInt(int minIncl, int maxExcl);
 std::string randomUUID();
 std::string secondsTimeToHumanReadable(u64 seconds);
 

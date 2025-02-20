@@ -13,6 +13,7 @@
 #include "TooltipsLayer.h"
 #include "ee_creature.h"
 #include "BaseFilter.h"
+#include "RenderFilter.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -804,6 +805,16 @@ void MainEditor::setUpWidgets()
             }
         },
         {
+            SDLK_r,
+            {
+                "Render",
+                {},
+                {
+                },
+                NULL
+            }
+        },
+        {
             SDLK_v,
             {
                 "View",
@@ -916,9 +927,23 @@ void MainEditor::setUpWidgets()
     SDL_Keycode keyorder[] = { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i, SDLK_o, SDLK_p,
                                SDLK_a, SDLK_s, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l,
                                SDLK_z, SDLK_x, SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m };
+    //load filters
     int i = 0;
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDLK_q].actions[keyorder[i++]] = {
+            filter->name(), [filter](MainEditor* editor) {
+                PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
+                g_addPopup(newPopup);
+                if (filter->getParameters().size() == 0) {
+                    newPopup->applyAndClose();
+                }
+            }
+        };
+    }
+    //load render filters
+    i = 0;
+    for (auto& filter : g_renderFilters) {
+        mainEditorKeyActions[SDLK_r].actions[keyorder[i++]] = {
             filter->name(), [filter](MainEditor* editor) {
                 PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
                 g_addPopup(newPopup);
@@ -949,7 +974,7 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
-    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_q, SDLK_v });
+    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_q, SDLK_r, SDLK_v });
     wxsManager.addDrawable(navbar);
 }
 

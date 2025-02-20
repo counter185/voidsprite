@@ -854,6 +854,28 @@ std::vector<std::string> split(std::string a, char b)
     return ret;
 }
 
+int randomInt(int minIncl, int maxExcl)
+{
+    if (minIncl > maxExcl) {
+        int t = minIncl;
+        minIncl = maxExcl;
+        maxExcl = t;
+    }
+    int range = maxExcl - minIncl;
+    if (range == 0) {
+        return minIncl;
+    }
+    if (range > RAND_MAX) {
+        int s = 0;
+        for (int s = 0; s < 1 + (range / RAND_MAX); s++) {
+            range -= RAND_MAX;
+            s += rand() % ixmin(range, RAND_MAX);
+        }
+        return s + minIncl;
+    }
+    return rand() % (maxExcl - minIncl) + minIncl;
+}
+
 std::string randomUUID()
 {
     std::string chars = "0123456789abcdef";

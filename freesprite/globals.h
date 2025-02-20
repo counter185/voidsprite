@@ -13,6 +13,7 @@
 #include <format>
 #include <map>
 #include <unordered_map>
+#include <stack>
 #include <new>
 #include <ctime>
 #include <vector>
@@ -132,6 +133,7 @@ class ScrollingPanel;
 
 //filters
 class BaseFilter;
+class RenderFilter;
 
 template <typename T>
 class ScreenWideNavBar;
@@ -152,6 +154,7 @@ inline double g_deltaTime = 1.0;
 inline double g_frameDeltaTime = 0.001;
 inline std::vector<NineSegmentPattern*> g_9spatterns;
 inline std::vector<BaseFilter*> g_filters;
+inline std::vector<RenderFilter*> g_renderFilters;
 inline bool g_windowFocused = true;
 
 extern std::vector<std::string> g_cmdlineArgs;

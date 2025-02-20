@@ -39,6 +39,7 @@ public:
 
     void eventButtonPressed(int evt_id) override;
     void eventSliderPosChanged(int evt_id, float value) override;
+    void eventCheckboxToggled(int evt_id, bool newState);
 
     void renderFilterPopupBackground();
     void setupWidgets();
