@@ -16,6 +16,7 @@ void g_loadFilters()
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
+    g_renderFilters.push_back(new GenRGBNoiseFilter());
 }
 
 Layer* BaseFilter::copy(Layer* src)

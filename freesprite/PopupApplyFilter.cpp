@@ -137,10 +137,10 @@ void PopupApplyFilter::setupWidgets()
     title->position = XY{5, 5};
     wxsManager.addDrawable(title);
 
-	params = targetFilter->getParameters();
+    params = targetFilter->getParameters();
     int y = 50;
     int i = 0;
-	for (auto& p : params) {
+    for (auto& p : params) {
         UILabel* label = new UILabel();
         label->text = p.name;
         label->position = XY{10, y + 2};
@@ -184,7 +184,7 @@ void PopupApplyFilter::setupWidgets()
         }
         i++;
         y += 40;
-	}
+    }
     updateLabels();
 
     setSize({ 550, y + 70 });
