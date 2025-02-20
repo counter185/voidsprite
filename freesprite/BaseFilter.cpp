@@ -12,6 +12,7 @@ void g_loadFilters()
         return PackRGBAtoARGB(255 - pxnow.r, 255 - pxnow.g, 255 - pxnow.b, pxnow.a);
     }));
     g_filters.push_back(new FilterStrideGlitch());
+    g_filters.push_back(new FilterPixelize());
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
@@ -164,6 +165,46 @@ Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> op
         }
         else {
             currentRepeats--;
+        }
+    }
+
+    return c;
+}
+
+Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    XY pixelSize = { std::stod(options["size.x"]), std::stod(options["size.y"]) };
+    int tilesW = (int)ceil(c->w / (double)pixelSize.x);
+    int tilesH = (int)ceil(c->h / (double)pixelSize.y);
+
+    for (int y = 0; y < tilesH; y++) {
+        for (int x = 0; x < tilesW; x++) {
+
+            XY origin = { x * pixelSize.x, y * pixelSize.y };
+
+            u64 rs = 0, gs = 0, bs = 0, as = 0;
+            double aSum = 0;
+            int measures = 0;
+            for (int yy = 0; yy < pixelSize.y; yy++) {
+                for (int xx = 0; xx < pixelSize.x; xx++) {
+                    if (pointInBox(xyAdd(origin, { xx,yy }), { 0,0,c->w,c->h })) {
+                        measures++;
+                        SDL_Color px = uint32ToSDLColor(src->getPixelAt(xyAdd(origin, {xx, yy}), true));
+                        rs += px.r;
+                        gs += px.g;
+                        bs += px.b;
+                        as += px.a;
+                        aSum += px.a / 255.0;
+                    }
+                }
+            }
+            rs = aSum > 0 ? (u64)(rs / aSum) : 0;
+            gs = aSum > 0 ? (u64)(gs / aSum) : 0;
+            bs = aSum > 0 ? (u64)(bs / aSum) : 0;
+            as /= measures;
+            c->fillRect(origin, xyAdd(origin, pixelSize), PackRGBAtoARGB(rs, gs, bs, as));
+
         }
     }
 

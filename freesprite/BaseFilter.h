@@ -110,3 +110,15 @@ public:
 		};
 	}
 };
+
+class FilterPixelize : public BaseFilter {
+public:
+	std::string name() override { return "Pixelize"; }
+	Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+	std::vector<FilterParameter> getParameters() override {
+		return {
+			INT_PARAM("size.x", 1, 100, 2),
+			INT_PARAM("size.y", 1, 100, 2),
+		};
+	}
+};
