@@ -1,10 +1,8 @@
-![voidsprite logo](freesprite/assets/mainlogo.png)
+![voidsprite logo](README_ASSETS/mainlogo.png)
 
-# voidsprite
+Free C++ pixel art editor
 
-Free C++ sprite editor
-
-![Preview image](img_preview_1.png)
+![Preview image](README_ASSETS/img_preview_1.png)
 
 ## Supported file formats
 ### Import:
@@ -44,7 +42,7 @@ Free C++ sprite editor
 
 You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
 
-For Windows, get the `voidsprite-build.zip` file.
+For Windows, get the `voidsprite-build-win64.zip` file.
 
 For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed. You can also try the portable binary from `voidsprite-build-linux.zip`, but this might not work on all systems.
 
@@ -80,6 +78,9 @@ You may find the [Official Discord server](https://discord.gg/c5SndMJKj2) here.
 
 [BlueSky page](https://voidsprite.bsky.social/)
 
+## Donate
+
+You can support the project by donating on [itch.io](https://cntrpl.itch.io/voidsprite/purchase)
 
 ## Licenses
 
