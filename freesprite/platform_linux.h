@@ -25,6 +25,7 @@ void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/templates");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
 }
 void platformInit() {}
 void platformPostInit() {}

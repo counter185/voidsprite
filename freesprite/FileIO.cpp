@@ -4768,31 +4768,82 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
                     return { false, {} };
                 }
             }
-            else if (lineN == 2) {
-                if (stringStartsWithIgnoreCase(line, "name: ")) {
-                    name = line.substr(6);
-                }
-                else {
-                    oldFormat = true;
-                    columns = std::stoi(line);
-                }
+            else if (stringStartsWithIgnoreCase(line, "name: ")) {
+                name = line.substr(6);
             }
-            else {
-                if (lineN == 3 && stringStartsWithIgnoreCase(line, "columns: ")) {
-                    columns = std::stoi(line.substr(9));
-                }
-                else {
-                    int r, g, b;
-                    std::istringstream iss(line);
-                    iss >> r >> g >> b;
-                    ret.push_back(PackRGBAtoARGB(r, g, b, 255));
-                }
+            else if (lineN == 3 && stringStartsWithIgnoreCase(line, "columns: ")) {
+                columns = std::stoi(line.substr(9));
+            } 
+            else if (line.size() > 3) {
+                int r, g, b;
+                std::istringstream iss(line);
+                iss >> r >> g >> b;
+                ret.push_back(PackRGBAtoARGB(r, g, b, 255));
             }
         }
         f.close();
         return { true, ret };
     }
     return { false, {} };
+}
+
+std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
+{
+    std::ifstream f(name, std::ios::in);
+    if (f.is_open()) {
+        std::pair<bool, std::vector<uint32_t>> ret;
+        while (!f.eof()) {
+            std::string line;
+            std::getline(f, line);
+            if (line.size() == 6 || line.size() == 8) {
+                std::string r = line.substr(0, 2);
+                std::string g = line.substr(2, 2);
+                std::string b = line.substr(4, 2);
+                std::string a = line.size() == 8 ? line.substr(6, 2) : "FF";
+                int ri = std::stoi(r, 0, 16);
+                int gi = std::stoi(g, 0, 16);
+                int bi = std::stoi(b, 0, 16);
+                int ai = std::stoi(a, 0, 16);
+                ret.second.push_back(PackRGBAtoARGB(ri, gi, bi, ai));
+            }
+        }
+        f.close();
+        ret.first = ret.second.size() > 0;
+        return ret;
+    }
+    return { false,{} };
+}
+
+std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString name)
+{
+    std::ifstream f(name, std::ios::in);
+    if (f.is_open()) {
+        std::pair<bool, std::vector<uint32_t>> ret;
+        while (!f.eof()) {
+            std::string line;
+            std::getline(f, line);
+            if (line.size() > 0 && line[0] == ';') {
+                continue;
+            }
+            if (line.size() == 6 || line.size() == 8) {
+                int idx = 0;
+                std::string a = line.size() == 8 ? line.substr(idx++*2, 2) : "FF";
+                std::string r = line.substr(idx++ * 2, 2);
+                std::string g = line.substr(idx++ * 2, 2);
+                std::string b = line.substr(idx++ * 2, 2);
+                
+                int ri = std::stoi(r, 0, 16);
+                int gi = std::stoi(g, 0, 16);
+                int bi = std::stoi(b, 0, 16);
+                int ai = std::stoi(a, 0, 16);
+                ret.second.push_back(PackRGBAtoARGB(ri, gi, bi, ai));
+            }
+        }
+        f.close();
+        ret.first = ret.second.size() > 0;
+        return ret;
+    }
+    return { false,{} };
 }
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path)

@@ -264,7 +264,6 @@ int main(int argc, char** argv)
 
     platformPreInit();
 
-    g_generateColorMap();
     g_loadConfig();
 
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
@@ -292,6 +291,10 @@ int main(int argc, char** argv)
         SDL_SetCursor(cur);
         SDL_FreeSurface(cursorSrf);
     }
+
+    g_setupIO();
+    g_loadPalettesToColorMap();
+    g_generateColorMap();
 
     g_mainlogo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/mainlogo.png");
     g_iconLayerAdd = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_add.png");
@@ -325,8 +328,6 @@ int main(int argc, char** argv)
 
     g_gamepad = new Gamepad();
     g_gamepad->TryCaptureGamepad();
-
-    g_setupIO();
 
     //load brushes
     g_brushes.push_back(new Brush1x1());

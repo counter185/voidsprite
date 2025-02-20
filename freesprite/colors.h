@@ -1,4 +1,6 @@
 #pragma once
+#include "FileIO.h"
+#include "mathops.h"
 
 #define HINT_NEXT_LINE "hint:newline"
 #define HINT_NEXT_LINE_HERE {HINT_NEXT_LINE,0}
@@ -300,6 +302,32 @@ inline std::vector<NamedColorPalette> g_namedColorMap = {
         }
     },
 };
+
+inline void g_loadPalettesToColorMap() {
+    for (auto& palImport : g_paletteImporters) {
+        auto fileList = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("palettes"), palImport->extension());
+        for (auto& file : fileList) {
+            std::string fileName = fileNameFromPath(convertStringToUTF8OnWin32(file));
+            if (palImport->canImport(file)) {
+                auto result = palImport->importPalette(file);
+                if (result.first) {
+                    auto colorList = result.second;
+                    NamedColorPalette ncp;
+                    ncp.name = fileName;
+                    int i = 0;
+                    for (auto& color : colorList) {
+                        ncp.colorMap.push_back({ std::format("{}:{:02x}", fileName, i++), color });
+                    }
+                    g_namedColorMap.push_back(ncp);
+                }
+                else {
+                    //g_addNotification(ErrorNotification("Palette Import Error", "Could not import palette from " + fileName));
+                    printf("palette load failed\n");
+                }
+            }
+        }
+    }
+}
 
 inline void g_generateColorMap() {
     for (NamedColorPalette& palette : g_namedColorMap) {

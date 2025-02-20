@@ -83,6 +83,8 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data);
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name);
+std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name);
+std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString name);
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
 bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
@@ -373,6 +375,17 @@ inline void g_setupIO() {
 
 
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("paint.net palette", ".txt", &readPltPDNTXT,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            char headerBytes[24];
+            memset(headerBytes, 0, 24);
+            fread(headerBytes, 23, 1, f);
+            char cmp[24] = ";paint.net Palette File";
+            fclose(f);
+            return std::string(headerBytes) == std::string(cmp);
+        }));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("JASC-PAL palette", ".pal", &readPltJASCPAL, 
         [](PlatformNativePathString path) { 
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
