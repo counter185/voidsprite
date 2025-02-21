@@ -5,38 +5,66 @@ Free C++ pixel art editor
 ![Preview image](README_ASSETS/img_preview_1.png)
 
 ## Supported file formats
-### Import:
-- PNG
-- BMP
-- JPEG XL
-- OpenRaster ORA
-- RPGMaker 2000/2003 XYZ
-- Atrophy Engine AETEX (tga/dds)
-- Wii TPL*
-- DDS* (DXT1, DXT2/3, DXT4/5)
-- Cave Story engine PBM
-- VTF* (BGRA, BGR, DXT1, DXT2/3, DXT4/5)
-- NES (dumps CHR-ROM)
-- Mario Paint save file (SRM)
-- SR8 
-- PXM Cave Story Map File
-- LMU RPGMaker2000/3 Map File
-- all other formats supported by SDL2_Image
 
-\* - not all subformats are currently implemented   
+✔ - implemented  
+〰 - partially implemented  
+❔ - implementation non-functional/not finished  
+✖ - not implemented  
+\* - see notes
 
-### Export:
-- PNG
-- JPEG XL
-- OpenRaster ORA
-- RPGMaker 2000/2003 XYZ
-- BMP
-- Cave Story engine PBM
-- PXM Cave Story Map File
-- PSP Pixel Studio Project File
-- C header (as `uint8_t` array)
-- Python file (as [R,G,B,A] `np.array`)
-- HTML document (inline Base64 image)
+### Import / Export
+
+| Name | Extension | Import | Export |
+|---|---|:-:|:-:|
+| voidsprite session | .voidsn | ✔ | ✔ |
+| PNG | .png | ✔ | ✔ |
+| BMP | .bmp | ✔ | 〰(24-bit only) |
+| TGA | .tga | ✔ | 〰(uncomp. 24-bit only) |
+| JPEG XL | .jxl | ✔ | ✔ |
+| Portable Bitmap, Graymap, Pixmap | .pbm .pgm .pbm | ✔ | 〰(text mode only) |
+| X Bitmap | .xbm | ✔ | ✔ |
+| Windows cursor | .cur | ✔ | ✔ |
+| OpenRaster | .ora | ✔* | ✔* |
+| Pixel Studio session | .psp | 〰* | ✔ |
+| Pixel Studio (compressed) session | .psx | 〰* | ✔ |
+| XYZ (RPG Maker 2000/2003) | .xyz | ✔ | ✔ |
+| PBM (Cave Story engine) | .pbm | ✔ | ✔ |
+
+\* **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
+\* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.
+
+### Import only
+
+| Name | Extension | Import | Export |
+|---|---|:-:|:-:|
+| Nintendo DS banner | .nds | ✔ | ✖ |
+| NES CHR-ROM | .nes | ✔ | ✖ |
+| Mario Paint save file | .srm | ✔(only main canvas) | ✖ |
+| X-Com SPK, BDY, SCR | .spk .bdy .scr | ✔ | ✖ |
+| Windows Shell Scrap | .shs | ✔(uses Win32 API) | ✖ |
+| Atrophy Engine texture | .aetex | 〰* | ✖ |
+| PS2 Icon | .icn .ico | 〰 | ✖ |
+| DirectDraw Surface | .dds | 〰* | ✖ |
+| Wii/GameCube TPL | .tpl | 〰(only RGB5A3) | ✖ |
+| Valve Texture Format | .vtf | 〰* | ✖ |
+| Windows 1.0/2.0/3.11 Paint | .msp | ❔ | ✖ |
+| PS Vita GXT | .gxt | ❔ | ✖ |
+| Every other SDL_Image format | * | ✔ | ✖ |
+
+\* **AETEX** - GXT and Switch ASTC subformats not implemented  
+\* **VTF** - only largest mipmap is loaded. Formats: BGRA8888, RGBA8888, BGR888, DXT1, DXT3, DXT5  
+\* **DDS** - only BC1, BC2, BC3 and B8G8R8A8
+
+### Export only
+
+| Name | Extension | Import | Export |
+|---|---|:-:|:-:|
+| C header (as uint32_t array) | .h | ✖ | ✔ |
+| Python NumPy array | .py | ✖ | ✔ |
+| HTML Base64 image | .html | ✖ | ✔ |
+| Java BufferedImage | .java | ✖ | 〰* |
+
+\* **Java BufferedImage** - only works for small images. Larger images go beyond the size limit.  
 
 ## Installing
 
