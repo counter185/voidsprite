@@ -18,6 +18,8 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 
+std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
+
 //void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 
@@ -52,6 +54,7 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
+MainEditor* readPixelStudioPSX(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
@@ -64,6 +67,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
+bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
 bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeTGA(PlatformNativePathString path, Layer* data);
@@ -245,6 +249,7 @@ inline void g_setupIO() {
         *exVOIDSNv3,
         *exVOIDSNv2,
         *exPixelStudioPSP,
+        *exPixelStudioPSX,
         *exORA,
         *exPNG,
         *exBMP,
@@ -264,6 +269,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2) );
     g_fileExporters.push_back( exORA = FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster) );
     g_fileExporters.push_back( exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", &writePixelStudioPSP) );
+    g_fileExporters.push_back( exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", &writePixelStudioPSX) );
 
     g_fileExporters.push_back( exPNG = FileExporter::flatExporter("PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB) );
@@ -292,6 +298,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Split Session", ".voidspsn", &loadSplitSession, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
