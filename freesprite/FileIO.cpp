@@ -4811,9 +4811,10 @@ bool writeVTF(PlatformNativePathString path, Layer* data)
         header.headerSize = 64;
         header.width = data->w;
         header.height = data->h;
-        header.flags = 1    //POINTSAMPLE
-            | 0x100         //NOMIP
+        header.flags = 1    // POINTSAMPLE
+            | 0x100         // NOMIP
             | 0x200         // NOLOD
+            | 0x2000        // 8BIT ALPHA
             ;
         header.frames = 1;
         header.firstFrame = 0;
