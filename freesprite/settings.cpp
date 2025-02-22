@@ -76,7 +76,7 @@ void g_loadConfig() {
 
 void g_tryPushLastFilePath(std::string a) {
     auto pos = std::find(g_config.lastOpenFiles.begin(),g_config.lastOpenFiles.end(), a);
-    if (pos != g_config.lastOpenFiles.begin() && g_config.lastOpenFiles.size() > 0) {
+    if ((pos != g_config.lastOpenFiles.begin() && g_config.lastOpenFiles.size() > 0) || (g_config.lastOpenFiles.size() == 0)) {
         if (pos != g_config.lastOpenFiles.end()) {
             g_config.lastOpenFiles.erase(pos);
         }
