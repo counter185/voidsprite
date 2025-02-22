@@ -109,7 +109,7 @@ public:
         XY ret = { 0,0 };
         for (Drawable*& a : subWidgets.drawablesList) {
             XY aPos = a->position;
-            XY aDim = a->getDimensions();
+            XY aDim = a->getRenderDimensions();
             if (aPos.x + aDim.x > ret.x) {
                 ret.x = aPos.x + aDim.x;
             }

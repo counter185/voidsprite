@@ -330,6 +330,7 @@
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="ButtonStartScreenSession.h" />
     <ClInclude Include="Canvas.h" />
+    <ClInclude Include="colormodels.h" />
     <ClInclude Include="CustomTemplate.h" />
     <ClInclude Include="discord_game_sdk\achievement_manager.h" />
     <ClInclude Include="discord_game_sdk\activity_manager.h" />

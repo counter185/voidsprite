@@ -18,6 +18,8 @@ public:
 	}
 	void render(XY pos) override;
 	void handleInput(SDL_Event evt, XY gPosOffset) override;
+	XY getDimensions() override { return XY{ wxWidth, wxHeight }; }
+	XY getRenderDimensions() override { return xyAdd(getDimensions(), { 0, 3 }); }
 	void focusOut() override {
 		Drawable::focusOut();
 		mouseHeld = false;

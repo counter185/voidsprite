@@ -5,6 +5,7 @@
 #define FORMAT_RGB			0b01
 #define FORMAT_PALETTIZED	0b10
 
+std::string getAllLibsVersions();
 
 uint8_t* DecompressMarioPaintSRM(FILE* f);
 

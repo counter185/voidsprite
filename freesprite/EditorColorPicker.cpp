@@ -18,7 +18,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     //-----------------
     //| Colors tab
 
-    colorTabs = new TabbedView({ { "Visual", g_iconColorVisual },{ "Sliders", g_iconColorHSV } }, 100);
+    colorTabs = new TabbedView({ { "Visual", g_iconColorVisual },{ "Sliders", g_iconColorHSV }, { "Other" }}, 100);
     colorTabs->position = XY{ 0,5 };
     colorModeTabs->tabs[0].wxs.addDrawable(colorTabs);
 
@@ -138,6 +138,50 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
     colorTabs->tabs[1].wxs.addDrawable(sliderB);
 
+    //   -------------------
+    //   | Other tab 
+    ScrollingPanel* colorModelsPanel = new ScrollingPanel();
+    colorModelsPanel->position = XY{0, 5};
+    colorModelsPanel->scrollHorizontally = false;
+    colorModelsPanel->scrollVertically = true;
+    colorModelsPanel->wxWidth = 370;
+    colorModelsPanel->wxHeight = 250;
+    colorTabs->tabs[2].wxs.addDrawable(colorModelsPanel);
+    {
+        int yNow = 5;
+        int i = 0;
+        for (auto& model : g_colorModels) {
+            std::string name = model.first;
+            ColorModel* mptr = model.second;
+
+            UILabel* nameLabel = new UILabel(name);
+            nameLabel->position = XY{ 5, yNow };
+            colorModelsPanel->subWidgets.addDrawable(nameLabel);
+            yNow += 30;
+
+            std::map<std::string, ColorModelValue> components;
+
+            for (auto& component : mptr->components()) {
+                UILabel* cnameLabel = new UILabel(component);
+                cnameLabel->position = XY{ 10, yNow };
+                colorModelsPanel->subWidgets.addDrawable(cnameLabel);
+                UILabel* cvalueLabel = new UILabel("0");
+                cvalueLabel->position = XY{ 30, yNow };
+                colorModelsPanel->subWidgets.addDrawable(cvalueLabel);
+                UIColorSlider* slider = new UIColorSlider();
+                slider->position = XY{ 80, yNow };
+                slider->wxWidth = 200;
+                slider->wxHeight = 20;
+                slider->setCallbackListener(100 + i, this);
+                colorModelsPanel->subWidgets.addDrawable(slider);
+                yNow += 30;
+                components[component] = { slider, cvalueLabel, 0 };
+            }
+
+            colorModels.push_back({ name, {mptr, components} });
+            i++;
+        }
+    }
     //-----------------
     //| Palettes tab
     ScrollingPanel* palettePanel = new ScrollingPanel();
@@ -324,6 +368,24 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
             currentB = f * 255;
             updateMainEditorColorFromRGBSliders();
             break;
+        default:
+            if (evt_id >= 100 && (evt_id - 100) < colorModels.size()) {
+                int modelid = evt_id - 100;
+                auto& model = colorModels[modelid];
+                std::string modelName = model.first;
+                ColorModelData& modelData = model.second;
+                ColorModel* mptr = modelData.targetModel;
+                std::map<std::string, double> componentData;
+                for (auto& component : modelData.components) {
+                    component.second.valueNow = component.second.valueSlider->sliderPos;
+                    component.second.valueLabel->text = std::format("{:.2f}", component.second.valueNow);
+                    componentData[component.first] = component.second.valueNow;
+                }
+                
+                u32 color = mptr->toRGB(componentData);
+                setMainEditorColorRGB(uint32ToSDLColor(color), true, true, true, modelName);
+            }
+            break;
     }
 }
 
@@ -358,12 +420,49 @@ void EditorColorPicker::setMainEditorColorHSV(double h, double s, double v)
 
 void EditorColorPicker::updateMainEditorColorFromRGBSliders()
 {
-    setMainEditorColorRGB({currentR, currentG, currentB}, true, false);
+    setMainEditorColorRGB({currentR, currentG, currentB}, true, false, true);
+}
+
+void EditorColorPicker::updateColorModelSliders(std::string dontUpdate)
+{
+    for (auto& model : colorModels) {
+        ColorModel* mptr = model.second.targetModel;
+        std::map<std::string, double> modelColorValue;
+        if (model.first != dontUpdate) {
+            modelColorValue = mptr->fromRGB(PackRGBAtoARGB(currentR, currentG, currentB, 255));
+        }
+        else {
+            for (auto& component : model.second.components) {
+                modelColorValue[component.first] = component.second.valueNow;
+            }
+        }
+
+        for (auto& component : model.second.components) {
+            UIColorSlider* slider = component.second.valueSlider;
+            UILabel* label = component.second.valueLabel;
+
+            auto modelColorMin = modelColorValue;
+            auto modelColorMax = modelColorValue;
+
+            //TODO: other min/max bounds
+            modelColorMin[component.first] = 0;
+            modelColorMax[component.first] = 1;
+
+            double val = modelColorValue[component.first];
+            if (model.first != dontUpdate) {
+                slider->sliderPos = val;
+                label->text = std::format("{:.2f}", val);
+                component.second.valueNow = val;
+            }
+            slider->colorMin = mptr->toRGB(modelColorMin);
+            slider->colorMax = mptr->toRGB(modelColorMax);
+        }
+    }
 }
 
 void EditorColorPicker::updateMainEditorColorFromRGBTextBoxes()
 {
-    setMainEditorColorRGB({currentR, currentG, currentB}, true, true);
+    setMainEditorColorRGB({currentR, currentG, currentB}, true, true, true);
 }
 
 void EditorColorPicker::updateMainEditorColorFromHSVTextBoxes()
@@ -376,7 +475,7 @@ void EditorColorPicker::updateMainEditorColorFromHSVTextBoxes()
 void EditorColorPicker::setMainEditorColorRGB(unsigned int col) {
     setMainEditorColorRGB(SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff) });
 }
-void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders, bool updateRGBSliders, bool updateHSVTextBoxes) {
+void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders, bool updateRGBSliders, bool updateHSVTextBoxes, std::string dontUpdateThisColorModel) {
     hsv a = rgb2hsv(rgb{ col.r / 255.0f, col.g / 255.0f, col.b / 255.0f });
     if (updateHSVSliders) {
         sliderH->sliderPos = (float)(a.h / 360.0f);
@@ -420,7 +519,7 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
         txtV->setText(std::to_string(currentV));
     }
 
-    uint32_t rgbColor = (0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
+    uint32_t rgbColor = sdlcolorToUint32(col) | 0xFF000000; //(0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
 
     sliderR->colorMin = rgbColor & 0x00FFFF;
     sliderR->colorMax = rgbColor | 0xFF0000;
@@ -431,6 +530,8 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
 
     colorTextField->setText(std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
     caller->pickedColor = rgbColor;
+
+    updateColorModelSliders(dontUpdateThisColorModel);
 }
 
 void EditorColorPicker::updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value)

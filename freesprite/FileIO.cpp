@@ -63,7 +63,24 @@ enum VTFFORMAT
     IMAGE_FORMAT_UVLX8888
 };
 
+std::string getAllLibsVersions() {
+    std::string ret = "";
+    ret += "SDL: " + std::to_string(SDL_MAJOR_VERSION) + "." + std::to_string(SDL_MINOR_VERSION) + "." +
+           std::to_string(SDL_PATCHLEVEL) + "\n";
+    ret += "SDL_image: " + std::to_string(SDL_IMAGE_MAJOR_VERSION) + "." + std::to_string(SDL_IMAGE_MINOR_VERSION) +
+           "." + std::to_string(SDL_IMAGE_PATCHLEVEL) + "\n";
+    ret += "SDL_ttf: " + std::to_string(SDL_TTF_MAJOR_VERSION) + "." + std::to_string(SDL_TTF_MINOR_VERSION) + "." +
+           std::to_string(SDL_TTF_PATCHLEVEL) + "\n";
 
+    ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
+           "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
+    ret += "libpng: " PNG_LIBPNG_VER_STRING "\n";
+    ret += "zlib: " ZLIB_VERSION "\n";
+    ret += "libjxl: " + std::to_string(JPEGXL_MAJOR_VERSION) + "." + std::to_string(JPEGXL_MINOR_VERSION) + 
+        "." + std::to_string(JPEGXL_PATCH_VERSION) + "\n";
+    ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
+    return ret;
+}
 
 void detile(Layer* ret, XY tileSize) {
 
@@ -1116,8 +1133,141 @@ void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byt
     readPNGBytes += byteCountToRead;
 }
 
-//todo: don't just copy code come on
+Layer* readPNG(png_structp png, png_infop info) {
+    uint32_t width = png_get_image_width(png, info);
+    uint32_t height = png_get_image_height(png, info);
+    png_byte color_type = png_get_color_type(png, info);
+    png_byte bit_depth = png_get_bit_depth(png, info);
+
+    Layer* ret;
+
+    if (color_type == PNG_COLOR_TYPE_PALETTE) {
+        LayerPalettized* ret2 = new LayerPalettized(width, height);
+        ret2->name = "PNG Image";
+        png_colorp palette;
+        int num_palette;
+        png_get_PLTE(png, info, &palette, &num_palette);
+
+        for (int x = 0; x < num_palette; x++) {
+            ret2->palette.push_back(0xFF000000 | (palette[x].red << 16) | (palette[x].green << 8) | palette[x].blue);
+        }
+
+        if (png_get_valid(png, info, PNG_INFO_tRNS)) {
+            png_bytep trns;
+            int num_trns;
+            png_color_16p trns16p;
+            png_get_tRNS(png, info, &trns, &num_trns, &trns16p);
+
+            for (int x = 0; x < num_trns; x++) {
+                ret2->palette[x] = (ret2->palette[x] & 0x00FFFFFF) | (trns[x] << 24);
+            }
+        }
+
+        png_bytepp rows = new png_bytep[height];
+        for (int y = 0; y < height; y++) {
+            rows[y] = new png_byte[png_get_rowbytes(png, info)];
+        }
+        png_read_image(png, rows);
+
+        uint32_t* pxData = (uint32_t*)ret2->pixelData;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                pxData[y * width + x] =
+                    bit_depth == 4 ? (rows[y][x / 2] >> (x % 2 == 0 ? 4 : 0)) & 0b1111
+                    : rows[y][x];   //todo, more bit depths
+            }
+        }
+        for (int y = 0; y < height; y++) {
+            delete[] rows[y];
+        }
+        delete[] rows;
+        ret = ret2;
+    }
+    else {
+        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+            png_set_expand_gray_1_2_4_to_8(png);
+        if (png_get_valid(png, info, PNG_INFO_tRNS))
+            png_set_tRNS_to_alpha(png);
+        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY)
+            png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+            png_set_gray_to_rgb(png);
+
+        png_read_update_info(png, info);
+
+        int numchannels = png_get_channels(png, info);
+        png_bytepp rows = new png_bytep[height];
+        for (int y = 0; y < height; y++) {
+            rows[y] = new png_byte[png_get_rowbytes(png, info)];
+        }
+        png_read_image(png, rows);
+
+        ret = new Layer(width, height);
+        ret->name = "PNG Image";
+
+        int imagePointer = 0;
+        for (uint32_t y = 0; y < height; y++) {
+            if (numchannels == 4) {
+                memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
+            }
+            else if (numchannels == 3) {
+                int currentRowPointer = 0;
+                for (uint32_t x = 0; x < width; x++) {
+                    ret->pixelData[imagePointer++] = 0xff;
+                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                }
+            }
+            else {
+                printf("WHAT\n");
+                delete ret;
+                png_destroy_read_struct(&png, &info, NULL);
+                return NULL;
+            }
+        }
+
+        if (numchannels == 4) {
+            SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
+            memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
+            SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
+            SDL_FreeSurface(convSrf);
+        }
+
+        for (uint32_t y = 0; y < height; y++) {
+            delete[] rows[y];
+        }
+        delete[] rows;
+    }
+    if (g_config.saveLoadFlatImageExtData) {
+        png_textp text_ptr;
+        int num_text;
+        png_get_text(png, info, &text_ptr, &num_text);
+        std::map<std::string, std::string> extdata;
+        for (int x = 0; x < num_text; x++) {
+            std::string key = text_ptr[x].key;
+            if (stringStartsWithIgnoreCase(key, "vsp/")) {
+                extdata[key.substr(4)] = text_ptr[x].text;
+            }
+        }
+        ret->importExportExtdata = extdata;
+    }
+
+    png_destroy_read_struct(&png, &info, NULL);
+    return ret;
+}
+
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
+
+    if (dataSize < 8) {
+        printf("PNG data too small\n");
+        return NULL;
+    }
+    else if (png_sig_cmp(data, 0, 8)) {
+        printf("Not a PNG file\n");
+        return NULL;
+    }
+
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     png_infop info = png_create_info_struct(png);
     readPNGBytes = 0;
@@ -1126,202 +1276,26 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
     //png_set_sig_bytes(png, kPngSignatureLength);
     png_read_info(png, info);
 
-    uint32_t width = png_get_image_width(png, info);
-    uint32_t height = png_get_image_height(png, info);
-    png_byte color_type = png_get_color_type(png, info);
-    png_byte bit_depth = png_get_bit_depth(png, info);
-
-    if (color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_palette_to_rgb(png);
-    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-        png_set_expand_gray_1_2_4_to_8(png);
-    if (png_get_valid(png, info, PNG_INFO_tRNS))
-        png_set_tRNS_to_alpha(png);
-    if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-    if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-        png_set_gray_to_rgb(png);
-
-    png_read_update_info(png, info);
-
-    int numchannels = png_get_channels(png, info);
-    png_bytepp rows = new png_bytep[height];
-    for (int y = 0; y < height; y++) {
-        rows[y] = new png_byte[png_get_rowbytes(png, info)];
-    }
-    png_read_image(png, rows);
-
-    Layer* nlayer = new Layer(width, height);
-    nlayer->name = "PNG Image";
-
-    int imagePointer = 0;
-    for (uint32_t y = 0; y < height; y++) {
-        if (numchannels == 4) {
-            memcpy(nlayer->pixelData + (y * numchannels * width), rows[y], width * numchannels);
-        }
-        else if (numchannels == 3) {
-            int currentRowPointer = 0;
-            for (uint32_t x = 0; x < width; x++) {
-                nlayer->pixelData[imagePointer++] = 0xff;
-                nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                nlayer->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-            }
-        }
-        else {
-            printf("WHAT\n");
-            exit(0);
-        }
-    }
-
-    if (numchannels == 4) {
-        SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
-        memcpy(convSrf->pixels, nlayer->pixelData, height * width * 4);
-        SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, width * 4);
-        SDL_FreeSurface(convSrf);
-    }
-
-    for (uint32_t y = 0; y < height; y++) {
-        delete[] rows[y];
-    }
-    delete[] rows;
-    png_destroy_read_struct(&png, &info, NULL);
-
-    return nlayer;
+    return readPNG(png, info);
 }
 Layer* readPNG(PlatformNativePathString path, uint64_t seek)
 {
     FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
     if (pngfile != NULL) {
+        u8 sig[8];
+        fread(sig, 1, 8, pngfile);
+        if (png_sig_cmp(sig, 0, 8)) {
+            printf("Not a PNG file\n");
+            return NULL;
+        }
+        fseek(pngfile, 0, SEEK_SET);
+
         png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
         png_infop info = png_create_info_struct(png);
         png_init_io(png, pngfile);
         png_read_info(png, info);
 
-        uint32_t width = png_get_image_width(png, info);
-        uint32_t height = png_get_image_height(png, info);
-        png_byte color_type = png_get_color_type(png, info);
-        png_byte bit_depth = png_get_bit_depth(png, info);
-
-        Layer* ret;
-
-        if (color_type == PNG_COLOR_TYPE_PALETTE) {
-            LayerPalettized* ret2 = new LayerPalettized(width, height);
-            ret2->name = "PNG Image";
-            png_colorp palette;
-            int num_palette;
-            png_get_PLTE(png, info, &palette, &num_palette);
-
-            for (int x = 0; x < num_palette; x++) {
-                ret2->palette.push_back(0xFF000000 | (palette[x].red << 16) | (palette[x].green << 8) | palette[x].blue);
-            }
-
-            if (png_get_valid(png, info, PNG_INFO_tRNS)) {
-                png_bytep trns;
-                int num_trns;
-                png_color_16p trns16p;
-                png_get_tRNS(png, info, &trns, &num_trns, &trns16p);
-
-                for (int x = 0; x < num_trns; x++) {
-                    ret2->palette[x] = (ret2->palette[x] & 0x00FFFFFF) | (trns[x] << 24);
-                }
-            }
-
-            png_bytepp rows = new png_bytep[height];
-            for (int y = 0; y < height; y++) {
-                rows[y] = new png_byte[png_get_rowbytes(png, info)];
-            }
-            png_read_image(png, rows);
-
-            uint32_t* pxData = (uint32_t*)ret2->pixelData;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    pxData[y * width + x] = 
-                        bit_depth == 4 ? (rows[y][x / 2] >> (x % 2 == 0 ? 4 : 0)) & 0b1111
-                        : rows[y][x];   //todo, more bit depths
-                }
-            }
-            for (int y = 0; y < height; y++) {
-                delete[] rows[y];
-            }
-            delete[] rows;
-            ret = ret2;
-        }
-        else {
-            if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-                png_set_expand_gray_1_2_4_to_8(png);
-            if (png_get_valid(png, info, PNG_INFO_tRNS))
-                png_set_tRNS_to_alpha(png);
-            if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY)
-                png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-            if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-                png_set_gray_to_rgb(png);
-
-            png_read_update_info(png, info);
-
-            int numchannels = png_get_channels(png, info);
-            png_bytepp rows = new png_bytep[height];
-            for (int y = 0; y < height; y++) {
-                rows[y] = new png_byte[png_get_rowbytes(png, info)];
-            }
-            png_read_image(png, rows);
-
-            ret = new Layer(width, height);
-            ret->name = "PNG Image";
-
-            int imagePointer = 0;
-            for (uint32_t y = 0; y < height; y++) {
-                if (numchannels == 4) {
-                    memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
-                }
-                else if (numchannels == 3) {
-                    int currentRowPointer = 0;
-                    for (uint32_t x = 0; x < width; x++) {
-                        ret->pixelData[imagePointer++] = 0xff;
-                        ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                        ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                        ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    }
-                }
-                else {
-                    printf("WHAT\n");
-                    delete ret;
-                    png_destroy_read_struct(&png, &info, NULL);
-                    return NULL;
-                }
-            }
-
-            if (numchannels == 4) {
-                SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
-                memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
-                SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
-                SDL_FreeSurface(convSrf);
-            }
-
-            for (uint32_t y = 0; y < height; y++) {
-                delete[] rows[y];
-            }
-            delete[] rows;
-        }
-        if (g_config.saveLoadFlatImageExtData) {
-            png_textp text_ptr;
-            int num_text;
-            png_get_text(png, info, &text_ptr, &num_text);
-            std::map<std::string, std::string> extdata;
-            for (int x = 0; x < num_text; x++) {
-                std::string key = text_ptr[x].key;
-                if (stringStartsWithIgnoreCase(key, "vsp/")) {
-                    extdata[key.substr(4)] = text_ptr[x].text;
-                }
-            }
-            ret->importExportExtdata = extdata;
-        }
-
-        png_destroy_read_struct(&png, &info, NULL);
-
-        fclose(pngfile);
-
-        return ret;
+        return readPNG(png, info);
     }
     return NULL;
 }
@@ -2586,7 +2560,7 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
         //u32* pxd = (u32*)ret->pixelData;
         for (int x = 0; x < 0x200; x++) {
             u8 pixel;
-			fread(&pixel, 1, 1, f);
+            fread(&pixel, 1, 1, f);
             pixelData[x] = pixel;
         }
 

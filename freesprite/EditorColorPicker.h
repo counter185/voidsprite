@@ -10,7 +10,17 @@
 #include "TabbedView.h"
 #include "UILabel.h"
 #include "DraggablePanel.h"
+#include "colormodels.h"
 
+struct ColorModelValue {
+	UIColorSlider* valueSlider;
+	UILabel* valueLabel;
+	double valueNow;
+};
+struct ColorModelData {
+	ColorModel* targetModel;
+	std::map<std::string, ColorModelValue> components;
+};
 class ColorPickerColorButton : public UIButton {
 public:
 	EditorColorPicker* parent = NULL;
@@ -51,6 +61,8 @@ public:
 	UIButton* eraserButton = NULL;
 	UIButton* blendModeButton = NULL;
 
+	std::vector<std::pair<std::string, ColorModelData>> colorModels;
+
 	std::vector<uint32_t> lastColors;
 	bool lastColorsChanged = true;
 
@@ -67,11 +79,12 @@ public:
 	void toggleAlphaBlendMode();
 	void updateMainEditorColor();
 	void updateMainEditorColorFromRGBSliders();
+	void updateColorModelSliders(std::string dontUpdate = "");
 	void updateMainEditorColorFromRGBTextBoxes();
 	void updateMainEditorColorFromHSVTextBoxes();
 	void setMainEditorColorHSV(double h, double s, double v);
 	void setMainEditorColorRGB(unsigned int col);
-	virtual void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true);
+	virtual void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true, std::string dontUpdateThisColorModel = "");
 
 	void updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value);
 	void updateHSVTextBoxOnInputEvent(std::string data, double* value);

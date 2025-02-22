@@ -30,6 +30,7 @@
 #include "BrushBezierLine.h"
 #include "background_operation.h"
 #include "discord_rpc.h"
+#include "colormodels.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -262,17 +263,15 @@ int main(int argc, char** argv)
 
     srand(time(NULL));
 
+    std::cout << getAllLibsVersions();
+
     platformPreInit();
 
     g_loadConfig();
 
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
-#if SDL_IMAGE_MINOR_VERSION <= 5
-#define IMG_INIT_AVIF 0
-#define IMG_INIT_JXL 0
-#endif
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-    IMG_Init(-1);
+    IMG_Init(-1);   //😈time to get evil
     const char* windowTitle = "void\xE2\x97\x86sprite"
 #if _DEBUG
         " \xE2\x97\x86 DEBUG"
@@ -291,6 +290,7 @@ int main(int argc, char** argv)
         SDL_SetCursor(cur);
         SDL_FreeSurface(cursorSrf);
     }
+    g_setupColorModels();
 
     g_setupIO();
     g_loadPalettesToColorMap();
