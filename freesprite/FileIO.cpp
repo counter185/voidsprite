@@ -1415,7 +1415,9 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
         png_init_io(png, pngfile);
         png_read_info(png, info);
 
-        return readPNG(png, info);
+        Layer* ret = readPNG(png, info);
+        fclose(pngfile);
+        return ret;
     }
     return NULL;
 }
