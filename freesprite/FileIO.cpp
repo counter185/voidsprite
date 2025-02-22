@@ -582,6 +582,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
             : imageFormat == IMAGE_FORMAT_BGRA8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_RGBA8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_ARGB8888 ? w * h * 4
+            : imageFormat == IMAGE_FORMAT_ABGR8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_RGBA16161616F ? w * h * 8
             : imageFormat == IMAGE_FORMAT_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
             : imageFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
@@ -651,6 +652,32 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
                 fread(ch, 4, 1, infile);
 
                 pxp[dataP] = PackRGBAtoARGB(ch[0], ch[1], ch[2], ch[3]);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_ARGB8888:
+        ret = new Layer(width, height);
+        ret->name = "VTF ARGB Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                uint8_t ch[4];
+                fread(ch, 4, 1, infile);
+
+                pxp[dataP] = PackRGBAtoARGB(ch[3], ch[0], ch[1], ch[2]);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_ABGR8888:
+        ret = new Layer(width, height);
+        ret->name = "VTF ABGR Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                uint8_t ch[4];
+                fread(ch, 4, 1, infile);
+
+                pxp[dataP] = PackRGBAtoARGB(ch[3], ch[2], ch[1], ch[0]);
             }
         }
         break;
