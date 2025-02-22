@@ -784,6 +784,28 @@ uint16_t BEtoLE16(uint16_t a)
     return (a >> 8) + (a << 8);
 }
 
+//https://www.quora.com/Can-half-precision-floats-be-used-in-C
+float halfToFloat(uint16_t half)
+{
+    // Convert half-precision to float 
+    uint32_t sign = half & 0x8000;
+    uint32_t exponent = (half >> 10) & 0x1F;
+    uint32_t mantissa = half & 0x3FF;
+
+    if (exponent == 0 && mantissa == 0) {
+        return 0.0f; // zero 
+    }
+    else if (exponent == 31) {
+        return sign ? -INFINITY : INFINITY; // infinity 
+    }
+    else {
+        exponent += 112; // adjust bias 
+        mantissa <<= 13; // adjust mantissa 
+        uint32_t f_bits = (sign << 16) | (exponent << 23) | mantissa;
+        return *reinterpret_cast<float*>(&f_bits);
+    }
+}
+
 uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte)
 {
     uint32_t outPixel = 0;
@@ -809,9 +831,14 @@ uint32_t RGB565toARGB8888(uint16_t rgb565)
     uint8_t r = ((rgb565 >> 11) & 0b11111) * 0x8;
     uint8_t g = ((rgb565 >> 5) & 0b111111) * 0x4;
     uint8_t b = (rgb565 & 0b11111) * 0x8;
-    return 0xFF000000 + (r << 16) + (g << 8) + b;
-
-    return 0;
+    return PackRGBAtoARGB(r, g, b, 255);
+}
+uint32_t BGR565toARGB8888(uint16_t bgr565)
+{
+    uint8_t b = ((bgr565 >> 11) & 0b11111) * 0x8;
+    uint8_t g = ((bgr565 >> 5) & 0b111111) * 0x4;
+    uint8_t r = (bgr565 & 0b11111) * 0x8;
+    return PackRGBAtoARGB(r,g,b,255);
 }
 
 uint32_t RGB555toARGB8888(uint16_t rgb555) 

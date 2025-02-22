@@ -99,7 +99,10 @@ double dxmax(double a, double b);
 uint32_t BEtoLE32(uint32_t a);
 uint16_t BEtoLE16(uint16_t a);
 
+float halfToFloat(uint16_t half);
+
 uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte);
+uint32_t BGR565toARGB8888(uint16_t rgb5a3Byte);
 uint32_t RGB565toARGB8888(uint16_t rgb5a3Byte);
 uint32_t RGB555toARGB8888(uint16_t rgb555);
 uint32_t BGR555toARGB8888(uint16_t bgr555);

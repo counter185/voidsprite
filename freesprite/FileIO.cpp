@@ -573,11 +573,18 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         w = ixmax(1, w / 2);
         h = ixmax(1, h / 2);
         int seekBy =
-            imageFormat == IMAGE_FORMAT_BGR888 ? w * h * 3
+            imageFormat == IMAGE_FORMAT_I8 ? w * h
+            : imageFormat == IMAGE_FORMAT_A8 ? w * h
+            : imageFormat == IMAGE_FORMAT_IA88 ? w * h * 2
+            : imageFormat == IMAGE_FORMAT_RGB565 ? w * h * 2
+            : imageFormat == IMAGE_FORMAT_BGR888 ? w * h * 3
+            : imageFormat == IMAGE_FORMAT_RGB888 ? w * h * 3
             : imageFormat == IMAGE_FORMAT_BGRA8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_RGBA8888 ? w * h * 4
             : imageFormat == IMAGE_FORMAT_ARGB8888 ? w * h * 4
+            : imageFormat == IMAGE_FORMAT_RGBA16161616F ? w * h * 8
             : imageFormat == IMAGE_FORMAT_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
+            : imageFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
             : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
             : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
             : 0;
@@ -586,6 +593,44 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
     //fseek(infile, 16, SEEK_CUR);
 
     switch (imageFormat) {
+    case IMAGE_FORMAT_A8:
+        ret = new Layer(width, height);
+        ret->name = "VTF A8 Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                u8 a;
+                fread(&a, 1, 1, infile);
+                pxp[dataP] = PackRGBAtoARGB(255,255,255,a);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_I8:
+        ret = new Layer(width, height);
+        ret->name = "VTF I8 Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                u8 i;
+                fread(&i, 1, 1, infile);
+                pxp[dataP] = PackRGBAtoARGB(i,i,i,255);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_IA88:
+        ret = new Layer(width, height);
+        ret->name = "VTF IA88 Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                u8 i;
+                u8 a;
+                fread(&i, 1, 1, infile);
+                fread(&a, 1, 1, infile);
+                pxp[dataP] = PackRGBAtoARGB(i,i,i,a);
+            }
+        }
+        break;    
     case IMAGE_FORMAT_BGRA8888:
         ret = new Layer(width, height);
         ret->name = "VTF BGRA Layer";
@@ -609,6 +654,30 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
             }
         }
         break;
+    case IMAGE_FORMAT_RGB888:
+        ret = new Layer(width, height);
+        ret->name = "VTF RGB Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                u8 c[3];
+                fread(c, 3, 1, infile);
+                pxp[dataP] = PackRGBAtoARGB(c[0], c[1], c[2], 255);
+            }
+        }
+        break;
+    case IMAGE_FORMAT_RGB565:
+        ret = new Layer(width, height);
+        ret->name = "VTF RGB565 Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                u8 c[2];
+                fread(c, 2, 1, infile);
+                pxp[dataP] = BGR565toARGB8888(c[0] | (c[1] << 8));
+            }
+        }
+        break;
     case IMAGE_FORMAT_BGR888:
         ret = new Layer(width, height);
         ret->name = "VTF BGR Layer";
@@ -621,6 +690,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         }
         break;
     case IMAGE_FORMAT_DXT1:
+    case IMAGE_FORMAT_DXT1_ONEBITALPHA:
         ret = new Layer(width, height);
         ret->name = "VTF DXT1 Layer";
         DeXT1(ret, width, height, infile);
@@ -634,6 +704,25 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF DXT5 Layer";
         DeXT45(ret, width, height, infile);
+        break;
+    case IMAGE_FORMAT_RGBA16161616F:
+        ret = new Layer(width, height);
+        //no idea how to make this work
+        ret->name = "VTF RGBA16f Layer";
+        {
+            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
+                u16 ch[4];
+                fread(ch, 2, 4, infile);
+                //cast these to 16 bit floats
+                u8 r = (u8)(halfToFloat(ch[1]) * 255);
+                u8 g = (u8)(halfToFloat(ch[2]) * 255);
+                u8 b = (u8)(halfToFloat(ch[0]) * 255);
+                u8 a = 255;//(u8)(halfToFloat(ch[0]) * 255);
+
+                pxp[dataP] = PackRGBAtoARGB(r, g, b, a);
+            }
+        }
         break;
     default:
         printf("IMAGE FORMAT NOT IMPLEMENTED\n");

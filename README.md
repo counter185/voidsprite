@@ -52,7 +52,7 @@ Free C++ pixel art editor
 | Every other SDL_Image format | * | ✔ | ✖ |
 
 \* **AETEX** - GXT and Switch ASTC subformats not implemented  
-\* **VTF** - only largest mipmap is loaded. Formats: BGRA8888, RGBA8888, BGR888, DXT1, DXT3, DXT5  
+\* **VTF** - only largest mipmap is loaded. Formats: I8, IA88, A8, RGB565,BGR888,RGB888, BGRA8888, RGBA8888, ARGB8888, DXT1, DXT3, DXT5  
 \* **DDS** - only BC1, BC2, BC3 and B8G8R8A8
 
 ### Export only
