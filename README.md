@@ -29,9 +29,11 @@ Free C++ pixel art editor
 | Pixel Studio (compressed) session | .psx | 〰* | ✔ |
 | XYZ (RPG Maker 2000/2003) | .xyz | ✔ | ✔ |
 | PBM (Cave Story engine) | .pbm | ✔ | ✔ |
+| Valve Texture Format | .vtf | 〰* | ✔(v7.1, BGRA8888) |
 
 \* **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
-\* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.
+\* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.  
+\* **VTF** - no mipmaps are imported or exported. Formats: I8, IA88, A8, RGB565,BGR888,RGB888, BGRA8888, RGBA8888, ARGB8888, ABGR8888, DXT1, DXT3, DXT5  
 
 ### Import only
 
@@ -46,13 +48,11 @@ Free C++ pixel art editor
 | PS2 Icon | .icn .ico | 〰 | ✖ |
 | DirectDraw Surface | .dds | 〰* | ✖ |
 | Wii/GameCube TPL | .tpl | 〰(only RGB5A3) | ✖ |
-| Valve Texture Format | .vtf | 〰* | ✖ |
 | Windows 1.0/2.0/3.11 Paint | .msp | ❔ | ✖ |
 | PS Vita GXT | .gxt | ❔ | ✖ |
 | Every other SDL_Image format | * | ✔ | ✖ |
 
 \* **AETEX** - GXT and Switch ASTC subformats not implemented  
-\* **VTF** - only largest mipmap is loaded. Formats: I8, IA88, A8, RGB565,BGR888,RGB888, BGRA8888, RGBA8888, ARGB8888, ABGR8888, DXT1, DXT3, DXT5  
 \* **DDS** - only BC1, BC2, BC3 and B8G8R8A8
 
 ### Export only

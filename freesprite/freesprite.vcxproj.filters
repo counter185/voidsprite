@@ -1025,6 +1025,9 @@
     <ClInclude Include="colormodels.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="iostructs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

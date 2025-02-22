@@ -352,6 +352,7 @@
     <ClInclude Include="discord_rpc.h" />
     <ClInclude Include="DraggablePanel.h" />
     <ClInclude Include="Gamepad.h" />
+    <ClInclude Include="iostructs.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="main.h" />

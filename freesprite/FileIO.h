@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "Layer.h"
+#include "iostructs.h"
 
 #define FORMAT_RGB			0b01
 #define FORMAT_PALETTIZED	0b10
@@ -84,6 +85,7 @@ bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
 bool writeJpegXL(PlatformNativePathString path, Layer* data);
+bool writeVTF(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
@@ -261,7 +263,8 @@ inline void g_setupIO() {
         *exAnymapPPM,
         *exXBM,
         *exSR8,
-        *exJXL
+        *exJXL,
+        *exVTF
         ;
 
     g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -282,6 +285,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exAnymapPGM = FileExporter::flatExporter("Portable Graymap (text) PGM", ".pgm", &writeAnymapTextPGM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exAnymapPPM = FileExporter::flatExporter("Portable Pixmap (text) PPM", ".ppm", &writeAnymapTextPPM, FORMAT_RGB) );
     g_fileExporters.push_back( exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exVTF = FileExporter::flatExporter("VTF", ".vtf", &writeVTF, FORMAT_RGB) );
     g_fileExporters.push_back( exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED) );
     g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -331,7 +335,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("Wii/GC TPL", ".tpl", &readWiiGCTPL));
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
     g_fileImporters.push_back(FileImporter::flatImporter("DDS (ddspp+s3tc open source)", ".dds", &readDDS));
-    g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF));
+    g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF, exVTF));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));

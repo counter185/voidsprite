@@ -564,6 +564,25 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
     }
 }
 
+u64 VTFgetImageSizeInBytesForFormat(int imageFormat, int w, int h) {
+    return imageFormat == IMAGE_FORMAT_I8 ? w * h
+        : imageFormat == IMAGE_FORMAT_A8 ? w * h
+        : imageFormat == IMAGE_FORMAT_IA88 ? w * h * 2
+        : imageFormat == IMAGE_FORMAT_RGB565 ? w * h * 2
+        : imageFormat == IMAGE_FORMAT_BGR888 ? w * h * 3
+        : imageFormat == IMAGE_FORMAT_RGB888 ? w * h * 3
+        : imageFormat == IMAGE_FORMAT_BGRA8888 ? w * h * 4
+        : imageFormat == IMAGE_FORMAT_RGBA8888 ? w * h * 4
+        : imageFormat == IMAGE_FORMAT_ARGB8888 ? w * h * 4
+        : imageFormat == IMAGE_FORMAT_ABGR8888 ? w * h * 4
+        : imageFormat == IMAGE_FORMAT_RGBA16161616F ? w * h * 8
+        : imageFormat == IMAGE_FORMAT_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
+        : imageFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
+        : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+        : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+        : 0;
+}
+
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat)
 {
     Layer* ret = NULL;
@@ -572,23 +591,8 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
     for (int skipMMap = 0; skipMMap < mipmapCount-1; skipMMap++) {
         w = ixmax(1, w / 2);
         h = ixmax(1, h / 2);
-        int seekBy =
-            imageFormat == IMAGE_FORMAT_I8 ? w * h
-            : imageFormat == IMAGE_FORMAT_A8 ? w * h
-            : imageFormat == IMAGE_FORMAT_IA88 ? w * h * 2
-            : imageFormat == IMAGE_FORMAT_RGB565 ? w * h * 2
-            : imageFormat == IMAGE_FORMAT_BGR888 ? w * h * 3
-            : imageFormat == IMAGE_FORMAT_RGB888 ? w * h * 3
-            : imageFormat == IMAGE_FORMAT_BGRA8888 ? w * h * 4
-            : imageFormat == IMAGE_FORMAT_RGBA8888 ? w * h * 4
-            : imageFormat == IMAGE_FORMAT_ARGB8888 ? w * h * 4
-            : imageFormat == IMAGE_FORMAT_ABGR8888 ? w * h * 4
-            : imageFormat == IMAGE_FORMAT_RGBA16161616F ? w * h * 8
-            : imageFormat == IMAGE_FORMAT_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
-            : imageFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
-            : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
-            : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
-            : 0;
+        int seekBy = VTFgetImageSizeInBytesForFormat(imageFormat, w, h);
+            
         fseek(infile, seekBy * frames, SEEK_CUR);
     }
     //fseek(infile, 16, SEEK_CUR);
@@ -1623,39 +1627,6 @@ Layer* readSDLImage(PlatformNativePathString path, uint64_t seek)
 
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
 {
-    struct TPLImageOffset {
-        uint32_t headerOffset;
-        uint32_t paletteHeader;
-    };
-    struct TPLImageHeader {
-        uint16_t height;
-        uint16_t width;
-        uint32_t format;
-        uint32_t imageDataAddress;
-        uint32_t wrapS;
-        uint32_t wrapT;
-        uint32_t minFilter;
-        uint32_t magFilter;
-        float LODBias;
-        uint8_t edgeLODEnable;
-        uint8_t minLOD;
-        uint8_t maxLOD;
-        uint8_t unpacked;
-    };
-    struct TPLPaletteHeader {
-        uint16_t entryCount;
-        uint8_t unpacked;
-        uint8_t paddingByte;
-        uint32_t paletteFormat;
-        uint32_t paletteDataAddress;
-
-        bool set;
-    };
-    struct TPLImage {
-        TPLImageHeader imgHdr;
-        TPLPaletteHeader pltHdr;
-    };
-
     std::vector<Layer*> layers;
 
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
@@ -1860,41 +1831,7 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
     Layer* ret = NULL;
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile != NULL) {
-        struct VTFHEADER
-        {
-            char            signature[4];       // File signature ("VTF\0"). (or as little-endian integer, 0x00465456)
-            unsigned int    version[2];         // version[0].version[1] (currently 7.2).
-            unsigned int    headerSize;         // Size of the header struct  (16 byte aligned; currently 80 bytes) + size of the resources dictionary (7.3+).
-            unsigned short  width;              // Width of the largest mipmap in pixels. Must be a power of 2.
-            unsigned short  height;             // Height of the largest mipmap in pixels. Must be a power of 2.
-            unsigned int    flags;              // VTF flags.
-            unsigned short  frames;             // Number of frames, if animated (1 for no animation).
-            unsigned short  firstFrame;         // First frame in animation (0 based). Can be -1 in environment maps older than 7.5, meaning there are 7 faces, not 6.
-            unsigned char   padding0[4];        // reflectivity padding (16 byte alignment).
-            float           reflectivity[3];    // reflectivity vector.
-            unsigned char   padding1[4];        // reflectivity padding (8 byte packing).
-            float           bumpmapScale;       // Bumpmap scale.
-            int             highResImageFormat; // High resolution image format.
-            unsigned char   mipmapCount;        // Number of mipmaps.
-            int             lowResImageFormat;  // Low resolution image format (Usually DXT1).
-            unsigned char   lowResImageWidth;   // Low resolution image width.
-            unsigned char   lowResImageHeight;  // Low resolution image height.
-
-            // 7.2+
-            unsigned short  depth;              // Depth of the largest mipmap in pixels. Must be a power of 2. Is 1 for a 2D texture.
-
-            // 7.3+
-            unsigned char   padding2[3];        // depth padding (4 byte alignment).
-            unsigned int    numResources;       // Number of resources this vtf has. The max appears to be 32.
-
-            unsigned char   padding3[8];        // Necessary on certain compilers
-        };
-        struct VTF_RESOURCE_ENTRY
-        {
-            unsigned char	tag[3]; 		// A three-byte "tag" that identifies what this resource is.
-            unsigned char	flags;			// Resource entry flags. The only known flag is 0x2, which indicates that no data chunk corresponds to this resource.
-            unsigned int	offset;			// The offset of this resource's data in the file. 
-        };
+        
         VTFHEADER hdr;
         fread(hdr.signature, 1, 4, infile);
         fread(hdr.version, 4, 2, infile);
@@ -1971,7 +1908,8 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
                 break;
             }*/
             fseek(infile, hdr.headerSize, SEEK_SET);
-            fseek(infile, (hdr.lowResImageWidth / 4) * (hdr.lowResImageHeight / 4) * 8, SEEK_CUR);
+            u64 lowResImageBytes = VTFgetImageSizeInBytesForFormat(hdr.lowResImageFormat, hdr.lowResImageWidth, hdr.lowResImageHeight);
+            fseek(infile, lowResImageBytes, SEEK_CUR);
 
             ret = _VTFseekToLargestMipmapAndRead(infile, hdr.width, hdr.height, hdr.mipmapCount, hdr.frames, hdr.highResImageFormat);
         }
@@ -2027,24 +1965,6 @@ Layer* readGCI(PlatformNativePathString path, uint64_t seek)
 
 Layer* readMSP(PlatformNativePathString path, uint64_t seek)
 {
-    struct MSPHeader
-    {
-        uint16_t  Key1;             /* Magic number    */
-        uint16_t  Key2;             /* Magic number    */
-        uint16_t  Width;            /* Width of the bitmap in pixels   */
-        uint16_t  Height;           /* Height of the bitmap in pixels   */
-        uint16_t  XARBitmap;        /* X Aspect ratio of the bitmap   */
-        uint16_t  YARBitmap;        /* Y Aspect ratio of the bitmap   */
-        uint16_t  XARPrinter;       /* X Aspect ratio of the printer   */
-        uint16_t  YARPrinter;       /* Y Aspect ratio of the printer   */
-        uint16_t  PrinterWidth;     /* Width of the printer in pixels   */
-        uint16_t  PrinterHeight;    /* Height of the printer in pixels   */
-        uint16_t  XAspectCorr;      /* X aspect correction (unused)     */
-        uint16_t  YAspectCorr;      /* Y aspect correction (unused)     */
-        uint16_t  Checksum;         /* Checksum of previous 24 bytes   */
-        uint16_t  Padding[3];       /* Unused padding    */
-    };
-
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile != NULL) {
         fseek(infile, 0, SEEK_END);
@@ -2052,7 +1972,7 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek)
         fseek(infile, 0, SEEK_SET);
 
         MSPHeader hdr;
-        printf("%i\n", sizeof(MSPHeader));
+        //printf("%i\n", sizeof(MSPHeader));
         fread(&hdr, sizeof(MSPHeader), 1, infile);
         //fseek(infile, 1, SEEK_CUR);
         Layer* ret = new Layer(hdr.Width, hdr.Height);
@@ -4870,6 +4790,45 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
         tracked_free(abgrPixels);
         fclose(f);
         return jxlCompressResult;
+    }
+    return false;
+}
+
+bool writeVTF(PlatformNativePathString path, Layer* data)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+        XY lowResDimensions = data->w > 32 || data->h > 32 ? XY{32, 32} : XY{data->w, data->h};
+        Layer* lowResImage = data->copyScaled(lowResDimensions);
+
+        VTFHEADER header;
+        memset(&header, 0, sizeof(VTFHEADER));
+        memcpy(&header.signature, "VTF\0", 4);
+        header.version[0] = 7;
+        header.version[1] = 1;
+        header.headerSize = 64;
+        header.width = data->w;
+        header.height = data->h;
+        header.flags = 1    //POINTSAMPLE
+            | 0x100         //NOMIP
+            | 0x200         // NOLOD
+            ;
+        header.frames = 1;
+        header.firstFrame = 0;
+        header.reflectivity[0] = header.reflectivity[1] = header.reflectivity[2] = 0.1796f; //i have no idea why
+        header.bumpmapScale = 1;
+        header.highResImageFormat = IMAGE_FORMAT_BGRA8888;
+        header.mipmapCount = 1;
+        header.lowResImageFormat = IMAGE_FORMAT_BGRA8888;
+        header.lowResImageWidth = lowResDimensions.x;
+        header.lowResImageHeight = lowResDimensions.y;
+
+        fwrite(&header,64, 1, f);
+        fwrite(lowResImage->pixelData, lowResDimensions.x * lowResDimensions.y, 4, f);
+        fwrite(data->pixelData, data->w * data->h, 4, f);
+        delete lowResImage;
+        fclose(f);
+        return true;
     }
     return false;
 }
