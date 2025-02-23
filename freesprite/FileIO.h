@@ -58,6 +58,7 @@ MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
+MainEditor* readAsepriteASE(PlatformNativePathString path);
 
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
@@ -304,6 +305,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));

@@ -3530,6 +3530,161 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
     return NULL;
 }
 
+MainEditor* readAsepriteASE(PlatformNativePathString path)
+{
+    struct ASERawPixelData {
+        XY position;
+        XY size;
+        u8* pixelData;
+    };
+    struct ASELayerData {
+        ASEPRITELayerChunkFragment0 rawFrag;
+        std::string name;
+    };
+
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        std::map<int, ASERawPixelData> pixelDatas;
+        std::map<int, ASELayerData> layerData;
+
+        ASEPRITEHeader header;
+        fread(&header, sizeof(ASEPRITEHeader), 1, f);
+        for (int x = 0; x < ixmin(1,header.numFrames); x++) {
+            int layerChunkIndexNow = 0;
+            ASEPRITEFrameHeader frameHeader;
+            fread(&frameHeader, sizeof(ASEPRITEFrameHeader), 1, f);
+            u32 numChunks = frameHeader.numChunksOld == 0xFFFF
+                ? frameHeader.numChunksNew : frameHeader.numChunksOld;
+
+            for (int nch = 0; nch < numChunks; nch++) {
+                u64 posRn = ftell(f);
+                u32 chunkSize;
+                u16 chunkType;
+                fread(&chunkSize, 4, 1, f);
+                fread(&chunkType, 2, 1, f);
+
+                switch (chunkType) {
+                    case 0x2004:
+                    {
+                        ASEPRITELayerChunkFragment0 frag0;
+                        fread(&frag0, sizeof(ASEPRITELayerChunkFragment0), 1, f);
+                        u16 nameLen;
+                        fread(&nameLen, 2, 1, f);
+                        std::string name;
+                        name.resize(nameLen);
+                        fread(name.data(), nameLen, 1, f);
+                        layerData[layerChunkIndexNow++] = { frag0, name };
+                    }
+                        break;
+                    case 0x2005:
+                    {
+                        ASEPRITECelChunkFragment0 frag0;
+                        fread(&frag0, sizeof(ASEPRITECelChunkFragment0), 1, f);
+                        switch (frag0.type) {
+                            case 0:
+                            {
+                                u16 w, h;
+                                fread(&w, 2, 1, f);
+                                fread(&h, 2, 1, f);
+                                int dataSize = w * h * (header.colorDepth / 8);
+                                u8* pixelData = (u8*)tracked_malloc(dataSize);
+                                fread(pixelData, dataSize, 1, f);
+                                pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
+                            }
+                                break;
+                            case 1:
+                            {
+                                //WHAT IS A LINKED CEL
+                                u16 framePosition;
+                                fread(&framePosition, 2, 1, f);
+                            }
+                                break;
+                            case 2:
+                            {
+                                u16 w, h;
+                                fread(&w, 2, 1, f);
+                                fread(&h, 2, 1, f);
+                                int zlibDataSize = chunkSize - 6 - sizeof(ASEPRITECelChunkFragment0) - 4;
+                                u8* compressedData = (u8*)tracked_malloc(zlibDataSize);
+                                fread(compressedData, zlibDataSize, 1, f);
+                                uLongf dstLength = w * h * (header.colorDepth / 8);
+                                u8* pixelData = (u8*)tracked_malloc(dstLength);
+                                int uncompressResult = uncompress(pixelData, &dstLength, compressedData, zlibDataSize);
+                                if (uncompressResult != Z_OK) {
+									printf("uncompress failed: %i\n", uncompressResult);
+                                }
+                                pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
+                                tracked_free(compressedData);
+                            }
+                                break;
+                            case 3:
+                                //what is a compressed tilemap
+                                ASEPRITECelChunkFragment03 frag03;
+                                fread(&frag03, sizeof(ASEPRITECelChunkFragment03), 1, f);
+                                //next up is zlibbed tile data
+                                break;
+                        }
+                    }
+                        break;
+                }
+
+                fseek(f, posRn, SEEK_SET);
+                fseek(f, chunkSize, SEEK_CUR);
+            }
+        }
+
+        MainEditor* retSn = NULL;
+        if (header.colorDepth != 32 && header.colorDepth != 16) {
+            //we are not there yet
+            printf("[ASEPRITE] unsupported color depth: %i\n", header.colorDepth);
+            
+        }
+        else {
+            if (pixelDatas.size() > 0) {
+                std::vector<Layer*> layers;
+                for (auto& kv : pixelDatas) {
+                    Layer* l = new Layer(header.width, header.height);
+                    l->name = "Aseprite layer";
+                    if (layerData.contains(kv.first)) {
+                        l->name = layerData[kv.first].name;
+                        l->layerAlpha = layerData[kv.first].rawFrag.opacity;
+                    }
+
+                    Layer* subLayer = new Layer(kv.second.size.x, kv.second.size.y);
+                    u32* px = (u32*)subLayer->pixelData;
+                    if (header.colorDepth == 32) {
+                        ASEPRITERGBAPixel* srcpx = (ASEPRITERGBAPixel*)kv.second.pixelData;
+                        for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
+                            ASEPRITERGBAPixel pixel = srcpx[pxp];
+                            px[pxp] = PackRGBAtoARGB(pixel.r, pixel.g, pixel.b, pixel.a);
+                        }
+                    }
+                    else if (header.colorDepth == 16) {
+                        ASEPRITEIA88Pixel* srcpx = (ASEPRITEIA88Pixel*)kv.second.pixelData;
+                        for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
+                            ASEPRITEIA88Pixel pixel = srcpx[pxp];
+                            px[pxp] = PackRGBAtoARGB(pixel.i, pixel.i, pixel.i, pixel.a);
+                        }
+                    }
+                    l->blit(subLayer, kv.second.position);
+                    delete subLayer;
+                    layers.push_back(l);
+                }
+                retSn = new MainEditor(layers);
+                retSn->tileDimensions = { header.gridWidth, header.gridHeight };
+            }
+        }
+
+        for (auto& kv : pixelDatas) {
+            tracked_free(kv.second.pixelData);
+        }
+
+        fclose(f);
+        return retSn;
+    }
+    return NULL;
+}
+
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter)
 {
     PlatformNativePathString fPath = convertStringOnWin32(utf8path);
