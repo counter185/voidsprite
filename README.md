@@ -35,6 +35,7 @@ Free C++ pixel art editor
 \* **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
 \* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.  
 \* **VTF** - no mipmaps are imported or exported. Formats: I8, IA88, A8, RGB565,BGR888,RGB888, BGRA8888, RGBA8888, ARGB8888, ABGR8888, DXT1, DXT3, DXT5  
+\* **Aseprite** - experimental. Only frame 1 is loaded. Layer blend modes and tilemaps are not available here.
 
 ### Import only
 
