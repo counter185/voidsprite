@@ -143,12 +143,17 @@ public:
             return _flatCheckExportFunction != NULL ? _flatCheckExportFunction((Layer*)data) : true;
         }
     }
-    virtual bool exportData(PlatformNativePathString path, void* data) { 
-        if (exportsWholeSession()) {
-            return _sessionExportFunction(path, (MainEditor*)data);
+    virtual bool exportData(PlatformNativePathString path, void* data) {
+        try {
+            if (exportsWholeSession()) {
+                return _sessionExportFunction(path, (MainEditor*)data);
+            }
+            else {
+                return _flatExportFunction(path, (Layer*)data);
+            }
         }
-        else {
-            return _flatExportFunction(path, (Layer*)data);
+        catch (std::exception) {
+            return false;
         }
     }
 protected:
@@ -199,11 +204,16 @@ public:
         }
     }
     virtual void* importData(PlatformNativePathString path) { 
-        if (importsWholeSession()) {
-            return _sessionImportFunction(path);
+        try {
+            if (importsWholeSession()) {
+                return _sessionImportFunction(path);
+            }
+            else {
+                return _flatImportFunction(path, 0);
+            }
         }
-        else {
-            return _flatImportFunction(path,0);
+        catch (std::exception) {
+            return NULL;
         }
     }
 protected:
@@ -305,7 +315,22 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
-    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, NULL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, NULL, FORMAT_RGB | FORMAT_PALETTIZED, 
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            fseek(f, 4, SEEK_SET);
+            u16 magic;
+            fread(&magic, 2, 1, f);
+            return magic == 0xA5E0;
+        }));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, NULL, FORMAT_RGB | FORMAT_PALETTIZED, 
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            fseek(f, 4, SEEK_SET);
+            u16 magic;
+            fread(&magic, 2, 1, f);
+            return magic == 0xA5E0;
+        }));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));

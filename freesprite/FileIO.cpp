@@ -3546,6 +3546,8 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
     if (f != NULL) {
         std::map<int, ASERawPixelData> pixelDatas;
         std::map<int, ASELayerData> layerData;
+        std::vector<u32> palette;
+        bool foundNewPaletteChunk = false;
 
         ASEPRITEHeader header;
         fread(&header, sizeof(ASEPRITEHeader), 1, f);
@@ -3611,7 +3613,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                                 u8* pixelData = (u8*)tracked_malloc(dstLength);
                                 int uncompressResult = uncompress(pixelData, &dstLength, compressedData, zlibDataSize);
                                 if (uncompressResult != Z_OK) {
-									printf("uncompress failed: %i\n", uncompressResult);
+                                    printf("uncompress failed: %i\n", uncompressResult);
                                 }
                                 pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
                                 tracked_free(compressedData);
@@ -3626,6 +3628,87 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         }
                     }
                         break;
+                    case 0x0004:
+                    {
+                        if (!foundNewPaletteChunk) {
+                            int paletteIndexNow = 0;
+                            u16 num;
+                            fread(&num, 2, 1, f);
+                            for (int x = 0; x < num; x++) {
+                                u8 numSkip;
+                                u8 numColors;
+                                fread(&numSkip, 1, 1, f);
+                                fread(&numColors, 1, 1, f);
+                                numColors = numColors == 0 ? 256 : numColors;
+                                paletteIndexNow += numSkip;
+                                for (int y = 0; y < numColors; y++) {
+                                    u8 rgb[3];
+                                    fread(&rgb, 1, 3, f);
+                                    if (palette.size() < paletteIndexNow + 1) {
+                                        palette.resize(paletteIndexNow + 1);
+                                    }
+                                    palette[paletteIndexNow++] = PackRGBAtoARGB(rgb[0], rgb[1], rgb[2], 255);
+                                }
+                            }
+                        }
+                    }
+                        break;
+                    case 0x0011:
+                    {
+                        if (!foundNewPaletteChunk) {
+                            int paletteIndexNow = 0;
+                            u16 num;
+                            fread(&num, 2, 1, f);
+                            for (int x = 0; x < num; x++) {
+                                u8 numSkip;
+                                u8 numColors;
+                                fread(&numSkip, 1, 1, f);
+                                fread(&numColors, 1, 1, f);
+                                numColors = numColors == 0 ? 256 : numColors;
+                                paletteIndexNow += numSkip;
+                                for (int y = 0; y < numColors; y++) {
+                                    u8 rgb666[3];
+                                    fread(&rgb666, 1, 3, f);
+                                    if (palette.size() < paletteIndexNow + 1) {
+                                        palette.resize(paletteIndexNow + 1);
+                                    }
+                                    //WHAT DO YOU MEAN 0-63
+                                }
+                            }
+                        }
+                    }
+                        break;
+                    case 0x2019:
+                    {
+                        foundNewPaletteChunk = true;
+                        u32 vals[3];
+                        fread(vals, 4, 3, f);
+                        u8 reserved[8];
+                        fread(reserved, 1, 8, f);
+
+                        u32 newPaletteSize = vals[0];
+                        u32 firstIndex = vals[1];
+                        u32 lastIndex = vals[2];
+                        if (palette.size() < newPaletteSize) {
+                            palette.resize(newPaletteSize);
+                        }
+                        for (int x = 0; x < lastIndex - firstIndex + 1; x++) {
+                            u16 flags;
+                            u8 rgba[4];
+                            fread(&flags, 2, 1, f);
+                            fread(rgba, 1, 4, f);
+                            palette[firstIndex + x] = PackRGBAtoARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+
+                            if (flags & 1) {
+                                u16 nameLen;
+                                fread(&nameLen, 2, 1, f);
+                                std::string name;
+                                name.resize(nameLen);
+                                fread(name.data(), nameLen, 1, f);
+                            }
+                        }
+                    }
+                        break;
                 }
 
                 fseek(f, posRn, SEEK_SET);
@@ -3634,43 +3717,73 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
         }
 
         MainEditor* retSn = NULL;
-        if (header.colorDepth != 32 && header.colorDepth != 16) {
+        if (header.colorDepth != 32 && header.colorDepth != 16 && header.colorDepth != 8) {
             //we are not there yet
             printf("[ASEPRITE] unsupported color depth: %i\n", header.colorDepth);
             
         }
         else {
             if (pixelDatas.size() > 0) {
-                std::vector<Layer*> layers;
-                for (auto& kv : pixelDatas) {
-                    Layer* l = new Layer(header.width, header.height);
-                    l->name = "Aseprite layer";
-                    if (layerData.contains(kv.first)) {
-                        l->name = layerData[kv.first].name;
-                        l->layerAlpha = layerData[kv.first].rawFrag.opacity;
-                    }
+                if (header.colorDepth == 8) {
+                    std::vector<LayerPalettized*> layers;
+                    for (auto& kv : pixelDatas) {
+                        LayerPalettized* l = new LayerPalettized(header.width, header.height);
+                        l->name = "Aseprite layer";
+                        if (layerData.contains(kv.first)) {
+                            l->name = layerData[kv.first].name;
+                            //l->layerAlpha = layerData[kv.first].rawFrag.opacity;
+                            l->hidden = !(layerData[kv.first].rawFrag.flags & 1);
+                        }
 
-                    Layer* subLayer = new Layer(kv.second.size.x, kv.second.size.y);
-                    u32* px = (u32*)subLayer->pixelData;
-                    if (header.colorDepth == 32) {
-                        ASEPRITERGBAPixel* srcpx = (ASEPRITERGBAPixel*)kv.second.pixelData;
+                        LayerPalettized* subLayer = new LayerPalettized(kv.second.size.x, kv.second.size.y);
+                        u32* px = (u32*)subLayer->pixelData;
                         for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
-                            ASEPRITERGBAPixel pixel = srcpx[pxp];
-                            px[pxp] = PackRGBAtoARGB(pixel.r, pixel.g, pixel.b, pixel.a);
+                            u8 pixel = kv.second.pixelData[pxp];
+                            px[pxp] = pixel;
                         }
+                       
+                        l->blit(subLayer, kv.second.position);
+                        delete subLayer;
+                        layers.push_back(l);
                     }
-                    else if (header.colorDepth == 16) {
-                        ASEPRITEIA88Pixel* srcpx = (ASEPRITEIA88Pixel*)kv.second.pixelData;
-                        for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
-                            ASEPRITEIA88Pixel pixel = srcpx[pxp];
-                            px[pxp] = PackRGBAtoARGB(pixel.i, pixel.i, pixel.i, pixel.a);
-                        }
-                    }
-                    l->blit(subLayer, kv.second.position);
-                    delete subLayer;
-                    layers.push_back(l);
+                    retSn = new MainEditorPalettized(layers);
+                    palette[header.paletteEntryThatIsTransparent] &= 0x00FFFFFF;
+                    ((MainEditorPalettized*)retSn)->setPalette(palette);
                 }
-                retSn = new MainEditor(layers);
+                else {
+                    std::vector<Layer*> layers;
+                    for (auto& kv : pixelDatas) {
+                        Layer* l = new Layer(header.width, header.height);
+                        l->name = "Aseprite layer";
+                        if (layerData.contains(kv.first)) {
+                            l->name = layerData[kv.first].name;
+                            l->layerAlpha = layerData[kv.first].rawFrag.opacity;
+                            l->hidden = !(layerData[kv.first].rawFrag.flags & 1);
+                        }
+
+                        Layer* subLayer = new Layer(kv.second.size.x, kv.second.size.y);
+                        u32* px = (u32*)subLayer->pixelData;
+                        if (header.colorDepth == 32) {
+                            ASEPRITERGBAPixel* srcpx = (ASEPRITERGBAPixel*)kv.second.pixelData;
+                            for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
+                                ASEPRITERGBAPixel pixel = srcpx[pxp];
+                                px[pxp] = PackRGBAtoARGB(pixel.r, pixel.g, pixel.b, pixel.a);
+                            }
+                        }
+                        else if (header.colorDepth == 16) {
+                            ASEPRITEIA88Pixel* srcpx = (ASEPRITEIA88Pixel*)kv.second.pixelData;
+                            for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
+                                ASEPRITEIA88Pixel pixel = srcpx[pxp];
+                                px[pxp] = PackRGBAtoARGB(pixel.i, pixel.i, pixel.i, pixel.a);
+                            }
+                        }
+                        l->blit(subLayer, kv.second.position);
+                        delete subLayer;
+                        layers.push_back(l);
+                    }
+                    retSn = new MainEditor(layers);
+                }
+                
                 retSn->tileDimensions = { header.gridWidth, header.gridHeight };
             }
         }
