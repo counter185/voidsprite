@@ -158,4 +158,40 @@ struct ASEPRITEIA88Pixel {
 	u8 i, a;
 };
 
+struct NCCHHeader {
+    u8 rsaSignature[0x100];
+    u32 magic;
+    u32 contentSize;
+    u64 partitionID;
+    u16 makerCode;
+    u16 version;
+    u32 flag;
+    u64 programID;
+    u8 reserved[0x10];
+    u8 logoRegionHash[0x20];
+    u8 productCode[0x10];
+    u8 extHeaderHash[0x20];
+    u32 extHeaderSize;
+    u32 reserved2;
+    u64 flags;
+    u32 plainRegionOffset;
+    u32 plainRegionSize;
+    u32 logoRegionOffset;
+    u32 logoRegionSize;
+    u32 exefsOffset;
+    u32 exefsSize;
+    u32 exefsHashRegionSize;
+};
+
+struct ExeFSFileHeader {
+    char fileName[0x8];
+    u32 fileOffset;
+    u32 fileSize;
+};
+struct ExeFSHeader {
+    ExeFSFileHeader fileHeaders[0xa];
+    u8 reserved[0x20];
+    u8 fileHashes[0x140];
+};
+
 #pragma pack(pop)

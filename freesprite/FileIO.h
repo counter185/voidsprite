@@ -49,6 +49,7 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
+Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
@@ -410,6 +411,7 @@ inline void g_setupIO() {
             return !(c[0] == 'M' && c[1] == 'Z') || len == (320 * 200);
         }));
     g_fileImporters.push_back(FileImporter::flatImporter("PSP/Vita GXT", ".gxt", &readGXT, NULL));
+    g_fileImporters.push_back(FileImporter::flatImporter("Nintendo 3DS CXI (dump icon)", ".cxi", &read3DSCXIIcon, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("SDL_Image", "", &readSDLImage));
 
 

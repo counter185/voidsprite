@@ -89,6 +89,7 @@ double XM1PW3P1(double x);
 
 int ixmin(int a, int b);
 int ixmax(int a, int b);
+int ixpow(int a, int b);
 int iclamp(int vmin, int b, int vmax);
 float fxmin(float a, float b);
 float fxmax(float a, float b);
@@ -272,23 +273,33 @@ public:
 
 class Detiler {
 private:
-    int tileSquareDimension;
-    int index = -1;
-    bool vertical = true;
+    int indexNow = -1;
+    int thisPower = 0;
+    int squareDim = 2;
+    Detiler* sub = NULL;
+    XY subLast = { 0,0 };
 public:
-    Detiler(int tileSquareDimension) {
-        this->tileSquareDimension = tileSquareDimension;
+    Detiler(int width, int pow = 0) {
+		squareDim = width;
+        thisPower = pow;
+	}
+    ~Detiler() {
+        if (sub != NULL) {
+            delete sub;
+        }
     }
     XY next() {
-        index++;
-        if (vertical) {
-            return XY{ index / tileSquareDimension, index % tileSquareDimension };
-        } else {
-            return XY{ index % tileSquareDimension, index / tileSquareDimension};
+        indexNow++;
+        if (indexNow == squareDim * squareDim) {
+            if (sub == NULL) {
+                sub = new Detiler(squareDim, thisPower + 1);
+                sub->next();
+            }
+            subLast = sub->next();
         }
-
-        if (index == tileSquareDimension * tileSquareDimension) {
-            index = -1;
-        }
+        indexNow %= squareDim * squareDim;
+        int x = indexNow % squareDim;
+        int y = indexNow / squareDim;
+        return xyAdd(subLast, {x * ixpow(squareDim, thisPower), y * ixpow(squareDim, thisPower)});
     }
 };

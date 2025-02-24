@@ -87,6 +87,13 @@ void detile(Layer* ret, XY tileSize) {
     Layer* t = new Layer(ret->w, ret->h);
     memcpy(t->pixelData, ret->pixelData, 4 * t->w * t->h);
     //t->blitTile(ret, { 0,1 }, { 1,0 }, tileSize);
+    Detiler dt(2);
+    for (int y = 0; y < ceil(ret->h / (double)tileSize.y); y++) {
+        for (int x = 0; x < ceil(ret->w / (double)tileSize.x); x++) {
+            XY tilePos = dt.next();
+            t->blitTile(ret, { x * tileSize.x, y * tileSize.y }, tilePos, tileSize);
+        }
+    }
     
     memcpy(ret->pixelData, t->pixelData, 4 * t->w * t->h);
     delete t;
@@ -2633,6 +2640,42 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
         }
 
         tracked_free(pixelData);
+        fclose(f);
+        return ret;
+    }
+    return NULL;
+}
+
+Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        NCCHHeader header;
+        fread(&header, sizeof(NCCHHeader), 1, f);
+        ExeFSHeader exefs;
+        fseek(f, header.exefsOffset * 0x200, SEEK_SET);
+        fread(&exefs, sizeof(ExeFSHeader), 1, f);
+
+        Layer* ret = NULL;
+        for (ExeFSFileHeader& exefsfile : exefs.fileHeaders) {
+            if (memcmp(exefsfile.fileName, "icon", 4) == 0) {
+                fseek(f, exefsfile.fileOffset + 0xE00, SEEK_SET);
+                u32 smdhMagic;
+                fread(&smdhMagic, 4, 1, f);
+                fseek(f, exefsfile.fileOffset + 0xE00 + 0x24C0, SEEK_SET);
+                u16 rgb565Data[48 * 48];
+                fread(rgb565Data, 2, 48 * 48, f);
+
+                Detiler detiler(2);
+                ret = new Layer(48, 48);
+                ret->name = "3DS CXI Icon Layer";
+                u32* pxd = (u32*)ret->pixelData;
+                for (int x = 0; x < 48 * 48; x++) {
+                    ret->setPixel(detiler.next(), RGB565toARGB8888(rgb565Data[x]));
+                }
+                break;
+            }
+        }
         fclose(f);
         return ret;
     }

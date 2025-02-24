@@ -767,6 +767,17 @@ u32 invertColor(u32 color)
 
 int ixmin(int a, int b) { return a > b ? b : a; }
 int ixmax(int a, int b) { return a > b ? a : b; }
+int ixpow(int a, int b)
+{
+    if (b == 0) {
+        return 1;
+    }
+    int ret = a;
+    for (int i = 1; i < b; i++) {
+		ret *= a;
+	}
+    return ret;
+}
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
 float fxmin(float a, float b) { return a > b ? b : a; }
 float fxmax(float a, float b) { return a > b ? a : b; }
