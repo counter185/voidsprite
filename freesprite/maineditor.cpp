@@ -783,12 +783,6 @@ void MainEditor::setUpWidgets()
                                 g_addPopup(newPopup);
                             }
                         }
-                    },
-                    {SDLK_o, { "Outline current layer",
-                            [](MainEditor* editor) {
-                                editor->layer_outline(false);
-                            }
-                        }
                     }
                 },
                 g_iconNavbarTabLayer

@@ -266,6 +266,7 @@ std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
     for (auto& p : params) {
         parameterMap[p.name] = std::to_string(p.defaultValue);
     }
+    parameterMap["!editor:activecolor"] = std::to_string(session->getActiveColor());
     return parameterMap;
 }
 

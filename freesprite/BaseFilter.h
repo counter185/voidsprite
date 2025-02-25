@@ -122,3 +122,15 @@ public:
         };
     }
 };
+
+class FilterOutline : public BaseFilter {
+public:
+    std::string name() override { return "Outline"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("thickness", 1, 50, 1),
+            BOOL_PARAM("corners", 0)
+        };
+    }
+};

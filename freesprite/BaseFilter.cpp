@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "BaseFilter.h"
 #include "RenderFilter.h"
 #include "Layer.h"
@@ -13,6 +14,7 @@ void g_loadFilters()
     }));
     g_filters.push_back(new FilterStrideGlitch());
     g_filters.push_back(new FilterPixelize());
+    g_filters.push_back(new FilterOutline());
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
@@ -207,6 +209,57 @@ Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> option
             c->fillRect(origin, xyAdd(origin, pixelSize), PackRGBAtoARGB(rs, gs, bs, as));
 
         }
+    }
+
+    return c;
+}
+
+Layer* FilterOutline::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    int iterations = std::stoi(options["thickness"]);
+    bool corners = std::stoi(options["corners"]);
+    u32 activeColor = std::stoul(options["!editor:activecolor"]);
+
+    for (int i = 0; i < iterations; i++) {
+        uint8_t* placePixelData = (uint8_t*)tracked_malloc(c->w * c->h);
+
+        for (int y = 0; y < c->h; y++) {
+            for (int x = 0; x < c->w; x++) {
+                ARRAY2DPOINT(placePixelData, x, y, c->w) =
+                    (c->getPixelAt({ x,y }) & 0xFF000000) == 0 ? 0 : 1;
+            }
+        }
+
+        XY neighbors[8] = { 
+            {1,0}, {0,1}, {-1,0}, {0,-1},
+            {1,1}, {-1,1}, {1,-1}, {-1,-1}
+        };
+
+        for (int y = 0; y < c->h; y++) {
+            for (int x = 0; x < c->w; x++) {
+                XY newPos = { x,y };
+                if (ARRAY2DPOINT(placePixelData, newPos.x, newPos.y, c->w) == 1) {
+                    continue;
+                }
+
+                int neighborCount = 0;
+                for (int i = 0; i < (corners ? 8 : 4); i++) {
+                    XY neighbor = neighbors[i];
+                    XY checkPos = xyAdd(newPos, neighbor);
+                    if (pointInBox(checkPos, { 0,0,c->w,c->h })) {
+                        if (ARRAY2DPOINT(placePixelData, checkPos.x, checkPos.y, c->w)) {
+                            neighborCount++;
+                        }
+                    }
+                }
+                if (neighborCount > 0) {
+                    c->setPixel(newPos, activeColor);
+                }
+            }
+        }
+
+        tracked_free(placePixelData);
     }
 
     return c;
