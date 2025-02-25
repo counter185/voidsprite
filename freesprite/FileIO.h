@@ -21,9 +21,12 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
+std::vector<u8> compressZlib(u8* data, size_t dataSize);
 
 //void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
+
+#include "io_aseprite.h"
 
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
@@ -59,7 +62,6 @@ MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
-MainEditor* readAsepriteASE(PlatformNativePathString path);
 
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
@@ -265,6 +267,7 @@ inline void g_setupIO() {
         *exVOIDSNv2,
         *exPixelStudioPSP,
         *exPixelStudioPSX,
+        *exAsepriteASE,
         *exORA,
         *exPNG,
         *exBMP,
@@ -286,6 +289,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exORA = FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster) );
     g_fileExporters.push_back( exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", &writePixelStudioPSP) );
     g_fileExporters.push_back( exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", &writePixelStudioPSX) );
+    g_fileExporters.push_back( exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", &writeAsepriteASE) );
 
     g_fileExporters.push_back( exPNG = FileExporter::flatExporter("PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB) );
@@ -316,20 +320,22 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
-    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, NULL, FORMAT_RGB | FORMAT_PALETTIZED, 
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
             fseek(f, 4, SEEK_SET);
             u16 magic;
             fread(&magic, 2, 1, f);
+            fclose(f);
             return magic == 0xA5E0;
         }));
-    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, NULL, FORMAT_RGB | FORMAT_PALETTIZED, 
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
             fseek(f, 4, SEEK_SET);
             u16 magic;
             fread(&magic, 2, 1, f);
+            fclose(f);
             return magic == 0xA5E0;
         }));
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));

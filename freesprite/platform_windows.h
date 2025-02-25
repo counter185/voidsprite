@@ -151,7 +151,10 @@ void platformOpenFileLocation(PlatformNativePathString path) {
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode) {
     FILE* ret;
-    _wfopen_s(&ret, path.c_str(), mode.c_str());
+    errno_t err = _wfopen_s(&ret, path.c_str(), mode.c_str());
+    if (err != 0) {
+        printf("Error opening file: %i\n", err);
+    }
     return ret;
 }
 

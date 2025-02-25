@@ -200,6 +200,7 @@
     <ClCompile Include="discord_game_sdk\voice_manager.cpp" />
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="Gamepad.cpp" />
+    <ClCompile Include="io_aseprite.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="MinecraftBlockPreviewScreen.cpp" />
@@ -353,6 +354,8 @@
     <ClInclude Include="DraggablePanel.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="iostructs.h" />
+    <ClInclude Include="io_aseprite.h" />
+    <ClInclude Include="io_base.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="main.h" />

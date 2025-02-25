@@ -109,6 +109,12 @@
     <Filter Include="Source files\external\discord_game_sdk">
       <UniqueIdentifier>{180db67a-855d-41da-9b30-46bc2dc4ae20}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\io">
+      <UniqueIdentifier>{02720e10-78b4-44ba-9933-868605dcb174}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\io">
+      <UniqueIdentifier>{277bb8fb-c422-47bd-8b7f-628f93501d7e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -124,9 +130,6 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="Layer.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileIO.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="libtga\tga.c">
@@ -540,6 +543,12 @@
     <ClCompile Include="RenderFilter.cpp">
       <Filter>Source files\filters</Filter>
     </ClCompile>
+    <ClCompile Include="io_aseprite.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="FileIO.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -561,9 +570,6 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="Layer.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileIO.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="libtga\tga.h">
@@ -1027,6 +1033,15 @@
     </ClInclude>
     <ClInclude Include="iostructs.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="io_aseprite.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io_base.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="FileIO.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
