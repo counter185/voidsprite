@@ -31,6 +31,7 @@ Free C++ pixel art editor
 | PBM (Cave Story engine) | .pbm | ✔ | ✔ |
 | Valve Texture Format | .vtf | 〰* | ✔(v7.1, BGRA8888) |
 | Aseprite Sprite | .aseprite .ase | 〰*(Frame 1 only) | ✔ |
+| Piskel | .piskel | 〰 | ✔ |
 
 \* **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
 \* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.  

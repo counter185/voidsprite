@@ -64,5 +64,56 @@ MainEditor* readPISKEL(PlatformNativePathString path)
 
 bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
 {
-	return false;
+    std::ofstream outfile(path);
+
+    if (outfile.is_open()) {
+        json o = json::object();
+        o["modelVersion"] = 2;
+        o["piskel"] = json::object();
+        o["piskel"]["name"] = "voidsprite Image";
+        o["piskel"]["description"] = "exported with voidsprite";
+        o["piskel"]["fps"] = 24;
+        o["piskel"]["height"] = editor->canvas.dimensions.y;
+        o["piskel"]["width"] = editor->canvas.dimensions.x;
+        o["piskel"]["layers"] = json::array();
+        for (Layer*& l : editor->layers) {
+            std::string nestedLayer = "";
+            json layerObj = json::object();
+            layerObj["name"] = l->name;
+            layerObj["opacity"] = (double)l->layerAlpha / 255.0;
+            layerObj["frameCount"] = 1;
+            layerObj["chunks"] = json::array();
+            json chunkObj = json::object();
+            if (writePNG(convertStringOnWin32("temp.bin"), l)) {
+                FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
+                fseek(infile, 0, SEEK_END);
+                uint64_t fileLength = ftell(infile);
+                fseek(infile, 0, SEEK_SET);
+                std::string fileBuffer;
+                fileBuffer.resize(fileLength);
+                fread(fileBuffer.data(), fileLength, 1, infile);
+                fclose(infile);
+
+                chunkObj["base64PNG"] = "data:image/png;base64," + base64::to_base64(fileBuffer);
+                chunkObj["layout"] = json::array();
+                chunkObj["layout"].push_back(json::array());
+                chunkObj["layout"][0].push_back(0);
+            }
+            else {
+                printf("WRITEPNG FAILED\n");
+            }
+            layerObj["chunks"].push_back(chunkObj);
+
+            nestedLayer = layerObj.dump();
+
+            o["piskel"]["layers"].push_back(nestedLayer);
+
+        }
+        o["piskel"]["hiddenFrames"] = json::array();
+
+        outfile << o.dump();
+        outfile.close();
+        return true;
+    }
+    return false;
 }
