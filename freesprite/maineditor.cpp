@@ -504,6 +504,11 @@ void MainEditor::DrawForeground()
     }
 
     g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ 255,255,255, (u8)(g_windowFocused ? 0x40 : 0x30) });
+
+    if (changesSinceLastSave) {
+        int fw = g_fnt->StatStringDimensions("\xE2\x97\x86").x;
+        g_fnt->RenderString("\xE2\x97\x86", g_windowW - fw - 2, g_windowH - 70, SDL_Color{ 255,255,255,0x70 });
+    }
 }
 
 void MainEditor::renderComments()
