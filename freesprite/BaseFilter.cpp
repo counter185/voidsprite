@@ -15,6 +15,7 @@ void g_loadFilters()
     g_filters.push_back(new FilterStrideGlitch());
     g_filters.push_back(new FilterPixelize());
     g_filters.push_back(new FilterOutline());
+    g_filters.push_back(new FilterBrightnessContrast());
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
@@ -260,6 +261,24 @@ Layer* FilterOutline::run(Layer* src, std::map<std::string, std::string> options
         }
 
         tracked_free(placePixelData);
+    }
+
+    return c;
+}
+
+Layer* FilterBrightnessContrast::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    double brightness = std::stod(options["brightness"]);
+    double contrast = std::stod(options["contrast"]);
+
+    u32* ppx = (u32*)c->pixelData;
+    for (u64 x = 0; x < c->w * c->h; x++) {
+        SDL_Color px = uint32ToSDLColor(ppx[x]);
+        px.r = ixmax(0, ixmin(255, (int)(px.r * contrast + brightness)));
+        px.g = ixmax(0, ixmin(255, (int)(px.g * contrast + brightness)));
+        px.b = ixmax(0, ixmin(255, (int)(px.b * contrast + brightness)));
+        ppx[x] = sdlcolorToUint32(px);
     }
 
     return c;

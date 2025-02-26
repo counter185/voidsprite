@@ -134,3 +134,15 @@ public:
         };
     }
 };
+
+class FilterBrightnessContrast : public BaseFilter {
+public:
+    std::string name() override { return "Brightness/contrast"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("brightness", -255, 255, 0),
+            FLOAT_PARAM("contrast", 0, 2, 1)
+        };
+    }
+};
