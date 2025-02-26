@@ -27,6 +27,7 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize);
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 
 #include "io_aseprite.h"
+#include "io_piskel.h"
 
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
@@ -206,18 +207,22 @@ public:
             return _flatCheckImportFunction != NULL ? _flatCheckImportFunction(path) : true;
         }
     }
-    virtual void* importData(PlatformNativePathString path) { 
+    virtual void* importData(PlatformNativePathString path) {
+#if !_DEBUG
         try {
+#endif
             if (importsWholeSession()) {
                 return _sessionImportFunction(path);
             }
             else {
                 return _flatImportFunction(path, 0);
             }
+#if !_DEBUG
         }
-        catch (std::exception) {
+        catch (std::exception e) {
             return NULL;
         }
+#endif
     }
 protected:
     int _formatFlags = FORMAT_RGB;
@@ -320,6 +325,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);

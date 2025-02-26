@@ -83,13 +83,13 @@ struct ASEPRITEChunkHeader {
     u32 size;
     u16 type;
 };
+#pragma pack(pop)
 
 inline void writeASEString(std::string a, FILE* f) {
     u16 b = a.size();
     fwrite(&b, 2, 1, f);
     fwrite(a.c_str(), a.size(), 1, f);
 }
-#pragma pack(pop)
 
 MainEditor* readAsepriteASE(PlatformNativePathString path);
 bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor);

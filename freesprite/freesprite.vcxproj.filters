@@ -549,6 +549,9 @@
     <ClCompile Include="FileIO.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io_piskel.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1041,6 +1044,9 @@
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="FileIO.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io_piskel.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
