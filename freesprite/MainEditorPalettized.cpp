@@ -88,16 +88,16 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
             }
             else {
                 Layer* l = flattenImageAndConvertToRGB();
-				result = exporter->exportData(name, l);
-				delete l;
+                result = exporter->exportData(name, l);
+                delete l;
             }
 
             if (result) {
-				if (lastWasSaveAs && g_config.openSavedPath) {
-					platformOpenFileLocation(lastConfirmedSavePath);
-				}
-				g_addNotification(SuccessNotification("Success", "File exported successfully."));
-			}
+                if (lastWasSaveAs && g_config.openSavedPath) {
+                    platformOpenFileLocation(lastConfirmedSavePath);
+                }
+                g_addNotification(SuccessNotification("Success", "File exported successfully."));
+            }
             else {
                 g_addNotification(ErrorNotification("Error", "Failed to exported file."));
             }
@@ -407,6 +407,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDLK_r, { "Rename current layer",
                             [](MainEditor* editor) {
                                 editor->layer_promptRename();
+                            }
+                        }
+                    },
+                    {SDLK_s, { "Isolate layer alpha",
+                            [](MainEditor* editor) {
+                                editor->layer_selectCurrentAlpha();
                             }
                         }
                     },

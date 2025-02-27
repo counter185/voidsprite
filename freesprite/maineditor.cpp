@@ -808,6 +808,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDLK_s, { "Isolate layer alpha",
+                            [](MainEditor* editor) {
+                                editor->layer_selectCurrentAlpha();
+                            }
+                        }
+                    },
                     {SDLK_a, { "Remove alpha channel",
                             [](MainEditor* editor) {
                                 editor->layer_setAllAlpha255();
@@ -2263,7 +2269,7 @@ void MainEditor::layer_hsvShift(hsv shift)
 
 void MainEditor::layer_outline(bool wholeImage)
 {
-    
+
     Layer* l = getCurrentLayer();
     uint8_t* placePixelData = (uint8_t*)tracked_malloc(l->w * l->h);
     if (placePixelData == NULL) {
@@ -2274,7 +2280,7 @@ void MainEditor::layer_outline(bool wholeImage)
 
     for (int y = 0; y < l->h; y++) {
         for (int x = 0; x < l->w; x++) {
-            ARRAY2DPOINT(placePixelData, x, y, l->w) = 
+            ARRAY2DPOINT(placePixelData, x, y, l->w) =
                 wholeImage ? 0
                 : ((l->isPalettized ? (l->getPixelAt({ x,y }) == -1) : (l->getPixelAt({ x,y }) & 0xFF000000) == 0) ? 0 : 1);
         }
@@ -2305,4 +2311,29 @@ void MainEditor::layer_outline(bool wholeImage)
     }
 
     tracked_free(placePixelData);
+}
+
+void MainEditor::layer_selectCurrentAlpha()
+{
+    Layer* l = getCurrentLayer();
+    isolatedFragment.clear();
+    int p = 0;
+    for (int y = 0; y < l->h; y++) {
+        for (int x = 0; x < l->w; x++) {
+            u32 px = l->getPixelAt({ x,y });
+            if (l->isPalettized) {
+                if (px != -1) {
+                    isolatedFragment.addPoint({ x,y });
+                    p++;
+                }
+            }
+            else {
+                if ((px & 0xFF000000) != 0) {
+                    isolatedFragment.addPoint({ x,y });
+                    p++;
+                }
+            }
+        }
+    }
+    isolateEnabled = p > 0;
 }
