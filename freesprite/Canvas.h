@@ -22,6 +22,11 @@ public:
 	void recenter();
 
 	XY canvasPointToScreenPoint(XY canvasPoint);
+	/// <summary>
+	/// Turns a rect in canvas-space to a rect in screen-space. Scale is taken into consideration.
+	/// </summary>
+	/// <param name="canvasRect">Rect in canvas-space</param>
+	/// <returns>Rect in screen-space</returns>
 	SDL_Rect canvasRectToScreenRect(SDL_Rect canvasRect);
 	XY screenPointToCanvasPoint(XY screenPoint);
 	XY getTilePosAt(XY screenPoint, XY tileSize = {0,0});

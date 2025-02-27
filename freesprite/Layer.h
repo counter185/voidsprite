@@ -332,10 +332,10 @@ public:
         layerDirty = true;
     }
 
-    void replaceColor(uint32_t from, uint32_t to, SDL_Rect clip = {-1,-1,-1,-1}) {
+    void replaceColor(uint32_t from, uint32_t to, ScanlineMap* isolate = NULL) {
         uint32_t* px32 = (uint32_t*)pixelData;
         for (uint64_t x = 0; x < w * h; x++) {
-            if (clip.w == -1 || pointInBox(XY{ (int)(x % w), (int)(x / w) }, clip)) {
+            if (isolate == NULL || isolate->pointExists(XY{ (int)(x % w), (int)(x / w) })) {
                 if (px32[x] == from || (!isPalettized && (px32[x] & 0xFF000000) == 0 && (from & 0xFF000000) == 0)) {
                     px32[x] = to;
                 }

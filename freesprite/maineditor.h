@@ -107,7 +107,7 @@ public:
     bool symmetryEnabled[2] = { false, false };
 
     bool isolateEnabled = false;
-    SDL_Rect isolateRect = { 10,10,50,40 };
+    ScanlineMap isolatedFragment;
 
     std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
@@ -142,7 +142,7 @@ public:
     void renderUndoStack();
     virtual void renderColorPickerAnim();
     void drawSymmetryLines();
-    void drawIsolatedRect();
+    void drawIsolatedFragment();
     void drawTileGrid();
     void renderGuidelines();
     void drawSplitSessionFragments();

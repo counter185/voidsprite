@@ -78,6 +78,8 @@ extern "C" {
 #define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
 #define COLOR_ERROR SDL_Color{255,0,0,255}
 
+#define UTF8_DIAMOND "\xE2\x97\x86"
+
 //util classes
 class EventCallbackListener;
 class TextRenderer;

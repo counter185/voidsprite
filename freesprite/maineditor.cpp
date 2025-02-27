@@ -140,7 +140,7 @@ void MainEditor::render() {
     }
 
     drawTileGrid();
-    drawIsolatedRect();
+    drawIsolatedFragment();
     drawSymmetryLines();
     renderGuidelines();
     drawSplitSessionFragments();
@@ -359,15 +359,48 @@ void MainEditor::drawSymmetryLines() {
     }
 }
 
-void MainEditor::drawIsolatedRect()
+void MainEditor::drawIsolatedFragment()
 {
     if (isolateEnabled) {
-        SDL_Rect r = canvas.canvasRectToScreenRect(isolateRect);/* {
+
+        isolatedFragment.forEachScanline([&](ScanlineMapElement sme) {
+            SDL_Rect r = canvas.canvasRectToScreenRect({ sme.origin.x, sme.origin.y, sme.size.x, 1 });
+            XY p1 = {r.x,r.y};
+            XY p2 = { r.x, r.y + canvas.scale/2 };
+            XY p3 = { r.x + r.w, r.y + canvas.scale/2};
+            XY p4 = { r.x + r.w, r.y + canvas.scale };
+
+            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+            SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
+            SDL_RenderDrawLine(g_rd, p3.x, p3.y, p4.x, p4.y);
+
+            XY origin = sme.origin;
+            XY p2p = { r.x,r.y + canvas.scale };
+
+            for (int x = 0; x < sme.size.x; x++) {
+                XY pointNow = xyAdd(origin, { x,0 });
+                if (!isolatedFragment.pointExists(xySubtract(pointNow, { 0,1 }))) {
+                    //top line
+                    XY p11 = xyAdd(p1, { x * canvas.scale, 0 });
+                    XY p12 = xyAdd(p11, { canvas.scale / 2, 0 });
+                    SDL_RenderDrawLine(g_rd, p11.x, p11.y, p12.x, p12.y);
+
+                }
+                if (!isolatedFragment.pointExists(xyAdd(pointNow, { 0,1 }))) {
+                    //bottom line
+                    XY p21 = xyAdd(p2p, { x * canvas.scale, 0 });
+                    XY p22 = xyAdd(p21, { canvas.scale / 2, 0 });
+                    SDL_RenderDrawLine(g_rd, p21.x, p21.y, p22.x, p22.y);
+                }
+            }
+        });
+
+        /*SDL_Rect r = canvas.canvasRectToScreenRect(isolateRect);/* {
             canvasCenterPoint.x + isolateRect.x * scale, 
             canvasCenterPoint.y + isolateRect.y * scale,
             isolateRect.w * scale,
             isolateRect.h * scale
-        };*/
+        };
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
         SDL_RenderDrawRect(g_rd, &r);
@@ -378,7 +411,7 @@ void MainEditor::drawIsolatedRect()
         r.h -= 2;
 
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        SDL_RenderDrawRect(g_rd, &r);
+        SDL_RenderDrawRect(g_rd, &r);*/
     }
 }
 
@@ -506,8 +539,8 @@ void MainEditor::DrawForeground()
     g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ 255,255,255, (u8)(g_windowFocused ? 0x40 : 0x30) });
 
     if (changesSinceLastSave) {
-        int fw = g_fnt->StatStringDimensions("\xE2\x97\x86").x;
-        g_fnt->RenderString("\xE2\x97\x86", g_windowW - fw - 2, g_windowH - 70, SDL_Color{ 255,255,255,0x70 });
+        int fw = g_fnt->StatStringDimensions(UTF8_DIAMOND).x;
+        g_fnt->RenderString(UTF8_DIAMOND, g_windowW - fw - 2, g_windowH - 70, SDL_Color{ 255,255,255,0x70 });
     }
 }
 
@@ -1018,7 +1051,7 @@ bool MainEditor::isInBounds(XY pos)
 {
     return
         canvas.pointInCanvasBounds(pos)
-        && (!isolateEnabled || (isolateEnabled && pointInBox(pos, isolateRect)));
+        && (!isolateEnabled || (isolateEnabled && isolatedFragment.pointExists(pos)));
 }
 
 void MainEditor::takeInput(SDL_Event evt) {
@@ -1181,7 +1214,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                                     };*/
                                     if (g_config.isolateRectOnLockTile) {
                                         isolateEnabled = true;
-                                        isolateRect = { tileToLock.x * tileDimensions.x, tileToLock.y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
+                                        isolatedFragment.clear();
+                                        isolatedFragment.addRect({ tileToLock.x * tileDimensions.x, tileToLock.y * tileDimensions.y, tileDimensions.x, tileDimensions.y });
                                     }
                                     if (tileToLock.x >= 0 && tileToLock.y >= 0) {
                                         lockedTilePreview = tileToLock;
@@ -1368,7 +1402,7 @@ void MainEditor::FillTexture() {
 
 void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry) {
     if ((currentPattern->canDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
-        if (!isolateEnabled || pointInBox(position, isolateRect)) {
+        if (!isolateEnabled || isolatedFragment.pointExists(position)) {
             uint32_t targetColor = color;
             if (blendAlphaMode) {
                 if (eraserMode) {
@@ -2218,7 +2252,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
 void MainEditor::layer_replaceColor(uint32_t from, uint32_t to)
 {
     //commitStateToCurrentLayer();
-    getCurrentLayer()->replaceColor(from, to, isolateEnabled ? isolateRect : SDL_Rect{-1,-1,-1,-1});
+    getCurrentLayer()->replaceColor(from, to, isolateEnabled ? &isolatedFragment : NULL);
 }
 
 void MainEditor::layer_hsvShift(hsv shift)

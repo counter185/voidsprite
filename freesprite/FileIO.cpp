@@ -5077,7 +5077,7 @@ std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString
                 *r = buffer;
             }
             if (ret.dimensions.x > 0 && ret.dimensions.y > 0) {
-                ret.pixelData = (u32*)tracked_malloc(4 * ret.dimensions.x * ret.dimensions.y);
+                ret.pixelData = (u32*)tracked_malloc(4 * ret.dimensions.x * ret.dimensions.y, "9SP");
             }
 
             if (ret.pixelData != NULL) {

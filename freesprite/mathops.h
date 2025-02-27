@@ -166,11 +166,11 @@ public:
 
 struct ScanlineMapElement {
     XY origin;
-    XY size;
+    XY size;    //y must be 1, x is the width
 };
 class ScanlineMap {
 public:
-    bool iPromiseNotToPutDuplicatePoints = false;
+    bool iPromiseNotToPutDuplicatePoints = false;   //skips checking if a point already exists in the map when adding
     std::map<int, std::vector<ScanlineMapElement>> scanlineMap;
 
     void mergeScanline(int p) {
@@ -192,6 +192,16 @@ public:
             int p = point.y;
             scanlineMap[p].push_back({ point, {1,1} });
             mergeScanline(p);
+        }
+    }
+    void addScanline(ScanlineMapElement e) {
+        for (int x = 0; x < e.size.x; x++) {
+            addPoint({ e.origin.x + x, e.origin.y });
+        }
+    }
+    void addRect(SDL_Rect r) {
+        for (int y = 0; y < r.h; y++) {
+            addScanline({ {r.x,r.y + y}, {r.w,1} });
         }
     }
     bool pointExists(XY point) {

@@ -272,9 +272,9 @@ int main(int argc, char** argv)
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
     IMG_Init(-1);   //😈time to get evil
-    const char* windowTitle = "void\xE2\x97\x86sprite"
+    const char* windowTitle = "void" UTF8_DIAMOND "sprite"
 #if _DEBUG
-        " \xE2\x97\x86 DEBUG"
+        " " UTF8_DIAMOND " DEBUG"
 #endif
     ;
     g_wd = SDL_CreateWindow(windowTitle, 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));

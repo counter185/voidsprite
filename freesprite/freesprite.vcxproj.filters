@@ -115,6 +115,9 @@
     <Filter Include="Source files\io">
       <UniqueIdentifier>{277bb8fb-c422-47bd-8b7f-628f93501d7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\platform">
+      <UniqueIdentifier>{e1bb0d2c-b445-420a-8b69-b3335199838c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -566,12 +569,6 @@
     <ClInclude Include="EventCallbackListener.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="platform.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="platform_windows.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="Layer.h">
       <Filter>Header files</Filter>
     </ClInclude>
@@ -857,9 +854,6 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h">
       <Filter>Header files\external\portable-file-dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="platform_linux.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="TilemapEditorLayerPicker.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
@@ -895,9 +889,6 @@
     </ClInclude>
     <ClInclude Include="TemplateRPG2KSystem.h">
       <Filter>Header files\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="platform_macos.h">
-      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="TemplateRPG2KChipset.h">
       <Filter>Header files\templates</Filter>
@@ -1048,6 +1039,18 @@
     </ClInclude>
     <ClInclude Include="io_piskel.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_linux.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_macos.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_windows.h">
+      <Filter>Header files\platform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
