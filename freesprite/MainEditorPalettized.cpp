@@ -410,7 +410,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_s, { "Isolate layer alpha",
+                    {SDLK_s, { "Select layer alpha",
                             [](MainEditor* editor) {
                                 editor->layer_selectCurrentAlpha();
                             }

@@ -214,7 +214,16 @@ void PopupApplyFilter::applyAndClose()
     g_startNewOperation([parameterMap, targetFilter, session, target]() {
         Layer* copy = targetFilter->run(target, parameterMap);
         session->commitStateToCurrentLayer();
-        memcpy(target->pixelData, copy->pixelData, 4 * target->w * target->h);
+        if (session->isolateEnabled) {
+            u32* srcpx = (u32*)copy->pixelData;
+            u32* dstpx = (u32*)target->pixelData;
+            session->isolatedFragment.forEachPoint([&](XY a) {
+                ARRAY2DPOINT(dstpx, a.x, a.y, target->w) = ARRAY2DPOINT(srcpx, a.x, a.y, target->w);
+            });
+        }
+        else {
+            memcpy(target->pixelData, copy->pixelData, 4 * target->w * target->h);
+        }
         target->layerDirty = true;
         delete copy;
     });
@@ -254,7 +263,17 @@ void PopupApplyFilter::updatePreview()
         u8* ppx;
         int pitch;
         SDL_LockTexture(previewTexture, NULL, (void**)&ppx, &pitch);
-        memcpy(ppx, previewPixelData, 4 * target->w * target->h);
+        u32* pppx = (u32*)ppx;
+        u32* previewPx = (u32*)previewPixelData;
+        if (session->isolateEnabled) {
+            memcpy(ppx, target->pixelData, 4 * target->w * target->h);
+            session->isolatedFragment.forEachPoint([&](XY a) {
+                ARRAY2DPOINT(pppx, a.x, a.y, target->w) = ARRAY2DPOINT(previewPx, a.x, a.y, target->w);
+            });
+        }
+        else {
+            memcpy(ppx, previewPixelData, 4 * target->w * target->h);
+        }
         SDL_UnlockTexture(previewTexture);
         pixelDataDirty = false;
     }

@@ -220,6 +220,15 @@ public:
             }
         }
     }
+    void forEachPoint(std::function<void(XY)> f) {
+        for (auto& me : scanlineMap) {
+            for (auto& mm : me.second) {
+                for (int x = 0; x < mm.size.x; x++) {
+                    f({ x + mm.origin.x, me.first });
+                }
+            }
+        }
+    }
     void clear() {
         scanlineMap.clear();
     }
