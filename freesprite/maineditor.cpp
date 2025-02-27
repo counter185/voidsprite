@@ -1693,17 +1693,17 @@ void MainEditor::undo()
                 l.targetlayer->undo();
                 break;
             case UNDOSTACK_CREATE_LAYER:
+            {
                 //remove layer from list
-                for (int x = 0; x < layers.size(); x++) {
-                    if (layers[x] == l.targetlayer) {
-                        layers.erase(layers.begin() + x);
-                        break;
-                    }
+                auto pos = std::find(layers.begin(), layers.end(), l.targetlayer);
+                if (pos != layers.end()) {
+                    layers.erase(pos);
                 }
                 if (selLayer >= layers.size()) {
                     switchActiveLayer(layers.size() - 1);
                 }
                 layerPicker->updateLayers();
+            }
                 break;
             case UNDOSTACK_DELETE_LAYER:
                 //add layer to list
@@ -1766,7 +1766,7 @@ void MainEditor::redo()
             break;
         case UNDOSTACK_CREATE_LAYER:
             //add layer back to list
-            layers.push_back(l.targetlayer);
+            layers.insert(layers.begin() + l.extdata, l.targetlayer);
             layerPicker->updateLayers();
             break;
         case UNDOSTACK_DELETE_LAYER:
@@ -1829,10 +1829,12 @@ Layer* MainEditor::newLayer()
 {
     Layer* nl = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     nl->name = std::format("New Layer {}", layers.size()+1);
-    layers.push_back(nl);
-    switchActiveLayer(layers.size() - 1);
+    int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
+    printf("adding new layer at %i\n", insertAtIdx);
+    layers.insert(layers.begin() + insertAtIdx, nl);
+    switchActiveLayer(insertAtIdx);
 
-    addToUndoStack(UndoStackElement{nl, UNDOSTACK_CREATE_LAYER});
+    addToUndoStack(UndoStackElement{nl, UNDOSTACK_CREATE_LAYER, insertAtIdx });
     return nl;
 }
 
