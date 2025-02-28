@@ -825,10 +825,15 @@ Layer* readPNGFromBase64String(std::string b64)
 {
     auto seekTo = b64.find("iVBO");
     if (seekTo != std::string::npos) {
-        std::string pixelData = b64.substr(seekTo);
-        std::string pixelsb64 = base64::from_base64(pixelData);
-        uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
-        return readPNGFromMem(imageData, pixelsb64.size());
+        try {
+            std::string pixelData = b64.substr(seekTo);
+            std::string pixelsb64 = base64::from_base64(pixelData);
+            uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
+            return readPNGFromMem(imageData, pixelsb64.size());
+        }
+        catch (std::exception) {
+            return NULL;
+        }
     }
     else {
         return NULL;

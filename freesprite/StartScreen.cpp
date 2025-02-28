@@ -523,7 +523,7 @@ void StartScreen::tryOpenImageFromClipboard()
             std::string clipboardText = clipboard;
             //base64 png
             if (clipboardText.size() > 0) {
-                if (clipboardText[clipboardText.size() - 1] == '=' && clipboardText.find("iVBO") != std::string::npos) {
+                if (clipboardText.find("iVBO") != std::string::npos) {
                     foundLayer = readPNGFromBase64String(clipboardText);
                 }
             }
