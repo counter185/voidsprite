@@ -517,6 +517,24 @@ void StartScreen::tryOpenImageFromClipboard()
         g_addScreen(new MainEditor(l));
     }
     else {
-        g_addNotification(ErrorNotification("Error", "No image in clipboard"));
+        char* clipboard = SDL_GetClipboardText();
+        Layer* foundLayer = NULL;
+        if (clipboard != NULL) {
+            std::string clipboardText = clipboard;
+            //base64 png
+            if (clipboardText.size() > 0) {
+                if (clipboardText[clipboardText.size() - 1] == '=' && clipboardText.find("iVBO") != std::string::npos) {
+                    foundLayer = readPNGFromBase64String(clipboardText);
+                }
+            }
+        }
+
+        if (foundLayer != NULL) {
+            g_addScreen(foundLayer->isPalettized ? new MainEditorPalettized((LayerPalettized*)foundLayer) : new MainEditor(foundLayer));
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "No image in clipboard"));
+        }
+        SDL_free(clipboard);
     }
 }

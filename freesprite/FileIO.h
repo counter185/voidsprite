@@ -23,6 +23,8 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
 std::vector<u8> compressZlib(u8* data, size_t dataSize);
 
+Layer* readPNGFromBase64String(std::string b64);
+
 //void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 

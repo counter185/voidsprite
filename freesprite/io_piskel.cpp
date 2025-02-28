@@ -30,18 +30,17 @@ MainEditor* readPISKEL(PlatformNativePathString path)
                 lastFrameCount = frameCount;
 
                 std::string pixels = layerData["chunks"][0]["base64PNG"];
-                auto hdr = pixels.find("iVBO"); // skip to header
-                if (hdr != std::string::npos) {
-					pixels = pixels.substr(hdr);
-				}
-                std::string pixelsb64 = base64::from_base64(pixels);
-                uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
-                Layer* nnlayer = readPNGFromMem(imageData, pixelsb64.size());
-                nnlayer->name = layerData.contains("name") ? layerData["name"] : "";
-                double opacity = layerData["opacity"];
-                nnlayer->layerAlpha = (u8)(255 * opacity);
+                Layer* nnlayer = readPNGFromBase64String(pixels);
+                if (nnlayer != NULL) {
+                    nnlayer->name = layerData.contains("name") ? layerData["name"] : "";
+                    double opacity = layerData["opacity"];
+                    nnlayer->layerAlpha = (u8)(255 * opacity);
 
-                layers.push_back(nnlayer);
+                    layers.push_back(nnlayer);
+                }
+                else {
+                    printf("layer load failed\n");
+                }
             }
 
             if (layers.size() > 0) {
