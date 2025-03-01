@@ -67,7 +67,7 @@ void ToolText::renderText()
 		textSurface = NULL;
 	}
 	if (cachedTextTexture != NULL) {
-		SDL_DestroyTexture(cachedTextTexture);
+		tracked_destroyTexture(cachedTextTexture);
 		cachedTextTexture = NULL;
 	}
 
@@ -84,7 +84,7 @@ void ToolText::renderText()
 			SDL_Surface* converted = SDL_ConvertSurfaceFormat(textSurface, SDL_PIXELFORMAT_ARGB8888, 0);
 			SDL_FreeSurface(textSurface);
 			textSurface = converted;
-			cachedTextTexture = SDL_CreateTextureFromSurface(g_rd, textSurface);
+			cachedTextTexture = tracked_createTextureFromSurface(g_rd, textSurface);
 		}
 		else {
 			g_addNotification(ErrorNotification("Error", "Failed to render text"));

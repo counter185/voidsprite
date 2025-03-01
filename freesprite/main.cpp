@@ -193,14 +193,14 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
         g_addNotification(ErrorNotification("Error", "Can't load: " + path));
         return NULL;
     }
-    SDL_Texture* ret = SDL_CreateTextureFromSurface(g_rd, srf);
+    SDL_Texture* ret = tracked_createTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
     return ret;
 }
 
 void UpdateViewportScaler(){
     if (viewport != NULL) {
-        SDL_DestroyTexture(viewport);
+        tracked_destroyTexture(viewport);
     }
     g_windowW = unscaledWindowSize.x / renderScale;
     g_windowH = unscaledWindowSize.y / renderScale;
@@ -209,7 +209,7 @@ void UpdateViewportScaler(){
         return;
     }
    
-    viewport = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+    viewport = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
 }
 
 void renderbgOpInProgressScreen() {
@@ -322,7 +322,7 @@ int main(int argc, char** argv)
 
     SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);
-    g_iconNotifTheCreature = SDL_CreateTextureFromSurface(g_rd, srf);
+    g_iconNotifTheCreature = tracked_createTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
     //SDL_Texture* the_creature = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/kaosekai.png");
 
@@ -667,11 +667,15 @@ int main(int argc, char** argv)
         }
 
 #if _DEBUG
-        XY origin = { g_windowW - 240, g_windowH - 90 };
+        XY origin = {g_windowW - 240, g_windowH - 90};
         for (auto& mem : g_named_memmap) {
-            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x, origin.y, {255,255,255,100});
+            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
+                                origin.y, {255, 255, 255, 100});
             origin.y -= 20;
         }
+        g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
+                            {255, 255, 255, 100});
+        origin.y -= 20;
 #endif
 
         

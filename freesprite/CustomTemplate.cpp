@@ -23,7 +23,7 @@ CustomTemplate* CustomTemplate::tryLoad(PlatformNativePathString path)
 
 Layer* CustomTemplate::generate()
 {
-    Layer* ret = image->copyScaled({image->w, image->h}); //tell noone
+    Layer* ret = image->copy();
     ret->name = "Template Layer";
     return ret;
 }

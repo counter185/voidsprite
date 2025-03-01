@@ -96,7 +96,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     memset(lowerLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
     memset(upperLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
 
-    callerCanvas = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
+    callerCanvas = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
 
     RecenterCanvas();
 
@@ -112,10 +112,10 @@ RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
         delete[] upperLayerData;
     }
     if (callerCanvas) {
-        SDL_DestroyTexture(callerCanvas);
+        tracked_destroyTexture(callerCanvas);
     }
     for (auto& tex : texturesLoaded) {
-        SDL_DestroyTexture(tex.second);
+        tracked_destroyTexture(tex.second);
     }
 }
 
@@ -1072,7 +1072,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
     for (int y = 0; y < dimensions.y * 16 && !failed; y += g_windowH) {
         for (int x = 0; x < dimensions.x * 16 && !failed; x += g_windowW) {
             //due to a bug in sdl only the window area gets rendered
-            SDL_Texture* newTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+            SDL_Texture* newTexture = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
             Layer* blitLayer = new Layer(g_windowW, g_windowH);
             SDL_SetRenderTarget(g_rd, newTexture);
             SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
@@ -1083,7 +1083,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
                 g_addNotification(ErrorNotification("Error", "SDL_RenderReadPixels failed"));
             }
             SDL_SetRenderTarget(g_rd, NULL);
-            SDL_DestroyTexture(newTexture);
+            tracked_destroyTexture(newTexture);
 
             newLayer->blit(blitLayer, { x,y });
             delete blitLayer;
@@ -1103,7 +1103,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
 void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 {
     for (auto& tx : texturesLoaded) {
-        SDL_DestroyTexture(tx.second);
+        tracked_destroyTexture(tx.second);
     }
     texturesLoaded.clear();
     events.clear();

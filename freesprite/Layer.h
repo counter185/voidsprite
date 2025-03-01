@@ -35,7 +35,7 @@ public:
         pixelData = (uint8_t*)tracked_malloc(width * height * 4, "Layers");
         if (pixelData != NULL) {
             memset(pixelData, 0, width * height * 4);
-            tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
             texDimensions = XY{ w,h };
             SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
         }
@@ -59,15 +59,15 @@ public:
         for (uint8_t*& r : redoQueue) {
             tracked_free(r);
         }
-        SDL_DestroyTexture(tex);
+        tracked_destroyTexture(tex);
     }
 
     virtual void updateTexture() {
         uint8_t* pixels;
         int pitch;
         if (texDimensions.x != w || texDimensions.y != h) {
-            SDL_DestroyTexture(tex);
-            tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+            tracked_destroyTexture(tex);
+            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
             texDimensions = XY{ w,h };
             SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
         }
@@ -112,17 +112,7 @@ public:
     }
 
     SDL_Texture* renderToTexture() {
-        //if this doesn't work, change it into a SDL_TEXTUREACCESS_STREAMING and just set the pixels
-        /*
-        SDL_Texture* ret = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, w, h);
-        SDL_SetTextureBlendMode(ret, SDL_BLENDMODE_BLEND);
-        SDL_SetRenderTarget(g_rd, ret);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
-        SDL_RenderClear(g_rd);
-        render(SDL_Rect{ 0,0,w,h }, SDL_Rect{ 0,0,w,h });
-        SDL_SetRenderTarget(g_rd, NULL);*/
-
-        SDL_Texture* ret = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+        SDL_Texture* ret = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
         SDL_SetTextureBlendMode(ret, SDL_BLENDMODE_BLEND);
         uint8_t* pixels;
         int pitch;

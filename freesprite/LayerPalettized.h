@@ -17,8 +17,8 @@ public:
 		uint8_t* pixels;
 		int pitch;
 		if (texDimensions.x != w || texDimensions.y != h) {
-			SDL_DestroyTexture(tex);
-			tex = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+			tracked_destroyTexture(tex);
+            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 			texDimensions = XY{ w,h };
 			SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 		}

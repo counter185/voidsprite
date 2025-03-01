@@ -134,7 +134,7 @@ void TextRenderer::RenderGlyph(uint32_t a) {
         : font;
     SDL_Surface* gl = TTF_RenderGlyph32_Blended(usedFont, (Uint32)a, SDL_Color{ 255,255,255,255 });
     if (gl != NULL) {
-        SDL_Texture* newTexture = SDL_CreateTextureFromSurface(g_rd, gl);
+        SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
 
         GlyphData newGlyphData;
         TTF_GlyphMetrics32(usedFont, a, &newGlyphData.minx, &newGlyphData.maxx, &newGlyphData.miny, &newGlyphData.maxy, &newGlyphData.advance);

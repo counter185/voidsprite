@@ -171,7 +171,7 @@ void MinecraftBlockPreviewScreen::eventPopupClosed(int evt_id, BasePopup* target
 
 void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
 {
-    SDL_Texture* renderTarget = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wh.x, wh.y);
+    SDL_Texture* renderTarget = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wh.x, wh.y);
     SDL_SetRenderTarget(g_rd, renderTarget);
 
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);

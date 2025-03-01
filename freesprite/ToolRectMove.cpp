@@ -19,7 +19,7 @@ void ToolRectMove::clickRelease(MainEditor* editor, XY pos)
 	clonedAreaPointAndDimensions = SDL_Rect{ xmin, ymin, xmax - xmin, ymax - ymin };
 	if (clonedArea != NULL) {
 		tracked_free(clonedArea);
-		SDL_DestroyTexture(cacheClonePreview);
+		tracked_destroyTexture(cacheClonePreview);
 	}
 	clonedArea = (uint32_t*)tracked_malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4, "Temp. mem.");
 	if (clonedArea == NULL) {
@@ -33,7 +33,7 @@ void ToolRectMove::clickRelease(MainEditor* editor, XY pos)
 			editor->SetPixel(XY{ x,y }, !editor->isPalettized ? 0x00000000 : -1);
 		}
 	}
-	cacheClonePreview = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h);
+	cacheClonePreview = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h);
 	uint32_t* pixels;
 	int pitch;
 	SDL_LockTexture(cacheClonePreview, NULL, (void**)&pixels, &pitch);

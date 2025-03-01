@@ -100,9 +100,14 @@ Layer* Layer::copyScaled(XY dimensions)
 {
     Layer* newLayer = new Layer(dimensions.x, dimensions.y);
 
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
+    for (int y = 0; y < newLayer->h; y++) {
+        for (int x = 0; x < newLayer->w; x++) {
+            XY samplePoint = {
+                w * (x / (float)newLayer->w),
+                h * (y / (float)newLayer->h)
+            };
+            newLayer->setPixel({x, y}, getPixelAt(samplePoint));
+            //newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
         }
     }
     return newLayer;

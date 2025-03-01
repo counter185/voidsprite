@@ -19,7 +19,7 @@ PopupApplyFilter::~PopupApplyFilter() {
     }
     if (previewTexture != NULL) {
         target->effectPreviewTexture = NULL;
-        SDL_DestroyTexture(previewTexture);
+        tracked_destroyTexture(previewTexture);
     }
 }
 
@@ -252,7 +252,7 @@ void PopupApplyFilter::updateLabels()
 void PopupApplyFilter::setupPreview()
 {
     previewPixelData = (u8*)tracked_malloc(4 * target->w * target->h);
-    previewTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, target->w, target->h);
+    previewTexture = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, target->w, target->h);
     SDL_SetTextureBlendMode(previewTexture, SDL_BLENDMODE_BLEND);
     target->effectPreviewTexture = previewTexture;
 

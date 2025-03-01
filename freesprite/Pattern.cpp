@@ -58,7 +58,7 @@ bool CustomPattern::canDrawAt(XY position)
 void CustomPattern::tryLoadIcon()
 {
     if (bitmap != NULL) {
-        cachedIcon = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
+        cachedIcon = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
         int bitmapPitch;
         uint32_t* iconBitmap;
         SDL_LockTexture(cachedIcon, NULL, (void**)&iconBitmap, &bitmapPitch);
