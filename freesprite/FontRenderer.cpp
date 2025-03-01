@@ -60,6 +60,12 @@ TextRenderer::~TextRenderer() {
     if (fontJP != NULL) {
         TTF_CloseFont(fontJP);
     }
+
+    for (auto& g : renderedGlyphs) {
+        if (g.second.texture != NULL) {
+            tracked_destroyTexture(g.second.texture);
+        }
+    }
 }
 
 XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {

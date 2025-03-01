@@ -360,11 +360,16 @@ public:
 
     virtual Layer* trim(SDL_Rect r);
 
-    //returns old pixel data
-    uint8_t* resize(XY to);
-    uint8_t* resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
-    uint8_t* resizeByTileCount(XY tileSizesNow, XY newTileCount);
-    uint8_t* integerScale(XY scale);
-    uint8_t* integerDownscale(XY scale);
+    //all of these below return the old pixel data
+    /// <summary>
+    /// Does not scale the image, only resizes the layer to the new dimensions.
+    /// </summary>
+    /// <param name="to">Target dimensions</param>
+    /// <returns>Old pixel data</returns>
+    u8* resize(XY to);
+    u8* resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
+    u8* resizeByTileCount(XY tileSizesNow, XY newTileCount);
+    u8* integerScale(XY scale);
+    u8* integerDownscale(XY scale);
 };
 

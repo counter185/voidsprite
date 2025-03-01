@@ -702,7 +702,7 @@ void MainEditor::setUpWidgets()
             SDLK_e,
             {
                 "Edit",
-                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_s, SDLK_c, SDLK_v, SDLK_b, SDLK_n},
+                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_s, SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m},
                 {
                     {SDLK_z, { "Undo",
                             [](MainEditor* editor) {
@@ -765,6 +765,12 @@ void MainEditor::setUpWidgets()
                     {SDLK_n, { "Integer scale canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                            }
+                        }
+                    },
+                    {SDLK_m, { "Scale canvas",
+                            [](MainEditor* editor) {
+                                g_addPopup(new PopupTileGeneric(editor, "Scale canvas", "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
@@ -1372,6 +1378,9 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
     }
     else if (evt_id == EVENT_MAINEDITOR_INTEGERSCALE) {
         integerScaleAllLayersFromCommand(((PopupIntegerScale*)p)->result, ((PopupIntegerScale*)p)->downscaleCheckbox->isChecked());
+    } 
+    else if (evt_id == EVENT_MAINEDITOR_RESCALELAYER) {
+        rescaleAllLayersFromCommand(((PopupTileGeneric*)p)->result);
     }
 }
 
@@ -2046,6 +2055,34 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
     }
 
     return ret;
+}
+
+void MainEditor::rescaleAllLayersFromCommand(XY size) {
+    if (xyEqual(canvas.dimensions, size)) {
+        g_addNotification(ErrorNotification("Error", "Size must be different to rescale."));
+        return;
+    }
+
+    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
+    for (int x = 0; x < layers.size(); x++) {
+        layerResizeData[x].oldDimensions = XY{layers[x]->w, layers[x]->h};
+        layerResizeData[x].oldData = layers[x]->pixelData;
+        Layer* sc = layers[x]->copyScaled(size);
+        layers[x]->pixelData = (u8*)tracked_malloc(size.x * size.y * 4);
+        memcpy(layers[x]->pixelData, sc->pixelData, size.x * size.y * 4);
+        delete sc;
+        layers[x]->w = size.x;
+        layers[x]->h = size.y;
+        layers[x]->layerDirty = true;
+    }
+    canvas.dimensions = {layers[0]->w, layers[0]->h};
+
+    UndoStackElement undoData{};
+    undoData.type = UNDOSTACK_RESIZE_LAYER;
+    undoData.extdata = tileDimensions.x;
+    undoData.extdata2 = tileDimensions.y;
+    undoData.extdata4 = layerResizeData;
+    addToUndoStack(undoData);
 }
 
 void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)

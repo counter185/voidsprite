@@ -204,6 +204,7 @@ public:
     void layer_selectCurrentAlpha();
     virtual Layer* flattenImage();
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
+    void rescaleAllLayersFromCommand(XY size);
     void resizeAllLayersFromCommand(XY size, bool byTile = false);
     void resizzeAllLayersByTilecountFromCommand(XY size);
     void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
