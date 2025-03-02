@@ -837,6 +837,13 @@ uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte)
     return outPixel;
 }
 
+uint32_t RGBA4444toARGB8888(uint16_t rgba4444) {
+    uint8_t r = ((rgba4444 >> 12) & 0b1111) * 0x11;
+    uint8_t g = ((rgba4444 >> 8) & 0b1111) * 0x11;
+    uint8_t b = ((rgba4444 >> 4) & 0b1111) * 0x11;
+    uint8_t a = (rgba4444 & 0b1111) * 0x11;
+    return PackRGBAtoARGB(r, g, b, a);
+}
 uint32_t RGB565toARGB8888(uint16_t rgb565)
 {
     uint8_t r = ((rgb565 >> 11) & 0b11111) * 0x8;

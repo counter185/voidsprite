@@ -555,6 +555,9 @@
     <ClCompile Include="io_piskel.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io_gim.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1051,6 +1054,9 @@
     </ClInclude>
     <ClInclude Include="platform_windows.h">
       <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="io_gim.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

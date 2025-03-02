@@ -30,6 +30,7 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 
 #include "io_aseprite.h"
 #include "io_piskel.h"
+#include "io_gim.h"
 
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
@@ -366,6 +367,7 @@ inline void g_setupIO() {
         }));
     g_fileImporters.push_back(FileImporter::flatImporter("RPG2000/2003 XYZ", ".xyz", &readXYZ, exXYZ, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Atrophy Engine AETEX v1/v2 (SDL_Image, DDS)", ".aetex", &readAETEX));
+    g_fileImporters.push_back(FileImporter::flatImporter("PS Graphic Image Map GIM", ".gim", &readGIM));
     g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICN", ".icn", &readPS2ICN));
     g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICO", ".ico", &readPS2ICN, NULL, FORMAT_RGB, 
         [](PlatformNativePathString path) {

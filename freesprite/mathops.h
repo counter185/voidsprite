@@ -102,6 +102,7 @@ uint16_t BEtoLE16(uint16_t a);
 
 float halfToFloat(uint16_t half);
 
+uint32_t RGBA4444toARGB8888(uint16_t rgba4444);
 uint32_t RGB5A3toARGB8888(uint16_t rgb5a3Byte);
 uint32_t BGR565toARGB8888(uint16_t rgb5a3Byte);
 uint32_t RGB565toARGB8888(uint16_t rgb5a3Byte);

@@ -201,6 +201,7 @@
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="io_aseprite.cpp" />
+    <ClCompile Include="io_gim.cpp" />
     <ClCompile Include="io_piskel.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
@@ -357,6 +358,7 @@
     <ClInclude Include="iostructs.h" />
     <ClInclude Include="io_aseprite.h" />
     <ClInclude Include="io_base.h" />
+    <ClInclude Include="io_gim.h" />
     <ClInclude Include="io_piskel.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
