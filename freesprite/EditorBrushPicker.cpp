@@ -184,10 +184,12 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
 void EditorBrushPicker::updateActiveBrushButton(int id)
 {
     for (UIButton*& bbtn : brushButtons) {
-        bbtn->fill = SDL_Color{ 0,0,0,0xd0 };
+        bool hasRightClickAction = g_brushes[bbtn->callback_id - 100]->overrideRightClick();
+        bbtn->fill = hasRightClickAction ? Fill::Gradient(0xD0000000, 0xD0000000, 0xD0000000, 0xD000AEFF)
+			: FILL_BUTTON_CHECKED_DEFAULT;
     }
     if (id >= 0) {
-        brushButtons[id]->fill = SDL_Color{ 0xff,0xff,0xff,0x40 };
+        brushButtons[id]->fill = Fill::Gradient(0x80FFFFFF, 0x40FFFFFF, 0x40FFFFFF, 0x40000000); //SDL_Color{ 0xff,0xff,0xff,0x40 };
     }
 }
 
@@ -205,7 +207,8 @@ void EditorBrushPicker::updateActiveBrushButton(BaseBrush* id)
 void EditorBrushPicker::updateActivePatternButton(Pattern* p)
 {
     for (int x = 0; x < patternButtons.size(); x++) {
-        patternButtons[x]->fill = p == g_patterns[x] ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff,0x40 };
+        patternButtons[x]->fill = p == g_patterns[x] ? Fill::Gradient(0x80000000, 0x80000000, 0x80FFFFFF, 0x80FFFFFF)
+                                                     : FILL_BUTTON_CHECKED_DEFAULT;
     }
     patternPanelBtn->icon = p->cachedIcon;
 }

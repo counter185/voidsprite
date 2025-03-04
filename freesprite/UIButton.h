@@ -2,6 +2,9 @@
 #include "globals.h"
 #include "mathops.h"
 #include "drawable.h"
+
+#define FILL_BUTTON_CHECKED_DEFAULT Fill::Solid(0xD0000000)
+
 class UIButton : public Drawable
 {
 public:
@@ -12,9 +15,7 @@ public:
 	bool fullWidthIcon = false;
 	bool instantTooltip = false;
 	
-	Fill fill = Fill::Solid(0xD0000000);
-	//SDL_Color colorBGFocused = SDL_Color{ 0,0,0,0xff };
-	//SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
+	Fill fill = FILL_BUTTON_CHECKED_DEFAULT;
 	SDL_Color colorTextFocused = SDL_Color{ 255,255,255,0xff };
 	SDL_Color colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
 

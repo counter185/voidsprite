@@ -61,5 +61,3 @@ public:
         }
     }
 };
-
-#define FILL_BUTTON_CHECKED_DEFAULT Fill::Solid(0xD0FFFFFF)
