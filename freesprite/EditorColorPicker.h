@@ -75,6 +75,7 @@ public:
 	void eventButtonPressed(int evt_id) override;
 	void eventSliderPosChanged(int evt_id, float f) override;
 
+	void updateEraserAndAlphaBlendButtons();
 	void toggleEraser();
 	void toggleAlphaBlendMode();
 	void updateMainEditorColor();

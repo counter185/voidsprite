@@ -164,11 +164,11 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
     }
     else if (evt_id == EVENT_MAINEDITOR_TOGGLEREPLACE) {
         caller->replaceAlphaMode = !caller->replaceAlphaMode;
-        editorReplaceBtn->fill = caller->replaceAlphaMode ? Fill::Solid(0x40FFFFFF) : Fill::Solid(0xD0000000);
+        editorReplaceBtn->fill = caller->replaceAlphaMode ? Fill::Gradient(0xD0000000, 0xD0000000, 0x40FFFFFF, 0x40FFFFFF) : Fill::Solid(0xD0000000);
     }
 	else if (evt_id == EVENT_MAINEDITOR_TOGGLEINVERTPATTERN) {
 		caller->invertPattern = !caller->invertPattern;
-		editorInvPatternBtn->fill = caller->invertPattern ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
+		editorInvPatternBtn->fill = caller->invertPattern ? Fill::Gradient(0xD0000000, 0xD0000000, 0x40FFFFFF, 0x40FFFFFF) : Fill::Solid(0xD0000000);
 	}
     else if (evt_id >= 200) {
         caller->currentPattern = g_patterns[evt_id - 200];
@@ -186,10 +186,10 @@ void EditorBrushPicker::updateActiveBrushButton(int id)
     for (UIButton*& bbtn : brushButtons) {
         bool hasRightClickAction = g_brushes[bbtn->callback_id - 100]->overrideRightClick();
         bbtn->fill = hasRightClickAction ? Fill::Gradient(0xD0000000, 0xD0000000, 0xD0000000, 0xD000AEFF)
-			: FILL_BUTTON_CHECKED_DEFAULT;
+                                         : Fill::Gradient(0xD0000000, 0xD0000000, 0xD0000000, 0xD0505050);
     }
     if (id >= 0) {
-        brushButtons[id]->fill = Fill::Gradient(0x80FFFFFF, 0x40FFFFFF, 0x40FFFFFF, 0x40000000); //SDL_Color{ 0xff,0xff,0xff,0x40 };
+        brushButtons[id]->fill = Fill::Gradient(0x80FFFFFF, 0x40FFFFFF, 0x40FFFFFF, g_brushes[id]->overrideRightClick() ? 0xD000AEFF : 0x40000000); //SDL_Color{ 0xff,0xff,0xff,0x40 };
     }
 }
 

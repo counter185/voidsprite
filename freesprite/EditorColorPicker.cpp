@@ -246,8 +246,9 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     blendModeButton->wxWidth = 30;
     blendModeButton->tooltip = "Alpha blend";
     blendModeButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEBLENDMODE, this);
-    blendModeButton->fill = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
     subWidgets.addDrawable(blendModeButton);
+
+    updateEraserAndAlphaBlendButtons();
 }
 
 void EditorColorPicker::render(XY position)
@@ -389,16 +390,23 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
     }
 }
 
-void EditorColorPicker::toggleEraser()
+void EditorColorPicker::updateEraserAndAlphaBlendButtons() {
+    eraserButton->fill = caller->eraserMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
+                                            : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
+    blendModeButton->fill = caller->blendAlphaMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
+                                                   : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
+}
+
+void EditorColorPicker::toggleEraser() 
 {
     caller->eraserMode = !caller->eraserMode;
-    eraserButton->fill = caller->eraserMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+    updateEraserAndAlphaBlendButtons();
 }
 
 void EditorColorPicker::toggleAlphaBlendMode()
 {
     caller->blendAlphaMode = !caller->blendAlphaMode;
-    blendModeButton->fill = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+    updateEraserAndAlphaBlendButtons();
 }
 
 void EditorColorPicker::updateMainEditorColor()

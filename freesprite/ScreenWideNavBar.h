@@ -36,7 +36,7 @@ public:
             UIButton* sectionButton = new UIButton();
             sectionButton->position = { x, 1 };
             sectionButton->text = keyBinds[editorSection].name + std::format("({})", SDL_GetKeyName(editorSection));
-            sectionButton->fill = Fill::Solid(0x70424242);
+            sectionButton->fill = Fill::Gradient(0x70424242, 0x70424242, 0x70000000, 0x70000000);
             sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
             sectionButton->wxWidth = xDist - 10;
             if (keyBinds[editorSection].icon != NULL) {
@@ -144,7 +144,7 @@ public:
                 newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight) };
                 y += newBtn->wxHeight;
                 newBtn->wxWidth = 320;
-                newBtn->fill = Fill::Solid(0xAA121212);
+                newBtn->fill = Fill::Gradient(0xAA121212, 0xAA121212, 0xAA000000, 0xAA000000);
                 newBtn->text = option.second.name + std::format(" ({})", SDL_GetKeyName(option.first));
                 newBtn->setCallbackListener(-1 - option.first, this);
                 submenuPanel->subWidgets.addDrawable(newBtn);
