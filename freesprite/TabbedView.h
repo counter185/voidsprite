@@ -125,7 +125,7 @@ public:
     void updateTabButtons() {
         for (int x = 0; x < tabButtons.drawablesList.size(); x++) {
             UIButton* btn = (UIButton*)tabButtons.drawablesList[x];
-            btn->colorBGFocused = btn->colorBGUnfocused = openTab == x ? tabFocusedColor : tabUnfocusedColor;
+            btn->fill = openTab == x ? tabFocusedColor : tabUnfocusedColor;
         }
     }
 

@@ -1058,6 +1058,9 @@
     <ClInclude Include="io_gim.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
+    <ClInclude Include="fills.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

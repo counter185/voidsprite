@@ -354,6 +354,7 @@
     <ClInclude Include="discord_game_sdk\voice_manager.h" />
     <ClInclude Include="discord_rpc.h" />
     <ClInclude Include="DraggablePanel.h" />
+    <ClInclude Include="fills.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="iostructs.h" />
     <ClInclude Include="io_aseprite.h" />

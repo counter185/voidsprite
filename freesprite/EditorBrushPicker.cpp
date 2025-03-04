@@ -164,11 +164,11 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
     }
     else if (evt_id == EVENT_MAINEDITOR_TOGGLEREPLACE) {
         caller->replaceAlphaMode = !caller->replaceAlphaMode;
-        editorReplaceBtn->colorBGFocused = editorReplaceBtn->colorBGUnfocused = caller->replaceAlphaMode ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
+        editorReplaceBtn->fill = caller->replaceAlphaMode ? Fill::Solid(0x40FFFFFF) : Fill::Solid(0xD0000000);
     }
 	else if (evt_id == EVENT_MAINEDITOR_TOGGLEINVERTPATTERN) {
 		caller->invertPattern = !caller->invertPattern;
-		editorInvPatternBtn->colorBGFocused = editorInvPatternBtn->colorBGUnfocused = caller->invertPattern ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
+		editorInvPatternBtn->fill = caller->invertPattern ? SDL_Color{ 0xff,0xff,0xff,0x40 } : SDL_Color{ 0,0,0,0xd0 };
 	}
     else if (evt_id >= 200) {
         caller->currentPattern = g_patterns[evt_id - 200];
@@ -184,10 +184,10 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
 void EditorBrushPicker::updateActiveBrushButton(int id)
 {
     for (UIButton*& bbtn : brushButtons) {
-        bbtn->colorBGFocused = bbtn->colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };
+        bbtn->fill = SDL_Color{ 0,0,0,0xd0 };
     }
     if (id >= 0) {
-        brushButtons[id]->colorBGFocused = brushButtons[id]->colorBGUnfocused = SDL_Color{ 0xff,0xff,0xff,0x40 };
+        brushButtons[id]->fill = SDL_Color{ 0xff,0xff,0xff,0x40 };
     }
 }
 
@@ -205,7 +205,7 @@ void EditorBrushPicker::updateActiveBrushButton(BaseBrush* id)
 void EditorBrushPicker::updateActivePatternButton(Pattern* p)
 {
     for (int x = 0; x < patternButtons.size(); x++) {
-        patternButtons[x]->colorBGFocused = patternButtons[x]->colorBGFocused = p == g_patterns[x] ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff,0x40 };
+        patternButtons[x]->fill = p == g_patterns[x] ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff,0x40 };
     }
     patternPanelBtn->icon = p->cachedIcon;
 }

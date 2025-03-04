@@ -52,15 +52,15 @@ void PanelRPG2KTilemapPreview::eventGeneric(int evt_id, int data1, int data2)
         switch (evt_id) {
             case 0:
                 caller->rdLowerLayer = !caller->rdLowerLayer;
-                btnLL->hideButton->colorBGFocused = btnLL->hideButton->colorBGUnfocused = caller->rdLowerLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
+                btnLL->hideButton->fill = caller->rdLowerLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
                 break;
             case 1:
                 caller->rdUpperLayer = !caller->rdUpperLayer;
-                btnUL->hideButton->colorBGFocused = btnUL->hideButton->colorBGUnfocused = caller->rdUpperLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
+                btnUL->hideButton->fill = caller->rdUpperLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
                 break;
             case 2:
                 caller->rdEventLayer = !caller->rdEventLayer;
-                btnEL->hideButton->colorBGFocused = btnEL->hideButton->colorBGUnfocused = caller->rdEventLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
+                btnEL->hideButton->fill = caller->rdEventLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
                 break;
         }
     }

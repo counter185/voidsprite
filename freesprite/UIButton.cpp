@@ -7,10 +7,11 @@
 void UIButton::render(XY pos)
 {
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
-	SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
+	//SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
 	SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
-	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	SDL_RenderFillRect(g_rd, &drawrect);
+	//SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+	//SDL_RenderFillRect(g_rd, &drawrect);
+    fill.fill(drawrect);
 	SDL_SetRenderDrawColor(g_rd, colorBorder.r, colorBorder.g, colorBorder.b, colorBorder.a);
 	SDL_RenderDrawRect(g_rd, &drawrect);
 

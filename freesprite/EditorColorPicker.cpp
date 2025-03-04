@@ -246,7 +246,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     blendModeButton->wxWidth = 30;
     blendModeButton->tooltip = "Alpha blend";
     blendModeButton->setCallbackListener(EVENT_COLORPICKER_TOGGLEBLENDMODE, this);
-    blendModeButton->colorBGFocused = blendModeButton->colorBGUnfocused = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+    blendModeButton->fill = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
     subWidgets.addDrawable(blendModeButton);
 }
 
@@ -392,13 +392,13 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
 void EditorColorPicker::toggleEraser()
 {
     caller->eraserMode = !caller->eraserMode;
-    eraserButton->colorBGFocused = eraserButton->colorBGUnfocused = caller->eraserMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+    eraserButton->fill = caller->eraserMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
 }
 
 void EditorColorPicker::toggleAlphaBlendMode()
 {
     caller->blendAlphaMode = !caller->blendAlphaMode;
-    blendModeButton->colorBGFocused = blendModeButton->colorBGUnfocused = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
+    blendModeButton->fill = caller->blendAlphaMode ? SDL_Color{ 0xff,0xff,0xff, 0x30 } : SDL_Color{ 0,0,0, 0x80 };
 }
 
 void EditorColorPicker::updateMainEditorColor()
@@ -626,7 +626,7 @@ ColorPickerColorButton::ColorPickerColorButton(EditorColorPicker* parent, u32 co
 {
     this->parent = parent;
     this->color = color;
-    this->colorBGUnfocused = this->colorBGFocused = uint32ToSDLColor(color);
+    this->fill = Fill::Solid(color);
 }
 
 void ColorPickerColorButton::click()

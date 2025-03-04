@@ -164,9 +164,9 @@ void TilemapEditorLayerPicker::updateLayers()
         UILayerButton* layerButton = new UILayerButton(std::format("Layer {}", lid+1));
         //todo:
         //layerButton->hideButton->colorBGFocused = layerButton->hideButton->colorBGUnfocused = (l->hidden ? SDL_Color{ 255,255,255,0x80 } : SDL_Color{ 0,0,0,0x80 });
-        layerButton->hideButton->colorBGFocused = layerButton->hideButton->colorBGUnfocused = SDL_Color{ 0,0,0,0x80 };
+        layerButton->hideButton->fill = SDL_Color{ 0,0,0,0x80 };
         layerButton->position = { 5, yposition };
-        layerButton->mainButton->colorBGFocused = layerButton->mainButton->colorBGUnfocused = (selectedLayerIndex == lid ? SDL_Color{ 255,255,255,0x60 } : SDL_Color{ 0,0,0,0x80 });
+        layerButton->mainButton->fill = (selectedLayerIndex == lid ? SDL_Color{ 255,255,255,0x60 } : SDL_Color{ 0,0,0,0x80 });
         yposition += 30;
         layerButton->setCallbackListener(lid, this);
         layerButtons.addDrawable(layerButton);

@@ -256,3 +256,4 @@ struct NineSegmentPattern {
 #include "colors.h"
 #include "palettes.h"
 #include "settings.h"
+#include "fills.h"

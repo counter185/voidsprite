@@ -170,7 +170,7 @@ void UIDropdown::genButtons(UIButton* (*customButtonGenFunction)(std::string nam
             btn->text = items[y];
             btn->wxWidth = wxWidth;
             btn->wxHeight = wxHeight;
-            btn->colorBGFocused = btn->colorBGUnfocused = colorBGFocused;
+            btn->fill = colorBGFocused;
             btn->position = { 0, wxHeight + y * btn->wxHeight };
             btn->tooltip = tooltips.size() > y ? tooltips[y] : "";
             btn->setCallbackListener(y, this);

@@ -210,7 +210,7 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
         for (int x = 0; x < 16 && paletteindex < upcastCaller->palette.size(); x++) {
             uint32_t col = upcastCaller->palette[paletteindex++];
             UIButton* colBtn = new UIButton();
-            colBtn->colorBGFocused = colBtn->colorBGUnfocused = SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff), (uint8_t)((col >> 24) & 0xff) };
+            colBtn->fill = Fill::Solid(col);
             colBtn->wxHeight = 16;
             colBtn->wxWidth = 22;
             colBtn->position = { x * colBtn->wxWidth, 10 + y * colBtn->wxHeight };
