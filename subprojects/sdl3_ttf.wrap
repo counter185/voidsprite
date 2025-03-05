@@ -1,0 +1,9 @@
+[wrap-file]
+directory = SDL3_ttf-3.2.0
+source_url = https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.0/SDL3_ttf-3.2.0.tar.gz
+source_filename = SDL3_ttf-3.2.0.tar.gz
+source_hash = 9A741DEFB7C7D6DFF658D402CB1CC46C1409A20DF00949E1572EB9043102EB62
+patch_directory = sdl3_ttf
+
+[provide]
+sdl3_ttf = sdl3_ttf_dep
