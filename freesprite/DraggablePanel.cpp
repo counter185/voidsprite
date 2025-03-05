@@ -16,14 +16,14 @@ void DraggablePanel::processDrag(SDL_Event evt)
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
         if (evt.button.button == SDL_BUTTON_LEFT) {
-            dragging = evt.button.state;
+            dragging = evt.button.down;
         }
         break;
     case SDL_MOUSEMOTION:
         if (dragging) {
             wasDragged = true;
-            position.x += evt.motion.xrel;
-            position.y += evt.motion.yrel;
+            position.x += (int)(evt.motion.xrel);
+            position.y += (int)(evt.motion.yrel);
 
             tryMoveOutOfOOB();
         }

@@ -78,7 +78,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
     Layer* nlayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     layers.push_back(nlayer);
-    SDL_ConvertPixels(srf->w, srf->h, srf->format->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, canvas.dimensions.x*4);
+    SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, canvas.dimensions.x*4);
 
     setUpWidgets();
     recenterCanvas();
@@ -219,7 +219,8 @@ void MainEditor::render() {
 
     if (wxsManager.anyFocused() && navbar->focused) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        SDL_RenderFillRect(g_rd, NULL);
+        SDL_Rect fullscreen = {0, 0, g_windowW, g_windowH};
+        SDL_RenderFillRect(g_rd, &fullscreen);
     }
 
     if (!hideUI) {
@@ -646,36 +647,36 @@ void MainEditor::setUpWidgets()
 {
     mainEditorKeyActions = {
         {
-            SDLK_f,
+            SDLK_F,
             {
                 "File",
-                {SDLK_s, SDLK_d, SDLK_e, SDLK_a, SDLK_r, SDLK_p, SDLK_c},
+                {SDLK_S, SDLK_D, SDLK_E, SDLK_A, SDLK_R, SDLK_P, SDLK_C},
                 {
-                    {SDLK_d, { "Save as",
+                    {SDLK_D, { "Save as",
                             [](MainEditor* editor) {
                                 editor->trySaveAsImage();
                             }
                         }
                     },
-                    {SDLK_s, { "Save",
+                    {SDLK_S, { "Save",
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
                             }
                         }
                     },
-                    {SDLK_e, { "Export as palettized",
+                    {SDLK_E, { "Export as palettized",
                             [](MainEditor* editor) {
                                 editor->tryExportPalettizedImage();
                             }
                         }
                     },
-                    {SDLK_a, { "Export tiles individually",
+                    {SDLK_A, { "Export tiles individually",
                             [](MainEditor* editor) {
                                 editor->exportTilesIndividually();
                             }
                         }
                     },
-                    {SDLK_r, { "Open in palettized editor",
+                    {SDLK_R, { "Open in palettized editor",
                             [](MainEditor* editor) {
                                 MainEditorPalettized* newEditor = editor->toPalettizedSession();
                                 if (newEditor != NULL) {
@@ -684,13 +685,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_c, { "Close",
+                    {SDLK_C, { "Close",
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
                         }
                     },
-                    {SDLK_p, { "Preferences",
+                    {SDLK_P, { "Preferences",
                             [](MainEditor* screen) {
                                 g_addPopup(new PopupGlobalConfig());
                             }
@@ -701,48 +702,48 @@ void MainEditor::setUpWidgets()
             }
         },
         {
-            SDLK_e,
+            SDLK_E,
             {
                 "Edit",
-                {SDLK_z, SDLK_r, SDLK_x, SDLK_y, SDLK_s, SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m},
+                {SDLK_Z, SDLK_R, SDLK_X, SDLK_Y, SDLK_S, SDLK_C, SDLK_V, SDLK_B, SDLK_N, SDLK_M},
                 {
-                    {SDLK_z, { "Undo",
+                    {SDLK_Z, { "Undo",
                             [](MainEditor* editor) {
                                 editor->undo();
                             }
                         }
                     },
-                    {SDLK_r, { "Redo",
+                    {SDLK_R, { "Redo",
                             [](MainEditor* editor) {
                                 editor->redo();
                             }
                         }
                     },
-                    {SDLK_x, { "Toggle symmetry: X",
+                    {SDLK_X, { "Toggle symmetry: X",
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
                             }
                         }
                     },
-                    {SDLK_y, { "Toggle symmetry: Y",
+                    {SDLK_Y, { "Toggle symmetry: Y",
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
                             }
                         }
                     },
-                    {SDLK_c, { "Resize canvas",
+                    {SDLK_C, { "Resize canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
-                    {SDLK_s, { "Deselect",
+                    {SDLK_S, { "Deselect",
                             [](MainEditor* editor) {
                                 editor->isolateEnabled = false;
                             }
                         }
                     },
-                    {SDLK_v, { "Resize canvas (per tile)",
+                    {SDLK_V, { "Resize canvas (per tile)",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -753,7 +754,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_b, { "Resize canvas (per n.tiles)",
+                    {SDLK_B, { "Resize canvas (per n.tiles)",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -764,19 +765,19 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_n, { "Integer scale canvas",
+                    {SDLK_N, { "Integer scale canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
-                    {SDLK_m, { "Scale canvas",
+                    {SDLK_M, { "Scale canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Scale canvas", "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
-                    {SDLK_p, { "Open in 9-segment pattern editor",
+                    {SDLK_P, { "Open in 9-segment pattern editor",
                             [](MainEditor* editor) {
                                 g_addScreen(new NineSegmentPatternEditorScreen(editor));
                             }
@@ -787,48 +788,48 @@ void MainEditor::setUpWidgets()
             }
         },
         {
-            SDLK_l,
+            SDLK_L,
             {
                 "Layer",
                 {},
                 {
-                    {SDLK_f, { "Flip current layer: X axis",
+                    {SDLK_F, { "Flip current layer: X axis",
                             [](MainEditor* editor) {
                                 editor->layer_flipHorizontally();
                             }
                         }
                     },
-                    {SDLK_g, { "Flip current layer: Y axis",
+                    {SDLK_G, { "Flip current layer: Y axis",
                             [](MainEditor* editor) {
                                 editor->layer_flipVertically();
                             }
                         }
                     },
-                    {SDLK_x, { "Print number of colors",
+                    {SDLK_X, { "Print number of colors",
                             [](MainEditor* editor) {
                                 g_addNotification(Notification("", std::format("{} colors in current layer", editor->getCurrentLayer()->numUniqueColors(true))));
                             }
                         }
                     },
-                    {SDLK_r, { "Rename current layer",
+                    {SDLK_R, { "Rename current layer",
                             [](MainEditor* editor) {
                                 editor->layer_promptRename();
                             }
                         }
                     },
-                    {SDLK_s, { "Isolate layer alpha",
+                    {SDLK_S, { "Isolate layer alpha",
                             [](MainEditor* editor) {
                                 editor->layer_selectCurrentAlpha();
                             }
                         }
                     },
-                    {SDLK_a, { "Remove alpha channel",
+                    {SDLK_A, { "Remove alpha channel",
                             [](MainEditor* editor) {
                                 editor->layer_setAllAlpha255();
                             }
                         }
                     },
-                    {SDLK_k, { "Set color key",
+                    {SDLK_K, { "Set color key",
                             [](MainEditor* editor) {
                                 PopupPickColor* newPopup = new PopupPickColor("Set color key", "Pick a color to set as the color key:");
                                 newPopup->setCallbackListener(EVENT_MAINEDITOR_SETCOLORKEY, editor);
@@ -841,7 +842,7 @@ void MainEditor::setUpWidgets()
             }
         },
         {
-            SDLK_q,
+            SDLK_Q,
             {
                 "Filters",
                 {},
@@ -851,7 +852,7 @@ void MainEditor::setUpWidgets()
             }
         },
         {
-            SDLK_r,
+            SDLK_R,
             {
                 "Render",
                 {},
@@ -861,18 +862,18 @@ void MainEditor::setUpWidgets()
             }
         },
         {
-            SDLK_v,
+            SDLK_V,
             {
                 "View",
                 {},
                 {
-                    {SDLK_r, { "Recenter canvas",
+                    {SDLK_R, { "Recenter canvas",
                             [](MainEditor* editor) {
                                 editor->recenterCanvas();
                             }
                         }
                     },
-                    {SDLK_b, { "Toggle background color",
+                    {SDLK_B, { "Toggle background color",
                             [](MainEditor* editor) {
                                 editor->backgroundColor.r = ~editor->backgroundColor.r;
                                 editor->backgroundColor.g = ~editor->backgroundColor.g;
@@ -880,7 +881,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_c, { "Toggle comments",
+                    {SDLK_C, { "Toggle comments",
                             [](MainEditor* editor) {
                                 (*(int*)&editor->commentViewMode)++;
                                 (*(int*)&editor->commentViewMode) %= 3;
@@ -892,13 +893,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_g, { "Set pixel grid...",
+                    {SDLK_G, { "Set pixel grid...",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupSetEditorPixelGrid(editor, "Set pixel grid", "Enter grid size <w>x<h>:"));
                             }
                         }
                     },
-                    {SDLK_s, { "Open spritesheet preview...",
+                    {SDLK_S, { "Open spritesheet preview...",
                             [](MainEditor* editor) {
                                 //if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
@@ -915,7 +916,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_t, { "Open tileset preview...",
+                    {SDLK_T, { "Open tileset preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -927,7 +928,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
+                    {SDLK_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
                                 if (!xyEqual(editor->canvas.dimensions, {480, 256})) {
                                     g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
@@ -939,7 +940,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_n, { "Open cube preview...",
+                    {SDLK_N, { "Open cube preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
@@ -951,7 +952,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
     #if _DEBUG
-                    {SDLK_m, { "Open Minecraft skin preview...",
+                    {SDLK_M, { "Open Minecraft skin preview...",
                             [](MainEditor* editor) {
                                 if (editor->canvas.dimensions.x != editor->canvas.dimensions.y && editor->canvas.dimensions.x / 2 != editor->canvas.dimensions.y) {
                                     g_addNotification(ErrorNotification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
@@ -970,13 +971,13 @@ void MainEditor::setUpWidgets()
         }
     };
 
-    SDL_Keycode keyorder[] = { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i, SDLK_o, SDLK_p,
-                               SDLK_a, SDLK_s, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l,
-                               SDLK_z, SDLK_x, SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m };
+    SDL_Keycode keyorder[] = { SDLK_Q, SDLK_W, SDLK_E, SDLK_R, SDLK_T, SDLK_Y, SDLK_U, SDLK_I, SDLK_O, SDLK_P,
+                               SDLK_A, SDLK_S, SDLK_D, SDLK_F, SDLK_G, SDLK_H, SDLK_J, SDLK_K, SDLK_L,
+                               SDLK_Z, SDLK_X, SDLK_C, SDLK_V, SDLK_B, SDLK_N, SDLK_M };
     //load filters
     int i = 0;
     for (auto& filter : g_filters) {
-        mainEditorKeyActions[SDLK_q].actions[keyorder[i++]] = {
+        mainEditorKeyActions[SDLK_Q].actions[keyorder[i++]] = {
             filter->name(), [filter](MainEditor* editor) {
                 PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
                 g_addPopup(newPopup);
@@ -989,7 +990,7 @@ void MainEditor::setUpWidgets()
     //load render filters
     i = 0;
     for (auto& filter : g_renderFilters) {
-        mainEditorKeyActions[SDLK_r].actions[keyorder[i++]] = {
+        mainEditorKeyActions[SDLK_R].actions[keyorder[i++]] = {
             filter->name(), [filter](MainEditor* editor) {
                 PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
                 g_addPopup(newPopup);
@@ -1022,7 +1023,7 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
-    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_f, SDLK_e, SDLK_l, SDLK_q, SDLK_r, SDLK_v });
+    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_F, SDLK_E, SDLK_L, SDLK_Q, SDLK_R, SDLK_V });
     wxsManager.addDrawable(navbar);
 }
 
@@ -1082,11 +1083,11 @@ void MainEditor::takeInput(SDL_Event evt) {
 
     LALT_TO_SUMMON_NAVBAR;
 
-    if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.keysym.sym == SDLK_q) {
-        qModifier = evt.key.state;
+    if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.scancode == SDLK_Q) {
+        qModifier = evt.key.down;
     }
 
-    if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_F1) {
+    if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDLK_F1) {
         hideUI = !hideUI;
     }
 
@@ -1095,9 +1096,9 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
                 if (evt.button.button == 1) {
-                    RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
+                    RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
                     if (currentBrush != NULL) {
-                        if (evt.button.state) {
+                        if (evt.button.down) {
                             if (!currentBrush->isReadOnly()) {
                                 commitStateToCurrentLayer();
                             }
@@ -1113,15 +1114,15 @@ void MainEditor::takeInput(SDL_Event evt) {
                         }
                     }
                     mouseHoldPosition = mousePixelTargetPoint;
-                    leftMouseHold = evt.button.state;
+                    leftMouseHold = evt.button.down;
                 }
                 else if (evt.button.button == 2) {
-                    middleMouseHold = evt.button.state;
+                    middleMouseHold = evt.button.down;
                 }
                 else if (evt.button.button == 3) {
-                    RecalcMousePixelTargetPoint(evt.button.x, evt.button.y);
+                    RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
                     if (currentBrush != NULL && currentBrush->overrideRightClick()) {
-                        if (evt.button.state) {
+                        if (evt.button.down) {
                             currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
                         }
                         else {
@@ -1129,7 +1130,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                         }
                     }
                     else {
-                        if (evt.button.state) {
+                        if (evt.button.down) {
                             lastColorPickWasFromWholeImage = !g_ctrlModifier;
                             setActiveColor(g_ctrlModifier ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint) : pickColorFromAllLayers(mousePixelTargetPoint));
                         }
@@ -1137,11 +1138,11 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 break;
             case SDL_MOUSEMOTION:
-                RecalcMousePixelTargetPoint(evt.motion.x, evt.motion.y);
+                RecalcMousePixelTargetPoint((int)(evt.motion.x), (int)(evt.motion.y));
                 if (middleMouseHold) {
                     canvas.panCanvas({
-                        evt.motion.xrel * (g_shiftModifier ? 2 : 1),
-                        evt.motion.yrel * (g_shiftModifier ? 2 : 1)
+                        (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
+                        (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
                     });
                 }
                 else if (leftMouseHold) {
@@ -1165,8 +1166,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                 else {
                     if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
                         canvas.panCanvas({
-                            -(g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20,
-                            (g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20
+                            (int)(-(g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20),
+                            (int)((g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20)
                         });
                     }
                     else {
@@ -1175,8 +1176,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 break;
             case SDL_KEYDOWN:
-                switch (evt.key.keysym.sym) {
-                    case SDLK_k:
+                switch (evt.key.scancode) {
+                    case SDLK_K:
                         if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
                             commitStateToCurrentLayer();
                             for (int x = 0; x < voidsprite_image_w; x++) {
@@ -1187,14 +1188,14 @@ void MainEditor::takeInput(SDL_Event evt) {
                             g_addNotification(Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
                         }
                         break;
-                    case SDLK_e:
+                    case SDLK_E:
                         colorPicker->eraserButton->click();
                         //colorPicker->toggleEraser();
                         break;
                     case SDLK_RCTRL:
                         middleMouseHold = !middleMouseHold;
                         break;
-                    case SDLK_z:
+                    case SDLK_Z:
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 redo();
@@ -1204,12 +1205,12 @@ void MainEditor::takeInput(SDL_Event evt) {
                             }
                         }
                         break;
-                    case SDLK_y:
+                    case SDLK_Y:
                         if (g_ctrlModifier) {
                             redo();
                         }
                         break;
-                    case SDLK_s:
+                    case SDLK_S:
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 trySaveAsImage();
@@ -1219,7 +1220,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                             }
                         }
                         break;
-                    case SDLK_q:
+                    case SDLK_Q:
                         if (g_ctrlModifier) {
                             if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
                                 lockedTilePreview = { -1,-1 };
@@ -1256,9 +1257,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                         layer_promptRename();
                         break;
                     default:
-                        if (evt.key.keysym.sym != SDLK_UNKNOWN) {
+                        if (evt.key.scancode != SDLK_UNKNOWN) {
                             for (BaseBrush* b : g_brushes) {
-                                if (b->keybind == evt.key.keysym.sym) {
+                                if (b->keybind == evt.key.scancode) {
                                     setActiveBrush(b);
                                     break;
                                 }
@@ -1269,6 +1270,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 break;
             case SDL_FINGERMOTION:
                 XY rel = { evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH };
+                //evt.tfinger.
                 canvas.panCanvas(rel);
                 break;
         }

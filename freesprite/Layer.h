@@ -42,11 +42,11 @@ public:
     }
     Layer(SDL_Surface* from) : Layer(from->w, from->h) {
         //pixelData = (uint8_t*)tracked_malloc(w * h * 4);
-        if (from->format->format == SDL_PIXELFORMAT_ARGB8888) {
+        if (from->format == SDL_PIXELFORMAT_ARGB8888) {
             memcpy(pixelData, from->pixels, w * h * 4);
         }
         else {
-            SDL_ConvertPixels(w, h, from->format->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
+            SDL_ConvertPixels(w, h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
             SDL_FreeSurface(from);
         }
     }

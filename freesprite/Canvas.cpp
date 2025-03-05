@@ -13,8 +13,8 @@ bool Canvas::takeInput(SDL_Event evt)
         case SDL_MOUSEMOTION:
             if (middleMouseHold) {
                 panCanvas({ 
-                    evt.motion.xrel * (g_shiftModifier ? 2 : 1),
-                    evt.motion.yrel * (g_shiftModifier ? 2 : 1)
+                    ((int)evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
+                    ((int)evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
                 });
             }
             break;

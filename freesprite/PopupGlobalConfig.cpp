@@ -208,7 +208,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
     if (bindingKeyIndex != -1) {
         if (evt.type == SDL_KEYDOWN) {
-            int targetKey = evt.key.keysym.sym == SDLK_LSHIFT ? SDLK_UNKNOWN : evt.key.keysym.sym;
+            int targetKey = evt.key.scancode == SDLK_LSHIFT ? SDLK_UNKNOWN : evt.key.scancode;
             if (targetKey != SDLK_ESCAPE) {
                 //find any other keybinds that use this key and reset them
                 if (targetKey != SDLK_UNKNOWN && std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) == reservedKeys.end()) {

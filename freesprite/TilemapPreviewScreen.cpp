@@ -14,36 +14,36 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     navbar = new ScreenWideNavBar<TilemapPreviewScreen*>(this,
         {
             {
-                SDLK_f,
+                SDLK_F,
                 {
                     "File",
-                    {SDLK_o, SDLK_s, SDLK_z, SDLK_x, SDLK_c},
+                    {SDLK_O, SDLK_S, SDLK_Z, SDLK_X, SDLK_C},
                     {
-                        {SDLK_o, { "Load layout from file",
+                        {SDLK_O, { "Load layout from file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "load tile layout", EVENT_TILEMAP_LOADLAYOUT);
                                 }
                             }
                         },
-                        {SDLK_s, { "Save layout to file",
+                        {SDLK_S, { "Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "save tile layout", EVENT_TILEMAP_SAVELAYOUT);
                                 }
                             }
                         },
-                        {SDLK_z, { "Render all layers to image",
+                        {SDLK_Z, { "Render all layers to image",
                                 [](TilemapPreviewScreen* screen) {
                                     screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE);
                                 }
                             }
                         },
-                        {SDLK_x, { "Render all layers to separate images",
+                        {SDLK_X, { "Render all layers to separate images",
                                 [](TilemapPreviewScreen* screen) {
                                     screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES);
                                 }
                             }
                         },
-                        {SDLK_c, { "Render current layer to image",
+                        {SDLK_C, { "Render current layer to image",
                                 [](TilemapPreviewScreen* screen) {
                                     screen->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE);
                                 }
@@ -54,12 +54,12 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                 }
             }, 
             {
-                SDLK_e,
+                SDLK_E,
                 {
                     "Edit",
                     {},
                     {
-                        {SDLK_r, { "Resize tilemap",
+                        {SDLK_R, { "Resize tilemap",
                                 [](TilemapPreviewScreen* screen) {
                                     g_addPopup(new PopupTileGeneric(screen, "Resize tilemap", "Enter the new size of the tilemap (in tiles)", screen->tilemapDimensions, EVENT_TILEMAP_RESIZE));
                                 }
@@ -69,7 +69,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     g_iconNavbarTabEdit
                 }
             }
-        }, { SDLK_f, SDLK_e });
+        }, { SDLK_F, SDLK_E });
     wxsManager.addDrawable(navbar);
 
     PanelTilemapPreview* panel = new PanelTilemapPreview(this);
@@ -186,7 +186,8 @@ void TilemapPreviewScreen::render()
 
     if (navbar->focused) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        SDL_RenderFillRect(g_rd, NULL);
+        SDL_Rect fullscreen = {0, 0, g_windowW, g_windowH};
+        SDL_RenderFillRect(g_rd, &fullscreen);
     }
 
     wxsManager.renderAll();
@@ -244,9 +245,9 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                 }
             }
             else if (evt.button.button == SDL_BUTTON_RIGHT) {
-                XY rel = canvas.screenPointToCanvasPoint({ evt.button.x, evt.button.y });
+                XY rel = canvas.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y });
                 if (canvas.pointInCanvasBounds(rel)) {
-                    XY tile = canvas.getTilePosAt({ evt.button.x, evt.button.y }, caller->getPaddedTileDimensions());
+                    XY tile = canvas.getTilePosAt({ (int)evt.button.x, (int)evt.button.y }, caller->getPaddedTileDimensions());
                     pickedTile = activeTilemap[tile.y][tile.x];
                 }
             }
@@ -262,10 +263,10 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
         case SDL_MOUSEMOTION:
             if (tileSelectOpen) {
                 if (scrollingTilemap) {
-                    tileSelectOffset = xyAdd(tileSelectOffset, XY{ evt.motion.xrel, evt.motion.yrel });
+                    tileSelectOffset = xyAdd(tileSelectOffset, XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
                 }
 
-                XY pos = xySubtract(XY{ evt.button.x, evt.button.y }, tileSelectOffset);
+                XY pos = xySubtract(XY{ (int)evt.button.x, (int)evt.button.y }, tileSelectOffset);
 
                 pos.x /= caller->tileDimensions.x * tileSelectScale;
                 pos.y /= caller->tileDimensions.y * tileSelectScale;
@@ -273,12 +274,12 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             else {
                 if (scrollingTilemap) {
-                    canvas.panCanvas( XY{ evt.motion.xrel, evt.motion.yrel });
+                    canvas.panCanvas( XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
                 }
 
                 if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
                     XY callerTileSize = caller->getPaddedTileDimensions();
-                    hoveredTilePosition = canvas.getTilePosAt(XY{ evt.motion.x, evt.motion.y }, callerTileSize);
+                    hoveredTilePosition = canvas.getTilePosAt(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, callerTileSize);
                 }
             }
             break;
@@ -292,11 +293,11 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_KEYDOWN:
-            if (evt.key.keysym.sym == SDLK_TAB) {
+            if (evt.key.scancode == SDLK_TAB) {
                 tileSelectOpen = !tileSelectOpen;
                 tileSelectTimer.start();
             }
-            else if (evt.key.keysym.sym == SDLK_LALT) {
+            else if (evt.key.scancode == SDLK_LALT) {
                 wxsManager.forceFocusOn(navbar);
             }
             break;

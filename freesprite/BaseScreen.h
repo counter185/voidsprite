@@ -2,7 +2,7 @@
 #include "globals.h"
 #include "DrawableManager.h"
 
-#define LALT_TO_SUMMON_NAVBAR if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_LALT) { if (!navbar->focused) wxsManager.forceFocusOn(navbar); else wxsManager.forceUnfocus(); return; }
+#define LALT_TO_SUMMON_NAVBAR if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDLK_LALT) { if (!navbar->focused) wxsManager.forceFocusOn(navbar); else wxsManager.forceUnfocus(); return; }
 
 class BaseScreen
 {

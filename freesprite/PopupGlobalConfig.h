@@ -22,8 +22,8 @@ private:
         SDLK_LALT,
         SDLK_LEFTBRACKET,
         SDLK_RIGHTBRACKET,
-        SDLK_q,
-        SDLK_e,
+        SDLK_Q,
+        SDLK_E,
         SDLK_F2
     };
 public:

@@ -66,11 +66,11 @@ enum VTFFORMAT
 std::string getAllLibsVersions() {
     std::string ret = "";
     ret += "SDL: " + std::to_string(SDL_MAJOR_VERSION) + "." + std::to_string(SDL_MINOR_VERSION) + "." +
-           std::to_string(SDL_PATCHLEVEL) + "\n";
+           std::to_string(SDL_MICRO_VERSION) + "\n";
     ret += "SDL_image: " + std::to_string(SDL_IMAGE_MAJOR_VERSION) + "." + std::to_string(SDL_IMAGE_MINOR_VERSION) +
-           "." + std::to_string(SDL_IMAGE_PATCHLEVEL) + "\n";
+           "." + std::to_string(SDL_IMAGE_MICRO_VERSION) + "\n";
     ret += "SDL_ttf: " + std::to_string(SDL_TTF_MAJOR_VERSION) + "." + std::to_string(SDL_TTF_MINOR_VERSION) + "." +
-           std::to_string(SDL_TTF_PATCHLEVEL) + "\n";
+           std::to_string(SDL_TTF_MICRO_VERSION) + "\n";
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
            "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
@@ -1389,7 +1389,7 @@ Layer* readPNG(png_structp png, png_infop info) {
         }
 
         if (numchannels == 4) {
-            SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
+            SDL_Surface* convSrf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR8888);
             memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
             SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
             SDL_FreeSurface(convSrf);
@@ -1562,10 +1562,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 if (compressionMethod == 0x81) {
                     uint8_t* rawData = (uint8_t*)tracked_malloc(filesize - r2dataStart);
                     fread(rawData, filesize - r2dataStart, 1, texfile);
-                    SDL_RWops* tgarw =
-                        SDL_RWFromMem(rawData, filesize - r2dataStart);
-                    SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
-                    SDL_RWclose(tgarw);
+                    SDL_IOStream* tgarw =
+                        SDL_IOFromMem(rawData, filesize - r2dataStart);
+                    SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
+                    SDL_CloseIO(tgarw);
                     if (tgasrf != NULL) {
                         ret = new Layer(tgasrf);
                         ret->name = "AETEX TGA Layer";
@@ -1646,10 +1646,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 uint8_t* tgaData = (uint8_t*)tracked_malloc(filesize - 0x38);
                 fread(tgaData, filesize - 0x38, 1, texfile);
                 fclose(texfile);
-                SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
+                SDL_IOStream* tgarw = SDL_IOFromMem(tgaData, filesize - 0x38);
                 //todo: dds
-                SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
-                SDL_RWclose(tgarw);
+                SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
+                SDL_CloseIO(tgarw);
                 tracked_free(tgaData);
                 return tgasrf == NULL ? NULL : new Layer(tgasrf);
             }
@@ -5102,8 +5102,6 @@ std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString
             if (ret.pixelData != NULL) {
                 fread(ret.pixelData, 4, ret.dimensions.x * ret.dimensions.y, f);
                 fclose(f);
-                /*ret.cachedTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, ret.dimensions.x, ret.dimensions.y);
-                SDL_UpdateTexture(ret.cachedTexture, NULL, ret.pixelData, 4 * ret.dimensions.x);*/
                 return { true, ret };
             }
         }

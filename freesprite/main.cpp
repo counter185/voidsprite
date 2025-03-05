@@ -1,5 +1,8 @@
 
 #include "globals.h"
+
+#include <SDL3/SDL_main.h>
+
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "BaseScreen.h"
@@ -269,16 +272,21 @@ int main(int argc, char** argv)
 
     g_loadConfig();
 
-    int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
-    SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-    IMG_Init(-1);   //😈time to get evil
+    for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
+        std::cout << "Renderer " << x << ": " << SDL_GetRenderDriver(x) << "\n";
+    }
+
+    SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition");
+    int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
+    //IMG_Init(-1);   //😈time to get evil
     const char* windowTitle = "void" UTF8_DIAMOND "sprite"
 #if _DEBUG
         " " UTF8_DIAMOND " DEBUG"
 #endif
     ;
-    g_wd = SDL_CreateWindow(windowTitle, 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
-    g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | (g_config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
+    g_wd = SDL_CreateWindow(windowTitle, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
+    g_rd = SDL_CreateRenderer(g_wd, "direct3d");
+    SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
@@ -320,7 +328,7 @@ int main(int argc, char** argv)
     g_iconNotifSuccess = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_success.png");
     g_iconNewColor = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_newcolor.png");
 
-    SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
+    SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);
     g_iconNotifTheCreature = tracked_createTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
@@ -492,33 +500,31 @@ int main(int argc, char** argv)
 
             //events that can fire during bg operation
             switch (evt.type) {
-                case SDL_KEYDOWN:
-                    if (evt.key.keysym.sym == SDLK_LCTRL) {
+                case SDL_EVENT_KEY_DOWN:
+                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = true;
                     }
-                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
                         g_shiftModifier = true;
                     }
                     break;
-                case SDL_KEYUP:
-                    if (evt.key.keysym.sym == SDLK_LCTRL) {
+                case SDL_EVENT_KEY_UP:
+                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = false;
                     }
-                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
                         g_shiftModifier = false;
                     }
                     break;
-                case SDL_WINDOWEVENT:
-                    if (evt.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        g_windowW = evt.window.data1;
-                        g_windowH = evt.window.data2;
-                        unscaledWindowSize = { g_windowW, g_windowH };
-                        UpdateViewportScaler();
-                    }
+                case SDL_EVENT_WINDOW_RESIZED:
+                    g_windowW = evt.window.data1;
+                    g_windowH = evt.window.data2;
+                    unscaledWindowSize = { g_windowW, g_windowH };
+                    UpdateViewportScaler();
                     break;
                 case SDL_MOUSEMOTION:
-                    g_mouseX = evt.motion.x;
-                    g_mouseY = evt.motion.y;
+                    g_mouseX = (int)(evt.motion.x);
+                    g_mouseY = (int)(evt.motion.y);
                     break;
             }
 
@@ -532,7 +538,7 @@ int main(int argc, char** argv)
                     //return 0;
                     break;
                 case SDL_KEYDOWN:
-                    if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
+                    if (evt.key.scancode == SDLK_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(0);
@@ -542,7 +548,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
+                    else if (evt.key.scancode == SDLK_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(screenStack.size() - 1);
@@ -552,7 +558,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_w) {
+                    else if (evt.key.scancode == SDLK_W) {
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 if (favourite && fav_screen < screenStack.size()) {
@@ -566,18 +572,18 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_F11) {
+                    else if (evt.key.scancode == SDLK_F11) {
                         fullscreen = !fullscreen;
-                        SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+                        SDL_SetWindowFullscreen(g_wd, fullscreen);
                         screenSwitchTimer.start();
                     }
-                    else if (evt.key.keysym.sym == SDLK_EQUALS){
+                    else if (evt.key.scancode == SDLK_EQUALS){
                         if (g_ctrlModifier) {
                             renderScale++;
                             UpdateViewportScaler();
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_MINUS){
+                    else if (evt.key.scancode == SDLK_MINUS){
                         if (g_ctrlModifier){
                             if (renderScale-- <= 1){
                                 renderScale = 1;

@@ -12,18 +12,18 @@ NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* paren
     navbar = new ScreenWideNavBar<NineSegmentPatternEditorScreen*>(this,
         {
             {
-                SDLK_f,
+                SDLK_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_c, { "Close",
+                        {SDLK_C, { "Close",
                                 [](NineSegmentPatternEditorScreen* screen) {
                                     screen->closeNextTick = true;
                                 }
                             }
                         },
-                        {SDLK_s, { "Export to 9-segment pattern",
+                        {SDLK_S, { "Export to 9-segment pattern",
                                 [](NineSegmentPatternEditorScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".void9sp", "9-segment pattern file"} }, "save 9-segment pattern", EVENT_9SPEDITOR_SAVE);
                                 }
@@ -33,7 +33,7 @@ NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* paren
                     g_iconNavbarTabFile
                 }
             },
-        }, { SDLK_f });
+        }, { SDLK_F });
     wxsManager.addDrawable(navbar);
 }
 
@@ -152,9 +152,9 @@ void NineSegmentPatternEditorScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_MOUSEMOTION:
-            calcMousePixelPos({evt.motion.x, evt.motion.y});
+            calcMousePixelPos({(int)(evt.motion.x), (int)(evt.motion.y)});
             if (scrollingCanvas) {
-                canvasDrawOrigin = xyAdd(canvasDrawOrigin, XY{ evt.motion.xrel, evt.motion.yrel });
+                canvasDrawOrigin = xyAdd(canvasDrawOrigin, XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
             }
             if (dragging.x != -1) {
                 int* targets[] = {&pointUL.x, &pointUR.x};

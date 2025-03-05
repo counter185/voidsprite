@@ -96,9 +96,8 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
         return;
     }
     else if (evt.type == SDL_DROPFILE) {
-        std::string filePath = evt.drop.file;
+        std::string filePath = evt.drop.data;
         tryAddFile(filePath);
-        SDL_free(evt.drop.file);
         return;
     }
 
@@ -113,7 +112,7 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
             else if (evt.button.button == SDL_BUTTON_LEFT) {
                 dragging = findTSSIAt(mousePixelPos);
                 if (dragging != -1) {
-                    draggingStartPixel = c.screenPointToCanvasPoint({ evt.button.x, evt.button.y });
+                    draggingStartPixel = c.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y });
                 }
             }
             else if (evt.button.button == SDL_BUTTON_RIGHT) {
@@ -134,7 +133,7 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
             }
             else if (evt.button.button == SDL_BUTTON_LEFT) {
                 if (dragging != -1) {
-                    XY endPoint = c.screenPointToCanvasPoint({evt.button.x, evt.button.y});
+                    XY endPoint = c.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y});
                     XY targetPosition = xyAdd(loadedImgs[dragging].position, xySubtract(endPoint, draggingStartPixel));
                     if (targetPosition.x >= 0 && targetPosition.y >= 0) {
                         loadedImgs[dragging].position = targetPosition;
@@ -149,9 +148,9 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
             }
             break;
         case SDL_MOUSEMOTION:
-            calcMousePixelPos({ evt.motion.x, evt.motion.y });
+            calcMousePixelPos({ (int)(evt.motion.x), (int)(evt.motion.y) });
             if (scrollingCanvas) {
-                c.panCanvas({ evt.motion.xrel, evt.motion.yrel });
+                c.panCanvas({ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
             }
             break;
         case SDL_MOUSEWHEEL:
@@ -241,27 +240,27 @@ void SplitSessionEditor::setupWidgets()
 
     navbar = new ScreenWideNavBar<SplitSessionEditor*>(this, {
         {
-            SDLK_f,
+            SDLK_F,
             {
                 "File",
-                {SDLK_s, SDLK_d, SDLK_f, SDLK_c},
+                {SDLK_S, SDLK_D, SDLK_F, SDLK_C},
                 {
-                    {SDLK_c, { "Close",
+                    {SDLK_C, { "Close",
                         [](SplitSessionEditor* screen) {
                             screen->closeNextTick = true;
                         }
                     }},
-                    {SDLK_s, { "Save",
+                    {SDLK_S, { "Save",
                         [](SplitSessionEditor* screen) {
                             screen->trySave();
                         }
                     }},
-                    {SDLK_d, { "Save and open in editor",
+                    {SDLK_D, { "Save and open in editor",
                         [](SplitSessionEditor* screen) {
                             screen->trySave(true);
                         }
                     }},
-                    {SDLK_f, { "Set output file location",
+                    {SDLK_F, { "Set output file location",
                         [](SplitSessionEditor* screen) {
                             platformTrySaveOtherFile(screen, {{".voidspsn", "Split session file"}}, "set split session file location", 0);
                         }
@@ -270,7 +269,7 @@ void SplitSessionEditor::setupWidgets()
                 g_iconNavbarTabFile
             }
         }
-    }, {SDLK_f});
+    }, {SDLK_F});
     wxsManager.addDrawable(navbar);
 
     recalcRelativePaths();

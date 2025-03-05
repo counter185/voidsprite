@@ -7,6 +7,7 @@ inline int g_allocated_textures = 0;
 
 inline SDL_Texture* tracked_createTextureFromSurface(SDL_Renderer* renderer, SDL_Surface* surface) {
     SDL_Texture* ret = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_SetTextureScaleMode(ret, SDL_SCALEMODE_NEAREST);
 #if _DEBUG
     if (ret != NULL) {
         g_allocated_textures++;
@@ -16,8 +17,9 @@ inline SDL_Texture* tracked_createTextureFromSurface(SDL_Renderer* renderer, SDL
 #endif
     return ret;
 }
-inline SDL_Texture* tracked_createTexture(SDL_Renderer* renderer, uint32_t format, int access, int w, int h) {
+inline SDL_Texture* tracked_createTexture(SDL_Renderer* renderer, SDL_PixelFormat format, SDL_TextureAccess access, int w, int h) {
     SDL_Texture* ret = SDL_CreateTexture(renderer, format, access, w, h);
+    SDL_SetTextureScaleMode(ret, SDL_SCALEMODE_NEAREST);
 #if _DEBUG
     if (ret != NULL) {
         g_allocated_textures++;
