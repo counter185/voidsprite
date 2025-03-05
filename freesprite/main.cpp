@@ -273,8 +273,19 @@ int main(int argc, char** argv)
     g_loadConfig();
 
     for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
-        std::cout << "Renderer " << x << ": " << SDL_GetRenderDriver(x) << "\n";
+        char* name = (char*)SDL_GetRenderDriver(x);
+        if (name != NULL) {
+            std::string renderDriverName = name;
+            g_availableRenderersNow.push_back(renderDriverName);
+            std::cout << "Renderer " << x << ": " << renderDriverName << "\n";
+        }
     }
+    if (std::find(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), g_config.preferredRenderer) == g_availableRenderersNow.end()) {
+        g_config.preferredRenderer = GlobalConfig().preferredRenderer;  //reset to default
+    }
+
+    std::string useRenderer = g_config.preferredRenderer;
+    std::cout << "Picking renderer: " << useRenderer << "\n";
 
     SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition");
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
@@ -285,7 +296,7 @@ int main(int argc, char** argv)
 #endif
     ;
     g_wd = SDL_CreateWindow(windowTitle, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
-    g_rd = SDL_CreateRenderer(g_wd, "direct3d");
+    g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
     SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
@@ -372,7 +383,7 @@ int main(int argc, char** argv)
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
         std::string keybindKey = std::format("brush:{}", i++);
         if (g_config.keybinds.contains(keybindKey)) {
-            brush->keybind = g_config.keybinds[keybindKey];
+            brush->keybind = (SDL_Scancode)g_config.keybinds[keybindKey];
         }
     }
 

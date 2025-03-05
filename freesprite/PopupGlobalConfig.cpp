@@ -22,6 +22,7 @@ enum ConfigOptions : int {
     CHECKBOX_VSYNC,
     CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA,
     CHECKBOX_DISCORD_RPC,
+    CHECKBOX_RENDERER,
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -62,6 +63,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb8->checkbox->tooltip = "When enabled, your activity will be shared as your Discord status.\nSupported only on Windows.";
     cb8->setCallbackListener(CHECKBOX_DISCORD_RPC, this);
     configTabs->tabs[0].wxs.addDrawable(cb8);
+    posInTab.y += 35;
+
+    UILabel* lbl4 = new UILabel("Renderer");
+    lbl4->position = posInTab;
+    configTabs->tabs[0].wxs.addDrawable(lbl4);
+    UIDropdown* dd2 = new UIDropdown(g_availableRenderersNow);
+    dd2->position = xyAdd(posInTab, {100, 0});
+    dd2->wxWidth = 180;
+    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
+    dd2->setTextToSelectedItem = true;
+    dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
+    configTabs->tabs[0].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
 
@@ -218,10 +231,10 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                             updateKeybindButtonText(kb);
                         }
                     }
-                    *keybindButtons[bindingKeyIndex].first.target = targetKey;
+                    *keybindButtons[bindingKeyIndex].first.target = (SDL_Scancode)targetKey;
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetKeyName(targetKey)))));
+                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
                 }
             }
             updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
@@ -306,10 +319,13 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
 {
     if (evt_id == CHECKBOX_ANIMATED_BACKGROUND) {
         g_config.animatedBackground = index;
+    } 
+    else if (evt_id == CHECKBOX_RENDERER) {
+        g_config.preferredRenderer = name;
     }
 }
 
 void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t)
 {
-    t.second->text = std::format("{}    ({})", t.first.name, SDL_GetKeyName(*t.first.target));
+    t.second->text = std::format("{}    ({})", t.first.name, SDL_GetScancodeName(*t.first.target));
 }
