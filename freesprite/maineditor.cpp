@@ -1269,9 +1269,16 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 break;
             case SDL_FINGERMOTION:
-                XY rel = { evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH };
-                //evt.tfinger.
-                canvas.panCanvas(rel);
+                if (!penDown) {
+                    XY rel = {evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH};
+                    // evt.tfinger.
+                    canvas.panCanvas(rel);
+                }
+                break;
+            case SDL_EVENT_PEN_DOWN:
+            case SDL_EVENT_PEN_UP:
+                penDown = evt.ptouch.down;
+                std::cout << "new pen state: " << penDown << "\n";
                 break;
         }
     } else {

@@ -78,6 +78,7 @@ public:
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;
+    bool penDown = false;
 
     bool changesSinceLastSave = false;
     PlatformNativePathString lastConfirmedSavePath;
