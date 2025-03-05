@@ -222,9 +222,10 @@ void MainEditor::render() {
         SDL_RenderFillRect(g_rd, NULL);
     }
 
-    DrawForeground();
-
-    wxsManager.renderAll();
+    if (!hideUI) {
+        DrawForeground();
+        wxsManager.renderAll();
+    }
 
     if (eraserMode) {
         SDL_Rect eraserRect = { g_mouseX + 6, g_mouseY - 30, 28, 28 };
@@ -1083,6 +1084,10 @@ void MainEditor::takeInput(SDL_Event evt) {
 
     if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.keysym.sym == SDLK_q) {
         qModifier = evt.key.state;
+    }
+
+    if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_F1) {
+        hideUI = !hideUI;
     }
 
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {

@@ -11,6 +11,9 @@ public:
     bool enabled = true;
     DrawableManager subWidgets;
 
+    /// <summary>
+    /// Direct parent that should take over its focused state
+    /// </summary>
     Panel* parent = NULL;
     bool passThroughMouse = false;
 

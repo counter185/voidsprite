@@ -77,6 +77,7 @@ public:
     bool lastColorPickWasFromWholeImage = false;
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
+    bool hideUI = false;
 
     bool changesSinceLastSave = false;
     PlatformNativePathString lastConfirmedSavePath;
