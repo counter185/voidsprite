@@ -3,6 +3,7 @@
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
+#include "CollapsableDraggablePanel.h"
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
 #include "EditorSpritesheetPreview.h"
@@ -1002,16 +1003,18 @@ void MainEditor::setUpWidgets()
     currentPattern = g_patterns[0];
 
     colorPicker = new EditorColorPicker(this);
-    colorPicker->position.y = 50;
-    colorPicker->position.x = 10;
-    wxsManager.addDrawable(colorPicker);
+    CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
+    colorPickerPanel->position.y = 50;
+    colorPickerPanel->position.x = 10;
+    wxsManager.addDrawable(colorPickerPanel);
     colorPicker->setMainEditorColorRGB(pickedColor);
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 450;
-    brushPicker->position.x = 10;
-    wxsManager.addDrawable(brushPicker);
+    CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
+    brushPickerPanel->position.y = 450;
+    brushPickerPanel->position.x = 10;
+    wxsManager.addDrawable(brushPickerPanel);
 
     layerPicker = new EditorLayerPicker(this);
     layerPicker->position = XY{ 440, 80 };

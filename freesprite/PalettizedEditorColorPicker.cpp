@@ -66,6 +66,9 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
 
 void PalettizedEditorColorPicker::render(XY position)
 {
+    if (!enabled) {
+        return;
+    }
     uint32_t colorNow = (upcastCaller->pickedPaletteIndex == -1 || upcastCaller->pickedPaletteIndex >= upcastCaller->palette.size()) ? 0x00000000 : upcastCaller->palette[upcastCaller->pickedPaletteIndex];
     SDL_Color colorNowB = { (colorNow >> 16) & 0xff, (colorNow >> 8) & 0xff, colorNow & 0xff, (colorNow >> 24) & 0xff };
     hsv colorNowHSV = rgb2hsv({colorNowB.r / 255.0, colorNowB.g / 255.0, colorNowB.b / 255.0});
@@ -98,8 +101,6 @@ void PalettizedEditorColorPicker::render(XY position)
 
     pickedColorLabel->text = std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow);
     pickedColorLabel->color = {valCol.r, valCol.g, valCol.b, 0xff};
-
-    g_fnt->RenderString("COLOR PICKER", position.x + 5, position.y + 1);
 
     subWidgets.renderAll(position);
 }

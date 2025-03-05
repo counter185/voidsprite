@@ -253,6 +253,9 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
 
 void EditorColorPicker::render(XY position)
 {
+    if (!enabled) {
+        return; 
+    }
     SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, currentV }));
 
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
@@ -264,10 +267,10 @@ void EditorColorPicker::render(XY position)
     //SDL_RenderFillRect(g_rd, &r);
 
     SDL_Color valCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmin(currentV + 0.4, 1.0) }));
-    if (focused) {
+    if (thisOrParentFocused()) {
         SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y  }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y  }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
     }
 
     XY tabOrigin = xyAdd(position, colorTabs->position);
@@ -279,7 +282,7 @@ void EditorColorPicker::render(XY position)
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 
-    g_fnt->RenderString("COLOR PICKER", position.x + 5, position.y + 1);
+    //g_fnt->RenderString("COLOR PICKER", position.x + 5, position.y + 1);
 
     DraggablePanel::render(position);
 }

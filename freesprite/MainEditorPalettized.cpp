@@ -9,6 +9,7 @@
 #include "RPG2KTilemapPreviewScreen.h"
 #include "MinecraftBlockPreviewScreen.h"
 #include "FileIO.h"
+#include "CollapsableDraggablePanel.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -525,16 +526,18 @@ void MainEditorPalettized::setUpWidgets()
     currentPattern = g_patterns[0];
 
     colorPicker = new PalettizedEditorColorPicker(this);
-    colorPicker->position.y = 50;
-    colorPicker->position.x = 10;
-    wxsManager.addDrawable(colorPicker);
+    auto colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
+    colorPickerPanel->position.y = 50;
+    colorPickerPanel->position.x = 10;
+    wxsManager.addDrawable(colorPickerPanel);
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(pickedPaletteIndex);
     //regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 450;
-    brushPicker->position.x = 10;
-    wxsManager.addDrawable(brushPicker);
+    auto brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
+    brushPickerPanel->position.y = 450;
+    brushPickerPanel->position.x = 10;
+    wxsManager.addDrawable(brushPickerPanel);
 
     layerPicker = new PalettizedEditorLayerPicker(this);
     layerPicker->position = XY{ 440, 80 };

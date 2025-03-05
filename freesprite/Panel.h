@@ -11,6 +11,9 @@ public:
     bool enabled = true;
     DrawableManager subWidgets;
 
+    Panel* parent = NULL;
+    bool passThroughMouse = false;
+
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     void render(XY position) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
@@ -29,5 +32,9 @@ public:
     bool takesMouseWheelEvents() override { return true; }
 
     XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
+
+    bool parentFocused() { return parent != NULL && parent->focused; }
+    bool thisOrParentFocused() { return parent != NULL ? parentFocused() : focused; }
+    Timer64& thisOrParentFocusTimer() { return parent != NULL ? parent->focusTimer : focusTimer; }
 };
 

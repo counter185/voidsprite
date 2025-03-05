@@ -23,6 +23,8 @@ public:
 
 	Timer64 lastClick;
 
+	std::function<void(UIButton*)> onClickCallback = NULL;
+
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
 		return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
 	}

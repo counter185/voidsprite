@@ -137,18 +137,19 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 
 void EditorBrushPicker::render(XY position)
 {
+    if (!enabled) {
+        return;
+	}
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
 
     SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
     SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
     renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
-    if (focused) {
+    if (thisOrParentFocused()) {
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
     }
-
-    g_fnt->RenderString("TOOLS", position.x + 3, position.y + 1);
 
     patternMenuPanel->position = xyAdd({ wxWidth, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
 

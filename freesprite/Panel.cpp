@@ -3,7 +3,7 @@
 bool Panel::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
     if (enabled) {
-        return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight }) || subWidgets.mouseInAny(thisPositionOnScreen, mousePos);
+        return (!passThroughMouse && pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight })) || subWidgets.mouseInAny(thisPositionOnScreen, mousePos);
     }
     return false;
 }

@@ -9,6 +9,9 @@ void DraggablePanel::handleInput(SDL_Event evt, XY gPosOffset)
 
 void DraggablePanel::processDrag(SDL_Event evt)
 {
+    if (passThroughMouse) {
+        return;
+    }
     switch (evt.type) {
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:

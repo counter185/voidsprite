@@ -558,6 +558,9 @@
     <ClCompile Include="io_gim.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="CollapsableDraggablePanel.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1060,6 +1063,9 @@
     </ClInclude>
     <ClInclude Include="fills.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollapsableDraggablePanel.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -183,6 +183,7 @@
     <ClCompile Include="BrushRectFill.cpp" />
     <ClCompile Include="ButtonStartScreenSession.cpp" />
     <ClCompile Include="Canvas.cpp" />
+    <ClCompile Include="CollapsableDraggablePanel.cpp" />
     <ClCompile Include="CustomTemplate.cpp" />
     <ClCompile Include="discord_game_sdk\achievement_manager.cpp" />
     <ClCompile Include="discord_game_sdk\activity_manager.cpp" />
@@ -333,6 +334,7 @@
     <ClInclude Include="BrushRectFill.h" />
     <ClInclude Include="ButtonStartScreenSession.h" />
     <ClInclude Include="Canvas.h" />
+    <ClInclude Include="CollapsableDraggablePanel.h" />
     <ClInclude Include="colormodels.h" />
     <ClInclude Include="CustomTemplate.h" />
     <ClInclude Include="discord_game_sdk\achievement_manager.h" />

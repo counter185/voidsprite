@@ -84,7 +84,10 @@ void UIButton::renderTooltip(XY pos)
 void UIButton::click()
 {
 	lastClick.start();
-	if (callback != NULL) {
+    if (onClickCallback != NULL) {
+        onClickCallback(this);
+    } 
+	else if (callback != NULL) {
 		callback->eventButtonPressed(callback_id);
 	}
 }
