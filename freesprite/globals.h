@@ -5,7 +5,7 @@
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
 
-//macro redefinition warning
+//macro redefinition warning, remove this line after fully migrating to sdl3
 #pragma warning(disable : 4005)
 #endif
 
@@ -222,8 +222,8 @@ struct NamedOperation {
 template <typename T>
 struct NavbarSection {
     std::string name;
-    std::vector<SDL_Keycode> order;
-    std::map<SDL_Keycode, NamedOperation<T>> actions;
+    std::vector<SDL_Scancode> order;
+    std::map<SDL_Scancode, NamedOperation<T>> actions;
     SDL_Texture* icon = NULL;
     UIButton* button = NULL;
 };

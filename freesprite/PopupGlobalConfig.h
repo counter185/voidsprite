@@ -17,14 +17,14 @@ private:
     bool bindingKey = false;
     int bindingKeyIndex = -1;
     std::vector<SDL_Keycode> reservedKeys = {
-        SDLK_LCTRL,
-        SDLK_RCTRL,
-        SDLK_LALT,
-        SDLK_LEFTBRACKET,
-        SDLK_RIGHTBRACKET,
-        SDLK_Q,
-        SDLK_E,
-        SDLK_F2
+        SDL_SCANCODE_LCTRL,
+        SDL_SCANCODE_RCTRL,
+        SDL_SCANCODE_LALT,
+        SDL_SCANCODE_LEFTBRACKET,
+        SDL_SCANCODE_RIGHTBRACKET,
+        SDL_SCANCODE_Q,
+        SDL_SCANCODE_E,
+        SDL_SCANCODE_F2
     };
 public:
     PopupGlobalConfig();

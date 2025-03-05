@@ -240,27 +240,27 @@ void SplitSessionEditor::setupWidgets()
 
     navbar = new ScreenWideNavBar<SplitSessionEditor*>(this, {
         {
-            SDLK_F,
+            SDL_SCANCODE_F,
             {
                 "File",
-                {SDLK_S, SDLK_D, SDLK_F, SDLK_C},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_C},
                 {
-                    {SDLK_C, { "Close",
+                    {SDL_SCANCODE_C, { "Close",
                         [](SplitSessionEditor* screen) {
                             screen->closeNextTick = true;
                         }
                     }},
-                    {SDLK_S, { "Save",
+                    {SDL_SCANCODE_S, { "Save",
                         [](SplitSessionEditor* screen) {
                             screen->trySave();
                         }
                     }},
-                    {SDLK_D, { "Save and open in editor",
+                    {SDL_SCANCODE_D, { "Save and open in editor",
                         [](SplitSessionEditor* screen) {
                             screen->trySave(true);
                         }
                     }},
-                    {SDLK_F, { "Set output file location",
+                    {SDL_SCANCODE_F, { "Set output file location",
                         [](SplitSessionEditor* screen) {
                             platformTrySaveOtherFile(screen, {{".voidspsn", "Split session file"}}, "set split session file location", 0);
                         }
@@ -269,7 +269,7 @@ void SplitSessionEditor::setupWidgets()
                 g_iconNavbarTabFile
             }
         }
-    }, {SDLK_F});
+    }, {SDL_SCANCODE_F});
     wxsManager.addDrawable(navbar);
 
     recalcRelativePaths();

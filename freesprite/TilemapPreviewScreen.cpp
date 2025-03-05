@@ -14,36 +14,36 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     navbar = new ScreenWideNavBar<TilemapPreviewScreen*>(this,
         {
             {
-                SDLK_F,
+                SDL_SCANCODE_F,
                 {
                     "File",
-                    {SDLK_O, SDLK_S, SDLK_Z, SDLK_X, SDLK_C},
+                    {SDL_SCANCODE_O, SDL_SCANCODE_S, SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C},
                     {
-                        {SDLK_O, { "Load layout from file",
+                        {SDL_SCANCODE_O, { "Load layout from file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "load tile layout", EVENT_TILEMAP_LOADLAYOUT);
                                 }
                             }
                         },
-                        {SDLK_S, { "Save layout to file",
+                        {SDL_SCANCODE_S, { "Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "save tile layout", EVENT_TILEMAP_SAVELAYOUT);
                                 }
                             }
                         },
-                        {SDLK_Z, { "Render all layers to image",
+                        {SDL_SCANCODE_Z, { "Render all layers to image",
                                 [](TilemapPreviewScreen* screen) {
                                     screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE);
                                 }
                             }
                         },
-                        {SDLK_X, { "Render all layers to separate images",
+                        {SDL_SCANCODE_X, { "Render all layers to separate images",
                                 [](TilemapPreviewScreen* screen) {
                                     screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES);
                                 }
                             }
                         },
-                        {SDLK_C, { "Render current layer to image",
+                        {SDL_SCANCODE_C, { "Render current layer to image",
                                 [](TilemapPreviewScreen* screen) {
                                     screen->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE);
                                 }
@@ -54,12 +54,12 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                 }
             }, 
             {
-                SDLK_E,
+                SDL_SCANCODE_E,
                 {
                     "Edit",
                     {},
                     {
-                        {SDLK_R, { "Resize tilemap",
+                        {SDL_SCANCODE_R, { "Resize tilemap",
                                 [](TilemapPreviewScreen* screen) {
                                     g_addPopup(new PopupTileGeneric(screen, "Resize tilemap", "Enter the new size of the tilemap (in tiles)", screen->tilemapDimensions, EVENT_TILEMAP_RESIZE));
                                 }
@@ -69,7 +69,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     g_iconNavbarTabEdit
                 }
             }
-        }, { SDLK_F, SDLK_E });
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_E });
     wxsManager.addDrawable(navbar);
 
     PanelTilemapPreview* panel = new PanelTilemapPreview(this);
@@ -293,11 +293,11 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_KEYDOWN:
-            if (evt.key.scancode == SDLK_TAB) {
+            if (evt.key.scancode == SDL_SCANCODE_TAB) {
                 tileSelectOpen = !tileSelectOpen;
                 tileSelectTimer.start();
             }
-            else if (evt.key.scancode == SDLK_LALT) {
+            else if (evt.key.scancode == SDL_SCANCODE_LALT) {
                 wxsManager.forceFocusOn(navbar);
             }
             break;

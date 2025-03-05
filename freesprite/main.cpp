@@ -538,7 +538,7 @@ int main(int argc, char** argv)
                     //return 0;
                     break;
                 case SDL_KEYDOWN:
-                    if (evt.key.scancode == SDLK_LEFTBRACKET) {
+                    if (evt.key.scancode == SDL_SCANCODE_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(0);
@@ -548,7 +548,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDLK_RIGHTBRACKET) {
+                    else if (evt.key.scancode == SDL_SCANCODE_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(screenStack.size() - 1);
@@ -558,7 +558,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDLK_W) {
+                    else if (evt.key.scancode == SDL_SCANCODE_W) {
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 if (favourite && fav_screen < screenStack.size()) {
@@ -572,18 +572,18 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDLK_F11) {
+                    else if (evt.key.scancode == SDL_SCANCODE_F11) {
                         fullscreen = !fullscreen;
                         SDL_SetWindowFullscreen(g_wd, fullscreen);
                         screenSwitchTimer.start();
                     }
-                    else if (evt.key.scancode == SDLK_EQUALS){
+                    else if (evt.key.scancode == SDL_SCANCODE_EQUALS){
                         if (g_ctrlModifier) {
                             renderScale++;
                             UpdateViewportScaler();
                         }
                     }
-                    else if (evt.key.scancode == SDLK_MINUS){
+                    else if (evt.key.scancode == SDL_SCANCODE_MINUS){
                         if (g_ctrlModifier){
                             if (renderScale-- <= 1){
                                 renderScale = 1;

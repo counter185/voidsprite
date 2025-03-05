@@ -67,14 +67,14 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 {
 	if (evt.type == SDL_KEYDOWN) {
 		switch (evt.key.scancode) {
-			case SDLK_TAB:
+			case SDL_SCANCODE_TAB:
 				break;
-			case SDLK_RETURN:
+			case SDL_SCANCODE_RETURN:
 				if (callback != NULL) {
 					callback->eventTextInputConfirm(callback_id, text);
 				}
 				break;
-			case SDLK_BACKSPACE:
+			case SDL_SCANCODE_BACKSPACE:
 				if (!text.empty()) {
 					text = text.substr(0, text.size() - 1);
 					if (callback != NULL) {
@@ -82,7 +82,7 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 					}
 				}
 				break;
-			case SDLK_DELETE:
+			case SDL_SCANCODE_DELETE:
 				text = "";
 				break;
 		}

@@ -80,7 +80,7 @@ void StartScreen::takeInput(SDL_Event evt)
             case SDL_MOUSEWHEEL:
                 break;
             case SDL_KEYDOWN:
-                if (evt.key.scancode == SDLK_V && g_ctrlModifier) {
+                if (evt.key.scancode == SDL_SCANCODE_V && g_ctrlModifier) {
                     tryOpenImageFromClipboard();
                 }
                 break;

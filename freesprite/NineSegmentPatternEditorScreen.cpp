@@ -12,18 +12,18 @@ NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* paren
     navbar = new ScreenWideNavBar<NineSegmentPatternEditorScreen*>(this,
         {
             {
-                SDLK_F,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_C, { "Close",
+                        {SDL_SCANCODE_C, { "Close",
                                 [](NineSegmentPatternEditorScreen* screen) {
                                     screen->closeNextTick = true;
                                 }
                             }
                         },
-                        {SDLK_S, { "Export to 9-segment pattern",
+                        {SDL_SCANCODE_S, { "Export to 9-segment pattern",
                                 [](NineSegmentPatternEditorScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".void9sp", "9-segment pattern file"} }, "save 9-segment pattern", EVENT_9SPEDITOR_SAVE);
                                 }
@@ -33,7 +33,7 @@ NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* paren
                     g_iconNavbarTabFile
                 }
             },
-        }, { SDLK_F });
+        }, { SDL_SCANCODE_F });
     wxsManager.addDrawable(navbar);
 }
 

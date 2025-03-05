@@ -21,18 +21,18 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     navbar = new ScreenWideNavBar<RPG2KTilemapPreviewScreen*>(this,
         {
             {
-                SDLK_F,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_O, { "Load layout from file",
+                        {SDL_SCANCODE_O, { "Load layout from file",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     platformTryLoadOtherFile(screen, {{".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                                 }
                             }
                         },
-                        {SDLK_E, { "Render to image",
+                        {SDL_SCANCODE_E, { "Render to image",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     std::vector<std::pair<std::string, std::string>> formats;
                                     for (auto f : g_fileExporters) {
@@ -42,7 +42,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                                 }
                             }
                         },
-                        /*{SDLK_S, {"Save layout to file",
+                        /*{SDL_SCANCODE_S, {"Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"} }, "Save tile layout", EVENT_OTHERFILE_SAVEFILE);
                                 }
@@ -53,12 +53,12 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                 }
             },
             {
-                SDLK_V,
+                SDL_SCANCODE_V,
                 {
                     "View",
                     {},
                     {
-                        {SDLK_E, { "Toggle Event display",
+                        {SDL_SCANCODE_E, { "Toggle Event display",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     screen->eventViewMode = (LMUEventViewMode)(((int)screen->eventViewMode + 1) % 4);
                                     switch (screen->eventViewMode) {
@@ -78,7 +78,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                                 }
                             }
                         },
-                        {SDLK_R, { "Recenter canvas",
+                        {SDL_SCANCODE_R, { "Recenter canvas",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     screen->RecenterCanvas();
                                 }
@@ -88,7 +88,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                     g_iconNavbarTabView 
                 }
             }
-        }, { SDLK_F, SDLK_V });
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
     lowerLayerData = new uint16_t[dimensions.x * dimensions.y];

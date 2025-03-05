@@ -107,11 +107,11 @@ void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
             }
         }
         else if (evt.type == SDL_KEYDOWN) {
-            if (evt.key.scancode == SDLK_ESCAPE) {
+            if (evt.key.scancode == SDL_SCANCODE_ESCAPE) {
                 isOpen = false;
                 openTimer.start();
             }
-            else if (evt.key.scancode == SDLK_SPACE) {
+            else if (evt.key.scancode == SDL_SCANCODE_SPACE) {
                 click();
             }
         }

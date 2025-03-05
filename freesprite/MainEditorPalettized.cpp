@@ -262,48 +262,48 @@ void MainEditorPalettized::setUpWidgets()
 {
     mainEditorKeyActions = {
         {
-            SDLK_F,
+            SDL_SCANCODE_F,
             {
                 "File",
-                {SDLK_S, SDLK_D, SDLK_E, SDLK_A, SDLK_R, SDLK_P, SDLK_C},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_C},
                 {
-                    {SDLK_D, { "Save as",
+                    {SDL_SCANCODE_D, { "Save as",
                             [](MainEditor* editor) {
                                 editor->trySaveAsImage();
                             }
                         }
                     },
-                    {SDLK_S, { "Save",
+                    {SDL_SCANCODE_S, { "Save",
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
                             }
                         }
                     },
-                    {SDLK_E, { "Export as RGB",
+                    {SDL_SCANCODE_E, { "Export as RGB",
                             [](MainEditor* editor) {
                                 ((MainEditorPalettized*)editor)->tryExportRGB();
                             }
                         }
                     },
-                    {SDLK_A, { "Export tiles individually",
+                    {SDL_SCANCODE_A, { "Export tiles individually",
                             [](MainEditor* editor) {
                                 editor->exportTilesIndividually();
                             }
                         }
                     },
-                    {SDLK_C, { "Close",
+                    {SDL_SCANCODE_C, { "Close",
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
                         }
                     },
-                    {SDLK_R, { "Open in RGB editor",
+                    {SDL_SCANCODE_R, { "Open in RGB editor",
                             [](MainEditor* editor) {
                                 ((MainEditorPalettized*)editor)->openInNormalRGBEditor();
                             }
                         }
                     },
-                    {SDLK_P, { "Preferences",
+                    {SDL_SCANCODE_P, { "Preferences",
                             [](MainEditor* screen) {
                                 g_addPopup(new PopupGlobalConfig());
                             }
@@ -314,48 +314,48 @@ void MainEditorPalettized::setUpWidgets()
             }
         },
         {
-            SDLK_E,
+            SDL_SCANCODE_E,
             {
                 "Edit",
-                {SDLK_Z, SDLK_R, SDLK_X, SDLK_Y, SDLK_S, SDLK_C, SDLK_V, SDLK_B, SDLK_N},
+                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N},
                 {
-                    {SDLK_Z, { "Undo",
+                    {SDL_SCANCODE_Z, { "Undo",
                             [](MainEditor* editor) {
                                 editor->undo();
                             }
                         }
                     },
-                    {SDLK_R, { "Redo",
+                    {SDL_SCANCODE_R, { "Redo",
                             [](MainEditor* editor) {
                                 editor->redo();
                             }
                         }
                     },
-                    {SDLK_X, { "Toggle symmetry: X",
+                    {SDL_SCANCODE_X, { "Toggle symmetry: X",
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
                             }
                         }
                     },
-                    {SDLK_Y, { "Toggle symmetry: Y",
+                    {SDL_SCANCODE_Y, { "Toggle symmetry: Y",
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
                             }
                         }
                     },
-                    {SDLK_S, { "Deselect",
+                    {SDL_SCANCODE_S, { "Deselect",
                             [](MainEditor* editor) {
                                 editor->isolateEnabled = false;
                             }
                         }
                     },
-                    {SDLK_C, { "Resize canvas",
+                    {SDL_SCANCODE_C, { "Resize canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
-                    {SDLK_V, { "Resize canvas (per tile)",
+                    {SDL_SCANCODE_V, { "Resize canvas (per tile)",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -366,7 +366,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_B, { "Resize canvas (per n.tiles)",
+                    {SDL_SCANCODE_B, { "Resize canvas (per n.tiles)",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -377,7 +377,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_N, { "Integer scale canvas",
+                    {SDL_SCANCODE_N, { "Integer scale canvas",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
@@ -388,36 +388,36 @@ void MainEditorPalettized::setUpWidgets()
             }
         },
         {
-            SDLK_L,
+            SDL_SCANCODE_L,
             {
                 "Layer",
                 {},
                 {
-                    {SDLK_F, { "Flip current layer: X axis",
+                    {SDL_SCANCODE_F, { "Flip current layer: X axis",
                             [](MainEditor* editor) {
                                 editor->layer_flipHorizontally();
                             }
                         }
                     },
-                    {SDLK_G, { "Flip current layer: Y axis",
+                    {SDL_SCANCODE_G, { "Flip current layer: Y axis",
                             [](MainEditor* editor) {
                                 editor->layer_flipVertically();
                             }
                         }
                     },
-                    {SDLK_R, { "Rename current layer",
+                    {SDL_SCANCODE_R, { "Rename current layer",
                             [](MainEditor* editor) {
                                 editor->layer_promptRename();
                             }
                         }
                     },
-                    {SDLK_S, { "Select layer alpha",
+                    {SDL_SCANCODE_S, { "Select layer alpha",
                             [](MainEditor* editor) {
                                 editor->layer_selectCurrentAlpha();
                             }
                         }
                     },
-                    {SDLK_O, { "Outline current layer",
+                    {SDL_SCANCODE_O, { "Outline current layer",
                             [](MainEditor* editor) {
                                 editor->layer_outline(false);
                             }
@@ -428,18 +428,18 @@ void MainEditorPalettized::setUpWidgets()
             }
         },
         {
-            SDLK_V,
+            SDL_SCANCODE_V,
             {
                 "View",
                 {},
                 {
-                    {SDLK_R, { "Recenter canvas",
+                    {SDL_SCANCODE_R, { "Recenter canvas",
                             [](MainEditor* editor) {
                                 editor->recenterCanvas();
                             }
                         }
                     },
-                    {SDLK_B, { "Toggle background color",
+                    {SDL_SCANCODE_B, { "Toggle background color",
                             [](MainEditor* editor) {
                                 editor->backgroundColor.r = ~editor->backgroundColor.r;
                                 editor->backgroundColor.g = ~editor->backgroundColor.g;
@@ -447,7 +447,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_C, { "Toggle comments",
+                    {SDL_SCANCODE_C, { "Toggle comments",
                             [](MainEditor* editor) {
                                 (*(int*)&editor->commentViewMode)++;
                                 (*(int*)&editor->commentViewMode) %= 3;
@@ -459,13 +459,13 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_G, { "Set pixel grid...",
+                    {SDL_SCANCODE_G, { "Set pixel grid...",
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupSetEditorPixelGrid(editor, "Set pixel grid", "Enter grid size <w>x<h>:"));
                             }
                         }
                     },
-                    {SDLK_S, { "Open spritesheet preview...",
+                    {SDL_SCANCODE_S, { "Open spritesheet preview...",
                             [](MainEditor* editor) {
                                 //if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
@@ -481,7 +481,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_T, { "Open tileset preview...",
+                    {SDL_SCANCODE_T, { "Open tileset preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -493,7 +493,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
+                    {SDL_SCANCODE_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
                                 if (!xyEqual(editor->canvas.dimensions, {480,256})) {
                                     g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
@@ -505,7 +505,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDLK_N, { "Open cube preview...",
+                    {SDL_SCANCODE_N, { "Open cube preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
@@ -544,7 +544,7 @@ void MainEditorPalettized::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
-    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDLK_F, SDLK_E, SDLK_L, SDLK_V });
+    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 }
 

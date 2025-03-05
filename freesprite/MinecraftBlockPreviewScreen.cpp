@@ -22,18 +22,18 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
     navbar = new ScreenWideNavBar<MinecraftBlockPreviewScreen*>(this,
         {
             {
-                SDLK_F,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_R, { "Render to separate workspace",
+                        {SDL_SCANCODE_R, { "Render to separate workspace",
                                 [](MinecraftBlockPreviewScreen* screen) {
                                     g_addPopup(new PopupTileGeneric(screen, "Render to workspace", "Image dimensions:", {512,512}, 3));
                                 }
                             }
                         },
-                        {SDLK_C, { "Close",
+                        {SDL_SCANCODE_C, { "Close",
                                 [](MinecraftBlockPreviewScreen* screen) {
                                     screen->closeNextTick = true;
                                 }
@@ -43,7 +43,7 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
                     g_iconNavbarTabFile
                 }
             },
-        }, { SDLK_F });
+        }, { SDL_SCANCODE_F });
     wxsManager.addDrawable(navbar);
 }
 
@@ -262,7 +262,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
             for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha;
+                vertices[i].color.a = l->layerAlpha / 255.0f;
             }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesTop, 6);
         }
@@ -293,7 +293,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
             for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha;
+                vertices[i].color.a = l->layerAlpha / 255.0f;
             }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesSideLeft, 6);
         }
@@ -324,7 +324,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
             for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha;
+                vertices[i].color.a = l->layerAlpha / 255.0f;
             }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesSideRight, 6);
         }

@@ -97,7 +97,7 @@ public:
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }
         }
-        else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDLK_TAB) {
+        else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
             tabs[openTab].wxs.tryFocusOnNextTabbable();
         }
         if (tabButtons.anyFocused()) {

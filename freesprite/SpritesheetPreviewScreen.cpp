@@ -26,12 +26,12 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     navbar = new ScreenWideNavBar<SpritesheetPreviewScreen*>(this,
         {
             {
-                SDLK_F,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_C, { "Close",
+                        {SDL_SCANCODE_C, { "Close",
                                 [](SpritesheetPreviewScreen* screen) {
                                     screen->closeNextTick = true;
                                 }
@@ -41,7 +41,7 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
                     g_iconNavbarTabFile
                 }
             },
-        }, { SDLK_F });
+        }, { SDL_SCANCODE_F });
     wxsManager.addDrawable(navbar);
 
 

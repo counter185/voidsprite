@@ -208,13 +208,13 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
     if (bindingKeyIndex != -1) {
         if (evt.type == SDL_KEYDOWN) {
-            int targetKey = evt.key.scancode == SDLK_LSHIFT ? SDLK_UNKNOWN : evt.key.scancode;
-            if (targetKey != SDLK_ESCAPE) {
+            int targetKey = evt.key.scancode == SDL_SCANCODE_LSHIFT ? SDL_SCANCODE_UNKNOWN : evt.key.scancode;
+            if (targetKey != SDL_SCANCODE_ESCAPE) {
                 //find any other keybinds that use this key and reset them
-                if (targetKey != SDLK_UNKNOWN && std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) == reservedKeys.end()) {
+                if (targetKey != SDL_SCANCODE_UNKNOWN && std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) == reservedKeys.end()) {
                     for (auto& kb : keybindButtons) {
                         if (kb.first.target != keybindButtons[bindingKeyIndex].first.target && *kb.first.target == targetKey) {
-                            *kb.first.target = SDLK_UNKNOWN;
+                            *kb.first.target = SDL_SCANCODE_UNKNOWN;
                             updateKeybindButtonText(kb);
                         }
                     }

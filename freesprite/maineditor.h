@@ -110,7 +110,7 @@ public:
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;
 
-    std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
+    std::map<SDL_Scancode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
     std::vector<uint32_t> lastColors;
 

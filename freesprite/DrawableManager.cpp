@@ -51,7 +51,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             }
         }
     }
-    else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDLK_TAB) {
+    else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             if (wxs.anyFocused()) {
