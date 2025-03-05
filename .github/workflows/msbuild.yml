@@ -84,7 +84,7 @@ jobs:
       run: |
         sudo sed -i '/deb-src/s/^# //' /etc/apt/sources.list
         sudo apt-get update
-        sudo apt-get build-dep libsdl3 libsdl3-ttf libsdl3-image
+        sudo apt-get build-dep libsdl2 libsdl2-ttf libsdl2-image
     
     - name: install latest meson
       run: pip3 install --user meson
