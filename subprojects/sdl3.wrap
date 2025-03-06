@@ -1,9 +1,0 @@
-[wrap-file]
-directory = SDL3-3.2.8
-source_url = https://github.com/libsdl-org/SDL/releases/download/release-3.2.8/SDL3-3.2.8.tar.gz
-source_filename = SDL3-3.2.8.tar.gz
-source_hash = 13388FABB361DE768ECDF2B65E52BB27D1054CAE6CCB6942BA926E378E00DB03
-patch_directory = sdl3
-
-[provide]
-sdl3 = sdl3_dep
