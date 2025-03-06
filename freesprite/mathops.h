@@ -206,6 +206,9 @@ public:
             addScanline({ {r.x,r.y + y}, {r.w,1} });
         }
     }
+    void addOtherMap(ScanlineMap other) {
+        other.forEachScanline([this](ScanlineMapElement e) { addScanline(e); });
+    }
     bool pointExists(XY point) {
         std::vector<ScanlineMapElement>& r = scanlineMap[point.y];
         for (ScanlineMapElement& sme : r) {

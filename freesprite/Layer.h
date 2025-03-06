@@ -371,5 +371,7 @@ public:
     u8* resizeByTileCount(XY tileSizesNow, XY newTileCount);
     u8* integerScale(XY scale);
     u8* integerDownscale(XY scale);
+
+    ScanlineMap wandSelectAt(XY pos);
 };
 
