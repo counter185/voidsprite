@@ -72,15 +72,30 @@ public:
             SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
         }
         SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
-        memcpy(pixels, pixelData, w * h * 4);
+        if (pitch == w*4) {
+            memcpy(pixels, pixelData, w * h * 4);
+        } else {
+            for (int y = 0; y < h; y++) {
+                memcpy(pixels + y * pitch, pixelData + y * w * 4, w* 4);
+            }
+        }
+        //memcpy(pixels, pixelData, w * h * 4);
 
+        //todo respect the pitch in the below too
         if (colorKeySet) {
-            uint32_t* px32 = (uint32_t*)pixelData;
-            for (uint64_t p = 0; p < w * h; p++) {
+            u32* px32 = (u32*)pixelData;
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if ((ARRAY2DPOINT(px32, x,y, w) & 0xffffff) == (colorKey & 0xFFFFFF)) {
+                        ARRAY2DPOINT(pixels, x*4+3, y, pitch) = 0;
+                    }
+                }
+            }
+            /*for (u64 p = 0; p < w * h; p++) {
                 if ((px32[p] & 0xffffff) == (colorKey & 0xFFFFFF)) {
                     pixels[p * 4+3] = 0;
                 }
-            }
+            }*/
         }
         SDL_UnlockTexture(tex);
         layerDirty = false;
@@ -124,7 +139,7 @@ public:
             uint32_t* px32 = (uint32_t*)pixels;
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    px32[x + (y * w)] = getVisualPixelAt(XY{ x,y });
+                    ARRAY2DPOINT(px32, x,y, pitch/4) = getVisualPixelAt(XY{ x,y });
                 }
             }
         }
