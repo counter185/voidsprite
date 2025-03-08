@@ -1137,9 +1137,13 @@ void MainEditor::takeInput(SDL_Event evt) {
                     }
                 }
                 break;
-            case SDL_MOUSEMOTION:
-                RecalcMousePixelTargetPoint((int)(evt.motion.x), (int)(evt.motion.y));
-                if (middleMouseHold) {
+            case SDL_EVENT_PEN_MOTION:
+            case SDL_EVENT_MOUSE_MOTION:
+                XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
+                                                         : XY{(int)evt.motion.x, (int)evt.motion.y};
+
+                RecalcMousePixelTargetPoint(xy.x, xy.y);
+                if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
                     canvas.panCanvas({
                         (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
                         (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)

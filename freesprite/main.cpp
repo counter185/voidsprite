@@ -302,6 +302,8 @@ int main(int argc, char** argv)
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+    //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
+    SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
     SDL_Surface* cursorSrf = IMG_Load(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
     if (cursorSrf != NULL) {
@@ -536,6 +538,10 @@ int main(int argc, char** argv)
                 case SDL_MOUSEMOTION:
                     g_mouseX = (int)(evt.motion.x);
                     g_mouseY = (int)(evt.motion.y);
+                    break;
+                case SDL_EVENT_PEN_MOTION:
+                    g_mouseX = (int)(evt.pmotion.x);
+                    g_mouseY = (int)(evt.pmotion.y);
                     break;
             }
 
