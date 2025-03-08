@@ -68,10 +68,8 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 {
     if (evt.type == SDL_DROPFILE) {
 
-		std::string path = std::string(evt.drop.file);
+		std::string path = std::string(evt.drop.data);
 		PlatformNativePathString outPath = convertStringOnWin32(path);
-
-		SDL_free(evt.drop.file);
 
 		MainEditor* session = loadAnyIntoSession(path);
 		FileExporter* exporter = g_fileExporters[exporterIndex];

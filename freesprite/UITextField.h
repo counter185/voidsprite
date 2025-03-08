@@ -18,11 +18,11 @@ public:
 
 	void focusIn() override {
 		Drawable::focusIn();
-		SDL_StartTextInput();
+		SDL_StartTextInput(g_wd);
 	}
 	void focusOut() override {
 		Drawable::focusOut();
-		SDL_StopTextInput();
+		SDL_StopTextInput(g_wd);
 	}
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {

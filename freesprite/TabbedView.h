@@ -92,12 +92,12 @@ public:
 
     void handleInput(SDL_Event evt, XY gPosOffset) override {
 
-        if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.state) {
-            if (!tabButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, gPosOffset)) {
-                tabs[openTab].wxs.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
+        if (evt.type == SDL_MOUSEBUTTONDOWN && (evt.button.button == 1 || evt.button.button == 3) && evt.button.down) {
+            if (!tabButtons.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, gPosOffset)) {
+                tabs[openTab].wxs.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }
         }
-        else if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_TAB) {
+        else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
             tabs[openTab].wxs.tryFocusOnNextTabbable();
         }
         if (tabButtons.anyFocused()) {

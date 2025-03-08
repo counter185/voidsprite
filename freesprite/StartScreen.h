@@ -163,36 +163,36 @@ public:
         navbar = new ScreenWideNavBar<StartScreen*>(this, 
         {
             {
-                SDLK_f,
+                SDL_SCANCODE_F,
                 {
                     "File",
-                    {SDLK_o, SDLK_v, SDLK_e, SDLK_s, SDLK_p},
+                    {SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_P},
                     {
-                        {SDLK_o, { "Open",
+                        {SDL_SCANCODE_O, { "Open",
                                 [](StartScreen* screen) {
                                     screen->openImageLoadDialog();
                                 }
                             }
                         },
-                        {SDLK_v, { "Open from clipboard",
+                        {SDL_SCANCODE_V, { "Open from clipboard",
                                 [](StartScreen* screen) {
                                     screen->tryOpenImageFromClipboard();
                                 }
                             }
                         },
-                        {SDLK_e, { "Quick Convert",
+                        {SDL_SCANCODE_E, { "Quick Convert",
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupQuickConvert("Quick Convert", "Select the format to export the image to.\nDrag a file into this window to convert to the same directory."));
                                 }
                             }
                         },
-                        {SDLK_s, { "New split session...",
+                        {SDL_SCANCODE_S, { "New split session...",
                                 [](StartScreen* screen) {
                                     platformTrySaveOtherFile(screen, {{".voidspsn", "Split session file"}}, "create new split session", 0);
                                 }
                             }
                         },
-                        {SDLK_p, { "Preferences",
+                        {SDL_SCANCODE_P, { "Preferences",
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupGlobalConfig());
                                 }
@@ -202,7 +202,7 @@ public:
                     g_iconNavbarTabFile
                 }
             }
-        }, { SDLK_f });
+        }, { SDL_SCANCODE_F });
         wxsManager.addDrawable(navbar);
 
 

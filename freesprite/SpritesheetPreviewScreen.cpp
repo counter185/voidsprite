@@ -26,12 +26,12 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     navbar = new ScreenWideNavBar<SpritesheetPreviewScreen*>(this,
         {
             {
-                SDLK_f,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_c, { "Close",
+                        {SDL_SCANCODE_C, { "Close",
                                 [](SpritesheetPreviewScreen* screen) {
                                     screen->closeNextTick = true;
                                 }
@@ -41,7 +41,7 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
                     g_iconNavbarTabFile
                 }
             },
-        }, { SDLK_f });
+        }, { SDL_SCANCODE_F });
     wxsManager.addDrawable(navbar);
 
 
@@ -180,9 +180,9 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
                 }
                 else if (evt.button.button == SDL_BUTTON_LEFT) {
                     if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0
-                        && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({evt.button.x, evt.button.y}))) 
+                        && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y}))) 
                     {
-                        XY tile = canvas.getTilePosAt(XY{ evt.button.x, evt.button.y }, caller->tileDimensions);
+                        XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->tileDimensions);
                         sprites.push_back(tile);
                         addTimelineButton();
                     }
@@ -195,7 +195,7 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
                 break;
             case SDL_MOUSEMOTION:
                 if (scrollingCanvas) {
-                    canvas.panCanvas(XY{ evt.motion.xrel, evt.motion.yrel });
+                    canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
                 }
                 break;
             case SDL_MOUSEWHEEL:

@@ -3,6 +3,9 @@
 #include "FontRenderer.h"
 #include "shiftjis.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 bool pointInBox(XY point, SDL_Rect rect) {
     XY normalP = { point.x - rect.x, point.y - rect.y };
     return normalP.x >= 0 && normalP.x < rect.w
@@ -485,13 +488,17 @@ void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_
 {
     SDL_Vertex verts[4];
     verts[0].position = xytofp({ bounds.x, bounds.y });
-    verts[0].color = { (uint8_t)((colorUL & 0xFF0000) >> 16), (uint8_t)((colorUL & 0x00FF00) >> 8), (uint8_t)(colorUL & 0x0000FF), (uint8_t)((colorUL & 0xFF000000) >> 24)};
+    verts[0].color = toFColor({(uint8_t)((colorUL & 0xFF0000) >> 16), (uint8_t)((colorUL & 0x00FF00) >> 8),
+                              (uint8_t)(colorUL & 0x0000FF), (uint8_t)((colorUL & 0xFF000000) >> 24)});
     verts[1].position = xytofp({ bounds.x + bounds.w, bounds.y });
-    verts[1].color = { (uint8_t)((colorUR & 0xFF0000) >> 16), (uint8_t)((colorUR & 0x00FF00) >> 8), (uint8_t)(colorUR & 0x0000FF), (uint8_t)((colorUR & 0xFF000000) >> 24) };
+    verts[1].color = toFColor({(uint8_t)((colorUR & 0xFF0000) >> 16), (uint8_t)((colorUR & 0x00FF00) >> 8),
+                              (uint8_t)(colorUR & 0x0000FF), (uint8_t)((colorUR & 0xFF000000) >> 24)});
     verts[2].position = xytofp({ bounds.x, bounds.y + bounds.h });
-    verts[2].color = { (uint8_t)((colorDL & 0xFF0000) >> 16), (uint8_t)((colorDL & 0x00FF00) >> 8), (uint8_t)(colorDL & 0x0000FF), (uint8_t)((colorDL & 0xFF000000) >> 24) };
+    verts[2].color = toFColor({(uint8_t)((colorDL & 0xFF0000) >> 16), (uint8_t)((colorDL & 0x00FF00) >> 8),
+                              (uint8_t)(colorDL & 0x0000FF), (uint8_t)((colorDL & 0xFF000000) >> 24)});
     verts[3].position = xytofp({ bounds.x + bounds.w, bounds.y + bounds.h });
-    verts[3].color = { (uint8_t)((colorDR & 0xFF0000) >> 16), (uint8_t)((colorDR & 0x00FF00) >> 8), (uint8_t)(colorDR & 0x0000FF), (uint8_t)((colorDR & 0xFF000000) >> 24) };
+    verts[3].color = toFColor({(uint8_t)((colorDR & 0xFF0000) >> 16), (uint8_t)((colorDR & 0x00FF00) >> 8),
+                              (uint8_t)(colorDR & 0x0000FF), (uint8_t)((colorDR & 0xFF000000) >> 24)});
 
     int indices[6] = { 0, 1, 2, 1, 3, 2 };
     SDL_RenderGeometry(g_rd, NULL, verts, 4, indices, 6);
@@ -502,13 +509,17 @@ void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t color
 {
     SDL_Vertex verts[4];
     verts[0].position = xytofp(ul);
-    verts[0].color = { (uint8_t)((colorUL & 0xFF0000) >> 16), (uint8_t)((colorUL & 0x00FF00) >> 8), (uint8_t)(colorUL & 0x0000FF), (uint8_t)((colorUL & 0xFF000000) >> 24)};
+    verts[0].color = toFColor({(u8)((colorUL & 0xFF0000) >> 16), (u8)((colorUL & 0x00FF00) >> 8),
+                              (u8)(colorUL & 0x0000FF), (u8)((colorUL & 0xFF000000) >> 24)});
     verts[1].position = xytofp(ur);
-    verts[1].color = { (uint8_t)((colorUR & 0xFF0000) >> 16), (uint8_t)((colorUR & 0x00FF00) >> 8), (uint8_t)(colorUR & 0x0000FF), (uint8_t)((colorUR & 0xFF000000) >> 24) };
+    verts[1].color = toFColor({(u8)((colorUR & 0xFF0000) >> 16), (u8)((colorUR & 0x00FF00) >> 8),
+                              (u8)(colorUR & 0x0000FF), (u8)((colorUR & 0xFF000000) >> 24)});
     verts[2].position = xytofp(dl);
-    verts[2].color = { (uint8_t)((colorDL & 0xFF0000) >> 16), (uint8_t)((colorDL & 0x00FF00) >> 8), (uint8_t)(colorDL & 0x0000FF), (uint8_t)((colorDL & 0xFF000000) >> 24) };
+    verts[2].color = toFColor({(u8)((colorDL & 0xFF0000) >> 16), (u8)((colorDL & 0x00FF00) >> 8),
+                              (u8)(colorDL & 0x0000FF), (u8)((colorDL & 0xFF000000) >> 24)});
     verts[3].position = xytofp(dr);
-    verts[3].color = { (uint8_t)((colorDR & 0xFF0000) >> 16), (uint8_t)((colorDR & 0x00FF00) >> 8), (uint8_t)(colorDR & 0x0000FF), (uint8_t)((colorDR & 0xFF000000) >> 24) };
+    verts[3].color = toFColor({(u8)((colorDR & 0xFF0000) >> 16), (u8)((colorDR & 0x00FF00) >> 8),
+                              (u8)(colorDR & 0x0000FF), (u8)((colorDR & 0xFF000000) >> 24)});
 
     int indices[6] = { 0, 1, 2, 1, 3, 2 };
     SDL_RenderGeometry(g_rd, NULL, verts, 4, indices, 6);
@@ -643,6 +654,10 @@ rgb hsv2rgb(hsv in)
         break;
     }
     return out;
+}
+
+SDL_FColor toFColor(SDL_Color c) {
+    return SDL_FColor{c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, c.a / 255.0f};
 }
 
 SDL_Color rgb2sdlcolor(rgb a) {
@@ -964,8 +979,8 @@ SDL_Event convertTouchToMouseEvent(SDL_Event src)
         ret.button.clicks = 1;
         ret.button.timestamp = src.tfinger.timestamp;
         ret.button.windowID = src.tfinger.windowID;
-        ret.button.which = src.tfinger.touchId;
-        ret.button.state = src.type == SDL_FINGERDOWN ? SDL_PRESSED : SDL_RELEASED;
+        ret.button.which = src.tfinger.touchID;
+        ret.button.down = src.type == SDL_FINGERDOWN;
         ret.button.x = src.tfinger.x * g_windowW;
         ret.button.y = src.tfinger.y * g_windowH;
         break;
@@ -975,7 +990,7 @@ SDL_Event convertTouchToMouseEvent(SDL_Event src)
         ret.motion.windowID = src.tfinger.windowID;
         ret.motion.x = src.tfinger.x * g_windowW;
         ret.motion.y = src.tfinger.y * g_windowH;
-        ret.motion.which = src.tfinger.touchId;
+        ret.motion.which = src.tfinger.touchID;
         ret.motion.state = 0;
         ret.motion.xrel = src.tfinger.dx * g_windowW;
         ret.motion.yrel = src.tfinger.dy * g_windowH;

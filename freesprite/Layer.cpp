@@ -277,3 +277,33 @@ uint8_t* Layer::integerDownscale(XY scale)
         return NULL;
     }
 }
+
+ScanlineMap Layer::wandSelectAt(XY pos) {
+    u32 pixel = getPixelAt(pos);
+    ScanlineMap ret;
+    std::vector<XY> openList;
+    openList.push_back(pos);
+    std::vector<XY> nextList;
+    while (!openList.empty()) {
+        for (XY& openListElement : openList) {
+            uint32_t pixelRn = getPixelAt(openListElement);
+            if (pointInBox(openListElement,{0,0,w,h}) &&
+                !ret.pointExists(openListElement) &&
+                (pixelRn == pixel || (!isPalettized && pixelRn >> 24 == 0 && pixel >> 24 == 0))) {
+                ret.addPoint(openListElement);
+                XY p[] = {
+                    {0,  1 },
+                    {0,  -1},
+                    {1,  0 },
+                    {-1, 0 }
+                };
+                for (XY& pp : p) {
+                    nextList.push_back(xyAdd(openListElement, pp));
+                }
+            }
+        }
+        openList = nextList;
+        nextList.clear();
+    }
+    return ret;
+}

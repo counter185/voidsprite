@@ -23,7 +23,7 @@ void UIHueSlider::render(XY pos)
         gradientPoints[x].position = xytofp({ xNow, pos.y });
         gradientPoints[x + 7].position = xytofp({ xNow, pos.y + wxHeight });
         u32 c = approxColors[x];
-        gradientPoints[x].color = gradientPoints[x + 7].color = {(u8)((c & 0xFF0000) >> 16), (u8)((c & 0x00FF00) >> 8), (u8)(c & 0x0000FF), 0xff};
+        gradientPoints[x].color = gradientPoints[x + 7].color = toFColor({(u8)((c & 0xFF0000) >> 16), (u8)((c & 0x00FF00) >> 8), (u8)(c & 0x0000FF), 0xff});
         xNow += segW;
     }
     gradientPoints[6].color = gradientPoints[13].color = gradientPoints[0].color;

@@ -57,9 +57,8 @@ void StartScreen::takeInput(SDL_Event evt)
     LALT_TO_SUMMON_NAVBAR;
 
     if (evt.type == SDL_DROPFILE) {
-        std::string filePath = evt.drop.file;
+        std::string filePath = evt.drop.data;
         tryLoadFile(filePath);
-        SDL_free(evt.drop.file);
         return;
     }
 
@@ -68,9 +67,9 @@ void StartScreen::takeInput(SDL_Event evt)
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
                 if (evt.button.button == SDL_BUTTON_LEFT) {
-                    if (evt.button.state) {
+                    if (evt.button.down) {
                         SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
-                        if (pointInBox({ evt.button.x, evt.button.y }, logoRect)) {
+                        if (pointInBox({ (int)evt.button.x, (int)evt.button.y }, logoRect)) {
                             g_addNotification(Notification("voidsprite alpha", "by counter185 & contributors", 6000, g_iconNotifTheCreature, COLOR_INFO));
                         }
                     }
@@ -81,7 +80,7 @@ void StartScreen::takeInput(SDL_Event evt)
             case SDL_MOUSEWHEEL:
                 break;
             case SDL_KEYDOWN:
-                if (evt.key.keysym.sym == SDLK_v && g_ctrlModifier) {
+                if (evt.key.scancode == SDL_SCANCODE_V && g_ctrlModifier) {
                     tryOpenImageFromClipboard();
                 }
                 break;
@@ -230,11 +229,23 @@ void StartScreen::populateLastOpenFiles()
     int i = 0;
     for (std::string& lastPath : g_config.lastOpenFiles) {
         UIButton* button = new UIButton();
-        button->text = lastPath;
         button->position = origin;
-        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(lastPath));
+        button->tooltip = lastPath;
+        std::string s = lastPath;
+        bool ellipsis = false;
+        const int maxW = 600;
+        while (s.size() > 3 && g_fnt->StatStringDimensions(s).x > maxW) {
+            s = s.substr(1);
+            ellipsis = true;
+        }
+        if (ellipsis) {
+            s = "..." + s;
+        }
+        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(s));
+        button->text = s;
         button->wxWidth = textDim.x;
         button->setCallbackListener((i++) + 20, this);
+        button->fill = Fill::Gradient(0x60000000, 0x60000000, 0x90909090, 0x90000000);
         origin.y += 30;
         lastOpenFilesPanel->subWidgets.addDrawable(button);
     }

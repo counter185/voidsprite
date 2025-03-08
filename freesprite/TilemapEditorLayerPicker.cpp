@@ -98,9 +98,9 @@ void TilemapEditorLayerPicker::render(XY position)
 
 void TilemapEditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.state) {
-        if (!layerButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position)) {
-            layerControlButtons.tryFocusOnPoint(XY{ evt.button.x, evt.button.y }, position);
+    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.down) {
+        if (!layerButtons.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, position)) {
+            layerControlButtons.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, position);
         }
     }
     if (layerButtons.anyFocused()) {

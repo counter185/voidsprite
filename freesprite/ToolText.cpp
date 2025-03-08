@@ -79,9 +79,9 @@ void ToolText::renderText()
 
 	if (font != NULL) {
 		TTF_SetFontSize(font, textSize);
-		textSurface = TTF_RenderUTF8_Solid(font, text.c_str(), { 255, 255, 255, 255 });
+		textSurface = TTF_RenderText_Solid(font, text.c_str(), 0, { 255, 255, 255, 255 });
 		if (textSurface != NULL) {
-			SDL_Surface* converted = SDL_ConvertSurfaceFormat(textSurface, SDL_PIXELFORMAT_ARGB8888, 0);
+			SDL_Surface* converted = SDL_ConvertSurface(textSurface, SDL_PIXELFORMAT_ARGB8888);
 			SDL_FreeSurface(textSurface);
 			textSurface = converted;
 			cachedTextTexture = tracked_createTextureFromSurface(g_rd, textSurface);

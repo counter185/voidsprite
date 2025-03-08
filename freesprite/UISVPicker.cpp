@@ -24,7 +24,7 @@ void UISVPicker::drawPosIndicator(XY origin)
 	rectAround2.w += 2;
 	rectAround2.h += 2;
 	SDL_RenderDrawRect(g_rd, &rectAround2);
-	SDL_RenderDrawPoint(g_rd, centerPoint.x, centerPoint.y);
+	SDL_RenderPoint(g_rd, centerPoint.x, centerPoint.y);
 
 	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x90);
 	rectAround2 = rectAround;
@@ -33,7 +33,7 @@ void UISVPicker::drawPosIndicator(XY origin)
 	rectAround2.w -= 2;
 	rectAround2.h -= 2;
 	SDL_RenderDrawRect(g_rd, &rectAround2);
-	SDL_RenderDrawPoint(g_rd, centerPoint.x - 1, centerPoint.y);
+	SDL_RenderPoint(g_rd, centerPoint.x - 1, centerPoint.y);
 }
 
 void UISVPicker::render(XY pos)
@@ -55,11 +55,11 @@ void UISVPicker::handleInput(SDL_Event evt, XY gPosOffset)
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
 		if (evt.button.button == 1) {
-			mouseHeld = evt.button.state;
+			mouseHeld = evt.button.down;
 		}
 	case SDL_MOUSEMOTION:
 		if (mouseHeld) {
-			XY mousePos = xySubtract(XY{ evt.motion.x, evt.motion.y }, gPosOffset);
+			XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
 			sPos = fclamp(0.0f, mousePos.x / (float)wxWidth, 1.0f);
 			vPos = 1.0f - fclamp(0.0f, mousePos.y / (float)wxHeight, 1.0f);
 			this->onSVValueChanged();

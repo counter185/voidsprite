@@ -78,6 +78,7 @@ public:
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;
+    bool penDown = false;
 
     bool changesSinceLastSave = false;
     PlatformNativePathString lastConfirmedSavePath;
@@ -93,6 +94,12 @@ public:
     bool qModifier = false;
     XY lockedTilePreview = { -1,-1 };
     Timer64 tileLockTimer;
+
+    bool zoomKeyHeld = false;
+    XY zoomOrigin{};
+    int zoomInitial = 0;
+    const int zoomPixelStep = 50;
+    Timer64 zoomKeyTimer;
 
     ScreenWideNavBar<MainEditor*>* navbar;
     EditorColorPicker* colorPicker;
@@ -110,7 +117,7 @@ public:
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;
 
-    std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
+    std::map<SDL_Scancode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
     std::vector<uint32_t> lastColors;
 
@@ -147,6 +154,7 @@ public:
     void drawTileGrid();
     void renderGuidelines();
     void drawSplitSessionFragments();
+    void drawZoomLines();
 
     void initLayers();
     virtual void setUpWidgets();

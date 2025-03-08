@@ -4,6 +4,9 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
+
+//macro redefinition warning, remove this line after fully migrating to sdl3
+#pragma warning(disable : 4005)
 #endif
 
 //#include <math.h>
@@ -31,9 +34,13 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 #else 
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_image/SDL_image.h>
+#endif
+
+#if SDL_MAJOR_VERSION == 3
+#include "sdl23compat.h"
 #endif
 
 extern "C" {
@@ -215,8 +222,8 @@ struct NamedOperation {
 template <typename T>
 struct NavbarSection {
     std::string name;
-    std::vector<SDL_Keycode> order;
-    std::map<SDL_Keycode, NamedOperation<T>> actions;
+    std::vector<SDL_Scancode> order;
+    std::map<SDL_Scancode, NamedOperation<T>> actions;
     SDL_Texture* icon = NULL;
     UIButton* button = NULL;
 };
