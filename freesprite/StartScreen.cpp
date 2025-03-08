@@ -229,11 +229,23 @@ void StartScreen::populateLastOpenFiles()
     int i = 0;
     for (std::string& lastPath : g_config.lastOpenFiles) {
         UIButton* button = new UIButton();
-        button->text = lastPath;
         button->position = origin;
-        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(lastPath));
+        button->tooltip = lastPath;
+        std::string s = lastPath;
+        bool ellipsis = false;
+        const int maxW = 600;
+        while (s.size() > 3 && g_fnt->StatStringDimensions(s).x > maxW) {
+            s = s.substr(1);
+            ellipsis = true;
+        }
+        if (ellipsis) {
+            s = "..." + s;
+        }
+        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(s));
+        button->text = s;
         button->wxWidth = textDim.x;
         button->setCallbackListener((i++) + 20, this);
+        button->fill = Fill::Gradient(0x60000000, 0x60000000, 0x90909090, 0x90000000);
         origin.y += 30;
         lastOpenFilesPanel->subWidgets.addDrawable(button);
     }

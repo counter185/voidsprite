@@ -145,6 +145,7 @@ void MainEditor::render() {
     drawSymmetryLines();
     renderGuidelines();
     drawSplitSessionFragments();
+    drawZoomLines();
 
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
@@ -517,6 +518,26 @@ void MainEditor::drawSplitSessionFragments()
         }
     }
     localTtp.renderAll();
+}
+
+void MainEditor::drawZoomLines() {
+    if (zoomKeyHeld) {
+        XY origin = xyAdd(zoomOrigin, {30,0});
+        SDL_Rect r = {origin.x, 0, 50 * XM1PW3P1(zoomKeyTimer.percentElapsedTime(500)), g_windowH};
+        renderGradient(r, 0xFF000000, 0x00000000, 0xFF000000, 0x00000000);
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+
+        drawLine({origin.x + 5, origin.y}, {origin.x + 20, origin.y}, XM1PW3P1(zoomKeyTimer.percentElapsedTime(400)));
+        int yy = zoomPixelStep;
+        int i = 0;
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x60);
+        while (origin.y + yy < g_windowH || origin.y - yy >= 0) {
+            i++;
+            drawLine({origin.x + 5, origin.y + yy}, {origin.x + 15, origin.y + yy}, XM1PW3P1(zoomKeyTimer.percentElapsedTime(200, 50 * i)));
+            drawLine({origin.x + 15, origin.y - yy}, {origin.x + 5, origin.y - yy}, XM1PW3P1(zoomKeyTimer.percentElapsedTime(200, 50 * i)));
+            yy += zoomPixelStep;
+        }
+    }
 }
 
 void MainEditor::DrawForeground()
@@ -1096,25 +1117,33 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
                 if (evt.button.button == 1) {
-                    RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
-                    if (currentBrush != NULL) {
-                        if (evt.button.down) {
-                            if (!currentBrush->isReadOnly()) {
-                                commitStateToCurrentLayer();
+                    if (middleMouseHold && evt.button.down) {
+                        zoomKeyHeld = true;
+                        zoomKeyTimer.start();
+                        zoomInitial = 0;
+                        zoomOrigin = {(int)evt.button.x, (int)evt.button.y};
+                    } else {
+                        zoomKeyHeld = false;
+                        RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
+                        if (currentBrush != NULL) {
+                            if (evt.button.down) {
+                                if (!currentBrush->isReadOnly()) {
+                                    commitStateToCurrentLayer();
+                                }
+                                currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                currentBrushMouseDowned = true;
                             }
-                            currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                            currentBrushMouseDowned = true;
-                        }
-                        else {
-                            if (currentBrushMouseDowned) {
-                                currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                currentBrushMouseDowned = false;
-                            }
+                            else {
+                                if (currentBrushMouseDowned) {
+                                    currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                    currentBrushMouseDowned = false;
+                                }
 
+                            }
                         }
+                        mouseHoldPosition = mousePixelTargetPoint;
+                        leftMouseHold = evt.button.down;
                     }
-                    mouseHoldPosition = mousePixelTargetPoint;
-                    leftMouseHold = evt.button.down;
                 }
                 else if (evt.button.button == 2) {
                     middleMouseHold = evt.button.down;
@@ -1143,22 +1172,29 @@ void MainEditor::takeInput(SDL_Event evt) {
                 if (!penDown || evt.type != SDL_EVENT_MOUSE_MOTION) {
                     XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
                                                              : XY{(int)evt.motion.x, (int)evt.motion.y};
-                
-                    RecalcMousePixelTargetPoint(xy.x, xy.y);
-                    if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
-                        canvas.panCanvas({
-                            (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
-                            (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
-                        });
-                    }
-                    else if (leftMouseHold) {
-                        if (currentBrush != NULL) {
-                            currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                    if (middleMouseHold && zoomKeyHeld) {
+                        int zoomDiff = xySubtract(xy, zoomOrigin).y / zoomPixelStep;
+                        if (zoomDiff != zoomInitial) {
+                            zoom(zoomDiff-zoomInitial);
+                            zoomInitial = zoomDiff;
                         }
-                        mouseHoldPosition = mousePixelTargetPoint;
-                    }
-                    if (currentBrush != NULL) {
-                        currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                    } else {
+                        RecalcMousePixelTargetPoint(xy.x, xy.y);
+                        if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
+                            canvas.panCanvas({
+                                (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
+                                (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
+                            });
+                        }
+                        else if (leftMouseHold) {
+                            if (currentBrush != NULL) {
+                                currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                            }
+                            mouseHoldPosition = mousePixelTargetPoint;
+                        }
+                        if (currentBrush != NULL) {
+                            currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                        }
                     }
                 }
                 break;

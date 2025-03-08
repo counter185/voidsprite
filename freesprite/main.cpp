@@ -548,6 +548,8 @@ int main(int argc, char** argv)
                     g_mouseX = (int)(evt.pmotion.x);
                     g_mouseY = (int)(evt.pmotion.y);
                     break;
+                case SDL_EVENT_PEN_DOWN:
+                case SDL_EVENT_PEN_UP:
                 case SDL_EVENT_PEN_BUTTON_DOWN:
                 case SDL_EVENT_PEN_BUTTON_UP:
                     lastPenEvent.start();

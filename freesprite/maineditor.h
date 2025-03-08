@@ -95,6 +95,12 @@ public:
     XY lockedTilePreview = { -1,-1 };
     Timer64 tileLockTimer;
 
+    bool zoomKeyHeld = false;
+    XY zoomOrigin{};
+    int zoomInitial = 0;
+    const int zoomPixelStep = 50;
+    Timer64 zoomKeyTimer;
+
     ScreenWideNavBar<MainEditor*>* navbar;
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
@@ -148,6 +154,7 @@ public:
     void drawTileGrid();
     void renderGuidelines();
     void drawSplitSessionFragments();
+    void drawZoomLines();
 
     void initLayers();
     virtual void setUpWidgets();
