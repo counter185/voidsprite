@@ -1147,6 +1147,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 else if (evt.button.button == 2) {
                     middleMouseHold = evt.button.down;
+                    zoomKeyHeld = false;
                 }
                 else if (evt.button.button == 3) {
                     RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);

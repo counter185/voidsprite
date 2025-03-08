@@ -144,7 +144,7 @@ public:
                 newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight) };
                 y += newBtn->wxHeight;
                 newBtn->wxWidth = 320;
-                newBtn->fill = Fill::Gradient(0xAA121212, 0xAA121212, 0xAA000000, 0xAA000000);
+                newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);
                 newBtn->text = option.second.name + std::format(" ({})", SDL_GetScancodeName((SDL_Scancode)option.first));
                 newBtn->setCallbackListener(-1 - option.first, this);
                 submenuPanel->subWidgets.addDrawable(newBtn);
