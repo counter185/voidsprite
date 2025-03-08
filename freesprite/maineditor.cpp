@@ -1145,7 +1145,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                                              : XY{(int)evt.motion.x, (int)evt.motion.y};
                 
                     RecalcMousePixelTargetPoint(xy.x, xy.y);
-                    if (middleMouseHold) {
+                    if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
                         canvas.panCanvas({
                             (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
                             (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
