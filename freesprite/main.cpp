@@ -98,6 +98,8 @@ std::vector<BaseTemplate*> g_templates;
 
 std::vector<Notification> g_notifications;
 
+Timer64 lastPenEvent;
+
 void g_addNotification(Notification a) {
     g_notifications.push_back(a);
 }
@@ -535,13 +537,20 @@ int main(int argc, char** argv)
                     unscaledWindowSize = { g_windowW, g_windowH };
                     UpdateViewportScaler();
                     break;
-                case SDL_MOUSEMOTION:
-                    g_mouseX = (int)(evt.motion.x);
-                    g_mouseY = (int)(evt.motion.y);
+                case SDL_EVENT_MOUSE_MOTION:
+                    if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
+                        g_mouseX = (int)(evt.motion.x);
+                        g_mouseY = (int)(evt.motion.y);
+                    }
                     break;
                 case SDL_EVENT_PEN_MOTION:
+                    lastPenEvent.start();
                     g_mouseX = (int)(evt.pmotion.x);
                     g_mouseY = (int)(evt.pmotion.y);
+                    break;
+                case SDL_EVENT_PEN_BUTTON_DOWN:
+                case SDL_EVENT_PEN_BUTTON_UP:
+                    lastPenEvent.start();
                     break;
             }
 

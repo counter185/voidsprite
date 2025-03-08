@@ -1138,25 +1138,28 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 break;
             case SDL_EVENT_PEN_MOTION:
+                //printf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
             case SDL_EVENT_MOUSE_MOTION:
-                XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
-                                                         : XY{(int)evt.motion.x, (int)evt.motion.y};
-
-                RecalcMousePixelTargetPoint(xy.x, xy.y);
-                if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
-                    canvas.panCanvas({
-                        (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
-                        (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
-                    });
-                }
-                else if (leftMouseHold) {
-                    if (currentBrush != NULL) {
-                        currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                if (!penDown || evt.type != SDL_EVENT_MOUSE_MOTION) {
+                    XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
+                                                             : XY{(int)evt.motion.x, (int)evt.motion.y};
+                
+                    RecalcMousePixelTargetPoint(xy.x, xy.y);
+                    if (middleMouseHold) {
+                        canvas.panCanvas({
+                            (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
+                            (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
+                        });
                     }
-                    mouseHoldPosition = mousePixelTargetPoint;
-                }
-                if (currentBrush != NULL) {
-                    currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                    else if (leftMouseHold) {
+                        if (currentBrush != NULL) {
+                            currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                        }
+                        mouseHoldPosition = mousePixelTargetPoint;
+                    }
+                    if (currentBrush != NULL) {
+                        currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                    }
                 }
                 break;
             case SDL_MOUSEWHEEL:
@@ -1282,6 +1285,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_PEN_DOWN:
             case SDL_EVENT_PEN_UP:
                 penDown = evt.ptouch.down;
+                SDL_SetWindowMouseGrab(g_wd, penDown);
                 std::cout << "new pen state: " << penDown << "\n";
                 break;
         }
