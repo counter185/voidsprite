@@ -1220,87 +1220,96 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 break;
             case SDL_EVENT_KEY_DOWN:
-                switch (evt.key.scancode) {
-                    case SDL_SCANCODE_K:
-                        if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
-                            commitStateToCurrentLayer();
-                            for (int x = 0; x < voidsprite_image_w; x++) {
-                                for (int y = 0; y < voidsprite_image_h; y++) {
-                                    SetPixel({ x,y }, the_creature[x + y * voidsprite_image_w]);
+                {
+                    bool passthroughBrushKeybinds = true;
+                    switch (evt.key.scancode) {
+                        case SDL_SCANCODE_K:
+                            if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
+                                passthroughBrushKeybinds = false;
+                                commitStateToCurrentLayer();
+                                for (int x = 0; x < voidsprite_image_w; x++) {
+                                    for (int y = 0; y < voidsprite_image_h; y++) {
+                                        SetPixel({x, y}, the_creature[x + y * voidsprite_image_w]);
+                                    }
+                                }
+                                g_addNotification(
+                                    Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
+                            }
+                            break;
+                        case SDL_SCANCODE_E:
+                            colorPicker->eraserButton->click();
+                            passthroughBrushKeybinds = false;
+                            // colorPicker->toggleEraser();
+                            break;
+                        case SDL_SCANCODE_RCTRL:
+                            passthroughBrushKeybinds = false;
+                            middleMouseHold = !middleMouseHold;
+                            break;
+                        case SDL_SCANCODE_Z:
+                            if (g_ctrlModifier) {
+                                passthroughBrushKeybinds = false;
+                                if (g_shiftModifier) {
+                                    redo();
+                                } else {
+                                    undo();
                                 }
                             }
-                            g_addNotification(Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
-                        }
-                        break;
-                    case SDL_SCANCODE_E:
-                        colorPicker->eraserButton->click();
-                        //colorPicker->toggleEraser();
-                        break;
-                    case SDL_SCANCODE_RCTRL:
-                        middleMouseHold = !middleMouseHold;
-                        break;
-                    case SDL_SCANCODE_Z:
-                        if (g_ctrlModifier) {
-                            if (g_shiftModifier) {
+                            break;
+                        case SDL_SCANCODE_Y:
+                            if (g_ctrlModifier) {
+                                passthroughBrushKeybinds = false;
                                 redo();
                             }
-                            else {
-                                undo();
+                            break;
+                        case SDL_SCANCODE_S:
+                            if (g_ctrlModifier) {
+                                passthroughBrushKeybinds = false;
+                                if (g_shiftModifier) {
+                                    trySaveAsImage();
+                                } else {
+                                    trySaveImage();
+                                }
                             }
-                        }
-                        break;
-                    case SDL_SCANCODE_Y:
-                        if (g_ctrlModifier) {
-                            redo();
-                        }
-                        break;
-                    case SDL_SCANCODE_S:
-                        if (g_ctrlModifier) {
-                            if (g_shiftModifier) {
-                                trySaveAsImage();
-                            }
-                            else {
-                                trySaveImage();
-                            }
-                        }
-                        break;
-                    case SDL_SCANCODE_Q:
-                        if (g_ctrlModifier) {
-                            if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
-                                lockedTilePreview = { -1,-1 };
-                            }
-                            else {
-                                
-                                if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-                                    XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
-                                    /* XY{
-                                        mouseInCanvasPoint.x / tileDimensions.x,
-                                        mouseInCanvasPoint.y / tileDimensions.y
-                                    };*/
-                                    if (g_config.isolateRectOnLockTile) {
-                                        isolateEnabled = true;
-                                        isolatedFragment.clear();
-                                        isolatedFragment.addRect({ tileToLock.x * tileDimensions.x, tileToLock.y * tileDimensions.y, tileDimensions.x, tileDimensions.y });
-                                    }
-                                    if (tileToLock.x >= 0 && tileToLock.y >= 0) {
-                                        lockedTilePreview = tileToLock;
+                            break;
+                        case SDL_SCANCODE_Q:
+                            if (g_ctrlModifier) {
+                                if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
+                                    lockedTilePreview = {-1, -1};
+                                } else {
+
+                                    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+                                        XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
+                                        /* XY{
+                                            mouseInCanvasPoint.x / tileDimensions.x,
+                                            mouseInCanvasPoint.y / tileDimensions.y
+                                        };*/
+                                        if (g_config.isolateRectOnLockTile) {
+                                            isolateEnabled = true;
+                                            isolatedFragment.clear();
+                                            isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
+                                                                      tileToLock.y * tileDimensions.y, tileDimensions.x,
+                                                                      tileDimensions.y});
+                                        }
+                                        if (tileToLock.x >= 0 && tileToLock.y >= 0) {
+                                            lockedTilePreview = tileToLock;
+                                            tileLockTimer.start();
+                                        } else {
+                                            g_addNotification(
+                                                ErrorNotification("Error", "Tile position out of bounds"));
+                                        }
+                                    } else {
+                                        lockedTilePreview = {0, 0};
                                         tileLockTimer.start();
                                     }
-                                    else {
-                                        g_addNotification(ErrorNotification("Error", "Tile position out of bounds"));
-                                    }
-                                }
-                                else {
-                                    lockedTilePreview = { 0,0 };
-                                    tileLockTimer.start();
                                 }
                             }
-                        }
-                        break;
-                    case SDL_SCANCODE_F2:
-                        layer_promptRename();
-                        break;
-                    default:
+                            break;
+                        case SDL_SCANCODE_F2:
+                            passthroughBrushKeybinds = false;
+                            layer_promptRename();
+                            break;
+                    }
+                    if (passthroughBrushKeybinds) {
                         if (evt.key.scancode != SDL_SCANCODE_UNKNOWN) {
                             for (BaseBrush* b : g_brushes) {
                                 if (b->keybind == evt.key.scancode) {
@@ -1309,7 +1318,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 }
                             }
                         }
-                        break;
+                    }
                 }
                 break;
             case SDL_FINGERMOTION:
