@@ -207,6 +207,9 @@ void g_closePopup(BasePopup* a);
 void g_pushClip(SDL_Rect r);
 void g_popClip();
 
+void g_pushRenderTarget(SDL_Texture* tex);
+void g_popRenderTarget();
+
 SDL_Texture* IMGLoadToTexture(std::string path);
 
 struct XY {

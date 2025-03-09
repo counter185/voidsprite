@@ -172,7 +172,7 @@ void MinecraftBlockPreviewScreen::eventPopupClosed(int evt_id, BasePopup* target
 void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
 {
     SDL_Texture* renderTarget = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wh.x, wh.y);
-    SDL_SetRenderTarget(g_rd, renderTarget);
+    g_pushRenderTarget(renderTarget);
 
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
     SDL_RenderClear(g_rd);
@@ -182,7 +182,7 @@ void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
     SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixelData, wh.x*4);
     SDL_FreeSurface(nsrf);
 
-    SDL_SetRenderTarget(g_rd, NULL);
+    g_popRenderTarget();
 
     MainEditor *newSession = new MainEditor(l);
     g_addScreen(newSession);

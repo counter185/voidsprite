@@ -190,6 +190,16 @@ void g_popClip() {
     SDL_RenderSetClipRect(g_rd, clips.size() == 0 ? NULL : &clips[clips.size() - 1]);
 }
 
+std::vector<SDL_Texture*> rts;
+void g_pushRenderTarget(SDL_Texture* rt) {
+    rts.push_back(rt);
+    SDL_SetRenderTarget(g_rd, rt);
+}
+void g_popRenderTarget() {
+    rts.pop_back();
+    SDL_SetRenderTarget(g_rd, rts.size() == 0 ? NULL : rts[rts.size() - 1]);
+}
+
 
 SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
@@ -646,7 +656,7 @@ int main(int argc, char** argv)
         }
 
         if (viewport != NULL){
-            SDL_SetRenderTarget(g_rd, viewport);
+            g_pushRenderTarget(viewport);
         }
 
         SDL_SetRenderDrawColor(g_rd, 0,0,0,255);
@@ -768,7 +778,7 @@ int main(int argc, char** argv)
 
 
         if (viewport != NULL){
-            SDL_SetRenderTarget(g_rd, NULL);
+            g_popRenderTarget();
             SDL_RenderCopy(g_rd, viewport, NULL, NULL);
         }
 

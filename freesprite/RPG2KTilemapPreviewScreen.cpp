@@ -268,7 +268,7 @@ void RPG2KTilemapPreviewScreen::RecenterCanvas()
 void RPG2KTilemapPreviewScreen::PrerenderCanvas()
 {
     SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_NONE);
-    SDL_SetRenderTarget(g_rd, callerCanvas);
+    g_pushRenderTarget(callerCanvas);
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
     SDL_RenderClear(g_rd);
     for (Layer*& l : caller->layers) {
@@ -277,7 +277,7 @@ void RPG2KTilemapPreviewScreen::PrerenderCanvas()
             //SDL_RenderCopy(g_rd, l->tex, NULL, NULL);
         }
     }
-    SDL_SetRenderTarget(g_rd, NULL);
+    g_popRenderTarget();
     SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_BLEND);
     
 }
@@ -1067,14 +1067,18 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
     Layer* newLayer = new Layer(dimensions.x * 16, dimensions.y * 16);
     forceOptimizationsOff = true;
     bool failed = false;
+    //SDL_RenderPresent(g_rd);
     for (int y = 0; y < dimensions.y * 16 && !failed; y += g_windowH) {
         for (int x = 0; x < dimensions.x * 16 && !failed; x += g_windowW) {
             //due to a bug in sdl only the window area gets rendered
             SDL_Texture* newTexture = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
             Layer* blitLayer = new Layer(g_windowW, g_windowH);
-            SDL_SetRenderTarget(g_rd, newTexture);
+            g_pushRenderTarget(newTexture);
+            SDL_FlushRenderer(g_rd);
             SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+            SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_NONE);
             SDL_RenderClear(g_rd);
+            SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
             RenderWholeMap({ -x,-y }, 1);
             SDL_Surface* newSrf = SDL_RenderReadPixels(g_rd, NULL);
             if (newSrf == NULL) {
@@ -1083,7 +1087,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
             SDL_ConvertPixels(blitLayer->w, blitLayer->h, newSrf->format, newSrf->pixels, newSrf->pitch,
                               SDL_PIXELFORMAT_ARGB8888, blitLayer->pixelData, blitLayer->w * 4);
             SDL_FreeSurface(newSrf);
-            SDL_SetRenderTarget(g_rd, NULL);
+            g_popRenderTarget();
             tracked_destroyTexture(newTexture);
 
             newLayer->blit(blitLayer, { x,y });
