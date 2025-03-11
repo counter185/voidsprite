@@ -24,9 +24,9 @@ zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'], static: get_option
 liblcf_dep = dependency('liblcf', fallback: ['liblcf', 'liblcf_dep'], static: get_option('portable'))
 libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'], static: get_option('portable'))
 
-sdl2_dep = dependency('sdl3', version: '>=3.0.0', fallback: ['sdl3', 'sdl3_dep'], static: get_option('portable'))
-sdl2_ttf_dep = dependency('SDL3_ttf', version: '>=3.0.0', fallback: ['sdl3_ttf', 'sdl3_ttf_dep'], static: get_option('portable'))
-sdl2_image_dep = dependency('SDL3_image', version: '>=3.0.0', fallback: ['sdl3_image', 'sdl3_image_dep'], static: get_option('portable'))
+sdl3_dep = dependency('sdl3', version: '>=3.0.0', fallback: ['sdl3', 'sdl3_dep'], static: get_option('portable'))
+sdl3_ttf_dep = dependency('SDL3_ttf', version: '>=3.0.0', fallback: ['sdl3_ttf', 'sdl3_ttf_dep'], static: get_option('portable'))
+sdl3_image_dep = dependency('SDL3_image', version: '>=3.0.0', fallback: ['sdl3_image', 'sdl3_image_dep'], static: get_option('portable'))
 
 libjxl_dep = dependency('libjxl')
 
@@ -42,15 +42,6 @@ dependencies = [
   sdl3_ttf_dep,
   sdl3_image_dep
 ]
-
-# Windows requires sdl2main dependency
-#if host_machine.system() == 'windows'
-#  sdl2main_dep = dependency('sdl2main', version: '>=2.0.22', fallback: ['sdl2main', 'sdl2main_dep'], static: get_option('portable'))
-#  dependencies += sdl2main_dep
-#endif
-
-#not anymore since sdl3 let's go
-
 
 # Install assets
 if get_option('portable') 
