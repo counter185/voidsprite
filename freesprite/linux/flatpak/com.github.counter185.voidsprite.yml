@@ -25,6 +25,10 @@ cleanup:
   - /lib/cmake
 
 modules:
+  - "SDL3.json"
+  - "SDL3_image.json"
+  - "SDL3_ttf.json"
+
   - name: pugixml
     buildsystem: cmake-ninja
     config-opts:
