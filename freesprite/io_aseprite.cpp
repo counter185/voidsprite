@@ -279,7 +279,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         if (editor->isPalettized && upcastEditor->palette.size() > 256) {
             g_addNotification(ErrorNotification("Error", "Aseprite supports max. 256 colors"));
             fclose(f);
-            return NULL;
+            return false;
         }
 
         u64 fileSizePosition = ftell(f);
