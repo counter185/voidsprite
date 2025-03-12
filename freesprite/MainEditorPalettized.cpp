@@ -203,6 +203,13 @@ uint32_t MainEditorPalettized::pickColorFromAllLayers(XY pos)
     return 0;
 }
 
+void MainEditorPalettized::setPaletteIndex(u32 index, u32 color) {
+    if (index < palette.size()) {
+        palette[index] = color;
+    }
+    updatePalette();
+}
+
 void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
 {
     if (palette.size() > newPalette.size()) {
@@ -214,6 +221,10 @@ void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
         palette = newPalette;
     }
 
+    updatePalette();
+}
+
+void MainEditorPalettized::updatePalette() {
     for (Layer*& l : layers) {
         ((LayerPalettized*)l)->palette = palette;
         ((LayerPalettized*)l)->layerDirty = true;

@@ -1105,7 +1105,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
     }
 }
 
-void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
+bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 {
     for (auto& tx : texturesLoaded) {
         tracked_destroyTexture(tx.second);
@@ -1212,9 +1212,11 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
         upperLayerData = upperLayer;
 
         file.close();
+        return true;
     }
     else {
         g_addNotification(Notification("Error loading file", "Could not open file for reading."));
+        return false;
     }
 }
 

@@ -123,6 +123,8 @@ public:
 
     SplitSessionData splitSessionData = { false };
 
+    std::vector<BaseScreen*> hintOpenScreensInInteractiveMode;
+
     u64 editTime = 0;
     u64 lastTimestamp = -1;
 

@@ -14,6 +14,7 @@
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "LayerPalettized.h"
+#include "RPG2KTilemapPreviewScreen.h"
 #include "PopupMessageBox.h"
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
@@ -3240,7 +3241,20 @@ MainEditor* readLMU(PlatformNativePathString path)
                         l->name = shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex-1].name));
                         ret = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
 
-                        //todo: load a rpg2ktilemappreviewscreen along with it too
+                        ret->tileDimensions = {16,16};
+
+                        if (ret->isPalettized) {
+                            //assume the first color is alpha because this seems to always be the case so far
+                            ((MainEditorPalettized*)ret)->setPaletteIndex(0, ((MainEditorPalettized*)ret)->palette[0] & 0xFFFFFF);
+                        }
+
+                        RPG2KTilemapPreviewScreen* mapPreview = new RPG2KTilemapPreviewScreen(ret);
+                        if (mapPreview->LoadLMU(path)) {
+                            ret->hintOpenScreensInInteractiveMode.push_back(mapPreview);
+                        }
+                        else {
+                            delete mapPreview;
+                        }
                     }
                     else {
                         g_addNotification(ErrorNotification("Error", "Failed to load Chipset"));

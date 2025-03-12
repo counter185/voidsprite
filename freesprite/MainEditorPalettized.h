@@ -21,7 +21,9 @@ public:
     uint32_t getActiveColor() override;
     void setActiveColor(uint32_t col, bool animate) override;
     uint32_t pickColorFromAllLayers(XY) override;
+    void setPaletteIndex(u32 index, u32 color);
     void setPalette(std::vector<uint32_t> palette);
+    void updatePalette();
 
     void renderColorPickerAnim() override;
 

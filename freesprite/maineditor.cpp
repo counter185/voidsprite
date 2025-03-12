@@ -114,6 +114,9 @@ MainEditor::~MainEditor() {
     for (Layer*& imgLayer : layers) {
         delete imgLayer;
     }
+    for (BaseScreen*& unopenedScreen : hintOpenScreensInInteractiveMode) {
+        delete unopenedScreen;
+    }
 }
 
 
@@ -247,6 +250,13 @@ void MainEditor::render() {
 }
 
 void MainEditor::tick() {
+
+    if (hintOpenScreensInInteractiveMode.size() > 0) {
+        for (BaseScreen*& s : hintOpenScreensInInteractiveMode) {
+            g_addScreen(s);
+        }
+        hintOpenScreensInInteractiveMode.clear();
+    }
 
     if (g_windowFocused) {
         u64 timestampNow = SDL_GetTicks64() / 1000;
