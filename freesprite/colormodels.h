@@ -4,6 +4,13 @@
 class ColorModel {
 public:
     virtual std::vector<std::string> components() = 0;
+    virtual std::map<std::string, std::pair<double, double>> componentRanges() {
+        std::map<std::string, std::pair<double, double>> r;
+        for (auto& c : components()) {
+            r[c] = {0.0, 1.0};
+        }
+        return r;
+    }
     virtual std::map<std::string, double> fromRGB(u32 color) = 0;
     virtual u32 toRGB(std::map<std::string, double> values) = 0;
 };
@@ -44,18 +51,25 @@ public:
 class HSLColorModel : public ColorModel {
 public:
     std::vector<std::string> components() override { return {"H", "S", "L"}; }
+    std::map<std::string, std::pair<double, double>> componentRanges() override {
+        return {
+            {"H", {0, 360}},
+            {"S", {0,1}},
+            {"L", {0,1}}
+        };
+    };
     std::map<std::string, double> fromRGB(u32 color) override {
         rgb rgb = u32ToRGB(color);
         hsl hsl = rgb2hsl(rgb);
         return {
-            {"H", hsl.h},
+            {"H", hsl.h*360.0},
             {"S", hsl.s},
             {"L", hsl.l}
         };
     }
     u32 toRGB(std::map<std::string, double> values) override {
         hsl hsl;
-        hsl.h = values["H"];
+        hsl.h = values["H"] / 360.0;
         hsl.s = values["S"];
         hsl.l = values["L"];
         rgb rgb = hsl2rgb(hsl);
@@ -67,5 +81,5 @@ inline std::unordered_map<std::string, ColorModel*> g_colorModels;
 
 inline void g_setupColorModels() {
     g_colorModels["CMYK"] = new CMYKColorModel();
-    //g_colorModels["HSL"] = new HSLColorModel();
+    g_colorModels["HSL"] = new HSLColorModel();
 }

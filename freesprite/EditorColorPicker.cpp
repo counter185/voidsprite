@@ -160,6 +160,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
             yNow += 30;
 
             std::map<std::string, ColorModelValue> components;
+            auto componentRanges = mptr->componentRanges();
 
             for (auto& component : mptr->components()) {
                 UILabel* cnameLabel = new UILabel(component);
@@ -175,7 +176,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
                 slider->setCallbackListener(100 + i, this);
                 colorModelsPanel->subWidgets.addDrawable(slider);
                 yNow += 30;
-                components[component] = { slider, cvalueLabel, 0 };
+                components[component] = {slider, cvalueLabel, 0, componentRanges[component]};
             }
 
             colorModels.push_back({ name, {mptr, components} });
@@ -381,7 +382,7 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
                 ColorModel* mptr = modelData.targetModel;
                 std::map<std::string, double> componentData;
                 for (auto& component : modelData.components) {
-                    component.second.valueNow = component.second.valueSlider->sliderPos;
+                    component.second.valueNow = component.second.range.first + component.second.valueSlider->sliderPos * (component.second.range.second - component.second.range.first);
                     component.second.valueLabel->text = std::format("{:.2f}", component.second.valueNow);
                     componentData[component.first] = component.second.valueNow;
                 }
@@ -461,12 +462,12 @@ void EditorColorPicker::updateColorModelSliders(std::string dontUpdate)
 
             double val = modelColorValue[component.first];
             if (model.first != dontUpdate) {
-                slider->sliderPos = val;
+                slider->sliderPos = (val - component.second.range.first) / (component.second.range.second - component.second.range.first);
                 label->text = std::format("{:.2f}", val);
                 component.second.valueNow = val;
             }
-            slider->colorMin = mptr->toRGB(modelColorMin);
-            slider->colorMax = mptr->toRGB(modelColorMax);
+            slider->colorMin = component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMin);
+            slider->colorMax = component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMax);
         }
     }
 }

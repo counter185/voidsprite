@@ -55,9 +55,17 @@ void ButtonStartScreenSession::renderTooltip(XY pos)
             g_popRenderTarget();
 
             int previewW = 300;
-            int previewH = (int)(previewW / ((float)g_windowW / g_windowH) * XM1PW3P1(hoverTimer.percentElapsedTime(200)));
+            double animTimer = XM1PW3P1(hoverTimer.percentElapsedTime(200));
+            double animTimerLonger = XM1PW3P1(hoverTimer.percentElapsedTime(600));
+            int previewH = (int)(previewW / ((float)g_windowW / g_windowH) * animTimer);
+            SDL_SetTextureAlphaMod(screenPreviewFramebuffer, 255 * hoverTimer.percentElapsedTime(200));
             SDL_Rect r = {ixmin(position.x, g_windowW - previewW), position.y - 30 - previewH, previewW, previewH};
+            
             SDL_RenderCopy(g_rd, screenPreviewFramebuffer, NULL, &r);
+
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
+            drawLine({r.x, r.y}, {r.x + r.w, r.y}, animTimerLonger);
+            drawLine({r.x, r.y}, {r.x, r.y + r.h}, animTimerLonger);
         }
     }
 }
