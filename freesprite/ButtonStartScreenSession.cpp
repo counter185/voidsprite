@@ -47,5 +47,17 @@ void ButtonStartScreenSession::renderTooltip(XY pos)
             XY bounds = g_fnt->StatStringDimensions(tooltip);
             g_ttp->addTooltip(Tooltip{ xySubtract(pos, {0, bounds.y + 14}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });
         }
+        if (screenPreviewFramebuffer != NULL && currentScreen != correspondingScreen) {
+            g_pushRenderTarget(screenPreviewFramebuffer);
+            SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+            SDL_RenderClear(g_rd);
+            screenStack[correspondingScreen]->render();
+            g_popRenderTarget();
+
+            int previewW = 300;
+            int previewH = (int)(previewW / ((float)g_windowW / g_windowH) * XM1PW3P1(hoverTimer.percentElapsedTime(200)));
+            SDL_Rect r = {ixmin(position.x, g_windowW - previewW), position.y - 30 - previewH, previewW, previewH};
+            SDL_RenderCopy(g_rd, screenPreviewFramebuffer, NULL, &r);
+        }
     }
 }

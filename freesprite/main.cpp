@@ -217,8 +217,13 @@ void UpdateViewportScaler(){
     if (viewport != NULL) {
         tracked_destroyTexture(viewport);
     }
+    if (screenPreviewFramebuffer != NULL) {
+        tracked_destroyTexture(screenPreviewFramebuffer);
+    }
     g_windowW = unscaledWindowSize.x / renderScale;
     g_windowH = unscaledWindowSize.y / renderScale;
+    screenPreviewFramebuffer = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+    SDL_SetTextureScaleMode(screenPreviewFramebuffer, SDL_SCALEMODE_LINEAR);
     if (renderScale == 1) {
         viewport = NULL;
         return;
@@ -316,6 +321,9 @@ int main(int argc, char** argv)
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
     //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
     SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
+
+    unscaledWindowSize = {g_windowW, g_windowH};
+    UpdateViewportScaler();
 
     SDL_Surface* cursorSrf = IMG_Load(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
     if (cursorSrf != NULL) {
@@ -692,6 +700,18 @@ int main(int argc, char** argv)
         }*/
 
 
+#if _DEBUG
+        XY origin = {g_windowW - 240, g_windowH - 90};
+        for (auto& mem : g_named_memmap) {
+            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
+                                origin.y, {255, 255, 255, 100});
+            origin.y -= 20;
+        }
+        g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
+                            {255, 255, 255, 100});
+        origin.y -= 20;
+#endif
+
         //draw the screen icons
         XY screenIcons = {g_windowW, g_windowH - 10};
         screenIcons = xySubtract(screenIcons, XY{ (int)(26 * screenStack.size()), 16});
@@ -709,18 +729,6 @@ int main(int argc, char** argv)
             int statW = g_fnt->StatStringDimensions(screenName).x;
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - ixmax(200, 10 + statW), g_windowH - 55);
         }
-
-#if _DEBUG
-        XY origin = {g_windowW - 240, g_windowH - 90};
-        for (auto& mem : g_named_memmap) {
-            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
-                                origin.y, {255, 255, 255, 100});
-            origin.y -= 20;
-        }
-        g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
-                            {255, 255, 255, 100});
-        origin.y -= 20;
-#endif
 
         
         //render notifications
