@@ -18,6 +18,7 @@ public:
         ""
 #endif
         ;
+    int autosaveInterval = 20;
 
     std::vector<std::string> lastOpenFiles;
 

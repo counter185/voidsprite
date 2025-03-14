@@ -267,6 +267,9 @@ inline std::vector<FileImporter*> g_fileImporters;
 
 inline std::vector<PaletteImporter*> g_paletteImporters;
 
+//used for autosave
+inline FileExporter* voidsnExporter = NULL;
+
 inline void g_setupIO() {
     FileExporter
         *exVOIDSNv5,
@@ -319,6 +322,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
     g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
 
+    voidsnExporter = exVOIDSNv5;
 
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));

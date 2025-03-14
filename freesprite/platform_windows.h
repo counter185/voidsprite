@@ -172,6 +172,9 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     subDir = appdataDir + L"palettes\\";
     CreateDirectoryW(subDir.c_str(), NULL);
 
+    subDir = appdataDir + L"autosaves\\";
+    CreateDirectoryW(subDir.c_str(), NULL);
+
     return appdataDir;
 }
 

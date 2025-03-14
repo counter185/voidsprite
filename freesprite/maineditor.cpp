@@ -294,6 +294,8 @@ void MainEditor::tick() {
         g_gamepad->SetLightbar((pickedColor >> 16) & 0xff, (pickedColor >> 8) & 0xff, pickedColor & 0xff);
     }
 
+    tickAutosave();
+
     if (closeNextTick) {
         g_closeScreen(this);
     }
@@ -1936,6 +1938,7 @@ Layer* MainEditor::newLayer()
 
 void MainEditor::deleteLayer(int index) {
     if (layers.size() <= 1) {
+        g_addNotification(ErrorNotification("Can't delete the last layer", ""));
         return;
     }
 
@@ -1980,6 +1983,35 @@ void MainEditor::setActiveBrush(BaseBrush* b)
     }
     currentBrush = b;
     brushPicker->updateActiveBrushButton(b);
+}
+
+void MainEditor::tickAutosave()
+{
+    if (!autosaveTimer.started) {
+        autosaveTimer.start();
+    }
+
+    if (g_config.autosaveInterval > 0 && changesSinceLastSave) {
+        if (autosaveTimer.elapsedTime() > g_config.autosaveInterval * 1000 * 60) {
+            autosaveTimer.start();
+            time_t now = time(NULL);
+            tm ltm;
+            localtime_s(&ltm, &now);
+            
+            std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon+1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
+            try {
+                if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
+                    g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
+                }
+                else {
+                    g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
+                }
+            }
+            catch (std::exception e) {
+                g_addNotification(ErrorNotification("Recovery autosave", "Exception during autosave"));
+            }
+        }
+    }
 }
 
 void MainEditor::moveLayerUp(int index) {

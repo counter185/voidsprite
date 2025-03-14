@@ -23,6 +23,7 @@ enum ConfigOptions : int {
     CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA,
     CHECKBOX_DISCORD_RPC,
     CHECKBOX_RENDERER,
+    TEXTFIELD_AUTOSAVE_INTERVAL
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -31,7 +32,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     previousConfig = GlobalConfig(g_config);
 
     wxHeight = 400;
-    wxWidth = 700;
+    wxWidth = 850;
 
     TabbedView* configTabs = new TabbedView({ {"General"}, {"Editor"}, {"Keybinds"}, {"Misc."}}, 90);
     configTabs->position = XY{ 10,50 };
@@ -133,6 +134,23 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
     cb5->setCallbackListener(CHECKBOX_FILL_TOOL_TILE_BOUND, this);
     configTabs->tabs[1].wxs.addDrawable(cb5);
+    posInTab.y += 35;
+
+    lbl2 = new UILabel("Recovery autosave interval (minutes) (0 to disable)");
+    lbl2->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    tf2 = new UITextField();
+    tf2->isNumericField = true;
+    tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y };
+    tf2->wxWidth = 80;
+    tf2->setText(std::to_string(g_config.autosaveInterval));
+    tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
+    configTabs->tabs[1].wxs.addDrawable(tf2);
+    posInTab.y += 35;
+    lbl2 = new UILabel(" Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory.");
+    lbl2->color = { 255,255,255,0xa0 };
+    lbl2->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl2);
     posInTab.y += 35;
 
     /*
@@ -313,6 +331,15 @@ void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
                 g_config.maxUndoHistory = previousConfig.maxUndoHistory;
             }
             break;
+        case TEXTFIELD_AUTOSAVE_INTERVAL:
+            try {
+                g_config.autosaveInterval = std::stoi(text);
+            }
+            catch (std::exception) {
+                g_config.autosaveInterval = previousConfig.autosaveInterval;
+            }
+            break;
+        
     }
 }
 

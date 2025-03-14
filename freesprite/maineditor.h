@@ -55,7 +55,7 @@ public:
     std::vector<UndoStackElement> undoStack, redoStack;
 
     XY tileDimensions = XY{ 0,0 };
-    uint8_t tileGridAlpha = 0x40;
+    u8 tileGridAlpha = 0x40;
     XY tileGridPaddingBottomRight = XY{ 0,0 };
     SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
     XY getPaddedTileDimensions();
@@ -128,6 +128,8 @@ public:
     u64 editTime = 0;
     u64 lastTimestamp = -1;
 
+    Timer64 autosaveTimer;
+
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);
@@ -182,6 +184,7 @@ public:
     virtual void setActiveColor(uint32_t, bool animate = true);
     virtual uint32_t getActiveColor();
     void setActiveBrush(BaseBrush* b);
+    void tickAutosave();
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();
