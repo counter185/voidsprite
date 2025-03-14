@@ -86,6 +86,7 @@ extern "C" {
 #define COLOR_ERROR SDL_Color{255,0,0,255}
 
 #define UTF8_DIAMOND "\xE2\x97\x86"
+#define UTF8_EMPTY_DIAMOND "\xE2\x97\x87"
 
 //util classes
 class EventCallbackListener;

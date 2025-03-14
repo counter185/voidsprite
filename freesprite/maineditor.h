@@ -21,6 +21,12 @@
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
 
+enum EditorUnsavedChanges : int {
+    NO_UNSAVED_CHANGES = 0,
+    CHANGES_RECOVERY_AUTOSAVED = 1,
+    HAS_UNSAVED_CHANGES = 2
+};
+
 enum MainEditorCommentMode : int {
     COMMENTMODE_HIDE_ALL = 0,
     COMMENTMODE_SHOW_HOVERED = 1,
@@ -80,7 +86,7 @@ public:
     bool hideUI = false;
     bool penDown = false;
 
-    bool changesSinceLastSave = false;
+    EditorUnsavedChanges changesSinceLastSave = NO_UNSAVED_CHANGES;
     PlatformNativePathString lastConfirmedSavePath;
     FileExporter* lastConfirmedExporter = NULL;
     bool lastConfirmedSave = false;

@@ -579,7 +579,7 @@ bool MainEditorPalettized::trySaveWithExporter(PlatformNativePathString name, Fi
         lastConfirmedSave = true;
         lastConfirmedSavePath = name;
         lastConfirmedExporter = exporter;
-        changesSinceLastSave = false;
+        changesSinceLastSave = NO_UNSAVED_CHANGES;
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }

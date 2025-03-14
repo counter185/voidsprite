@@ -574,9 +574,10 @@ void MainEditor::DrawForeground()
 
     g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ 255,255,255, (u8)(g_windowFocused ? 0x40 : 0x30) });
 
-    if (changesSinceLastSave) {
-        int fw = g_fnt->StatStringDimensions(UTF8_DIAMOND).x;
-        g_fnt->RenderString(UTF8_DIAMOND, g_windowW - fw - 2, g_windowH - 70, SDL_Color{ 255,255,255,0x70 });
+    if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
+        std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
+        int fw = g_fnt->StatStringDimensions(unsavedSymbol).x;
+        g_fnt->RenderString(unsavedSymbol, g_windowW - fw - 2, g_windowH - 70, SDL_Color{ 255,255,255,0x70 });
     }
 }
 
@@ -1080,7 +1081,7 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 }
 
 bool MainEditor::requestSafeClose() {
-    if (!changesSinceLastSave) {
+    if (changesSinceLastSave == NO_UNSAVED_CHANGES) {
         closeNextTick = true;
         return true;
     }
@@ -1577,7 +1578,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         lastConfirmedSave = true;
         lastConfirmedSavePath = name;
         lastConfirmedExporter = exporter;
-        changesSinceLastSave = false;
+        changesSinceLastSave = NO_UNSAVED_CHANGES;
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }
@@ -1745,7 +1746,7 @@ void MainEditor::addToUndoStack(UndoStackElement undo)
     discardRedoStack();
     undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
-    changesSinceLastSave = true;
+    changesSinceLastSave = HAS_UNSAVED_CHANGES;
 }
 
 void MainEditor::discardUndoStack()
@@ -1991,7 +1992,7 @@ void MainEditor::tickAutosave()
         autosaveTimer.start();
     }
 
-    if (g_config.autosaveInterval > 0 && changesSinceLastSave) {
+    if (g_config.autosaveInterval > 0 && changesSinceLastSave == HAS_UNSAVED_CHANGES) {
         if (autosaveTimer.elapsedTime() > g_config.autosaveInterval * 1000 * 60) {
             autosaveTimer.start();
             time_t now = time(NULL);
@@ -2002,6 +2003,7 @@ void MainEditor::tickAutosave()
             try {
                 if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
                     g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
+                    changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
                 }
                 else {
                     g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
