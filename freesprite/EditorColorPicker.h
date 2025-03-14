@@ -45,11 +45,11 @@ public:
     UIHueSlider* hueSlider = NULL;
     UISVPicker* satValSlider = NULL;
     UITextField* colorTextField = NULL;
-    UISlider* sliderH = NULL;
 
     UITextField* txtR, *txtG, *txtB;
     UITextField* txtH, *txtS, *txtV;
 
+    UIColorSlider* sliderH = NULL;
     UIColorSlider* sliderS = NULL;
     UIColorSlider* sliderV = NULL;
     UIColorSlider* sliderR = NULL;

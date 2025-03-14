@@ -96,7 +96,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     colorTabs->tabs[1].wxs.addDrawable(txtS);
     colorTabs->tabs[1].wxs.addDrawable(txtV);
 
-    sliderH = new UISlider();
+    sliderH = new UIColorSlider();
     sliderH->position = XY{ 30, 120 + 10 };
     sliderH->wxWidth = 200;
     sliderH->wxHeight = 25;
@@ -519,6 +519,18 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
     rgb colorSMax = hsv2rgb(hsv{ currentH, 1, currentV });
     rgb colorVMin = hsv2rgb(hsv{ currentH, currentS, 0 });
     rgb colorVMax = hsv2rgb(hsv{ currentH, currentS, 1 });
+
+    // todo: make these affected by saturation and value
+    sliderH->colors = {
+        0xFFFF0000,
+        0xFFFFFF00,
+        0xFF00FF00,
+        0xFF00FFFF,
+        0xFF0000FF,
+        0xFFFF00FF,
+        0xFFFF0000
+    };
+
     sliderS->colors = {PackRGBAtoARGB(colorSMin.r * 255, colorSMin.g * 255, colorSMin.b * 255, 255),
                        PackRGBAtoARGB(colorSMax.r * 255, colorSMax.g * 255, colorSMax.b * 255, 255)};
 
