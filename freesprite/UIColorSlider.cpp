@@ -4,7 +4,29 @@ void UIColorSlider::render(XY pos)
 {
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
 
-	SDL_Vertex gradientVerts[4];
+	if (colors.size() > 1) {
+		int splits = ixmax(colors.size(), 2) - 1;
+		int wSplit = wxWidth / splits;
+
+		for (int x = 0; x < splits; x++) {
+			SDL_Rect subRect = drawrect;
+			subRect.w = wSplit;
+			subRect.x = pos.x + x * wSplit;
+			u32 color1 = colors[x] | 0xFF000000;
+			u32 color2 = colors[x + 1] | 0xFF000000;
+			renderGradient(subRect, color1, color2, color1, color2);
+		}
+	}
+	else if (colors.size() == 1) {
+		SDL_SetRenderDrawColor(g_rd, (colors[0] >> 16) & 0xff, (colors[0] >> 8) & 0xff, colors[0] & 0xff, 0xff);
+		SDL_RenderFillRect(g_rd, &drawrect);
+	}
+	else {
+		SDL_SetRenderDrawColor(g_rd, 0x0, 0x0, 0x0, 0x80);
+		SDL_RenderFillRect(g_rd, &drawrect);
+	}
+
+	/* SDL_Vertex gradientVerts[4];
 	gradientVerts[0].position = { (float)pos.x, (float)pos.y };
 	gradientVerts[0].color = toFColor(SDL_Color{ (uint8_t)((colorMin >> 16) & 0xff), (uint8_t)((colorMin >> 8) & 0xff), (uint8_t)((colorMin) & 0xff), 0xff });
 
@@ -18,7 +40,7 @@ void UIColorSlider::render(XY pos)
 	gradientVerts[3].color = toFColor(SDL_Color{ (uint8_t)((colorMin >> 16) & 0xff), (uint8_t)((colorMin >> 8) & 0xff), (uint8_t)((colorMin) & 0xff), 0xff });
 
 	int indices[6] = { 0, 1, 2, 0, 2, 3 };
-	SDL_RenderGeometry(g_rd, NULL, gradientVerts, 4, indices, 6);
+	SDL_RenderGeometry(g_rd, NULL, gradientVerts, 4, indices, 6);*/
 
 	//SDL_SetRenderDrawColor(g_rd, 0x0, 0x0, 0x0, focused ? 0xff : 0x80);
 	//SDL_RenderFillRect(g_rd, &drawrect);

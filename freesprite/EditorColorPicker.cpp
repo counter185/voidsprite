@@ -454,11 +454,12 @@ void EditorColorPicker::updateColorModelSliders(std::string dontUpdate)
             UILabel* label = component.second.valueLabel;
 
             auto modelColorMin = modelColorValue;
+            auto modelColorMid = modelColorValue;
             auto modelColorMax = modelColorValue;
 
-            //TODO: other min/max bounds
-            modelColorMin[component.first] = 0;
-            modelColorMax[component.first] = 1;
+            modelColorMin[component.first] = component.second.range.first;
+            modelColorMid[component.first] = component.second.range.first + (component.second.range.second - component.second.range.first) / 2;
+            modelColorMax[component.first] = component.second.range.second;
 
             double val = modelColorValue[component.first];
             if (model.first != dontUpdate) {
@@ -466,8 +467,9 @@ void EditorColorPicker::updateColorModelSliders(std::string dontUpdate)
                 label->text = std::format("{:.2f}", val);
                 component.second.valueNow = val;
             }
-            slider->colorMin = component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMin);
-            slider->colorMax = component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMax);
+            slider->colors = {component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMin),
+                              component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMid),
+                              component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMax)};
         }
     }
 }
@@ -517,10 +519,11 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
     rgb colorSMax = hsv2rgb(hsv{ currentH, 1, currentV });
     rgb colorVMin = hsv2rgb(hsv{ currentH, currentS, 0 });
     rgb colorVMax = hsv2rgb(hsv{ currentH, currentS, 1 });
-    sliderS->colorMin = (0xFF << 24) + ((int)(colorSMin.r*255) << 16) + ((int)(colorSMin.g * 255) << 8) + (int)(colorSMin.b * 255);
-    sliderS->colorMax = (0xFF << 24) + ((int)(colorSMax.r*255) << 16) + ((int)(colorSMax.g * 255) << 8) + (int)(colorSMax.b * 255);
-    sliderV->colorMin = (0xFF << 24) + ((int)(colorVMin.r*255) << 16) + ((int)(colorVMin.g * 255) << 8) + (int)(colorVMin.b * 255);
-    sliderV->colorMax = (0xFF << 24) + ((int)(colorVMax.r*255) << 16) + ((int)(colorVMax.g * 255) << 8) + (int)(colorVMax.b * 255);
+    sliderS->colors = {PackRGBAtoARGB(colorSMin.r * 255, colorSMin.g * 255, colorSMin.b * 255, 255),
+                       PackRGBAtoARGB(colorSMax.r * 255, colorSMax.g * 255, colorSMax.b * 255, 255)};
+
+    sliderV->colors = {PackRGBAtoARGB(colorVMin.r * 255, colorVMin.g * 255, colorVMin.b * 255, 255),
+                       PackRGBAtoARGB(colorVMax.r * 255, colorVMax.g * 255, colorVMax.b * 255, 255)};
 
     txtR->setText(std::to_string(currentR));
     txtG->setText(std::to_string(currentG));
@@ -533,12 +536,18 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
 
     uint32_t rgbColor = sdlcolorToUint32(col) | 0xFF000000; //(0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
 
-    sliderR->colorMin = rgbColor & 0x00FFFF;
-    sliderR->colorMax = rgbColor | 0xFF0000;
-    sliderG->colorMin = rgbColor & 0xFF00FF;
-    sliderG->colorMax = rgbColor | 0x00FF00;
-    sliderB->colorMin = rgbColor & 0xFFFF00;
-    sliderB->colorMax = rgbColor | 0x0000FF;
+    sliderR->colors = {
+        rgbColor & 0x00FFFF,
+        rgbColor | 0xFF0000
+    };
+    sliderG->colors = {
+        rgbColor & 0xFF00FF, 
+        rgbColor | 0x00FF00
+    };
+    sliderB->colors = {
+        rgbColor & 0xFFFF00, 
+        rgbColor | 0x0000FF
+    };
 
     colorTextField->setText(std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
     caller->pickedColor = rgbColor;
