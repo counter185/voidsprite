@@ -307,3 +307,19 @@ ScanlineMap Layer::wandSelectAt(XY pos) {
     }
     return ret;
 }
+
+void Layer::clear(ScanlineMap* area)
+{
+    if (area == NULL) {
+        memset(pixelData, isPalettized ? -1 : 0, w * h * 4);
+    }
+    else {
+        u32* ppx = (u32*)pixelData;
+        area->forEachPoint([&](XY p) {
+            if (pointInBox(p, SDL_Rect{ 0,0,w,h })) {
+                ARRAY2DPOINT(ppx, p.x, p.y, w) = isPalettized ? -1 : 0x00000000;
+            }
+        });
+    }
+    layerDirty = true;
+}

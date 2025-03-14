@@ -388,5 +388,7 @@ public:
     u8* integerDownscale(XY scale);
 
     ScanlineMap wandSelectAt(XY pos);
+
+    void clear(ScanlineMap* area = NULL);
 };
 

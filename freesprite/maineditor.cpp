@@ -1251,6 +1251,12 @@ void MainEditor::takeInput(SDL_Event evt) {
                             passthroughBrushKeybinds = false;
                             // colorPicker->toggleEraser();
                             break;
+                        case SDL_SCANCODE_DELETE:
+                            commitStateToCurrentLayer();
+                            passthroughBrushKeybinds = false;
+                            getCurrentLayer()->clear(isolateEnabled ? &isolatedFragment : NULL);
+                            g_addNotification(Notification("Area cleared", "", 1000));
+                            break;
                         case SDL_SCANCODE_RCTRL:
                             passthroughBrushKeybinds = false;
                             middleMouseHold = !middleMouseHold;
