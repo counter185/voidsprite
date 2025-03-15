@@ -1848,6 +1848,7 @@ void MainEditor::undo()
                 tileDimensions = td;
                 break;
         }
+        changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
     }
 }
@@ -1920,6 +1921,7 @@ void MainEditor::redo()
             tileDimensions = td;
             break;
         }
+        changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
     }
 }

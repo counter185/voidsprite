@@ -167,10 +167,10 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
                 cnameLabel->position = XY{ 10, yNow };
                 colorModelsPanel->subWidgets.addDrawable(cnameLabel);
                 UILabel* cvalueLabel = new UILabel("0");
-                cvalueLabel->position = XY{ 30, yNow };
+                cvalueLabel->position = XY{ 50, yNow };
                 colorModelsPanel->subWidgets.addDrawable(cvalueLabel);
                 UIColorSlider* slider = new UIColorSlider();
-                slider->position = XY{ 80, yNow };
+                slider->position = XY{ 120, yNow };
                 slider->wxWidth = 200;
                 slider->wxHeight = 20;
                 slider->setCallbackListener(100 + i, this);
