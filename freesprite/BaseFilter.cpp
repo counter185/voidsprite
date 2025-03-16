@@ -364,6 +364,11 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
     if (colors.size() <= numColors) {
         return copy(src);
     }
+    u32* pppx = (u32*)src->pixelData;
+    bool oneColorWillBeAlpha = numColors > 1 && std::any_of(pppx, pppx + src->w * src->h, [](u32 a) { return (a & 0xff000000) == 0; });
+    if (oneColorWillBeAlpha) {
+        numColors--;
+    }
     std::vector<std::vector<u32>> buckets = {colors};
     while (buckets.size() < numColors) {
         std::sort(buckets.begin(), buckets.end(), [](std::vector<u32> a, std::vector<u32> b) {return a.size() > b.size(); });
@@ -386,7 +391,12 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
     Layer* c = copy(src);
     u32* ppx = (u32*)c->pixelData;
     for (u64 x = 0; x < c->w * c->h; x++) {
-        ppx[x] = 0xFF000000 | remap[ppx[x] & 0xFFFFFF];
+        if (oneColorWillBeAlpha && (ppx[x] & 0xFF000000) == 0) {
+            ppx[x] = 0;
+        }
+        else {
+            ppx[x] = 0xFF000000 | remap[ppx[x] & 0xFFFFFF];
+        }
     }
     return c;
 }
