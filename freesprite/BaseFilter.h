@@ -146,3 +146,14 @@ public:
         };
     }
 };
+
+class FilterQuantize : public BaseFilter {
+public:
+    std::string name() override { return "Quantize colors"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("num.colors", 1, 256, 128),
+        };
+    }
+};

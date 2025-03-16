@@ -983,7 +983,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     positions.push_back(XY{ x,y });
                 }
 #if _DEBUG
-                //std::cout << action.dump(4) << std::endl;
+                std::cout << action.dump(4) << std::endl;
 #endif
                 switch (tool) {
                     //1px pencil
@@ -1016,9 +1016,17 @@ MainEditor* deserializePixelStudioSession(json j)
                     break;
                     //erase selection
                 case 6:
-                    for (XY& p : positions) {
+                {
+                    std::string metaString = action["Meta"];
+                    json meta = json::parse(metaString);
+                    XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                    XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+
+                    nlayer->fillRect(from, to, 0x00000000);
+                    /*for (XY& p : positions) {
                         nlayer->setPixel(p, 0x00000000);
-                    }
+                    }*/
+                }
                     break;
                     //move
                 case 10:
@@ -1028,12 +1036,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
                     XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
 
-                    SDL_Rect rect = {
-                        ixmin(from.x, to.x),
-                        ixmin(from.y, to.y),
-                        abs(from.x - to.x) + 1,
-                        abs(from.y - to.y) + 1
-                    };
+                    SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1};
 
                     XY blitAt = positions[1];
                     u32* pixelData = (u32*)tracked_malloc(rect.w * rect.h * 4);
@@ -1063,11 +1066,27 @@ MainEditor* deserializePixelStudioSession(json j)
                 break;
                 //flip x
                 case 13:
-                    nlayer->flipHorizontally();
+                {
+                    std::string metaString = action["Meta"];
+                    json meta = json::parse(metaString);
+                    XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                    XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+
+                    SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
+                    nlayer->flipHorizontally(rect);
+                }
                     break;
-                    //flip y
+                //flip y
                 case 14:
-                    nlayer->flipVertically();
+                {
+                    std::string metaString = action["Meta"];
+                    json meta = json::parse(metaString);
+                    XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                    XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+
+                    SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
+                    nlayer->flipVertically(rect);
+                }
                     break;
                     //replace color
                 case 18:
@@ -1115,6 +1134,9 @@ MainEditor* deserializePixelStudioSession(json j)
                     delete nnlayer;
                 }
                 break;
+                //case 21:
+                    //rotate selection
+                    //break;
                 case 24:
                     //adjust HSL,
                     //data is in `"Meta": "[-15660,0,0]",`
@@ -1140,7 +1162,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     //nlayer->shiftLayerHSL(shift);
 
                 }
-                break;
+                    break;
                 default:
                     g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
                     printf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);

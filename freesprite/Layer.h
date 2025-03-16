@@ -200,25 +200,30 @@ public:
         return getPixelAt(position, ignoreLayerAlpha);
     }
 
-    void flipHorizontally() {
+    void flipHorizontally(SDL_Rect region = {-1,-1,-1,-1}) {
+        if (region.w == -1) {
+            region = {0, 0, w, h};
+        }
         uint32_t* px32 = (uint32_t*)pixelData;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w / 2; x++) {
-                uint32_t p = *(px32 + (y*w) + (w - 1 - x));
-                *(px32 + (y*w) + (w - 1 - x)) = *(px32 + (y*w) + x);
-                *(px32 + (y*w) + x) = p;
+        for (int y = 0; y < region.h; y++) {
+            for (int x = 0; x < region.w / 2; x++) {
+                u32 p = ARRAY2DPOINT(px32, region.x + region.w-1-x, region.y + y, w);
+                ARRAY2DPOINT(px32, region.x + region.w - 1 - x, region.y + y, w) = ARRAY2DPOINT(px32, region.x + x, region.y + y, w);
+                ARRAY2DPOINT(px32, region.x + x, region.y + y, w) = p;
             }
         }
         layerDirty = true;
     }
-    void flipVertically() {
-        uint32_t* px32 = (uint32_t*)pixelData;
-        for (int y = 0; y < h/2; y++) {
-            for (int x = 0; x < w; x++) {
-                uint32_t p = *(px32 + (y*w) + (w - 1 - x));
-                uint32_t* p2 = px32 + ((h-1-y)*w) + (w - 1 - x);
-                *(px32 + (y * w) + (w - 1 - x)) = *p2;
-                *p2 = p;
+    void flipVertically(SDL_Rect region = { -1,-1,-1,-1 }) {
+        if (region.w == -1) {
+            region = { 0, 0, w, h };
+        }
+        u32* px32 = (u32*)pixelData;
+        for (int y = 0; y < region.h/2; y++) {
+            for (int x = 0; x < region.w; x++) {
+                u32 p = ARRAY2DPOINT(px32, region.x + x, region.y + y, w);
+                ARRAY2DPOINT(px32, region.x + x, region.y + y, w) = ARRAY2DPOINT(px32, region.x + x, region.y + region.h-1-y, w);
+                ARRAY2DPOINT(px32, region.x + x, region.y + region.h-1-y, w) = p;
             }
         }
         layerDirty = true;

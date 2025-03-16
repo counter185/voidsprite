@@ -114,35 +114,9 @@ Layer* Layer::copyScaled(XY dimensions)
 }
 
 void Layer::paintBucket(XY pos, u32 color) {
-    uint32_t pixel = getPixelAt(pos);
-    uint32_t swapTo = color;
-
-    if (pixel == swapTo) {
-        return;
-    }
-
-    std::vector<XY> openList;
-    openList.push_back(pos);
-    std::vector<XY> nextList;
-    while (!openList.empty()) {
-        for (XY& openListElement : openList) {
-            uint32_t pixelRn = getPixelAt(openListElement);
-            if (pointInBox(openListElement, {0,0,w,h}) && (pixelRn == pixel || (!isPalettized && pixelRn >> 24 == 0 && pixel >> 24 == 0))) {
-                setPixel(openListElement, swapTo);
-                XY p[] = {
-                    {0,1},
-                    {0,-1},
-                    {1,0},
-                    {-1,0}
-                };
-                for (XY& pp : p) {
-                    nextList.push_back(xyAdd(openListElement, pp));
-                }
-            }
-        }
-        openList = nextList;
-        nextList.clear();
-    }
+    wandSelectAt(pos).forEachPoint([&](XY p) {
+        setPixel(p, color);
+    });
 }
 
 Layer* Layer::trim(SDL_Rect r)
