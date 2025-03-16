@@ -31,8 +31,8 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 #include "io_aseprite.h"
 #include "io_piskel.h"
 #include "io_gim.h"
+#include "io_rpgm.h"
 
-Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
@@ -61,7 +61,6 @@ Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
-MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
@@ -78,7 +77,6 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
-bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
