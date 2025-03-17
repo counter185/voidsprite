@@ -214,6 +214,7 @@
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />
     <ClCompile Include="PanelMCBlockPreview.cpp" />
+    <ClCompile Include="PanelReference.cpp" />
     <ClCompile Include="PanelRPG2KTilemapPreview.cpp" />
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
@@ -378,6 +379,7 @@
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
     <ClInclude Include="Panel.h" />
     <ClInclude Include="PanelMCBlockPreview.h" />
+    <ClInclude Include="PanelReference.h" />
     <ClInclude Include="PanelRPG2KTilemapPreview.h" />
     <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="PanelTilemapPreview.h" />

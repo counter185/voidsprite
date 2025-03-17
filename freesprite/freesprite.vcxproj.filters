@@ -564,6 +564,9 @@
     <ClCompile Include="io_rpgm.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="PanelReference.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1075,6 +1078,9 @@
     </ClInclude>
     <ClInclude Include="io_rpgm.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelReference.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,7 @@
 #include "ee_creature.h"
 #include "BaseFilter.h"
 #include "RenderFilter.h"
+#include "PanelReference.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1116,6 +1117,17 @@ void MainEditor::takeInput(SDL_Event evt) {
     }
 
     LALT_TO_SUMMON_NAVBAR;
+
+    if (evt.type == SDL_DROPFILE) {
+        std::string path = evt.drop.data;
+        MainEditor* ssn = loadAnyIntoSession(path);
+        if (ssn != NULL) {
+            Layer* flat = ssn->flattenImage();
+            Panel* referencePanel = new PanelReference(flat);
+            addWidget(new CollapsableDraggablePanel("REFERENCE", referencePanel));
+            delete ssn;
+        }
+    }
 
     if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.scancode == SDL_SCANCODE_Q) {
         qModifier = evt.key.down;

@@ -17,6 +17,8 @@ public:
 	int callback_id = -1;
 	EventCallbackListener* callback = NULL;
 
+	virtual ~Drawable() {}
+
 	virtual bool isMouseIn(XY thisPositionOnScreen, XY mousePos) { return false; }
 	virtual bool clickable() { return true; }
 	virtual bool focusableWithTab() { return false; }
