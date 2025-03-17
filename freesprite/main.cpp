@@ -715,6 +715,7 @@ int main(int argc, char** argv)
         //draw the screen icons
         XY screenIcons = {g_windowW, g_windowH - 10};
         screenIcons = xySubtract(screenIcons, XY{ (int)(26 * screenStack.size()), 16});
+        XY screenIconOrigin = screenIcons;
         
         for (int x = 0; x < screenStack.size(); x++) {
             BaseScreen* s = screenStack[x];
@@ -730,6 +731,44 @@ int main(int argc, char** argv)
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - ixmax(200, 10 + statW), g_windowH - 55);
         }
 
+        //draw battery icon
+        int batteryRectW = 60;
+        int batterySeconds, batteryPercent;
+        SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
+        if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
+            XY batteryOrigin = xySubtract(screenIconOrigin, { 120, 0 });
+            XY batteryOriginLow = xyAdd(batteryOrigin, { 0,16 });
+            XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
+
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
+            SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
+            SDL_RenderDrawRect(g_rd, &batteryRect);
+
+            SDL_Color primaryColor = powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{253, 255, 146, 0x80}
+                                   : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
+                                   : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
+                                   : SDL_Color{ 255,255,255, 0x80 };
+
+            SDL_SetRenderDrawColor(g_rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
+            drawLine(batteryOrigin, batteryOriginLow);
+            drawLine(batteryEnd, xyAdd(batteryOriginLow, { batteryRectW, 0 }));
+            XY statPercent = statLineEndpoint(batteryOrigin, xyAdd(batteryOrigin, { batteryRectW, 0 }), batteryPercent / 100.0);
+            XY statPercentLow = { statPercent.x, batteryOriginLow.y };
+            drawLine(statPercent, statPercentLow);
+            drawLine(batteryOrigin, statPercent);
+            drawLine(batteryOriginLow, statPercentLow);
+            g_fnt->RenderString(std::format("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
+
+            if (powerstate == SDL_POWERSTATE_CHARGING) {
+                g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80});
+            }
+            else if (powerstate == SDL_POWERSTATE_CHARGED) {
+                g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
+            }
+            else if (powerstate == SDL_POWERSTATE_ERROR) {
+                g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
+            }
+        }
         
         //render notifications
         tickNotifications();
