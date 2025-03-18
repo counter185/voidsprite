@@ -87,7 +87,7 @@ For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requir
 
 ### Linux
 
-1. Install the dependencies and their respective development packages: sdl2, sdl2_ttf, sdl2_image, libpng, pugixml, zlib, liblcf, libjxl, libhwy
+1. Install the dependencies and their respective development packages: sdl3, sdl3_ttf, sdl3_image, libpng, pugixml, zlib, liblcf, libjxl, libhwy
    * Some dependencies (libpng, pugixml, zlib, liblcf) will be automatically downloaded and built during the build step if not installed - don't worry if your distro does not package them.
    * GCC/G++ 13 or later is required
 2. Install meson (note that version 0.62.2 or higher is required; Ubuntu 22.04 users will want to install a newer version directly from pip with `pip3 install --user meson`)
