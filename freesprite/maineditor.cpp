@@ -33,6 +33,14 @@
 #include "PopupPickColor.h"
 #include "PopupApplyFilter.h"
 
+#if defined(__unix__)
+#include <time.h>
+#elif defined(_WIN32)
+#include <time.h>
+#else
+#include <ctime>
+#endif
+
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
 {
     XY tileDim = xyEqual(tileDimensions, { 0,0 }) ? canvas.dimensions : tileDimensions;
@@ -2011,8 +2019,13 @@ void MainEditor::tickAutosave()
             autosaveTimer.start();
             time_t now = time(NULL);
             tm ltm;
-            localtime_s(&ltm, &now);
-            
+            #if defined(__unix__)
+                localtime_r(&now, &ltm);
+            #elif defined(_WIN32)
+                localtime_s(&ltm, &now);
+            #else
+                ltm = *std::localtime(&now);
+            #endif
             std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon+1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
             try {
                 if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {

@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <math.h>
+#include <math.h>
 
 struct rgb {
     double r;       // a fraction between 0 and 1
