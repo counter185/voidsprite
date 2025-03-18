@@ -253,6 +253,13 @@ uint8_t* Layer::integerDownscale(XY scale)
 }
 
 ScanlineMap Layer::wandSelectAt(XY pos) {
+    ScanlineMap r;
+    wandSelectWithOperationAt(pos, [&](XY a) {
+        r.addPoint(a);
+    });
+    return r;
+}
+void Layer::wandSelectWithOperationAt(XY pos, std::function<void(XY)> foreachPoint) {
     u32 pixel = getPixelAt(pos);
     ScanlineMap ret;
     std::vector<XY> openList;
@@ -261,10 +268,11 @@ ScanlineMap Layer::wandSelectAt(XY pos) {
     while (!openList.empty()) {
         for (XY& openListElement : openList) {
             uint32_t pixelRn = getPixelAt(openListElement);
-            if (pointInBox(openListElement,{0,0,w,h}) &&
+            if (pointInBox(openListElement, { 0,0,w,h }) &&
                 !ret.pointExists(openListElement) &&
                 (pixelRn == pixel || (!isPalettized && pixelRn >> 24 == 0 && pixel >> 24 == 0))) {
                 ret.addPoint(openListElement);
+                foreachPoint(openListElement);
                 XY p[] = {
                     {0,  1 },
                     {0,  -1},
@@ -279,7 +287,6 @@ ScanlineMap Layer::wandSelectAt(XY pos) {
         openList = nextList;
         nextList.clear();
     }
-    return ret;
 }
 
 void Layer::clear(ScanlineMap* area)

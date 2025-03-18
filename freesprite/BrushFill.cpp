@@ -29,7 +29,12 @@ void BrushFill::clickPress(MainEditor* editor, XY pos)
 {
     g_startNewOperation([this, editor, pos]() {
         Layer* currentLayer = editor->getCurrentLayer();
-        uint32_t pixel = currentLayer->getPixelAt(pos);
+
+        currentLayer->wandSelectWithOperationAt(pos, [editor](XY point) {
+            editor->SetPixel(point, editor->getActiveColor());
+        });
+
+        /*uint32_t pixel = currentLayer->getPixelAt(pos);
         uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
 
         if (pixel == swapTo) {
@@ -71,7 +76,7 @@ void BrushFill::clickPress(MainEditor* editor, XY pos)
             }
             openList = nextList;
             nextList.clear();
-        }
+        }*/
     });
 }
 

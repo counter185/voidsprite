@@ -393,6 +393,7 @@ public:
     u8* integerDownscale(XY scale);
 
     ScanlineMap wandSelectAt(XY pos);
+    void wandSelectWithOperationAt(XY pos, std::function<void(XY)> foreachPoint);
 
     void clear(ScanlineMap* area = NULL);
 };
