@@ -5,6 +5,7 @@
 #include "UtilPathfind.h"
 #include "background_operation.h"
 #include "mathops.h"
+#include "mathops.tcc"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -16,7 +17,7 @@ private:
 
 public:
     BigBitField(usize w, usize h) : bits((char*) malloc(w * h)), w(w), h(h) {
-        if (bits != NULL) memset(bits, 0, w * h);
+        if (bits != NULL) memset(bits, 0, div_ceil<usize>(w * h, 8));
     }
 
     ~BigBitField() {
@@ -31,22 +32,20 @@ public:
         if (x < 0 || y < 0 || (usize) x > w || (usize) y > h) return;
 
         usize p = (usize) y * h + (usize) x;
-        //usize s = p % 8;
-        //p /= 8;
+        usize s = p % 8;
+        p /= 8;
 
-        //bits[p] |= 1 << s;
-        bits[p] = true;
+        bits[p] |= 1 << s;
     }
 
     inline bool is(isize x, isize y) {
         if (x < 0 || y < 0 || (usize) x > w || (usize) y > h) return false;
 
         usize p = (usize) y * h + (usize) x;
-        //usize s = p % 8;
-        //p /= 8;
+        usize s = p % 8;
+        p /= 8;
 
-        //return bits[p] & (1 << s);
-        return bits[p];
+        return bits[p] & (1 << s);
     }
 };
 

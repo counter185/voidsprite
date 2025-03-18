@@ -5,5 +5,5 @@ template<typename V> inline const V div_floor(V val, V di) {
 }
 
 template<typename V> inline const V div_ceil(V val, V di) {
-    return val / di + (val & 1);
+    return val / di + (val % di > 0);
 }
