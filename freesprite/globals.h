@@ -29,15 +29,9 @@
 #include <thread>
 #include <atomic>
 
-#ifdef __APPLE__
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_image.h>
-#else 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_image/SDL_image.h>
-#endif
 
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
