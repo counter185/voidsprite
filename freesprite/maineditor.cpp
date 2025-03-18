@@ -2019,7 +2019,8 @@ void MainEditor::tickAutosave()
             autosaveTimer.start();
             time_t now = time(NULL);
             tm ltm;
-            #if defined(__unix__)
+            // todo: make a platform-specific localtime function
+            #if defined(__unix__) || defined(__APPLE__)
                 localtime_r(&now, &ltm);
             #elif defined(_WIN32)
                 localtime_s(&ltm, &now);
