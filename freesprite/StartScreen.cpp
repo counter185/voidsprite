@@ -167,7 +167,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
     }
     else if (evt_id >= 20) {
         int index = evt_id - 20;
-        if (index < g_config.lastOpenFiles.size()) {
+        if ((isize) index < (isize) g_config.lastOpenFiles.size()) {
             tryLoadFile(g_config.lastOpenFiles[index]);
         }
     }
@@ -175,12 +175,16 @@ void StartScreen::eventButtonPressed(int evt_id) {
 
 void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex)
 {
+    (void) name, (void) importerIndex;
+
     if (evt_id == 0) {
         g_addScreen(new SplitSessionEditor(name));
     }
 }
 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
+    (void) evt_id;
+
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
     importerIndex--;
     FileImporter* importer = g_fileImporters[importerIndex];
@@ -202,6 +206,8 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 
 void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
+    (void) name;
+
     if (evt_id == EVENT_STARTSCREEN_TEMPLATEPICKED) {
         BaseTemplate* templ = g_templates[index];
         MainEditor* newMainEditor = new MainEditor(templ->generate());
@@ -261,7 +267,7 @@ void StartScreen::renderStartupAnim()
         }
         else {
             SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255 * (1.0 - animTime));
-            SDL_Rect bgRect = { 0, 0, g_windowW, g_windowH * (1.0 - XM1PW3P1(animTime)) };
+            SDL_Rect bgRect = { 0, 0, g_windowW, int(g_windowH * (1.0 - XM1PW3P1(animTime))) };
             SDL_RenderFillRect(g_rd, &bgRect);
             //SDL_RenderFillRect(g_rd, NULL);
 
@@ -285,8 +291,8 @@ void StartScreen::renderStartupAnim()
 
 void StartScreen::renderBackground()
 {
-    uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    u32 colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    u32 colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
     renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
     struct StartScreenEffect {
@@ -310,13 +316,13 @@ void StartScreen::renderBackground()
 
     for (int x = 0; x < effects.size(); x++) {
         bool remove = false;
-        XY normPosition = { g_windowW * (effects[x].pos.x / 960.0), g_windowH * (effects[x].pos.y / 960.0) };
+        XY normPosition = { int(g_windowW * (effects[x].pos.x / 960.0)), int(g_windowH * (effects[x].pos.y / 960.0)) };
         switch (effects[x].type) {
             case 0:
             {
                 //long 2s line
                 remove = effects[x].timer.percentElapsedTime(2000) == 1.0;
-                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 120) / 960.0), g_windowH * ((effects[x].pos.y - 120) / 960.0) };
+                XY normPosition2 = { int(g_windowW * ((effects[x].pos.x + 120) / 960.0)), int(g_windowH * ((effects[x].pos.y - 120) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30 * (1.0 - effects[x].timer.percentElapsedTime(2000)));
                 drawLine(normPosition, normPosition2, 1.0);
             }
@@ -325,7 +331,7 @@ void StartScreen::renderBackground()
             {
                 //long 0.7s trail
                 remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
-                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 500) / 960.0), g_windowH * ((effects[x].pos.y - 500) / 960.0) };
+                XY normPosition2 = { int(g_windowW * ((effects[x].pos.x + 500) / 960.0)), int(g_windowH * ((effects[x].pos.y - 500) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30 - 0x20 * effects[x].timer.percentElapsedTime(700));
                 drawLine(normPosition, normPosition2, 1.0-XM1PW3P1(effects[x].timer.percentElapsedTime(700)));
             }
@@ -334,7 +340,7 @@ void StartScreen::renderBackground()
             {
                 //short 3s line
                 remove = effects[x].timer.percentElapsedTime(3000) == 1.0;
-                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 40) / 960.0), g_windowH * ((effects[x].pos.y - 40) / 960.0) };
+                XY normPosition2 = { int(g_windowW * ((effects[x].pos.x + 40) / 960.0)), int(g_windowH * ((effects[x].pos.y - 40) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(3000)));
                 drawLine(normPosition, normPosition2, 1.0);
             }
@@ -343,7 +349,7 @@ void StartScreen::renderBackground()
             {
                 //mid length 2.5s line
                 remove = effects[x].timer.percentElapsedTime(2500) == 1.0;
-                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 90) / 960.0), g_windowH * ((effects[x].pos.y - 90) / 960.0) };
+                XY normPosition2 = { int(g_windowW * ((effects[x].pos.x + 90) / 960.0)), int(g_windowH * ((effects[x].pos.y - 90) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(2500)));
                 drawLine(normPosition, normPosition2, 1.0);
             }
@@ -352,8 +358,8 @@ void StartScreen::renderBackground()
             {
                 //short 1s star
                 remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
-                XY normPosition2 = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 15) / 960.0) };
-                XY normPosition3 = { g_windowW * ((effects[x].pos.x - 15) / 960.0), g_windowH * ((effects[x].pos.y + 15) / 960.0) };
+                XY normPosition2 = { int(g_windowW * ((effects[x].pos.x + 15) / 960.0)), int(g_windowH * ((effects[x].pos.y - 15) / 960.0)) };
+                XY normPosition3 = { int(g_windowW * ((effects[x].pos.x - 15) / 960.0)), int(g_windowH * ((effects[x].pos.y + 15) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50 - 0x50 * effects[x].timer.percentElapsedTime(1000));
                 drawLine(normPosition, normPosition2, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
                 drawLine(normPosition, normPosition3, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
@@ -364,9 +370,9 @@ void StartScreen::renderBackground()
                 //short 0.6s diamond
                 remove = effects[x].timer.percentElapsedTime(600) == 1.0;
                 XY posLeft = normPosition;
-                XY posRight = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y) / 960.0) };
-                XY posUp = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 12) / 960.0) };
-                XY posDown = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y + 12) / 960.0) };
+                XY posRight = { int(g_windowW * ((effects[x].pos.x + 30) / 960.0)), int(g_windowH * ((effects[x].pos.y) / 960.0)) };
+                XY posUp = { int(g_windowW * ((effects[x].pos.x + 15) / 960.0)), int(g_windowH * ((effects[x].pos.y - 12) / 960.0)) };
+                XY posDown = { int(g_windowW * ((effects[x].pos.x + 15) / 960.0)), int(g_windowH * ((effects[x].pos.y + 12) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x24 - 0x24 * effects[x].timer.percentElapsedTime(600));
                 drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
                 drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
@@ -379,9 +385,9 @@ void StartScreen::renderBackground()
                 //long 1.3s big diamond
                 remove = effects[x].timer.percentElapsedTime(1300) == 1.0;
                 XY posLeft = normPosition;
-                XY posRight = { g_windowW * ((effects[x].pos.x + 60) / 960.0), g_windowH * ((effects[x].pos.y) / 960.0) };
-                XY posUp = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y - 24) / 960.0) };
-                XY posDown = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y + 24) / 960.0) };
+                XY posRight = { int(g_windowW * ((effects[x].pos.x + 60) / 960.0)), int(g_windowH * ((effects[x].pos.y) / 960.0)) };
+                XY posUp = { int(g_windowW * ((effects[x].pos.x + 30) / 960.0)), int(g_windowH * ((effects[x].pos.y - 24) / 960.0)) };
+                XY posDown = { int(g_windowW * ((effects[x].pos.x + 30) / 960.0)), int(g_windowH * ((effects[x].pos.y + 24) / 960.0)) };
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19 - 0x19 * effects[x].timer.percentElapsedTime(1300));
                 drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
                 drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
@@ -410,6 +416,8 @@ void StartScreen::renderBackground()
     int monthNow = tmNow.tm_mon;
     int dayNow = tmNow.tm_mday;
 
+    (void) yearNow, (void) monthNow, (void) dayNow;
+
     int hourNow = tmNow.tm_hour;//std::chrono::duration_cast<std::chrono::hours>(timeNow.time_since_epoch()).count() % 24;
     int minuteNow = tmNow.tm_min;//std::chrono::duration_cast<std::chrono::minutes>(timeNow.time_since_epoch()).count() % 60;
     int secondNow = tmNow.tm_sec;//std::chrono::duration_cast<std::chrono::seconds>(timeNow.time_since_epoch()).count() % 60;
@@ -421,8 +429,8 @@ void StartScreen::renderBackground()
     //draw hour lines
     double sep = (g_windowH - (60 + yOrigin)) / (23.0);
     for (int x = 0; x < 24; x++) {
-        XY lineP1 = { xOrigin, yOrigin + x * sep };
-        XY lineP2 = { xOrigin - g_windowW/32, yOrigin + x * sep };
+        XY lineP1 = { xOrigin, int(yOrigin + x * sep) };
+        XY lineP2 = { xOrigin - g_windowW/32, int(yOrigin + x * sep) };
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
         drawLine(lineP1, lineP2, 1.0);
@@ -443,8 +451,8 @@ void StartScreen::renderBackground()
     xOrigin -= g_windowW / 32 + 20;
     sep = (g_windowH - (60 + yOrigin)) / (59.0);
     for (int x = 0; x < 60; x++) {
-        XY lineP1 = { xOrigin, yOrigin + x * sep };
-        XY lineP2 = { xOrigin - g_windowW / 20, yOrigin + x * sep };
+        XY lineP1 = { xOrigin, int(yOrigin + x * sep) };
+        XY lineP2 = { xOrigin - g_windowW / 20, int(yOrigin + x * sep) };
         if (x % 2) {
             lineP1 = xyAdd(lineP1, { -20, 0 });
             lineP2 = xyAdd(lineP2, { -20, 0 });
@@ -471,8 +479,8 @@ void StartScreen::renderBackground()
     xOrigin -= g_windowW / 20 + 20 + 20;
     sep = (g_windowH - (60 + yOrigin)) / (59.0);
     for (int x = 0; x < 60; x++) {
-        XY lineP1 = { xOrigin, yOrigin + x * sep };
-        XY lineP2 = { xOrigin - g_windowW / 16, yOrigin + x * sep };
+        XY lineP1 = { xOrigin, int(yOrigin + x * sep) };
+        XY lineP2 = { xOrigin - g_windowW / 16, int(yOrigin + x * sep) };
         if (x % 2) {
             lineP1 = xyAdd(lineP1, { -40, 0 });
             lineP2 = xyAdd(lineP2, { -40, 0 });

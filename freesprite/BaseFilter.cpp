@@ -180,7 +180,7 @@ Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> op
 Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> options)
 {
     Layer* c = copy(src);
-    XY pixelSize = { std::stod(options["size.x"]), std::stod(options["size.y"]) };
+    XY pixelSize = { std::stoi(options["size.x"]), std::stoi(options["size.y"]) };
     int tilesW = (int)ceil(c->w / (double)pixelSize.x);
     int tilesH = (int)ceil(c->h / (double)pixelSize.y);
 
@@ -275,7 +275,7 @@ Layer* FilterBrightnessContrast::run(Layer* src, std::map<std::string, std::stri
     double contrast = std::stod(options["contrast"]);
 
     u32* ppx = (u32*)c->pixelData;
-    for (u64 x = 0; x < c->w * c->h; x++) {
+    for (u64 x = 0; x < (u64) c->w * (u64) c->h; x++) {
         SDL_Color px = uint32ToSDLColor(ppx[x]);
         px.r = ixmax(0, ixmin(255, (int)(px.r * contrast + brightness)));
         px.g = ixmax(0, ixmin(255, (int)(px.g * contrast + brightness)));
@@ -322,7 +322,7 @@ std::pair<std::vector<u32>, std::vector<u32>> evalMedianCutBucket(std::vector<u3
     midPoint *= mask / 0xff;
     std::sort(colors.begin(), colors.end(), [mask](u32 a, u32 b) { return (a & mask) < (b & mask); });
     int indexMaxStart = -1;
-    for (int x = 0; x < colors.size(); x++) {
+    for (usize x = 0; x < colors.size(); x++) {
         if ((colors[x] & mask) > midPoint) {
             indexMaxStart = x;
             break;

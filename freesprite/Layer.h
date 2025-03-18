@@ -10,9 +10,10 @@ public:
 
     std::map<std::string, std::string> importExportExtdata;
 
-    u8* pixelData;	//!!! THIS IS IN ARGB
-    std::vector<uint8_t*> undoQueue;
-    std::vector<uint8_t*> redoQueue;
+    /// ARGB pixel data
+    u8* pixelData;
+    std::vector<u8*> undoQueue;
+    std::vector<u8*> redoQueue;
     int w, h;
     SDL_Texture* tex = NULL;
     XY texDimensions = {0,0};
@@ -23,16 +24,16 @@ public:
     bool hidden = false;
 
     bool colorKeySet = false;
-    uint32_t colorKey = 0;
-    uint8_t lastConfirmedlayerAlpha = 255;
-    uint8_t layerAlpha = 255;
+    u32 colorKey = 0;
+    u8 lastConfirmedlayerAlpha = 255;
+    u8 layerAlpha = 255;
 
     SDL_Texture* effectPreviewTexture = NULL;
 
     Layer(int width, int height) {
         w = width;
         h = height;
-        pixelData = (uint8_t*)tracked_malloc(width * height * 4, "Layers");
+        pixelData = (u8*)tracked_malloc(width * height * 4, "Layers");
         if (pixelData != NULL) {
             memset(pixelData, 0, width * height * 4);
             tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
@@ -41,9 +42,9 @@ public:
         }
     }
     Layer(SDL_Surface* from) : Layer(from->w, from->h) {
-        //pixelData = (uint8_t*)tracked_malloc(w * h * 4);
+        //pixelData = (u8*)tracked_malloc(area() * 4);
         if (from->format == SDL_PIXELFORMAT_ARGB8888) {
-            memcpy(pixelData, from->pixels, w * h * 4);
+            memcpy(pixelData, from->pixels, area() * 4);
         }
         else {
             SDL_ConvertPixels(w, h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
@@ -53,17 +54,17 @@ public:
 
     virtual ~Layer() {
         tracked_free(pixelData);
-        for (uint8_t*& u : undoQueue) {
+        for (u8*& u : undoQueue) {
             tracked_free(u);
         }
-        for (uint8_t*& r : redoQueue) {
+        for (u8*& r : redoQueue) {
             tracked_free(r);
         }
         tracked_destroyTexture(tex);
     }
 
     virtual void updateTexture() {
-        uint8_t* pixels;
+        u8* pixels;
         int pitch;
         if (texDimensions.x != w || texDimensions.y != h) {
             tracked_destroyTexture(tex);
@@ -73,13 +74,13 @@ public:
         }
         SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
         if (pitch == w*4) {
-            memcpy(pixels, pixelData, w * h * 4);
+            memcpy(pixels, pixelData, area() * 4);
         } else {
             for (int y = 0; y < h; y++) {
                 memcpy(pixels + y * pitch, pixelData + y * w * 4, w* 4);
             }
         }
-        //memcpy(pixels, pixelData, w * h * 4);
+        //memcpy(pixels, pixelData, area() * 4);
 
         //todo respect the pitch in the below too
         if (colorKeySet) {
@@ -91,7 +92,7 @@ public:
                     }
                 }
             }
-            /*for (u64 p = 0; p < w * h; p++) {
+            /*for (u64 p = 0; p < area(); p++) {
                 if ((px32[p] & 0xffffff) == (colorKey & 0xFFFFFF)) {
                     pixels[p * 4+3] = 0;
                 }
@@ -101,7 +102,7 @@ public:
         layerDirty = false;
     }
 
-    void render(SDL_Rect where, uint8_t alpha = 255) {
+    void render(SDL_Rect where, u8 alpha = 255) {
         SDL_Texture* target = effectPreviewTexture ? effectPreviewTexture : tex;
         if (layerDirty) {
             updateTexture();
@@ -114,7 +115,7 @@ public:
         SDL_RenderCopy(g_rd, target, NULL, &where);
     }
 
-    void render(SDL_Rect where, SDL_Rect clip, uint8_t alpha = 255) {
+    void render(SDL_Rect where, SDL_Rect clip, u8 alpha = 255) {
         if (layerDirty) {
             updateTexture();
         }
@@ -126,17 +127,21 @@ public:
         SDL_RenderCopy(g_rd, tex, &clip, &where);
     }
 
+    inline u64 area() {
+        return (u64) w * (u64) h;
+    }
+
     SDL_Texture* renderToTexture() {
         SDL_Texture* ret = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
         SDL_SetTextureBlendMode(ret, SDL_BLENDMODE_BLEND);
-        uint8_t* pixels;
+        u8* pixels;
         int pitch;
         SDL_LockTexture(ret, NULL, (void**)&pixels, &pitch);
         if (!isPalettized) {
-            memcpy(pixels, pixelData, w * h * 4);
+            memcpy(pixels, pixelData, area() * 4);
         }
         else {
-            uint32_t* px32 = (uint32_t*)pixels;
+            u32* px32 = (u32*)pixels;
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     ARRAY2DPOINT(px32, x,y, pitch/4) = getVisualPixelAt(XY{ x,y });
@@ -152,15 +157,15 @@ public:
     void blit(Layer* sourceLayer, XY position, SDL_Rect clip, bool fast = false);
     void blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize);
 
-    void setPixel(XY position, uint32_t color) {
-        uint32_t* intpxdata = (uint32_t*)pixelData;
+    void setPixel(XY position, u32 color) {
+        u32* intpxdata = (u32*)pixelData;
         if (position.x >= 0 && position.x < w
             && position.y >= 0 && position.y < h) {
             intpxdata[position.x + (position.y * w)] = color;
             layerDirty = true;
         }
     }
-    void fillRect(XY from, XY to, uint32_t color) {
+    void fillRect(XY from, XY to, u32 color) {
         int minx = ixmin(from.x, to.x);
         int maxx = ixmax(from.x, to.x);
         int miny = ixmin(from.y, to.y);
@@ -172,22 +177,22 @@ public:
             }
         }
     }
-    void drawLine(XY from, XY to, uint32_t color) {
+    void drawLine(XY from, XY to, u32 color) {
         rasterizeLine(from, to, [this, color](XY p) { setPixel(p, color); });
     }
-    void drawRect(XY from, XY to, uint32_t color) {
+    void drawRect(XY from, XY to, u32 color) {
         drawLine(from, XY{ to.x, from.y }, color);
         drawLine(from, XY{ from.x, to.y }, color);
         drawLine(XY{ to.x, from.y }, to, color);
         drawLine(XY{ from.x, to.y }, to, color);
     }
 
-    virtual uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) {
+    virtual u32 getPixelAt(XY position, bool ignoreLayerAlpha = true) {
         if (position.x >= 0 && position.x < w
             && position.y >= 0 && position.y < h) {
-            uint32_t* intpxdata = (uint32_t*)pixelData;
-            uint32_t pixel = intpxdata[position.x + (position.y * w)];
-            uint8_t alpha = (((pixel >> 24) / 255.0f) * (ignoreLayerAlpha ? 1.0f : (layerAlpha / 255.0f))) * 255;
+            u32* intpxdata = (u32*)pixelData;
+            u32 pixel = intpxdata[position.x + (position.y * w)];
+            u8 alpha = (((pixel >> 24) / 255.0f) * (ignoreLayerAlpha ? 1.0f : (layerAlpha / 255.0f))) * 255;
             pixel = (pixel & 0x00ffffff) | (alpha << 24);
             return pixel;
         }
@@ -196,7 +201,7 @@ public:
         }
     }
 
-    virtual uint32_t getVisualPixelAt(XY position, bool ignoreLayerAlpha = true) {
+    virtual u32 getVisualPixelAt(XY position, bool ignoreLayerAlpha = true) {
         return getPixelAt(position, ignoreLayerAlpha);
     }
 
@@ -204,7 +209,7 @@ public:
         if (region.w == -1) {
             region = {0, 0, w, h};
         }
-        uint32_t* px32 = (uint32_t*)pixelData;
+        u32* px32 = (u32*)pixelData;
         for (int y = 0; y < region.h; y++) {
             for (int x = 0; x < region.w / 2; x++) {
                 u32 p = ARRAY2DPOINT(px32, region.x + region.w-1-x, region.y + y, w);
@@ -230,7 +235,7 @@ public:
     }
 
     void discardRedoStack() {
-        for (uint8_t*& redoD : redoQueue) {
+        for (u8*& redoD : redoQueue) {
             tracked_free(redoD);
         }
         redoQueue.clear();
@@ -243,9 +248,9 @@ public:
     }
     void commitStateToUndoStack() {
         discardRedoStack();
-        uint8_t* copiedPixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
+        u8* copiedPixelData = (u8*)tracked_malloc(area() * 4, "Layers");
         if (copiedPixelData != NULL) {
-            memcpy(copiedPixelData, pixelData, w * h * 4);
+            memcpy(copiedPixelData, pixelData, area() * 4);
             undoQueue.push_back(copiedPixelData);
         }
         else {
@@ -273,11 +278,11 @@ public:
         return (unsigned int)getUniqueColors(onlyRGB).size();
     }
 
-    virtual std::vector<uint32_t> getUniqueColors(bool onlyRGB = false) {
-        std::map<uint32_t, int> cols;
-        uint32_t* pixels = (uint32_t*)pixelData;
-        for (uint64_t x = 0; x < w * h; x++) {
-            uint32_t px = pixels[x];
+    virtual std::vector<u32> getUniqueColors(bool onlyRGB = false) {
+        std::map<u32, int> cols;
+        u32* pixels = (u32*)pixelData;
+        for (u64 x = 0; x < area(); x++) {
+            u64 px = pixels[x];
             if (onlyRGB) {
                 px |= 0xff000000;
             }
@@ -288,18 +293,18 @@ public:
             }
             cols[px] = 1;
         }
-        std::vector<uint32_t> ret;
+        std::vector<u32> ret;
         for (auto& a : cols) {
             ret.push_back(a.first);
         }
         return ret;
     }
 
-    std::vector<uint32_t> get256MostUsedColors(bool onlyRGB = false) {
-        std::map<uint32_t, int> cols;
-        uint32_t* pixels = (uint32_t*)pixelData;
-        for (uint64_t x = 0; x < w * h; x++) {
-            uint32_t px = pixels[x];
+    std::vector<u32> get256MostUsedColors(bool onlyRGB = false) {
+        std::map<u32, int> cols;
+        u32* pixels = (u32*)pixelData;
+        for (u64 x = 0; x < (u64) w * (u64) h; x++) {
+            u32 px = pixels[x];
             if (onlyRGB) {
                 px |= 0xff000000;
             }
@@ -311,15 +316,15 @@ public:
             cols[px] = 1;
         }
 
-        std::vector<std::pair<uint32_t, int>> colorValues(cols.size());
+        std::vector<std::pair<u32, int>> colorValues(cols.size());
         std::copy(cols.begin(), cols.end(), colorValues.begin());
         std::sort(colorValues.begin(), colorValues.end(),
-            [](const std::pair<uint32_t, int>& a, const std::pair<uint32_t, int>& b) {
+            [](const std::pair<u32, int>& a, const std::pair<u32, int>& b) {
                 return a.second > b.second;
             }
         );
 
-        std::vector<uint32_t> ret;
+        std::vector<u32> ret;
         for (auto& a : colorValues) {
             ret.push_back(a.first);
             if (ret.size() >= 256) {
@@ -335,16 +340,16 @@ public:
     Layer* copyScaled(XY dimensions);
 
     void setAllAlpha255() {
-        uint32_t* px32 = (uint32_t*)pixelData;
-        for (uint64_t x = 0; x < w * h; x++) {
+        u32* px32 = (u32*)pixelData;
+        for (u64 x = 0; x < area(); x++) {
             px32[x] |= 0xff000000;
         }
         layerDirty = true;
     }
 
-    void replaceColor(uint32_t from, uint32_t to, ScanlineMap* isolate = NULL) {
-        uint32_t* px32 = (uint32_t*)pixelData;
-        for (uint64_t x = 0; x < w * h; x++) {
+    void replaceColor(u32 from, u32 to, ScanlineMap* isolate = NULL) {
+        u32* px32 = (u32*)pixelData;
+        for (u64 x = 0; x < area(); x++) {
             if (isolate == NULL || isolate->pointExists(XY{ (int)(x % w), (int)(x / w) })) {
                 if (px32[x] == from || (!isPalettized && (px32[x] & 0xFF000000) == 0 && (from & 0xFF000000) == 0)) {
                     px32[x] = to;
@@ -361,7 +366,7 @@ public:
             return;
         }
         u32* px32 = (u32*)pixelData;
-        for (u64 dataPtr = 0; dataPtr < w * h; dataPtr++) {
+        for (u64 dataPtr = 0; dataPtr < area(); dataPtr++) {
             px32[dataPtr] = hsvShift(px32[dataPtr], shift);
         }
         layerDirty = true;
@@ -372,7 +377,7 @@ public:
             return;
         }
         u32* px32 = (u32*)pixelData;
-        for (u64 dataPtr = 0; dataPtr < w * h; dataPtr++) {
+        for (u64 dataPtr = 0; dataPtr < area(); dataPtr++) {
             px32[dataPtr] = hslShift(px32[dataPtr], shift);
         }
         layerDirty = true;

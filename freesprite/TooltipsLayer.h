@@ -5,7 +5,7 @@ struct Tooltip {
     XY position = {0,0};
     std::string text = "Default tooltip text";
     SDL_Color textColor = { 0xff,0xff,0xff,0xff };
-    double timer;
+    double timer = 0;
 };
 
 class TooltipsLayer

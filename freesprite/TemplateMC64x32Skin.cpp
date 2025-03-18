@@ -1,32 +1,32 @@
 #include "TemplateMC64x32Skin.h"
 #include "Layer.h"
 
-uint8_t patternFront[] = {
+u8 patternFront[] = {
     1,1,1,
     1,1,1,
     1,1,1
 };
-uint8_t patternRight[] = {
+u8 patternRight[] = {
     0,0,1,
     0,0,1,
     0,0,1
 };
-uint8_t patternLeft[] = {
+u8 patternLeft[] = {
     1,0,0,
     1,0,0,
     1,0,0
 };
-uint8_t patternBack[] = {
+u8 patternBack[] = {
     1,1,1,
     1,0,1,
     1,1,1
 };
-uint8_t patternTop[] = {
+u8 patternTop[] = {
     1,1,1,
     0,0,0,
     0,0,0
 };
-uint8_t patternBottom[] = {
+u8 patternBottom[] = {
     0,0,0,
     0,0,0,
     1,1,1
@@ -38,11 +38,11 @@ Layer* TemplateMC64x32Skin::generate()
     nlayer->name = "Template layer";
     memset(nlayer->pixelData, 0x00, 64 * 32 * 4);
 
-    uint32_t headColors[2] = { 0xFF062608, 0xff1b591f };
-    uint32_t hatColors[2] = { 0xFF042030, 0xff1b3459 };
-    uint32_t bodyColors[2] = { 0xFF675215, 0xff232003 };
-    uint32_t legColors[2] = { 0xFF82182f, 0xff380709 };
-    uint32_t armColors[2] = { 0xFF3a8d28, 0xff0f3906 };
+    u32 headColors[2] = { 0xFF062608, 0xff1b591f };
+    u32 hatColors[2] = { 0xFF042030, 0xff1b3459 };
+    u32 bodyColors[2] = { 0xFF675215, 0xff232003 };
+    u32 legColors[2] = { 0xFF82182f, 0xff380709 };
+    u32 armColors[2] = { 0xFF3a8d28, 0xff0f3906 };
 
     //head
     nlayer->fillRect(XY{ 8,0 }, XY{ 16,8 }, headColors[0]);

@@ -26,7 +26,7 @@ public:
 
     TabbedView(std::vector<Tab> tabN, int buttonWidth = 60) {
         int buttonX = 0;
-        for (int x = 0; x < tabN.size(); x++) {
+        for (usize x = 0; x < tabN.size(); x++) {
             UIButton* nbutton = new UIButton();
             nbutton->wxWidth = buttonWidth;
             nbutton->wxHeight = buttonsHeight;
@@ -54,13 +54,13 @@ public:
     }
 
     void focusOut() override {
-		Drawable::focusOut();
-		tabs[openTab].wxs.forceUnfocus();
-	}
+        Drawable::focusOut();
+        tabs[openTab].wxs.forceUnfocus();
+    }
     void mouseHoverOut() override {
         Drawable::mouseHoverOut();
         tabButtons.forceUnhover();
-		tabs[openTab].wxs.forceUnhover();
+        tabs[openTab].wxs.forceUnhover();
     }
 
     void render(XY position) override {
@@ -112,20 +112,20 @@ public:
         if (openTab != evt_id) {
             tabSwitchTimer.start();
             if (openTab < evt_id) {
-				nextTabSlideFromTheLeft = false;
-			}
-			else {
-				nextTabSlideFromTheLeft = true;
-			}
+                nextTabSlideFromTheLeft = false;
+            }
+            else {
+                nextTabSlideFromTheLeft = true;
+            }
         }
         openTab = evt_id;
         updateTabButtons();
     }
 
     void updateTabButtons() {
-        for (int x = 0; x < tabButtons.drawablesList.size(); x++) {
+        for (usize x = 0; x < tabButtons.drawablesList.size(); x++) {
             UIButton* btn = (UIButton*)tabButtons.drawablesList[x];
-            btn->fill = openTab == x ? tabFocusedColor : tabUnfocusedColor;
+            btn->fill = (isize) openTab == (isize) x ? tabFocusedColor : tabUnfocusedColor;
         }
     }
 

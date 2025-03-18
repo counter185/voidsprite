@@ -91,10 +91,10 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
         }, { SDL_SCANCODE_F, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
-    lowerLayerData = new uint16_t[dimensions.x * dimensions.y];
-    upperLayerData = new uint16_t[dimensions.x * dimensions.y];
-    memset(lowerLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
-    memset(upperLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
+    lowerLayerData = new u16[dimensions.x * dimensions.y];
+    upperLayerData = new u16[dimensions.x * dimensions.y];
+    memset(lowerLayerData, 0, dimensions.x * dimensions.y * sizeof(u16));
+    memset(upperLayerData, 0, dimensions.x * dimensions.y * sizeof(u16));
 
     callerCanvas = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
 
@@ -237,7 +237,7 @@ void RPG2KTilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathStr
     }
 }
 
-uint16_t RPG2KTilemapPreviewScreen::lowerLayerTileAt(XY position)
+u16 RPG2KTilemapPreviewScreen::lowerLayerTileAt(XY position)
 {
     if (position.x > 0 && position.x < dimensions.x && position.y > 0 && position.y < dimensions.y) {
         return lowerLayerData[position.y * dimensions.x + position.x];
@@ -249,10 +249,11 @@ uint16_t RPG2KTilemapPreviewScreen::lowerLayerTileAt(XY position)
 
 bool RPG2KTilemapPreviewScreen::isDeepWaterTileAt(XY position)
 {
-    uint16_t tile = lowerLayerTileAt(position);
+    u16 tile = lowerLayerTileAt(position);
     if (tile < 0x0BB8) {
         int watertile = tile % 50;
         int watertype = tile / 50 / 20;
+        (void) watertile;
         return watertype == 2;
     }
     else {
@@ -282,7 +283,7 @@ void RPG2KTilemapPreviewScreen::PrerenderCanvas()
     
 }
 
-void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState)
+void RPG2KTilemapPreviewScreen::RenderWaterTile(u8 connection, u16 watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState)
 {
     int waterAnimLength = 500;
     if (animState == -1) {
@@ -668,7 +669,7 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
     }
 }
 
-void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex)
+void RPG2KTilemapPreviewScreen::RenderAutoTile(u8 connection, u16 autotileIndex, SDL_Rect dst, SDL_Texture* tex)
 {
     XY autotileOrigin = { 0,0 };
     if (autotileIndex < 4) {
@@ -930,12 +931,12 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
     }
 }
 
-void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst, int animState)
+void RPG2KTilemapPreviewScreen::RenderRPG2KTile(u16 tile, XY position, SDL_Rect dst, int animState)
 {
     SDL_Texture* draw = callerCanvas;
 
     char type = 'o';
-    uint16_t index = tile;
+    u16 index = tile;
     if (index >= 0x2710) {   //upper layer
         index -= 0x2710;
         XY startPos = { 18 * 16, 0 };
@@ -1047,8 +1048,8 @@ void RPG2KTilemapPreviewScreen::RenderWholeMap(XY at, int sscale, bool rdLowerLa
                 continue;
             }
             SDL_Rect dst = { at.x + x * 16 * sscale, at.y + y * 16 * sscale, 16 * sscale, 16 * sscale };
-            uint16_t lowerTile = lowerLayerData[y * dimensions.x + x];
-            uint16_t upperTile = upperLayerData[y * dimensions.x + x];
+            u16 lowerTile = lowerLayerData[y * dimensions.x + x];
+            u16 upperTile = upperLayerData[y * dimensions.x + x];
             if (rdLowerLayer) {
                 RenderRPG2KTile(lowerTile, { x, y }, dst);
             }
@@ -1124,8 +1125,8 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
         dimensions = { map->width, map->height };
         canvas.dimensions = { dimensions.x * 16, dimensions.y * 16 };
         RecenterCanvas();
-        uint16_t* lowerLayer = new uint16_t[map->width * map->height];
-        uint16_t* upperLayer = new uint16_t[map->width * map->height];
+        u16* lowerLayer = new u16[map->width * map->height];
+        u16* upperLayer = new u16[map->width * map->height];
         int dataPointer = 0;
         for (int y = 0; y < map->height; y++) {
             for (int x = 0; x < map->width; x++) {

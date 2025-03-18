@@ -5,6 +5,8 @@
 
 void BrushRectFill::clickPress(MainEditor* editor, XY pos)
 {
+    (void) editor;
+
     heldDown = true;
     lastMousePos = pos;
     startPos = pos;

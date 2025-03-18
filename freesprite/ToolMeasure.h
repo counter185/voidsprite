@@ -16,8 +16,8 @@ class ToolMeasure :
     XY getSection() override { return XY{ 1,1 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;
-    void clickDrag(MainEditor* editor, XY from, XY to) override { lastMousePos = to; }
-    void clickRelease(MainEditor* editor, XY pos) override { heldDown = false; }
+    void clickDrag(MainEditor* editor, XY from, XY to) override { (void) editor, (void) from, lastMousePos = to; }
+    void clickRelease(MainEditor* editor, XY pos) override { (void) editor, (void) pos, heldDown = false; }
     void renderOnCanvas(XY canvasDrawPoint, int scale) override;
 };
 

@@ -2,28 +2,28 @@
 #include "TemplateRPG2KFaceset.h"
 
 //this naming is required to not piss off g++ "multiple definitions of"
-uint8_t rpg2kfaceset_patternUp[5][5] = {
+u8 rpg2kfaceset_patternUp[5][5] = {
     {0,0,1,0,0},
     {0,1,1,0,0},
     {1,0,1,0,0},
     {0,0,1,0,0},
     {0,0,1,0,0},
 };
-uint8_t rpg2kfaceset_patternRight[5][5] = {
+u8 rpg2kfaceset_patternRight[5][5] = {
     {0,1,1,1,0},
     {1,0,0,0,1},
     {0,0,0,1,0},
     {0,0,1,0,0},
     {1,1,1,1,1},
 };
-uint8_t rpg2kfaceset_patternDown[5][5] = {
+u8 rpg2kfaceset_patternDown[5][5] = {
     {0,1,1,1,0},
     {1,0,0,0,1},
     {0,0,1,1,0},
     {1,0,0,0,1},
     {0,1,1,1,0},
 };
-uint8_t rpg2kfaceset_patternLeft[5][5] = {
+u8 rpg2kfaceset_patternLeft[5][5] = {
     {0,1,0,1,0},
     {0,1,0,1,0},
     {0,1,1,1,0},
@@ -36,8 +36,8 @@ Layer* TemplateRPG2KFaceset::generate()
 {
     Layer* ret = new Layer(192, 192);
     ret->name = "Template Layer";
-    uint32_t tileBGColors[] = {
-              0xff1e0000, 0xff380000,
+    u32 tileBGColors[] = {
+        0xff1e0000, 0xff380000,
         0xff382300, 0xff150d00,
         0xff0d1500, 0xff233900,
         0xff00431e, 0xff001f0e,
@@ -60,8 +60,8 @@ Layer* TemplateRPG2KFaceset::generate()
 
         }
         XY arrowSymbolOrigin = xyAdd(base, XY{ 1, yy * 48 + 1 });
-        uint8_t* patternSymbols[] = { (uint8_t*)rpg2kfaceset_patternUp, (uint8_t*)rpg2kfaceset_patternRight, (uint8_t*)rpg2kfaceset_patternDown, (uint8_t*)rpg2kfaceset_patternLeft };
-        uint8_t* patternSymbol = patternSymbols[yy];
+        u8* patternSymbols[] = { (u8*)rpg2kfaceset_patternUp, (u8*)rpg2kfaceset_patternRight, (u8*)rpg2kfaceset_patternDown, (u8*)rpg2kfaceset_patternLeft };
+        u8* patternSymbol = patternSymbols[yy];
         for (int yyy = 0; yyy < 5; yyy++) {
             for (int xxx = 0; xxx < 5; xxx++) {
                 if (patternSymbol[yyy * 5 + xxx] == 1) {

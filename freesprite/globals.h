@@ -34,6 +34,7 @@
 #include <SDL3_image/SDL_image.h>
 
 #if SDL_MAJOR_VERSION == 3
+#define SDL_DISABLE_OLD_NAMES
 #include "sdl23compat.h"
 #endif
 
@@ -46,6 +47,8 @@ extern "C" {
 #define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),(mode)))==NULL
 #endif
 
+#define usize size_t
+#define isize ssize_t
 #define u64 uint64_t
 #define s64 int64_t
 #define u32 uint32_t

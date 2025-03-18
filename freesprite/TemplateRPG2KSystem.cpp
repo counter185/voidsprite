@@ -5,7 +5,7 @@ Layer* TemplateRPG2KSystem::generate()
 {
     Layer* ret = new Layer(160, 80);
     ret->name = "Template Layer";
-    uint32_t tileBGColors[] = {
+    u32 tileBGColors[] = {
         0xff1e0000, 0xff380000,
         0xff0d0d15, 0xff382338,
         0xff233923, 0xff0d150d,
@@ -15,14 +15,14 @@ Layer* TemplateRPG2KSystem::generate()
         0xff100022, 0xff200043,
         0xff220019, 0xff480036
     };
-     uint32_t tileBGColors8x8[] = {
+    u32 tileBGColors8x8[] = {
         0xff002338, 0xff000d15,
         0xff000d15, 0xff002338,
         0xff002338, 0xff000d15,
         0xff000d15, 0xff002338,
         0xff004243, 0xff002122,
     };
-     uint32_t tileBGColorsText[] = {
+    u32 tileBGColorsText[] = {
         0xff99d0de, 0xff757500,
         0xff0fff00, 0xff757575,
         0xffff0000, 0xff380000,
@@ -77,7 +77,7 @@ Layer* TemplateRPG2KSystem::generate()
     iindex = 0;
     int iter = 0;
 
-     for (int y4 = 0; y4 < 2; y4++) {
+    for (int y4 = 0; y4 < 2; y4++) {
         for (int x4 = 0; x4 < 10; x4++) {
             XY from = xyAdd(base4, XY{ x4 * 16, y4 * 16 });
             XY to = xyAdd(from, XY{ 16,16 });

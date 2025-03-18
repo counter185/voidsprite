@@ -4,22 +4,29 @@
 
 void ToolGuideline::clickPress(MainEditor* editor, XY pos)
 {
+    (void) editor, (void) pos;
+
     mouseLeftHeld = true;
 }
 
 void ToolGuideline::clickDrag(MainEditor* editor, XY from, XY to)
 {
+    (void) editor, (void) from, (void) to;
 }
 
 void ToolGuideline::clickRelease(MainEditor* editor, XY pos)
 {
+    (void) pos;
+
     if (mouseLeftHeld) {
         int symXPos = lastMouseMotionPos.x / 2;
         bool symXMiddle = lastMouseMotionPos.x % 2;
 
+        (void) symXMiddle, (void) symXPos;
+
         if (editor->eraserMode)
         {
-            for (int x = 0; x < editor->guidelines.size(); x++) {
+            for (usize x = 0; x < editor->guidelines.size(); x++) {
                 if (editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.x) {
                     editor->guidelines.erase(editor->guidelines.begin() + x);
                     break;
@@ -28,7 +35,7 @@ void ToolGuideline::clickRelease(MainEditor* editor, XY pos)
         }
         else {
             bool exists = false;
-            for (int x = 0; x < editor->guidelines.size(); x++) {
+            for (usize x = 0; x < editor->guidelines.size(); x++) {
                 if (editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.x) {
                     exists = true;
                     break;
@@ -44,18 +51,24 @@ void ToolGuideline::clickRelease(MainEditor* editor, XY pos)
 
 void ToolGuideline::rightClickPress(MainEditor* editor, XY pos)
 {
+    (void) editor, (void) pos;
+
     mouseRightHeld = true;
 }
 
 void ToolGuideline::rightClickRelease(MainEditor* editor, XY pos)
 {
+    (void) pos;
+
     if (mouseRightHeld) {
         int symYPos = lastMouseMotionPos.y / 2;
         bool symYMiddle = lastMouseMotionPos.y % 2;
 
+        (void) symYPos, (void) symYMiddle;
+
         if (editor->eraserMode)
         {
-            for (int x = 0; x < editor->guidelines.size(); x++) {
+            for (usize x = 0; x < editor->guidelines.size(); x++) {
                 if (!editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.y) {
                     editor->guidelines.erase(editor->guidelines.begin() + x);
                     break;
@@ -64,7 +77,7 @@ void ToolGuideline::rightClickRelease(MainEditor* editor, XY pos)
         }
         else {
             bool exists = false;
-            for (int x = 0; x < editor->guidelines.size(); x++) {
+            for (usize x = 0; x < editor->guidelines.size(); x++) {
                 if (!editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.y) {
                     exists = true;
                     break;
@@ -87,7 +100,7 @@ void ToolGuideline::renderOnCanvas(XY canvasDrawPoint, int scale)
     if (mouseLeftHeld) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
         SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
-        g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY - 40 }, std::format("{}{}", symXPos, symXMiddle ? ".5" : "")});
+        g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY - 40 }, std::format("{}{}", symXPos, symXMiddle ? ".5" : "") });
     }
 
     int symYPos = lastMouseMotionPos.y / 2;

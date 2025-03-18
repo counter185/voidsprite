@@ -36,7 +36,7 @@ enum MainEditorCommentMode : int {
 struct CommentData {
     XY position;
     std::string data;
-    Timer64 animTimer;
+    Timer64 animTimer = Timer64();
     bool hovered = false;
 };
 
@@ -127,7 +127,7 @@ public:
 
     std::vector<uint32_t> lastColors;
 
-    SplitSessionData splitSessionData = { false };
+    SplitSessionData splitSessionData = { .overallDimensions = {0, 0}, .images = {} };
 
     std::vector<BaseScreen*> hintOpenScreensInInteractiveMode;
 

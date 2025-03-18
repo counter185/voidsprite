@@ -117,7 +117,7 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
             }
             else if (evt.button.button == SDL_BUTTON_RIGHT) {
                 int i = findTSSIAt(mousePixelPos);
-                if (i >= 0 && i < loadedImgs.size()) {
+                if (i >= 0 && i < (int) loadedImgs.size()) {
 
                     PopupYesNo* newPopup = new PopupYesNo(
                         "Remove image?",
@@ -162,6 +162,8 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
 
 void SplitSessionEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
 {
+    (void) exporterIndex;
+
     if (evt_id == 0) {
         outputSPSNFilePath = convertStringToUTF8OnWin32(name);
         recalcRelativePaths();
@@ -170,7 +172,7 @@ void SplitSessionEditor::eventFileSaved(int evt_id, PlatformNativePathString nam
 
 void SplitSessionEditor::eventPopupClosed(int evt_id, BasePopup* popup)
 {
-    if (evt_id >= 10 && evt_id - 10 < loadedImgs.size()) {
+    if (evt_id >= 10 && evt_id - 10 < (int) loadedImgs.size()) {
         if (((PopupYesNo*)popup)->result) {
             int index = evt_id - 10;
             auto& tssi = loadedImgs[index];
@@ -193,9 +195,9 @@ void SplitSessionEditor::drawTSSITooltips()
     TooltipsLayer localttp;
 
     int i = findTSSIAt(c.screenPointToCanvasPoint({ g_mouseX, g_mouseY }));
-    for (int x = 0; x < loadedImgs.size(); x++) {
+    for (usize x = 0; x < loadedImgs.size(); x++) {
         tempSplitSessionImage& tssi = loadedImgs[x];
-        if (i == x) {
+        if ((isize) i == x) {
             tssi.namePopupTimer.startIfNotStarted();
         }
         else {
@@ -316,7 +318,7 @@ void SplitSessionEditor::populateSubImagesList()
 {
     int y = 0;
     subImagesPanel->subWidgets.freeAllDrawables();
-    for (int x = 0; x < loadedImgs.size(); x++) {
+    for (usize x = 0; x < loadedImgs.size(); x++) {
         tempSplitSessionImage& tssi = loadedImgs[x];
         UILabel* lbl = new UILabel();
         lbl->text = "-- " + tssi.calcRelativePath;

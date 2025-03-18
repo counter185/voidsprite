@@ -28,6 +28,8 @@ void BrushFill::resetState()
 void BrushFill::clickPress(MainEditor* editor, XY pos)
 {
     g_startNewOperation([this, editor, pos]() {
+        (void) this;
+
         Layer* currentLayer = editor->getCurrentLayer();
         uint32_t pixel = currentLayer->getPixelAt(pos);
         uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
@@ -81,6 +83,8 @@ void BrushFill::clickDrag(MainEditor*, XY, XY)
 
 void BrushFill::rightClickPress(MainEditor* editor, XY pos)
 {
+    (void) pos;
+
     editor->commitStateToCurrentLayer();
     uint32_t swapTo = editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor();
     previewClosedList.forEachScanline([editor, swapTo](ScanlineMapElement sme) {

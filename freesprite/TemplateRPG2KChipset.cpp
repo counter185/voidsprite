@@ -8,8 +8,8 @@ Layer* TemplateRPG2KChipset::generate()
 {
     Layer* ret = new Layer(480, 256);
     ret->name = "Template Layer";
-    uint32_t tileBGColors_terrain[] = {
-              0xff001e5e, 0xff003868,
+    u32 tileBGColors_terrain[] = {
+        0xff001e5e, 0xff003868,
         0xff000d15, 0xff002338,
         0xff00001d, 0xff000039,
         0xff1d001d, 0xff390039,
@@ -18,23 +18,23 @@ Layer* TemplateRPG2KChipset::generate()
         0xff002620, 0xff003b31,
         0xff063d00, 0xff061d00,
         0xff061d00, 0xff063d00,
-         0xff003b31, 0xff002620,
+        0xff003b31, 0xff002620,
         0xff002620, 0xff003b31,
         0xff063d00, 0xff061d00,
         0xff061d00, 0xff063d00,
-         0xff003b31, 0xff002620,
+        0xff003b31, 0xff002620,
         0xff002620, 0xff003b31,
         0xff063d00, 0xff061d00,
         0xff061d00, 0xff063d00,
-         0xff003b31, 0xff002620,
+        0xff003b31, 0xff002620,
         0xff002620, 0xff003b31,
         0xff063d00, 0xff061d00,
         0xff061d00, 0xff063d00,
-         0xff003b31, 0xff002620,
+        0xff003b31, 0xff002620,
         0xff002620, 0xff003b31
 
     };
-    uint32_t tileBGColors_tiles[] = {
+    u32 tileBGColors_tiles[] = {
         0xff3d1300,0xff240b00,
         0xff240b00,0xff3d1300,
         0xff3d1300,0xff240b00,
@@ -64,6 +64,7 @@ Layer* TemplateRPG2KChipset::generate()
     int iindex = 0;
     int x = 0;
     int y = 0;
+    (void) x, (void) y;
     int m = 0;
     int iter = 0;
     int bgc_iter = 0;
@@ -118,8 +119,6 @@ Layer* TemplateRPG2KChipset::generate()
     ret->fillRect({288,128},{303,143}, 0xff705c00);
     
     return ret;
-
-    
 }
     
 std::vector<CommentData> TemplateRPG2KChipset::placeComments()
@@ -133,8 +132,6 @@ std::vector<CommentData> TemplateRPG2KChipset::placeComments()
         { {192,0}, "Lower Layer Tiles" },
         { {288,128}, "Upper Layer Tiles" },
         { {368,112}, "Air Tile" },
-
-
     };
 }
 

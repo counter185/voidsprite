@@ -59,8 +59,8 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
 
 TilemapEditorLayerPicker::~TilemapEditorLayerPicker()
 {
-	layerButtons.freeAllDrawables();
-	layerControlButtons.freeAllDrawables();
+    layerButtons.freeAllDrawables();
+    layerControlButtons.freeAllDrawables();
 }
 
 
@@ -77,8 +77,8 @@ void TilemapEditorLayerPicker::render(XY position)
     //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     //SDL_RenderFillRect(g_rd, &r);
 
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
+    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, u8(focused ? 0xa0 : 0x90) };
+    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, u8(focused ? 0xa0 : 0x90) };
     renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
     if (focused) {
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
@@ -116,6 +116,8 @@ void TilemapEditorLayerPicker::handleInput(SDL_Event evt, XY gPosOffset)
 
 void TilemapEditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
 {
+    (void) data2;
+
     if (data1 == 0) {
         caller->switchActiveLayer(evt_id);
     }
@@ -159,6 +161,7 @@ void TilemapEditorLayerPicker::updateLayers()
     int selectedLayerIndex = caller->activeLayerIndex();
     for (int lid = caller->tilemap.size(); lid-- > 0;) {
         auto& l = caller->tilemap[lid];
+        (void) l;
         //todo:
         //UILayerButton* layerButton = new UILayerButton(l->name);
         UILayerButton* layerButton = new UILayerButton(std::format("Layer {}", lid+1));

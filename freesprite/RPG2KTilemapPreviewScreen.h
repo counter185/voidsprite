@@ -25,8 +25,8 @@ class RPG2KTilemapPreviewScreen :
 public:
     MainEditor* caller = NULL;
     XY dimensions = XY{ 20,15 };
-    uint16_t* lowerLayerData = NULL;
-    uint16_t* upperLayerData = NULL;
+    u16* lowerLayerData = NULL;
+    u16* upperLayerData = NULL;
     ScreenWideNavBar<RPG2KTilemapPreviewScreen*>* navbar = NULL;
     std::vector<LMUEvent> events;
 
@@ -36,7 +36,7 @@ public:
     Canvas canvas;
 
     bool rdLowerLayer = true, rdUpperLayer = true, rdEventLayer = true;
-    uint8_t gridOpacity = 0x18;
+    u8 gridOpacity = 0x18;
     bool scrollingTilemap = false;
     LMUEventViewMode eventViewMode = LMUEVENTS_SHOW_INGAME_AND_RECTS;
     bool forceOptimizationsOff = false;
@@ -53,14 +53,14 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
     void eventFileSaved(int evt_id, PlatformNativePathString path, int exporter_index) override;
 
-    uint16_t lowerLayerTileAt(XY position);
+    u16 lowerLayerTileAt(XY position);
     bool isDeepWaterTileAt(XY position);
 
     void RecenterCanvas();
     void PrerenderCanvas();
-    void RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState = -1);
-    void RenderAutoTile(uint8_t connection, uint16_t autotileIndex, SDL_Rect dst, SDL_Texture* tex);
-    void RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst, int animState = -1);
+    void RenderWaterTile(u8 connection, u16 watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState = -1);
+    void RenderAutoTile(u8 connection, u16 autotileIndex, SDL_Rect dst, SDL_Texture* tex);
+    void RenderRPG2KTile(u16 tile, XY position, SDL_Rect dst, int animState = -1);
     void RenderEvents(XY originPoint, int canvasScale);
     void RenderWholeMap(XY at, int scale, bool rdLowerLayer = true, bool rdUpperLayer = true, bool rdEvents = true);
     Layer* RenderWholeMapToTexture();

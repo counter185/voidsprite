@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math.h>
+#include "mathops.tcc"
 
 struct rgb {
     double r;       // a fraction between 0 and 1

@@ -87,7 +87,7 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
 
 TilemapPreviewScreen::~TilemapPreviewScreen()
 {
-    for (int l = 0; l < tilemap.size(); l++) {
+    for (usize l = 0; l < tilemap.size(); l++) {
         XY**& tilemapLayer = tilemap.at(l);
         if (tilemapLayer != NULL) {
             for (int y = 0; y < tilemapDimensions.y; y++) {
@@ -109,7 +109,9 @@ void TilemapPreviewScreen::render()
 
     SDL_Rect tilemapDrawRect = canvas.getCanvasOnScreenRect();
 
-    for (int l = 0; l < tilemap.size(); l++) {
+    (void) tilemapDrawRect;
+
+    for (usize l = 0; l < tilemap.size(); l++) {
         for (int y = 0; y < tilemapDimensions.y; y++) {
             for (int x = 0; x < tilemapDimensions.x; x++) {
 
@@ -148,8 +150,8 @@ void TilemapPreviewScreen::render()
     //render tile select menu
     if (tileSelectOpen) {
 
-        SDL_Rect tsbgRect = { 0,0, g_windowW * XM1PW3P1(tileSelectTimer.percentElapsedTime(300)), g_windowH};
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xd0 * XM1PW3P1(tileSelectTimer.percentElapsedTime(300))));
+        SDL_Rect tsbgRect = { 0, 0, int(g_windowW * XM1PW3P1(tileSelectTimer.percentElapsedTime(300))), g_windowH};
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (u8)(0xd0 * XM1PW3P1(tileSelectTimer.percentElapsedTime(300))));
         SDL_RenderFillRect(g_rd, &tsbgRect);
 
         int xOffset = -g_windowW * (1.0 - XM1PW3P1(tileSelectTimer.percentElapsedTime(300)));
@@ -380,7 +382,7 @@ void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString n
                 return;
             }
             else {
-                uint8_t version = 2;
+                u8 version = 2;
                 fwrite(&version, 1, 1, file);
                 fwrite(&tilemapDimensions.x, 4, 1, file);
                 fwrite(&tilemapDimensions.y, 4, 1, file);
@@ -464,7 +466,7 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                 return;
             }
             else {
-                uint8_t version;
+                u8 version;
                 fread(&version, 1, 1, file);
                 switch (version) {
                 case 1:
@@ -562,13 +564,13 @@ void TilemapPreviewScreen::resizeTilemap(int w, int h)
 
 void TilemapPreviewScreen::drawBackground()
 {
-    uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    u32 colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    u32 colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
     renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
     if (g_config.animatedBackground) {
-        uint64_t now = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
-        uint64_t progress = now % 120000;
+        u64 now = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
+        u64 progress = now % 120000;
         for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {
             if (y >= 0) {
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x13);
@@ -603,7 +605,7 @@ int TilemapPreviewScreen::activeLayerIndex()
     if (activeTilemap == NULL) {
         return -1;
     }
-    for (int i = 0; i < tilemap.size(); i++) {
+    for (usize i = 0; i < tilemap.size(); i++) {
         if (tilemap[i] == activeTilemap) {
             return i;
         }
@@ -613,7 +615,7 @@ int TilemapPreviewScreen::activeLayerIndex()
 
 void TilemapPreviewScreen::switchActiveLayer(int layerIndex)
 {
-    if (layerIndex >= 0 && layerIndex < tilemap.size()) {
+    if (layerIndex >= 0 && (isize) layerIndex < (isize) tilemap.size()) {
         activeTilemap = tilemap[layerIndex];
         layerSelectTimer.start();
     }
@@ -621,7 +623,7 @@ void TilemapPreviewScreen::switchActiveLayer(int layerIndex)
 
 void TilemapPreviewScreen::freeAllLayers()
 {
-    for (int l = 0; l < tilemap.size(); l++) {
+    for (usize l = 0; l < tilemap.size(); l++) {
         XY**& tilemapLayer = tilemap.at(l);
         if (tilemapLayer != NULL) {
             for (int y = 0; y < tilemapDimensions.y; y++) {
@@ -658,14 +660,14 @@ void TilemapPreviewScreen::deleteLayer(int index)
         tracked_free(tilemapLayer);
         tilemap.erase(tilemap.begin() + index);
         if (activeTilemap == tilemapLayer) {
-            activeTilemap = tilemap[index < tilemap.size() ? index : tilemap.size()-1];
+            activeTilemap = tilemap[(isize) index < (isize) tilemap.size() ? index : tilemap.size()-1];
         }
     }
 }
 
 void TilemapPreviewScreen::moveLayerUp(int index)
 {
-    if (index != tilemap.size() - 1) {
+    if ((isize) index != (isize) tilemap.size() - 1) {
         XY** tmp = tilemap[index];
         tilemap[index] = tilemap[index + 1];
         tilemap[index + 1] = tmp;
@@ -761,7 +763,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             bool ss = false;
             PlatformNativePathString filename = path + convertStringOnWin32(std::format("-{}{}", x++, exporter->extension()));
             if (exporter->exportsWholeSession()) {
-                MainEditor* ssn = new MainEditor({ ll });
+                MainEditor* ssn = new MainEditor(ll);
                 ssn->tileDimensions = tileSize;
                 ss = exporter->exportData(filename, ssn);
                 delete ssn;
@@ -772,12 +774,12 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             }
             exports += ss ? 1 : 0;
         }
-        success = exports == tilemap.size();
+        success = (isize) exports == (isize) tilemap.size();
     }
     else if (type == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
         Layer* ll = renderLayer(activeTilemap);
         if (exporter->exportsWholeSession()) {
-            MainEditor* ssn = new MainEditor({ ll });
+            MainEditor* ssn = new MainEditor(ll);
             success = exporter->exportData(path, ssn);
             delete ssn;
         }

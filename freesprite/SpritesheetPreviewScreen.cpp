@@ -57,7 +57,6 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     spriteScrollerLabel->text = "Timeline";
     spriteScrollerLabel->position = XY{ 2, 2 };
     spriteView->tabButtons.addDrawable(spriteScrollerLabel);*/
-
 }
 
 SpritesheetPreviewScreen::~SpritesheetPreviewScreen() {
@@ -104,6 +103,8 @@ void SpritesheetPreviewScreen::render()
 
     int rightPanelWidth = ixmax(300, canvas.scale * tileSize.x);
 
+    (void) rightPanelWidth;
+
     //drawPreview(XY{ rightPanelRect.x + 10, 100 });
 
     wxsManager.renderAll();
@@ -111,9 +112,9 @@ void SpritesheetPreviewScreen::render()
     XY spriteListOrigin = xyAdd(spriteView->position, spriteView->scrollOffset);
 
     if (sprites.size() > 0) {
-        for (int x = 0; x < sprites.size(); x++) {
+        for (usize x = 0; x < sprites.size(); x++) {
             int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * canvas.scale);
-            XY spritePos = xyAdd(spriteListOrigin, XY{ x * elementWidth + x * 5 , 50 });
+            XY spritePos = xyAdd(spriteListOrigin, XY{ int(x * elementWidth + x * 5), 50 });
             drawPreview(spritePos, x);
             SDL_Rect spriteArea = {
                 spritePos.x,
@@ -121,7 +122,7 @@ void SpritesheetPreviewScreen::render()
                 caller->tileDimensions.x * canvas.scale,
                 caller->tileDimensions.y * canvas.scale
             };
-            SDL_SetRenderDrawColor(g_rd, spritesProgress == x ? 0 : 255, 255, spritesProgress == x ? 0 : 255, 0x80);
+            SDL_SetRenderDrawColor(g_rd, (isize) spritesProgress == x ? 0 : 255, 255, (isize) spritesProgress == x ? 0 : 255, 0x80);
             SDL_RenderDrawRect(g_rd, &spriteArea);
             g_fnt->RenderString(std::to_string(x), spritePos.x, spritePos.y - 24);
         }
@@ -146,13 +147,15 @@ void SpritesheetPreviewScreen::tick()
     int rightPanelWidth = ixmax(300, canvas.scale * caller->tileDimensions.x);
     XY origin = { g_windowW - rightPanelWidth, 20 };
 
+    (void) origin;
+
     spriteView->wxWidth = g_windowW;
     spriteView->wxHeight = 30 + caller->tileDimensions.y * canvas.scale + 60;
     spriteView->position = { 0, g_windowH - spriteView->wxHeight };
 
     canvas.lockToScreenBounds(0, 0, spriteView->wxHeight, rightPanelWidth);
 
-    for (int x = 0; x < spriteView->subWidgets.drawablesList.size(); x++) {
+    for (usize x = 0; x < spriteView->subWidgets.drawablesList.size(); x++) {
         int timelineIndex = x / N_BUTTONS_ADDED_TO_TIMELINE;
         int timelineAction = x % N_BUTTONS_ADDED_TO_TIMELINE;
 
@@ -211,13 +214,14 @@ BaseScreen* SpritesheetPreviewScreen::isSubscreenOf() {
 
 void SpritesheetPreviewScreen::eventTextInput(int evt_id, std::string data)
 {
+    (void) evt_id, (void) data;
 }
 
 void SpritesheetPreviewScreen::eventButtonPressed(int evt_id)
 {
     int timelineIndex = evt_id / N_BUTTONS_ADDED_TO_TIMELINE;
     int timelineAction = evt_id % N_BUTTONS_ADDED_TO_TIMELINE;
-    if (timelineIndex < sprites.size()) {
+    if (timelineIndex < (int) sprites.size()) {
         if (timelineAction == 0) {
             sprites.erase(sprites.begin() + timelineIndex);
             popTimelineButton();
@@ -232,7 +236,7 @@ void SpritesheetPreviewScreen::eventButtonPressed(int evt_id)
         }
         else if (timelineAction == 2) {
             //move sprite at index timelineIndex one place to the right
-            if (timelineIndex < sprites.size() - 1) {
+            if (timelineIndex < (int) sprites.size() - 1) {
                 XY temp = sprites[timelineIndex];
                 sprites[timelineIndex] = sprites[timelineIndex + 1];
                 sprites[timelineIndex + 1] = temp;
@@ -254,7 +258,7 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
             callerPaddedTileSize.x * canvas.scale,
             callerPaddedTileSize.y * canvas.scale
         };
-        if (spritesProgress >= sprites.size()) {
+        if ((isize) spritesProgress >= sprites.size()) {
             spritesProgress = 0;
         }
         XY currentSprite = sprites[which == -1 ? spritesProgress : which];
@@ -291,7 +295,7 @@ void SpritesheetPreviewScreen::drawBackground()
 void SpritesheetPreviewScreen::genTimelineButtons()
 {
     spriteView->subWidgets.freeAllDrawables();
-    for (int x = 0; x < sprites.size(); x++) {
+    for (usize x = 0; x < sprites.size(); x++) {
         addTimelineButton();
     }
 }
