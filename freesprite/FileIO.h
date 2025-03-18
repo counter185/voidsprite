@@ -31,8 +31,8 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 #include "io_aseprite.h"
 #include "io_piskel.h"
 #include "io_gim.h"
+#include "io_rpgm.h"
 
-Layer* readXYZ(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
@@ -61,7 +61,6 @@ Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
-MainEditor* readLMU(PlatformNativePathString path);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
@@ -78,7 +77,6 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
-bool writeXYZ(PlatformNativePathString path, Layer* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
@@ -267,6 +265,9 @@ inline std::vector<FileImporter*> g_fileImporters;
 
 inline std::vector<PaletteImporter*> g_paletteImporters;
 
+//used for autosave
+inline FileExporter* voidsnExporter = NULL;
+
 inline void g_setupIO() {
     FileExporter
         *exVOIDSNv5,
@@ -319,6 +320,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
     g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
 
+    voidsnExporter = exVOIDSNv5;
 
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));

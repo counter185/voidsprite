@@ -13,8 +13,8 @@ bool Canvas::takeInput(SDL_Event evt)
         case SDL_MOUSEMOTION:
             if (middleMouseHold) {
                 panCanvas({ 
-                    evt.motion.xrel * (g_shiftModifier ? 2 : 1),
-                    evt.motion.yrel * (g_shiftModifier ? 2 : 1)
+                    ((int)evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
+                    ((int)evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
                 });
             }
             break;
@@ -25,11 +25,12 @@ bool Canvas::takeInput(SDL_Event evt)
     return false;
 }
 
-void Canvas::lockToScreenBounds(int top, int left, int bottom, int right)
+void Canvas::lockToScreenBounds(int top, int left, int bottom, int right, XY bounds)
 {
+    bounds = bounds.x == -1 ? XY{g_windowW, g_windowH} : bounds;
     currentDrawPoint = XY{
-        iclamp(-dimensions.x * scale + 4 + left, currentDrawPoint.x, g_windowW - 4 - right),
-        iclamp(-dimensions.y * scale + 4 + top, currentDrawPoint.y, g_windowH - 4 - bottom)
+        iclamp(-dimensions.x * scale + 4 + left, currentDrawPoint.x, bounds.x - 4 - right),
+        iclamp(-dimensions.y * scale + 4 + top, currentDrawPoint.y, bounds.y - 4 - bottom)
     };
 }
 
@@ -102,11 +103,12 @@ void Canvas::panCanvas(XY by)
     currentDrawPoint.y += by.y;
 }
 
-void Canvas::recenter()
+void Canvas::recenter(XY windowDimensions)
 {
+    windowDimensions = windowDimensions.x == -1 ? XY{g_windowW, g_windowH} : windowDimensions;
     currentDrawPoint = XY{
-        (g_windowW / 2) - (dimensions.x * scale) / 2,
-        (g_windowH / 2) - (dimensions.y * scale) / 2
+        (windowDimensions.x / 2) - (dimensions.x * scale) / 2,
+        (windowDimensions.y / 2) - (dimensions.y * scale) / 2
     };
 }
 

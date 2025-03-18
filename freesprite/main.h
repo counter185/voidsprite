@@ -9,3 +9,5 @@ inline Timer64 screenSwitchTimer;
 
 inline DrawableManager overlayWidgets;
 inline std::vector<ButtonStartScreenSession*> screenButtons;
+
+inline SDL_Texture* screenPreviewFramebuffer = NULL;

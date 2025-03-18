@@ -561,6 +561,12 @@
     <ClCompile Include="CollapsableDraggablePanel.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="io_rpgm.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelReference.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1066,6 +1072,15 @@
     </ClInclude>
     <ClInclude Include="CollapsableDraggablePanel.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="sdl23compat.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="io_rpgm.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelReference.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

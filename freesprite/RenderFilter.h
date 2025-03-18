@@ -92,3 +92,33 @@ public:
     }; }
 
 };
+
+class PrintPaletteFilter : public RenderFilter {
+    std::string name() override { return "Render palette"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override { 
+        Layer* c = copy(src);
+        int columns = std::stoi(options["columns"]);
+        XY sqDim = {std::stoi(options["square.w"]), std::stoi(options["square.h"])};
+        auto cols = src->getUniqueColors(true);
+        int ynow = 0;
+        int xnow = 0;
+        int limit = 1000;
+        for (auto& cc : cols) {
+            XY tileOrigin = {xnow * sqDim.x, ynow * sqDim.y};
+            c->fillRect(tileOrigin, xyAdd(tileOrigin, xySubtract(sqDim, {1,1})), cc);
+            if (xnow++ == columns) {
+                xnow = 0;
+                ynow++;
+            }
+        }
+        return c;
+    }
+
+    virtual std::vector<FilterParameter> getParameters() {
+        return {
+            INT_PARAM("columns", 1, 100, 16), 
+            INT_PARAM("square.w", 1, 16, 1),
+            INT_PARAM("square.h", 1, 16, 1)
+        };
+    }
+};

@@ -11,6 +11,10 @@ public:
     bool enabled = true;
     DrawableManager subWidgets;
 
+    ~Panel() {
+        subWidgets.freeAllDrawables();
+    }
+
     /// <summary>
     /// Direct parent that should take over its focused state
     /// </summary>
@@ -36,6 +40,7 @@ public:
 
     XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
 
+    Panel* getTopmostParent() { return parent != NULL ? parent->getTopmostParent() : this; }
     bool parentFocused() { return parent != NULL && parent->focused; }
     bool thisOrParentFocused() { return parent != NULL ? parentFocused() : focused; }
     Timer64& thisOrParentFocusTimer() { return parent != NULL ? parent->focusTimer : focusTimer; }

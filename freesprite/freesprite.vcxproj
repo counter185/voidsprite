@@ -103,7 +103,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,7 +121,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,7 +136,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
@@ -157,7 +157,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
@@ -204,6 +204,7 @@
     <ClCompile Include="io_aseprite.cpp" />
     <ClCompile Include="io_gim.cpp" />
     <ClCompile Include="io_piskel.cpp" />
+    <ClCompile Include="io_rpgm.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="MinecraftBlockPreviewScreen.cpp" />
@@ -213,6 +214,7 @@
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />
     <ClCompile Include="PanelMCBlockPreview.cpp" />
+    <ClCompile Include="PanelReference.cpp" />
     <ClCompile Include="PanelRPG2KTilemapPreview.cpp" />
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
@@ -363,6 +365,7 @@
     <ClInclude Include="io_base.h" />
     <ClInclude Include="io_gim.h" />
     <ClInclude Include="io_piskel.h" />
+    <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="main.h" />
@@ -376,6 +379,7 @@
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
     <ClInclude Include="Panel.h" />
     <ClInclude Include="PanelMCBlockPreview.h" />
+    <ClInclude Include="PanelReference.h" />
     <ClInclude Include="PanelRPG2KTilemapPreview.h" />
     <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="PanelTilemapPreview.h" />
@@ -392,6 +396,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="sdl23compat.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />
     <ClInclude Include="splitsession.h" />

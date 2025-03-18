@@ -64,6 +64,6 @@ public:
     void RenderEvents(XY originPoint, int canvasScale);
     void RenderWholeMap(XY at, int scale, bool rdLowerLayer = true, bool rdUpperLayer = true, bool rdEvents = true);
     Layer* RenderWholeMapToTexture();
-    void LoadLMU(PlatformNativePathString path);
+    bool LoadLMU(PlatformNativePathString path);
 };
 

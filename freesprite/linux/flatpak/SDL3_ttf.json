@@ -1,0 +1,31 @@
+{
+    "name": "SDL3_ttf",
+    "buildsystem": "cmake-ninja",
+    "builddir": true,
+    "config-opts": [
+        "-DCMAKE_VERBOSE_MAKEFILE=ON",
+        "-DCMAKE_BUILD_TYPE:STRING=Release",
+        "-DCMAKE_INSTALL_LIBDIR:PATH=lib"
+    ],
+    "sources": [
+        {
+            "type": "archive",
+            "url": "https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.0/SDL3_ttf-3.2.0.tar.gz",
+            "sha256": "9a741defb7c7d6dff658d402cb1cc46c1409a20df00949e1572eb9043102eb62",
+            "x-checker-data": {
+                "type": "anitya",
+                "project-id": 4784,
+                "stable-only": true,
+                "url-template": "https://github.com/libsdl-org/SDL_ttf/releases/download/release-${version0}.${version1}.${version2}/SDL3_ttf-${version0}.${version1}.${version2}.tar.gz"
+            }
+        }
+    ],
+    "cleanup": [
+        "/include",
+        "/lib/*.la",
+        "/lib/*.a",
+        "/lib/cmake",
+        "/share/aclocal",
+        "/lib/pkgconfig"
+    ]
+}

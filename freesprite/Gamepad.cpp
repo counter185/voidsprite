@@ -3,13 +3,15 @@
 
 void Gamepad::TryCaptureGamepad()
 {
-	int n = SDL_NumJoysticks();
+    int n;
+    SDL_JoystickID* ids = SDL_GetGamepads(&n);
+    SDL_free(ids);
 	if (n > 0) {
-		gamepad = SDL_GameControllerOpen(0);
+		gamepad = SDL_OpenGamepad(0);
 	}
 
 	if (gamepad != NULL) {
-		g_addNotification(Notification("Gamepad connected", SDL_GameControllerName(gamepad)));
+		g_addNotification(Notification("Gamepad connected", SDL_GetGamepadName(gamepad)));
 	}
 	gamepadConnected = gamepad != NULL;
 }
@@ -30,11 +32,11 @@ void Gamepad::TakeEvent(SDL_Event evt)
 			}
 			break;
 		case SDL_CONTROLLERAXISMOTION:
-			if (evt.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX) {
-				gamepadLSX = evt.caxis.value / 32768.0f;
+			if (evt.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTX) {
+				gamepadLSX = evt.gaxis.value / 32768.0f;
 			}
-			if (evt.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY) {
-				gamepadLSY = evt.caxis.value / 32768.0f;
+			if (evt.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTY) {
+				gamepadLSY = evt.gaxis.value / 32768.0f;
 			}
 			break;
 	}
@@ -43,6 +45,6 @@ void Gamepad::TakeEvent(SDL_Event evt)
 void Gamepad::SetLightbar(uint8_t r, uint8_t g, uint8_t b)
 {
 	if (gamepad != NULL) {
-		SDL_GameControllerSetLED(gamepad, r, g, b);
+		SDL_SetGamepadLED(gamepad, r, g, b);
 	}
 }

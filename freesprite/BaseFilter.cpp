@@ -16,10 +16,12 @@ void g_loadFilters()
     g_filters.push_back(new FilterPixelize());
     g_filters.push_back(new FilterOutline());
     g_filters.push_back(new FilterBrightnessContrast());
+    g_filters.push_back(new FilterQuantize());
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
     g_renderFilters.push_back(new GenRGBNoiseFilter());
+    g_renderFilters.push_back(new PrintPaletteFilter());
 }
 
 Layer* BaseFilter::copy(Layer* src)
@@ -281,5 +283,120 @@ Layer* FilterBrightnessContrast::run(Layer* src, std::map<std::string, std::stri
         ppx[x] = sdlcolorToUint32(px);
     }
 
+    return c;
+}
+
+std::pair<std::vector<u32>, std::vector<u32>> evalMedianCutBucket(std::vector<u32> colors) {
+    if (colors.size() == 0) {
+        return { {}, {} };
+    }
+    u8 minR = (colors[0] & 0xFF0000) >> 16;
+    u8 maxR = (colors[0] & 0xFF0000) >> 16;
+    u8 minG = (colors[0] & 0x00FF00) >> 8;
+    u8 maxG = (colors[0] & 0x00FF00) >> 8;
+    u8 minB = (colors[0] & 0x0000FF);
+    u8 maxB = (colors[0] & 0x0000FF);
+    for (u32 c : colors) {
+        SDL_Color cc = uint32ToSDLColor(c);
+        minR = ixmin(minR, cc.r);
+        maxR = ixmax(maxR, cc.r);
+        minG = ixmin(minG, cc.g);
+        maxG = ixmax(maxG, cc.g);
+        minB = ixmin(minB, cc.b);
+        maxB = ixmax(maxB, cc.b);
+        if ((minR == 0 && maxR == 255) || (minG == 0 && maxG == 255) || (minB == 0 && maxB == 255)) {
+            break;
+        }
+    }
+    u8 rRange = maxR - minR;
+    u8 gRange = maxG - minG;
+    u8 bRange = maxB - minB;
+    u8 maxRange = ixmax(ixmax(rRange, gRange), bRange);
+    std::pair<std::vector<u32>, std::vector<u32>> ret;
+    u32 midPoint = maxRange == rRange ? minR + rRange / 2 
+                 : maxRange == gRange ? minG + gRange / 2 
+                 : minB + bRange / 2;
+    u32 mask = maxRange == rRange ? 0xff0000
+             : maxRange == gRange ? 0x00ff00
+             : 0xff;
+    midPoint *= mask / 0xff;
+    std::sort(colors.begin(), colors.end(), [mask](u32 a, u32 b) { return (a & mask) < (b & mask); });
+    int indexMaxStart = -1;
+    for (int x = 0; x < colors.size(); x++) {
+        if ((colors[x] & mask) > midPoint) {
+            indexMaxStart = x;
+            break;
+        }
+    }
+    if (indexMaxStart == -1) {
+        ret.first = colors;
+        ret.second = {};
+    }
+    else if (indexMaxStart == 0) {
+        ret.first = {};
+        ret.second = colors;
+    }
+    else {
+        ret.first = std::vector<u32>(colors.begin(), colors.begin() + indexMaxStart);
+        ret.second = std::vector<u32>(colors.begin() + indexMaxStart, colors.end());
+    }
+    return ret;
+}
+u32 evalBucketMean(std::vector<u32> colors) {
+    if (colors.size() == 0) {
+        return 0;
+    }
+    u64 r = 0, g = 0, b = 0, a = 0;
+    for (u32 c : colors) {
+        SDL_Color cc = uint32ToSDLColor(c);
+        r += cc.r;
+        g += cc.g;
+        b += cc.b;
+        a += cc.a;
+    }
+    return PackRGBAtoARGB(r / colors.size(), g / colors.size(), b / colors.size(), a / colors.size());
+}
+
+Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> options)
+{
+    int numColors = std::stoi(options["num.colors"]);
+    auto colors = src->getUniqueColors(true);
+    if (colors.size() <= numColors) {
+        return copy(src);
+    }
+    u32* pppx = (u32*)src->pixelData;
+    bool oneColorWillBeAlpha = numColors > 1 && std::any_of(pppx, pppx + src->w * src->h, [](u32 a) { return (a & 0xff000000) == 0; });
+    if (oneColorWillBeAlpha) {
+        numColors--;
+    }
+    std::vector<std::vector<u32>> buckets = {colors};
+    while (buckets.size() < numColors) {
+        std::sort(buckets.begin(), buckets.end(), [](std::vector<u32> a, std::vector<u32> b) {return a.size() > b.size(); });
+        auto split = evalMedianCutBucket(buckets.front());
+        buckets.erase(buckets.begin());
+        if (split.first.size() > 0) {
+            buckets.push_back(split.first);
+        }
+        if (split.second.size() > 0) {
+            buckets.push_back(split.second);
+        }
+    }
+    std::map<u32, u32> remap;
+    for (auto& b : buckets) {
+        u32 mean = evalBucketMean(b);
+        for (u32 c : b) {
+            remap[c&0xFFFFFF] = mean;
+        }
+    }
+    Layer* c = copy(src);
+    u32* ppx = (u32*)c->pixelData;
+    for (u64 x = 0; x < c->w * c->h; x++) {
+        if (oneColorWillBeAlpha && (ppx[x] & 0xFF000000) == 0) {
+            ppx[x] = 0;
+        }
+        else {
+            ppx[x] = 0xFF000000 | remap[ppx[x] & 0xFFFFFF];
+        }
+    }
     return c;
 }

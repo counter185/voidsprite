@@ -14,6 +14,7 @@
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "LayerPalettized.h"
+#include "RPG2KTilemapPreviewScreen.h"
 #include "PopupMessageBox.h"
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
@@ -22,8 +23,6 @@
 #include "pugixml/pugixml.hpp"
 #include "astc_dec/astc_decomp.h"
 #include "base64/base64.hpp"
-#include "lcf/lmu/reader.h"
-#include "lcf/ldb/reader.h"
 #include "json/json.hpp"
 #include <jxl/encode_cxx.h>
 #include <jxl/decode_cxx.h>
@@ -66,11 +65,11 @@ enum VTFFORMAT
 std::string getAllLibsVersions() {
     std::string ret = "";
     ret += "SDL: " + std::to_string(SDL_MAJOR_VERSION) + "." + std::to_string(SDL_MINOR_VERSION) + "." +
-           std::to_string(SDL_PATCHLEVEL) + "\n";
+           std::to_string(SDL_MICRO_VERSION) + "\n";
     ret += "SDL_image: " + std::to_string(SDL_IMAGE_MAJOR_VERSION) + "." + std::to_string(SDL_IMAGE_MINOR_VERSION) +
-           "." + std::to_string(SDL_IMAGE_PATCHLEVEL) + "\n";
+           "." + std::to_string(SDL_IMAGE_MICRO_VERSION) + "\n";
     ret += "SDL_ttf: " + std::to_string(SDL_TTF_MAJOR_VERSION) + "." + std::to_string(SDL_TTF_MINOR_VERSION) + "." +
-           std::to_string(SDL_TTF_PATCHLEVEL) + "\n";
+           std::to_string(SDL_TTF_MICRO_VERSION) + "\n";
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
            "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
@@ -984,7 +983,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     positions.push_back(XY{ x,y });
                 }
 #if _DEBUG
-                //std::cout << action.dump(4) << std::endl;
+                std::cout << action.dump(4) << std::endl;
 #endif
                 switch (tool) {
                     //1px pencil
@@ -1017,9 +1016,17 @@ MainEditor* deserializePixelStudioSession(json j)
                     break;
                     //erase selection
                 case 6:
-                    for (XY& p : positions) {
+                {
+                    std::string metaString = action["Meta"];
+                    json meta = json::parse(metaString);
+                    XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                    XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+
+                    nlayer->fillRect(from, to, 0x00000000);
+                    /*for (XY& p : positions) {
                         nlayer->setPixel(p, 0x00000000);
-                    }
+                    }*/
+                }
                     break;
                     //move
                 case 10:
@@ -1029,12 +1036,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
                     XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
 
-                    SDL_Rect rect = {
-                        ixmin(from.x, to.x),
-                        ixmin(from.y, to.y),
-                        abs(from.x - to.x) + 1,
-                        abs(from.y - to.y) + 1
-                    };
+                    SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1};
 
                     XY blitAt = positions[1];
                     u32* pixelData = (u32*)tracked_malloc(rect.w * rect.h * 4);
@@ -1064,11 +1066,27 @@ MainEditor* deserializePixelStudioSession(json j)
                 break;
                 //flip x
                 case 13:
-                    nlayer->flipHorizontally();
+                {
+                    std::string metaString = action["Meta"];
+                    json meta = json::parse(metaString);
+                    XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                    XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+
+                    SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
+                    nlayer->flipHorizontally(rect);
+                }
                     break;
-                    //flip y
+                //flip y
                 case 14:
-                    nlayer->flipVertically();
+                {
+                    std::string metaString = action["Meta"];
+                    json meta = json::parse(metaString);
+                    XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
+                    XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+
+                    SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
+                    nlayer->flipVertically(rect);
+                }
                     break;
                     //replace color
                 case 18:
@@ -1116,6 +1134,9 @@ MainEditor* deserializePixelStudioSession(json j)
                     delete nnlayer;
                 }
                 break;
+                //case 21:
+                    //rotate selection
+                    //break;
                 case 24:
                     //adjust HSL,
                     //data is in `"Meta": "[-15660,0,0]",`
@@ -1141,7 +1162,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     //nlayer->shiftLayerHSL(shift);
 
                 }
-                break;
+                    break;
                 default:
                     g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
                     printf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
@@ -1213,63 +1234,6 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
             zip_entry_close(zip);
         }
     }
-}
-
-Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
-{
-    FILE* f = platformOpenFile(path, PlatformFileModeRB);
-
-    if (f != NULL) {
-        fseek(f, 0, SEEK_END);
-        long filesize = ftell(f);
-        fseek(f, 0, SEEK_SET);
-
-        char header[4];
-        fread(header, 1, 4, f);
-        short imgW, imgH;
-        fread(&imgW, 2, 1, f);
-        fread(&imgH, 2, 1, f);
-        
-        long cDataSize = filesize - (4 + 2 + 2);
-        Bytef* compressedData = (Bytef*)tracked_malloc(cDataSize);
-        fread(compressedData, 1, cDataSize, f);
-
-        uLongf decompressedSize = 768 + imgW * imgH;
-        Bytef* decompBytes = (Bytef*)tracked_malloc(decompressedSize);
-        int res = uncompress(decompBytes, &decompressedSize, compressedData, cDataSize);
-        //hopefully res == Z_OK
-
-        /* //write uncompressed xyz data to file:
-        FILE* outf = NULL;
-        fopen_s(&outf, "decompressedxyz.bin", "wb");
-        fwrite(decompBytes, 1, cDataSize, outf);
-        fclose(outf);
-        */
-
-        LayerPalettized* nLayer = new LayerPalettized(imgW, imgH);
-
-        //uint32_t colorPalette[256];
-        int filePtr = 0;
-        for (int c = 0; c < 256; c++) {
-            //colorPalette[c] = 0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]);
-            nLayer->palette.push_back(0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]));
-        }
-        
-        uint32_t* pxData = (uint32_t*)nLayer->pixelData;
-        for (int x = 0; x < imgW * imgH; x++) {
-            //pxData[x] = colorPalette[decompBytes[filePtr++]];
-            pxData[x] = decompBytes[filePtr++];
-        }
-
-        nLayer->name = "XYZ Image";
-
-        tracked_free(compressedData);
-        tracked_free(decompBytes);
-
-        fclose(f);
-        return nLayer;
-    }
-    return NULL;
 }
 
 void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::string text) {
@@ -1389,7 +1353,7 @@ Layer* readPNG(png_structp png, png_infop info) {
         }
 
         if (numchannels == 4) {
-            SDL_Surface* convSrf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
+            SDL_Surface* convSrf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR8888);
             memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
             SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
             SDL_FreeSurface(convSrf);
@@ -1562,10 +1526,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 if (compressionMethod == 0x81) {
                     uint8_t* rawData = (uint8_t*)tracked_malloc(filesize - r2dataStart);
                     fread(rawData, filesize - r2dataStart, 1, texfile);
-                    SDL_RWops* tgarw =
-                        SDL_RWFromMem(rawData, filesize - r2dataStart);
-                    SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
-                    SDL_RWclose(tgarw);
+                    SDL_IOStream* tgarw =
+                        SDL_IOFromMem(rawData, filesize - r2dataStart);
+                    SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
+                    SDL_CloseIO(tgarw);
                     if (tgasrf != NULL) {
                         ret = new Layer(tgasrf);
                         ret->name = "AETEX TGA Layer";
@@ -1646,10 +1610,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 uint8_t* tgaData = (uint8_t*)tracked_malloc(filesize - 0x38);
                 fread(tgaData, filesize - 0x38, 1, texfile);
                 fclose(texfile);
-                SDL_RWops* tgarw = SDL_RWFromMem(tgaData, filesize - 0x38);
+                SDL_IOStream* tgarw = SDL_IOFromMem(tgaData, filesize - 0x38);
                 //todo: dds
-                SDL_Surface* tgasrf = IMG_LoadTGA_RW(tgarw);
-                SDL_RWclose(tgarw);
+                SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
+                SDL_CloseIO(tgarw);
                 tracked_free(tgaData);
                 return tgasrf == NULL ? NULL : new Layer(tgasrf);
             }
@@ -3209,64 +3173,6 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek)
 #endif
 }
 
-MainEditor* readLMU(PlatformNativePathString path)
-{
-    MainEditor* ret = NULL;
-
-    std::ifstream lmuFile(path, std::ios::binary);
-    if (lmuFile.is_open()) {
-        std::unique_ptr<lcf::rpg::Map> a = lcf::LMU_Reader::Load(lmuFile);
-        int chipsetIndex = a.get()->chipset_id;
-        PlatformNativePathString pathDir = path.substr(0, path.find_last_of(convertStringOnWin32("/\\")));
-        PlatformNativePathString ldbPath = pathDir + convertStringOnWin32("/RPG_RT.ldb");
-
-        if (std::filesystem::exists(ldbPath)) {
-            std::ifstream ldbFile(ldbPath, std::ios::binary);
-            if (ldbFile.is_open()) {
-                std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
-                if (db.get()->chipsets.size() > chipsetIndex) {
-                    //chipset_name is the file name
-                    std::cout << "chipset_name = " << db.get()->chipsets[chipsetIndex-1].chipset_name << "\n";
-                    std::cout << "name = " << db.get()->chipsets[chipsetIndex-1].name << "\n";
-
-                    PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex-1].chipset_name)));
-                    Layer* l = NULL;
-                    l = readXYZ(chipsetPath + convertStringOnWin32(".xyz"));
-                    if (l == NULL) {
-                        l = readPNG(chipsetPath + convertStringOnWin32(".png"));
-                    }
-
-                    if (l != NULL) {
-                        l->name = shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex-1].name));
-                        ret = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
-
-                        //todo: load a rpg2ktilemappreviewscreen along with it too
-                    }
-                    else {
-                        g_addNotification(ErrorNotification("Error", "Failed to load Chipset"));
-                    }
-                }
-                else {
-                    g_addNotification(ErrorNotification("Error", "Chipset index not in database"));
-                }
-                ldbFile.close();
-            }
-            else {
-                g_addNotification(ErrorNotification("Error", "Failed to read LDB"));
-            }
-        }
-        else {
-            g_addNotification(ErrorNotification("Error", "LDB not found"));
-        }
-        lmuFile.close();
-    }
-    else {
-        g_addNotification(ErrorNotification("Error", "Failed to read LMU"));
-    }
-
-    return ret;
-}
-
 MainEditor* readOpenRaster(PlatformNativePathString path)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
@@ -4217,82 +4123,6 @@ bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data)
     return false;
 }
 
-bool writeXYZ(PlatformNativePathString path, Layer* data)
-{
-    std::vector<uint32_t> uniqueColors;
-    if (data->isPalettized) {
-        if (((LayerPalettized*)data)->palette.size() > 256) {
-            g_addNotification(ErrorNotification("XYZ export failed", "Too many colors in palette"));
-            printf("[XYZ] Too many colors\n");
-            return false;
-        }
-    } else {
-        uniqueColors = data->getUniqueColors(true);
-        if (uniqueColors.size() > 256) {
-            g_addNotification(ErrorNotification("XYZ export failed", "Your image has more than 256 colors"));
-            printf("[XYZ] Too many colors\n");
-            return false;
-        }
-    }
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        fwrite("XYZ1", 4, 1, outfile);
-        fwrite(&data->w, 2, 1, outfile);
-        fwrite(&data->h, 2, 1, outfile);
-
-        //write palette data
-        uint8_t paletteData[256*3];
-        int p = 0;
-        if (data->isPalettized) {
-            for (uint32_t& a : ((LayerPalettized*)data)->palette) {
-                uint32_t color = a;
-                paletteData[p++] = (color >> 16) & 0xff;
-                paletteData[p++] = (color >> 8) & 0xff;
-                paletteData[p++] = color & 0xff;
-            }
-        }
-        else {
-            for (uint32_t& a : uniqueColors) {
-                uint32_t color = a;
-                paletteData[p++] = (color >> 16) & 0xff;
-                paletteData[p++] = (color >> 8) & 0xff;
-                paletteData[p++] = color & 0xff;
-            }
-        }
-
-        //write pixel data
-        uint8_t* pxPalleteData = (uint8_t*)tracked_malloc(data->w * data->h);
-        uint32_t* pixelData32 = (uint32_t*)data->pixelData;
-        if (data->isPalettized) {
-            for (uint64_t x = 0; x < data->w * data->h; x++) {
-                pxPalleteData[x] = (uint8_t)(pixelData32[x]);
-            }
-        }
-        else {
-            for (uint64_t x = 0; x < data->w * data->h; x++) {
-                uint32_t pixel = pixelData32[x] | 0xff000000;
-                int index = std::find(uniqueColors.begin(), uniqueColors.end(), pixel) - uniqueColors.begin();
-                pxPalleteData[x] = (uint8_t)(index);
-            }
-        }
-        unsigned long dataLength = 256 * 3 + data->w * data->h;
-        uint8_t* combined = (uint8_t*)tracked_malloc(dataLength);
-        memcpy(combined, paletteData, 256 * 3);
-        memcpy(combined+(256*3), pxPalleteData, data->w * data->h);
-        uint8_t* dst = (uint8_t*)tracked_malloc(dataLength);
-        compress((Bytef*)dst, &dataLength, combined, dataLength);
-        fwrite(dst, dataLength, 1, outfile);
-
-        tracked_free(combined);
-        tracked_free(dst);
-        tracked_free(pxPalleteData);
-        fclose(outfile);
-        return true;
-    }
-
-    return false;
-}
-
 bool writeBMP(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
@@ -5102,8 +4932,6 @@ std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString
             if (ret.pixelData != NULL) {
                 fread(ret.pixelData, 4, ret.dimensions.x * ret.dimensions.y, f);
                 fclose(f);
-                /*ret.cachedTexture = SDL_CreateTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, ret.dimensions.x, ret.dimensions.y);
-                SDL_UpdateTexture(ret.cachedTexture, NULL, ret.pixelData, 4 * ret.dimensions.x);*/
                 return { true, ret };
             }
         }

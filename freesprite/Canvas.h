@@ -12,14 +12,14 @@ public:
 	//okay actually LET'S NOT USE THIS
 	bool takeInput(SDL_Event evt);
 
-	void lockToScreenBounds(int top = 0, int left = 0, int bottom = 0, int right = 0);
+	void lockToScreenBounds(int top = 0, int left = 0, int bottom = 0, int right = 0, XY bounds = {-1,-1});
 	bool pointInCanvasBounds(XY point);
 	void drawCanvasOutline(int shades = 1, SDL_Color c = { 255,255,255,255 });
 	SDL_Rect getCanvasOnScreenRect();
 	void drawTileGrid(XY tileSize);
 	void zoom(int how_much);
 	void panCanvas(XY by);
-	void recenter();
+	void recenter(XY windowDimensions = {-1,-1});
 
 	XY canvasPointToScreenPoint(XY canvasPoint);
 	/// <summary>

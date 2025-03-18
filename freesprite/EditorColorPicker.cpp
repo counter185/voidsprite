@@ -96,7 +96,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     colorTabs->tabs[1].wxs.addDrawable(txtS);
     colorTabs->tabs[1].wxs.addDrawable(txtV);
 
-    sliderH = new UISlider();
+    sliderH = new UIColorSlider();
     sliderH->position = XY{ 30, 120 + 10 };
     sliderH->wxWidth = 200;
     sliderH->wxHeight = 25;
@@ -160,22 +160,23 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
             yNow += 30;
 
             std::map<std::string, ColorModelValue> components;
+            auto componentRanges = mptr->componentRanges();
 
             for (auto& component : mptr->components()) {
                 UILabel* cnameLabel = new UILabel(component);
                 cnameLabel->position = XY{ 10, yNow };
                 colorModelsPanel->subWidgets.addDrawable(cnameLabel);
                 UILabel* cvalueLabel = new UILabel("0");
-                cvalueLabel->position = XY{ 30, yNow };
+                cvalueLabel->position = XY{ 50, yNow };
                 colorModelsPanel->subWidgets.addDrawable(cvalueLabel);
                 UIColorSlider* slider = new UIColorSlider();
-                slider->position = XY{ 80, yNow };
+                slider->position = XY{ 120, yNow };
                 slider->wxWidth = 200;
                 slider->wxHeight = 20;
                 slider->setCallbackListener(100 + i, this);
                 colorModelsPanel->subWidgets.addDrawable(slider);
                 yNow += 30;
-                components[component] = { slider, cvalueLabel, 0 };
+                components[component] = {slider, cvalueLabel, 0, componentRanges[component]};
             }
 
             colorModels.push_back({ name, {mptr, components} });
@@ -381,7 +382,7 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
                 ColorModel* mptr = modelData.targetModel;
                 std::map<std::string, double> componentData;
                 for (auto& component : modelData.components) {
-                    component.second.valueNow = component.second.valueSlider->sliderPos;
+                    component.second.valueNow = component.second.range.first + component.second.valueSlider->sliderPos * (component.second.range.second - component.second.range.first);
                     component.second.valueLabel->text = std::format("{:.2f}", component.second.valueNow);
                     componentData[component.first] = component.second.valueNow;
                 }
@@ -453,20 +454,22 @@ void EditorColorPicker::updateColorModelSliders(std::string dontUpdate)
             UILabel* label = component.second.valueLabel;
 
             auto modelColorMin = modelColorValue;
+            auto modelColorMid = modelColorValue;
             auto modelColorMax = modelColorValue;
 
-            //TODO: other min/max bounds
-            modelColorMin[component.first] = 0;
-            modelColorMax[component.first] = 1;
+            modelColorMin[component.first] = component.second.range.first;
+            modelColorMid[component.first] = component.second.range.first + (component.second.range.second - component.second.range.first) / 2;
+            modelColorMax[component.first] = component.second.range.second;
 
             double val = modelColorValue[component.first];
             if (model.first != dontUpdate) {
-                slider->sliderPos = val;
+                slider->sliderPos = (val - component.second.range.first) / (component.second.range.second - component.second.range.first);
                 label->text = std::format("{:.2f}", val);
                 component.second.valueNow = val;
             }
-            slider->colorMin = mptr->toRGB(modelColorMin);
-            slider->colorMax = mptr->toRGB(modelColorMax);
+            slider->colors = {component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMin),
+                              component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMid),
+                              component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMax)};
         }
     }
 }
@@ -516,10 +519,23 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
     rgb colorSMax = hsv2rgb(hsv{ currentH, 1, currentV });
     rgb colorVMin = hsv2rgb(hsv{ currentH, currentS, 0 });
     rgb colorVMax = hsv2rgb(hsv{ currentH, currentS, 1 });
-    sliderS->colorMin = (0xFF << 24) + ((int)(colorSMin.r*255) << 16) + ((int)(colorSMin.g * 255) << 8) + (int)(colorSMin.b * 255);
-    sliderS->colorMax = (0xFF << 24) + ((int)(colorSMax.r*255) << 16) + ((int)(colorSMax.g * 255) << 8) + (int)(colorSMax.b * 255);
-    sliderV->colorMin = (0xFF << 24) + ((int)(colorVMin.r*255) << 16) + ((int)(colorVMin.g * 255) << 8) + (int)(colorVMin.b * 255);
-    sliderV->colorMax = (0xFF << 24) + ((int)(colorVMax.r*255) << 16) + ((int)(colorVMax.g * 255) << 8) + (int)(colorVMax.b * 255);
+
+    // todo: make these affected by saturation and value
+    sliderH->colors = {
+        0xFFFF0000,
+        0xFFFFFF00,
+        0xFF00FF00,
+        0xFF00FFFF,
+        0xFF0000FF,
+        0xFFFF00FF,
+        0xFFFF0000
+    };
+
+    sliderS->colors = {PackRGBAtoARGB(colorSMin.r * 255, colorSMin.g * 255, colorSMin.b * 255, 255),
+                       PackRGBAtoARGB(colorSMax.r * 255, colorSMax.g * 255, colorSMax.b * 255, 255)};
+
+    sliderV->colors = {PackRGBAtoARGB(colorVMin.r * 255, colorVMin.g * 255, colorVMin.b * 255, 255),
+                       PackRGBAtoARGB(colorVMax.r * 255, colorVMax.g * 255, colorVMax.b * 255, 255)};
 
     txtR->setText(std::to_string(currentR));
     txtG->setText(std::to_string(currentG));
@@ -532,12 +548,18 @@ void EditorColorPicker::setMainEditorColorRGB(SDL_Color col, bool updateHSVSlide
 
     uint32_t rgbColor = sdlcolorToUint32(col) | 0xFF000000; //(0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
 
-    sliderR->colorMin = rgbColor & 0x00FFFF;
-    sliderR->colorMax = rgbColor | 0xFF0000;
-    sliderG->colorMin = rgbColor & 0xFF00FF;
-    sliderG->colorMax = rgbColor | 0x00FF00;
-    sliderB->colorMin = rgbColor & 0xFFFF00;
-    sliderB->colorMax = rgbColor | 0x0000FF;
+    sliderR->colors = {
+        rgbColor & 0x00FFFF,
+        rgbColor | 0xFF0000
+    };
+    sliderG->colors = {
+        rgbColor & 0xFF00FF, 
+        rgbColor | 0x00FF00
+    };
+    sliderB->colors = {
+        rgbColor & 0xFFFF00, 
+        rgbColor | 0x0000FF
+    };
 
     colorTextField->setText(std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
     caller->pickedColor = rgbColor;

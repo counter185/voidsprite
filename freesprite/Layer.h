@@ -42,11 +42,11 @@ public:
     }
     Layer(SDL_Surface* from) : Layer(from->w, from->h) {
         //pixelData = (uint8_t*)tracked_malloc(w * h * 4);
-        if (from->format->format == SDL_PIXELFORMAT_ARGB8888) {
+        if (from->format == SDL_PIXELFORMAT_ARGB8888) {
             memcpy(pixelData, from->pixels, w * h * 4);
         }
         else {
-            SDL_ConvertPixels(w, h, from->format->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
+            SDL_ConvertPixels(w, h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
             SDL_FreeSurface(from);
         }
     }
@@ -72,15 +72,30 @@ public:
             SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
         }
         SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
-        memcpy(pixels, pixelData, w * h * 4);
+        if (pitch == w*4) {
+            memcpy(pixels, pixelData, w * h * 4);
+        } else {
+            for (int y = 0; y < h; y++) {
+                memcpy(pixels + y * pitch, pixelData + y * w * 4, w* 4);
+            }
+        }
+        //memcpy(pixels, pixelData, w * h * 4);
 
+        //todo respect the pitch in the below too
         if (colorKeySet) {
-            uint32_t* px32 = (uint32_t*)pixelData;
-            for (uint64_t p = 0; p < w * h; p++) {
+            u32* px32 = (u32*)pixelData;
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if ((ARRAY2DPOINT(px32, x,y, w) & 0xffffff) == (colorKey & 0xFFFFFF)) {
+                        ARRAY2DPOINT(pixels, x*4+3, y, pitch) = 0;
+                    }
+                }
+            }
+            /*for (u64 p = 0; p < w * h; p++) {
                 if ((px32[p] & 0xffffff) == (colorKey & 0xFFFFFF)) {
                     pixels[p * 4+3] = 0;
                 }
-            }
+            }*/
         }
         SDL_UnlockTexture(tex);
         layerDirty = false;
@@ -124,7 +139,7 @@ public:
             uint32_t* px32 = (uint32_t*)pixels;
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    px32[x + (y * w)] = getVisualPixelAt(XY{ x,y });
+                    ARRAY2DPOINT(px32, x,y, pitch/4) = getVisualPixelAt(XY{ x,y });
                 }
             }
         }
@@ -185,25 +200,30 @@ public:
         return getPixelAt(position, ignoreLayerAlpha);
     }
 
-    void flipHorizontally() {
+    void flipHorizontally(SDL_Rect region = {-1,-1,-1,-1}) {
+        if (region.w == -1) {
+            region = {0, 0, w, h};
+        }
         uint32_t* px32 = (uint32_t*)pixelData;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w / 2; x++) {
-                uint32_t p = *(px32 + (y*w) + (w - 1 - x));
-                *(px32 + (y*w) + (w - 1 - x)) = *(px32 + (y*w) + x);
-                *(px32 + (y*w) + x) = p;
+        for (int y = 0; y < region.h; y++) {
+            for (int x = 0; x < region.w / 2; x++) {
+                u32 p = ARRAY2DPOINT(px32, region.x + region.w-1-x, region.y + y, w);
+                ARRAY2DPOINT(px32, region.x + region.w - 1 - x, region.y + y, w) = ARRAY2DPOINT(px32, region.x + x, region.y + y, w);
+                ARRAY2DPOINT(px32, region.x + x, region.y + y, w) = p;
             }
         }
         layerDirty = true;
     }
-    void flipVertically() {
-        uint32_t* px32 = (uint32_t*)pixelData;
-        for (int y = 0; y < h/2; y++) {
-            for (int x = 0; x < w; x++) {
-                uint32_t p = *(px32 + (y*w) + (w - 1 - x));
-                uint32_t* p2 = px32 + ((h-1-y)*w) + (w - 1 - x);
-                *(px32 + (y * w) + (w - 1 - x)) = *p2;
-                *p2 = p;
+    void flipVertically(SDL_Rect region = { -1,-1,-1,-1 }) {
+        if (region.w == -1) {
+            region = { 0, 0, w, h };
+        }
+        u32* px32 = (u32*)pixelData;
+        for (int y = 0; y < region.h/2; y++) {
+            for (int x = 0; x < region.w; x++) {
+                u32 p = ARRAY2DPOINT(px32, region.x + x, region.y + y, w);
+                ARRAY2DPOINT(px32, region.x + x, region.y + y, w) = ARRAY2DPOINT(px32, region.x + x, region.y + region.h-1-y, w);
+                ARRAY2DPOINT(px32, region.x + x, region.y + region.h-1-y, w) = p;
             }
         }
         layerDirty = true;
@@ -371,5 +391,9 @@ public:
     u8* resizeByTileCount(XY tileSizesNow, XY newTileCount);
     u8* integerScale(XY scale);
     u8* integerDownscale(XY scale);
+
+    ScanlineMap wandSelectAt(XY pos);
+
+    void clear(ScanlineMap* area = NULL);
 };
 

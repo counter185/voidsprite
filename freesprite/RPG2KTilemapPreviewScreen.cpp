@@ -21,18 +21,18 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     navbar = new ScreenWideNavBar<RPG2KTilemapPreviewScreen*>(this,
         {
             {
-                SDLK_f,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_o, { "Load layout from file",
+                        {SDL_SCANCODE_O, { "Load layout from file",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     platformTryLoadOtherFile(screen, {{".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                                 }
                             }
                         },
-                        {SDLK_e, { "Render to image",
+                        {SDL_SCANCODE_E, { "Render to image",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     std::vector<std::pair<std::string, std::string>> formats;
                                     for (auto f : g_fileExporters) {
@@ -42,7 +42,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                                 }
                             }
                         },
-                        /*{SDLK_s, {"Save layout to file",
+                        /*{SDL_SCANCODE_S, {"Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"} }, "Save tile layout", EVENT_OTHERFILE_SAVEFILE);
                                 }
@@ -53,12 +53,12 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                 }
             },
             {
-                SDLK_v,
+                SDL_SCANCODE_V,
                 {
                     "View",
                     {},
                     {
-                        {SDLK_e, { "Toggle Event display",
+                        {SDL_SCANCODE_E, { "Toggle Event display",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     screen->eventViewMode = (LMUEventViewMode)(((int)screen->eventViewMode + 1) % 4);
                                     switch (screen->eventViewMode) {
@@ -78,7 +78,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                                 }
                             }
                         },
-                        {SDLK_r, { "Recenter canvas",
+                        {SDL_SCANCODE_R, { "Recenter canvas",
                                 [](RPG2KTilemapPreviewScreen* screen) {
                                     screen->RecenterCanvas();
                                 }
@@ -88,7 +88,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                     g_iconNavbarTabView 
                 }
             }
-        }, { SDLK_f, SDLK_v });
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
     lowerLayerData = new uint16_t[dimensions.x * dimensions.y];
@@ -163,12 +163,10 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
     LALT_TO_SUMMON_NAVBAR;
 
     if (evt.type == SDL_DROPFILE) {
-        PlatformNativePathString p = convertStringOnWin32(evt.drop.file);
+        PlatformNativePathString p = convertStringOnWin32(evt.drop.data);
         if (stringEndsWithIgnoreCase(p, convertStringOnWin32(".lmu"))) {
             LoadLMU(p);
         }
-        
-        SDL_free(evt.drop.file);
         return;
     }
 
@@ -180,12 +178,12 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingTilemap = evt.button.state;
+                scrollingTilemap = evt.button.down;
             }
             break;
         case SDL_MOUSEMOTION:
             if (scrollingTilemap) {
-                canvas.panCanvas(XY{ evt.motion.xrel, evt.motion.yrel });
+                canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
             }
             break;
         }
@@ -270,7 +268,7 @@ void RPG2KTilemapPreviewScreen::RecenterCanvas()
 void RPG2KTilemapPreviewScreen::PrerenderCanvas()
 {
     SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_NONE);
-    SDL_SetRenderTarget(g_rd, callerCanvas);
+    g_pushRenderTarget(callerCanvas);
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
     SDL_RenderClear(g_rd);
     for (Layer*& l : caller->layers) {
@@ -279,7 +277,7 @@ void RPG2KTilemapPreviewScreen::PrerenderCanvas()
             //SDL_RenderCopy(g_rd, l->tex, NULL, NULL);
         }
     }
-    SDL_SetRenderTarget(g_rd, NULL);
+    g_popRenderTarget();
     SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_BLEND);
     
 }
@@ -1069,20 +1067,27 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
     Layer* newLayer = new Layer(dimensions.x * 16, dimensions.y * 16);
     forceOptimizationsOff = true;
     bool failed = false;
+    //SDL_RenderPresent(g_rd);
     for (int y = 0; y < dimensions.y * 16 && !failed; y += g_windowH) {
         for (int x = 0; x < dimensions.x * 16 && !failed; x += g_windowW) {
             //due to a bug in sdl only the window area gets rendered
             SDL_Texture* newTexture = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
             Layer* blitLayer = new Layer(g_windowW, g_windowH);
-            SDL_SetRenderTarget(g_rd, newTexture);
+            g_pushRenderTarget(newTexture);
+            SDL_FlushRenderer(g_rd);
             SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+            SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_NONE);
             SDL_RenderClear(g_rd);
+            SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
             RenderWholeMap({ -x,-y }, 1);
-            failed = SDL_RenderReadPixels(g_rd, NULL, SDL_PIXELFORMAT_ARGB8888, blitLayer->pixelData, blitLayer->w * 4);
-            if (failed) {
+            SDL_Surface* newSrf = SDL_RenderReadPixels(g_rd, NULL);
+            if (newSrf == NULL) {
                 g_addNotification(ErrorNotification("Error", "SDL_RenderReadPixels failed"));
             }
-            SDL_SetRenderTarget(g_rd, NULL);
+            SDL_ConvertPixels(blitLayer->w, blitLayer->h, newSrf->format, newSrf->pixels, newSrf->pitch,
+                              SDL_PIXELFORMAT_ARGB8888, blitLayer->pixelData, blitLayer->w * 4);
+            SDL_FreeSurface(newSrf);
+            g_popRenderTarget();
             tracked_destroyTexture(newTexture);
 
             newLayer->blit(blitLayer, { x,y });
@@ -1100,7 +1105,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
     }
 }
 
-void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
+bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 {
     for (auto& tx : texturesLoaded) {
         tracked_destroyTexture(tx.second);
@@ -1207,9 +1212,11 @@ void RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
         upperLayerData = upperLayer;
 
         file.close();
+        return true;
     }
     else {
         g_addNotification(Notification("Error loading file", "Could not open file for reading."));
+        return false;
     }
 }
 

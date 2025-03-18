@@ -5,11 +5,7 @@
 #include <dwmapi.h>
 #endif
 
-#ifdef __GNUC__
-#include <SDL2/SDL_syswm.h>
-#else
-#include <SDL_syswm.h>
-#endif
+#include <SDL3/SDL_properties.h>
 
 #include <d3d9.h>
 #include <windows.h>
@@ -27,11 +23,8 @@ void platformPostInit() {
     static bool d = false;
     if (!d) {
 		#if WINDOWS_XP == 0
-            SDL_SysWMinfo wmInfo;
-            SDL_VERSION(&wmInfo.version);
-            SDL_GetWindowWMInfo(g_wd, &wmInfo);
             BOOL USE_DARK_MODE = true;
-            WINhWnd = wmInfo.info.win.window;
+            WINhWnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(g_wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
             bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
                 WINhWnd, 20,
                 &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
@@ -177,6 +170,9 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     CreateDirectoryW(subDir.c_str(), NULL);
 
     subDir = appdataDir + L"palettes\\";
+    CreateDirectoryW(subDir.c_str(), NULL);
+
+    subDir = appdataDir + L"autosaves\\";
     CreateDirectoryW(subDir.c_str(), NULL);
 
     return appdataDir;

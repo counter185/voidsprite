@@ -21,6 +21,12 @@
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
 
+enum EditorUnsavedChanges : int {
+    NO_UNSAVED_CHANGES = 0,
+    CHANGES_RECOVERY_AUTOSAVED = 1,
+    HAS_UNSAVED_CHANGES = 2
+};
+
 enum MainEditorCommentMode : int {
     COMMENTMODE_HIDE_ALL = 0,
     COMMENTMODE_SHOW_HOVERED = 1,
@@ -55,7 +61,7 @@ public:
     std::vector<UndoStackElement> undoStack, redoStack;
 
     XY tileDimensions = XY{ 0,0 };
-    uint8_t tileGridAlpha = 0x40;
+    u8 tileGridAlpha = 0x40;
     XY tileGridPaddingBottomRight = XY{ 0,0 };
     SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
     XY getPaddedTileDimensions();
@@ -78,8 +84,9 @@ public:
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;
+    bool penDown = false;
 
-    bool changesSinceLastSave = false;
+    EditorUnsavedChanges changesSinceLastSave = NO_UNSAVED_CHANGES;
     PlatformNativePathString lastConfirmedSavePath;
     FileExporter* lastConfirmedExporter = NULL;
     bool lastConfirmedSave = false;
@@ -93,6 +100,12 @@ public:
     bool qModifier = false;
     XY lockedTilePreview = { -1,-1 };
     Timer64 tileLockTimer;
+
+    bool zoomKeyHeld = false;
+    XY zoomOrigin{};
+    int zoomInitial = 0;
+    const int zoomPixelStep = 50;
+    Timer64 zoomKeyTimer;
 
     ScreenWideNavBar<MainEditor*>* navbar;
     EditorColorPicker* colorPicker;
@@ -110,14 +123,18 @@ public:
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;
 
-    std::map<SDL_Keycode, NavbarSection<MainEditor*>> mainEditorKeyActions;
+    std::map<SDL_Scancode, NavbarSection<MainEditor*>> mainEditorKeyActions;
 
     std::vector<uint32_t> lastColors;
 
     SplitSessionData splitSessionData = { false };
 
+    std::vector<BaseScreen*> hintOpenScreensInInteractiveMode;
+
     u64 editTime = 0;
     u64 lastTimestamp = -1;
+
+    Timer64 autosaveTimer;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
@@ -147,6 +164,7 @@ public:
     void drawTileGrid();
     void renderGuidelines();
     void drawSplitSessionFragments();
+    void drawZoomLines();
 
     void initLayers();
     virtual void setUpWidgets();
@@ -172,6 +190,7 @@ public:
     virtual void setActiveColor(uint32_t, bool animate = true);
     virtual uint32_t getActiveColor();
     void setActiveBrush(BaseBrush* b);
+    void tickAutosave();
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

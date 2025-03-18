@@ -22,6 +22,8 @@ enum ConfigOptions : int {
     CHECKBOX_VSYNC,
     CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA,
     CHECKBOX_DISCORD_RPC,
+    CHECKBOX_RENDERER,
+    TEXTFIELD_AUTOSAVE_INTERVAL
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -30,7 +32,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     previousConfig = GlobalConfig(g_config);
 
     wxHeight = 400;
-    wxWidth = 700;
+    wxWidth = 850;
 
     TabbedView* configTabs = new TabbedView({ {"General"}, {"Editor"}, {"Keybinds"}, {"Misc."}}, 90);
     configTabs->position = XY{ 10,50 };
@@ -62,6 +64,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb8->checkbox->tooltip = "When enabled, your activity will be shared as your Discord status.\nSupported only on Windows.";
     cb8->setCallbackListener(CHECKBOX_DISCORD_RPC, this);
     configTabs->tabs[0].wxs.addDrawable(cb8);
+    posInTab.y += 35;
+
+    UILabel* lbl4 = new UILabel("Renderer");
+    lbl4->position = posInTab;
+    configTabs->tabs[0].wxs.addDrawable(lbl4);
+    UIDropdown* dd2 = new UIDropdown(g_availableRenderersNow);
+    dd2->position = xyAdd(posInTab, {100, 0});
+    dd2->wxWidth = 180;
+    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
+    dd2->setTextToSelectedItem = true;
+    dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
+    configTabs->tabs[0].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
 
@@ -120,6 +134,23 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
     cb5->setCallbackListener(CHECKBOX_FILL_TOOL_TILE_BOUND, this);
     configTabs->tabs[1].wxs.addDrawable(cb5);
+    posInTab.y += 35;
+
+    lbl2 = new UILabel("Recovery autosave interval (minutes) (0 to disable)");
+    lbl2->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    tf2 = new UITextField();
+    tf2->isNumericField = true;
+    tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y };
+    tf2->wxWidth = 80;
+    tf2->setText(std::to_string(g_config.autosaveInterval));
+    tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
+    configTabs->tabs[1].wxs.addDrawable(tf2);
+    posInTab.y += 35;
+    lbl2 = new UILabel(" Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory.");
+    lbl2->color = { 255,255,255,0xa0 };
+    lbl2->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl2);
     posInTab.y += 35;
 
     /*
@@ -208,20 +239,21 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
     if (bindingKeyIndex != -1) {
         if (evt.type == SDL_KEYDOWN) {
-            int targetKey = evt.key.keysym.sym == SDLK_LSHIFT ? SDLK_UNKNOWN : evt.key.keysym.sym;
-            if (targetKey != SDLK_ESCAPE) {
+            int targetKey = evt.key.scancode == SDL_SCANCODE_LSHIFT ? SDL_SCANCODE_UNKNOWN : evt.key.scancode;
+            if (targetKey != SDL_SCANCODE_ESCAPE) {
                 //find any other keybinds that use this key and reset them
-                if (targetKey != SDLK_UNKNOWN && std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) == reservedKeys.end()) {
+                bool keyIsReserved = (targetKey != SDL_SCANCODE_UNKNOWN) && (std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) != reservedKeys.end());
+                if (!keyIsReserved) {
                     for (auto& kb : keybindButtons) {
                         if (kb.first.target != keybindButtons[bindingKeyIndex].first.target && *kb.first.target == targetKey) {
-                            *kb.first.target = SDLK_UNKNOWN;
+                            *kb.first.target = SDL_SCANCODE_UNKNOWN;
                             updateKeybindButtonText(kb);
                         }
                     }
-                    *keybindButtons[bindingKeyIndex].first.target = targetKey;
+                    *keybindButtons[bindingKeyIndex].first.target = (SDL_Scancode)targetKey;
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetKeyName(targetKey)))));
+                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
                 }
             }
             updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
@@ -299,6 +331,15 @@ void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
                 g_config.maxUndoHistory = previousConfig.maxUndoHistory;
             }
             break;
+        case TEXTFIELD_AUTOSAVE_INTERVAL:
+            try {
+                g_config.autosaveInterval = std::stoi(text);
+            }
+            catch (std::exception) {
+                g_config.autosaveInterval = previousConfig.autosaveInterval;
+            }
+            break;
+        
     }
 }
 
@@ -306,10 +347,13 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
 {
     if (evt_id == CHECKBOX_ANIMATED_BACKGROUND) {
         g_config.animatedBackground = index;
+    } 
+    else if (evt_id == CHECKBOX_RENDERER) {
+        g_config.preferredRenderer = name;
     }
 }
 
 void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t)
 {
-    t.second->text = std::format("{}    ({})", t.first.name, SDL_GetKeyName(*t.first.target));
+    t.second->text = std::format("{}    ({})", t.first.name, SDL_GetScancodeName(*t.first.target));
 }

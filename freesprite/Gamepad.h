@@ -7,7 +7,7 @@ public:
 	float gamepadLSX = 0, gamepadLSY = 0;
 
 	bool gamepadConnected = false;
-	SDL_GameController* gamepad = NULL;
+	SDL_Gamepad* gamepad = NULL;
 	void TryCaptureGamepad();
 	void TakeEvent(SDL_Event evt);
 	void SetLightbar(uint8_t r, uint8_t g, uint8_t b);

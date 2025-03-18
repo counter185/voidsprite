@@ -19,7 +19,8 @@ void UITextField::render(XY pos)
 		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
 		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
 
-		SDL_SetTextInputRect(&drawrect);
+		
+		SDL_SetTextInputArea(g_wd, &drawrect, 0);
 	}
 
 	if (hovered) {
@@ -65,15 +66,15 @@ void UITextField::render(XY pos)
 void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 {
 	if (evt.type == SDL_KEYDOWN) {
-		switch (evt.key.keysym.sym) {
-			case SDLK_TAB:
+		switch (evt.key.scancode) {
+			case SDL_SCANCODE_TAB:
 				break;
-			case SDLK_RETURN:
+			case SDL_SCANCODE_RETURN:
 				if (callback != NULL) {
 					callback->eventTextInputConfirm(callback_id, text);
 				}
 				break;
-			case SDLK_BACKSPACE:
+			case SDL_SCANCODE_BACKSPACE:
 				if (!text.empty()) {
 					text = text.substr(0, text.size() - 1);
 					if (callback != NULL) {
@@ -81,22 +82,22 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 					}
 				}
 				break;
-			case SDLK_DELETE:
+			case SDL_SCANCODE_DELETE:
 				text = "";
 				break;
 		}
 	}
 	else if (evt.type == SDL_TEXTINPUT) {
 		bool textAdded = false;
-		for (char& c : evt.text.text) {
-			if (c == '\0') {
-				break;
-			}
+		char* nextc = (char*)evt.text.text;
+		while (*nextc != '\0') {
+			char c = *nextc;
 			if ((isNumericField && c >= '0' && c <= '9')
 				|| !isNumericField) {
 				text += c;
 				textAdded = true;
 			}
+			nextc++;
 		}
 		if (textAdded && callback != NULL) {
 			callback->eventTextInput(callback_id, text);

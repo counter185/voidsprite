@@ -1,5 +1,8 @@
 
 #include "globals.h"
+
+#include <SDL3/SDL_main.h>
+
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "BaseScreen.h"
@@ -95,6 +98,8 @@ std::vector<BaseTemplate*> g_templates;
 
 std::vector<Notification> g_notifications;
 
+Timer64 lastPenEvent;
+
 void g_addNotification(Notification a) {
     g_notifications.push_back(a);
 }
@@ -185,6 +190,16 @@ void g_popClip() {
     SDL_RenderSetClipRect(g_rd, clips.size() == 0 ? NULL : &clips[clips.size() - 1]);
 }
 
+std::vector<SDL_Texture*> rts;
+void g_pushRenderTarget(SDL_Texture* rt) {
+    rts.push_back(rt);
+    SDL_SetRenderTarget(g_rd, rt);
+}
+void g_popRenderTarget() {
+    rts.pop_back();
+    SDL_SetRenderTarget(g_rd, rts.size() == 0 ? NULL : rts[rts.size() - 1]);
+}
+
 
 SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
@@ -202,8 +217,13 @@ void UpdateViewportScaler(){
     if (viewport != NULL) {
         tracked_destroyTexture(viewport);
     }
+    if (screenPreviewFramebuffer != NULL) {
+        tracked_destroyTexture(screenPreviewFramebuffer);
+    }
     g_windowW = unscaledWindowSize.x / renderScale;
     g_windowH = unscaledWindowSize.y / renderScale;
+    screenPreviewFramebuffer = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+    SDL_SetTextureScaleMode(screenPreviewFramebuffer, SDL_SCALEMODE_LINEAR);
     if (renderScale == 1) {
         viewport = NULL;
         return;
@@ -269,20 +289,41 @@ int main(int argc, char** argv)
 
     g_loadConfig();
 
-    int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
-    SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-    IMG_Init(-1);   //😈time to get evil
+    for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
+        char* name = (char*)SDL_GetRenderDriver(x);
+        if (name != NULL) {
+            std::string renderDriverName = name;
+            g_availableRenderersNow.push_back(renderDriverName);
+            std::cout << "Renderer " << x << ": " << renderDriverName << "\n";
+        }
+    }
+    if (std::find(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), g_config.preferredRenderer) == g_availableRenderersNow.end()) {
+        g_config.preferredRenderer = GlobalConfig().preferredRenderer;  //reset to default
+    }
+
+    std::string useRenderer = g_config.preferredRenderer;
+    std::cout << "Picking renderer: " << useRenderer << "\n";
+
+    SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition");
+    int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
+    //IMG_Init(-1);   //😈time to get evil
     const char* windowTitle = "void" UTF8_DIAMOND "sprite"
 #if _DEBUG
         " " UTF8_DIAMOND " DEBUG"
 #endif
     ;
-    g_wd = SDL_CreateWindow(windowTitle, 50, 50, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
-    g_rd = SDL_CreateRenderer(g_wd, -1, SDL_RENDERER_ACCELERATED | (g_config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
+    g_wd = SDL_CreateWindow(windowTitle, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
+    g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
+    SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+    //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
+    SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
+
+    unscaledWindowSize = {g_windowW, g_windowH};
+    UpdateViewportScaler();
 
     SDL_Surface* cursorSrf = IMG_Load(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
     if (cursorSrf != NULL) {
@@ -320,7 +361,7 @@ int main(int argc, char** argv)
     g_iconNotifSuccess = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_success.png");
     g_iconNewColor = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_newcolor.png");
 
-    SDL_Surface* srf = SDL_CreateRGBSurfaceWithFormat(0, 50, 50, 32, SDL_PIXELFORMAT_ARGB8888);
+    SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);
     g_iconNotifTheCreature = tracked_createTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
@@ -364,7 +405,7 @@ int main(int argc, char** argv)
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
         std::string keybindKey = std::format("brush:{}", i++);
         if (g_config.keybinds.contains(keybindKey)) {
-            brush->keybind = g_config.keybinds[keybindKey];
+            brush->keybind = (SDL_Scancode)g_config.keybinds[keybindKey];
         }
     }
 
@@ -492,33 +533,44 @@ int main(int argc, char** argv)
 
             //events that can fire during bg operation
             switch (evt.type) {
-                case SDL_KEYDOWN:
-                    if (evt.key.keysym.sym == SDLK_LCTRL) {
+                case SDL_EVENT_KEY_DOWN:
+                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = true;
                     }
-                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
                         g_shiftModifier = true;
                     }
                     break;
-                case SDL_KEYUP:
-                    if (evt.key.keysym.sym == SDLK_LCTRL) {
+                case SDL_EVENT_KEY_UP:
+                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = false;
                     }
-                    else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
                         g_shiftModifier = false;
                     }
                     break;
-                case SDL_WINDOWEVENT:
-                    if (evt.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        g_windowW = evt.window.data1;
-                        g_windowH = evt.window.data2;
-                        unscaledWindowSize = { g_windowW, g_windowH };
-                        UpdateViewportScaler();
+                case SDL_EVENT_WINDOW_RESIZED:
+                    g_windowW = evt.window.data1;
+                    g_windowH = evt.window.data2;
+                    unscaledWindowSize = { g_windowW, g_windowH };
+                    UpdateViewportScaler();
+                    break;
+                case SDL_EVENT_MOUSE_MOTION:
+                    if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
+                        g_mouseX = (int)(evt.motion.x);
+                        g_mouseY = (int)(evt.motion.y);
                     }
                     break;
-                case SDL_MOUSEMOTION:
-                    g_mouseX = evt.motion.x;
-                    g_mouseY = evt.motion.y;
+                case SDL_EVENT_PEN_MOTION:
+                    lastPenEvent.start();
+                    g_mouseX = (int)(evt.pmotion.x);
+                    g_mouseY = (int)(evt.pmotion.y);
+                    break;
+                case SDL_EVENT_PEN_DOWN:
+                case SDL_EVENT_PEN_UP:
+                case SDL_EVENT_PEN_BUTTON_DOWN:
+                case SDL_EVENT_PEN_BUTTON_UP:
+                    lastPenEvent.start();
                     break;
             }
 
@@ -532,7 +584,7 @@ int main(int argc, char** argv)
                     //return 0;
                     break;
                 case SDL_KEYDOWN:
-                    if (evt.key.keysym.sym == SDLK_LEFTBRACKET) {
+                    if (evt.key.scancode == SDL_SCANCODE_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(0);
@@ -542,7 +594,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_RIGHTBRACKET) {
+                    else if (evt.key.scancode == SDL_SCANCODE_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(screenStack.size() - 1);
@@ -552,7 +604,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_w) {
+                    else if (evt.key.scancode == SDL_SCANCODE_W) {
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 if (favourite && fav_screen < screenStack.size()) {
@@ -566,18 +618,18 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_F11) {
+                    else if (evt.key.scancode == SDL_SCANCODE_F11) {
                         fullscreen = !fullscreen;
-                        SDL_SetWindowFullscreen(g_wd, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+                        SDL_SetWindowFullscreen(g_wd, fullscreen);
                         screenSwitchTimer.start();
                     }
-                    else if (evt.key.keysym.sym == SDLK_EQUALS){
+                    else if (evt.key.scancode == SDL_SCANCODE_EQUALS){
                         if (g_ctrlModifier) {
                             renderScale++;
                             UpdateViewportScaler();
                         }
                     }
-                    else if (evt.key.keysym.sym == SDLK_MINUS){
+                    else if (evt.key.scancode == SDL_SCANCODE_MINUS){
                         if (g_ctrlModifier){
                             if (renderScale-- <= 1){
                                 renderScale = 1;
@@ -612,7 +664,7 @@ int main(int argc, char** argv)
         }
 
         if (viewport != NULL){
-            SDL_SetRenderTarget(g_rd, viewport);
+            g_pushRenderTarget(viewport);
         }
 
         SDL_SetRenderDrawColor(g_rd, 0,0,0,255);
@@ -648,9 +700,22 @@ int main(int argc, char** argv)
         }*/
 
 
+#if _DEBUG
+        XY origin = {g_windowW - 240, g_windowH - 90};
+        for (auto& mem : g_named_memmap) {
+            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
+                                origin.y, {255, 255, 255, 100});
+            origin.y -= 20;
+        }
+        g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
+                            {255, 255, 255, 100});
+        origin.y -= 20;
+#endif
+
         //draw the screen icons
         XY screenIcons = {g_windowW, g_windowH - 10};
         screenIcons = xySubtract(screenIcons, XY{ (int)(26 * screenStack.size()), 16});
+        XY screenIconOrigin = screenIcons;
         
         for (int x = 0; x < screenStack.size(); x++) {
             BaseScreen* s = screenStack[x];
@@ -666,18 +731,44 @@ int main(int argc, char** argv)
             g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - ixmax(200, 10 + statW), g_windowH - 55);
         }
 
-#if _DEBUG
-        XY origin = {g_windowW - 240, g_windowH - 90};
-        for (auto& mem : g_named_memmap) {
-            g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
-                                origin.y, {255, 255, 255, 100});
-            origin.y -= 20;
-        }
-        g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
-                            {255, 255, 255, 100});
-        origin.y -= 20;
-#endif
+        //draw battery icon
+        int batteryRectW = 60;
+        int batterySeconds, batteryPercent;
+        SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
+        if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
+            XY batteryOrigin = xySubtract(screenIconOrigin, { 120, 0 });
+            XY batteryOriginLow = xyAdd(batteryOrigin, { 0,16 });
+            XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
 
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
+            SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
+            SDL_RenderDrawRect(g_rd, &batteryRect);
+
+            SDL_Color primaryColor = powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{253, 255, 146, 0x80}
+                                   : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
+                                   : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
+                                   : SDL_Color{ 255,255,255, 0x80 };
+
+            SDL_SetRenderDrawColor(g_rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
+            drawLine(batteryOrigin, batteryOriginLow);
+            drawLine(batteryEnd, xyAdd(batteryOriginLow, { batteryRectW, 0 }));
+            XY statPercent = statLineEndpoint(batteryOrigin, xyAdd(batteryOrigin, { batteryRectW, 0 }), batteryPercent / 100.0);
+            XY statPercentLow = { statPercent.x, batteryOriginLow.y };
+            drawLine(statPercent, statPercentLow);
+            drawLine(batteryOrigin, statPercent);
+            drawLine(batteryOriginLow, statPercentLow);
+            g_fnt->RenderString(std::format("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
+
+            if (powerstate == SDL_POWERSTATE_CHARGING) {
+                g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80});
+            }
+            else if (powerstate == SDL_POWERSTATE_CHARGED) {
+                g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
+            }
+            else if (powerstate == SDL_POWERSTATE_ERROR) {
+                g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
+            }
+        }
         
         //render notifications
         tickNotifications();
@@ -734,7 +825,7 @@ int main(int argc, char** argv)
 
 
         if (viewport != NULL){
-            SDL_SetRenderTarget(g_rd, NULL);
+            g_popRenderTarget();
             SDL_RenderCopy(g_rd, viewport, NULL, NULL);
         }
 

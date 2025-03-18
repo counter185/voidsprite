@@ -22,18 +22,18 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
     navbar = new ScreenWideNavBar<MinecraftBlockPreviewScreen*>(this,
         {
             {
-                SDLK_f,
+                SDL_SCANCODE_F,
                 {
                     "File",
                     {},
                     {
-                        {SDLK_r, { "Render to separate workspace",
+                        {SDL_SCANCODE_R, { "Render to separate workspace",
                                 [](MinecraftBlockPreviewScreen* screen) {
                                     g_addPopup(new PopupTileGeneric(screen, "Render to workspace", "Image dimensions:", {512,512}, 3));
                                 }
                             }
                         },
-                        {SDLK_c, { "Close",
+                        {SDL_SCANCODE_C, { "Close",
                                 [](MinecraftBlockPreviewScreen* screen) {
                                     screen->closeNextTick = true;
                                 }
@@ -43,7 +43,7 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
                     g_iconNavbarTabFile
                 }
             },
-        }, { SDLK_f });
+        }, { SDL_SCANCODE_F });
     wxsManager.addDrawable(navbar);
 }
 
@@ -117,9 +117,9 @@ void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
             }
             else if (evt.button.button == SDL_BUTTON_LEFT) {
                 if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0
-                    && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({ evt.button.x, evt.button.y })))
+                    && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y })))
                 {
-                    XY tile = canvas.getTilePosAt(XY{ evt.button.x, evt.button.y }, caller->tileDimensions);
+                    XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->tileDimensions);
                     //do thing here
                     XY* ws[] = { &tileTop, &tileSideLeft, &tileSideRight };
                     *ws[choosingSide++] = tile;
@@ -134,7 +134,7 @@ void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
             break;
         case SDL_MOUSEMOTION:
             if (scrollingCanvas) {
-                canvas.panCanvas(XY{ evt.motion.xrel, evt.motion.yrel });
+                canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
             }
             break;
         case SDL_MOUSEWHEEL:
@@ -172,15 +172,17 @@ void MinecraftBlockPreviewScreen::eventPopupClosed(int evt_id, BasePopup* target
 void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
 {
     SDL_Texture* renderTarget = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wh.x, wh.y);
-    SDL_SetRenderTarget(g_rd, renderTarget);
+    g_pushRenderTarget(renderTarget);
 
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
     SDL_RenderClear(g_rd);
     drawIsometricBlock({0, 0, wh.x, wh.y});
     Layer* l = new Layer(wh.x, wh.y);
-    SDL_RenderReadPixels(g_rd, NULL, SDL_PIXELFORMAT_ARGB8888, l->pixelData, wh.x * 4);
+    SDL_Surface* nsrf = SDL_RenderReadPixels(g_rd, NULL);
+    SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixelData, wh.x*4);
+    SDL_FreeSurface(nsrf);
 
-    SDL_SetRenderTarget(g_rd, NULL);
+    g_popRenderTarget();
 
     MainEditor *newSession = new MainEditor(l);
     g_addScreen(newSession);
@@ -228,7 +230,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
     };
 
     for (int i = 0; i < 7; i++) {
-        vertices[i].color = SDL_Color{0xff,0xff,0xff,0xff};
+        vertices[i].color = toFColor(SDL_Color{0xff,0xff,0xff,0xff});
     }
 
     SDL_Rect topTextureRect =
@@ -260,7 +262,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
             for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha;
+                vertices[i].color.a = l->layerAlpha / 255.0f;
             }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesTop, 6);
         }
@@ -271,7 +273,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         if (shadeSides) {
             for (int i = 0; i < 7; i++) {
-                vertices[i].color = SDL_Color{ 0xff / 4 * 3,0xff / 4 * 3,0xff / 4 * 3, 0xff };
+                vertices[i].color = toFColor(SDL_Color{ 0xff / 4 * 3,0xff / 4 * 3,0xff / 4 * 3, 0xff });
             }
         }
 
@@ -291,7 +293,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
             for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha;
+                vertices[i].color.a = l->layerAlpha / 255.0f;
             }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesSideLeft, 6);
         }
@@ -302,7 +304,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         if (shadeSides) {
             for (int i = 0; i < 7; i++) {
-                vertices[i].color = SDL_Color{ 0xff / 2, 0xff / 2, 0xff / 2, 0xff };
+                vertices[i].color = toFColor(SDL_Color{ 0xff / 2, 0xff / 2, 0xff / 2, 0xff });
             }
         }
 
@@ -322,7 +324,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
         for (Layer*& l : caller->layers) {
             //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
             for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha;
+                vertices[i].color.a = l->layerAlpha / 255.0f;
             }
             int r = SDL_RenderGeometry(g_rd, l->tex, vertices, 7, indicesSideRight, 6);
         }

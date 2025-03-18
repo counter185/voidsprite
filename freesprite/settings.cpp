@@ -15,6 +15,8 @@ bool g_saveConfig() {
         file << "vsync=" << (g_config.vsync ? "1" : "0") << std::endl;
         file << "saveLoadFlatImageExtData=" << (g_config.saveLoadFlatImageExtData ? "1" : "0") << std::endl;
         file << "discordRPC=" << (g_config.useDiscordRPC ? "1" : "0") << std::endl;
+        file << "renderer=" << g_config.preferredRenderer << std::endl;
+        file << "autosaveInterval=" << g_config.autosaveInterval << std::endl;
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -68,6 +70,8 @@ void g_loadConfig() {
         if (config.contains("vsync")) { g_config.vsync = config["vsync"] == "1"; }
         if (config.contains("saveLoadFlatImageExtData")) { g_config.saveLoadFlatImageExtData = config["saveLoadFlatImageExtData"] == "1"; }
         if (config.contains("discordRPC")) { g_config.useDiscordRPC = config["discordRPC"] == "1"; }
+        if (config.contains("renderer")) { g_config.preferredRenderer = config["renderer"]; }
+        if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception) {} }
 
         g_configWasLoaded = true;
         file.close();

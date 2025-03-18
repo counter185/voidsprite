@@ -3,8 +3,9 @@
 class UIColorSlider : public UISlider
 {
 public:
-    uint32_t colorMin = 0x000000;
-    uint32_t colorMax = 0xFFFFFF;
+    std::vector<u32> colors = {0x000000, 0xFFFFFF};
+    //uint32_t colorMin = 0x000000;
+    //uint32_t colorMax = 0xFFFFFF;
 
     void render(XY pos) override;
 };

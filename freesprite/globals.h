@@ -4,6 +4,9 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
+
+//macro redefinition warning, remove this line after fully migrating to sdl3
+#pragma warning(disable : 4005)
 #endif
 
 //#include <math.h>
@@ -26,14 +29,12 @@
 #include <thread>
 #include <atomic>
 
-#ifdef __APPLE__
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_image.h>
-#else 
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_image/SDL_image.h>
+
+#if SDL_MAJOR_VERSION == 3
+#include "sdl23compat.h"
 #endif
 
 extern "C" {
@@ -79,6 +80,7 @@ extern "C" {
 #define COLOR_ERROR SDL_Color{255,0,0,255}
 
 #define UTF8_DIAMOND "\xE2\x97\x86"
+#define UTF8_EMPTY_DIAMOND "\xE2\x97\x87"
 
 //util classes
 class EventCallbackListener;
@@ -200,6 +202,9 @@ void g_closePopup(BasePopup* a);
 void g_pushClip(SDL_Rect r);
 void g_popClip();
 
+void g_pushRenderTarget(SDL_Texture* tex);
+void g_popRenderTarget();
+
 SDL_Texture* IMGLoadToTexture(std::string path);
 
 struct XY {
@@ -215,8 +220,8 @@ struct NamedOperation {
 template <typename T>
 struct NavbarSection {
     std::string name;
-    std::vector<SDL_Keycode> order;
-    std::map<SDL_Keycode, NamedOperation<T>> actions;
+    std::vector<SDL_Scancode> order;
+    std::map<SDL_Scancode, NamedOperation<T>> actions;
     SDL_Texture* icon = NULL;
     UIButton* button = NULL;
 };

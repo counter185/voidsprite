@@ -13,13 +13,13 @@ class ScreenWideNavBar : public Panel, public EventCallbackListener
 public:
     T parent;
     Panel* submenuPanel;
-    SDL_Keycode currentSubmenuOpen = -1;
+    u32 currentSubmenuOpen = -1;
     Timer64 submenuOpenTimer;
 
-    std::vector<SDL_Keycode> submenuOrder;
-    std::map<SDL_Keycode, NavbarSection<T>> keyBinds;
+    std::vector<SDL_Scancode> submenuOrder;
+    std::map<SDL_Scancode, NavbarSection<T>> keyBinds;
 
-    ScreenWideNavBar(T caller, std::map<SDL_Keycode, NavbarSection<T>> actions, std::vector<SDL_Keycode> order) {
+    ScreenWideNavBar(T caller, std::map<SDL_Scancode, NavbarSection<T>> actions, std::vector<SDL_Scancode> order) {
         wxHeight = 30;
         parent = caller;
         submenuOrder = order;
@@ -35,7 +35,7 @@ public:
         for (auto& editorSection : submenuOrder) {
             UIButton* sectionButton = new UIButton();
             sectionButton->position = { x, 1 };
-            sectionButton->text = keyBinds[editorSection].name + std::format("({})", SDL_GetKeyName(editorSection));
+            sectionButton->text = keyBinds[editorSection].name + std::format("({})", SDL_GetScancodeName(editorSection));
             sectionButton->fill = Fill::Gradient(0x70424242, 0x70424242, 0x70000000, 0x70000000);
             sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
             sectionButton->wxWidth = xDist - 10;
@@ -71,7 +71,7 @@ public:
 
         //special case here
         if (evt.type == SDL_KEYDOWN) {
-            tryPressHotkey(evt.key.keysym.sym);
+            tryPressHotkey(evt.key.scancode);
         }
 
         DrawableManager::processInputEventInMultiple({ subWidgets }, evt, position);
@@ -80,21 +80,21 @@ public:
 
     void focusOut() override {
         Panel::focusOut();
-        openSubmenu(-1);
+        openSubmenu((SDL_Scancode)-1);
     }
     bool shouldMoveToFrontOnFocus() override { return true; }
     void eventButtonPressed(int evt_id) override {
         if (evt_id < 0) {
-            SDL_Keycode subBtnID = -evt_id - 1;
+            SDL_Scancode subBtnID = (SDL_Scancode)(-evt_id - 1);
             doSubmenuAction(subBtnID);
         }
         else {
-            SDL_Keycode submenuID = evt_id;
+            SDL_Scancode submenuID = (SDL_Scancode)evt_id;
             openSubmenu(submenuID);
         }
     }
 
-    void tryPressHotkey(SDL_Keycode k) {
+    void tryPressHotkey(SDL_Scancode k) {
         if (currentSubmenuOpen == -1) {
             if (keyBinds.contains(k)) {
                 //openSubmenu(k);
@@ -103,16 +103,16 @@ public:
             }
         }
         else {
-            if (k == SDLK_ESCAPE) {
-                openSubmenu(-1);
+            if (k == SDL_SCANCODE_ESCAPE) {
+                openSubmenu((SDL_Scancode)-1);
             }
             else {
                 doSubmenuAction(k);
             }
         }
     }
-    void openSubmenu(SDL_Keycode which) {
-        currentSubmenuOpen = -1;
+    void openSubmenu(SDL_Scancode which) {
+        currentSubmenuOpen = (SDL_Scancode)-1;
         submenuOpenTimer.start();
         updateCurrentSubmenu();
         if (which != -1) {
@@ -120,10 +120,10 @@ public:
             updateCurrentSubmenu();
         }
     }
-    void doSubmenuAction(SDL_Keycode which) {
-        if (currentSubmenuOpen != -1 && keyBinds[currentSubmenuOpen].actions.contains(which)) {
-            keyBinds[currentSubmenuOpen].actions[which].function(parent);
-            openSubmenu(-1);
+    void doSubmenuAction(SDL_Scancode which) {
+        if (currentSubmenuOpen != -1 && keyBinds[(SDL_Scancode)currentSubmenuOpen].actions.contains(which)) {
+            keyBinds[(SDL_Scancode)currentSubmenuOpen].actions[which].function(parent);
+            openSubmenu((SDL_Scancode)-1);
             parentManager->forceUnfocus();
         }
     }
@@ -138,14 +138,14 @@ public:
             int x = 10 + (std::find(submenuOrder.begin(), submenuOrder.end(), currentSubmenuOpen) - submenuOrder.begin()) * 120;
             submenuPanel->position = { x, 0 };
 
-            for (auto& option : keyBinds[currentSubmenuOpen].actions) {
+            for (auto& option : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
                 UIButton* newBtn = new UIButton();
-                std::vector<SDL_Keycode> order = keyBinds[currentSubmenuOpen].order;
+                std::vector<SDL_Scancode> order = keyBinds[(SDL_Scancode)currentSubmenuOpen].order;
                 newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight) };
                 y += newBtn->wxHeight;
                 newBtn->wxWidth = 320;
-                newBtn->fill = Fill::Gradient(0xAA121212, 0xAA121212, 0xAA000000, 0xAA000000);
-                newBtn->text = option.second.name + std::format(" ({})", SDL_GetKeyName(option.first));
+                newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);
+                newBtn->text = option.second.name + std::format(" ({})", SDL_GetScancodeName((SDL_Scancode)option.first));
                 newBtn->setCallbackListener(-1 - option.first, this);
                 submenuPanel->subWidgets.addDrawable(newBtn);
             }

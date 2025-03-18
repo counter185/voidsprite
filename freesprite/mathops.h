@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <math.h>
+#include <math.h>
 
 struct rgb {
     double r;       // a fraction between 0 and 1
@@ -38,6 +38,7 @@ rgb hsl2rgb(hsl c);
 rgb sdlColorToRGB(SDL_Color c);
 rgb u32ToRGB(u32 color);
 
+SDL_FColor toFColor(SDL_Color c);
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
@@ -204,6 +205,9 @@ public:
         for (int y = 0; y < r.h; y++) {
             addScanline({ {r.x,r.y + y}, {r.w,1} });
         }
+    }
+    void addOtherMap(ScanlineMap other) {
+        other.forEachScanline([this](ScanlineMapElement e) { addScanline(e); });
     }
     bool pointExists(XY point) {
         std::vector<ScanlineMapElement>& r = scanlineMap[point.y];

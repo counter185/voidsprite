@@ -11,6 +11,14 @@ public:
     bool vsync = true;
     bool saveLoadFlatImageExtData = true;
     bool useDiscordRPC = false;
+    std::string preferredRenderer =
+#if _WIN32
+        "direct3d"
+#else
+        ""
+#endif
+        ;
+    int autosaveInterval = 20;
 
     std::vector<std::string> lastOpenFiles;
 
@@ -20,6 +28,7 @@ public:
 
 inline bool g_configWasLoaded = false;
 inline GlobalConfig g_config;
+inline std::vector<std::string> g_availableRenderersNow;
 
 bool g_saveConfig();
 void g_loadConfig();
