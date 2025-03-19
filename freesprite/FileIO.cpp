@@ -790,7 +790,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         strm.avail_out = bufferSize;
         strm.next_out = out;
         ret2 = inflate(&strm, Z_NO_FLUSH);
-        if (ret2 == Z_STREAM_ERROR) {
+        if (ret2 < 0) {
             printf("inflate error\n");
             break;
         }
@@ -818,6 +818,31 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
 	}
     compressedData.resize(compressedDataSize);
     return compressedData;
+}
+
+void unZlibFile(PlatformNativePathString path)
+{
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile == NULL) {
+        g_addNotification(ErrorNotification("Error", "Failed to open file"));
+        return;
+    }
+    fseek(infile, 0, SEEK_END);
+    uint64_t fileLength = ftell(infile);
+    fseek(infile, 0, SEEK_SET);
+    u8* fileBuffer = (u8*)tracked_malloc(fileLength);
+    fread(fileBuffer, fileLength, 1, infile);
+    fclose(infile);
+    std::vector<u8> decompressedData = decompressZlibWithoutUncompressedSize(fileBuffer, fileLength);
+    FILE* outfile = platformOpenFile(path + convertStringOnWin32(".unzlib"), PlatformFileModeWB);
+    fwrite(decompressedData.data(), decompressedData.size(), 1, outfile);
+    fclose(outfile);
+    tracked_free(fileBuffer);
+    if (decompressedData.size() == 0) {
+        g_addNotification(ErrorNotification("Error", "Failed to decompress zlib file"));
+    } else {
+        g_addNotification(SuccessNotification("Success", "Zlib file decompressed"));
+    }
 }
 
 Layer* readPNGFromBase64String(std::string b64)
@@ -1484,138 +1509,167 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
             fread(&a, 1, 1, texfile);
             magicNumber += a;
         }
-        //according to game decomps, magicNumber must == 1 or else it's considered the wrong format
-
-        fseek(texfile, 4, SEEK_SET);
-        uint8_t gameIDMaybe;
-        fread(&gameIDMaybe, 1, 1, texfile);
-
-        fseek(texfile, 8, SEEK_SET);
-        uint8_t formatType;
-        fread(&formatType, 1, 1, texfile);
-
-        fseek(texfile, 0x2c, SEEK_SET);
-        u32 r2dataStart;
-        fread(&r2dataStart, 4, 1, texfile);
-
-        u8 compressionMethod;
-        fseek(texfile, 0x0C, SEEK_SET);
-        fread(&compressionMethod, 1, 1, texfile);
-
-        u16 imgW, imgH;
-        fseek(texfile, 0x10, SEEK_SET);
-        fread(&imgW, 2, 1, texfile);
-        fread(&imgH, 2, 1, texfile);
-
-        if (gameIDMaybe == 0x0a) {
-            //only for runner2
-            char ddsheader[4];
-            fseek(texfile, r2dataStart, SEEK_SET);
-            fread(&ddsheader, 4, 1, texfile);
-            printf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
-
-            if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
-                printf("[AETEX] DDS found\n");
-                fclose(texfile);
-                return readDDS(path, 0x34);
+        if (magicNumber != 1) {
+            fseek(texfile, 4, SEEK_SET);
+            u8 zlibByte;
+            fread(&zlibByte, 1, 1, texfile);
+            if (zlibByte == 'x') {
+                fseek(texfile, 4, SEEK_SET);
+                u8* zlibData = (u8*)tracked_malloc(filesize - 4);
+                fread(zlibData, filesize - 4, 1, texfile);
+                auto decompressedData = decompressZlibWithoutUncompressedSize(zlibData, filesize - 4);
+                tracked_free(zlibData);
+                FILE* tempf = platformOpenFile(convertStringOnWin32("temp2.bin"), PlatformFileModeWB);
+                fwrite(decompressedData.data(), decompressedData.size(), 1, tempf);
+                fclose(tempf);
+                auto ret = readAETEX(convertStringOnWin32("temp2.bin"), 0);
+                std::filesystem::remove("temp2.bin");
+                return ret;
             }
             else {
-                fseek(texfile, r2dataStart, SEEK_SET);
-                Layer* ret = NULL;
-
-                if (compressionMethod == 0x81) {
-                    uint8_t* rawData = (uint8_t*)tracked_malloc(filesize - r2dataStart);
-                    fread(rawData, filesize - r2dataStart, 1, texfile);
-                    SDL_IOStream* tgarw =
-                        SDL_IOFromMem(rawData, filesize - r2dataStart);
-                    SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
-                    SDL_CloseIO(tgarw);
-                    if (tgasrf != NULL) {
-                        ret = new Layer(tgasrf);
-                        ret->name = "AETEX TGA Layer";
-                    }
-                    tracked_free(rawData);
-                }
-                else if (compressionMethod == 0x8B) {
-                    ret = new Layer(imgW, imgH);
-                    ret->name = "AETEX DXT1 Layer";
-                    fseek(texfile, r2dataStart, SEEK_SET);
-                    DeXT1(ret, imgW, imgH, texfile);
-                }
-                else if (compressionMethod == 0x8C) {
-                    ret = new Layer(imgW, imgH);
-                    ret->name = "AETEX DXT2/3 Layer";
-                    fseek(texfile, r2dataStart, SEEK_SET);
-                    DeXT23(ret, imgW, imgH, texfile);
-                }
-                else {
-                    g_addNotification(ErrorNotification("AETEX error", std::format("Compression method {} unsupported", compressionMethod)));
-                }
-                fclose(texfile);
-                
-                return ret;
+                g_addNotification(ErrorNotification("AETEX error", "Invalid magic number"));
+                return NULL;
             }
         }
         else {
-            if (formatType == 0x80) {
-                printf("[AETEX] ASTC texture\n");
-                //fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
-                //uint8_t* astcData = (uint8_t*)tracked_malloc(filesize - 0x80);
-                //fread(astcData, filesize - 0x80, 1, texfile);
+            //according to game decomps, magicNumber must == 1 or else it's considered the wrong format
 
-                uint16_t astcWidth, astcHeight;
-                fseek(texfile, 0x10, SEEK_SET);
-                fread(&astcWidth, 2, 1, texfile);
-                fread(&astcHeight, 2, 1, texfile);
+            fseek(texfile, 4, SEEK_SET);
+            uint8_t gameIDMaybe;
+            fread(&gameIDMaybe, 1, 1, texfile);
 
-                /*for (int x = 2; x < 13; x++) {
-                    for (int y = 2; y < 13; y++) {
-                        Layer* nlayer = new Layer(astcWidth, astcHeight);
-                        nlayer->name = "AETEX ASTC layer";
+            fseek(texfile, 8, SEEK_SET);
+            uint8_t formatType;
+            fread(&formatType, 1, 1, texfile);
 
-                        uint8_t* rgbaData = (uint8_t*)tracked_malloc(astcWidth * astcHeight * 4);
+            fseek(texfile, 0x2c, SEEK_SET);
+            u32 r2dataStart;
+            fread(&r2dataStart, 4, 1, texfile);
 
-                        fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
-                        //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
-                        int errors = DeASTC(nlayer, astcWidth, astcHeight, texfile, x, y);
-                        //printf("[AETEX] astc %s\n", success ? "success" : "failed");
-                        //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
-                        tracked_free(rgbaData);
-                        delete nlayer;
+            u8 compressionMethod;
+            fseek(texfile, 0x0C, SEEK_SET);
+            fread(&compressionMethod, 1, 1, texfile);
 
-                        int totalBlocks = ceil(astcWidth / (float)x) * ceil(astcHeight / (float)y);
-                        printf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
-                    }
+            u16 imgW, imgH;
+            fseek(texfile, 0x10, SEEK_SET);
+            fread(&imgW, 2, 1, texfile);
+            fread(&imgH, 2, 1, texfile);
+
+            if (gameIDMaybe == 0x0a || gameIDMaybe == 0x0c) {
+                //0x0a - runner2
+                //0x0c - sportsfriends
+                fseek(texfile, r2dataStart, SEEK_SET);
+                if (gameIDMaybe == 0x0c) {
+                    fread(&r2dataStart, 4, 1, texfile);
+                    fseek(texfile, r2dataStart, SEEK_SET);
                 }
+                char ddsheader[4];
+                fread(&ddsheader, 4, 1, texfile);
+                printf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
 
-                return NULL;*/
+                if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
+                    printf("[AETEX] DDS found\n");
+                    fclose(texfile);
+                    return readDDS(path, r2dataStart);
+                }
+                else {
+                    fseek(texfile, r2dataStart, SEEK_SET);
+                    Layer* ret = NULL;
 
-                Layer* nlayer = new Layer(astcWidth, astcHeight);
-                nlayer->name = "AETEX ASTC layer";
+                    if (compressionMethod == 0x81) {
+                        uint8_t* rawData = (uint8_t*)tracked_malloc(filesize - r2dataStart);
+                        fread(rawData, filesize - r2dataStart, 1, texfile);
+                        SDL_IOStream* tgarw =
+                            SDL_IOFromMem(rawData, filesize - r2dataStart);
+                        SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
+                        SDL_CloseIO(tgarw);
+                        if (tgasrf != NULL) {
+                            ret = new Layer(tgasrf);
+                            ret->name = "AETEX TGA Layer";
+                        }
+                        tracked_free(rawData);
+                    }
+                    else if (compressionMethod == 0x8B) {
+                        ret = new Layer(imgW, imgH);
+                        ret->name = "AETEX DXT1 Layer";
+                        fseek(texfile, r2dataStart, SEEK_SET);
+                        DeXT1(ret, imgW, imgH, texfile);
+                    }
+                    else if (compressionMethod == 0x8C) {
+                        ret = new Layer(imgW, imgH);
+                        ret->name = "AETEX DXT2/3 Layer";
+                        fseek(texfile, r2dataStart, SEEK_SET);
+                        DeXT23(ret, imgW, imgH, texfile);
+                    }
+                    else {
+                        g_addNotification(ErrorNotification("AETEX error", std::format("Compression method {} unsupported", compressionMethod)));
+                    }
+                    fclose(texfile);
 
-                uint8_t* rgbaData = (uint8_t*)tracked_malloc(astcWidth * astcHeight * 4);
-
-                fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
-                //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
-                DeASTC(nlayer, astcWidth, astcHeight, filesize, texfile);
-                //printf("[AETEX] astc %s\n", success ? "success" : "failed");
-                //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
-                tracked_free(rgbaData);
-                //tracked_free(astcData);
-                return nlayer;
+                    return ret;
+                }
             }
             else {
+                if (formatType == 0x80) {
+                    printf("[AETEX] ASTC texture\n");
+                    //fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
+                    //uint8_t* astcData = (uint8_t*)tracked_malloc(filesize - 0x80);
+                    //fread(astcData, filesize - 0x80, 1, texfile);
 
-                fseek(texfile, 0x38, SEEK_SET);
-                uint8_t* tgaData = (uint8_t*)tracked_malloc(filesize - 0x38);
-                fread(tgaData, filesize - 0x38, 1, texfile);
-                fclose(texfile);
-                SDL_IOStream* tgarw = SDL_IOFromMem(tgaData, filesize - 0x38);
-                //todo: dds
-                SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
-                SDL_CloseIO(tgarw);
-                tracked_free(tgaData);
-                return tgasrf == NULL ? NULL : new Layer(tgasrf);
+                    uint16_t astcWidth, astcHeight;
+                    fseek(texfile, 0x10, SEEK_SET);
+                    fread(&astcWidth, 2, 1, texfile);
+                    fread(&astcHeight, 2, 1, texfile);
+
+                    /*for (int x = 2; x < 13; x++) {
+                        for (int y = 2; y < 13; y++) {
+                            Layer* nlayer = new Layer(astcWidth, astcHeight);
+                            nlayer->name = "AETEX ASTC layer";
+
+                            uint8_t* rgbaData = (uint8_t*)tracked_malloc(astcWidth * astcHeight * 4);
+
+                            fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
+                            //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
+                            int errors = DeASTC(nlayer, astcWidth, astcHeight, texfile, x, y);
+                            //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                            //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
+                            tracked_free(rgbaData);
+                            delete nlayer;
+
+                            int totalBlocks = ceil(astcWidth / (float)x) * ceil(astcHeight / (float)y);
+                            printf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
+                        }
+                    }
+
+                    return NULL;*/
+
+                    Layer* nlayer = new Layer(astcWidth, astcHeight);
+                    nlayer->name = "AETEX ASTC layer";
+
+                    uint8_t* rgbaData = (uint8_t*)tracked_malloc(astcWidth * astcHeight * 4);
+
+                    fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
+                    //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
+                    DeASTC(nlayer, astcWidth, astcHeight, filesize, texfile);
+                    //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                    //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
+                    tracked_free(rgbaData);
+                    //tracked_free(astcData);
+                    return nlayer;
+                }
+                else {
+
+                    fseek(texfile, 0x38, SEEK_SET);
+                    uint8_t* tgaData = (uint8_t*)tracked_malloc(filesize - 0x38);
+                    fread(tgaData, filesize - 0x38, 1, texfile);
+                    fclose(texfile);
+                    SDL_IOStream* tgarw = SDL_IOFromMem(tgaData, filesize - 0x38);
+                    //todo: dds
+                    SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
+                    SDL_CloseIO(tgarw);
+                    tracked_free(tgaData);
+                    return tgasrf == NULL ? NULL : new Layer(tgasrf);
+                }
             }
         }
     }

@@ -58,7 +58,12 @@ void StartScreen::takeInput(SDL_Event evt)
 
     if (evt.type == SDL_DROPFILE) {
         std::string filePath = evt.drop.data;
-        tryLoadFile(filePath);
+        if (stringEndsWithIgnoreCase(filePath, ".zlib")) {
+            unZlibFile(convertStringOnWin32(filePath));
+        }
+        else {
+            tryLoadFile(filePath);
+        }
         return;
     }
 
