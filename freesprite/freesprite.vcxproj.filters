@@ -565,7 +565,10 @@
       <Filter>Source files\io</Filter>
     </ClCompile>
     <ClCompile Include="PanelReference.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushDiamond.cpp">
+      <Filter>Source files\brushes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1080,7 +1083,10 @@
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="PanelReference.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushDiamond.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

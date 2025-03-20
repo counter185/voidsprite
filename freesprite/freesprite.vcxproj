@@ -178,6 +178,7 @@
     <ClCompile Include="Brush9SegmentRect.cpp" />
     <ClCompile Include="BrushBezierLine.cpp" />
     <ClCompile Include="BrushCircle.cpp" />
+    <ClCompile Include="BrushDiamond.cpp" />
     <ClCompile Include="BrushFill.cpp" />
     <ClCompile Include="BrushRect.cpp" />
     <ClCompile Include="BrushRectFill.cpp" />
@@ -331,6 +332,7 @@
     <ClInclude Include="Brush9SegmentRect.h" />
     <ClInclude Include="BrushBezierLine.h" />
     <ClInclude Include="BrushCircle.h" />
+    <ClInclude Include="BrushDiamond.h" />
     <ClInclude Include="BrushFill.h" />
     <ClInclude Include="BrushRect.h" />
     <ClInclude Include="BrushRectFill.h" />

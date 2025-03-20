@@ -281,6 +281,18 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc
         }
     }
 }
+void rasterizeDiamond(XY from, XY to, std::function<void(XY)> forEachPixel)
+{
+    XY pointTop = XY{(from.x + to.x) / 2, from.y};
+    XY pointRight = XY{to.x, (from.y + to.y) / 2};
+    XY pointBottom = XY{(from.x + to.x) / 2, to.y};
+    XY pointLeft = XY{from.x, (from.y + to.y) / 2};
+
+    rasterizeLine(pointTop, pointRight, forEachPixel);
+    rasterizeLine(pointRight, pointBottom, forEachPixel);
+    rasterizeLine(pointBottom, pointLeft, forEachPixel);
+    rasterizeLine(pointLeft, pointTop, forEachPixel);
+}
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel) {
     XY calcPosMax = xyAdd(posMax, { 1,1 });
     XY dimensions = xySubtract(calcPosMax, posMin);

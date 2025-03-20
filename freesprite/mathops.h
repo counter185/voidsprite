@@ -78,6 +78,7 @@ std::string evalRelativePath(std::string directory, std::string file);
 std::string fileNameFromPath(std::string fullPath);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0, bool ceilLine = false);
+void rasterizeDiamond(XY from, XY to, std::function<void(XY)> forEachPixel);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
 void rasterizeSplitEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
 void rasterizeSplitEllipseByY(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);

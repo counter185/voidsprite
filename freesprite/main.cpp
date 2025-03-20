@@ -31,6 +31,7 @@
 #include "ninesegmentpatterns.h"
 #include "ToolGuideline.h"
 #include "BrushBezierLine.h"
+#include "BrushDiamond.h"
 #include "background_operation.h"
 #include "discord_rpc.h"
 #include "colormodels.h"
@@ -385,6 +386,7 @@ int main(int argc, char** argv)
     g_brushes.push_back(new Brush9SegmentRect());
     g_brushes.push_back(new BrushCircle());
     g_brushes.push_back(new BrushCircleArc());
+    g_brushes.push_back(new BrushDiamond());
     g_brushes.push_back(new BrushFill());
     g_brushes.push_back(new BrushReplaceColor());
     g_brushes.push_back(new ToolColorPicker());
