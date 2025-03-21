@@ -220,6 +220,16 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
     return ret;
 }
 
+bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {
+    try {
+        std::filesystem::copy(from, to);
+        return true;
+    }
+    catch (std::exception&) {
+        return false;
+    }
+}
+
 Layer *platformGetImageFromClipboard() { return NULL; }
 
 FILE *platformOpenFile(PlatformNativePathString path,

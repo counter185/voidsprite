@@ -76,6 +76,7 @@ public:
     void eventTextInputConfirm(int evt_id, std::string data) override;
     void eventButtonPressed(int evt_id) override;
     void eventSliderPosChanged(int evt_id, float f) override;
+    void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
     void updateEraserAndAlphaBlendButtons();
     void toggleEraser();

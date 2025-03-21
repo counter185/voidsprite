@@ -50,7 +50,14 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     buttonLoadPalette->text = "Load palette";
     buttonLoadPalette->wxWidth = 120;
     buttonLoadPalette->wxHeight = 30;
-    buttonLoadPalette->setCallbackListener(EVENT_PALETTECOLORPICKER_LOADPALETTE, this);
+    buttonLoadPalette->onClickCallback = [&](UIButton*) {
+        std::vector<std::pair<std::string, std::string>> filetypes;
+        for (auto& importer : g_paletteImporters) {
+            filetypes.push_back({ importer->extension(), importer->name() });
+        }
+        platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
+    };
+    //buttonLoadPalette->setCallbackListener(EVENT_PALETTECOLORPICKER_LOADPALETTE, this);
     colorPaletteTabs->tabs[1].wxs.addDrawable(buttonLoadPalette);
 
     UIDropdown* defaultpalettePicker = new UIDropdown(palettes);
@@ -115,13 +122,6 @@ void PalettizedEditorColorPicker::eventButtonPressed(int evt_id)
     }
     else if (evt_id == EVENT_PALETTECOLORPICKER_SAVEPALETTE) {
         platformTrySaveOtherFile(this, { {".voidplt", "voidsprite palette"} }, "save palette", EVENT_PALETTECOLORPICKER_SAVEPALETTE);
-    }
-    else if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
-        std::vector<std::pair<std::string, std::string>> filetypes;
-        for (auto& importer : g_paletteImporters) {
-			filetypes.push_back({ importer->extension(), importer->name()});
-		}
-        platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
     }
     else if (evt_id == EVENT_PALETTECOLORPICKER_NEWCOLOR) {
         auto paletteCopy = upcastCaller->palette;

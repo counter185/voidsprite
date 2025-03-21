@@ -135,6 +135,10 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     }
 }
 
+bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {
+    return CopyFileW(from.c_str(), to.c_str(), FALSE);
+}
+
 void platformOpenFileLocation(PlatformNativePathString path) {
     std::wstring command = L"explorer /select,\"";
     command += path;

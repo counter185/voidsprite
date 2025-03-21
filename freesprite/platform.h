@@ -21,6 +21,7 @@ void platformTryLoadImageFile(EventCallbackListener* caller);
 void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id);
 void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id);
 void platformOpenFileLocation(PlatformNativePathString path);
+bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to);
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");

@@ -155,6 +155,16 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     return cpppath;
 }
 
+bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {
+    try {
+        std::filesystem::copy(from, to);
+        return true;
+    }
+    catch (std::exception&) {
+        return false;
+    }
+}
+
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension) {
     std::vector<PlatformNativePathString> ret;
     for (const auto& file : std::filesystem::directory_iterator(path)) {

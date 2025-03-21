@@ -4,6 +4,7 @@
 #include "EditorColorPicker.h"
 #include "mathops.h"
 #include "ScrollingPanel.h"
+#include "Notification.h"
 
 EditorColorPicker::EditorColorPicker(MainEditor* c) {
     caller = c;
@@ -367,6 +368,21 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
     }
 }
 
+void EditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
+{
+    if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
+        std::string fname = fileNameFromPath(convertStringToUTF8OnWin32(name));
+        if (platformCopyFile(name, platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + fname))) {
+            g_addNotification(SuccessShortNotification("Success", "Palette imported into colorlist"));
+            g_reloadColorMap();
+            reloadColorLists();
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "Failed to import palette"));
+        }
+    }
+}
+
 void EditorColorPicker::updateEraserAndAlphaBlendButtons() {
     eraserButton->fill = caller->eraserMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
                                             : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
@@ -662,12 +678,18 @@ void EditorColorPicker::reloadColorLists()
 
     UIButton* loadNewButton = new UIButton("Load palette...");
     loadNewButton->position = XY{ 5, yNow };
-    loadNewButton->wxWidth = 100;
-    //loadNewButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
+    loadNewButton->wxWidth = 140;
+    loadNewButton->onClickCallback = [&](UIButton*) {
+        std::vector<std::pair<std::string, std::string>> filetypes;
+        for (auto& importer : g_paletteImporters) {
+            filetypes.push_back({ importer->extension(), importer->name() });
+        }
+        platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
+    };
     palettePanel->subWidgets.addDrawable(loadNewButton);
 
     UIButton* reloadButton = new UIButton("Refresh");
-    reloadButton->position = XY{110, yNow};
+    reloadButton->position = XY{150, yNow};
     reloadButton->wxWidth = 100;
     reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
     palettePanel->subWidgets.addDrawable(reloadButton);
