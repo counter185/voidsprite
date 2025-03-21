@@ -11,6 +11,8 @@
 
 //#include <math.h>
 
+
+
 #include <chrono>
 #include <string>
 #include <format>
@@ -81,6 +83,11 @@ extern "C" {
 
 #define UTF8_DIAMOND "\xE2\x97\x86"
 #define UTF8_EMPTY_DIAMOND "\xE2\x97\x87"
+
+#ifndef INT_MAX
+#define INT_MAX 2147483647
+#define INT_MIN (-2147483647 - 1)
+#endif
 
 //util classes
 class EventCallbackListener;
