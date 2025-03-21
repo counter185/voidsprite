@@ -23,7 +23,8 @@ enum ConfigOptions : int {
     CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA,
     CHECKBOX_DISCORD_RPC,
     CHECKBOX_RENDERER,
-    TEXTFIELD_AUTOSAVE_INTERVAL
+    TEXTFIELD_AUTOSAVE_INTERVAL,
+    CHECKBOX_ROWCOLS_START_AT_1
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -66,6 +67,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
+    UILabel* lbl3 = new UILabel("Animated background");
+    lbl3->position = posInTab;
+    configTabs->tabs[0].wxs.addDrawable(lbl3);
+    UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
+    dd1->position = xyAdd(posInTab, { 200, 0 });
+    dd1->wxWidth = 180;
+    dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
+    dd1->setTextToSelectedItem = true;
+    dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
+    configTabs->tabs[0].wxs.addDrawable(dd1);
+    posInTab.y += 35;
+
     UILabel* lbl4 = new UILabel("Renderer");
     lbl4->position = posInTab;
     configTabs->tabs[0].wxs.addDrawable(lbl4);
@@ -92,19 +105,13 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(cb1);
     posInTab.y += 35;
 
-    UILabel* lbl3 = new UILabel("Animated background");
-    lbl3->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl3);
-    UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
-    dd1->position = xyAdd(posInTab, { 200, 0 });
-    dd1->wxWidth = 180;
-    dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
-    dd1->setTextToSelectedItem = true;
-    dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
-    configTabs->tabs[1].wxs.addDrawable(dd1);
+    UICheckbox* cb3 = new UICheckbox("Row/column index labels start at 1", g_config.rowColIndexesStartAt1);
+    cb3->position = posInTab;
+    cb3->setCallbackListener(CHECKBOX_ROWCOLS_START_AT_1, this);
+    configTabs->tabs[1].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
-    UICheckbox* cb3 = new UICheckbox("Pan canvas with touchpad", g_config.scrollWithTouchpad);
+    cb3 = new UICheckbox("Pan canvas with touchpad", g_config.scrollWithTouchpad);
     cb3->position = posInTab;
     cb3->setCallbackListener(CHECKBOX_SCROLL_WITH_TOUCHPAD, this);
     configTabs->tabs[1].wxs.addDrawable(cb3);
@@ -316,6 +323,9 @@ void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
             break;
         case CHECKBOX_DISCORD_RPC:
             g_config.useDiscordRPC = checked;
+            break;
+        case CHECKBOX_ROWCOLS_START_AT_1:
+            g_config.rowColIndexesStartAt1 = checked;
             break;
     }
 }

@@ -238,6 +238,27 @@ public:
     void clear() {
         scanlineMap.clear();
     }
+    SDL_Rect getMinMaxRect() {
+        XY min = {INT_MAX, INT_MAX};
+        XY max = {INT_MIN, INT_MIN};
+        for (auto& me : scanlineMap) {
+            if (me.first < min.y) {
+                min.y = me.first;
+            }
+            if (me.first > max.y) {
+                max.y = me.first;
+            }
+            for (auto& mm : me.second) {
+                if (mm.origin.x < min.x) {
+                    min.x = mm.origin.x;
+                }
+                if ((mm.origin.x + mm.size.x) > max.x) {
+                    max.x = mm.origin.x + mm.size.x;
+                }
+            }
+        }
+        return {min.x, min.y, max.x - min.x, max.y - min.y};
+    }
 };
 //todo ^ make the above into an intlinemap too
 

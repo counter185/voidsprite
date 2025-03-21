@@ -185,40 +185,13 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     }
     //-----------------
     //| Palettes tab
-    ScrollingPanel* palettePanel = new ScrollingPanel();
+    palettePanel = new ScrollingPanel();
     palettePanel->position = XY{ 0,5 };
     palettePanel->scrollHorizontally = false;
     palettePanel->scrollVertically = true;
     palettePanel->wxWidth = 370;
     palettePanel->wxHeight = 270;
-    int yNow = 5;
-    for (auto& p : g_namedColorMap) {
-        UILabel* nameLabel = new UILabel(p.name);
-        nameLabel->position = XY{5, yNow};
-        palettePanel->subWidgets.addDrawable(nameLabel);
-        yNow += 30;
-        int xNow = 0;
-        for (auto& color : p.colorMap) {
-            if (color.first == HINT_NEXT_LINE) {
-                xNow = 0;
-                yNow += 20;
-                continue;
-            }
-
-            ColorPickerColorButton* b = new ColorPickerColorButton(this, color.second);
-            b->position = XY{xNow, yNow};
-            b->tooltip = color.first;
-            b->wxWidth = 24;
-            b->wxHeight = 20;
-            palettePanel->subWidgets.addDrawable(b);
-            xNow += b->wxWidth;
-            if (xNow + b->wxWidth >= palettePanel->wxWidth) {
-                xNow = 0;
-                yNow += b->wxHeight;
-            }
-        }
-        yNow += 30;
-    }
+    reloadColorLists();
     colorModeTabs->tabs[2].wxs.addDrawable(palettePanel);
 
 
@@ -653,6 +626,53 @@ void EditorColorPicker::updateLastColorButtons()
         }
     }
     lastColorsChanged = false;
+}
+
+void EditorColorPicker::reloadColorLists()
+{
+    palettePanel->subWidgets.freeAllDrawables();
+    int yNow = 5;
+    for (auto& p : g_namedColorMap) {
+        UILabel* nameLabel = new UILabel(p.name);
+        nameLabel->position = XY{ 5, yNow };
+        palettePanel->subWidgets.addDrawable(nameLabel);
+        yNow += 30;
+        int xNow = 0;
+        for (auto& color : p.colorMap) {
+            if (color.first == HINT_NEXT_LINE) {
+                xNow = 0;
+                yNow += 20;
+                continue;
+            }
+
+            ColorPickerColorButton* b = new ColorPickerColorButton(this, color.second);
+            b->position = XY{ xNow, yNow };
+            b->tooltip = color.first;
+            b->wxWidth = 24;
+            b->wxHeight = 20;
+            palettePanel->subWidgets.addDrawable(b);
+            xNow += b->wxWidth;
+            if (xNow + b->wxWidth >= palettePanel->wxWidth) {
+                xNow = 0;
+                yNow += b->wxHeight;
+            }
+        }
+        yNow += 30;
+    }
+
+    UIButton* loadNewButton = new UIButton("Load palette...");
+    loadNewButton->position = XY{ 5, yNow };
+    loadNewButton->wxWidth = 100;
+    //loadNewButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
+    palettePanel->subWidgets.addDrawable(loadNewButton);
+
+    UIButton* reloadButton = new UIButton("Refresh");
+    reloadButton->position = XY{110, yNow};
+    reloadButton->wxWidth = 100;
+    reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
+    palettePanel->subWidgets.addDrawable(reloadButton);
+
+    yNow += 30;
 }
 
 ColorPickerColorButton::ColorPickerColorButton(EditorColorPicker* parent, u32 color) : UIButton()

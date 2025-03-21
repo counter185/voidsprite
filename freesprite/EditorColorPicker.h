@@ -58,6 +58,7 @@ public:
 
     TabbedView* colorModeTabs = NULL;
     TabbedView* colorTabs = NULL;
+    ScrollingPanel* palettePanel = NULL;
 
     UIButton* eraserButton = NULL;
     UIButton* blendModeButton = NULL;
@@ -93,6 +94,7 @@ public:
 
     void pushLastColor(uint32_t col);
     virtual void updateLastColorButtons();
+    void reloadColorLists();
 
     void editorColorHSliderChanged(double h) {
         currentH = h;

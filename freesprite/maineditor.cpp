@@ -153,6 +153,7 @@ void MainEditor::render() {
     }
 
     drawTileGrid();
+    drawRowColNumbers();
     drawIsolatedFragment();
     drawSymmetryLines();
     renderGuidelines();
@@ -557,6 +558,41 @@ void MainEditor::drawZoomLines() {
             drawLine({origin.x + 5, origin.y + yy}, {origin.x + 15, origin.y + yy}, XM1PW3P1(zoomKeyTimer.percentElapsedTime(200, 50 * i)));
             drawLine({origin.x + 15, origin.y - yy}, {origin.x + 5, origin.y - yy}, XM1PW3P1(zoomKeyTimer.percentElapsedTime(200, 50 * i)));
             yy += zoomPixelStep;
+        }
+    }
+}
+
+void MainEditor::drawRowColNumbers()
+{
+    if (canvas.scale >= 20) {
+        const u8 opacity = 0x50;
+        SDL_Color textColor = backgroundColor.r == 255 ? SDL_Color{ 0,0,0,opacity } : SDL_Color{ 255,255,255,opacity };
+        SDL_Rect canvasDrawRect = canvas.getCanvasOnScreenRect();
+        bool drawHorizontal = canvasDrawRect.y + canvasDrawRect.h < g_windowH;
+        int indexOffset = g_config.rowColIndexesStartAt1 ? 1 : 0;
+        if (canvasDrawRect.x + canvasDrawRect.w < g_windowW) {
+            //vertical
+            XY origin = {canvasDrawRect.x + canvasDrawRect.w + 2, canvasDrawRect.y};
+            for (int i = 0; i < canvas.dimensions.x + (drawHorizontal ? 0 : 1) && origin.y < g_windowH; i++) {
+                if (origin.y >= 0) {
+                    int fh = g_fnt->StatStringDimensions(std::to_string(i+ indexOffset)).y;
+                    int dy = (canvas.scale / 2) - (fh / 2);
+                    g_fnt->RenderString(std::to_string(i+ indexOffset), origin.x, origin.y + dy, textColor);
+                }
+                origin.y += canvas.scale;
+            }
+        }
+        if (drawHorizontal) {
+            //horizontal
+            XY origin = {canvasDrawRect.x, canvasDrawRect.y + canvasDrawRect.h + 2};
+            for (int i = 0; i < canvas.dimensions.y + 1 && origin.x < g_windowW; i++) {
+                if (origin.x >= 0) {
+                    int fw = g_fnt->StatStringDimensions(std::to_string(i+ indexOffset)).x;
+                    int dx = (canvas.scale / 2) - (fw / 2);
+                    g_fnt->RenderString(std::to_string(i+ indexOffset), origin.x + dx, origin.y, textColor);
+                }
+                origin.x += canvas.scale;
+            }
         }
     }
 }

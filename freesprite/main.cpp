@@ -335,8 +335,7 @@ int main(int argc, char** argv)
     g_setupColorModels();
 
     g_setupIO();
-    g_loadPalettesToColorMap();
-    g_generateColorMap();
+    g_reloadColorMap();
 
     g_mainlogo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/mainlogo.png");
     g_iconLayerAdd = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_add.png");
@@ -739,7 +738,7 @@ int main(int argc, char** argv)
         SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
         if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
             XY batteryOrigin = xySubtract(screenIconOrigin, { 120, 0 });
-            XY batteryOriginLow = xyAdd(batteryOrigin, { 0,16 });
+            XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
             XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
 
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);

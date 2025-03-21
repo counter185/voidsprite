@@ -13,7 +13,7 @@ struct NamedColorPalette {
     std::vector<std::pair<std::string, u32>> colorMap;
 };
 
-inline std::vector<NamedColorPalette> g_namedColorMap = {
+inline std::vector<NamedColorPalette> g_baseNamedColorMap = {
     {
         "Base Colors",
         {
@@ -303,7 +303,23 @@ inline std::vector<NamedColorPalette> g_namedColorMap = {
     },
 };
 
-inline void g_loadPalettesToColorMap() {
+inline std::vector<NamedColorPalette> g_namedColorMap = {};
+
+inline void g_generateColorMap() {
+    g_colors.clear();
+    for (NamedColorPalette& palette : g_namedColorMap) {
+        for (auto& color : palette.colorMap) {
+            if (color.first != HINT_NEXT_LINE) {
+                g_colors[color.first] = color.second;
+            }
+        }
+    }
+}
+
+inline void g_reloadColorMap() {
+    g_namedColorMap.clear();
+    g_namedColorMap.insert(g_namedColorMap.end(), g_baseNamedColorMap.begin(), g_baseNamedColorMap.end());
+
     for (auto& palImport : g_paletteImporters) {
         auto fileList = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("palettes"), palImport->extension());
         for (auto& file : fileList) {
@@ -327,14 +343,6 @@ inline void g_loadPalettesToColorMap() {
             }
         }
     }
-}
 
-inline void g_generateColorMap() {
-    for (NamedColorPalette& palette : g_namedColorMap) {
-        for (auto& color : palette.colorMap) {
-            if (color.first != HINT_NEXT_LINE) {
-                g_colors[color.first] = color.second;
-            }
-        }
-    }
+    g_generateColorMap();
 }

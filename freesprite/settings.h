@@ -19,6 +19,7 @@ public:
 #endif
         ;
     int autosaveInterval = 20;
+    bool rowColIndexesStartAt1 = false;
 
     std::vector<std::string> lastOpenFiles;
 

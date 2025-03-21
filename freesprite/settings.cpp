@@ -17,6 +17,7 @@ bool g_saveConfig() {
         file << "discordRPC=" << (g_config.useDiscordRPC ? "1" : "0") << std::endl;
         file << "renderer=" << g_config.preferredRenderer << std::endl;
         file << "autosaveInterval=" << g_config.autosaveInterval << std::endl;
+        file << "rowColIndexesStartAt1=" << g_config.rowColIndexesStartAt1 << std::endl;
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -72,6 +73,7 @@ void g_loadConfig() {
         if (config.contains("discordRPC")) { g_config.useDiscordRPC = config["discordRPC"] == "1"; }
         if (config.contains("renderer")) { g_config.preferredRenderer = config["renderer"]; }
         if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception) {} }
+        if (config.contains("rowColIndexesStartAt1")) { g_config.rowColIndexesStartAt1 = config["rowColIndexesStartAt1"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();

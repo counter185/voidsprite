@@ -45,6 +45,11 @@ struct Guideline {
     int position;
 };
 
+struct Frame {
+    std::vector<Layer*> layers;
+    std::vector<CommentData> comments;
+};
+
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 protected:
@@ -54,6 +59,8 @@ public:
 
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
     std::vector<CommentData> comments;
+
+    std::vector<Frame*> frames;
 
     std::vector<Layer*> layers;
     int selLayer = 0;
@@ -112,10 +119,10 @@ public:
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;
 
-    SDL_Color backgroundColor = SDL_Color{0,0,0,255};
+    SDL_Color backgroundColor = SDL_Color{ 0,0,0,255 };
 
-    XY symmetryPositions = {0,0};
-    XY guidelinePosition = {0,0};
+    XY symmetryPositions = { 0,0 };
+    XY guidelinePosition = { 0,0 };
     std::vector<Guideline> guidelines;
 
     bool symmetryEnabled[2] = { false, false };
@@ -153,7 +160,7 @@ public:
     void eventPopupClosed(int evt_id, BasePopup* p) override;
     void eventTextInputConfirm(int evt_id, std::string text) override;
     void eventColorSet(int evt_id, uint32_t color) override;
-    
+
     void DrawBackground();
     void DrawForeground();
     void renderComments();
@@ -165,6 +172,7 @@ public:
     void renderGuidelines();
     void drawSplitSessionFragments();
     void drawZoomLines();
+    void drawRowColNumbers();
 
     void initLayers();
     virtual void setUpWidgets();
@@ -177,7 +185,7 @@ public:
     virtual void trySaveImage();
     virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);
     virtual void trySaveAsImage();
-    std::map<std::string,std::string> makeSingleLayerExtdata();
+    std::map<std::string, std::string> makeSingleLayerExtdata();
     void loadSingleLayerExtdata(Layer* l);
     std::string makeCommentDataString();
     static std::vector<CommentData> parseCommentDataString(std::string data);
