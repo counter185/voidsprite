@@ -1,9 +1,10 @@
+#define ENGLISH_LOC_INCLUDED
 { "en-us", { "English", {
     // common strings used in a few different places
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
 
-    // navbar strings
+    // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
 
@@ -18,5 +19,6 @@
     {"vsp.launchpad.tab.createindexed.tooltip", "Create a new image with a limited color palette.\n"
                                                 "Exporting to palette-only formats will keep the color order as it is in the editor."},
     {"vsp.launchpad.nav.openclipboard", "Open from clipboard"},
+    {"vsp.launchpad.nav.quickconvert", "Quick Convert"}
 
 }}},

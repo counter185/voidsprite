@@ -16,6 +16,7 @@ private:
     std::vector<std::pair<KeybindConf, UIButton*>> keybindButtons;
     bool bindingKey = false;
     int bindingKeyIndex = -1;
+    std::vector<std::string> langLocNames;
     std::vector<SDL_Scancode> reservedKeys = {
         SDL_SCANCODE_LCTRL,
         SDL_SCANCODE_RCTRL,

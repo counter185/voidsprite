@@ -24,7 +24,8 @@ enum ConfigOptions : int {
     CHECKBOX_DISCORD_RPC,
     CHECKBOX_RENDERER,
     TEXTFIELD_AUTOSAVE_INTERVAL,
-    CHECKBOX_ROWCOLS_START_AT_1
+    CHECKBOX_ROWCOLS_START_AT_1,
+    DROPDOWN_LANGUAGE
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -91,6 +92,22 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
+    std::vector<std::string> langNames;
+    for (auto& loc : g_localizations) {
+        langLocNames.push_back(loc.first);
+        langNames.push_back(loc.second.langName);
+    }
+    lbl4 = new UILabel("Language (restart required)");
+    lbl4->position = posInTab;
+    configTabs->tabs[0].wxs.addDrawable(lbl4);
+    dd2 = new UIDropdown(langNames);
+    dd2->position = xyAdd(posInTab, { 300, 0 });
+    dd2->wxWidth = 180;
+    dd2->setCallbackListener(DROPDOWN_LANGUAGE, this);
+    dd2->setTextToSelectedItem = true;
+    dd2->text = g_localizations.contains(g_config.language) ? g_localizations[g_config.language].langName : "???";
+    configTabs->tabs[0].wxs.addDrawable(dd2);
+    posInTab.y += 35;
 
     /*
         -------------------------
@@ -357,9 +374,12 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
 {
     if (evt_id == CHECKBOX_ANIMATED_BACKGROUND) {
         g_config.animatedBackground = index;
-    } 
+    }
     else if (evt_id == CHECKBOX_RENDERER) {
         g_config.preferredRenderer = name;
+    }
+    else if (evt_id == DROPDOWN_LANGUAGE) {
+        g_config.language = langLocNames[index];
     }
 }
 

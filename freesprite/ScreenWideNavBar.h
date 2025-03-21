@@ -6,6 +6,7 @@
 #include "UIButton.h"
 #include "EventCallbackListener.h"
 #include "Panel.h"
+#include "FontRenderer.h"
 
 template <class T>
 class ScreenWideNavBar : public Panel, public EventCallbackListener
@@ -31,6 +32,14 @@ public:
 
         int x = 10;
         int xDist = 120;
+
+        //determine the right width
+        for (auto& editorSection : submenuOrder) {
+            std::string fullSectionName = keyBinds[editorSection].name + std::format("({})", SDL_GetScancodeName(editorSection));
+            int w = g_fnt->StatStringDimensions(fullSectionName).x + 10 + (keyBinds[editorSection].icon != NULL ? 30 : 0) + 10;
+            xDist = ixmax(xDist, w);
+        }
+
         position = XY{ 0,0 };
         for (auto& editorSection : submenuOrder) {
             UIButton* sectionButton = new UIButton();

@@ -180,7 +180,7 @@ public:
                                 }
                             }
                         },
-                        {SDL_SCANCODE_E, { "Quick Convert",
+                        {SDL_SCANCODE_E, { TL("vsp.launchpad.nav.quickconvert"),
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupQuickConvert("Quick Convert", "Select the format to export the image to.\nDrag a file into this window to convert to the same directory."));
                                 }
