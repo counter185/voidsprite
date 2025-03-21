@@ -31,10 +31,6 @@ void StartScreen::render()
         drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
     }*/
 
-    g_fnt->RenderString("voidsprite", 10, 40);
-
-    g_fnt->RenderString("New image", 10, 80);
-
     bgr.x += bgr.w + 10;
     bgr.y += 40;
     bgr.h -= 40;
@@ -104,11 +100,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
                 }
                 catch (std::out_of_range) {
-                    g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
             else {
-                g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
+                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
         case 1:
@@ -123,11 +119,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     g_addScreen(newMainEditor);
                 }
                 catch (std::out_of_range) {
-                    g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
             else {
-                g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
+                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
         }
@@ -142,11 +138,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     g_addScreen(new MainEditorPalettized(XY{ newImgW, newImgH }));
                 }
                 catch (std::out_of_range) {
-                    g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
             else {
-                g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
+                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
         case 1:
@@ -161,11 +157,11 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     g_addScreen(newMainEditor);
                 }
                 catch (std::out_of_range) {
-                    g_addNotification(ErrorNotification("Error starting editor", "Invalid dimensions. Number out of range."));
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
             else {
-                g_addNotification(ErrorNotification("Error starting editor", "Input the canvas dimensions."));
+                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
         }
@@ -201,7 +197,7 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
         }
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Failed to load file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
     }
 }
 
@@ -225,7 +221,7 @@ void StartScreen::populateLastOpenFiles()
     lastOpenFilesPanel->subWidgets.freeAllDrawables();
 
     UILabel* lbl = new UILabel();
-    lbl->text = "Last open files";
+    lbl->text = TL("vsp.launchpad.lastfiles");
     lbl->position = {5, 2};
     lastOpenFilesPanel->subWidgets.addDrawable(lbl);
 
@@ -280,7 +276,7 @@ void StartScreen::renderStartupAnim()
             }
 
             if (textAnimTime > 0.05) {
-                std::string s = g_configWasLoaded ? "Welcome back" : "Welcome to voidsprite";
+                std::string s = g_configWasLoaded ? TL("vsp.launchpad.welcomereturning") : TL("vsp.launchpad.welcome1sttime");
                 XY fd = g_fnt->StatStringDimensions(s);
                 g_fnt->RenderString(s, g_windowW - fd.x - 2, 0, { 255,255,255, (u8)(255 * (1.0 - XM1PW3P1((textAnimTime - 0.05) / 0.95))) });
             }

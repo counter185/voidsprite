@@ -45,10 +45,18 @@ public:
     bool closeNextTick = false;
 
     StartScreen() {
+
+        UILabel* title = new UILabel("voidsprite");
+        title->position = {10, 40};
+        wxsManager.addDrawable(title);
+        
+        title = new UILabel(TL("vsp.launchpad.newimage"));
+        title->position = {10, 80};
+        wxsManager.addDrawable(title);
+
         newImageTabs = new TabbedView({ {TL("vsp.launchpad.tab.pixeldim"), g_iconMenuPxDim}, {TL("vsp.launchpad.tab.spritesheet"), g_iconMenuSpritesheet}, {TL("vsp.launchpad.tab.templates"), g_iconMenuTemplates}}, 180);
         newImageTabs->position = XY{ 10, 110 };
         wxsManager.addDrawable(newImageTabs);
-
 
         //tab 0
         tab0TextFieldW = new UITextField();
@@ -158,6 +166,7 @@ public:
         lastOpenFilesPanel->wxWidth = 560;
         lastOpenFilesPanel->wxHeight = 520;
         lastOpenFilesPanel->position = {570, 75};
+        lastOpenFilesPanel->passThroughMouse = true;
         wxsManager.addDrawable(lastOpenFilesPanel);
 
         navbar = new ScreenWideNavBar<StartScreen*>(this, 

@@ -3,12 +3,19 @@
     // common strings used in a few different places
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
+    {"vsp.cmn.error", "Error"},
+    {"vsp.cmn.error.fileloadfail", "Failed to load file"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
 
     // screen: voidsprite launchpad
+    {"vsp.launchpad.newimage", "New image"},
+    {"vsp.launchpad.lastfiles", "Last open files"},
+    {"vsp.launchpad.welcome1sttime", "Welcome to voidsprite"},
+    {"vsp.launchpad.welcomereturning", "Welcome back"},
+
     {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
     {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
     {"vsp.launchpad.tab.templates", "Templates"},
@@ -19,6 +26,10 @@
     {"vsp.launchpad.tab.createindexed.tooltip", "Create a new image with a limited color palette.\n"
                                                 "Exporting to palette-only formats will keep the color order as it is in the editor."},
     {"vsp.launchpad.nav.openclipboard", "Open from clipboard"},
-    {"vsp.launchpad.nav.quickconvert", "Quick Convert"}
+    {"vsp.launchpad.nav.quickconvert", "Quick Convert"},
+
+    {"vsp.launchpad.error.starteditor", "Error starting editor"},
+    {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
+    {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
 
 }}},
