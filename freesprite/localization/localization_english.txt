@@ -1,0 +1,6 @@
+{ "en-us", { "English", {
+    // screen: voidsprite launchpad
+    {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
+    {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
+    {"vsp.launchpad.tab.templates", "Templates"},
+}}},

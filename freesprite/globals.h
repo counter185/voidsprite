@@ -11,8 +11,6 @@
 
 //#include <math.h>
 
-
-
 #include <chrono>
 #include <string>
 #include <format>
@@ -263,6 +261,7 @@ struct NineSegmentPattern {
     SDL_Texture* cachedTexture = NULL;
 };
 
+#include "localization/localization.h"
 #include "memory_tracker.h"
 #include "platform.h"
 #include "colors.h"

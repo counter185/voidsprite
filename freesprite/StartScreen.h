@@ -45,7 +45,7 @@ public:
     bool closeNextTick = false;
 
     StartScreen() {
-        newImageTabs = new TabbedView({ {"Pixel dimensions", g_iconMenuPxDim}, {"Sprites/Tiles", g_iconMenuSpritesheet}, {"Templates", g_iconMenuTemplates} }, 180);
+        newImageTabs = new TabbedView({ {TL("vsp.launchpad.tab.pixeldim"), g_iconMenuPxDim}, {TL("vsp.launchpad.tab.spritesheet"), g_iconMenuSpritesheet}, {TL("vsp.launchpad.tab.templates"), g_iconMenuTemplates}}, 180);
         newImageTabs->position = XY{ 10, 110 };
         wxsManager.addDrawable(newImageTabs);
 

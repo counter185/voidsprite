@@ -207,6 +207,7 @@
     <ClCompile Include="io_piskel.cpp" />
     <ClCompile Include="io_rpgm.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
+    <ClCompile Include="localization\localization.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="MinecraftBlockPreviewScreen.cpp" />
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp" />
@@ -370,6 +371,7 @@
     <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
+    <ClInclude Include="localization\localization.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="memory_tracker.h" />

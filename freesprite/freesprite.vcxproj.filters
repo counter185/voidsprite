@@ -118,6 +118,12 @@
     <Filter Include="Header files\platform">
       <UniqueIdentifier>{e1bb0d2c-b445-420a-8b69-b3335199838c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\localization">
+      <UniqueIdentifier>{4776ae29-c294-4910-80d8-6f5903dfeec0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\localization">
+      <UniqueIdentifier>{4b5a48fc-a3e7-407b-a588-56df8aa3a743}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -569,6 +575,9 @@
     </ClCompile>
     <ClCompile Include="BrushDiamond.cpp">
       <Filter>Source files\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="localization\localization.cpp">
+      <Filter>Source files\localization</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1087,6 +1096,9 @@
     </ClInclude>
     <ClInclude Include="BrushDiamond.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="localization\localization.h">
+      <Filter>Header files\localization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

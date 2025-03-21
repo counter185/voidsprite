@@ -20,6 +20,7 @@ public:
         ;
     int autosaveInterval = 20;
     bool rowColIndexesStartAt1 = false;
+    std::string language = "en-us";
 
     std::vector<std::string> lastOpenFiles;
 
