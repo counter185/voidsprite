@@ -1,6 +1,22 @@
 { "en-us", { "English", {
+    // common strings used in a few different places
+    {"vsp.cmn.width", "Width"},
+    {"vsp.cmn.height", "Height"},
+
+    // navbar strings
+    {"vsp.nav.file", "File"},
+    {"vsp.nav.open", "Open"},
+
     // screen: voidsprite launchpad
     {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
     {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
     {"vsp.launchpad.tab.templates", "Templates"},
+    {"vsp.launchpad.tab.picktemplate", "Select template..."},
+    {"vsp.launchpad.tab.creatergb", "Create (RGB)"},
+    {"vsp.launchpad.tab.creatergb.tooltip", "Create a new image with full color support."},
+    {"vsp.launchpad.tab.createindexed", "Create (Indexed)"},
+    {"vsp.launchpad.tab.createindexed.tooltip", "Create a new image with a limited color palette.\n"
+                                                "Exporting to palette-only formats will keep the color order as it is in the editor."},
+    {"vsp.launchpad.nav.openclipboard", "Open from clipboard"},
+
 }}},

@@ -66,12 +66,12 @@ public:
         newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
 
         UILabel* wLabel = new UILabel();
-        wLabel->text = "Width";
+        wLabel->text = TL("vsp.cmn.width");
         wLabel->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
         newImageTabs->tabs[0].wxs.addDrawable(wLabel);
 
         UILabel* hLabel = new UILabel();
-        hLabel->text = "Height";
+        hLabel->text = TL("vsp.cmn.height");
         hLabel->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
         newImageTabs->tabs[0].wxs.addDrawable(hLabel);
 
@@ -130,7 +130,7 @@ public:
         }
         UIDropdown* templatesDropdown = new UIDropdown(templates);
         templatesDropdown->position = XY{ 40, 5 };
-        templatesDropdown->text = "Select template...";
+        templatesDropdown->text = TL("vsp.launchpad.tab.picktemplate");
         templatesDropdown->setCallbackListener(EVENT_STARTSCREEN_TEMPLATEPICKED, this);
         templatesDropdown->wxWidth = 400;
         templatesDropdown->genButtons();
@@ -141,16 +141,16 @@ public:
             buttonNewImageRGB->setCallbackListener(4, this);
             buttonNewImageRGB->position = XY{ 30,90 };
             buttonNewImageRGB->wxWidth = 120;
-            buttonNewImageRGB->text = "Create (RGB)";
-            buttonNewImageRGB->tooltip = "Create a new image with full color support.";
+            buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
+            buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
 
             UIButton* buttonNewImagePalettized = new UIButton();
             buttonNewImagePalettized->setCallbackListener(5, this);
             buttonNewImagePalettized->position = XY{ 160,90 };
             buttonNewImagePalettized->wxWidth = 200;
-            buttonNewImagePalettized->text = "Create (Palettized)";
-            buttonNewImagePalettized->tooltip = "Create a new image with a limited color palette.\nExporting to palette-only formats will keep the color order as it is in the editor.";
+            buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
+            buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
         }
 
@@ -165,16 +165,16 @@ public:
             {
                 SDL_SCANCODE_F,
                 {
-                    "File",
+                    TL("vsp.nav.file"),
                     {SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_P},
                     {
-                        {SDL_SCANCODE_O, { "Open",
+                        {SDL_SCANCODE_O, { TL("vsp.nav.open"),
                                 [](StartScreen* screen) {
                                     screen->openImageLoadDialog();
                                 }
                             }
                         },
-                        {SDL_SCANCODE_V, { "Open from clipboard",
+                        {SDL_SCANCODE_V, { TL("vsp.launchpad.nav.openclipboard"),
                                 [](StartScreen* screen) {
                                     screen->tryOpenImageFromClipboard();
                                 }
