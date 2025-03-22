@@ -5,10 +5,15 @@
     {"vsp.cmn.height", "Height"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file"},
+    {"vsp.cmn.filetype.splitsession", "Split session file"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
+
+    // popup titles
+    {"vsp.popup.newsplitsession", "create new split session"},
+    {"vsp.popup.openimage", "open image"},
 
     // screen: voidsprite launchpad
     {"vsp.launchpad.newimage", "New image"},
@@ -27,9 +32,15 @@
                                                 "Exporting to palette-only formats will keep the color order as it is in the editor."},
     {"vsp.launchpad.nav.openclipboard", "Open from clipboard"},
     {"vsp.launchpad.nav.quickconvert", "Quick Convert"},
+    {"vsp.launchpad.nav.newsplitsession", "New split session..."},
+    {"vsp.launchpad.nav.preferences", "Preferences"},
 
     {"vsp.launchpad.error.starteditor", "Error starting editor"},
     {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
     {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
+    {"vsp.launchpad.error.clipboard_no_image", "No image in clipboard"},
+
+    {"vsp.launchpad.quickconvert.desc", "Select the format to export the image to.\n"
+                                        "Drag a file into this window to convert to the same directory."},
 
 }}},

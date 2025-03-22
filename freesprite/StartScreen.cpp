@@ -507,7 +507,7 @@ void StartScreen::openImageLoadDialog()
         filetypes.push_back({ f->extension(), f->name()});
     }
 
-    platformTryLoadOtherFile(this, filetypes, "open image", 0);
+    platformTryLoadOtherFile(this, filetypes, TL("vsp.popup.openimage"), 0);
 }
 
 void StartScreen::tryLoadFile(std::string path)
@@ -518,7 +518,7 @@ void StartScreen::tryLoadFile(std::string path)
         g_tryPushLastFilePath(path);
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Failed to load file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
     }
 }
 
@@ -545,7 +545,7 @@ void StartScreen::tryOpenImageFromClipboard()
             g_addScreen(foundLayer->isPalettized ? new MainEditorPalettized((LayerPalettized*)foundLayer) : new MainEditor(foundLayer));
         }
         else {
-            g_addNotification(ErrorNotification("Error", "No image in clipboard"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.clipboard_no_image")));
         }
         SDL_free(clipboard);
     }

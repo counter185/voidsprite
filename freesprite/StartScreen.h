@@ -191,17 +191,17 @@ public:
                         },
                         {SDL_SCANCODE_E, { TL("vsp.launchpad.nav.quickconvert"),
                                 [](StartScreen* screen) {
-                                    g_addPopup(new PopupQuickConvert("Quick Convert", "Select the format to export the image to.\nDrag a file into this window to convert to the same directory."));
+                                    g_addPopup(new PopupQuickConvert(TL("vsp.launchpad.nav.quickconvert"), TL("vsp.launchpad.quickconvert.desc")));
                                 }
                             }
                         },
-                        {SDL_SCANCODE_S, { "New split session...",
+                        {SDL_SCANCODE_S, { TL("vsp.launchpad.nav.newsplitsession"),
                                 [](StartScreen* screen) {
-                                    platformTrySaveOtherFile(screen, {{".voidspsn", "Split session file"}}, "create new split session", 0);
+                                    platformTrySaveOtherFile(screen, {{".voidspsn", TL("vsp.cmn.filetype.splitsession")}}, TL("vsp.popup.newsplitsession"), 0);
                                 }
                             }
                         },
-                        {SDL_SCANCODE_P, { "Preferences",
+                        {SDL_SCANCODE_P, { TL("vsp.launchpad.nav.preferences"),
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupGlobalConfig());
                                 }
@@ -228,7 +228,8 @@ public:
                     tryLoadFile(arg);
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("Could not find file:\n {}", arg)));
+                    //todo: this notification never fits the whole file name
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Could not find file:\n {}", arg)));
                 }
             }
         }
