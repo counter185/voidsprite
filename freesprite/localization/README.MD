@@ -25,4 +25,4 @@ std::map<std::string, LocalizationData> g_localizations = {
 4. Building voidsprite should now make your added language show up in the settings. You may now make edits to your localization file.
 
 > Your localization file needs to be encoded with UTF-8.  
-> If there's an issue with fonts not having required regional characters, please open an issue.
+> If the included fonts don't have required regional characters, please open an issue.
