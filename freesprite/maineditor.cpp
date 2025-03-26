@@ -2248,6 +2248,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
         return;
     }
 
+    //todo: detect if copyscaled or malloc fails
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{layers[x]->w, layers[x]->h};
