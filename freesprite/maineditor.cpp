@@ -833,7 +833,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_bytile"),
+                    {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -844,19 +844,19 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_N, { TL("vsp.maineditor.rescanv_bytile"),
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
-                    {SDL_SCANCODE_M, { TL("vsp.maineditor.rescanv_bytile"),
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.canvscale"),
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Scale canvas", "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
-                    {SDL_SCANCODE_P, { TL("vsp.maineditor.rescanv_bytile"),
+                    {SDL_SCANCODE_P, { TL("vsp.maineditor.nineseg"),
                             [](MainEditor* editor) {
                                 g_addScreen(new NineSegmentPatternEditorScreen(editor));
                             }
