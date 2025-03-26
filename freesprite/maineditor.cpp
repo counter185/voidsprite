@@ -728,34 +728,34 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_F,
             {
-                "File",
+                TL("vsp.maineditor.file"),
                 {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_C},
                 {
-                    {SDL_SCANCODE_D, { "Save as",
+                    {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [](MainEditor* editor) {
                                 editor->trySaveAsImage();
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { "Save",
+                    {SDL_SCANCODE_S, { TL("vsp.maineditor.save"),
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
                             }
                         }
                     },
-                    {SDL_SCANCODE_E, { "Export as palettized",
+                    {SDL_SCANCODE_E, { TL("vsp.maineditor.exportpal"),
                             [](MainEditor* editor) {
                                 editor->tryExportPalettizedImage();
                             }
                         }
                     },
-                    {SDL_SCANCODE_A, { "Export tiles individually",
+                    {SDL_SCANCODE_A, { TL("vsp.maineditor.exportind"),
                             [](MainEditor* editor) {
                                 editor->exportTilesIndividually();
                             }
                         }
                     },
-                    {SDL_SCANCODE_R, { "Open in palettized editor",
+                    {SDL_SCANCODE_R, { TL("vsp.maineditor.paledit"),
                             [](MainEditor* editor) {
                                 MainEditorPalettized* newEditor = editor->toPalettizedSession();
                                 if (newEditor != NULL) {
@@ -764,13 +764,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { "Close",
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.close"),
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
                         }
                     },
-                    {SDL_SCANCODE_P, { "Preferences",
+                    {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"),
                             [](MainEditor* screen) {
                                 g_addPopup(new PopupGlobalConfig());
                             }
@@ -783,46 +783,46 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_E,
             {
-                "Edit",
+                TL("vsp.maineditor.edit"),
                 {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
-                    {SDL_SCANCODE_Z, { "Undo",
+                    {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"),
                             [](MainEditor* editor) {
                                 editor->undo();
                             }
                         }
                     },
-                    {SDL_SCANCODE_R, { "Redo",
+                    {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"),
                             [](MainEditor* editor) {
                                 editor->redo();
                             }
                         }
                     },
-                    {SDL_SCANCODE_X, { "Toggle symmetry: X",
+                    {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
                             }
                         }
                     },
-                    {SDL_SCANCODE_Y, { "Toggle symmetry: Y",
+                    {SDL_SCANCODE_Y, { TL("vsp.maineditor.symy"),
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { "Resize canvas",
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { "Deselect",
+                    {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
                             [](MainEditor* editor) {
                                 editor->isolateEnabled = false;
                             }
                         }
                     },
-                    {SDL_SCANCODE_V, { "Resize canvas (per tile)",
+                    {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -833,7 +833,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_B, { "Resize canvas (per n.tiles)",
+                    {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
@@ -844,19 +844,19 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_N, { "Integer scale canvas",
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
-                    {SDL_SCANCODE_M, { "Scale canvas",
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 g_addPopup(new PopupTileGeneric(editor, "Scale canvas", "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
-                    {SDL_SCANCODE_P, { "Open in 9-segment pattern editor",
+                    {SDL_SCANCODE_P, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 g_addScreen(new NineSegmentPatternEditorScreen(editor));
                             }
@@ -869,48 +869,48 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_L,
             {
-                "Layer",
+                TL("vsp.maineditor.layer"),
                 {},
                 {
-                    {SDL_SCANCODE_F, { "Flip current layer: X axis",
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipx"),
                             [](MainEditor* editor) {
                                 editor->layer_flipHorizontally();
                             }
                         }
                     },
-                    {SDL_SCANCODE_G, { "Flip current layer: Y axis",
+                    {SDL_SCANCODE_G, { TL("vsp.maineditor.flipy"),
                             [](MainEditor* editor) {
                                 editor->layer_flipVertically();
                             }
                         }
                     },
-                    {SDL_SCANCODE_X, { "Print number of colors",
+                    {SDL_SCANCODE_X, { TL("vsp.maineditor.printcol"),
                             [](MainEditor* editor) {
                                 g_addNotification(Notification("", std::format("{} colors in current layer", editor->getCurrentLayer()->numUniqueColors(true))));
                             }
                         }
                     },
-                    {SDL_SCANCODE_R, { "Rename current layer",
+                    {SDL_SCANCODE_R, { TL("vsp.maineditor.renlayer"),
                             [](MainEditor* editor) {
                                 editor->layer_promptRename();
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { "Isolate layer alpha",
+                    {SDL_SCANCODE_S, { TL("vsp.maineditor.isolatealpha"),
                             [](MainEditor* editor) {
                                 editor->layer_selectCurrentAlpha();
                             }
                         }
                     },
-                    {SDL_SCANCODE_A, { "Remove alpha channel",
+                    {SDL_SCANCODE_A, { TL("vsp.maineditor.removealpha"),
                             [](MainEditor* editor) {
                                 editor->layer_setAllAlpha255();
                             }
                         }
                     },
-                    {SDL_SCANCODE_K, { "Set color key",
+                    {SDL_SCANCODE_K, { TL("vsp.maineditor.setckey"),
                             [](MainEditor* editor) {
-                                PopupPickColor* newPopup = new PopupPickColor("Set color key", "Pick a color to set as the color key:");
+                                PopupPickColor* newPopup = new PopupPickColor(TL("vsp.maineditor.setckey"), TL("vsp.maineditor.setckeydesc"));
                                 newPopup->setCallbackListener(EVENT_MAINEDITOR_SETCOLORKEY, editor);
                                 g_addPopup(newPopup);
                             }
