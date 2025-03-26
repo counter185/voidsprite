@@ -1324,8 +1324,10 @@ Layer* readPNG(png_structp png, png_infop info) {
             for (int x = 0; x < width; x++) {
                 pxData[y * width + x] =
                     bit_depth == 1 ? (rows[y][x / 8] >> (7 - (x % 8))) & 0b1
+                    : bit_depth == 2 ? (rows[y][x / 4] >> (2 * (3 - (x % 4)))) & 0b11
                     : bit_depth == 4 ? (rows[y][x / 2] >> (x % 2 == 0 ? 4 : 0)) & 0b1111
                     : rows[y][x];   //todo, more bit depths
+                                    //: are those all of them?
             }
         }
         for (int y = 0; y < height; y++) {
