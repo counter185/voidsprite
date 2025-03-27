@@ -617,7 +617,7 @@ void MainEditor::DrawForeground()
         g_fnt->RenderString(std::format("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
-    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ 255,255,255, (u8)(g_windowFocused ? 0x40 : 0x30) });
+    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ (u8)(255 - backgroundColor.r), (u8)(255 - backgroundColor.g), (u8)(255 - backgroundColor.b), (u8)(g_windowFocused ? 0x40 : 0x30) });
 
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
