@@ -573,7 +573,7 @@ void MainEditor::drawRowColNumbers()
         if (canvasDrawRect.x + canvasDrawRect.w < g_windowW) {
             //vertical
             XY origin = {canvasDrawRect.x + canvasDrawRect.w + 2, canvasDrawRect.y};
-            for (int i = 0; i < canvas.dimensions.x + (drawHorizontal ? 0 : 1) && origin.y < g_windowH; i++) {
+            for (int i = 0; i < canvas.dimensions.y + (drawHorizontal ? 0 : 1) && origin.y < g_windowH; i++) {
                 if (origin.y >= 0) {
                     int fh = g_fnt->StatStringDimensions(std::to_string(i+ indexOffset)).y;
                     int dy = (canvas.scale / 2) - (fh / 2);
@@ -585,7 +585,7 @@ void MainEditor::drawRowColNumbers()
         if (drawHorizontal) {
             //horizontal
             XY origin = {canvasDrawRect.x, canvasDrawRect.y + canvasDrawRect.h + 2};
-            for (int i = 0; i < canvas.dimensions.y + 1 && origin.x < g_windowW; i++) {
+            for (int i = 0; i < canvas.dimensions.x + 1 && origin.x < g_windowW; i++) {
                 if (origin.x >= 0) {
                     int fw = g_fnt->StatStringDimensions(std::to_string(i+ indexOffset)).x;
                     int dx = (canvas.scale / 2) - (fw / 2);
