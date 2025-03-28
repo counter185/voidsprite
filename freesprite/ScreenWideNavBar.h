@@ -8,6 +8,7 @@
 #include "Panel.h"
 #include "FontRenderer.h"
 
+//todo: untemplate this
 template <class T>
 class ScreenWideNavBar : public Panel, public EventCallbackListener
 {

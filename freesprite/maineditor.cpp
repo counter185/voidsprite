@@ -5,6 +5,7 @@
 #include "EditorLayerPicker.h"
 #include "CollapsableDraggablePanel.h"
 #include "ScreenWideNavBar.h"
+#include "ScreenWideActionBar.h"
 #include "Notification.h"
 #include "EditorSpritesheetPreview.h"
 #include "FileIO.h"
@@ -1053,6 +1054,7 @@ void MainEditor::setUpWidgets()
     SDL_Scancode keyorder[] = { SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R, SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_U, SDL_SCANCODE_I, SDL_SCANCODE_O, SDL_SCANCODE_P,
                                SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_H, SDL_SCANCODE_J, SDL_SCANCODE_K, SDL_SCANCODE_L,
                                SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M };
+
     //load filters
     int i = 0;
     for (auto& filter : g_filters) {
@@ -1085,7 +1087,7 @@ void MainEditor::setUpWidgets()
 
     colorPicker = new EditorColorPicker(this);
     CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
-    colorPickerPanel->position.y = 50;
+    colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
     colorPicker->setMainEditorColorRGB(pickedColor);
@@ -1093,7 +1095,7 @@ void MainEditor::setUpWidgets()
 
     brushPicker = new EditorBrushPicker(this);
     CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
-    brushPickerPanel->position.y = 450;
+    brushPickerPanel->position.y = 454;
     brushPickerPanel->position.x = 10;
     wxsManager.addDrawable(brushPickerPanel);
 
@@ -1104,6 +1106,29 @@ void MainEditor::setUpWidgets()
 
     navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
+
+    //action bar
+    ScreenWideActionBar* actionbar = new ScreenWideActionBar({});
+    actionbar->position = { 0, navbar->wxHeight };
+
+    int nextNavbarX = 5;
+    UIButton* undoButton = new UIButton("<-", "Undo");
+    undoButton->onClickCallback = [this](UIButton* btn) { undo(); };
+    undoButton->position = { nextNavbarX,0 };
+    undoButton->wxWidth = 30;
+    undoButton->wxHeight = 30;
+    actionbar->addDrawable(undoButton);
+    nextNavbarX += 35;
+
+    UIButton* redoButton = new UIButton("->", "Redo");
+    redoButton->onClickCallback = [this](UIButton* btn) { redo(); };
+    redoButton->position = { nextNavbarX,0 };
+    redoButton->wxWidth = 30;
+    redoButton->wxHeight = 30;
+    actionbar->addDrawable(redoButton);
+    nextNavbarX += 35;
+
+    wxsManager.addDrawable(actionbar);
 }
 
 void MainEditor::addWidget(Drawable* wx)

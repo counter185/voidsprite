@@ -230,6 +230,7 @@
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RenderFilter.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
+    <ClCompile Include="ScreenWideActionBar.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="SplitSessionEditor.cpp" />
     <ClCompile Include="TemplateRPG2KBattleAnim.cpp" />
@@ -400,6 +401,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="ScreenWideActionBar.h" />
     <ClInclude Include="sdl23compat.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />
