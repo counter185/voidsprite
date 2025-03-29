@@ -1932,6 +1932,9 @@ void MainEditor::undo()
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
     }
+    else {
+        g_addNotification(ErrorNotification("Nothing to undo", ""));
+    }
 }
 
 void MainEditor::redo()
@@ -2004,6 +2007,9 @@ void MainEditor::redo()
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
+    }
+    else {
+        g_addNotification(ErrorNotification("Nothing to redo", ""));
     }
 }
 

@@ -43,15 +43,15 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
 
 void PopupTileGeneric::render()
 {
-	renderDefaultBackground();
+    renderDefaultBackground();
 
-	XY titlePos = getDefaultTitlePosition();
-	XY contentPos = getDefaultContentPosition();
+    XY titlePos = getDefaultTitlePosition();
+    XY contentPos = getDefaultContentPosition();
 
-	g_fnt->RenderString(title, titlePos.x, titlePos.y);
-	g_fnt->RenderString(text, contentPos.x, contentPos.y);
-	//XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
-	renderDrawables();
+    g_fnt->RenderString(title, titlePos.x, titlePos.y, {255,255,255,255}, 22);
+    g_fnt->RenderString(text, contentPos.x, contentPos.y);
+    //XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
+    renderDrawables();
 }
 
 void PopupTileGeneric::eventTextInputConfirm(int evt_id, std::string data)

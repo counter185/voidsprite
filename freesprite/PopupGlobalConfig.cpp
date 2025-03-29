@@ -172,8 +172,9 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(tf2);
     posInTab.y += 35;
     lbl2 = new UILabel(" Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory.");
+    lbl2->fontsize = 14;
     lbl2->color = { 255,255,255,0xa0 };
-    lbl2->position = posInTab;
+    lbl2->position = xySubtract(posInTab, {0,4});
     configTabs->tabs[1].wxs.addDrawable(lbl2);
     posInTab.y += 35;
 
@@ -254,7 +255,7 @@ void PopupGlobalConfig::render()
     renderDefaultBackground();
 
     XY titlePos = getDefaultTitlePosition();
-    g_fnt->RenderString("Preferences", titlePos.x, titlePos.y);
+    g_fnt->RenderString("Preferences", titlePos.x, titlePos.y, {255,255,255,255}, 22);
 
     renderDrawables();
 }

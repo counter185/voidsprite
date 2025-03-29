@@ -66,7 +66,8 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     subWidgets.addDrawable(duplicateBtn);
 
     UILabel* opacityLabel = new UILabel();
-    opacityLabel->position = { 5, 65 };
+    opacityLabel->position = { 7, 67 };
+    opacityLabel->fontsize = 16;
     opacityLabel->text = "Opacity";
     subWidgets.addDrawable(opacityLabel);
 

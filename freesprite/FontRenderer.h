@@ -12,14 +12,14 @@ public:
     TextRenderer();
     ~TextRenderer();
 
-    XY RenderString(std::string text, int x, int y, SDL_Color col = { 255,255,255,255 });
-    XY StatStringDimensions(std::string text);
+    XY RenderString(std::string text, int x, int y, SDL_Color col = { 255,255,255,255 }, int size = 18);
+    XY StatStringDimensions(std::string text, int size = 18);
 private:
     TTF_Font* font = NULL;
     TTF_Font* fontJP = NULL;
-    std::map<uint32_t, GlyphData> renderedGlyphs;
+    std::map<int, std::map<uint32_t, GlyphData>> renderedGlyphs;
 
-    void RenderGlyph(uint32_t a);
+    void RenderGlyph(uint32_t a, int size);
 };
 
 bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out);

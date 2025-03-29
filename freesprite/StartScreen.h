@@ -51,7 +51,8 @@ public:
         wxsManager.addDrawable(title);
         
         title = new UILabel(TL("vsp.launchpad.newimage"));
-        title->position = {10, 80};
+        title->fontsize = 22;
+        title->position = {10, 75};
         wxsManager.addDrawable(title);
 
         newImageTabs = new TabbedView({ {TL("vsp.launchpad.tab.pixeldim"), g_iconMenuPxDim}, {TL("vsp.launchpad.tab.spritesheet"), g_iconMenuSpritesheet}, {TL("vsp.launchpad.tab.templates"), g_iconMenuTemplates}}, 180);

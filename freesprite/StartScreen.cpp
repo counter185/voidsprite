@@ -18,7 +18,7 @@ void StartScreen::render()
 
     SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
     SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
-    g_fnt->RenderString(std::format("alpha@{}", __DATE__), 2, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50});
+    g_fnt->RenderString(std::format("alpha@{}", __DATE__), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
     SDL_Rect bgr = SDL_Rect{ 0, 35, 560, 300 };
     SDL_Color colorBG1 = { 0x30, 0x30, 0x30, 0xa0};
@@ -222,6 +222,7 @@ void StartScreen::populateLastOpenFiles()
 
     UILabel* lbl = new UILabel();
     lbl->text = TL("vsp.launchpad.lastfiles");
+    lbl->fontsize = 22;
     lbl->position = {5, 2};
     lastOpenFilesPanel->subWidgets.addDrawable(lbl);
 

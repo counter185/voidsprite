@@ -5,6 +5,7 @@ class UILabel :
 {
 public:
     std::string text = "";
+    int fontsize = 18;
     SDL_Color color = { 255, 255, 255, 255 };
     
     UILabel() {}

@@ -61,14 +61,16 @@ TextRenderer::~TextRenderer() {
         TTF_CloseFont(fontJP);
     }
 
-    for (auto& g : renderedGlyphs) {
-        if (g.second.texture != NULL) {
-            tracked_destroyTexture(g.second.texture);
+    for (auto& s : renderedGlyphs) {
+        for (auto& g : s.second) {
+            if (g.second.texture != NULL) {
+                tracked_destroyTexture(g.second.texture);
+            }
         }
     }
 }
 
-XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
+XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col, int size) {
     int drawX = x;
     int drawY = y;
     uint32_t currentUTF8Sym = 0;
@@ -85,10 +87,10 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
                 /*if (!renderedGlyphs.contains(target)) {
                     RenderGlyph(target);
                 }*/
-                if (!renderedGlyphs.contains(currentUTF8Sym)) {
-                    RenderGlyph(currentUTF8Sym);
+                if (!renderedGlyphs[size].contains(currentUTF8Sym)) {
+                    RenderGlyph(currentUTF8Sym, size);
                 }
-                GlyphData glyphData = renderedGlyphs[currentUTF8Sym];
+                GlyphData glyphData = renderedGlyphs[size][currentUTF8Sym];
                 SDL_Rect drawRect = { drawX, drawY, glyphData.w, glyphData.h };
                 SDL_SetTextureColorMod(glyphData.texture, col.r, col.g, col.b);
                 SDL_SetTextureAlphaMod(glyphData.texture, col.a);
@@ -100,7 +102,7 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
     return { drawX, drawY };
 }
 
-XY TextRenderer::StatStringDimensions(std::string text)
+XY TextRenderer::StatStringDimensions(std::string text, int size)
 {
     int drawX = 0;
     int drawY = 0;
@@ -118,10 +120,10 @@ XY TextRenderer::StatStringDimensions(std::string text)
         else {
             bool shouldDraw = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);
             if (shouldDraw) {
-                if (!renderedGlyphs.contains(currentUTF8Sym)) {
-                    RenderGlyph(currentUTF8Sym);
+                if (!renderedGlyphs[size].contains(currentUTF8Sym)) {
+                    RenderGlyph(currentUTF8Sym, size);
                 }
-                GlyphData glyphData = renderedGlyphs[currentUTF8Sym];
+                GlyphData glyphData = renderedGlyphs[size][currentUTF8Sym];
                 drawX += glyphData.advance;
                 if (drawX > maxDraw.x) {
 					maxDraw.x = drawX;
@@ -134,10 +136,11 @@ XY TextRenderer::StatStringDimensions(std::string text)
     return maxDraw;
 }
 
-void TextRenderer::RenderGlyph(uint32_t a) {
+void TextRenderer::RenderGlyph(uint32_t a, int size) {
     TTF_Font* usedFont =
         (a >= 0x3000 && a <= 0x30ff) || (a >= 0xff00 && a <= 0xffef) || (a >= 0x4e00 && a <= 0x9faf) ? fontJP
         : font;
+    TTF_SetFontSize(usedFont, size);
     SDL_Surface* gl = TTF_RenderGlyph_Blended(usedFont, (Uint32)a, SDL_Color{ 255,255,255,255 });
     if (gl != NULL) {
         SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
@@ -148,10 +151,10 @@ void TextRenderer::RenderGlyph(uint32_t a) {
         newGlyphData.w = gl->w;
         newGlyphData.h = gl->h;
         SDL_FreeSurface(gl);
-        renderedGlyphs[a] = newGlyphData;
+        renderedGlyphs[size][a] = newGlyphData;
 
     }
     else {
-        renderedGlyphs[a] = GlyphData{ 0,0,0,0,0,0,0,NULL };
+        renderedGlyphs[size][a] = GlyphData{ 0,0,0,0,0,0,0,NULL };
     }
 }

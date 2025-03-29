@@ -705,12 +705,12 @@ int main(int argc, char** argv)
         XY origin = {g_windowW - 240, g_windowH - 90};
         for (auto& mem : g_named_memmap) {
             g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
-                                origin.y, {255, 255, 255, 100});
-            origin.y -= 20;
+                                origin.y, {255, 255, 255, 100}, 14);
+            origin.y -= 16;
         }
         g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
-                            {255, 255, 255, 100});
-        origin.y -= 20;
+                            {255, 255, 255, 100}, 14);
+        origin.y -= 16;
 #endif
 
         //draw the screen icons
@@ -728,8 +728,8 @@ int main(int argc, char** argv)
         //todo: make this a uilabel
         if (!screenStack.empty()) {
             std::string screenName = screenStack[currentScreen]->getName();
-            int statW = g_fnt->StatStringDimensions(screenName).x;
-            g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - ixmax(200, 10 + statW), g_windowH - 55);
+            int statW = g_fnt->StatStringDimensions(screenName, 16).x;
+            g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - (10 + statW), g_windowH - 55, {255,255,255,255}, 16);
         }
 
         //draw battery icon
@@ -806,7 +806,7 @@ int main(int argc, char** argv)
 
             //text
             g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
-            g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))});
+            g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))}, 16);
             notifY += 65;
         }
 
