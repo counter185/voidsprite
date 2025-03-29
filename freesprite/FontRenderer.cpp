@@ -47,6 +47,8 @@ bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out) {
 }
 
 TextRenderer::TextRenderer() {
+    glyphBuffer = new TextureBuffer(1024, 1024);
+
     font = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
     font = font == NULL ? TTF_OpenFont(FONT_PATH, 18) : font;
     fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
@@ -61,11 +63,13 @@ TextRenderer::~TextRenderer() {
         TTF_CloseFont(fontJP);
     }
 
-    for (auto& g : renderedGlyphs) {
+    delete glyphBuffer;
+
+    /*for (auto& g : renderedGlyphs) {
         if (g.second.texture != NULL) {
             tracked_destroyTexture(g.second.texture);
         }
-    }
+    }*/
 }
 
 XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
@@ -90,9 +94,10 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col) {
                 }
                 GlyphData glyphData = renderedGlyphs[currentUTF8Sym];
                 SDL_Rect drawRect = { drawX, drawY, glyphData.w, glyphData.h };
-                SDL_SetTextureColorMod(glyphData.texture, col.r, col.g, col.b);
-                SDL_SetTextureAlphaMod(glyphData.texture, col.a);
-                SDL_RenderCopy(g_rd, glyphData.texture, NULL, &drawRect);
+                SDL_SetTextureColorMod(glyphData.texture.tx, col.r, col.g, col.b);
+                SDL_SetTextureAlphaMod(glyphData.texture.tx, col.a);
+                glyphData.texture.renderAt(&drawRect);
+                //SDL_RenderCopy(g_rd, glyphData.texture, NULL, &drawRect);
                 drawX += glyphData.advance;
             }
         }
@@ -140,11 +145,11 @@ void TextRenderer::RenderGlyph(uint32_t a) {
         : font;
     SDL_Surface* gl = TTF_RenderGlyph_Blended(usedFont, (Uint32)a, SDL_Color{ 255,255,255,255 });
     if (gl != NULL) {
-        SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
+        //SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
 
         GlyphData newGlyphData;
         TTF_GetGlyphMetrics(usedFont, a, &newGlyphData.minx, &newGlyphData.maxx, &newGlyphData.miny, &newGlyphData.maxy, &newGlyphData.advance);
-        newGlyphData.texture = newTexture;
+        newGlyphData.texture = glyphBuffer->put(gl);
         newGlyphData.w = gl->w;
         newGlyphData.h = gl->h;
         SDL_FreeSurface(gl);
@@ -152,6 +157,6 @@ void TextRenderer::RenderGlyph(uint32_t a) {
 
     }
     else {
-        renderedGlyphs[a] = GlyphData{ 0,0,0,0,0,0,0,NULL };
+        renderedGlyphs[a] = GlyphData{ 0,0,0,0,0,0,0,{false} };
     }
 }
