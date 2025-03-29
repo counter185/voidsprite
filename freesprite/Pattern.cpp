@@ -6,7 +6,8 @@
 
 void Pattern::tryLoadIcon()
 {
-    cachedIcon = IMGLoadToTexture(getIconPath());
+    SDL_Surface* iconSrf = IMGLoadToSurface(getIconPath());
+    cachedIcon = Pattern::iconBuffer.put(iconSrf);
 }
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)
@@ -58,7 +59,16 @@ bool CustomPattern::canDrawAt(XY position)
 void CustomPattern::tryLoadIcon()
 {
     if (bitmap != NULL) {
-        cachedIcon = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
+        SDL_Surface* srf = SDL_CreateSurface(22, 22, SDL_PIXELFORMAT_ARGB8888);
+        u32* ppx = (u32*)srf->pixels;
+        for (int y = 0; y < 22; y++) {
+            for (int x = 0; x < 22; x++) {
+                ARRAY2DPOINT(ppx, x,y, 22) = canDrawAt({x / 2,y / 2}) ? 0xffffffff : 0x00000000;
+            }
+        }
+        cachedIcon = Pattern::iconBuffer.put(srf);
+        SDL_FreeSurface(srf);
+        /*cachedIcon = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
         int bitmapPitch;
         uint32_t* iconBitmap;
         SDL_LockTexture(cachedIcon, NULL, (void**)&iconBitmap, &bitmapPitch);
@@ -67,6 +77,6 @@ void CustomPattern::tryLoadIcon()
                 iconBitmap[x + y * 22] = canDrawAt({x/2,y/2}) ? 0xffffffff : 0x00000000;
             }
         }
-        SDL_UnlockTexture(cachedIcon);
+        SDL_UnlockTexture(cachedIcon);*/
     }
 }

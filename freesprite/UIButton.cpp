@@ -24,6 +24,12 @@ void UIButton::render(XY pos)
 		SDL_RenderCopy(g_rd, icon, NULL, &iconRect);
 		textX += iconRect.w;
 	}
+	else if (iconRO.valid) {
+		SDL_SetTextureAlphaMod(iconRO.tx, 0xff);
+		SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
+        iconRO.renderAt(&iconRect);
+		textX += iconRect.w;
+	}
 
 	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
 

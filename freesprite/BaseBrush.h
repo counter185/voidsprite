@@ -1,6 +1,11 @@
 #pragma once
 #include "globals.h"
 
+struct BrushParameter {
+	std::string name;
+	int type;
+};
+
 class BaseBrush
 {
 public:

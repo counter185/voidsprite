@@ -580,6 +580,9 @@
       <Filter>Source files\localization</Filter>
     </ClCompile>
     <ClCompile Include="ScreenWideActionBar.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureBuffer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1104,6 +1107,9 @@
       <Filter>Header files\localization</Filter>
     </ClInclude>
     <ClInclude Include="ScreenWideActionBar.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureBuffer.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

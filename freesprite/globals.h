@@ -71,7 +71,7 @@ extern "C" {
 #define VOIDSPRITE_ASSETS_PATH ""
 #endif
 
-#define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]
+#define ARRAY2DPOINT(arr,x,y,w) (arr)[(y)*w+(x)]
 
 #define FONT_PATH VOIDSPRITE_ASSETS_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_JP VOIDSPRITE_ASSETS_PATH "appfontjp-NotoSansJP-VariableFont_wght.ttf"
@@ -101,6 +101,7 @@ class FileImporter;
 class FileExporter;
 struct NineSegmentPattern;
 class DrawableManager;
+class TextureBuffer;
 
 //templates
 class BaseTemplate;
@@ -210,6 +211,7 @@ void g_popClip();
 void g_pushRenderTarget(SDL_Texture* tex);
 void g_popRenderTarget();
 
+SDL_Surface* IMGLoadToSurface(std::string path);
 SDL_Texture* IMGLoadToTexture(std::string path);
 
 struct XY {

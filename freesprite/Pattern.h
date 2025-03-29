@@ -1,10 +1,13 @@
 #pragma once
 #include "globals.h"
+#include "TextureBuffer.h"
 
 class Pattern
 {
+protected:
+	static inline TextureBuffer iconBuffer{256,256};
 public:
-	SDL_Texture* cachedIcon = NULL;
+	RenderObject cachedIcon = NULL;
 
 	virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/pattern_default.png"; }
 	virtual std::string getName() { return "Pattern"; }
