@@ -22,9 +22,10 @@ void TextureAtlas::blit(SDL_Surface* srf, int atx, int aty) {
 	//printf(SDL_GetError());
 	for (int y = 0; y < srf->h; y++) {
 		//we can assume this will be in bounds (checks are already being done in put())
-		memcpy(&ARRAY2DPOINT(pixels, atx, aty + y, pitch), &ARRAY2DPOINT((u32*)sourceTarget->pixels, 0, y, srf->w) , 4 * srf->w);
+		memcpy(&ARRAY2DPOINT(pixels, atx, aty + y, pitch/4), &ARRAY2DPOINT((u8*)sourceTarget->pixels, 0, y, sourceTarget->pitch) , 4 * srf->w);
+		//memset(&ARRAY2DPOINT(pixels, atx, aty + y, pitch/4), 255, 4 * srf->w);
 	}
-	memset(pixels, 255, 4 * srf->w * srf->h);
+	//memset(pixels, 255, 4 * srf->w * srf->h);
 	if (sourceTarget != srf) {
 		SDL_FreeSurface(sourceTarget);
 	}
@@ -56,6 +57,7 @@ RenderObject TextureAtlas::put(SDL_Surface* srf) {
 		else if (area.y + area.h > nextY) {
 			nextY = area.y + area.h;
 		}
+		nextX = area.w + area.x;
 		allocatedRects.push_back(area);
 	}
 
