@@ -305,7 +305,7 @@ int main(int argc, char** argv)
     std::string useRenderer = g_config.preferredRenderer;
     std::cout << "Picking renderer: " << useRenderer << "\n";
 
-    SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition");
+    SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
     //IMG_Init(-1);   //😈time to get evil
     const char* windowTitle = "void" UTF8_DIAMOND "sprite"

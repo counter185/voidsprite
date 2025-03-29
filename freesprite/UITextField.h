@@ -16,6 +16,10 @@ public:
 	SDL_Color bgColor = { 0,0,0, 0xff };
 	SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
 
+	std::vector<std::string> imeCandidates;
+    int imeCandidateIndex = 0;
+	Timer64 imeCandidatesTimer;
+
 	void focusIn() override {
 		Drawable::focusIn();
 		SDL_StartTextInput(g_wd);
@@ -23,6 +27,7 @@ public:
 	void focusOut() override {
 		Drawable::focusOut();
 		SDL_StopTextInput(g_wd);
+		imeCandidates.clear();
 	}
 
 	bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {

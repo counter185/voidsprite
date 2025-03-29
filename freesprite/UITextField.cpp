@@ -21,6 +21,15 @@ void UITextField::render(XY pos)
 
 		
 		SDL_SetTextInputArea(g_wd, &drawrect, 0);
+
+		if (imeCandidates.size() > 0) {
+			XY imeCandsOrigin = xyAdd(pos, { 0, wxHeight });
+			for (int i = 0; i < imeCandidates.size(); i++) {
+				g_ttp->addTooltip(Tooltip{ imeCandsOrigin, imeCandidates[i], i == imeCandidateIndex ? SDL_Color{0,255,0,255} : SDL_Color{ 255,255,255,255 }, XM1PW3P1(imeCandidatesTimer.percentElapsedTime(400))});
+				imeCandsOrigin.y += 30;
+			}
+			
+		}
 	}
 
 	if (hovered) {
@@ -102,6 +111,16 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 		if (textAdded && callback != NULL) {
 			callback->eventTextInput(callback_id, text);
 		}
+	}
+	else if (evt.type == SDL_EVENT_TEXT_EDITING_CANDIDATES) {
+		if (imeCandidates.size() == 0) {
+            imeCandidatesTimer.start();
+		}
+		imeCandidates.clear();
+		for (int x = 0; x < evt.edit_candidates.num_candidates; x++) {
+            imeCandidates.push_back(evt.edit_candidates.candidates[x]);
+		}
+		imeCandidateIndex = evt.edit_candidates.selected_candidate;
 	}
 }
 

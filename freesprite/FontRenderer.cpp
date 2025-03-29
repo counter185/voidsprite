@@ -79,7 +79,7 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col, int
         char target = text.at(chx);
         if (target == '\n') {
             drawX = x;
-            drawY += 18;
+            drawY += size;
         }
         else {
             bool shouldDraw = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);
@@ -115,7 +115,7 @@ XY TextRenderer::StatStringDimensions(std::string text, int size)
         char target = text.at(chx);
         if (target == '\n') {
             drawX = 0;
-            drawY += 18;
+            drawY += size;
         }
         else {
             bool shouldDraw = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);
@@ -131,7 +131,7 @@ XY TextRenderer::StatStringDimensions(std::string text, int size)
             }
         }
     }
-    drawY += 18;
+    drawY += size;
     maxDraw.y = drawY;
     return maxDraw;
 }
