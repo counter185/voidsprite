@@ -202,13 +202,19 @@ void g_popRenderTarget() {
 }
 
 
-SDL_Texture* IMGLoadToTexture(std::string path) {
+SDL_Surface* IMGLoadToSurface(std::string path)
+{
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
     srf = srf == NULL ? IMG_Load(path.c_str()) : srf;
     if (srf == NULL) {
         g_addNotification(ErrorNotification("Error", "Can't load: " + path));
         return NULL;
     }
+    return srf;
+}
+
+SDL_Texture* IMGLoadToTexture(std::string path) {
+    SDL_Surface* srf = IMGLoadToSurface(path);
     SDL_Texture* ret = tracked_createTextureFromSurface(g_rd, srf);
     SDL_FreeSurface(srf);
     return ret;

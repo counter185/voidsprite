@@ -47,7 +47,7 @@ bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out) {
 }
 
 TextRenderer::TextRenderer() {
-    glyphBuffer = new TextureBuffer(1024, 1024);
+    glyphBuffer = new TextureBuffer(512, 512);
 
     font = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
     font = font == NULL ? TTF_OpenFont(FONT_PATH, 18) : font;

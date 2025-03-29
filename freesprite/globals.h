@@ -101,6 +101,7 @@ class FileImporter;
 class FileExporter;
 struct NineSegmentPattern;
 class DrawableManager;
+class TextureBuffer;
 
 //templates
 class BaseTemplate;
@@ -210,6 +211,7 @@ void g_popClip();
 void g_pushRenderTarget(SDL_Texture* tex);
 void g_popRenderTarget();
 
+SDL_Surface* IMGLoadToSurface(std::string path);
 SDL_Texture* IMGLoadToTexture(std::string path);
 
 struct XY {

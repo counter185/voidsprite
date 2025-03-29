@@ -14,7 +14,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	patternPanelBtn->wxWidth = 40;
 	patternPanelBtn->wxHeight = 24;
 	patternPanelBtn->tooltip = "Open pattern menu";
-	patternPanelBtn->icon = g_patterns[0]->cachedIcon;
+	patternPanelBtn->iconRO = g_patterns[0]->cachedIcon;
 	patternPanelBtn->setCallbackListener(EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU, this);
 	subWidgets.addDrawable(patternPanelBtn);
 
@@ -124,7 +124,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 		}
 		newBtn->position = XY{ px, py };
 		px += 26;
-		newBtn->icon = pattern->cachedIcon;
+		newBtn->iconRO = pattern->cachedIcon;
 		newBtn->tooltip = pattern->getName();
 		//newBtn->text = brush->getName();
 		newBtn->wxWidth = 24;
@@ -211,5 +211,5 @@ void EditorBrushPicker::updateActivePatternButton(Pattern* p)
         patternButtons[x]->fill = p == g_patterns[x] ? Fill::Gradient(0x80000000, 0x80000000, 0x80FFFFFF, 0x80FFFFFF)
                                                      : FILL_BUTTON_CHECKED_DEFAULT;
     }
-    patternPanelBtn->icon = p->cachedIcon;
+    patternPanelBtn->iconRO = p->cachedIcon;
 }

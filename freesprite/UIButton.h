@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "mathops.h"
 #include "drawable.h"
+#include "TextureBuffer.h"
 
 #define FILL_BUTTON_CHECKED_DEFAULT Fill::Solid(0xD0000000)
 
@@ -12,6 +13,7 @@ public:
     std::string tooltip;
     int wxWidth = 250, wxHeight = 30;
     SDL_Texture* icon = NULL;
+    RenderObject iconRO = {false};
     bool fullWidthIcon = false;
     bool instantTooltip = false;
     

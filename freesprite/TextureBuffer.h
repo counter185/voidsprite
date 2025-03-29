@@ -12,7 +12,9 @@ public:
 	RenderObject(bool v, SDL_Texture* t, SDL_Rect c) : valid(v), tx(t), clip(c) {}
 
 	void renderAt(SDL_Rect* dst) {
-		SDL_RenderCopy(g_rd, tx, &clip, dst);
+		if (valid) {
+			SDL_RenderCopy(g_rd, tx, &clip, dst);
+		}
 	}
 };
 
@@ -49,6 +51,9 @@ public:
 	}
 
 	RenderObject put(SDL_Surface* srf) {
+		if (srf == NULL) {
+			return { false };
+		}
 		if (srf->w > txW || srf->h > txH) {
 			return { false };
 		}
