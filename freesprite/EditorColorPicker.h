@@ -106,5 +106,9 @@ public:
         currentV = v;
         updateMainEditorColor();
     }
+
+#if _WIN32
+    void openOldWindowsColorPicker();
+#endif
 };
 

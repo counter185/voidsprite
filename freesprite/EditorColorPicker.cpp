@@ -6,6 +6,10 @@
 #include "ScrollingPanel.h"
 #include "Notification.h"
 
+#if _WIN32
+#include <windows.h>
+#endif
+
 EditorColorPicker::EditorColorPicker(MainEditor* c) {
     caller = c;
 
@@ -183,6 +187,15 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
             colorModels.push_back({ name, {mptr, components} });
             i++;
         }
+
+#if _WIN32
+        UIButton* oldColorPickerButton = new UIButton("Win32 color picker...");
+        oldColorPickerButton->position = XY{ 5, yNow };
+        oldColorPickerButton->wxWidth = 210;
+        oldColorPickerButton->onClickCallback = [this](UIButton*) { openOldWindowsColorPicker(); };
+        colorModelsPanel->subWidgets.addDrawable(oldColorPickerButton);
+        yNow += 35;
+#endif
     }
     //-----------------
     //| Palettes tab
@@ -694,8 +707,35 @@ void EditorColorPicker::reloadColorLists()
     reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
     palettePanel->subWidgets.addDrawable(reloadButton);
 
-    yNow += 30;
+    yNow += 35;
 }
+
+#if _WIN32
+void EditorColorPicker::openOldWindowsColorPicker()
+{
+    CHOOSECOLOR cc{};
+    static COLORREF customColorList[16] = {
+        RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),
+        RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0)
+    };
+    cc.lStructSize = sizeof(CHOOSECOLOR);
+    cc.hwndOwner = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(g_wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);;
+    cc.hInstance = NULL;
+    SDL_Color sdlc = uint32ToSDLColor(caller->pickedColor);
+    cc.rgbResult = RGB(sdlc.r, sdlc.g, sdlc.b);
+    cc.lpCustColors = customColorList;
+    cc.Flags = CC_RGBINIT | CC_FULLOPEN;
+    cc.lCustData = 0;
+    cc.lpfnHook = NULL;
+    cc.lpTemplateName = NULL;
+
+    if (ChooseColor(&cc)) {
+        SDL_Color colorbgr = uint32ToSDLColor(cc.rgbResult);
+        setMainEditorColorRGB(PackRGBAtoARGB(colorbgr.b, colorbgr.g, colorbgr.r, 255));
+        printf("win32 picked color: %x\n", cc.rgbResult);
+    }
+}
+#endif
 
 ColorPickerColorButton::ColorPickerColorButton(EditorColorPicker* parent, u32 color) : UIButton()
 {
