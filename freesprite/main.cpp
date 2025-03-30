@@ -323,6 +323,8 @@ int main(int argc, char** argv)
     //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
     SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
+    g_props = SDL_CreateProperties();
+
     unscaledWindowSize = {g_windowW, g_windowH};
     UpdateViewportScaler();
 

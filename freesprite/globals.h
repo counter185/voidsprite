@@ -165,6 +165,7 @@ inline std::vector<NineSegmentPattern*> g_9spatterns;
 inline std::vector<BaseFilter*> g_filters;
 inline std::vector<RenderFilter*> g_renderFilters;
 inline bool g_windowFocused = true;
+inline SDL_PropertiesID g_props;
 
 extern std::vector<std::string> g_cmdlineArgs;
 

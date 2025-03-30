@@ -34,6 +34,7 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 #include "io_piskel.h"
 #include "io_gim.h"
 #include "io_rpgm.h"
+#include "io_jxl.h"
 
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
@@ -60,7 +61,6 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
-Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
@@ -92,7 +92,6 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data);
 bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
-bool writeJpegXL(PlatformNativePathString path, Layer* data);
 bool writeVTF(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
