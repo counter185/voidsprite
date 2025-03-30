@@ -40,7 +40,7 @@ public:
        
         caller->tileDimensions = newTileSize;
         
-        caller->tileGridAlpha = (uint8_t)(opacitySlider->sliderPos * 255);
+        caller->tileGridAlpha = (uint8_t)(opacitySlider->getValue(0, 255));
        
         closePopup();
     }
@@ -64,7 +64,7 @@ public:
                     g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
                 }
                 caller->tileGridPaddingBottomRight = newTileGridPaddingBottomRight;
-                caller->tileGridAlpha = (uint8_t)(opacitySlider->sliderPos * 255);
+                caller->tileGridAlpha = (uint8_t)(opacitySlider->getValue(0,255));
                 closePopup();
             }
         }

@@ -5,5 +5,5 @@
 
 void UIHueSlider::onSliderPosChanged()
 {
-    parent->editorColorHSliderChanged(this->sliderPos * 360);
+    parent->editorColorHSliderChanged(this->getValue(0,360));
 }

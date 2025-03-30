@@ -8,30 +8,15 @@
 #include "BaseScreen.h"
 #include "StartScreen.h"
 #include "BasePopup.h"
-#include "BrushFill.h"
-#include "Brush1pxLinePathfind.h"
-#include "BrushCircle.h"
+#include "BaseBrush.h"
 #include "Pattern.h"
 #include "Notification.h"
-#include "ToolRectMove.h"
-#include "Brush9SegmentRect.h"
-#include "Brush1x1ArcX.h"
-#include "Brush1x1ArcY.h"
-#include "BrushReplaceColor.h"
-#include "ToolRectFlip.h"
-#include "ToolRectRotate.h"
-#include "ToolRectSwap.h"
-#include "ToolText.h"
-#include "ToolRectIsolate.h"
 #include "Gamepad.h"
 #include "FileIO.h"
 #include "TooltipsLayer.h"
 #include "ButtonStartScreenSession.h"
 #include "CustomTemplate.h"
 #include "ninesegmentpatterns.h"
-#include "ToolGuideline.h"
-#include "BrushBezierLine.h"
-#include "BrushDiamond.h"
 #include "background_operation.h"
 #include "discord_rpc.h"
 #include "colormodels.h"
@@ -373,36 +358,7 @@ int main(int argc, char** argv)
     g_gamepad->TryCaptureGamepad();
 
     //load brushes
-    g_brushes.push_back(new Brush1x1());
-    g_brushes.push_back(new Brush1x1PixelPerfect());
-    g_brushes.push_back(new Brush1x1Burst());
-    g_brushes.push_back(new Brush1x1ArcX());
-    g_brushes.push_back(new Brush1x1ArcY());
-    g_brushes.push_back(new Brush3pxCircle());
-    g_brushes.push_back(new Brush1pxLine());
-    g_brushes.push_back(new Brush1pxLinePathfind());
-    g_brushes.push_back(new BrushBezierLine());
-    g_brushes.push_back(new BrushRect());
-    g_brushes.push_back(new BrushRectFill());
-    g_brushes.push_back(new Brush9SegmentRect());
-    g_brushes.push_back(new BrushCircle());
-    g_brushes.push_back(new BrushCircleArc());
-    g_brushes.push_back(new BrushDiamond());
-    g_brushes.push_back(new BrushFill());
-    g_brushes.push_back(new BrushReplaceColor());
-    g_brushes.push_back(new ToolColorPicker());
-    g_brushes.push_back(new ToolRectIsolate());
-    g_brushes.push_back(new ToolRectClone());
-    g_brushes.push_back(new ToolRectMove());
-    g_brushes.push_back(new ToolRectSwap());
-    g_brushes.push_back(new ToolRectFlip());
-    g_brushes.push_back(new ToolRectRotate());
-    g_brushes.push_back(new ToolComment());
-    g_brushes.push_back(new ToolGuideline());
-    g_brushes.push_back(new ToolSetXSymmetry());
-    g_brushes.push_back(new ToolSetYSymmetry());
-    g_brushes.push_back(new ToolMeasure());
-    g_brushes.push_back(new ToolText());
+    g_loadBrushes();
     int i = 0;
     for (BaseBrush*& brush : g_brushes) {
         brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());

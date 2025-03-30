@@ -15,7 +15,8 @@ private:
     void clearTooltips();
 public:
     bool border = true;
-    uint32_t gradientUL = 0xFF000000,
+    bool takeTooltips = true;
+    u32 gradientUL = 0xFF000000,
         gradientUR = 0xFF000000,
         gradientLL = 0xD0000000,
         gradientLR = 0xD0000000;

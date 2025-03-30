@@ -1,6 +1,8 @@
 #include "io_base.h"
 #include "io_jxl.h"
 
+#if VOIDSPRITE_JXL_ENABLED
+
 #include <jxl/encode_cxx.h>
 #include <jxl/decode_cxx.h>
 
@@ -184,3 +186,5 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
     }
     return false;
 }
+
+#endif

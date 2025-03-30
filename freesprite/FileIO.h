@@ -289,7 +289,6 @@ inline void g_setupIO() {
         *exAnymapPPM,
         *exXBM,
         *exSR8,
-        *exJXL,
         *exVTF
         ;
 
@@ -304,7 +303,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED) );
 
     g_fileExporters.push_back( exPNG = FileExporter::flatExporter("PNG (libpng)", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED) );
-    g_fileExporters.push_back( exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB) );
+
     g_fileExporters.push_back( exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exBMP = FileExporter::flatExporter("BMP (EasyBMP)", ".bmp", &writeBMP) );
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
@@ -320,6 +319,12 @@ inline void g_setupIO() {
     g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
     g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
+
+#if VOIDSPRITE_JXL_ENABLED
+    FileExporter* exJXL;
+    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL (libjxl)", ".jxl", &readJpegXL, exJXL));
+#endif
 
     voidsnExporter = exVOIDSNv5;
 
@@ -356,7 +361,6 @@ inline void g_setupIO() {
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG (libpng)", ".png", &readPNG, exPNG));
-    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL (libjxl)", ".jxl", &readJpegXL, exJXL));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP (EasyBMP)", ".bmp", &readBMP, exBMP));
     //g_fileImporters.push_back(FileImporter::flatImporter("GIF", ".gif", &readGIF, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM (EasyBMP)", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,

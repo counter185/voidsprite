@@ -356,7 +356,7 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
                 ColorModel* mptr = modelData.targetModel;
                 std::map<std::string, double> componentData;
                 for (auto& component : modelData.components) {
-                    component.second.valueNow = component.second.range.first + component.second.valueSlider->sliderPos * (component.second.range.second - component.second.range.first);
+                    component.second.valueNow = component.second.valueSlider->getValue(component.second.range.first, component.second.range.second);
                     component.second.valueLabel->text = std::format("{:.2f}", component.second.valueNow);
                     componentData[component.first] = component.second.valueNow;
                 }

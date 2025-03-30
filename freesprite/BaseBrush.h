@@ -1,6 +1,17 @@
 #pragma once
 #include "globals.h"
 
+#define BRUSH_INT_PROPERTY(name,min,max,defaultvalue) BrushProperty{name,1,min,max,defaultvalue}
+#define BRUSH_DOUBLE_PROPERTY(name,min,max,defaultvalue) BrushProperty{name,2,min,max,defaultvalue}
+
+struct BrushProperty {
+	std::string name;
+	int type;
+	double min;
+	double max;
+	double defaultValue;
+};
+
 class BaseBrush
 {
 public:
@@ -16,6 +27,7 @@ public:
 	virtual std::string getName() { return "Base brush"; }
 	virtual std::string getTooltip() { return ""; }
 	virtual XY getSection() { return XY{ 0,0 }; }
+	virtual std::map<std::string, BrushProperty> getProperties() { return {}; }
 
 	virtual void mouseMotion(MainEditor* editor, XY pos) {
 		lastMouseMotionPos = pos;
@@ -26,6 +38,7 @@ public:
 	virtual void rightClickPress(MainEditor* editor, XY pos) {}
 	virtual void rightClickRelease(MainEditor* editor, XY pos) {}
 	virtual void renderOnCanvas(XY canvasDrawPoint, int scale) {}
+	// Get canvasDrawPoint with editor->canvas.currentDrawPoint
 	virtual void renderOnCanvas(MainEditor* editor, int scale);
 
 	void drawLocalPoint(XY canvasOrigin, XY point, int scale) {
@@ -51,3 +64,4 @@ public:
 	void drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale);
 };
 
+void g_loadBrushes();

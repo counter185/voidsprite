@@ -4,20 +4,8 @@
 #include "splitsession.h"
 #include "DrawableManager.h"
 #include "EditorColorPicker.h"
-#include "BaseBrush.h"
-#include "Brush1x1.h"
-#include "Brush3pxCircle.h"
-#include "Brush1pxLine.h"
-#include "BrushRect.h"
-#include "BrushRectFill.h"
-#include "ToolRectClone.h"
-#include "ToolColorPicker.h"
-#include "ToolSetXSymmetry.h"
-#include "ToolSetYSymmetry.h"
 #include "Layer.h"
 #include "SpritesheetPreviewScreen.h"
-#include "ToolComment.h"
-#include "ToolMeasure.h"
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
 
@@ -45,10 +33,10 @@ struct Guideline {
     int position;
 };
 
-struct Frame {
+/*struct Frame {
     std::vector<Layer*> layers;
     std::vector<CommentData> comments;
-};
+};*/
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
@@ -60,7 +48,7 @@ public:
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
     std::vector<CommentData> comments;
 
-    std::vector<Frame*> frames;
+    //std::vector<Frame*> frames;
 
     std::vector<Layer*> layers;
     int selLayer = 0;
@@ -138,6 +126,9 @@ public:
 
     std::vector<BaseScreen*> hintOpenScreensInInteractiveMode;
 
+    std::map<std::string, double> toolProperties;
+    Panel* toolPropertiesPanel = NULL;
+
     u64 editTime = 0;
     u64 lastTimestamp = -1;
 
@@ -176,6 +167,7 @@ public:
 
     void initLayers();
     virtual void setUpWidgets();
+    void initToolParameters();
     void addWidget(Drawable* wx);
     void removeWidget(Drawable* wx);
     void RecalcMousePixelTargetPoint(int x, int y);

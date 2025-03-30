@@ -13,6 +13,8 @@ public:
         text = t;
     }
 
+    XY statSize();
+
     bool focusable() override { return false; }
     void render(XY pos) override;
 };

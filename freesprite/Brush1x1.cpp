@@ -3,11 +3,30 @@
 #include "MainEditorPalettized.h"
 
 void Brush1x1::clickPress(MainEditor* editor, XY pos) {
-	editor->SetPixel(pos, editor->getActiveColor());
+	int size = editor->toolProperties["brush.squarepixel.size"];
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			editor->SetPixel(xyAdd(pos, {i,j}), editor->getActiveColor());
+		}
+	}
 }
 
 void Brush1x1::clickDrag(MainEditor* editor, XY from, XY to) {
-	editor->DrawLine(from, to, editor->getActiveColor());
+	rasterizeLine(from, to, [&](XY a) { clickPress(editor, a); });
+}
+
+void Brush1x1::renderOnCanvas(MainEditor* editor, int scale) {
+	XY canvasDrawPoint = editor->canvas.currentDrawPoint;
+	int size = editor->toolProperties["brush.squarepixel.size"];
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			XY p = xyAdd(lastMouseMotionPos, { i,j });
+			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+			drawLocalPoint(canvasDrawPoint, p, scale);
+			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+			drawPointOutline(canvasDrawPoint, p, scale);
+		}
+	}
 }
 
 void Brush1x1PixelPerfect::clickPress(MainEditor* editor, XY pos)

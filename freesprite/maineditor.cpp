@@ -1082,9 +1082,6 @@ void MainEditor::setUpWidgets()
         };
     }
 
-    currentBrush = g_brushes[0];
-    currentPattern = g_patterns[0];
-
     colorPicker = new EditorColorPicker(this);
     CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
     colorPickerPanel->position.y = 63;
@@ -1128,7 +1125,54 @@ void MainEditor::setUpWidgets()
     actionbar->addDrawable(redoButton);
     nextNavbarX += 35;
 
+    toolPropertiesPanel = new Panel();
+    toolPropertiesPanel->position = {nextNavbarX + 50, 0};
+    actionbar->addDrawable(toolPropertiesPanel);
+
     wxsManager.addDrawable(actionbar);
+
+    //this must happen after actionbar init
+    setActiveBrush(g_brushes[0]);
+    currentPattern = g_patterns[0];
+}
+
+void MainEditor::initToolParameters()
+{
+    toolPropertiesPanel->subWidgets.freeAllDrawables();
+    int x = 0;
+    if (currentBrush != NULL) {
+        for (auto& prop : currentBrush->getProperties()) {
+            UILabel* label = new UILabel(prop.second.name);
+            label->position = {x, 4};
+            x += label->statSize().x + 20;
+
+            UILabel* valueLabel = new UILabel();
+            valueLabel->position = {x, 4};
+            valueLabel->color = { 255,255,255,0xa0 };
+            x += 40;
+
+            toolPropertiesPanel->subWidgets.addDrawable(label);
+            toolPropertiesPanel->subWidgets.addDrawable(valueLabel);
+
+            switch (prop.second.type) {
+                case 1: //int
+                    UISlider* slider = new UISlider();
+                    slider->setValue(prop.second.min, prop.second.max, prop.second.defaultValue);
+                    valueLabel->text = std::to_string((int)slider->getValue(prop.second.min, prop.second.max));
+                    slider->wxHeight = 18;
+                    slider->wxWidth = 150;
+                    slider->position = { x, 8 };
+                    slider->onChangeValueCallback = [this, prop, valueLabel](UISlider* s, float) {
+                        int v = s->getValue(prop.second.min, prop.second.max);
+                        this->toolProperties[prop.first] = v;
+                        valueLabel->text = std::to_string(v);
+                    };
+                    toolPropertiesPanel->subWidgets.addDrawable(slider);
+                    x += 110;
+                    break;
+            }
+        }
+    }
 }
 
 void MainEditor::addWidget(Drawable* wx)
@@ -2072,7 +2116,13 @@ void MainEditor::setActiveBrush(BaseBrush* b)
         currentBrush->resetState();
     }
     currentBrush = b;
+    for (auto& prop : currentBrush->getProperties()) {
+        if (!toolProperties.contains(prop.first)) {
+            toolProperties[prop.first] = prop.second.defaultValue;
+        }
+    }
     brushPicker->updateActiveBrushButton(b);
+    initToolParameters();
 }
 
 void MainEditor::tickAutosave()

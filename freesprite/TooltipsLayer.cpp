@@ -9,7 +9,9 @@ void TooltipsLayer::clearTooltips()
 
 void TooltipsLayer::addTooltip(Tooltip t)
 {
-	tooltips.push_back(t);
+	if (takeTooltips) {
+		tooltips.push_back(t);
+	}
 }
 
 void TooltipsLayer::renderAll()

@@ -88,15 +88,15 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
 void PopupSetEditorPixelGrid::render()
 {
-	renderDefaultBackground();
+    renderDefaultBackground();
 
-	XY titlePos = getDefaultTitlePosition();
-	XY contentPos = getDefaultContentPosition();
+    XY titlePos = getDefaultTitlePosition();
+    XY contentPos = getDefaultContentPosition();
 
-	g_fnt->RenderString(title, titlePos.x, titlePos.y);
-	g_fnt->RenderString(text, contentPos.x, contentPos.y);
+    g_fnt->RenderString(title, titlePos.x, titlePos.y);
+    g_fnt->RenderString(text, contentPos.x, contentPos.y);
     //XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
     //g_fnt->RenderString("Opacity", opacityTextPos.x, opacityTextPos.y);
-	renderDrawables();
+    renderDrawables();
 }
 

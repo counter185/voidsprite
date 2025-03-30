@@ -533,7 +533,7 @@ void MainEditorPalettized::setUpWidgets()
         }
     };
 
-    currentBrush = g_brushes[0];
+    setActiveBrush(g_brushes[0]);
     currentPattern = g_patterns[0];
 
     colorPicker = new PalettizedEditorColorPicker(this);

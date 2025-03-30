@@ -51,7 +51,9 @@ void ButtonStartScreenSession::renderTooltip(XY pos)
             g_pushRenderTarget(screenPreviewFramebuffer);
             SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
             SDL_RenderClear(g_rd);
+            g_ttp->takeTooltips = false;
             screenStack[correspondingScreen]->render();
+            g_ttp->takeTooltips = true;
             g_popRenderTarget();
 
             int previewW = 300;
