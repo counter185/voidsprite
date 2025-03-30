@@ -50,11 +50,12 @@ Free C++ pixel art editor
 | Atrophy Engine texture | .aetex | 〰* | ✖ |
 | PS2 Icon | .icn .ico | 〰 | ✖ |
 | DirectDraw Surface | .dds | 〰* | ✖ |
-| Wii/GameCube TPL | .tpl | 〰(only RGB5A3) | ✖ |
+| Wii/GameCube TPL | .tpl | 〰* | ✖ |
 | Windows 1.0/2.0/3.11 Paint | .msp | ❔ | ✖ |
 | PS Vita GXT | .gxt | ❔ | ✖ |
 | Every other SDL_Image format | * | ✔ | ✖ |
 
+\* **Wii TPL** - only I4, RGB5A3, RGBA32
 \* **AETEX** - GXT and Switch ASTC subformats not implemented  
 \* **DDS** - only BC1, BC2, BC3 and B8G8R8A8
 

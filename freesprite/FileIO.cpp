@@ -1734,6 +1734,31 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
 
             fseek(infile, nImg.imgHdr.imageDataAddress, SEEK_SET);
             switch (nImg.imgHdr.format) {
+                case 0x00:      //I4
+                    {
+                        Layer* newLayer = new Layer(nImg.imgHdr.width, nImg.imgHdr.height);
+                        newLayer->name = "TPL I4 Layer";
+                        //uint32_t* imgDataPtr = (uint32_t*)newLayer->pixelData;
+                        int xBlocks = (int)ceil(newLayer->w / 8.0);
+                        int yBlocks = (int)ceil(newLayer->h / 8.0);
+                        for (int yb = 0; yb < yBlocks; yb++) {
+                            for (int xb = 0; xb < xBlocks; xb++) {
+                                for (int ybb = 0; ybb < 8; ybb++) {
+                                    for (int xbb = 0; xbb < 4; xbb++) {
+                                        u8 px;
+                                        fread(&px, 1, 1, infile);
+                                        u8 v1 = (px & 0b1111) * 0x11;
+                                        u8 v2 = ((px & 0b11110000) >> 4) * 0x11;
+                                        newLayer->setPixel(XY{ xb * 8 + xbb * 2, yb * 8 + ybb }, PackRGBAtoARGB(v2, v2, v2, 255));
+                                        newLayer->setPixel(XY{ xb * 8 + xbb * 2 + 1, yb * 8 + ybb }, PackRGBAtoARGB(v1, v1, v1, 255));
+                                    }
+                                }
+                            }
+                        }
+                        layers.push_back(newLayer);
+                        //TODO: don't just break if there are multiple images
+                        break;
+                    }
                 case 0x05:      //RGB5A3
                     {
                         Layer* newLayer = new Layer(nImg.imgHdr.width, nImg.imgHdr.height);
@@ -1745,7 +1770,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
                             for (int xb = 0; xb < xBlocks; xb++) {
                                 for (int ybb = 0; ybb < 4; ybb++) {
                                     for (int xbb = 0; xbb < 4; xbb++) {
-                                        uint16_t px;
+                                        u16 px;
                                         fread(&px, 2, 1, infile);
                                         px = BEtoLE16(px);
                                         newLayer->setPixel(XY{ xb * 4 + xbb, yb * 4 + ybb }, RGB5A3toARGB8888(px));
@@ -1758,6 +1783,55 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
                         break;
                     }
                     break;
+                case 0x06:      //RGBA32
+                    {
+                        Layer* newLayer = new Layer(nImg.imgHdr.width, nImg.imgHdr.height);
+                        newLayer->name = "TPL RGBA32 Layer";
+                        int xBlocks = (int)ceil(newLayer->w / 4.0);
+                        int yBlocks = (int)ceil(newLayer->h / 4.0);
+                        for (int yb = 0; yb < yBlocks; yb++) {
+                            for (int xb = 0; xb < xBlocks; xb++) {
+
+                                u8 ablock[16];
+                                u8 rblock[16];
+                                u8 gblock[16];
+                                u8 bblock[16];
+                                for (int b = 0; b < 64; b++) {
+                                    u8* lowTarget = b < 32 ? ablock : gblock;
+                                    u8* highTarget = b < 32 ? rblock : bblock;
+                                    int targetIndex = (b % 32) / 2;
+
+                                    u8* whichTarget = (b % 2 == 0) ? lowTarget : highTarget;
+                                    fread(whichTarget + targetIndex, 1, 1, infile);
+                                }
+
+                                for (int ybb = 0; ybb < 4; ybb++) {
+                                    for (int xbb = 0; xbb < 4; xbb++) {
+                                        int index = ybb * 4 + xbb;
+                                        newLayer->setPixel(XY{ xb * 4 + xbb, yb * 4 + ybb }, 
+                                            PackRGBAtoARGB(rblock[index], gblock[index], bblock[index], ablock[index]));
+                                    }
+                                }
+                            }
+                        }
+                        layers.push_back(newLayer);
+                        //TODO: don't just break if there are multiple images
+                        break;
+                    }
+                    break;
+                /*case 0x0e:      //DXT1
+                    //todo: broken
+                    {
+                        Layer* newLayer = new Layer(nImg.imgHdr.width, nImg.imgHdr.height);
+                        newLayer->name = "TPL CMPR Layer";
+                        //int xBlocks = (int)ceil(newLayer->w / 4.0);
+                        //int yBlocks = (int)ceil(newLayer->h / 4.0);
+                        //u8* dxt1 = tracked_malloc(xBlocks * yBlocks * 4 * 4 / 2);
+                        DeXT1(newLayer, newLayer->w, newLayer->h, infile);
+                        //tracked_free(dxt1);
+                        layers.push_back(newLayer);
+                        break;
+                    }*/
                 default:
                     printf("unsupported format\n");
                     break;
