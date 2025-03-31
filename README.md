@@ -55,7 +55,7 @@ Free C++ pixel art editor
 | PS Vita GXT | .gxt | ❔ | ✖ |
 | Every other SDL_Image format | * | ✔ | ✖ |
 
-\* **Wii TPL** - only I4, RGB5A3, RGBA32
+\* **Wii TPL** - only I4, RGB5A3, RGBA32  
 \* **AETEX** - GXT and Switch ASTC subformats not implemented  
 \* **DDS** - only BC1, BC2, BC3 and B8G8R8A8
 

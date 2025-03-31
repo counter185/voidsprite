@@ -579,14 +579,14 @@
     <ClCompile Include="localization\localization.cpp">
       <Filter>Source files\localization</Filter>
     </ClCompile>
-    <ClCompile Include="ScreenWideActionBar.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="io_jxl.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
     <ClCompile Include="PopupListRecoveryAutosaves.cpp">
       <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenWideActionBar.cpp">
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1109,14 +1109,14 @@
     <ClInclude Include="localization\localization.h">
       <Filter>Header files\localization</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenWideActionBar.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="io_jxl.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="PopupListRecoveryAutosaves.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenWideActionBar.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
