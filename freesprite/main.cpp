@@ -60,6 +60,7 @@ SDL_Texture* g_iconLayerUp = NULL;
 SDL_Texture* g_iconLayerDown = NULL;
 SDL_Texture* g_iconLayerDownMerge = NULL;
 SDL_Texture* g_iconLayerDuplicate = NULL;
+SDL_Texture* g_iconLayerHide = NULL;
 SDL_Texture* g_iconEraser = NULL;
 SDL_Texture* g_iconBlendMode = NULL;
 SDL_Texture* g_iconColorRGB = NULL;
@@ -77,6 +78,8 @@ SDL_Texture* g_iconNotifTheCreature = NULL;
 SDL_Texture* g_iconNotifError = NULL;
 SDL_Texture* g_iconNotifSuccess = NULL;
 SDL_Texture* g_iconNewColor = NULL;
+SDL_Texture* g_iconActionBarUndo = NULL;
+SDL_Texture* g_iconActionBarRedo = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
@@ -331,6 +334,7 @@ int main(int argc, char** argv)
     g_iconLayerDown = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_down.png");
     g_iconLayerDownMerge = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_downmerge.png");
     g_iconLayerDuplicate = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_duplicate.png");
+    g_iconLayerHide = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_hide.png");
     g_iconEraser = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_eraser.png");
     g_iconBlendMode = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_blendmode.png");
     g_iconColorRGB = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_rgb.png");
@@ -347,6 +351,8 @@ int main(int argc, char** argv)
     g_iconNotifError = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_error.png");
     g_iconNotifSuccess = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_success.png");
     g_iconNewColor = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_newcolor.png");
+    g_iconActionBarUndo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/actionbar_undo.png");
+    g_iconActionBarRedo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/actionbar_redo.png");
 
     SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);

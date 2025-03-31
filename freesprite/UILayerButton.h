@@ -22,7 +22,9 @@ public:
 		subWidgets.addDrawable(mainButton);
 
 		hideButton = new UIButton();
-		hideButton->text = "H";
+		//hideButton->text = "H";
+		hideButton->tooltip = "Hide";
+		hideButton->icon = g_iconLayerHide;
 		hideButton->position = XY{ mainButton->wxWidth + 10,0 };
 		hideButton->wxWidth = 30;
 		hideButton->setCallbackListener(1, this);

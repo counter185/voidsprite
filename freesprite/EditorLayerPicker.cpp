@@ -164,7 +164,7 @@ void EditorLayerPicker::updateLayers()
     for (int lid = caller->layers.size(); lid --> 0;) {
         Layer* l = caller->layers[lid];
         UILayerButton* layerButton = new UILayerButton(l->name);
-        layerButton->hideButton->fill = (l->hidden ? SDL_Color{ 255,255,255,0x80 } : SDL_Color{0,0,0,0x80});
+        layerButton->hideButton->fill = (l->hidden ? Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF) : SDL_Color{0,0,0,0x80});
         layerButton->position = { 0, yposition };
         layerButton->mainButton->fill = (caller->selLayer == lid ? Fill::Gradient(0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF) : SDL_Color{ 0,0,0,0x80 });
         yposition += 30;

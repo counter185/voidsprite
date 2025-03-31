@@ -176,6 +176,7 @@ extern SDL_Texture* g_mainlogo,
    *g_iconLayerDown,
    *g_iconLayerDownMerge,
    *g_iconLayerDuplicate,
+   *g_iconLayerHide,
    *g_iconEraser,
    *g_iconBlendMode,
    *g_iconColorHSV,
@@ -192,7 +193,9 @@ extern SDL_Texture* g_mainlogo,
    *g_iconNotifTheCreature,
    *g_iconNotifError,
    *g_iconNotifSuccess,
-   *g_iconNewColor;
+   *g_iconNewColor,
+   *g_iconActionBarUndo,
+   *g_iconActionBarRedo;
 
 void g_addNotification(Notification a);
 

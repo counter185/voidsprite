@@ -1118,7 +1118,8 @@ void MainEditor::makeActionBar()
     actionbar->position = { 0, navbar->wxHeight };
 
     int nextNavbarX = 5;
-    UIButton* undoButton = new UIButton("<-", "Undo");
+    UIButton* undoButton = new UIButton("", "Undo");
+    undoButton->icon = g_iconActionBarUndo;
     undoButton->onClickCallback = [this](UIButton* btn) { undo(); };
     undoButton->position = { nextNavbarX,0 };
     undoButton->wxWidth = 30;
@@ -1126,7 +1127,8 @@ void MainEditor::makeActionBar()
     actionbar->addDrawable(undoButton);
     nextNavbarX += 35;
 
-    UIButton* redoButton = new UIButton("->", "Redo");
+    UIButton* redoButton = new UIButton("", "Redo");
+    redoButton->icon = g_iconActionBarRedo;
     redoButton->onClickCallback = [this](UIButton* btn) { redo(); };
     redoButton->position = { nextNavbarX,0 };
     redoButton->wxWidth = 30;
