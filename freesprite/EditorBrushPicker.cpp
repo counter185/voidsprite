@@ -52,7 +52,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	patternMenu->wxWidth = 30 * 6 + 20;
 	patternMenu->wxHeight = 130;
 	patternMenu->position = { 0,35 };
-	patternMenu->bgColor = { 0,0,0,0x80 };
+	patternMenu->bgColor = Fill::Solid(0x80000000);
 	patternMenuPanel->subWidgets.addDrawable(patternMenu);
 
 

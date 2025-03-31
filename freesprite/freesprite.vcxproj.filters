@@ -585,6 +585,9 @@
     <ClCompile Include="io_jxl.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="PopupListRecoveryAutosaves.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1112,6 +1115,9 @@
     <ClInclude Include="io_jxl.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
+    <ClInclude Include="PopupListRecoveryAutosaves.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
@@ -1125,5 +1131,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="localization\localization_english.txt">
+      <Filter>Header files\localization</Filter>
+    </Text>
   </ItemGroup>
 </Project>

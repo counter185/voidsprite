@@ -9,9 +9,7 @@ public:
     SDL_Color color = { 255, 255, 255, 255 };
     
     UILabel() {}
-    UILabel(std::string t) {
-        text = t;
-    }
+    UILabel(std::string t) : text(t) {}
 
     XY statSize();
 

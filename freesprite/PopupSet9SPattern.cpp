@@ -42,19 +42,8 @@ PopupSet9SPattern::PopupSet9SPattern()
     nbutton->wxWidth = 120;
     nbutton->setCallbackListener(-1, this);
     wxsManager.addDrawable(nbutton);
-}
 
-void PopupSet9SPattern::render()
-{
-    renderDefaultBackground();
-
-    XY titlePos = getDefaultTitlePosition();
-    XY contentPos = getDefaultContentPosition();
-
-    g_fnt->RenderString(title, titlePos.x, titlePos.y);
-    g_fnt->RenderString(text, contentPos.x, contentPos.y);
-
-    renderDrawables();
+    makeTitleAndDesc("Set 9-segment pattern");
 }
 
 void PopupSet9SPattern::eventButtonPressed(int evt_id)

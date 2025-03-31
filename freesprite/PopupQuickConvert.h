@@ -7,9 +7,6 @@ class PopupQuickConvert :
     public BasePopup, public EventCallbackListener
 {
 public:
-    std::string title = "";
-    std::string text = "";
-    
     UICheckbox* checkForceRGB;
     UIDropdown* pickExportFormat;
     int exporterIndex = 0;
@@ -17,7 +14,6 @@ public:
     PopupQuickConvert(std::string tt, std::string tx);
 
     void takeInput(SDL_Event evt) override;
-    void render() override;
 
     void eventButtonPressed(int evt_id) override {
         closePopup();

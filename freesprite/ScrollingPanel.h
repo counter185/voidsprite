@@ -12,7 +12,7 @@ public:
     XY scrollOffset = XY{ 0,0 };
     int wxWidth = 200;
     int wxHeight = 200;
-    SDL_Color bgColor = { 0,0,0,0xe0 };
+    Fill bgColor = Fill::Solid(0xe0000000);
     bool clipElementsToSize = true;
 
     ScrollingPanel() {
@@ -26,8 +26,7 @@ public:
         updateBounds();
 
         SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-        SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-        SDL_RenderFillRect(g_rd, &r);
+        bgColor.fill(r);
 
         //DEBUG: show bounds
         /*XY endpoint = getInsideAreaWH();
@@ -39,6 +38,16 @@ public:
             g_pushClip(r);
         }
         subWidgets.renderAll(xyAdd(position, scrollOffset));
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+        XY area = getInsideAreaWH();
+        if (scrollVertically && area.y > wxHeight) {
+            int lineH = (int)(ixpow(wxHeight,2) / (double)area.y);
+            XY scrollbarOrigin = { position.x + wxWidth - 3,  position.y + (int)((-scrollOffset.y / (double)area.y) * wxHeight) };
+            //SDL_RenderPoint(g_rd, scrollbarOrigin.x, scrollbarOrigin.y);
+            SDL_RenderLine(g_rd, scrollbarOrigin.x, scrollbarOrigin.y, scrollbarOrigin.x, scrollbarOrigin.y + lineH);
+        }
+
         if (clipElementsToSize) {
             g_popClip();
         }

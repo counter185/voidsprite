@@ -7,12 +7,8 @@ class PopupMessageBox :
     public BasePopup, public EventCallbackListener
 {
 public:
-    std::string title = "";
-    std::string text = "";
-
     PopupMessageBox(std::string tt, std::string tx, XY size = {600, 200}) {
-        this->title = tt;
-        this->text = tx;
+
         setSize(size);
         UIButton* nbutton = new UIButton();
         nbutton->text = "OK";
@@ -21,9 +17,9 @@ public:
         nbutton->wxWidth = 120;
         nbutton->setCallbackListener(0, this);
         wxsManager.addDrawable(nbutton);
-    }
 
-    void render() override;
+        makeTitleAndDesc(tt, tx);
+    }
 
     void eventButtonPressed(int evt_id) override {
         closePopup();

@@ -6,8 +6,6 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
 {
     wxHeight = 240;
 
-    this->title = tt;
-    this->text = tx;
     this->popupEvtID = event_id;
     this->callback = callback;
 
@@ -39,19 +37,8 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     tboxY->wxWidth = 120;
     tboxY->setCallbackListener(2, this);
     wxsManager.addDrawable(tboxY);
-}
 
-void PopupTileGeneric::render()
-{
-    renderDefaultBackground();
-
-    XY titlePos = getDefaultTitlePosition();
-    XY contentPos = getDefaultContentPosition();
-
-    g_fnt->RenderString(title, titlePos.x, titlePos.y, {255,255,255,255}, 22);
-    g_fnt->RenderString(text, contentPos.x, contentPos.y);
-    //XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
-    renderDrawables();
+    makeTitleAndDesc(tt, tx);
 }
 
 void PopupTileGeneric::eventTextInputConfirm(int evt_id, std::string data)

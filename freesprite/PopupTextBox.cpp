@@ -6,9 +6,6 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, std::string defaultVa
 {
 	wxHeight = 240;
 
-	this->title = tt;
-	this->text = tx;
-
     UIButton* nbutton = new UIButton();
     nbutton->text = "Confirm";
     nbutton->position = XY{ wxWidth - 260, wxHeight - 40 };
@@ -31,17 +28,6 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, std::string defaultVa
     wxsManager.addDrawable(tbox);
 
     wxsManager.forceFocusOn(tbox);
-}
 
-void PopupTextBox::render()
-{
-	renderDefaultBackground();
-
-	XY titlePos = getDefaultTitlePosition();
-	XY contentPos = getDefaultContentPosition();
-
-	g_fnt->RenderString(title, titlePos.x, titlePos.y);
-	g_fnt->RenderString(text, contentPos.x, contentPos.y);
-	//XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
-	renderDrawables();
+    makeTitleAndDesc(tt, tx);
 }

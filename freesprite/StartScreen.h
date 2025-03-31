@@ -18,6 +18,7 @@
 #include "PopupQuickConvert.h"
 #include "PopupGlobalConfig.h"
 #include "SplitSessionEditor.h"
+#include "PopupListRecoveryAutosaves.h"
 #include "Timer64.h"
 #include "Panel.h"
 
@@ -176,7 +177,7 @@ public:
                 SDL_SCANCODE_F,
                 {
                     TL("vsp.nav.file"),
-                    {SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_P},
+                    {SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P},
                     {
                         {SDL_SCANCODE_O, { TL("vsp.nav.open"),
                                 [](StartScreen* screen) {
@@ -205,6 +206,12 @@ public:
                         {SDL_SCANCODE_P, { TL("vsp.launchpad.nav.preferences"),
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupGlobalConfig());
+                                }
+                            }
+                        },
+                        {SDL_SCANCODE_R, { TL("vsp.launchpad.nav.recoveryautosaves"),
+                                [](StartScreen* screen) {
+                                    g_addPopup(new PopupListRecoveryAutosaves());
                                 }
                             }
                         }

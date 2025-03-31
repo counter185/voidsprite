@@ -224,6 +224,7 @@
     <ClCompile Include="PopupApplyFilter.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupIntegerScale.cpp" />
+    <ClCompile Include="PopupListRecoveryAutosaves.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupSet9SPattern.cpp" />
@@ -395,6 +396,7 @@
     <ClInclude Include="PopupApplyFilter.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupIntegerScale.h" />
+    <ClInclude Include="PopupListRecoveryAutosaves.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupSet9SPattern.h" />
@@ -503,6 +505,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="localization\localization_english.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

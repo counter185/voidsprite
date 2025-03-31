@@ -248,16 +248,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     saveAndCloseButton->wxWidth = 130;
     saveAndCloseButton->setCallbackListener(1, this);
     wxsManager.addDrawable(saveAndCloseButton);
-}
 
-void PopupGlobalConfig::render()
-{
-    renderDefaultBackground();
-
-    XY titlePos = getDefaultTitlePosition();
-    g_fnt->RenderString("Preferences", titlePos.x, titlePos.y, {255,255,255,255}, 22);
-
-    renderDrawables();
+    makeTitleAndDesc("Preferences");
 }
 
 void PopupGlobalConfig::takeInput(SDL_Event evt)

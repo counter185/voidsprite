@@ -8,8 +8,6 @@
 #include "UICheckbox.h"
 
 PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
-    this->title = tt;
-    this->text = tx;
     wxHeight = 200;
     UIButton* nbutton = new UIButton();
     nbutton->text = "Back";
@@ -39,6 +37,8 @@ PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
     pickExportFormat->setCallbackListener(EVENT_QUICKCONVERT_PICKFORMAT, this);
 	pickExportFormat->genButtons();
 	wxsManager.addDrawable(pickExportFormat);
+
+	makeTitleAndDesc(tt, tx);
 }
 
 void PopupQuickConvert::takeInput(SDL_Event evt)
@@ -49,19 +49,6 @@ void PopupQuickConvert::takeInput(SDL_Event evt)
 	else {
 		BasePopup::takeInput(evt);
 	}
-}
-
-void PopupQuickConvert::render()
-{
-    renderDefaultBackground();
-
-    XY titlePos = getDefaultTitlePosition();
-    XY contentPos = getDefaultContentPosition();
-
-    g_fnt->RenderString(title, titlePos.x, titlePos.y);
-    g_fnt->RenderString(text, contentPos.x, contentPos.y);
-
-    renderDrawables();
 }
 
 void PopupQuickConvert::onDropFileEvent(SDL_Event evt)

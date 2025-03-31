@@ -12,8 +12,6 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     }
 
     this->caller = parent;
-    this->title = tt;
-    this->text = tx;
     UIButton* nbutton = new UIButton();
     nbutton->text = "Set";
     nbutton->position = XY{ wxWidth - 260, wxHeight - 40 };
@@ -84,19 +82,6 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     dropdown->text = "Presets";
     dropdown->setCallbackListener(39, this);
     wxsManager.addDrawable(dropdown);
+
+    makeTitleAndDesc(tt, tx);
 }
-
-void PopupSetEditorPixelGrid::render()
-{
-    renderDefaultBackground();
-
-    XY titlePos = getDefaultTitlePosition();
-    XY contentPos = getDefaultContentPosition();
-
-    g_fnt->RenderString(title, titlePos.x, titlePos.y);
-    g_fnt->RenderString(text, contentPos.x, contentPos.y);
-    //XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
-    //g_fnt->RenderString("Opacity", opacityTextPos.x, opacityTextPos.y);
-    renderDrawables();
-}
-

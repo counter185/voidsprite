@@ -10,8 +10,6 @@ class PopupSetEditorPixelGrid :
     public BasePopup, public EventCallbackListener
 {
 public:
-    std::string title = "";
-    std::string text = "";
     std::vector<XY> predefinedTileSizes = {
         {0,0},
         {8,8},
@@ -31,8 +29,6 @@ public:
     MainEditor* caller;
 
     PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx);
-
-    void render() override;
 
     void eventDropdownItemSelected(int evt_id, int index, std::string name) {
     if (evt_id == 39) {   

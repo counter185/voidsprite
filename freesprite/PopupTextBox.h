@@ -6,14 +6,10 @@
 class PopupTextBox : public BasePopup, public EventCallbackListener
 {
 public:
-	std::string title = "";
-	std::string text = "";
 
 	UITextField* tbox;
 
 	PopupTextBox(std::string tt, std::string tx, std::string defaultValue = "", int textFieldWidth = 220);
-
-	void render() override;
 
     void eventButtonPressed(int evt_id) override {
         if (evt_id == 0) {

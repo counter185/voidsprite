@@ -9,8 +9,6 @@
 PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 {
 	caller = parent;
-	title = tt;
-	text = tx;
 	textSize = parent->textSize;
 
 	textbox = new UITextField();
@@ -44,20 +42,8 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 	nbutton2->wxWidth = 120;
 	nbutton2->setCallbackListener(1, this);
 	wxsManager.addDrawable(nbutton2);
-}
 
-void PopupTextTool::render()
-{
-	renderDefaultBackground();
-
-	XY titlePos = getDefaultTitlePosition();
-	XY contentPos = getDefaultContentPosition();
-
-	g_fnt->RenderString(title, titlePos.x, titlePos.y);
-	g_fnt->RenderString(text, contentPos.x, contentPos.y);
-	//XY opacityTextPos = xyAdd(getPopupOrigin(), XY{ 20, 140 });
-	//g_fnt->RenderString("Opacity", opacityTextPos.x, opacityTextPos.y);
-	renderDrawables();
+	makeTitleAndDesc(tt, tx);
 }
 
 void PopupTextTool::eventButtonPressed(int evt_id) {

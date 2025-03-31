@@ -8,8 +8,6 @@ class PopupTileGeneric :
     public BasePopup, public EventCallbackListener
 {
 public:
-    std::string title = "";
-    std::string text = "";
 
     UITextField* tboxX;
     UITextField* tboxY;
@@ -20,8 +18,6 @@ public:
     EventCallbackListener* callback;
 
     PopupTileGeneric(EventCallbackListener* callback, std::string tt, std::string tx, XY defaultValues, int event_id);
-
-    void render() override;
 
     void eventTextInputConfirm(int evt_id, std::string data) override;
     void eventButtonPressed(int evt_id) override;

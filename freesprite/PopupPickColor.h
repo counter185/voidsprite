@@ -8,15 +8,11 @@ class PopupPickColor :
     public BasePopup, public EventCallbackListener
 {
 public:
-    std::string title = "";
-    std::string text = "";
     
     UIColorInputField* colorInput;
     UITextField* alphaInput = NULL;
 
     PopupPickColor(std::string tt, std::string tx, bool acceptAlpha = false);
-
-    void render() override;
 
     void eventButtonPressed(int evt_id) override;
     void eventTextInput(int evt_id, std::string data) override;

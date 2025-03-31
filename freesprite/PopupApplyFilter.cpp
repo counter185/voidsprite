@@ -26,7 +26,7 @@ PopupApplyFilter::~PopupApplyFilter() {
 void PopupApplyFilter::render() {
     updatePreview();
     renderFilterPopupBackground();
-    BasePopup::render();
+    renderDrawables();
     if (nowRendering) {
         g_fnt->RenderString("Rendering preview...", 2, g_windowH - 30, {255,255,255,200});
     }
@@ -134,6 +134,7 @@ void PopupApplyFilter::setupWidgets()
 {
     UILabel* title = new UILabel();
     title->text = targetFilter->name();
+    title->fontsize = 22;
     title->position = XY{5, 5};
     wxsManager.addDrawable(title);
 

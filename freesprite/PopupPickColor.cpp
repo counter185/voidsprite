@@ -4,8 +4,6 @@
 #include "FontRenderer.h"
 
 PopupPickColor::PopupPickColor(std::string tt, std::string tx, bool acceptAlpha) {
-    this->title = tt;
-    this->text = tx;
     this->acceptAlpha = acceptAlpha;
     wxHeight = 200;
 
@@ -36,19 +34,8 @@ PopupPickColor::PopupPickColor(std::string tt, std::string tx, bool acceptAlpha)
     nbutton2->wxWidth = 120;
     nbutton2->setCallbackListener(1, this);
     wxsManager.addDrawable(nbutton2);
-}
 
-void PopupPickColor::render()
-{
-    renderDefaultBackground();
-
-    XY titlePos = getDefaultTitlePosition();
-    XY contentPos = getDefaultContentPosition();
-
-    g_fnt->RenderString(title, titlePos.x, titlePos.y);
-    g_fnt->RenderString(text, contentPos.x, contentPos.y);
-
-    renderDrawables();
+    makeTitleAndDesc(tt, tx);
 }
 
 void PopupPickColor::eventButtonPressed(int evt_id)

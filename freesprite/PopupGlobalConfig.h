@@ -30,7 +30,6 @@ private:
 public:
     PopupGlobalConfig();
 
-    void render() override;
     void takeInput(SDL_Event evt) override;
 
     void eventButtonPressed(int evt_id) override;
