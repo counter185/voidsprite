@@ -72,6 +72,7 @@ protected:
     UIButton* actionButton(std::string text) {
         if (!actionButtonXInit) {
             nextActionButtonX = wxWidth - 130;
+            actionButtonXInit = true;
         }
         UIButton* nbutton = new UIButton();
         nbutton->text = text;

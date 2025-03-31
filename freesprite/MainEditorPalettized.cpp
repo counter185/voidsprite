@@ -533,9 +533,6 @@ void MainEditorPalettized::setUpWidgets()
         }
     };
 
-    setActiveBrush(g_brushes[0]);
-    currentPattern = g_patterns[0];
-
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
     colorPickerPanel->position.y = 50;
@@ -557,6 +554,11 @@ void MainEditorPalettized::setUpWidgets()
 
     navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
+
+    makeActionBar();
+
+    setActiveBrush(g_brushes[0]);
+    currentPattern = g_patterns[0];
 }
 
 void MainEditorPalettized::trySaveImage()

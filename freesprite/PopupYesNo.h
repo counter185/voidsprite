@@ -13,21 +13,11 @@ public:
 
         wxHeight = 200;
 
-        UIButton* nbutton = new UIButton();
-        nbutton->text = TL("vsp.cmn.no");
-        nbutton->position = XY{ wxWidth - 130, wxHeight - 40 };
-        nbutton->wxHeight = 35;
-        nbutton->wxWidth = 120;
+        UIButton* nbutton = actionButton(TL("vsp.cmn.no"));
         nbutton->setCallbackListener(false, this);
-        wxsManager.addDrawable(nbutton);
 
-        UIButton* ybutton = new UIButton();
-        ybutton->text = TL("vsp.cmn.yes");
-        ybutton->position = XY{ wxWidth - 260, wxHeight - 40 };
-        ybutton->wxHeight = 35;
-        ybutton->wxWidth = 120;
+        UIButton* ybutton = actionButton(TL("vsp.cmn.yes"));
         ybutton->setCallbackListener(true, this);
-        wxsManager.addDrawable(ybutton);
 
         makeTitleAndDesc(tt, tx);
     }

@@ -15,6 +15,17 @@ void UIButton::render(XY pos)
 	SDL_SetRenderDrawColor(g_rd, colorBorder.r, colorBorder.g, colorBorder.b, colorBorder.a);
 	SDL_RenderDrawRect(g_rd, &drawrect);
 
+	SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x40);
+	int offset = 4;
+	XY p1 = { drawrect.x + offset, drawrect.y + offset };
+	XY p2 = { drawrect.x + drawrect.w - offset, drawrect.y + drawrect.h - offset };
+	double hoverTime = !hoverTimer.started ? 0 
+					   : hovered ? XM1PW3P1(hoverTimer.percentElapsedTime(400)) : (1 - XM1PW3P1(hoverTimer.percentElapsedTime(200)));
+	//SDL_RenderDrawLine(g_rd, p1.x, p1.y, p1.x + drawrect.w / 2, p1.y);
+	//SDL_RenderDrawLine(g_rd, p1.x, p1.y, p1.x, p1.y + drawrect.h / 2);
+	drawLine(p2, { p2.x - drawrect.w + offset, p2.y }, 0.25 + 0.65 * hoverTime);
+	drawLine({ p2.x, p2.y - 1 }, { p2.x, p2.y - drawrect.h + offset}, 0.33 + 0.56 * hoverTime);
+
 	renderAnimations(pos);
 
 	int textX = pos.x + 5;

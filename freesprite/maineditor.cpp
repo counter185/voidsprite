@@ -1104,6 +1104,15 @@ void MainEditor::setUpWidgets()
     navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
+    makeActionBar();
+
+    //this must happen after actionbar init
+    setActiveBrush(g_brushes[0]);
+    currentPattern = g_patterns[0];
+}
+
+void MainEditor::makeActionBar()
+{
     //action bar
     ScreenWideActionBar* actionbar = new ScreenWideActionBar({});
     actionbar->position = { 0, navbar->wxHeight };
@@ -1126,14 +1135,10 @@ void MainEditor::setUpWidgets()
     nextNavbarX += 35;
 
     toolPropertiesPanel = new Panel();
-    toolPropertiesPanel->position = {nextNavbarX + 50, 0};
+    toolPropertiesPanel->position = { nextNavbarX + 50, 0 };
     actionbar->addDrawable(toolPropertiesPanel);
 
     wxsManager.addDrawable(actionbar);
-
-    //this must happen after actionbar init
-    setActiveBrush(g_brushes[0]);
-    currentPattern = g_patterns[0];
 }
 
 void MainEditor::initToolParameters()

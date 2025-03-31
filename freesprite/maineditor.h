@@ -167,6 +167,7 @@ public:
 
     void initLayers();
     virtual void setUpWidgets();
+    void makeActionBar();
     void initToolParameters();
     void addWidget(Drawable* wx);
     void removeWidget(Drawable* wx);
