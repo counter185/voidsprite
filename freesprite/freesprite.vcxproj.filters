@@ -588,6 +588,9 @@
     <ClCompile Include="ScreenWideActionBar.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="ScreenNonogramPlayer.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1117,6 +1120,9 @@
     </ClInclude>
     <ClInclude Include="ScreenWideActionBar.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenNonogramPlayer.h">
+      <Filter>Header files\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

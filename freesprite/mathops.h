@@ -60,6 +60,7 @@ XY xySubtract(XY p1, XY p2);
 u64 encodeXY(XY a);
 XY decodeXY(u64 enc);
 SDL_FPoint xytofp(XY p);
+SDL_Rect offsetRect(SDL_Rect r, int offset);
 double angleBetweenTwoPoints(XY a, XY b);
 XY getSnappedPoint(XY from, XY to);
 

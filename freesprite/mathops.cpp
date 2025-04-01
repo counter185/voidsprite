@@ -48,6 +48,16 @@ SDL_FPoint xytofp(XY p)
     return {(float)p.x, (float)p.y};
 }
 
+SDL_Rect offsetRect(SDL_Rect r, int offset)
+{
+    return {
+        r.x - offset,
+        r.y - offset,
+        r.w + offset * 2,
+        r.h + offset * 2
+    };
+}
+
 double angleBetweenTwoPoints(XY a, XY b)
 {
     return atan2(b.y - a.y, b.x - a.x) / M_PI * 180 + 180;

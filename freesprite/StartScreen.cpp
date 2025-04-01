@@ -5,6 +5,7 @@
 #include "PopupMessageBox.h"
 #include "Notification.h"
 #include "CustomTemplate.h"
+#include "ScreenNonogramPlayer.h"
 
 void StartScreen::tick() {
     if (closeNextTick) {
@@ -83,6 +84,9 @@ void StartScreen::takeInput(SDL_Event evt)
             case SDL_KEYDOWN:
                 if (evt.key.scancode == SDL_SCANCODE_V && g_ctrlModifier) {
                     tryOpenImageFromClipboard();
+                }
+                else if (evt.key.scancode == SDL_SCANCODE_N && g_ctrlModifier) {
+                    ScreenNonogramPlayer::StartDebugGame();
                 }
                 break;
         }

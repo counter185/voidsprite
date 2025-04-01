@@ -7,7 +7,11 @@ public:
 	XY currentDrawPoint = {0,0};
 	XY dimensions = { 0,0 };
 	int scale = 1;
+	int minScale = 1;
 	bool middleMouseHold = false;
+
+	Canvas() {}
+	Canvas(XY dims) : dimensions(dims) {}
 
 	//okay actually LET'S NOT USE THIS
 	bool takeInput(SDL_Event evt);

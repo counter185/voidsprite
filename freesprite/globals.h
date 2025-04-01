@@ -219,6 +219,9 @@ SDL_Texture* IMGLoadToTexture(std::string path);
 struct XY {
     int x, y;
 };
+struct XYf {
+    float x, y;
+};
 
 template <typename T>
 struct NamedOperation {

@@ -232,6 +232,7 @@
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RenderFilter.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
+    <ClCompile Include="ScreenNonogramPlayer.cpp" />
     <ClCompile Include="ScreenWideActionBar.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="SplitSessionEditor.cpp" />
@@ -405,6 +406,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="ScreenNonogramPlayer.h" />
     <ClInclude Include="ScreenWideActionBar.h" />
     <ClInclude Include="sdl23compat.h" />
     <ClInclude Include="settings.h" />

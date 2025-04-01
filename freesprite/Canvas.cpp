@@ -83,15 +83,15 @@ void Canvas::zoom(int how_much)
 {
     XY centerAround = {g_mouseX, g_mouseY};//XY{ g_windowW / 2, g_windowH / 2 };
 
-    XY screenCenterPoint = XY{
-            (currentDrawPoint.x - centerAround.x) / -scale,
-            (currentDrawPoint.y - centerAround.y) / -scale
+    XYf screenCenterPoint = XYf{
+        (currentDrawPoint.x - centerAround.x) / (float)-scale,
+        (currentDrawPoint.y - centerAround.y) / (float)-scale
     };
     scale += how_much;
-    scale = scale < 1 ? 1 : scale;
+    scale = ixmax(scale, minScale);
     XY onscreenPointNow = XY{
-        currentDrawPoint.x + screenCenterPoint.x * scale,
-        currentDrawPoint.y + screenCenterPoint.y * scale
+        (int)(currentDrawPoint.x + screenCenterPoint.x * scale),
+        (int)(currentDrawPoint.y + screenCenterPoint.y * scale)
     };
     XY pointDiff = xySubtract(centerAround, onscreenPointNow);
     currentDrawPoint = xyAdd(currentDrawPoint, pointDiff);
@@ -105,6 +105,7 @@ void Canvas::panCanvas(XY by)
 
 void Canvas::recenter(XY windowDimensions)
 {
+    scale = ixmax(scale, minScale);
     windowDimensions = windowDimensions.x == -1 ? XY{g_windowW, g_windowH} : windowDimensions;
     currentDrawPoint = XY{
         (windowDimensions.x / 2) - (dimensions.x * scale) / 2,
