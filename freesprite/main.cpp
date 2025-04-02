@@ -41,6 +41,7 @@ int renderScale = 1;
 SDL_Texture* viewport = NULL;
 std::string g_programDirectory = "";
 
+std::string lastWindowTitle = "";
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
@@ -296,12 +297,13 @@ int main(int argc, char** argv)
     SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
     //IMG_Init(-1);   //😈time to get evil
-    const char* windowTitle = "void" UTF8_DIAMOND "sprite"
+    std::string windowTitle = "void" UTF8_DIAMOND "sprite"
 #if _DEBUG
         " " UTF8_DIAMOND " DEBUG"
 #endif
     ;
-    g_wd = SDL_CreateWindow(windowTitle, g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
+    g_wd = SDL_CreateWindow(windowTitle.c_str(), g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
+    lastWindowTitle = windowTitle;
     g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
     SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
     platformInit();
@@ -813,6 +815,11 @@ int main(int argc, char** argv)
             screenStack.size() == 1 ? "1 active workspace" : std::format("{} active workspaces", screenStack.size()),
             screenStack.size() > 0 ? screenStack[currentScreen]->getRPCString() : "-"
         );
+        std::string newWindowTitle = windowTitle + std::format("   | {}   | {} active workspaces", (screenStack.size() > 0 ? screenStack[currentScreen]->getRPCString() : "--"), screenStack.size());
+        if (newWindowTitle != lastWindowTitle) {
+            SDL_SetWindowTitle(g_wd, newWindowTitle.c_str());
+            lastWindowTitle = newWindowTitle;
+        }
     }
 
     if (threadSet) {
