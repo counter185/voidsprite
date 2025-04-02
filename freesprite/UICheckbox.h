@@ -5,33 +5,49 @@
 #include "EventCallbackListener.h"
 
 class UICheckboxButton : public UIButton {
-public:
+private:
     bool state = false;
+    bool* statePtr = NULL;
+public:
     Timer64 stateChangeTimer;
 
-    UICheckboxButton(bool defaultState = false) {
+    UICheckboxButton(bool* linkTo) : statePtr(linkTo) {
         wxHeight = wxWidth = 30;
         icon = NULL;
         text = "";
-        state = defaultState;
         stateChangeTimer.start();
+    }
+
+    UICheckboxButton(bool defaultState = false) : UICheckboxButton(&state) {
+        state = defaultState;
     }
     void render(XY pos) override;
 
     void click() override;
+
+    bool isChecked() { return *statePtr; }
+    void setChecked(bool s) { 
+        if (s != isChecked()) {
+            stateChangeTimer.start();
+        }
+        *statePtr = s;
+    }
 };
 
 class UICheckbox :
     public Panel, public EventCallbackListener
 {
+private:
+    UICheckbox(std::string text);
 public:
     UILabel* label;
     UICheckboxButton* checkbox;
 
-    UICheckbox(std::string text, bool defaultState = false);
+    UICheckbox(std::string text, bool* linkTo);
+    UICheckbox(std::string text, bool defaultState);
 
     bool isChecked() {
-        return checkbox->state;
+        return checkbox->isChecked();
     }
 
     void eventButtonPressed(int evt_id) override {

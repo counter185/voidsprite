@@ -1,17 +1,28 @@
 #include "UICheckbox.h"
 #include "UILabel.h"
 
-UICheckbox::UICheckbox(std::string text, bool defaultState)
+UICheckbox::UICheckbox(std::string text)
+{
+	label = new UILabel();
+	label->text = text;
+	label->position = { 35,0 };
+	subWidgets.addDrawable(label);
+}
+
+UICheckbox::UICheckbox(std::string text, bool* linkTo) : UICheckbox(text)
+{
+	checkbox = new UICheckboxButton(linkTo);
+	checkbox->position = { 0,0 };
+	checkbox->setCallbackListener(0, this);
+	subWidgets.addDrawable(checkbox);
+}
+
+UICheckbox::UICheckbox(std::string text, bool defaultState) : UICheckbox(text)
 {
 	checkbox = new UICheckboxButton(defaultState);
 	checkbox->position = { 0,0 };
 	checkbox->setCallbackListener(0, this);
 	subWidgets.addDrawable(checkbox);
-
-	label = new UILabel();
-	label->text = text;
-	label->position = { 35,0 };
-	subWidgets.addDrawable(label);
 }
 
 void UICheckboxButton::render(XY pos) {
@@ -25,7 +36,7 @@ void UICheckboxButton::render(XY pos) {
 	XY lineP3 = { r.x + r.w, lineP2.y - ((r.x+r.w) - lineP2.x)};
 
 	double timer = XM1PW3P1(stateChangeTimer.percentElapsedTime(400));
-	if (state) {
+	if (isChecked()) {
 		drawLine(lineP2, lineP1, timer);
 		drawLine(lineP2, lineP3, timer);
 	}
@@ -37,7 +48,7 @@ void UICheckboxButton::render(XY pos) {
 
 void UICheckboxButton::click()
 {
-	state = !state;
+	setChecked(!isChecked());
 	stateChangeTimer.start();
 	UIButton::click();
 }
