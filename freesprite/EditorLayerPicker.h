@@ -20,7 +20,6 @@ public:
 	void render(XY position) override;
 
 	void eventGeneric(int evt_id, int data1, int data2) override;
-	void eventButtonPressed(int evt_id) override;
 	void eventSliderPosChanged(int evt_id, float value) override;
 	void eventSliderPosFinishedChanging(int evt_id, float value) override;
 

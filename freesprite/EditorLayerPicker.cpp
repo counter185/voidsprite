@@ -18,9 +18,9 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     addBtn->position = { 5, 30 };
     //addBtn->text = "+";
     addBtn->wxWidth = 30;
-    addBtn->setCallbackListener(-1, this);
     addBtn->icon = g_iconLayerAdd;
     addBtn->tooltip = "New layer";
+    addBtn->onClickCallback = [this](UIButton*) { caller->newLayer(); updateLayers(); };
     subWidgets.addDrawable(addBtn);
 
     UIButton* removeBtn = new UIButton();
@@ -29,7 +29,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     removeBtn->wxWidth = 30;
     removeBtn->icon = g_iconLayerDelete;
     removeBtn->tooltip = "Delete layer";
-    removeBtn->setCallbackListener(-2, this);
+    removeBtn->onClickCallback = [this](UIButton*) { caller->deleteLayer(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(removeBtn);
 
     UIButton* upBtn = new UIButton();
@@ -37,7 +37,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     upBtn->wxWidth = 30;
     upBtn->icon = g_iconLayerUp;
     upBtn->tooltip = "Move layer up";
-    upBtn->setCallbackListener(-3, this);
+    upBtn->onClickCallback = [this](UIButton*) { caller->moveLayerUp(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(upBtn);
 
     UIButton* downBtn = new UIButton();
@@ -45,7 +45,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     downBtn->wxWidth = 30;
     downBtn->icon = g_iconLayerDown;
     downBtn->tooltip = "Move layer down";
-    downBtn->setCallbackListener(-4, this);
+    downBtn->onClickCallback = [this](UIButton*) { caller->moveLayerDown(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(downBtn);
 
     UIButton* mergeDownBtn = new UIButton();
@@ -54,7 +54,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     mergeDownBtn->wxWidth = 30;
     mergeDownBtn->icon = g_iconLayerDownMerge;
     mergeDownBtn->tooltip = "Merge down";
-    mergeDownBtn->setCallbackListener(-5, this);
+    mergeDownBtn->onClickCallback = [this](UIButton*) { caller->mergeLayerDown(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(mergeDownBtn);
 
     UIButton* duplicateBtn = new UIButton();
@@ -62,7 +62,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     duplicateBtn->wxWidth = 30;
     duplicateBtn->icon = g_iconLayerDuplicate;
     duplicateBtn->tooltip = "Duplicate layer";
-    duplicateBtn->setCallbackListener(-6, this);
+    duplicateBtn->onClickCallback = [this](UIButton*) { caller->duplicateLayer(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(duplicateBtn);
 
     UILabel* opacityLabel = new UILabel();
@@ -118,29 +118,6 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     updateLayers();
 }
 
-void EditorLayerPicker::eventButtonPressed(int evt_id)
-{
-    if (evt_id == -1) {
-        caller->newLayer();
-    }
-    else if (evt_id == -2) {
-        caller->deleteLayer(caller->selLayer);
-    }
-    else if (evt_id == -3) {
-        caller->moveLayerUp(caller->selLayer);
-    }
-    else if (evt_id == -4) {
-        caller->moveLayerDown(caller->selLayer);
-    }
-    else if (evt_id == -5) {
-        caller->mergeLayerDown(caller->selLayer);
-    }
-    else if (evt_id == -6) {
-        caller->duplicateLayer(caller->selLayer);
-    }
-    updateLayers();
-}
-
 void EditorLayerPicker::eventSliderPosChanged(int evt_id, float value)
 {
     if (evt_id == EVENT_LAYERPICKER_OPACITYSLIDER) {
@@ -163,7 +140,7 @@ void EditorLayerPicker::updateLayers()
     int yposition = 0;
     for (int lid = caller->layers.size(); lid --> 0;) {
         Layer* l = caller->layers[lid];
-        UILayerButton* layerButton = new UILayerButton(l->name);
+        UILayerButton* layerButton = new UILayerButton(l->name, l);
         layerButton->hideButton->fill = (l->hidden ? Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF) : SDL_Color{0,0,0,0x80});
         layerButton->position = { 0, yposition };
         layerButton->mainButton->fill = (caller->selLayer == lid ? Fill::Gradient(0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF) : SDL_Color{ 0,0,0,0x80 });

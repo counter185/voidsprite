@@ -3,18 +3,32 @@
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
 #include "Panel.h"
+#include "UIButton.h"
+
+class LayerActiveButton : public UIButton {
+private:
+	Layer* ll = NULL;
+public:
+	LayerActiveButton(Layer* l) : UIButton(), ll(l) {}
+
+	void render(XY at) override;
+};
 
 class UILayerButton : public Panel, public EventCallbackListener
 {
+private:
+	Layer* layer;
 public:
 	UIButton* mainButton;
 	UIButton* hideButton;
-	
-	UILayerButton(std::string mainName) {
+
+	UILayerButton(std::string mainName, Layer* linkedLayer) {
 		wxWidth = 240;
 		wxHeight = 30;
 
-		mainButton = new UIButton();
+		layer = linkedLayer;
+
+		mainButton = new LayerActiveButton(layer);
 		mainButton->text = mainName;
 		mainButton->position = XY{ 0,0 };
 		mainButton->wxWidth = 200;

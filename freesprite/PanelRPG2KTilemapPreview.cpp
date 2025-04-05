@@ -9,17 +9,17 @@ PanelRPG2KTilemapPreview::PanelRPG2KTilemapPreview(RPG2KTilemapPreviewScreen* ca
     wxWidth = 280;
     wxHeight = 180;
 
-    btnLL = new UILayerButton("Lower layer");
+    btnLL = new UILayerButton("Lower layer", NULL);
     btnLL->position = XY{ 5, 100 };
     btnLL->setCallbackListener(0, this);
     subWidgets.addDrawable(btnLL);
 
-    btnUL = new UILayerButton("Upper layer");
+    btnUL = new UILayerButton("Upper layer", NULL);
     btnUL->position = XY{ 5, 65 };
     btnUL->setCallbackListener(1, this);
     subWidgets.addDrawable(btnUL);
 
-    btnEL = new UILayerButton("Event layer");
+    btnEL = new UILayerButton("Event layer", NULL);
     btnEL->position = XY{ 5, 30 };
     btnEL->setCallbackListener(2, this);
     subWidgets.addDrawable(btnEL);
