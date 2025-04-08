@@ -270,6 +270,8 @@ struct IntLineMapElement {
 class IntLineMap {
 public:
     int pointCount = 0;
+    // Skips checking if a point already exists in the map when adding
+    // Improves speed but you must ensure you don't add duplicates
     bool iPromiseNotToPutDuplicatePoints = false;
     std::map<int, std::vector<IntLineMapElement>> intlineMap;
 

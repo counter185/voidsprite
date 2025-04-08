@@ -56,6 +56,8 @@
 #define EVENT_TILEMAP_RESIZE 53
 #define EVENT_MAINEDITOR_RESCALELAYER 54
 
+//get rid of this whole system somehow
+// (maybe only leave it for async ops like file popups)
 class EventCallbackListener {
 public:
 	virtual void eventGeneric(int evt_id, int data1, int data2) {}

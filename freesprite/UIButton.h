@@ -24,6 +24,7 @@ public:
     Timer64 lastClick;
 
     std::function<void(UIButton*)> onClickCallback = NULL;
+    std::function<void(UIButton*)> onRightClickCallback = NULL;
 
     UIButton(std::string text = "", std::string tooltip = "") : Drawable() 
     {

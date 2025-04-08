@@ -48,7 +48,13 @@
                                         "Drag a file into this window to convert to the same directory."},
 
     {"vsp.launchpad.recoveryautosaves.desc", "Sessions saved with the recovery autosave feature will appear here.\n"
-                                             "You can set the recovery autosave delay in preferences."},
+                                             "You can set the recovery autosave delay in preferences.\n"
+                                             "Right click to delete an autosaved file."},
+    {"vsp.launchpad.recoveryautosaves.deleteconfirm", "Delete this file?"},
+    {"vsp.launchpad.recoveryautosaves.deleteconfirm.desc", "This autosaved file will be deleted:"},
+    {"vsp.launchpad.recoveryautosaves.deleted", "Autosave successfully deleted"},
+    {"vsp.launchpad.recoveryautosaves.deletefail", "Failed to delete file"},
+    {"vsp.launchpad.recoveryautosaves.allfilesize", "Overall size: "},
 
     // screen: voidsprite main editor
     {"vsp.maineditor.file","File"},

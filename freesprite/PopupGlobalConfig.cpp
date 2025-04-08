@@ -47,24 +47,21 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     XY posInTab = { 0,10 };
 
-    UICheckbox* cb6 = new UICheckbox("Vertical sync", g_config.vsync);
+    UICheckbox* cb6 = new UICheckbox("Vertical sync", &g_config.vsync);
     cb6->position = posInTab;
     cb6->checkbox->tooltip = "When enabled, the framerate will be locked to your display's refresh rate.\nDisabling this will make brushes smoother but also increase energy consumption.\nvoidsprite must be restarted for this change to take effect.";
-    cb6->setCallbackListener(CHECKBOX_VSYNC, this);
     configTabs->tabs[0].wxs.addDrawable(cb6);
     posInTab.y += 35;
 
-    UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", g_config.saveLoadFlatImageExtData);
+    UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", &g_config.saveLoadFlatImageExtData);
     cb7->position = posInTab;
     cb7->checkbox->tooltip = "When enabled, voidsprite will load and save extra data such as canvas comments,\ntile grid and symmetry to PNGs.";
-    cb7->setCallbackListener(CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA, this);
     configTabs->tabs[0].wxs.addDrawable(cb7);
     posInTab.y += 35;
 
-    UICheckbox* cb8 = new UICheckbox("Discord Rich Presence", g_config.useDiscordRPC);
+    UICheckbox* cb8 = new UICheckbox("Discord Rich Presence", &g_config.useDiscordRPC);
     cb8->position = posInTab;
     cb8->checkbox->tooltip = "When enabled, your activity will be shared as your Discord status.\nSupported only on Windows.";
-    cb8->setCallbackListener(CHECKBOX_DISCORD_RPC, this);
     configTabs->tabs[0].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
@@ -116,21 +113,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
 
-    UICheckbox* cb1 = new UICheckbox("Open saved file location", g_config.openSavedPath);
+    UICheckbox* cb1 = new UICheckbox("Open saved file location", &g_config.openSavedPath);
     cb1->position = posInTab;
-    cb1->setCallbackListener(CHECKBOX_OPEN_SAVED_PATH, this);
     configTabs->tabs[1].wxs.addDrawable(cb1);
     posInTab.y += 35;
 
-    UICheckbox* cb3 = new UICheckbox("Row/column index labels start at 1", g_config.rowColIndexesStartAt1);
+    UICheckbox* cb3 = new UICheckbox("Row/column index labels start at 1", &g_config.rowColIndexesStartAt1);
     cb3->position = posInTab;
-    cb3->setCallbackListener(CHECKBOX_ROWCOLS_START_AT_1, this);
     configTabs->tabs[1].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
-    cb3 = new UICheckbox("Pan canvas with touchpad", g_config.scrollWithTouchpad);
+    cb3 = new UICheckbox("Pan canvas with touchpad", &g_config.scrollWithTouchpad);
     cb3->position = posInTab;
-    cb3->setCallbackListener(CHECKBOX_SCROLL_WITH_TOUCHPAD, this);
     configTabs->tabs[1].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
@@ -146,17 +140,15 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(tf2);
     posInTab.y += 35;
 
-    UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", g_config.isolateRectOnLockTile);
+    UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", &g_config.isolateRectOnLockTile);
     cb4->position = posInTab;
     cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
-    cb4->setCallbackListener(CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE, this);
     configTabs->tabs[1].wxs.addDrawable(cb4);
     posInTab.y += 35;
 
-    UICheckbox* cb5 = new UICheckbox("Lock Fill tool to tile size", g_config.fillToolTileBound);
+    UICheckbox* cb5 = new UICheckbox("Lock Fill tool to tile size", &g_config.fillToolTileBound);
     cb5->position = posInTab;
     cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
-    cb5->setCallbackListener(CHECKBOX_FILL_TOOL_TILE_BOUND, this);
     configTabs->tabs[1].wxs.addDrawable(cb5);
     posInTab.y += 35;
 
@@ -307,36 +299,6 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
         bindingKey = true;
         bindingKeyIndex = evt_id - 1000;
         keybindButtons[bindingKeyIndex].second->text = std::format("{} [SET KEY... (ESC: cancel, LShift: clear)]", keybindButtons[bindingKeyIndex].first.name);
-    }
-}
-
-void PopupGlobalConfig::eventCheckboxToggled(int evt_id, bool checked)
-{
-    switch (evt_id) {
-        case CHECKBOX_OPEN_SAVED_PATH:
-            g_config.openSavedPath = checked;
-            break;
-        case CHECKBOX_SCROLL_WITH_TOUCHPAD:
-            g_config.scrollWithTouchpad = checked;
-            break;
-        case CHECKBOX_ISOLATE_RECT_ON_LOCK_TILE:
-            g_config.isolateRectOnLockTile = checked;
-            break;
-        case CHECKBOX_FILL_TOOL_TILE_BOUND:
-            g_config.fillToolTileBound = checked;
-            break;
-        case CHECKBOX_VSYNC:
-            g_config.vsync = checked;
-            break;
-        case CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA:
-            g_config.saveLoadFlatImageExtData = checked;
-            break;
-        case CHECKBOX_DISCORD_RPC:
-            g_config.useDiscordRPC = checked;
-            break;
-        case CHECKBOX_ROWCOLS_START_AT_1:
-            g_config.rowColIndexesStartAt1 = checked;
-            break;
     }
 }
 

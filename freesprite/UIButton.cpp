@@ -106,7 +106,10 @@ void UIButton::click()
 void UIButton::rightClick()
 {
 	lastClick.start();
-	if (callback != NULL) {
+	if (onRightClickCallback != NULL) {
+		onRightClickCallback(this);
+	}
+	else if (callback != NULL) {
 		callback->eventButtonRightClicked(callback_id);
 	}
 }

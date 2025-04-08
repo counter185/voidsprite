@@ -33,7 +33,6 @@ public:
     void takeInput(SDL_Event evt) override;
 
     void eventButtonPressed(int evt_id) override;
-    void eventCheckboxToggled(int evt_id, bool checked) override;
     void eventTextInput(int evt_id, std::string text) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
