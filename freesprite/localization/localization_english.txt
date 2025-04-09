@@ -44,6 +44,7 @@
     {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
     {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
     {"vsp.launchpad.error.clipboard_no_image", "No image in clipboard"},
+    {"vsp.launchpad.error.templatefail", "Failed to load template"},
 
     {"vsp.launchpad.quickconvert.desc", "Select the format to export the image to.\n"
                                         "Drag a file into this window to convert to the same directory."},

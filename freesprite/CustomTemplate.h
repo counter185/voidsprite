@@ -3,6 +3,8 @@
 class CustomTemplate :
     public BaseTemplate
 {
+private:
+    CustomTemplate() {}
 public:
     std::string name = "";
     Layer* image = NULL;
@@ -10,10 +12,12 @@ public:
     XY tilepadding = { 0,0 };
     std::vector<CommentData> comments;
 
-    static CustomTemplate* tryLoad(PlatformNativePathString path);
+    std::string pathToFile;
 
-    CustomTemplate() {
+    CustomTemplate(PlatformNativePathString path) : pathToFile(convertStringToUTF8OnWin32(path)) {
+        name = fileNameFromPath(pathToFile);
     }
+    
     std::string getName() override { return name; };
     Layer* generate() override;
     XY tileSize() override { return tilesize; }

@@ -159,7 +159,7 @@ extern Gamepad* g_gamepad;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
 extern std::vector<Pattern*> g_patterns;
-extern std::vector<BaseTemplate*> g_templates;
+inline std::vector<BaseTemplate*> g_templates;
 inline double g_deltaTime = 1.0;
 inline double g_frameDeltaTime = 0.001;
 inline std::vector<NineSegmentPattern*> g_9spatterns;

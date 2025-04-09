@@ -84,7 +84,6 @@ SDL_Texture* g_iconActionBarRedo = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
-std::vector<BaseTemplate*> g_templates;
 
 std::vector<Notification> g_notifications;
 
@@ -432,8 +431,8 @@ int main(int argc, char** argv)
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".png"),
         platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".voidsn")
         });
-    for (auto& t : customTemplatePaths) {
-        CustomTemplate* tt = CustomTemplate::tryLoad(t);
+    for (PlatformNativePathString& t : customTemplatePaths) {
+        CustomTemplate* tt = new CustomTemplate(t);
         if (tt != NULL) {
             g_templates.push_back(tt);
             customTemplates++;

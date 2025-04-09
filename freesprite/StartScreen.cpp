@@ -238,7 +238,12 @@ void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string n
 {
     if (evt_id == EVENT_STARTSCREEN_TEMPLATEPICKED) {
         BaseTemplate* templ = g_templates[index];
-        MainEditor* newMainEditor = new MainEditor(templ->generate());
+        Layer* templateLayer = templ->generate();
+        if (templateLayer == NULL) {
+            g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.templatefail")));
+            return;
+        }
+        MainEditor* newMainEditor = new MainEditor(templateLayer);
         std::vector<CommentData> templateComments = templ->placeComments();
         for (CommentData& comment : templateComments) {
             newMainEditor->comments.push_back(comment);
