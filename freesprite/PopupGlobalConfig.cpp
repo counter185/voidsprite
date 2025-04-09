@@ -90,7 +90,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     posInTab.y += 35;
 
     std::vector<std::string> langNames;
-    for (auto& loc : g_localizations) {
+    for (auto& loc : getLocalizations()) {
         langLocNames.push_back(loc.first);
         langNames.push_back(loc.second.langName);
     }
@@ -102,7 +102,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     dd2->wxWidth = 180;
     dd2->setCallbackListener(DROPDOWN_LANGUAGE, this);
     dd2->setTextToSelectedItem = true;
-    dd2->text = g_localizations.contains(g_config.language) ? g_localizations[g_config.language].langName : "???";
+    dd2->text = getLocalizations().contains(g_config.language) ? getLocalizations()[g_config.language].langName : "???";
     configTabs->tabs[0].wxs.addDrawable(dd2);
     posInTab.y += 35;
 

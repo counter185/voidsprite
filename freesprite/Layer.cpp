@@ -98,16 +98,17 @@ Layer* Layer::copyWithNoTextureInit()
 //i don't even know if this works
 Layer* Layer::copyScaled(XY dimensions)
 {
-    Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-
-    for (int y = 0; y < newLayer->h; y++) {
-        for (int x = 0; x < newLayer->w; x++) {
-            XY samplePoint = {
-                w * (x / (float)newLayer->w),
-                h * (y / (float)newLayer->h)
-            };
-            newLayer->setPixel({x, y}, getPixelAt(samplePoint));
-            //newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
+    Layer* newLayer = tryAllocLayer(dimensions.x, dimensions.y);
+    if (newLayer != NULL) {
+        for (int y = 0; y < newLayer->h; y++) {
+            for (int x = 0; x < newLayer->w; x++) {
+                XY samplePoint = {
+                    w * (x / (float)newLayer->w),
+                    h * (y / (float)newLayer->h)
+                };
+                newLayer->setPixel({ x, y }, getPixelAt(samplePoint));
+                //newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
+            }
         }
     }
     return newLayer;

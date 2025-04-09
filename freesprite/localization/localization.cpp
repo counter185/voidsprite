@@ -21,3 +21,8 @@ std::string g_getLocString(std::string key) {
         return std::string("--NO KEY: ") + key;
     }
 }
+
+//compiler bug workaround
+std::map<std::string, LocalizationData>& getLocalizations() {
+    return g_localizations;
+}
