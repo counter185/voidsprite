@@ -10,10 +10,10 @@ public:
 
     std::map<std::string, std::string> importExportExtdata;
 
-    u8* pixelData;	//!!! THIS IS IN ARGB
+    u8* pixelData = NULL;	//!!! THIS IS IN ARGB
     std::vector<uint8_t*> undoQueue;
     std::vector<uint8_t*> redoQueue;
-    int w, h;
+    int w = -1, h = -1;
     SDL_Texture* tex = NULL;
     XY texDimensions = {0,0};
     bool layerDirty = true;
@@ -32,16 +32,9 @@ public:
     Layer(int width, int height) {
         w = width;
         h = height;
-        pixelData = (uint8_t*)tracked_malloc(width * height * 4, "Layers");
-        if (pixelData != NULL) {
-            memset(pixelData, 0, width * height * 4);
-            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-            texDimensions = XY{ w,h };
-            SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-        }
+        allocMemory();
     }
     Layer(SDL_Surface* from) : Layer(from->w, from->h) {
-        //pixelData = (uint8_t*)tracked_malloc(w * h * 4);
         if (from->format == SDL_PIXELFORMAT_ARGB8888) {
             memcpy(pixelData, from->pixels, w * h * 4);
         }
@@ -60,6 +53,45 @@ public:
             tracked_free(r);
         }
         tracked_destroyTexture(tex);
+    }
+
+    /// <summary>
+    /// Tries to allocate a new layer. If either memory allocation or texture creation fails, frees it and returns NULL.
+    /// </summary>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <returns>Valid Layer* on success, NULL on failure.</returns>
+    static Layer* tryAllocLayer(int width, int height) {
+        if (width > 0 && height > 0) {
+            Layer* ret = new Layer();
+            ret->w = width;
+            ret->h = height;
+            if (ret->allocMemory()) {
+                return ret;
+            }
+            else {
+                delete ret;
+                return NULL;
+            }
+        }
+        return NULL;
+    }
+
+    virtual bool allocMemory() {
+        pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
+        if (pixelData != NULL) {
+            memset(pixelData, 0, w * h * 4);
+            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+            texDimensions = XY{ w,h };
+            SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+            if (tex == NULL) {
+                tracked_free(pixelData);
+                pixelData = NULL;
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     virtual void updateTexture() {

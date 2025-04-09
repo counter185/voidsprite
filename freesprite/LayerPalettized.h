@@ -1,16 +1,33 @@
 #pragma once
 #include "Layer.h"
+
+//todo: rename it all to indexed
 class LayerPalettized :
     public Layer
 {
+protected:
+	LayerPalettized() : Layer() {}
 public:
 	std::vector<uint32_t> palette;
 
 	//here, pixelData is supposed to be treated as an array of 32-bit indices.
 
-	LayerPalettized(int w, int h) : Layer(w, h) {
-		memset(pixelData, -1, w * h * 4);
-		isPalettized = true;
+	LayerPalettized(int w, int h) : Layer(w, h) {}
+
+	static LayerPalettized* tryAllocIndexedLayer(int width, int height) {
+		if (width > 0 && height > 0) {
+			LayerPalettized* ret = new LayerPalettized();
+			ret->w = width;
+			ret->h = height;
+			if (ret->allocMemory()) {
+				return ret;
+			}
+			else {
+				delete ret;
+				return NULL;
+			}
+		}
+		return NULL;
 	}
 
 	void updateTexture() override {
@@ -46,6 +63,15 @@ public:
 		}
 		SDL_UnlockTexture(tex);
 		layerDirty = false;
+	}
+
+	bool allocMemory() override {
+		if (Layer::allocMemory()) {
+			memset(pixelData, -1, w * h * 4);
+			isPalettized = true;
+			return true;
+		}
+		return false;
 	}
 
 	uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) override {

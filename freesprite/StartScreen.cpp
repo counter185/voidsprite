@@ -6,6 +6,7 @@
 #include "Notification.h"
 #include "CustomTemplate.h"
 #include "ScreenNonogramPlayer.h"
+#include "LayerPalettized.h"
 
 void StartScreen::tick() {
     if (closeNextTick) {
@@ -101,7 +102,14 @@ void StartScreen::eventButtonPressed(int evt_id) {
                 try {
                     int newImgW = std::stoi(tab0TextFieldW->getText());
                     int newImgH = std::stoi(tab0TextFieldH->getText());
-                    g_addScreen(new MainEditor(XY{ newImgW, newImgH }));
+                    Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
+                    if (newLayer != NULL) {
+                        MainEditor* newMainEditor = new MainEditor(newLayer);
+                        g_addScreen(newMainEditor);
+                    }
+                    else {
+                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
+                    }
                 }
                 catch (std::out_of_range) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
@@ -118,9 +126,15 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     XY cellSize = XY{ std::stoi(tab1TextFieldCW->getText()) , std::stoi(tab1TextFieldCH->getText()) };
                     int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->getText());
                     int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
-                    MainEditor* newMainEditor = new MainEditor(XY{ newImgW, newImgH });
-                    newMainEditor->tileDimensions = cellSize;
-                    g_addScreen(newMainEditor);
+                    Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
+                    if (newLayer != NULL) {
+                        MainEditor* newMainEditor = new MainEditor(newLayer);
+                        newMainEditor->tileDimensions = cellSize;
+                        g_addScreen(newMainEditor);
+                    }
+                    else {
+                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
+                    }
                 }
                 catch (std::out_of_range) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
@@ -139,7 +153,15 @@ void StartScreen::eventButtonPressed(int evt_id) {
                 try {
                     int newImgW = std::stoi(tab0TextFieldW->getText());
                     int newImgH = std::stoi(tab0TextFieldH->getText());
-                    g_addScreen(new MainEditorPalettized(XY{ newImgW, newImgH }));
+                    LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
+                    if (newLayer != NULL) {
+                        newLayer->palette = g_palettes[PALETTE_DEFAULT];
+                        MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
+                        g_addScreen(newMainEditor);
+                    }
+                    else {
+                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
+                    }
                 }
                 catch (std::out_of_range) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
@@ -156,9 +178,16 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     XY cellSize = XY{ std::stoi(tab1TextFieldCW->getText()) , std::stoi(tab1TextFieldCH->getText()) };
                     int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->getText());
                     int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
-                    MainEditorPalettized* newMainEditor = new MainEditorPalettized(XY{ newImgW, newImgH });
-                    newMainEditor->tileDimensions = cellSize;
-                    g_addScreen(newMainEditor);
+                    LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
+                    if (newLayer != NULL) {
+                        newLayer->palette = g_palettes[PALETTE_DEFAULT];
+                        MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
+                        newMainEditor->tileDimensions = cellSize;
+                        g_addScreen(newMainEditor);
+                    }
+                    else {
+                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
+                    }
                 }
                 catch (std::out_of_range) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));

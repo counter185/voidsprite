@@ -169,7 +169,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
     }
 
-    printf("[ASTC] at %x / %x\n", ftell(infile), fileLength); 
+    printf("[ASTC] at %lx / %lx\n", ftell(infile), fileLength); 
     return astcErrors;
 }
 

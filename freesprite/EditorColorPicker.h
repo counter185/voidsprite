@@ -46,6 +46,8 @@ public:
     UISVPicker* satValSlider = NULL;
     UITextField* colorTextField = NULL;
 
+
+    //todo: change these sliders to work based off the color models system
     UITextField* txtR, *txtG, *txtB;
     UITextField* txtH, *txtS, *txtV;
 

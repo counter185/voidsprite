@@ -4,6 +4,7 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
+#pragma warning(disable : 4477) //printf wrong format argument whatever
 
 //macro redefinition warning, remove this line after fully migrating to sdl3
 #pragma warning(disable : 4005)

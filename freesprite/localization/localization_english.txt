@@ -8,6 +8,7 @@
     {"vsp.cmn.height", "Height"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file"},
+    {"vsp.cmn.error.mallocfail", "Memory allocation failed"},
     {"vsp.cmn.filetype.splitsession", "Split session file"},
 
     // common navbar strings
