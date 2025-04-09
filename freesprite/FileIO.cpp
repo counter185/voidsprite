@@ -3364,8 +3364,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         std::string key;
                         key.resize(keySize);
                         fread(&key[0], keySize, 1, infile);
-                        //WHAT
-                        //HOW DOES THIS
                         int valSize;
                         fread(&valSize, 4, 1, infile);
                         std::string val;

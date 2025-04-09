@@ -2066,14 +2066,19 @@ void MainEditor::redo()
 
 Layer* MainEditor::newLayer()
 {
-    Layer* nl = new Layer(canvas.dimensions.x, canvas.dimensions.y);
-    nl->name = std::format("New Layer {}", layers.size()+1);
-    int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-    printf("adding new layer at %i\n", insertAtIdx);
-    layers.insert(layers.begin() + insertAtIdx, nl);
-    switchActiveLayer(insertAtIdx);
+    Layer* nl = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
+    if (nl != NULL) {
+        nl->name = std::format("New Layer {}", layers.size() + 1);
+        int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
+        printf("adding new layer at %i\n", insertAtIdx);
+        layers.insert(layers.begin() + insertAtIdx, nl);
+        switchActiveLayer(insertAtIdx);
 
-    addToUndoStack(UndoStackElement{nl, UNDOSTACK_CREATE_LAYER, insertAtIdx });
+        addToUndoStack(UndoStackElement{ nl, UNDOSTACK_CREATE_LAYER, insertAtIdx });
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
+    }
     return nl;
 }
 

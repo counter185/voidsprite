@@ -606,13 +606,20 @@ Layer* MainEditorPalettized::flattenImage()
 
 Layer* MainEditorPalettized::newLayer()
 {
-    LayerPalettized* nl = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
-    nl->palette = palette;
-    nl->name = std::format("New Layer {}", layers.size() + 1);
-    layers.push_back(nl);
-    switchActiveLayer(layers.size() - 1);
+    LayerPalettized* nl = LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y);
+    if (nl != NULL) {
+        nl->palette = palette;
+        nl->name = std::format("New Layer {}", layers.size() + 1);
+        int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
+        printf("adding new layer at %i\n", insertAtIdx);
+        layers.insert(layers.begin() + insertAtIdx, nl);
+        switchActiveLayer(insertAtIdx);
 
-    addToUndoStack(UndoStackElement{ nl, UNDOSTACK_CREATE_LAYER });
+        addToUndoStack(UndoStackElement{ nl, UNDOSTACK_CREATE_LAYER, insertAtIdx });
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
+    }
     return nl;
 }
 

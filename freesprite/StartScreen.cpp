@@ -316,8 +316,8 @@ void StartScreen::renderStartupAnim()
 
             if (textAnimTime > 0.05) {
                 std::string s = g_configWasLoaded ? TL("vsp.launchpad.welcomereturning") : TL("vsp.launchpad.welcome1sttime");
-                XY fd = g_fnt->StatStringDimensions(s);
-                g_fnt->RenderString(s, g_windowW - fd.x - 2, 0, { 255,255,255, (u8)(255 * (1.0 - XM1PW3P1((textAnimTime - 0.05) / 0.95))) });
+                XY fd = g_fnt->StatStringDimensions(s, 33);
+                g_fnt->RenderString(s, g_windowW - fd.x - 2, 0, { 255,255,255, (u8)(255 * (1.0 - XM1PW3P1((textAnimTime - 0.05) / 0.95))) }, 33);
             }
         }
     }
