@@ -37,7 +37,7 @@ public:
     void eventTextInput(int evt_id, std::string data) override;
     void eventButtonPressed(int evt_id) override;
 
-    std::string getName() override { return "Preview sprites"; }
+    std::string getName() override { return TL("vsp.spritesheetpreview"); }
 
     void drawPreview(XY at, int which = -1);
     void drawBackground();

@@ -11,8 +11,13 @@ public:
 	std::vector<uint32_t> palette;
 
 	//here, pixelData is supposed to be treated as an array of 32-bit indices.
+	//-1 means empty (transparent)
 
-	LayerPalettized(int w, int h) : Layer(w, h) {}
+	LayerPalettized(int width, int height) {
+		w = width;
+		h = height;
+		allocMemory();
+	}
 
 	static LayerPalettized* tryAllocIndexedLayer(int width, int height) {
 		if (width > 0 && height > 0) {

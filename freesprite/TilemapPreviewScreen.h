@@ -39,7 +39,7 @@ public:
 	void takeInput(SDL_Event evt) override;
 	BaseScreen* isSubscreenOf() override;
 
-	std::string getName() override { return "Preview tiles"; }
+	std::string getName() override { return TL("vsp.tilemappreview"); }
 
 	virtual void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
 	virtual void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;

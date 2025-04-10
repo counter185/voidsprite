@@ -254,7 +254,7 @@ public:
         populateLastOpenFiles();
     }
 
-    std::string getName() override { return "voidsprite Launchpad"; }
+    std::string getName() override { return TL("vsp.launchpad"); }
 
     void eventTextInputConfirm(int evt_id, std::string data) override {
         if (evt_id == 3) {

@@ -810,11 +810,15 @@ int main(int argc, char** argv)
         g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
         g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
 
+        //tl strings shouldn't be read every frame
+        static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
+        static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
+
         g_updateRPC(
-            screenStack.size() == 1 ? "1 active workspace" : std::format("{} active workspaces", screenStack.size()),
+            screenStack.size() == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", screenStack.size(), tlActiveWorkspacesString),
             screenStack.size() > 0 ? screenStack[currentScreen]->getRPCString() : "-"
         );
-        std::string newWindowTitle = windowTitle + std::format("   | {}   | {} active workspaces", (screenStack.size() > 0 ? screenStack[currentScreen]->getRPCString() : "--"), screenStack.size());
+        std::string newWindowTitle = windowTitle + std::format("   | {}   | {} {}", (screenStack.size() > 0 ? screenStack[currentScreen]->getRPCString() : "--"), screenStack.size(), tlActiveWorkspacesString);
         if (newWindowTitle != lastWindowTitle) {
             SDL_SetWindowTitle(g_wd, newWindowTitle.c_str());
             lastWindowTitle = newWindowTitle;

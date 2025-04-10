@@ -144,7 +144,7 @@ public:
     void tick() override;
     void takeInput(SDL_Event evt) override;
 
-    std::string getName() override { return lastConfirmedSave ? std::format("Editor: {}", fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))) : "Editor"; }
+    std::string getName() override { return TL("vsp.maineditor") + (lastConfirmedSave ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath)) : std::string("")); }
     bool takesTouchEvents() override { return true; }
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;

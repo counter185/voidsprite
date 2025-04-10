@@ -15,11 +15,17 @@
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
 
+    //rich presence (discord, title bar) strings
+    {"vsp.rpc.1activeworkspace", "1 active workspace"},
+    {"vsp.rpc.activeworkspaces", "active workspaces"},
+
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},
     {"vsp.popup.openimage", "open image"},
 
     // screen: voidsprite launchpad
+    {"vsp.launchpad", "voidsprite Launchpad"},
+
     {"vsp.launchpad.newimage", "New image"},
     {"vsp.launchpad.lastfiles", "Last open files"},
     {"vsp.launchpad.welcome1sttime", "Welcome to voidsprite"},
@@ -59,12 +65,14 @@
     {"vsp.launchpad.recoveryautosaves.allfilesize", "Overall size: "},
 
     // screen: voidsprite main editor
+    {"vsp.maineditor", "Editor"},
+
     {"vsp.maineditor.file","File"},
     {"vsp.maineditor.saveas","Save As"},
     {"vsp.maineditor.save","Save"},
-    {"vsp.maineditor.exportpal","Export as palettized"},
+    {"vsp.maineditor.exportpal","Export as indexed"},
     {"vsp.maineditor.exportind","Export tiles individually"},
-    {"vsp.maineditor.paledit","Open in palettized editor"},
+    {"vsp.maineditor.paledit","Open in indexed editor"},
     {"vsp.maineditor.close","Close"},
     {"vsp.maineditor.preference","Preferences"},
 
@@ -81,7 +89,6 @@
     {"vsp.maineditor.canvscale","Scale canvas"},
     {"vsp.maineditor.nineseg","Open in 9-segment pattern editor"},
 
-
     {"vsp.maineditor.layer","Layer"},
     {"vsp.maineditor.flipx","Flip current layer: X axis"},
     {"vsp.maineditor.flipy","Flip current layer: Y axis"},
@@ -91,5 +98,20 @@
     {"vsp.maineditor.removealpha","Remove alpha channel"},
     {"vsp.maineditor.setckey","Set color key"},
     {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
+
+    //screen: 3d cube preview
+    {"vsp.cubepreview", "Preview cube"},
+
+    //screen: rpg2k map preview
+    {"vsp.lmupreview", "Preview RPG2K map"},
+
+    //screen: split session editor
+    {"vsp.splitsessioneditor", "Split session editor"},
+
+    //screen: spritesheet preview
+    {"vsp.spritesheetpreview", "Preview sprites"},
+
+    //screen: tilemap preview
+    {"vsp.tilemappreview", "Preview tiles"},
 
 }}},

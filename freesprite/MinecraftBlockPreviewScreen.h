@@ -36,7 +36,7 @@ public:
     void tick() override;
     BaseScreen* isSubscreenOf() override;
 
-    std::string getName() override { return "Preview cube"; }
+    std::string getName() override { return TL("vsp.cubepreview"); }
 
     void eventPopupClosed(int evt_id, BasePopup* target) override;
 

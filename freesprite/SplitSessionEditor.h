@@ -41,7 +41,7 @@ public:
     void render() override;
     void takeInput(SDL_Event evt) override;
 
-    std::string getName() override { return "Split session editor"; }
+    std::string getName() override { return TL("vsp.splitsessioneditor"); }
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) override;
     void eventPopupClosed(int evt_id, BasePopup* popup) override;
 

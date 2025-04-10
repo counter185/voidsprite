@@ -47,7 +47,7 @@ public:
     void render() override;
     void tick() override;
     void takeInput(SDL_Event evt) override;
-    std::string getName() override { return "Preview RPG2K map"; }
+    std::string getName() override { return TL("vsp.lmupreview"); }
     BaseScreen* isSubscreenOf() override;
 
     void eventFileOpen(int evt_id, PlatformNativePathString path, int importer_index) override;
