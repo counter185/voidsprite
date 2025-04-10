@@ -7,9 +7,9 @@
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
     {"vsp.cmn.error", "Error"},
-    {"vsp.cmn.error.fileloadfail", "Failed to load file"},
-    {"vsp.cmn.error.mallocfail", "Memory allocation failed"},
-    {"vsp.cmn.filetype.splitsession", "Split session file"},
+    {"vsp.cmn.error.fileloadfail", "Failed to load file."},
+    {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
+    {"vsp.cmn.filetype.splitsession", "Split session file."},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
@@ -49,8 +49,8 @@
     {"vsp.launchpad.error.starteditor", "Error starting editor"},
     {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
     {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
-    {"vsp.launchpad.error.clipboard_no_image", "No image in clipboard"},
-    {"vsp.launchpad.error.templatefail", "Failed to load template"},
+    {"vsp.launchpad.error.clipboard_no_image", "No image in clipboard."},
+    {"vsp.launchpad.error.templatefail", "Failed to load template."},
 
     {"vsp.launchpad.quickconvert.desc", "Select the format to export the image to.\n"
                                         "Drag a file into this window to convert to the same directory."},
@@ -60,8 +60,8 @@
                                              "Right click to delete an autosaved file."},
     {"vsp.launchpad.recoveryautosaves.deleteconfirm", "Delete this file?"},
     {"vsp.launchpad.recoveryautosaves.deleteconfirm.desc", "This autosaved file will be deleted:"},
-    {"vsp.launchpad.recoveryautosaves.deleted", "Autosave successfully deleted"},
-    {"vsp.launchpad.recoveryautosaves.deletefail", "Failed to delete file"},
+    {"vsp.launchpad.recoveryautosaves.deleted", "Autosave successfully deleted."},
+    {"vsp.launchpad.recoveryautosaves.deletefail", "Failed to delete file."},
     {"vsp.launchpad.recoveryautosaves.allfilesize", "Overall size: "},
 
     // screen: voidsprite main editor
@@ -81,22 +81,22 @@
     {"vsp.maineditor.redo","Redo"},
     {"vsp.maineditor.symx","Toggle symmetry: X"},
     {"vsp.maineditor.symy","Toggle symmetry: Y"},
-    {"vsp.maineditor.rescanv","Resize canvas"},
+    {"vsp.maineditor.rescanv","Resize canvas"}, // translation note: this scales the canvas, image remains the same
     {"vsp.maineditor.dsel","Deselect"},
     {"vsp.maineditor.rescanv_bytile","Resize canvas (per tile)"},
-    {"vsp.maineditor.rescanv_ntile","Resize canvas (per n.tiles)"},
+    {"vsp.maineditor.rescanv_ntile","Resize canvas (per n.tiles)"}, // translation note: n.tiles means "number of tiles"
     {"vsp.maineditor.intscale","Integer scale canvas"},
-    {"vsp.maineditor.canvscale","Scale canvas"},
+    {"vsp.maineditor.canvscale","Scale canvas"}, // translation note: this and the above feature scale the entire image alongside the canvas
     {"vsp.maineditor.nineseg","Open in 9-segment pattern editor"},
 
     {"vsp.maineditor.layer","Layer"},
     {"vsp.maineditor.flipx","Flip current layer: X axis"},
     {"vsp.maineditor.flipy","Flip current layer: Y axis"},
-    {"vsp.maineditor.printcol","Print number of colors"},
+    {"vsp.maineditor.printcol","Print number of colors"}, // translation note: outputs the number of colors on the current layer via a notification
     {"vsp.maineditor.renlayer","Rename current layer"},
     {"vsp.maineditor.isolatealpha","Isolate layer alpha"},
     {"vsp.maineditor.removealpha","Remove alpha channel"},
-    {"vsp.maineditor.setckey","Set color key"},
+    {"vsp.maineditor.setckey","Set color key"}, // translation note: "color key" here means the color chosen becomes transparent
     {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
 
     //screen: 3d cube preview
