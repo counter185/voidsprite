@@ -730,7 +730,7 @@ void MainEditor::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 TL("vsp.maineditor.file"),
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_C},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [](MainEditor* editor) {
@@ -765,7 +765,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { TL("vsp.maineditor.close"),
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyImageToClipboard();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_X, { TL("vsp.maineditor.close"),
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
@@ -914,6 +920,12 @@ void MainEditor::setUpWidgets()
                                 PopupPickColor* newPopup = new PopupPickColor(TL("vsp.maineditor.setckey"), TL("vsp.maineditor.setckeydesc"));
                                 newPopup->setCallbackListener(EVENT_MAINEDITOR_SETCOLORKEY, editor);
                                 g_addPopup(newPopup);
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyLayerToClipboard(editor->getCurrentLayer());
                             }
                         }
                     }
@@ -1422,6 +1434,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 }
                             }
                             break;
+                        case SDL_SCANCODE_C:
+                            copyLayerToClipboard(getCurrentLayer());
+                            break;
                         case SDL_SCANCODE_Q:
                             if (g_ctrlModifier) {
                                 if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
@@ -1671,6 +1686,25 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
     rasterizeLine(from, to, [&](XY a)->void {
         SetPixel(a, color);
         });
+}
+
+void MainEditor::copyImageToClipboard()
+{
+    Layer* flat = flattenImage();
+    if (flat != NULL) {
+        copyLayerToClipboard(flat);
+        delete flat;
+    } 
+}
+
+void MainEditor::copyLayerToClipboard(Layer* l)
+{
+    if (platformPutImageInClipboard(l)) {
+        g_addNotification(SuccessNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardcopy")));
+    }
 }
 
 void MainEditor::trySaveImage()
@@ -2275,17 +2309,29 @@ void MainEditor::layer_setAllAlpha255()
 
 Layer* MainEditor::flattenImage()
 {
-    Layer* ret = new Layer(canvas.dimensions.x, canvas.dimensions.y);
-    int x = 0;
-    uint32_t* retppx = (uint32_t*)ret->pixelData;
-    for (Layer*& l : layers) {
-        if (l->hidden) {
-            continue;
-        }
-        uint32_t* ppx = (uint32_t*)l->pixelData;
-        if (x++ == 0) {
-            if (l->layerAlpha == 255) {
-                memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+    Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
+    if (ret != NULL) {
+        int x = 0;
+        uint32_t* retppx = (uint32_t*)ret->pixelData;
+        for (Layer*& l : layers) {
+            if (l->hidden) {
+                continue;
+            }
+            uint32_t* ppx = (uint32_t*)l->pixelData;
+            if (x++ == 0) {
+                if (l->layerAlpha == 255) {
+                    memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+                }
+                else {
+                    for (uint64_t p = 0; p < l->w * l->h; p++) {
+                        uint32_t pixel = ppx[p];
+                        uint8_t alpha = pixel >> 24;
+                        alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
+                        pixel = (pixel & 0x00ffffff) | (alpha << 24);
+
+                        retppx[p] = pixel;
+                    }
+                }
             }
             else {
                 for (uint64_t p = 0; p < l->w * l->h; p++) {
@@ -2294,25 +2340,18 @@ Layer* MainEditor::flattenImage()
                     alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
                     pixel = (pixel & 0x00ffffff) | (alpha << 24);
 
-                    retppx[p] = pixel;
+                    uint32_t srcPixel = retppx[p];
+                    uint8_t alpha2 = srcPixel >> 24;
+                    alpha2 = (uint8_t)((alpha2 / 255.0f) * (ret->layerAlpha / 255.0f) * 255);
+                    srcPixel = (srcPixel & 0x00ffffff) | (alpha2 << 24);
+
+                    retppx[p] = alphaBlend(srcPixel, pixel);
                 }
             }
         }
-        else {
-            for (uint64_t p = 0; p < l->w * l->h; p++) {
-                uint32_t pixel = ppx[p];
-                uint8_t alpha = pixel >> 24;
-                alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
-                pixel = (pixel & 0x00ffffff) | (alpha << 24);
-
-                uint32_t srcPixel = retppx[p];
-                uint8_t alpha2 = srcPixel >> 24;
-                alpha2 = (uint8_t)((alpha2 / 255.0f) * (ret->layerAlpha / 255.0f) * 255);
-                srcPixel = (srcPixel & 0x00ffffff) | (alpha2 << 24);
-
-                retppx[p] = alphaBlend(srcPixel, pixel);
-            }
-        }
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
     }
     return ret;
 }

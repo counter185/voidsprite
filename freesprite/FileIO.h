@@ -35,6 +35,7 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 #include "io_gim.h"
 #include "io_rpgm.h"
 #include "io_jxl.h"
+#include "io_dibv5.h"
 
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
@@ -290,7 +291,8 @@ inline void g_setupIO() {
         *exAnymapPPM,
         *exXBM,
         *exSR8,
-        *exVTF
+        *exVTF,
+        *exDIBv5
         ;
 
     g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -315,6 +317,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exVTF = FileExporter::flatExporter("VTF", ".vtf", &writeVTF, FORMAT_RGB) );
     g_fileExporters.push_back( exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exDIBv5 = FileExporter::flatExporter("DIBv5 Clipboard Dump", ".dibv5", &writeDIBV5, FORMAT_RGB) );
     g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
@@ -394,6 +397,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Windows Shell Scrap SHS", ".shs", &readWinSHS, NULL, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("DIBv5 Clipboard Dump", ".dibv5", &readDIBV5, exDIBv5, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);

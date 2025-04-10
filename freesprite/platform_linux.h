@@ -175,6 +175,10 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
     return ret;
 }
 
+bool platformPutImageInClipboard(Layer* l) {
+    return false;
+}
+
 Layer *platformGetImageFromClipboard() { return NULL; }
 
 FILE *platformOpenFile(PlatformNativePathString path,

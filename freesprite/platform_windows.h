@@ -206,11 +206,70 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
     return ret;*/
 }
 
+bool platformPutImageInClipboard(Layer* l) {
+    if (OpenClipboard(WINhWnd)) {
+        EmptyClipboard();
+
+        int writtenFormats = 0;
+
+        std::vector<u8> dibv5data = writeDIBv5ToMem(l);
+        HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, dibv5data.size());
+        if (!hMem) {
+            CloseClipboard();
+            return false;
+        }
+        memcpy(GlobalLock(hMem), dibv5data.data(), dibv5data.size());
+        GlobalUnlock(hMem);
+        if (!SetClipboardData(CF_DIBV5, hMem)) {
+            GlobalFree(hMem);
+        }
+        else {
+            writtenFormats++;
+        }
+
+        UINT pngFormat = RegisterClipboardFormatW(L"PNG");
+        if (writePNG(convertStringOnWin32("temp.bin"), l)) {
+            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
+            fseek(infile, 0, SEEK_END);
+            uint64_t fileLength = ftell(infile);
+            fseek(infile, 0, SEEK_SET);
+
+            HGLOBAL pngHMem = GlobalAlloc(GMEM_MOVEABLE, fileLength);
+            if (!pngHMem) {
+                CloseClipboard();
+                fclose(infile);
+                return false;
+            }
+            fread(GlobalLock(pngHMem), 1, fileLength, infile);
+            GlobalUnlock(pngHMem);
+            if (!SetClipboardData(pngFormat, pngHMem)) {
+                GlobalFree(pngHMem);
+            }
+            else {
+                writtenFormats++;
+            }
+
+            fclose(infile);
+            std::filesystem::remove("temp.bin");
+
+        }
+
+        CloseClipboard();
+        return writtenFormats > 0;
+    }
+    else {
+        return false;
+    }
+    
+}
+
 Layer* platformGetImageFromClipboard() {
 
-    bool res = OpenClipboard(WINhWnd);
+    bool res;
+    HANDLE dataHandle;
+    res = OpenClipboard(WINhWnd);
     UINT fileNameFormat = RegisterClipboardFormatW(L"FileNameW");
-    HANDLE dataHandle = GetClipboardData(fileNameFormat);
+    dataHandle = GetClipboardData(fileNameFormat);
     Layer* foundImage = NULL;
     if (dataHandle != NULL) {
         void* pData = GlobalLock(dataHandle);
@@ -255,13 +314,29 @@ Layer* platformGetImageFromClipboard() {
         CloseClipboard();
     }
 
-    
     if (foundPNG != NULL) {
         return foundPNG;
     }
     else {
         printf("No PNG data in clipboard\n");
     }
+
+    //dibv5
+    res = OpenClipboard(WINhWnd);
+    Layer* foundDIBV5 = NULL;
+    dataHandle = GetClipboardData(CF_DIBV5);
+    if (dataHandle != NULL) {
+        void* pData = GlobalLock(dataHandle);
+        if (pData) {
+            SIZE_T size = GlobalSize(dataHandle);
+            u8* mem = (u8*)tracked_malloc(size);
+            memcpy(mem, pData, size);
+            GlobalUnlock(dataHandle);
+            foundDIBV5 = readDIBv5FromMem(mem, size);
+            tracked_free(mem);
+        }
+    }
+    CloseClipboard();
 
     //if there's no PNG in the clipboard, read as a bitmap
     res = OpenClipboard(WINhWnd);

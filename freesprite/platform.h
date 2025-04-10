@@ -26,6 +26,7 @@ bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");
 
+bool platformPutImageInClipboard(Layer* l);
 Layer* platformGetImageFromClipboard();
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);

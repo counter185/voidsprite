@@ -230,6 +230,10 @@ bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to
     }
 }
 
+bool platformPutImageInClipboard(Layer* l) {
+    return false;
+}
+
 Layer *platformGetImageFromClipboard() { return NULL; }
 
 FILE *platformOpenFile(PlatformNativePathString path,

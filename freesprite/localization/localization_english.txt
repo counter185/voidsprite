@@ -10,6 +10,8 @@
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
     {"vsp.cmn.filetype.splitsession", "Split session file."},
+    {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
+    {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
@@ -75,6 +77,7 @@
     {"vsp.maineditor.paledit","Open in indexed editor"},
     {"vsp.maineditor.close","Close"},
     {"vsp.maineditor.preference","Preferences"},
+    {"vsp.maineditor.copyflattoclipboard", "Copy to clipboard"},
 
     {"vsp.maineditor.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},
@@ -98,6 +101,7 @@
     {"vsp.maineditor.removealpha","Remove alpha channel"},
     {"vsp.maineditor.setckey","Set color key"}, // translation note: "color key" here means the color chosen becomes transparent
     {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
+    {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

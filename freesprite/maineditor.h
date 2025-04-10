@@ -175,6 +175,8 @@ public:
     void FillTexture();
     virtual void SetPixel(XY position, uint32_t color, bool pushToLastColors = true, uint8_t symmetry = 0);
     void DrawLine(XY from, XY to, uint32_t color);
+    void copyImageToClipboard();
+    void copyLayerToClipboard(Layer* l);
     virtual void trySaveImage();
     virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);
     virtual void trySaveAsImage();

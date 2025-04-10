@@ -591,6 +591,9 @@
     <ClCompile Include="ScreenNonogramPlayer.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="io_dibv5.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1123,6 +1126,9 @@
     </ClInclude>
     <ClInclude Include="ScreenNonogramPlayer.h">
       <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="io_dibv5.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
