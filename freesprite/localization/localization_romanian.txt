@@ -1,0 +1,107 @@
+﻿{ "ro-RO", { "Română", {
+	// tl done by andrewidot/angelaidot go buy him/her a beer or something
+	// caught up with the latest tl as of github commit b4da22f on the main branch
+    {"vsp.cmn.yes", "Da"},
+    {"vsp.cmn.no", "Nu"},
+    {"vsp.cmn.close", "Închide"},
+    {"vsp.cmn.width", "Lățime"},
+    {"vsp.cmn.height", "Înălțime"},
+    {"vsp.cmn.error", "Eroare"},
+    {"vsp.cmn.error.fileloadfail", "Deschiderea fișierului a eșuat."},
+    {"vsp.cmn.error.mallocfail", "Alocarea memoriei a eșuat."},
+    {"vsp.cmn.filetype.splitsession", "Sesiune împărțită."},
+
+    {"vsp.nav.file", "Fișier"},
+    {"vsp.nav.open", "Deschide"},
+
+    {"vsp.rpc.1activeworkspace", "un spațiu de lucru activ"},
+    {"vsp.rpc.activeworkspaces", "spații de lucru active"},
+
+    {"vsp.popup.newsplitsession", "creează o sesiune împărțită"},
+    {"vsp.popup.openimage", "deschide o imagine"},
+
+    {"vsp.launchpad", "voidsprite Launchpad"},
+
+    {"vsp.launchpad.newimage", "Imagine nouă"},
+    {"vsp.launchpad.lastfiles", "Fișiere deschise anterior"},
+    {"vsp.launchpad.welcome1sttime", "Bun venit la voidsprite"},
+    {"vsp.launchpad.welcomereturning", "Bine ai revenit"},
+
+    {"vsp.launchpad.tab.pixeldim", "Dimensiuni în pixeli"},
+    {"vsp.launchpad.tab.spritesheet", "Sprite-uri/Dale"},
+    {"vsp.launchpad.tab.templates", "Șabloane"},
+    {"vsp.launchpad.tab.picktemplate", "Selectează un șablon..."},
+    {"vsp.launchpad.tab.creatergb", "Creează (RGB)"},
+    {"vsp.launchpad.tab.creatergb.tooltip", "Creează o imagine cu suport pentru toate culorile."},
+    {"vsp.launchpad.tab.createindexed", "Creează (Indexat)"},
+    {"vsp.launchpad.tab.createindexed.tooltip", "Creează o imagine cu o paletă de culori limitată.\n"
+                                                "Exporturile în formaturi palette-only vor păstra ordinea culorilor așa cum apar în editor."},
+    {"vsp.launchpad.nav.openclipboard", "Deschide din clipboard"},
+    {"vsp.launchpad.nav.quickconvert", "Conversie Rapidă"},
+    {"vsp.launchpad.nav.newsplitsession", "Sesiune împărțită nouă..."},
+    {"vsp.launchpad.nav.preferences", "Preferințe"},
+    {"vsp.launchpad.nav.recoveryautosaves", "Salvări automate de recuperare"},
+
+    {"vsp.launchpad.error.starteditor", "Eroare la pornirea editorului"},
+    {"vsp.launchpad.error.oob", "Dimensiuni invalide. Numărul este în afara intervalului."},
+    {"vsp.launchpad.error.no_dims", "Introdu dimensiunea pânzei."},
+    {"vsp.launchpad.error.clipboard_no_image", "Nu există nicio imagine în clipboard."},
+    {"vsp.launchpad.error.templatefail", "Încărcarea șablonului a eșuat."},
+
+    {"vsp.launchpad.quickconvert.desc", "Selectează formatul în care vrei să exportezi imaginea.\n"
+                                        "Trage o imagine în această fereastră pentru a salva conversia în același director ca aceasta."},
+
+    {"vsp.launchpad.recoveryautosaves.desc", "Sesiuni salvate cu funcția de salvări automate de recuperare vor apărea aici.\n"
+                                             "Poti seta timpul între salvări automate de recuperare in preferințe.\n"
+                                             "Apăsați clic dreapta pentru a șterge un fișier salvat automat."},
+    {"vsp.launchpad.recoveryautosaves.deleteconfirm", "Vrei să ștergi acest fișier?"},
+    {"vsp.launchpad.recoveryautosaves.deleteconfirm.desc", "Acest fișier salvat automatic va fi șters:"},
+    {"vsp.launchpad.recoveryautosaves.deleted", "Salvarea automată a fost ștearsă."},
+    {"vsp.launchpad.recoveryautosaves.deletefail", "Ștergerea fișerului a eșuat."},
+    {"vsp.launchpad.recoveryautosaves.allfilesize", "Mărime: "},
+
+    {"vsp.maineditor", "Editor"},
+
+    {"vsp.maineditor.file","Fișier"},
+    {"vsp.maineditor.saveas","Salvează ca"},
+    {"vsp.maineditor.save","Salvează"},
+    {"vsp.maineditor.exportpal","Exportează imagine indexată"},
+    {"vsp.maineditor.exportind","Exportează dale individual"},
+    {"vsp.maineditor.paledit","Deschide în editorul indexat"},
+    {"vsp.maineditor.close","Închide"},
+    {"vsp.maineditor.preference","Preferințe"},
+
+    {"vsp.maineditor.edit","Editează"},
+    {"vsp.maineditor.undo","Undo"}, // no clue how to translate these two so i wont bother LOL
+    {"vsp.maineditor.redo","Redo"},
+    {"vsp.maineditor.symx","Pornește simetria pe axa X"},
+    {"vsp.maineditor.symy","Pornește simetria pe axa Y"},
+    {"vsp.maineditor.rescanv","Redimensionează pânza"},
+    {"vsp.maineditor.dsel","Deselectați"},
+    {"vsp.maineditor.rescanv_bytile","Redimensionează pânza pe dală"},
+    {"vsp.maineditor.rescanv_ntile","Redimensionează pânza pe numărul de dale"},
+    {"vsp.maineditor.intscale","Redimensionează pânza pe numere întregi"},
+    {"vsp.maineditor.canvscale","Redimensionează imaginea"},
+    {"vsp.maineditor.nineseg","Deschide în editorul pentru model în 9 segmente"}, // i dont think this is properly translated but i cant be bothered
+
+    {"vsp.maineditor.layer","Strat"},
+    {"vsp.maineditor.flipx","Răsturnați stratul actual pe axa X"},
+    {"vsp.maineditor.flipy","Răsturnați stratul actual pe axa Y"},
+    {"vsp.maineditor.printcol","Afișează numărul de culori pe strat"},
+    {"vsp.maineditor.renlayer","Redenumește stratul actual"},
+    {"vsp.maineditor.isolatealpha","Izolează canalul alfa al stratului"},
+    {"vsp.maineditor.removealpha","Șterge canalul alfa"},
+    {"vsp.maineditor.setckey","Setează o culoare transparentă"},
+    {"vsp.maineditor.setckeydesc","Alege o culoare care va deveni transparentă în editor:"},
+
+    {"vsp.cubepreview", "Previzualizare cub"},
+
+    {"vsp.lmupreview", "Previzualizare hartă RPG2K"},
+
+    {"vsp.splitsessioneditor", "Editor pentru sesiuni împărțite"},
+
+    {"vsp.spritesheetpreview", "Previzualizare sprite-uri"},
+	
+    {"vsp.tilemappreview", "Previzualizare dale"},
+
+}}},
