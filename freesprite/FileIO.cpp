@@ -3540,6 +3540,17 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
     return NULL;
 }
 
+Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter)
+{
+    MainEditor* ssn = loadAnyIntoSession(utf8path, outputFoundImporter);
+    if (ssn != NULL) {
+        Layer* ret = ssn->flattenImage();
+        delete ssn;
+        return ret;
+    }
+    return NULL;
+}
+
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter)
 {
     PlatformNativePathString fPath = convertStringOnWin32(utf8path);

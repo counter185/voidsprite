@@ -207,8 +207,65 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
 }
 
 Layer* platformGetImageFromClipboard() {
+
     bool res = OpenClipboard(WINhWnd);
-    HANDLE dataHandle = GetClipboardData(CF_BITMAP);
+    UINT fileNameFormat = RegisterClipboardFormatW(L"FileNameW");
+    HANDLE dataHandle = GetClipboardData(fileNameFormat);
+    Layer* foundImage = NULL;
+    if (dataHandle != NULL) {
+        void* pData = GlobalLock(dataHandle);
+        if (pData) {
+            SIZE_T size = GlobalSize(dataHandle);
+            std::wstring filePath;
+            filePath.resize(size);
+            memcpy(&filePath[0], pData, size);
+            GlobalUnlock(dataHandle);
+            if (std::filesystem::exists(filePath)) {
+                foundImage = loadAnyIntoFlat(convertStringToUTF8OnWin32(filePath));
+            }
+        }
+    }
+    else {
+        printf("No file path data in clipboard\n");
+    }
+    if (foundImage != NULL) {
+        return foundImage;
+    }
+
+    CloseClipboard();
+
+    Layer* foundPNG = NULL;
+    for (std::wstring pngFormatName : {L"PNG", L"image/png"}) { //browsers use PNG, krita saves to image/png
+        res = OpenClipboard(WINhWnd);
+        UINT pngFormat = RegisterClipboardFormatW(pngFormatName.c_str());
+        dataHandle = GetClipboardData(pngFormat);
+        if (dataHandle != NULL) {
+            void* pData = GlobalLock(dataHandle);
+            if (pData) {
+                SIZE_T size = GlobalSize(dataHandle);
+                u8* mem = (u8*)tracked_malloc(size);
+                memcpy(mem, pData, size);
+                GlobalUnlock(dataHandle);
+                foundPNG = readPNGFromMem(mem, size);
+                tracked_free(mem);
+                CloseClipboard();
+                break;
+            }
+        }
+        CloseClipboard();
+    }
+
+    
+    if (foundPNG != NULL) {
+        return foundPNG;
+    }
+    else {
+        printf("No PNG data in clipboard\n");
+    }
+
+    //if there's no PNG in the clipboard, read as a bitmap
+    res = OpenClipboard(WINhWnd);
+    dataHandle = GetClipboardData(CF_BITMAP);
     if (dataHandle == NULL) {
         CloseClipboard();
         return NULL;

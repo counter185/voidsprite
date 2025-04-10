@@ -68,6 +68,7 @@ MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
+Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
 bool writePNG(PlatformNativePathString path, Layer* data);
