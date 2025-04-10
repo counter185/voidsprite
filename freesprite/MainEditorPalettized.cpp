@@ -276,7 +276,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 "File",
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_C},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { "Save as",
                             [](MainEditor* editor) {
@@ -302,7 +302,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { "Close",
+                    {SDL_SCANCODE_X, { "Close",
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
@@ -311,6 +311,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_R, { "Open in RGB editor",
                             [](MainEditor* editor) {
                                 ((MainEditorPalettized*)editor)->openInNormalRGBEditor();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyImageToClipboard();
                             }
                         }
                     },
@@ -433,7 +439,14 @@ void MainEditorPalettized::setUpWidgets()
                                 editor->layer_outline(false);
                             }
                         }
-                    }
+                    },
+                    //todo: fix it (make it so that the -1 index never gets passed)
+                    /*{SDL_SCANCODE_C, {TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyLayerToClipboard(editor->getCurrentLayer());
+                            }
+                        }
+                    }*/
                 },
                 g_iconNavbarTabLayer
             }

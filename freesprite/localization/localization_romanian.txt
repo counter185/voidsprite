@@ -1,6 +1,6 @@
-﻿{ "ro-RO", { "Română", {
-	// tl done by andrewidot/angelaidot go buy him/her a beer or something
-	// caught up with the latest tl as of github commit b4da22f on the main branch
+{ "ro-RO", { "Română", {
+    // tl done by andrewidot/angelaidot go buy him/her a beer or something
+    // caught up with the latest tl as of github commit b4da22f on the main branch
     {"vsp.cmn.yes", "Da"},
     {"vsp.cmn.no", "Nu"},
     {"vsp.cmn.close", "Închide"},
@@ -101,7 +101,7 @@
     {"vsp.splitsessioneditor", "Editor pentru sesiuni împărțite"},
 
     {"vsp.spritesheetpreview", "Previzualizare sprite-uri"},
-	
+    
     {"vsp.tilemappreview", "Previzualizare dale"},
 
 }}},

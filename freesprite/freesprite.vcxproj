@@ -512,6 +512,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="localization\localization_english.txt" />
+    <Text Include="localization\localization_romanian.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
