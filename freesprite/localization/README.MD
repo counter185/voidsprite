@@ -7,10 +7,11 @@ If a language you want to add already has its localization file here, you may ed
 1. Copy `localization_english.txt` and rename it.
 2. Change this line at the beginning of your copied file appropriately:
 ```cpp
-{ "en-us", { "English", {
+{ "en-us", { "English", "", {
 ```
+The third string will appear in the settings when the language is chosen and should contain the credits for the translation.  
 The language name should be in that language, for example:  
-`{ "pl-pl", { "Polski" {`  
+`{ "pl-pl", { "Polski", "Polish translation by me", {`  
 
 3. Open `localization.cpp` and add an `#include` to your copied file:
 ```cpp

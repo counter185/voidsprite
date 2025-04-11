@@ -69,16 +69,16 @@ protected:
         }
     }
 
-    UIButton* actionButton(std::string text) {
+    UIButton* actionButton(std::string text, int width = 120) {
         if (!actionButtonXInit) {
-            nextActionButtonX = wxWidth - 130;
+            nextActionButtonX = wxWidth - (width + 10);
             actionButtonXInit = true;
         }
         UIButton* nbutton = new UIButton();
         nbutton->text = text;
         nbutton->position = XY{ nextActionButtonX, wxHeight - 40 };
-        nextActionButtonX -= 130;
-        nbutton->wxWidth = 120;
+        nextActionButtonX -= width + 10;
+        nbutton->wxWidth = width;
         wxsManager.addDrawable(nbutton);
         return nbutton;
     }

@@ -11,8 +11,8 @@ class EditorLayerPicker : public DraggablePanel, public EventCallbackListener
 protected:
 	EditorLayerPicker() {};
 public:
-	MainEditor* caller;
-	ScrollingPanel* layerListPanel;
+	MainEditor* caller = NULL;
+	ScrollingPanel* layerListPanel = NULL;
 	UISlider* opacitySlider = NULL;
 
 	EditorLayerPicker(MainEditor* editor);

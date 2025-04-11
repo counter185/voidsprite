@@ -1,5 +1,5 @@
 #define ENGLISH_LOC_INCLUDED
-{ "en-us", { "English", {
+{ "en-us", { "English", "", {
     // common strings used in a few different places
     {"vsp.cmn.yes", "Yes"},
     {"vsp.cmn.no", "No"},

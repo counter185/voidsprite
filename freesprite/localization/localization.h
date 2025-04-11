@@ -4,6 +4,7 @@
 
 struct LocalizationData {
 	std::string langName;
+	std::string langCredit;
 	std::map<std::string, std::string> kvs;
 };
 

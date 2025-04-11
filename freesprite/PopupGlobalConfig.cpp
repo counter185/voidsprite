@@ -36,7 +36,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     wxHeight = 400;
     wxWidth = 850;
 
-    TabbedView* configTabs = new TabbedView({ {"General"}, {"Editor"}, {"Keybinds"}, {"Misc."}}, 90);
+    TabbedView* configTabs = new TabbedView({ {"General"}, {"Visual"}, { "Editor" }, {"Keybinds"}, {"Misc."}}, 90);
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
 
@@ -46,12 +46,6 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     XY posInTab = { 0,10 };
-
-    UICheckbox* cb6 = new UICheckbox("Vertical sync", &g_config.vsync);
-    cb6->position = posInTab;
-    cb6->checkbox->tooltip = "When enabled, the framerate will be locked to your display's refresh rate.\nDisabling this will make brushes smoother but also increase energy consumption.\nvoidsprite must be restarted for this change to take effect.";
-    configTabs->tabs[0].wxs.addDrawable(cb6);
-    posInTab.y += 35;
 
     UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", &g_config.saveLoadFlatImageExtData);
     cb7->position = posInTab;
@@ -65,39 +59,15 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
-    UILabel* lbl3 = new UILabel("Animated background");
-    lbl3->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl3);
-    UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
-    dd1->position = xyAdd(posInTab, { 200, 0 });
-    dd1->wxWidth = 180;
-    dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
-    dd1->setTextToSelectedItem = true;
-    dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
-    configTabs->tabs[0].wxs.addDrawable(dd1);
-    posInTab.y += 35;
-
-    UILabel* lbl4 = new UILabel("Renderer");
-    lbl4->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl4);
-    UIDropdown* dd2 = new UIDropdown(g_availableRenderersNow);
-    dd2->position = xyAdd(posInTab, {100, 0});
-    dd2->wxWidth = 180;
-    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
-    dd2->setTextToSelectedItem = true;
-    dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
-    configTabs->tabs[0].wxs.addDrawable(dd2);
-    posInTab.y += 35;
-
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
         langLocNames.push_back(loc.first);
         langNames.push_back(loc.second.langName);
     }
-    lbl4 = new UILabel("Language (restart required)");
+    UILabel* lbl4 = new UILabel("Language (restart required)");
     lbl4->position = posInTab;
     configTabs->tabs[0].wxs.addDrawable(lbl4);
-    dd2 = new UIDropdown(langNames);
+    UIDropdown* dd2 = new UIDropdown(langNames);
     dd2->position = xyAdd(posInTab, { 300, 0 });
     dd2->wxWidth = 180;
     dd2->setCallbackListener(DROPDOWN_LANGUAGE, this);
@@ -106,10 +76,54 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
+    languageCredit = new UILabel("");
+    languageCredit->fontsize = 16;
+    languageCredit->position = xyAdd(posInTab, {30, 0});
+    languageCredit->color = { 255,255,255,0xa0 };
+    configTabs->tabs[0].wxs.addDrawable(languageCredit);
+    posInTab.y += 70;
+    updateLanguageCredit();
+
+    /*
+        -------------------------
+        VISUAL TAB
+        -------------------------
+    */
+    posInTab = { 0,10 };
+    UICheckbox* cb6 = new UICheckbox("Vertical sync", &g_config.vsync);
+    cb6->position = posInTab;
+    cb6->checkbox->tooltip = "When enabled, the framerate will be locked to your display's refresh rate.\nDisabling this will make brushes smoother but also increase energy consumption.\nvoidsprite must be restarted for this change to take effect.";
+    configTabs->tabs[1].wxs.addDrawable(cb6);
+    posInTab.y += 35;
+
+    UILabel* lbl3 = new UILabel("Animated background");
+    lbl3->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl3);
+    UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
+    dd1->position = xyAdd(posInTab, { 200, 0 });
+    dd1->wxWidth = 180;
+    dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
+    dd1->setTextToSelectedItem = true;
+    dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
+    configTabs->tabs[1].wxs.addDrawable(dd1);
+    posInTab.y += 35;
+
+    lbl4 = new UILabel("Renderer");
+    lbl4->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl4);
+    dd2 = new UIDropdown(g_availableRenderersNow);
+    dd2->position = xyAdd(posInTab, { 100, 0 });
+    dd2->wxWidth = 180;
+    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
+    dd2->setTextToSelectedItem = true;
+    dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
+    configTabs->tabs[1].wxs.addDrawable(dd2);
+    posInTab.y += 35;
+
     cb8 = new UICheckbox("Enable visual effects", &g_config.vfxEnabled);
     cb8->position = posInTab;
     cb8->checkbox->tooltip = "When disabled, some visual effect animations will not play.";
-    configTabs->tabs[0].wxs.addDrawable(cb8);
+    configTabs->tabs[1].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
     /*
@@ -121,59 +135,59 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     UICheckbox* cb1 = new UICheckbox("Open saved file location", &g_config.openSavedPath);
     cb1->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(cb1);
+    configTabs->tabs[2].wxs.addDrawable(cb1);
     posInTab.y += 35;
 
     UICheckbox* cb3 = new UICheckbox("Row/column index labels start at 1", &g_config.rowColIndexesStartAt1);
     cb3->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(cb3);
+    configTabs->tabs[2].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
     cb3 = new UICheckbox("Pan canvas with touchpad", &g_config.scrollWithTouchpad);
     cb3->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(cb3);
+    configTabs->tabs[2].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
     UILabel* lbl2 = new UILabel("Max undo history");
     lbl2->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    configTabs->tabs[2].wxs.addDrawable(lbl2);
     UITextField* tf2 = new UITextField();
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y};
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.maxUndoHistory));
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
-    configTabs->tabs[1].wxs.addDrawable(tf2);
+    configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
 
     UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", &g_config.isolateRectOnLockTile);
     cb4->position = posInTab;
     cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
-    configTabs->tabs[1].wxs.addDrawable(cb4);
+    configTabs->tabs[2].wxs.addDrawable(cb4);
     posInTab.y += 35;
 
     UICheckbox* cb5 = new UICheckbox("Lock Fill tool to tile size", &g_config.fillToolTileBound);
     cb5->position = posInTab;
     cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
-    configTabs->tabs[1].wxs.addDrawable(cb5);
+    configTabs->tabs[2].wxs.addDrawable(cb5);
     posInTab.y += 35;
 
     lbl2 = new UILabel("Recovery autosave interval (minutes) (0 to disable)");
     lbl2->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    configTabs->tabs[2].wxs.addDrawable(lbl2);
     tf2 = new UITextField();
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y };
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.autosaveInterval));
     tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
-    configTabs->tabs[1].wxs.addDrawable(tf2);
+    configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
     lbl2 = new UILabel(" Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory.");
     lbl2->fontsize = 14;
     lbl2->color = { 255,255,255,0xa0 };
     lbl2->position = xySubtract(posInTab, {0,4});
-    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    configTabs->tabs[2].wxs.addDrawable(lbl2);
     posInTab.y += 35;
 
     /*
@@ -188,7 +202,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsPanel->wxHeight = wxHeight - 140;
     keybindsPanel->scrollVertically = true;
     keybindsPanel->scrollHorizontally = false;
-    configTabs->tabs[2].wxs.addDrawable(keybindsPanel);
+    configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
 
 
     std::vector<KeybindConf> keybindsWithIcons = {
@@ -227,25 +241,29 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->position = posInTab;
     btn->wxWidth = 230;
     btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
-    configTabs->tabs[3].wxs.addDrawable(btn);
+    configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
 
-    UIButton* closeButton = new UIButton();
-    closeButton->text = "Close";
-    closeButton->position = XY{ wxWidth - 140, wxHeight - 40 };
-    closeButton->wxHeight = 30;
-    closeButton->wxWidth = 130;
-    closeButton->setCallbackListener(0, this);
-    wxsManager.addDrawable(closeButton);
+    
 
-    UIButton* saveAndCloseButton = new UIButton();
-    saveAndCloseButton->text = "Save and close";
-    saveAndCloseButton->position = XY{ wxWidth - 280, wxHeight - 40 };
-    saveAndCloseButton->wxHeight = 30;
-    saveAndCloseButton->wxWidth = 130;
-    saveAndCloseButton->setCallbackListener(1, this);
-    wxsManager.addDrawable(saveAndCloseButton);
+    UIButton* closeButton = actionButton("Close", 140);
+    closeButton->onClickCallback = [this](UIButton*) {
+        g_config = previousConfig;
+        closePopup();
+    };
+
+    UIButton* saveAndCloseButton = actionButton("Save and close", 140);
+    saveAndCloseButton->onClickCallback = [this](UIButton*) {
+        if (g_saveConfig()) {
+            g_addNotification(SuccessShortNotification("Success", "Preferences saved"));
+            g_initOrDeinitRPCBasedOnConfig();
+            closePopup();
+        }
+        else {
+            g_addNotification(ErrorNotification("Error", "Failed to save preferences"));
+        }
+    };
 
     makeTitleAndDesc("Preferences");
 }
@@ -282,23 +300,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 
 void PopupGlobalConfig::eventButtonPressed(int evt_id)
 {
-    if (evt_id == 0) {
-        // close and discard
-        g_config = previousConfig;
-        closePopup();
-    }
-    else if (evt_id == 1) {
-        //save and close
-        if (g_saveConfig()) {
-            g_addNotification(SuccessShortNotification("Success", "Preferences saved"));
-            g_initOrDeinitRPCBasedOnConfig();
-            closePopup();
-        }
-        else {
-            g_addNotification(ErrorNotification("Error", "Failed to save preferences"));
-        }
-    }
-    else if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
+    if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
         platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
     }
     else if (evt_id >= 1000) {
@@ -341,10 +343,21 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
     }
     else if (evt_id == DROPDOWN_LANGUAGE) {
         g_config.language = langLocNames[index];
+        updateLanguageCredit();
     }
 }
 
 void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t)
 {
     t.second->text = std::format("{}    ({})", t.first.name, SDL_GetScancodeName(*t.first.target));
+}
+
+void PopupGlobalConfig::updateLanguageCredit()
+{
+    if (getLocalizations().contains(g_config.language)) {
+        languageCredit->text = getLocalizations()[g_config.language].langCredit;
+    }
+    else {
+        languageCredit->text = "";
+    }
 }

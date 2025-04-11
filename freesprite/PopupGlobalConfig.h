@@ -12,6 +12,7 @@ class PopupGlobalConfig :
     public BasePopup, public EventCallbackListener
 {
 private:
+    UILabel* languageCredit = NULL;
     GlobalConfig previousConfig;
     std::vector<std::pair<KeybindConf, UIButton*>> keybindButtons;
     bool bindingKey = false;
@@ -37,5 +38,6 @@ public:
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
     void updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t);
+    void updateLanguageCredit();
 };
 
