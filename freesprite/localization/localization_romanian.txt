@@ -1,6 +1,6 @@
 { "ro-RO", { "Română", {
     // tl done by andrewidot/angelaidot go buy him/her a beer or something
-    // caught up with the latest tl as of github commit b4da22f on the main branch
+    // caught up with the latest tl as of github commit 9c6376f on the main branch
     {"vsp.cmn.yes", "Da"},
     {"vsp.cmn.no", "Nu"},
     {"vsp.cmn.close", "Închide"},
@@ -9,7 +9,9 @@
     {"vsp.cmn.error", "Eroare"},
     {"vsp.cmn.error.fileloadfail", "Deschiderea fișierului a eșuat."},
     {"vsp.cmn.error.mallocfail", "Alocarea memoriei a eșuat."},
-    {"vsp.cmn.filetype.splitsession", "Sesiune împărțită."},
+    {"vsp.cmn.filetype.splitsession", "Fișier de sesiune împărțită."},
+    {"vsp.cmn.copiedtoclipboard", "Copiat în clipboard"},
+    {"vsp.cmn.error.clipboardcopy", "Copiarea în clipboard a eșuat."},
 
     {"vsp.nav.file", "Fișier"},
     {"vsp.nav.open", "Deschide"},
@@ -70,6 +72,7 @@
     {"vsp.maineditor.paledit","Deschide în editorul indexat"},
     {"vsp.maineditor.close","Închide"},
     {"vsp.maineditor.preference","Preferințe"},
+	{"vsp.maineditor.copyflattoclipboard", "Copiază în clipboard"},
 
     {"vsp.maineditor.edit","Editează"},
     {"vsp.maineditor.undo","Undo"}, // no clue how to translate these two so i wont bother LOL
@@ -93,6 +96,7 @@
     {"vsp.maineditor.removealpha","Șterge canalul alfa"},
     {"vsp.maineditor.setckey","Setează o culoare transparentă"},
     {"vsp.maineditor.setckeydesc","Alege o culoare care va deveni transparentă în editor:"},
+	{"vsp.maineditor.nav.layer.copylayertoclipboard","Copiază stratul în clipboard"},
 
     {"vsp.cubepreview", "Previzualizare cub"},
 
