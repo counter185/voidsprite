@@ -106,6 +106,12 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
+    cb8 = new UICheckbox("Enable visual effects", &g_config.vfxEnabled);
+    cb8->position = posInTab;
+    cb8->checkbox->tooltip = "When disabled, some visual effect animations will not play.";
+    configTabs->tabs[0].wxs.addDrawable(cb8);
+    posInTab.y += 35;
+
     /*
         -------------------------
         EDITOR TAB

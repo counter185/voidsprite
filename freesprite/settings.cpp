@@ -19,6 +19,7 @@ bool g_saveConfig() {
         file << "autosaveInterval=" << g_config.autosaveInterval << std::endl;
         file << "rowColIndexesStartAt1=" << g_config.rowColIndexesStartAt1 << std::endl;
         file << "language=" << g_config.language << std::endl;
+        file << "vfxEnabled=" << (g_config.vfxEnabled ? "1" : "0") << std::endl;
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -76,6 +77,7 @@ void g_loadConfig() {
         if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception) {} }
         if (config.contains("rowColIndexesStartAt1")) { g_config.rowColIndexesStartAt1 = config["rowColIndexesStartAt1"] == "1"; }
         if (config.contains("language")) { g_config.language = config["language"]; }
+        if (config.contains("vfxEnabled")) { g_config.vfxEnabled = config["vfxEnabled"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();
