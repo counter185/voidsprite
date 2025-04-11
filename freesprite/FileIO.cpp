@@ -3519,7 +3519,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
                     if (!ret->isPalettized && extData.contains("activecolor")) {
                         uint32_t c = std::stoul(extData["activecolor"], NULL, 16);
-                        ret->setActiveColor(c, false);
+                        ret->setActiveColor(c);
                     }
                     if (ret->isPalettized && extData.contains("palette.index")) {
                         ((MainEditorPalettized*)ret)->pickedPaletteIndex = std::stoi(extData["palette.index"]);

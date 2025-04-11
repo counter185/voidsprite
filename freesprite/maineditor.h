@@ -74,8 +74,6 @@ public:
     bool leftMouseHold = false;
     bool middleMouseHold = false;
     Timer64 layerSwitchTimer;
-    Timer64 colorPickTimer;
-    bool lastColorPickWasFromWholeImage = false;
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;
@@ -156,7 +154,6 @@ public:
     void DrawForeground();
     void renderComments();
     void renderUndoStack();
-    virtual void renderColorPickerAnim();
     void drawSymmetryLines();
     void drawIsolatedFragment();
     void drawTileGrid();
@@ -190,8 +187,9 @@ public:
     bool isInBounds(XY pos);
     virtual uint32_t pickColorFromAllLayers(XY);
     void regenerateLastColors();
-    virtual void setActiveColor(uint32_t, bool animate = true);
+    virtual void setActiveColor(uint32_t);
     virtual uint32_t getActiveColor();
+    virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     void tickAutosave();
 

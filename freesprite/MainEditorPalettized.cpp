@@ -178,15 +178,12 @@ uint32_t MainEditorPalettized::getActiveColor()
     return pickedPaletteIndex;
 }
 
-void MainEditorPalettized::setActiveColor(uint32_t col, bool animate)
+void MainEditorPalettized::setActiveColor(uint32_t col)
 {
     if (col == -1) {
         col = 0;
     }
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(col);
-    if (animate) {
-        colorPickTimer.start();
-    }
 }
 
 uint32_t MainEditorPalettized::pickColorFromAllLayers(XY pos)
@@ -233,40 +230,13 @@ void MainEditorPalettized::updatePalette() {
     ((PalettizedEditorColorPicker*)colorPicker)->updateForcedColorPaletteButtons();
 }
 
-void MainEditorPalettized::renderColorPickerAnim()
+void MainEditorPalettized::playColorPickerVFX(bool inward)
 {
-    if (colorPickTimer.started && colorPickTimer.percentElapsedTime(500) <= 1.0f) {
-        float progress = colorPickTimer.percentElapsedTime(500);
-        int pxDistance = 40 * (lastColorPickWasFromWholeImage ? XM1PW3P1(progress) : (1.0 - XM1PW3P1(progress)));
-
-        SDL_Rect colRect2 = { g_mouseX, g_mouseY, 1,1 };
-        int pxDistance2 = pxDistance + 1;
-        colRect2.x -= pxDistance2;
-        colRect2.w = pxDistance2 * 2;
-        colRect2.y -= pxDistance2;
-        colRect2.h = pxDistance2 * 2;
-
-        //SDL_SetRenderDrawColor(g_rd, 255,255,255, (uint8_t)(127 * XM1PW3P1(1.0f - progress)));
-        //SDL_RenderDrawRect(g_rd, &colRect2);
-
-        for (int x = 3; x >= 1; x--) {
-            SDL_Rect colRect = { g_mouseX, g_mouseY, 1,1 };
-            int nowPxDistance = pxDistance / x;
-            colRect.x -= nowPxDistance;
-            colRect.w = nowPxDistance * 2;
-            colRect.y -= nowPxDistance;
-            colRect.h = nowPxDistance * 2;
-            uint32_t effectColor = (pickedPaletteIndex < palette.size() && pickedPaletteIndex >= 0) ? palette[pickedPaletteIndex] : 0;
-            hsv thsv = rgb2hsv(rgb{ ((effectColor >> 16) & 0xff) / 255.0f, ((effectColor >> 8) & 0xff) / 255.0f, (effectColor & 0xff) / 255.0f });
-            thsv.s /= 3;
-            thsv.v += 0.4;
-            thsv.v = dxmin(1.0, thsv.v);
-            rgb trgb = hsv2rgb(thsv);
-            SDL_Color trgbColor = SDL_Color{ (uint8_t)(trgb.r * 255.0), (uint8_t)(trgb.g * 255.0), (uint8_t)(trgb.b * 255.0), 255 };
-            SDL_SetRenderDrawColor(g_rd, trgbColor.r, trgbColor.g, trgbColor.b, (uint8_t)(255 * XM1PW3P1(1.0f - progress)));
-            SDL_RenderDrawRect(g_rd, &colRect);
-        }
+    u32 targetColor = 0;
+    if (pickedPaletteIndex < palette.size() && pickedPaletteIndex > 0) {
+        targetColor = palette[pickedPaletteIndex];
     }
+    g_newVFX(VFX_COLORPICKER, 500, targetColor, { g_mouseX, g_mouseY,-1,-1 }, { inward ? 1u : 0u });
 }
 
 void MainEditorPalettized::setUpWidgets()

@@ -19,13 +19,13 @@ public:
 
     void SetPixel(XY position, uint32_t color, bool pushToLastColors = true, uint8_t symmetry = 0) override;
     uint32_t getActiveColor() override;
-    void setActiveColor(uint32_t col, bool animate) override;
+    void setActiveColor(uint32_t col) override;
     uint32_t pickColorFromAllLayers(XY) override;
     void setPaletteIndex(u32 index, u32 color);
     void setPalette(std::vector<uint32_t> palette);
     void updatePalette();
 
-    void renderColorPickerAnim() override;
+    void playColorPickerVFX(bool inward) override;
 
     void setUpWidgets() override;
     void trySaveImage() override;
