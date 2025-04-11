@@ -139,6 +139,9 @@ void g_closeScreen(BaseScreen* screen) {
         }
         if (screenStack[x] == screen) {
             delete screenStack[x];
+            if (x == currentScreen) {
+                g_newVFX(VFX_SCREENCLOSE, 500);
+            }
             screenStack.erase(screenStack.begin() + x);
             overlayWidgets.removeDrawable(screenButtons[screenButtons.size() - 1]);
             screenButtons.pop_back();
@@ -163,7 +166,7 @@ void g_switchScreen(int index) {
         if (index != currentScreen) {
             currentScreen = index;
             screenStack[currentScreen]->onReturnToScreen();
-            screenSwitchTimer.start();
+            g_newVFX(VFX_SCREENSWITCH, 800);
         }
         overlayWidgets.forceUnfocus();
     }
@@ -587,7 +590,7 @@ int main(int argc, char** argv)
                     else if (evt.key.scancode == SDL_SCANCODE_F11) {
                         fullscreen = !fullscreen;
                         SDL_SetWindowFullscreen(g_wd, fullscreen);
-                        screenSwitchTimer.start();
+                        g_newVFX(VFX_SCREENSWITCH, 800);
                     }
                     else if (evt.key.scancode == SDL_SCANCODE_EQUALS){
                         if (g_ctrlModifier) {
@@ -642,23 +645,6 @@ int main(int argc, char** argv)
 
         for (BasePopup*& popup : popupStack) {
             popup->render();
-        }
-
-        //screen switching animation
-        if (screenSwitchTimer.started) {
-            double animTimer = XM1PW3P1(screenSwitchTimer.percentElapsedTime(800));
-            if (animTimer < 1) {
-                double reverseAnimTimer = 1.0 - animTimer;
-                XY windowOffset = { g_windowW / 16 , g_windowH / 16 };
-                SDL_Rect rect = {
-                    windowOffset.x * reverseAnimTimer,
-                    windowOffset.y * reverseAnimTimer,
-                    g_windowW - 2 * windowOffset.x * reverseAnimTimer,
-                    g_windowH - 2 * windowOffset.y * reverseAnimTimer,
-                };
-                SDL_SetRenderDrawColor(g_rd, 255, 255, 255,  0xd0 * reverseAnimTimer);
-                SDL_RenderDrawRect(g_rd, &rect);
-            }
         }
 
         /*if (!popupStack.empty()) {
@@ -776,6 +762,7 @@ int main(int argc, char** argv)
         }
 
         g_ttp->renderAll();
+        g_renderVFX();
 
         if (g_bgOpRunning) {
             renderbgOpInProgressScreen();

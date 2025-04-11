@@ -23,6 +23,8 @@ public:
 
     Timer64 lastClick;
 
+    XY lastPositionOnScreen = { 0,0 };
+
     std::function<void(UIButton*)> onClickCallback = NULL;
     std::function<void(UIButton*)> onRightClickCallback = NULL;
 

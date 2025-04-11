@@ -57,6 +57,15 @@ SDL_Rect offsetRect(SDL_Rect r, int offset)
         r.h + offset * 2
     };
 }
+SDL_Rect offsetRect(SDL_Rect r, int offsetX, int offsetY)
+{
+    return {
+        r.x - offsetX,
+        r.y - offsetY,
+        r.w + offsetX * 2,
+        r.h + offsetY * 2
+    };
+}
 
 double angleBetweenTwoPoints(XY a, XY b)
 {

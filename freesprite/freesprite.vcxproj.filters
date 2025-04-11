@@ -594,6 +594,9 @@
     <ClCompile Include="io_dibv5.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="vfx.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1129,6 +1132,9 @@
     </ClInclude>
     <ClInclude Include="io_dibv5.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

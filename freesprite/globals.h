@@ -276,3 +276,4 @@ struct NineSegmentPattern {
 #include "palettes.h"
 #include "settings.h"
 #include "fills.h"
+#include "vfx.h"

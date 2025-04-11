@@ -61,6 +61,7 @@ u64 encodeXY(XY a);
 XY decodeXY(u64 enc);
 SDL_FPoint xytofp(XY p);
 SDL_Rect offsetRect(SDL_Rect r, int offset);
+SDL_Rect offsetRect(SDL_Rect r, int offsetX, int offsetY);
 double angleBetweenTwoPoints(XY a, XY b);
 XY getSnappedPoint(XY from, XY to);
 

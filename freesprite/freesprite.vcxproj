@@ -319,6 +319,7 @@
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
     <ClCompile Include="UtilPathfind.cpp" />
+    <ClCompile Include="vfx.cpp" />
     <ClCompile Include="zip\zip.c" />
   </ItemGroup>
   <ItemGroup>
@@ -498,6 +499,7 @@
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
     <ClInclude Include="UtilPathfind.h" />
+    <ClInclude Include="vfx.h" />
     <ClInclude Include="zip\miniz.h" />
     <ClInclude Include="zip\zip.h" />
   </ItemGroup>

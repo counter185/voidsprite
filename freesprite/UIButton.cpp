@@ -6,6 +6,8 @@
 
 void UIButton::render(XY pos)
 {
+	lastPositionOnScreen = pos;
+
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
 	//SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
 	SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
@@ -95,6 +97,7 @@ void UIButton::renderTooltip(XY pos)
 void UIButton::click()
 {
 	lastClick.start();
+	g_newVFX(VFX_BUTTONPULSE, 700, 0x80FFFFFF, { lastPositionOnScreen.x, lastPositionOnScreen.y, wxWidth, wxHeight });
     if (onClickCallback != NULL) {
         onClickCallback(this);
     } 
