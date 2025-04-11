@@ -24,3 +24,6 @@ public:
 	}
 };
 
+
+void g_renderNotifications();
+void g_tickNotifications();
