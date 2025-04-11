@@ -11,7 +11,7 @@
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
     {"vsp.cmn.filetype.splitsession", "Split session file."},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
-    {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard"},
+    {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
