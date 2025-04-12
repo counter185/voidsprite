@@ -3,7 +3,7 @@
 
 class Brush1x1 : public BaseBrush
 {
-	std::string getName() override { return "1x1 Pixel"; }
+	std::string getName() override { return "Square Pixel"; }
 	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_px1x1.png"; }
 	std::map<std::string, BrushProperty> getProperties() override 
 	{ 
