@@ -45,10 +45,72 @@ void platformPostInit() {
     d3dobject->Release();
 }
 
+//todo
+bool platformAssocFileTypes() {
+    std::vector<std::wstring> filetypes = {
+        L".voidsn",
+        L".voidsnv5",
+        L".voidsnv4",
+        L".voidsnv3",
+        L".voidsnv2",
+    };
+
+    //add the program into hkey_classes_root
+    WCHAR path[MAX_PATH];
+    if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) {
+        HKEY classesRootKey;
+        if (RegOpenKeyW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", &classesRootKey) != ERROR_SUCCESS) {
+			printf("failed to open hkey_classes_root\n");
+			return false;
+        }
+        std::wstring pathWstr = path;
+        pathWstr += L" %1";
+
+        HKEY voidspriteRootKey;
+        if (RegCreateKeyExW(classesRootKey, L"voidsprite", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &voidspriteRootKey, NULL) == ERROR_SUCCESS) {
+            HKEY hKey;
+            if (RegCreateKeyExW(voidspriteRootKey, L"DefaultIcon", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+                std::wstring assocIconPath = convertStringOnWin32(pathInProgramDirectory("assets\\icon_fileassoc.ico"));
+                
+				RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)assocIconPath.c_str(), (assocIconPath.size()+1) * sizeof(wchar_t));
+                RegCloseKey(hKey);
+            }
+            if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size()+1) * sizeof(wchar_t));
+                RegCloseKey(hKey);
+            }
+			RegCloseKey(voidspriteRootKey);
+        }
+        else {
+			printf("failed to create voidsprite key in hkey_classes_root\n");
+			RegCloseKey(classesRootKey);
+            return false;
+        }
+        //RegCloseKey(classesRootKey);
+
+        //add all of the filetypes to hkey_classes_root too
+		for (auto& ext : filetypes) {
+			HKEY hKey;
+			if (RegCreateKeyExW(classesRootKey, ext.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+				RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)L"voidsprite", sizeof(L"voidsprite"));
+				RegCloseKey(hKey);
+            }
+            else {
+				printf("failed to create %ls key in hkey_classes_root\n", ext.c_str());
+				//RegCloseKey(classesRootKey);
+				//return false;
+            }
+		}
+		RegCloseKey(classesRootKey);
+
+        return true;
+    }
+    return false;
+}
+
 void platformTrySaveImageFile(EventCallbackListener* listener) {}
 
 void platformTryLoadImageFile(EventCallbackListener* listener) {}
-
 
 //pairs in format {extension, name}
 void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id) {

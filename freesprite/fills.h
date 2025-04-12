@@ -4,7 +4,8 @@ enum FillType {
     FILL_INVALID = 0,
     FILL_SOLID = 1,
     FILL_GRADIENT = 2,
-    FILL_TEXTURE = 3
+    FILL_TEXTURE = 3,
+    FILL_3POINTVGRADIENT = 4,
 };
 
 class Fill {
@@ -14,6 +15,7 @@ public:
     FillType type;
     u32 fillSolidColor = 0xFFFFFFFF;
     u32 fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR = 0xFFFFFFFF;
+	u32 fillGradientML, fillGradientMR = 0xFFFFFFFF;
     SDL_Texture* fillTexture = NULL;
 
     static Fill Solid(u32 color)
@@ -27,6 +29,17 @@ public:
         Fill r(FILL_GRADIENT);
         r.fillGradientUL = ul;
         r.fillGradientUR = ur;
+        r.fillGradientDL = dl;
+        r.fillGradientDR = dr;
+        return r;
+    }
+    static Fill ThreePointVerticalGradient(u32 ul, u32 ur, u32 ml, u32 mr, u32 dl, u32 dr)
+    {
+        Fill r(FILL_3POINTVGRADIENT);
+        r.fillGradientUL = ul;
+        r.fillGradientUR = ur;
+		r.fillGradientML = ml;
+		r.fillGradientMR = mr;
         r.fillGradientDL = dl;
         r.fillGradientDR = dr;
         return r;
@@ -54,6 +67,10 @@ public:
                 break;
             case FILL_GRADIENT:
                 renderGradient(r, fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR);
+                break;
+            case FILL_3POINTVGRADIENT:
+                renderGradient({r.x,r.y,r.w,r.h/2}, fillGradientUL, fillGradientUR, fillGradientML, fillGradientMR);
+                renderGradient({r.x,r.y+r.h/2,r.w,r.h/2}, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
                 break;
             case FILL_TEXTURE:
                 SDL_RenderCopy(g_rd, fillTexture, NULL, &r);

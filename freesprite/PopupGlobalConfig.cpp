@@ -244,6 +244,22 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
+    btn = new UIButton();
+    btn->text = "Associate file extensions";
+    btn->tooltip = "Associate .voidsn* files to the currently running instance of voidsprite.";
+    btn->position = posInTab;
+    btn->wxWidth = 230;
+	btn->onClickCallback = [this](UIButton*) {
+		if (platformAssocFileTypes()) {
+			g_addNotification(SuccessShortNotification("File extensions associated", ""));
+		}
+		else {
+			g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to associate file extensions"));
+		}
+	};
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
+
 
     
 

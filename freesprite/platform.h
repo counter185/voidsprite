@@ -16,6 +16,8 @@ void platformPreInit();
 void platformInit();
 void platformPostInit();
 
+bool platformAssocFileTypes();
+
 void platformTrySaveImageFile(EventCallbackListener* caller);
 void platformTryLoadImageFile(EventCallbackListener* caller);
 void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id);

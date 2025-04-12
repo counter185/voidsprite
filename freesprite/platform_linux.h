@@ -31,6 +31,9 @@ void platformPreInit() {
 void platformInit() {}
 void platformPostInit() {}
 
+//todo
+bool platformAssocFileTypes() { return false; }
+
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
 

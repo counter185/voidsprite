@@ -52,6 +52,9 @@ void platformPostInit() {
     g_addNotification(Notification("macOS Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
 }
 
+//todo
+bool platformAssocFileTypes() { return false; }
+
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
 
