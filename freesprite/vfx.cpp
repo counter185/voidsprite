@@ -27,7 +27,17 @@ public:
                     double percent = interpolation(timer.percentElapsedTime(duration));
                     double percentHalfTime = interpolation(timer.percentElapsedTime(duration / 2));
                     SDL_Rect screenRect = { 0,0, g_windowW, g_windowH };
-                    screenRect = offsetRect(screenRect, (g_windowW / -16.0) * percentHalfTime);
+                    screenRect = offsetRect(screenRect, (screenRect.w / -16.0) * percentHalfTime, (screenRect.h / -16.0) * percentHalfTime);
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255 * (1.0 - percent));
+                    SDL_RenderFillRect(g_rd, &screenRect);
+                }
+                break;
+            case VFX_POPUPCLOSE:
+                {
+                    double percent = interpolation(timer.percentElapsedTime(duration));
+                    double percentHalfTime = interpolation(timer.percentElapsedTime(duration / 2));
+                    SDL_Rect screenRect = extData2;
+                    screenRect = offsetRect(screenRect, (screenRect.w / -12.0) * percentHalfTime, (screenRect.h / -12.0) * percentHalfTime);
                     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255 * (1.0 - percent));
                     SDL_RenderFillRect(g_rd, &screenRect);
                 }
