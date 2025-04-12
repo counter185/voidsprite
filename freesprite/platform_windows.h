@@ -56,7 +56,7 @@ bool platformAssocFileTypes(std::vector<std::string> extensions) {
 			return false;
         }
         std::wstring pathWstr = path;
-        pathWstr += L" %1";
+        pathWstr += L" \"%1\"";
 
         HKEY voidspriteRootKey;
         if (RegCreateKeyExW(classesRootKey, L"voidsprite", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &voidspriteRootKey, NULL) == ERROR_SUCCESS) {
