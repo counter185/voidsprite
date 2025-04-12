@@ -22,6 +22,7 @@ public:
     bool rowColIndexesStartAt1 = false;
     std::string language = "en-us";
     bool vfxEnabled = true;
+    bool overrideCursor = true;
 
     std::vector<std::string> lastOpenFiles;
 

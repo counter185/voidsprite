@@ -597,6 +597,9 @@
     <ClCompile Include="vfx.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="PopupChooseExtsToAssoc.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1135,6 +1138,9 @@
     </ClInclude>
     <ClInclude Include="vfx.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupChooseExtsToAssoc.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

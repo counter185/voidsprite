@@ -9,9 +9,11 @@
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
-    {"vsp.cmn.filetype.splitsession", "Split session file."},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
     {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
+
+    //file type names
+    {"vsp.cmn.filetype.splitsession", "Split session file"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
@@ -117,5 +119,15 @@
 
     //screen: tilemap preview
     {"vsp.tilemappreview", "Preview tiles"},
+
+
+    //popup: settings
+    {"vsp.config.title", "Preferences"},
+
+    {"vsp.config.associateexts.title", "Associate file extensions"},
+    {"vsp.config.associateexts.desc", "Choose file types to associate"},
+    {"vsp.config.associateexts.success", "File extensions associated."},
+    {"vsp.config.associateexts.error", "Failed to associate file extensions."},
+    {"vsp.config.associateexts.noselect", "No file types selected."},
 
 }}},

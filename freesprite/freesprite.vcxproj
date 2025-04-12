@@ -223,6 +223,7 @@
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
     <ClCompile Include="PopupApplyFilter.cpp" />
+    <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupListRecoveryAutosaves.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="PopupApplyFilter.h" />
+    <ClInclude Include="PopupChooseExtsToAssoc.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupIntegerScale.h" />
     <ClInclude Include="PopupListRecoveryAutosaves.h" />

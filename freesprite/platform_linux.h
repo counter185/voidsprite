@@ -32,7 +32,7 @@ void platformInit() {}
 void platformPostInit() {}
 
 //todo
-bool platformAssocFileTypes() { return false; }
+bool platformAssocFileTypes(std::vector<std::string> extensions) { return false; }
 
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}

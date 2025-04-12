@@ -45,15 +45,7 @@ void platformPostInit() {
     d3dobject->Release();
 }
 
-//todo
-bool platformAssocFileTypes() {
-    std::vector<std::wstring> filetypes = {
-        L".voidsn",
-        L".voidsnv5",
-        L".voidsnv4",
-        L".voidsnv3",
-        L".voidsnv2",
-    };
+bool platformAssocFileTypes(std::vector<std::string> extensions) {
 
     //add the program into hkey_classes_root
     WCHAR path[MAX_PATH];
@@ -89,14 +81,15 @@ bool platformAssocFileTypes() {
         //RegCloseKey(classesRootKey);
 
         //add all of the filetypes to hkey_classes_root too
-		for (auto& ext : filetypes) {
+		for (auto& ext : extensions) {
 			HKEY hKey;
-			if (RegCreateKeyExW(classesRootKey, ext.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+			std::wstring extw = utf8StringToWstring(ext);
+			if (RegCreateKeyExW(classesRootKey, extw.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
 				RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)L"voidsprite", sizeof(L"voidsprite"));
 				RegCloseKey(hKey);
             }
             else {
-				printf("failed to create %ls key in hkey_classes_root\n", ext.c_str());
+				printf("failed to create %s key in hkey_classes_root\n", ext.c_str());
 				//RegCloseKey(classesRootKey);
 				//return false;
             }

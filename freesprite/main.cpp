@@ -306,14 +306,17 @@ int main(int argc, char** argv)
     unscaledWindowSize = {g_windowW, g_windowH};
     UpdateViewportScaler();
 
-    SDL_Surface* cursorSrf = IMG_Load(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
-    if (cursorSrf != NULL) {
-        SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
-        SDL_SetCursor(cur);
-        SDL_FreeSurface(cursorSrf);
+    if (g_config.overrideCursor) {
+        std::string cursorPath = pathInProgramDirectory(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
+        SDL_Surface* cursorSrf = IMG_Load(cursorPath.c_str());
+        if (cursorSrf != NULL) {
+            SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
+            SDL_SetCursor(cur);
+            SDL_FreeSurface(cursorSrf);
+        }
     }
-    g_setupColorModels();
 
+    g_setupColorModels();
     g_setupIO();
     g_reloadColorMap();
 
@@ -630,7 +633,14 @@ int main(int argc, char** argv)
         }
 
         for (BasePopup*& popup : popupStack) {
-            popup->render();
+            if (popup != popupStack[popupStack.size() - 1]) {
+                g_ttp->takeTooltips = false;
+                popup->render();
+				g_ttp->takeTooltips = true;
+            }
+            else {
+                popup->render();
+            }
         }
 
         /*if (!popupStack.empty()) {

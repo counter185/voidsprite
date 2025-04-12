@@ -10,6 +10,7 @@
 #include "ScrollingPanel.h"
 #include "BaseBrush.h"
 #include "discord_rpc.h"
+#include "PopupChooseExtsToAssoc.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -126,6 +127,12 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
+    cb8 = new UICheckbox("Override system cursor (restart required)", &g_config.overrideCursor);
+    cb8->position = posInTab;
+    cb8->checkbox->tooltip = "When enabled, voidsprite will use a custom mouse cursor sprite.";
+    configTabs->tabs[1].wxs.addDrawable(cb8);
+    posInTab.y += 35;
+
     /*
         -------------------------
         EDITOR TAB
@@ -236,26 +243,21 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
     UIButton* btn = new UIButton();
-    btn->text = "Open app data directory";
+    btn->text = "Open app data directory...";
     btn->tooltip = "Open the directory where voidsprite stores its data.";
     btn->position = posInTab;
-    btn->wxWidth = 230;
+    btn->wxWidth = 270;
     btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
     btn = new UIButton();
-    btn->text = "Associate file extensions";
-    btn->tooltip = "Associate .voidsn* files to the currently running instance of voidsprite.";
+    btn->text = "Associate file extensions...";
+    btn->tooltip = "Choose file types to associate with the currently running instance of voidsprite.";
     btn->position = posInTab;
-    btn->wxWidth = 230;
+    btn->wxWidth = 270;
 	btn->onClickCallback = [this](UIButton*) {
-		if (platformAssocFileTypes()) {
-			g_addNotification(SuccessShortNotification("File extensions associated", ""));
-		}
-		else {
-			g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to associate file extensions"));
-		}
+        g_addPopup(new PopupChooseExtsToAssoc());
 	};
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
@@ -277,11 +279,11 @@ PopupGlobalConfig::PopupGlobalConfig()
             closePopup();
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Failed to save preferences"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to save preferences"));
         }
     };
 
-    makeTitleAndDesc("Preferences");
+    makeTitleAndDesc(TL("vsp.config.title"));
 }
 
 void PopupGlobalConfig::takeInput(SDL_Event evt)
