@@ -274,6 +274,7 @@ public:
     
     void populateLastOpenFiles();
     void renderStartupAnim();
+    void renderFileDropAnim();
     void renderBackground();
     void openImageLoadDialog();
     void tryLoadFile(std::string path);
