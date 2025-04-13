@@ -159,19 +159,24 @@ void TTFFontObject::RenderGlyph(uint32_t a, int size)
     if (!charInBounds(a)) {
         printf("** requested glyph outside of bounds\n");
     }
-    TTF_SetFontSize(font, size);
-    SDL_Surface* gl = TTF_RenderGlyph_Blended(font, (Uint32)a, SDL_Color{ 255,255,255,255 });
-    if (gl != NULL) {
-        SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
+    if (TTF_FontHasGlyph(font, a)) {
+        TTF_SetFontSize(font, size);
+        SDL_Surface* gl = TTF_RenderGlyph_Blended(font, (Uint32)a, SDL_Color{ 255,255,255,255 });
+        if (gl != NULL) {
+            SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
 
-        GlyphData newGlyphData;
-        TTF_GetGlyphMetrics(font, a, &newGlyphData.minx, &newGlyphData.maxx, &newGlyphData.miny, &newGlyphData.maxy, &newGlyphData.advance);
-        newGlyphData.texture = newTexture;
-        newGlyphData.w = gl->w;
-        newGlyphData.h = gl->h;
-        SDL_FreeSurface(gl);
-        renderedGlyphs[size][a] = newGlyphData;
+            GlyphData newGlyphData;
+            TTF_GetGlyphMetrics(font, a, &newGlyphData.minx, &newGlyphData.maxx, &newGlyphData.miny, &newGlyphData.maxy, &newGlyphData.advance);
+            newGlyphData.texture = newTexture;
+            newGlyphData.w = gl->w;
+            newGlyphData.h = gl->h;
+            SDL_FreeSurface(gl);
+            renderedGlyphs[size][a] = newGlyphData;
 
+        }
+        else {
+            renderedGlyphs[size][a] = GlyphData{ 0,0,0,0,0,0,0,NULL };
+        }
     }
     else {
         renderedGlyphs[size][a] = GlyphData{ 0,0,0,0,0,0,0,NULL };

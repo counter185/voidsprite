@@ -30,7 +30,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
             u32 numChunks = frameHeader.numChunksOld == 0xFFFF
                 ? frameHeader.numChunksNew : frameHeader.numChunksOld;
 
-            for (int nch = 0; nch < numChunks; nch++) {
+            for (u32 nch = 0; nch < numChunks; nch++) {
                 u64 posRn = ftell(f);
                 u32 chunkSize;
                 u16 chunkType;

@@ -475,6 +475,12 @@ int main(int argc, char** argv)
             g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
         }
     }
+
+    /*SDL_Surface* rasterCP437FontImg = IMG_Load(pathInProgramDirectory("assets/codepage437-8x8-voidfont.png").c_str());
+    if (rasterCP437FontImg != NULL) {
+        BitmapFontObject* fnt = new BitmapFontObject(rasterCP437FontImg, 437);
+        g_fnt->AddFont(fnt);
+    }*/
     
 
     g_ttp = new TooltipsLayer();

@@ -46,6 +46,8 @@ uint32_t sdlcolorToUint32(SDL_Color c);
 SDL_Color uint32ToSDLColor(u32 c);
 uint32_t modAlpha(uint32_t color, uint8_t alpha);
 
+SDL_Surface* trimSurface(SDL_Surface* target, SDL_Rect dims);
+
 u32 hsvShift(u32 color, hsv shift);
 u32 hslShift(u32 color, hsl shift);
 u32 hslShiftPixelStudioCompat(u32 color, hsl shift);
@@ -351,5 +353,48 @@ public:
         int x = indexNow % squareDim;
         int y = indexNow / squareDim;
         return xyAdd(subLast, {x * ixpow(squareDim, thisPower), y * ixpow(squareDim, thisPower)});
+    }
+};
+
+//double ended map
+//assumes we're nice enough to not put duplicate values
+template <typename T, typename S>
+class demapAB {
+private:
+    std::map<T, S> ABmap;
+    std::map<S, T> BAmap;
+public:
+    demapAB() {}
+    demapAB(std::vector<std::pair<T, S>> contents) {
+        for (auto& kv : contents) {
+            pushSideA(kv.first, kv.second);
+        }
+    }
+
+    S operator[](T v){
+        return getFromA(v);
+    }
+
+    void pushSideA(T key, S value) {
+        ABmap[key] = value;
+        BAmap[value] = key;
+    }
+    void pushSideB(S key, S value) {
+        ABmap[value] = key;
+        BAmap[key] = value;
+    }
+
+    S getFromA(T key) {
+        return ABmap[key];
+    }
+    T getFromB(S key) {
+        return BAmap[key];
+    }
+
+    bool containsA(T v) {
+        return ABmap.contains(v);
+    }
+    bool containsB(S v) {
+        return BAmap.contains(v);
     }
 };

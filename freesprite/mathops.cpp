@@ -726,6 +726,18 @@ uint32_t modAlpha(uint32_t color, uint8_t alpha)
     return (color & 0x00FFFFFF) + (alpha << 24);
 }
 
+SDL_Surface* trimSurface(SDL_Surface* target, SDL_Rect dims)
+{
+    SDL_Surface* ret = SDL_CreateSurface(dims.w, dims.h, target->format);
+    int bpp = (target->pitch / target->w);
+    for (int y = 0; y < dims.h; y++) {
+        u8* srcScanline = &ARRAY2DPOINT(((u8*)target->pixels), dims.x*bpp, dims.y + y, target->pitch);
+        u8* dstScanline = &ARRAY2DPOINT(((u8*)ret->pixels), 0, y, ret->pitch);
+        memcpy(dstScanline, srcScanline, dims.w * bpp);
+    }
+    return ret;
+}
+
 u32 hsvShift(u32 color, hsv shift)
 {
     rgb colorRGB = { (float)((color & 0xFF0000) >> 16) / 255.0f, (float)((color & 0x00FF00) >> 8) / 255.0f, (float)(color & 0x0000FF) / 255.0f };
