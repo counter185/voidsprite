@@ -24,6 +24,10 @@
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
+private:
+    Timer64 fileDropTimer;
+    bool droppingFile = false;
+    XY fileDropXY = { -1,-1 };
 public:
     TabbedView* newImageTabs;
 
@@ -251,6 +255,7 @@ public:
     void takeInput(SDL_Event evt) override;
 
     void onReturnToScreen() override {
+        droppingFile = false;
         populateLastOpenFiles();
     }
 

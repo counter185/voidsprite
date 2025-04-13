@@ -40,6 +40,8 @@ void StartScreen::render()
 
     wxsManager.renderAll();
 
+    renderFileDropAnim();
+
     renderStartupAnim();
 }
 
@@ -55,6 +57,7 @@ void StartScreen::takeInput(SDL_Event evt)
     LALT_TO_SUMMON_NAVBAR;
 
     if (evt.type == SDL_DROPFILE) {
+        droppingFile = false;
         std::string filePath = evt.drop.data;
         if (stringEndsWithIgnoreCase(filePath, ".zlib")) {
             unZlibFile(convertStringOnWin32(filePath));
@@ -63,6 +66,16 @@ void StartScreen::takeInput(SDL_Event evt)
             tryLoadFile(filePath);
         }
         return;
+    }
+    else if (evt.type == SDL_EVENT_DROP_BEGIN) {
+        fileDropTimer.start();
+        droppingFile = true;
+    }
+    else if (evt.type == SDL_EVENT_DROP_COMPLETE) {
+        droppingFile = false;
+    }
+    else if (evt.type == SDL_EVENT_DROP_POSITION) {
+        fileDropXY = { (int)evt.drop.x, (int)evt.drop.y };
     }
 
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
@@ -319,6 +332,44 @@ void StartScreen::renderStartupAnim()
                 XY fd = g_fnt->StatStringDimensions(s, 33);
                 g_fnt->RenderString(s, g_windowW - fd.x - 2, 0, { 255,255,255, (u8)(255 * (1.0 - XM1PW3P1((textAnimTime - 0.05) / 0.95))) }, 33);
             }
+        }
+    }
+}
+
+void StartScreen::renderFileDropAnim()
+{
+    if (droppingFile) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0 * fileDropTimer.percentElapsedTime(200));
+        SDL_Rect r = { 0,0,g_windowW,g_windowH };
+        SDL_RenderFillRect(g_rd, &r);
+
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
+        SDL_Rect r2 = { 0,0, g_windowW, (g_windowH / 6) * XM1PW3P1(fileDropTimer.percentElapsedTime(1500)) };
+        SDL_RenderFillRect(g_rd, &r2);
+        r2.y = g_windowH - r2.h;
+        SDL_RenderFillRect(g_rd, &r2);
+
+        g_fnt->RenderString("Drop an image here to open it in a new workspace...", 50, 50, { 255,255,255,(u8)(255 * fileDropTimer.percentElapsedTime(200)) }, 22);
+
+        if (g_config.vfxEnabled) {
+            for (int x = 0; x < 3; x++) {
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, (255 / (x + 1)) * fileDropTimer.percentLoopingTime(2000, x * 700));
+                XY origin = fileDropXY;
+                SDL_Rect r3 = offsetRect({ origin.x, origin.y,1,1 }, ixpow(4, x + 1) * XM1PW3P1(fileDropTimer.percentLoopingTime(1000)));
+                SDL_RenderDrawRect(g_rd, &r3);
+            }
+
+
+            double tick1 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500));
+            double tick2 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500, 700));
+            double tick3 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500, 700));
+            double tick4 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500));
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255 * tick1);
+            drawLine(xyAdd(fileDropXY, { -60,-60 }), xyAdd(fileDropXY, { -20,-20 }), tick1);
+            drawLine(xyAdd(fileDropXY, { -60, 60 }), xyAdd(fileDropXY, { -20, 20 }), tick1);
+            drawLine(xyAdd(fileDropXY, { 60,-60 }), xyAdd(fileDropXY, { 20,-20 }), tick1);
+            drawLine(xyAdd(fileDropXY, { 60, 60 }), xyAdd(fileDropXY, { 20, 20 }), tick1);
+
         }
     }
 }

@@ -9,17 +9,13 @@
 
 PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
     wxHeight = 200;
-    UIButton* nbutton = new UIButton();
-    nbutton->text = "Back";
-    nbutton->position = XY{ wxWidth - 130, wxHeight - 40 };
-    nbutton->wxHeight = 35;
-    nbutton->wxWidth = 120;
-    nbutton->setCallbackListener(0, this);
-    wxsManager.addDrawable(nbutton);
+    UIButton* nbutton = actionButton(TL("vsp.cmn.close"));
+	nbutton->onClickCallback = [this](UIButton*) {
+		closePopup();
+	};
 
-    checkForceRGB = new UICheckbox("Always convert palettized formats to RGB", false);
+    UICheckbox* checkForceRGB = new UICheckbox("Always convert palettized formats to RGB", &forceRGB);
 	checkForceRGB->position = XY{ 20, 140 };
-	checkForceRGB->setCallbackListener(EVENT_QUICKCONVERT_FORCE_RGB, this);
 	wxsManager.addDrawable(checkForceRGB);
 
     std::vector<std::string> formats;
@@ -60,7 +56,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
 
 		MainEditor* session = loadAnyIntoSession(path);
 		FileExporter* exporter = g_fileExporters[exporterIndex];
-		doQuickConvert(session, outPath, exporter, checkForceRGB->isChecked());
+		doQuickConvert(session, outPath, exporter, forceRGB);
     }
 }
 
@@ -81,7 +77,7 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
 		}
 	}
 	if (exporter == NULL) {
-		g_addNotification(ErrorNotification("Error", "No exporter found for this file"));
+		g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No exporter found for this file"));
 		printf("No exporter found for file %s\n", convertStringToUTF8OnWin32(outPath).c_str());
 		delete session;
 		return;
