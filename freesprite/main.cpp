@@ -453,8 +453,29 @@ int main(int argc, char** argv)
     //load filters
     g_loadFilters();
 
+    //load fonts
     TTF_Init();
     g_fnt = new TextRenderer();
+    TTF_Font* fontDefault = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
+    fontDefault = fontDefault == NULL ? TTF_OpenFont(FONT_PATH, 18) : fontDefault;
+    g_fnt->AddFont(fontDefault, { {0, 0xFFFFFFFF} });
+
+    TTF_Font* fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
+    fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
+    g_fnt->AddFont(fontJP, {
+        {0x3000, 0x30FF},   // CJK Symbols and Punctuation, hiragana, katakana
+		{0xFF00, 0xFFEF},   // Halfwidth and Fullwidth Forms
+		{0x4E00, 0x9FAF}    // CJK Unified Ideographs
+    });
+
+    std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
+    if (std::filesystem::exists(customFontPath)) {
+        TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
+        if (fontCustom != NULL) {
+            g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
+        }
+    }
+    
 
     g_ttp = new TooltipsLayer();
 
