@@ -168,10 +168,14 @@ public:
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
         }
 
+
+        int startScreenPanelEndpoint = newImageTabs->getDimensions().x + newImageTabs->position.x;
+        startScreenPanelEndpoint = ixmax(560, startScreenPanelEndpoint);
+
         lastOpenFilesPanel = new Panel();
-        lastOpenFilesPanel->wxWidth = 560;
+        lastOpenFilesPanel->wxWidth = startScreenPanelEndpoint;
         lastOpenFilesPanel->wxHeight = 520;
-        lastOpenFilesPanel->position = {570, 75};
+        lastOpenFilesPanel->position = { startScreenPanelEndpoint + 10, 75};
         lastOpenFilesPanel->passThroughMouse = true;
         wxsManager.addDrawable(lastOpenFilesPanel);
 

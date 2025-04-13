@@ -45,7 +45,7 @@ std::string lastWindowTitle = "";
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
-TextRenderer* g_fnt;
+TextRenderer* g_fnt = NULL;
 TooltipsLayer* g_ttp;
 Gamepad* g_gamepad = NULL;
 std::vector<std::string> g_cmdlineArgs;
@@ -155,6 +155,32 @@ void g_switchScreen(int index) {
             g_newVFX(VFX_SCREENSWITCH, 800);
         }
         overlayWidgets.forceUnfocus();
+    }
+}
+
+void g_reloadFonts() {
+    if (g_fnt != NULL) {
+        delete g_fnt;
+    }
+    g_fnt = new TextRenderer();
+    TTF_Font* fontDefault = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
+    fontDefault = fontDefault == NULL ? TTF_OpenFont(FONT_PATH, 18) : fontDefault;
+    g_fnt->AddFont(fontDefault, { {0, 0xFFFFFFFF} });
+
+    TTF_Font* fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
+    fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
+    g_fnt->AddFont(fontJP, {
+        {0x3000, 0x30FF},   // CJK Symbols and Punctuation, hiragana, katakana
+        {0xFF00, 0xFFEF},   // Halfwidth and Fullwidth Forms
+        {0x4E00, 0x9FAF}    // CJK Unified Ideographs
+        });
+
+    std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
+    if (std::filesystem::exists(customFontPath)) {
+        TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
+        if (fontCustom != NULL) {
+            g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
+        }
     }
 }
 
@@ -455,26 +481,7 @@ int main(int argc, char** argv)
 
     //load fonts
     TTF_Init();
-    g_fnt = new TextRenderer();
-    TTF_Font* fontDefault = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
-    fontDefault = fontDefault == NULL ? TTF_OpenFont(FONT_PATH, 18) : fontDefault;
-    g_fnt->AddFont(fontDefault, { {0, 0xFFFFFFFF} });
-
-    TTF_Font* fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
-    fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
-    g_fnt->AddFont(fontJP, {
-        {0x3000, 0x30FF},   // CJK Symbols and Punctuation, hiragana, katakana
-		{0xFF00, 0xFFEF},   // Halfwidth and Fullwidth Forms
-		{0x4E00, 0x9FAF}    // CJK Unified Ideographs
-    });
-
-    std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
-    if (std::filesystem::exists(customFontPath)) {
-        TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
-        if (fontCustom != NULL) {
-            g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
-        }
-    }
+    g_reloadFonts();
 
     /*SDL_Surface* rasterCP437FontImg = IMG_Load(pathInProgramDirectory("assets/codepage437-8x8-voidfont.png").c_str());
     if (rasterCP437FontImg != NULL) {

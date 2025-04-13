@@ -22,7 +22,7 @@ void StartScreen::render()
     SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
     g_fnt->RenderString(std::format("alpha@{}", __DATE__), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
-    SDL_Rect bgr = SDL_Rect{ 0, 35, 560, 300 };
+    SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
     SDL_Color colorBG1 = { 0x30, 0x30, 0x30, 0xa0};
     SDL_Color colorBG2 = { 0x20, 0x20, 0x20, 0xa0};
     SDL_Color colorBG3 = { 0x10, 0x10, 0x10, 0xa0 };

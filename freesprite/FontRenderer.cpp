@@ -56,7 +56,7 @@ TextRenderer::TextRenderer() {
 TextRenderer::~TextRenderer() {
 
     for (auto& s : fontStack) {
-		delete s;
+        delete s;
     }
 }
 
@@ -110,8 +110,8 @@ XY TextRenderer::StatStringDimensions(std::string text, int size)
                 GlyphData glyphData = getGlyphForChar(currentUTF8Sym, size); //renderedGlyphs[size][currentUTF8Sym];
                 drawX += glyphData.advance;
                 if (drawX > maxDraw.x) {
-					maxDraw.x = drawX;
-				}
+                    maxDraw.x = drawX;
+                }
             }
         }
     }
@@ -124,10 +124,10 @@ GlyphData TextRenderer::getGlyphForChar(uint32_t ch, int size)
 {
     for (auto& font : fontStack) {
         if (font->charInBounds(ch) && font->hasGlyphForChar(ch, size)) {
-			return font->getGlyphForChar(ch, size);
+            return font->getGlyphForChar(ch, size);
         }
     }
-	return GlyphData{ 0,0,0,0,0,0,0,NULL };
+    return GlyphData{ 0,0,0,0,0,0,0,NULL };
 }
 
 /*void TextRenderer::RenderGlyph(uint32_t a, int size) {

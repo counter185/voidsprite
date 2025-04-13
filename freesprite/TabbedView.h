@@ -24,24 +24,7 @@ public:
     Timer64 tabSwitchTimer;
     bool nextTabSlideFromTheLeft = false;
 
-    TabbedView(std::vector<Tab> tabN, int buttonWidth = 60) {
-        int buttonX = 0;
-        for (int x = 0; x < tabN.size(); x++) {
-            UIButton* nbutton = new UIButton();
-            nbutton->wxWidth = buttonWidth;
-            nbutton->wxHeight = buttonsHeight;
-            nbutton->position = XY{ buttonX, 0 };
-            nbutton->text = tabN[x].name;
-            nbutton->icon = tabN[x].icon;
-            buttonX += nbutton->wxWidth;
-            nbutton->setCallbackListener(x, this);
-            tabButtons.addDrawable(nbutton);
-
-            tabs.push_back(tabN[x]);
-        }
-        updateTabButtons();
-        tabSwitchTimer.start();
-    }
+    TabbedView(std::vector<Tab> tabN, int buttonWidth = 60);
     ~TabbedView() {
         tabButtons.freeAllDrawables();
         for (Tab& t : tabs) {
@@ -130,5 +113,20 @@ public:
     }
 
     bool takesMouseWheelEvents() override { return true; }
+
+    XY getDimensions() override { 
+        XY ret = { 0,0 };
+        for (Drawable*& a : tabButtons.drawablesList) {
+            XY aPos = a->position;
+            XY aDim = a->getRenderDimensions();
+            if (aPos.x + aDim.x > ret.x) {
+                ret.x = aPos.x + aDim.x;
+            }
+            if (aPos.y + aDim.y > ret.y) {
+                ret.y = aPos.y + aDim.y;
+            }
+        }
+        return ret;
+    };
 };
 

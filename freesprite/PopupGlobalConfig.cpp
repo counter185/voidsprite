@@ -262,6 +262,17 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
+    btn = new UIButton();
+    btn->text = TL("vsp.config.opt.reloadfonts");
+    btn->position = posInTab;
+    btn->wxWidth = 270;
+	btn->onClickCallback = [this](UIButton*) {
+        g_reloadFonts();
+        g_addNotification(SuccessShortNotification(TL("vsp.config.opt.fontsreloaded"), ""));
+	};
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
+
 
     
 

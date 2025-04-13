@@ -123,6 +123,8 @@
 
     //popup: settings
     {"vsp.config.title", "Preferences"},
+    {"vsp.config.opt.reloadfonts", "Reload fonts..."},
+    {"vsp.config.opt.fontsreloaded", "Fonts reloaded"},
 
     {"vsp.config.associateexts.title", "Associate file extensions"},
     {"vsp.config.associateexts.desc", "Choose file types to associate"},

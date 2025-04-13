@@ -52,24 +52,24 @@ class FontObject {
 protected:
     std::map<int, std::map<uint32_t, GlyphData>> renderedGlyphs;
 public:
-	std::vector<std::pair<u32, u32>> charBounds;
+    std::vector<std::pair<u32, u32>> charBounds;
     
     virtual ~FontObject() {
-		for (auto& glyph : renderedGlyphs) {
-			for (auto& glyphData : glyph.second) {
-				if (glyphData.second.texture != NULL) {
-					tracked_destroyTexture(glyphData.second.texture);
-				}
-			}
-		}
+        for (auto& glyphMap : renderedGlyphs) {
+            for (auto& glyphData : glyphMap.second) {
+                if (glyphData.second.texture != NULL) {
+                    tracked_destroyTexture(glyphData.second.texture);
+                }
+            }
+        }
     }
 
     bool charInBounds(u32 ch) {
-		for (auto& bounds : charBounds) {
-			if (ch >= bounds.first && ch <= bounds.second) {
-				return true;
-			}
-		}
+        for (auto& bounds : charBounds) {
+            if (ch >= bounds.first && ch <= bounds.second) {
+                return true;
+            }
+        }
         return false;
     }
     virtual bool hasGlyphForChar(u32 ch, int size) = 0;
@@ -78,21 +78,20 @@ public:
 
 class TTFFontObject : public FontObject {
 private:
-	TTF_Font* font = NULL;
+    TTF_Font* font = NULL;
     void RenderGlyph(uint32_t a, int size);
 public:
-	TTFFontObject(TTF_Font* f) : font(f) {
-	}
+    TTFFontObject(TTF_Font* f) : font(f) {
+    }
     ~TTFFontObject() override {
         if (font != NULL) {
             TTF_CloseFont(font);
         }
-		FontObject::~FontObject();
     }
 
     bool hasGlyphForChar(u32 ch, int size) override {
         if (!renderedGlyphs[size].contains(ch)) {
-			RenderGlyph(ch, size);
+            RenderGlyph(ch, size);
         }
         return renderedGlyphs[size][ch].texture != NULL;
     }
@@ -156,7 +155,6 @@ public:
         if (tex != NULL) {
             SDL_DestroySurface(tex);
         }
-        FontObject::~FontObject();
     }
 
     bool hasGlyphForChar(u32 ch, int size) override {
@@ -206,7 +204,7 @@ public:
 private:
     std::vector<FontObject*> fontStack;
 
-	GlyphData getGlyphForChar(uint32_t ch, int size);
+    GlyphData getGlyphForChar(uint32_t ch, int size);
 };
 
 bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out);
