@@ -15,7 +15,7 @@ public:
     FillType type;
     u32 fillSolidColor = 0xFFFFFFFF;
     u32 fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR = 0xFFFFFFFF;
-	u32 fillGradientML, fillGradientMR = 0xFFFFFFFF;
+    u32 fillGradientML, fillGradientMR = 0xFFFFFFFF;
     SDL_Texture* fillTexture = NULL;
 
     static Fill Solid(u32 color)
@@ -38,8 +38,8 @@ public:
         Fill r(FILL_3POINTVGRADIENT);
         r.fillGradientUL = ul;
         r.fillGradientUR = ur;
-		r.fillGradientML = ml;
-		r.fillGradientMR = mr;
+        r.fillGradientML = ml;
+        r.fillGradientMR = mr;
         r.fillGradientDL = dl;
         r.fillGradientDR = dr;
         return r;
@@ -76,5 +76,54 @@ public:
                 SDL_RenderCopy(g_rd, fillTexture, NULL, &r);
                 break;
         }
+    }
+
+    std::string serialize() {
+        switch (type) {
+            case FILL_SOLID:
+                return std::format("fill:solid:{:08X}", fillSolidColor);
+            case FILL_GRADIENT:
+                return std::format("fill:gradient:{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR);
+            case FILL_3POINTVGRADIENT:
+                return std::format("fill:3pointgradient:{:08X}/{:08X}/{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
+            default:
+                return "fill:none";
+        }
+    }
+    static Fill deserialize(std::string str) {
+        try {
+            std::vector<std::string> parts = splitString(str, ':');
+            if (parts.size() < 2 || parts[0] != "fill") {
+                return Fill(FILL_INVALID);
+            }
+            if (parts[1] == "solid") {
+                return Fill::Solid(std::stoul(parts[2], nullptr, 16));
+            }
+            else if (parts[1] == "3pointgradient") {
+                auto subColors = splitString(parts[2], '/');
+                return Fill::ThreePointVerticalGradient(
+                    std::stoul(subColors[0], nullptr, 16),
+                    std::stoul(subColors[1], nullptr, 16),
+                    std::stoul(subColors[2], nullptr, 16),
+                    std::stoul(subColors[3], nullptr, 16),
+                    std::stoul(subColors[4], nullptr, 16),
+                    std::stoul(subColors[5], nullptr, 16)
+                );
+            }
+            else if (parts[1] == "gradient") {
+                auto subColors = splitString(parts[2], '/');
+                return Fill::Gradient(
+                    std::stoul(subColors[0], nullptr, 16),
+                    std::stoul(subColors[1], nullptr, 16),
+                    std::stoul(subColors[2], nullptr, 16),
+                    std::stoul(subColors[3], nullptr, 16)
+                );
+            }
+        }
+        catch (std::exception& e) {
+            printf("Error deserializing fill: %s\n", e.what());
+        }
+
+        return Fill(FILL_INVALID);
     }
 };

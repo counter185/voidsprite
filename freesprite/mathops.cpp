@@ -72,6 +72,18 @@ double angleBetweenTwoPoints(XY a, XY b)
     return atan2(b.y - a.y, b.x - a.x) / M_PI * 180 + 180;
 }
 
+std::vector<std::string> splitString(std::string a, char b)
+{
+    std::vector<std::string> ret;
+    while (a.find(b) != std::string::npos) {
+        std::string part = a.substr(0, a.find(b));
+        ret.push_back(part);
+        a = a.substr(a.find(b) + 1);
+    }
+    ret.push_back(a);
+    return ret;
+}
+
 std::string stringToLower(std::string a)
 {
     std::string ret;
@@ -833,8 +845,8 @@ int ixpow(int a, int b)
     }
     int ret = a;
     for (int i = 1; i < b; i++) {
-		ret *= a;
-	}
+        ret *= a;
+    }
     return ret;
 }
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }

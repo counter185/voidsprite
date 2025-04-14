@@ -67,6 +67,7 @@ SDL_Rect offsetRect(SDL_Rect r, int offsetX, int offsetY);
 double angleBetweenTwoPoints(XY a, XY b);
 XY getSnappedPoint(XY from, XY to);
 
+std::vector<std::string> splitString(std::string a, char b);
 std::string stringToLower(std::string a);
 std::string shiftJIStoUTF8(std::string a);
 std::wstring utf8StringToWstring(std::string a);
@@ -332,9 +333,9 @@ private:
     XY subLast = { 0,0 };
 public:
     Detiler(int width, int pow = 0) {
-		squareDim = width;
+        squareDim = width;
         thisPower = pow;
-	}
+    }
     ~Detiler() {
         if (sub != NULL) {
             delete sub;
