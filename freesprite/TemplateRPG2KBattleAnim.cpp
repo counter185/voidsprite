@@ -18,7 +18,7 @@ uint8_t battletemplate_patternX[5][5] = {
 Layer* TemplateRPG2KBattleAnim::generate()
 {
     Layer* ret = new Layer(480, 480);
-    ret->name = "Template Layer";
+    ret->name = TL("vsp.layer.template");
 
     uint32_t tileBGs[] = {
         0xFF1D0000, 0xFF3B0000,

@@ -4,13 +4,17 @@
     {"vsp.cmn.yes", "Yes"},
     {"vsp.cmn.no", "No"},
     {"vsp.cmn.close", "Close"},
+    {"vsp.cmn.apply", "Apply"},
+    {"vsp.cmn.cancel", "Cancel"},
+    {"vsp.cmn.confirm", "Confirm"},
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
+    {"vsp.cmn.error.decompressfail", "Failed to decompress data."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
-    {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
     {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
+    {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
 
     //file type names
     {"vsp.cmn.filetype.splitsession", "Split session file"},
@@ -26,6 +30,15 @@
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},
     {"vsp.popup.openimage", "open image"},
+
+    // default layer names
+    {"vsp.layer.template", "Template Layer"},
+    {"vsp.layer.jxl", "JPEG XL Layer"},
+    {"vsp.layer.xyz", "XYZ Image"},
+    {"vsp.layer.aseprite", "Aseprite Layer"},
+
+    // strings related to main.cpp
+    {"vsp.bgop.inprogress", "Operation in progress. Please wait..."},
 
     // screen: voidsprite launchpad
     {"vsp.launchpad", "voidsprite Launchpad"},
@@ -70,6 +83,10 @@
 
     // screen: voidsprite main editor
     {"vsp.maineditor", "Editor"},
+    {"vsp.maineditor.erasermode", "(Erase)"},
+
+    {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
+    {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
 
     {"vsp.maineditor.file","File"},
     {"vsp.maineditor.saveas","Save As"},
@@ -116,6 +133,7 @@
 
     //screen: spritesheet preview
     {"vsp.spritesheetpreview", "Preview sprites"},
+    {"vsp.spritesheetpreview.timeline", "Timeline"},
 
     //screen: tilemap preview
     {"vsp.tilemappreview", "Preview tiles"},
@@ -123,6 +141,35 @@
 
     //popup: settings
     {"vsp.config.title", "Preferences"},
+
+    {"vsp.config.tab.general", "General"},
+    {"vsp.config.tab.visual", "Visual"},
+    {"vsp.config.tab.editor", "Editor"},
+    {"vsp.config.tab.keybinds", "Keybinds"},
+    {"vsp.config.tab.misc", "Misc."},
+
+    {"vsp.config.opt.pngextdata", "Save/load extra data to PNGs"},
+    {"vsp.config.opt.pngextdata.desc", "When enabled, voidsprite will load and save extra data such as canvas comments,\n"
+                                       "tile grid and symmetry to PNGs."},
+    {"vsp.config.opt.discordrpc", "Discord Rich Presence"},
+    {"vsp.config.opt.discordrpc.desc", "When enabled, your activity will be shared as your Discord status.\n"
+                                       "Supported only on Windows."},
+    {"vsp.config.opt.lang", "Language (restart required)"},
+    {"vsp.config.opt.vsync", "Vertical sync"},
+    {"vsp.config.opt.vsync.desc", "When enabled, the framerate will be locked to your display's refresh rate.\n"
+                                  "Disabling this will make brushes smoother but also increase energy consumption.\n"
+                                  "voidsprite must be restarted for this change to take effect."},
+    {"vsp.config.opt.bganim", "Animated background"},
+    {"vsp.config.opt.bganim.none", "Off"},
+    {"vsp.config.opt.bganim.sharp", "Sharp"},
+    {"vsp.config.opt.bganim.smooth", "Smooth"},
+    {"vsp.config.opt.bganim.sharpstatic", "Sharp (static)"},
+    {"vsp.config.opt.bganim.smoothstatic", "Smooth (static)"},
+    {"vsp.config.opt.renderer", "Renderer"},
+    {"vsp.config.opt.vfx", "Enable visual effects"},
+    {"vsp.config.opt.vfx.desc", "When disabled, some visual effect animations will not play."},
+    {"vsp.config.opt.cursor", "Override system cursor (restart required)"},
+    {"vsp.config.opt.cursor.desc", "When enabled, voidsprite will use a custom mouse cursor sprite."},
     {"vsp.config.opt.reloadfonts", "Reload fonts..."},
     {"vsp.config.opt.fontsreloaded", "Fonts reloaded"},
 
@@ -131,5 +178,11 @@
     {"vsp.config.associateexts.success", "File extensions associated."},
     {"vsp.config.associateexts.error", "Failed to associate file extensions."},
     {"vsp.config.associateexts.noselect", "No file types selected."},
+
+    //popup: apply filter
+    {"vsp.applyfilter.renderingpreview", "Rendering preview..."},
+
+    //popup: quick convert
+    {"vsp.quickconvert.forceindexedtorgb", "Always convert indexed formats to RGB"},
 
 }}},

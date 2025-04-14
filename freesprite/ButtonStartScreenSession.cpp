@@ -35,7 +35,7 @@ void ButtonStartScreenSession::click()
         g_switchScreen(correspondingScreen);
     }
     else {
-        g_addNotification(ErrorNotification("Error", "this should never happen"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "this should never happen"));
     }
     UIButton::click();
 }

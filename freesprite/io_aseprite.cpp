@@ -200,7 +200,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                     std::vector<LayerPalettized*> layers;
                     for (auto& kv : pixelDatas) {
                         LayerPalettized* l = new LayerPalettized(header.width, header.height);
-                        l->name = "Aseprite layer";
+                        l->name = TL("vsp.layer.aseprite");
                         if (layerData.contains(kv.first)) {
                             l->name = layerData[kv.first].name;
                             //l->layerAlpha = layerData[kv.first].rawFrag.opacity;
@@ -277,7 +277,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
 
         MainEditorPalettized* upcastEditor = editor->isPalettized ? (MainEditorPalettized*)editor : NULL;
         if (editor->isPalettized && upcastEditor->palette.size() > 256) {
-            g_addNotification(ErrorNotification("Error", "Aseprite supports max. 256 colors"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Aseprite supports max. 256 colors"));
             fclose(f);
             return false;
         }

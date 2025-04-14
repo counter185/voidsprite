@@ -30,12 +30,12 @@ PopupChooseExtsToAssoc::PopupChooseExtsToAssoc()
 		}
 	}
 
-	UIButton* closeBtn = actionButton("Cancel");
+	UIButton* closeBtn = actionButton(TL("vsp.cmn.cancel"));
 	closeBtn->onClickCallback = [this](UIButton* id) {
 		this->closePopup();
 	};
 
-	UIButton* confirmBtn = actionButton("Confirm");
+	UIButton* confirmBtn = actionButton(TL("vsp.cmn.apply"));
 	confirmBtn->onClickCallback = [this](UIButton* id) {
 		std::vector<std::string> exts;
 		for (auto& p : filetypes) {

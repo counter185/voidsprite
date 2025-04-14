@@ -221,16 +221,7 @@ void MainEditor::render() {
 
     if (currentBrush != NULL) {
         currentBrush->renderOnCanvas(this, canvas.scale);
-    }
-
-    /*if (spritesheetPreview != NULL) {
-        spritesheetPreview->previewWx->render(XY{ 0,0 });
-    }*/
-
-    //g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
-    //g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
-
-    
+    }    
 
     if (wxsManager.anyFocused() && navbar->focused) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
@@ -610,7 +601,8 @@ void MainEditor::DrawForeground()
     }
 
     if (currentBrush != NULL) {
-        g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? "(Erase)" : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        static std::string eraserModeText = TL("vsp.maineditor.erasermode");
+        g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
     if (currentPattern != NULL) {
@@ -783,7 +775,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
+                                g_addPopup(new PopupTileGeneric(editor, TL("vsp.maineditor.rescanv"), "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
@@ -796,7 +788,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
                                     g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile size", "New tile size:", XY{ editor->tileDimensions.x, editor->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
@@ -807,7 +799,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
                                     g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->canvas.dimensions.x / (float)editor->tileDimensions.x), (int)ceil(editor->canvas.dimensions.y / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
@@ -817,13 +809,13 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(editor, TL("vsp.maineditor.intscale"), "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.canvscale"),
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Scale canvas", "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
+                                g_addPopup(new PopupTileGeneric(editor, TL("vsp.maineditor.canvscale"), "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
@@ -959,7 +951,7 @@ void MainEditor::setUpWidgets()
                             [](MainEditor* editor) {
                                 //if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                         return;
                                     }
                                     SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
@@ -967,7 +959,7 @@ void MainEditor::setUpWidgets()
                                     //editor->spritesheetPreview = newScreen;
                                 //}
                                 //else {
-                                //    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
+                                //    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Spritesheet preview is already open."));
                                 //}
                             }
                         }
@@ -975,7 +967,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_T, { "Open tileset preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                     return;
                                 }
                                 TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
@@ -987,7 +979,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
                                 if (!xyEqual(editor->canvas.dimensions, {480, 256})) {
-                                    g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions must be 480x256"));
                                     return;
                                 }
                                 RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
@@ -999,7 +991,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_N, { "Open cube preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile grid must be set"));
                                     return;
                                 }
                                 MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
@@ -1011,7 +1003,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
                             [](MainEditor* editor) {
                                 if (editor->canvas.dimensions.x != editor->canvas.dimensions.y && editor->canvas.dimensions.x / 2 != editor->canvas.dimensions.y) {
-                                    g_addNotification(ErrorNotification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
                                     return;
                                 }
                                 MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(editor);
@@ -1059,7 +1051,7 @@ void MainEditor::setUpWidgets()
     }
 
     colorPicker = new EditorColorPicker(this);
-    CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
+    CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.colorpicker.title"), colorPicker);
     colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
@@ -1067,7 +1059,7 @@ void MainEditor::setUpWidgets()
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
+    CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.brushpicker.title"), brushPicker);
     brushPickerPanel->position.y = 454;
     brushPickerPanel->position.x = 10;
     wxsManager.addDrawable(brushPickerPanel);
@@ -1094,7 +1086,7 @@ void MainEditor::makeActionBar()
     actionbar->position = { 0, navbar->wxHeight };
 
     int nextNavbarX = 5;
-    UIButton* undoButton = new UIButton("", "Undo");
+    UIButton* undoButton = new UIButton("", TL("vsp.maineditor.undo"));
     undoButton->icon = g_iconActionBarUndo;
     undoButton->onClickCallback = [this](UIButton* btn) { undo(); };
     undoButton->position = { nextNavbarX,0 };
@@ -1103,7 +1095,7 @@ void MainEditor::makeActionBar()
     actionbar->addDrawable(undoButton);
     nextNavbarX += 35;
 
-    UIButton* redoButton = new UIButton("", "Redo");
+    UIButton* redoButton = new UIButton("", TL("vsp.maineditor.redo"));
     redoButton->icon = g_iconActionBarRedo;
     redoButton->onClickCallback = [this](UIButton* btn) { redo(); };
     redoButton->position = { nextNavbarX,0 };
@@ -1427,7 +1419,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                             tileLockTimer.start();
                                         } else {
                                             g_addNotification(
-                                                ErrorNotification("Error", "Tile position out of bounds"));
+                                                ErrorNotification(TL("vsp.cmn.error"), "Tile position out of bounds"));
                                         }
                                     } else {
                                         lockedTilePreview = {0, 0};
@@ -1518,15 +1510,15 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     g_addNotification(SuccessNotification("Success", "File exported successfully."));
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
                 }
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Invalid exporter"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid exporter"));
         }
     }
     else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
@@ -1554,7 +1546,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     }
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("Failed to export tile {}:{}", x,y)));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Failed to export tile {}:{}", x,y)));
                 }
             }
         }
@@ -2344,7 +2336,7 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 
 void MainEditor::rescaleAllLayersFromCommand(XY size) {
     if (xyEqual(canvas.dimensions, size)) {
-        g_addNotification(ErrorNotification("Error", "Size must be different to rescale."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size must be different to rescale."));
         return;
     }
 
@@ -2375,13 +2367,13 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
     if (byTile) {
         if (xyEqual(tileDimensions, size)) {
-            g_addNotification(ErrorNotification("Error", "Tile size must be different to resize."));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile size must be different to resize."));
             return;
         }
     }
     else {
         if (xyEqual(canvas.dimensions, size)) {
-            g_addNotification(ErrorNotification("Error", "Size must be different to resize."));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size must be different to resize."));
             return;
         }
     }
@@ -2432,11 +2424,11 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
 {
     if (scale.x == 0 || scale.y == 0 || (scale.x == 1 && scale.y == 1)) {
-        g_addNotification(ErrorNotification("Error", "Invalid scale."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid scale."));
         return;
     }
     else if (downscale && (canvas.dimensions.x % scale.x != 0 || canvas.dimensions.y % scale.y != 0)) {
-        g_addNotification(ErrorNotification("Error", "Dimensions not divisible."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions not divisible."));
         return;
     }
 
@@ -2460,7 +2452,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
 MainEditorPalettized* MainEditor::toPalettizedSession()
 {
     if (isPalettized) {
-        g_addNotification(ErrorNotification("Error", "?????"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "?????"));
         return NULL;
     }
     else {
@@ -2499,7 +2491,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
             return ret;
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Too many colors in current session"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors in current session"));
             return NULL;
         }
     }
@@ -2524,7 +2516,7 @@ void MainEditor::exportTilesIndividually()
         platformTrySaveOtherFile(this, formats, "export tiles", EVENT_MAINEDITOR_EXPORTTILES);
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
     }
 }
 
@@ -2598,7 +2590,7 @@ void MainEditor::layer_outline(bool wholeImage)
     Layer* l = getCurrentLayer();
     uint8_t* placePixelData = (uint8_t*)tracked_malloc(l->w * l->h);
     if (placePixelData == NULL) {
-        g_addNotification(ErrorNotification("Error", "malloc failed"));
+        g_addNotification(NOTIF_MALLOC_FAIL);
         return;
     }
     commitStateToCurrentLayer();

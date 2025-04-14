@@ -100,11 +100,11 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                 g_addNotification(SuccessNotification("Success", "File exported successfully."));
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Invalid exporter"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid exporter"));
         }
     }
     else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {

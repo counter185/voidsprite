@@ -28,7 +28,7 @@ void PopupApplyFilter::render() {
     renderFilterPopupBackground();
     renderDrawables();
     if (nowRendering) {
-        g_fnt->RenderString("Rendering preview...", 2, g_windowH - 30, {255,255,255,200});
+        g_fnt->RenderString(TL("vsp.applyfilter.renderingpreview"), 2, g_windowH - 30, {255,255,255,200});
     }
 }
 
@@ -191,14 +191,14 @@ void PopupApplyFilter::setupWidgets()
     setSize({ 550, y + 70 });
 
     UIButton* btnApply = new UIButton();
-    btnApply->text = "Apply";
+    btnApply->text = TL("vsp.cmn.apply");
     btnApply->wxWidth = 100;
     btnApply->position = XY{wxWidth - 10 - btnApply->wxWidth, wxHeight - 10 - btnApply->wxHeight};
     btnApply->setCallbackListener(-1, this);
     wxsManager.addDrawable(btnApply);
     
     UIButton* btnCancel = new UIButton();
-    btnCancel->text = "Cancel";
+    btnCancel->text = TL("vsp.cmn.cancel");
     btnCancel->wxWidth = 100;
     btnCancel->position = XY{btnApply->position.x - 10 - btnCancel->wxWidth, wxHeight - 10 - btnCancel->wxHeight};
     btnCancel->setCallbackListener(-2, this);

@@ -4,7 +4,7 @@
 Layer* TemplateRPG2KSystem::generate()
 {
     Layer* ret = new Layer(160, 80);
-    ret->name = "Template Layer";
+    ret->name = TL("vsp.layer.template");
     uint32_t tileBGColors[] = {
         0xff1e0000, 0xff380000,
         0xff0d0d15, 0xff382338,

@@ -25,11 +25,11 @@ void Brush9SegmentRect::clickRelease(MainEditor* editor, XY pos)
     maxy++;
 
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Tool not supported in palettized editor."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tool not supported in palettized editor."));
         return;
     }
     if (pickedPattern == NULL) {
-        g_addNotification(ErrorNotification("Error", "No pattern selected."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No pattern selected."));
         return;
     }
 
@@ -98,7 +98,7 @@ void Brush9SegmentRect::eventGeneric(int evt_id, int data1, int data2)
             pickedPattern = g_9spatterns[data1];
         }
         else {
-            g_addNotification(ErrorNotification("Error","Invalid pattern"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"),"Invalid pattern"));
         }
     }
 }

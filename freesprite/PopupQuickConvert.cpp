@@ -14,7 +14,7 @@ PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
 		closePopup();
 	};
 
-    UICheckbox* checkForceRGB = new UICheckbox("Always convert palettized formats to RGB", &forceRGB);
+    UICheckbox* checkForceRGB = new UICheckbox(TL("vsp.quickconvert.forceindexedtorgb"), &forceRGB);
 	checkForceRGB->position = XY{ 20, 140 };
 	wxsManager.addDrawable(checkForceRGB);
 
@@ -127,13 +127,13 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
 				g_addNotification(SuccessNotification("Success", "Exported file"));
 			}
 			else {
-				g_addNotification(ErrorNotification("Error", "Failed to export file"));
+				g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to export file"));
 			}
 			delete l;
 		}
 		delete session;
 	}
 	else {
-		g_addNotification(ErrorNotification("Error", "Failed to load file"));
+		g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
 	}
 }

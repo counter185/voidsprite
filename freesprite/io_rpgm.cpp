@@ -31,7 +31,7 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
         //hopefully res == Z_OK
 
         if (res != Z_OK) {
-            g_addNotification(ErrorNotification("XYZ import failed", "Failed to decompress data"));
+            g_addNotification(ErrorNotification("XYZ import failed", TL("vsp.cmn.error.decompressfail")));
             printf("[XYZ] uncompress failed\n");
             tracked_free(compressedData);
             tracked_free(decompBytes);
@@ -54,7 +54,7 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
             pxData[x] = decompBytes[filePtr++];
         }
 
-        nLayer->name = "XYZ Image";
+        nLayer->name = TL("vsp.layer.xyz");
 
         tracked_free(compressedData);
         tracked_free(decompBytes);
@@ -191,25 +191,25 @@ MainEditor* readLMU(PlatformNativePathString path)
                         }
                     }
                     else {
-                        g_addNotification(ErrorNotification("Error", "Failed to load Chipset"));
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load Chipset"));
                     }
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", "Chipset index not in database"));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Chipset index not in database"));
                 }
                 ldbFile.close();
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Failed to read LDB"));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to read LDB"));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "LDB not found"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "LDB not found"));
         }
         lmuFile.close();
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Failed to read LMU"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to read LMU"));
     }
 
     return ret;

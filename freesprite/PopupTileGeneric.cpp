@@ -9,19 +9,11 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     this->popupEvtID = event_id;
     this->callback = callback;
 
-    UIButton* nbutton = new UIButton();
-    nbutton->text = "Set";
-    nbutton->position = XY{ wxWidth - 260, wxHeight - 40 };
-    nbutton->wxWidth = 120;
+    UIButton* nbutton = actionButton("vsp.cmn.apply");
     nbutton->setCallbackListener(0, this);
-    wxsManager.addDrawable(nbutton);
 
-    UIButton* nbutton2 = new UIButton();
-    nbutton2->text = "Cancel";
-    nbutton2->position = XY{ wxWidth - 130, wxHeight - 40 };
-    nbutton2->wxWidth = 120;
+    UIButton* nbutton2 = actionButton("vsp.cmn.cancel");
     nbutton2->setCallbackListener(1, this);
-    wxsManager.addDrawable(nbutton2);
 
     tboxX = new UITextField();
     tboxX->position = XY{ 20, 80 };

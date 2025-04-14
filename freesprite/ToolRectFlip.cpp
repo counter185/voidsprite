@@ -60,7 +60,7 @@ void ToolRectFlip::doFlip(MainEditor* editor, XY startPos, XY endPos, bool yFlip
 	int regionH = maxPoint.y - minPoint.y + 1;
 	uint32_t* copy = (uint32_t*)tracked_malloc(4 * regionW * regionH, "Temp. mem.");
 	if (copy == NULL) {
-		g_addNotification(ErrorNotification("Error", "malloc failed"));
+		g_addNotification(NOTIF_MALLOC_FAIL);
 		return;
 	}
 

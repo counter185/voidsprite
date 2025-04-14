@@ -391,7 +391,7 @@ void EditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name,
             reloadColorLists();
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Failed to import palette"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to import palette"));
         }
     }
 }

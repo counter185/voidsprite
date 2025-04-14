@@ -7,7 +7,7 @@
 Layer* TemplateRPG2KChipset::generate()
 {
     Layer* ret = new Layer(480, 256);
-    ret->name = "Template Layer";
+    ret->name = TL("vsp.layer.template");
     uint32_t tileBGColors_terrain[] = {
               0xff001e5e, 0xff003868,
         0xff000d15, 0xff002338,

@@ -823,7 +823,7 @@ void unZlibFile(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile == NULL) {
-        g_addNotification(ErrorNotification("Error", "Failed to open file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to open file"));
         return;
     }
     fseek(infile, 0, SEEK_END);
@@ -838,7 +838,7 @@ void unZlibFile(PlatformNativePathString path)
     fclose(outfile);
     tracked_free(fileBuffer);
     if (decompressedData.size() == 0) {
-        g_addNotification(ErrorNotification("Error", "Failed to decompress zlib file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to decompress zlib file"));
     } else {
         g_addNotification(SuccessNotification("Success", "Zlib file decompressed"));
     }
@@ -942,7 +942,7 @@ MainEditor* deserializePixelStudioSession(json j)
     printf("Version: %i\n", pspversion);
 
     if (pspversion != 2) {
-        g_addNotification(ErrorNotification("Error", "Unsupported Pixel Studio file version"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported Pixel Studio file version"));
         return NULL;
     }
 
@@ -3197,7 +3197,7 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek)
     return l;
 
 #else
-    g_addNotification(ErrorNotification("Error", "Format not supported on this platform"));
+    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Format not supported on this platform"));
     return NULL;
 #endif
 }
@@ -3277,7 +3277,7 @@ MainEditor* readPixelStudioPSX(PlatformNativePathString path)
             return deserializePixelStudioSession(j);
         }
         catch (std::exception) {
-            g_addNotification(ErrorNotification("Error", "Failed to parse PSX JSON"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to parse PSX JSON"));
             return NULL;
         }
     }
@@ -3530,7 +3530,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 break;
             default:
                 printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
-                g_addNotification(ErrorNotification("Error", std::format("VOIDSN file v{} not supported", voidsnversion)));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("VOIDSN file v{} not supported", voidsnversion)));
                 fclose(infile);
                 return NULL;
         }
@@ -3589,7 +3589,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
 bool writePNG(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized && ((LayerPalettized*)data)->palette.size() > 256){
-        g_addNotification(ErrorNotification("Error", "Too many colors in palette"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors in palette"));
         return false;
     }
 
@@ -3680,7 +3680,7 @@ bool writePNG(PlatformNativePathString path, Layer* data)
 bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
     if (data[0]->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -3714,7 +3714,7 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 {
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -3755,7 +3755,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 {
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4035,7 +4035,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 {
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4164,7 +4164,7 @@ bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data)
 bool writeBMP(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4189,7 +4189,7 @@ bool writeBMP(PlatformNativePathString path, Layer* data) {
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4221,7 +4221,7 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
 {
     auto uqColors = data->getUniqueColors();
     if (uqColors.size() > 2) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. X Bitmap requires 2."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. X Bitmap requires 2."));
         return false;
     }
 
@@ -4265,7 +4265,7 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
 
 bool writeTGA(PlatformNativePathString path, Layer* data) {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4356,7 +4356,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4390,7 +4390,7 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4439,7 +4439,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
 {
     auto uqColors = data->getUniqueColors();
     if (uqColors.size() > 2) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. Anymap PBM requires 2."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. Anymap PBM requires 2."));
         return false;
     }
     std::sort(uqColors.begin(), uqColors.end());
@@ -4471,7 +4471,7 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
         if (((LayerPalettized*)data)->palette.size() > 256) {
-            g_addNotification(ErrorNotification("Error", "Too many colors. Anymap PGM requires up to 256."));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. Anymap PGM requires up to 256."));
             return false;
         }
     }
@@ -4567,7 +4567,7 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
 {
     std::vector<u32> palette = data->isPalettized ? ((LayerPalettized*)data)->palette : data->getUniqueColors();
     if (palette.size() > 256) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires max. 256."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. CUR requires max. 256."));
         return false;
     }
 
@@ -4723,11 +4723,11 @@ std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString n
                 return { true, newPalette };
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Unsupported VOIDPLT file version"));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported VOIDPLT file version"));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Invalid palette file"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid palette file"));
         }
         fclose(f);
     }
@@ -4782,7 +4782,7 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
             if (lineN == 1) {
                 magic = line;
                 if (magic != "GIMP Palette") {
-                    g_addNotification(ErrorNotification("Error", "Invalid GIMP palette file"));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid GIMP palette file"));
                     f.close();
                     return { false, {} };
                 }
@@ -4943,7 +4943,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                 version = std::stoi(line.substr(31));
             }
             catch (std::exception) {
-                g_addNotification(ErrorNotification("Error", "Invalid split session file"));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid split session file"));
                f.close();   //not needed apparently
                 return NULL;
             }
@@ -4983,12 +4983,12 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                     delete subsn;
                                 }
                                 else {
-                                    g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
                                 }
                                 
                             }
                             catch (std::exception) {
-                                g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
                             }
                         }
                         else if (stringStartsWithIgnoreCase(line, "comment:")) {
@@ -5041,7 +5041,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                 }
                     break;
                 default:
-                    g_addNotification(ErrorNotification("Error", "Unsupported split session file version"));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported split session file version"));
                     f.close();
                     return NULL;
             }
@@ -5053,7 +5053,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
 bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
 {
     if (!data->splitSessionData.set) {
-        g_addNotification(ErrorNotification("Error", "No split session data."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No split session data."));
         return false;
     }
     std::ofstream f(path);
@@ -5078,7 +5078,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
             delete trimmed;
         }
         else {
-            g_addNotification(ErrorNotification("Error", "No exporter for split session image"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No exporter for split session image"));
         }
     }
     delete flat;
@@ -5089,7 +5089,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 

@@ -37,7 +37,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     wxHeight = 400;
     wxWidth = 850;
 
-    TabbedView* configTabs = new TabbedView({ {"General"}, {"Visual"}, { "Editor" }, {"Keybinds"}, {"Misc."}}, 90);
+    TabbedView* configTabs = new TabbedView({ {TL("vsp.config.tab.general")}, {TL("vsp.config.tab.visual")}, {TL("vsp.config.tab.editor")}, {TL("vsp.config.tab.keybinds")}, {TL("vsp.config.tab.misc")}}, 90);
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
 
@@ -48,15 +48,15 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     XY posInTab = { 0,10 };
 
-    UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", &g_config.saveLoadFlatImageExtData);
+    UICheckbox* cb7 = new UICheckbox(TL("vsp.config.opt.pngextdata"), &g_config.saveLoadFlatImageExtData);
     cb7->position = posInTab;
-    cb7->checkbox->tooltip = "When enabled, voidsprite will load and save extra data such as canvas comments,\ntile grid and symmetry to PNGs.";
+    cb7->checkbox->tooltip = TL("vsp.config.opt.pngextdata.desc");
     configTabs->tabs[0].wxs.addDrawable(cb7);
     posInTab.y += 35;
 
-    UICheckbox* cb8 = new UICheckbox("Discord Rich Presence", &g_config.useDiscordRPC);
+    UICheckbox* cb8 = new UICheckbox(TL("vsp.config.opt.discordrpc"), &g_config.useDiscordRPC);
     cb8->position = posInTab;
-    cb8->checkbox->tooltip = "When enabled, your activity will be shared as your Discord status.\nSupported only on Windows.";
+    cb8->checkbox->tooltip = TL("vsp.config.opt.discordrpc.desc");
     configTabs->tabs[0].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
@@ -65,7 +65,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         langLocNames.push_back(loc.first);
         langNames.push_back(loc.second.langName);
     }
-    UILabel* lbl4 = new UILabel("Language (restart required)");
+    UILabel* lbl4 = new UILabel(TL("vsp.config.opt.lang"));
     lbl4->position = posInTab;
     configTabs->tabs[0].wxs.addDrawable(lbl4);
     UIDropdown* dd2 = new UIDropdown(langNames);
@@ -91,16 +91,16 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     posInTab = { 0,10 };
-    UICheckbox* cb6 = new UICheckbox("Vertical sync", &g_config.vsync);
+    UICheckbox* cb6 = new UICheckbox(TL("vsp.config.opt.vsync"), &g_config.vsync);
     cb6->position = posInTab;
-    cb6->checkbox->tooltip = "When enabled, the framerate will be locked to your display's refresh rate.\nDisabling this will make brushes smoother but also increase energy consumption.\nvoidsprite must be restarted for this change to take effect.";
+    cb6->checkbox->tooltip = TL("vsp.config.opt.vsync.desc");
     configTabs->tabs[1].wxs.addDrawable(cb6);
     posInTab.y += 35;
 
-    UILabel* lbl3 = new UILabel("Animated background");
+    UILabel* lbl3 = new UILabel(TL("vsp.config.opt.bganim"));
     lbl3->position = posInTab;
     configTabs->tabs[1].wxs.addDrawable(lbl3);
-    UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
+    UIDropdown* dd1 = new UIDropdown({ TL("vsp.config.opt.bganim.none"), TL("vsp.config.opt.bganim.sharp"), TL("vsp.config.opt.bganim.smooth"), TL("vsp.config.opt.bganim.sharpstatic"), TL("vsp.config.opt.bganim.smoothstatic") });
     dd1->position = xyAdd(posInTab, { 200, 0 });
     dd1->wxWidth = 180;
     dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
@@ -109,7 +109,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(dd1);
     posInTab.y += 35;
 
-    lbl4 = new UILabel("Renderer");
+    lbl4 = new UILabel(TL("vsp.config.opt.renderer"));
     lbl4->position = posInTab;
     configTabs->tabs[1].wxs.addDrawable(lbl4);
     dd2 = new UIDropdown(g_availableRenderersNow);
@@ -121,15 +121,15 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
-    cb8 = new UICheckbox("Enable visual effects", &g_config.vfxEnabled);
+    cb8 = new UICheckbox(TL("vsp.config.opt.vfx"), &g_config.vfxEnabled);
     cb8->position = posInTab;
-    cb8->checkbox->tooltip = "When disabled, some visual effect animations will not play.";
+    cb8->checkbox->tooltip = TL("vsp.config.opt.vfx.desc");
     configTabs->tabs[1].wxs.addDrawable(cb8);
     posInTab.y += 35;
 
-    cb8 = new UICheckbox("Override system cursor (restart required)", &g_config.overrideCursor);
+    cb8 = new UICheckbox(TL("vsp.config.opt.cursor"), &g_config.overrideCursor);
     cb8->position = posInTab;
-    cb8->checkbox->tooltip = "When enabled, voidsprite will use a custom mouse cursor sprite.";
+    cb8->checkbox->tooltip = TL("vsp.config.opt.cursor.desc");
     configTabs->tabs[1].wxs.addDrawable(cb8);
     posInTab.y += 35;
 

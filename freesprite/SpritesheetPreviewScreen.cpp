@@ -130,7 +130,8 @@ void SpritesheetPreviewScreen::render()
         g_fnt->RenderString("Click on sprites to add them to the timeline...", 20, spriteView->position.y + 60);
     }
 
-    g_fnt->RenderString("Timeline", 2, spriteView->position.y + 2);
+    static std::string tlTimeline = TL("vsp.spritesheetpreview.timeline");
+    g_fnt->RenderString(tlTimeline, 2, spriteView->position.y + 2);
 
 }
 

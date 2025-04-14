@@ -209,7 +209,7 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
     srf = srf == NULL ? IMG_Load(path.c_str()) : srf;
     if (srf == NULL) {
-        g_addNotification(ErrorNotification("Error", "Can't load: " + path));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
         return NULL;
     }
     SDL_Texture* ret = tracked_createTextureFromSurface(g_rd, srf);
@@ -239,9 +239,7 @@ void UpdateViewportScaler(){
 void renderbgOpInProgressScreen() {
 
     SDL_Rect r = { 0, 0, g_windowW, g_windowH };
-    //SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80 * g_bgOpStartTimer.percentElapsedTime(600));
-    //SDL_RenderFillRect(g_rd, &r);
-
+    
     u32 colFB = PackRGBAtoARGB(0, 0, 0, (u8)(0xd0 * g_bgOpStartTimer.percentElapsedTime(600)));
     u32 colHB = PackRGBAtoARGB(0, 0, 0, (u8)(0x80 * g_bgOpStartTimer.percentElapsedTime(600)));
 
@@ -250,9 +248,10 @@ void renderbgOpInProgressScreen() {
 
     TooltipsLayer localttp;
 
-    localttp.addTooltip(Tooltip{ {0,g_windowH - 30 }, "Operation in progress. Please wait...", {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
+    static std::string bgOpInProgressText = TL("vsp.bgop.inprogress");
+
+    localttp.addTooltip(Tooltip{ {0,g_windowH - 30 }, bgOpInProgressText, {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
     localttp.renderAll();
-    //g_fnt->RenderString("Operation in progress...", 5, 10, {255,255,255,(u8)(255* g_bgOpStartTimer.percentElapsedTime(600)) });
 }
 
 int main(int argc, char** argv)

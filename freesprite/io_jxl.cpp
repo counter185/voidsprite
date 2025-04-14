@@ -23,7 +23,7 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
 
         u8* jxlData = (u8*)tracked_malloc(jxlSize);
         if (jxlData == NULL) {
-            g_addNotification(ErrorNotification("Error", "malloc failed"));
+            g_addNotification(NOTIF_MALLOC_FAIL);
             fclose(f);
             return NULL;
         }
@@ -97,7 +97,7 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
         Layer* ret = NULL;
         if (w > 0 && h > 0 && pixelData != NULL) {
             ret = new Layer(w, h);
-            ret->name = "JPEG XL Layer";
+            ret->name = TL("vsp.layer.jxl");
             SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ABGR8888, pixelData, 4 * w, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, 4 * w);
         }
         tracked_free(pixelData);
@@ -115,7 +115,7 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
         u8* abgrPixels = (u8*)tracked_malloc(data->w * data->h * 4);
         if (abgrPixels == NULL) {
             fclose(f);
-            g_addNotification(ErrorNotification("Error", "malloc failed"));
+            g_addNotification(NOTIF_MALLOC_FAIL);
             return false;
         }
         SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888,
