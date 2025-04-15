@@ -235,7 +235,7 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path) {
 		pathList.push_back(vcRoot + convertStringOnWin32("/assets/" + path));
 		pathList.push_back(vcRoot + convertStringOnWin32("/" + path));
     }
-    pathList.push_back(convertStringOnWin32(pathInProgramDirectory(VOIDSPRITE_ASSETS_PATH + std::string("/assets/") + path)));
+    pathList.push_back(convertStringOnWin32(pathInProgramDirectory(VOIDSPRITE_ASSETS_PATH + ("/assets/" + path))));
 	SDL_Surface* srf = NULL;
     for (auto& path : pathList) {
         std::string pathUTF8 = convertStringToUTF8OnWin32(path);

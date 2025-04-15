@@ -80,9 +80,11 @@ class TTFFontObject : public FontObject {
 private:
     TTF_Font* font = NULL;
     void RenderGlyph(uint32_t a, int size);
+    bool isBitmapFont = false;
 public:
     TTFFontObject(TTF_Font* f) : font(f) {
-        printf("[TTFFontObject] font: %s, engine: %s\n", TTF_GetFontFamilyName(f), TTF_FontIsScalable(f) ? "ttf" : "bitmap");
+        isBitmapFont = !TTF_FontIsScalable(f);
+        printf("[TTFFontObject] font: %s, engine: %s\n", TTF_GetFontFamilyName(f), isBitmapFont ? "bitmap" : "ttf");
     }
     ~TTFFontObject() override {
         if (font != NULL) {

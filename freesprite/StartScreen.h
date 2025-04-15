@@ -154,14 +154,14 @@ public:
             UIButton* buttonNewImageRGB = new UIButton();
             buttonNewImageRGB->setCallbackListener(4, this);
             buttonNewImageRGB->position = XY{ 30,90 };
-            buttonNewImageRGB->wxWidth = 120;
+            buttonNewImageRGB->wxWidth = 160;
             buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
             buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
 
             UIButton* buttonNewImagePalettized = new UIButton();
             buttonNewImagePalettized->setCallbackListener(5, this);
-            buttonNewImagePalettized->position = XY{ 160,90 };
+            buttonNewImagePalettized->position = XY{ 200,90 };
             buttonNewImagePalettized->wxWidth = 200;
             buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
             buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
