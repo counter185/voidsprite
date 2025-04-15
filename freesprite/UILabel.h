@@ -12,6 +12,7 @@ public:
     UILabel(std::string t) : text(t) {}
 
     XY statSize();
+    XY calcEndpoint();
 
     bool focusable() override { return false; }
     void render(XY pos) override;

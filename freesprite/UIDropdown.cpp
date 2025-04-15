@@ -127,7 +127,10 @@ void UIDropdown::eventButtonPressed(int evt_id)
         text = items[evt_id];
     }
     isOpen = false;
-    if (callback != NULL) {
+    if (onDropdownItemSelectedCallback != NULL) {
+		onDropdownItemSelectedCallback(this, evt_id, items[evt_id]);
+	}
+	else if (callback != NULL) {
         callback->eventDropdownItemSelected(callback_id, evt_id, items[evt_id]);
     }
 }

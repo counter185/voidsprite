@@ -280,3 +280,4 @@ struct NineSegmentPattern {
 #include "settings.h"
 #include "fills.h"
 #include "vfx.h"
+#include "visual_config.h"

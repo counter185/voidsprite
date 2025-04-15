@@ -170,6 +170,7 @@
     {"vsp.config.opt.vfx.desc", "When disabled, some visual effect animations will not play."},
     {"vsp.config.opt.cursor", "Override system cursor (restart required)"},
     {"vsp.config.opt.cursor.desc", "When enabled, voidsprite will use a custom mouse cursor sprite."},
+    {"vsp.config.opt.visualconfig", "Visual configuration"},
     {"vsp.config.opt.reloadfonts", "Reload fonts..."},
     {"vsp.config.opt.fontsreloaded", "Fonts reloaded"},
 

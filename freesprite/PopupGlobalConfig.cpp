@@ -26,7 +26,8 @@ enum ConfigOptions : int {
     CHECKBOX_RENDERER,
     TEXTFIELD_AUTOSAVE_INTERVAL,
     CHECKBOX_ROWCOLS_START_AT_1,
-    DROPDOWN_LANGUAGE
+    DROPDOWN_LANGUAGE,
+    DROPDOWN_VISUAL_CONFIG,
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -113,7 +114,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     lbl4->position = posInTab;
     configTabs->tabs[1].wxs.addDrawable(lbl4);
     dd2 = new UIDropdown(g_availableRenderersNow);
-    dd2->position = xyAdd(posInTab, { 100, 0 });
+    dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 180;
     dd2->setCallbackListener(CHECKBOX_RENDERER, this);
     dd2->setTextToSelectedItem = true;
@@ -131,6 +132,35 @@ PopupGlobalConfig::PopupGlobalConfig()
     cb8->position = posInTab;
     cb8->checkbox->tooltip = TL("vsp.config.opt.cursor.desc");
     configTabs->tabs[1].wxs.addDrawable(cb8);
+    posInTab.y += 35;
+
+    auto availableVisualConfs = g_getAvailableVisualConfigs();
+    std::vector<std::string> visualConfNames = { getDefaultVisualConf()["meta/name"] };
+    for (auto& meta : availableVisualConfs) {
+        visualConfNames.push_back(meta.name);
+    }
+    lbl4 = new UILabel(TL("vsp.config.opt.visualconfig"));
+    lbl4->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl4);
+    dd2 = new UIDropdown(visualConfNames);
+    dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
+    dd2->wxWidth = 240;
+    dd2->setTextToSelectedItem = true;
+    dd2->onDropdownItemSelectedCallback = [this, availableVisualConfs](UIDropdown* dd, int index, std::string name) {
+        if (index == 0) {   //default
+            g_config.customVisualConfigPath = "";
+        }
+        else {
+            index--;
+            if (index >= 0 && index < availableVisualConfs.size()) {
+                g_config.customVisualConfigPath = convertStringToUTF8OnWin32(availableVisualConfs[index].path);
+            }
+        }
+        g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath));
+        g_reloadFonts();
+    };
+    dd2->text = fileNameFromPath(visualConfigValue("meta/name"));
+    configTabs->tabs[1].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
     /*
@@ -256,9 +286,9 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->tooltip = "Choose file types to associate with the currently running instance of voidsprite.";
     btn->position = posInTab;
     btn->wxWidth = 270;
-	btn->onClickCallback = [this](UIButton*) {
+    btn->onClickCallback = [this](UIButton*) {
         g_addPopup(new PopupChooseExtsToAssoc());
-	};
+    };
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
@@ -266,10 +296,10 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->text = TL("vsp.config.opt.reloadfonts");
     btn->position = posInTab;
     btn->wxWidth = 270;
-	btn->onClickCallback = [this](UIButton*) {
+    btn->onClickCallback = [this](UIButton*) {
         g_reloadFonts();
         g_addNotification(SuccessShortNotification(TL("vsp.config.opt.fontsreloaded"), ""));
-	};
+    };
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
@@ -278,7 +308,12 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     UIButton* closeButton = actionButton("Close", 140);
     closeButton->onClickCallback = [this](UIButton*) {
+        bool visualConfigChanged = g_config.customVisualConfigPath != previousConfig.customVisualConfigPath;
         g_config = previousConfig;
+        if (visualConfigChanged) {
+            g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath));
+            g_reloadFonts();
+        }
         closePopup();
     };
 

@@ -175,13 +175,23 @@ void g_reloadFonts() {
         {0x4E00, 0x9FAF}    // CJK Unified Ideographs
         });
 
-    std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
+    std::string customFont = visualConfigValue("general/font");
+    if (!g_usingDefaultVisualConfig()) {
+		std::string customFontPath = convertStringToUTF8OnWin32(g_getCustomVisualConfigRoot()) + "/" + customFont;
+        if (std::filesystem::exists(customFontPath)) {
+			TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
+			if (fontCustom != NULL) {
+				g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
+			}
+        }
+    }
+    /*std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
     if (std::filesystem::exists(customFontPath)) {
         TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
         if (fontCustom != NULL) {
             g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
         }
-    }
+    }*/
 }
 
 std::vector<SDL_Rect> clips;
@@ -330,6 +340,15 @@ int main(int argc, char** argv)
 
     unscaledWindowSize = {g_windowW, g_windowH};
     UpdateViewportScaler();
+
+    if (g_config.customVisualConfigPath != "") {
+        if (!g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath))) {
+            printf("Failed to load custom visual config\n");
+        }
+    }
+    if (!std::filesystem::exists(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/visualconfigs/sample_config.json"))) {
+		serializeVisualConfig(getDefaultVisualConf(), convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath()) + "/visualconfigs/sample_config.json");
+    }
 
     if (g_config.overrideCursor) {
         std::string cursorPath = pathInProgramDirectory(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");

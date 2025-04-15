@@ -200,6 +200,7 @@ public:
         }
     }
     XY RenderString(std::string text, int x, int y, SDL_Color col = { 255,255,255,255 }, int size = 18);
+    XY StatStringEndpoint(std::string text, int x, int y, int size);
     XY StatStringDimensions(std::string text, int size = 18);
 private:
     std::vector<FontObject*> fontStack;

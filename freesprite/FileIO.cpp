@@ -812,9 +812,9 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
     compressedData.resize(maxCompressedDataSize);
     int res = compress(compressedData.data(), (uLongf*)&compressedDataSize, data, dataSize);
     if (res != Z_OK) {
-		printf("compress failed\n");
-		return std::vector<u8>();
-	}
+        printf("compress failed\n");
+        return std::vector<u8>();
+    }
     compressedData.resize(compressedDataSize);
     return compressedData;
 }

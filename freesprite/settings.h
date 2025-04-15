@@ -23,6 +23,7 @@ public:
     std::string language = "en-us";
     bool vfxEnabled = true;
     bool overrideCursor = true;
+    std::string customVisualConfigPath = "";
 
     std::vector<std::string> lastOpenFiles;
 

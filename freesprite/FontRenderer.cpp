@@ -89,6 +89,30 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col, int
     return { drawX, drawY };
 }
 
+XY TextRenderer::StatStringEndpoint(std::string text, int x, int y, int size)
+{
+    int drawX = 0;
+    int drawY = 0;
+
+    uint32_t currentUTF8Sym = 0;
+    int nextUTFBytes = 0;
+    for (int chx = 0; chx != text.size(); chx++) {
+        char target = text.at(chx);
+        if (target == '\n') {
+            drawX = 0;
+            drawY += size;
+        }
+        else {
+            bool shouldDraw = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);
+            if (shouldDraw) {
+                GlyphData glyphData = getGlyphForChar(currentUTF8Sym, size); //renderedGlyphs[size][currentUTF8Sym];
+                drawX += glyphData.advance;
+            }
+        }
+    }
+    return xyAdd({x,y}, { drawX, drawY });
+}
+
 XY TextRenderer::StatStringDimensions(std::string text, int size)
 {
     int drawX = 0;
