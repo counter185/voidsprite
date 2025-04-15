@@ -177,12 +177,13 @@ void g_reloadFonts() {
 
     std::string customFont = visualConfigValue("general/font");
     if (!g_usingDefaultVisualConfig()) {
-		std::string customFontPath = convertStringToUTF8OnWin32(g_getCustomVisualConfigRoot()) + "/" + customFont;
-        if (std::filesystem::exists(customFontPath)) {
-			TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
-			if (fontCustom != NULL) {
-				g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
-			}
+        PlatformNativePathString vcRoot = g_getCustomVisualConfigRoot();
+        std::string customFontPath = convertStringToUTF8OnWin32(vcRoot) + "/" + customFont;
+        if (std::filesystem::exists(vcRoot + convertStringOnWin32("/" + customFont))) {
+            TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);
+            if (fontCustom != NULL) {
+                g_fnt->AddFont(fontCustom, { {0, 0xFFFFFFFF} });
+            }
         }
     }
     /*std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
@@ -218,6 +219,31 @@ void g_popRenderTarget() {
 SDL_Texture* IMGLoadToTexture(std::string path) {
     SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
     srf = srf == NULL ? IMG_Load(path.c_str()) : srf;
+    if (srf == NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
+        return NULL;
+    }
+    SDL_Texture* ret = tracked_createTextureFromSurface(g_rd, srf);
+    SDL_FreeSurface(srf);
+    return ret;
+}
+
+SDL_Texture* IMGLoadAssetToTexture(std::string path) {
+    std::vector<PlatformNativePathString> pathList;
+    if (!g_usingDefaultVisualConfig()) {
+		PlatformNativePathString vcRoot = g_getCustomVisualConfigRoot();
+		pathList.push_back(vcRoot + convertStringOnWin32("/assets/" + path));
+		pathList.push_back(vcRoot + convertStringOnWin32("/" + path));
+    }
+    pathList.push_back(convertStringOnWin32(pathInProgramDirectory(VOIDSPRITE_ASSETS_PATH + std::string("/assets/") + path)));
+	SDL_Surface* srf = NULL;
+    for (auto& path : pathList) {
+        std::string pathUTF8 = convertStringToUTF8OnWin32(path);
+		srf = IMG_Load(pathUTF8.c_str());
+		if (srf != NULL) {
+			break;
+		}
+    }
     if (srf == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
         return NULL;
@@ -347,7 +373,7 @@ int main(int argc, char** argv)
         }
     }
     if (!std::filesystem::exists(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/visualconfigs/sample_config.json"))) {
-		serializeVisualConfig(getDefaultVisualConf(), convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath()) + "/visualconfigs/sample_config.json");
+        serializeVisualConfig(getDefaultVisualConf(), convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath()) + "/visualconfigs/sample_config.json");
     }
 
     if (g_config.overrideCursor) {
@@ -364,32 +390,32 @@ int main(int argc, char** argv)
     g_setupIO();
     g_reloadColorMap();
 
-    g_mainlogo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/mainlogo.png");
-    g_iconLayerAdd = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_add.png");
-    g_iconLayerDelete = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_delete.png");
-    g_iconLayerUp = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_up.png");
-    g_iconLayerDown = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_down.png");
-    g_iconLayerDownMerge = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_downmerge.png");
-    g_iconLayerDuplicate = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_duplicate.png");
-    g_iconLayerHide = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_layer_hide.png");
-    g_iconEraser = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_eraser.png");
-    g_iconBlendMode = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_blendmode.png");
-    g_iconColorRGB = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_rgb.png");
-    g_iconColorHSV = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_hsv.png");
-    g_iconColorVisual = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_color_visual.png");
-    g_iconNavbarTabFile = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_file.png");
-    g_iconNavbarTabEdit = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_edit.png");
-    g_iconNavbarTabLayer = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_layer.png");
-    g_iconNavbarTabView = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/tab_view.png");
-    g_iconComment = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_message.png");
-    g_iconMenuPxDim = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_pxdim.png");
-    g_iconMenuSpritesheet = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_sptl.png");
-    g_iconMenuTemplates = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/menu_templates.png");
-    g_iconNotifError = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_error.png");
-    g_iconNotifSuccess = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/notif_success.png");
-    g_iconNewColor = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/icon_newcolor.png");
-    g_iconActionBarUndo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/actionbar_undo.png");
-    g_iconActionBarRedo = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/actionbar_redo.png");
+    g_mainlogo =            IMGLoadAssetToTexture("mainlogo.png");
+    g_iconLayerAdd =        IMGLoadAssetToTexture("icon_layer_add.png");
+    g_iconLayerDelete =     IMGLoadAssetToTexture("icon_layer_delete.png");
+    g_iconLayerUp =         IMGLoadAssetToTexture("icon_layer_up.png");
+    g_iconLayerDown =       IMGLoadAssetToTexture("icon_layer_down.png");
+    g_iconLayerDownMerge =  IMGLoadAssetToTexture("icon_layer_downmerge.png");
+    g_iconLayerDuplicate =  IMGLoadAssetToTexture("icon_layer_duplicate.png");
+    g_iconLayerHide =       IMGLoadAssetToTexture("icon_layer_hide.png");
+    g_iconEraser =          IMGLoadAssetToTexture("icon_eraser.png");
+    g_iconBlendMode =       IMGLoadAssetToTexture("icon_blendmode.png");
+    g_iconColorRGB =        IMGLoadAssetToTexture("icon_color_rgb.png");
+    g_iconColorHSV =        IMGLoadAssetToTexture("icon_color_hsv.png");
+    g_iconColorVisual =     IMGLoadAssetToTexture("icon_color_visual.png");
+    g_iconNavbarTabFile =   IMGLoadAssetToTexture("tab_file.png");
+    g_iconNavbarTabEdit =   IMGLoadAssetToTexture("tab_edit.png");
+    g_iconNavbarTabLayer =  IMGLoadAssetToTexture("tab_layer.png");
+    g_iconNavbarTabView =   IMGLoadAssetToTexture("tab_view.png");
+    g_iconComment =         IMGLoadAssetToTexture("icon_message.png");
+    g_iconMenuPxDim =       IMGLoadAssetToTexture("menu_pxdim.png");
+    g_iconMenuSpritesheet = IMGLoadAssetToTexture("menu_sptl.png");
+    g_iconMenuTemplates =   IMGLoadAssetToTexture("menu_templates.png");
+    g_iconNotifError =      IMGLoadAssetToTexture("notif_error.png");
+    g_iconNotifSuccess =    IMGLoadAssetToTexture("notif_success.png");
+    g_iconNewColor =        IMGLoadAssetToTexture("icon_newcolor.png");
+    g_iconActionBarUndo =   IMGLoadAssetToTexture("actionbar_undo.png");
+    g_iconActionBarRedo =   IMGLoadAssetToTexture("actionbar_redo.png");
 
     SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);
@@ -404,7 +430,7 @@ int main(int argc, char** argv)
     g_loadBrushes();
     int i = 0;
     for (BaseBrush*& brush : g_brushes) {
-        brush->cachedIcon = IMGLoadToTexture(brush->getIconPath());
+        brush->cachedIcon = IMGLoadAssetToTexture(brush->getIconPath());
         std::string keybindKey = std::format("brush:{}", i++);
         if (g_config.keybinds.contains(keybindKey)) {
             brush->keybind = (SDL_Scancode)g_config.keybinds[keybindKey];
@@ -688,7 +714,7 @@ int main(int argc, char** argv)
             if (popup != popupStack[popupStack.size() - 1]) {
                 g_ttp->takeTooltips = false;
                 popup->render();
-				g_ttp->takeTooltips = true;
+                g_ttp->takeTooltips = true;
             }
             else {
                 popup->render();

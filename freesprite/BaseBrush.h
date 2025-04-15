@@ -23,7 +23,7 @@ public:
 	virtual bool isReadOnly() { return false; }
 	virtual bool wantDoublePosPrecision() { return false; }
 	virtual bool overrideRightClick() { return false; }
-	virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/brush_default.png"; }
+	virtual std::string getIconPath() { return "brush_default.png"; }
 	virtual std::string getName() { return "Base brush"; }
 	virtual std::string getTooltip() { return ""; }
 	virtual XY getSection() { return XY{ 0,0 }; }

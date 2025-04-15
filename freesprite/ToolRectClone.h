@@ -17,7 +17,7 @@ class ToolRectClone :
 
     std::string getName() override { return "Clone rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left.\nPaste it at a different location with Mouse Right."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_cloner.png"; }
+    std::string getIconPath() override { return "tool_cloner.png"; }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }

@@ -12,7 +12,7 @@ class BrushBezierLine :
     }
     std::string getName() override { return "Bezier Line"; };
     std::string getTooltip() override { return "Place and move control points with Mouse Left.\nDraw line with Mouse Right."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_bezierline.png"; }
+    std::string getIconPath() override { return "brush_bezierline.png"; }
     XY getSection() override { return XY{ 0,2 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;

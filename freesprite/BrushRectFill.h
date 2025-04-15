@@ -11,7 +11,7 @@ class BrushRectFill :
 		startPos = XY{ 0,0 };
 	}
 	std::string getName() override { return "Filled Rectangle"; };
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_rectfill.png"; }
+	std::string getIconPath() override { return "brush_rectfill.png"; }
 	XY getSection() override { return XY{ 0,2 }; }
 
 	void clickPress(MainEditor* editor, XY pos) override;

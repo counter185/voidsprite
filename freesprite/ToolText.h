@@ -14,7 +14,7 @@ public:
     SDL_Texture* cachedTextTexture = NULL;
 
     std::string getName() override { return "Text"; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_text.png"; }
+    std::string getIconPath() override { return "tool_text.png"; }
     XY getSection() override { return XY{ 0,2 }; }
 
     bool overrideRightClick() override { return true; }

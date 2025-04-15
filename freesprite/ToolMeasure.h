@@ -9,7 +9,7 @@ class ToolMeasure :
     XY lastMousePos = XY{ 0,0 };
     Timer64 clickTimer;
 
-    virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_measure.png"; }
+    virtual std::string getIconPath() { return "tool_measure.png"; }
     bool isReadOnly() override { return true; }
     std::string getName() { return "Measure"; }
     std::string getTooltip() override { return "Select an area with Mouse Left to measure its size in pixels"; }

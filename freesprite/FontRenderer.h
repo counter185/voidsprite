@@ -82,6 +82,7 @@ private:
     void RenderGlyph(uint32_t a, int size);
 public:
     TTFFontObject(TTF_Font* f) : font(f) {
+        printf("[TTFFontObject] font: %s, engine: %s\n", TTF_GetFontFamilyName(f), TTF_FontIsScalable(f) ? "ttf" : "bitmap");
     }
     ~TTFFontObject() override {
         if (font != NULL) {

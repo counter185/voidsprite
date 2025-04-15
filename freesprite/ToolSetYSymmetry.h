@@ -8,7 +8,7 @@ class ToolSetYSymmetry : public BaseBrush
     MainEditor* lastEditor = NULL;
     Timer64 clickTimer;
 
-    std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_setysym.png"; }
+    std::string getIconPath() { return "tool_setysym.png"; }
     std::string getTooltip() override { return "Mouse Left to enable and set the position of the Y symmetry line.\nMouse Right to toggle Y symmetry off/on."; }
     XY getSection() override { return XY{ 1,1 }; }
 

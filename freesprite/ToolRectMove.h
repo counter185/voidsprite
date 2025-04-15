@@ -14,7 +14,7 @@ class ToolRectMove :
 
     std::string getName() override { return "Move rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left to cut it.\nPaste it at a different location with Mouse Right."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_mover.png"; }
+    std::string getIconPath() override { return "tool_mover.png"; }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }

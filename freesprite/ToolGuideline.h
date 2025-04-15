@@ -11,7 +11,7 @@ class ToolGuideline :
     //MainEditor* lastEditor = NULL;
     Timer64 clickTimer;
 
-    std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_setguide.png"; }
+    std::string getIconPath() { return "tool_setguide.png"; }
     std::string getTooltip() override { return "Mouse Left to place/edit vertical guidelines.\nMouse Right to place/edit horizontal guidelines.\nUse Eraser mode to remove guidelines."; }
     XY getSection() override { return XY{ 1,1 }; }
 

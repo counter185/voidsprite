@@ -11,7 +11,7 @@ public:
 		startPos = XY{ 0,0 };
 	}
 	std::string getName() override { return "1px Circle"; };
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxcircle.png"; }
+	std::string getIconPath() override { return "brush_1pxcircle.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 
 	void clickPress(MainEditor* editor, XY pos) override;
@@ -28,7 +28,7 @@ public:
 		startPos = XY{ 0,0 };
 	}
 	std::string getName() override { return "1px Circle (arc)"; };
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxarccircle.png"; }
+	std::string getIconPath() override { return "brush_1pxarccircle.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 
 	void clickPress(MainEditor* editor, XY pos) override;

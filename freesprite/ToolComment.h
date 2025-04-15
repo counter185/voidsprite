@@ -8,7 +8,7 @@ public:
     MainEditor* clickEditor = NULL;
     XY clickPos = {0,0};
 
-    virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_comment.png"; }
+    virtual std::string getIconPath() { return "tool_comment.png"; }
     bool isReadOnly() override { return true; }
     std::string getName() { return "Add comment"; }
     std::string getTooltip() override { return "Mouse Left to add a comment.\nMouse Left in Eraser mode to delete a comment."; }

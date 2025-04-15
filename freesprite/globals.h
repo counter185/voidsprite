@@ -219,6 +219,7 @@ void g_popRenderTarget();
 void g_reloadFonts();
 
 SDL_Texture* IMGLoadToTexture(std::string path);
+SDL_Texture* IMGLoadAssetToTexture(std::string path);
 
 struct XY {
     int x, y;

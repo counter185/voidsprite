@@ -4,7 +4,7 @@ class Brush1x1ArcY :
     public BaseBrush
 {
 	std::string getName() override { return "1x1 Pixel (arc Y)"; }
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_px1x1arcy.png"; }
+	std::string getIconPath() override { return "brush_px1x1arcy.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}

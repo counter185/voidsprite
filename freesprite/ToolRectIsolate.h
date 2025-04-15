@@ -11,7 +11,7 @@ public:
     XY lastMousePos = XY{ 0,0 };
     Timer64 clickTimer;
 
-    virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/tool_rectisolate.png"; }
+    virtual std::string getIconPath() { return "tool_rectisolate.png"; }
     bool isReadOnly() override { return true; }
     bool overrideRightClick() override { return true; }
     std::string getName() { return "Isolate rect"; }

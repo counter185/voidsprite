@@ -4,7 +4,7 @@
 class Brush3pxCircle : public BaseBrush
 {
 	std::string getName() override { return "Round Pixel"; }
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_3pxcircle.png"; }
+	std::string getIconPath() override { return "brush_3pxcircle.png"; }
 	std::map<std::string, BrushProperty> getProperties() override
 	{
 		return {

@@ -13,7 +13,7 @@ class ToolRectSwap : public BaseBrush
 
     std::string getName() override { return "Swap rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left.\nSwap the source and selected destination areas with Mouse Right."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_swapr.png"; }
+    std::string getIconPath() override { return "tool_swapr.png"; }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }

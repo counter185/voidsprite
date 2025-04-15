@@ -6,7 +6,7 @@
 
 void Pattern::tryLoadIcon()
 {
-    cachedIcon = IMGLoadToTexture(getIconPath());
+    cachedIcon = IMGLoadAssetToTexture(getIconPath());
 }
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)

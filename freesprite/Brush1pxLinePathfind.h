@@ -11,7 +11,7 @@ public:
     }
     std::string getName() override { return "1px Pathfind Line"; };
     std::string getTooltip() override { return "Hold Mouse Left at the start point, then release at the end point.\nPathfinding will be used to draw it."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxlinepathfind.png"; }
+    std::string getIconPath() override { return "brush_1pxlinepathfind.png"; }
     XY getSection() override { return XY{ 0,2 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;
