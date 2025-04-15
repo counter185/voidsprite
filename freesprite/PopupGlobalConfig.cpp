@@ -102,7 +102,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     lbl3->position = posInTab;
     configTabs->tabs[1].wxs.addDrawable(lbl3);
     UIDropdown* dd1 = new UIDropdown({ TL("vsp.config.opt.bganim.none"), TL("vsp.config.opt.bganim.sharp"), TL("vsp.config.opt.bganim.smooth"), TL("vsp.config.opt.bganim.sharpstatic"), TL("vsp.config.opt.bganim.smoothstatic") });
-    dd1->position = xyAdd(posInTab, { 200, 0 });
+    dd1->position = { ixmax(lbl3->calcEndpoint().x + 30, posInTab.x + 200), posInTab.y };
     dd1->wxWidth = 180;
     dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
     dd1->setTextToSelectedItem = true;
