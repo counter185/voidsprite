@@ -50,7 +50,8 @@ void logerr(std::string a)
 	printf("[E] %s\n", a.c_str());
 }
 
-void logprintf(const char* format, ...) {
+void logprintf(const char* format, ...) 
+{
 	if (logFile != NULL) {
 		va_list args;
 		va_start(args, format);
@@ -66,8 +67,9 @@ void logprintf(char* format, ...)
 	if (logFile != NULL) {
 		va_list args;
 		va_start(args, format);
+		fflush(logFile);
 		vfprintf(logFile, format, args);
+		vprintf(format, args);
 		va_end(args);
 	}
-	printf(format);
 }
