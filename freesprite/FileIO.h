@@ -8,6 +8,8 @@
 
 std::string getAllLibsVersions();
 
+std::map<std::string, std::string> parseINI(PlatformNativePathString path);
+
 uint8_t* DecompressMarioPaintSRM(FILE* f);
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile);

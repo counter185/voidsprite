@@ -22,16 +22,16 @@
 extern char **environ;
 
 std::string linux_getCPUName() {
-	std::ifstream cpuInfoFile("/proc/cpuinfo");
+    std::ifstream cpuInfoFile("/proc/cpuinfo");
     if (cpuInfoFile.is_open()) {
         std::string line;
-		while (std::getline(cpuInfoFile, line)) {
-			if (line.find("model name") != std::string::npos) {
-				std::string cpuName = line.substr(line.find(":") + 1);
-				cpuInfoFile.close();
-				return cpuName;
-			}
-		}
+        while (std::getline(cpuInfoFile, line)) {
+            if (line.find("model name") != std::string::npos) {
+                std::string cpuName = line.substr(line.find(":") + 1);
+                cpuInfoFile.close();
+                return cpuName;
+            }
+        }
     }
     else {
         return "(failed to read /proc/cpuinfo)\n";
@@ -225,7 +225,16 @@ std::string platformGetSystemInfo() {
     else {
         ret += std::format("OS: {} {} {}\n", buffer.sysname, buffer.version, buffer.release);
     }
-	ret += std::format("CPU: {}\n", linux_getCPUName());
+
+    auto distroInfo = parseINI("/etc/os-release");
+    std::string distroInfoString =
+        distroInfo.contains("PRETTY_NAME") ? distroInfo["PRETTY_NAME"]
+        : distroInfo.contains("NAME") ? std::format("{} {}", distroInfo["NAME"], distroInfo["VERSION"]);
+    if (distroInfoString != "") {
+        ret += std::format("os-release info: {}\n", distroInfoString);
+    }
+
+    ret += std::format("CPU: {}\n", linux_getCPUName());
     ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
 
     //todo: get gpu, maybe the hardware model if possible, distro info

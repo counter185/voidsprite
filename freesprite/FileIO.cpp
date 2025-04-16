@@ -80,6 +80,26 @@ std::string getAllLibsVersions() {
     return ret;
 }
 
+std::map<std::string, std::string> parseINI(PlatformNativePathString path)
+{
+    std::ifstream infile(path);
+    std::map<std::string, std::string> ret;
+    std::string line;
+    while (std::getline(infile, line)) {
+        if (line.empty() || line[0] == ';') continue;
+        size_t pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            if (value.size() >= 2 && value[0] == '\"' && value[value.size() - 1] == '\"') {
+                value = value.substr(1, value.size() - 2);
+            }
+            ret[key] = value;
+        }
+    }
+    return ret;
+}
+
 void detile(Layer* ret, XY tileSize) {
 
     Layer* t = new Layer(ret->w, ret->h);
