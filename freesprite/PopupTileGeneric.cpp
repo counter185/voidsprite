@@ -9,10 +9,10 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     this->popupEvtID = event_id;
     this->callback = callback;
 
-    UIButton* nbutton = actionButton("vsp.cmn.apply");
+    UIButton* nbutton = actionButton(TL("vsp.cmn.apply"));
     nbutton->setCallbackListener(0, this);
 
-    UIButton* nbutton2 = actionButton("vsp.cmn.cancel");
+    UIButton* nbutton2 = actionButton(TL("vsp.cmn.cancel"));
     nbutton2->setCallbackListener(1, this);
 
     tboxX = new UITextField();
