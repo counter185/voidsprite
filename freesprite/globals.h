@@ -76,8 +76,8 @@ extern "C" {
 
 #define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]
 
-#define FONT_PATH VOIDSPRITE_ASSETS_PATH "appfont-MPLUSRounded1c-Medium.ttf"
-#define FONT_PATH_JP VOIDSPRITE_ASSETS_PATH "appfontjp-NotoSansJP-VariableFont_wght.ttf"
+#define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
+#define FONT_PATH_JP "appfontjp-NotoSansJP-VariableFont_wght.ttf"
 
 #define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
 #define COLOR_ERROR SDL_Color{255,0,0,255}

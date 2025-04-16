@@ -84,7 +84,7 @@ private:
 public:
     TTFFontObject(TTF_Font* f) : font(f) {
         isBitmapFont = !TTF_FontIsScalable(f);
-        logprintf("[TTFFontObject] font: %s, engine: %s\n", TTF_GetFontFamilyName(f), isBitmapFont ? "bitmap" : "ttf");
+        loginfo(std::format("[TTFFontObject] font: {}, engine: {}", TTF_GetFontFamilyName(f), isBitmapFont ? "bitmap" : "ttf"));
     }
     ~TTFFontObject() override {
         if (font != NULL) {

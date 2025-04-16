@@ -165,15 +165,22 @@ void g_reloadFonts() {
     g_fnt = new TextRenderer();
     TTF_Font* fontDefault = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
     fontDefault = fontDefault == NULL ? TTF_OpenFont(FONT_PATH, 18) : fontDefault;
-    g_fnt->AddFont(fontDefault, { {0, 0xFFFFFFFF} });
+    if (fontDefault != NULL) {
+        g_fnt->AddFont(fontDefault, { {0, 0xFFFFFFFF} });
+    }
+    else {
+        logerr("Failed to load the default font");
+    }
 
     TTF_Font* fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
     fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
-    g_fnt->AddFont(fontJP, {
-        {0x3000, 0x30FF},   // CJK Symbols and Punctuation, hiragana, katakana
-        {0xFF00, 0xFFEF},   // Halfwidth and Fullwidth Forms
-        {0x4E00, 0x9FAF}    // CJK Unified Ideographs
-        });
+    if (fontJP != NULL) {
+        g_fnt->AddFont(fontJP, {
+            {0x3000, 0x30FF},   // CJK Symbols and Punctuation, hiragana, katakana
+            {0xFF00, 0xFFEF},   // Halfwidth and Fullwidth Forms
+            {0x4E00, 0x9FAF}    // CJK Unified Ideographs
+            });
+    }
 
     std::string customFont = visualConfigValue("general/font");
     if (!g_usingDefaultVisualConfig()) {
@@ -235,7 +242,7 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path) {
 		pathList.push_back(vcRoot + convertStringOnWin32("/assets/" + path));
 		pathList.push_back(vcRoot + convertStringOnWin32("/" + path));
     }
-    pathList.push_back(convertStringOnWin32(pathInProgramDirectory(std::string(VOIDSPRITE_ASSETS_PATH "/assets/") + path)));
+    pathList.push_back(convertStringOnWin32(pathInProgramDirectory("/assets/" + path)));
 	SDL_Surface* srf = NULL;
     for (auto& path : pathList) {
         std::string pathUTF8 = convertStringToUTF8OnWin32(path);
@@ -330,6 +337,7 @@ int main(int argc, char** argv)
     loginfo("System information:\n" + platformGetSystemInfo());
 
     g_loadConfig();
+	loginfo("Config loaded");
 
     for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
         char* name = (char*)SDL_GetRenderDriver(x);
@@ -358,6 +366,7 @@ int main(int argc, char** argv)
     lastWindowTitle = windowTitle;
     g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
     SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
+    loginfo("Passed SDL_Init");
     platformInit();
     SDL_SetRenderDrawBlendMode(g_rd, SDL_BLENDMODE_BLEND);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
@@ -372,7 +381,7 @@ int main(int argc, char** argv)
 
     if (g_config.customVisualConfigPath != "") {
         if (!g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath))) {
-            logprintf("Failed to load custom visual config\n");
+            logerr("Failed to load custom visual config");
         }
     }
     if (!std::filesystem::exists(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/visualconfigs/sample_config.json"))) {
@@ -380,7 +389,7 @@ int main(int argc, char** argv)
     }
 
     if (g_config.overrideCursor) {
-        std::string cursorPath = pathInProgramDirectory(VOIDSPRITE_ASSETS_PATH "assets/app_cursor.png");
+        std::string cursorPath = pathInProgramDirectory("assets/app_cursor.png");
         SDL_Surface* cursorSrf = IMG_Load(cursorPath.c_str());
         if (cursorSrf != NULL) {
             SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
@@ -392,6 +401,8 @@ int main(int argc, char** argv)
     g_setupColorModels();
     g_setupIO();
     g_reloadColorMap();
+
+    loginfo("Loading assets");
 
     g_mainlogo =            IMGLoadAssetToTexture("mainlogo.png");
     g_iconLayerAdd =        IMGLoadAssetToTexture("icon_layer_add.png");
@@ -429,6 +440,8 @@ int main(int argc, char** argv)
     g_gamepad = new Gamepad();
     g_gamepad->TryCaptureGamepad();
 
+    loginfo("Loading tools");
+
     //load brushes
     g_loadBrushes();
     int i = 0;
@@ -439,6 +452,8 @@ int main(int argc, char** argv)
             brush->keybind = (SDL_Scancode)g_config.keybinds[keybindKey];
         }
     }
+
+    loginfo("Loading patterns");
 
     //load patterns
     g_patterns.push_back(new PatternFull());
@@ -482,6 +497,8 @@ int main(int argc, char** argv)
         pattern->tryLoadIcon();
     }
 
+    loginfo("Loading templates");
+
     // load templates
     g_templates = {
         new TemplateRPG2KCharset(),
@@ -503,6 +520,8 @@ int main(int argc, char** argv)
             customTemplates++;
         }
     }
+
+    loginfo("Loading 9S patterns");
 
     // load 9segment patterns
     g_9spatterns = {
@@ -526,6 +545,7 @@ int main(int argc, char** argv)
     //load filters
     g_loadFilters();
 
+    loginfo("Loading fonts");
     //load fonts
     TTF_Init();
     g_reloadFonts();
@@ -539,6 +559,7 @@ int main(int argc, char** argv)
 
     g_ttp = new TooltipsLayer();
 
+    loginfo("Starting launchpad");
     StartScreen* launchpad = new StartScreen();
     g_addScreen(launchpad, screenStack.empty());
 
@@ -547,6 +568,7 @@ int main(int argc, char** argv)
     }
 
     platformPostInit();
+    loginfo("Init passed");
 
     //run conversions
     for (auto& c : convertTargets) {

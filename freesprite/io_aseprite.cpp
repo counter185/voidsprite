@@ -164,7 +164,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                     if (palette.size() < newPaletteSize) {
                         palette.resize(newPaletteSize);
                     }
-                    for (int x = 0; x < lastIndex - firstIndex + 1; x++) {
+                    for (u32 x = 0; x < lastIndex - firstIndex + 1; x++) {
                         u16 flags;
                         u8 rgba[4];
                         fread(&flags, 2, 1, f);

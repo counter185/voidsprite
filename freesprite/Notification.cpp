@@ -58,6 +58,7 @@ void g_renderNotifications()
 
 void g_addNotification(Notification a) {
     g_notifications.push_back(a);
+    loginfo(std::format("New notification:\n  {} | {}", a.title, a.message));
 }
 void g_tickNotifications() {
     for (int x = 0; x < g_notifications.size(); x++) {

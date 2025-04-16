@@ -229,7 +229,8 @@ std::string platformGetSystemInfo() {
     auto distroInfo = parseINI("/etc/os-release");
     std::string distroInfoString =
         distroInfo.contains("PRETTY_NAME") ? distroInfo["PRETTY_NAME"]
-        : distroInfo.contains("NAME") ? std::format("{} {}", distroInfo["NAME"], distroInfo["VERSION"]);
+        : distroInfo.contains("NAME") ? std::format("{} {}", distroInfo["NAME"], distroInfo["VERSION"])
+        : "";
     if (distroInfoString != "") {
         ret += std::format("os-release info: {}\n", distroInfoString);
     }
