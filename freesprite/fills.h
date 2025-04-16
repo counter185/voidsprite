@@ -121,7 +121,7 @@ public:
             }
         }
         catch (std::exception& e) {
-            printf("Error deserializing fill: %s\n", e.what());
+            logprintf("Error deserializing fill: %s\n", e.what());
         }
 
         return Fill(FILL_INVALID);

@@ -603,6 +603,9 @@
     <ClCompile Include="visual_config.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="log.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1146,6 +1149,9 @@
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="visual_config.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

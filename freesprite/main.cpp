@@ -292,6 +292,7 @@ void renderbgOpInProgressScreen() {
 
 int main(int argc, char** argv)
 {
+    log_init();
     bool convert = false, convertReadingSrc = false;
     std::vector<std::pair<std::string, std::string>> convertTargets;
 
@@ -322,9 +323,11 @@ int main(int argc, char** argv)
 
     srand(time(NULL));
 
-    std::cout << getAllLibsVersions();
+    loginfo("Library versions:\n" + getAllLibsVersions());
 
     platformPreInit();
+
+    loginfo("System information:\n" + platformGetSystemInfo());
 
     g_loadConfig();
 
@@ -333,7 +336,7 @@ int main(int argc, char** argv)
         if (name != NULL) {
             std::string renderDriverName = name;
             g_availableRenderersNow.push_back(renderDriverName);
-            std::cout << "Renderer " << x << ": " << renderDriverName << "\n";
+            loginfo(std::format("Renderer {}: {}", x, renderDriverName));
         }
     }
     if (std::find(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), g_config.preferredRenderer) == g_availableRenderersNow.end()) {
@@ -341,7 +344,7 @@ int main(int argc, char** argv)
     }
 
     std::string useRenderer = g_config.preferredRenderer;
-    std::cout << "Picking renderer: " << useRenderer << "\n";
+    loginfo(std::format("Picking renderer: {}", useRenderer));
 
     SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
     int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
@@ -369,7 +372,7 @@ int main(int argc, char** argv)
 
     if (g_config.customVisualConfigPath != "") {
         if (!g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath))) {
-            printf("Failed to load custom visual config\n");
+            logprintf("Failed to load custom visual config\n");
         }
     }
     if (!std::filesystem::exists(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/visualconfigs/sample_config.json"))) {
@@ -855,6 +858,7 @@ int main(int argc, char** argv)
     }
 
     g_deinitRPC();
+    log_close();
 
     return 0;
 }

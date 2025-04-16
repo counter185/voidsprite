@@ -62,7 +62,7 @@ bool __util_anyEqualsAndGGreater(Node* val, std::vector<Node*> list) {
     }
     std::ifstream infile(filepath);
     if (!infile.good()) {
-        printf("FILE OPEN FAIL\n");
+        logprintf("FILE OPEN FAIL\n");
     }
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
@@ -81,19 +81,19 @@ bool __util_anyEqualsAndGGreater(Node* val, std::vector<Node*> list) {
             int val = outmap[y][x];
 #if PRINT_COLORS
             if (val == 5) {
-                printf("\e[0;31m");
+                logprintf("\e[0;31m");
             }
             else if (__util_anyEquals_A(Node(x, y), drawNodes)) {
-                printf("\e[0;33m");
+                logprintf("\e[0;33m");
                 val = 1;
             }
             else {
-                printf("\e[0;37m");
+                logprintf("\e[0;37m");
             }
 #endif
-            printf("%i,", val);
+            logprintf("%i,", val);
         }
-        printf("\n");
+        logprintf("\n");
     }
 }*/
 
@@ -156,7 +156,7 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
                 pathN = npathN;
             }
             g_addNotification(SuccessShortNotification(std::format("A* finished in {} steps", step), ""));
-            printf("genAStar finished in %i steps\n", step);
+            logprintf("genAStar finished in %i steps\n", step);
             return nodePath;
         }
         else {
@@ -208,6 +208,6 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
         }
     }
     g_addNotification(ErrorNotification("A* could not find a path", ""));
-    //printf("no path\n");
+    //logprintf("no path\n");
     return std::vector<Node>();
 }

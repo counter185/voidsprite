@@ -181,7 +181,7 @@ GlyphData TextRenderer::getGlyphForChar(uint32_t ch, int size)
 void TTFFontObject::RenderGlyph(uint32_t a, int size)
 {
     if (!charInBounds(a)) {
-        printf("** requested glyph outside of bounds\n");
+        logprintf("** requested glyph outside of bounds\n");
     }
     if (TTF_FontHasGlyph(font, a)) {
         TTF_SetFontSize(font, size);

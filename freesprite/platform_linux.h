@@ -3,6 +3,7 @@
 #include <pwd.h>
 #include <spawn.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
@@ -19,6 +20,24 @@
 // update: WE ARE SO BACK
 
 extern char **environ;
+
+std::string linux_getCPUName() {
+	std::ifstream cpuInfoFile("/proc/cpuinfo");
+    if (cpuInfoFile.is_open()) {
+        std::string line;
+		while (std::getline(cpuInfoFile, line)) {
+			if (line.find("model name") != std::string::npos) {
+				std::string cpuName = line.substr(line.find(":") + 1);
+				cpuInfoFile.close();
+				return cpuName;
+			}
+		}
+    }
+    else {
+        return "(failed to read /proc/cpuinfo)\n";
+    }
+    
+}
 
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
@@ -188,5 +207,28 @@ Layer *platformGetImageFromClipboard() { return NULL; }
 FILE *platformOpenFile(PlatformNativePathString path,
                        PlatformNativePathString mode) {
     FILE *ret = fopen(path.c_str(), mode.c_str());
+    return ret;
+}
+
+std::string platformGetSystemInfo() {
+    std::string ret = "";
+
+    struct utsname buffer;
+    char* p;
+    long ver[16];
+    int i = 0;
+
+    errno = 0;
+    if (uname(&buffer) != 0) {
+        ret += "(Error running uname)\n"
+    }
+    else {
+        ret += std::format("OS: {} {} {}\n", buffer.sysname, buffer.version, buffer.release);
+    }
+	ret += std::format("CPU: {}\n", linux_getCPUName());
+    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+
+    //todo: get gpu, maybe the hardware model if possible, distro info
+
     return ret;
 }

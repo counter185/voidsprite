@@ -97,7 +97,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
         std::map<u16, GIMBlock> blockMap;
 
         for (GIMBlock& b : blocks) {
-            printf("[GIM] Block ID: %x, next header offset: %x, data offset: %x, size: %x\n", b.block_id, b.block_header_next, b.block_data_offset, b.block_size);
+            logprintf("[GIM] Block ID: %x, next header offset: %x, data offset: %x, size: %x\n", b.block_id, b.block_header_next, b.block_data_offset, b.block_size);
             blockMap[b.block_id] = b;
         }
         
@@ -111,7 +111,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 imgBlock = imageBlockBEtoLE(imgBlock);
             }
             int nEntries = imgBlock.w * imgBlock.h;
-            printf("palette color format: %x\n", imgBlock.image_format);
+            logprintf("palette color format: %x\n", imgBlock.image_format);
             u32 next;
             int bpp = 
                 imgBlock.image_format == 0x03 ? 4       //rgba8888
@@ -122,7 +122,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
             u64 pixelStart = block05Offset + imgBlock.pixels_start;
             fseek(f, pixelStart, SEEK_SET);
             if (bpp == 0) {
-                printf("unsupported palette color format\n");
+                logprintf("unsupported palette color format\n");
             } else {
                 for (int i = 0; i < nEntries; i++) {
                     fread(&next, bpp, 1, f);
@@ -152,8 +152,8 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
         if (isBE) {
             imgBlock = imageBlockBEtoLE(imgBlock);
         }
-        printf("image format: %x\n", imgBlock.image_format);
-        printf("pixel order: %i\n", imgBlock.pixel_order);  //1 needs to be detiled or something
+        logprintf("image format: %x\n", imgBlock.image_format);
+        logprintf("pixel order: %i\n", imgBlock.pixel_order);  //1 needs to be detiled or something
         Layer* ret = NULL;
         u64 pixelDataSize = imgBlock.pixels_end - imgBlock.pixels_start;
         u64 pixelStart = block04Offset + imgBlock.pixels_start;

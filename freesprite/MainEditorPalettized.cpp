@@ -594,7 +594,7 @@ Layer* MainEditorPalettized::newLayer()
         nl->palette = palette;
         nl->name = std::format("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        printf("adding new layer at %i\n", insertAtIdx);
+        logprintf("adding new layer at %i\n", insertAtIdx);
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -612,7 +612,7 @@ Layer* MainEditorPalettized::mergeLayers(Layer* bottom, Layer* top)
     ret->palette = palette;
 
     if (!bottom->isPalettized || !top->isPalettized) {
-        printf("UH OH\n");
+        logprintf("UH OH\n");
     }
 
     memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);

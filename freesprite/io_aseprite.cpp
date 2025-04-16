@@ -85,7 +85,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         u8* pixelData = (u8*)tracked_malloc(dstLength);
                         int uncompressResult = uncompress(pixelData, &dstLength, compressedData, zlibDataSize);
                         if (uncompressResult != Z_OK) {
-                            printf("uncompress failed: %i\n", uncompressResult);
+                            logprintf("uncompress failed: %i\n", uncompressResult);
                         }
                         pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
                         tracked_free(compressedData);
@@ -191,7 +191,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
         MainEditor* retSn = NULL;
         if (header.colorDepth != 32 && header.colorDepth != 16 && header.colorDepth != 8) {
             //we are not there yet
-            printf("[ASEPRITE] unsupported color depth: %i\n", header.colorDepth);
+            logprintf("[ASEPRITE] unsupported color depth: %i\n", header.colorDepth);
 
         }
         else {

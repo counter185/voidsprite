@@ -1283,7 +1283,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 }
                 break;
             case SDL_EVENT_PEN_MOTION:
-                //printf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
+                //logprintf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
             case SDL_EVENT_MOUSE_MOTION:
                 if (!penDown || evt.type != SDL_EVENT_MOUSE_MOTION) {
                     XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
@@ -1456,7 +1456,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_PEN_UP:
                 penDown = evt.ptouch.down;
                 SDL_SetWindowMouseGrab(g_wd, penDown);
-                std::cout << "new pen state: " << penDown << "\n";
+                loginfo(std::format("new pen state: {}", penDown));
                 break;
         }
     } else {
@@ -1468,7 +1468,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 {
     if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
         exporterID--;
-        printf("eventFileSaved: got file name %ls\n", name.c_str());
+        logprintf("eventFileSaved: got file name %ls\n", name.c_str());
 
         bool result = false;
 
@@ -2062,7 +2062,7 @@ Layer* MainEditor::newLayer()
     if (nl != NULL) {
         nl->name = std::format("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        printf("adding new layer at %i\n", insertAtIdx);
+        logprintf("adding new layer at %i\n", insertAtIdx);
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -2238,7 +2238,7 @@ void MainEditor::layer_flipVertically()
 void MainEditor::layer_setOpacity(uint8_t opacity) {
     Layer* clayer = getCurrentLayer();
     addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_SET_OPACITY, clayer->lastConfirmedlayerAlpha, opacity });
-    //printf("added to undo stack: %i, %i\n", clayer->lastConfirmedlayerAlpha, opacity);
+    //logprintf("added to undo stack: %i, %i\n", clayer->lastConfirmedlayerAlpha, opacity);
     clayer->layerAlpha = opacity;
     clayer->lastConfirmedlayerAlpha = clayer->layerAlpha;
 }
@@ -2566,7 +2566,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
             return c;
         }
     }
-    printf("_removeComment NOT FOUND\n");
+    logprintf("_removeComment NOT FOUND\n");
     //shitass workaround tell noone thanks
     //@hirano185 hey girlie check this out!
     return { {0,0}, "\1" };

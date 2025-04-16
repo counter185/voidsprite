@@ -32,7 +32,7 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 
         if (res != Z_OK) {
             g_addNotification(ErrorNotification("XYZ import failed", TL("vsp.cmn.error.decompressfail")));
-            printf("[XYZ] uncompress failed\n");
+            logprintf("[XYZ] uncompress failed\n");
             tracked_free(compressedData);
             tracked_free(decompBytes);
             fclose(f);
@@ -72,7 +72,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
     if (data->isPalettized) {
         if (((LayerPalettized*)data)->palette.size() > 256) {
             g_addNotification(ErrorNotification("XYZ export failed", "Too many colors in palette"));
-            printf("[XYZ] Too many colors\n");
+            logprintf("[XYZ] Too many colors\n");
             return false;
         }
     }
@@ -80,7 +80,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
         uniqueColors = data->getUniqueColors(true);
         if (uniqueColors.size() > 256) {
             g_addNotification(ErrorNotification("XYZ export failed", "Your image has more than 256 colors"));
-            printf("[XYZ] Too many colors\n");
+            logprintf("[XYZ] Too many colors\n");
             return false;
         }
     }
@@ -161,8 +161,8 @@ MainEditor* readLMU(PlatformNativePathString path)
                 std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
                 if (db.get()->chipsets.size() > chipsetIndex) {
                     //chipset_name is the file name
-                    std::cout << "chipset_name = " << db.get()->chipsets[chipsetIndex - 1].chipset_name << "\n";
-                    std::cout << "name = " << db.get()->chipsets[chipsetIndex - 1].name << "\n";
+                    loginfo(std::format("chipset_name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
+                    loginfo(std::format("name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].name)));
 
                     PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
                     Layer* l = NULL;

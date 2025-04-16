@@ -132,7 +132,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
                             bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
 
                             if (!success) {
-                                printf("ASTC decompression failed\n");
+                                logprintf("ASTC decompression failed\n");
                                 //astcErrors++;
                                 //return;
                             }
@@ -169,7 +169,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
     }
 
-    printf("[ASTC] at %lx / %lx\n", ftell(infile), fileLength); 
+    logprintf("[ASTC] at %lx / %lx\n", ftell(infile), fileLength); 
     return astcErrors;
 }
 
@@ -761,7 +761,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         }
         break;
     default:
-        printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+        logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
         break;
     }
     return ret;
@@ -780,7 +780,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
     strm.next_in = data;
     int ret2 = inflateInit(&strm);
     if (ret2 != Z_OK) {
-        printf("inflateInit failed\n");
+        logprintf("inflateInit failed\n");
         return ret;
     }
     u8 out[bufferSize];
@@ -790,7 +790,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         strm.next_out = out;
         ret2 = inflate(&strm, Z_NO_FLUSH);
         if (ret2 < 0) {
-            printf("inflate error\n");
+            logprintf("inflate error\n");
             break;
         }
         int nextDataSize = bufferSize - strm.avail_out;
@@ -800,7 +800,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         //ret.insert(ret.end(), out, out + nextDataSize);
     } while (ret2 != Z_STREAM_END);
     inflateEnd(&strm);
-    printf("total decompressed size: %lli\n", totalSize);
+    logprintf("total decompressed size: %lli\n", totalSize);
     return ret;
 }
 
@@ -812,7 +812,7 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
     compressedData.resize(maxCompressedDataSize);
     int res = compress(compressedData.data(), (uLongf*)&compressedDataSize, data, dataSize);
     if (res != Z_OK) {
-        printf("compress failed\n");
+        logprintf("compress failed\n");
         return std::vector<u8>();
     }
     compressedData.resize(compressedDataSize);
@@ -921,7 +921,7 @@ json serializePixelStudioSession(MainEditor* data) {
             pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
         }
         else {
-            printf("WRITEPNG FAILED\n");
+            logprintf("WRITEPNG FAILED\n");
         }
         historyJson["_source"] = pixelDataPNGAsBase64;
 
@@ -939,7 +939,7 @@ json serializePixelStudioSession(MainEditor* data) {
 MainEditor* deserializePixelStudioSession(json j)
 {
     int pspversion = j["Version"].get<int>();
-    printf("Version: %i\n", pspversion);
+    logprintf("Version: %i\n", pspversion);
 
     if (pspversion != 2) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported Pixel Studio file version"));
@@ -951,9 +951,9 @@ MainEditor* deserializePixelStudioSession(json j)
     json clips = j["Clips"];
     json clip0 = clips[0];
     std::string name = clip0["Name"];
-    printf("Clip Name: %s\n", name.c_str());
+    logprintf("Clip Name: %s\n", name.c_str());
     int activeFrameIndex = clip0["ActiveFrameIndex"].get<int>();
-    printf("Active Frame Index: %i\n", activeFrameIndex);
+    logprintf("Active Frame Index: %i\n", activeFrameIndex);
 
     bool showWarning = false;
 
@@ -1007,7 +1007,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     positions.push_back(XY{ x,y });
                 }
 #if _DEBUG
-                std::cout << action.dump(4) << std::endl;
+                loginfo(action.dump(4));
 #endif
                 switch (tool) {
                     //1px pencil
@@ -1167,7 +1167,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     //hue: max is 32400
                     //saturation, min is -10000
                 {
-                    std::cout << action.dump(4) << std::endl;
+                    loginfo(action.dump(4));
                     std::string metaStr = action["Meta"];
                     json meta = json::parse(metaStr);
                     int hue = meta[0];
@@ -1178,7 +1178,7 @@ MainEditor* deserializePixelStudioSession(json j)
                         saturation / 10000.0f,
                         lightness / 10000.0f
                     };
-                    printf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
+                    logprintf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
                     u32* px32 = (u32*)nlayer->pixelData;
                     for (u64 dataPtr = 0; dataPtr < nlayer->w * nlayer->h; dataPtr++) {
                         px32[dataPtr] = hslShiftPixelStudioCompat(px32[dataPtr], shift);
@@ -1189,16 +1189,16 @@ MainEditor* deserializePixelStudioSession(json j)
                     break;
                 default:
                     g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
-                    printf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
-                    printf("\trelevant position data:\n");
+                    logprintf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
+                    logprintf("\trelevant position data:\n");
                     for (XY& p : positions) {
-                        printf("\t%i, %i\n", p.x, p.y);
+                        logprintf("\t%i, %i\n", p.x, p.y);
                     }
-                    printf("\trelevant color data:\n");
+                    logprintf("\trelevant color data:\n");
                     for (u32& c : colors) {
-                        printf("\t%x\n", c);
+                        logprintf("\t%x\n", c);
                     }
-                    std::cout << action.dump(4) << std::endl;
+                    loginfo(action.dump(4));
                     showWarning = true;
                     break;
                 }
@@ -1251,7 +1251,7 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
                 sizeCorrectLayer->name = std::string(layerNode.attribute("name").as_string());
                 layers->insert(layers->begin(), sizeCorrectLayer);
             } else {
-                printf("NOOOOO LAYER IS NULL\n");
+                logprintf("NOOOOO LAYER IS NULL\n");
             }
 
             tracked_free(pngData);
@@ -1273,7 +1273,7 @@ size_t PNGFileSize = 0;
 void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
     png_voidp io_ptr = png_get_io_ptr(png_ptr);
     if (io_ptr == NULL) {
-        printf("WHY  IS io_ptr NULL\n");
+        logprintf("WHY  IS io_ptr NULL\n");
         return;
     }
 
@@ -1372,7 +1372,7 @@ Layer* readPNG(png_structp png, png_infop info) {
                 }
             }
             else {
-                printf("WHAT\n");
+                logprintf("WHAT\n");
                 delete ret;
                 png_destroy_read_struct(&png, &info, NULL);
                 return NULL;
@@ -1412,11 +1412,11 @@ Layer* readPNG(png_structp png, png_infop info) {
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
 
     if (dataSize < 8) {
-        printf("PNG data too small\n");
+        logprintf("PNG data too small\n");
         return NULL;
     }
     else if (png_sig_cmp(data, 0, 8)) {
-        printf("Not a PNG file\n");
+        logprintf("Not a PNG file\n");
         return NULL;
     }
 
@@ -1437,7 +1437,7 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
         u8 sig[8];
         fread(sig, 1, 8, pngfile);
         if (png_sig_cmp(sig, 0, 8)) {
-            printf("Not a PNG file\n");
+            logprintf("Not a PNG file\n");
             return NULL;
         }
         fseek(pngfile, 0, SEEK_SET);
@@ -1567,10 +1567,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 }
                 char ddsheader[4];
                 fread(&ddsheader, 4, 1, texfile);
-                printf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
+                logprintf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
 
                 if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
-                    printf("[AETEX] DDS found\n");
+                    logprintf("[AETEX] DDS found\n");
                     fclose(texfile);
                     return readDDS(path, r2dataStart);
                 }
@@ -1613,7 +1613,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
             }
             else {
                 if (formatType == 0x80) {
-                    printf("[AETEX] ASTC texture\n");
+                    logprintf("[AETEX] ASTC texture\n");
                     //fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                     //uint8_t* astcData = (uint8_t*)tracked_malloc(filesize - 0x80);
                     //fread(astcData, filesize - 0x80, 1, texfile);
@@ -1633,13 +1633,13 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                             fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                             //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
                             int errors = DeASTC(nlayer, astcWidth, astcHeight, texfile, x, y);
-                            //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                            //logprintf("[AETEX] astc %s\n", success ? "success" : "failed");
                             //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
                             tracked_free(rgbaData);
                             delete nlayer;
 
                             int totalBlocks = ceil(astcWidth / (float)x) * ceil(astcHeight / (float)y);
-                            printf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
+                            logprintf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
                         }
                     }
 
@@ -1653,7 +1653,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                     fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                     //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
                     DeASTC(nlayer, astcWidth, astcHeight, filesize, texfile);
-                    //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                    //logprintf("[AETEX] astc %s\n", success ? "success" : "failed");
                     //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
                     tracked_free(rgbaData);
                     //tracked_free(astcData);
@@ -1703,7 +1703,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
         fread(&imageTableOffset, 4,1, infile);
         nImages = BEtoLE32(nImages);
         imageTableOffset = BEtoLE32(imageTableOffset);
-        printf("[TPL] %i image(s)\n", nImages);
+        logprintf("[TPL] %i image(s)\n", nImages);
 
         fseek(infile, imageTableOffset, SEEK_SET);
 
@@ -1725,7 +1725,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
             nImg.imgHdr.width = BEtoLE16(nImg.imgHdr.width);
             nImg.imgHdr.format = BEtoLE32(nImg.imgHdr.format);
             nImg.imgHdr.imageDataAddress = BEtoLE32(nImg.imgHdr.imageDataAddress);
-            printf("image: %i x %i, format: %x, address: %x\n", nImg.imgHdr.height, nImg.imgHdr.width, nImg.imgHdr.format, nImg.imgHdr.imageDataAddress);
+            logprintf("image: %i x %i, format: %x, address: %x\n", nImg.imgHdr.height, nImg.imgHdr.width, nImg.imgHdr.format, nImg.imgHdr.imageDataAddress);
             if (i.paletteHeader != 0) {
                 fseek(infile, i.paletteHeader, SEEK_SET);
                 fread(&nImg.pltHdr, sizeof(TPLPaletteHeader), 1, infile);
@@ -1833,7 +1833,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
                         break;
                     }*/
                 default:
-                    printf("unsupported format\n");
+                    logprintf("unsupported format\n");
                     break;
             }
 
@@ -1859,7 +1859,7 @@ Layer* readNES(PlatformNativePathString path, uint64_t seek)
     if (infile != NULL) {
         NESHeader header;
         fread(&header, sizeof(NESHeader), 1, infile);
-        printf("Mapper: %i%i\n", header.flag7>>4, header.flag6 >> 4);
+        logprintf("Mapper: %i%i\n", header.flag7>>4, header.flag6 >> 4);
         bool trainerPresent = (header.flag6 >> 3) & 0b1;
 
         if (trainerPresent) {
@@ -1953,7 +1953,7 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
             }
                 break;
             default:
-                printf("format [%i] not supported\n", desc.format);
+                logprintf("format [%i] not supported\n", desc.format);
                 break;
         }
 
@@ -1990,10 +1990,10 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
         fread(&hdr.lowResImageWidth, 1, 1, infile);
         fread(&hdr.lowResImageHeight, 1, 1, infile);
 
-        printf("[VTF] VERSION: %i.%i\n", hdr.version[0], hdr.version[1]);
-        printf("[VTF] LowRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.lowResImageFormat, hdr.lowResImageWidth, hdr.lowResImageHeight);
-        printf("[VTF] HiRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.highResImageFormat, hdr.width, hdr.height);
-        printf("[VTF] Mipmaps: %i\n", hdr.mipmapCount);
+        logprintf("[VTF] VERSION: %i.%i\n", hdr.version[0], hdr.version[1]);
+        logprintf("[VTF] LowRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.lowResImageFormat, hdr.lowResImageWidth, hdr.lowResImageHeight);
+        logprintf("[VTF] HiRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.highResImageFormat, hdr.width, hdr.height);
+        logprintf("[VTF] Mipmaps: %i\n", hdr.mipmapCount);
 
         if (hdr.version[1] >= 2) {
             fread(&hdr.depth, 2, 1, infile);
@@ -2006,10 +2006,10 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
             for (int x = 0; x < hdr.numResources; x++) {
                 VTF_RESOURCE_ENTRY vtfRes;
                 fread(&vtfRes, sizeof(VTF_RESOURCE_ENTRY), 1, infile);
-                printf("[VTF] Found resource: %i %i %i  offset: %x\n", vtfRes.tag[0], vtfRes.tag[1], vtfRes.tag[2], vtfRes.offset);
+                logprintf("[VTF] Found resource: %i %i %i  offset: %x\n", vtfRes.tag[0], vtfRes.tag[1], vtfRes.tag[2], vtfRes.offset);
                 resources.push_back(vtfRes);
             }
-            printf("[VTF] numResources = %i\n", resources.size());
+            logprintf("[VTF] numResources = %i\n", resources.size());
 
             for (VTF_RESOURCE_ENTRY& res : resources) {
                 if (res.tag[0] == 0x01 && res.tag[1] == 0x00 && res.tag[2] == 0x00) {
@@ -2022,7 +2022,7 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
                         DeXT1(ret, hdr.lowResImageWidth, hdr.lowResImageHeight, infile);
                         break;
                     default:
-                        printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+                        logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
                         break;
                     }*/
                 }
@@ -2041,7 +2041,7 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
                 DeXT1(ret, hdr.lowResImageWidth, hdr.lowResImageHeight, infile);
                 break;
             default:
-                printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+                logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
                 break;
             }*/
             fseek(infile, hdr.headerSize, SEEK_SET);
@@ -2109,7 +2109,7 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek)
         fseek(infile, 0, SEEK_SET);
 
         MSPHeader hdr;
-        //printf("%i\n", sizeof(MSPHeader));
+        //logprintf("%i\n", sizeof(MSPHeader));
         fread(&hdr, sizeof(MSPHeader), 1, infile);
         //fseek(infile, 1, SEEK_CUR);
         Layer* ret = new Layer(hdr.Width, hdr.Height);
@@ -2215,7 +2215,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
                 break;
             }
             else {
-                printf("????\n");
+                logprintf("????\n");
                 delete ret;
                 fclose(f);
                 return NULL;
@@ -2514,7 +2514,7 @@ Layer* readXBM(PlatformNativePathString path, uint64_t seek) {
                     h = std::stoi(value);
                 }
                 else {
-                    printf("[XBM] invalid define: %s\n", defname.c_str());
+                    logprintf("[XBM] invalid define: %s\n", defname.c_str());
                 }
 
                 if (w >= 0 && h >= 0) {
@@ -2631,8 +2631,8 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
         fread(&header, sizeof(PS2IcnHeader), 1, f);
         //std::reverse(&header.textureType, &header.textureType + 1);
         //std::reverse(&header.verts, &header.verts + 1);
-        printf("[PS2ICN] texture type: %x\n", header.textureType);
-        printf("[PS2ICN] verts: %x\n", header.verts);
+        logprintf("[PS2ICN] texture type: %x\n", header.textureType);
+        logprintf("[PS2ICN] verts: %x\n", header.verts);
         
         int sizeofVertexStruct =
             header.animShapes * 8   //vertex coordinates
@@ -2642,7 +2642,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
 
         PS2IcnAnimationHeader animHeader;
         fread(&animHeader, sizeof(PS2IcnAnimationHeader), 1, f);
-        printf("[PS2ICN] num. anim frames: %x\n", animHeader.numberOfFrames);
+        logprintf("[PS2ICN] num. anim frames: %x\n", animHeader.numberOfFrames);
         for (int x = 0; x < animHeader.numberOfFrames; x++) {
             fseek(f, 4, SEEK_CUR);
             u32 numberOfKeys;
@@ -2650,7 +2650,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
             fseek(f, 8 + 8 * numberOfKeys, SEEK_CUR);
         }
 
-        printf("[PS2ICN] texture segment start: %x\n", ftell(f));
+        logprintf("[PS2ICN] texture segment start: %x\n", ftell(f));
         //aand we have arrived at the `Texture segment` just look at that view
         ret = new Layer(128, 128);
         ret->name = "PS2 ICN Layer";
@@ -2676,7 +2676,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
             u64 pxPtr = 0;
             fread(&sizeOfCompressedTextureData, 2, 1, f);
             sizeOfCompressedTextureData = BEtoLE16(sizeOfCompressedTextureData);
-            printf("[PS2ICN] texture size: %x\n", sizeOfCompressedTextureData);
+            logprintf("[PS2ICN] texture size: %x\n", sizeOfCompressedTextureData);
             while (pxPtr < 128 * 128 && !feof(f)) {
                 u16 code;
                 fread(&code, 2,1, f);
@@ -2724,7 +2724,7 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
         fread(&iconOffset, 4, 1, f);
         //iconOffset = BEtoLE32(iconOffset);
 
-        printf("[NDS] icon offset: %x\n", iconOffset);
+        logprintf("[NDS] icon offset: %x\n", iconOffset);
         u32 bitmapStart = 0x20 + iconOffset;
 
         u8* pixelData = (u8*)tracked_malloc(32 * 32);
@@ -3006,7 +3006,7 @@ Layer* readGIF(PlatformNativePathString path, u64 seek)
                         }
                         break;
                     default:
-                        printf("UNKNOWN EXTENSION: %i\n", label);
+                        logprintf("UNKNOWN EXTENSION: %i\n", label);
                         break;
                 }
             }
@@ -3075,8 +3075,8 @@ Layer* readGXT(PlatformNativePathString path, u64 seek)
         GXTHeader header;
         std::vector<GXTTextureSpec> textures;
 
-        printf("%i\n", sizeof(GXTHeader));
-        printf("%i\n", sizeof(GXTTextureSpec));
+        logprintf("%i\n", sizeof(GXTHeader));
+        logprintf("%i\n", sizeof(GXTTextureSpec));
 
         fread(&header, sizeof(GXTHeader), 1, f);
         for (int x = 0; x < header.embeddedTextureCount; x++) {
@@ -3084,12 +3084,12 @@ Layer* readGXT(PlatformNativePathString path, u64 seek)
             fread(&spec, sizeof(GXTTextureSpec), 1, f);
             textures.push_back(spec);
 
-            printf("Texture %i\n", x);
-            printf("Offset: %x\n", spec.textureOffset);
-            printf("Size: %x\n", spec.textureSize);
-            printf("Dimensions: %i %i\n", spec.width, spec.height);
-            printf("Format: %x\n", spec.textureBaseFormat);
-            printf("------------\n");
+            logprintf("Texture %i\n", x);
+            logprintf("Offset: %x\n", spec.textureOffset);
+            logprintf("Size: %x\n", spec.textureSize);
+            logprintf("Dimensions: %i %i\n", spec.width, spec.height);
+            logprintf("Format: %x\n", spec.textureBaseFormat);
+            logprintf("------------\n");
         }
 
         if (textures.size() > 0) {
@@ -3353,7 +3353,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     fread(metaHeader, 13, 1, infile);
                     // this should equal /VOIDSN.META/
                     if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
-                        printf("INVALID META HEADER\n");
+                        logprintf("INVALID META HEADER\n");
                     }
                     int nExtData;
                     fread(&nExtData, 4, 1, infile);
@@ -3529,7 +3529,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 }
                 break;
             default:
-                printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
+                logprintf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("VOIDSN file v{} not supported", voidsnversion)));
                 fclose(infile);
                 return NULL;
@@ -3579,7 +3579,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
                 return session;
             }
             else {
-                printf("%s : load failed\n", importer->name().c_str());
+                logprintf("%s : load failed\n", importer->name().c_str());
             }
         }
     }
@@ -3700,7 +3700,7 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
 
         for (Layer*& lr : data) {
             if (lr->w * lr->h != projDimensions.x * projDimensions.y) {
-                printf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
         }
@@ -3737,7 +3737,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -3815,7 +3815,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -3906,7 +3906,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -4007,7 +4007,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -4073,7 +4073,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
                 zip_entry_fwrite(zip, "temp.bin");
             }
             else {
-                printf("OPENRASTER: PNG WRITE ERROR\n");
+                logprintf("OPENRASTER: PNG WRITE ERROR\n");
             }
             delete flat;
         }
@@ -4088,7 +4088,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
                 zip_entry_fwrite(zip, "temp.bin");
             }
             else {
-                printf("OPENRASTER: PNG WRITE ERROR\n");
+                logprintf("OPENRASTER: PNG WRITE ERROR\n");
             }
             delete flatScaled;
         }
@@ -4103,7 +4103,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
                 zip_entry_close(zip);
             }
             else {
-                printf("OPENRASTER: PNG WRITE ERROR\n");
+                logprintf("OPENRASTER: PNG WRITE ERROR\n");
             }
         }
 
@@ -5005,7 +5005,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                 }
                             }
                             catch (std::exception) {
-                                printf("error reading comment\n");
+                                logprintf("error reading comment\n");
                             }
                         }
                         else if (line.find(':')) {

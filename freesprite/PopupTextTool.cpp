@@ -29,10 +29,10 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 	textboxSize->wxWidth = 120;
 	wxsManager.addDrawable(textboxSize);
 
-	UIButton* nbutton = actionButton("vsp.cmn.apply");
+	UIButton* nbutton = actionButton(TL("vsp.cmn.apply"));
 	nbutton->setCallbackListener(0, this);
 
-	UIButton* nbutton2 = actionButton("vsp.cmn.cancel");
+	UIButton* nbutton2 = actionButton(TL("vsp.cmn.cancel"));
 	nbutton2->setCallbackListener(1, this);
 
 	makeTitleAndDesc(tt, tx);

@@ -611,7 +611,7 @@ void EditorColorPicker::pushLastColor(uint32_t col)
         return;
     }
 
-    //printf("pushing new color!\n");
+    //logprintf("pushing new color!\n");
     lastColorsChanged = true;
 
     if (fnd != lastColors.end()) {
@@ -732,7 +732,7 @@ void EditorColorPicker::openOldWindowsColorPicker()
     if (ChooseColor(&cc)) {
         SDL_Color colorbgr = uint32ToSDLColor(cc.rgbResult);
         setMainEditorColorRGB(PackRGBAtoARGB(colorbgr.b, colorbgr.g, colorbgr.r, 255));
-        printf("win32 picked color: %x\n", cc.rgbResult);
+        logprintf("win32 picked color: %x\n", cc.rgbResult);
     }
 }
 #endif

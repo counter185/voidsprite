@@ -245,3 +245,10 @@ FILE *platformOpenFile(PlatformNativePathString path,
     FILE *ret = fopen(path.c_str(), mode.c_str());
     return ret;
 }
+
+std::string platformGetSystemInfo() {
+    //todo
+    std::string ret = "";
+    ret += "macOS\n";
+    return ret;
+}

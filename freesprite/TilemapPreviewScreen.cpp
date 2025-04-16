@@ -425,7 +425,7 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                     fread(&mapHeight, 2, 1, file);
 
                     if (zerox10Byte == 0x10) {
-                        printf("[PXE] mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
+                        logprintf("[PXE] mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
                         resizeTilemap(mapLength, mapHeight);
                         freeAllLayers();
                         XY** newTilemap = newLayer();
@@ -436,7 +436,7 @@ void TilemapPreviewScreen::eventFileOpen(int evt_id, PlatformNativePathString na
                         }
                     }
                     else if (zerox10Byte == 0x21) {
-                        printf("[PXE] multi layer, mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
+                        logprintf("[PXE] multi layer, mapLength: %i ; mapHeight: %i\n", mapLength, mapHeight);
                         resizeTilemap(mapLength, mapHeight);
                         freeAllLayers();
                         for (int lidx = 0; lidx < 4; lidx++) {

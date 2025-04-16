@@ -39,7 +39,7 @@ MainEditor* readPISKEL(PlatformNativePathString path)
                     layers.push_back(nnlayer);
                 }
                 else {
-                    printf("layer load failed\n");
+                    logprintf("layer load failed\n");
                 }
             }
 
@@ -99,7 +99,7 @@ bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
                 chunkObj["layout"][0].push_back(0);
             }
             else {
-                printf("WRITEPNG FAILED\n");
+                logprintf("WRITEPNG FAILED\n");
             }
             layerObj["chunks"].push_back(chunkObj);
 

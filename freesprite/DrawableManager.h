@@ -10,7 +10,7 @@ public:
 
 	~DrawableManager() {
 		if (drawablesList.size() == 0) {
-			//printf("[DrawableManager] duplicate destructor\n");
+			//logprintf("[DrawableManager] duplicate destructor\n");
 		}
 		freeAllDrawables(); 
 	}

@@ -129,7 +129,7 @@ void EditorLayerPicker::eventSliderPosFinishedChanging(int evt_id, float value)
 {
     if (evt_id == EVENT_LAYERPICKER_OPACITYSLIDER) {
         caller->layer_setOpacity((uint8_t)(value * 255));
-        //printf("eventSliderPosFinishedChanging, %x\n", (uint8_t)(value * 255));
+        //logprintf("eventSliderPosFinishedChanging, %x\n", (uint8_t)(value * 255));
     }
 }
 

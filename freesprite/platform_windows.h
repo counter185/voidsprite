@@ -9,15 +9,67 @@
 
 #include <d3d9.h>
 #include <windows.h>
+#include <VersionHelpers.h>
+#include <tlhelp32.h>
 #include <commdlg.h>
 
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
 
-void platformPreInit() {
-
+bool windows_isProcessRunning(std::wstring name) {
+	HANDLE hProcessSnap;
+	PROCESSENTRY32 pe32;
+	BOOL hRes;
+	// Take a snapshot of all processes in the system.
+	hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
+	if (hProcessSnap == INVALID_HANDLE_VALUE) {
+		return false;
+	}
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+	// Retrieve information about the first process,
+	// and exit if unsuccessful
+	if (!Process32First(hProcessSnap, &pe32)) {
+		CloseHandle(hProcessSnap);     // clean the snapshot object
+		return false;
+	}
+	do {
+		if (name == pe32.szExeFile) {
+			CloseHandle(hProcessSnap);
+			return true;
+		}
+	} while (Process32Next(hProcessSnap, &pe32));
+	CloseHandle(hProcessSnap);
+	return false;
 }
+
+std::string windows_readStringFromRegistry(HKEY rootKey, std::wstring path, std::wstring keyname) {
+    HKEY hKey;
+    std::string ret = "";
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, path.c_str(), 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        wchar_t stringData[1024];
+        DWORD size = sizeof(stringData);
+        if (RegQueryValueExW(hKey, keyname.c_str(), NULL, NULL, (LPBYTE)stringData, &size) == ERROR_SUCCESS) {
+            ret = convertStringToUTF8OnWin32(stringData);
+        }
+        RegCloseKey(hKey);
+    }
+    else {
+        ret = "";
+    }
+    return ret;
+}
+
+std::string windows_getActiveGPUName() {
+    IDirect3D9* d3dobject = Direct3DCreate9(D3D_SDK_VERSION);
+    D3DADAPTER_IDENTIFIER9 ident;
+    d3dobject->GetAdapterIdentifier(0, 0, &ident);
+    std::string ret = ident.Description;
+    d3dobject->Release();
+    return ret;
+}
+
+void platformPreInit() {}
 void platformInit() {}
 void platformPostInit() {
     static bool d = false;
@@ -37,12 +89,6 @@ void platformPostInit() {
         //SendMessageW(WINhWnd, WM_PAINT, NULL, NULL);
         d = true;
     }
-
-    IDirect3D9* d3dobject = Direct3DCreate9(D3D_SDK_VERSION);
-    D3DADAPTER_IDENTIFIER9 ident;
-    d3dobject->GetAdapterIdentifier(0, 0, &ident);
-    printf("GPU: %s\n", ident.Description);
-    d3dobject->Release();
 }
 
 bool platformAssocFileTypes(std::vector<std::string> extensions) {
@@ -52,7 +98,7 @@ bool platformAssocFileTypes(std::vector<std::string> extensions) {
     if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) {
         HKEY classesRootKey;
         if (RegOpenKeyW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", &classesRootKey) != ERROR_SUCCESS) {
-			printf("failed to open hkey_classes_root\n");
+			logprintf("failed to open hkey_classes_root\n");
 			return false;
         }
         std::wstring pathWstr = path;
@@ -74,7 +120,7 @@ bool platformAssocFileTypes(std::vector<std::string> extensions) {
 			RegCloseKey(voidspriteRootKey);
         }
         else {
-			printf("failed to create voidsprite key in hkey_classes_root\n");
+			logprintf("failed to create voidsprite key in hkey_classes_root\n");
 			RegCloseKey(classesRootKey);
             return false;
         }
@@ -89,7 +135,7 @@ bool platformAssocFileTypes(std::vector<std::string> extensions) {
 				RegCloseKey(hKey);
             }
             else {
-				printf("failed to create %s key in hkey_classes_root\n", ext.c_str());
+				logprintf("failed to create %s key in hkey_classes_root\n", ext.c_str());
 				//RegCloseKey(classesRootKey);
 				//return false;
             }
@@ -148,7 +194,7 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
         listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
-        printf("windows error: %i\n", GetLastError());
+        logprintf("windows error: %i\n", GetLastError());
     }
 }
 
@@ -186,7 +232,7 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
         listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
-        printf("windows error: %i\n", GetLastError());
+        logprintf("windows error: %i\n", GetLastError());
     }
 }
 
@@ -205,7 +251,7 @@ FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString m
     FILE* ret;
     errno_t err = _wfopen_s(&ret, path.c_str(), mode.c_str());
     if (err != 0) {
-        printf("Error opening file: %i\n", err);
+        logprintf("Error opening file: %i\n", err);
     }
     return ret;
 }
@@ -343,7 +389,7 @@ Layer* platformGetImageFromClipboard() {
         }
     }
     else {
-        printf("No file path data in clipboard\n");
+        logprintf("No file path data in clipboard\n");
     }
     if (foundImage != NULL) {
         return foundImage;
@@ -376,7 +422,7 @@ Layer* platformGetImageFromClipboard() {
         return foundPNG;
     }
     else {
-        printf("No PNG data in clipboard\n");
+        logprintf("No PNG data in clipboard\n");
     }
 
     //dibv5
@@ -421,4 +467,28 @@ Layer* platformGetImageFromClipboard() {
 	ReleaseDC(WINhWnd, hdc);
 	CloseClipboard();
 	return layer;
+}
+
+std::string platformGetSystemInfo() {
+    std::string ret;
+    ret += std::format("OS: {} {} {}\n", 
+        windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName"), 
+        windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion"), 
+        windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab"));
+    if (!windows_isProcessRunning(L"csrss.exe")) {
+        if (std::filesystem::exists("Z:\\bin\\sh")) {
+            ret += "  (Running on a compatibility layer)\n";
+        }
+        else {
+            ret += "  (Running on a compatibility layer?)\n";
+        }
+    }
+    ret += std::format("System: {} {}\n",
+        windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemManufacturer"),
+        windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemProductName"));
+    ret += "CPU: " + windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", L"ProcessorNameString") + "\n";
+    ret += "GPU: " + windows_getActiveGPUName() + "\n";
+	ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+
+    return ret;
 }

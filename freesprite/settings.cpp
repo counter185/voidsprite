@@ -57,7 +57,7 @@ void g_loadConfig() {
                         g_config.keybinds[key.substr(key.find(':') + 1)] = keybind;
                     }
                     catch (std::exception) {
-                        printf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
+                        logprintf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
                     }
                 }
                 else if (key == "lastfile") {

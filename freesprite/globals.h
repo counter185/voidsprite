@@ -4,7 +4,7 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
-#pragma warning(disable : 4477) //printf wrong format argument whatever
+#pragma warning(disable : 4477) //logprintf wrong format argument whatever
 #pragma warning(disable : 4099) //liblcf link without debugging info whatever don't care
 
 //macro redefinition warning, remove this line after fully migrating to sdl3
@@ -13,6 +13,7 @@
 
 //#include <math.h>
 
+#include <stdarg.h>
 #include <chrono>
 #include <string>
 #include <format>
@@ -44,7 +45,7 @@ extern "C" {
 }
 
 #ifdef __GNUC__
-#define sprintf_s snprintf
+#define slogprintf_s snlogprintf
 #define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),(mode)))==NULL
 #endif
 
@@ -273,6 +274,7 @@ struct NineSegmentPattern {
     SDL_Texture* cachedTexture = NULL;
 };
 
+#include "log.h"
 #include "localization/localization.h"
 #include "memory_tracker.h"
 #include "platform.h"

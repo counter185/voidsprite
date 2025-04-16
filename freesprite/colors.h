@@ -338,7 +338,7 @@ inline void g_reloadColorMap() {
                 }
                 else {
                     //g_addNotification(ErrorNotification("Palette Import Error", "Could not import palette from " + fileName));
-                    printf("palette load failed\n");
+                    logprintf("palette load failed\n");
                 }
             }
         }

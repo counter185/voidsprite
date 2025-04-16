@@ -8,7 +8,7 @@ Layer* readDIBv5FromMem(u8* mem, u64 size)
         vsp_BITMAPV5HEADER header = *((vsp_BITMAPV5HEADER*)mem);
         u32 startOffset = header.bV5Size;
         u16 bitDepth = header.bV5BitCount;
-        printf("[DIBv5] Compression type: %i, bit depth: %i\n", header.bV5Compression, bitDepth);
+        logprintf("[DIBv5] Compression type: %i, bit depth: %i\n", header.bV5Compression, bitDepth);
         switch (header.bV5Compression) {
             case 0:         //BI_RGB
                 ret = Layer::tryAllocLayer(header.bV5Width, header.bV5Height);
@@ -55,7 +55,7 @@ Layer* readDIBv5FromMem(u8* mem, u64 size)
                 return readPNGFromMem(mem + startOffset, size - startOffset);
                 break;
             default:
-                printf("-- unsupported compression type\n");
+                logprintf("-- unsupported compression type\n");
                 break;
 
         }

@@ -78,7 +78,7 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
 	}
 	if (exporter == NULL) {
 		g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No exporter found for this file"));
-		printf("No exporter found for file %s\n", convertStringToUTF8OnWin32(outPath).c_str());
+		logprintf("No exporter found for file %s\n", convertStringToUTF8OnWin32(outPath).c_str());
 		delete session;
 		return;
 	}

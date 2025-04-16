@@ -46,7 +46,7 @@ void evalVisualConfigJsonTree(nlohmann::json& object, std::unordered_map<std::st
             evalVisualConfigJsonTree(value, target, jsonPathNow + key + "/");
         }
         else {
-            printf("Unknown type in visual config JSON: %s\n", value.dump().c_str());
+            logprintf("Unknown type in visual config JSON: %s\n", value.dump().c_str());
         }
     }
 }
@@ -62,7 +62,7 @@ std::unordered_map<std::string, std::string> loadVisualConfig(PlatformNativePath
         return conf;
     }
     else {
-        printf("Error opening file for reading: %s\n", path.c_str());
+        logprintf("Error opening file for reading: %s\n", path.c_str());
         return {};
     }
 }
@@ -90,7 +90,7 @@ std::vector<VisualConfigMeta> g_getAvailableVisualConfigs()
                 ret.push_back(meta);
             }
             catch (std::exception& e) {
-                printf("Error loading visual config %s: %s\n", convertStringToUTF8OnWin32(vc).c_str(), e.what());
+                logprintf("Error loading visual config %s: %s\n", convertStringToUTF8OnWin32(vc).c_str(), e.what());
                 continue;
             }
         }
@@ -136,7 +136,7 @@ void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, s
         fileout << j.dump(4);
     }
     else {
-        printf("Error opening file for writing: %s\n", path.c_str());
+        logprintf("Error opening file for writing: %s\n", path.c_str());
     }
     fileout.close();
 }
