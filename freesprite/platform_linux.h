@@ -220,7 +220,7 @@ std::string platformGetSystemInfo() {
 
     errno = 0;
     if (uname(&buffer) != 0) {
-        ret += "(Error running uname)\n"
+        ret += "(Error running uname)\n";
     }
     else {
         ret += std::format("OS: {} {} {}\n", buffer.sysname, buffer.version, buffer.release);
