@@ -108,8 +108,7 @@ public:
     std::vector<FilterParameter> getParameters() override {
         return {
             INT_PARAM("splits", 1, 100, 4),
-            INT_PARAM("length.min", 1, 100, 3),
-            INT_PARAM("length.max", 1, 100, 8),
+            INT_RANGE_PARAM("length", 1, 100, 3, 8, 0xffffffff)
         };
     }
 };
