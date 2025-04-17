@@ -15,3 +15,6 @@ std::unordered_map<std::string, std::string>& getDefaultVisualConf();
 std::string visualConfigValue(std::string key);
 Fill visualConfigFill(std::string key);
 void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, std::string path);
+
+SDL_Texture* getVisualConfigTexture(std::string key);
+void clearVisualConfigTextureCache();

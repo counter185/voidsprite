@@ -22,6 +22,7 @@
     // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
+    {"vsp.nav.save", "Save"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
@@ -88,13 +89,10 @@
     {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
     {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
 
-    {"vsp.maineditor.file","File"},
     {"vsp.maineditor.saveas","Save As"},
-    {"vsp.maineditor.save","Save"},
     {"vsp.maineditor.exportpal","Export as indexed"},
     {"vsp.maineditor.exportind","Export tiles individually"},
     {"vsp.maineditor.paledit","Open in indexed editor"},
-    {"vsp.maineditor.close","Close"},
     {"vsp.maineditor.preference","Preferences"},
     {"vsp.maineditor.copyflattoclipboard", "Copy to clipboard"},
 

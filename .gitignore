@@ -426,3 +426,4 @@ flatpak-repo/
 *.flatpak
 
 mac-build-resources/generated*
+freesprite/localization/.vscode/settings.json

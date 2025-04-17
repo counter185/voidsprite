@@ -1,5 +1,7 @@
 #pragma once
 
+SDL_Texture* getVisualConfigTexture(std::string key);
+
 enum FillType {
     FILL_INVALID = 0,
     FILL_SOLID = 1,
@@ -16,6 +18,7 @@ public:
     u32 fillSolidColor = 0xFFFFFFFF;
     u32 fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR = 0xFFFFFFFF;
     u32 fillGradientML, fillGradientMR = 0xFFFFFFFF;
+    std::string fillTextureVCKey = "";
     SDL_Texture* fillTexture = NULL;
 
     static Fill Solid(u32 color)
@@ -50,6 +53,12 @@ public:
         r.fillTexture = tex;
         return r;
     }
+    static Fill Texture(std::string vcAssetKey)
+    { 
+        Fill r(FILL_TEXTURE);
+        r.fillTextureVCKey = vcAssetKey;
+        return r;
+    }
 
     Fill(SDL_Color c) {
         type = FILL_SOLID;
@@ -73,7 +82,7 @@ public:
                 renderGradient({r.x,r.y+r.h/2,r.w,r.h/2}, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
                 break;
             case FILL_TEXTURE:
-                SDL_RenderCopy(g_rd, fillTexture, NULL, &r);
+                SDL_RenderCopy(g_rd, (fillTexture == NULL ? getVisualConfigTexture(fillTextureVCKey) : fillTexture), NULL, &r);
                 break;
         }
     }
@@ -86,6 +95,8 @@ public:
                 return std::format("fill:gradient:{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR);
             case FILL_3POINTVGRADIENT:
                 return std::format("fill:3pointgradient:{:08X}/{:08X}/{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
+            case FILL_TEXTURE:
+                return std::format("fill:texture:{}", fillTextureVCKey);
             default:
                 return "fill:none";
         }
@@ -118,6 +129,10 @@ public:
                     std::stoul(subColors[2], nullptr, 16),
                     std::stoul(subColors[3], nullptr, 16)
                 );
+            }
+            else if (parts[1] == "texture") {
+                std::string vcKey = parts[2];
+                return Fill::Texture(vcKey);
             }
         }
         catch (std::exception& e) {

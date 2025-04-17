@@ -15,6 +15,7 @@
 
     {"vsp.nav.file", "Fișier"},
     {"vsp.nav.open", "Deschide"},
+    {"vsp.nav.save","Salvează"},
 
     {"vsp.rpc.1activeworkspace", "un spațiu de lucru activ"},
     {"vsp.rpc.activeworkspaces", "spații de lucru active"},
@@ -64,13 +65,10 @@
 
     {"vsp.maineditor", "Editor"},
 
-    {"vsp.maineditor.file","Fișier"},
     {"vsp.maineditor.saveas","Salvează ca"},
-    {"vsp.maineditor.save","Salvează"},
     {"vsp.maineditor.exportpal","Exportează imagine indexată"},
     {"vsp.maineditor.exportind","Exportează dale individual"},
     {"vsp.maineditor.paledit","Deschide în editorul indexat"},
-    {"vsp.maineditor.close","Închide"},
     {"vsp.maineditor.preference","Preferințe"},
     {"vsp.maineditor.copyflattoclipboard", "Copiază în clipboard"},
 

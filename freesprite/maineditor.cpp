@@ -685,7 +685,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_F,
             {
-                TL("vsp.maineditor.file"),
+                TL("vsp.nav.file"),
                 {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
@@ -694,7 +694,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { TL("vsp.maineditor.save"),
+                    {SDL_SCANCODE_S, { TL("vsp.nav.save"),
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
                             }
@@ -727,7 +727,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_X, { TL("vsp.maineditor.close"),
+                    {SDL_SCANCODE_X, { TL("vsp.cmn.close"),
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }

@@ -1175,5 +1175,8 @@
     <Text Include="localization\localization_romanian.txt">
       <Filter>Header files\localization</Filter>
     </Text>
+    <Text Include="localization\localization_japanese.txt">
+      <Filter>Header files\localization</Filter>
+    </Text>
   </ItemGroup>
 </Project>

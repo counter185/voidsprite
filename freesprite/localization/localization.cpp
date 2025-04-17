@@ -3,6 +3,7 @@
 std::map<std::string, LocalizationData> g_localizations = {
 #include "localization_english.txt"
 #include "localization_romanian.txt"
+//#include "localization_japanese.txt"
 };
 
 #ifndef ENGLISH_LOC_INCLUDED

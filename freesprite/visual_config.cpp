@@ -12,6 +12,8 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"launchpad/bg", Fill::Gradient(0xFF000000,0xFF000000,0xFF000000,0xFF202020).serialize()},
 };
 
+std::map<std::string, SDL_Texture*> visualConfigTextureCache = {};
+
 std::unordered_map<std::string, std::string> customVisualConfig = {};
 PlatformNativePathString customVisualConfigRoot;
 bool customVisualConfigLoaded = false;
@@ -99,12 +101,14 @@ std::vector<VisualConfigMeta> g_getAvailableVisualConfigs()
 }
 bool g_loadVisualConfig(PlatformNativePathString path) {
     if (path.empty()) {
+        clearVisualConfigTextureCache();
         customVisualConfig = {};
         customVisualConfigLoaded = false;
         customVisualConfigRoot = convertStringOnWin32("");
         return true;
     }
     else if (std::filesystem::exists(path) && std::filesystem::exists(path + convertStringOnWin32("/config.json"))) {
+        clearVisualConfigTextureCache();
         customVisualConfig = loadVisualConfig(path + convertStringOnWin32("/config.json"));
         customVisualConfigLoaded = customVisualConfig.size() > 0;
         customVisualConfigRoot = path;
@@ -139,4 +143,22 @@ void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, s
         logprintf("Error opening file for writing: %s\n", path.c_str());
     }
     fileout.close();
+}
+
+SDL_Texture* getVisualConfigTexture(std::string key) {
+	if (visualConfigTextureCache.contains(key)) {
+		return visualConfigTextureCache[key];
+	}
+	else {
+		SDL_Texture* tex = IMGLoadAssetToTexture(key);
+		visualConfigTextureCache[key] = tex;
+		return tex;
+	}
+}
+
+void clearVisualConfigTextureCache() {
+	for (auto& [key, tex] : visualConfigTextureCache) {
+		tracked_destroyTexture(tex);
+	}
+	visualConfigTextureCache.clear();
 }
