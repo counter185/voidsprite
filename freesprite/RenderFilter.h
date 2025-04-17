@@ -15,23 +15,29 @@ public:
     Layer* run(Layer* src, std::map<std::string, std::string> options) override {
         bool grayscale = std::stod(options["grayscale"]) == 1;
         bool black_to_alpha = std::stod(options["black is alpha"]) == 1;
+        u8 range_min = std::stoul(options["range.min"]);
+        u8 range_max = std::stoul(options["range.max"]);
+
         Layer* c = copy(src);
         u32* px = (u32*)c->pixelData;
 
         for (int i = 0; i < c->w * c->h; i++) {
             if (grayscale) {
-                u8 r = rand() % 256;
-                px[i] = black_to_alpha ? PackRGBAtoARGB(0xff,0xff,0xff, r) : PackRGBAtoARGB(r, r, r, 0xFF);
+                u8 r = range_min == range_max ? range_max : (rand() % (range_max - range_min)) + range_min;
+                px[i] = black_to_alpha ? PackRGBAtoARGB(0xff, 0xff, 0xff, r) : PackRGBAtoARGB(r, r, r, 0xFF);
             }
             else {
-                px[i] = rand() % 2 == 0 ? (black_to_alpha ? 0x00000000 : 0xFF000000) : 0xFFFFFFFF;
+                u8 r = range_min == range_max ? range_max : rand() % 2 == 0 ? range_min : range_max;
+                px[i] = black_to_alpha ? PackRGBAtoARGB(0xff, 0xff, 0xff, r) : PackRGBAtoARGB(r, r, r, 0xFF);
             }
         }
+
         return c;
     }
-    virtual std::vector<FilterParameter> getParameters() { return {
+    std::vector<FilterParameter> getParameters() override { return {
         BOOL_PARAM("grayscale", 1),
         BOOL_PARAM("black is alpha", 1),
+        INT_RANGE_PARAM("range", 0, 255, 0, 255, 0xffffffff),
     }; }
 
 };
@@ -80,7 +86,7 @@ public:
         }
         return c;
     }
-    virtual std::vector<FilterParameter> getParameters() { return {
+    std::vector<FilterParameter> getParameters() override { return {
         // INT_PARAM("red.min", 0, 255, 0),
         // INT_PARAM("red.max", 0, 255, 255),
         // INT_PARAM("green.min", 0, 255, 0),
@@ -119,7 +125,7 @@ class PrintPaletteFilter : public RenderFilter {
         return c;
     }
 
-    virtual std::vector<FilterParameter> getParameters() {
+    std::vector<FilterParameter> getParameters() override {
         return {
             INT_PARAM("columns", 1, 100, 16), 
             INT_PARAM("square.w", 1, 16, 1),
