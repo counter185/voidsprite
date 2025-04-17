@@ -6,7 +6,7 @@ void UIColorSlider::render(XY pos)
 
     if (colors.size() > 1) {
         int splits = ixmax(colors.size(), 2) - 1;
-        double wSplit = wxWidth / splits;
+        double wSplit = (double) wxWidth / splits;
 
         for (int x = 0; x < splits; x++) {
             SDL_Rect subRect = drawrect;

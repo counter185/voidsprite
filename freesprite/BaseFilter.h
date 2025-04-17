@@ -6,6 +6,7 @@
 #define COLORRGB_PARAM(name,def) (FilterParameter{name,0,0,0,PT_COLOR_RGB,def})
 #define COLORL_PARAM(name) (FilterParameter{name,0,255,127,PT_COLOR_L})
 #define BOOL_PARAM(name,def) (FilterParameter{name,0,1,def,PT_BOOL})
+#define INT_RANGE_PARAM(name,min,max,defl,defm,col) (FilterParameter{name,min,max,defl,PT_INT_RANGE,col,defm})
 
 enum ParameterType {
     PT_INT = 0,
@@ -13,6 +14,7 @@ enum ParameterType {
     PT_COLOR_RGB = 2,
     PT_COLOR_L = 3,
     PT_BOOL = 4,
+    PT_INT_RANGE = 5,
 };
 
 struct FilterParameter {
@@ -22,6 +24,7 @@ struct FilterParameter {
     double defaultValue = 0.5;
     ParameterType paramType;
     u32 vU32 = 0;
+    double defaultValueTwo = 0.5;
 };
 
 void g_loadFilters();

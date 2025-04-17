@@ -427,3 +427,5 @@ flatpak-repo/
 
 mac-build-resources/generated*
 freesprite/localization/.vscode/settings.json
+
+/fuck
