@@ -67,7 +67,7 @@ public:
     XY mousePixelTargetPoint2xP;
     XY mouseHoldPosition;
     bool closeNextTick = false;
-    BaseBrush* currentBrush;
+    BaseBrush* currentBrush = NULL;
     bool currentBrushMouseDowned = false;
     bool invertPattern = false;
     Pattern* currentPattern;
