@@ -7,6 +7,7 @@
 class UICheckboxButton : public UIButton {
 private:
     bool state = false;
+    bool clickedFlag = false;
     bool* statePtr = NULL;
 public:
     Timer64 stateChangeTimer;

@@ -122,6 +122,11 @@ public:
         }
     }
     void openSubmenu(SDL_Scancode which) {
+        if (currentSubmenuOpen == which) {
+            currentSubmenuOpen = (SDL_Scancode)-1;
+            updateCurrentSubmenu();
+            return;
+        }
         currentSubmenuOpen = (SDL_Scancode)-1;
         submenuOpenTimer.start();
         updateCurrentSubmenu();
