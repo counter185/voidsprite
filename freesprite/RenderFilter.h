@@ -90,9 +90,9 @@ public:
         // INT_PARAM("alpha.min", 0, 255, 255),
         // INT_PARAM("alpha.max", 0, 255, 255),
 
-        INT_RANGE_PARAM("red", 0, 255, 0, 255, 0xff0000ff),
-        INT_RANGE_PARAM("green", 0, 255, 0, 255, 0x00ff00ff),
-        INT_RANGE_PARAM("blue", 0, 255, 0, 255, 0x0000ffff),
+        INT_RANGE_PARAM("red", 0, 255, 0, 255, 0xffff0000),
+        INT_RANGE_PARAM("green", 0, 255, 0, 255, 0xff00ff00),
+        INT_RANGE_PARAM("blue", 0, 255, 0, 255, 0xff0000ff),
         INT_RANGE_PARAM("alpha", 0, 255, 0, 255, 0xffffffff),
     }; }
 

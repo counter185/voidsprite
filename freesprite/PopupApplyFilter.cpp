@@ -187,7 +187,7 @@ void PopupApplyFilter::setupWidgets()
                 wxsManager.addDrawable(slider);
 
                 UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 70, 0 });
+                valueLabel->position = xySubtract(slider->position, { 84, 0 });
                 paramLabels.push_back(valueLabel);
                 wxsManager.addDrawable(valueLabel);
             }
@@ -215,7 +215,7 @@ void PopupApplyFilter::setupWidgets()
                 wxsManager.addDrawable(slider);
 
                 UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 70, 0 });
+                valueLabel->position = xySubtract(slider->position, { 84, 0 });
                 paramLabels.push_back(valueLabel);
                 wxsManager.addDrawable(valueLabel);
             }

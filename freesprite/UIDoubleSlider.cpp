@@ -5,11 +5,11 @@
 void UIDoubleSlider::drawPosIndicator(XY origin) {
     //g_fnt->RenderString(std::string("pos:") + std::to_string(sliderPos), origin.x + 10, origin.y + wxHeight / 4);
 
-    Fill::Solid(bodyColor).fill(SDL_Rect {
-        .x = (int) (origin.x + wxWidth * sliderPos.min),
-        .y = origin.y - 1,
-        .w = (int) (wxWidth * sliderPos.max) - (int) (wxWidth * sliderPos.min),
-        .h = wxHeight - 2,
+    Fill::Gradient(bodyColor, bodyColor, 0, 0).fill(SDL_Rect {
+        .x = origin.x + (int) (wxWidth * sliderPos.min) + 1,
+        .y = origin.y + 2,
+        .w = (int) (wxWidth * sliderPos.max) - (int) (wxWidth * sliderPos.min) - 1,
+        .h = wxHeight - 4,
     });
 
     // Least
@@ -21,16 +21,18 @@ void UIDoubleSlider::drawPosIndicator(XY origin) {
         for (int x = 0; x < 2; x++) {
             int fxdist = xdist + x;    
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist);
-            SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
             //draws first triangle
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
-            SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
             //draws top/bottom bars
+            //SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight + fxdist);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y - fxdist);
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y - fxdist);
             //draws second triangle
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
-            SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         }
     }
@@ -43,16 +45,18 @@ void UIDoubleSlider::drawPosIndicator(XY origin) {
         
         for (int x = 0; x < 2; x++) {
             int fxdist = xdist + x;    
-            SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist);
             SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
             //draws first triangle
-            SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
             SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y - fxdist, centerPoint.x, centerPoint.y);
             //draws top/bottom bars
+            //SDL_RenderDrawLine(g_rd, centerPoint.x, centerPoint.y + wxHeight + fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y - fxdist);
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist);
             SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y - fxdist, centerPoint.x + fxdist, centerPoint.y - fxdist);
             //draws second triangle
-            SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
+            //SDL_RenderDrawLine(g_rd, centerPoint.x - fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
             SDL_RenderDrawLine(g_rd, centerPoint.x + fxdist, centerPoint.y + wxHeight + fxdist, centerPoint.x, centerPoint.y + wxHeight);
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
         }
