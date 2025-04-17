@@ -81,14 +81,19 @@ public:
         return c;
     }
     virtual std::vector<FilterParameter> getParameters() { return {
-        INT_PARAM("red.min", 0, 255, 0),
-        INT_PARAM("red.max", 0, 255, 255),
-        INT_PARAM("green.min", 0, 255, 0),
-        INT_PARAM("green.max", 0, 255, 255),
-        INT_PARAM("blue.min", 0, 255, 0),
-        INT_PARAM("blue.max", 0, 255, 255),
-        INT_PARAM("alpha.min", 0, 255, 255),
-        INT_PARAM("alpha.max", 0, 255, 255),
+        // INT_PARAM("red.min", 0, 255, 0),
+        // INT_PARAM("red.max", 0, 255, 255),
+        // INT_PARAM("green.min", 0, 255, 0),
+        // INT_PARAM("green.max", 0, 255, 255),
+        // INT_PARAM("blue.min", 0, 255, 0),
+        // INT_PARAM("blue.max", 0, 255, 255),
+        // INT_PARAM("alpha.min", 0, 255, 255),
+        // INT_PARAM("alpha.max", 0, 255, 255),
+
+        INT_RANGE_PARAM("red", 0, 255, 0, 255, 0xff0000ff),
+        INT_RANGE_PARAM("green", 0, 255, 0, 255, 0x00ff00ff),
+        INT_RANGE_PARAM("blue", 0, 255, 0, 255, 0x0000ffff),
+        INT_RANGE_PARAM("alpha", 0, 255, 0, 255, 0xffffffff),
     }; }
 
 };

@@ -1,6 +1,11 @@
 #pragma once
 #include "globals.h"
 
+struct UIDoubleSliderBounds {
+    double min;
+    double max;
+};
+
 #define EVENT_COLORPICKER_TEXTFIELD 1
 #define EVENT_MAINEDITOR_SAVEFILE 2
 #define EVENT_BRUSHPICKER_BRUSH_CHANGED 3
@@ -70,6 +75,8 @@ public:
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
 	virtual void eventSliderPosFinishedChanging(int evt_id, float value) {}
+	virtual void eventDoubleSliderPosChanged(int evt_id, UIDoubleSliderBounds value) {}
+	virtual void eventDoubleSliderPosFinishedChanging(int evt_id, UIDoubleSliderBounds value) {}
 	virtual void eventDropdownItemSelected(int evt_id, int index, std::string name) {}
 	virtual void eventCheckboxToggled(int evt_id, bool newState) {}
 	virtual void eventColorSet(int evt_id, uint32_t color) {}

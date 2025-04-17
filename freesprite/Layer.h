@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "mathops.h"
+
 class Layer
 {
 protected:

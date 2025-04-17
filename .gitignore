@@ -426,3 +426,5 @@ flatpak-repo/
 *.flatpak
 
 mac-build-resources/generated*
+
+/fuck

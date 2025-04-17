@@ -318,6 +318,7 @@
     <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UILayerButton.cpp" />
     <ClCompile Include="UISlider.cpp" />
+    <ClCompile Include="UIDoubleSlider.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
     <ClCompile Include="UtilPathfind.cpp" />
