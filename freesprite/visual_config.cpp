@@ -10,6 +10,12 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"meta/author", "your name here"},
     {"general/font", ""},
     {"launchpad/bg", Fill::Gradient(0xFF000000,0xFF000000,0xFF000000,0xFF202020).serialize()},
+    {"launchpad/effects_color", "FFFFFFFF"},
+    {"launchpad/hours_color", "FFFFFFFF"},
+    {"launchpad/minutes_color", "FFFFFFFF"},
+    {"launchpad/seconds_color", "FFFFFFFF"},
+    {"maineditor/bg", Fill::Gradient(0xFF000000,0xFF000000,0xFF000000,0xFF202020).serialize()},
+    {"maineditor/bg_alt", Fill::Gradient(0xFFDFDFDF,0xFFDFDFDF,0xFFDFDFDF,0xFF808080).serialize()},
 };
 
 std::map<std::string, SDL_Texture*> visualConfigTextureCache = {};
@@ -31,6 +37,27 @@ std::string visualConfigValue(std::string key) {
 }
 Fill visualConfigFill(std::string key) {
     return Fill::deserialize(visualConfigValue(key));
+}
+
+u32 visualConfigHexU32(std::string key)
+{
+    std::string value = visualConfigValue(key);
+    if (!value.empty()) {
+        try {
+            return std::stoul(value, nullptr, 16);
+        }
+        catch (std::exception& e) {
+            logerr(std::format("Error parsing hex value for key {}: {}", key, e.what()));
+            
+        }
+    }
+    return 0xFFFFFFFF;
+}
+
+SDL_Color visualConfigColor(std::string key)
+{
+	u32 hex = visualConfigHexU32(key);
+	return uint32ToSDLColor(hex);
 }
 
 void evalVisualConfigJsonTree(nlohmann::json& object, std::unordered_map<std::string, std::string>& target, std::string jsonPathNow = "") {
@@ -146,19 +173,19 @@ void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, s
 }
 
 SDL_Texture* getVisualConfigTexture(std::string key) {
-	if (visualConfigTextureCache.contains(key)) {
-		return visualConfigTextureCache[key];
-	}
-	else {
-		SDL_Texture* tex = IMGLoadAssetToTexture(key);
-		visualConfigTextureCache[key] = tex;
-		return tex;
-	}
+    if (visualConfigTextureCache.contains(key)) {
+        return visualConfigTextureCache[key];
+    }
+    else {
+        SDL_Texture* tex = IMGLoadAssetToTexture(key);
+        visualConfigTextureCache[key] = tex;
+        return tex;
+    }
 }
 
 void clearVisualConfigTextureCache() {
-	for (auto& [key, tex] : visualConfigTextureCache) {
-		tracked_destroyTexture(tex);
-	}
-	visualConfigTextureCache.clear();
+    for (auto& [key, tex] : visualConfigTextureCache) {
+        tracked_destroyTexture(tex);
+    }
+    visualConfigTextureCache.clear();
 }

@@ -304,9 +304,12 @@ void MainEditor::tick() {
 
 void MainEditor::DrawBackground()
 {
-    uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
-    renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+    static Fill fillPrimary = visualConfigFill("maineditor/bg");
+    static Fill fillAlt = visualConfigFill("maineditor/bg_alt");
+    //uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    //uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    //renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+    (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? fillPrimary : fillAlt).fill({ 0,0,g_windowW,g_windowH });
 
     uint64_t bgtimer = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
     if (g_config.animatedBackground == 1 || g_config.animatedBackground == 3) {

@@ -571,7 +571,7 @@ void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t color
 
 std::string pathInProgramDirectory(std::string path)
 {
-    return (std::string(VOIDSPRITE_ASSETS_PATH).empty() ? g_programDirectory : VOIDSPRITE_ASSETS_PATH) + "/" + path;
+    return (std::string(VOIDSPRITE_ASSETS_PATH).empty() ? g_programDirectory : std::string(VOIDSPRITE_ASSETS_PATH)) + "/" + path;
 }
 
 hsv rgb2hsv(rgb in)
