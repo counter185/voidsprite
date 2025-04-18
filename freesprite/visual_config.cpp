@@ -84,14 +84,20 @@ std::unordered_map<std::string, std::string> loadVisualConfig(PlatformNativePath
     std::ifstream infile(path);
     if (infile.is_open()) {
         nlohmann::json j;
-        infile >> j;
-        std::unordered_map<std::string, std::string> conf;
-        evalVisualConfigJsonTree(j, conf);
-        infile.close();
-        return conf;
+        try {
+            infile >> j;
+            std::unordered_map<std::string, std::string> conf;
+            evalVisualConfigJsonTree(j, conf);
+            infile.close();
+            return conf;
+        }
+        catch (std::exception& e) {
+            logerr(std::format("Error reading visual configuration {}:\n  {}", convertStringToUTF8OnWin32(path), e.what()));
+            return {};
+        }
     }
     else {
-        logprintf("Error opening file for reading: %s\n", path.c_str());
+        logerr(std::format("Error opening file for reading: {}", convertStringToUTF8OnWin32(path)));
         return {};
     }
 }
