@@ -238,18 +238,18 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
 SDL_Texture* IMGLoadAssetToTexture(std::string path) {
     std::vector<PlatformNativePathString> pathList;
     if (!g_usingDefaultVisualConfig()) {
-		PlatformNativePathString vcRoot = g_getCustomVisualConfigRoot();
-		pathList.push_back(vcRoot + convertStringOnWin32("/assets/" + path));
-		pathList.push_back(vcRoot + convertStringOnWin32("/" + path));
+        PlatformNativePathString vcRoot = g_getCustomVisualConfigRoot();
+        pathList.push_back(vcRoot + convertStringOnWin32("/assets/" + path));
+        pathList.push_back(vcRoot + convertStringOnWin32("/" + path));
     }
     pathList.push_back(convertStringOnWin32(pathInProgramDirectory("/assets/" + path)));
-	SDL_Surface* srf = NULL;
+    SDL_Surface* srf = NULL;
     for (auto& path : pathList) {
         std::string pathUTF8 = convertStringToUTF8OnWin32(path);
-		srf = IMG_Load(pathUTF8.c_str());
-		if (srf != NULL) {
-			break;
-		}
+        srf = IMG_Load(pathUTF8.c_str());
+        if (srf != NULL) {
+            break;
+        }
     }
     if (srf == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
@@ -337,7 +337,7 @@ int main(int argc, char** argv)
     loginfo("System information:\n" + platformGetSystemInfo());
 
     g_loadConfig();
-	loginfo("Config loaded");
+    loginfo("Config loaded");
 
     for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
         char* name = (char*)SDL_GetRenderDriver(x);
@@ -562,6 +562,28 @@ int main(int argc, char** argv)
     loginfo("Starting launchpad");
     StartScreen* launchpad = new StartScreen();
     g_addScreen(launchpad, screenStack.empty());
+    //run command line args
+    bool closeLaunchpad = false;
+    for (std::string& arg : g_cmdlineArgs) {
+        if (arg.substr(0, 2) == "--") {
+            std::string option = arg.substr(2);
+            if (option == "no-launchpad") {
+                closeLaunchpad = true;
+            }
+        }
+        else {
+            if (std::filesystem::exists(convertStringOnWin32(arg))) {
+                launchpad->tryLoadFile(arg);
+            }
+            else {
+                //todo: this notification never fits the whole file name
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Could not find file:\n {}", arg)));
+            }
+        }
+    }
+    if (screenStack.size() > 1 && closeLaunchpad) {
+        g_closeScreen(launchpad);
+    }
 
     if (g_config.useDiscordRPC) {
         g_initRPC();

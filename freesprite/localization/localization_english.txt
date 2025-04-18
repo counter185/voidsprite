@@ -177,6 +177,7 @@
     {"vsp.config.associateexts.success", "File extensions associated."},
     {"vsp.config.associateexts.error", "Failed to associate file extensions."},
     {"vsp.config.associateexts.noselect", "No file types selected."},
+    {"vsp.config.associateexts.dontopenlaunchpad", "Don't open voidsprite Launchpad"},
 
     //popup: apply filter
     {"vsp.applyfilter.renderingpreview", "Rendering preview..."},

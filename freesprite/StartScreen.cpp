@@ -401,7 +401,7 @@ void StartScreen::renderBackground()
         effects.push_back(e);
     }
 
-	static SDL_Color vfxColor = visualConfigColor("launchpad/effects_color");
+    static SDL_Color vfxColor = visualConfigColor("launchpad/effects_color");
 
     for (int x = 0; x < effects.size(); x++) {
         bool remove = false;
@@ -513,9 +513,9 @@ void StartScreen::renderBackground()
     int xOrigin = g_windowW - 10;
     int yOrigin = 40;
 
-	static SDL_Color hourColor = visualConfigColor("launchpad/hours_color");
-	static SDL_Color minuteColor = visualConfigColor("launchpad/minutes_color");
-	static SDL_Color secondColor = visualConfigColor("launchpad/seconds_color");
+    static SDL_Color hourColor = visualConfigColor("launchpad/hours_color");
+    static SDL_Color minuteColor = visualConfigColor("launchpad/minutes_color");
+    static SDL_Color secondColor = visualConfigColor("launchpad/seconds_color");
 
     //draw hour lines
     double sep = (g_windowH - (60 + yOrigin)) / (23.0);

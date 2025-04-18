@@ -18,7 +18,7 @@ void platformPostInit();
 
 std::string platformGetSystemInfo();
 
-bool platformAssocFileTypes(std::vector<std::string> extensions);
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs);
 
 void platformTrySaveImageFile(EventCallbackListener* caller);
 void platformTryLoadImageFile(EventCallbackListener* caller);

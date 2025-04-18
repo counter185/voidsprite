@@ -230,26 +230,6 @@ public:
         }, { SDL_SCANCODE_F });
         wxsManager.addDrawable(navbar);
 
-
-        for (std::string& arg : g_cmdlineArgs) {
-
-            if (arg.substr(0,2) == "--") {
-                std::string option = arg.substr(2);
-                if (option == "no-launchpad") {
-                    this->closeNextTick = true;
-                }
-            }
-            else {
-                if (std::filesystem::exists(convertStringOnWin32(arg))) {
-                    tryLoadFile(arg);
-                }
-                else {
-                    //todo: this notification never fits the whole file name
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Could not find file:\n {}", arg)));
-                }
-            }
-        }
-
         populateLastOpenFiles();
         startupAnimTimer.start();
     }

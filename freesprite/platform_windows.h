@@ -18,29 +18,29 @@ wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
 
 bool windows_isProcessRunning(std::wstring name) {
-	HANDLE hProcessSnap;
-	PROCESSENTRY32 pe32;
-	BOOL hRes;
-	// Take a snapshot of all processes in the system.
-	hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
-	if (hProcessSnap == INVALID_HANDLE_VALUE) {
-		return false;
-	}
-	pe32.dwSize = sizeof(PROCESSENTRY32);
-	// Retrieve information about the first process,
-	// and exit if unsuccessful
-	if (!Process32First(hProcessSnap, &pe32)) {
-		CloseHandle(hProcessSnap);     // clean the snapshot object
-		return false;
-	}
-	do {
-		if (name == pe32.szExeFile) {
-			CloseHandle(hProcessSnap);
-			return true;
-		}
-	} while (Process32Next(hProcessSnap, &pe32));
-	CloseHandle(hProcessSnap);
-	return false;
+    HANDLE hProcessSnap;
+    PROCESSENTRY32 pe32;
+    BOOL hRes;
+    // Take a snapshot of all processes in the system.
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    // Retrieve information about the first process,
+    // and exit if unsuccessful
+    if (!Process32First(hProcessSnap, &pe32)) {
+        CloseHandle(hProcessSnap);     // clean the snapshot object
+        return false;
+    }
+    do {
+        if (name == pe32.szExeFile) {
+            CloseHandle(hProcessSnap);
+            return true;
+        }
+    } while (Process32Next(hProcessSnap, &pe32));
+    CloseHandle(hProcessSnap);
+    return false;
 }
 
 std::string windows_readStringFromRegistry(HKEY rootKey, std::wstring path, std::wstring keyname) {
@@ -74,14 +74,14 @@ void platformInit() {}
 void platformPostInit() {
     static bool d = false;
     if (!d) {
-		#if WINDOWS_XP == 0
+        #if WINDOWS_XP == 0
             BOOL USE_DARK_MODE = true;
             WINhWnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(g_wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
             bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
                 WINhWnd, 20,
                 &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
             SDL_HideWindow(g_wd);
-		#endif
+        #endif
         SDL_ShowWindow(g_wd);
         //RedrawWindow(WINhWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
         //UpdateWindow(WINhWnd);
@@ -91,17 +91,20 @@ void platformPostInit() {
     }
 }
 
-bool platformAssocFileTypes(std::vector<std::string> extensions) {
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) {
 
     //add the program into hkey_classes_root
     WCHAR path[MAX_PATH];
     if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) {
         HKEY classesRootKey;
         if (RegOpenKeyW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", &classesRootKey) != ERROR_SUCCESS) {
-			logprintf("failed to open hkey_classes_root\n");
-			return false;
+            logprintf("failed to open hkey_classes_root\n");
+            return false;
         }
         std::wstring pathWstr = path;
+        for (auto& arg : additionalArgs) {
+            pathWstr += L" " + convertStringOnWin32(arg);
+        }
         pathWstr += L" \"%1\"";
 
         HKEY voidspriteRootKey;
@@ -110,37 +113,37 @@ bool platformAssocFileTypes(std::vector<std::string> extensions) {
             if (RegCreateKeyExW(voidspriteRootKey, L"DefaultIcon", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
                 std::wstring assocIconPath = convertStringOnWin32(pathInProgramDirectory("assets\\icon_fileassoc.ico"));
                 
-				RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)assocIconPath.c_str(), (assocIconPath.size()+1) * sizeof(wchar_t));
+                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)assocIconPath.c_str(), (assocIconPath.size()+1) * sizeof(wchar_t));
                 RegCloseKey(hKey);
             }
             if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
                 RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size()+1) * sizeof(wchar_t));
                 RegCloseKey(hKey);
             }
-			RegCloseKey(voidspriteRootKey);
+            RegCloseKey(voidspriteRootKey);
         }
         else {
-			logprintf("failed to create voidsprite key in hkey_classes_root\n");
-			RegCloseKey(classesRootKey);
+            logprintf("failed to create voidsprite key in hkey_classes_root\n");
+            RegCloseKey(classesRootKey);
             return false;
         }
         //RegCloseKey(classesRootKey);
 
         //add all of the filetypes to hkey_classes_root too
-		for (auto& ext : extensions) {
-			HKEY hKey;
-			std::wstring extw = utf8StringToWstring(ext);
-			if (RegCreateKeyExW(classesRootKey, extw.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
-				RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)L"voidsprite", sizeof(L"voidsprite"));
-				RegCloseKey(hKey);
+        for (auto& ext : extensions) {
+            HKEY hKey;
+            std::wstring extw = utf8StringToWstring(ext);
+            if (RegCreateKeyExW(classesRootKey, extw.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)L"voidsprite", sizeof(L"voidsprite"));
+                RegCloseKey(hKey);
             }
             else {
-				logprintf("failed to create %s key in hkey_classes_root\n", ext.c_str());
-				//RegCloseKey(classesRootKey);
-				//return false;
+                logprintf("failed to create %s key in hkey_classes_root\n", ext.c_str());
+                //RegCloseKey(classesRootKey);
+                //return false;
             }
-		}
-		RegCloseKey(classesRootKey);
+        }
+        RegCloseKey(classesRootKey);
 
         return true;
     }
@@ -457,16 +460,16 @@ Layer* platformGetImageFromClipboard() {
     HBITMAP oldBmp = (HBITMAP)SelectObject(memDC, bmp);
     Layer* layer = new Layer(bitmap.bmWidth, bitmap.bmHeight);
     for (int y = 0; y < bitmap.bmHeight; y++) {
-		for (int x = 0; x < bitmap.bmWidth; x++) {
-			COLORREF color = GetPixel(memDC, x, y);
+        for (int x = 0; x < bitmap.bmWidth; x++) {
+            COLORREF color = GetPixel(memDC, x, y);
             layer->setPixel({ x, y }, sdlcolorToUint32(SDL_Color{ GetRValue(color), GetGValue(color), GetBValue(color), 255 }));
-		}
-	}
+        }
+    }
     SelectObject(memDC, oldBmp);
-	DeleteDC(memDC);
-	ReleaseDC(WINhWnd, hdc);
-	CloseClipboard();
-	return layer;
+    DeleteDC(memDC);
+    ReleaseDC(WINhWnd, hdc);
+    CloseClipboard();
+    return layer;
 }
 
 std::string platformGetSystemInfo() {
@@ -488,7 +491,7 @@ std::string platformGetSystemInfo() {
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemProductName"));
     ret += "CPU: " + windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", L"ProcessorNameString") + "\n";
     ret += "GPU: " + windows_getActiveGPUName() + "\n";
-	ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
 
     return ret;
 }

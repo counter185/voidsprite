@@ -54,7 +54,7 @@ void platformPostInit() {
 }
 
 //todo
-bool platformAssocFileTypes(std::vector<std::string> extensions) { return false; }
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
 
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
