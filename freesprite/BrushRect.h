@@ -10,7 +10,7 @@ class BrushRect :
 	void resetState() {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Rectangle"; };
+	std::string getName() override { return TL("vsp.brush.rect"); };
 	std::string getIconPath() override { return "brush_1pxrect.png"; }
 	XY getSection() override { return XY{ 0,2 }; }
 

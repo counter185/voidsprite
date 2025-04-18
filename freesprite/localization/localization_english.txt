@@ -203,4 +203,48 @@
     //popup: quick convert
     {"vsp.quickconvert.forceindexedtorgb", "Always convert indexed formats to RGB"},
 
+    //brushes/tools
+    {"vsp.brush.undefined", "Default brush"},
+    {"vsp.brush.squarepixel", "Square Pixel"},
+    {"vsp.brush.squarepixelpxperfect", "1x1 Pixel (Pixel-Perfect)"},
+    {"vsp.brush.squarepixelburst", "1x1 Pixel (burst)"},
+    {"vsp.brush.squarepixelburst.desc", "Hold Mouse Left to draw.\n"
+                                        "While drawing, make arcs with fast mouse movements or holding Mouse Right.\n"
+                                        "This will create interconnecting lines."},
+    {"vsp.brush.squarepixelarcx", "1x1 Pixel (arc X)"},
+    {"vsp.brush.squarepixelarcy", "1x1 Pixel (arc Y)"},
+    {"vsp.brush.line", "1px Line"},
+    {"vsp.brush.line.desc", "Hold Mouse Left at the beginning of the line, then release at the end point"},
+    {"vsp.brush.pathfindline", "1px Pathfind Line"},
+    {"vsp.brush.pathfindline.desc", "Hold Mouse Left at the start point, then release at the end point.\n"
+                                    "Pathfinding will be used to draw it."},
+    {"vsp.brush.roundpixel", "Round Pixel"},
+    {"vsp.brush.rect", "1px Rectangle"},
+    {"vsp.brush.rectfill", "Filled Rectangle"},
+    {"vsp.brush.circle", "1px Circle"},
+    {"vsp.brush.circlearc", "1px Circle (arc)"},
+    {"vsp.brush.diamond", "1px Diamond"},
+    {"vsp.brush.fill", "Fill"},
+    {"vsp.brush.fill.desc", "Mouse Left to fill an area with the current color.\n"
+                            "Mouse Right to fill only the currently selected area."},
+    {"vsp.brush.swapcolor", "Replace color"},
+    {"vsp.brush.swapcolor.desc", "Mouse Left to replace all occurrences of the clicked color with the current active color."},
+    {"vsp.brush.pickcolor", "Color Picker"},
+    {"vsp.brush.pickcolor.desc", "Mouse Left to pick a color from the current layer."},
+    {"vsp.brush.comment", "Add comment"},
+    {"vsp.brush.comment.desc", "Mouse Left to add a comment.\n" 
+                              "Mouse Left in Eraser mode to delete a comment."},
+    {"vsp.brush.guideline", "Add guideline"},
+    {"vsp.brush.guideline.desc", "Mouse Left to place/edit vertical guidelines.\n"
+                                 "Mouse Right to place/edit horizontal guidelines.\n"
+                                 "Use Eraser mode to remove guidelines."},
+    {"vsp.brush.measure", "Measure"},
+    {"vsp.brush.measure.desc", "Select an area with Mouse Left to measure its size in pixels"},
+    {"vsp.brush.xsym", "Set X symmetry"},
+    {"vsp.brush.xsym.desc", "Mouse Left to enable and set the position of the X symmetry line.\n"
+                            "Mouse Right to toggle X symmetry off/on."},
+    {"vsp.brush.ysym", "Set Y symmetry"},
+    {"vsp.brush.ysym.desc", "Mouse Left to enable and set the position of the Y symmetry line.\n"
+                            "Mouse Right to toggle Y symmetry off/on."},
+
 }}},

@@ -12,13 +12,13 @@ class ToolGuideline :
     Timer64 clickTimer;
 
     std::string getIconPath() { return "tool_setguide.png"; }
-    std::string getTooltip() override { return "Mouse Left to place/edit vertical guidelines.\nMouse Right to place/edit horizontal guidelines.\nUse Eraser mode to remove guidelines."; }
+    std::string getName() { return TL("vsp.brush.guideline"); }
+    std::string getTooltip() override { return TL("vsp.brush.guideline.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 
     bool isReadOnly() override { return true; }
     bool wantDoublePosPrecision() override { return true; }
     bool overrideRightClick() override { return true; }
-    std::string getName() { return "Guideline tool"; }
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override;
     void clickRelease(MainEditor* editor, XY pos) override;

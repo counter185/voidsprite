@@ -32,6 +32,7 @@ std::string g_getLocString(std::string key) {
 #endif
     }
     else {
+        logerr(std::format("Translation key not found in language {}:\n {}", g_config.language, key));
         return std::string("--NO KEY: ") + key;
     }
 }

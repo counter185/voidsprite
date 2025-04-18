@@ -3,7 +3,7 @@
 
 class Brush1x1 : public BaseBrush
 {
-	std::string getName() override { return "Square Pixel"; }
+	std::string getName() override { return TL("vsp.brush.squarepixel"); }
 	std::string getIconPath() override { return "brush_px1x1.png"; }
 	std::map<std::string, BrushProperty> getProperties() override 
 	{ 
@@ -24,7 +24,7 @@ class Brush1x1PixelPerfect : public BaseBrush
 	bool hasTrailPoint = false;
 	bool dragging = false;
 
-	std::string getName() override { return "1x1 Pixel (Pixel-Perfect)"; }
+	std::string getName() override { return TL("vsp.brush.squarepixelpxperfect"); }
 	std::string getIconPath() override { return "brush_px1x1pxpf.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
@@ -47,8 +47,8 @@ class Brush1x1Burst : public BaseBrush
 	bool dragging = false;
 	bool rightHeld = false;
 
-	std::string getName() override { return "1x1 Pixel (burst)"; }
-	std::string getTooltip() override { return "Hold Mouse Left to draw.\nWhile drawing, make arcs with fast mouse movements or holding Mouse Right.\nThis will create interconnecting lines."; }
+	std::string getName() override { return TL("vsp.brush.squarepixelburst"); }
+	std::string getTooltip() override { return TL("vsp.brush.squarepixelburst.desc"); }
 	std::string getIconPath() override { return "brush_px1x1burst.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;

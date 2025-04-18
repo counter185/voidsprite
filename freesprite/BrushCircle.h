@@ -10,7 +10,7 @@ public:
 	void resetState() {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Circle"; };
+	std::string getName() override { return TL("vsp.brush.circle"); };
 	std::string getIconPath() override { return "brush_1pxcircle.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 
@@ -27,7 +27,7 @@ public:
 	void resetState() {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Circle (arc)"; };
+	std::string getName() override { return TL("vsp.brush.circlearc"); };
 	std::string getIconPath() override { return "brush_1pxarccircle.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 

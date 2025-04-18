@@ -9,7 +9,7 @@ class BrushDiamond :
 	void resetState() {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Diamond"; };
+	std::string getName() override { return TL("vsp.brush.diamond"); };
 	std::string getIconPath() override { return "brush_1pxdiamond.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 

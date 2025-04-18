@@ -10,8 +10,8 @@ public:
 
     virtual std::string getIconPath() { return "tool_comment.png"; }
     bool isReadOnly() override { return true; }
-    std::string getName() { return "Add comment"; }
-    std::string getTooltip() override { return "Mouse Left to add a comment.\nMouse Left in Eraser mode to delete a comment."; }
+    std::string getName() { return TL("vsp.brush.comment"); }
+    std::string getTooltip() override { return TL("vsp.brush.comment.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;

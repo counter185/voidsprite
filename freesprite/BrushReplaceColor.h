@@ -3,8 +3,8 @@
 class BrushReplaceColor : public BaseBrush
 {
 public:
-	std::string getName() override { return "Replace color"; }
-	std::string getTooltip() override { return "Mouse Left to replace all occurrences of the clicked color with the current active color."; }
+	std::string getName() override { return TL("vsp.brush.swapcolor"); }
+	std::string getTooltip() override { return TL("vsp.brush.swapcolor.desc"); }
 	std::string getIconPath() override { return "brush_replace.png"; }
 	XY getSection() override { return XY{ 0,1 }; }
 

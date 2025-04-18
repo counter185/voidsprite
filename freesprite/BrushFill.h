@@ -19,8 +19,8 @@ private:
 public:
 	MainEditor* lastEditor = NULL;
 
-	std::string getName() override { return "Fill"; }
-	std::string getTooltip() override { return "Mouse Left to fill an area with the current color.\nMouse Right to fill only the currently selected area."; }
+	std::string getName() override { return TL("vsp.brush.fill"); }
+	std::string getTooltip() override { return TL("vsp.brush.fill.desc"); }
 	std::string getIconPath() override { return "brush_fill.png"; }
 	XY getSection() override { return XY{ 0,1 }; }
 

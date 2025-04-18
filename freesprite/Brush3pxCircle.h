@@ -3,7 +3,7 @@
 
 class Brush3pxCircle : public BaseBrush
 {
-	std::string getName() override { return "Round Pixel"; }
+	std::string getName() override { return TL("vsp.brush.roundpixel"); }
 	std::string getIconPath() override { return "brush_3pxcircle.png"; }
 	std::map<std::string, BrushProperty> getProperties() override
 	{

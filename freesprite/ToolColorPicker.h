@@ -5,8 +5,8 @@ class ToolColorPicker :
 {
     virtual std::string getIconPath() { return "tool_colorpicker.png"; }
     bool isReadOnly() override { return true; }
-    std::string getName() { return "Color Picker"; }
-    std::string getTooltip() override { return "Mouse Left to pick a color from the current layer."; }
+    std::string getName() { return TL("vsp.brush.pickcolor"); }
+    std::string getTooltip() override { return TL("vsp.brush.pickcolor.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;

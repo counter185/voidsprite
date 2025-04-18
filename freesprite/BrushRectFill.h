@@ -10,7 +10,7 @@ class BrushRectFill :
 	void resetState() {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "Filled Rectangle"; };
+	std::string getName() override { return TL("vsp.brush.rectfill"); };
 	std::string getIconPath() override { return "brush_rectfill.png"; }
 	XY getSection() override { return XY{ 0,2 }; }
 

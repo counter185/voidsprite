@@ -11,8 +11,8 @@ class ToolMeasure :
 
     virtual std::string getIconPath() { return "tool_measure.png"; }
     bool isReadOnly() override { return true; }
-    std::string getName() { return "Measure"; }
-    std::string getTooltip() override { return "Select an area with Mouse Left to measure its size in pixels"; }
+    std::string getName() { return TL("vsp.brush.measure"); }
+    std::string getTooltip() override { return TL("vsp.brush.measure.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;

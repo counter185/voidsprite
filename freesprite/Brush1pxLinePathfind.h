@@ -9,8 +9,8 @@ public:
     void resetState() {
         startPos = XY{ 0,0 };
     }
-    std::string getName() override { return "1px Pathfind Line"; };
-    std::string getTooltip() override { return "Hold Mouse Left at the start point, then release at the end point.\nPathfinding will be used to draw it."; }
+    std::string getName() override { return TL("vsp.brush.pathfindline"); };
+    std::string getTooltip() override { return TL("vsp.brush.pathfindline.desc"); }
     std::string getIconPath() override { return "brush_1pxlinepathfind.png"; }
     XY getSection() override { return XY{ 0,2 }; }
 

@@ -24,7 +24,7 @@ public:
 	virtual bool wantDoublePosPrecision() { return false; }
 	virtual bool overrideRightClick() { return false; }
 	virtual std::string getIconPath() { return "brush_default.png"; }
-	virtual std::string getName() { return "Base brush"; }
+	virtual std::string getName() { return TL("vsp.brush.undefined"); }
 	virtual std::string getTooltip() { return ""; }
 	virtual XY getSection() { return XY{ 0,0 }; }
 	virtual std::map<std::string, BrushProperty> getProperties() { return {}; }

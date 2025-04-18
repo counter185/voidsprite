@@ -3,7 +3,7 @@
 class Brush1x1ArcX :
     public BaseBrush
 {
-	std::string getName() override { return "1x1 Pixel (arc X)"; }
+	std::string getName() override { return TL("vsp.brush.squarepixelarcx"); }
 	std::string getIconPath() override { return "brush_px1x1arcx.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
