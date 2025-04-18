@@ -119,12 +119,12 @@ public:
         newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
 
         UILabel* w2Label = new UILabel();
-        w2Label->text = "Cell width";
+        w2Label->text = TL("vsp.launchpad.tab.cellw");
         w2Label->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(w2Label);
 
         UILabel* h2Label = new UILabel();
-        h2Label->text = "Cell height";
+        h2Label->text = TL("vsp.launchpad.tab.cellh");
         h2Label->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(h2Label);
 

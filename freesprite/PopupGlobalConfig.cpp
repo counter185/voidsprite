@@ -170,22 +170,22 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
 
-    UICheckbox* cb1 = new UICheckbox("Open saved file location", &g_config.openSavedPath);
+    UICheckbox* cb1 = new UICheckbox(TL("vsp.config.opt.opensavelocation"), &g_config.openSavedPath);
     cb1->position = posInTab;
     configTabs->tabs[2].wxs.addDrawable(cb1);
     posInTab.y += 35;
 
-    UICheckbox* cb3 = new UICheckbox("Row/column index labels start at 1", &g_config.rowColIndexesStartAt1);
+    UICheckbox* cb3 = new UICheckbox(TL("vsp.config.opt.startrowcolidxat1"), &g_config.rowColIndexesStartAt1);
     cb3->position = posInTab;
     configTabs->tabs[2].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
-    cb3 = new UICheckbox("Pan canvas with touchpad", &g_config.scrollWithTouchpad);
+    cb3 = new UICheckbox(TL("vsp.config.opt.altscrolling"), &g_config.scrollWithTouchpad);
     cb3->position = posInTab;
     configTabs->tabs[2].wxs.addDrawable(cb3);
     posInTab.y += 35;
 
-    UILabel* lbl2 = new UILabel("Max undo history");
+    UILabel* lbl2 = new UILabel(TL("vsp.config.opt.maxundocount"));
     lbl2->position = posInTab;
     configTabs->tabs[2].wxs.addDrawable(lbl2);
     UITextField* tf2 = new UITextField();
@@ -197,19 +197,19 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
 
-    UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", &g_config.isolateRectOnLockTile);
+    UICheckbox* cb4 = new UICheckbox(TL("vsp.config.opt.selectonlocktile"), &g_config.isolateRectOnLockTile);
     cb4->position = posInTab;
-    cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
+    cb4->checkbox->tooltip = TL("vsp.config.opt.selectonlocktile.desc");
     configTabs->tabs[2].wxs.addDrawable(cb4);
     posInTab.y += 35;
 
-    UICheckbox* cb5 = new UICheckbox("Lock Fill tool to tile size", &g_config.fillToolTileBound);
+    UICheckbox* cb5 = new UICheckbox(TL("vsp.config.opt.lockfilltotiles"), &g_config.fillToolTileBound);
     cb5->position = posInTab;
-    cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
+    cb5->checkbox->tooltip = TL("vsp.config.opt.lockfilltotiles.desc");
     configTabs->tabs[2].wxs.addDrawable(cb5);
     posInTab.y += 35;
 
-    lbl2 = new UILabel("Recovery autosave interval (minutes) (0 to disable)");
+    lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;
     configTabs->tabs[2].wxs.addDrawable(lbl2);
     tf2 = new UITextField();
@@ -220,7 +220,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
     configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
-    lbl2 = new UILabel(" Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory.");
+    lbl2 = new UILabel(TL("vsp.config.hint.recoveryautosaves"));
     lbl2->fontsize = 14;
     lbl2->color = { 255,255,255,0xa0 };
     lbl2->position = xySubtract(posInTab, {0,4});
@@ -273,8 +273,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
     UIButton* btn = new UIButton();
-    btn->text = "Open app data directory...";
-    btn->tooltip = "Open the directory where voidsprite stores its data.";
+    btn->text = TL("vsp.config.opt.openappdata");
+    btn->tooltip = TL("vsp.config.opt.openappdata.desc");
     btn->position = posInTab;
     btn->wxWidth = 270;
     btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
@@ -282,8 +282,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     posInTab.y += 35;
 
     btn = new UIButton();
-    btn->text = "Associate file extensions...";
-    btn->tooltip = "Choose file types to associate with the currently running instance of voidsprite.";
+    btn->text = TL("vsp.config.opt.associateexts");
+    btn->tooltip = TL("vsp.config.opt.associateexts.desc");
     btn->position = posInTab;
     btn->wxWidth = 270;
     btn->onClickCallback = [this](UIButton*) {
@@ -306,7 +306,7 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     
 
-    UIButton* closeButton = actionButton("Close", 140);
+    UIButton* closeButton = actionButton(TL("vsp.cmn.close"), 140);
     closeButton->onClickCallback = [this](UIButton*) {
         bool visualConfigChanged = g_config.customVisualConfigPath != previousConfig.customVisualConfigPath;
         g_config = previousConfig;
@@ -317,15 +317,15 @@ PopupGlobalConfig::PopupGlobalConfig()
         closePopup();
     };
 
-    UIButton* saveAndCloseButton = actionButton("Save and close", 140);
+    UIButton* saveAndCloseButton = actionButton(TL("vsp.cmn.apply"), 140);
     saveAndCloseButton->onClickCallback = [this](UIButton*) {
         if (g_saveConfig()) {
-            g_addNotification(SuccessShortNotification("Success", "Preferences saved"));
+            g_addNotification(SuccessShortNotification(TL("vsp.config.notif.saved"), ""));
             g_initOrDeinitRPCBasedOnConfig();
             closePopup();
         }
         else {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to save preferences"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.config.notif.savefailed")));
         }
     };
 
@@ -350,7 +350,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     *keybindButtons[bindingKeyIndex].first.target = (SDL_Scancode)targetKey;
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
                 }
             }
             updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
