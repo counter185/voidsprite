@@ -16,6 +16,7 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --filesystem=host
+  - --device=dri
 
 cleanup:
   - /include
