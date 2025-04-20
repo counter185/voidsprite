@@ -124,7 +124,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -149,7 +149,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -176,7 +176,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -202,7 +202,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }

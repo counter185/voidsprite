@@ -56,7 +56,7 @@ void PopupPickColor::updateRGBTextBoxOnInputEvent(std::string data, uint8_t* val
             alphaInput->setText(std::to_string(alpha));
         }
     }
-    catch (std::exception) {
+    catch (std::exception&) {
 
     }
 }

@@ -584,7 +584,7 @@ void EditorColorPicker::updateRGBTextBoxOnInputEvent(std::string data, uint8_t* 
             updateMainEditorColorFromRGBTextBoxes();
         }
     }
-    catch (std::exception) {
+    catch (std::exception&) {
 
     }
 }
@@ -597,7 +597,7 @@ void EditorColorPicker::updateHSVTextBoxOnInputEvent(std::string data, double* v
             updateMainEditorColorFromHSVTextBoxes();
         }
     }
-    catch (std::exception) {
+    catch (std::exception&) {
 
     }
 }

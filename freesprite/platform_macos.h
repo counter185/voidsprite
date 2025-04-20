@@ -129,7 +129,7 @@ void platformTrySaveOtherFile(
                     g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
                 }
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
             }
         }

@@ -56,7 +56,7 @@ void g_loadConfig() {
                         int keybind = std::stoi(value);
                         g_config.keybinds[key.substr(key.find(':') + 1)] = keybind;
                     }
-                    catch (std::exception) {
+                    catch (std::exception&) {
                         logprintf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
                     }
                 }
@@ -67,8 +67,8 @@ void g_loadConfig() {
         }
 
         if (config.contains("openSavedPath")) { g_config.openSavedPath = config["openSavedPath"] == "1"; }
-        if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception) {} }
-        if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception) {} }
+        if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception&) {} }
+        if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception&) {} }
         if (config.contains("scrollWithTouchpad")) { g_config.scrollWithTouchpad = config["scrollWithTouchpad"] == "1"; }
         if (config.contains("isolateRectOnLockTile")) { g_config.isolateRectOnLockTile = config["isolateRectOnLockTile"] == "1"; }
         if (config.contains("fillToolTileBound")) { g_config.fillToolTileBound = config["fillToolTileBound"] == "1"; }
@@ -76,7 +76,7 @@ void g_loadConfig() {
         if (config.contains("saveLoadFlatImageExtData")) { g_config.saveLoadFlatImageExtData = config["saveLoadFlatImageExtData"] == "1"; }
         if (config.contains("discordRPC")) { g_config.useDiscordRPC = config["discordRPC"] == "1"; }
         if (config.contains("renderer")) { g_config.preferredRenderer = config["renderer"]; }
-        if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception) {} }
+        if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception&) {} }
         if (config.contains("rowColIndexesStartAt1")) { g_config.rowColIndexesStartAt1 = config["rowColIndexesStartAt1"] == "1"; }
         if (config.contains("language")) { g_config.language = config["language"]; }
         if (config.contains("vfxEnabled")) { g_config.vfxEnabled = config["vfxEnabled"] == "1"; }

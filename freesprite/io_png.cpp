@@ -1,12 +1,14 @@
-#include "io_base.h"
-#include "io_png.h"
-
-//i know how this looks but do not touch this or else linux build will break again
+//libpng must be the first include or else it will cry
 #if _WIN32
 #include "libpng/png.h"
 #else
 #include <libpng/png.h>
 #endif
+
+#include "io_base.h"
+#include "io_png.h"
+
+#include "base64/base64.hpp"
 
 std::string getlibpngVersion()
 {
@@ -26,6 +28,25 @@ void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byt
     char* inputStream = (char*)io_ptr;
     memcpy(outBytes, inputStream + readPNGBytes, byteCountToRead);
     readPNGBytes += byteCountToRead;
+}
+
+Layer* readPNGFromBase64String(std::string b64)
+{
+    auto seekTo = b64.find("iVBO");
+    if (seekTo != std::string::npos) {
+        try {
+            std::string pixelData = b64.substr(seekTo);
+            std::string pixelsb64 = base64::from_base64(pixelData);
+            uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
+            return readPNGFromMem(imageData, pixelsb64.size());
+        }
+        catch (std::exception&) {
+            return NULL;
+        }
+    }
+    else {
+        return NULL;
+    }
 }
 
 void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::string text) {

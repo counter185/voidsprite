@@ -156,7 +156,7 @@ public:
                 return _flatExportFunction(path, (Layer*)data);
             }
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             return false;
         }
     }

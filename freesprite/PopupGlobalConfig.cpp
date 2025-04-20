@@ -381,7 +381,7 @@ void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
             try {
                 g_config.maxUndoHistory = std::stoi(text);
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_config.maxUndoHistory = previousConfig.maxUndoHistory;
             }
             break;
@@ -389,7 +389,7 @@ void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
             try {
                 g_config.autosaveInterval = std::stoi(text);
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_config.autosaveInterval = previousConfig.autosaveInterval;
             }
             break;

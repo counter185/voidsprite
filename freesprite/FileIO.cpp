@@ -861,25 +861,6 @@ void unZlibFile(PlatformNativePathString path)
     }
 }
 
-Layer* readPNGFromBase64String(std::string b64)
-{
-    auto seekTo = b64.find("iVBO");
-    if (seekTo != std::string::npos) {
-        try {
-            std::string pixelData = b64.substr(seekTo);
-            std::string pixelsb64 = base64::from_base64(pixelData);
-            uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
-            return readPNGFromMem(imageData, pixelsb64.size());
-        }
-        catch (std::exception) {
-            return NULL;
-        }
-    }
-    else {
-        return NULL;
-    }
-}
-
 json serializePixelStudioSession(MainEditor* data) {
     json o = json::object();
     o["Version"] = 2;
@@ -1977,7 +1958,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
             fclose(f);
             return l;
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             fclose(f);
             return NULL;
         }
@@ -3088,7 +3069,7 @@ MainEditor* readPixelStudioPSX(PlatformNativePathString path)
             json j = json::parse(jsonString);
             return deserializePixelStudioSession(j);
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to parse PSX JSON"));
             return NULL;
         }
@@ -3316,7 +3297,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                                 guidelinesData = guidelinesData.substr(nextSC + 1);
                             }
                         }
-                        catch (std::exception) {
+                        catch (std::exception&) {
                         }
                     }
                     if (!ret->isPalettized && extData.contains("layer.opacity")) {
@@ -4652,7 +4633,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
             try {
                 version = std::stoi(line.substr(31));
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid split session file"));
                f.close();   //not needed apparently
                 return NULL;
@@ -4697,7 +4678,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                 }
                                 
                             }
-                            catch (std::exception) {
+                            catch (std::exception&) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
                             }
                         }
@@ -4714,7 +4695,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                     comments.push_back(CommentData{ XY{x,y}, comment });
                                 }
                             }
-                            catch (std::exception) {
+                            catch (std::exception&) {
                                 logprintf("error reading comment\n");
                             }
                         }

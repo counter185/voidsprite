@@ -65,7 +65,7 @@ void PanelSpritesheetPreview::eventTextInput(int evt_id, std::string data)
             caller->msPerSprite = std::stoi(data);
             textfieldMSPerSprite->bgColor = { 0,0,0,0xff };
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             caller->msPerSprite = -1;
             textfieldMSPerSprite->bgColor = { 80,0,0,0xff };
         }
