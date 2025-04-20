@@ -5,6 +5,8 @@
 #include "EventCallbackListener.h"
 #include "Notification.h"
 
+#include "platform_universal.h"
+
 //i hope i never have to use this language again
 constexpr const char* loadFileAppleScript =
 "set outfile to POSIX path of (choose file with prompt \\\"voidsprite: {}\\\" of type {})\n"
