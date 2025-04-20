@@ -13,6 +13,8 @@
 #include <tlhelp32.h>
 #include <commdlg.h>
 
+//#include "platform_universal.h"
+
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
@@ -20,7 +22,6 @@ int lastFilterIndex = 1;
 bool windows_isProcessRunning(std::wstring name) {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
-    BOOL hRes;
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
@@ -314,6 +315,8 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
 }
 
 bool platformPutImageInClipboard(Layer* l) {
+    //return universal_platformPushLayerToClipboard(l);
+
     if (OpenClipboard(WINhWnd)) {
         EmptyClipboard();
 
@@ -335,30 +338,21 @@ bool platformPutImageInClipboard(Layer* l) {
         }
 
         UINT pngFormat = RegisterClipboardFormatW(L"PNG");
-        if (writePNG(convertStringOnWin32("temp.bin"), l)) {
-            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
-            fseek(infile, 0, SEEK_END);
-            uint64_t fileLength = ftell(infile);
-            fseek(infile, 0, SEEK_SET);
+        std::vector<u8> pngData = writePNGToMem(l);
+        uint64_t fileLength = pngData.size();
 
-            HGLOBAL pngHMem = GlobalAlloc(GMEM_MOVEABLE, fileLength);
-            if (!pngHMem) {
-                CloseClipboard();
-                fclose(infile);
-                return false;
-            }
-            fread(GlobalLock(pngHMem), 1, fileLength, infile);
-            GlobalUnlock(pngHMem);
-            if (!SetClipboardData(pngFormat, pngHMem)) {
-                GlobalFree(pngHMem);
-            }
-            else {
-                writtenFormats++;
-            }
-
-            fclose(infile);
-            std::filesystem::remove("temp.bin");
-
+        HGLOBAL pngHMem = GlobalAlloc(GMEM_MOVEABLE, fileLength);
+        if (!pngHMem) {
+            CloseClipboard();
+            return false;
+        }
+        memcpy(GlobalLock(pngHMem), pngData.data(), fileLength);
+        GlobalUnlock(pngHMem);
+        if (!SetClipboardData(pngFormat, pngHMem)) {
+            GlobalFree(pngHMem);
+        }
+        else {
+            writtenFormats++;
         }
 
         CloseClipboard();
@@ -392,7 +386,7 @@ Layer* platformGetImageFromClipboard() {
         }
     }
     else {
-        logprintf("No file path data in clipboard\n");
+        loginfo("No file path data in clipboard, moving on to reading the whole image...");
     }
     if (foundImage != NULL) {
         return foundImage;
@@ -425,7 +419,7 @@ Layer* platformGetImageFromClipboard() {
         return foundPNG;
     }
     else {
-        logprintf("No PNG data in clipboard\n");
+        loginfo("No PNG data in clipboard");
     }
 
     //dibv5

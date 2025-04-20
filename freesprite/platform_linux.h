@@ -201,7 +201,7 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
 }
 
 bool platformPutImageInClipboard(Layer* l) {
-    return false;
+    return universal_platformPushLayerToClipboard(l);
 }
 
 Layer *platformGetImageFromClipboard() { return universal_platformGetLayerFromClipboard(); }

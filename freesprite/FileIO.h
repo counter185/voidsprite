@@ -27,11 +27,7 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize);
 
 void unZlibFile(PlatformNativePathString path);
 
-Layer* readPNGFromBase64String(std::string b64);
-
-//void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
-Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
-
+#include "io_png.h"
 #include "io_aseprite.h"
 #include "io_piskel.h"
 #include "io_gim.h"
@@ -39,7 +35,6 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 #include "io_jxl.h"
 #include "io_dibv5.h"
 
-Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
@@ -74,7 +69,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path);
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
-bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);

@@ -22,7 +22,13 @@ inline void g_initRPC() {
 
 inline void g_deinitRPC() {
     if (discordInit) {
-        delete core;
+        try {
+            delete core;
+        }
+        catch (std::exception&) {
+            //don't care
+            logwarn("error deinitializing discord RPC");
+        }
         discordInit = false;
     }
 }

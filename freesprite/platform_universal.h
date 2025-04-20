@@ -2,6 +2,36 @@
 
 #include "globals.h"
 
+inline bool universal_platformPushLayerToClipboard(Layer* l) {
+	std::vector<u8> pngData = writePNGToMem(l);
+	static uint64_t fileLength;
+	fileLength = pngData.size();
+	u8* pngDataCopy = (u8*)tracked_malloc(fileLength, "Clipboard data");
+	memcpy(pngDataCopy, pngData.data(), fileLength);
+	SDL_ClipboardDataCallback cb = [](void* userdata, const char* mimetype, size_t* size) {
+		loginfo(std::format("Requested clipboard mime type: {}", mimetype));
+		if (mimetype != NULL) {
+			std::string mtype = mimetype;
+			if (mtype == "image/png") {
+				*size = fileLength;
+				return (const void*)userdata;
+			}
+			else {
+				*size = 0;
+				return (const void*)NULL;
+			}
+		}
+		*size = 0;
+		return (const void*)NULL;
+	};
+	SDL_ClipboardCleanupCallback ccb = [](void* userdata) {
+		loginfo("Clipboard cleanup callback called");
+		tracked_free(userdata);
+	};
+	const char* mimetypesReturned[] = {"image/png"};
+	return SDL_SetClipboardData(cb, ccb, pngDataCopy, (const char**)mimetypesReturned, 1);
+}
+
 inline Layer* universal_platformGetLayerFromClipboard() {
 	std::map<std::string,bool> formats = {};
 	size_t numMimeTypes = 0;

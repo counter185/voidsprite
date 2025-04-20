@@ -6,6 +6,12 @@
 #include <jxl/encode_cxx.h>
 #include <jxl/decode_cxx.h>
 
+std::string getlibjxlVersion()
+{
+    return std::to_string(JPEGXL_MAJOR_VERSION) + "." + std::to_string(JPEGXL_MINOR_VERSION) +
+        "." + std::to_string(JPEGXL_PATCH_VERSION);
+}
+
 Layer* readJpegXL(PlatformNativePathString path, u64 seek)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);

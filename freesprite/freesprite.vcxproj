@@ -207,6 +207,7 @@
     <ClCompile Include="io_gim.cpp" />
     <ClCompile Include="io_jxl.cpp" />
     <ClCompile Include="io_piskel.cpp" />
+    <ClCompile Include="io_png.cpp" />
     <ClCompile Include="io_rpgm.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="localization\localization.cpp" />
@@ -380,6 +381,7 @@
     <ClInclude Include="io_gim.h" />
     <ClInclude Include="io_jxl.h" />
     <ClInclude Include="io_piskel.h" />
+    <ClInclude Include="io_png.h" />
     <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />

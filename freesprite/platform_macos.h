@@ -237,7 +237,7 @@ bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to
 }
 
 bool platformPutImageInClipboard(Layer* l) {
-    return false;
+    return universal_platformPushLayerToClipboard(l);
 }
 
 Layer *platformGetImageFromClipboard() { return universal_platformGetLayerFromClipboard(); }

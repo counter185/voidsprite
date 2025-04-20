@@ -1,9 +1,6 @@
-//i know how this looks but do not touch this or else linux build will break again
+
 #if _WIN32
-#include "libpng/png.h"
 #include <windows.h>
-#else
-#include <libpng/png.h>
 #endif
 
 #include "libtga/tga.h"
@@ -14,7 +11,6 @@
 #include "astc_dec/astc_decomp.h"
 #include "base64/base64.hpp"
 #include "json/json.hpp"
-#include <jxl/version.h>
 
 #include "globals.h"
 #include "Notification.h"
@@ -72,10 +68,11 @@ std::string getAllLibsVersions() {
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
            "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
-    ret += "libpng: " PNG_LIBPNG_VER_STRING "\n";
+    ret += std::format("libpng: {}\n", getlibpngVersion());
     ret += "zlib: " ZLIB_VERSION "\n";
-    ret += "libjxl: " + std::to_string(JPEGXL_MAJOR_VERSION) + "." + std::to_string(JPEGXL_MINOR_VERSION) + 
-        "." + std::to_string(JPEGXL_PATCH_VERSION) + "\n";
+#if VOIDSPRITE_JXL_ENABLED
+    ret += std::format("libjxl: {}\n", getlibjxlVersion());
+#endif
     ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
     return ret;
 }
@@ -925,24 +922,13 @@ json serializePixelStudioSession(MainEditor* data) {
         json historyJson;
         historyJson["Actions"] = json::array();
         historyJson["Index"] = 0;
-        std::string pixelDataPNGAsBase64 = "";
-        if (writePNG(convertStringOnWin32("temp.bin"), l)) {
-            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
-            fseek(infile, 0, SEEK_END);
-            uint64_t fileLength = ftell(infile);
-            fseek(infile, 0, SEEK_SET);
-            //char* fileBuffer = (char*)tracked_malloc(fileLength);
-            std::string fileBuffer;
-            fileBuffer.resize(fileLength);
-            fread(fileBuffer.data(), fileLength, 1, infile);
-            //fread(fileBuffer, fileLength, 1, infile);
-            fclose(infile);
 
-            pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
-        }
-        else {
-            logprintf("WRITEPNG FAILED\n");
-        }
+        std::string pixelDataPNGAsBase64 = "";
+        std::vector<u8> pngData = writePNGToMem(l);
+        std::string fileBuffer;
+        fileBuffer.resize(pngData.size());
+        memcpy(&fileBuffer[0], pngData.data(), pngData.size());
+        pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
         historyJson["_source"] = pixelDataPNGAsBase64;
 
         layer["_historyJson"] = historyJson.dump();
@@ -1278,200 +1264,6 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
             zip_entry_close(zip);
         }
     }
-}
-
-void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::string text) {
-    png_text pngt;
-    pngt.key = (char*)key.c_str();
-    pngt.text = (char*)text.c_str();
-    pngt.compression = PNG_TEXT_COMPRESSION_NONE;
-    png_set_text(outpng, outpnginfo, &pngt, 1);
-}
-
-size_t readPNGBytes = 0;   //if you promise to tell noone
-size_t PNGFileSize = 0;
-void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
-    png_voidp io_ptr = png_get_io_ptr(png_ptr);
-    if (io_ptr == NULL) {
-        logprintf("WHY  IS io_ptr NULL\n");
-        return;
-    }
-
-    char* inputStream = (char*)io_ptr;
-    memcpy(outBytes, inputStream + readPNGBytes, byteCountToRead);
-    readPNGBytes += byteCountToRead;
-}
-
-Layer* readPNG(png_structp png, png_infop info) {
-    uint32_t width = png_get_image_width(png, info);
-    uint32_t height = png_get_image_height(png, info);
-    png_byte color_type = png_get_color_type(png, info);
-    png_byte bit_depth = png_get_bit_depth(png, info);
-
-    Layer* ret;
-
-    if (color_type == PNG_COLOR_TYPE_PALETTE) {
-        LayerPalettized* ret2 = new LayerPalettized(width, height);
-        ret2->name = "PNG Image";
-        png_colorp palette;
-        int num_palette;
-        png_get_PLTE(png, info, &palette, &num_palette);
-
-        for (int x = 0; x < num_palette; x++) {
-            ret2->palette.push_back(0xFF000000 | (palette[x].red << 16) | (palette[x].green << 8) | palette[x].blue);
-        }
-
-        if (png_get_valid(png, info, PNG_INFO_tRNS)) {
-            png_bytep trns;
-            int num_trns;
-            png_color_16p trns16p;
-            png_get_tRNS(png, info, &trns, &num_trns, &trns16p);
-
-            for (int x = 0; x < num_trns; x++) {
-                ret2->palette[x] = (ret2->palette[x] & 0x00FFFFFF) | (trns[x] << 24);
-            }
-        }
-
-        png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
-            rows[y] = new png_byte[png_get_rowbytes(png, info)];
-        }
-        png_read_image(png, rows);
-
-        uint32_t* pxData = (uint32_t*)ret2->pixelData;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                pxData[y * width + x] =
-                    bit_depth == 1 ? (rows[y][x / 8] >> (7 - (x % 8))) & 0b1
-                    : bit_depth == 2 ? (rows[y][x / 4] >> (2 * (3 - (x % 4)))) & 0b11
-                    : bit_depth == 4 ? (rows[y][x / 2] >> (x % 2 == 0 ? 4 : 0)) & 0b1111
-                    : rows[y][x];   //todo, more bit depths
-                                    //: are those all of them?
-            }
-        }
-        for (int y = 0; y < height; y++) {
-            delete[] rows[y];
-        }
-        delete[] rows;
-        ret = ret2;
-    }
-    else {
-        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-            png_set_expand_gray_1_2_4_to_8(png);
-        if (png_get_valid(png, info, PNG_INFO_tRNS))
-            png_set_tRNS_to_alpha(png);
-        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY)
-            png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-            png_set_gray_to_rgb(png);
-
-        png_read_update_info(png, info);
-
-        int numchannels = png_get_channels(png, info);
-        png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
-            rows[y] = new png_byte[png_get_rowbytes(png, info)];
-        }
-        png_read_image(png, rows);
-
-        ret = new Layer(width, height);
-        ret->name = "PNG Image";
-
-        int imagePointer = 0;
-        for (uint32_t y = 0; y < height; y++) {
-            if (numchannels == 4) {
-                memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
-            }
-            else if (numchannels == 3) {
-                int currentRowPointer = 0;
-                for (uint32_t x = 0; x < width; x++) {
-                    ret->pixelData[imagePointer++] = 0xff;
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                }
-            }
-            else {
-                logprintf("WHAT\n");
-                delete ret;
-                png_destroy_read_struct(&png, &info, NULL);
-                return NULL;
-            }
-        }
-
-        if (numchannels == 4) {
-            SDL_Surface* convSrf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR8888);
-            memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
-            SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
-            SDL_FreeSurface(convSrf);
-        }
-
-        for (uint32_t y = 0; y < height; y++) {
-            delete[] rows[y];
-        }
-        delete[] rows;
-    }
-    if (g_config.saveLoadFlatImageExtData) {
-        png_textp text_ptr;
-        int num_text;
-        png_get_text(png, info, &text_ptr, &num_text);
-        std::map<std::string, std::string> extdata;
-        for (int x = 0; x < num_text; x++) {
-            std::string key = text_ptr[x].key;
-            if (stringStartsWithIgnoreCase(key, "vsp/")) {
-                extdata[key.substr(4)] = text_ptr[x].text;
-            }
-        }
-        ret->importExportExtdata = extdata;
-    }
-
-    png_destroy_read_struct(&png, &info, NULL);
-    return ret;
-}
-
-Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
-
-    if (dataSize < 8) {
-        logprintf("PNG data too small\n");
-        return NULL;
-    }
-    else if (png_sig_cmp(data, 0, 8)) {
-        logprintf("Not a PNG file\n");
-        return NULL;
-    }
-
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    png_infop info = png_create_info_struct(png);
-    readPNGBytes = 0;
-    PNGFileSize = dataSize;
-    png_set_read_fn(png, (void*)data, _readPNGDataFromMem);
-    //png_set_sig_bytes(png, kPngSignatureLength);
-    png_read_info(png, info);
-
-    return readPNG(png, info);
-}
-Layer* readPNG(PlatformNativePathString path, uint64_t seek)
-{
-    FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
-    if (pngfile != NULL) {
-        u8 sig[8];
-        fread(sig, 1, 8, pngfile);
-        if (png_sig_cmp(sig, 0, 8)) {
-            logprintf("Not a PNG file\n");
-            return NULL;
-        }
-        fseek(pngfile, 0, SEEK_SET);
-
-        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-        png_infop info = png_create_info_struct(png);
-        png_init_io(png, pngfile);
-        png_read_info(png, info);
-
-        Layer* ret = readPNG(png, info);
-        fclose(pngfile);
-        return ret;
-    }
-    return NULL;
 }
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek) {
@@ -3606,97 +3398,6 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
     return NULL;
 }
 
-bool writePNG(PlatformNativePathString path, Layer* data)
-{
-    if (data->isPalettized && ((LayerPalettized*)data)->palette.size() > 256){
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors in palette"));
-        return false;
-    }
-
-    // exports png
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        png_structp outpng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-        png_infop outpnginfo = png_create_info_struct(outpng);
-        setjmp(png_jmpbuf(outpng));
-        png_init_io(outpng, outfile);
-        png_set_compression_level(outpng, Z_BEST_COMPRESSION);
-        png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
-        png_set_compression_buffer_size(outpng, 1024 * 1024);
-
-        if (g_config.saveLoadFlatImageExtData) {
-            addPNGText(outpng, outpnginfo, "Software", "voidsprite - libpng " PNG_LIBPNG_VER_STRING);
-            auto extmap = data->importExportExtdata;
-            for (auto& kv : extmap) {
-                addPNGText(outpng, outpnginfo, "vsp/" + kv.first, kv.second);
-            }
-        }
-
-        setjmp(png_jmpbuf(outpng));
-
-        if (!data->isPalettized) {
-            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-            setjmp(png_jmpbuf(outpng));
-            png_write_info(outpng, outpnginfo);
-
-            uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
-            SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
-
-            png_bytepp rows = new png_bytep[data->h];
-            for (int y = 0; y < data->h; y++) {
-                rows[y] = convertedToABGR + (y * data->w * 4);
-            }
-            png_write_image(outpng, rows);
-            delete[] rows;
-            tracked_free(convertedToABGR);
-        }
-        else {
-            LayerPalettized* pltLayer = (LayerPalettized*)data;
-            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-            setjmp(png_jmpbuf(outpng));
-
-            png_colorp plt = new png_color[pltLayer->palette.size()];
-            memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
-            png_bytep trns = new png_byte[pltLayer->palette.size()];
-
-            for (int x = 0; x < pltLayer->palette.size(); x++) {
-                plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
-                plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
-                plt[x].blue = pltLayer->palette[x] & 0xff;
-                trns[x] = (pltLayer->palette[x] >> 24) & 0xff;
-            }
-
-            png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
-            png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
-            png_write_info(outpng, outpnginfo);
-
-            int32_t* pixelData32 = (int32_t*)pltLayer->pixelData;
-            png_bytepp rows = new png_bytep[data->h];
-            for (int y = 0; y < data->h; y++) {
-                png_bytep row = new png_byte[data->w];
-                for (int x = 0; x < data->w; x++) {
-                    row[x] = pixelData32[x + y * data->w];
-                }
-                rows[y] = row;
-            }
-            png_write_image(outpng, rows);
-            delete[] plt;
-            delete[] trns;
-            for (int y = 0; y < data->h; y++) {
-                delete[] rows[y];
-            }
-            delete[] rows;
-
-        }
-        png_write_end(outpng, outpnginfo);
-
-        png_destroy_write_struct(&outpng, &outpnginfo);
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
-
 bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
     if (data[0]->isPalettized) {
@@ -4089,42 +3790,31 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "mergedimage.png"); 
         {
             Layer* flat = editor->flattenImage();
-            if (writePNG(convertStringOnWin32("temp.bin"), flat)) {
-                zip_entry_fwrite(zip, "temp.bin");
-            }
-            else {
-                logprintf("OPENRASTER: PNG WRITE ERROR\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(flat);
+            zip_entry_write(zip, pngData.data(), pngData.size());
             delete flat;
         }
         zip_entry_close(zip);
 
+        //todo: quantize it to 256 colors and save it as an 8bit png
         zip_entry_open(zip, "Thumbnails/thumbnail.png"); 
         {
             Layer* flat = editor->flattenImage();
             Layer* flatScaled = flat->copyScaled(XY{255,255});
             delete flat;
-            if (writePNG(convertStringOnWin32("temp.bin"), flatScaled)) {
-                zip_entry_fwrite(zip, "temp.bin");
-            }
-            else {
-                logprintf("OPENRASTER: PNG WRITE ERROR\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(flatScaled);
+            zip_entry_write(zip, pngData.data(), pngData.size());
             delete flatScaled;
         }
         zip_entry_close(zip);
 
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
-            if (writePNG(convertStringOnWin32("temp.bin"), *l)) {
-                std::string fname = std::format("data/layer{}.png", i++);
-                zip_entry_open(zip, fname.c_str());
-                zip_entry_fwrite(zip, "temp.bin");
-                zip_entry_close(zip);
-            }
-            else {
-                logprintf("OPENRASTER: PNG WRITE ERROR\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(*l);
+            std::string fname = std::format("data/layer{}.png", i++);
+            zip_entry_open(zip, fname.c_str());
+            zip_entry_write(zip, pngData.data(), pngData.size());
+            zip_entry_close(zip);
         }
 
         zip_stream_copy(zip, (void**)&zipBuffer, &zipBufferSize);
@@ -5116,37 +4806,24 @@ bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
 
     if (outfile != NULL) {
-        if (writePNG(convertStringOnWin32("temp.bin"), data)) {
-            //open temp.bin file, convert to base64, write to outfile
-            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
-            if (infile != NULL) {
-                fseek(infile, 0, SEEK_END);
-                uint64_t fileLength = ftell(infile);
-                fseek(infile, 0, SEEK_SET);
-                //char* fileBuffer = (char*)tracked_malloc(fileLength);
-                std::string fileBuffer;
-                fileBuffer.resize(fileLength);
-                fread(fileBuffer.data(), fileLength, 1, infile);
-                //fread(fileBuffer, fileLength, 1, infile);
-                fclose(infile);
 
-                std::string base64Buffer = base64::to_base64(fileBuffer);
-
-                std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
-                std::string htmlPost = "\"></img>\n\t</body>\n</html>";
-                fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
-                fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
-                fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
-                //tracked_free(fileBuffer);
-            }
-
-
-            fclose(outfile);
-            return true;
+        std::string base64Buffer;
+        {
+            std::vector<u8> pngData = writePNGToMem(data);
+            std::string fileBuffer;
+            fileBuffer.resize(pngData.size());
+            memcpy(fileBuffer.data(), pngData.data(), pngData.size());
+            base64Buffer = base64::to_base64(fileBuffer);
         }
 
+        std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
+        std::string htmlPost = "\"></img>\n\t</body>\n</html>";
+        fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
+        fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
+        fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
+        
         fclose(outfile);
-        return false;
+        return true;
     }
     return false;
 }
