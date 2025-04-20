@@ -238,7 +238,7 @@ bool platformPutImageInClipboard(Layer* l) {
     return false;
 }
 
-Layer *platformGetImageFromClipboard() { return NULL; }
+Layer *platformGetImageFromClipboard() { return universal_platformGetLayerFromClipboard(); }
 
 FILE *platformOpenFile(PlatformNativePathString path,
                        PlatformNativePathString mode) {

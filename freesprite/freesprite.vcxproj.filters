@@ -1157,6 +1157,9 @@
     <ClInclude Include="log.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="platform_universal.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

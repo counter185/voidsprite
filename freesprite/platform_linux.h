@@ -9,6 +9,8 @@
 #include "Notification.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
 
+#include "platform_universal.h"
+
 // I gave up on trying to make this work
 // first sdl2 was too old
 // then sdl2_image was too old
@@ -202,7 +204,7 @@ bool platformPutImageInClipboard(Layer* l) {
     return false;
 }
 
-Layer *platformGetImageFromClipboard() { return NULL; }
+Layer *platformGetImageFromClipboard() { return universal_platformGetLayerFromClipboard(); }
 
 FILE *platformOpenFile(PlatformNativePathString path,
                        PlatformNativePathString mode) {
