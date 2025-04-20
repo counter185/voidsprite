@@ -14,7 +14,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
 	Layer* ret = NULL;
 	if (mimetypes != NULL) {
 		if (formats.contains("image/png")) {
-			u64 dataSize = 0;
+			size_t dataSize = 0;
 			u8* pngdata = (u8*)SDL_GetClipboardData("image/png", &dataSize);
 			if (pngdata != NULL) {
 				ret = readPNGFromMem(pngdata, dataSize);
@@ -24,7 +24,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
 		else {
 			for (auto& [type, _] : formats) {
 				if (stringStartsWithIgnoreCase(type, "image/")) {
-					u64 dataSize = 0;
+					size_t dataSize = 0;
 					u8* imageData = (u8*)SDL_GetClipboardData(type.c_str(), &dataSize);
 					SDL_IOStream* io = SDL_IOFromMem(imageData, dataSize);
 					SDL_Surface* srf = IMG_Load_IO(io, true);
