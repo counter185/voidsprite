@@ -1,6 +1,8 @@
 //libpng must be the first include or else it will cry
 #if _WIN32
 #include "libpng/png.h"
+#elif __ANDROID__
+#include "libpng/png.h"
 #else
 #include <libpng/png.h>
 #endif

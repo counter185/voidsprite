@@ -33,8 +33,8 @@
 #include <atomic>
 
 #include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
@@ -72,6 +72,13 @@ extern "C" {
 
 #ifndef VOIDSPRITE_ASSETS_PATH
 #define VOIDSPRITE_ASSETS_PATH ""
+#endif
+#ifndef VOIDSPRITE_ASSETS_SUBDIR
+    #if __ANDROID__
+    #define VOIDSPRITE_ASSETS_SUBDIR ""
+    #else
+    #define VOIDSPRITE_ASSETS_SUBDIR "/assets/"
+    #endif
 #endif
 
 #define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]

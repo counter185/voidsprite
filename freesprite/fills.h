@@ -67,6 +67,8 @@ public:
 
     void fill(SDL_Rect r) {
         switch (type) {
+            case FILL_INVALID:
+                break;
             case FILL_SOLID:
                 {
                     SDL_Color c = uint32ToSDLColor(fillSolidColor);

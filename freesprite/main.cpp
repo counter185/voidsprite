@@ -239,10 +239,10 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path) {
     std::vector<PlatformNativePathString> pathList;
     if (!g_usingDefaultVisualConfig()) {
         PlatformNativePathString vcRoot = g_getCustomVisualConfigRoot();
-        pathList.push_back(vcRoot + convertStringOnWin32("/assets/" + path));
+        pathList.push_back(vcRoot + convertStringOnWin32(VOIDSPRITE_ASSETS_SUBDIR + path));
         pathList.push_back(vcRoot + convertStringOnWin32("/" + path));
     }
-    pathList.push_back(convertStringOnWin32(pathInProgramDirectory("/assets/" + path)));
+    pathList.push_back(convertStringOnWin32(pathInProgramDirectory(VOIDSPRITE_ASSETS_SUBDIR + path)));
     SDL_Surface* srf = NULL;
     for (auto& path : pathList) {
         std::string pathUTF8 = convertStringToUTF8OnWin32(path);
@@ -252,6 +252,7 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path) {
         }
     }
     if (srf == NULL) {
+        logerr(std::format("Failed to load asset: {}", convertStringToUTF8OnWin32(pathList[pathList.size() - 1])));
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
         return NULL;
     }
@@ -324,8 +325,12 @@ int main(int argc, char** argv)
             g_cmdlineArgs.push_back(a);
         }
     }
+    #if __ANDROID__
+    g_programDirectory = "";
+    #else
     g_programDirectory = std::string(argv[0]);
     g_programDirectory = g_programDirectory.substr(0, g_programDirectory.find_last_of("/\\"));
+    #endif
     //g_addNotification(Notification("", g_programDirectory));
 
     srand(time(NULL));
@@ -389,7 +394,7 @@ int main(int argc, char** argv)
     }
 
     if (g_config.overrideCursor) {
-        std::string cursorPath = pathInProgramDirectory("assets/app_cursor.png");
+        std::string cursorPath = pathInProgramDirectory(VOIDSPRITE_ASSETS_SUBDIR "app_cursor.png");
         SDL_Surface* cursorSrf = IMG_Load(cursorPath.c_str());
         if (cursorSrf != NULL) {
             SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);

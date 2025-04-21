@@ -429,3 +429,17 @@ mac-build-resources/generated*
 freesprite/localization/.vscode/settings.json
 
 /fuck
+
+android-project/.gradle
+android-project/app/build
+android-project/app/build/*
+
+#symlinks
+android-project/app/jni/src/voidsprite
+android-project/app/jni/liblcf
+
+android-project/app/jni/SDL*
+android-project/app/jni/SDL_image/*
+android-project/app/jni/SDL_ttf/*
+android-project/app/jni/zlib/*
+android-project/app/src/main/assets*
