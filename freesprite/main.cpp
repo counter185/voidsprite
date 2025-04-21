@@ -617,18 +617,18 @@ int main(int argc, char** argv)
             //events that can fire during bg operation
             switch (evt.type) {
                 case SDL_EVENT_KEY_DOWN:
-                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
+                    if (KEYCODE(evt) == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = true;
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
+                    else if (KEYCODE(evt) == SDL_SCANCODE_LSHIFT) {
                         g_shiftModifier = true;
                     }
                     break;
                 case SDL_EVENT_KEY_UP:
-                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
+                    if (KEYCODE(evt) == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = false;
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
+                    else if (KEYCODE(evt) == SDL_SCANCODE_LSHIFT) {
                         g_shiftModifier = false;
                     }
                     break;
@@ -667,7 +667,7 @@ int main(int argc, char** argv)
                     //return 0;
                     break;
                 case SDL_KEYDOWN:
-                    if (evt.key.scancode == SDL_SCANCODE_LEFTBRACKET) {
+                    if (KEYCODE(evt) == SDL_SCANCODE_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(0);
@@ -677,7 +677,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_RIGHTBRACKET) {
+                    else if (KEYCODE(evt) == SDL_SCANCODE_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(screenStack.size() - 1);
@@ -687,7 +687,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_W) {
+                    else if (KEYCODE(evt) == SDL_SCANCODE_W) {
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
                                 if (favourite && fav_screen < screenStack.size()) {
@@ -701,18 +701,18 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_F11) {
+                    else if (KEYCODE(evt) == SDL_SCANCODE_F11) {
                         fullscreen = !fullscreen;
                         SDL_SetWindowFullscreen(g_wd, fullscreen);
                         g_newVFX(VFX_SCREENSWITCH, 800);
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_EQUALS){
+                    else if (KEYCODE(evt) == SDL_SCANCODE_EQUALS){
                         if (g_ctrlModifier) {
                             renderScale++;
                             UpdateViewportScaler();
                         }
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_MINUS){
+                    else if (KEYCODE(evt) == SDL_SCANCODE_MINUS){
                         if (g_ctrlModifier){
                             if (renderScale-- <= 1){
                                 renderScale = 1;

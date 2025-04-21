@@ -79,7 +79,7 @@ void UIDoubleSlider::handleInput(SDL_Event evt, XY gPosOffset)
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
             if (evt.button.button == 1) {
-                if (evt.button.down) {
+                if (DOWN(evt.button)) {
                     XY mousePos = xySubtract(XY{ (int)evt.button.x, (int)evt.button.y }, gPosOffset);
                     if (mousePos.y >= 0 && mousePos.y <= wxHeight) {
                         double newPos = fclamp(0.0f, mousePos.x / (float)wxWidth, 1.0f);
@@ -95,7 +95,7 @@ void UIDoubleSlider::handleInput(SDL_Event evt, XY gPosOffset)
                         this->onSliderPosFinishedChanging();
                     }
                 }
-                mouseHeld = evt.button.down;
+                mouseHeld = DOWN(evt.button);
             }
             break;
         case SDL_MOUSEMOTION:

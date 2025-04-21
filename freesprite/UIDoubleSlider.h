@@ -3,7 +3,6 @@
 #include "drawable.h"
 #include "mathops.h"
 #include "EventCallbackListener.h"
-#include <SDL3/SDL_rect.h>
 
 class UIDoubleSlider : public Drawable
 {

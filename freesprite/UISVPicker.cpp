@@ -55,7 +55,7 @@ void UISVPicker::handleInput(SDL_Event evt, XY gPosOffset)
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
         if (evt.button.button == 1) {
-            mouseHeld = evt.button.down;
+            mouseHeld = DOWN(evt.button);
         }
     case SDL_MOUSEMOTION:
         if (mouseHeld) {

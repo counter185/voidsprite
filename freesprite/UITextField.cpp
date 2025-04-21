@@ -75,7 +75,7 @@ void UITextField::render(XY pos)
 void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 {
 	if (evt.type == SDL_KEYDOWN) {
-		switch (evt.key.scancode) {
+		switch (KEYCODE(evt)) {
 			case SDL_SCANCODE_TAB:
 				break;
 			case SDL_SCANCODE_RETURN:

@@ -126,17 +126,17 @@ void ScreenNonogramPlayer::takeInput(SDL_Event evt)
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			if (evt.button.button == SDL_BUTTON_MIDDLE) {
-				mmiddleDown = evt.button.down;
+				mmiddleDown = DOWN(evt.button);
 			}
 			else if (evt.button.button == SDL_BUTTON_LEFT) {
-				mleftDown = evt.button.down;
+				mleftDown = DOWN(evt.button);
 				UpdateMousePoint(c.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y }));
 				if (mleftDown) {
 					PlaceFillAt(mousePoint);
 				}
 			}
 			else if (evt.button.button == SDL_BUTTON_RIGHT) {
-				mrightDown = evt.button.down;
+				mrightDown = DOWN(evt.button);
 				UpdateMousePoint(c.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y }));
 				if (mrightDown) {
 					PlaceXAt(mousePoint);

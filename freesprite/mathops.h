@@ -39,6 +39,13 @@ rgb sdlColorToRGB(SDL_Color c);
 rgb u32ToRGB(u32 color);
 
 SDL_FColor toFColor(SDL_Color c);
+
+#if SDL_MAJOR_VERSION > 2
+inline SDL_FColor convColor(SDL_Color c) { return toFColor(c); }
+#else
+inline SDL_Color convColor(SDL_Color c) { return c; }
+#endif
+
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
 unsigned int alphaBlend(unsigned int colora, unsigned int colorb);

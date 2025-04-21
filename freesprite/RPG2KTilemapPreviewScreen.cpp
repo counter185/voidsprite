@@ -178,7 +178,7 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingTilemap = evt.button.down;
+                scrollingTilemap = DOWN(evt.button);
             }
             break;
         case SDL_MOUSEMOTION:

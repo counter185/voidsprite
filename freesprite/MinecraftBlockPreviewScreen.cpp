@@ -230,7 +230,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
     };
 
     for (int i = 0; i < 7; i++) {
-        vertices[i].color = toFColor(SDL_Color{0xff,0xff,0xff,0xff});
+        vertices[i].color = convColor(SDL_Color{0xff,0xff,0xff,0xff});
     }
 
     SDL_Rect topTextureRect =
@@ -273,7 +273,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         if (shadeSides) {
             for (int i = 0; i < 7; i++) {
-                vertices[i].color = toFColor(SDL_Color{ 0xff / 4 * 3,0xff / 4 * 3,0xff / 4 * 3, 0xff });
+                vertices[i].color = convColor(SDL_Color{ 0xff / 4 * 3,0xff / 4 * 3,0xff / 4 * 3, 0xff });
             }
         }
 
@@ -304,7 +304,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
 
         if (shadeSides) {
             for (int i = 0; i < 7; i++) {
-                vertices[i].color = toFColor(SDL_Color{ 0xff / 2, 0xff / 2, 0xff / 2, 0xff });
+                vertices[i].color = convColor(SDL_Color{ 0xff / 2, 0xff / 2, 0xff / 2, 0xff });
             }
         }
 

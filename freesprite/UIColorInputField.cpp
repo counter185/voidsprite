@@ -25,7 +25,7 @@ void UIColorInputField::render(XY pos)
 
 void UIColorInputField::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.down) {
+    if (evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && DOWN(evt.button)) {
         wxsManager.tryFocusOnPoint(xySubtract(XY{ (int)evt.button.x, (int)evt.button.y }, gPosOffset));
     }
     if (wxsManager.anyFocused()) {

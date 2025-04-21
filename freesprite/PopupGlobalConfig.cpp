@@ -336,7 +336,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
     if (bindingKeyIndex != -1) {
         if (evt.type == SDL_KEYDOWN) {
-            int targetKey = evt.key.scancode == SDL_SCANCODE_LSHIFT ? SDL_SCANCODE_UNKNOWN : evt.key.scancode;
+            int targetKey = KEYCODE(evt) == SDL_SCANCODE_LSHIFT ? SDL_SCANCODE_UNKNOWN : KEYCODE(evt);
             if (targetKey != SDL_SCANCODE_ESCAPE) {
                 //find any other keybinds that use this key and reset them
                 bool keyIsReserved = (targetKey != SDL_SCANCODE_UNKNOWN) && (std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) != reservedKeys.end());

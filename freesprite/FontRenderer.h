@@ -83,8 +83,12 @@ private:
     bool isBitmapFont = false;
 public:
     TTFFontObject(TTF_Font* f) : font(f) {
+#if TTF_MAJOR_VERSION > 2
         isBitmapFont = !TTF_FontIsScalable(f);
         loginfo(std::format("[TTFFontObject] font: {}, engine: {}", TTF_GetFontFamilyName(f), isBitmapFont ? "bitmap" : "ttf"));
+#else
+        isBitmapFont = false;
+#endif
     }
     ~TTFFontObject() override {
         if (font != NULL) {

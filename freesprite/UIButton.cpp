@@ -52,7 +52,7 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 {
 	if (evt.type == SDL_MOUSEBUTTONDOWN) {
 		XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
-		if (evt.button.down && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
+		if (DOWN(evt.button) && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
 			if (evt.button.button == 1) {
 				click();
 			} else if (evt.button.button == 3) {

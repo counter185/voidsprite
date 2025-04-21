@@ -94,24 +94,24 @@ void UIDropdown::mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction)
 
 void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (isOpen && evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.down) {
+    if (isOpen && evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && DOWN(evt.button)) {
         wxs.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, xyAdd(gPosOffset, XY{0,menuYOffset}));
     }
     if (!isOpen || !wxs.anyFocused()) {
         if (evt.type == SDL_MOUSEBUTTONDOWN) {
             XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
-            if (evt.button.button == 1 && evt.button.down) {
+            if (evt.button.button == 1 && DOWN(evt.button)) {
                 if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
                     click();
                 }
             }
         }
         else if (evt.type == SDL_KEYDOWN) {
-            if (evt.key.scancode == SDL_SCANCODE_ESCAPE) {
+            if (KEYCODE(evt) == SDL_SCANCODE_ESCAPE) {
                 isOpen = false;
                 openTimer.start();
             }
-            else if (evt.key.scancode == SDL_SCANCODE_SPACE) {
+            else if (KEYCODE(evt) == SDL_SCANCODE_SPACE) {
                 click();
             }
         }

@@ -43,7 +43,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
         return processMouseWheelEventInMultiple(wxss, evt, parentOffset);
     }
     SDL_Event convEvent = convertTouchToMouseEvent(evt);
-    if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.down) {
+    if (convEvent.type == SDL_MOUSEBUTTONDOWN && DOWN(convEvent.button)) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             if (wxs.tryFocusOnPoint(XY{ (int)convEvent.button.x, (int)convEvent.button.y }, parentOffset)) {
@@ -51,7 +51,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             }
         }
     }
-    else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
+    else if (evt.type == SDL_KEYDOWN && KEYCODE(evt) == SDL_SCANCODE_TAB) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             if (wxs.anyFocused()) {

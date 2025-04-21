@@ -36,11 +36,16 @@ public:
         allocMemory();
     }
     Layer(SDL_Surface* from) : Layer(from->w, from->h) {
-        if (from->format == SDL_PIXELFORMAT_ARGB8888) {
+#if SDL_MAJOR_VERSION == 2
+        u32 formatNow = from->format->format;
+#else
+        u32 formatNow = from->format;
+#endif
+        if (formatNow == SDL_PIXELFORMAT_ARGB8888) {
             memcpy(pixelData, from->pixels, w * h * 4);
         }
         else {
-            SDL_ConvertPixels(w, h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
+            SDL_ConvertPixels(w, h, formatNow, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixelData, w * 4);
             SDL_FreeSurface(from);
         }
     }

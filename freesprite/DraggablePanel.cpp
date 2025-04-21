@@ -16,7 +16,7 @@ void DraggablePanel::processDrag(SDL_Event evt)
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
         if (evt.button.button == SDL_BUTTON_LEFT) {
-            dragging = evt.button.down;
+            dragging = DOWN(evt.button);
         }
         break;
     case SDL_MOUSEMOTION:

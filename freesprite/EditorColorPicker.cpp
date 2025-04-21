@@ -713,6 +713,7 @@ void EditorColorPicker::reloadColorLists()
 #if _WIN32
 void EditorColorPicker::openOldWindowsColorPicker()
 {
+#if SDL_MAJOR_VERSION > 2
     CHOOSECOLOR cc{};
     static COLORREF customColorList[16] = {
         RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),RGB(0, 0, 0),
@@ -734,6 +735,7 @@ void EditorColorPicker::openOldWindowsColorPicker()
         setMainEditorColorRGB(PackRGBAtoARGB(colorbgr.b, colorbgr.g, colorbgr.r, 255));
         logprintf("win32 picked color: %x\n", cc.rgbResult);
     }
+#endif
 }
 #endif
 

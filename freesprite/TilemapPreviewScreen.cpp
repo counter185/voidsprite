@@ -293,11 +293,11 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_KEYDOWN:
-            if (evt.key.scancode == SDL_SCANCODE_TAB) {
+            if (KEYCODE(evt) == SDL_SCANCODE_TAB) {
                 tileSelectOpen = !tileSelectOpen;
                 tileSelectTimer.start();
             }
-            else if (evt.key.scancode == SDL_SCANCODE_LALT) {
+            else if (KEYCODE(evt) == SDL_SCANCODE_LALT) {
                 wxsManager.forceFocusOn(navbar);
             }
             break;

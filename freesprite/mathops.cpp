@@ -1035,7 +1035,7 @@ SDL_Event convertTouchToMouseEvent(SDL_Event src)
         ret.button.timestamp = src.tfinger.timestamp;
         ret.button.windowID = src.tfinger.windowID;
         ret.button.which = src.tfinger.touchID;
-        ret.button.down = src.type == SDL_FINGERDOWN;
+        DOWN(ret.button) = src.type == SDL_FINGERDOWN;
         ret.button.x = src.tfinger.x * g_windowW;
         ret.button.y = src.tfinger.y * g_windowH;
         break;

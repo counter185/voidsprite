@@ -81,7 +81,7 @@ public:
 
         //special case here
         if (evt.type == SDL_KEYDOWN) {
-            tryPressHotkey(evt.key.scancode);
+            tryPressHotkey((SDL_Scancode)KEYCODE(evt));
         }
 
         DrawableManager::processInputEventInMultiple({ subWidgets }, evt, position);

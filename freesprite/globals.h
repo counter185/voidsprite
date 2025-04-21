@@ -32,13 +32,23 @@
 #include <thread>
 #include <atomic>
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_image/SDL_image.h>
-
-#if SDL_MAJOR_VERSION == 3
-#include "sdl23compat.h"
+#ifdef VOIDSPRITE_USING_SDL2
+    #ifdef _MSVC_LANG
+        #include <SDL.h>
+        #include <SDL_ttf.h>
+        #include <SDL_image.h>
+    #else
+        #include <SDL2/SDL.h>
+        #include <SDL2_ttf/SDL_ttf.h>
+        #include <SDL2_image/SDL_image.h>
+    #endif
+#else
+    #include <SDL3/SDL.h>
+    #include <SDL3_ttf/SDL_ttf.h>
+    #include <SDL3_image/SDL_image.h>
 #endif
+
+#include "sdl23compat.h"
 
 extern "C" {
 #include <zlib.h>

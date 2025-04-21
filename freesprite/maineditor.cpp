@@ -1220,11 +1220,11 @@ void MainEditor::takeInput(SDL_Event evt) {
         }
     }
 
-    if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.scancode == SDL_SCANCODE_Q) {
-        qModifier = evt.key.down;
+    if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && KEYCODE(evt) == SDL_SCANCODE_Q) {
+        qModifier = DOWN(evt.key);
     }
 
-    if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_F1) {
+    if (evt.type == SDL_KEYDOWN && KEYCODE(evt) == SDL_SCANCODE_F1) {
         hideUI = !hideUI;
     }
 
@@ -1233,7 +1233,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
                 if (evt.button.button == 1) {
-                    if (middleMouseHold && evt.button.down) {
+                    if (middleMouseHold && DOWN(evt.button)) {
                         zoomKeyHeld = true;
                         zoomKeyTimer.start();
                         zoomInitial = 0;
@@ -1242,7 +1242,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                         zoomKeyHeld = false;
                         RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
                         if (currentBrush != NULL) {
-                            if (evt.button.down) {
+                            if (DOWN(evt.button)) {
                                 if (!currentBrush->isReadOnly()) {
                                     commitStateToCurrentLayer();
                                 }
@@ -1258,17 +1258,17 @@ void MainEditor::takeInput(SDL_Event evt) {
                             }
                         }
                         mouseHoldPosition = mousePixelTargetPoint;
-                        leftMouseHold = evt.button.down;
+                        leftMouseHold = DOWN(evt.button);
                     }
                 }
                 else if (evt.button.button == 2) {
-                    middleMouseHold = evt.button.down;
+                    middleMouseHold = DOWN(evt.button);
                     zoomKeyHeld = false;
                 }
                 else if (evt.button.button == 3) {
                     RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
                     if (currentBrush != NULL && currentBrush->overrideRightClick()) {
-                        if (evt.button.down) {
+                        if (DOWN(evt.button)) {
                             currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
                         }
                         else {
@@ -1276,7 +1276,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                         }
                     }
                     else {
-                        if (evt.button.down) {
+                        if (DOWN(evt.button)) {
                             bool pickFromWholeImage = !g_ctrlModifier;
                             setActiveColor(!pickFromWholeImage ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint)
                                 : pickColorFromAllLayers(mousePixelTargetPoint));
@@ -1340,7 +1340,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_KEY_DOWN:
                 {
                     bool passthroughBrushKeybinds = true;
-                    switch (evt.key.scancode) {
+                    switch (KEYCODE(evt)) {
                         case SDL_SCANCODE_K:
                             if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
                                 passthroughBrushKeybinds = false;
@@ -1437,9 +1437,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                             break;
                     }
                     if (passthroughBrushKeybinds) {
-                        if (evt.key.scancode != SDL_SCANCODE_UNKNOWN) {
+                        if (KEYCODE(evt) != SDL_SCANCODE_UNKNOWN) {
                             for (BaseBrush* b : g_brushes) {
-                                if (b->keybind == evt.key.scancode) {
+                                if (b->keybind == KEYCODE(evt)) {
                                     setActiveBrush(b);
                                     break;
                                 }
@@ -1457,7 +1457,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 break;
             case SDL_EVENT_PEN_DOWN:
             case SDL_EVENT_PEN_UP:
-                penDown = evt.ptouch.down;
+                penDown = DOWN(evt.ptouch);
                 SDL_SetWindowMouseGrab(g_wd, penDown);
                 loginfo(std::format("new pen state: {}", penDown));
                 break;
