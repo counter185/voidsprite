@@ -1074,7 +1074,8 @@ SDL_Event scaleScreenPositionsInEvent(SDL_Event src) {
         case SDL_EVENT_FINGER_DOWN:
         case SDL_EVENT_FINGER_MOTION:
         case SDL_EVENT_FINGER_UP:
-            divMultiple({&src.tfinger.x, &src.tfinger.y, &src.tfinger.dx, &src.tfinger.dy}, scaleFactor);
+            //these are normalized so don't scale them
+            //divMultiple({&src.tfinger.x, &src.tfinger.y, &src.tfinger.dx, &src.tfinger.dy}, scaleFactor);
             break;
         case SDL_EVENT_PEN_AXIS:
             divMultiple({ &src.paxis.x, &src.paxis.y }, scaleFactor);

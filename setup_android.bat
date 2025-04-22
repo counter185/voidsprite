@@ -5,6 +5,7 @@ net session > nul
 if not %errorlevel% == 0 goto noadmin
 
 cd /d %~dp0
+copy_assets
 cd android-project\app\jni
 rem   todo: check if git is even present
 git clone --recursive https://github.com/libsdl-org/SDL.git

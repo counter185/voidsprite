@@ -6,7 +6,7 @@ md android-project\app\src\main\assets
 copy freesprite\*.ttf x64\Debug\
 copy freesprite\*.ttf x64\Release\
 copy freesprite\*.ttf gcc-build\build
-copy android-project\app\src\main\assets
+copy freesprite\*.ttf android-project\app\src\main\assets
 copy freesprite\assets\* x64\Debug\assets\
 copy freesprite\assets\* x64\Release\assets\
 copy freesprite\assets\* gcc-build\build\assets

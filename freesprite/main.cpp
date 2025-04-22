@@ -329,7 +329,9 @@ int main(int argc, char** argv)
     #else
     g_programDirectory = std::string(argv[0]);
     g_programDirectory = g_programDirectory.substr(0, g_programDirectory.find_last_of("/\\"));
+    g_programDirectory += _WIN32 ? "\\" : "/";
     #endif
+    loginfo(std::format("Program directory: {}", g_programDirectory));
     //g_addNotification(Notification("", g_programDirectory));
 
     srand(time(NULL));
