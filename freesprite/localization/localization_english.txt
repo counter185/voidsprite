@@ -9,6 +9,8 @@
     {"vsp.cmn.confirm", "Confirm"},
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
+    {"vsp.cmn.zoomin", "Zoom in"},
+    {"vsp.cmn.zoomout", "Zoom out"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
     {"vsp.cmn.error.decompressfail", "Failed to decompress data."},

@@ -1055,6 +1055,44 @@ SDL_Event convertTouchToMouseEvent(SDL_Event src)
     }
     return ret;
 }
+SDL_Event scaleScreenPositionsInEvent(SDL_Event src) {
+    if (g_renderScale == 1) {
+        return src;
+    }
+    double scaleFactor = g_renderScale;
+    std::function<void(std::vector<float*>, double)> divMultiple = 
+        [](std::vector<float*> f, double ff) { for (auto*& p : f) { *p = *p / ff; } };
+    switch (src.type) {
+        case SDL_EVENT_MOUSE_MOTION:
+            divMultiple({&src.motion.x, &src.motion.y, &src.motion.xrel, &src.motion.yrel}, scaleFactor);
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            divMultiple({ &src.button.x, &src.button.y }, scaleFactor);
+            break;
+        case SDL_EVENT_FINGER_CANCELED:
+        case SDL_EVENT_FINGER_DOWN:
+        case SDL_EVENT_FINGER_MOTION:
+        case SDL_EVENT_FINGER_UP:
+            divMultiple({&src.tfinger.x, &src.tfinger.y, &src.tfinger.dx, &src.tfinger.dy}, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_AXIS:
+            divMultiple({ &src.paxis.x, &src.paxis.y }, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_MOTION:
+            divMultiple({ &src.pmotion.x, &src.pmotion.y }, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_DOWN:
+        case SDL_EVENT_PEN_UP:
+            divMultiple({ &src.ptouch.x, &src.ptouch.y }, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_BUTTON_DOWN:
+        case SDL_EVENT_PEN_BUTTON_UP:
+            divMultiple({&src.pbutton.x, &src.pbutton.y}, scaleFactor);
+            break;
+    }
+    return src;
+}
 
 hsl rgb2hsl(rgb c) {
 

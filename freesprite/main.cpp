@@ -37,7 +37,6 @@
 int g_windowW = 1280;
 int g_windowH = 720;
 XY unscaledWindowSize = {g_windowW, g_windowH};
-int renderScale = 1;
 SDL_Texture* viewport = NULL;
 std::string g_programDirectory = "";
 
@@ -268,11 +267,11 @@ void UpdateViewportScaler(){
     if (screenPreviewFramebuffer != NULL) {
         tracked_destroyTexture(screenPreviewFramebuffer);
     }
-    g_windowW = unscaledWindowSize.x / renderScale;
-    g_windowH = unscaledWindowSize.y / renderScale;
+    g_windowW = unscaledWindowSize.x / g_renderScale;
+    g_windowH = unscaledWindowSize.y / g_renderScale;
     screenPreviewFramebuffer = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
     SDL_SetTextureScaleMode(screenPreviewFramebuffer, SDL_SCALEMODE_LINEAR);
-    if (renderScale == 1) {
+    if (g_renderScale == 1) {
         viewport = NULL;
         return;
     }
@@ -625,6 +624,7 @@ int main(int argc, char** argv)
     while (!screenStack.empty()) {
         uint64_t ticksBegin = SDL_GetTicks64();
         while (SDL_PollEvent(&evt)) {
+            evt = scaleScreenPositionsInEvent(evt);
             DrawableManager::processHoverEventInMultiple({ overlayWidgets }, evt);
 
             //events that can fire during bg operation
@@ -724,14 +724,14 @@ int main(int argc, char** argv)
                     }
                     else if (evt.key.scancode == SDL_SCANCODE_EQUALS){
                         if (g_ctrlModifier) {
-                            renderScale++;
+                            g_renderScale++;
                             UpdateViewportScaler();
                         }
                     }
                     else if (evt.key.scancode == SDL_SCANCODE_MINUS){
                         if (g_ctrlModifier){
-                            if (renderScale-- <= 1){
-                                renderScale = 1;
+                            if (g_renderScale-- <= 1){
+                                g_renderScale = 1;
                             }
                             UpdateViewportScaler();
 

@@ -124,6 +124,7 @@ std::string randomUUID();
 std::string secondsTimeToHumanReadable(u64 seconds);
 
 SDL_Event convertTouchToMouseEvent(SDL_Event src);
+SDL_Event scaleScreenPositionsInEvent(SDL_Event src);
 
 template<typename T>
 inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)

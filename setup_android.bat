@@ -4,7 +4,7 @@ rem   we need admin for symlinks for some reason
 net session > nul
 if not %errorlevel% == 0 goto noadmin
 
-cd %~dp0
+cd /d %~dp0
 cd android-project\app\jni
 rem   todo: check if git is even present
 git clone --recursive https://github.com/libsdl-org/SDL.git

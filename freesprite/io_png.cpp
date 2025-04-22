@@ -96,8 +96,8 @@ Layer* readPNG(png_structp png, png_infop info) {
         png_read_image(png, rows);
 
         uint32_t* pxData = (uint32_t*)ret2->pixelData;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (u32 y = 0; y < height; y++) {
+            for (u32 x = 0; x < width; x++) {
                 pxData[y * width + x] =
                     bit_depth == 1 ? (rows[y][x / 8] >> (7 - (x % 8))) & 0b1
                     : bit_depth == 2 ? (rows[y][x / 4] >> (2 * (3 - (x % 4)))) & 0b11
@@ -126,7 +126,7 @@ Layer* readPNG(png_structp png, png_infop info) {
 
         int numchannels = png_get_channels(png, info);
         png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
+        for (u32 y = 0; y < height; y++) {
             rows[y] = new png_byte[png_get_rowbytes(png, info)];
         }
         png_read_image(png, rows);

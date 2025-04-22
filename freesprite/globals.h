@@ -159,6 +159,7 @@ class ScreenWideNavBar;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
+inline int g_renderScale = 1;
 extern std::string g_programDirectory;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;

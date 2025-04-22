@@ -4235,7 +4235,7 @@ bool writeSR8(PlatformNativePathString path, Layer* data)
         g_addNotification(ErrorNotification("Error exporting SR8", "RGB export not supported."));
         return false;
     }
-    if (!((LayerPalettized*)data)->palette.size() > 256) {
+    if (((LayerPalettized*)data)->palette.size() > 256) {
         g_addNotification(ErrorNotification("Error exporting SR8", "Invalid palette size. Must be 256 colors."));
         return false;
     }

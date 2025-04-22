@@ -1107,6 +1107,24 @@ void MainEditor::makeActionBar()
     actionbar->addDrawable(redoButton);
     nextNavbarX += 35;
 
+    UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
+    //redoButton->icon = g_iconActionBarRedo;
+    zoominButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(1, {g_windowW/2, g_windowH/2}); };
+    zoominButton->position = { nextNavbarX,0 };
+    zoominButton->wxWidth = 30;
+    zoominButton->wxHeight = 30;
+    actionbar->addDrawable(zoominButton);
+    nextNavbarX += 35;
+
+    UIButton* zoomoutButton = new UIButton("", TL("vsp.cmn.zoomout"));
+    //redoButton->icon = g_iconActionBarRedo;
+    zoomoutButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(-1, { g_windowW / 2, g_windowH / 2 }); };
+    zoomoutButton->position = { nextNavbarX,0 };
+    zoomoutButton->wxWidth = 30;
+    zoomoutButton->wxHeight = 30;
+    actionbar->addDrawable(zoomoutButton);
+    nextNavbarX += 35;
+
     toolPropertiesPanel = new Panel();
     toolPropertiesPanel->position = { nextNavbarX + 50, 0 };
     actionbar->addDrawable(toolPropertiesPanel);
