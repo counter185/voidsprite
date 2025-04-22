@@ -444,3 +444,4 @@ android-project/app/jni/SDL_image/*
 android-project/app/jni/SDL_ttf/*
 android-project/app/jni/zlib*
 android-project/app/src/main/assets*
+android-project/build/reports/problems/problems-report.html

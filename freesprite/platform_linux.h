@@ -59,21 +59,7 @@ bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
 
-int findIndexByExtension(
-    std::vector<std::pair<std::string, std::string>> &filetypes,
-    std::string filename) {
-    std::transform(filename.begin(), filename.end(), filename.begin(),
-                   ::tolower);
-    for (int x = 0; x < filetypes.size(); x++) {
-        auto &p = filetypes[x];
-        if (filename.size() > p.first.size()) {
-            if (filename.substr(filename.size() - p.first.size()) == p.first) {
-                return x + 1;
-            }
-        }
-    }
-    return -1;
-}
+
 
 void platformTrySaveOtherFile(
     EventCallbackListener *caller,

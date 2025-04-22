@@ -1,6 +1,67 @@
 #pragma once
 
 #include "globals.h"
+#include "EventCallbackListener.h"
+
+int findIndexByExtension(
+        std::vector<std::pair<std::string, std::string>> &filetypes,
+        std::string filename) {
+    std::transform(filename.begin(), filename.end(), filename.begin(),
+                   ::tolower);
+    for (int x = 0; x < filetypes.size(); x++) {
+        auto &p = filetypes[x];
+        if (filename.size() > p.first.size()) {
+            if (filename.substr(filename.size() - p.first.size()) == p.first) {
+                return x + 1;
+            }
+        }
+    }
+    return -1;
+}
+
+inline void universal_platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {
+
+    EventCallbackListener* lsnr = listener;
+    static std::function<void(void*, const char* const*, int)> dialogCallback;
+    dialogCallback = [lsnr, evt_id, &filetypes](void* userdata, const char* const* filelist, int filter) {
+        if (filelist != NULL) {
+            std::string filenameStr = filelist[0];
+            loginfo(std::format("File selected: {}", filenameStr));
+            EventCallbackListener* listener = (EventCallbackListener*)userdata;
+            lsnr->eventFileOpen(evt_id, filenameStr, findIndexByExtension(filetypes, filenameStr));
+        }
+    };
+    static SDL_DialogFileCallback dialogCallback2;
+    dialogCallback2 = [](void* userdata, const char* const* filelist, int filter) {
+        auto fn = *((std::function<void(void*, const char* const*, int)>*)userdata);
+        fn(userdata, filelist, filter);
+    };
+
+    std::vector<std::pair<std::string, std::string>> transformedFiletypes = {};
+    for (auto& p : filetypes) {
+        transformedFiletypes.push_back({p.first == "" ? "*" : p.first, p.second});
+    }
+
+    std::vector<SDL_DialogFileFilter> filters = {};
+    for (auto& p : transformedFiletypes) {
+        SDL_DialogFileFilter filter = {};
+        filter.name = p.second.c_str();
+        filter.pattern = p.first.c_str();
+        filters.push_back(filter);
+    }
+
+    SDL_ShowOpenFileDialog(
+        dialogCallback2,
+        &dialogCallback,
+        g_wd,
+        filters.data(),
+        filters.size(),
+        "/sdcard/",
+        false
+    );
+
+    logerr(SDL_GetError());
+}
 
 inline bool universal_platformPushLayerToClipboard(Layer* l) {
 	std::vector<u8> pngData = writePNGToMem(l);
