@@ -367,7 +367,15 @@ int main(int argc, char** argv)
         " " UTF8_DIAMOND " DEBUG"
 #endif
     ;
-    g_wd = SDL_CreateWindow(windowTitle.c_str(), g_windowW, g_windowH, SDL_WINDOW_RESIZABLE | (_WIN32 ? SDL_WINDOW_HIDDEN : 0));
+    u32 windowFlags =
+#if __ANDROID__
+        SDL_WINDOW_MAXIMIZED |
+#endif
+#if _WIN32
+        SDL_WINDOW_HIDDEN |
+#endif
+        SDL_WINDOW_RESIZABLE;
+    g_wd = SDL_CreateWindow(windowTitle.c_str(), g_windowW, g_windowH, windowFlags);
     lastWindowTitle = windowTitle;
     g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
     SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
@@ -622,7 +630,10 @@ int main(int argc, char** argv)
             //events that can fire during bg operation
             switch (evt.type) {
                 case SDL_EVENT_KEY_DOWN:
-                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
+                    if (evt.key.scancode == SDL_SCANCODE_AC_BACK){
+                        evt.type = SDL_EVENT_QUIT;
+                    }
+                    else if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
                         g_ctrlModifier = true;
                     }
                     else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {

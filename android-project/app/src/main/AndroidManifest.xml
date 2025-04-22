@@ -105,6 +105,28 @@
             </intent-filter>
             -->
         </activity>
+
+        <!--<provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.filesprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/vsp_file_provider_paths"/>
+        </provider>-->
+        <!--<provider
+            android:name=".VSPAppdataProvider"
+            android:authorities="${applicationId}.user"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>-->
+
     </application>
 
 </manifest>

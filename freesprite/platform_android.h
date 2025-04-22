@@ -21,13 +21,28 @@ void platformInit() {}
 void platformPostInit() {}
 
 std::string appdataPath = "";
+std::string systemInformation = "Android";
 
-extern "C"
+//jni calls
+extern "C" {
+
 JNIEXPORT void JNICALL
 Java_pl_cntrpl_voidsprite_VSPActivity_passAppdataPathString(JNIEnv *env, jclass clazz,
-        jstring appdata_path) {
+                                                            jstring appdata_path) {
     const char *path = env->GetStringUTFChars(appdata_path, 0);
     appdataPath = std::string(path);
+    env->ReleaseStringUTFChars(appdata_path, path);
+}
+
+JNIEXPORT void JNICALL
+Java_pl_cntrpl_voidsprite_VSPActivity_passSystemInformationString(JNIEnv *env, jclass clazz,
+                                                                  jstring system_info) {
+    const char* inf = env->GetStringUTFChars(system_info, 0);
+    systemInformation = std::string(inf);
+    env->ReleaseStringUTFChars(system_info, inf);
+
+}
+
 }
 
 //todo
@@ -104,6 +119,5 @@ FILE *platformOpenFile(PlatformNativePathString path,
 }
 
 std::string platformGetSystemInfo() {
-    std::string ret = "Android";
-    return ret;
+    return systemInformation;
 }
