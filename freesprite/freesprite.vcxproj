@@ -415,6 +415,7 @@
     <ClInclude Include="PopupSet9SPattern.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
+    <ClInclude Include="PopupAbout.h" />
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />

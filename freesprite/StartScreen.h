@@ -21,6 +21,7 @@
 #include "PopupListRecoveryAutosaves.h"
 #include "Timer64.h"
 #include "Panel.h"
+#include "PopupAbout.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -220,8 +221,23 @@ public:
                     },
                     g_iconNavbarTabFile
                 }
+            },
+            {
+                SDL_SCANCODE_I,
+                {
+                    TL("vsp.nav.help"),
+                    {},
+                    {
+                        {SDL_SCANCODE_A, { TL("vsp.launchpad.nav.about"),
+                                [](StartScreen* screen) {
+                                    g_addPopup(new PopupAbout());
+                                }
+                            }
+                        },
+                    }
+                }
             }
-        }, { SDL_SCANCODE_F });
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_I });
         wxsManager.addDrawable(navbar);
 
         populateLastOpenFiles();

@@ -875,6 +875,9 @@
     <ClInclude Include="PopupTextTool.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
+    <ClInclude Include="PopupAbout.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
     <ClInclude Include="ToolRectFlip.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>

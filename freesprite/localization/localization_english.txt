@@ -25,6 +25,7 @@
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
     {"vsp.nav.save", "Save"},
+    {"vsp.nav.help", "Help"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
@@ -67,6 +68,7 @@
     {"vsp.launchpad.nav.newsplitsession", "New split session..."},
     {"vsp.launchpad.nav.preferences", "Preferences"},
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
+    {"vsp.launchpad.nav.about", "About voidsprite"},
 
     {"vsp.launchpad.error.starteditor", "Error starting editor"},
     {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
@@ -204,6 +206,14 @@
 
     //popup: quick convert
     {"vsp.quickconvert.forceindexedtorgb", "Always convert indexed formats to RGB"},
+
+    //popup: about
+    {"vsp.about.title", "About void" UTF8_DIAMOND "sprite"},
+    {"vsp.about.tab.general", "General"},
+    {"vsp.about.tab.systeminfo", "System information"},
+    {"vsp.about.tab.libs", "Libraries"},
+    {"vsp.about.contributors", "Contributors:"},
+    {"vsp.about.translations", "Translation credits:"},
 
     //brushes/tools
     {"vsp.brush.undefined", "Default brush"},
