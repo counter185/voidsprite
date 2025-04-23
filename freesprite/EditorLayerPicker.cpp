@@ -65,10 +65,9 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     duplicateBtn->onClickCallback = [this](UIButton*) { caller->duplicateLayer(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(duplicateBtn);
 
-    UILabel* opacityLabel = new UILabel();
+    UILabel* opacityLabel = new UILabel("Opacity");
     opacityLabel->position = { 7, 67 };
     opacityLabel->fontsize = 16;
-    opacityLabel->text = "Opacity";
     subWidgets.addDrawable(opacityLabel);
 
     opacitySlider = new UISlider();

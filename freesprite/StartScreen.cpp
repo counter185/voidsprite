@@ -271,8 +271,7 @@ void StartScreen::populateLastOpenFiles()
 {
     lastOpenFilesPanel->subWidgets.freeAllDrawables();
 
-    UILabel* lbl = new UILabel();
-    lbl->text = TL("vsp.launchpad.lastfiles");
+    UILabel* lbl = new UILabel(TL("vsp.launchpad.lastfiles"));
     lbl->fontsize = 22;
     lbl->position = {5, 2};
     lastOpenFilesPanel->subWidgets.addDrawable(lbl);

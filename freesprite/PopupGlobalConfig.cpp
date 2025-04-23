@@ -190,7 +190,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[2].wxs.addDrawable(lbl2);
     UITextField* tf2 = new UITextField();
     tf2->isNumericField = true;
-    tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y};
+    tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y};
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.maxUndoHistory));
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
@@ -214,7 +214,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[2].wxs.addDrawable(lbl2);
     tf2 = new UITextField();
     tf2->isNumericField = true;
-    tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y };
+    tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y };
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.autosaveInterval));
     tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
@@ -419,9 +419,9 @@ void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*
 void PopupGlobalConfig::updateLanguageCredit()
 {
     if (getLocalizations().contains(g_config.language)) {
-        languageCredit->text = getLocalizations()[g_config.language].langCredit;
+        languageCredit->setText(getLocalizations()[g_config.language].langCredit);
     }
     else {
-        languageCredit->text = "";
+        languageCredit->setText("");
     }
 }

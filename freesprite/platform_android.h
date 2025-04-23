@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL_android.h>
 #include <jni.h>
 #include "EventCallbackListener.h"
 #include "Notification.h"

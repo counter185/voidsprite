@@ -51,6 +51,14 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             }
         }
     }
+    else if (convEvent.type == SDL_EVENT_FINGER_DOWN) {
+        for (auto& wxsw : wxss) {
+            auto& wxs = wxsw.get();
+            if (wxs.tryFocusOnPoint(XY{ (int)(convEvent.tfinger.x * g_windowW), (int)(convEvent.tfinger.y * g_windowH) }, parentOffset)) {
+                break;
+            }
+        }
+    }
     else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();

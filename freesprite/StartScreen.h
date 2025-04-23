@@ -79,13 +79,11 @@ public:
         tab0TextFieldH->isNumericField = true;
         newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
 
-        UILabel* wLabel = new UILabel();
-        wLabel->text = TL("vsp.cmn.width");
+        UILabel* wLabel = new UILabel(TL("vsp.cmn.width"));
         wLabel->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
         newImageTabs->tabs[0].wxs.addDrawable(wLabel);
 
-        UILabel* hLabel = new UILabel();
-        hLabel->text = TL("vsp.cmn.height");
+        UILabel* hLabel = new UILabel(TL("vsp.cmn.height"));
         hLabel->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
         newImageTabs->tabs[0].wxs.addDrawable(hLabel);
 
@@ -118,23 +116,19 @@ public:
         tab1TextFieldCHX->setCallbackListener(3, this);
         newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
 
-        UILabel* w2Label = new UILabel();
-        w2Label->text = TL("vsp.launchpad.tab.cellw");
+        UILabel* w2Label = new UILabel(TL("vsp.launchpad.tab.cellw"));
         w2Label->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(w2Label);
 
-        UILabel* h2Label = new UILabel();
-        h2Label->text = TL("vsp.launchpad.tab.cellh");
+        UILabel* h2Label = new UILabel(TL("vsp.launchpad.tab.cellh"));
         h2Label->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(h2Label);
 
-        UILabel* w2Label2 = new UILabel();
-        w2Label2->text = "x";
+        UILabel* w2Label2 = new UILabel("x");
         w2Label2->position = xySubtract(XY{ 280,120 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(w2Label2);
 
-        UILabel* h2Label2 = new UILabel();
-        h2Label2->text = "x";
+        UILabel* h2Label2 = new UILabel("x");
         h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 

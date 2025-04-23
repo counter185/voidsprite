@@ -17,8 +17,7 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 	textbox->wxWidth = 260;
 	wxsManager.addDrawable(textbox);
 
-	UILabel* label = new UILabel();
-	label->text = "Text Size";
+	UILabel* label = new UILabel("Text Size");
 	label->position = XY{ 20, 120 };
 	wxsManager.addDrawable(label);
 

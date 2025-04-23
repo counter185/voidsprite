@@ -30,15 +30,13 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     tboxY->wxWidth = 120;
     wxsManager.addDrawable(tboxY);
 
-    UILabel* paddingLabel = new UILabel();
+    UILabel* paddingLabel = new UILabel("Padding");
     paddingLabel->position = XY{ 20, 125 };
-    paddingLabel->text = "Padding";
     wxsManager.addDrawable(paddingLabel);
 
 
-    UILabel* ll = new UILabel();
+    UILabel* ll = new UILabel("Right");
     ll->position = XY{ 120, 125 };
-    ll->text = "Right";
     wxsManager.addDrawable(ll);
 
     tboxPadRX = new UITextField();
@@ -47,9 +45,8 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     tboxPadRX->wxWidth = 60;
     wxsManager.addDrawable(tboxPadRX);
 
-    ll = new UILabel();
+    ll = new UILabel("Bottom");
     ll->position = XY{ 250, 125 };
-    ll->text = "Bottom";
     wxsManager.addDrawable(ll);
 
     tboxPadBY = new UITextField();
@@ -58,9 +55,8 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     tboxPadBY->wxWidth = 60;
     wxsManager.addDrawable(tboxPadBY);
 
-    UILabel* opacityLabel = new UILabel();
+    UILabel* opacityLabel = new UILabel("Opacity");
     opacityLabel->position = XY{ 20, 185 };
-    opacityLabel->text = "Opacity";
     wxsManager.addDrawable(opacityLabel);
 
     opacitySlider = new UISlider();

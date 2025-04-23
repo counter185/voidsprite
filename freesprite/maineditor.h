@@ -78,6 +78,7 @@ public:
     bool lastUndoWasRedo = false;
     bool hideUI = false;
     bool penDown = false;
+    bool penAltButtonDown = false;
 
     EditorUnsavedChanges changesSinceLastSave = NO_UNSAVED_CHANGES;
     PlatformNativePathString lastConfirmedSavePath;
@@ -161,6 +162,8 @@ public:
     void drawSplitSessionFragments();
     void drawZoomLines();
     void drawRowColNumbers();
+
+    void inputMouseRight(XY at, bool down);
 
     void initLayers();
     virtual void setUpWidgets();

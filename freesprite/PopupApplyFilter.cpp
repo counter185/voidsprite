@@ -151,8 +151,7 @@ void PopupApplyFilter::renderFilterPopupBackground()
 
 void PopupApplyFilter::setupWidgets()
 {
-    UILabel* title = new UILabel();
-    title->text = targetFilter->name();
+    UILabel* title = new UILabel(targetFilter->name());
     title->fontsize = 22;
     title->position = XY{5, 5};
     wxsManager.addDrawable(title);
@@ -161,8 +160,7 @@ void PopupApplyFilter::setupWidgets()
     int y = 50;
     int i = 0;
     for (auto& p : params) {
-        UILabel* label = new UILabel();
-        label->text = p.name;
+        UILabel* label = new UILabel(p.name);
         label->position = XY{10, y + 2};
         wxsManager.addDrawable(label);
 
@@ -278,14 +276,14 @@ void PopupApplyFilter::updateLabels()
         UILabel* label = paramLabels[i];
         switch (p.paramType) {
             case PT_INT:
-                label->text = std::to_string((int)p.defaultValue);
+                label->setText(std::to_string((int)p.defaultValue));
                 break;
             case PT_FLOAT:
             default:
-                label->text = std::format("{:.1f}", p.defaultValue);
+                label->setText(std::format("{:.1f}", p.defaultValue));
                 break;
             case PT_INT_RANGE:
-                label->text = std::to_string((int)p.defaultValue) + ":" + std::to_string((int)p.defaultValueTwo);
+                label->setText(std::to_string((int)p.defaultValue) + ":" + std::to_string((int)p.defaultValueTwo));
                 break;
         }
     }

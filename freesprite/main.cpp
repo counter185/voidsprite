@@ -279,6 +279,18 @@ void UpdateViewportScaler(){
     viewport = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
 }
 
+void AutoViewportScale() {
+    int newViewportScale = 1;
+    if (g_windowW > g_windowH) {
+        newViewportScale = ixmax(1, unscaledWindowSize.y / 720);
+    }
+    else {
+        newViewportScale = ixmax(1, unscaledWindowSize.x / 1280);
+    }
+    g_renderScale = newViewportScale;
+    UpdateViewportScaler();
+}
+
 void renderbgOpInProgressScreen() {
 
     SDL_Rect r = { 0, 0, g_windowW, g_windowH };
@@ -654,7 +666,11 @@ int main(int argc, char** argv)
                     g_windowW = evt.window.data1;
                     g_windowH = evt.window.data2;
                     unscaledWindowSize = { g_windowW, g_windowH };
+#if __ANDROID__
+                    AutoViewportScale();
+#else
                     UpdateViewportScaler();
+#endif
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
                     if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {

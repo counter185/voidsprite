@@ -11,14 +11,12 @@ PanelMCBlockPreview::PanelMCBlockPreview(MinecraftBlockPreviewScreen* caller, bo
 	wxWidth = small ? 180 : 320;
 	wxHeight = small ? 190 : 420;
 
-	UILabel* titleLabel = new UILabel();
-    titleLabel->text = "Cube";
+	UILabel* titleLabel = new UILabel("Cube");
     titleLabel->position = {5, 2};
     subWidgets.addDrawable(titleLabel);
 
     if (!small) {
-        UILabel* l = new UILabel();
-        l->text = "Angle";
+        UILabel* l = new UILabel("Angle");
         l->position = { 15, 40 };
         subWidgets.addDrawable(l);
 

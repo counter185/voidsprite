@@ -3,8 +3,7 @@
 
 UICheckbox::UICheckbox(std::string text)
 {
-	label = new UILabel();
-	label->text = text;
+	label = new UILabel(text);
 	label->position = { 35,0 };
 	subWidgets.addDrawable(label);
 }

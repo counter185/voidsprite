@@ -303,7 +303,7 @@ void SplitSessionEditor::recalcCanvasDimensions()
 
 void SplitSessionEditor::recalcRelativePaths()
 {
-    guideLabel->text = outputSPSNFilePath.size() > 0 ? outputSPSNFilePath : "No output file set.";
+    guideLabel->setText(outputSPSNFilePath.size() > 0 ? outputSPSNFilePath : "No output file set.");
     for (tempSplitSessionImage& tssi : loadedImgs) {
         tssi.calcRelativePath = evalRelativePath(outputSPSNFilePath, tssi.fullOriginalPath);
         std::replace(tssi.calcRelativePath.begin(), tssi.calcRelativePath.end(), '\\', '/');
@@ -319,7 +319,7 @@ void SplitSessionEditor::populateSubImagesList()
     for (int x = 0; x < loadedImgs.size(); x++) {
         tempSplitSessionImage& tssi = loadedImgs[x];
         UILabel* lbl = new UILabel();
-        lbl->text = "-- " + tssi.calcRelativePath;
+        lbl->setText("-- " + tssi.calcRelativePath);
         lbl->position = {0, y};
         y += 30;
         //btn->wxWidth = 250;
@@ -328,8 +328,7 @@ void SplitSessionEditor::populateSubImagesList()
         subImagesPanel->subWidgets.addDrawable(lbl);
     }
 
-    UILabel* lbl = new UILabel();
-    lbl->text = " + [Drag images in to add them to the split session]";
+    UILabel* lbl = new UILabel(" + [Drag images in to add them to the split session]");
     lbl->position = { 0, y };
     subImagesPanel->subWidgets.addDrawable(lbl);
     y += 30;

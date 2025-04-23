@@ -29,7 +29,6 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
 
     pickedColorLabel = new UILabel();
     pickedColorLabel->position = { 60, 350 };
-    pickedColorLabel->text = "";
     subWidgets.addDrawable(pickedColorLabel);
 
     std::vector<std::string> palettes;
@@ -106,7 +105,7 @@ void PalettizedEditorColorPicker::render(XY position)
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 
-    pickedColorLabel->text = std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow);
+    pickedColorLabel->setText(std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow));
     pickedColorLabel->color = {valCol.r, valCol.g, valCol.b, 0xff};
 
     subWidgets.renderAll(position);

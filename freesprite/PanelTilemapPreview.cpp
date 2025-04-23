@@ -11,13 +11,11 @@ PanelTilemapPreview::PanelTilemapPreview(TilemapPreviewScreen* parent) {
     wxHeight = 200;
     position = { 20,50 };
 
-    UILabel* ll = new UILabel();
-    ll->text = "Tileset preview";
+    UILabel* ll = new UILabel("Tileset preview");
     ll->position = { 5,5 };
     subWidgets.addDrawable(ll);
     
-    ll = new UILabel();
-    ll->text = "Selected tile: [TAB] to switch";
+    ll = new UILabel("Selected tile: [TAB] to switch");
     ll->position = { 15,60 };
     subWidgets.addDrawable(ll);
 }

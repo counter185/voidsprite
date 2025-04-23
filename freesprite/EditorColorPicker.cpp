@@ -41,28 +41,22 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
     //   -------------------
     //   | Sliders tab 
 
-    UILabel* labelH = new UILabel();
-    UILabel* labelR = new UILabel();
-    labelR->text = "R";
-    labelH->text = "H";
+    UILabel* labelH = new UILabel("H");
+    UILabel* labelR = new UILabel("R");
     labelH->position = XY{ 0, 120 + 10 };
     labelR->position = XY{ 0, 10 };
     colorTabs->tabs[1].wxs.addDrawable(labelH);
     colorTabs->tabs[1].wxs.addDrawable(labelR);
 
-    UILabel* labelS = new UILabel();
-    UILabel* labelG = new UILabel();
-    labelG->text = "G";
-    labelS->text = "S";
+    UILabel* labelS = new UILabel("S");
+    UILabel* labelG = new UILabel("G");
     labelS->position = XY{ 0, 120 + 45 };
     labelG->position = XY{ 0, 45 };
     colorTabs->tabs[1].wxs.addDrawable(labelS);
     colorTabs->tabs[1].wxs.addDrawable(labelG);
 
-    UILabel* labelV = new UILabel();
-    UILabel* labelB = new UILabel();
-    labelB->text = "B";
-    labelV->text = "V";
+    UILabel* labelV = new UILabel("V");
+    UILabel* labelB = new UILabel("B");
     labelV->position = XY{ 0, 120 + 80 };
     labelB->position = XY{ 0, 80 };
     colorTabs->tabs[1].wxs.addDrawable(labelV);
@@ -370,7 +364,7 @@ void EditorColorPicker::eventSliderPosChanged(int evt_id, float f)
                 std::map<std::string, double> componentData;
                 for (auto& component : modelData.components) {
                     component.second.valueNow = component.second.valueSlider->getValue(component.second.range.first, component.second.range.second);
-                    component.second.valueLabel->text = std::format("{:.2f}", component.second.valueNow);
+                    component.second.valueLabel->setText(std::format("{:.2f}", component.second.valueNow));
                     componentData[component.first] = component.second.valueNow;
                 }
                 
@@ -466,7 +460,7 @@ void EditorColorPicker::updateColorModelSliders(std::string dontUpdate)
             double val = modelColorValue[component.first];
             if (model.first != dontUpdate) {
                 slider->sliderPos = (val - component.second.range.first) / (component.second.range.second - component.second.range.first);
-                label->text = std::format("{:.2f}", val);
+                label->setText(std::format("{:.2f}", val));
                 component.second.valueNow = val;
             }
             slider->colors = {component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMin),

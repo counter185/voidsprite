@@ -10,14 +10,12 @@ PanelSpritesheetPreview::PanelSpritesheetPreview(SpritesheetPreviewScreen* calle
     wxWidth = 320;
     wxHeight = 200;
 
-    UILabel* titleLabel = new UILabel();
-    titleLabel->text = "Preview sprites";
+    UILabel* titleLabel = new UILabel("Preview sprites");
     titleLabel->position = { 5, 2 };
     subWidgets.addDrawable(titleLabel);
 
-	msPerSpriteLabel = new UILabel();
+	msPerSpriteLabel = new UILabel("MS per sprite");
     msPerSpriteLabel->position = { 5, 40 };
-	msPerSpriteLabel->text = "MS per sprite";
 	subWidgets.addDrawable(msPerSpriteLabel);
 
 	textfieldMSPerSprite = new UITextField();

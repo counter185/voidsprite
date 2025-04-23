@@ -35,7 +35,7 @@ void PopupListRecoveryAutosaves::refreshList()
 {
 	scrollPanel->subWidgets.freeAllDrawables();
 
-	allFilesSizeLabel->text = TL("vsp.launchpad.recoveryautosaves.allfilesize") + bytesToFriendlyString(getAllRecoveryFilesSize());
+	allFilesSizeLabel->setText(TL("vsp.launchpad.recoveryautosaves.allfilesize") + bytesToFriendlyString(getAllRecoveryFilesSize()));
 
 	auto autosaveFiles = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves"), ".voidsn");
 	int x = 0;

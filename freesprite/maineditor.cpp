@@ -591,6 +591,27 @@ void MainEditor::drawRowColNumbers()
     }
 }
 
+void MainEditor::inputMouseRight(XY at, bool down)
+{
+    RecalcMousePixelTargetPoint(at.x, at.y);
+    if (currentBrush != NULL && currentBrush->overrideRightClick()) {
+        if (down) {
+            currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+        }
+        else {
+            currentBrush->rightClickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+        }
+    }
+    else {
+        if (down) {
+            bool pickFromWholeImage = !g_ctrlModifier;
+            setActiveColor(!pickFromWholeImage ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint)
+                : pickColorFromAllLayers(mousePixelTargetPoint));
+            playColorPickerVFX(pickFromWholeImage);
+        }
+    }
+}
+
 void MainEditor::DrawForeground()
 {
     drawBottomBar();
@@ -1154,14 +1175,14 @@ void MainEditor::initToolParameters()
                 case 1: //int
                     UISlider* slider = new UISlider();
                     slider->setValue(prop.second.min, prop.second.max, prop.second.defaultValue);
-                    valueLabel->text = std::to_string((int)slider->getValue(prop.second.min, prop.second.max));
+                    valueLabel->setText(std::to_string((int)slider->getValue(prop.second.min, prop.second.max)));
                     slider->wxHeight = 18;
                     slider->wxWidth = 150;
                     slider->position = { x, 8 };
                     slider->onChangeValueCallback = [this, prop, valueLabel](UISlider* s, float) {
                         int v = s->getValue(prop.second.min, prop.second.max);
                         this->toolProperties[prop.first] = v;
-                        valueLabel->text = std::to_string(v);
+                        valueLabel->setText(std::to_string(v));
                     };
                     toolPropertiesPanel->subWidgets.addDrawable(slider);
                     x += 110;
@@ -1284,25 +1305,18 @@ void MainEditor::takeInput(SDL_Event evt) {
                     zoomKeyHeld = false;
                 }
                 else if (evt.button.button == 3) {
-                    RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
-                    if (currentBrush != NULL && currentBrush->overrideRightClick()) {
-                        if (evt.button.down) {
-                            currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                        }
-                        else {
-                            currentBrush->rightClickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                        }
-                    }
-                    else {
-                        if (evt.button.down) {
-                            bool pickFromWholeImage = !g_ctrlModifier;
-                            setActiveColor(!pickFromWholeImage ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint)
-                                : pickColorFromAllLayers(mousePixelTargetPoint));
-                            playColorPickerVFX(pickFromWholeImage);
-                        }
-                    }
+                    inputMouseRight({ (int)evt.button.x, (int)evt.button.y }, evt.button.down);
                 }
                 break;
+#if __ANDROID__ 
+            //limiting this to android because on pc you can just rebind these buttons however you want
+            case SDL_EVENT_PEN_BUTTON_DOWN:
+            case SDL_EVENT_PEN_BUTTON_UP:
+                if (evt.pbutton.button == 1) {    //this should be the s-pen button
+                    //inputMouseRight({ (int)(evt.button.x * g_windowW), (int)(evt.button.y * g_windowH) }, evt.pbutton.down);
+                }
+                break;
+#endif
             case SDL_EVENT_PEN_MOTION:
                 //logprintf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
             case SDL_EVENT_MOUSE_MOTION:
@@ -1469,7 +1483,6 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_FINGERMOTION:
                 if (!penDown) {
                     XY rel = {evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH};
-                    // evt.tfinger.
                     canvas.panCanvas(rel);
                 }
                 break;
@@ -1477,7 +1490,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_PEN_UP:
                 penDown = evt.ptouch.down;
                 SDL_SetWindowMouseGrab(g_wd, penDown);
-                loginfo(std::format("new pen state: {}", penDown));
+                //loginfo(std::format("new pen state: {}", penDown));
                 break;
         }
     } else {
