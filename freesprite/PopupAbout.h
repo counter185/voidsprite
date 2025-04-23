@@ -8,7 +8,12 @@
 #include "FileIO.h"
 
 inline std::string listOfContributors = ""
+#if __ANDROID__
+        //fix this symlink some day
+        "< list of contributors currently only available on GitHub >"
+#else
 #include "../CONTRIBUTORS.txt"
+#endif
 ;
 
 class PopupAbout : public BasePopup {

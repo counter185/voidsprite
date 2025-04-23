@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL_android.h>
 #include <jni.h>
 #include "EventCallbackListener.h"
 #include "Notification.h"
@@ -19,7 +18,10 @@ void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 }
 void platformInit() {}
-void platformPostInit() {}
+void platformPostInit() {
+    //sometimes it just doesn't do that
+    SDL_MaximizeWindow(g_wd);
+}
 
 std::string appdataPath = "";
 std::string systemInformation = "Android";

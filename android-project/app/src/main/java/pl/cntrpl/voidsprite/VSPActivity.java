@@ -1,6 +1,10 @@
 package pl.cntrpl.voidsprite;
 
+import android.net.Uri;
 import android.os.Build;
+import android.content.Intent;
+import android.os.Environment;
+import android.provider.Settings;
 
 import org.libsdl.app.SDLActivity;
 
@@ -18,6 +22,14 @@ public class VSPActivity extends SDLActivity {
             systemInformation += String.format("SOC: %s %s\n", Build.SOC_MANUFACTURER, Build.SOC_MODEL);
         }
         passSystemInformationString(systemInformation);
+
+        // we need the all files access permission to support split sessions and all the obscure formats
+        if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
+        
         super.main();
     }
 
