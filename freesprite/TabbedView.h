@@ -80,6 +80,12 @@ public:
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }
         }
+        else if (evt.type == SDL_EVENT_FINGER_DOWN) {
+            XY touchPos = {(int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH)};
+            if (!tabButtons.tryFocusOnPoint(touchPos, gPosOffset)) {
+                tabs[openTab].wxs.tryFocusOnPoint(touchPos, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
+            }
+        }
         else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
             tabs[openTab].wxs.tryFocusOnNextTabbable();
         }
@@ -113,6 +119,7 @@ public:
     }
 
     bool takesMouseWheelEvents() override { return true; }
+    bool takesTouchEvents() override { return true; }
 
     XY getDimensions() override { 
         XY ret = { 0,0 };

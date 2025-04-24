@@ -57,7 +57,18 @@ public:
         DrawableManager::processHoverEventInMultiple({ subWidgets }, evt, xyAdd(gPosOffset, scrollOffset));
 
         if (!DrawableManager::processInputEventInMultiple({subWidgets}, evt, xyAdd(gPosOffset, scrollOffset))) {
-            
+            if (evt.type == SDL_EVENT_FINGER_MOTION) {
+                XY motionPos = {(int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH)};
+                XY motionDir = {(int)(evt.tfinger.dx * g_windowW), (int)(evt.tfinger.dy * g_windowH)};
+                if (pointInBox(motionPos, {gPosOffset.x, gPosOffset.y, wxWidth, wxHeight})) {
+                    if (scrollVertically) {
+                        scrollOffset.y += motionDir.y;
+                    }
+                    if (scrollHorizontally) {
+                        scrollOffset.x += motionDir.x;
+                    }
+                }
+            }
         }
     }
     void mouseHoverMotion(XY mousePos, XY gPosOffset) override
@@ -80,6 +91,8 @@ public:
             }
         }
     }
+
+    bool takesTouchEvents() override { return true; }
 
     void updateBounds() {
         XY insideArea = getInsideAreaWH();
