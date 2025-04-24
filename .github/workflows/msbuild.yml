@@ -166,5 +166,5 @@ jobs:
         link-to-sdk: true
 
     - name: the fun part
-      working-directory: ${{env.GITHUB_WORKSPACE}}/android-project
-      run: ./gradlew build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd android-project && ./gradlew build
