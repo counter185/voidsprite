@@ -11,7 +11,7 @@ project(
   VERSION 1.0
   LANGUAGES CXX)
 
-add_library(liblcf 
+add_library(liblcf STATIC 
     dbarray.cpp
     dbstring_struct.cpp
     encoder.cpp

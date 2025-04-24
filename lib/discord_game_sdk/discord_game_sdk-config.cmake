@@ -1,0 +1,1 @@
+add_subdirectory(lib/discord_game_sdk)
