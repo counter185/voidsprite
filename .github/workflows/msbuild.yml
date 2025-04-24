@@ -148,7 +148,7 @@ jobs:
 
     - name: setup android dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ./setup_android_on_linux.sh
+      run: chmod u+x ./setup_android_on_linux.sh && ./setup_android_on_linux.sh
     
     - name: Set up JDK 17
       uses: actions/setup-java@v3
