@@ -29,7 +29,7 @@ public:
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override {}
 	void rightClickPress(MainEditor* editor, XY pos) override;
-	void renderOnCanvas(MainEditor* editor, int scale);
-	bool overrideRightClick() { return true; }
+	void renderOnCanvas(MainEditor* editor, int scale) override;
+	bool overrideRightClick() override { return true; }
 };
 

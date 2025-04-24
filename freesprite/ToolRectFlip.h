@@ -19,7 +19,7 @@ public:
     void clickRelease(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
     void rightClickRelease(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale);
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override;
 
     void doFlip(MainEditor* editor, XY startPos, XY endPos, bool yFlip);
 };

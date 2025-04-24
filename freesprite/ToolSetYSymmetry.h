@@ -8,8 +8,8 @@ class ToolSetYSymmetry : public BaseBrush
     MainEditor* lastEditor = NULL;
     Timer64 clickTimer;
 
-    std::string getIconPath() { return "tool_setysym.png"; }
-    std::string getName() { return TL("vsp.brush.ysym"); }
+    std::string getIconPath() override { return "tool_setysym.png"; }
+    std::string getName() override { return TL("vsp.brush.ysym"); }
     std::string getTooltip() override { return TL("vsp.brush.ysym.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 

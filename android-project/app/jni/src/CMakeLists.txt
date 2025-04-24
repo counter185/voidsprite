@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 project(my_app)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narrowing -Wno-macro-redefined -D VOIDSPRITE_JXL_ENABLED=0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narrowing -Wno-macro-redefined -Wno-switch -Wno-inconsistent-missing-override -D VOIDSPRITE_JXL_ENABLED=0")
 
 if(NOT TARGET SDL3::SDL3)
     find_package(SDL3 CONFIG)

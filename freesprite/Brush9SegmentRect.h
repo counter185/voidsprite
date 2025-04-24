@@ -12,7 +12,7 @@ class Brush9SegmentRect :
 
     NineSegmentPattern* pickedPattern = NULL;
 
-    void resetState() {
+    void resetState() override {
         startPos = XY{ 0,0 };
     }
     std::string getName() override { return "9-segment Rectangle [WIP]"; };

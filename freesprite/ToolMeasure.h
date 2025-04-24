@@ -9,9 +9,9 @@ class ToolMeasure :
     XY lastMousePos = XY{ 0,0 };
     Timer64 clickTimer;
 
-    virtual std::string getIconPath() { return "tool_measure.png"; }
+    std::string getIconPath() override { return "tool_measure.png"; }
     bool isReadOnly() override { return true; }
-    std::string getName() { return TL("vsp.brush.measure"); }
+    std::string getName() override { return TL("vsp.brush.measure"); }
     std::string getTooltip() override { return TL("vsp.brush.measure.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 

@@ -21,7 +21,7 @@ class ToolRectMove :
     void clickPress(MainEditor* editor, XY pos) override;
     void clickRelease(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale) {
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override {
         if (mouseDown) {
             drawPixelRect(mouseDownPoint, lastMouseMotionPos, canvasDrawPoint, scale);
         }

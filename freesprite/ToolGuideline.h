@@ -11,8 +11,8 @@ class ToolGuideline :
     //MainEditor* lastEditor = NULL;
     Timer64 clickTimer;
 
-    std::string getIconPath() { return "tool_setguide.png"; }
-    std::string getName() { return TL("vsp.brush.guideline"); }
+    std::string getIconPath() override { return "tool_setguide.png"; }
+    std::string getName() override { return TL("vsp.brush.guideline"); }
     std::string getTooltip() override { return TL("vsp.brush.guideline.desc"); }
     XY getSection() override { return XY{ 1,1 }; }
 

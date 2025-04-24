@@ -11,6 +11,6 @@ public:
 	void clickPress(MainEditor* editor, XY pos) override;
 	//void clickDrag(MainEditor* editor, XY from, XY to) override;
 	//void clickRelease(MainEditor* editor, XY pos) override {}
-	void renderOnCanvas(MainEditor* editor, int scale);
+	void renderOnCanvas(MainEditor* editor, int scale) override;
 };
 

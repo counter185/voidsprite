@@ -20,7 +20,7 @@ public:
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale);
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override;
 
     void eventPopupClosed(int evt_id, BasePopup* target) override;
 
