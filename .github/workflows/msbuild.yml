@@ -158,6 +158,8 @@ jobs:
     
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        log-accepted-android-sdk-licenses: false
 
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
@@ -167,4 +169,4 @@ jobs:
 
     - name: the fun part
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd android-project && ./gradlew build
+      run: cd android-project && chmod u+x ./gradlew && ./gradlew build
