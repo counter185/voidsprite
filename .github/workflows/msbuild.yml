@@ -141,14 +141,14 @@ jobs:
           voidsprite.app.tar
   
   build-android:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
     - name: setup android dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: runas.exe /savecred /user:administrator ./setup_android.bat
+      run: ./setup_android_on_linux.sh
     
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -166,5 +166,5 @@ jobs:
         link-to-sdk: true
 
     - name: the fun part
-      working-directory: ${{env.GITHUB_WORKSPACE}}\android-project
+      working-directory: ${{env.GITHUB_WORKSPACE}}/android-project
       run: ./gradlew build
