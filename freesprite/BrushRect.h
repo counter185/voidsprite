@@ -7,7 +7,7 @@ class BrushRect :
 	bool heldDown = false;
 	XY lastMousePos = XY{ 0,0 };
 
-	void resetState() {
+	void resetState() override {
 		startPos = XY{ 0,0 };
 	}
 	std::string getName() override { return TL("vsp.brush.rect"); };

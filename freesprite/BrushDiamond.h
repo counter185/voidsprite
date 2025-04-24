@@ -6,7 +6,7 @@ class BrushDiamond :
 	XY startPos = XY{ 0,0 };
 	bool heldDown = false;
 
-	void resetState() {
+	void resetState() override {
 		startPos = XY{ 0,0 };
 	}
 	std::string getName() override { return TL("vsp.brush.diamond"); };

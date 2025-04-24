@@ -6,7 +6,7 @@ public:
     XY startPos = XY{ 0,0 };
     bool dragging = false;
 
-    void resetState() {
+    void resetState() override {
         startPos = XY{ 0,0 };
     }
     std::string getName() override { return TL("vsp.brush.pathfindline"); };
@@ -17,6 +17,6 @@ public:
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override {}
     void clickRelease(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale);
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override;
 };
 

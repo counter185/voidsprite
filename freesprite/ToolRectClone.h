@@ -24,8 +24,8 @@ class ToolRectClone :
     void clickPress(MainEditor* editor, XY pos) override;
     void clickRelease(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
-    bool isReadOnly() { return true; }
-    void renderOnCanvas(XY canvasDrawPoint, int scale) {
+    bool isReadOnly() override { return true; }
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override {
         if (mouseDown) {
             drawPixelRect(mouseDownPoint, lastMouseMotionPos, canvasDrawPoint, scale);
         }
