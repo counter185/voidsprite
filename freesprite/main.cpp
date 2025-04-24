@@ -282,10 +282,12 @@ void UpdateViewportScaler(){
 void AutoViewportScale() {
     int newViewportScale = 1;
     if (g_windowW > g_windowH) {
-        newViewportScale = ixmax(1, unscaledWindowSize.y / 720);
+        newViewportScale = unscaledWindowSize.y < (720 * 1.5) ? 1
+                : ixmax(2, unscaledWindowSize.y / 720);
     }
     else {
-        newViewportScale = ixmax(1, unscaledWindowSize.x / 1280);
+        newViewportScale = unscaledWindowSize.x < (1280 * 1.5) ? 1
+                : ixmax(2, unscaledWindowSize.x / 1280);
     }
     g_renderScale = newViewportScale;
     UpdateViewportScaler();

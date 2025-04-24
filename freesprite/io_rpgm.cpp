@@ -45,7 +45,10 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
         int filePtr = 0;
         for (int c = 0; c < 256; c++) {
             //colorPalette[c] = 0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]);
-            nLayer->palette.push_back(PackRGBAtoARGB(decompBytes[filePtr++], decompBytes[filePtr++], decompBytes[filePtr++],255));
+            u8 r = decompBytes[filePtr++];
+            u8 g = decompBytes[filePtr++];
+            u8 b = decompBytes[filePtr++];
+            nLayer->palette.push_back(PackRGBAtoARGB(r, g, b,255));
         }
 
         uint32_t* pxData = (uint32_t*)nLayer->pixelData;

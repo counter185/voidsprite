@@ -51,10 +51,12 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             }
         }
     }
-    else if (convEvent.type == SDL_EVENT_FINGER_DOWN) {
+    else if (evt.type == SDL_EVENT_FINGER_DOWN) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
-            if (wxs.tryFocusOnPoint(XY{ (int)(convEvent.tfinger.x * g_windowW), (int)(convEvent.tfinger.y * g_windowH) }, parentOffset)) {
+            XY touchPos = XY{ (int)(convEvent.tfinger.x * g_windowW), (int)(convEvent.tfinger.y * g_windowH) };
+            //loginfo(std::format("attempting to focus on point from touch event {} {}", touchPos.x, touchPos.y));
+            if (wxs.tryFocusOnPoint(touchPos, parentOffset)) {
                 break;
             }
         }
