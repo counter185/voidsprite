@@ -139,3 +139,32 @@ jobs:
         name: voidsprite-build-mac-intel64
         path: |
           voidsprite.app.tar
+  
+  build-android:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: setup android dependencies
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./setup_android.bat
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r27d
+        link-to-sdk: true
+
+    - name: the fun part
+      working-directory: ${{env.GITHUB_WORKSPACE}}\android-project
+      run: ./gradlew build
