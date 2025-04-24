@@ -4,14 +4,14 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
-#pragma warning(disable : 4477) //logprintf wrong format argument whatever
-#pragma warning(disable : 4099) //liblcf link without debugging info whatever don't care
+#pragma warning(disable : 4477) // logprintf wrong format argument whatever
+#pragma warning(disable : 4099) // liblcf link without debugging info whatever don't care
 
-//macro redefinition warning, remove this line after fully migrating to sdl3
+// macro redefinition warning, remove this line after fully migrating to sdl3
 #pragma warning(disable : 4005)
 #endif
 
-//#include <math.h>
+// #include <math.h>
 
 #include <stdarg.h>
 #include <chrono>
@@ -46,7 +46,7 @@ extern "C" {
 
 #ifdef __GNUC__
 #define slogprintf_s snlogprintf
-#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),(mode)))==NULL
+#define fopen_s(pFile, filename, mode) ((*(pFile)) = fopen((filename), (mode))) == NULL
 #endif
 
 #define u64 uint64_t
@@ -74,20 +74,20 @@ extern "C" {
 #define VOIDSPRITE_ASSETS_PATH ""
 #endif
 #ifndef VOIDSPRITE_ASSETS_SUBDIR
-    #if __ANDROID__
-    #define VOIDSPRITE_ASSETS_SUBDIR ""
-    #else
-    #define VOIDSPRITE_ASSETS_SUBDIR "/assets/"
-    #endif
+#if __ANDROID__
+#define VOIDSPRITE_ASSETS_SUBDIR ""
+#else
+#define VOIDSPRITE_ASSETS_SUBDIR "/assets/"
+#endif
 #endif
 
-#define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]
+#define ARRAY2DPOINT(arr, x, y, w) arr[(y) * w + (x)]
 
-#define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
-#define FONT_PATH_JP "appfontjp-NotoSansJP-Medium.ttf"
+#define FONT_PATH "assets/appfont-MPLUSRounded1c-Medium.ttf"
+#define FONT_PATH_JP "assets/appfontjp-NotoSansJP-Medium.ttf"
 
 #define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
-#define COLOR_ERROR SDL_Color{255,0,0,255}
+#define COLOR_ERROR SDL_Color{255, 0, 0, 255}
 
 #define UTF8_DIAMOND "\xE2\x97\x86"
 #define UTF8_EMPTY_DIAMOND "\xE2\x97\x87"
@@ -97,7 +97,7 @@ extern "C" {
 #define INT_MIN (-2147483647 - 1)
 #endif
 
-//util classes
+// util classes
 class EventCallbackListener;
 class TextRenderer;
 class Layer;
@@ -112,10 +112,10 @@ class FileExporter;
 struct NineSegmentPattern;
 class DrawableManager;
 
-//templates
+// templates
 class BaseTemplate;
 
-//screens/popups
+// screens/popups
 class BaseScreen;
 class BasePopup;
 class MainEditor;
@@ -124,7 +124,7 @@ class SpritesheetPreviewScreen;
 class TilemapPreviewScreen;
 class MinecraftBlockPreviewScreen;
 
-//specialized ui elements
+// specialized ui elements
 class EditorColorPicker;
 class EditorBrushPicker;
 class EditorLayerPicker;
@@ -134,12 +134,12 @@ class PanelSpritesheetPreview;
 class ButtonStartScreenSession;
 class PanelMCBlockPreview;
 
-//brushes/tools
+// brushes/tools
 class BaseBrush;
 class Brush9SegmentRect;
 class ToolText;
 
-//standard ui elements
+// standard ui elements
 class UIColorInputField;
 class UILayerButton;
 class UIButton;
@@ -150,12 +150,11 @@ class UICheckbox;
 class Panel;
 class ScrollingPanel;
 
-//filters
+// filters
 class BaseFilter;
 class RenderFilter;
 
-template <typename T>
-class ScreenWideNavBar;
+template <typename T> class ScreenWideNavBar;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
@@ -180,33 +179,12 @@ inline SDL_PropertiesID g_props;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
-extern SDL_Texture* g_mainlogo,
-   *g_iconLayerAdd,
-   *g_iconLayerDelete,
-   *g_iconLayerUp,
-   *g_iconLayerDown,
-   *g_iconLayerDownMerge,
-   *g_iconLayerDuplicate,
-   *g_iconLayerHide,
-   *g_iconEraser,
-   *g_iconBlendMode,
-   *g_iconColorHSV,
-   *g_iconColorRGB,
-   *g_iconColorVisual,
-   *g_iconNavbarTabFile,
-   *g_iconNavbarTabEdit,
-   *g_iconNavbarTabLayer,
-   *g_iconNavbarTabView,
-   *g_iconComment,
-   *g_iconMenuPxDim,
-   *g_iconMenuSpritesheet,
-   *g_iconMenuTemplates,
-   *g_iconNotifTheCreature,
-   *g_iconNotifError,
-   *g_iconNotifSuccess,
-   *g_iconNewColor,
-   *g_iconActionBarUndo,
-   *g_iconActionBarRedo;
+extern SDL_Texture *g_mainlogo, *g_iconLayerAdd, *g_iconLayerDelete, *g_iconLayerUp, *g_iconLayerDown,
+    *g_iconLayerDownMerge, *g_iconLayerDuplicate, *g_iconLayerHide, *g_iconEraser, *g_iconBlendMode, *g_iconColorHSV,
+    *g_iconColorRGB, *g_iconColorVisual, *g_iconNavbarTabFile, *g_iconNavbarTabEdit, *g_iconNavbarTabLayer,
+    *g_iconNavbarTabView, *g_iconComment, *g_iconMenuPxDim, *g_iconMenuSpritesheet, *g_iconMenuTemplates,
+    *g_iconNotifTheCreature, *g_iconNotifError, *g_iconNotifSuccess, *g_iconNewColor, *g_iconActionBarUndo,
+    *g_iconActionBarRedo;
 
 void g_addNotification(Notification a);
 
@@ -237,14 +215,12 @@ struct XYf {
     float x, y;
 };
 
-template <typename T>
-struct NamedOperation {
+template <typename T> struct NamedOperation {
     std::string name;
     std::function<void(T)> function;
 };
 
-template <typename T>
-struct NavbarSection {
+template <typename T> struct NavbarSection {
     std::string name;
     std::vector<SDL_Scancode> order;
     std::map<SDL_Scancode, NamedOperation<T>> actions;

@@ -1,4 +1,26 @@
 #pragma once
+
+#undef SDL_RenderDrawLine
+#undef SDL_GetTicks64
+#undef SDL_FreeSurface
+#undef SDL_KEYUP
+#undef SDL_KEYDOWN
+#undef SDL_QUIT
+#undef SDL_MOUSEWHEEL
+#undef SDL_MOUSEMOTION
+#undef SDL_MOUSEBUTTONUP
+#undef SDL_MOUSEBUTTONDOWN
+#undef SDL_CONTROLLERDEVICEADDED
+#undef SDL_CONTROLLERDEVICEREMOVED
+#undef SDL_FINGERMOTION
+#undef SDL_FINGERDOWN
+#undef SDL_FINGERUP
+#undef SDL_CONTROLLERAXISMOTION
+#undef SDL_TEXTINPUT
+#undef SDL_DROPFILE
+#undef SDL_GameControllerGetAttached
+#undef SDL_RenderSetClipRect
+
 #define SDL_RenderDrawLine SDL_RenderLine
 #define SDL_GetTicks64 SDL_GetTicks
 #define SDL_FreeSurface SDL_DestroySurface

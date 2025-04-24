@@ -17,7 +17,6 @@
 mono_crash.*
 
 include/
-lib/
 
 # Build results
 [Dd]ebug/

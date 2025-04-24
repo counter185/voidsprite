@@ -1,179 +1,177 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# Workflows are temporarily disabled while the works
+# on cmake port is still being done.
 
-name: Build (win64 and linux64)
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-env:
-  # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: .
-
-  # Configuration type to build.
-  # You can convert this to a build matrix if you need coverage of multiple configuration types.
-  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-  BUILD_CONFIGURATION: Release
-  
-  ACTIONS_STEP_DEBUG: true
-
-permissions:
-  contents: read
-
-jobs:
-  build-windows64:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
-
-    - name: Extract voidsprite devlibs
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: tar -xf freesprite/devlibs/devlibs.zip -C freesprite/devlibs
-
-    - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /t:voidsprite /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
-
-    - name: Make build directories and copy devlibs
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ./copy_devlibs.bat
-      
-    - name: Copy assets
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ./copy_assets.bat
-
-    - name: Push build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: voidsprite-build-win64
-        path: |
-          x64/Release
-          
-  #  build-linux64:
-  #
-  #    runs-on: ubuntu-22.04
-  #
-  #    steps:
-  #    - uses: actions/checkout@v4
-  #
-  #    - name: install g++13
-  #      run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -y && sudo apt-get install g++-13
-  #
-  #    - name: install devlibs
-  #      run: sudo apt-get install -y python3 python3-pip zlib1g-dev libpng-dev libhwy-dev libpugixml-dev ninja-build python3-distutils python3-pkg-resources
-  #
-  #    - name: manually install jxl
-  #      run: wget https://github.com/libjxl/libjxl/releases/download/v0.11.1/jxl-debs-amd64-ubuntu-22.04-v0.11.1.tar.gz && tar -xvzf jxl-debs-amd64-ubuntu-22.04-v0.11.1.tar.gz && sudo dpkg -i libjxl_0.11.1_amd64.deb && sudo dpkg -i libjxl-dev_0.11.1_amd64.deb
-  #
-  #    - name: install sdl3 build deps
-  #      run: |
-  #        sudo sed -i '/deb-src/s/^# //' /etc/apt/sources.list
-  #        sudo apt-get update
-  #        sudo apt-get build-dep libsdl2 libsdl2-ttf libsdl2-image
-  #    
-  #    - name: install latest meson
-  #      run: pip3 install --user meson
-  #
-  #    - name: run build
-  #      run: CC=gcc-13 CXX=g++-13 ./linux_build.sh --portable
-  #
-  #    - name: add licenses
-  #      run: cp -r OPEN_SOURCE_LICENSES target/debug
-  #
-  #    - name: Push build artifacts
-  #      uses: actions/upload-artifact@v4
-  #      with:
-  #        name: voidsprite-build-linux
-  #        path: |
-  #          target/debug
-          
-  build-linux64-flatpak:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
-    steps:
-    - uses: actions/checkout@v4
-    - uses: flathub-infra/flatpak-github-actions/flatpak-builder@master
-      with:
-        bundle: voidsprite-build-linux64-flatpak.flatpak
-        manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
-        cache-key: flatpak-builder-${{ github.sha }}
-        
-  build-mac-x64:
-    runs-on: macos-13
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: install g++13
-      run: brew install gcc@13
-
-    - name: install devlibs
-      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
-
-    - name: run build
-      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
-
-    - name: workaround gh actions artifact file permissions
-      run: tar -cvf voidsprite.app.tar -C target/mac_release .
-
-    - name: Push build artifacts
-      uses: actions/upload-artifact@v4
-      with: 
-        name: voidsprite-build-mac-intel64
-        path: |
-          voidsprite.app.tar
-  
-  build-android:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: setup android dependencies
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: chmod u+x ./setup_android_on_linux.sh && ./setup_android_on_linux.sh
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        log-accepted-android-sdk-licenses: false
-
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r27c
-        link-to-sdk: true
-
-    - name: gradlew build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd android-project && chmod u+x ./gradlew && ./gradlew build
-
-    - name: Push build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: voidsprite-build-android
-        path: |
-          android-project/app/build/outputs/apk/debug
+# name: Build (win64 and linux64)
+# 
+# on:
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+# 
+# env:
+#   # Path to the solution file relative to the root of the project.
+#   SOLUTION_FILE_PATH: .
+# 
+#   # Configuration type to build.
+#   # You can convert this to a build matrix if you need coverage of multiple configuration types.
+#   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+#   BUILD_CONFIGURATION: Release
+#   
+#   ACTIONS_STEP_DEBUG: true
+# 
+# permissions:
+#   contents: read
+# 
+# jobs:
+#   build-windows64:
+#     runs-on: windows-latest
+# 
+#     steps:
+#     - uses: actions/checkout@v4
+# 
+#     - name: Add MSBuild to PATH
+#       uses: microsoft/setup-msbuild@v1.0.2
+# 
+#     - name: Restore NuGet packages
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+# 
+#     - name: Extract voidsprite devlibs
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       run: tar -xf freesprite/devlibs/devlibs.zip -C freesprite/devlibs
+# 
+#     - name: Build
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       # Add additional options to the MSBuild command line here (like platform or verbosity level).
+#       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+#       run: msbuild /m /t:voidsprite /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
+# 
+#     - name: Make build directories and copy devlibs
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       run: ./copy_devlibs.bat
+#       
+#     - name: Copy assets
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       run: ./copy_assets.bat
+# 
+#     - name: Push build artifacts
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: voidsprite-build-win64
+#         path: |
+#           x64/Release
+#           
+#   #  build-linux64:
+#   #
+#   #    runs-on: ubuntu-22.04
+#   #
+#   #    steps:
+#   #    - uses: actions/checkout@v4
+#   #
+#   #    - name: install g++13
+#   #      run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -y && sudo apt-get install g++-13
+#   #
+#   #    - name: install devlibs
+#   #      run: sudo apt-get install -y python3 python3-pip zlib1g-dev libpng-dev libhwy-dev libpugixml-dev ninja-build python3-distutils python3-pkg-resources
+#   #
+#   #    - name: manually install jxl
+#   #      run: wget https://github.com/libjxl/libjxl/releases/download/v0.11.1/jxl-debs-amd64-ubuntu-22.04-v0.11.1.tar.gz && tar -xvzf jxl-debs-amd64-ubuntu-22.04-v0.11.1.tar.gz && sudo dpkg -i libjxl_0.11.1_amd64.deb && sudo dpkg -i libjxl-dev_0.11.1_amd64.deb
+#   #
+#   #    - name: install sdl3 build deps
+#   #      run: |
+#   #        sudo sed -i '/deb-src/s/^# //' /etc/apt/sources.list
+#   #        sudo apt-get update
+#   #        sudo apt-get build-dep libsdl2 libsdl2-ttf libsdl2-image
+#   #    
+#   #    - name: install latest meson
+#   #      run: pip3 install --user meson
+#   #
+#   #    - name: run build
+#   #      run: CC=gcc-13 CXX=g++-13 ./linux_build.sh --portable
+#   #
+#   #    - name: add licenses
+#   #      run: cp -r OPEN_SOURCE_LICENSES target/debug
+#   #
+#   #    - name: Push build artifacts
+#   #      uses: actions/upload-artifact@v4
+#   #      with:
+#   #        name: voidsprite-build-linux
+#   #        path: |
+#   #          target/debug
+#           
+#   build-linux64-flatpak:
+#     runs-on: ubuntu-latest
+#     container:
+#       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+#       options: --privileged
+#     steps:
+#     - uses: actions/checkout@v4
+#     - uses: flathub-infra/flatpak-github-actions/flatpak-builder@master
+#       with:
+#         bundle: voidsprite-build-linux64-flatpak.flatpak
+#         manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
+#         cache-key: flatpak-builder-${{ github.sha }}
+#         
+#   build-mac-x64:
+#     runs-on: macos-13
+# 
+#     steps:
+#     - uses: actions/checkout@v4
+# 
+#     - name: install g++13
+#       run: brew install gcc@13
+# 
+#     - name: install devlibs
+#       run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
+# 
+#     - name: run build
+#       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
+# 
+#     - name: workaround gh actions artifact file permissions
+#       run: tar -cvf voidsprite.app.tar -C target/mac_release .
+# 
+#     - name: Push build artifacts
+#       uses: actions/upload-artifact@v4
+#       with: 
+#         name: voidsprite-build-mac-intel64
+#         path: |
+#           voidsprite.app.tar
+#   
+#   build-android:
+#     runs-on: ubuntu-latest
+# 
+#     steps:
+#     - uses: actions/checkout@v4
+# 
+#     - name: setup android dependencies
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       run: chmod u+x ./setup_android_on_linux.sh && ./setup_android_on_linux.sh
+#     
+#     - name: Set up JDK 17
+#       uses: actions/setup-java@v3
+#       with:
+#         java-version: '17'
+#         distribution: 'temurin'
+#     
+#     - name: Setup Android SDK
+#       uses: android-actions/setup-android@v3
+#       with:
+#         log-accepted-android-sdk-licenses: false
+# 
+#     - uses: nttld/setup-ndk@v1
+#       id: setup-ndk
+#       with:
+#         ndk-version: r27c
+#         link-to-sdk: true
+# 
+#     - name: gradlew build
+#       working-directory: ${{env.GITHUB_WORKSPACE}}
+#       run: cd android-project && chmod u+x ./gradlew && ./gradlew build
+# 
+#     - name: Push build artifacts
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: voidsprite-build-android
+#         path: |
+#           android-project/app/build/outputs/apk/debug

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include "ffi.h"
 #include "event.h"
 #ifdef _WIN32
@@ -549,10 +550,7 @@ private:
 
 class LobbySearchQuery final {
 public:
-    Result Filter(MetadataKey key,
-                  LobbySearchComparison comparison,
-                  LobbySearchCast cast,
-                  MetadataValue value);
+    Result Filter(MetadataKey key, LobbySearchComparison comparison, LobbySearchCast cast, MetadataValue value);
     Result Sort(MetadataKey key, LobbySearchCast cast, MetadataValue value);
     Result Limit(std::uint32_t limit);
     Result Distance(LobbySearchDistance distance);
