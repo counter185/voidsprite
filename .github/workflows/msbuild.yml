@@ -167,6 +167,13 @@ jobs:
         ndk-version: r27c
         link-to-sdk: true
 
-    - name: the fun part
+    - name: gradlew build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: cd android-project && chmod u+x ./gradlew && ./gradlew build
+
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: voidsprite-build-linux
+        path: |
+          android-project/app/build/outputs/apk/debug
