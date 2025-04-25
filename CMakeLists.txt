@@ -23,6 +23,14 @@ file(GLOB_RECURSE src freesprite/*.cpp freesprite/*.c)
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/liblcf")
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/libpng")
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/discord_game_sdk")
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/zlib")
+    execute_process(
+        COMMAND git clone https://github.com/madler/zlib lib/zlib --depth 1 --branch v1.3.1
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+endif()
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/zlib")
+include_directories("${CMAKE_SOURCE_DIR}/lib/zlib")
 if(VOIDSPRITE_STATIC_SDL3)
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3")
         execute_process(
@@ -77,6 +85,7 @@ else()
     target_link_libraries(voidsprite PRIVATE SDL3_image-static)
 endif()
 target_link_libraries(voidsprite PUBLIC jxl)
+target_link_libraries(voidsprite PRIVATE zlibstatic)
 target_link_libraries(voidsprite PRIVATE discord_game_sdk)
 target_link_libraries(voidsprite PRIVATE liblcf)
 target_link_libraries(voidsprite PRIVATE libpng::libpng-static)
