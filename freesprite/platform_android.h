@@ -59,7 +59,7 @@ void platformTrySaveOtherFile(
         std::vector<std::pair<std::string, std::string>> filetypes,
         std::string windowTitle, int evt_id) {
     PopupFilePicker* fp = PopupFilePicker::SaveFile(windowTitle, filetypes);
-    fp->setCallbackListener(evt_id, listener);
+    fp->setCallbackListener(evt_id, caller);
     g_addPopup(fp);    
 }
 

@@ -144,14 +144,21 @@ void PopupFilePicker::populateRootAndFileList() {
     for (auto& file : std::filesystem::directory_iterator(currentDir)) {
         PlatformNativePathString wFileName = file.path().filename();
         std::string fileName = convertStringToUTF8OnWin32(wFileName);
+        bool matchesExtension = stringEndsWithIgnoreCase(fileName, targetExtension);
+
         UIButton* btn = new UIButton( fileName + (file.is_directory() ? "/" : "") );
         btn->position = { 5, fileY };
-        btn->wxWidth = g_fnt->StatStringDimensions(fileName).x + 20;
+        btn->wxWidth = g_fnt->StatStringDimensions(fileName).x + 15 + 30;
         btn->wxHeight = 30;
+
+        btn->icon = 
+            file.is_directory() ? g_iconFilePickerDirectory
+            : matchesExtension ? g_iconFilePickerSupportedFile
+            : g_iconFilePickerFile;
 
         btn->colorTextFocused = btn->colorTextUnfocused =
             file.is_directory() ? SDL_Color{ 0xFF, 0xFC, 0x7B, 0xFF } 
-            : stringEndsWithIgnoreCase(fileName, targetExtension) ? SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF }
+            : matchesExtension ? SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF }
             : SDL_Color{ 0xFF, 0xFF, 0xFF, 0x80 };
 
         if (file.is_directory()) {

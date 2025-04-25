@@ -80,6 +80,9 @@ SDL_Texture* g_iconNotifSuccess = NULL;
 SDL_Texture* g_iconNewColor = NULL;
 SDL_Texture* g_iconActionBarUndo = NULL;
 SDL_Texture* g_iconActionBarRedo = NULL;
+SDL_Texture* g_iconFilePickerDirectory = NULL;
+SDL_Texture* g_iconFilePickerFile = NULL;
+SDL_Texture* g_iconFilePickerSupportedFile = NULL;
 
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
@@ -458,6 +461,9 @@ int main(int argc, char** argv)
     g_iconNewColor =        IMGLoadAssetToTexture("icon_newcolor.png");
     g_iconActionBarUndo =   IMGLoadAssetToTexture("actionbar_undo.png");
     g_iconActionBarRedo =   IMGLoadAssetToTexture("actionbar_redo.png");
+    g_iconFilePickerDirectory =     IMGLoadAssetToTexture("icon_filepicker_directory.png");
+    g_iconFilePickerFile =          IMGLoadAssetToTexture("icon_filepicker_file.png");
+    g_iconFilePickerSupportedFile = IMGLoadAssetToTexture("icon_filepicker_supportedfile.png");
 
     SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
     memcpy(srf->pixels, the_creature, 50 * 50 * 4);

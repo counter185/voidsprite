@@ -207,7 +207,10 @@ extern SDL_Texture* g_mainlogo,
    *g_iconNotifSuccess,
    *g_iconNewColor,
    *g_iconActionBarUndo,
-   *g_iconActionBarRedo;
+   *g_iconActionBarRedo,
+   *g_iconFilePickerDirectory,
+   *g_iconFilePickerFile,
+   *g_iconFilePickerSupportedFile;
 
 void g_addNotification(Notification a);
 
