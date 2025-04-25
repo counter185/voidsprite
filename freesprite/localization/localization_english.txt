@@ -34,6 +34,7 @@
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},
     {"vsp.popup.openimage", "open image"},
+    {"vsp.popup.saveimage", "save image"},
 
     // default layer names
     {"vsp.layer.template", "Template Layer"},
@@ -217,6 +218,10 @@
 
     //popup: file picker
     {"vsp.filepicker.filename", "File name"},
+    {"vsp.filepicker.overwrite", "Overwrite file?"},
+    {"vsp.filepicker.filenotfound", "File not found."},
+    {"vsp.filepicker.nofilename", "No file name chosen."},
+    {"vsp.filepicker.overwriteconfirm", "This file already exists. Overwrite?"},
 
     //brushes/tools
     {"vsp.brush.undefined", "Default brush"},

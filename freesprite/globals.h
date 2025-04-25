@@ -147,6 +147,7 @@ class UILabel;
 class UISlider;
 class UITextField;
 class UICheckbox;
+class UIDropdown;
 class Panel;
 class ScrollingPanel;
 

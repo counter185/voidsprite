@@ -403,6 +403,7 @@
     <ClInclude Include="PanelRPG2KTilemapPreview.h" />
     <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="PanelTilemapPreview.h" />
+    <ClInclude Include="platform_android.h" />
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="platform_universal.h" />

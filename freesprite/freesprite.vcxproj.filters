@@ -1175,6 +1175,9 @@
     <ClInclude Include="PopupFilePicker.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
+    <ClInclude Include="platform_android.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

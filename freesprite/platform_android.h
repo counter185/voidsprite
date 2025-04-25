@@ -58,6 +58,9 @@ void platformTrySaveOtherFile(
         EventCallbackListener *caller,
         std::vector<std::pair<std::string, std::string>> filetypes,
         std::string windowTitle, int evt_id) {
+    PopupFilePicker* fp = PopupFilePicker::SaveFile(windowTitle, filetypes);
+    fp->setCallbackListener(evt_id, listener);
+    g_addPopup(fp);    
 }
 
 void platformTryLoadOtherFile(
@@ -65,7 +68,7 @@ void platformTryLoadOtherFile(
         std::vector<std::pair<std::string, std::string>> filetypes,
         std::string windowTitle, int evt_id) {
     //universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
-    PopupFilePicker* fp = new PopupFilePicker(windowTitle, filetypes);
+    PopupFilePicker* fp = PopupFilePicker::OpenFile(windowTitle, filetypes);
     fp->setCallbackListener(evt_id, listener);
     g_addPopup(fp);
 }

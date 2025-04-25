@@ -1763,7 +1763,7 @@ void MainEditor::trySaveAsImage()
         for (auto f : g_fileExporters) {
             formats.push_back({ f->extension(), f->name() });
         }
-        platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
+        platformTrySaveOtherFile(this, formats, TL("vsp.popup.saveimage"), EVENT_MAINEDITOR_SAVEFILE);
     }
 }
 

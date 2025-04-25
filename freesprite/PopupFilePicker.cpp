@@ -1,29 +1,30 @@
 #include "PopupFilePicker.h"
 #include "FontRenderer.h"
 #include "Notification.h"
+#include "PopupYesNo.h"
+#include "UIDropdown.h"
 
-PopupFilePicker::PopupFilePicker(std::string title, std::vector<std::pair<std::string, std::string>> fileTypes) {
-    mode = FILEPICKER_OPENFILE;
+PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vector<std::pair<std::string, std::string>> ftypes) : mode(m), fileTypes(ftypes) {
     setSize({ 960, 540 });
 
     rootDirs = platformListRootDirectories();
     currentDir = rootDirs[0].path;
 
     driveList = new ScrollingPanel();
-    driveList->position = { 3, 60 };
+    driveList->position = { 3, 65 };
     driveList->wxWidth = 200;
-    driveList->wxHeight = wxHeight - 170;
+    driveList->wxHeight = wxHeight - 180;
     driveList->bgColor = Fill::Gradient(0xFF101010, 0xFF101010, 0xFF101010, 0xFF202020);
     wxsManager.addDrawable(driveList);
 
     fileList = new ScrollingPanel();
-    fileList->position = { 10 + driveList->wxWidth, 60 };
+    fileList->position = { 10 + driveList->wxWidth, 65 };
     fileList->wxWidth = wxWidth - 20 - driveList->wxWidth;
-    fileList->wxHeight = wxHeight - 170;
+    fileList->wxHeight = wxHeight - 180;
     fileList->bgColor = Fill::Gradient(0xFF101010, 0xFF101010, 0xFF101010, 0xFF202020);
     wxsManager.addDrawable(fileList);
 
-    currentDirLabel = new UILabel("/home/user");
+    currentDirLabel = new UILabel("--file path");
     currentDirLabel->position = { 10 + driveList->wxWidth, 40 };
     currentDirLabel->fontsize = 16;
     wxsManager.addDrawable(currentDirLabel);
@@ -39,6 +40,22 @@ PopupFilePicker::PopupFilePicker(std::string title, std::vector<std::pair<std::s
     currentFileName->wxHeight = 30;
     wxsManager.addDrawable(currentFileName);
 
+    std::vector<std::pair<std::string, std::string>> typesInDropdown;
+    for (auto& fileType : fileTypes) {
+        typesInDropdown.push_back({fileType.first + " (" + fileType.second + ")", ""});
+    }
+    fileTypeDropdown = new UIDropdown(typesInDropdown);
+    fileTypeDropdown->position = xyAdd(fileNameLabel->position, { 0, currentFileName->wxHeight + 5 });
+    fileTypeDropdown->wxWidth = wxWidth - fileTypeDropdown->position.x - 10;
+    fileTypeDropdown->setTextToSelectedItem = true;
+    fileTypeDropdown->text = typesInDropdown[currentFileTypeIndex].first;
+    fileTypeDropdown->onDropdownItemSelectedCallback = [this](UIDropdown* dropdown, int index, std::string item) {
+        currentFileTypeIndex = index;
+        currentFileName->setText("");
+        populateRootAndFileList();
+    };
+    wxsManager.addDrawable(fileTypeDropdown);
+
     UIButton* cancelButton = actionButton(TL("vsp.cmn.cancel"));
     cancelButton->onClickCallback = [this](UIButton* btn) {
         this->closePopup();
@@ -48,12 +65,38 @@ PopupFilePicker::PopupFilePicker(std::string title, std::vector<std::pair<std::s
         PlatformNativePathString fullFilePath = appendPath(currentDir, convertStringOnWin32(currentFileName->getText()));
         if (mode == FILEPICKER_OPENFILE) {
             if (currentFileName->getText().size() == 0 || !std::filesystem::exists(fullFilePath)) {
-                g_addNotification(ErrorNotification(TL("vsp.filepicker.error"), TL("vsp.filepicker.filenotfound")));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.filenotfound")));
             } else {
                 if (callback != NULL) {
                     callback->eventFileOpen(callback_id, fullFilePath, -1);
                 }
                 this->closePopup();
+            }
+        } else if (mode == FILEPICKER_SAVEFILE) {
+            std::string targetExtension = fileTypes[currentFileTypeIndex].first;
+            if (!stringEndsWithIgnoreCase(currentFileName->getText(), targetExtension)) {
+                fullFilePath += convertStringOnWin32(targetExtension);
+            }
+            if (currentFileName->getText().size() > 0) {
+                if (std::filesystem::exists(fullFilePath)) {
+                    PopupYesNo* popup = new PopupYesNo(TL("vsp.filepicker.overwrite"), TL("vsp.filepicker.overwriteconfirm"));
+                    popup->onFinishCallback = [this, fullFilePath](PopupYesNo* popup, bool yes) {
+                        if (yes) {
+                            if (callback != NULL) {
+                                callback->eventFileSaved(callback_id, fullFilePath, currentFileTypeIndex + 1);
+                            }
+                            this->closePopup();
+                        }
+                    };
+                    g_addPopup(popup);
+                } else {
+                    if (callback != NULL) {
+                        callback->eventFileSaved(callback_id, fullFilePath, currentFileTypeIndex + 1);
+                    }
+                    this->closePopup();
+                }
+            } else {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.nofilename")));
             }
         }
     };
@@ -96,13 +139,21 @@ void PopupFilePicker::populateRootAndFileList() {
     fileList->subWidgets.addDrawable(btn);
     fileY += btn->wxHeight;
 
+    std::string targetExtension = fileTypes[currentFileTypeIndex].first;
+
     for (auto& file : std::filesystem::directory_iterator(currentDir)) {
         PlatformNativePathString wFileName = file.path().filename();
         std::string fileName = convertStringToUTF8OnWin32(wFileName);
-        UIButton* btn = new UIButton( fileName);
+        UIButton* btn = new UIButton( fileName + (file.is_directory() ? "/" : "") );
         btn->position = { 5, fileY };
         btn->wxWidth = g_fnt->StatStringDimensions(fileName).x + 20;
         btn->wxHeight = 30;
+
+        btn->colorTextFocused = btn->colorTextUnfocused =
+            file.is_directory() ? SDL_Color{ 0xFF, 0xFC, 0x7B, 0xFF } 
+            : stringEndsWithIgnoreCase(fileName, targetExtension) ? SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF }
+            : SDL_Color{ 0xFF, 0xFF, 0xFF, 0x80 };
+
         if (file.is_directory()) {
             btn->onClickCallback = [this, wFileName](UIButton* btn) {
                 currentDir = appendPath(currentDir, wFileName);
