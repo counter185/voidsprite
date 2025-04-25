@@ -5,9 +5,9 @@ name: Build (win64 and linux64)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "cmake" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "cmake" ]
 
 env:
   # Path to the solution file relative to the root of the project.
