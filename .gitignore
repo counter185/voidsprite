@@ -448,7 +448,8 @@ android-project/build/reports/problems/problems-report.html
 /android-project/.vscode
 /android-project/app/.cxx
 
-# SDL3
+# Libs
+/lib/zlib
 /lib/SDL3
 /lib/SDL3_ttf
 /lib/SDL3_image
