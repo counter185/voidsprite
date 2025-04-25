@@ -232,13 +232,7 @@ void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
     if (importerIndex == -1) {
-        MainEditor* m = loadAnyIntoSession(convertStringToUTF8OnWin32(name));
-        if (m != NULL) {
-            g_addScreen(m);
-        }
-        else {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
-        }
+        tryLoadFile(convertStringToUTF8OnWin32(name));
     } else {
         importerIndex--;
         FileImporter* importer = g_fileImporters[importerIndex];
