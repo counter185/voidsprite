@@ -448,3 +448,8 @@ android-project/build/reports/problems/problems-report.html
 /android-project/.vscode
 /android-project/app/.cxx
 /enc_temp_folder
+
+# SDL3
+/lib/SDL3
+/lib/SDL3_ttf
+/lib/SDL3_image

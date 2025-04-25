@@ -103,6 +103,7 @@ For Linux, get the `voidsprite-build-linux-x86_64.flatpak.zip` file; this requir
    * To set install prefix (i.e. `/usr`), use `--prefix <path>`. As a shortcut for `/usr` you can pass `--global`
    * `--install` will install the resulting files into prefix
    * If you installed a separate version of GCC to use alongside your system install, you can specify a different compiler by setting the `CC` variable while calling `linux_build.sh`, e.g. `CC=gcc-13 ./linux_build.sh`
+   * If you don't have SDL3 packages on the system, you may want to build it from source `--build-sdl3` (must have cmake 3.16+)
 
 #### Flatpak
 
