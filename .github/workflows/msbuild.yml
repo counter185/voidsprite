@@ -66,6 +66,8 @@ jobs:
     #     path: |
     #       x64/Release
 
+    - uses: ilammy/setup-nasm@v1
+
     - name: Build CMake project
       uses: threeal/cmake-action@v2.1.0
       with:
