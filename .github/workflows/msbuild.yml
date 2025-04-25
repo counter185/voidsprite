@@ -33,8 +33,12 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Restore NuGet packages
+    - name: Predownload SDL3_ttf
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: git clone https://github.com/libsdl-org/SDL_ttf --branch release-3.2.2 lib/SDL3_ttf --depth 1
+
+    - name: Install SDL3_ttf deps
+      working-directory: ${{env.GITHUB_WORKSPACE}}/lib/SDL3_ttf/external
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     # - name: Extract voidsprite devlibs
