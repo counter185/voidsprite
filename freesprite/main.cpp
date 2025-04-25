@@ -462,7 +462,9 @@ int main(int argc, char** argv)
     g_iconActionBarUndo =   IMGLoadAssetToTexture("actionbar_undo.png");
     g_iconActionBarRedo =   IMGLoadAssetToTexture("actionbar_redo.png");
     g_iconFilePickerDirectory =     IMGLoadAssetToTexture("icon_filepicker_directory.png");
+        SDL_SetTextureColorMod(g_iconFilePickerDirectory, 0xFF, 0xFC, 0x7B);
     g_iconFilePickerFile =          IMGLoadAssetToTexture("icon_filepicker_file.png");
+        SDL_SetTextureColorMod(g_iconFilePickerFile, 0x80, 0x80, 0x80);
     g_iconFilePickerSupportedFile = IMGLoadAssetToTexture("icon_filepicker_supportedfile.png");
 
     SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);

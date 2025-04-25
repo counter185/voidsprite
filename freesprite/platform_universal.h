@@ -2,6 +2,7 @@
 
 #include "globals.h"
 #include "EventCallbackListener.h"
+#include "PopupFilePicker.h"
 
 int findIndexByExtension(
         std::vector<std::pair<std::string, std::string>> &filetypes,
@@ -19,7 +20,26 @@ int findIndexByExtension(
     return -1;
 }
 
-inline void universal_platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {
+inline void universal_platformTrySaveOtherFile(
+	EventCallbackListener *caller,
+	std::vector<std::pair<std::string, std::string>> filetypes,
+	std::string windowTitle, int evt_id) {
+	PopupFilePicker* fp = PopupFilePicker::SaveFile(windowTitle, filetypes);
+	fp->setCallbackListener(evt_id, caller);
+	g_addPopup(fp);    
+}
+
+inline void universal_platformTryLoadOtherFile(
+	EventCallbackListener *listener,
+	std::vector<std::pair<std::string, std::string>> filetypes,
+	std::string windowTitle, int evt_id) {
+	//universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+	PopupFilePicker* fp = PopupFilePicker::OpenFile(windowTitle, filetypes);
+	fp->setCallbackListener(evt_id, listener);
+	g_addPopup(fp);
+}
+
+inline void universalSDL_platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {
 
     EventCallbackListener* lsnr = listener;
     static std::function<void(void*, const char* const*, int)> dialogCallback;
@@ -28,7 +48,7 @@ inline void universal_platformTryLoadOtherFile(EventCallbackListener* listener, 
             std::string filenameStr = filelist[0];
             loginfo(std::format("File selected: {}", filenameStr));
             EventCallbackListener* listener = (EventCallbackListener*)userdata;
-            lsnr->eventFileOpen(evt_id, filenameStr, findIndexByExtension(filetypes, filenameStr));
+            lsnr->eventFileOpen(evt_id, convertStringOnWin32(filenameStr), findIndexByExtension(filetypes, filenameStr));
         }
     };
     static SDL_DialogFileCallback dialogCallback2;

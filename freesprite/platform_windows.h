@@ -13,7 +13,14 @@
 #include <tlhelp32.h>
 #include <commdlg.h>
 
-//#include "platform_universal.h"
+#ifndef VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
+#define VOIDSPRITE_USE_UNIVERSAL_FILEPICKER 1
+#endif
+
+
+#if VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
+#include "platform_universal.h"
+#endif
 
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
@@ -157,6 +164,11 @@ void platformTryLoadImageFile(EventCallbackListener* listener) {}
 
 //pairs in format {extension, name}
 void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id) {
+    #if VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
+        universal_platformTrySaveOtherFile(listener, filetypes, windowTitle, evt_id);
+        return;
+    #endif
+
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
@@ -203,6 +215,11 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
 }
 
 void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {
+    #if VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
+        universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+        return;
+    #endif
+
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);

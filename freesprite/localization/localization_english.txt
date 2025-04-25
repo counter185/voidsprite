@@ -222,6 +222,7 @@
     {"vsp.filepicker.filenotfound", "File not found."},
     {"vsp.filepicker.nofilename", "No file name chosen."},
     {"vsp.filepicker.overwriteconfirm", "This file already exists. Overwrite?"},
+    {"vsp.filepicker.folderreaderror", "Error accessing folder:"},
 
     //brushes/tools
     {"vsp.brush.undefined", "Default brush"},

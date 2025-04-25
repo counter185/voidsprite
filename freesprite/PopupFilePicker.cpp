@@ -141,37 +141,43 @@ void PopupFilePicker::populateRootAndFileList() {
 
     std::string targetExtension = fileTypes[currentFileTypeIndex].first;
 
-    for (auto& file : std::filesystem::directory_iterator(currentDir)) {
-        PlatformNativePathString wFileName = file.path().filename();
-        std::string fileName = convertStringToUTF8OnWin32(wFileName);
-        bool matchesExtension = stringEndsWithIgnoreCase(fileName, targetExtension);
+    try {
+        for (auto &file: std::filesystem::directory_iterator(currentDir)) {
+            PlatformNativePathString wFileName = file.path().filename();
+            std::string fileName = convertStringToUTF8OnWin32(wFileName);
+            bool matchesExtension = stringEndsWithIgnoreCase(fileName, targetExtension);
 
-        UIButton* btn = new UIButton( fileName + (file.is_directory() ? "/" : "") );
-        btn->position = { 5, fileY };
-        btn->wxWidth = g_fnt->StatStringDimensions(fileName).x + 15 + 30;
-        btn->wxHeight = 30;
+            UIButton *btn = new UIButton(fileName + (file.is_directory() ? "/" : ""));
+            btn->position = {5, fileY};
+            btn->wxWidth = g_fnt->StatStringDimensions(fileName).x + 15 + 30;
+            btn->wxHeight = 30;
 
-        btn->icon = 
-            file.is_directory() ? g_iconFilePickerDirectory
-            : matchesExtension ? g_iconFilePickerSupportedFile
-            : g_iconFilePickerFile;
+            btn->icon =
+                    file.is_directory() ? g_iconFilePickerDirectory
+                                        : matchesExtension ? g_iconFilePickerSupportedFile
+                                                           : g_iconFilePickerFile;
 
-        btn->colorTextFocused = btn->colorTextUnfocused =
-            file.is_directory() ? SDL_Color{ 0xFF, 0xFC, 0x7B, 0xFF } 
-            : matchesExtension ? SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF }
-            : SDL_Color{ 0xFF, 0xFF, 0xFF, 0x80 };
+            btn->colorTextFocused = btn->colorTextUnfocused =
+                    file.is_directory() ? SDL_Color{0xFF, 0xFC, 0x7B, 0xFF}
+                                        : matchesExtension ? SDL_Color{0xFF, 0xFF, 0xFF, 0xFF}
+                                                           : SDL_Color{0xFF, 0xFF, 0xFF, 0x80};
 
-        if (file.is_directory()) {
-            btn->onClickCallback = [this, wFileName](UIButton* btn) {
-                currentDir = appendPath(currentDir, wFileName);
-                populateRootAndFileList();
-            };
-        } else {
-            btn->onClickCallback = [this, fileName](UIButton* btn) {
-                currentFileName->setText(fileName);
-            };
+            if (file.is_directory()) {
+                btn->onClickCallback = [this, wFileName](UIButton *btn) {
+                    currentDir = appendPath(currentDir, wFileName);
+                    populateRootAndFileList();
+                };
+            } else {
+                btn->onClickCallback = [this, fileName](UIButton *btn) {
+                    currentFileName->setText(fileName);
+                };
+            }
+            fileList->subWidgets.addDrawable(btn);
+            fileY += btn->wxHeight;
         }
-        fileList->subWidgets.addDrawable(btn);
-        fileY += btn->wxHeight;
+    } catch (std::exception& e) {
+        UILabel* l = new UILabel(std::format("{}\n  {}", TL("vsp.filepicker.folderreaderror"), e.what()));
+        l->position = {5, fileY};
+        fileList->subWidgets.addDrawable(l);
     }
 }
