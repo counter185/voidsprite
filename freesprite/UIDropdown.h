@@ -53,6 +53,7 @@ public:
     void genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item) = NULL);
 
     bool takesMouseWheelEvents() override { return true; }
+    bool takesTouchEvents() override { return true; }
 
     void click();
 };

@@ -54,17 +54,46 @@ void UIButton::focusIn()
 	
 }
 
+void UIButton::focusOut()
+{
+	touchHoldingDown = false;
+}
+
 void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 {
-	if (evt.type == SDL_MOUSEBUTTONDOWN) {
-		XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
-		if (evt.button.down && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
-			if (evt.button.button == 1) {
-				click();
-			} else if (evt.button.button == 3) {
-				rightClick();
+	switch (evt.type) {
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		{
+			XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
+			if (evt.button.down && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
+				if (evt.button.button == 1) {
+					click();
+				}
+				else if (evt.button.button == 3) {
+					rightClick();
+				}
 			}
 		}
+			break;
+		case SDL_EVENT_FINGER_DOWN:
+		{
+			XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+			if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+				touchHoldingDown = true;
+			}
+		}
+			break;
+		case SDL_EVENT_FINGER_UP:
+		{
+			touchHoldingDown = false;
+			XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+			if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+				click();
+			}
+		}
+			break;
+		case SDL_EVENT_FINGER_MOTION:
+			break;
 	}
 }
 
