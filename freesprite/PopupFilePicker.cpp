@@ -142,27 +142,56 @@ void PopupFilePicker::populateRootAndFileList() {
     std::string targetExtension = fileTypes[currentFileTypeIndex].first;
 
     try {
-        for (auto &file: std::filesystem::directory_iterator(currentDir)) {
-            PlatformNativePathString wFileName = file.path().filename();
-            std::string fileName = convertStringToUTF8OnWin32(wFileName);
-            bool matchesExtension = stringEndsWithIgnoreCase(fileName, targetExtension);
+        struct FilePickerFileEntry {
+            PlatformNativePathString realFileName;
+            std::string displayFileName;
+            bool isDirectory;
+            bool matchesExtension;
+        };
+        std::vector<FilePickerFileEntry> fileEntries = {};
+        for (auto& file : std::filesystem::directory_iterator(currentDir)) {
+            std::string utf8name = convertStringToUTF8OnWin32(file.path().filename());
+            fileEntries.push_back({
+                file.path().filename(),
+				utf8name,
+				file.is_directory(),
+                stringEndsWithIgnoreCase(utf8name, targetExtension)
+            });
+        }
 
-            UIButton *btn = new UIButton(fileName + (file.is_directory() ? "/" : ""));
+        std::sort(fileEntries.begin(), fileEntries.end(), [](FilePickerFileEntry& left, FilePickerFileEntry& right) {
+            if (left.isDirectory != right.isDirectory) {
+                return left.isDirectory > right.isDirectory;
+            }
+            else if (left.matchesExtension != right.matchesExtension) {
+                return left.matchesExtension > right.matchesExtension;
+            }
+            else {
+                return left.displayFileName < right.displayFileName;
+            }
+        });
+
+        for (auto& fileEntry : fileEntries) {
+            bool matchesExtension = fileEntry.matchesExtension;
+
+            UIButton* btn = new UIButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
             btn->position = {5, fileY};
-            btn->wxWidth = g_fnt->StatStringDimensions(fileName).x + 15 + 30;
+            btn->wxWidth = g_fnt->StatStringDimensions(btn->text).x + 15 + 30;
             btn->wxHeight = 30;
 
             btn->icon =
-                    file.is_directory() ? g_iconFilePickerDirectory
-                                        : matchesExtension ? g_iconFilePickerSupportedFile
-                                                           : g_iconFilePickerFile;
+                fileEntry.isDirectory ? g_iconFilePickerDirectory
+                                      : matchesExtension ? g_iconFilePickerSupportedFile
+                                      : g_iconFilePickerFile;
 
             btn->colorTextFocused = btn->colorTextUnfocused =
-                    file.is_directory() ? SDL_Color{0xFF, 0xFC, 0x7B, 0xFF}
-                                        : matchesExtension ? SDL_Color{0xFF, 0xFF, 0xFF, 0xFF}
-                                                           : SDL_Color{0xFF, 0xFF, 0xFF, 0x80};
+                fileEntry.isDirectory ? SDL_Color{0xFF, 0xFC, 0x7B, 0xFF}
+                                      : matchesExtension ? SDL_Color{0xFF, 0xFF, 0xFF, 0xFF}
+                                      : SDL_Color{0xFF, 0xFF, 0xFF, 0x80};
 
-            if (file.is_directory()) {
+            PlatformNativePathString wFileName = fileEntry.realFileName;
+            std::string fileName = fileEntry.displayFileName;
+            if (fileEntry.isDirectory) {
                 btn->onClickCallback = [this, wFileName](UIButton *btn) {
                     currentDir = appendPath(currentDir, wFileName);
                     populateRootAndFileList();

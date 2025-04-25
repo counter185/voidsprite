@@ -9,6 +9,12 @@ void UIButton::render(XY pos)
 	lastPositionOnScreen = pos;
 
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
+
+	if (pos.y >= g_windowH || pos.x >= g_windowW
+		|| (pos.y+wxHeight) < 0 || (pos.x+wxWidth) < 0) {
+		return;
+	}
+
 	//SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
 	SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
 	//SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
