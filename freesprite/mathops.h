@@ -81,6 +81,7 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
 
 std::string evalRelativePath(std::string directory, std::string file);
 std::string fileNameFromPath(std::string fullPath);
+PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNativePathString subdir);
 
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0, bool ceilLine = false);
 void rasterizeDiamond(XY from, XY to, std::function<void(XY)> forEachPixel);

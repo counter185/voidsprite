@@ -215,6 +215,9 @@
     {"vsp.about.contributors", "Contributors:"},
     {"vsp.about.translations", "Translation credits:"},
 
+    //popup: file picker
+    {"vsp.filepicker.filename", "File name"},
+
     //brushes/tools
     {"vsp.brush.undefined", "Default brush"},
     {"vsp.brush.squarepixel", "Square Pixel"},

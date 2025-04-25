@@ -5,7 +5,7 @@
 #include "Notification.h"
 
 #include "platform_universal.h"
-
+#include "PopupFilePicker.h"
 
 
 void platformPreInit() {
@@ -64,7 +64,10 @@ void platformTryLoadOtherFile(
         EventCallbackListener *listener,
         std::vector<std::pair<std::string, std::string>> filetypes,
         std::string windowTitle, int evt_id) {
-    universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+    //universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+    PopupFilePicker* fp = new PopupFilePicker(windowTitle, filetypes);
+    fp->setCallbackListener(evt_id, listener);
+    g_addPopup(fp);
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
@@ -108,4 +111,11 @@ FILE *platformOpenFile(PlatformNativePathString path,
 
 std::string platformGetSystemInfo() {
     return systemInformation;
+}
+
+std::vector<RootDirInfo> platformListRootDirectories() {
+    std::vector<RootDirInfo> ret;
+    RootDirInfo rootDir = {"Internal storage", "/sdcard"};
+    ret.push_back(rootDir);
+    return ret;
 }

@@ -489,3 +489,48 @@ std::string platformGetSystemInfo() {
 
     return ret;
 }
+
+std::vector<RootDirInfo> platformListRootDirectories() {
+    std::vector<RootDirInfo> ret;
+
+    //get userprofile dir
+    wchar_t userProfilePath[MAX_PATH + 1];
+    memset(userProfilePath, 0, (MAX_PATH + 1) * sizeof(wchar_t));
+    GetEnvironmentVariableW(L"USERPROFILE", userProfilePath, MAX_PATH);
+    std::wstring userProfilePathW = userProfilePath;
+
+    for (auto& [subdir, name] : std::vector<std::pair<std::wstring, std::string>>{ 
+        {L"", "User home"},
+        {L"Documents", "Documents"},
+        {L"Desktop", "Desktop"},
+        {L"Downloads", "Downloads"},
+        {L"Pictures", "Pictures"},
+        {L"Videos", "Videos"},
+        {L"Music", "Music"},
+    }) {
+		std::wstring fullSubdir = appendPath(userProfilePathW, subdir);
+        if (std::filesystem::exists(fullSubdir)) {
+            ret.push_back({name, fullSubdir });
+        }
+    }
+
+    u32 logicalDrives = GetLogicalDrives();
+    u32 maskNow = 1;
+    for (char drive = 'A'; drive <= 'Z'; drive++) {
+        if (logicalDrives & maskNow) {
+            std::wstring drivePath = std::format(L"{}:\\", drive);
+            UINT driveType = GetDriveTypeW(drivePath.c_str());
+            if (driveType != DRIVE_NO_ROOT_DIR) {
+                std::string name = 
+                    driveType == DRIVE_RAMDISK ? std::format("RAM Disk {}:\\", drive)
+                    : driveType == DRIVE_CDROM ? std::format("CD-ROM {}:\\", drive)
+                    : driveType == DRIVE_REMOVABLE ? std::format("Removable Drive {}:\\", drive)
+                    : std::format("Drive {}:\\", drive);
+                ret.push_back({name, drivePath});
+            }
+        }
+        maskNow <<= 1;
+    }
+
+    return ret;
+}

@@ -238,3 +238,8 @@ std::string platformGetSystemInfo() {
     ret += "macOS\n";
     return ret;
 }
+
+//todo
+std::vector<RootDirInfo> platformListRootDirectories() {
+    return {{"",""}};
+}

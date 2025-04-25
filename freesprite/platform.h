@@ -16,6 +16,11 @@ void platformPreInit();
 void platformInit();
 void platformPostInit();
 
+struct RootDirInfo {
+    std::string friendlyName;
+    PlatformNativePathString path;
+};
+
 std::string platformGetSystemInfo();
 
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs);
@@ -29,6 +34,7 @@ bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");
+std::vector<RootDirInfo> platformListRootDirectories();
 
 bool platformPutImageInClipboard(Layer* l);
 Layer* platformGetImageFromClipboard();

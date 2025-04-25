@@ -8,6 +8,8 @@
 #include "ScreenNonogramPlayer.h"
 #include "LayerPalettized.h"
 
+#include "PopupFilePicker.h"
+
 void StartScreen::tick() {
     if (closeNextTick) {
         g_closeScreen(this);
@@ -229,21 +231,31 @@ void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int 
 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
-    importerIndex--;
-    FileImporter* importer = g_fileImporters[importerIndex];
-    void* importedData = importer->importData(name);
-    if (importedData != NULL) {
-        if (!importer->importsWholeSession()) {
-            Layer* nlayer = (Layer*)importedData;
-            g_addScreen(!nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer));
+    if (importerIndex == -1) {
+        MainEditor* m = loadAnyIntoSession(convertStringToUTF8OnWin32(name));
+        if (m != NULL) {
+            g_addScreen(m);
         }
         else {
-            MainEditor* session = (MainEditor*)importedData;
-            g_addScreen(session);
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         }
-    }
-    else {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+    } else {
+        importerIndex--;
+        FileImporter* importer = g_fileImporters[importerIndex];
+        void* importedData = importer->importData(name);
+        if (importedData != NULL) {
+            if (!importer->importsWholeSession()) {
+                Layer* nlayer = (Layer*)importedData;
+                g_addScreen(!nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer));
+            }
+            else {
+                MainEditor* session = (MainEditor*)importedData;
+                g_addScreen(session);
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+        }
     }
 }
 

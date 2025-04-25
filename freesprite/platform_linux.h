@@ -230,3 +230,15 @@ std::string platformGetSystemInfo() {
 
     return ret;
 }
+
+std::vector<RootDirInfo> platformListRootDirectories() {
+    std::vector<RootDirInfo> ret;
+    
+    char *homeDir = getenv("HOME");
+    if (homeDir != NULL) {
+        std::string homeDirStr = homeDir;
+        ret.push_back({"User home", homeDirStr});
+    }
+
+    ret.push_back({"Root", "/"});
+}

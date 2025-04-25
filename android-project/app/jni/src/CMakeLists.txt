@@ -152,6 +152,7 @@ add_library(main SHARED
         voidsprite/PopupTextTool.cpp
         voidsprite/PopupTileGeneric.cpp
         voidsprite/PopupYesNo.cpp
+        voidsprite/PopupFilePicker.cpp
         voidsprite/RenderFilter.cpp
         voidsprite/RPG2KTilemapPreviewScreen.cpp
         voidsprite/ScreenNonogramPlayer.cpp

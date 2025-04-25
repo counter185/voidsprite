@@ -612,6 +612,9 @@
     <ClCompile Include="io_png.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="PopupFilePicker.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1168,6 +1171,9 @@
     </ClInclude>
     <ClInclude Include="io_png.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupFilePicker.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

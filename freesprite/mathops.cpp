@@ -248,6 +248,26 @@ std::string fileNameFromPath(std::string fullPath)
     }
 }
 
+PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNativePathString subdir)
+{
+    PlatformNativePathString separator =
+#if _WIN32
+        L"\\"
+#else
+        "/"
+#endif
+        ;
+	PlatformNativePathString ret = parent;
+    if (parent.size() == 0) {
+        return subdir;
+    }
+	if (parent.size() > 0 && parent[parent.size() - 1] != '/' && parent[parent.size() - 1] != '\\') {
+		ret += separator;
+	}
+	ret += subdir;
+	return ret;
+}
+
 XY getSnappedPoint(XY from, XY to) {
     double ang = angleBetweenTwoPoints(from, to);
     if ((ang > 70 && ang < 110) || (ang > 250 && ang < 290)) {

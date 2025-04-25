@@ -13,6 +13,7 @@ public:
     Timer64 startTimer;
 
     virtual bool takesInput() { return true; }
+	bool takesTouchEvents() override { return true; }
 
     void takeInput(SDL_Event evt) override {
         DrawableManager::processHoverEventInMultiple({ wxsManager }, evt, getPopupOrigin());
