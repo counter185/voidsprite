@@ -14,25 +14,25 @@ Free C++ pixel art editor
 
 ### Import / Export
 
-| Name | Extension | Import | Export |
-|---|---|:-:|:-:|
-| voidsprite session | .voidsn | ✔ | ✔ |
-| PNG | .png | ✔ | ✔ |
-| BMP | .bmp | ✔ | 〰(24-bit only) |
-| TGA | .tga | ✔ | 〰(uncomp. 24-bit only) |
-| JPEG XL | .jxl | ✔ | ✔ |
-| Portable Bitmap, Graymap, Pixmap | .pbm .pgm .pbm | ✔ | 〰(text mode only) |
-| X Bitmap | .xbm | ✔ | ✔ |
-| Windows cursor | .cur | ✔ | ✔ |
-| OpenRaster | .ora | ✔* | ✔* |
-| Pixel Studio session | .psp | 〰* | ✔ |
-| Pixel Studio (compressed) session | .psx | 〰* | ✔ |
-| XYZ (RPG Maker 2000/2003) | .xyz | ✔ | ✔ |
-| DIBv5 Clipboard dump | .dibv5 | 〰* | ✔ |
-| PBM (Cave Story engine) | .pbm | ✔ | ✔ |
-| Valve Texture Format | .vtf | 〰* | ✔(v7.1, BGRA8888) |
-| Aseprite Sprite | .aseprite .ase | 〰*(Frame 1 only) | ✔ |
-| Piskel | .piskel | 〰 | ✔ |
+| Name                              | Extension      | Import            | Export                  |
+|-----------------------------------|----------------|:-----------------:|:-----------------------:|
+| voidsprite session                | .voidsn        | ✔                 | ✔                       |
+| PNG                               | .png           | ✔                 | ✔                       |
+| BMP                               | .bmp           | ✔                 | 〰(24-bit only)         |
+| TGA                               | .tga           | ✔                 | 〰(uncomp. 24-bit only) |
+| JPEG XL                           | .jxl           | ✔                 | ✔                       |
+| Portable Bitmap, Graymap, Pixmap  | .pbm .pgm .pbm | ✔                 | 〰(text mode only)      |
+| X Bitmap                          | .xbm           | ✔                 | ✔                       |
+| Windows cursor                    | .cur           | ✔                 | ✔                       |
+| OpenRaster                        | .ora           | ✔*                | ✔*                      |
+| Pixel Studio session              | .psp           | 〰*               | ✔                       |
+| Pixel Studio (compressed) session | .psx           | 〰*               | ✔                       |
+| XYZ (RPG Maker 2000/2003)         | .xyz           | ✔                 | ✔                       |
+| DIBv5 Clipboard dump              | .dibv5         | 〰*               | ✔                       |
+| PBM (Cave Story engine)           | .pbm           | ✔                 | ✔                       |
+| Valve Texture Format              | .vtf           | 〰*               | ✔(v7.1, BGRA8888)       |
+| Aseprite Sprite                   | .aseprite .ase | 〰*(Frame 1 only) | ✔                       |
+| Piskel                            | .piskel        | 〰                | ✔                       |
 
 \* **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
 \* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.  
@@ -42,22 +42,22 @@ Free C++ pixel art editor
 
 ### Import only
 
-| Name | Extension | Import | Export |
-|---|---|:-:|:-:|
-| Nintendo DS banner | .nds | ✔ | ✖ |
-| NES (dump CHR-ROM) | .nes | ✔ | ✖ |
-| Mario Paint save file | .srm | ✔(only main canvas) | ✖ |
-| X-Com SPK, BDY, SCR | .spk .bdy .scr | ✔ | ✖ |
-| Windows Shell Scrap | .shs | ✔(uses Win32 API) | ✖ |
-| Atrophy Engine texture | .aetex | 〰* | ✖ |
-| PS2 Icon | .icn .ico | 〰 | ✖ |
-| DirectDraw Surface | .dds | 〰* | ✖ |
-| Wii/GameCube TPL | .tpl | 〰* | ✖ |
-| Windows 1.0/2.0/3.11 Paint | .msp | ❔ | ✖ |
-| PS Vita GXT | .gxt | ❔ | ✖ |
-| PSP/PS3 GIM | .gim | ❔ | ✖ |
-| Nintendo 3DS app icon | .cxi | ❔ | ✖ |
-| Every other SDL_Image format | * | ✔ | ✖ |
+| Name                         | Extension      | Import              | Export |
+|------------------------------|----------------|:-------------------:|:------:|
+| Nintendo DS banner           | .nds           | ✔                   | ✖      |
+| NES (dump CHR-ROM)           | .nes           | ✔                   | ✖      |
+| Mario Paint save file        | .srm           | ✔(only main canvas) | ✖      |
+| X-Com SPK, BDY, SCR          | .spk .bdy .scr | ✔                   | ✖      |
+| Windows Shell Scrap          | .shs           | ✔(uses Win32 API)   | ✖      |
+| Atrophy Engine texture       | .aetex         | 〰*                 | ✖      |
+| PS2 Icon                     | .icn .ico      | 〰                  | ✖      |
+| DirectDraw Surface           | .dds           | 〰*                 | ✖      |
+| Wii/GameCube TPL             | .tpl           | 〰*                 | ✖      |
+| Windows 1.0/2.0/3.11 Paint   | .msp           | ❔                  | ✖      |
+| PS Vita GXT                  | .gxt           | ❔                  | ✖      |
+| PSP/PS3 GIM                  | .gim           | ❔                  | ✖      |
+| Nintendo 3DS app icon        | .cxi           | ❔                  | ✖      |
+| Every other SDL_Image format | *              | ✔                   | ✖      |
 
 \* **Wii TPL** - only I4, RGB5A3, RGBA32  
 \* **AETEX** - GXT and Switch ASTC subformats not implemented  
@@ -65,12 +65,12 @@ Free C++ pixel art editor
 
 ### Export only
 
-| Name | Extension | Import | Export |
-|---|---|:-:|:-:|
-| C header (as uint32_t array) | .h | ✖ | ✔ |
-| Python NumPy array | .py | ✖ | ✔ |
-| HTML Base64 image | .html | ✖ | ✔ |
-| Java BufferedImage | .java | ✖ | 〰* |
+| Name                         | Extension | Import | Export |
+|------------------------------|-----------|:------:|:------:|
+| C header (as uint32_t array) | .h        | ✖      | ✔      |
+| Python NumPy array           | .py       | ✖      | ✔      |
+| HTML Base64 image            | .html     | ✖      | ✔      |
+| Java BufferedImage           | .java     | ✖      | 〰*    |
 
 \* **Java BufferedImage** - only works for small images. Larger images go beyond the function size limit.  
 
@@ -80,9 +80,37 @@ You can grab a pre-built binary from the latest CI artifacts: https://nightly.li
 
 For Windows, get the `voidsprite-build-win64.zip` file.
 
-For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed. You can also try the portable binary from `voidsprite-build-linux.zip`, but this might not work on all systems.
+For Linux, get the `voidsprite-build-linux-x86_64.flatpak.zip` file; this requires [Flatpak](https://flatpak.org) to be installed.
 
 ## Building
+
+> These instructions are WIP!
+
+### Windows
+
+`todo!()`
+
+### Linux
+
+1. Install the dependencies and their respective development packages: sdl3, sdl3_ttf, sdl3_image, libpng, pugixml, zlib, liblcf, libjxl, libhwy
+   * Some dependencies (libpng, pugixml, zlib, liblcf) will be automatically built during the build step if not installed - don't worry if your distro does not package them.
+   * GCC/G++ 13 or later is required
+2. Install cmake (3.15+)
+3. Run `./linux_build.sh`
+   * You can also pass the `--run` flag to automatically run the built binary
+   * To set install prefix (i.e. `/usr`), use `--prefix <path>`. As a shortcut for `/usr` you can pass `--global`
+   * `--install` will install the resulting files into prefix
+   * If you installed a separate version of GCC to use alongside your system install, you can specify a different compiler by setting the `CC` variable while calling `linux_build.sh`, e.g. `CC=gcc-13 ./linux_build.sh`
+
+#### Flatpak
+
+`todo!()`
+
+## Building (Legacy)
+
+> These instructions are out of date!
+>
+> You may still use those, but they are not guaranteed to work.
 
 ### Windows
 

@@ -569,9 +569,84 @@ void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t color
 
 }
 
+#ifdef __linux__
+#include <linux/limits.h>
+#include <cstring>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+static char* l_assetsDirectory = NULL;
+#endif
+
 std::string pathInProgramDirectory(std::string path)
 {
-    return (std::string(VOIDSPRITE_ASSETS_PATH).empty() ? g_programDirectory : std::string(VOIDSPRITE_ASSETS_PATH)) + path;
+#ifdef __linux__
+    if (l_assetsDirectory == NULL) {
+        if (VOIDSPRITE_ASSETS_PATH[0] == '/') l_assetsDirectory = (char*) VOIDSPRITE_ASSETS_PATH;
+        else {
+            l_assetsDirectory = (char*) malloc(PATH_MAX + 1);
+            for (size_t i = 0; i < PATH_MAX + 1; i++) l_assetsDirectory[i] = 0;
+            size_t exe_dir_len;
+            if (realpath("/proc/self/exe", l_assetsDirectory) == NULL ||
+                (exe_dir_len = strlen(l_assetsDirectory)) + 1 > PATH_MAX) {
+                printf("File name too long\n");
+                abort();
+            }
+            size_t vsp_dir_len = strlen(VOIDSPRITE_ASSETS_PATH);
+            if (l_assetsDirectory[exe_dir_len - 1] != '/') exe_dir_len++;
+            {
+                exe_dir_len--;
+                while (exe_dir_len != 0 && l_assetsDirectory[exe_dir_len] == '/') exe_dir_len--;
+                while (exe_dir_len != 0 && l_assetsDirectory[exe_dir_len] != '/') exe_dir_len--;
+                exe_dir_len++;
+                l_assetsDirectory[exe_dir_len] = 0;
+            }
+            if (exe_dir_len + vsp_dir_len > PATH_MAX) {
+                printf("File name too long\n");
+                abort();
+            }
+            char* assetsPtr = l_assetsDirectory + exe_dir_len;
+            assert(*assetsPtr == 0);
+            const char* segmentPtrS = VOIDSPRITE_ASSETS_PATH;
+            const char* segmentPtrE = segmentPtrS;
+            while (*segmentPtrS != 0) {
+                while (*segmentPtrE != 0 && *segmentPtrE != '/') segmentPtrE++;
+                size_t segmentLength = segmentPtrE - segmentPtrS + 1;
+                if (segmentLength == 3 &&
+                    segmentPtrS[0] == '.' && segmentPtrS[1] == '.' &&
+                    (segmentPtrS[2] == 0 || segmentPtrS[2] == '/')) {
+                    assetsPtr -= 2;
+                    if (assetsPtr < l_assetsDirectory) assetsPtr = l_assetsDirectory;
+                    else while (assetsPtr != l_assetsDirectory && *assetsPtr != '/') assetsPtr--;
+                    assetsPtr++;
+                    *assetsPtr = 0;
+                } else if (!(segmentLength == 2 &&
+                    segmentPtrS[0] == '.' &&
+                    (segmentPtrS[1] == 0 || segmentPtrS[1] == '/'))) {
+                    memcpy(assetsPtr, segmentPtrS, segmentLength);
+                    assetsPtr += segmentLength;
+                    *assetsPtr = 0;
+                }
+                if (*segmentPtrE != 0) segmentPtrE++;
+                segmentPtrS = segmentPtrE;
+            }
+            while (*assetsPtr == 0) assetsPtr--;
+            if (*assetsPtr != '/') {
+                *++assetsPtr = '/';
+                *++assetsPtr = 0;
+            }
+        }
+    }
+#endif
+    return (std::string(VOIDSPRITE_ASSETS_PATH).empty()
+    ? g_programDirectory
+    :
+#ifdef __linux__
+        std::string(l_assetsDirectory) + path
+#else
+        std::string(VOIDSPRITE_ASSETS_PATH) + path
+#endif
+    );
 }
 
 hsv rgb2hsv(rgb in)
