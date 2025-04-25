@@ -63,7 +63,7 @@ jobs:
 #           x64/Release
 #           
   build-linux64:
-    runs-on: ubuntu-24.10
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -86,8 +86,17 @@ jobs:
     # - name: install latest meson
     #   run: pip3 install --user meson
 
+    - name: install sdl3 deps
+      run: |
+        sudo apt-get install -y build-essential git make \
+        pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+        libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+        libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+        libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+        libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
+
     - name: run build
-      run: CC=gcc-13 CXX=g++-13 ./linux_build.sh
+      run: CC=gcc-13 CXX=g++-13 ./linux_build.sh --build-sdl3
 
     - name: add licenses
       run: cp -r OPEN_SOURCE_LICENSES target/debug

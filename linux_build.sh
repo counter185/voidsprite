@@ -45,6 +45,8 @@
 
 set -e
 
+cd "$(dirname "$(realpath "$0")")"
+
 prefix=".."
 buildtypep=debug
 buildtype=Debug
@@ -52,6 +54,8 @@ makeg="Unix Makefiles"
 make=make
 run=0
 install=0
+
+build_sdl3=0
 
 if command -v ninja &> /dev/null; then
     makeg=Ninja
@@ -66,11 +70,23 @@ while [ $# -gt 0 ]; do
         "--prefix") shift; prefix="$1"; shift;;
         "--release") buildtype=Release; buildtypep=eelease; shift;;
         "--init") init=1; shift;;
+
+        "--build-sdl3") build_sdl3=1; shift;;
     esac
 done
 
+# if [ "$build_sdl3" == "1" ] && [ ! -d lib/SDL3 ]; then
+#     git clone https://github.com/libsdl-org/SDL --branch release-3.2.10 lib/SDL3 --depth 1
+#     > lib/SDL3/SDL3-config.cmake <<EOF
+# add_subdirectory(lib/SDL3)
+# EOF
+# fi
+
 mkdir -p build
-(cmake . -B build/$buildtypep -G $makeg -DCMAKE_BUILD_TYPE=$buildtype -DVOIDSPRITE_ASSETS_PATH=${prefix}/share/voidsprite && (cd build/$buildtypep && $make)) 2>&1 | tee fuck
+(cmake . -B build/$buildtypep \
+    -G $makeg $(if [ "$build_sdl3" == "1" ]; then echo -DVOIDSPRITE_STATIC_SDL3=ON; fi) \
+    -DCMAKE_BUILD_TYPE=$buildtype \
+    -DVOIDSPRITE_ASSETS_PATH=${prefix}/share/voidsprite && (cd build/$buildtypep && $make)) 2>&1 | tee fuck
 test ${PIPESTATUS[0]} -eq 0
 
 rm -fr target/$buildtypep
