@@ -1158,8 +1158,8 @@ void MainEditor::initToolParameters()
     toolPropertiesPanel->subWidgets.freeAllDrawables();
     int x = 0;
     if (currentBrush != NULL) {
-        for (auto& prop : currentBrush->getProperties()) {
-            UILabel* label = new UILabel(prop.second.name);
+        for (auto& [key, prop] : currentBrush->getProperties()) {
+            UILabel* label = new UILabel(prop.name);
             label->position = {x, 4};
             x += label->statSize().x + 20;
 
@@ -1171,17 +1171,17 @@ void MainEditor::initToolParameters()
             toolPropertiesPanel->subWidgets.addDrawable(label);
             toolPropertiesPanel->subWidgets.addDrawable(valueLabel);
 
-            switch (prop.second.type) {
+            switch (prop.type) {
                 case 1: //int
                     UISlider* slider = new UISlider();
-                    slider->setValue(prop.second.min, prop.second.max, prop.second.defaultValue);
-                    valueLabel->setText(std::to_string((int)slider->getValue(prop.second.min, prop.second.max)));
+                    slider->setValue(prop.min, prop.max, this->toolProperties[key]);
+                    valueLabel->setText(std::to_string((int)slider->getValue(prop.min, prop.max)));
                     slider->wxHeight = 18;
                     slider->wxWidth = 150;
                     slider->position = { x, 8 };
-                    slider->onChangeValueCallback = [this, prop, valueLabel](UISlider* s, float) {
-                        int v = s->getValue(prop.second.min, prop.second.max);
-                        this->toolProperties[prop.first] = v;
+                    slider->onChangeValueCallback = [this, prop, key, valueLabel](UISlider* s, float) {
+                        int v = s->getValue(prop.min, prop.max);
+                        this->toolProperties[key] = v;
                         valueLabel->setText(std::to_string(v));
                     };
                     toolPropertiesPanel->subWidgets.addDrawable(slider);
