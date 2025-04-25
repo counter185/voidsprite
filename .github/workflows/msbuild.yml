@@ -33,13 +33,13 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Predownload SDL3_ttf
-      run: git clone https://github.com/libsdl-org/SDL_ttf --branch release-3.2.2 lib/SDL3_ttf --depth 1
+    # - name: Predownload SDL3_ttf
+    #   run: git clone https://github.com/libsdl-org/SDL_ttf --branch release-3.2.2 lib/SDL3_ttf --depth 1
 
-    - name: Install SDL3_ttf deps
-      run: |
-        cd lib/SDL3_ttf/external
-        pwsh Get-GitModules.ps1 
+    # - name: Install SDL3_ttf deps
+    #   run: |
+    #     cd lib/SDL3_ttf/external
+    #     pwsh Get-GitModules.ps1 
 
     # - name: Extract voidsprite devlibs
     #   working-directory: ${{env.GITHUB_WORKSPACE}}

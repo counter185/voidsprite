@@ -26,21 +26,21 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/lib/discord_game_sdk")
 if(VOIDSPRITE_STATIC_SDL3)
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3")
         execute_process(
-            COMMAND git clone https://github.com/libsdl-org/SDL --branch release-3.2.10 lib/SDL3 --depth 1
+            COMMAND git clone https://github.com/libsdl-org/SDL --branch release-3.2.10 lib/SDL3 --depth 1 --recursive
             WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         )
     endif()
 
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3_ttf")
         execute_process(
-            COMMAND git clone https://github.com/libsdl-org/SDL_ttf --branch release-3.2.2 lib/SDL3_ttf --depth 1
+            COMMAND git clone https://github.com/libsdl-org/SDL_ttf --branch release-3.2.2 lib/SDL3_ttf --depth 1 --recursive
             WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         )
     endif()
 
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3_image")
         execute_process(
-            COMMAND git clone https://github.com/libsdl-org/SDL_image --branch release-3.2.4 lib/SDL3_image --depth 1
+            COMMAND git clone https://github.com/libsdl-org/SDL_image --branch release-3.2.4 lib/SDL3_image --depth 1 --recursive
             WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         )
     endif()
