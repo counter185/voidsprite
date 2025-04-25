@@ -20,9 +20,9 @@ include_directories(lib)
 
 file(GLOB_RECURSE src freesprite/*.cpp freesprite/*.c)
 
-find_package(liblcf REQUIRED)
-find_package(libpng REQUIRED)
-find_package(discord_game_sdk REQUIRED)
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/liblcf")
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/libpng")
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/discord_game_sdk")
 if(VOIDSPRITE_STATIC_SDL3)
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3")
         execute_process(
@@ -79,6 +79,6 @@ endif()
 target_link_libraries(voidsprite PUBLIC jxl)
 target_link_libraries(voidsprite PRIVATE discord_game_sdk)
 target_link_libraries(voidsprite PRIVATE liblcf)
-target_link_libraries(voidsprite PRIVATE libpng)
+target_link_libraries(voidsprite PRIVATE libpng::libpng-static)
 
 file(COPY freesprite/assets DESTINATION ${CMAKE_BINARY_DIR})
