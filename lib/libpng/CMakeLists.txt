@@ -10,3 +10,5 @@ file(GLOB_RECURSE src *.c)
 add_library(libpng-static STATIC)
 add_library(libpng::libpng-static ALIAS libpng-static)
 target_sources(libpng-static PRIVATE ${src})
+
+include_directories("../zlib")
