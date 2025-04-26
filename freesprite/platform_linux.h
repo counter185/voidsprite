@@ -65,6 +65,12 @@ void platformTrySaveOtherFile(
     EventCallbackListener *caller,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
+
+    if (!g_config.useSystemFileDialog) {
+        universal_platformTrySaveOtherFile(caller, filetypes, windowTitle, evt_id);
+        return;
+    }
+
     std::vector<std::string> fileTypeStrings;
     for (auto &p : filetypes) {
         fileTypeStrings.push_back(p.second);
@@ -89,6 +95,12 @@ void platformTryLoadOtherFile(
     EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
+
+    if (!g_config.useSystemFileDialog) {
+        universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+        return;
+    }
+
     std::vector<std::string> fileTypeStrings;
     for (auto &p : filetypes) {
         fileTypeStrings.push_back(p.second);

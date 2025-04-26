@@ -24,6 +24,13 @@ public:
     bool vfxEnabled = true;
     bool overrideCursor = true;
     std::string customVisualConfigPath = "";
+    bool useSystemFileDialog = 
+#if __ANDROID__
+        false
+#else
+        true
+#endif   
+        ;
 
     std::vector<std::string> lastOpenFiles;
 

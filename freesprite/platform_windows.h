@@ -13,14 +13,7 @@
 #include <tlhelp32.h>
 #include <commdlg.h>
 
-#ifndef VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
-#define VOIDSPRITE_USE_UNIVERSAL_FILEPICKER 0
-#endif
-
-
-#if VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
 #include "platform_universal.h"
-#endif
 
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
@@ -164,10 +157,10 @@ void platformTryLoadImageFile(EventCallbackListener* listener) {}
 
 //pairs in format {extension, name}
 void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id) {
-    #if VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
+    if (!g_config.useSystemFileDialog) {
         universal_platformTrySaveOtherFile(listener, filetypes, windowTitle, evt_id);
         return;
-    #endif
+    }
 
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
@@ -215,10 +208,10 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
 }
 
 void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::pair<std::string, std::string>> filetypes, std::string windowTitle, int evt_id) {
-    #if VOIDSPRITE_USE_UNIVERSAL_FILEPICKER
+    if (!g_config.useSystemFileDialog) {
         universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
         return;
-    #endif
+    }
 
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
@@ -525,7 +518,7 @@ std::vector<RootDirInfo> platformListRootDirectories() {
         {L"Videos", "Videos"},
         {L"Music", "Music"},
     }) {
-		std::wstring fullSubdir = appendPath(userProfilePathW, subdir);
+        std::wstring fullSubdir = appendPath(userProfilePathW, subdir);
         if (std::filesystem::exists(fullSubdir)) {
             ret.push_back({name, fullSubdir });
         }

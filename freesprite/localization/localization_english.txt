@@ -161,6 +161,9 @@
     {"vsp.config.opt.discordrpc", "Discord Rich Presence"},
     {"vsp.config.opt.discordrpc.desc", "When enabled, your activity will be shared as your Discord status.\n"
                                        "Supported only on Windows."},
+    {"vsp.config.opt.usesystemfilepicker", "Use system file dialog"},
+    {"vsp.config.opt.usesystemfilepicker.desc", "When enabled, opening and saving files will use the system file picker window.\n"
+                                                "Only supported on desktop platforms."},
     {"vsp.config.opt.lang", "Language (restart required)"},
     {"vsp.config.opt.vsync", "Vertical sync"},
     {"vsp.config.opt.vsync.desc", "When enabled, the framerate will be locked to your display's refresh rate.\n"
