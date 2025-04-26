@@ -29,17 +29,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      recursive: true
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-
-    # - name: Predownload SDL3_ttf
-    #   run: git clone https://github.com/libsdl-org/SDL_ttf --branch release-3.2.2 lib/SDL3_ttf --depth 1
-
-    # - name: Install SDL3_ttf deps
-    #   run: |
-    #     cd lib/SDL3_ttf/external
-    #     pwsh Get-GitModules.ps1 
 
     # - name: Extract voidsprite devlibs
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -66,7 +59,9 @@ jobs:
     #     path: |
     #       x64/Release
 
-    - uses: ilammy/setup-nasm@v1
+    - run: winget install -e --id Kitware.CMake
+    - run: winget install -e --id NASM.NASM
+    - run: powershell -Command "(Invoke-WebRequest -Uri https://git.io/JnHTY -OutFile install_zlib.bat)"; ./install_zlib.bat; del install_zlib.bat
 
     - name: Build CMake project
       uses: threeal/cmake-action@v2.1.0
@@ -84,6 +79,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      recursive: true
 
     - name: install g++13
       run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -y && sudo apt-get install g++-13
