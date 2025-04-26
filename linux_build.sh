@@ -56,6 +56,7 @@ run=0
 install=0
 
 build_sdl3=0
+build_libjxl=0
 
 if command -v ninja &> /dev/null; then
     makeg=Ninja
@@ -72,6 +73,7 @@ while [ $# -gt 0 ]; do
         "--init") init=1; shift;;
 
         "--build-sdl3") build_sdl3=1; shift;;
+        "--build-libjxl") build_libjxl=1; shift;;
     esac
 done
 
@@ -82,9 +84,15 @@ done
 # EOF
 # fi
 
+if [ "$build_jxl" == "1" ]; then
+    echo "oh no"
+fi
+
 mkdir -p build
 (cmake . -B build/$buildtypep \
-    -G $makeg $(if [ "$build_sdl3" == "1" ]; then echo -DVOIDSPRITE_STATIC_SDL3=ON; fi) \
+    -G $makeg \
+    $(if [ "$build_sdl3" == "1" ]; then echo -DVOIDSPRITE_STATIC_SDL3=ON; fi) \
+    $(if [ ! "$build_jxl" == "1" ]; then echo -DVOIDSPRITE_JXL_ENABLED=OFF; fi) \
     -DCMAKE_BUILD_TYPE=$buildtype \
     -DVOIDSPRITE_ASSETS_PATH=${prefix}/share/voidsprite && (cd build/$buildtypep && $make)) 2>&1 | tee fuck
 test ${PIPESTATUS[0]} -eq 0

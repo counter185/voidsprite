@@ -60,7 +60,7 @@ jobs:
     #     path: |
     #       x64/Release
 
-    - run: powershell -Command "(Invoke-WebRequest -Uri https://git.io/JnHTY -OutFile install_zlib.bat)"; ./install_zlib.bat; del install_zlib.bat
+    #- run: powershell -Command "(Invoke-WebRequest -Uri https://git.io/JnHTY -OutFile install_zlib.bat)"; ./install_zlib.bat; del install_zlib.bat
     - uses: ilammy/setup-nasm@v1
 
     - name: Build CMake project
@@ -70,6 +70,7 @@ jobs:
         build-dir: build
         options: |
           VOIDSPRITE_STATIC_SDL3=ON
+          VOIDSPRITE_JXL_ENABLED=OFF
 
     - name: print everything in build dir thanks
       run: ls build

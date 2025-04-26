@@ -3,10 +3,33 @@ project(voidsprite)
 
 set(VOIDSPRITE_ASSETS_PATH "" CACHE STRING "Specify the assets path")
 option(VOIDSPRITE_STATIC_SDL3 "Statically link SDL3" OFF)
+option(VOIDSPRITE_JXL_ENABLED "Enable JXL with libjxl" ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D VOIDSPRITE_JXL_ENABLED=1")
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+message("")
+message("Voidsprite:")
+message("- build-sdl3: ${VOIDSPRITE_STATIC_SDL3}")
+message("- build-libjxl: ${VOIDSPRITE_JXL_ENABLED}")
+message("")
+
+if(VOIDSPRITE_JXL_ENABLED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D VOIDSPRITE_JXL_ENABLED=1")
+    set(JPEGXL_STATIC ON)
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/libjxl")
+        execute_process(
+            COMMAND git clone https://github.com/libjxl/libjxl lib/libjxl --depth 1 --branch v0.11.1 --recursive
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        )
+    endif()
+    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/libjxl")
+    include_directories("${CMAKE_SOURCE_DIR}/lib/libjxl/lib/include")
+    target_link_libraries(voidsprite PRIVATE jxl)
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D VOIDSPRITE_JXL_ENABLED=0")
+endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D VOIDSPRITE_ASSETS_PATH=\\\"${VOIDSPRITE_ASSETS_PATH}\\\"")
 
 set(CMAKE_CXX_STANDARD 20)
@@ -84,7 +107,6 @@ else()
     target_link_libraries(voidsprite PRIVATE SDL3_ttf-static)
     target_link_libraries(voidsprite PRIVATE SDL3_image-static)
 endif()
-target_link_libraries(voidsprite PUBLIC jxl)
 target_link_libraries(voidsprite PRIVATE zlibstatic)
 target_link_libraries(voidsprite PRIVATE discord_game_sdk)
 target_link_libraries(voidsprite PRIVATE liblcf)
