@@ -61,6 +61,7 @@ jobs:
     #       x64/Release
 
     - run: powershell -Command "(Invoke-WebRequest -Uri https://git.io/JnHTY -OutFile install_zlib.bat)"; ./install_zlib.bat; del install_zlib.bat
+    - uses: ilammy/setup-nasm@v1
 
     - name: Build CMake project
       uses: threeal/cmake-action@v2.1.0
