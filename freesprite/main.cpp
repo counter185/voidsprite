@@ -52,38 +52,6 @@ bool fullscreen = false;
 bool g_ctrlModifier = false;
 bool g_shiftModifier = false;
 
-
-SDL_Texture* g_mainlogo = NULL;
-SDL_Texture* g_iconLayerAdd = NULL;
-SDL_Texture* g_iconLayerDelete = NULL;
-SDL_Texture* g_iconLayerUp = NULL;
-SDL_Texture* g_iconLayerDown = NULL;
-SDL_Texture* g_iconLayerDownMerge = NULL;
-SDL_Texture* g_iconLayerDuplicate = NULL;
-SDL_Texture* g_iconLayerHide = NULL;
-SDL_Texture* g_iconEraser = NULL;
-SDL_Texture* g_iconBlendMode = NULL;
-SDL_Texture* g_iconColorRGB = NULL;
-SDL_Texture* g_iconColorHSV = NULL;
-SDL_Texture* g_iconColorVisual = NULL;
-SDL_Texture* g_iconNavbarTabFile = NULL;
-SDL_Texture* g_iconNavbarTabEdit = NULL;
-SDL_Texture* g_iconNavbarTabLayer = NULL;
-SDL_Texture* g_iconNavbarTabView = NULL;
-SDL_Texture* g_iconComment = NULL;
-SDL_Texture* g_iconMenuPxDim = NULL;
-SDL_Texture* g_iconMenuSpritesheet = NULL;
-SDL_Texture* g_iconMenuTemplates = NULL;
-SDL_Texture* g_iconNotifTheCreature = NULL;
-SDL_Texture* g_iconNotifError = NULL;
-SDL_Texture* g_iconNotifSuccess = NULL;
-SDL_Texture* g_iconNewColor = NULL;
-SDL_Texture* g_iconActionBarUndo = NULL;
-SDL_Texture* g_iconActionBarRedo = NULL;
-SDL_Texture* g_iconFilePickerDirectory = NULL;
-SDL_Texture* g_iconFilePickerFile = NULL;
-SDL_Texture* g_iconFilePickerSupportedFile = NULL;
-
 std::vector<BaseBrush*> g_brushes;
 std::vector<Pattern*> g_patterns;
 
@@ -316,6 +284,8 @@ void renderbgOpInProgressScreen() {
 
 int main(int argc, char** argv)
 {
+    std::chrono::time_point<std::chrono::system_clock> startupTime = std::chrono::system_clock::now();
+
     log_init();
     bool convert = false, convertReadingSrc = false;
     std::vector<std::pair<std::string, std::string>> convertTargets;
@@ -435,32 +405,35 @@ int main(int argc, char** argv)
 
     loginfo("Loading assets");
 
-    g_mainlogo =            IMGLoadAssetToTexture("mainlogo.png");
-    g_iconLayerAdd =        IMGLoadAssetToTexture("icon_layer_add.png");
-    g_iconLayerDelete =     IMGLoadAssetToTexture("icon_layer_delete.png");
-    g_iconLayerUp =         IMGLoadAssetToTexture("icon_layer_up.png");
-    g_iconLayerDown =       IMGLoadAssetToTexture("icon_layer_down.png");
-    g_iconLayerDownMerge =  IMGLoadAssetToTexture("icon_layer_downmerge.png");
-    g_iconLayerDuplicate =  IMGLoadAssetToTexture("icon_layer_duplicate.png");
-    g_iconLayerHide =       IMGLoadAssetToTexture("icon_layer_hide.png");
-    g_iconEraser =          IMGLoadAssetToTexture("icon_eraser.png");
-    g_iconBlendMode =       IMGLoadAssetToTexture("icon_blendmode.png");
-    g_iconColorRGB =        IMGLoadAssetToTexture("icon_color_rgb.png");
-    g_iconColorHSV =        IMGLoadAssetToTexture("icon_color_hsv.png");
-    g_iconColorVisual =     IMGLoadAssetToTexture("icon_color_visual.png");
-    g_iconNavbarTabFile =   IMGLoadAssetToTexture("tab_file.png");
-    g_iconNavbarTabEdit =   IMGLoadAssetToTexture("tab_edit.png");
-    g_iconNavbarTabLayer =  IMGLoadAssetToTexture("tab_layer.png");
-    g_iconNavbarTabView =   IMGLoadAssetToTexture("tab_view.png");
-    g_iconComment =         IMGLoadAssetToTexture("icon_message.png");
-    g_iconMenuPxDim =       IMGLoadAssetToTexture("menu_pxdim.png");
-    g_iconMenuSpritesheet = IMGLoadAssetToTexture("menu_sptl.png");
-    g_iconMenuTemplates =   IMGLoadAssetToTexture("menu_templates.png");
-    g_iconNotifError =      IMGLoadAssetToTexture("notif_error.png");
-    g_iconNotifSuccess =    IMGLoadAssetToTexture("notif_success.png");
-    g_iconNewColor =        IMGLoadAssetToTexture("icon_newcolor.png");
-    g_iconActionBarUndo =   IMGLoadAssetToTexture("actionbar_undo.png");
-    g_iconActionBarRedo =   IMGLoadAssetToTexture("actionbar_redo.png");
+    g_mainlogo =                    IMGLoadAssetToTexture("mainlogo.png");
+    g_iconLayerAdd =                IMGLoadAssetToTexture("icon_layer_add.png");
+    g_iconLayerDelete =             IMGLoadAssetToTexture("icon_layer_delete.png");
+    g_iconLayerUp =                 IMGLoadAssetToTexture("icon_layer_up.png");
+    g_iconLayerDown =               IMGLoadAssetToTexture("icon_layer_down.png");
+    g_iconLayerDownMerge =          IMGLoadAssetToTexture("icon_layer_downmerge.png");
+    g_iconLayerDuplicate =          IMGLoadAssetToTexture("icon_layer_duplicate.png");
+    g_iconLayerHide =               IMGLoadAssetToTexture("icon_layer_hide.png");
+    g_iconEraser =                  IMGLoadAssetToTexture("icon_eraser.png");
+    g_iconBlendMode =               IMGLoadAssetToTexture("icon_blendmode.png");
+    g_iconColorRGB =                IMGLoadAssetToTexture("icon_color_rgb.png");
+    g_iconColorHSV =                IMGLoadAssetToTexture("icon_color_hsv.png");
+    g_iconColorVisual =             IMGLoadAssetToTexture("icon_color_visual.png");
+    g_iconNavbarTabFile =           IMGLoadAssetToTexture("tab_file.png");
+    g_iconNavbarTabEdit =           IMGLoadAssetToTexture("tab_edit.png");
+    g_iconNavbarTabLayer =          IMGLoadAssetToTexture("tab_layer.png");
+    g_iconNavbarTabView =           IMGLoadAssetToTexture("tab_view.png");
+    g_iconComment =                 IMGLoadAssetToTexture("icon_message.png");
+    g_iconMenuPxDim =               IMGLoadAssetToTexture("menu_pxdim.png");
+    g_iconMenuSpritesheet =         IMGLoadAssetToTexture("menu_sptl.png");
+    g_iconMenuTemplates =           IMGLoadAssetToTexture("menu_templates.png");
+    g_iconNotifError =              IMGLoadAssetToTexture("notif_error.png");
+    g_iconNotifSuccess =            IMGLoadAssetToTexture("notif_success.png");
+    g_iconNewColor =                IMGLoadAssetToTexture("icon_newcolor.png");
+    g_iconActionBarUndo =           IMGLoadAssetToTexture("actionbar_undo.png");
+    g_iconActionBarRedo =           IMGLoadAssetToTexture("actionbar_redo.png");
+    g_iconActionBarZoomIn =         IMGLoadAssetToTexture("actionbar_zoomin.png");
+    g_iconActionBarZoomOut =        IMGLoadAssetToTexture("actionbar_zoomout.png");
+    g_iconActionBarSave =           IMGLoadAssetToTexture("actionbar_save.png");
     g_iconFilePickerDirectory =     IMGLoadAssetToTexture("icon_filepicker_directory.png");
         SDL_SetTextureColorMod(g_iconFilePickerDirectory, 0xFF, 0xFC, 0x7B);
     g_iconFilePickerFile =          IMGLoadAssetToTexture("icon_filepicker_file.png");
@@ -643,6 +616,10 @@ int main(int argc, char** argv)
     if (custom9SPatterns > 0) {
         g_addNotification(Notification(std::format("Loaded {} custom 9seg. patterns", custom9SPatterns), "", 4000, NULL, COLOR_INFO));
     }
+
+    auto startupFinish = std::chrono::system_clock::now() - startupTime;
+    auto startupDuration = std::chrono::duration_cast<std::chrono::milliseconds>(startupFinish).count();
+    loginfo(std::format("Startup took {}ms", startupDuration));
 
     SDL_Event evt;
     while (!screenStack.empty()) {

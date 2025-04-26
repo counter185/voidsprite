@@ -41,14 +41,14 @@ inline void tracked_destroyTexture(SDL_Texture* texture) {
 }
 
 inline void* tracked_malloc(u64 bytes, std::string name = "unk") {
-	void* ret = malloc(bytes);
+    void* ret = malloc(bytes);
 #if _DEBUG
-	if (ret != NULL) {
+    if (ret != NULL) {
         allocated_mems[ret] = { bytes, name };
         g_named_memmap[name] += bytes;
-	}
+    }
 #endif
-	return ret;
+    return ret;
 }
 
 inline void tracked_free(void *ptr) {

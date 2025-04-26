@@ -139,7 +139,7 @@
       <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
+      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,7 +160,7 @@
       <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
+      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

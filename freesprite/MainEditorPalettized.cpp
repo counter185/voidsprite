@@ -518,7 +518,7 @@ void MainEditorPalettized::setUpWidgets()
 
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
-    colorPickerPanel->position.y = 50;
+    colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(pickedPaletteIndex);
@@ -526,7 +526,7 @@ void MainEditorPalettized::setUpWidgets()
 
     brushPicker = new EditorBrushPicker(this);
     auto brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
-    brushPickerPanel->position.y = 450;
+    brushPickerPanel->position.y = 454;
     brushPickerPanel->position.x = 10;
     wxsManager.addDrawable(brushPickerPanel);
 

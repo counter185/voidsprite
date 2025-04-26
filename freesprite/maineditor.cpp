@@ -1128,8 +1128,17 @@ void MainEditor::makeActionBar()
     actionbar->addDrawable(redoButton);
     nextNavbarX += 35;
 
+    UIButton* saveButton = new UIButton("", TL("vsp.nav.save"));
+    saveButton->icon = g_iconActionBarSave;
+    saveButton->onClickCallback = [this](UIButton* btn) { if (g_shiftModifier) trySaveAsImage(); else trySaveImage(); };
+    saveButton->position = { nextNavbarX,0 };
+    saveButton->wxWidth = 30;
+    saveButton->wxHeight = 30;
+    actionbar->addDrawable(saveButton);
+    nextNavbarX += 35;
+
     UIButton* zoomoutButton = new UIButton("", TL("vsp.cmn.zoomout"));
-    //redoButton->icon = g_iconActionBarRedo;
+    zoomoutButton->icon = g_iconActionBarZoomOut;
     zoomoutButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(-1, { g_windowW / 2, g_windowH / 2 }); };
     zoomoutButton->position = { nextNavbarX,0 };
     zoomoutButton->wxWidth = 30;
@@ -1138,7 +1147,7 @@ void MainEditor::makeActionBar()
     nextNavbarX += 35;
 
     UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
-    //redoButton->icon = g_iconActionBarRedo;
+    zoominButton->icon = g_iconActionBarZoomIn;
     zoominButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(1, {g_windowW/2, g_windowH/2}); };
     zoominButton->position = { nextNavbarX,0 };
     zoominButton->wxWidth = 30;
