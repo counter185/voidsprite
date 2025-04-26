@@ -60,8 +60,6 @@ jobs:
     #     path: |
     #       x64/Release
 
-    - run: winget install -e --id Kitware.CMake
-    - run: winget install -e --id NASM.NASM
     - run: powershell -Command "(Invoke-WebRequest -Uri https://git.io/JnHTY -OutFile install_zlib.bat)"; ./install_zlib.bat; del install_zlib.bat
 
     - name: Build CMake project
