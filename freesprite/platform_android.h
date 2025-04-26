@@ -48,8 +48,8 @@ Java_pl_cntrpl_voidsprite_VSPActivity_passSystemInformationString(JNIEnv *env, j
 
 }
 
-std::vector<std::string> android_getStoragePathsFromProcMounts() {
-    std::vector<std::string> ret;
+std::vector<RootDirInfo> android_getStoragePathsFromProcMounts() {
+    std::vector<RootDirInfo> ret;
 
     std::ifstream mounts("/proc/mounts");
     if (mounts.is_open()) {
@@ -59,7 +59,10 @@ std::vector<std::string> android_getStoragePathsFromProcMounts() {
             if (mps.size() > 1) {
                 std::string mountPoint = mps[1];
                 if (mountPoint.starts_with("/storage/") && !mountPoint.starts_with("/storage/emulated")) {
-                    ret.push_back(mountPoint);
+                    ret.push_back({std::format("SD: {}", fileNameFromPath(mountPoint)), mountPoint});
+                }
+                else if (mountPoint.starts_with("/mnt/media_rw")) {
+                    ret.push_back({std::format("USB: {}", fileNameFromPath(mountPoint)), mountPoint});
                 }
             }
         }
@@ -143,10 +146,8 @@ std::vector<RootDirInfo> platformListRootDirectories() {
     RootDirInfo rootDir = {"Internal storage", "/sdcard"};
     ret.push_back(rootDir);
 
-    for (auto& path: android_getStoragePathsFromProcMounts()) {
-        std::string name = fileNameFromPath(path);
-        RootDirInfo mntDir = {name, path};
-        ret.push_back(mntDir);
+    for (auto& rtDir: android_getStoragePathsFromProcMounts()) {
+        ret.push_back(rtDir);
     }
     return ret;
 }
