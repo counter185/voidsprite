@@ -39,5 +39,7 @@ public:
 
     void updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t);
     void updateLanguageCredit();
+
+    UICheckbox* optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position);
 };
 

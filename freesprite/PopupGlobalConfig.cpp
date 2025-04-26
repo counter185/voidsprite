@@ -38,7 +38,13 @@ PopupGlobalConfig::PopupGlobalConfig()
     wxHeight = 400;
     wxWidth = 850;
 
-    TabbedView* configTabs = new TabbedView({ {TL("vsp.config.tab.general")}, {TL("vsp.config.tab.visual")}, {TL("vsp.config.tab.editor")}, {TL("vsp.config.tab.keybinds")}, {TL("vsp.config.tab.misc")}}, 90);
+    TabbedView* configTabs = new TabbedView({ 
+        {TL("vsp.config.tab.general")}, 
+        {TL("vsp.config.tab.visual")}, 
+        {TL("vsp.config.tab.editor")}, 
+        {TL("vsp.config.tab.keybinds")}, 
+        {TL("vsp.config.tab.misc")}
+    }, 90);
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
 
@@ -48,18 +54,9 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     XY posInTab = { 0,10 };
-
-    UICheckbox* cb7 = new UICheckbox(TL("vsp.config.opt.pngextdata"), &g_config.saveLoadFlatImageExtData);
-    cb7->position = posInTab;
-    cb7->checkbox->tooltip = TL("vsp.config.opt.pngextdata.desc");
-    configTabs->tabs[0].wxs.addDrawable(cb7);
-    posInTab.y += 35;
-
-    UICheckbox* cb8 = new UICheckbox(TL("vsp.config.opt.discordrpc"), &g_config.useDiscordRPC);
-    cb8->position = posInTab;
-    cb8->checkbox->tooltip = TL("vsp.config.opt.discordrpc.desc");
-    configTabs->tabs[0].wxs.addDrawable(cb8);
-    posInTab.y += 35;
+    
+    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
+    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
@@ -92,11 +89,8 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     posInTab = { 0,10 };
-    UICheckbox* cb6 = new UICheckbox(TL("vsp.config.opt.vsync"), &g_config.vsync);
-    cb6->position = posInTab;
-    cb6->checkbox->tooltip = TL("vsp.config.opt.vsync.desc");
-    configTabs->tabs[1].wxs.addDrawable(cb6);
-    posInTab.y += 35;
+
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync, &posInTab));
 
     UILabel* lbl3 = new UILabel(TL("vsp.config.opt.bganim"));
     lbl3->position = posInTab;
@@ -122,17 +116,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[1].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
-    cb8 = new UICheckbox(TL("vsp.config.opt.vfx"), &g_config.vfxEnabled);
-    cb8->position = posInTab;
-    cb8->checkbox->tooltip = TL("vsp.config.opt.vfx.desc");
-    configTabs->tabs[1].wxs.addDrawable(cb8);
-    posInTab.y += 35;
-
-    cb8 = new UICheckbox(TL("vsp.config.opt.cursor"), &g_config.overrideCursor);
-    cb8->position = posInTab;
-    cb8->checkbox->tooltip = TL("vsp.config.opt.cursor.desc");
-    configTabs->tabs[1].wxs.addDrawable(cb8);
-    posInTab.y += 35;
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();
     std::vector<std::string> visualConfNames = { getDefaultVisualConf()["meta/name"] };
@@ -170,20 +155,9 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
 
-    UICheckbox* cb1 = new UICheckbox(TL("vsp.config.opt.opensavelocation"), &g_config.openSavedPath);
-    cb1->position = posInTab;
-    configTabs->tabs[2].wxs.addDrawable(cb1);
-    posInTab.y += 35;
-
-    UICheckbox* cb3 = new UICheckbox(TL("vsp.config.opt.startrowcolidxat1"), &g_config.rowColIndexesStartAt1);
-    cb3->position = posInTab;
-    configTabs->tabs[2].wxs.addDrawable(cb3);
-    posInTab.y += 35;
-
-    cb3 = new UICheckbox(TL("vsp.config.opt.altscrolling"), &g_config.scrollWithTouchpad);
-    cb3->position = posInTab;
-    configTabs->tabs[2].wxs.addDrawable(cb3);
-    posInTab.y += 35;
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath, &posInTab));
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1, &posInTab));
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad, &posInTab));
 
     UILabel* lbl2 = new UILabel(TL("vsp.config.opt.maxundocount"));
     lbl2->position = posInTab;
@@ -197,17 +171,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
 
-    UICheckbox* cb4 = new UICheckbox(TL("vsp.config.opt.selectonlocktile"), &g_config.isolateRectOnLockTile);
-    cb4->position = posInTab;
-    cb4->checkbox->tooltip = TL("vsp.config.opt.selectonlocktile.desc");
-    configTabs->tabs[2].wxs.addDrawable(cb4);
-    posInTab.y += 35;
-
-    UICheckbox* cb5 = new UICheckbox(TL("vsp.config.opt.lockfilltotiles"), &g_config.fillToolTileBound);
-    cb5->position = posInTab;
-    cb5->checkbox->tooltip = TL("vsp.config.opt.lockfilltotiles.desc");
-    configTabs->tabs[2].wxs.addDrawable(cb5);
-    posInTab.y += 35;
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile, &posInTab));
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
 
     lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;
@@ -424,4 +389,15 @@ void PopupGlobalConfig::updateLanguageCredit()
     else {
         languageCredit->setText("");
     }
+}
+
+UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position)
+{
+    UICheckbox* cb7 = new UICheckbox(name, target);
+    cb7->position = *position;
+    if (tooltip != "") {
+        cb7->checkbox->tooltip = tooltip;
+    }
+    position->y += 35;
+    return cb7;
 }
