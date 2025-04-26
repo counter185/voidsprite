@@ -1,0 +1,16 @@
+[submodule "lib/zlib"]
+    path = lib/zlib
+    url = https://github.com/madler/zlib
+    branch = v1.3.1
+[submodule "lib/SDL3"]
+    path = lib/SDL3
+    url = https://github.com/libsdl-org/SDL
+    branch = release-3.2.10
+[submodule "lib/SDL3_image"]
+    path = lib/SDL3_image
+    url = https://github.com/libsdl-org/SDL_image
+    branch = release-3.2.4
+[submodule "lib/SDL3_ttf"]
+    path = lib/SDL3_ttf
+    url = https://github.com/libsdl-org/SDL_ttf
+    branch = release-3.2.2

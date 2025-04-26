@@ -450,7 +450,7 @@ android-project/build/reports/problems/problems-report.html
 /enc_temp_folder
 
 # Libs
-/lib/zlib
-/lib/SDL3
-/lib/SDL3_ttf
-/lib/SDL3_image
+#/lib/zlib
+#/lib/SDL3
+#/lib/SDL3_ttf
+#/lib/SDL3_image
