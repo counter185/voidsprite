@@ -3003,6 +3003,11 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
         MainEditor* ret = NULL;
         //read .ora file using zip
         zip_t *zip = zip_cstream_open(f, ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+        if (zip == NULL) {
+            fclose(f);
+            return NULL;
+        }
+
         {
             pugi::xml_document doc;
 

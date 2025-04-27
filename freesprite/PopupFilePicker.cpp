@@ -68,7 +68,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.filenotfound")));
             } else {
                 if (callback != NULL) {
-                    callback->eventFileOpen(callback_id, fullFilePath, -1);
+                    callback->eventFileOpen(callback_id, fullFilePath, currentFileTypeIndex + 1);
                 }
                 this->closePopup();
             }
