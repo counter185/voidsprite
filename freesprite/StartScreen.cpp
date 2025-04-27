@@ -104,6 +104,11 @@ void StartScreen::takeInput(SDL_Event evt)
                 else if (evt.key.scancode == SDL_SCANCODE_N && g_ctrlModifier) {
                     ScreenNonogramPlayer::StartDebugGame();
                 }
+#if _DEBUG
+                else if (evt.key.scancode == SDL_SCANCODE_INSERT && g_ctrlModifier && g_shiftModifier) {
+                    throw std::exception("** user-initiated test crash");
+                }
+#endif
                 break;
         }
     }

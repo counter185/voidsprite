@@ -110,6 +110,8 @@ void PopupFilePicker::populateRootAndFileList() {
     driveList->subWidgets.freeAllDrawables();
     fileList->subWidgets.freeAllDrawables();
 
+    driveList->scrollOffset = { 0,0 };
+
     currentDirLabel->setText(convertStringToUTF8OnWin32(currentDir));
     currentFileName->setText("");
 

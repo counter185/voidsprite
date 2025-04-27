@@ -31,6 +31,13 @@
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
     {"vsp.rpc.activeworkspaces", "active workspaces"},
 
+    //crash popup
+    {"vsp.fatalerror.title", "fatal error"},
+    {"vsp.fatalerror.body", "An unrecoverable error has occurred.\n"
+                            "Relevant information was saved to the \"voidsprite_log.txt\" file in the app data directory.\n"
+                            "If you're reporting this issue on GitHub, please include that file.\n"
+                            " More details:"},
+
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},
     {"vsp.popup.openimage", "open image"},

@@ -3,6 +3,7 @@
 
 void log_init();
 void log_close();
+void log_duplicateLast();
 
 void loginfo(std::string a);
 void logwarn(std::string a);

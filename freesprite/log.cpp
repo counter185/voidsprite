@@ -1,18 +1,41 @@
 #include "globals.h"
 
 FILE* logFile = NULL;
+PlatformNativePathString logPath;
 
 void log_init()
 {
-	PlatformNativePathString logPath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/voidsprite_log.txt");
-	logFile = platformOpenFile(logPath, convertStringOnWin32("w"));
 	if (logFile == NULL) {
-		printf("Failed to open log file\n");
+		logPath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/voidsprite_log.txt");
+		logFile = platformOpenFile(logPath, convertStringOnWin32("w"));
+		if (logFile == NULL) {
+			printf("Failed to open log file\n");
+		}
+		else {
+			loginfo("Log file initialized");
+		}
 	}
 	else {
-		loginfo("Log file initialized");
+		logwarn("Attempted to initialize logging when already initialized.");
 	}
 }
+
+void log_duplicateLast() {
+	bool logExists = std::filesystem::exists(logPath);
+	if (!logPath.empty() && logExists) {
+		time_t t = time(NULL);
+		tm tmn;
+#ifdef _MSC_VER
+		localtime_s(&tmn, &t);
+#else
+		tmn = *localtime(&timeNowT);
+#endif
+		std::string date = std::format("{:04d}-{:02d}-{:02d}--{:02d}-{:02d}-{:02d}", tmn.tm_year + 1900, tmn.tm_mon + 1, tmn.tm_mday, tmn.tm_hour, tmn.tm_min, tmn.tm_sec);
+		PlatformNativePathString newLogPath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(std::format("/voidsprite_log-{}.txt", date));
+		platformCopyFile(logPath, newLogPath);
+	}
+}
+
 void log_close() {
 	if (logFile != NULL) {
 		fclose(logFile);
