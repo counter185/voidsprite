@@ -225,6 +225,7 @@ public:
     void layer_replaceColor(uint32_t from, uint32_t to);
     void layer_hsvShift(hsv shift);
     void layer_outline(bool wholeImage = false);
+    void layer_clearSelectedArea();
     void layer_selectCurrentAlpha();
     virtual Layer* flattenImage();
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);

@@ -908,7 +908,13 @@ void MainEditor::setUpWidgets()
                                 editor->copyLayerToClipboard(editor->getCurrentLayer());
                             }
                         }
-                    }
+                    },
+                    {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
+                            [](MainEditor* editor) {
+                                editor->layer_clearSelectedArea();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabLayer
             }
@@ -1401,10 +1407,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                             // colorPicker->toggleEraser();
                             break;
                         case SDL_SCANCODE_DELETE:
-                            commitStateToCurrentLayer();
+                            layer_clearSelectedArea();
                             passthroughBrushKeybinds = false;
-                            getCurrentLayer()->clear(isolateEnabled ? &isolatedFragment : NULL);
-                            g_addNotification(Notification("Area cleared", "", 1000));
                             break;
                         case SDL_SCANCODE_RCTRL:
                             passthroughBrushKeybinds = false;
@@ -1506,6 +1510,13 @@ void MainEditor::takeInput(SDL_Event evt) {
         leftMouseHold = false;
         penDown = false;
     }
+}
+
+void MainEditor::layer_clearSelectedArea()
+{
+    commitStateToCurrentLayer();
+    getCurrentLayer()->clear(isolateEnabled ? &isolatedFragment : NULL);
+    g_addNotification(Notification("Area cleared", "", 1000));
 }
 
 void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)

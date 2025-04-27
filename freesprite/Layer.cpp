@@ -34,8 +34,8 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
             for (int x = 0; x < clipSource.w; x++) {
                 u32 px = sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y}, false);
                 if (sourceLayer->colorKeySet && px == sourceLayer->colorKey) {
-					continue;
-				}
+                    continue;
+                }
                 u32 blendedPixel = alphaBlend(getPixelAt(XY{ x + position.x, y + position.y }), px);
                 setPixel(XY{ x + position.x, y + position.y }, blendedPixel);
             }

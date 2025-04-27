@@ -133,6 +133,7 @@
     {"vsp.maineditor.setckey","Set color key"}, // translation note: "color key" here means the color chosen becomes transparent
     {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
     {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
+    {"vsp.maineditor.nav.layer.clearselection", "Erase selected area"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

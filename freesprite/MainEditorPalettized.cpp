@@ -410,6 +410,12 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
+                            [](MainEditor* editor) {
+                                editor->layer_clearSelectedArea();
+                            }
+                        }
+                    },
                     //todo: fix it (make it so that the -1 index never gets passed)
                     /*{SDL_SCANCODE_C, {TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
                             [](MainEditor* editor) {
