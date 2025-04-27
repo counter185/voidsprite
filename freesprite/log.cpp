@@ -28,7 +28,7 @@ void log_duplicateLast() {
 #ifdef _MSC_VER
 		localtime_s(&tmn, &t);
 #else
-		tmn = *localtime(&timeNowT);
+		tmn = *localtime(&t);
 #endif
 		std::string date = std::format("{:04d}-{:02d}-{:02d}--{:02d}-{:02d}-{:02d}", tmn.tm_year + 1900, tmn.tm_mon + 1, tmn.tm_mday, tmn.tm_hour, tmn.tm_min, tmn.tm_sec);
 		PlatformNativePathString newLogPath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(std::format("/voidsprite_log-{}.txt", date));
