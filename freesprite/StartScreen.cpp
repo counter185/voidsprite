@@ -246,14 +246,22 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
         FileImporter* importer = g_fileImporters[importerIndex];
         void* importedData = importer->importData(name);
         if (importedData != NULL) {
+            MainEditor* outSession = NULL;
             if (!importer->importsWholeSession()) {
                 Layer* nlayer = (Layer*)importedData;
-                g_addScreen(!nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer));
+                outSession = !nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer);
             }
             else {
-                MainEditor* session = (MainEditor*)importedData;
-                g_addScreen(session);
+                outSession = (MainEditor*)importedData;
             }
+
+            if (importer->getCorrespondingExporter() != NULL) {
+                outSession->lastWasSaveAs = false;
+                outSession->lastConfirmedSave = true;
+                outSession->lastConfirmedSavePath = name;
+                outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
+            }
+            g_addScreen(outSession);
         }
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));

@@ -63,14 +63,14 @@ public:
 
     Canvas canvas;
 
-    XY mousePixelTargetPoint;
-    XY mousePixelTargetPoint2xP;
-    XY mouseHoldPosition;
+    XY mousePixelTargetPoint = XY{0,0};
+    XY mousePixelTargetPoint2xP = XY{ 0,0 };
+    XY mouseHoldPosition = XY{ 0,0 };
     bool closeNextTick = false;
     BaseBrush* currentBrush = NULL;
     bool currentBrushMouseDowned = false;
     bool invertPattern = false;
-    Pattern* currentPattern;
+    Pattern* currentPattern = NULL;
     bool leftMouseHold = false;
     bool middleMouseHold = false;
     Timer64 layerSwitchTimer;
