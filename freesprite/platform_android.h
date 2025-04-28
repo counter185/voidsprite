@@ -147,8 +147,8 @@ std::string platformGetSystemInfo() {
 
 std::vector<RootDirInfo> platformListRootDirectories() {
     std::vector<RootDirInfo> ret;
-    RootDirInfo rootDir = {"Internal storage", "/sdcard"};
-    ret.push_back(rootDir);
+    ret.push_back({"Internal storage", "/sdcard"});
+    ret.push_back({"Application data", platformEnsureDirAndGetConfigFilePath()});
 
     for (auto& rtDir: android_getStoragePathsFromProcMounts()) {
         ret.push_back(rtDir);

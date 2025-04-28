@@ -836,11 +836,11 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
     return compressedData;
 }
 
-void unZlibFile(PlatformNativePathString path)
+void zlibFile(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile == NULL) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to open file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         return;
     }
     fseek(infile, 0, SEEK_END);
@@ -849,7 +849,37 @@ void unZlibFile(PlatformNativePathString path)
     u8* fileBuffer = (u8*)tracked_malloc(fileLength);
     fread(fileBuffer, fileLength, 1, infile);
     fclose(infile);
+
+    std::vector<u8> compressedData = compressZlib(fileBuffer, fileLength);
+
+    FILE* outfile = platformOpenFile(path + convertStringOnWin32(".zlib"), PlatformFileModeWB);
+    fwrite(compressedData.data(), compressedData.size(), 1, outfile);
+    fclose(outfile);
+    tracked_free(fileBuffer);
+    if (compressedData.size() == 0) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to compress zlib file"));
+    }
+    else {
+        g_addNotification(SuccessNotification("Success", "Zlib file compressed"));
+    }
+}
+
+void unZlibFile(PlatformNativePathString path)
+{
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile == NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+        return;
+    }
+    fseek(infile, 0, SEEK_END);
+    uint64_t fileLength = ftell(infile);
+    fseek(infile, 0, SEEK_SET);
+    u8* fileBuffer = (u8*)tracked_malloc(fileLength);
+    fread(fileBuffer, fileLength, 1, infile);
+    fclose(infile);
+
     std::vector<u8> decompressedData = decompressZlibWithoutUncompressedSize(fileBuffer, fileLength);
+
     FILE* outfile = platformOpenFile(path + convertStringOnWin32(".unzlib"), PlatformFileModeWB);
     fwrite(decompressedData.data(), decompressedData.size(), 1, outfile);
     fclose(outfile);

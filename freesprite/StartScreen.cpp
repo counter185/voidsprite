@@ -64,6 +64,9 @@ void StartScreen::takeInput(SDL_Event evt)
         if (stringEndsWithIgnoreCase(filePath, ".zlib")) {
             unZlibFile(convertStringOnWin32(filePath));
         }
+        else if (stringEndsWithIgnoreCase(filePath, ".unzlib")) {
+            zlibFile(convertStringOnWin32(filePath));
+        }
         else {
             tryLoadFile(filePath);
         }
