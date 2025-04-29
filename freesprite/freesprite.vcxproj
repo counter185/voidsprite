@@ -201,6 +201,7 @@
     <ClCompile Include="discord_game_sdk\user_manager.cpp" />
     <ClCompile Include="discord_game_sdk\voice_manager.cpp" />
     <ClCompile Include="DraggablePanel.cpp" />
+    <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="io_aseprite.cpp" />
     <ClCompile Include="io_dibv5.cpp" />
@@ -373,6 +374,7 @@
     <ClInclude Include="discord_game_sdk\voice_manager.h" />
     <ClInclude Include="discord_rpc.h" />
     <ClInclude Include="DraggablePanel.h" />
+    <ClInclude Include="EditorTouchToggle.h" />
     <ClInclude Include="fills.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="iostructs.h" />

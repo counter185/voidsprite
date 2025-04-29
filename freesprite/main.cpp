@@ -666,6 +666,14 @@ int main(int argc, char** argv)
                         g_mouseY = (int)(evt.motion.y);
                     }
                     break;
+                case SDL_EVENT_FINGER_DOWN:
+                case SDL_EVENT_FINGER_UP:
+                case SDL_EVENT_FINGER_MOTION:
+                    if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
+                        g_mouseX = evt.tfinger.x * g_windowW;
+                        g_mouseY = evt.tfinger.y * g_windowH;
+                    }
+                    break;
                 case SDL_EVENT_PEN_MOTION:
                     lastPenEvent.start();
                     g_mouseX = (int)(evt.pmotion.x);

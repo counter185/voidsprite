@@ -615,6 +615,9 @@
     <ClCompile Include="PopupFilePicker.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="EditorTouchToggle.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1177,6 +1180,9 @@
     </ClInclude>
     <ClInclude Include="platform_android.h">
       <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorTouchToggle.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -102,6 +102,14 @@
 
     {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
     {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
+    {"vsp.maineditor.panel.touchmode.title", "TOUCH MODE"},
+    {"vsp.maineditor.panel.touchmode.pan", "Pan"},
+    {"vsp.maineditor.panel.touchmode.leftclick", "Mouse Left"},
+    {"vsp.maineditor.panel.touchmode.rightclick", "Mouse Right"},
+
+    {"vsp.maineditor.tab.filters", "Filters"},
+    {"vsp.maineditor.tab.render", "Render"},
+    {"vsp.maineditor.tab.view", "View"},
 
     {"vsp.maineditor.saveas","Save As"},
     {"vsp.maineditor.exportpal","Export as indexed"},

@@ -129,6 +129,7 @@ class EditorColorPicker;
 class EditorBrushPicker;
 class EditorLayerPicker;
 class EditorSpritesheetPreview;
+class EditorTouchToggle;
 class TilemapEditorLayerPicker;
 class PanelSpritesheetPreview;
 class ButtonStartScreenSession;

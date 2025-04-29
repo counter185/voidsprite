@@ -21,6 +21,13 @@ enum MainEditorCommentMode : int {
     COMMENTMODE_SHOW_ALL = 2
 };
 
+enum EditorTouchMode : int {
+    TOUCHMODE_PAN = 0,
+    TOUCHMODE_LEFTCLICK = 1,
+	TOUCHMODE_RIGHTCLICK = 2,
+    TOUCHMODE_MAX
+};
+
 struct CommentData {
     XY position;
     std::string data;
@@ -127,6 +134,9 @@ public:
 
     std::map<std::string, double> toolProperties;
     Panel* toolPropertiesPanel = NULL;
+
+    EditorTouchToggle* touchModePanel = NULL;
+    EditorTouchMode touchMode = TOUCHMODE_PAN;
 
     u64 editTime = 0;
     u64 lastTimestamp = -1;

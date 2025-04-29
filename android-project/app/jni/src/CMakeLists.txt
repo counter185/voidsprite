@@ -106,6 +106,7 @@ add_library(main SHARED
         voidsprite/EditorColorPicker.cpp
         voidsprite/EditorLayerPicker.cpp
         voidsprite/EditorSpritesheetPreview.cpp
+        voidsprite/EditorTouchToggle.cpp
         voidsprite/FileIO.cpp
         voidsprite/FontRenderer.cpp
         voidsprite/Gamepad.cpp

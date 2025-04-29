@@ -10,6 +10,7 @@
 #include "MinecraftBlockPreviewScreen.h"
 #include "FileIO.h"
 #include "CollapsableDraggablePanel.h"
+#include "EditorTouchToggle.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -513,6 +514,16 @@ void MainEditorPalettized::setUpWidgets()
                                 }
                                 MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
                                 g_addScreen(newScreen);
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_P, { "Open touch mode panel...",
+                            [](MainEditor* editor) {
+                                if (editor->touchModePanel == NULL) {
+                                    editor->touchModePanel = new EditorTouchToggle(editor);
+                                    editor->touchModePanel->position = { g_windowW - editor->touchModePanel->wxWidth - 10, g_windowH - editor->touchModePanel->wxHeight - 40 };
+                                    editor->addWidget(editor->touchModePanel);
+                                }
                             }
                         }
                     },

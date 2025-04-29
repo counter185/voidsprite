@@ -3,6 +3,7 @@
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
+#include "EditorTouchToggle.h"
 #include "CollapsableDraggablePanel.h"
 #include "ScreenWideNavBar.h"
 #include "ScreenWideActionBar.h"
@@ -922,7 +923,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_Q,
             {
-                "Filters",
+                TL("vsp.maineditor.tab.filters"),
                 {},
                 {
                 },
@@ -932,7 +933,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_R,
             {
-                "Render",
+                TL("vsp.maineditor.tab.render"),
                 {},
                 {
                 },
@@ -942,7 +943,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_V,
             {
-                "View",
+                TL("vsp.maineditor.tab.view"),
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
@@ -1026,6 +1027,16 @@ void MainEditor::setUpWidgets()
                                 }
                                 MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
                                 g_addScreen(newScreen);
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_P, { "Open touch mode panel...",
+                            [](MainEditor* editor) {
+                                if (editor->touchModePanel == NULL) {
+                                    editor->touchModePanel = new EditorTouchToggle(editor);
+                                    editor->touchModePanel->position = { g_windowW - editor->touchModePanel->wxWidth - 10, g_windowH - editor->touchModePanel->wxHeight - 40 };
+									editor->addWidget(editor->touchModePanel);
+                                }
                             }
                         }
                     },
@@ -1215,6 +1226,9 @@ void MainEditor::addWidget(Drawable* wx)
 void MainEditor::removeWidget(Drawable* wx)
 {
     wxsManager.removeDrawable(wx);
+    if (wx == (Drawable*)touchModePanel) {
+        touchModePanel = NULL;
+    }
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
@@ -1283,6 +1297,21 @@ void MainEditor::takeInput(SDL_Event evt) {
     }
 
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
+
+        switch (evt.type) {
+            case SDL_EVENT_FINGER_DOWN:
+            case SDL_EVENT_FINGER_UP:
+            case SDL_EVENT_FINGER_MOTION:
+                if (touchMode != TOUCHMODE_PAN) {
+                    evt = convertTouchToMouseEvent(evt);
+                    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN || evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+                        evt.button.button = touchMode == TOUCHMODE_LEFTCLICK ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
+                    }
+                }
+                break;
+
+        }
+
         switch (evt.type) {
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
