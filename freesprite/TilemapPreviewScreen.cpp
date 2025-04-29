@@ -701,13 +701,17 @@ void TilemapPreviewScreen::duplicateLayer(int index)
 {
     XY**& tilemapLayer = tilemap.at(index);
     XY** newTilemap = (XY**)tracked_malloc(tilemapDimensions.y * sizeof(XY*), "Tilemap");
-    for (int y = 0; y < tilemapDimensions.y; y++) {
-        newTilemap[y] = (XY*)tracked_malloc(tilemapDimensions.x * sizeof(XY), "Tilemap");
-        for (int x = 0; x < tilemapDimensions.x; x++) {
-            newTilemap[y][x] = tilemapLayer[y][x];
+    if (newTilemap != NULL) {
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+            newTilemap[y] = (XY *) tracked_malloc(tilemapDimensions.x * sizeof(XY), "Tilemap");
+            for (int x = 0; x < tilemapDimensions.x; x++) {
+                newTilemap[y][x] = tilemapLayer[y][x];
+            }
         }
+        tilemap.insert(tilemap.begin() + index, newTilemap);
+    } else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
     }
-    tilemap.insert(tilemap.begin() + index, newTilemap);
 }
 
 void TilemapPreviewScreen::promptRenderMap(int type)
@@ -787,12 +791,12 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
         }
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Not implemented"));
     }
 
     g_addNotification(
         success ? SuccessNotification("Success", "Rendered map to image")
-        : ErrorNotification("Error", "Error rendering map to image")
+        : ErrorNotification(TL("vsp.cmn.error"), "Error rendering map to image")
     );
 }
 

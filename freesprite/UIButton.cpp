@@ -79,20 +79,29 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 		{
 			XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
 			if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+				touchHoldDownPos = touchPosition;
 				touchHoldingDown = true;
 			}
 		}
 			break;
 		case SDL_EVENT_FINGER_UP:
 		{
-			touchHoldingDown = false;
-			XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
-			if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
-				click();
+			if (touchHoldingDown) {
+				touchHoldingDown = false;
+				XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+				if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+					click();
+				}
 			}
 		}
 			break;
 		case SDL_EVENT_FINGER_MOTION:
+			if (touchHoldingDown) {
+				XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+				if (xyDistance(touchPosition, touchHoldDownPos) > 6) {
+					touchHoldingDown = false;
+				}
+			}
 			break;
 	}
 }

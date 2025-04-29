@@ -38,7 +38,8 @@ public:
 
     void render(XY position) override {
         wxWidth = collapsablePanel->wxWidth;
-        wxHeight = COLLAPSED_HEIGHT + (collapsablePanel->enabled ? collapsablePanel->wxHeight : 0);
+        //wxHeight = COLLAPSED_HEIGHT + (collapsablePanel->enabled ? collapsablePanel->wxHeight : 0);
+        wxHeight = collapsablePanel->enabled ? collapsablePanel->wxHeight : 0;
         DraggablePanel::render(position);
     }
 

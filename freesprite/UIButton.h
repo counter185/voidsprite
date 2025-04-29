@@ -9,6 +9,7 @@ class UIButton : public Drawable
 {
 private:
     bool touchHoldingDown = false;
+    XY touchHoldDownPos = { -1,-1 };
 public:
     std::string text;
     std::string tooltip;
