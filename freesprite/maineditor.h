@@ -205,6 +205,8 @@ public:
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     void tickAutosave();
+    bool usingAltBG();
+    void setAltBG(bool useAltBG);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

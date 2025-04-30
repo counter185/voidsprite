@@ -3301,6 +3301,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
                     if (extData.contains("layer.selected")) { ret->selLayer = std::stoi(extData["layer.selected"]); }
                     if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
+                    if (extData.contains("editor.altbg")) { ret->setAltBG(extData["editor.altbg"] == "1"); }
                     if (extData.contains("sym.enabled")) { 
                         ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
                         ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
@@ -3532,7 +3533,8 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
-            {"layer.opacity", layerOpacityData}
+            {"layer.opacity", layerOpacityData},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
         nvalBuffer = extData.size();
@@ -3603,7 +3605,8 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
-            {"palette.enabled", editor->isPalettized ? "1" : "0"}
+            {"palette.enabled", editor->isPalettized ? "1" : "0"},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
         if (editor->isPalettized) {
@@ -3704,7 +3707,8 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             {"layer.visibility", layerVisibilityData},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
             {"guidelines", guidelinesData},
-            {"edit.time", std::to_string(editor->editTime)}
+            {"edit.time", std::to_string(editor->editTime)},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
         if (editor->isPalettized) {

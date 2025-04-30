@@ -310,7 +310,7 @@ void MainEditor::DrawBackground()
     //uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
     //uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
     //renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
-    (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? fillPrimary : fillAlt).fill({ 0,0,g_windowW,g_windowH });
+    (usingAltBG() ? fillAlt : fillPrimary).fill({ 0,0,g_windowW,g_windowH });
 
     uint64_t bgtimer = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
     if (g_config.animatedBackground == 1 || g_config.animatedBackground == 3) {
@@ -1828,6 +1828,7 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
     ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
     ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
     ret["CommentData"] = makeCommentDataString();
+	ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
     return ret;
 }
 
@@ -1843,6 +1844,7 @@ void MainEditor::loadSingleLayerExtdata(Layer* l) {
         if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
         if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
         if (kvmap.contains("CommentData")) { comments = parseCommentDataString(kvmap["CommentData"]); }
+		if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
     }
     catch (std::exception e) {}
 }
@@ -2249,6 +2251,16 @@ void MainEditor::tickAutosave()
             }
         }
     }
+}
+
+//todo: clean all of that up
+bool MainEditor::usingAltBG()
+{
+    return sdlcolorToUint32(backgroundColor) != 0xFF000000;
+}
+void MainEditor::setAltBG(bool useAltBG)
+{
+	backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
 }
 
 void MainEditor::moveLayerUp(int index) {
