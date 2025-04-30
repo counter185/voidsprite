@@ -163,6 +163,8 @@ void g_reloadFonts() {
             }
         }
     }
+
+    g_fnt->precacheFontCommonChars(18);
     /*std::string customFontPath = convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/appfont.ttf"));
     if (std::filesystem::exists(customFontPath)) {
         TTF_Font* fontCustom = TTF_OpenFont(customFontPath.c_str(), 18);

@@ -144,6 +144,18 @@ XY TextRenderer::StatStringDimensions(std::string text, int size)
     return maxDraw;
 }
 
+void TextRenderer::precacheFontCommonChars(int size)
+{
+    //barely any effect on desktop
+    //but reduces stuttering on android
+    std::string str =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "1234567890"
+        "!@#$%^&*()[]:\\/|+_<>?`~";
+    StatStringDimensions(str, size);
+}
+
 GlyphData TextRenderer::getGlyphForChar(uint32_t ch, int size)
 {
     for (auto& font : fontStack) {
