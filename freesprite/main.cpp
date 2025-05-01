@@ -624,6 +624,11 @@ int main(int argc, char** argv)
         auto startupDuration = std::chrono::duration_cast<std::chrono::milliseconds>(startupFinish).count();
         loginfo(std::format("Startup took {}ms", startupDuration));
 
+#if __ANDROID__
+        //sometimes it really really doesn't feel like maximizing
+        SDL_MaximizeWindow(g_wd);
+#endif
+
         SDL_Event evt;
         while (!screenStack.empty()) {
             uint64_t ticksBegin = SDL_GetTicks64();

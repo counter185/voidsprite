@@ -98,7 +98,7 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 		case SDL_EVENT_FINGER_MOTION:
 			if (touchHoldingDown) {
 				XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
-				if (xyDistance(touchPosition, touchHoldDownPos) > 6) {
+				if (xyDistance(touchPosition, touchHoldDownPos) > 20) {
 					touchHoldingDown = false;
 				}
 			}
@@ -121,7 +121,7 @@ void UIButton::renderAnimations(XY pos)
 		}
 	}
 
-	if (hovered) {
+	if (hovered || touchHoldingDown) {
 		renderGradient(drawrect, 0x10FFFFFF, 0x10FFFFFF, 0x40D3F4FF, 0x40D3F4FF);
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
 		SDL_RenderDrawRect(g_rd, &drawrect);
