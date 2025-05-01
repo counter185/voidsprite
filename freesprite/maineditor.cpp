@@ -1035,7 +1035,7 @@ void MainEditor::setUpWidgets()
                                 if (editor->touchModePanel == NULL) {
                                     editor->touchModePanel = new EditorTouchToggle(editor);
                                     editor->touchModePanel->position = { g_windowW - editor->touchModePanel->wxWidth - 10, g_windowH - editor->touchModePanel->wxHeight - 40 };
-									editor->addWidget(editor->touchModePanel);
+                                    editor->addWidget(editor->touchModePanel);
                                 }
                             }
                         }
@@ -1828,7 +1828,7 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
     ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
     ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
     ret["CommentData"] = makeCommentDataString();
-	ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
+    ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
     return ret;
 }
 
@@ -1844,7 +1844,7 @@ void MainEditor::loadSingleLayerExtdata(Layer* l) {
         if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
         if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
         if (kvmap.contains("CommentData")) { comments = parseCommentDataString(kvmap["CommentData"]); }
-		if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
+        if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
     }
     catch (std::exception e) {}
 }
@@ -2260,7 +2260,7 @@ bool MainEditor::usingAltBG()
 }
 void MainEditor::setAltBG(bool useAltBG)
 {
-	backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
+    backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
 }
 
 void MainEditor::moveLayerUp(int index) {

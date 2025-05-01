@@ -99,11 +99,11 @@
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
             <!-- Drop file event -->
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="*/*" />
-            </intent-filter>
+                <data android:mimeType="image/*" />
+            </intent-filter>-->
         </activity>
 
         <!--<provider

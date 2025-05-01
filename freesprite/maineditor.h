@@ -24,7 +24,7 @@ enum MainEditorCommentMode : int {
 enum EditorTouchMode : int {
     TOUCHMODE_PAN = 0,
     TOUCHMODE_LEFTCLICK = 1,
-	TOUCHMODE_RIGHTCLICK = 2,
+    TOUCHMODE_RIGHTCLICK = 2,
     TOUCHMODE_MAX
 };
 
