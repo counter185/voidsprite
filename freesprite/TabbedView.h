@@ -23,6 +23,7 @@ public:
     SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0xe0 };
     Timer64 tabSwitchTimer;
     bool nextTabSlideFromTheLeft = false;
+    std::function<void(TabbedView*,int)> onTabSwitchedCallback = NULL;
 
     TabbedView(std::vector<Tab> tabN, int buttonWidth = 60);
     ~TabbedView() {
@@ -37,13 +38,13 @@ public:
     }
 
     void focusOut() override {
-		Drawable::focusOut();
-		tabs[openTab].wxs.forceUnfocus();
-	}
+        Drawable::focusOut();
+        tabs[openTab].wxs.forceUnfocus();
+    }
     void mouseHoverOut() override {
         Drawable::mouseHoverOut();
         tabButtons.forceUnhover();
-		tabs[openTab].wxs.forceUnhover();
+        tabs[openTab].wxs.forceUnhover();
     }
 
     void render(XY position) override {
@@ -101,13 +102,16 @@ public:
         if (openTab != evt_id) {
             tabSwitchTimer.start();
             if (openTab < evt_id) {
-				nextTabSlideFromTheLeft = false;
-			}
-			else {
-				nextTabSlideFromTheLeft = true;
-			}
+                nextTabSlideFromTheLeft = false;
+            }
+            else {
+                nextTabSlideFromTheLeft = true;
+            }
         }
         openTab = evt_id;
+        if (onTabSwitchedCallback != NULL) {
+            onTabSwitchedCallback(this, openTab);
+        }
         updateTabButtons();
     }
 

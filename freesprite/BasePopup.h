@@ -5,6 +5,8 @@
 #include "UILabel.h"
 #include "UIButton.h"
 
+#define CLOSE_ON_SDL_QUIT if(evt.type==SDL_EVENT_QUIT){closePopup();return;}
+
 class BasePopup :
     public BaseScreen
 {
@@ -16,6 +18,7 @@ public:
 	bool takesTouchEvents() override { return true; }
 
     void takeInput(SDL_Event evt) override {
+        CLOSE_ON_SDL_QUIT;
         DrawableManager::processHoverEventInMultiple({ wxsManager }, evt, getPopupOrigin());
         if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt, getPopupOrigin())) {
             defaultInputAction(evt);

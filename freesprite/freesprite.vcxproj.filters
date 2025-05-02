@@ -618,6 +618,9 @@
     <ClCompile Include="EditorTouchToggle.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="PopupExportScaled.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1183,6 +1186,9 @@
     </ClInclude>
     <ClInclude Include="EditorTouchToggle.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupExportScaled.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,7 @@
 #include "PopupTileGeneric.h"
 #include "PopupSetEditorPixelGrid.h"
 #include "PopupGlobalConfig.h"
+#include "PopupExportScaled.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -247,7 +248,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 "File",
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_F, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { "Save as",
                             [](MainEditor* editor) {
@@ -258,6 +259,14 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_S, { "Save",
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
+                            [](MainEditor* editor) {
+                                PopupExportScaled* popup = new PopupExportScaled(editor);
+                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, editor);
+                                g_addPopup(popup);
                             }
                         }
                     },

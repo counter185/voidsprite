@@ -79,20 +79,32 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 			case SDL_SCANCODE_TAB:
 				break;
 			case SDL_SCANCODE_RETURN:
-				if (callback != NULL) {
+				if (onTextChangedConfirmCallback != NULL) {
+					onTextChangedConfirmCallback(this, text);
+				}
+				else if (callback != NULL) {
 					callback->eventTextInputConfirm(callback_id, text);
 				}
 				break;
 			case SDL_SCANCODE_BACKSPACE:
 				if (!text.empty()) {
 					text = text.substr(0, text.size() - 1);
-					if (callback != NULL) {
+					if (onTextChangedCallback != NULL) {
+						onTextChangedCallback(this, text);
+					}
+					else if (callback != NULL) {
 						callback->eventTextInput(callback_id, text);
 					}
 				}
 				break;
 			case SDL_SCANCODE_DELETE:
 				text = "";
+				if (onTextChangedCallback != NULL) {
+					onTextChangedCallback(this, text);
+				}
+				else if (callback != NULL) {
+					callback->eventTextInput(callback_id, text);
+				}
 				break;
 		}
 	}
@@ -108,8 +120,13 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 			}
 			nextc++;
 		}
-		if (textAdded && callback != NULL) {
-			callback->eventTextInput(callback_id, text);
+		if (textAdded) {
+			if (onTextChangedCallback != NULL) {
+				onTextChangedCallback(this, text);
+			}
+			else if (callback != NULL) {
+				callback->eventTextInput(callback_id, text);
+			}
 		}
 	}
 	else if (evt.type == SDL_EVENT_TEXT_EDITING_CANDIDATES) {

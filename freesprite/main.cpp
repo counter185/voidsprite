@@ -57,7 +57,6 @@ std::vector<Pattern*> g_patterns;
 
 Timer64 lastPenEvent;
 
-std::vector<BasePopup*> popupStack;
 void g_addPopup(BasePopup* a) {
     popupStack.push_back(a);
     a->startTimer.start();
@@ -704,7 +703,7 @@ int main(int argc, char** argv)
                     //return 0;
                     break;
                 case SDL_KEYDOWN:
-                    if (evt.key.scancode == SDL_SCANCODE_LEFTBRACKET) {
+                    if (popupStack.empty() && evt.key.scancode == SDL_SCANCODE_LEFTBRACKET) {
                         if (currentScreen != 0) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(0);
@@ -714,7 +713,7 @@ int main(int argc, char** argv)
                             }
                         }
                     }
-                    else if (evt.key.scancode == SDL_SCANCODE_RIGHTBRACKET) {
+                    else if (popupStack.empty() && evt.key.scancode == SDL_SCANCODE_RIGHTBRACKET) {
                         if (currentScreen < screenStack.size() - 1) {
                             if (g_ctrlModifier) {
                                 g_switchScreen(screenStack.size() - 1);
@@ -727,7 +726,7 @@ int main(int argc, char** argv)
                     else if (evt.key.scancode == SDL_SCANCODE_W) {
                         if (g_ctrlModifier) {
                             if (g_shiftModifier) {
-                                if (favourite && fav_screen < screenStack.size()) {
+                                if (popupStack.empty() && favourite && fav_screen < screenStack.size()) {
                                     g_switchScreen(fav_screen);
                                 }
                             }

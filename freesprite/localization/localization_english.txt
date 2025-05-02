@@ -16,6 +16,7 @@
     {"vsp.cmn.error.decompressfail", "Failed to decompress data."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
     {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
+    {"vsp.cmn.error.exportfail", "Failed to export file."},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
 
     //file type names
@@ -117,6 +118,8 @@
     {"vsp.maineditor.paledit","Open in indexed editor"},
     {"vsp.maineditor.preference","Preferences"},
     {"vsp.maineditor.copyflattoclipboard", "Copy to clipboard"},
+
+    {"vsp.maineditor.nav.exportscaled", "Export scaled"},
 
     {"vsp.maineditor.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},
@@ -220,6 +223,15 @@
     {"vsp.config.associateexts.error", "Failed to associate file extensions."},
     {"vsp.config.associateexts.noselect", "No file types selected."},
     {"vsp.config.associateexts.dontopenlaunchpad", "Don't open voidsprite Launchpad"},
+
+    //popup: export scaled
+    {"vsp.exportscaled.integerscale", "Integer scale"},
+    {"vsp.exportscaled.pixelsize", "Pixel size"},
+    {"vsp.exportscaled.resultsize", "Result size: "},
+    {"vsp.exportscaled.invalidsize", "Invalid size."},
+    {"vsp.exportscaled.integerscale.title", "Scale with integer scaling"},
+    {"vsp.exportscaled.pixelsize.title", "Scale to pixel size"},
+    {"vsp.exportscaled.invalidsize", "Invalid size."},
 
     //popup: apply filter
     {"vsp.applyfilter.renderingpreview", "Rendering preview..."},

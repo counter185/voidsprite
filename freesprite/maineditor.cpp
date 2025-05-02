@@ -34,6 +34,7 @@
 #include "PopupGlobalConfig.h"
 #include "PopupPickColor.h"
 #include "PopupApplyFilter.h"
+#include "PopupExportScaled.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -711,7 +712,7 @@ void MainEditor::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 TL("vsp.nav.file"),
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [](MainEditor* editor) {
@@ -722,6 +723,14 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_S, { TL("vsp.nav.save"),
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
+                            [](MainEditor* editor) {
+                                PopupExportScaled* popup = new PopupExportScaled(editor);
+                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, editor);
+                                g_addPopup(popup);
                             }
                         }
                     },
@@ -1594,11 +1603,11 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     g_addNotification(SuccessNotification("Success", "File exported successfully."));
                 }
                 else {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
                 }
             }
             else {
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
             }
         }
         else {
