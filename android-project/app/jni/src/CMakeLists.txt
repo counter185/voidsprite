@@ -141,6 +141,7 @@ add_library(main SHARED
         voidsprite/platform.cpp
         voidsprite/PopupApplyFilter.cpp
         voidsprite/PopupChooseExtsToAssoc.cpp
+        voidsprite/PopupExportScaled.cpp
         voidsprite/PopupGlobalConfig.cpp
         voidsprite/PopupIntegerScale.cpp
         voidsprite/PopupListRecoveryAutosaves.cpp
