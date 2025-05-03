@@ -8,7 +8,8 @@ class Brush3pxCircle : public BaseBrush
 	std::map<std::string, BrushProperty> getProperties() override
 	{
 		return {
-			{"brush.circlepixel.size", BRUSH_INT_PROPERTY("Size",3,11,3)}
+			{"brush.circlepixel.pressuresens", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.pressuresize"),1)},
+			{"brush.circlepixel.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),3,16,3)}
 		};
 	}
 	void clickPress(MainEditor* editor, XY pos) override;

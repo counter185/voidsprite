@@ -3,8 +3,8 @@
 
 void Brush3pxCircle::clickPress(MainEditor* editor, XY pos)
 {
-	int size = editor->toolProperties["brush.circlepixel.size"];
-
+	int size = (int)(editor->toolProperties["brush.circlepixel.size"] 
+		* (editor->toolProperties["brush.circlepixel.pressuresens"] == 1 ? editor->penPressure : 1.0));
 	rasterizeCirclePoint(pos, size, [editor](XY p) {
 		editor->SetPixel(p, editor->getActiveColor());
 	});
@@ -12,7 +12,8 @@ void Brush3pxCircle::clickPress(MainEditor* editor, XY pos)
 
 void Brush3pxCircle::clickDrag(MainEditor* editor, XY from, XY to)
 {
-	int size = editor->toolProperties["brush.circlepixel.size"];
+	int size = (int)(editor->toolProperties["brush.circlepixel.size"] 
+		* (editor->toolProperties["brush.circlepixel.pressuresens"] == 1 ? editor->penPressure : 1.0));
 	rasterizeLine(from, to, [editor, size](XY pos) {
 		rasterizeCirclePoint(pos, size, [editor](XY p) {
 			editor->SetPixel(p, editor->getActiveColor());

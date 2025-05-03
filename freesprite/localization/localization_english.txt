@@ -256,6 +256,9 @@
     {"vsp.filepicker.folderreaderror", "Error accessing folder:"},
 
     //brushes/tools
+    {"vsp.brush.param.size", "Size"},
+    {"vsp.brush.param.pressuresize", "Pressure size"},
+
     {"vsp.brush.undefined", "Default brush"},
     {"vsp.brush.squarepixel", "Square Pixel"},
     {"vsp.brush.squarepixelpxperfect", "1x1 Pixel (Pixel-Perfect)"},

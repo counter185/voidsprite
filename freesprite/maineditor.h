@@ -86,6 +86,7 @@ public:
     bool hideUI = false;
     bool penDown = false;
     bool penAltButtonDown = false;
+    double penPressure = 1.0f;
 
     EditorUnsavedChanges changesSinceLastSave = NO_UNSAVED_CHANGES;
     PlatformNativePathString lastConfirmedSavePath;

@@ -8,7 +8,8 @@ class Brush1x1 : public BaseBrush
 	std::map<std::string, BrushProperty> getProperties() override 
 	{ 
 		return {
-			{"brush.squarepixel.size", BRUSH_INT_PROPERTY("Size",1,10,1)}
+			{"brush.squarepixel.pressuresens", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.pressuresize"),1)},
+			{"brush.squarepixel.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
 		}; 
 	}
 	void clickPress(MainEditor* editor, XY pos) override;

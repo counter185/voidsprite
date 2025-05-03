@@ -1197,30 +1197,45 @@ void MainEditor::initToolParameters()
             UILabel* label = new UILabel(prop.name);
             label->position = {x, 4};
             x += label->statSize().x + 20;
-
-            UILabel* valueLabel = new UILabel();
-            valueLabel->position = {x, 4};
-            valueLabel->color = { 255,255,255,0xa0 };
-            x += 40;
-
             toolPropertiesPanel->subWidgets.addDrawable(label);
-            toolPropertiesPanel->subWidgets.addDrawable(valueLabel);
+
+            UILabel* valueLabel = NULL;
+            if (prop.type != 3) {
+                valueLabel = new UILabel();
+                valueLabel->position = { x, 4 };
+                valueLabel->color = { 255,255,255,0xa0 };
+                x += 40;
+                toolPropertiesPanel->subWidgets.addDrawable(valueLabel);
+            }
 
             switch (prop.type) {
                 case 1: //int
-                    UISlider* slider = new UISlider();
-                    slider->setValue(prop.min, prop.max, this->toolProperties[key]);
-                    valueLabel->setText(std::to_string((int)slider->getValue(prop.min, prop.max)));
-                    slider->wxHeight = 18;
-                    slider->wxWidth = 150;
-                    slider->position = { x, 8 };
-                    slider->onChangeValueCallback = [this, prop, key, valueLabel](UISlider* s, float) {
-                        int v = s->getValue(prop.min, prop.max);
-                        this->toolProperties[key] = v;
-                        valueLabel->setText(std::to_string(v));
-                    };
-                    toolPropertiesPanel->subWidgets.addDrawable(slider);
-                    x += 110;
+                    {
+                        UISlider* slider = new UISlider();
+                        slider->setValue(prop.min, prop.max, this->toolProperties[key]);
+                        valueLabel->setText(std::to_string((int)slider->getValue(prop.min, prop.max)));
+                        slider->wxHeight = 18;
+                        slider->wxWidth = 150;
+                        slider->position = { x, 8 };
+                        slider->onChangeValueCallback = [this, prop, key, valueLabel](UISlider* s, float) {
+                            int v = s->getValue(prop.min, prop.max);
+                            this->toolProperties[key] = v;
+                            valueLabel->setText(std::to_string(v));
+                            };
+                        toolPropertiesPanel->subWidgets.addDrawable(slider);
+                        x += 110;
+                    }
+                    break;
+                case 3: //bool
+                    {
+                        UICheckbox* chkbx = new UICheckbox("", this->toolProperties[key] == 1);
+						chkbx->position = { x, 3 };
+                        chkbx->onStateChangeCallback = [this, key, valueLabel](UICheckbox* c, bool state) {
+                            this->toolProperties[key] = state ? 1 : 0;
+                        };
+                        toolPropertiesPanel->subWidgets.addDrawable(chkbx);
+                        x += 60;
+                    }
                     break;
             }
         }
@@ -1324,7 +1339,7 @@ void MainEditor::takeInput(SDL_Event evt) {
         switch (evt.type) {
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                if (evt.button.button == 1) {
+                if (evt.button.button == SDL_BUTTON_LEFT) {
                     if (middleMouseHold && evt.button.down) {
                         zoomKeyHeld = true;
                         zoomKeyTimer.start();
@@ -1333,6 +1348,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                     } else {
                         zoomKeyHeld = false;
                         RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
+                        if (evt.button.which != SDL_PEN_MOUSEID) {
+                            penPressure = 1.0f;
+                        }
                         if (currentBrush != NULL) {
                             if (evt.button.down) {
                                 if (!currentBrush->isReadOnly()) {
@@ -1353,11 +1371,11 @@ void MainEditor::takeInput(SDL_Event evt) {
                         leftMouseHold = evt.button.down;
                     }
                 }
-                else if (evt.button.button == 2) {
+                else if (evt.button.button == SDL_BUTTON_MIDDLE) {
                     middleMouseHold = evt.button.down;
                     zoomKeyHeld = false;
                 }
-                else if (evt.button.button == 3) {
+                else if (evt.button.button == SDL_BUTTON_RIGHT) {
                     inputMouseRight({ (int)evt.button.x, (int)evt.button.y }, evt.button.down);
                 }
                 break;
@@ -1542,6 +1560,11 @@ void MainEditor::takeInput(SDL_Event evt) {
                 penDown = evt.ptouch.down;
                 SDL_SetWindowMouseGrab(g_wd, penDown);
                 //loginfo(std::format("new pen state: {}", penDown));
+                break;
+            case SDL_EVENT_PEN_AXIS:
+                if (evt.paxis.axis == 0) {  //should always be the pressure axis
+					penPressure = evt.paxis.value;
+                }
                 break;
         }
     } else {
