@@ -269,6 +269,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
+#if __ANDROID__
+    btn = new UIButton();
+    btn->text = TL("vsp.config.opt.setfileaccess");
+    btn->position = posInTab;
+    btn->wxWidth = 270;
+    btn->onClickCallback = [this](UIButton*) {
+        platformRequestFileAccessPermissions();
+    };
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
+#endif
+
 
     
 

@@ -32,6 +32,8 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
 void platformOpenFileLocation(PlatformNativePathString path);
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to);
 
+bool platformHasFileAccessPermissions();
+void platformRequestFileAccessPermissions();
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");
 std::vector<RootDirInfo> platformListRootDirectories();

@@ -7,6 +7,7 @@
 #include "platform_universal.h"
 #include "PopupFilePicker.h"
 
+JNIEnv* lastJNI = NULL;
 
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
@@ -35,6 +36,7 @@ extern "C" {
 JNIEXPORT void JNICALL
 Java_pl_cntrpl_voidsprite_VSPActivity_passAppdataPathString(JNIEnv *env, jclass clazz,
                                                             jstring appdata_path) {
+    lastJNI = env;
     const char *path = env->GetStringUTFChars(appdata_path, 0);
     appdataPath = std::string(path);
     env->ReleaseStringUTFChars(appdata_path, path);
@@ -43,6 +45,7 @@ Java_pl_cntrpl_voidsprite_VSPActivity_passAppdataPathString(JNIEnv *env, jclass 
 JNIEXPORT void JNICALL
 Java_pl_cntrpl_voidsprite_VSPActivity_passSystemInformationString(JNIEnv *env, jclass clazz,
                                                                   jstring system_info) {
+    lastJNI = env;
     const char* inf = env->GetStringUTFChars(system_info, 0);
     systemInformation = std::string(inf);
     env->ReleaseStringUTFChars(system_info, inf);
@@ -157,4 +160,25 @@ std::vector<RootDirInfo> platformListRootDirectories() {
         ret.push_back(rtDir);
     }
     return ret;
+}
+
+bool platformHasFileAccessPermissions() {
+    jclass vspactivity = lastJNI->FindClass("pl/cntrpl/voidsprite/VSPActivity");
+    if (vspactivity != nullptr) {
+        jmethodID checkMethod = lastJNI->GetStaticMethodID(vspactivity, "hasFileAccessPermission", "()Z");
+        if (checkMethod != nullptr) {
+            return lastJNI->CallStaticBooleanMethod(vspactivity, checkMethod);
+        }
+    }
+    return false;
+}
+
+void platformRequestFileAccessPermissions() {
+    jclass vspactivity = lastJNI->FindClass("pl/cntrpl/voidsprite/VSPActivity");
+    if (vspactivity != nullptr) {
+        jmethodID checkMethod = lastJNI->GetStaticMethodID(vspactivity, "requestAllFilesPermission", "()V");
+        if (checkMethod != nullptr) {
+            lastJNI->CallStaticVoidMethod(vspactivity, checkMethod);
+        }
+    }
 }

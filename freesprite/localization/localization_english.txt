@@ -79,6 +79,12 @@
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
     {"vsp.launchpad.nav.about", "About voidsprite"},
 
+    {"vsp.launchpad.filepermcheck.title", "File access permission required"},
+    {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"
+                                         "Would you like to enable them now?\n\n"
+                                         UTF8_DIAMOND "If you do not enable file access permissions,\n"
+                                         "    you will only be able to save and load files to the data directory."},
+
     {"vsp.launchpad.error.starteditor", "Error starting editor"},
     {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
     {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
@@ -202,6 +208,7 @@
     {"vsp.config.opt.visualconfig", "Visual configuration (restart required)"},
     {"vsp.config.opt.reloadfonts", "Reload fonts..."},
     {"vsp.config.opt.fontsreloaded", "Fonts reloaded"},
+    {"vsp.config.opt.setfileaccess", "Manage file access permissions..."},
     {"vsp.config.opt.opensavelocation", "Open saved file location"},
     {"vsp.config.opt.startrowcolidxat1", "Row/column index labels start at 1"},
     {"vsp.config.opt.altscrolling", "Pan canvas with touchpad"},

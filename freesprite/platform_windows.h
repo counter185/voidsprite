@@ -544,3 +544,8 @@ std::vector<RootDirInfo> platformListRootDirectories() {
 
     return ret;
 }
+
+bool platformHasFileAccessPermissions() {
+    return true;
+}
+void platformRequestFileAccessPermissions() {}
