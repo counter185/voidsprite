@@ -22,6 +22,7 @@
 #include "Timer64.h"
 #include "Panel.h"
 #include "PopupAbout.h"
+#include "PopupYesNo.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
@@ -239,6 +240,17 @@ public:
             }
         }, { SDL_SCANCODE_F, SDL_SCANCODE_I });
         wxsManager.addDrawable(navbar);
+
+        if (!platformHasFileAccessPermissions()) {
+            PopupYesNo* permissionPopup = new PopupYesNo(TL("vsp.launchpad.filepermcheck.title"), TL("vsp.launchpad.filepermcheck.desc"));
+            permissionPopup->onFinishCallback = [](PopupYesNo*, bool yes) {
+                if (yes) {
+                    platformRequestFileAccessPermissions();
+                }
+            };
+
+            g_addPopup(permissionPopup);
+        }
 
         populateLastOpenFiles();
         startupAnimTimer.start();

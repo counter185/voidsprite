@@ -243,3 +243,8 @@ std::string platformGetSystemInfo() {
 std::vector<RootDirInfo> platformListRootDirectories() {
     return {{"",""}};
 }
+
+bool platformHasFileAccessPermissions() {
+    return true;
+}
+void platformRequestFileAccessPermissions() {}

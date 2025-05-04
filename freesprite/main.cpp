@@ -656,6 +656,13 @@ int main(int argc, char** argv)
                         g_shiftModifier = false;
                     }
                     break;
+                case SDL_EVENT_WINDOW_FOCUS_GAINED:
+#if __ANDROID__
+                    if (!SDL_IsDeXMode()) {
+                        SDL_MaximizeWindow(g_wd);
+                    }
+#endif
+                    break;
                 case SDL_EVENT_WINDOW_RESIZED:
                     g_windowW = evt.window.data1;
                     g_windowH = evt.window.data2;
