@@ -29,6 +29,10 @@
 #  endif
 #endif
 
+#ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
+#undef PNG_ARM_NEON_INTRINSICS_AVAILABLE
+#endif
+
 #ifdef PNG_READ_SUPPORTED
 
 /* Set the action on getting a CRC error for an ancillary or critical chunk. */

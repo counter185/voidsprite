@@ -1,0 +1,190 @@
+{ "ja-jp", { "日本語", "", {
+    // work in progress
+    // i am learning and i have no way of verifying if any of this is even correct or fitting
+    // have fun
+
+    // common strings used in a few different places
+    {"vsp.cmn.yes", "はい"},
+    {"vsp.cmn.no", "いいえ"},
+    {"vsp.cmn.close", "閉めて"},
+    {"vsp.cmn.apply", "Apply"},
+    {"vsp.cmn.cancel", "キャンセル"},
+    {"vsp.cmn.confirm", "Confirm"},
+    {"vsp.cmn.width", "Width"},
+    {"vsp.cmn.height", "Height"},
+    {"vsp.cmn.error", "エラー"},
+    {"vsp.cmn.error.fileloadfail", "ファイルをロードできませんでした"},
+    {"vsp.cmn.error.decompressfail", "データを展開をできませんでした"},
+    {"vsp.cmn.error.mallocfail", "メモリーをアロケートできませんでした"},
+    {"vsp.cmn.error.clipboardcopy", "クリップボードにコピーできませんでした"},
+    {"vsp.cmn.copiedtoclipboard", "クリップボードにコピーをしました"},
+
+    //file type names
+    {"vsp.cmn.filetype.splitsession", "スプリットセッションのファイル"},
+
+    // common navbar strings
+    {"vsp.nav.file", "ファイル"},
+    {"vsp.nav.open", "開く"},
+    {"vsp.nav.save","セーブ"},
+
+    //rich presence (discord, title bar) strings
+    {"vsp.rpc.1activeworkspace", "1つのアクティブなワークスペース"},
+    {"vsp.rpc.activeworkspaces", "つのアクティブなワークスペース"},
+
+    // popup titles
+    {"vsp.popup.newsplitsession", "新しいスプリットセッションを作って"},
+    {"vsp.popup.openimage", "イメージを開けて"},
+
+    // default layer names
+    {"vsp.layer.template", "テンプレートのレイヤー"},
+    {"vsp.layer.jxl", "JPEG XLレイヤー"},
+    {"vsp.layer.xyz", "XYZイメージ"},
+    {"vsp.layer.aseprite", "Asepriteレイヤー"},
+
+    // strings related to main.cpp
+    {"vsp.bgop.inprogress", "Operation in progress. Please wait..."},
+
+    // screen: voidsprite launchpad
+    {"vsp.launchpad", "voidsprite Launchpad"},
+
+    {"vsp.launchpad.newimage", "新しいイメージ"},
+    {"vsp.launchpad.lastfiles", "最近開けたファイル"},
+    {"vsp.launchpad.welcome1sttime", "ようこそ、voidspriteへ"},
+    {"vsp.launchpad.welcomereturning", "Welcome back"},
+
+    {"vsp.launchpad.tab.pixeldim", "ピクセル広さ"},
+    {"vsp.launchpad.tab.spritesheet", "スプライト／タイル"},
+    {"vsp.launchpad.tab.templates", "テンプレート"},
+    {"vsp.launchpad.tab.picktemplate", "テンプレートを選んで…"},
+    {"vsp.launchpad.tab.creatergb", "作って (ＲＧＢ)"},
+    {"vsp.launchpad.tab.creatergb.tooltip", "Create a new image with full color support."},
+    {"vsp.launchpad.tab.createindexed", "Create (Indexed)"},
+    {"vsp.launchpad.tab.createindexed.tooltip", "Create a new image with a limited color palette.\n"
+                                                "Exporting to palette-only formats will keep the color order as it is in the editor."},
+    {"vsp.launchpad.nav.openclipboard", "クリップボードに開けて"},
+    {"vsp.launchpad.nav.quickconvert", "Quick Convert"},
+    {"vsp.launchpad.nav.newsplitsession", "新しいスプリットセッション..."},
+    {"vsp.launchpad.nav.preferences", "設定"},
+    {"vsp.launchpad.nav.recoveryautosaves", "リカバリーオートセーブ…"},
+
+    {"vsp.launchpad.error.starteditor", "Error starting editor"},
+    {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
+    {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
+    {"vsp.launchpad.error.clipboard_no_image", "クリップボードはイメージではありません"},
+    {"vsp.launchpad.error.templatefail", "テンプレートをロードできませんでした"},
+
+    {"vsp.launchpad.quickconvert.desc", "Select the format to export the image to.\n"
+                                        "Drag a file into this window to convert to the same directory."},
+
+    {"vsp.launchpad.recoveryautosaves.desc", "Sessions saved with the recovery autosave feature will appear here.\n"
+                                             "You can set the recovery autosave delay in preferences.\n"
+                                             "Right click to delete an autosaved file."},
+    {"vsp.launchpad.recoveryautosaves.deleteconfirm", "Delete this file?"},
+    {"vsp.launchpad.recoveryautosaves.deleteconfirm.desc", "This autosaved file will be deleted:"},
+    {"vsp.launchpad.recoveryautosaves.deleted", "Autosave successfully deleted."},
+    {"vsp.launchpad.recoveryautosaves.deletefail", "Failed to delete file."},
+    {"vsp.launchpad.recoveryautosaves.allfilesize", "Overall size: "},
+
+    // screen: voidsprite main editor
+    {"vsp.maineditor", "エディター"},
+    {"vsp.maineditor.erasermode", "(Erase)"},
+
+    {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
+    {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
+
+    {"vsp.maineditor.saveas","Save As"},
+    {"vsp.maineditor.exportpal","Export as indexed"},
+    {"vsp.maineditor.exportind","Export tiles individually"},
+    {"vsp.maineditor.paledit","Open in indexed editor"},
+    {"vsp.maineditor.preference","Preferences"},
+    {"vsp.maineditor.copyflattoclipboard", "クリップボードにコピー"},
+
+    {"vsp.maineditor.edit","Edit"},
+    {"vsp.maineditor.undo","Undo"},
+    {"vsp.maineditor.redo","Redo"},
+    {"vsp.maineditor.symx","Toggle symmetry: X"},
+    {"vsp.maineditor.symy","Toggle symmetry: Y"},
+    {"vsp.maineditor.rescanv","Resize canvas"}, // translation note: this scales the canvas, image remains the same
+    {"vsp.maineditor.dsel","Deselect"},
+    {"vsp.maineditor.rescanv_bytile","Resize canvas (per tile)"},
+    {"vsp.maineditor.rescanv_ntile","Resize canvas (per n.tiles)"}, // translation note: n.tiles means "number of tiles"
+    {"vsp.maineditor.intscale","Integer scale canvas"},
+    {"vsp.maineditor.canvscale","Scale canvas"}, // translation note: this and the above feature scale the entire image alongside the canvas
+    {"vsp.maineditor.nineseg","Open in 9-segment pattern editor"},
+
+    {"vsp.maineditor.layer","レイヤー"},
+    {"vsp.maineditor.flipx","Flip current layer: X axis"},
+    {"vsp.maineditor.flipy","Flip current layer: Y axis"},
+    {"vsp.maineditor.printcol","Print number of colors"}, // translation note: outputs the number of colors on the current layer via a notification
+    {"vsp.maineditor.renlayer","Rename current layer"},
+    {"vsp.maineditor.isolatealpha","Isolate layer alpha"},
+    {"vsp.maineditor.removealpha","Remove alpha channel"},
+    {"vsp.maineditor.setckey","Set color key"}, // translation note: "color key" here means the color chosen becomes transparent
+    {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
+    {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
+
+    //screen: 3d cube preview
+    {"vsp.cubepreview", "Preview cube"},
+
+    //screen: rpg2k map preview
+    {"vsp.lmupreview", "RPG2Kマップのプレビュー"},
+
+    //screen: split session editor
+    {"vsp.splitsessioneditor", "スプリットセッションのエディター"},
+
+    //screen: spritesheet preview
+    {"vsp.spritesheetpreview", "スプライトのプレビュー"},
+    {"vsp.spritesheetpreview.timeline", "タイムライン"},
+
+    //screen: tilemap preview
+    {"vsp.tilemappreview", "タイルのプレビュー"},
+
+
+    //popup: settings
+    {"vsp.config.title", "設定"},
+
+    {"vsp.config.tab.general", "General"},
+    {"vsp.config.tab.visual", "Visual"},
+    {"vsp.config.tab.editor", "エディター"},
+    {"vsp.config.tab.keybinds", "Keybinds"},
+    {"vsp.config.tab.misc", "Misc."},
+
+    {"vsp.config.opt.pngextdata", "Save/load extra data to PNGs"},
+    {"vsp.config.opt.pngextdata.desc", "When enabled, voidsprite will load and save extra data such as canvas comments,\n"
+                                       "tile grid and symmetry to PNGs."},
+    {"vsp.config.opt.discordrpc", "Discord Rich Presence"},
+    {"vsp.config.opt.discordrpc.desc", "When enabled, your activity will be shared as your Discord status.\n"
+                                       "Supported only on Windows."},
+    {"vsp.config.opt.lang", "Language (restart required)"},
+    {"vsp.config.opt.vsync", "Vertical sync"},
+    {"vsp.config.opt.vsync.desc", "When enabled, the framerate will be locked to your display's refresh rate.\n"
+                                  "Disabling this will make brushes smoother but also increase energy consumption.\n"
+                                  "voidsprite must be restarted for this change to take effect."},
+    {"vsp.config.opt.bganim", "Animated background"},
+    {"vsp.config.opt.bganim.none", "Off"},
+    {"vsp.config.opt.bganim.sharp", "Sharp"},
+    {"vsp.config.opt.bganim.smooth", "Smooth"},
+    {"vsp.config.opt.bganim.sharpstatic", "Sharp (static)"},
+    {"vsp.config.opt.bganim.smoothstatic", "Smooth (static)"},
+    {"vsp.config.opt.renderer", "Renderer"},
+    {"vsp.config.opt.vfx", "Enable visual effects"},
+    {"vsp.config.opt.vfx.desc", "When disabled, some visual effect animations will not play."},
+    {"vsp.config.opt.cursor", "Override system cursor (restart required)"},
+    {"vsp.config.opt.cursor.desc", "When enabled, voidsprite will use a custom mouse cursor sprite."},
+    {"vsp.config.opt.visualconfig", "Visual configuration (restart required)"},
+    {"vsp.config.opt.reloadfonts", "Reload fonts..."},
+    {"vsp.config.opt.fontsreloaded", "Fonts reloaded"},
+
+    {"vsp.config.associateexts.title", "Associate file extensions"},
+    {"vsp.config.associateexts.desc", "Choose file types to associate"},
+    {"vsp.config.associateexts.success", "File extensions associated."},
+    {"vsp.config.associateexts.error", "Failed to associate file extensions."},
+    {"vsp.config.associateexts.noselect", "No file types selected."},
+
+    //popup: apply filter
+    {"vsp.applyfilter.renderingpreview", "Rendering preview..."},
+
+    //popup: quick convert
+    {"vsp.quickconvert.forceindexedtorgb", "Always convert indexed formats to RGB"},
+
+}}},

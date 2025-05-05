@@ -39,7 +39,7 @@ MainEditor* readPISKEL(PlatformNativePathString path)
                     layers.push_back(nnlayer);
                 }
                 else {
-                    printf("layer load failed\n");
+                    logprintf("layer load failed\n");
                 }
             }
 
@@ -83,24 +83,16 @@ bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
             layerObj["frameCount"] = 1;
             layerObj["chunks"] = json::array();
             json chunkObj = json::object();
-            if (writePNG(convertStringOnWin32("temp.bin"), l)) {
-                FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
-                fseek(infile, 0, SEEK_END);
-                uint64_t fileLength = ftell(infile);
-                fseek(infile, 0, SEEK_SET);
-                std::string fileBuffer;
-                fileBuffer.resize(fileLength);
-                fread(fileBuffer.data(), fileLength, 1, infile);
-                fclose(infile);
 
-                chunkObj["base64PNG"] = "data:image/png;base64," + base64::to_base64(fileBuffer);
-                chunkObj["layout"] = json::array();
-                chunkObj["layout"].push_back(json::array());
-                chunkObj["layout"][0].push_back(0);
-            }
-            else {
-                printf("WRITEPNG FAILED\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(l);
+            std::string fileBuffer;
+            fileBuffer.resize(pngData.size());
+            memcpy(fileBuffer.data(), pngData.data(), pngData.size());
+            chunkObj["base64PNG"] = "data:image/png;base64," + base64::to_base64(fileBuffer);
+            chunkObj["layout"] = json::array();
+            chunkObj["layout"].push_back(json::array());
+            chunkObj["layout"][0].push_back(0);
+            
             layerObj["chunks"].push_back(chunkObj);
 
             nestedLayer = layerObj.dump();

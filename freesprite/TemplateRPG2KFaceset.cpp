@@ -35,7 +35,7 @@ uint8_t rpg2kfaceset_patternLeft[5][5] = {
 Layer* TemplateRPG2KFaceset::generate()
 {
     Layer* ret = new Layer(192, 192);
-    ret->name = "Template Layer";
+    ret->name = TL("vsp.layer.template");
     uint32_t tileBGColors[] = {
               0xff1e0000, 0xff380000,
         0xff382300, 0xff150d00,

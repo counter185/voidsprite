@@ -34,8 +34,8 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
             for (int x = 0; x < clipSource.w; x++) {
                 u32 px = sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y}, false);
                 if (sourceLayer->colorKeySet && px == sourceLayer->colorKey) {
-					continue;
-				}
+                    continue;
+                }
                 u32 blendedPixel = alphaBlend(getPixelAt(XY{ x + position.x, y + position.y }), px);
                 setPixel(XY{ x + position.x, y + position.y }, blendedPixel);
             }
@@ -98,16 +98,55 @@ Layer* Layer::copyWithNoTextureInit()
 //i don't even know if this works
 Layer* Layer::copyScaled(XY dimensions)
 {
-    Layer* newLayer = tryAllocLayer(dimensions.x, dimensions.y);
+    bool shouldIntegerScale = 
+        ixmax(dimensions.x, w) % ixmin(dimensions.x, w) == 0
+		&& ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
+    Layer* newLayer = NULL;
+    if (isPalettized) {
+        newLayer = LayerPalettized::tryAllocIndexedLayer(dimensions.x, dimensions.y);
+		if (newLayer != NULL) {
+			((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
+		}
+    }
+    else {
+        newLayer = tryAllocLayer(dimensions.x, dimensions.y);
+        if (newLayer != NULL) {
+            newLayer->layerAlpha = layerAlpha;
+        }
+    }
+
     if (newLayer != NULL) {
-        for (int y = 0; y < newLayer->h; y++) {
-            for (int x = 0; x < newLayer->w; x++) {
-                XY samplePoint = {
-                    w * (x / (float)newLayer->w),
-                    h * (y / (float)newLayer->h)
-                };
-                newLayer->setPixel({ x, y }, getPixelAt(samplePoint));
-                //newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
+        newLayer->name = name;
+        newLayer->colorKey = colorKey;
+        newLayer->colorKeySet = colorKeySet;
+        newLayer->hidden = hidden;
+
+        if (!shouldIntegerScale) {
+            loginfo(std::format("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            for (int y = 0; y < newLayer->h; y++) {
+                for (int x = 0; x < newLayer->w; x++) {
+                    XY samplePoint = {
+                        w * (x / (float)newLayer->w),
+                        h * (y / (float)newLayer->h)
+                    };
+                    newLayer->setPixel({ x, y }, getPixelAt(samplePoint));
+                    //newLayer->setPixel(XY{(int)(x * (dimensions.x / (float)w)), (int)(y * (dimensions.y / (float)h))}, getPixelAt(XY{x, y}));
+                }
+            }
+        }
+        else {
+            loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w,h, dimensions.x, dimensions.y));
+			bool downscale = dimensions.x < w || dimensions.y < h;
+			int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
+			int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
+
+            for (int y = 0; y < newLayer->h; y++) {
+                for (int x = 0; x < newLayer->w; x++) {
+                    XY samplePoint =
+                        !downscale ? XY{ x / scaleFactorX, y / scaleFactorY }
+				                   : XY{ x * scaleFactorX, y * scaleFactorY };
+                    newLayer->setPixel({ x, y }, getPixelAt(samplePoint));
+                }
             }
         }
     }

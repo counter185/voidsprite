@@ -139,7 +139,7 @@
       <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
+      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,7 +160,7 @@
       <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat"</Command>
+      <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -201,14 +201,18 @@
     <ClCompile Include="discord_game_sdk\user_manager.cpp" />
     <ClCompile Include="discord_game_sdk\voice_manager.cpp" />
     <ClCompile Include="DraggablePanel.cpp" />
+    <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="io_aseprite.cpp" />
+    <ClCompile Include="io_dibv5.cpp" />
     <ClCompile Include="io_gim.cpp" />
     <ClCompile Include="io_jxl.cpp" />
     <ClCompile Include="io_piskel.cpp" />
+    <ClCompile Include="io_png.cpp" />
     <ClCompile Include="io_rpgm.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="localization\localization.cpp" />
+    <ClCompile Include="log.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="MinecraftBlockPreviewScreen.cpp" />
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp" />
@@ -222,6 +226,9 @@
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
     <ClCompile Include="PopupApplyFilter.cpp" />
+    <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
+    <ClCompile Include="PopupExportScaled.cpp" />
+    <ClCompile Include="PopupFilePicker.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupListRecoveryAutosaves.cpp" />
@@ -315,9 +322,12 @@
     <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UILayerButton.cpp" />
     <ClCompile Include="UISlider.cpp" />
+    <ClCompile Include="UIDoubleSlider.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
     <ClCompile Include="UtilPathfind.cpp" />
+    <ClCompile Include="vfx.cpp" />
+    <ClCompile Include="visual_config.cpp" />
     <ClCompile Include="zip\zip.c" />
   </ItemGroup>
   <ItemGroup>
@@ -365,18 +375,22 @@
     <ClInclude Include="discord_game_sdk\voice_manager.h" />
     <ClInclude Include="discord_rpc.h" />
     <ClInclude Include="DraggablePanel.h" />
+    <ClInclude Include="EditorTouchToggle.h" />
     <ClInclude Include="fills.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="iostructs.h" />
     <ClInclude Include="io_aseprite.h" />
     <ClInclude Include="io_base.h" />
+    <ClInclude Include="io_dibv5.h" />
     <ClInclude Include="io_gim.h" />
     <ClInclude Include="io_jxl.h" />
     <ClInclude Include="io_piskel.h" />
+    <ClInclude Include="io_png.h" />
     <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="localization\localization.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="memory_tracker.h" />
@@ -392,9 +406,14 @@
     <ClInclude Include="PanelRPG2KTilemapPreview.h" />
     <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="PanelTilemapPreview.h" />
+    <ClInclude Include="platform_android.h" />
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
+    <ClInclude Include="platform_universal.h" />
     <ClInclude Include="PopupApplyFilter.h" />
+    <ClInclude Include="PopupChooseExtsToAssoc.h" />
+    <ClInclude Include="PopupExportScaled.h" />
+    <ClInclude Include="PopupFilePicker.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupIntegerScale.h" />
     <ClInclude Include="PopupListRecoveryAutosaves.h" />
@@ -403,6 +422,7 @@
     <ClInclude Include="PopupSet9SPattern.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
+    <ClInclude Include="PopupAbout.h" />
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
@@ -496,6 +516,8 @@
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
     <ClInclude Include="UtilPathfind.h" />
+    <ClInclude Include="vfx.h" />
+    <ClInclude Include="visual_config.h" />
     <ClInclude Include="zip\miniz.h" />
     <ClInclude Include="zip\zip.h" />
   </ItemGroup>
@@ -510,6 +532,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="localization\localization_english.txt" />
+    <Text Include="localization\localization_japanese.txt" />
+    <Text Include="localization\localization_romanian.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

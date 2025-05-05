@@ -20,6 +20,9 @@ public:
     int imeCandidateIndex = 0;
     Timer64 imeCandidatesTimer;
 
+    std::function<void(UITextField*,std::string)> onTextChangedCallback = NULL;
+    std::function<void(UITextField*,std::string)> onTextChangedConfirmCallback = NULL;
+
     void focusIn() override {
         Drawable::focusIn();
         SDL_SetBooleanProperty(g_props, SDL_PROP_TEXTINPUT_TYPE_NUMBER, isNumericField);

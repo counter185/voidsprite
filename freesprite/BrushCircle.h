@@ -7,11 +7,11 @@ public:
 	XY startPos = XY{ 0,0 };
 	bool heldDown = false;
 
-	void resetState() {
+	void resetState() override {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Circle"; };
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxcircle.png"; }
+	std::string getName() override { return TL("vsp.brush.circle"); };
+	std::string getIconPath() override { return "brush_1pxcircle.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 
 	void clickPress(MainEditor* editor, XY pos) override;
@@ -24,17 +24,17 @@ protected:
 	bool rightClicked = false;
 public:
 
-	void resetState() {
+	void resetState() override {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Circle (arc)"; };
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxarccircle.png"; }
+	std::string getName() override { return TL("vsp.brush.circlearc"); };
+	std::string getIconPath() override { return "brush_1pxarccircle.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickRelease(MainEditor* editor, XY pos) override;
 	void renderOnCanvas(XY canvasDrawPoint, int scale) override;
-	virtual void rightClickPress(MainEditor* editor, XY pos) override;
-	virtual void rightClickRelease(MainEditor* editor, XY pos) override;
-	virtual bool overrideRightClick() { return true; }
+	void rightClickPress(MainEditor* editor, XY pos) override;
+	void rightClickRelease(MainEditor* editor, XY pos) override;
+	bool overrideRightClick() override { return true; }
 };

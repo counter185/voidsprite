@@ -17,8 +17,7 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 	textbox->wxWidth = 260;
 	wxsManager.addDrawable(textbox);
 
-	UILabel* label = new UILabel();
-	label->text = "Text Size";
+	UILabel* label = new UILabel("Text Size");
 	label->position = XY{ 20, 120 };
 	wxsManager.addDrawable(label);
 
@@ -29,19 +28,11 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 	textboxSize->wxWidth = 120;
 	wxsManager.addDrawable(textboxSize);
 
-	UIButton* nbutton = new UIButton();
-	nbutton->text = "Set";
-	nbutton->position = XY{ wxWidth - 260, wxHeight - 40 };
-	nbutton->wxWidth = 120;
+	UIButton* nbutton = actionButton(TL("vsp.cmn.apply"));
 	nbutton->setCallbackListener(0, this);
-	wxsManager.addDrawable(nbutton);
 
-	UIButton* nbutton2 = new UIButton();
-	nbutton2->text = "Cancel";
-	nbutton2->position = XY{ wxWidth - 130, wxHeight - 40 };
-	nbutton2->wxWidth = 120;
+	UIButton* nbutton2 = actionButton(TL("vsp.cmn.cancel"));
 	nbutton2->setCallbackListener(1, this);
-	wxsManager.addDrawable(nbutton2);
 
 	makeTitleAndDesc(tt, tx);
 }

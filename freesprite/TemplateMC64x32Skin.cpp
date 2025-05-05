@@ -35,7 +35,7 @@ uint8_t patternBottom[] = {
 Layer* TemplateMC64x32Skin::generate()
 {
     Layer* nlayer = new Layer(64, 32);
-    nlayer->name = "Template layer";
+    nlayer->name = TL("vsp.layer.template");
     memset(nlayer->pixelData, 0x00, 64 * 32 * 4);
 
     uint32_t headColors[2] = { 0xFF062608, 0xff1b591f };

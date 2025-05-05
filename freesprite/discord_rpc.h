@@ -15,14 +15,20 @@ inline void g_initRPC() {
         discord::Result result = discord::Core::Create(1341694438560235613L, DiscordCreateFlags_NoRequireDiscord, &core);
         discordInit = result == discord::Result::Ok;
         if (!discordInit) {
-            printf("[Discord Game SDK] init failed\n");
+            logprintf("[Discord Game SDK] init failed\n");
         }
     }
 }
 
 inline void g_deinitRPC() {
     if (discordInit) {
-        delete core;
+        try {
+            delete core;
+        }
+        catch (std::exception&) {
+            //don't care
+            logwarn("error deinitializing discord RPC");
+        }
         discordInit = false;
     }
 }
@@ -45,7 +51,7 @@ inline void g_updateRPC(std::string state, std::string details) {
             currentActivity.SetDetails(prevDetails.c_str());
             core->ActivityManager().UpdateActivity(currentActivity, [](discord::Result result) {
                 if (result != discord::Result::Ok) {
-                    printf("[Discord Game SDK] update failed\n");
+                    logprintf("[Discord Game SDK] update failed\n");
                 }
                 });
         }

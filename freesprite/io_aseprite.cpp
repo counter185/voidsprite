@@ -30,7 +30,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
             u32 numChunks = frameHeader.numChunksOld == 0xFFFF
                 ? frameHeader.numChunksNew : frameHeader.numChunksOld;
 
-            for (int nch = 0; nch < numChunks; nch++) {
+            for (u32 nch = 0; nch < numChunks; nch++) {
                 u64 posRn = ftell(f);
                 u32 chunkSize;
                 u16 chunkType;
@@ -85,7 +85,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         u8* pixelData = (u8*)tracked_malloc(dstLength);
                         int uncompressResult = uncompress(pixelData, &dstLength, compressedData, zlibDataSize);
                         if (uncompressResult != Z_OK) {
-                            printf("uncompress failed: %i\n", uncompressResult);
+                            logprintf("uncompress failed: %i\n", uncompressResult);
                         }
                         pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
                         tracked_free(compressedData);
@@ -164,7 +164,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                     if (palette.size() < newPaletteSize) {
                         palette.resize(newPaletteSize);
                     }
-                    for (int x = 0; x < lastIndex - firstIndex + 1; x++) {
+                    for (u32 x = 0; x < lastIndex - firstIndex + 1; x++) {
                         u16 flags;
                         u8 rgba[4];
                         fread(&flags, 2, 1, f);
@@ -191,7 +191,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
         MainEditor* retSn = NULL;
         if (header.colorDepth != 32 && header.colorDepth != 16 && header.colorDepth != 8) {
             //we are not there yet
-            printf("[ASEPRITE] unsupported color depth: %i\n", header.colorDepth);
+            logprintf("[ASEPRITE] unsupported color depth: %i\n", header.colorDepth);
 
         }
         else {
@@ -200,7 +200,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                     std::vector<LayerPalettized*> layers;
                     for (auto& kv : pixelDatas) {
                         LayerPalettized* l = new LayerPalettized(header.width, header.height);
-                        l->name = "Aseprite layer";
+                        l->name = TL("vsp.layer.aseprite");
                         if (layerData.contains(kv.first)) {
                             l->name = layerData[kv.first].name;
                             //l->layerAlpha = layerData[kv.first].rawFrag.opacity;
@@ -277,7 +277,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
 
         MainEditorPalettized* upcastEditor = editor->isPalettized ? (MainEditorPalettized*)editor : NULL;
         if (editor->isPalettized && upcastEditor->palette.size() > 256) {
-            g_addNotification(ErrorNotification("Error", "Aseprite supports max. 256 colors"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Aseprite supports max. 256 colors"));
             fclose(f);
             return false;
         }

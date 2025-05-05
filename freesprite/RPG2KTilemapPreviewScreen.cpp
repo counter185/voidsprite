@@ -1185,7 +1185,7 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 
                     if (newEvt.tex == NULL) {
                         charsetLoadFails += 1;
-                        std::cout << "charset load failed: " << newEvt.texFileName << "\n";
+                        loginfo(std::format("charset load failed: {}", newEvt.texFileName));
                     }
                 }
                 

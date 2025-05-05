@@ -6,7 +6,7 @@
 
 void Pattern::tryLoadIcon()
 {
-    cachedIcon = IMGLoadToTexture(getIconPath());
+    cachedIcon = IMGLoadAssetToTexture(getIconPath());
 }
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)
@@ -30,7 +30,7 @@ CustomPattern* CustomPattern::load(PlatformNativePathString path)
     }
     g_addNotification(ErrorNotification("Error", "Can't load: " + convertStringToUTF8OnWin32(path)));
     std::string err = "Can't load: " + convertStringToUTF8OnWin32(path);
-    printf("%s\n", err.c_str());
+    logprintf("%s\n", err.c_str());
     return NULL;
 }
 

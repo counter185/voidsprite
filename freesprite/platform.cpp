@@ -7,6 +7,8 @@
 	#include "platform_windows.h"
 #elif __APPLE__
 	#include "platform_macos.h"
+#elif __ANDROID__
+    #include "platform_android.h"
 #else
 	#include "platform_linux.h"
 #endif

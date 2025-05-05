@@ -31,8 +31,8 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
         //hopefully res == Z_OK
 
         if (res != Z_OK) {
-            g_addNotification(ErrorNotification("XYZ import failed", "Failed to decompress data"));
-            printf("[XYZ] uncompress failed\n");
+            g_addNotification(ErrorNotification("XYZ import failed", TL("vsp.cmn.error.decompressfail")));
+            logprintf("[XYZ] uncompress failed\n");
             tracked_free(compressedData);
             tracked_free(decompBytes);
             fclose(f);
@@ -45,7 +45,10 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
         int filePtr = 0;
         for (int c = 0; c < 256; c++) {
             //colorPalette[c] = 0xFF000000 | (decompBytes[filePtr++] << 16) | (decompBytes[filePtr++] << 8) | (decompBytes[filePtr++]);
-            nLayer->palette.push_back(PackRGBAtoARGB(decompBytes[filePtr++], decompBytes[filePtr++], decompBytes[filePtr++],255));
+            u8 r = decompBytes[filePtr++];
+            u8 g = decompBytes[filePtr++];
+            u8 b = decompBytes[filePtr++];
+            nLayer->palette.push_back(PackRGBAtoARGB(r, g, b,255));
         }
 
         uint32_t* pxData = (uint32_t*)nLayer->pixelData;
@@ -54,7 +57,7 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
             pxData[x] = decompBytes[filePtr++];
         }
 
-        nLayer->name = "XYZ Image";
+        nLayer->name = TL("vsp.layer.xyz");
 
         tracked_free(compressedData);
         tracked_free(decompBytes);
@@ -72,7 +75,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
     if (data->isPalettized) {
         if (((LayerPalettized*)data)->palette.size() > 256) {
             g_addNotification(ErrorNotification("XYZ export failed", "Too many colors in palette"));
-            printf("[XYZ] Too many colors\n");
+            logprintf("[XYZ] Too many colors\n");
             return false;
         }
     }
@@ -80,7 +83,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
         uniqueColors = data->getUniqueColors(true);
         if (uniqueColors.size() > 256) {
             g_addNotification(ErrorNotification("XYZ export failed", "Your image has more than 256 colors"));
-            printf("[XYZ] Too many colors\n");
+            logprintf("[XYZ] Too many colors\n");
             return false;
         }
     }
@@ -161,8 +164,8 @@ MainEditor* readLMU(PlatformNativePathString path)
                 std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
                 if (db.get()->chipsets.size() > chipsetIndex) {
                     //chipset_name is the file name
-                    std::cout << "chipset_name = " << db.get()->chipsets[chipsetIndex - 1].chipset_name << "\n";
-                    std::cout << "name = " << db.get()->chipsets[chipsetIndex - 1].name << "\n";
+                    loginfo(std::format("chipset_name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
+                    loginfo(std::format("name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].name)));
 
                     PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
                     Layer* l = NULL;
@@ -191,25 +194,25 @@ MainEditor* readLMU(PlatformNativePathString path)
                         }
                     }
                     else {
-                        g_addNotification(ErrorNotification("Error", "Failed to load Chipset"));
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load Chipset"));
                     }
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", "Chipset index not in database"));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Chipset index not in database"));
                 }
                 ldbFile.close();
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Failed to read LDB"));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to read LDB"));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "LDB not found"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "LDB not found"));
         }
         lmuFile.close();
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Failed to read LMU"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to read LMU"));
     }
 
     return ret;

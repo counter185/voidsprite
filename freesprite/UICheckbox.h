@@ -7,6 +7,7 @@
 class UICheckboxButton : public UIButton {
 private:
     bool state = false;
+    bool clickedFlag = false;
     bool* statePtr = NULL;
 public:
     Timer64 stateChangeTimer;
@@ -43,6 +44,8 @@ public:
     UILabel* label;
     UICheckboxButton* checkbox;
 
+	std::function<void(UICheckbox*, bool)> onStateChangeCallback = NULL;
+
     UICheckbox(std::string text, bool* linkTo);
     UICheckbox(std::string text, bool defaultState);
 
@@ -52,7 +55,10 @@ public:
 
     void eventButtonPressed(int evt_id) override {
 		if (evt_id == 0) {
-            if (callback != NULL) {
+			if (onStateChangeCallback != NULL) {
+				onStateChangeCallback(this, isChecked());
+			}
+            else if (callback != NULL) {
                 callback->eventCheckboxToggled(callback_id, isChecked());
             }
 		}

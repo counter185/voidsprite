@@ -53,7 +53,7 @@ else
 endif
 
 install_subdir('assets', install_dir: assets_dir)
-install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-VariableFont_wght.ttf', install_dir: assets_dir)
+install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-Medium.ttf', install_dir: assets_dir)
 if host_machine.system() == 'linux'
   subdir('linux')
 endif

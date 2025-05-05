@@ -37,6 +37,7 @@ public:
     bool isPanel() override { return true; }
 
     bool takesMouseWheelEvents() override { return true; }
+    bool takesTouchEvents() override { return true; }
 
     XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
 

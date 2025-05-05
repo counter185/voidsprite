@@ -79,13 +79,11 @@ void Canvas::drawTileGrid(XY tileSize)
     }
 }
 
-void Canvas::zoom(int how_much)
+void Canvas::zoom(int how_much, XY centerPoint)
 {
-    XY centerAround = {g_mouseX, g_mouseY};//XY{ g_windowW / 2, g_windowH / 2 };
-
     XYf screenCenterPoint = XYf{
-        (currentDrawPoint.x - centerAround.x) / (float)-scale,
-        (currentDrawPoint.y - centerAround.y) / (float)-scale
+        (currentDrawPoint.x - centerPoint.x) / (float)-scale,
+        (currentDrawPoint.y - centerPoint.y) / (float)-scale
     };
     scale += how_much;
     scale = ixmax(scale, minScale);
@@ -93,7 +91,7 @@ void Canvas::zoom(int how_much)
         (int)(currentDrawPoint.x + screenCenterPoint.x * scale),
         (int)(currentDrawPoint.y + screenCenterPoint.y * scale)
     };
-    XY pointDiff = xySubtract(centerAround, onscreenPointNow);
+    XY pointDiff = xySubtract(centerPoint, onscreenPointNow);
     currentDrawPoint = xyAdd(currentDrawPoint, pointDiff);
 }
 

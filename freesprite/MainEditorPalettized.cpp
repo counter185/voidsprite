@@ -10,12 +10,14 @@
 #include "MinecraftBlockPreviewScreen.h"
 #include "FileIO.h"
 #include "CollapsableDraggablePanel.h"
+#include "EditorTouchToggle.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
 #include "PopupTileGeneric.h"
 #include "PopupSetEditorPixelGrid.h"
 #include "PopupGlobalConfig.h"
+#include "PopupExportScaled.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -100,11 +102,11 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                 g_addNotification(SuccessNotification("Success", "File exported successfully."));
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Invalid exporter"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid exporter"));
         }
     }
     else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
@@ -178,15 +180,12 @@ uint32_t MainEditorPalettized::getActiveColor()
     return pickedPaletteIndex;
 }
 
-void MainEditorPalettized::setActiveColor(uint32_t col, bool animate)
+void MainEditorPalettized::setActiveColor(uint32_t col)
 {
     if (col == -1) {
         col = 0;
     }
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(col);
-    if (animate) {
-        colorPickTimer.start();
-    }
 }
 
 uint32_t MainEditorPalettized::pickColorFromAllLayers(XY pos)
@@ -233,40 +232,13 @@ void MainEditorPalettized::updatePalette() {
     ((PalettizedEditorColorPicker*)colorPicker)->updateForcedColorPaletteButtons();
 }
 
-void MainEditorPalettized::renderColorPickerAnim()
+void MainEditorPalettized::playColorPickerVFX(bool inward)
 {
-    if (colorPickTimer.started && colorPickTimer.percentElapsedTime(500) <= 1.0f) {
-        float progress = colorPickTimer.percentElapsedTime(500);
-        int pxDistance = 40 * (lastColorPickWasFromWholeImage ? XM1PW3P1(progress) : (1.0 - XM1PW3P1(progress)));
-
-        SDL_Rect colRect2 = { g_mouseX, g_mouseY, 1,1 };
-        int pxDistance2 = pxDistance + 1;
-        colRect2.x -= pxDistance2;
-        colRect2.w = pxDistance2 * 2;
-        colRect2.y -= pxDistance2;
-        colRect2.h = pxDistance2 * 2;
-
-        //SDL_SetRenderDrawColor(g_rd, 255,255,255, (uint8_t)(127 * XM1PW3P1(1.0f - progress)));
-        //SDL_RenderDrawRect(g_rd, &colRect2);
-
-        for (int x = 3; x >= 1; x--) {
-            SDL_Rect colRect = { g_mouseX, g_mouseY, 1,1 };
-            int nowPxDistance = pxDistance / x;
-            colRect.x -= nowPxDistance;
-            colRect.w = nowPxDistance * 2;
-            colRect.y -= nowPxDistance;
-            colRect.h = nowPxDistance * 2;
-            uint32_t effectColor = (pickedPaletteIndex < palette.size() && pickedPaletteIndex >= 0) ? palette[pickedPaletteIndex] : 0;
-            hsv thsv = rgb2hsv(rgb{ ((effectColor >> 16) & 0xff) / 255.0f, ((effectColor >> 8) & 0xff) / 255.0f, (effectColor & 0xff) / 255.0f });
-            thsv.s /= 3;
-            thsv.v += 0.4;
-            thsv.v = dxmin(1.0, thsv.v);
-            rgb trgb = hsv2rgb(thsv);
-            SDL_Color trgbColor = SDL_Color{ (uint8_t)(trgb.r * 255.0), (uint8_t)(trgb.g * 255.0), (uint8_t)(trgb.b * 255.0), 255 };
-            SDL_SetRenderDrawColor(g_rd, trgbColor.r, trgbColor.g, trgbColor.b, (uint8_t)(255 * XM1PW3P1(1.0f - progress)));
-            SDL_RenderDrawRect(g_rd, &colRect);
-        }
+    u32 targetColor = 0;
+    if (pickedPaletteIndex < palette.size() && pickedPaletteIndex > 0) {
+        targetColor = palette[pickedPaletteIndex];
     }
+    g_newVFX(VFX_COLORPICKER, 500, targetColor, { g_mouseX, g_mouseY,-1,-1 }, { inward ? 1u : 0u });
 }
 
 void MainEditorPalettized::setUpWidgets()
@@ -276,7 +248,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 "File",
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_C},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_F, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { "Save as",
                             [](MainEditor* editor) {
@@ -287,6 +259,14 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_S, { "Save",
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
+                            [](MainEditor* editor) {
+                                PopupExportScaled* popup = new PopupExportScaled(editor);
+                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, editor);
+                                g_addPopup(popup);
                             }
                         }
                     },
@@ -302,7 +282,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { "Close",
+                    {SDL_SCANCODE_X, { "Close",
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
@@ -311,6 +291,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_R, { "Open in RGB editor",
                             [](MainEditor* editor) {
                                 ((MainEditorPalettized*)editor)->openInNormalRGBEditor();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyImageToClipboard();
                             }
                         }
                     },
@@ -433,7 +419,20 @@ void MainEditorPalettized::setUpWidgets()
                                 editor->layer_outline(false);
                             }
                         }
-                    }
+                    },
+                    {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
+                            [](MainEditor* editor) {
+                                editor->layer_clearSelectedArea();
+                            }
+                        }
+                    },
+                    //todo: fix it (make it so that the -1 index never gets passed)
+                    /*{SDL_SCANCODE_C, {TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyLayerToClipboard(editor->getCurrentLayer());
+                            }
+                        }
+                    }*/
                 },
                 g_iconNavbarTabLayer
             }
@@ -527,6 +526,16 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_P, { "Open touch mode panel...",
+                            [](MainEditor* editor) {
+                                if (editor->touchModePanel == NULL) {
+                                    editor->touchModePanel = new EditorTouchToggle(editor);
+                                    editor->touchModePanel->position = { g_windowW - editor->touchModePanel->wxWidth - 10, g_windowH - editor->touchModePanel->wxHeight - 40 };
+                                    editor->addWidget(editor->touchModePanel);
+                                }
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabView
             }
@@ -535,7 +544,7 @@ void MainEditorPalettized::setUpWidgets()
 
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
-    colorPickerPanel->position.y = 50;
+    colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(pickedPaletteIndex);
@@ -543,7 +552,7 @@ void MainEditorPalettized::setUpWidgets()
 
     brushPicker = new EditorBrushPicker(this);
     auto brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
-    brushPickerPanel->position.y = 450;
+    brushPickerPanel->position.y = 454;
     brushPickerPanel->position.x = 10;
     wxsManager.addDrawable(brushPickerPanel);
 
@@ -611,7 +620,7 @@ Layer* MainEditorPalettized::newLayer()
         nl->palette = palette;
         nl->name = std::format("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        printf("adding new layer at %i\n", insertAtIdx);
+        logprintf("adding new layer at %i\n", insertAtIdx);
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -629,7 +638,7 @@ Layer* MainEditorPalettized::mergeLayers(Layer* bottom, Layer* top)
     ret->palette = palette;
 
     if (!bottom->isPalettized || !top->isPalettized) {
-        printf("UH OH\n");
+        logprintf("UH OH\n");
     }
 
     memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);

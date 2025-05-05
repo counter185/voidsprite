@@ -10,6 +10,7 @@
 #include "ScrollingPanel.h"
 #include "BaseBrush.h"
 #include "discord_rpc.h"
+#include "PopupChooseExtsToAssoc.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -25,7 +26,8 @@ enum ConfigOptions : int {
     CHECKBOX_RENDERER,
     TEXTFIELD_AUTOSAVE_INTERVAL,
     CHECKBOX_ROWCOLS_START_AT_1,
-    DROPDOWN_LANGUAGE
+    DROPDOWN_LANGUAGE,
+    DROPDOWN_VISUAL_CONFIG,
 };
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -36,7 +38,13 @@ PopupGlobalConfig::PopupGlobalConfig()
     wxHeight = 400;
     wxWidth = 850;
 
-    TabbedView* configTabs = new TabbedView({ {"General"}, {"Editor"}, {"Keybinds"}, {"Misc."}}, 90);
+    TabbedView* configTabs = new TabbedView({ 
+        {TL("vsp.config.tab.general")}, 
+        {TL("vsp.config.tab.visual")}, 
+        {TL("vsp.config.tab.editor")}, 
+        {TL("vsp.config.tab.keybinds")}, 
+        {TL("vsp.config.tab.misc")}
+    }, 90);
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
 
@@ -46,64 +54,99 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     XY posInTab = { 0,10 };
-
-    UICheckbox* cb6 = new UICheckbox("Vertical sync", &g_config.vsync);
-    cb6->position = posInTab;
-    cb6->checkbox->tooltip = "When enabled, the framerate will be locked to your display's refresh rate.\nDisabling this will make brushes smoother but also increase energy consumption.\nvoidsprite must be restarted for this change to take effect.";
-    configTabs->tabs[0].wxs.addDrawable(cb6);
-    posInTab.y += 35;
-
-    UICheckbox* cb7 = new UICheckbox("Save/load extra data to PNGs", &g_config.saveLoadFlatImageExtData);
-    cb7->position = posInTab;
-    cb7->checkbox->tooltip = "When enabled, voidsprite will load and save extra data such as canvas comments,\ntile grid and symmetry to PNGs.";
-    configTabs->tabs[0].wxs.addDrawable(cb7);
-    posInTab.y += 35;
-
-    UICheckbox* cb8 = new UICheckbox("Discord Rich Presence", &g_config.useDiscordRPC);
-    cb8->position = posInTab;
-    cb8->checkbox->tooltip = "When enabled, your activity will be shared as your Discord status.\nSupported only on Windows.";
-    configTabs->tabs[0].wxs.addDrawable(cb8);
-    posInTab.y += 35;
-
-    UILabel* lbl3 = new UILabel("Animated background");
-    lbl3->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl3);
-    UIDropdown* dd1 = new UIDropdown({ "Off", "Sharp", "Smooth", "Sharp (static)", "Smooth (static)" });
-    dd1->position = xyAdd(posInTab, { 200, 0 });
-    dd1->wxWidth = 180;
-    dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
-    dd1->setTextToSelectedItem = true;
-    dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
-    configTabs->tabs[0].wxs.addDrawable(dd1);
-    posInTab.y += 35;
-
-    UILabel* lbl4 = new UILabel("Renderer");
-    lbl4->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl4);
-    UIDropdown* dd2 = new UIDropdown(g_availableRenderersNow);
-    dd2->position = xyAdd(posInTab, {100, 0});
-    dd2->wxWidth = 180;
-    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
-    dd2->setTextToSelectedItem = true;
-    dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
-    configTabs->tabs[0].wxs.addDrawable(dd2);
-    posInTab.y += 35;
+    
+    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
+    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
+    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog, &posInTab));
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
         langLocNames.push_back(loc.first);
         langNames.push_back(loc.second.langName);
     }
-    lbl4 = new UILabel("Language (restart required)");
+    UILabel* lbl4 = new UILabel(TL("vsp.config.opt.lang"));
     lbl4->position = posInTab;
     configTabs->tabs[0].wxs.addDrawable(lbl4);
-    dd2 = new UIDropdown(langNames);
+    UIDropdown* dd2 = new UIDropdown(langNames);
     dd2->position = xyAdd(posInTab, { 300, 0 });
     dd2->wxWidth = 180;
     dd2->setCallbackListener(DROPDOWN_LANGUAGE, this);
     dd2->setTextToSelectedItem = true;
     dd2->text = getLocalizations().contains(g_config.language) ? getLocalizations()[g_config.language].langName : "???";
     configTabs->tabs[0].wxs.addDrawable(dd2);
+    posInTab.y += 35;
+
+    languageCredit = new UILabel("");
+    languageCredit->fontsize = 16;
+    languageCredit->position = xyAdd(posInTab, {30, 0});
+    languageCredit->color = { 255,255,255,0xa0 };
+    configTabs->tabs[0].wxs.addDrawable(languageCredit);
+    posInTab.y += 70;
+    updateLanguageCredit();
+
+    /*
+        -------------------------
+        VISUAL TAB
+        -------------------------
+    */
+    posInTab = { 0,10 };
+
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync, &posInTab));
+
+    UILabel* lbl3 = new UILabel(TL("vsp.config.opt.bganim"));
+    lbl3->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl3);
+    UIDropdown* dd1 = new UIDropdown({ TL("vsp.config.opt.bganim.none"), TL("vsp.config.opt.bganim.sharp"), TL("vsp.config.opt.bganim.smooth"), TL("vsp.config.opt.bganim.sharpstatic"), TL("vsp.config.opt.bganim.smoothstatic") });
+    dd1->position = { ixmax(lbl3->calcEndpoint().x + 30, posInTab.x + 200), posInTab.y };
+    dd1->wxWidth = 180;
+    dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
+    dd1->setTextToSelectedItem = true;
+    dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
+    configTabs->tabs[1].wxs.addDrawable(dd1);
+    posInTab.y += 35;
+
+    lbl4 = new UILabel(TL("vsp.config.opt.renderer"));
+    lbl4->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl4);
+    dd2 = new UIDropdown(g_availableRenderersNow);
+    dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
+    dd2->wxWidth = 180;
+    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
+    dd2->setTextToSelectedItem = true;
+    dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
+    configTabs->tabs[1].wxs.addDrawable(dd2);
+    posInTab.y += 35;
+
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
+
+    auto availableVisualConfs = g_getAvailableVisualConfigs();
+    std::vector<std::string> visualConfNames = { getDefaultVisualConf()["meta/name"] };
+    for (auto& meta : availableVisualConfs) {
+        visualConfNames.push_back(meta.name);
+    }
+    lbl4 = new UILabel(TL("vsp.config.opt.visualconfig"));
+    lbl4->position = posInTab;
+    configTabs->tabs[1].wxs.addDrawable(lbl4);
+    dd2 = new UIDropdown(visualConfNames);
+    dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
+    dd2->wxWidth = 240;
+    dd2->setTextToSelectedItem = true;
+    dd2->onDropdownItemSelectedCallback = [this, availableVisualConfs](UIDropdown* dd, int index, std::string name) {
+        if (index == 0) {   //default
+            g_config.customVisualConfigPath = "";
+        }
+        else {
+            index--;
+            if (index >= 0 && index < availableVisualConfs.size()) {
+                g_config.customVisualConfigPath = convertStringToUTF8OnWin32(availableVisualConfs[index].path);
+            }
+        }
+        g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath));
+        g_reloadFonts();
+    };
+    dd2->text = fileNameFromPath(visualConfigValue("meta/name"));
+    configTabs->tabs[1].wxs.addDrawable(dd2);
     posInTab.y += 35;
 
     /*
@@ -113,61 +156,41 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
 
-    UICheckbox* cb1 = new UICheckbox("Open saved file location", &g_config.openSavedPath);
-    cb1->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(cb1);
-    posInTab.y += 35;
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath, &posInTab));
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1, &posInTab));
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad, &posInTab));
 
-    UICheckbox* cb3 = new UICheckbox("Row/column index labels start at 1", &g_config.rowColIndexesStartAt1);
-    cb3->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(cb3);
-    posInTab.y += 35;
-
-    cb3 = new UICheckbox("Pan canvas with touchpad", &g_config.scrollWithTouchpad);
-    cb3->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(cb3);
-    posInTab.y += 35;
-
-    UILabel* lbl2 = new UILabel("Max undo history");
+    UILabel* lbl2 = new UILabel(TL("vsp.config.opt.maxundocount"));
     lbl2->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    configTabs->tabs[2].wxs.addDrawable(lbl2);
     UITextField* tf2 = new UITextField();
     tf2->isNumericField = true;
-    tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y};
+    tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y};
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.maxUndoHistory));
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
-    configTabs->tabs[1].wxs.addDrawable(tf2);
+    configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
 
-    UICheckbox* cb4 = new UICheckbox("Isolate rect on locking tile", &g_config.isolateRectOnLockTile);
-    cb4->position = posInTab;
-    cb4->checkbox->tooltip = "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area.";
-    configTabs->tabs[1].wxs.addDrawable(cb4);
-    posInTab.y += 35;
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile, &posInTab));
+	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
 
-    UICheckbox* cb5 = new UICheckbox("Lock Fill tool to tile size", &g_config.fillToolTileBound);
-    cb5->position = posInTab;
-    cb5->checkbox->tooltip = "When enabled, the Fill tool will not flow past the current tile if a tile size is set.";
-    configTabs->tabs[1].wxs.addDrawable(cb5);
-    posInTab.y += 35;
-
-    lbl2 = new UILabel("Recovery autosave interval (minutes) (0 to disable)");
+    lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    configTabs->tabs[2].wxs.addDrawable(lbl2);
     tf2 = new UITextField();
     tf2->isNumericField = true;
-    tf2->position = XY{ posInTab.x + 10 + g_fnt->StatStringDimensions(lbl2->text).x, posInTab.y };
+    tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y };
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.autosaveInterval));
     tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
-    configTabs->tabs[1].wxs.addDrawable(tf2);
+    configTabs->tabs[2].wxs.addDrawable(tf2);
     posInTab.y += 35;
-    lbl2 = new UILabel(" Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory.");
+    lbl2 = new UILabel(TL("vsp.config.hint.recoveryautosaves"));
     lbl2->fontsize = 14;
     lbl2->color = { 255,255,255,0xa0 };
     lbl2->position = xySubtract(posInTab, {0,4});
-    configTabs->tabs[1].wxs.addDrawable(lbl2);
+    configTabs->tabs[2].wxs.addDrawable(lbl2);
     posInTab.y += 35;
 
     /*
@@ -182,7 +205,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsPanel->wxHeight = wxHeight - 140;
     keybindsPanel->scrollVertically = true;
     keybindsPanel->scrollHorizontally = false;
-    configTabs->tabs[2].wxs.addDrawable(keybindsPanel);
+    configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
 
 
     std::vector<KeybindConf> keybindsWithIcons = {
@@ -216,32 +239,75 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
     posInTab = { 0,10 };
     UIButton* btn = new UIButton();
-    btn->text = "Open app data directory";
-    btn->tooltip = "Open the directory where voidsprite stores its data.";
+    btn->text = TL("vsp.config.opt.openappdata");
+    btn->tooltip = TL("vsp.config.opt.openappdata.desc");
     btn->position = posInTab;
-    btn->wxWidth = 230;
+    btn->wxWidth = 270;
     btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
-    configTabs->tabs[3].wxs.addDrawable(btn);
+    configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
+    btn = new UIButton();
+    btn->text = TL("vsp.config.opt.associateexts");
+    btn->tooltip = TL("vsp.config.opt.associateexts.desc");
+    btn->position = posInTab;
+    btn->wxWidth = 270;
+    btn->onClickCallback = [this](UIButton*) {
+        g_addPopup(new PopupChooseExtsToAssoc());
+    };
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
 
-    UIButton* closeButton = new UIButton();
-    closeButton->text = "Close";
-    closeButton->position = XY{ wxWidth - 140, wxHeight - 40 };
-    closeButton->wxHeight = 30;
-    closeButton->wxWidth = 130;
-    closeButton->setCallbackListener(0, this);
-    wxsManager.addDrawable(closeButton);
+    btn = new UIButton();
+    btn->text = TL("vsp.config.opt.reloadfonts");
+    btn->position = posInTab;
+    btn->wxWidth = 270;
+    btn->onClickCallback = [this](UIButton*) {
+        g_reloadFonts();
+        g_addNotification(SuccessShortNotification(TL("vsp.config.opt.fontsreloaded"), ""));
+    };
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
 
-    UIButton* saveAndCloseButton = new UIButton();
-    saveAndCloseButton->text = "Save and close";
-    saveAndCloseButton->position = XY{ wxWidth - 280, wxHeight - 40 };
-    saveAndCloseButton->wxHeight = 30;
-    saveAndCloseButton->wxWidth = 130;
-    saveAndCloseButton->setCallbackListener(1, this);
-    wxsManager.addDrawable(saveAndCloseButton);
+#if __ANDROID__
+    btn = new UIButton();
+    btn->text = TL("vsp.config.opt.setfileaccess");
+    btn->position = posInTab;
+    btn->wxWidth = 270;
+    btn->onClickCallback = [this](UIButton*) {
+        platformRequestFileAccessPermissions();
+    };
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
+#endif
 
-    makeTitleAndDesc("Preferences");
+
+    
+
+    UIButton* closeButton = actionButton(TL("vsp.cmn.close"), 140);
+    closeButton->onClickCallback = [this](UIButton*) {
+        bool visualConfigChanged = g_config.customVisualConfigPath != previousConfig.customVisualConfigPath;
+        g_config = previousConfig;
+        if (visualConfigChanged) {
+            g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath));
+            g_reloadFonts();
+        }
+        closePopup();
+    };
+
+    UIButton* saveAndCloseButton = actionButton(TL("vsp.cmn.apply"), 140);
+    saveAndCloseButton->onClickCallback = [this](UIButton*) {
+        if (g_saveConfig()) {
+            g_addNotification(SuccessShortNotification(TL("vsp.config.notif.saved"), ""));
+            g_initOrDeinitRPCBasedOnConfig();
+            closePopup();
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.config.notif.savefailed")));
+        }
+    };
+
+    makeTitleAndDesc(TL("vsp.config.title"));
 }
 
 void PopupGlobalConfig::takeInput(SDL_Event evt)
@@ -262,7 +328,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     *keybindButtons[bindingKeyIndex].first.target = (SDL_Scancode)targetKey;
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
                 }
             }
             updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
@@ -276,23 +342,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 
 void PopupGlobalConfig::eventButtonPressed(int evt_id)
 {
-    if (evt_id == 0) {
-        // close and discard
-        g_config = previousConfig;
-        closePopup();
-    }
-    else if (evt_id == 1) {
-        //save and close
-        if (g_saveConfig()) {
-            g_addNotification(SuccessShortNotification("Success", "Preferences saved"));
-            g_initOrDeinitRPCBasedOnConfig();
-            closePopup();
-        }
-        else {
-            g_addNotification(ErrorNotification("Error", "Failed to save preferences"));
-        }
-    }
-    else if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
+    if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
         platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
     }
     else if (evt_id >= 1000) {
@@ -309,7 +359,7 @@ void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
             try {
                 g_config.maxUndoHistory = std::stoi(text);
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_config.maxUndoHistory = previousConfig.maxUndoHistory;
             }
             break;
@@ -317,7 +367,7 @@ void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
             try {
                 g_config.autosaveInterval = std::stoi(text);
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_config.autosaveInterval = previousConfig.autosaveInterval;
             }
             break;
@@ -335,10 +385,36 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
     }
     else if (evt_id == DROPDOWN_LANGUAGE) {
         g_config.language = langLocNames[index];
+        updateLanguageCredit();
     }
 }
 
 void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t)
 {
     t.second->text = std::format("{}    ({})", t.first.name, SDL_GetScancodeName(*t.first.target));
+}
+
+void PopupGlobalConfig::updateLanguageCredit()
+{
+    if (getLocalizations().contains(g_config.language)) {
+		std::string langCredit = getLocalizations()[g_config.language].langCredit;
+        if (g_config.language != "en-us") {
+            langCredit += std::format("\n[completion: {:.2f}%]", g_getLocCompletionPercentage(g_config.language) * 100);
+        }
+        languageCredit->setText(langCredit);
+    }
+    else {
+        languageCredit->setText("");
+    }
+}
+
+UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position)
+{
+    UICheckbox* cb7 = new UICheckbox(name, target);
+    cb7->position = *position;
+    if (tooltip != "") {
+        cb7->checkbox->tooltip = tooltip;
+    }
+    position->y += 35;
+    return cb7;
 }

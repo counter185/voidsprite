@@ -1,6 +1,11 @@
 #pragma once
 #include "globals.h"
 
+struct UIDoubleSliderBounds {
+    double min;
+    double max;
+};
+
 #define EVENT_COLORPICKER_TEXTFIELD 1
 #define EVENT_MAINEDITOR_SAVEFILE 2
 #define EVENT_BRUSHPICKER_BRUSH_CHANGED 3
@@ -40,7 +45,6 @@
 #define EVENT_MAINEDITOR_SETCOLORKEY 37
 #define EVENT_STARTSCREEN_TEMPLATEPICKED 38
 #define EVENT_LMUPREVIEW_RENDERMAP 39
-#define EVENT_QUICKCONVERT_FORCE_RGB 40
 #define EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE 41
 #define EVENT_MAINEDITOR_EXPORTPALETTIZED 42
 #define EVENT_PALETTECOLORPICKER_NEWCOLOR 43
@@ -55,6 +59,7 @@
 #define EVENT_TILEMAP_RENDERCURRENTLTOIMAGE 52
 #define EVENT_TILEMAP_RESIZE 53
 #define EVENT_MAINEDITOR_RESCALELAYER 54
+#define EVENT_MAINEDITOR_EXPORTSCALED 55
 
 //get rid of this whole system somehow
 // (maybe only leave it for async ops like file popups)
@@ -71,6 +76,8 @@ public:
 	virtual void eventPopupClosed(int evt_id, BasePopup* target) {}
 	virtual void eventSliderPosChanged(int evt_id, float value) {}
 	virtual void eventSliderPosFinishedChanging(int evt_id, float value) {}
+	virtual void eventDoubleSliderPosChanged(int evt_id, UIDoubleSliderBounds value) {}
+	virtual void eventDoubleSliderPosFinishedChanging(int evt_id, UIDoubleSliderBounds value) {}
 	virtual void eventDropdownItemSelected(int evt_id, int index, std::string name) {}
 	virtual void eventCheckboxToggled(int evt_id, bool newState) {}
 	virtual void eventColorSet(int evt_id, uint32_t color) {}

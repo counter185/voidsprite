@@ -94,13 +94,27 @@ void UIDropdown::mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction)
 
 void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 {
-    if (isOpen && evt.type == SDL_MOUSEBUTTONDOWN && evt.button.button == 1 && evt.button.down) {
-        wxs.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, xyAdd(gPosOffset, XY{0,menuYOffset}));
+    SDL_Event cevt = convertTouchToMouseEvent(evt);
+
+    if (isOpen && cevt.type == SDL_MOUSEBUTTONDOWN && cevt.button.button == 1 && cevt.button.down) {
+        wxs.tryFocusOnPoint(XY{ (int)cevt.button.x, (int)cevt.button.y }, xyAdd(gPosOffset, XY{0,menuYOffset}));
     }
+
+    if (isOpen && evt.type == SDL_EVENT_FINGER_MOTION) {
+        XY motionPos = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+        XY motionDir = { (int)(evt.tfinger.dx * g_windowW), (int)(evt.tfinger.dy * g_windowH) };
+        if (pointInBox(motionPos, { gPosOffset.x, gPosOffset.y, wxWidth, wxHeight }) 
+            || wxs.mouseInAny(xyAdd({ 0, menuYOffset }, gPosOffset), motionPos)) {
+            menuYOffset += motionDir.y;
+            if (menuYOffset > 0) menuYOffset = 0;
+            if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
+        }
+    }
+
     if (!isOpen || !wxs.anyFocused()) {
-        if (evt.type == SDL_MOUSEBUTTONDOWN) {
-            XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
-            if (evt.button.button == 1 && evt.button.down) {
+        if (cevt.type == SDL_MOUSEBUTTONDOWN) {
+            XY mousePos = xySubtract(XY{ (int)(cevt.motion.x), (int)(cevt.motion.y) }, gPosOffset);
+            if (cevt.button.button == 1 && cevt.button.down) {
                 if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
                     click();
                 }
@@ -127,7 +141,10 @@ void UIDropdown::eventButtonPressed(int evt_id)
         text = items[evt_id];
     }
     isOpen = false;
-    if (callback != NULL) {
+    if (onDropdownItemSelectedCallback != NULL) {
+		onDropdownItemSelectedCallback(this, evt_id, items[evt_id]);
+	}
+	else if (callback != NULL) {
         callback->eventDropdownItemSelected(callback_id, evt_id, items[evt_id]);
     }
 }

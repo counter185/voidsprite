@@ -57,10 +57,31 @@ SDL_Rect offsetRect(SDL_Rect r, int offset)
         r.h + offset * 2
     };
 }
+SDL_Rect offsetRect(SDL_Rect r, int offsetX, int offsetY)
+{
+    return {
+        r.x - offsetX,
+        r.y - offsetY,
+        r.w + offsetX * 2,
+        r.h + offsetY * 2
+    };
+}
 
 double angleBetweenTwoPoints(XY a, XY b)
 {
     return atan2(b.y - a.y, b.x - a.x) / M_PI * 180 + 180;
+}
+
+std::vector<std::string> splitString(std::string a, char b)
+{
+    std::vector<std::string> ret;
+    while (a.find(b) != std::string::npos) {
+        std::string part = a.substr(0, a.find(b));
+        ret.push_back(part);
+        a = a.substr(a.find(b) + 1);
+    }
+    ret.push_back(a);
+    return ret;
 }
 
 std::string stringToLower(std::string a)
@@ -225,6 +246,26 @@ std::string fileNameFromPath(std::string fullPath)
     else {
         return fullPath.substr(fullPath.find_last_of("/\\") + 1);
     }
+}
+
+PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNativePathString subdir)
+{
+    PlatformNativePathString separator =
+#if _WIN32
+        L"\\"
+#else
+        "/"
+#endif
+        ;
+	PlatformNativePathString ret = parent;
+    if (parent.size() == 0) {
+        return subdir;
+    }
+	if (parent.size() > 0 && parent[parent.size() - 1] != '/' && parent[parent.size() - 1] != '\\') {
+		ret += separator;
+	}
+	ret += subdir;
+	return ret;
 }
 
 XY getSnappedPoint(XY from, XY to) {
@@ -550,7 +591,7 @@ void renderGradient(XY ul, XY ur, XY dl, XY dr, uint32_t colorUL, uint32_t color
 
 std::string pathInProgramDirectory(std::string path)
 {
-    return g_programDirectory + "/" + path;
+    return (std::string(VOIDSPRITE_ASSETS_PATH).empty() ? g_programDirectory : std::string(VOIDSPRITE_ASSETS_PATH)) + path;
 }
 
 hsv rgb2hsv(rgb in)
@@ -717,6 +758,18 @@ uint32_t modAlpha(uint32_t color, uint8_t alpha)
     return (color & 0x00FFFFFF) + (alpha << 24);
 }
 
+SDL_Surface* trimSurface(SDL_Surface* target, SDL_Rect dims)
+{
+    SDL_Surface* ret = SDL_CreateSurface(dims.w, dims.h, target->format);
+    int bpp = (target->pitch / target->w);
+    for (int y = 0; y < dims.h; y++) {
+        u8* srcScanline = &ARRAY2DPOINT(((u8*)target->pixels), dims.x*bpp, dims.y + y, target->pitch);
+        u8* dstScanline = &ARRAY2DPOINT(((u8*)ret->pixels), 0, y, ret->pitch);
+        memcpy(dstScanline, srcScanline, dims.w * bpp);
+    }
+    return ret;
+}
+
 u32 hsvShift(u32 color, hsv shift)
 {
     rgb colorRGB = { (float)((color & 0xFF0000) >> 16) / 255.0f, (float)((color & 0x00FF00) >> 8) / 255.0f, (float)(color & 0x0000FF) / 255.0f };
@@ -812,8 +865,8 @@ int ixpow(int a, int b)
     }
     int ret = a;
     for (int i = 1; i < b; i++) {
-		ret *= a;
-	}
+        ret *= a;
+    }
     return ret;
 }
 int iclamp(int vmin, int b, int vmax) { return ixmax(vmin, ixmin(b, vmax)); }
@@ -1021,6 +1074,45 @@ SDL_Event convertTouchToMouseEvent(SDL_Event src)
         return src;
     }
     return ret;
+}
+SDL_Event scaleScreenPositionsInEvent(SDL_Event src) {
+    if (g_renderScale == 1) {
+        return src;
+    }
+    double scaleFactor = g_renderScale;
+    std::function<void(std::vector<float*>, double)> divMultiple = 
+        [](std::vector<float*> f, double ff) { for (auto*& p : f) { *p = *p / ff; } };
+    switch (src.type) {
+        case SDL_EVENT_MOUSE_MOTION:
+            divMultiple({&src.motion.x, &src.motion.y, &src.motion.xrel, &src.motion.yrel}, scaleFactor);
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            divMultiple({ &src.button.x, &src.button.y }, scaleFactor);
+            break;
+        case SDL_EVENT_FINGER_CANCELED:
+        case SDL_EVENT_FINGER_DOWN:
+        case SDL_EVENT_FINGER_MOTION:
+        case SDL_EVENT_FINGER_UP:
+            //these are normalized so don't scale them
+            //divMultiple({&src.tfinger.x, &src.tfinger.y, &src.tfinger.dx, &src.tfinger.dy}, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_AXIS:
+            divMultiple({ &src.paxis.x, &src.paxis.y }, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_MOTION:
+            divMultiple({ &src.pmotion.x, &src.pmotion.y }, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_DOWN:
+        case SDL_EVENT_PEN_UP:
+            divMultiple({ &src.ptouch.x, &src.ptouch.y }, scaleFactor);
+            break;
+        case SDL_EVENT_PEN_BUTTON_DOWN:
+        case SDL_EVENT_PEN_BUTTON_UP:
+            divMultiple({&src.pbutton.x, &src.pbutton.y}, scaleFactor);
+            break;
+    }
+    return src;
 }
 
 hsl rgb2hsl(rgb c) {

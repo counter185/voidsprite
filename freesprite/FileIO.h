@@ -8,6 +8,8 @@
 
 std::string getAllLibsVersions();
 
+std::map<std::string, std::string> parseINI(PlatformNativePathString path);
+
 uint8_t* DecompressMarioPaintSRM(FILE* f);
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile);
@@ -23,20 +25,17 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
 std::vector<u8> compressZlib(u8* data, size_t dataSize);
 
+void zlibFile(PlatformNativePathString path);
 void unZlibFile(PlatformNativePathString path);
 
-Layer* readPNGFromBase64String(std::string b64);
-
-//void _parseORAStacksRecursively(MainEditor* editor, pugi::xml_node rootNode, zip_t* zip, XY offset = {0,0});
-Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
-
+#include "io_png.h"
 #include "io_aseprite.h"
 #include "io_piskel.h"
 #include "io_gim.h"
 #include "io_rpgm.h"
 #include "io_jxl.h"
+#include "io_dibv5.h"
 
-Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
@@ -71,7 +70,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path);
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
-bool writePNG(PlatformNativePathString path, Layer* data);
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);
@@ -159,7 +157,7 @@ public:
                 return _flatExportFunction(path, (Layer*)data);
             }
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             return false;
         }
     }
@@ -290,7 +288,8 @@ inline void g_setupIO() {
         *exAnymapPPM,
         *exXBM,
         *exSR8,
-        *exVTF
+        *exVTF,
+        *exDIBv5
         ;
 
     g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -307,6 +306,10 @@ inline void g_setupIO() {
 
     g_fileExporters.push_back( exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exBMP = FileExporter::flatExporter("BMP (EasyBMP)", ".bmp", &writeBMP) );
+#if VOIDSPRITE_JXL_ENABLED
+    FileExporter* exJXL;
+    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB));
+#endif
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
     g_fileExporters.push_back( exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM (EasyBMP)", ".pbm", &writeCaveStoryPBM) );
     g_fileExporters.push_back( exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -315,17 +318,13 @@ inline void g_setupIO() {
     g_fileExporters.push_back( exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exVTF = FileExporter::flatExporter("VTF", ".vtf", &writeVTF, FORMAT_RGB) );
     g_fileExporters.push_back( exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exDIBv5 = FileExporter::flatExporter("DIBv5 Clipboard Dump", ".dibv5", &writeDIBV5, FORMAT_RGB) );
     g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
     g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
 
-#if VOIDSPRITE_JXL_ENABLED
-    FileExporter* exJXL;
-    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL (libjxl)", ".jxl", &writeJpegXL, FORMAT_RGB));
-    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL (libjxl)", ".jxl", &readJpegXL, exJXL));
-#endif
 
     voidsnExporter = exVOIDSNv5;
 
@@ -364,6 +363,9 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("PNG (libpng)", ".png", &readPNG, exPNG));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP (EasyBMP)", ".bmp", &readBMP, exBMP));
     //g_fileImporters.push_back(FileImporter::flatImporter("GIF", ".gif", &readGIF, NULL));
+#if VOIDSPRITE_JXL_ENABLED
+    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL (libjxl)", ".jxl", &readJpegXL, exJXL));
+#endif
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM (EasyBMP)", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);
@@ -394,6 +396,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Windows Shell Scrap SHS", ".shs", &readWinSHS, NULL, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("DIBv5 Clipboard Dump", ".dibv5", &readDIBV5, exDIBv5, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {
             FILE* f = platformOpenFile(path, PlatformFileModeRB);

@@ -6,7 +6,15 @@
 
 void UIButton::render(XY pos)
 {
+	lastPositionOnScreen = pos;
+
 	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
+
+	if (pos.y >= g_windowH || pos.x >= g_windowW
+		|| (pos.y+wxHeight) < 0 || (pos.x+wxWidth) < 0) {
+		return;
+	}
+
 	//SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
 	SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
 	//SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
@@ -46,17 +54,55 @@ void UIButton::focusIn()
 	
 }
 
+void UIButton::focusOut()
+{
+	touchHoldingDown = false;
+}
+
 void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 {
-	if (evt.type == SDL_MOUSEBUTTONDOWN) {
-		XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
-		if (evt.button.down && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
-			if (evt.button.button == 1) {
-				click();
-			} else if (evt.button.button == 3) {
-				rightClick();
+	switch (evt.type) {
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		{
+			XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
+			if (evt.button.down && pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
+				if (evt.button.button == 1) {
+					click();
+				}
+				else if (evt.button.button == 3) {
+					rightClick();
+				}
 			}
 		}
+			break;
+		case SDL_EVENT_FINGER_DOWN:
+		{
+			XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+			if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+				touchHoldDownPos = touchPosition;
+				touchHoldingDown = true;
+			}
+		}
+			break;
+		case SDL_EVENT_FINGER_UP:
+		{
+			if (touchHoldingDown) {
+				touchHoldingDown = false;
+				XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+				if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+					click();
+				}
+			}
+		}
+			break;
+		case SDL_EVENT_FINGER_MOTION:
+			if (touchHoldingDown) {
+				XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
+				if (xyDistance(touchPosition, touchHoldDownPos) > 20) {
+					touchHoldingDown = false;
+				}
+			}
+			break;
 	}
 }
 
@@ -75,7 +121,7 @@ void UIButton::renderAnimations(XY pos)
 		}
 	}
 
-	if (hovered) {
+	if (hovered || touchHoldingDown) {
 		renderGradient(drawrect, 0x10FFFFFF, 0x10FFFFFF, 0x40D3F4FF, 0x40D3F4FF);
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
 		SDL_RenderDrawRect(g_rd, &drawrect);
@@ -95,6 +141,7 @@ void UIButton::renderTooltip(XY pos)
 void UIButton::click()
 {
 	lastClick.start();
+	g_newVFX(VFX_BUTTONPULSE, 700, 0x80FFFFFF, { lastPositionOnScreen.x, lastPositionOnScreen.y, wxWidth, wxHeight });
     if (onClickCallback != NULL) {
         onClickCallback(this);
     } 

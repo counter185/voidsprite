@@ -21,7 +21,8 @@ public:
 	void drawCanvasOutline(int shades = 1, SDL_Color c = { 255,255,255,255 });
 	SDL_Rect getCanvasOnScreenRect();
 	void drawTileGrid(XY tileSize);
-	void zoom(int how_much);
+	void zoom(int how_much, XY around);
+	void zoom(int how_much) { zoom(how_much, { g_mouseX, g_mouseY }); }
 	void panCanvas(XY by);
 	void recenter(XY windowDimensions = {-1,-1});
 

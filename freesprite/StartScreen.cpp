@@ -8,6 +8,8 @@
 #include "ScreenNonogramPlayer.h"
 #include "LayerPalettized.h"
 
+#include "PopupFilePicker.h"
+
 void StartScreen::tick() {
     if (closeNextTick) {
         g_closeScreen(this);
@@ -22,7 +24,7 @@ void StartScreen::render()
     SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
     g_fnt->RenderString(std::format("alpha@{}", __DATE__), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
-    SDL_Rect bgr = SDL_Rect{ 0, 35, 560, 300 };
+    SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
     SDL_Color colorBG1 = { 0x30, 0x30, 0x30, 0xa0};
     SDL_Color colorBG2 = { 0x20, 0x20, 0x20, 0xa0};
     SDL_Color colorBG3 = { 0x10, 0x10, 0x10, 0xa0 };
@@ -40,6 +42,8 @@ void StartScreen::render()
 
     wxsManager.renderAll();
 
+    renderFileDropAnim();
+
     renderStartupAnim();
 }
 
@@ -55,14 +59,28 @@ void StartScreen::takeInput(SDL_Event evt)
     LALT_TO_SUMMON_NAVBAR;
 
     if (evt.type == SDL_DROPFILE) {
+        droppingFile = false;
         std::string filePath = evt.drop.data;
         if (stringEndsWithIgnoreCase(filePath, ".zlib")) {
             unZlibFile(convertStringOnWin32(filePath));
+        }
+        else if (stringEndsWithIgnoreCase(filePath, ".unzlib")) {
+            zlibFile(convertStringOnWin32(filePath));
         }
         else {
             tryLoadFile(filePath);
         }
         return;
+    }
+    else if (evt.type == SDL_EVENT_DROP_BEGIN) {
+        fileDropTimer.start();
+        droppingFile = true;
+    }
+    else if (evt.type == SDL_EVENT_DROP_COMPLETE) {
+        droppingFile = false;
+    }
+    else if (evt.type == SDL_EVENT_DROP_POSITION) {
+        fileDropXY = { (int)evt.drop.x, (int)evt.drop.y };
     }
 
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
@@ -89,6 +107,11 @@ void StartScreen::takeInput(SDL_Event evt)
                 else if (evt.key.scancode == SDL_SCANCODE_N && g_ctrlModifier) {
                     ScreenNonogramPlayer::StartDebugGame();
                 }
+#if _DEBUG
+                else if (evt.key.scancode == SDL_SCANCODE_INSERT && g_ctrlModifier && g_shiftModifier) {
+                    throw std::exception("** user-initiated test crash");
+                }
+#endif
                 break;
         }
     }
@@ -111,7 +134,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -136,7 +159,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -163,7 +186,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -189,7 +212,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
-                catch (std::out_of_range) {
+                catch (std::out_of_range&) {
                     g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
                 }
             }
@@ -216,21 +239,33 @@ void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int 
 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
-    importerIndex--;
-    FileImporter* importer = g_fileImporters[importerIndex];
-    void* importedData = importer->importData(name);
-    if (importedData != NULL) {
-        if (!importer->importsWholeSession()) {
-            Layer* nlayer = (Layer*)importedData;
-            g_addScreen(!nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer));
+    if (importerIndex == -1) {
+        tryLoadFile(convertStringToUTF8OnWin32(name));
+    } else {
+        importerIndex--;
+        FileImporter* importer = g_fileImporters[importerIndex];
+        void* importedData = importer->importData(name);
+        if (importedData != NULL) {
+            MainEditor* outSession = NULL;
+            if (!importer->importsWholeSession()) {
+                Layer* nlayer = (Layer*)importedData;
+                outSession = !nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer);
+            }
+            else {
+                outSession = (MainEditor*)importedData;
+            }
+
+            if (importer->getCorrespondingExporter() != NULL) {
+                outSession->lastWasSaveAs = false;
+                outSession->lastConfirmedSave = true;
+                outSession->lastConfirmedSavePath = name;
+                outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
+            }
+            g_addScreen(outSession);
         }
         else {
-            MainEditor* session = (MainEditor*)importedData;
-            g_addScreen(session);
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         }
-    }
-    else {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
     }
 }
 
@@ -258,8 +293,7 @@ void StartScreen::populateLastOpenFiles()
 {
     lastOpenFilesPanel->subWidgets.freeAllDrawables();
 
-    UILabel* lbl = new UILabel();
-    lbl->text = TL("vsp.launchpad.lastfiles");
+    UILabel* lbl = new UILabel(TL("vsp.launchpad.lastfiles"));
     lbl->fontsize = 22;
     lbl->position = {5, 2};
     lastOpenFilesPanel->subWidgets.addDrawable(lbl);
@@ -323,11 +357,51 @@ void StartScreen::renderStartupAnim()
     }
 }
 
+void StartScreen::renderFileDropAnim()
+{
+    if (droppingFile) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0 * fileDropTimer.percentElapsedTime(200));
+        SDL_Rect r = { 0,0,g_windowW,g_windowH };
+        SDL_RenderFillRect(g_rd, &r);
+
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
+        SDL_Rect r2 = { 0,0, g_windowW, (g_windowH / 6) * XM1PW3P1(fileDropTimer.percentElapsedTime(1500)) };
+        SDL_RenderFillRect(g_rd, &r2);
+        r2.y = g_windowH - r2.h;
+        SDL_RenderFillRect(g_rd, &r2);
+
+        g_fnt->RenderString("Drop an image here to open it in a new workspace...", 50, 50, { 255,255,255,(u8)(255 * fileDropTimer.percentElapsedTime(200)) }, 22);
+
+        if (g_config.vfxEnabled) {
+            for (int x = 0; x < 3; x++) {
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, (255 / (x + 1)) * fileDropTimer.percentLoopingTime(2000, x * 700));
+                XY origin = fileDropXY;
+                SDL_Rect r3 = offsetRect({ origin.x, origin.y,1,1 }, ixpow(4, x + 1) * XM1PW3P1(fileDropTimer.percentLoopingTime(1000)));
+                SDL_RenderDrawRect(g_rd, &r3);
+            }
+
+
+            double tick1 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500));
+            double tick2 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500, 700));
+            double tick3 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500, 700));
+            double tick4 = 1.0 - XM1PW3P1(fileDropTimer.percentLoopingTime(1500));
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255 * tick1);
+            drawLine(xyAdd(fileDropXY, { -60,-60 }), xyAdd(fileDropXY, { -20,-20 }), tick1);
+            drawLine(xyAdd(fileDropXY, { -60, 60 }), xyAdd(fileDropXY, { -20, 20 }), tick1);
+            drawLine(xyAdd(fileDropXY, { 60,-60 }), xyAdd(fileDropXY, { 20,-20 }), tick1);
+            drawLine(xyAdd(fileDropXY, { 60, 60 }), xyAdd(fileDropXY, { 20, 20 }), tick1);
+
+        }
+    }
+}
+
 void StartScreen::renderBackground()
 {
-    uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
-    renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+    static Fill backgroundFill = visualConfigFill("launchpad/bg");
+    backgroundFill.fill({ 0,0,g_windowW,g_windowH });
+    //uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    //uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    //renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
     struct StartScreenEffect {
         int type;
@@ -348,6 +422,8 @@ void StartScreen::renderBackground()
         effects.push_back(e);
     }
 
+    static SDL_Color vfxColor = visualConfigColor("launchpad/effects_color");
+
     for (int x = 0; x < effects.size(); x++) {
         bool remove = false;
         XY normPosition = { g_windowW * (effects[x].pos.x / 960.0), g_windowH * (effects[x].pos.y / 960.0) };
@@ -357,7 +433,7 @@ void StartScreen::renderBackground()
                 //long 2s line
                 remove = effects[x].timer.percentElapsedTime(2000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 120) / 960.0), g_windowH * ((effects[x].pos.y - 120) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30 * (1.0 - effects[x].timer.percentElapsedTime(2000)));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x30 * (1.0 - effects[x].timer.percentElapsedTime(2000)));
                 drawLine(normPosition, normPosition2, 1.0);
             }
             break;
@@ -366,7 +442,7 @@ void StartScreen::renderBackground()
                 //long 0.7s trail
                 remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 500) / 960.0), g_windowH * ((effects[x].pos.y - 500) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30 - 0x20 * effects[x].timer.percentElapsedTime(700));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x30 - 0x20 * effects[x].timer.percentElapsedTime(700));
                 drawLine(normPosition, normPosition2, 1.0-XM1PW3P1(effects[x].timer.percentElapsedTime(700)));
             }
                 break;
@@ -375,7 +451,7 @@ void StartScreen::renderBackground()
                 //short 3s line
                 remove = effects[x].timer.percentElapsedTime(3000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 40) / 960.0), g_windowH * ((effects[x].pos.y - 40) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(3000)));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(3000)));
                 drawLine(normPosition, normPosition2, 1.0);
             }
                 break;
@@ -384,7 +460,7 @@ void StartScreen::renderBackground()
                 //mid length 2.5s line
                 remove = effects[x].timer.percentElapsedTime(2500) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 90) / 960.0), g_windowH * ((effects[x].pos.y - 90) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(2500)));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(2500)));
                 drawLine(normPosition, normPosition2, 1.0);
             }
                 break;
@@ -394,7 +470,7 @@ void StartScreen::renderBackground()
                 remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 15) / 960.0) };
                 XY normPosition3 = { g_windowW * ((effects[x].pos.x - 15) / 960.0), g_windowH * ((effects[x].pos.y + 15) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50 - 0x50 * effects[x].timer.percentElapsedTime(1000));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x50 - 0x50 * effects[x].timer.percentElapsedTime(1000));
                 drawLine(normPosition, normPosition2, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
                 drawLine(normPosition, normPosition3, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
             }
@@ -407,7 +483,7 @@ void StartScreen::renderBackground()
                 XY posRight = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y) / 960.0) };
                 XY posUp = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 12) / 960.0) };
                 XY posDown = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y + 12) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x24 - 0x24 * effects[x].timer.percentElapsedTime(600));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x24 - 0x24 * effects[x].timer.percentElapsedTime(600));
                 drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
                 drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
                 drawLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
@@ -422,7 +498,7 @@ void StartScreen::renderBackground()
                 XY posRight = { g_windowW * ((effects[x].pos.x + 60) / 960.0), g_windowH * ((effects[x].pos.y) / 960.0) };
                 XY posUp = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y - 24) / 960.0) };
                 XY posDown = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y + 24) / 960.0) };
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19 - 0x19 * effects[x].timer.percentElapsedTime(1300));
+                SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x19 - 0x19 * effects[x].timer.percentElapsedTime(1300));
                 drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
                 drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
                 drawLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
@@ -458,23 +534,27 @@ void StartScreen::renderBackground()
     int xOrigin = g_windowW - 10;
     int yOrigin = 40;
 
+    static SDL_Color hourColor = visualConfigColor("launchpad/hours_color");
+    static SDL_Color minuteColor = visualConfigColor("launchpad/minutes_color");
+    static SDL_Color secondColor = visualConfigColor("launchpad/seconds_color");
+
     //draw hour lines
     double sep = (g_windowH - (60 + yOrigin)) / (23.0);
     for (int x = 0; x < 24; x++) {
         XY lineP1 = { xOrigin, yOrigin + x * sep };
         XY lineP2 = { xOrigin - g_windowW/32, yOrigin + x * sep };
 
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
+        SDL_SetRenderDrawColor(g_rd, hourColor.r, hourColor.g, hourColor.b, 0x20);
         drawLine(lineP1, lineP2, 1.0);
 
         if (x == hourNow) {
             //progress line
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x42);
+            SDL_SetRenderDrawColor(g_rd, hourColor.r, hourColor.g, hourColor.b, 0x42);
             drawLine(lineP1, lineP2, (minuteNow / 60.0));
         }
         
         else if (x < hourNow) {
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x29);
+            SDL_SetRenderDrawColor(g_rd, hourColor.r, hourColor.g, hourColor.b, 0x29);
             drawLine(lineP1, lineP2, 1.0);
         }
     }
@@ -493,16 +573,16 @@ void StartScreen::renderBackground()
             lineP2 = t;
         }
 
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x1A);
+        SDL_SetRenderDrawColor(g_rd, minuteColor.r, minuteColor.g, minuteColor.b, 0x1A);
         drawLine(lineP1, lineP2, 1.0);
 
         if (x == minuteNow) {
             //progress line
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x39);
+            SDL_SetRenderDrawColor(g_rd, minuteColor.r, minuteColor.g, minuteColor.b, 0x39);
             drawLine(lineP1, lineP2, (secondNow / 60.0));
         }
         else if (x < minuteNow) {
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
+            SDL_SetRenderDrawColor(g_rd, minuteColor.r, minuteColor.g, minuteColor.b, 0x20);
             drawLine(lineP1, lineP2, 1.0);
         }
     }
@@ -521,16 +601,16 @@ void StartScreen::renderBackground()
             lineP2 = t;
         }
 
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x13);
+        SDL_SetRenderDrawColor(g_rd, secondColor.r, secondColor.g, secondColor.b, 0x13);
         drawLine(lineP1, lineP2, 1.0);
 
         if (x == secondNow) {
             //progress line
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x2F);
+            SDL_SetRenderDrawColor(g_rd, secondColor.r, secondColor.g, secondColor.b, 0x2F);
             drawLine(lineP1, lineP2, XM1PW3P1(msNow / 1000.0));
         }
         else if (x < secondNow) {
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x1A);
+            SDL_SetRenderDrawColor(g_rd, secondColor.r, secondColor.g, secondColor.b, 0x1A);
             drawLine(lineP1, lineP2, 1.0);
         }
     }

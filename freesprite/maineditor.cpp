@@ -3,6 +3,7 @@
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
+#include "EditorTouchToggle.h"
 #include "CollapsableDraggablePanel.h"
 #include "ScreenWideNavBar.h"
 #include "ScreenWideActionBar.h"
@@ -33,6 +34,7 @@
 #include "PopupGlobalConfig.h"
 #include "PopupPickColor.h"
 #include "PopupApplyFilter.h"
+#include "PopupExportScaled.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -221,16 +223,7 @@ void MainEditor::render() {
 
     if (currentBrush != NULL) {
         currentBrush->renderOnCanvas(this, canvas.scale);
-    }
-
-    /*if (spritesheetPreview != NULL) {
-        spritesheetPreview->previewWx->render(XY{ 0,0 });
-    }*/
-
-    //g_fnt->RenderString(std::string("Scale: ") + std::to_string(scale), 0, 20);
-    //g_fnt->RenderString(std::string("MousePixelPoint: ") + std::to_string(mousePixelTargetPoint.x) + std::string(":") + std::to_string(mousePixelTargetPoint.y), 0, 50);
-
-    
+    }    
 
     if (wxsManager.anyFocused() && navbar->focused) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
@@ -257,7 +250,6 @@ void MainEditor::render() {
         SDL_RenderFillRect(g_rd, &patternRect);
         SDL_RenderCopy(g_rd, currentPattern->cachedIcon, NULL, &patternRect);
     }
-    renderColorPickerAnim();
 }
 
 void MainEditor::tick() {
@@ -314,9 +306,12 @@ void MainEditor::tick() {
 
 void MainEditor::DrawBackground()
 {
-    uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
-    renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+    static Fill fillPrimary = visualConfigFill("maineditor/bg");
+    static Fill fillAlt = visualConfigFill("maineditor/bg_alt");
+    //uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    //uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    //renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+    (usingAltBG() ? fillAlt : fillPrimary).fill({ 0,0,g_windowW,g_windowH });
 
     uint64_t bgtimer = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
     if (g_config.animatedBackground == 1 || g_config.animatedBackground == 3) {
@@ -598,6 +593,27 @@ void MainEditor::drawRowColNumbers()
     }
 }
 
+void MainEditor::inputMouseRight(XY at, bool down)
+{
+    RecalcMousePixelTargetPoint(at.x, at.y);
+    if (currentBrush != NULL && currentBrush->overrideRightClick()) {
+        if (down) {
+            currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+        }
+        else {
+            currentBrush->rightClickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+        }
+    }
+    else {
+        if (down) {
+            bool pickFromWholeImage = !g_ctrlModifier;
+            setActiveColor(!pickFromWholeImage ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint)
+                : pickColorFromAllLayers(mousePixelTargetPoint));
+            playColorPickerVFX(pickFromWholeImage);
+        }
+    }
+}
+
 void MainEditor::DrawForeground()
 {
     drawBottomBar();
@@ -611,7 +627,8 @@ void MainEditor::DrawForeground()
     }
 
     if (currentBrush != NULL) {
-        g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? "(Erase)" : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        static std::string eraserModeText = TL("vsp.maineditor.erasermode");
+        g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
     if (currentPattern != NULL) {
@@ -679,41 +696,6 @@ void MainEditor::renderUndoStack()
     SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
 }
 
-void MainEditor::renderColorPickerAnim()
-{
-    if (colorPickTimer.started && colorPickTimer.percentElapsedTime(500) <= 1.0f) {
-        float progress = colorPickTimer.percentElapsedTime(500);
-        int pxDistance = 40 * (lastColorPickWasFromWholeImage ? XM1PW3P1(progress) : (1.0 - XM1PW3P1(progress)));
-
-        SDL_Rect colRect2 = { g_mouseX, g_mouseY, 1,1 };
-        int pxDistance2 = pxDistance + 1;
-        colRect2.x -= pxDistance2;
-        colRect2.w = pxDistance2 * 2;
-        colRect2.y -= pxDistance2;
-        colRect2.h = pxDistance2 * 2;
-
-        //SDL_SetRenderDrawColor(g_rd, 255,255,255, (uint8_t)(127 * XM1PW3P1(1.0f - progress)));
-        //SDL_RenderDrawRect(g_rd, &colRect2);
-
-        for (int x = 3; x >= 1; x--) {
-            SDL_Rect colRect = { g_mouseX, g_mouseY, 1,1 };
-            int nowPxDistance = pxDistance / x;
-            colRect.x -= nowPxDistance;
-            colRect.w = nowPxDistance * 2;
-            colRect.y -= nowPxDistance;
-            colRect.h = nowPxDistance * 2;
-            hsv thsv = rgb2hsv(rgb{ ((pickedColor >> 16) & 0xff) / 255.0f, ((pickedColor >> 8) & 0xff) / 255.0f, (pickedColor & 0xff) / 255.0f });
-            thsv.s /= 3;
-            thsv.v += 0.4;
-            thsv.v = dxmin(1.0, thsv.v);
-            rgb trgb = hsv2rgb(thsv);
-            SDL_Color trgbColor = SDL_Color{ (uint8_t)(trgb.r * 255.0), (uint8_t)(trgb.g * 255.0), (uint8_t)(trgb.b * 255.0), 255 };
-            SDL_SetRenderDrawColor(g_rd, trgbColor.r, trgbColor.g, trgbColor.b, (uint8_t)(255 * XM1PW3P1(1.0f - progress)));
-            SDL_RenderDrawRect(g_rd, &colRect);
-        }
-    }
-}
-
 void MainEditor::initLayers()
 {
     for (Layer*& l : layers) {
@@ -729,8 +711,8 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_F,
             {
-                TL("vsp.maineditor.file"),
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_C},
+                TL("vsp.nav.file"),
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [](MainEditor* editor) {
@@ -738,9 +720,17 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { TL("vsp.maineditor.save"),
+                    {SDL_SCANCODE_S, { TL("vsp.nav.save"),
                             [](MainEditor* editor) {
                                 editor->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
+                            [](MainEditor* editor) {
+                                PopupExportScaled* popup = new PopupExportScaled(editor);
+                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, editor);
+                                g_addPopup(popup);
                             }
                         }
                     },
@@ -765,7 +755,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { TL("vsp.maineditor.close"),
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyImageToClipboard();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_X, { TL("vsp.cmn.close"),
                             [](MainEditor* editor) {
                                 editor->requestSafeClose();
                             }
@@ -813,7 +809,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Resize canvas", "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
+                                g_addPopup(new PopupTileGeneric(editor, TL("vsp.maineditor.rescanv"), "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
@@ -826,7 +822,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
                                     g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile size", "New tile size:", XY{ editor->tileDimensions.x, editor->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
@@ -837,7 +833,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
                                     g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->canvas.dimensions.x / (float)editor->tileDimensions.x), (int)ceil(editor->canvas.dimensions.y / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
@@ -847,13 +843,13 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupIntegerScale(editor, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(editor, TL("vsp.maineditor.intscale"), "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.canvscale"),
                             [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, "Scale canvas", "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
+                                g_addPopup(new PopupTileGeneric(editor, TL("vsp.maineditor.canvscale"), "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
@@ -916,7 +912,19 @@ void MainEditor::setUpWidgets()
                                 g_addPopup(newPopup);
                             }
                         }
-                    }
+                    },
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
+                            [](MainEditor* editor) {
+                                editor->copyLayerToClipboard(editor->getCurrentLayer());
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
+                            [](MainEditor* editor) {
+                                editor->layer_clearSelectedArea();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabLayer
             }
@@ -924,7 +932,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_Q,
             {
-                "Filters",
+                TL("vsp.maineditor.tab.filters"),
                 {},
                 {
                 },
@@ -934,7 +942,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_R,
             {
-                "Render",
+                TL("vsp.maineditor.tab.render"),
                 {},
                 {
                 },
@@ -944,7 +952,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_V,
             {
-                "View",
+                TL("vsp.maineditor.tab.view"),
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
@@ -983,7 +991,7 @@ void MainEditor::setUpWidgets()
                             [](MainEditor* editor) {
                                 //if (editor->spritesheetPreview == NULL) {
                                     if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                         return;
                                     }
                                     SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
@@ -991,7 +999,7 @@ void MainEditor::setUpWidgets()
                                     //editor->spritesheetPreview = newScreen;
                                 //}
                                 //else {
-                                //    g_addNotification(ErrorNotification("Error", "Spritesheet preview is already open."));
+                                //    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Spritesheet preview is already open."));
                                 //}
                             }
                         }
@@ -999,7 +1007,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_T, { "Open tileset preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                     return;
                                 }
                                 TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
@@ -1011,7 +1019,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [](MainEditor* editor) {
                                 if (!xyEqual(editor->canvas.dimensions, {480, 256})) {
-                                    g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions must be 480x256"));
                                     return;
                                 }
                                 RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
@@ -1023,7 +1031,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_N, { "Open cube preview...",
                             [](MainEditor* editor) {
                                 if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile grid must be set"));
                                     return;
                                 }
                                 MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
@@ -1031,11 +1039,21 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_P, { "Open touch mode panel...",
+                            [](MainEditor* editor) {
+                                if (editor->touchModePanel == NULL) {
+                                    editor->touchModePanel = new EditorTouchToggle(editor);
+                                    editor->touchModePanel->position = { g_windowW - editor->touchModePanel->wxWidth - 10, g_windowH - editor->touchModePanel->wxHeight - 40 };
+                                    editor->addWidget(editor->touchModePanel);
+                                }
+                            }
+                        }
+                    },
     #if _DEBUG
                     {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
                             [](MainEditor* editor) {
                                 if (editor->canvas.dimensions.x != editor->canvas.dimensions.y && editor->canvas.dimensions.x / 2 != editor->canvas.dimensions.y) {
-                                    g_addNotification(ErrorNotification("Error", "Invalid size. Aspect must be 1:1 or 2:1."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
                                     return;
                                 }
                                 MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(editor);
@@ -1083,7 +1101,7 @@ void MainEditor::setUpWidgets()
     }
 
     colorPicker = new EditorColorPicker(this);
-    CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
+    CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.colorpicker.title"), colorPicker);
     colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
@@ -1091,7 +1109,7 @@ void MainEditor::setUpWidgets()
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
+    CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.brushpicker.title"), brushPicker);
     brushPickerPanel->position.y = 454;
     brushPickerPanel->position.x = 10;
     wxsManager.addDrawable(brushPickerPanel);
@@ -1118,7 +1136,7 @@ void MainEditor::makeActionBar()
     actionbar->position = { 0, navbar->wxHeight };
 
     int nextNavbarX = 5;
-    UIButton* undoButton = new UIButton("", "Undo");
+    UIButton* undoButton = new UIButton("", TL("vsp.maineditor.undo"));
     undoButton->icon = g_iconActionBarUndo;
     undoButton->onClickCallback = [this](UIButton* btn) { undo(); };
     undoButton->position = { nextNavbarX,0 };
@@ -1127,13 +1145,40 @@ void MainEditor::makeActionBar()
     actionbar->addDrawable(undoButton);
     nextNavbarX += 35;
 
-    UIButton* redoButton = new UIButton("", "Redo");
+    UIButton* redoButton = new UIButton("", TL("vsp.maineditor.redo"));
     redoButton->icon = g_iconActionBarRedo;
     redoButton->onClickCallback = [this](UIButton* btn) { redo(); };
     redoButton->position = { nextNavbarX,0 };
     redoButton->wxWidth = 30;
     redoButton->wxHeight = 30;
     actionbar->addDrawable(redoButton);
+    nextNavbarX += 35;
+
+    UIButton* saveButton = new UIButton("", TL("vsp.nav.save"));
+    saveButton->icon = g_iconActionBarSave;
+    saveButton->onClickCallback = [this](UIButton* btn) { if (g_shiftModifier) trySaveAsImage(); else trySaveImage(); };
+    saveButton->position = { nextNavbarX,0 };
+    saveButton->wxWidth = 30;
+    saveButton->wxHeight = 30;
+    actionbar->addDrawable(saveButton);
+    nextNavbarX += 35;
+
+    UIButton* zoomoutButton = new UIButton("", TL("vsp.cmn.zoomout"));
+    zoomoutButton->icon = g_iconActionBarZoomOut;
+    zoomoutButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(-1, { g_windowW / 2, g_windowH / 2 }); };
+    zoomoutButton->position = { nextNavbarX,0 };
+    zoomoutButton->wxWidth = 30;
+    zoomoutButton->wxHeight = 30;
+    actionbar->addDrawable(zoomoutButton);
+    nextNavbarX += 35;
+
+    UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
+    zoominButton->icon = g_iconActionBarZoomIn;
+    zoominButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(1, {g_windowW/2, g_windowH/2}); };
+    zoominButton->position = { nextNavbarX,0 };
+    zoominButton->wxWidth = 30;
+    zoominButton->wxHeight = 30;
+    actionbar->addDrawable(zoominButton);
     nextNavbarX += 35;
 
     toolPropertiesPanel = new Panel();
@@ -1148,34 +1193,49 @@ void MainEditor::initToolParameters()
     toolPropertiesPanel->subWidgets.freeAllDrawables();
     int x = 0;
     if (currentBrush != NULL) {
-        for (auto& prop : currentBrush->getProperties()) {
-            UILabel* label = new UILabel(prop.second.name);
+        for (auto& [key, prop] : currentBrush->getProperties()) {
+            UILabel* label = new UILabel(prop.name);
             label->position = {x, 4};
             x += label->statSize().x + 20;
-
-            UILabel* valueLabel = new UILabel();
-            valueLabel->position = {x, 4};
-            valueLabel->color = { 255,255,255,0xa0 };
-            x += 40;
-
             toolPropertiesPanel->subWidgets.addDrawable(label);
-            toolPropertiesPanel->subWidgets.addDrawable(valueLabel);
 
-            switch (prop.second.type) {
+            UILabel* valueLabel = NULL;
+            if (prop.type != 3) {
+                valueLabel = new UILabel();
+                valueLabel->position = { x, 4 };
+                valueLabel->color = { 255,255,255,0xa0 };
+                x += 40;
+                toolPropertiesPanel->subWidgets.addDrawable(valueLabel);
+            }
+
+            switch (prop.type) {
                 case 1: //int
-                    UISlider* slider = new UISlider();
-                    slider->setValue(prop.second.min, prop.second.max, prop.second.defaultValue);
-                    valueLabel->text = std::to_string((int)slider->getValue(prop.second.min, prop.second.max));
-                    slider->wxHeight = 18;
-                    slider->wxWidth = 150;
-                    slider->position = { x, 8 };
-                    slider->onChangeValueCallback = [this, prop, valueLabel](UISlider* s, float) {
-                        int v = s->getValue(prop.second.min, prop.second.max);
-                        this->toolProperties[prop.first] = v;
-                        valueLabel->text = std::to_string(v);
-                    };
-                    toolPropertiesPanel->subWidgets.addDrawable(slider);
-                    x += 110;
+                    {
+                        UISlider* slider = new UISlider();
+                        slider->setValue(prop.min, prop.max, this->toolProperties[key]);
+                        valueLabel->setText(std::to_string((int)slider->getValue(prop.min, prop.max)));
+                        slider->wxHeight = 18;
+                        slider->wxWidth = 150;
+                        slider->position = { x, 8 };
+                        slider->onChangeValueCallback = [this, prop, key, valueLabel](UISlider* s, float) {
+                            int v = s->getValue(prop.min, prop.max);
+                            this->toolProperties[key] = v;
+                            valueLabel->setText(std::to_string(v));
+                            };
+                        toolPropertiesPanel->subWidgets.addDrawable(slider);
+                        x += 110;
+                    }
+                    break;
+                case 3: //bool
+                    {
+                        UICheckbox* chkbx = new UICheckbox("", this->toolProperties[key] == 1);
+						chkbx->position = { x, 3 };
+                        chkbx->onStateChangeCallback = [this, key, valueLabel](UICheckbox* c, bool state) {
+                            this->toolProperties[key] = state ? 1 : 0;
+                        };
+                        toolPropertiesPanel->subWidgets.addDrawable(chkbx);
+                        x += 60;
+                    }
                     break;
             }
         }
@@ -1190,6 +1250,9 @@ void MainEditor::addWidget(Drawable* wx)
 void MainEditor::removeWidget(Drawable* wx)
 {
     wxsManager.removeDrawable(wx);
+    if (wx == (Drawable*)touchModePanel) {
+        touchModePanel = NULL;
+    }
 }
 
 void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
@@ -1258,10 +1321,25 @@ void MainEditor::takeInput(SDL_Event evt) {
     }
 
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
+
+        switch (evt.type) {
+            case SDL_EVENT_FINGER_DOWN:
+            case SDL_EVENT_FINGER_UP:
+            case SDL_EVENT_FINGER_MOTION:
+                if (touchMode != TOUCHMODE_PAN) {
+                    evt = convertTouchToMouseEvent(evt);
+                    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN || evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+                        evt.button.button = touchMode == TOUCHMODE_LEFTCLICK ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
+                    }
+                }
+                break;
+
+        }
+
         switch (evt.type) {
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                if (evt.button.button == 1) {
+                if (evt.button.button == SDL_BUTTON_LEFT) {
                     if (middleMouseHold && evt.button.down) {
                         zoomKeyHeld = true;
                         zoomKeyTimer.start();
@@ -1270,6 +1348,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                     } else {
                         zoomKeyHeld = false;
                         RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
+                        if (evt.button.which != SDL_PEN_MOUSEID) {
+                            penPressure = 1.0f;
+                        }
                         if (currentBrush != NULL) {
                             if (evt.button.down) {
                                 if (!currentBrush->isReadOnly()) {
@@ -1290,30 +1371,25 @@ void MainEditor::takeInput(SDL_Event evt) {
                         leftMouseHold = evt.button.down;
                     }
                 }
-                else if (evt.button.button == 2) {
+                else if (evt.button.button == SDL_BUTTON_MIDDLE) {
                     middleMouseHold = evt.button.down;
                     zoomKeyHeld = false;
                 }
-                else if (evt.button.button == 3) {
-                    RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
-                    if (currentBrush != NULL && currentBrush->overrideRightClick()) {
-                        if (evt.button.down) {
-                            currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                        }
-                        else {
-                            currentBrush->rightClickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                        }
-                    }
-                    else {
-                        if (evt.button.down) {
-                            lastColorPickWasFromWholeImage = !g_ctrlModifier;
-                            setActiveColor(g_ctrlModifier ? getCurrentLayer()->getPixelAt(mousePixelTargetPoint) : pickColorFromAllLayers(mousePixelTargetPoint));
-                        }
-                    }
+                else if (evt.button.button == SDL_BUTTON_RIGHT) {
+                    inputMouseRight({ (int)evt.button.x, (int)evt.button.y }, evt.button.down);
                 }
                 break;
+#if __ANDROID__ 
+            //limiting this to android because on pc you can just rebind these buttons however you want
+            case SDL_EVENT_PEN_BUTTON_DOWN:
+            case SDL_EVENT_PEN_BUTTON_UP:
+                if (evt.pbutton.button == 1) {    //this should be the s-pen button
+                    //inputMouseRight({ (int)(evt.button.x * g_windowW), (int)(evt.button.y * g_windowH) }, evt.pbutton.down);
+                }
+                break;
+#endif
             case SDL_EVENT_PEN_MOTION:
-                //printf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
+                //logprintf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
             case SDL_EVENT_MOUSE_MOTION:
                 if (!penDown || evt.type != SDL_EVENT_MOUSE_MOTION) {
                     XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
@@ -1387,10 +1463,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                             // colorPicker->toggleEraser();
                             break;
                         case SDL_SCANCODE_DELETE:
-                            commitStateToCurrentLayer();
+                            layer_clearSelectedArea();
                             passthroughBrushKeybinds = false;
-                            getCurrentLayer()->clear(isolateEnabled ? &isolatedFragment : NULL);
-                            g_addNotification(Notification("Area cleared", "", 1000));
                             break;
                         case SDL_SCANCODE_RCTRL:
                             passthroughBrushKeybinds = false;
@@ -1422,6 +1496,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 }
                             }
                             break;
+                        case SDL_SCANCODE_C:
+                            copyLayerToClipboard(getCurrentLayer());
+                            break;
                         case SDL_SCANCODE_Q:
                             if (g_ctrlModifier) {
                                 if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
@@ -1446,7 +1523,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                             tileLockTimer.start();
                                         } else {
                                             g_addNotification(
-                                                ErrorNotification("Error", "Tile position out of bounds"));
+                                                ErrorNotification(TL("vsp.cmn.error"), "Tile position out of bounds"));
                                         }
                                     } else {
                                         lockedTilePreview = {0, 0};
@@ -1475,7 +1552,6 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_FINGERMOTION:
                 if (!penDown) {
                     XY rel = {evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH};
-                    // evt.tfinger.
                     canvas.panCanvas(rel);
                 }
                 break;
@@ -1483,19 +1559,32 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_PEN_UP:
                 penDown = evt.ptouch.down;
                 SDL_SetWindowMouseGrab(g_wd, penDown);
-                std::cout << "new pen state: " << penDown << "\n";
+                //loginfo(std::format("new pen state: {}", penDown));
+                break;
+            case SDL_EVENT_PEN_AXIS:
+                if (evt.paxis.axis == 0) {  //should always be the pressure axis
+					penPressure = evt.paxis.value;
+                }
                 break;
         }
     } else {
         leftMouseHold = false;
+        penDown = false;
     }
+}
+
+void MainEditor::layer_clearSelectedArea()
+{
+    commitStateToCurrentLayer();
+    getCurrentLayer()->clear(isolateEnabled ? &isolatedFragment : NULL);
+    g_addNotification(Notification("Area cleared", "", 1000));
 }
 
 void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)
 {
     if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
         exporterID--;
-        printf("eventFileSaved: got file name %ls\n", name.c_str());
+        logprintf("eventFileSaved: got file name %ls\n", name.c_str());
 
         bool result = false;
 
@@ -1537,15 +1626,15 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     g_addNotification(SuccessNotification("Success", "File exported successfully."));
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
                 }
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Failed to exported file."));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Invalid exporter"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid exporter"));
         }
     }
     else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
@@ -1573,7 +1662,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     }
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("Failed to export tile {}:{}", x,y)));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Failed to export tile {}:{}", x,y)));
                 }
             }
         }
@@ -1673,6 +1762,25 @@ void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
         });
 }
 
+void MainEditor::copyImageToClipboard()
+{
+    Layer* flat = flattenImage();
+    if (flat != NULL) {
+        copyLayerToClipboard(flat);
+        delete flat;
+    } 
+}
+
+void MainEditor::copyLayerToClipboard(Layer* l)
+{
+    if (platformPutImageInClipboard(l)) {
+        g_addNotification(SuccessNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardcopy")));
+    }
+}
+
 void MainEditor::trySaveImage()
 {
     bool result = false;
@@ -1736,7 +1844,7 @@ void MainEditor::trySaveAsImage()
         for (auto f : g_fileExporters) {
             formats.push_back({ f->extension(), f->name() });
         }
-        platformTrySaveOtherFile(this, formats, "save image", EVENT_MAINEDITOR_SAVEFILE);
+        platformTrySaveOtherFile(this, formats, TL("vsp.popup.saveimage"), EVENT_MAINEDITOR_SAVEFILE);
     }
 }
 
@@ -1752,6 +1860,7 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
     ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
     ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
     ret["CommentData"] = makeCommentDataString();
+    ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
     return ret;
 }
 
@@ -1767,6 +1876,7 @@ void MainEditor::loadSingleLayerExtdata(Layer* l) {
         if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
         if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
         if (kvmap.contains("CommentData")) { comments = parseCommentDataString(kvmap["CommentData"]); }
+        if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
     }
     catch (std::exception e) {}
 }
@@ -2070,7 +2180,7 @@ Layer* MainEditor::newLayer()
     if (nl != NULL) {
         nl->name = std::format("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        printf("adding new layer at %i\n", insertAtIdx);
+        logprintf("adding new layer at %i\n", insertAtIdx);
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -2109,17 +2219,19 @@ void MainEditor::regenerateLastColors()
     }
 }
 
-void MainEditor::setActiveColor(uint32_t col, bool animate)
+void MainEditor::setActiveColor(uint32_t col)
 {
     colorPicker->setMainEditorColorRGB(col);
-    if (animate) {
-        colorPickTimer.start();
-    }
 }
 
 uint32_t MainEditor::getActiveColor()
 {
     return pickedColor;
+}
+
+void MainEditor::playColorPickerVFX(bool inward)
+{
+    g_newVFX(VFX_COLORPICKER, 500, pickedColor, { g_mouseX, g_mouseY,-1,-1 }, { inward ? 1u : 0u });
 }
 
 void MainEditor::setActiveBrush(BaseBrush* b)
@@ -2171,6 +2283,16 @@ void MainEditor::tickAutosave()
             }
         }
     }
+}
+
+//todo: clean all of that up
+bool MainEditor::usingAltBG()
+{
+    return sdlcolorToUint32(backgroundColor) != 0xFF000000;
+}
+void MainEditor::setAltBG(bool useAltBG)
+{
+    backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
 }
 
 void MainEditor::moveLayerUp(int index) {
@@ -2244,7 +2366,7 @@ void MainEditor::layer_flipVertically()
 void MainEditor::layer_setOpacity(uint8_t opacity) {
     Layer* clayer = getCurrentLayer();
     addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_SET_OPACITY, clayer->lastConfirmedlayerAlpha, opacity });
-    //printf("added to undo stack: %i, %i\n", clayer->lastConfirmedlayerAlpha, opacity);
+    //logprintf("added to undo stack: %i, %i\n", clayer->lastConfirmedlayerAlpha, opacity);
     clayer->layerAlpha = opacity;
     clayer->lastConfirmedlayerAlpha = clayer->layerAlpha;
 }
@@ -2275,17 +2397,29 @@ void MainEditor::layer_setAllAlpha255()
 
 Layer* MainEditor::flattenImage()
 {
-    Layer* ret = new Layer(canvas.dimensions.x, canvas.dimensions.y);
-    int x = 0;
-    uint32_t* retppx = (uint32_t*)ret->pixelData;
-    for (Layer*& l : layers) {
-        if (l->hidden) {
-            continue;
-        }
-        uint32_t* ppx = (uint32_t*)l->pixelData;
-        if (x++ == 0) {
-            if (l->layerAlpha == 255) {
-                memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+    Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
+    if (ret != NULL) {
+        int x = 0;
+        uint32_t* retppx = (uint32_t*)ret->pixelData;
+        for (Layer*& l : layers) {
+            if (l->hidden) {
+                continue;
+            }
+            uint32_t* ppx = (uint32_t*)l->pixelData;
+            if (x++ == 0) {
+                if (l->layerAlpha == 255) {
+                    memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+                }
+                else {
+                    for (uint64_t p = 0; p < l->w * l->h; p++) {
+                        uint32_t pixel = ppx[p];
+                        uint8_t alpha = pixel >> 24;
+                        alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
+                        pixel = (pixel & 0x00ffffff) | (alpha << 24);
+
+                        retppx[p] = pixel;
+                    }
+                }
             }
             else {
                 for (uint64_t p = 0; p < l->w * l->h; p++) {
@@ -2294,25 +2428,18 @@ Layer* MainEditor::flattenImage()
                     alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
                     pixel = (pixel & 0x00ffffff) | (alpha << 24);
 
-                    retppx[p] = pixel;
+                    uint32_t srcPixel = retppx[p];
+                    uint8_t alpha2 = srcPixel >> 24;
+                    alpha2 = (uint8_t)((alpha2 / 255.0f) * (ret->layerAlpha / 255.0f) * 255);
+                    srcPixel = (srcPixel & 0x00ffffff) | (alpha2 << 24);
+
+                    retppx[p] = alphaBlend(srcPixel, pixel);
                 }
             }
         }
-        else {
-            for (uint64_t p = 0; p < l->w * l->h; p++) {
-                uint32_t pixel = ppx[p];
-                uint8_t alpha = pixel >> 24;
-                alpha = (uint8_t)((alpha / 255.0f) * (l->layerAlpha / 255.0f) * 255);
-                pixel = (pixel & 0x00ffffff) | (alpha << 24);
-
-                uint32_t srcPixel = retppx[p];
-                uint8_t alpha2 = srcPixel >> 24;
-                alpha2 = (uint8_t)((alpha2 / 255.0f) * (ret->layerAlpha / 255.0f) * 255);
-                srcPixel = (srcPixel & 0x00ffffff) | (alpha2 << 24);
-
-                retppx[p] = alphaBlend(srcPixel, pixel);
-            }
-        }
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
     }
     return ret;
 }
@@ -2337,7 +2464,7 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 
 void MainEditor::rescaleAllLayersFromCommand(XY size) {
     if (xyEqual(canvas.dimensions, size)) {
-        g_addNotification(ErrorNotification("Error", "Size must be different to rescale."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size must be different to rescale."));
         return;
     }
 
@@ -2368,13 +2495,13 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
     if (byTile) {
         if (xyEqual(tileDimensions, size)) {
-            g_addNotification(ErrorNotification("Error", "Tile size must be different to resize."));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile size must be different to resize."));
             return;
         }
     }
     else {
         if (xyEqual(canvas.dimensions, size)) {
-            g_addNotification(ErrorNotification("Error", "Size must be different to resize."));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size must be different to resize."));
             return;
         }
     }
@@ -2425,11 +2552,11 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
 {
     if (scale.x == 0 || scale.y == 0 || (scale.x == 1 && scale.y == 1)) {
-        g_addNotification(ErrorNotification("Error", "Invalid scale."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid scale."));
         return;
     }
     else if (downscale && (canvas.dimensions.x % scale.x != 0 || canvas.dimensions.y % scale.y != 0)) {
-        g_addNotification(ErrorNotification("Error", "Dimensions not divisible."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions not divisible."));
         return;
     }
 
@@ -2453,7 +2580,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
 MainEditorPalettized* MainEditor::toPalettizedSession()
 {
     if (isPalettized) {
-        g_addNotification(ErrorNotification("Error", "?????"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "?????"));
         return NULL;
     }
     else {
@@ -2492,7 +2619,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
             return ret;
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Too many colors in current session"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors in current session"));
             return NULL;
         }
     }
@@ -2517,7 +2644,7 @@ void MainEditor::exportTilesIndividually()
         platformTrySaveOtherFile(this, formats, "export tiles", EVENT_MAINEDITOR_EXPORTTILES);
     }
     else {
-        g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
     }
 }
 
@@ -2567,7 +2694,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
             return c;
         }
     }
-    printf("_removeComment NOT FOUND\n");
+    logprintf("_removeComment NOT FOUND\n");
     //shitass workaround tell noone thanks
     //@hirano185 hey girlie check this out!
     return { {0,0}, "\1" };
@@ -2591,7 +2718,7 @@ void MainEditor::layer_outline(bool wholeImage)
     Layer* l = getCurrentLayer();
     uint8_t* placePixelData = (uint8_t*)tracked_malloc(l->w * l->h);
     if (placePixelData == NULL) {
-        g_addNotification(ErrorNotification("Error", "malloc failed"));
+        g_addNotification(NOTIF_MALLOC_FAIL);
         return;
     }
     commitStateToCurrentLayer();

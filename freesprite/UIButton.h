@@ -7,6 +7,9 @@
 
 class UIButton : public Drawable
 {
+private:
+    bool touchHoldingDown = false;
+    XY touchHoldDownPos = { -1,-1 };
 public:
     std::string text;
     std::string tooltip;
@@ -23,6 +26,8 @@ public:
 
     Timer64 lastClick;
 
+    XY lastPositionOnScreen = { 0,0 };
+
     std::function<void(UIButton*)> onClickCallback = NULL;
     std::function<void(UIButton*)> onRightClickCallback = NULL;
 
@@ -37,8 +42,10 @@ public:
     }
     void render(XY pos) override;
     void focusIn() override;
+    void focusOut() override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
+    bool takesTouchEvents() override { return true; }
 
     void renderAnimations(XY pos);
     virtual void renderTooltip(XY pos);

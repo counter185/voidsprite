@@ -3,8 +3,7 @@
 
 UICheckbox::UICheckbox(std::string text)
 {
-	label = new UILabel();
-	label->text = text;
+	label = new UILabel(text);
 	label->position = { 35,0 };
 	subWidgets.addDrawable(label);
 }
@@ -35,7 +34,7 @@ void UICheckboxButton::render(XY pos) {
 	XY lineP2 = { r.x + r.w / 3, r.y + r.h / 5 * 4 };
 	XY lineP3 = { r.x + r.w, lineP2.y - ((r.x+r.w) - lineP2.x)};
 
-	double timer = XM1PW3P1(stateChangeTimer.percentElapsedTime(400));
+	double timer = clickedFlag ? XM1PW3P1(stateChangeTimer.percentElapsedTime(400)) : 1.0;
 	if (isChecked()) {
 		drawLine(lineP2, lineP1, timer);
 		drawLine(lineP2, lineP3, timer);
@@ -48,6 +47,7 @@ void UICheckboxButton::render(XY pos) {
 
 void UICheckboxButton::click()
 {
+    clickedFlag = true;
 	setChecked(!isChecked());
 	stateChangeTimer.start();
 	UIButton::click();

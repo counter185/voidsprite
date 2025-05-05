@@ -9,7 +9,7 @@ public:
     bool dragRightClick = false;
 
     std::string getName() override { return "Rotate rect"; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_rotrect.png"; }
+    std::string getIconPath() override { return "tool_rotrect.png"; }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }

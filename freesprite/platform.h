@@ -16,6 +16,15 @@ void platformPreInit();
 void platformInit();
 void platformPostInit();
 
+struct RootDirInfo {
+    std::string friendlyName;
+    PlatformNativePathString path;
+};
+
+std::string platformGetSystemInfo();
+
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs);
+
 void platformTrySaveImageFile(EventCallbackListener* caller);
 void platformTryLoadImageFile(EventCallbackListener* caller);
 void platformTrySaveOtherFile(EventCallbackListener* caller, std::vector<std::pair<std::string,std::string>> filetypes, std::string windowTitle, int evt_id);
@@ -23,9 +32,13 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
 void platformOpenFileLocation(PlatformNativePathString path);
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to);
 
+bool platformHasFileAccessPermissions();
+void platformRequestFileAccessPermissions();
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");
+std::vector<RootDirInfo> platformListRootDirectories();
 
+bool platformPutImageInClipboard(Layer* l);
 Layer* platformGetImageFromClipboard();
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);

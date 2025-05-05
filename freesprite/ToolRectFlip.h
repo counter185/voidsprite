@@ -10,7 +10,7 @@ public:
 
     std::string getName() override { return "Flip rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left to flip it horizontally.\nSelect an area with Mouse Right to flip it vertically."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_fliprect.png"; }
+    std::string getIconPath() override { return "tool_fliprect.png"; }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }
@@ -19,7 +19,7 @@ public:
     void clickRelease(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
     void rightClickRelease(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale);
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override;
 
     void doFlip(MainEditor* editor, XY startPos, XY endPos, bool yFlip);
 };

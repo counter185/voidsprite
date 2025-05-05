@@ -17,15 +17,15 @@ class ToolRectClone :
 
     std::string getName() override { return "Clone rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left.\nPaste it at a different location with Mouse Right."; }
-    std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/tool_cloner.png"; }
+    std::string getIconPath() override { return "tool_cloner.png"; }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }
     void clickPress(MainEditor* editor, XY pos) override;
     void clickRelease(MainEditor* editor, XY pos) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
-    bool isReadOnly() { return true; }
-    void renderOnCanvas(XY canvasDrawPoint, int scale) {
+    bool isReadOnly() override { return true; }
+    void renderOnCanvas(XY canvasDrawPoint, int scale) override {
         if (mouseDown) {
             drawPixelRect(mouseDownPoint, lastMouseMotionPos, canvasDrawPoint, scale);
         }

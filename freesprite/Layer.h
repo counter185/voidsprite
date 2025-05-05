@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "mathops.h"
+
 class Layer
 {
 protected:
@@ -281,7 +282,7 @@ public:
             undoQueue.push_back(copiedPixelData);
         }
         else {
-            printf("malloc FAILED we are FUCKED\n");
+            logprintf("malloc FAILED we are FUCKED\n");
         }
     }
     void undo() {

@@ -5,6 +5,8 @@
 #include "UILabel.h"
 #include "UIButton.h"
 
+#define CLOSE_ON_SDL_QUIT if(evt.type==SDL_EVENT_QUIT){closePopup();return;}
+
 class BasePopup :
     public BaseScreen
 {
@@ -13,8 +15,10 @@ public:
     Timer64 startTimer;
 
     virtual bool takesInput() { return true; }
+	bool takesTouchEvents() override { return true; }
 
     void takeInput(SDL_Event evt) override {
+        CLOSE_ON_SDL_QUIT;
         DrawableManager::processHoverEventInMultiple({ wxsManager }, evt, getPopupOrigin());
         if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt, getPopupOrigin())) {
             defaultInputAction(evt);
@@ -69,16 +73,16 @@ protected:
         }
     }
 
-    UIButton* actionButton(std::string text) {
+    UIButton* actionButton(std::string text, int width = 120) {
         if (!actionButtonXInit) {
-            nextActionButtonX = wxWidth - 130;
+            nextActionButtonX = wxWidth - (width + 10);
             actionButtonXInit = true;
         }
         UIButton* nbutton = new UIButton();
         nbutton->text = text;
         nbutton->position = XY{ nextActionButtonX, wxHeight - 40 };
-        nextActionButtonX -= 130;
-        nbutton->wxWidth = 120;
+        nextActionButtonX -= width + 10;
+        nbutton->wxWidth = width;
         wxsManager.addDrawable(nbutton);
         return nbutton;
     }

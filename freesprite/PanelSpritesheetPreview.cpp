@@ -10,14 +10,12 @@ PanelSpritesheetPreview::PanelSpritesheetPreview(SpritesheetPreviewScreen* calle
     wxWidth = 320;
     wxHeight = 200;
 
-    UILabel* titleLabel = new UILabel();
-    titleLabel->text = "Preview sprites";
+    UILabel* titleLabel = new UILabel("Preview sprites");
     titleLabel->position = { 5, 2 };
     subWidgets.addDrawable(titleLabel);
 
-	msPerSpriteLabel = new UILabel();
+	msPerSpriteLabel = new UILabel("MS per sprite");
     msPerSpriteLabel->position = { 5, 40 };
-	msPerSpriteLabel->text = "MS per sprite";
 	subWidgets.addDrawable(msPerSpriteLabel);
 
 	textfieldMSPerSprite = new UITextField();
@@ -44,9 +42,9 @@ void PanelSpritesheetPreview::render(XY position)
     //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     //SDL_RenderFillRect(g_rd, &r);
 
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
-    renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
+    u32 colorBG1 = PackRGBAtoARGB( 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 );
+    u32 colorBG2 = PackRGBAtoARGB( 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 );
+    renderGradient(r, colorBG2, colorBG1, colorBG1, colorBG1);
     if (focused) {
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
         drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
@@ -65,7 +63,7 @@ void PanelSpritesheetPreview::eventTextInput(int evt_id, std::string data)
             caller->msPerSprite = std::stoi(data);
             textfieldMSPerSprite->bgColor = { 0,0,0,0xff };
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             caller->msPerSprite = -1;
             textfieldMSPerSprite->bgColor = { 80,0,0,0xff };
         }

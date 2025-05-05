@@ -5,6 +5,8 @@
 #include "EventCallbackListener.h"
 #include "Notification.h"
 
+#include "platform_universal.h"
+
 //i hope i never have to use this language again
 constexpr const char* loadFileAppleScript =
 "set outfile to POSIX path of (choose file with prompt \\\"voidsprite: {}\\\" of type {})\n"
@@ -46,30 +48,18 @@ void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 }
 void platformInit() {}
 void platformPostInit() {
     g_addNotification(Notification("macOS Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
 }
 
+//todo
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
+
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
-
-int findIndexByExtension(
-    std::vector<std::pair<std::string, std::string>> &filetypes,
-    std::string filename) {
-    std::transform(filename.begin(), filename.end(), filename.begin(),
-                   ::tolower);
-    for (int x = 0; x < filetypes.size(); x++) {
-        auto &p = filetypes[x];
-        if (filename.size() > p.first.size()) {
-            if (filename.substr(filename.size() - p.first.size()) == p.first) {
-                return x + 1;
-            }
-        }
-    }
-    return -1;
-}
 
 void platformTrySaveOtherFile(
     EventCallbackListener *caller,
@@ -123,7 +113,7 @@ void platformTrySaveOtherFile(
                     g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
                 }
             }
-            catch (std::exception) {
+            catch (std::exception&) {
                 g_addNotification(ErrorNotification("macOS error", "Invalid file type"));
             }
         }
@@ -230,10 +220,31 @@ bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to
     }
 }
 
-Layer *platformGetImageFromClipboard() { return NULL; }
+bool platformPutImageInClipboard(Layer* l) {
+    return universal_platformPushLayerToClipboard(l);
+}
+
+Layer *platformGetImageFromClipboard() { return universal_platformGetLayerFromClipboard(); }
 
 FILE *platformOpenFile(PlatformNativePathString path,
                        PlatformNativePathString mode) {
     FILE *ret = fopen(path.c_str(), mode.c_str());
     return ret;
 }
+
+std::string platformGetSystemInfo() {
+    //todo
+    std::string ret = "";
+    ret += "macOS\n";
+    return ret;
+}
+
+//todo
+std::vector<RootDirInfo> platformListRootDirectories() {
+    return {{"",""}};
+}
+
+bool platformHasFileAccessPermissions() {
+    return true;
+}
+void platformRequestFileAccessPermissions() {}

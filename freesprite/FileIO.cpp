@@ -1,9 +1,6 @@
-//i know how this looks but do not touch this or else linux build will break again
+
 #if _WIN32
-#include "libpng/png.h"
 #include <windows.h>
-#else
-#include <libpng/png.h>
 #endif
 
 #include "libtga/tga.h"
@@ -14,7 +11,6 @@
 #include "astc_dec/astc_decomp.h"
 #include "base64/base64.hpp"
 #include "json/json.hpp"
-#include <jxl/version.h>
 
 #include "globals.h"
 #include "Notification.h"
@@ -72,11 +68,32 @@ std::string getAllLibsVersions() {
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
            "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
-    ret += "libpng: " PNG_LIBPNG_VER_STRING "\n";
+    ret += std::format("libpng: {}\n", getlibpngVersion());
     ret += "zlib: " ZLIB_VERSION "\n";
-    ret += "libjxl: " + std::to_string(JPEGXL_MAJOR_VERSION) + "." + std::to_string(JPEGXL_MINOR_VERSION) + 
-        "." + std::to_string(JPEGXL_PATCH_VERSION) + "\n";
+#if VOIDSPRITE_JXL_ENABLED
+    ret += std::format("libjxl: {}\n", getlibjxlVersion());
+#endif
     ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
+    return ret;
+}
+
+std::map<std::string, std::string> parseINI(PlatformNativePathString path)
+{
+    std::ifstream infile(path);
+    std::map<std::string, std::string> ret;
+    std::string line;
+    while (std::getline(infile, line)) {
+        if (line.empty() || line[0] == ';') continue;
+        size_t pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            if (value.size() >= 2 && value[0] == '\"' && value[value.size() - 1] == '\"') {
+                value = value.substr(1, value.size() - 2);
+            }
+            ret[key] = value;
+        }
+    }
     return ret;
 }
 
@@ -132,7 +149,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
                             bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
 
                             if (!success) {
-                                printf("ASTC decompression failed\n");
+                                logprintf("ASTC decompression failed\n");
                                 //astcErrors++;
                                 //return;
                             }
@@ -169,7 +186,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
     }
 
-    printf("[ASTC] at %lx / %lx\n", ftell(infile), fileLength); 
+    logprintf("[ASTC] at %lx / %lx\n", ftell(infile), fileLength); 
     return astcErrors;
 }
 
@@ -761,7 +778,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         }
         break;
     default:
-        printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+        logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
         break;
     }
     return ret;
@@ -780,7 +797,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
     strm.next_in = data;
     int ret2 = inflateInit(&strm);
     if (ret2 != Z_OK) {
-        printf("inflateInit failed\n");
+        logprintf("inflateInit failed\n");
         return ret;
     }
     u8 out[bufferSize];
@@ -790,7 +807,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         strm.next_out = out;
         ret2 = inflate(&strm, Z_NO_FLUSH);
         if (ret2 < 0) {
-            printf("inflate error\n");
+            logprintf("inflate error\n");
             break;
         }
         int nextDataSize = bufferSize - strm.avail_out;
@@ -800,7 +817,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         //ret.insert(ret.end(), out, out + nextDataSize);
     } while (ret2 != Z_STREAM_END);
     inflateEnd(&strm);
-    printf("total decompressed size: %lli\n", totalSize);
+    logprintf("total decompressed size: %lli\n", totalSize);
     return ret;
 }
 
@@ -812,18 +829,18 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
     compressedData.resize(maxCompressedDataSize);
     int res = compress(compressedData.data(), (uLongf*)&compressedDataSize, data, dataSize);
     if (res != Z_OK) {
-		printf("compress failed\n");
-		return std::vector<u8>();
-	}
+        logprintf("compress failed\n");
+        return std::vector<u8>();
+    }
     compressedData.resize(compressedDataSize);
     return compressedData;
 }
 
-void unZlibFile(PlatformNativePathString path)
+void zlibFile(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile == NULL) {
-        g_addNotification(ErrorNotification("Error", "Failed to open file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         return;
     }
     fseek(infile, 0, SEEK_END);
@@ -832,34 +849,45 @@ void unZlibFile(PlatformNativePathString path)
     u8* fileBuffer = (u8*)tracked_malloc(fileLength);
     fread(fileBuffer, fileLength, 1, infile);
     fclose(infile);
+
+    std::vector<u8> compressedData = compressZlib(fileBuffer, fileLength);
+
+    FILE* outfile = platformOpenFile(path + convertStringOnWin32(".zlib"), PlatformFileModeWB);
+    fwrite(compressedData.data(), compressedData.size(), 1, outfile);
+    fclose(outfile);
+    tracked_free(fileBuffer);
+    if (compressedData.size() == 0) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to compress zlib file"));
+    }
+    else {
+        g_addNotification(SuccessNotification("Success", "Zlib file compressed"));
+    }
+}
+
+void unZlibFile(PlatformNativePathString path)
+{
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile == NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+        return;
+    }
+    fseek(infile, 0, SEEK_END);
+    uint64_t fileLength = ftell(infile);
+    fseek(infile, 0, SEEK_SET);
+    u8* fileBuffer = (u8*)tracked_malloc(fileLength);
+    fread(fileBuffer, fileLength, 1, infile);
+    fclose(infile);
+
     std::vector<u8> decompressedData = decompressZlibWithoutUncompressedSize(fileBuffer, fileLength);
+
     FILE* outfile = platformOpenFile(path + convertStringOnWin32(".unzlib"), PlatformFileModeWB);
     fwrite(decompressedData.data(), decompressedData.size(), 1, outfile);
     fclose(outfile);
     tracked_free(fileBuffer);
     if (decompressedData.size() == 0) {
-        g_addNotification(ErrorNotification("Error", "Failed to decompress zlib file"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to decompress zlib file"));
     } else {
         g_addNotification(SuccessNotification("Success", "Zlib file decompressed"));
-    }
-}
-
-Layer* readPNGFromBase64String(std::string b64)
-{
-    auto seekTo = b64.find("iVBO");
-    if (seekTo != std::string::npos) {
-        try {
-            std::string pixelData = b64.substr(seekTo);
-            std::string pixelsb64 = base64::from_base64(pixelData);
-            uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
-            return readPNGFromMem(imageData, pixelsb64.size());
-        }
-        catch (std::exception) {
-            return NULL;
-        }
-    }
-    else {
-        return NULL;
     }
 }
 
@@ -905,24 +933,13 @@ json serializePixelStudioSession(MainEditor* data) {
         json historyJson;
         historyJson["Actions"] = json::array();
         historyJson["Index"] = 0;
-        std::string pixelDataPNGAsBase64 = "";
-        if (writePNG(convertStringOnWin32("temp.bin"), l)) {
-            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
-            fseek(infile, 0, SEEK_END);
-            uint64_t fileLength = ftell(infile);
-            fseek(infile, 0, SEEK_SET);
-            //char* fileBuffer = (char*)tracked_malloc(fileLength);
-            std::string fileBuffer;
-            fileBuffer.resize(fileLength);
-            fread(fileBuffer.data(), fileLength, 1, infile);
-            //fread(fileBuffer, fileLength, 1, infile);
-            fclose(infile);
 
-            pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
-        }
-        else {
-            printf("WRITEPNG FAILED\n");
-        }
+        std::string pixelDataPNGAsBase64 = "";
+        std::vector<u8> pngData = writePNGToMem(l);
+        std::string fileBuffer;
+        fileBuffer.resize(pngData.size());
+        memcpy(&fileBuffer[0], pngData.data(), pngData.size());
+        pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
         historyJson["_source"] = pixelDataPNGAsBase64;
 
         layer["_historyJson"] = historyJson.dump();
@@ -939,10 +956,10 @@ json serializePixelStudioSession(MainEditor* data) {
 MainEditor* deserializePixelStudioSession(json j)
 {
     int pspversion = j["Version"].get<int>();
-    printf("Version: %i\n", pspversion);
+    logprintf("Version: %i\n", pspversion);
 
     if (pspversion != 2) {
-        g_addNotification(ErrorNotification("Error", "Unsupported Pixel Studio file version"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported Pixel Studio file version"));
         return NULL;
     }
 
@@ -951,9 +968,9 @@ MainEditor* deserializePixelStudioSession(json j)
     json clips = j["Clips"];
     json clip0 = clips[0];
     std::string name = clip0["Name"];
-    printf("Clip Name: %s\n", name.c_str());
+    logprintf("Clip Name: %s\n", name.c_str());
     int activeFrameIndex = clip0["ActiveFrameIndex"].get<int>();
-    printf("Active Frame Index: %i\n", activeFrameIndex);
+    logprintf("Active Frame Index: %i\n", activeFrameIndex);
 
     bool showWarning = false;
 
@@ -1007,7 +1024,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     positions.push_back(XY{ x,y });
                 }
 #if _DEBUG
-                std::cout << action.dump(4) << std::endl;
+                loginfo(action.dump(4));
 #endif
                 switch (tool) {
                     //1px pencil
@@ -1167,7 +1184,7 @@ MainEditor* deserializePixelStudioSession(json j)
                     //hue: max is 32400
                     //saturation, min is -10000
                 {
-                    std::cout << action.dump(4) << std::endl;
+                    loginfo(action.dump(4));
                     std::string metaStr = action["Meta"];
                     json meta = json::parse(metaStr);
                     int hue = meta[0];
@@ -1178,7 +1195,7 @@ MainEditor* deserializePixelStudioSession(json j)
                         saturation / 10000.0f,
                         lightness / 10000.0f
                     };
-                    printf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
+                    logprintf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
                     u32* px32 = (u32*)nlayer->pixelData;
                     for (u64 dataPtr = 0; dataPtr < nlayer->w * nlayer->h; dataPtr++) {
                         px32[dataPtr] = hslShiftPixelStudioCompat(px32[dataPtr], shift);
@@ -1189,16 +1206,16 @@ MainEditor* deserializePixelStudioSession(json j)
                     break;
                 default:
                     g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
-                    printf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
-                    printf("\trelevant position data:\n");
+                    logprintf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
+                    logprintf("\trelevant position data:\n");
                     for (XY& p : positions) {
-                        printf("\t%i, %i\n", p.x, p.y);
+                        logprintf("\t%i, %i\n", p.x, p.y);
                     }
-                    printf("\trelevant color data:\n");
+                    logprintf("\trelevant color data:\n");
                     for (u32& c : colors) {
-                        printf("\t%x\n", c);
+                        logprintf("\t%x\n", c);
                     }
-                    std::cout << action.dump(4) << std::endl;
+                    loginfo(action.dump(4));
                     showWarning = true;
                     break;
                 }
@@ -1251,207 +1268,13 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
                 sizeCorrectLayer->name = std::string(layerNode.attribute("name").as_string());
                 layers->insert(layers->begin(), sizeCorrectLayer);
             } else {
-                printf("NOOOOO LAYER IS NULL\n");
+                logprintf("NOOOOO LAYER IS NULL\n");
             }
 
             tracked_free(pngData);
             zip_entry_close(zip);
         }
     }
-}
-
-void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::string text) {
-    png_text pngt;
-    pngt.key = (char*)key.c_str();
-    pngt.text = (char*)text.c_str();
-    pngt.compression = PNG_TEXT_COMPRESSION_NONE;
-    png_set_text(outpng, outpnginfo, &pngt, 1);
-}
-
-size_t readPNGBytes = 0;   //if you promise to tell noone
-size_t PNGFileSize = 0;
-void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
-    png_voidp io_ptr = png_get_io_ptr(png_ptr);
-    if (io_ptr == NULL) {
-        printf("WHY  IS io_ptr NULL\n");
-        return;
-    }
-
-    char* inputStream = (char*)io_ptr;
-    memcpy(outBytes, inputStream + readPNGBytes, byteCountToRead);
-    readPNGBytes += byteCountToRead;
-}
-
-Layer* readPNG(png_structp png, png_infop info) {
-    uint32_t width = png_get_image_width(png, info);
-    uint32_t height = png_get_image_height(png, info);
-    png_byte color_type = png_get_color_type(png, info);
-    png_byte bit_depth = png_get_bit_depth(png, info);
-
-    Layer* ret;
-
-    if (color_type == PNG_COLOR_TYPE_PALETTE) {
-        LayerPalettized* ret2 = new LayerPalettized(width, height);
-        ret2->name = "PNG Image";
-        png_colorp palette;
-        int num_palette;
-        png_get_PLTE(png, info, &palette, &num_palette);
-
-        for (int x = 0; x < num_palette; x++) {
-            ret2->palette.push_back(0xFF000000 | (palette[x].red << 16) | (palette[x].green << 8) | palette[x].blue);
-        }
-
-        if (png_get_valid(png, info, PNG_INFO_tRNS)) {
-            png_bytep trns;
-            int num_trns;
-            png_color_16p trns16p;
-            png_get_tRNS(png, info, &trns, &num_trns, &trns16p);
-
-            for (int x = 0; x < num_trns; x++) {
-                ret2->palette[x] = (ret2->palette[x] & 0x00FFFFFF) | (trns[x] << 24);
-            }
-        }
-
-        png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
-            rows[y] = new png_byte[png_get_rowbytes(png, info)];
-        }
-        png_read_image(png, rows);
-
-        uint32_t* pxData = (uint32_t*)ret2->pixelData;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                pxData[y * width + x] =
-                    bit_depth == 1 ? (rows[y][x / 8] >> (7 - (x % 8))) & 0b1
-                    : bit_depth == 2 ? (rows[y][x / 4] >> (2 * (3 - (x % 4)))) & 0b11
-                    : bit_depth == 4 ? (rows[y][x / 2] >> (x % 2 == 0 ? 4 : 0)) & 0b1111
-                    : rows[y][x];   //todo, more bit depths
-                                    //: are those all of them?
-            }
-        }
-        for (int y = 0; y < height; y++) {
-            delete[] rows[y];
-        }
-        delete[] rows;
-        ret = ret2;
-    }
-    else {
-        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-            png_set_expand_gray_1_2_4_to_8(png);
-        if (png_get_valid(png, info, PNG_INFO_tRNS))
-            png_set_tRNS_to_alpha(png);
-        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY)
-            png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-            png_set_gray_to_rgb(png);
-
-        png_read_update_info(png, info);
-
-        int numchannels = png_get_channels(png, info);
-        png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
-            rows[y] = new png_byte[png_get_rowbytes(png, info)];
-        }
-        png_read_image(png, rows);
-
-        ret = new Layer(width, height);
-        ret->name = "PNG Image";
-
-        int imagePointer = 0;
-        for (uint32_t y = 0; y < height; y++) {
-            if (numchannels == 4) {
-                memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
-            }
-            else if (numchannels == 3) {
-                int currentRowPointer = 0;
-                for (uint32_t x = 0; x < width; x++) {
-                    ret->pixelData[imagePointer++] = 0xff;
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                }
-            }
-            else {
-                printf("WHAT\n");
-                delete ret;
-                png_destroy_read_struct(&png, &info, NULL);
-                return NULL;
-            }
-        }
-
-        if (numchannels == 4) {
-            SDL_Surface* convSrf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR8888);
-            memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
-            SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
-            SDL_FreeSurface(convSrf);
-        }
-
-        for (uint32_t y = 0; y < height; y++) {
-            delete[] rows[y];
-        }
-        delete[] rows;
-    }
-    if (g_config.saveLoadFlatImageExtData) {
-        png_textp text_ptr;
-        int num_text;
-        png_get_text(png, info, &text_ptr, &num_text);
-        std::map<std::string, std::string> extdata;
-        for (int x = 0; x < num_text; x++) {
-            std::string key = text_ptr[x].key;
-            if (stringStartsWithIgnoreCase(key, "vsp/")) {
-                extdata[key.substr(4)] = text_ptr[x].text;
-            }
-        }
-        ret->importExportExtdata = extdata;
-    }
-
-    png_destroy_read_struct(&png, &info, NULL);
-    return ret;
-}
-
-Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
-
-    if (dataSize < 8) {
-        printf("PNG data too small\n");
-        return NULL;
-    }
-    else if (png_sig_cmp(data, 0, 8)) {
-        printf("Not a PNG file\n");
-        return NULL;
-    }
-
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    png_infop info = png_create_info_struct(png);
-    readPNGBytes = 0;
-    PNGFileSize = dataSize;
-    png_set_read_fn(png, (void*)data, _readPNGDataFromMem);
-    //png_set_sig_bytes(png, kPngSignatureLength);
-    png_read_info(png, info);
-
-    return readPNG(png, info);
-}
-Layer* readPNG(PlatformNativePathString path, uint64_t seek)
-{
-    FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
-    if (pngfile != NULL) {
-        u8 sig[8];
-        fread(sig, 1, 8, pngfile);
-        if (png_sig_cmp(sig, 0, 8)) {
-            printf("Not a PNG file\n");
-            return NULL;
-        }
-        fseek(pngfile, 0, SEEK_SET);
-
-        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-        png_infop info = png_create_info_struct(png);
-        png_init_io(png, pngfile);
-        png_read_info(png, info);
-
-        Layer* ret = readPNG(png, info);
-        fclose(pngfile);
-        return ret;
-    }
-    return NULL;
 }
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek) {
@@ -1567,10 +1390,10 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                 }
                 char ddsheader[4];
                 fread(&ddsheader, 4, 1, texfile);
-                printf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
+                logprintf("[AETEX] R2 texture, r2DataStart = %x\n", r2dataStart);
 
                 if (ddsheader[0] == 'D' && ddsheader[1] == 'D' && ddsheader[2] == 'S') {
-                    printf("[AETEX] DDS found\n");
+                    logprintf("[AETEX] DDS found\n");
                     fclose(texfile);
                     return readDDS(path, r2dataStart);
                 }
@@ -1613,7 +1436,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
             }
             else {
                 if (formatType == 0x80) {
-                    printf("[AETEX] ASTC texture\n");
+                    logprintf("[AETEX] ASTC texture\n");
                     //fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                     //uint8_t* astcData = (uint8_t*)tracked_malloc(filesize - 0x80);
                     //fread(astcData, filesize - 0x80, 1, texfile);
@@ -1633,13 +1456,13 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                             fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                             //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
                             int errors = DeASTC(nlayer, astcWidth, astcHeight, texfile, x, y);
-                            //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                            //logprintf("[AETEX] astc %s\n", success ? "success" : "failed");
                             //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
                             tracked_free(rgbaData);
                             delete nlayer;
 
                             int totalBlocks = ceil(astcWidth / (float)x) * ceil(astcHeight / (float)y);
-                            printf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
+                            logprintf("%i : %i: %i / %i errors (%f%%)\n", x, y, errors, totalBlocks, (float)errors/totalBlocks * 100);
                         }
                     }
 
@@ -1653,7 +1476,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                     fseek(texfile, 0x80, SEEK_SET); //replace this with u16 at 0x2C
                     //bool success = basisu::astc::decompress(rgbaData, astcData, false, 12,12);
                     DeASTC(nlayer, astcWidth, astcHeight, filesize, texfile);
-                    //printf("[AETEX] astc %s\n", success ? "success" : "failed");
+                    //logprintf("[AETEX] astc %s\n", success ? "success" : "failed");
                     //SDL_ConvertPixels(astcWidth, astcHeight, SDL_PIXELFORMAT_RGBA8888, rgbaData, astcWidth * 4, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, astcWidth * 4);
                     tracked_free(rgbaData);
                     //tracked_free(astcData);
@@ -1703,7 +1526,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
         fread(&imageTableOffset, 4,1, infile);
         nImages = BEtoLE32(nImages);
         imageTableOffset = BEtoLE32(imageTableOffset);
-        printf("[TPL] %i image(s)\n", nImages);
+        logprintf("[TPL] %i image(s)\n", nImages);
 
         fseek(infile, imageTableOffset, SEEK_SET);
 
@@ -1725,7 +1548,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
             nImg.imgHdr.width = BEtoLE16(nImg.imgHdr.width);
             nImg.imgHdr.format = BEtoLE32(nImg.imgHdr.format);
             nImg.imgHdr.imageDataAddress = BEtoLE32(nImg.imgHdr.imageDataAddress);
-            printf("image: %i x %i, format: %x, address: %x\n", nImg.imgHdr.height, nImg.imgHdr.width, nImg.imgHdr.format, nImg.imgHdr.imageDataAddress);
+            logprintf("image: %i x %i, format: %x, address: %x\n", nImg.imgHdr.height, nImg.imgHdr.width, nImg.imgHdr.format, nImg.imgHdr.imageDataAddress);
             if (i.paletteHeader != 0) {
                 fseek(infile, i.paletteHeader, SEEK_SET);
                 fread(&nImg.pltHdr, sizeof(TPLPaletteHeader), 1, infile);
@@ -1833,7 +1656,7 @@ Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)
                         break;
                     }*/
                 default:
-                    printf("unsupported format\n");
+                    logprintf("unsupported format\n");
                     break;
             }
 
@@ -1859,7 +1682,7 @@ Layer* readNES(PlatformNativePathString path, uint64_t seek)
     if (infile != NULL) {
         NESHeader header;
         fread(&header, sizeof(NESHeader), 1, infile);
-        printf("Mapper: %i%i\n", header.flag7>>4, header.flag6 >> 4);
+        logprintf("Mapper: %i%i\n", header.flag7>>4, header.flag6 >> 4);
         bool trainerPresent = (header.flag6 >> 3) & 0b1;
 
         if (trainerPresent) {
@@ -1953,7 +1776,7 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
             }
                 break;
             default:
-                printf("format [%i] not supported\n", desc.format);
+                logprintf("format [%i] not supported\n", desc.format);
                 break;
         }
 
@@ -1990,10 +1813,10 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
         fread(&hdr.lowResImageWidth, 1, 1, infile);
         fread(&hdr.lowResImageHeight, 1, 1, infile);
 
-        printf("[VTF] VERSION: %i.%i\n", hdr.version[0], hdr.version[1]);
-        printf("[VTF] LowRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.lowResImageFormat, hdr.lowResImageWidth, hdr.lowResImageHeight);
-        printf("[VTF] HiRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.highResImageFormat, hdr.width, hdr.height);
-        printf("[VTF] Mipmaps: %i\n", hdr.mipmapCount);
+        logprintf("[VTF] VERSION: %i.%i\n", hdr.version[0], hdr.version[1]);
+        logprintf("[VTF] LowRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.lowResImageFormat, hdr.lowResImageWidth, hdr.lowResImageHeight);
+        logprintf("[VTF] HiRes IMAGE FORMAT: %i   WxH: %i x %i\n", hdr.highResImageFormat, hdr.width, hdr.height);
+        logprintf("[VTF] Mipmaps: %i\n", hdr.mipmapCount);
 
         if (hdr.version[1] >= 2) {
             fread(&hdr.depth, 2, 1, infile);
@@ -2006,10 +1829,10 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
             for (int x = 0; x < hdr.numResources; x++) {
                 VTF_RESOURCE_ENTRY vtfRes;
                 fread(&vtfRes, sizeof(VTF_RESOURCE_ENTRY), 1, infile);
-                printf("[VTF] Found resource: %i %i %i  offset: %x\n", vtfRes.tag[0], vtfRes.tag[1], vtfRes.tag[2], vtfRes.offset);
+                logprintf("[VTF] Found resource: %i %i %i  offset: %x\n", vtfRes.tag[0], vtfRes.tag[1], vtfRes.tag[2], vtfRes.offset);
                 resources.push_back(vtfRes);
             }
-            printf("[VTF] numResources = %i\n", resources.size());
+            logprintf("[VTF] numResources = %i\n", resources.size());
 
             for (VTF_RESOURCE_ENTRY& res : resources) {
                 if (res.tag[0] == 0x01 && res.tag[1] == 0x00 && res.tag[2] == 0x00) {
@@ -2022,7 +1845,7 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
                         DeXT1(ret, hdr.lowResImageWidth, hdr.lowResImageHeight, infile);
                         break;
                     default:
-                        printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+                        logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
                         break;
                     }*/
                 }
@@ -2041,7 +1864,7 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
                 DeXT1(ret, hdr.lowResImageWidth, hdr.lowResImageHeight, infile);
                 break;
             default:
-                printf("IMAGE FORMAT NOT IMPLEMENTED\n");
+                logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
                 break;
             }*/
             fseek(infile, hdr.headerSize, SEEK_SET);
@@ -2109,7 +1932,7 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek)
         fseek(infile, 0, SEEK_SET);
 
         MSPHeader hdr;
-        //printf("%i\n", sizeof(MSPHeader));
+        //logprintf("%i\n", sizeof(MSPHeader));
         fread(&hdr, sizeof(MSPHeader), 1, infile);
         //fseek(infile, 1, SEEK_CUR);
         Layer* ret = new Layer(hdr.Width, hdr.Height);
@@ -2165,7 +1988,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
             fclose(f);
             return l;
         }
-        catch (std::exception) {
+        catch (std::exception&) {
             fclose(f);
             return NULL;
         }
@@ -2215,7 +2038,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
                 break;
             }
             else {
-                printf("????\n");
+                logprintf("????\n");
                 delete ret;
                 fclose(f);
                 return NULL;
@@ -2514,7 +2337,7 @@ Layer* readXBM(PlatformNativePathString path, uint64_t seek) {
                     h = std::stoi(value);
                 }
                 else {
-                    printf("[XBM] invalid define: %s\n", defname.c_str());
+                    logprintf("[XBM] invalid define: %s\n", defname.c_str());
                 }
 
                 if (w >= 0 && h >= 0) {
@@ -2631,8 +2454,8 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
         fread(&header, sizeof(PS2IcnHeader), 1, f);
         //std::reverse(&header.textureType, &header.textureType + 1);
         //std::reverse(&header.verts, &header.verts + 1);
-        printf("[PS2ICN] texture type: %x\n", header.textureType);
-        printf("[PS2ICN] verts: %x\n", header.verts);
+        logprintf("[PS2ICN] texture type: %x\n", header.textureType);
+        logprintf("[PS2ICN] verts: %x\n", header.verts);
         
         int sizeofVertexStruct =
             header.animShapes * 8   //vertex coordinates
@@ -2642,7 +2465,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
 
         PS2IcnAnimationHeader animHeader;
         fread(&animHeader, sizeof(PS2IcnAnimationHeader), 1, f);
-        printf("[PS2ICN] num. anim frames: %x\n", animHeader.numberOfFrames);
+        logprintf("[PS2ICN] num. anim frames: %x\n", animHeader.numberOfFrames);
         for (int x = 0; x < animHeader.numberOfFrames; x++) {
             fseek(f, 4, SEEK_CUR);
             u32 numberOfKeys;
@@ -2650,7 +2473,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
             fseek(f, 8 + 8 * numberOfKeys, SEEK_CUR);
         }
 
-        printf("[PS2ICN] texture segment start: %x\n", ftell(f));
+        logprintf("[PS2ICN] texture segment start: %x\n", ftell(f));
         //aand we have arrived at the `Texture segment` just look at that view
         ret = new Layer(128, 128);
         ret->name = "PS2 ICN Layer";
@@ -2676,7 +2499,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
             u64 pxPtr = 0;
             fread(&sizeOfCompressedTextureData, 2, 1, f);
             sizeOfCompressedTextureData = BEtoLE16(sizeOfCompressedTextureData);
-            printf("[PS2ICN] texture size: %x\n", sizeOfCompressedTextureData);
+            logprintf("[PS2ICN] texture size: %x\n", sizeOfCompressedTextureData);
             while (pxPtr < 128 * 128 && !feof(f)) {
                 u16 code;
                 fread(&code, 2,1, f);
@@ -2724,7 +2547,7 @@ Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek)
         fread(&iconOffset, 4, 1, f);
         //iconOffset = BEtoLE32(iconOffset);
 
-        printf("[NDS] icon offset: %x\n", iconOffset);
+        logprintf("[NDS] icon offset: %x\n", iconOffset);
         u32 bitmapStart = 0x20 + iconOffset;
 
         u8* pixelData = (u8*)tracked_malloc(32 * 32);
@@ -3006,7 +2829,7 @@ Layer* readGIF(PlatformNativePathString path, u64 seek)
                         }
                         break;
                     default:
-                        printf("UNKNOWN EXTENSION: %i\n", label);
+                        logprintf("UNKNOWN EXTENSION: %i\n", label);
                         break;
                 }
             }
@@ -3075,8 +2898,8 @@ Layer* readGXT(PlatformNativePathString path, u64 seek)
         GXTHeader header;
         std::vector<GXTTextureSpec> textures;
 
-        printf("%i\n", sizeof(GXTHeader));
-        printf("%i\n", sizeof(GXTTextureSpec));
+        logprintf("%i\n", sizeof(GXTHeader));
+        logprintf("%i\n", sizeof(GXTTextureSpec));
 
         fread(&header, sizeof(GXTHeader), 1, f);
         for (int x = 0; x < header.embeddedTextureCount; x++) {
@@ -3084,12 +2907,12 @@ Layer* readGXT(PlatformNativePathString path, u64 seek)
             fread(&spec, sizeof(GXTTextureSpec), 1, f);
             textures.push_back(spec);
 
-            printf("Texture %i\n", x);
-            printf("Offset: %x\n", spec.textureOffset);
-            printf("Size: %x\n", spec.textureSize);
-            printf("Dimensions: %i %i\n", spec.width, spec.height);
-            printf("Format: %x\n", spec.textureBaseFormat);
-            printf("------------\n");
+            logprintf("Texture %i\n", x);
+            logprintf("Offset: %x\n", spec.textureOffset);
+            logprintf("Size: %x\n", spec.textureSize);
+            logprintf("Dimensions: %i %i\n", spec.width, spec.height);
+            logprintf("Format: %x\n", spec.textureBaseFormat);
+            logprintf("------------\n");
         }
 
         if (textures.size() > 0) {
@@ -3197,7 +3020,7 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek)
     return l;
 
 #else
-    g_addNotification(ErrorNotification("Error", "Format not supported on this platform"));
+    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Format not supported on this platform"));
     return NULL;
 #endif
 }
@@ -3210,6 +3033,11 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
         MainEditor* ret = NULL;
         //read .ora file using zip
         zip_t *zip = zip_cstream_open(f, ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+        if (zip == NULL) {
+            fclose(f);
+            return NULL;
+        }
+
         {
             pugi::xml_document doc;
 
@@ -3276,8 +3104,8 @@ MainEditor* readPixelStudioPSX(PlatformNativePathString path)
             json j = json::parse(jsonString);
             return deserializePixelStudioSession(j);
         }
-        catch (std::exception) {
-            g_addNotification(ErrorNotification("Error", "Failed to parse PSX JSON"));
+        catch (std::exception&) {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to parse PSX JSON"));
             return NULL;
         }
     }
@@ -3353,7 +3181,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     fread(metaHeader, 13, 1, infile);
                     // this should equal /VOIDSN.META/
                     if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
-                        printf("INVALID META HEADER\n");
+                        logprintf("INVALID META HEADER\n");
                     }
                     int nExtData;
                     fread(&nExtData, 4, 1, infile);
@@ -3473,6 +3301,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
                     if (extData.contains("layer.selected")) { ret->selLayer = std::stoi(extData["layer.selected"]); }
                     if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
+                    if (extData.contains("editor.altbg")) { ret->setAltBG(extData["editor.altbg"] == "1"); }
                     if (extData.contains("sym.enabled")) { 
                         ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
                         ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
@@ -3504,7 +3333,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                                 guidelinesData = guidelinesData.substr(nextSC + 1);
                             }
                         }
-                        catch (std::exception) {
+                        catch (std::exception&) {
                         }
                     }
                     if (!ret->isPalettized && extData.contains("layer.opacity")) {
@@ -3519,7 +3348,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
                     if (!ret->isPalettized && extData.contains("activecolor")) {
                         uint32_t c = std::stoul(extData["activecolor"], NULL, 16);
-                        ret->setActiveColor(c, false);
+                        ret->setActiveColor(c);
                     }
                     if (ret->isPalettized && extData.contains("palette.index")) {
                         ((MainEditorPalettized*)ret)->pickedPaletteIndex = std::stoi(extData["palette.index"]);
@@ -3529,8 +3358,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 }
                 break;
             default:
-                printf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
-                g_addNotification(ErrorNotification("Error", std::format("VOIDSN file v{} not supported", voidsnversion)));
+                logprintf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("VOIDSN file v{} not supported", voidsnversion)));
                 fclose(infile);
                 return NULL;
         }
@@ -3579,108 +3408,17 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
                 return session;
             }
             else {
-                printf("%s : load failed\n", importer->name().c_str());
+                logprintf("%s : load failed\n", importer->name().c_str());
             }
         }
     }
     return NULL;
 }
 
-bool writePNG(PlatformNativePathString path, Layer* data)
-{
-    if (data->isPalettized && ((LayerPalettized*)data)->palette.size() > 256){
-        g_addNotification(ErrorNotification("Error", "Too many colors in palette"));
-        return false;
-    }
-
-    // exports png
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        png_structp outpng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-        png_infop outpnginfo = png_create_info_struct(outpng);
-        setjmp(png_jmpbuf(outpng));
-        png_init_io(outpng, outfile);
-        png_set_compression_level(outpng, Z_BEST_COMPRESSION);
-        png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
-        png_set_compression_buffer_size(outpng, 1024 * 1024);
-
-        if (g_config.saveLoadFlatImageExtData) {
-            addPNGText(outpng, outpnginfo, "Software", "voidsprite - libpng " PNG_LIBPNG_VER_STRING);
-            auto extmap = data->importExportExtdata;
-            for (auto& kv : extmap) {
-                addPNGText(outpng, outpnginfo, "vsp/" + kv.first, kv.second);
-            }
-        }
-
-        setjmp(png_jmpbuf(outpng));
-
-        if (!data->isPalettized) {
-            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-            setjmp(png_jmpbuf(outpng));
-            png_write_info(outpng, outpnginfo);
-
-            uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
-            SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
-
-            png_bytepp rows = new png_bytep[data->h];
-            for (int y = 0; y < data->h; y++) {
-                rows[y] = convertedToABGR + (y * data->w * 4);
-            }
-            png_write_image(outpng, rows);
-            delete[] rows;
-            tracked_free(convertedToABGR);
-        }
-        else {
-            LayerPalettized* pltLayer = (LayerPalettized*)data;
-            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-            setjmp(png_jmpbuf(outpng));
-
-            png_colorp plt = new png_color[pltLayer->palette.size()];
-            memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
-            png_bytep trns = new png_byte[pltLayer->palette.size()];
-
-            for (int x = 0; x < pltLayer->palette.size(); x++) {
-                plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
-                plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
-                plt[x].blue = pltLayer->palette[x] & 0xff;
-                trns[x] = (pltLayer->palette[x] >> 24) & 0xff;
-            }
-
-            png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
-            png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
-            png_write_info(outpng, outpnginfo);
-
-            int32_t* pixelData32 = (int32_t*)pltLayer->pixelData;
-            png_bytepp rows = new png_bytep[data->h];
-            for (int y = 0; y < data->h; y++) {
-                png_bytep row = new png_byte[data->w];
-                for (int x = 0; x < data->w; x++) {
-                    row[x] = pixelData32[x + y * data->w];
-                }
-                rows[y] = row;
-            }
-            png_write_image(outpng, rows);
-            delete[] plt;
-            delete[] trns;
-            for (int y = 0; y < data->h; y++) {
-                delete[] rows[y];
-            }
-            delete[] rows;
-
-        }
-        png_write_end(outpng, outpnginfo);
-
-        png_destroy_write_struct(&outpng, &outpnginfo);
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
-
 bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
     if (data[0]->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -3700,7 +3438,7 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
 
         for (Layer*& lr : data) {
             if (lr->w * lr->h != projDimensions.x * projDimensions.y) {
-                printf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
         }
@@ -3714,7 +3452,7 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 {
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -3737,7 +3475,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -3755,7 +3493,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 {
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -3773,7 +3511,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData = commentsData = editor->makeCommentDataString();
+        std::string commentsData = editor->makeCommentDataString();
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->layers) {
@@ -3795,7 +3533,8 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
-            {"layer.opacity", layerOpacityData}
+            {"layer.opacity", layerOpacityData},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
         nvalBuffer = extData.size();
@@ -3815,7 +3554,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -3849,7 +3588,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData = commentsData = editor->makeCommentDataString();
+        std::string commentsData = editor->makeCommentDataString();
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->layers) {
@@ -3866,7 +3605,8 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
-            {"palette.enabled", editor->isPalettized ? "1" : "0"}
+            {"palette.enabled", editor->isPalettized ? "1" : "0"},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
         if (editor->isPalettized) {
@@ -3906,7 +3646,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -3967,7 +3707,8 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             {"layer.visibility", layerVisibilityData},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
             {"guidelines", guidelinesData},
-            {"edit.time", std::to_string(editor->editTime)}
+            {"edit.time", std::to_string(editor->editTime)},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
         if (editor->isPalettized) {
@@ -4007,7 +3748,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                printf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             nvalBuffer = lr->name.size();
             fwrite(&nvalBuffer, 4, 1, outfile);
@@ -4035,7 +3776,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
 {
     if (editor->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4069,42 +3810,31 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "mergedimage.png"); 
         {
             Layer* flat = editor->flattenImage();
-            if (writePNG(convertStringOnWin32("temp.bin"), flat)) {
-                zip_entry_fwrite(zip, "temp.bin");
-            }
-            else {
-                printf("OPENRASTER: PNG WRITE ERROR\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(flat);
+            zip_entry_write(zip, pngData.data(), pngData.size());
             delete flat;
         }
         zip_entry_close(zip);
 
+        //todo: quantize it to 256 colors and save it as an 8bit png
         zip_entry_open(zip, "Thumbnails/thumbnail.png"); 
         {
             Layer* flat = editor->flattenImage();
             Layer* flatScaled = flat->copyScaled(XY{255,255});
             delete flat;
-            if (writePNG(convertStringOnWin32("temp.bin"), flatScaled)) {
-                zip_entry_fwrite(zip, "temp.bin");
-            }
-            else {
-                printf("OPENRASTER: PNG WRITE ERROR\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(flatScaled);
+            zip_entry_write(zip, pngData.data(), pngData.size());
             delete flatScaled;
         }
         zip_entry_close(zip);
 
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
-            if (writePNG(convertStringOnWin32("temp.bin"), *l)) {
-                std::string fname = std::format("data/layer{}.png", i++);
-                zip_entry_open(zip, fname.c_str());
-                zip_entry_fwrite(zip, "temp.bin");
-                zip_entry_close(zip);
-            }
-            else {
-                printf("OPENRASTER: PNG WRITE ERROR\n");
-            }
+            std::vector<u8> pngData = writePNGToMem(*l);
+            std::string fname = std::format("data/layer{}.png", i++);
+            zip_entry_open(zip, fname.c_str());
+            zip_entry_write(zip, pngData.data(), pngData.size());
+            zip_entry_close(zip);
         }
 
         zip_stream_copy(zip, (void**)&zipBuffer, &zipBufferSize);
@@ -4164,7 +3894,7 @@ bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data)
 bool writeBMP(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4189,7 +3919,7 @@ bool writeBMP(PlatformNativePathString path, Layer* data) {
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4221,7 +3951,7 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
 {
     auto uqColors = data->getUniqueColors();
     if (uqColors.size() > 2) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. X Bitmap requires 2."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. X Bitmap requires 2."));
         return false;
     }
 
@@ -4265,7 +3995,7 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
 
 bool writeTGA(PlatformNativePathString path, Layer* data) {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4326,7 +4056,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
         }
         else {
             LayerPalettized* upcast = (LayerPalettized*)data;
-            fprintf(outfile, "uint32_t voidsprite_palette data[%i] = {\n", upcast->palette.size());
+            fprintf(outfile, "uint32_t voidsprite_palette data[%ull] = {\n", upcast->palette.size());
             int x = 0;
             for (uint32_t& col : upcast->palette) {
                 fprintf(outfile, "0x%08X,", col);
@@ -4356,7 +4086,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4390,7 +4120,7 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
@@ -4439,7 +4169,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
 {
     auto uqColors = data->getUniqueColors();
     if (uqColors.size() > 2) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. Anymap PBM requires 2."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. Anymap PBM requires 2."));
         return false;
     }
     std::sort(uqColors.begin(), uqColors.end());
@@ -4457,7 +4187,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
                 if (!data->isPalettized && (c & 0xFF000000) == 0) {
                     c = 0;
                 }
-                fprintf(f, "%u ", 1 - (std::find(uqColors.begin(), uqColors.end(), c) - uqColors.begin()));
+                fprintf(f, "%ull ", 1 - (std::find(uqColors.begin(), uqColors.end(), c) - uqColors.begin()));
             }
             fprintf(f, "\n");
         }
@@ -4471,7 +4201,7 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
         if (((LayerPalettized*)data)->palette.size() > 256) {
-            g_addNotification(ErrorNotification("Error", "Too many colors. Anymap PGM requires up to 256."));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. Anymap PGM requires up to 256."));
             return false;
         }
     }
@@ -4544,7 +4274,7 @@ bool writeSR8(PlatformNativePathString path, Layer* data)
         g_addNotification(ErrorNotification("Error exporting SR8", "RGB export not supported."));
         return false;
     }
-    if (!((LayerPalettized*)data)->palette.size() > 256) {
+    if (((LayerPalettized*)data)->palette.size() > 256) {
         g_addNotification(ErrorNotification("Error exporting SR8", "Invalid palette size. Must be 256 colors."));
         return false;
     }
@@ -4567,7 +4297,7 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
 {
     std::vector<u32> palette = data->isPalettized ? ((LayerPalettized*)data)->palette : data->getUniqueColors();
     if (palette.size() > 256) {
-        g_addNotification(ErrorNotification("Error", "Too many colors. CUR requires max. 256."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Too many colors. CUR requires max. 256."));
         return false;
     }
 
@@ -4723,11 +4453,11 @@ std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString n
                 return { true, newPalette };
             }
             else {
-                g_addNotification(ErrorNotification("Error", "Unsupported VOIDPLT file version"));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported VOIDPLT file version"));
             }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Invalid palette file"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid palette file"));
         }
         fclose(f);
     }
@@ -4782,7 +4512,7 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
             if (lineN == 1) {
                 magic = line;
                 if (magic != "GIMP Palette") {
-                    g_addNotification(ErrorNotification("Error", "Invalid GIMP palette file"));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid GIMP palette file"));
                     f.close();
                     return { false, {} };
                 }
@@ -4942,8 +4672,8 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
             try {
                 version = std::stoi(line.substr(31));
             }
-            catch (std::exception) {
-                g_addNotification(ErrorNotification("Error", "Invalid split session file"));
+            catch (std::exception&) {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid split session file"));
                f.close();   //not needed apparently
                 return NULL;
             }
@@ -4983,12 +4713,12 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                     delete subsn;
                                 }
                                 else {
-                                    g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
                                 }
                                 
                             }
-                            catch (std::exception) {
-                                g_addNotification(ErrorNotification("Error", "Failed to load split session fragment"));
+                            catch (std::exception&) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
                             }
                         }
                         else if (stringStartsWithIgnoreCase(line, "comment:")) {
@@ -5004,8 +4734,8 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                                     comments.push_back(CommentData{ XY{x,y}, comment });
                                 }
                             }
-                            catch (std::exception) {
-                                printf("error reading comment\n");
+                            catch (std::exception&) {
+                                logprintf("error reading comment\n");
                             }
                         }
                         else if (line.find(':')) {
@@ -5041,7 +4771,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                 }
                     break;
                 default:
-                    g_addNotification(ErrorNotification("Error", "Unsupported split session file version"));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported split session file version"));
                     f.close();
                     return NULL;
             }
@@ -5053,7 +4783,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
 bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
 {
     if (!data->splitSessionData.set) {
-        g_addNotification(ErrorNotification("Error", "No split session data."));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No split session data."));
         return false;
     }
     std::ofstream f(path);
@@ -5078,7 +4808,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
             delete trimmed;
         }
         else {
-            g_addNotification(ErrorNotification("Error", "No exporter for split session image"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No exporter for split session image"));
         }
     }
     delete flat;
@@ -5089,44 +4819,31 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification("Error", "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
 
     if (outfile != NULL) {
-        if (writePNG(convertStringOnWin32("temp.bin"), data)) {
-            //open temp.bin file, convert to base64, write to outfile
-            FILE* infile = platformOpenFile(convertStringOnWin32("temp.bin"), PlatformFileModeRB);
-            if (infile != NULL) {
-                fseek(infile, 0, SEEK_END);
-                uint64_t fileLength = ftell(infile);
-                fseek(infile, 0, SEEK_SET);
-                //char* fileBuffer = (char*)tracked_malloc(fileLength);
-                std::string fileBuffer;
-                fileBuffer.resize(fileLength);
-                fread(fileBuffer.data(), fileLength, 1, infile);
-                //fread(fileBuffer, fileLength, 1, infile);
-                fclose(infile);
 
-                std::string base64Buffer = base64::to_base64(fileBuffer);
-
-                std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
-                std::string htmlPost = "\"></img>\n\t</body>\n</html>";
-                fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
-                fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
-                fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
-                //tracked_free(fileBuffer);
-            }
-
-
-            fclose(outfile);
-            return true;
+        std::string base64Buffer;
+        {
+            std::vector<u8> pngData = writePNGToMem(data);
+            std::string fileBuffer;
+            fileBuffer.resize(pngData.size());
+            memcpy(fileBuffer.data(), pngData.data(), pngData.size());
+            base64Buffer = base64::to_base64(fileBuffer);
         }
 
+        std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
+        std::string htmlPost = "\"></img>\n\t</body>\n</html>";
+        fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
+        fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
+        fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
+        
         fclose(outfile);
-        return false;
+        return true;
     }
     return false;
 }

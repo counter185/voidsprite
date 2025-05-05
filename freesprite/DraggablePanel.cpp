@@ -13,21 +13,34 @@ void DraggablePanel::processDrag(SDL_Event evt)
         return;
     }
     switch (evt.type) {
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
-        if (evt.button.button == SDL_BUTTON_LEFT) {
-            dragging = evt.button.down;
-        }
-        break;
-    case SDL_MOUSEMOTION:
-        if (dragging) {
-            wasDragged = true;
-            position.x += (int)(evt.motion.xrel);
-            position.y += (int)(evt.motion.yrel);
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+            if (evt.button.button == SDL_BUTTON_LEFT) {
+                dragging = evt.button.down;
+            }
+            break;
+        case SDL_MOUSEMOTION:
+            if (dragging) {
+                wasDragged = true;
+                position.x += (int)(evt.motion.xrel);
+                position.y += (int)(evt.motion.yrel);
 
-            tryMoveOutOfOOB();
-        }
-        break;
+                tryMoveOutOfOOB();
+            }
+            break;
+        case SDL_EVENT_FINGER_DOWN:
+        case SDL_EVENT_FINGER_UP:
+            dragging = evt.type == SDL_EVENT_FINGER_DOWN;
+            break;
+        case SDL_EVENT_FINGER_MOTION:
+            if (dragging) {
+                wasDragged = true;
+                position.x += (int)(evt.tfinger.dx * g_windowW);
+                position.y += (int)(evt.tfinger.dy * g_windowH);
+
+                tryMoveOutOfOOB();
+            }
+            break;
     }
 }
 

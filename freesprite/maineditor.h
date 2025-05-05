@@ -21,6 +21,13 @@ enum MainEditorCommentMode : int {
     COMMENTMODE_SHOW_ALL = 2
 };
 
+enum EditorTouchMode : int {
+    TOUCHMODE_PAN = 0,
+    TOUCHMODE_LEFTCLICK = 1,
+    TOUCHMODE_RIGHTCLICK = 2,
+    TOUCHMODE_MAX
+};
+
 struct CommentData {
     XY position;
     std::string data;
@@ -63,23 +70,23 @@ public:
 
     Canvas canvas;
 
-    XY mousePixelTargetPoint;
-    XY mousePixelTargetPoint2xP;
-    XY mouseHoldPosition;
+    XY mousePixelTargetPoint = XY{0,0};
+    XY mousePixelTargetPoint2xP = XY{ 0,0 };
+    XY mouseHoldPosition = XY{ 0,0 };
     bool closeNextTick = false;
-    BaseBrush* currentBrush;
+    BaseBrush* currentBrush = NULL;
     bool currentBrushMouseDowned = false;
     bool invertPattern = false;
-    Pattern* currentPattern;
+    Pattern* currentPattern = NULL;
     bool leftMouseHold = false;
     bool middleMouseHold = false;
     Timer64 layerSwitchTimer;
-    Timer64 colorPickTimer;
-    bool lastColorPickWasFromWholeImage = false;
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;
     bool penDown = false;
+    bool penAltButtonDown = false;
+    double penPressure = 1.0f;
 
     EditorUnsavedChanges changesSinceLastSave = NO_UNSAVED_CHANGES;
     PlatformNativePathString lastConfirmedSavePath;
@@ -129,6 +136,9 @@ public:
     std::map<std::string, double> toolProperties;
     Panel* toolPropertiesPanel = NULL;
 
+    EditorTouchToggle* touchModePanel = NULL;
+    EditorTouchMode touchMode = TOUCHMODE_PAN;
+
     u64 editTime = 0;
     u64 lastTimestamp = -1;
 
@@ -156,7 +166,6 @@ public:
     void DrawForeground();
     void renderComments();
     void renderUndoStack();
-    virtual void renderColorPickerAnim();
     void drawSymmetryLines();
     void drawIsolatedFragment();
     void drawTileGrid();
@@ -164,6 +173,8 @@ public:
     void drawSplitSessionFragments();
     void drawZoomLines();
     void drawRowColNumbers();
+
+    void inputMouseRight(XY at, bool down);
 
     void initLayers();
     virtual void setUpWidgets();
@@ -175,6 +186,8 @@ public:
     void FillTexture();
     virtual void SetPixel(XY position, uint32_t color, bool pushToLastColors = true, uint8_t symmetry = 0);
     void DrawLine(XY from, XY to, uint32_t color);
+    void copyImageToClipboard();
+    void copyLayerToClipboard(Layer* l);
     virtual void trySaveImage();
     virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);
     virtual void trySaveAsImage();
@@ -188,10 +201,13 @@ public:
     bool isInBounds(XY pos);
     virtual uint32_t pickColorFromAllLayers(XY);
     void regenerateLastColors();
-    virtual void setActiveColor(uint32_t, bool animate = true);
+    virtual void setActiveColor(uint32_t);
     virtual uint32_t getActiveColor();
+    virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     void tickAutosave();
+    bool usingAltBG();
+    void setAltBG(bool useAltBG);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();
@@ -222,6 +238,7 @@ public:
     void layer_replaceColor(uint32_t from, uint32_t to);
     void layer_hsvShift(hsv shift);
     void layer_outline(bool wholeImage = false);
+    void layer_clearSelectedArea();
     void layer_selectCurrentAlpha();
     virtual Layer* flattenImage();
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);

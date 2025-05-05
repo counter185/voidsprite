@@ -32,9 +32,8 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	patternMenuPanel->position = { wxWidth + 30, 0 };
 	subWidgets.addDrawable(patternMenuPanel);
 
-	UILabel* lbl = new UILabel();
+	UILabel* lbl = new UILabel("PATTERNS");
 	lbl->position = { 0, 5 };
-	lbl->text = "PATTERNS";
 	patternMenuPanel->subWidgets.addDrawable(lbl);
 
 	editorInvPatternBtn = new UIButton();

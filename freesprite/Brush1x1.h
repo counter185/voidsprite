@@ -3,12 +3,13 @@
 
 class Brush1x1 : public BaseBrush
 {
-	std::string getName() override { return "1x1 Pixel"; }
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_px1x1.png"; }
+	std::string getName() override { return TL("vsp.brush.squarepixel"); }
+	std::string getIconPath() override { return "brush_px1x1.png"; }
 	std::map<std::string, BrushProperty> getProperties() override 
 	{ 
 		return {
-			{"brush.squarepixel.size", BRUSH_INT_PROPERTY("Size",1,10,1)}
+			{"brush.squarepixel.pressuresens", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.pressuresize"),1)},
+			{"brush.squarepixel.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
 		}; 
 	}
 	void clickPress(MainEditor* editor, XY pos) override;
@@ -24,12 +25,12 @@ class Brush1x1PixelPerfect : public BaseBrush
 	bool hasTrailPoint = false;
 	bool dragging = false;
 
-	std::string getName() override { return "1x1 Pixel (Pixel-Perfect)"; }
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_px1x1pxpf.png"; }
+	std::string getName() override { return TL("vsp.brush.squarepixelpxperfect"); }
+	std::string getIconPath() override { return "brush_px1x1pxpf.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override;
-	void renderOnCanvas(XY canvasDrawPoint, int scale) {
+	void renderOnCanvas(XY canvasDrawPoint, int scale) override {
 		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
 		drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
 		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
@@ -47,9 +48,9 @@ class Brush1x1Burst : public BaseBrush
 	bool dragging = false;
 	bool rightHeld = false;
 
-	std::string getName() override { return "1x1 Pixel (burst)"; }
-	std::string getTooltip() override { return "Hold Mouse Left to draw.\nWhile drawing, make arcs with fast mouse movements or holding Mouse Right.\nThis will create interconnecting lines."; }
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_px1x1burst.png"; }
+	std::string getName() override { return TL("vsp.brush.squarepixelburst"); }
+	std::string getTooltip() override { return TL("vsp.brush.squarepixelburst.desc"); }
+	std::string getIconPath() override { return "brush_px1x1burst.png"; }
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override;
 	void clickRelease(MainEditor* editor, XY pos) override;

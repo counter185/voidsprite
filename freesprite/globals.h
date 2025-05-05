@@ -4,7 +4,8 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
-#pragma warning(disable : 4477) //printf wrong format argument whatever
+#pragma warning(disable : 4477) //logprintf wrong format argument whatever
+#pragma warning(disable : 4099) //liblcf link without debugging info whatever don't care
 
 //macro redefinition warning, remove this line after fully migrating to sdl3
 #pragma warning(disable : 4005)
@@ -12,6 +13,7 @@
 
 //#include <math.h>
 
+#include <stdarg.h>
 #include <chrono>
 #include <string>
 #include <format>
@@ -31,8 +33,8 @@
 #include <atomic>
 
 #include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
@@ -43,7 +45,7 @@ extern "C" {
 }
 
 #ifdef __GNUC__
-#define sprintf_s snprintf
+#define slogprintf_s snlogprintf
 #define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),(mode)))==NULL
 #endif
 
@@ -71,11 +73,18 @@ extern "C" {
 #ifndef VOIDSPRITE_ASSETS_PATH
 #define VOIDSPRITE_ASSETS_PATH ""
 #endif
+#ifndef VOIDSPRITE_ASSETS_SUBDIR
+    #if __ANDROID__
+    #define VOIDSPRITE_ASSETS_SUBDIR ""
+    #else
+    #define VOIDSPRITE_ASSETS_SUBDIR "/assets/"
+    #endif
+#endif
 
 #define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]
 
-#define FONT_PATH VOIDSPRITE_ASSETS_PATH "appfont-MPLUSRounded1c-Medium.ttf"
-#define FONT_PATH_JP VOIDSPRITE_ASSETS_PATH "appfontjp-NotoSansJP-VariableFont_wght.ttf"
+#define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
+#define FONT_PATH_JP "appfontjp-NotoSansJP-Medium.ttf"
 
 #define COLOR_INFO SDL_Color{0x63, 0xc6, 0xff, 255}
 #define COLOR_ERROR SDL_Color{255,0,0,255}
@@ -120,6 +129,7 @@ class EditorColorPicker;
 class EditorBrushPicker;
 class EditorLayerPicker;
 class EditorSpritesheetPreview;
+class EditorTouchToggle;
 class TilemapEditorLayerPicker;
 class PanelSpritesheetPreview;
 class ButtonStartScreenSession;
@@ -138,6 +148,7 @@ class UILabel;
 class UISlider;
 class UITextField;
 class UICheckbox;
+class UIDropdown;
 class Panel;
 class ScrollingPanel;
 
@@ -150,6 +161,7 @@ class ScreenWideNavBar;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
+inline int g_renderScale = 1;
 extern std::string g_programDirectory;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;
@@ -170,33 +182,39 @@ inline SDL_PropertiesID g_props;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
-extern SDL_Texture* g_mainlogo,
-   *g_iconLayerAdd,
-   *g_iconLayerDelete,
-   *g_iconLayerUp,
-   *g_iconLayerDown,
-   *g_iconLayerDownMerge,
-   *g_iconLayerDuplicate,
-   *g_iconLayerHide,
-   *g_iconEraser,
-   *g_iconBlendMode,
-   *g_iconColorHSV,
-   *g_iconColorRGB,
-   *g_iconColorVisual,
-   *g_iconNavbarTabFile,
-   *g_iconNavbarTabEdit,
-   *g_iconNavbarTabLayer,
-   *g_iconNavbarTabView,
-   *g_iconComment,
-   *g_iconMenuPxDim,
-   *g_iconMenuSpritesheet,
-   *g_iconMenuTemplates,
-   *g_iconNotifTheCreature,
-   *g_iconNotifError,
-   *g_iconNotifSuccess,
-   *g_iconNewColor,
-   *g_iconActionBarUndo,
-   *g_iconActionBarRedo;
+inline SDL_Texture* g_mainlogo = NULL,
+   *g_iconLayerAdd = NULL,
+   *g_iconLayerDelete = NULL,
+   *g_iconLayerUp = NULL,
+   *g_iconLayerDown = NULL,
+   *g_iconLayerDownMerge = NULL,
+   *g_iconLayerDuplicate = NULL,
+   *g_iconLayerHide = NULL,
+   *g_iconEraser = NULL,
+   *g_iconBlendMode = NULL,
+   *g_iconColorHSV = NULL,
+   *g_iconColorRGB = NULL,
+   *g_iconColorVisual = NULL,
+   *g_iconNavbarTabFile = NULL,
+   *g_iconNavbarTabEdit = NULL,
+   *g_iconNavbarTabLayer = NULL,
+   *g_iconNavbarTabView = NULL,
+   *g_iconComment = NULL,
+   *g_iconMenuPxDim = NULL,
+   *g_iconMenuSpritesheet = NULL,
+   *g_iconMenuTemplates = NULL,
+   *g_iconNotifTheCreature = NULL,
+   *g_iconNotifError = NULL,
+   *g_iconNotifSuccess = NULL,
+   *g_iconNewColor = NULL,
+   *g_iconActionBarUndo = NULL,
+   *g_iconActionBarRedo = NULL,
+   *g_iconActionBarZoomIn = NULL,
+   *g_iconActionBarZoomOut = NULL,
+   *g_iconActionBarSave = NULL,
+   *g_iconFilePickerDirectory = NULL,
+   *g_iconFilePickerFile = NULL,
+   *g_iconFilePickerSupportedFile = NULL;
 
 void g_addNotification(Notification a);
 
@@ -215,7 +233,10 @@ void g_popClip();
 void g_pushRenderTarget(SDL_Texture* tex);
 void g_popRenderTarget();
 
+void g_reloadFonts();
+
 SDL_Texture* IMGLoadToTexture(std::string path);
+SDL_Texture* IMGLoadAssetToTexture(std::string path);
 
 struct XY {
     int x, y;
@@ -269,6 +290,7 @@ struct NineSegmentPattern {
     SDL_Texture* cachedTexture = NULL;
 };
 
+#include "log.h"
 #include "localization/localization.h"
 #include "memory_tracker.h"
 #include "platform.h"
@@ -276,3 +298,5 @@ struct NineSegmentPattern {
 #include "palettes.h"
 #include "settings.h"
 #include "fills.h"
+#include "vfx.h"
+#include "visual_config.h"

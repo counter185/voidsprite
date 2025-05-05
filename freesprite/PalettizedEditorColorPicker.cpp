@@ -29,13 +29,12 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
 
     pickedColorLabel = new UILabel();
     pickedColorLabel->position = { 60, 350 };
-    pickedColorLabel->text = "";
     subWidgets.addDrawable(pickedColorLabel);
 
     std::vector<std::string> palettes;
     for (auto& pal : g_palettes) {
-		palettes.push_back(pal.first);
-	}
+        palettes.push_back(pal.first);
+    }
 
     UIButton* buttonSavePalette = new UIButton();
     buttonSavePalette->position = { 20, 60 };
@@ -91,10 +90,10 @@ void PalettizedEditorColorPicker::render(XY position)
     //SDL_RenderFillRect(g_rd, &r);
 
     SDL_Color valCol = rgb2sdlcolor(hsv2rgb(hsv{ colorNowHSV.h, colorNowHSV.s, dxmin(colorNowHSV.v + 0.4, 1.0) }));
-    if (focused) {
+    if (thisOrParentFocused()) {
         SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
     }
 
     XY tabOrigin = xyAdd(position, colorPaletteTabs->position);
@@ -106,7 +105,7 @@ void PalettizedEditorColorPicker::render(XY position)
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 
-    pickedColorLabel->text = std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow);
+    pickedColorLabel->setText(std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow));
     pickedColorLabel->color = {valCol.r, valCol.g, valCol.b, 0xff};
 
     subWidgets.renderAll(position);
@@ -151,8 +150,8 @@ void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
 void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
     if (evt_id == EVENT_PALETTECOLORPICKER_PALETTELIST) {
-		upcastCaller->setPalette(g_palettes[name]);
-	}
+        upcastCaller->setPalette(g_palettes[name]);
+    }
 }
 
 void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
@@ -165,16 +164,16 @@ void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathS
             fwrite(&fileversion, 1, 1, f);
             uint32_t count = upcastCaller->palette.size();
             fwrite(&count, 1, 4, f);
-			for (uint32_t col : upcastCaller->palette) {
-				fwrite(&col, 1, 4, f);
-			}
-			fclose(f);
+            for (uint32_t col : upcastCaller->palette) {
+                fwrite(&col, 1, 4, f);
+            }
+            fclose(f);
             g_addNotification(SuccessNotification("Success", "Palette file saved"));
         }
         else {
             g_addNotification(ErrorNotification("Error", "Could not save palette file"));
         }
-	}
+    }
 }
 
 void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
@@ -183,10 +182,10 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
         importerIndex--;
         auto result = g_paletteImporters[importerIndex]->importPalette(name);
         if (result.first) {
-			upcastCaller->setPalette(result.second);
+            upcastCaller->setPalette(result.second);
             updateForcedColorPaletteButtons();
-			g_addNotification(SuccessNotification("Success", "Palette file loaded"));
-		}
+            g_addNotification(SuccessNotification("Success", "Palette file loaded"));
+        }
         else {
             g_addNotification(ErrorNotification("Error", "Could not load palette file"));
         }
@@ -198,7 +197,7 @@ void PalettizedEditorColorPicker::eventColorSet(int evt_id, uint32_t color)
     if (evt_id >= 200) {
         upcastCaller->palette[evt_id - 200] = color;
         upcastCaller->setPalette(upcastCaller->palette);
-		updateForcedColorPaletteButtons();
+        updateForcedColorPaletteButtons();
     }
 }
 
@@ -222,15 +221,15 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
 
     int paletteCount = upcastCaller->palette.size();
     if (paletteCount < 256) {
-		UIButton* newColorButton = new UIButton();
-		newColorButton->wxWidth = 22;
-		newColorButton->wxHeight = 16;
+        UIButton* newColorButton = new UIButton();
+        newColorButton->wxWidth = 22;
+        newColorButton->wxHeight = 16;
         newColorButton->fullWidthIcon = true;
         newColorButton->icon = g_iconNewColor;
         newColorButton->position = { newColorButton->wxWidth * (paletteCount%16), 10 + newColorButton->wxHeight * (paletteCount /16)};
-		newColorButton->setCallbackListener(EVENT_PALETTECOLORPICKER_NEWCOLOR, this);
-		colorPaletteTabs->tabs[0].wxs.addDrawable(newColorButton);
-	}
+        newColorButton->setCallbackListener(EVENT_PALETTECOLORPICKER_NEWCOLOR, this);
+        colorPaletteTabs->tabs[0].wxs.addDrawable(newColorButton);
+    }
 
 }
 

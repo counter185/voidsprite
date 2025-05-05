@@ -21,9 +21,15 @@
 #include "PopupListRecoveryAutosaves.h"
 #include "Timer64.h"
 #include "Panel.h"
+#include "PopupAbout.h"
+#include "PopupYesNo.h"
 
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
+private:
+    Timer64 fileDropTimer;
+    bool droppingFile = false;
+    XY fileDropXY = { -1,-1 };
 public:
     TabbedView* newImageTabs;
 
@@ -75,13 +81,11 @@ public:
         tab0TextFieldH->isNumericField = true;
         newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
 
-        UILabel* wLabel = new UILabel();
-        wLabel->text = TL("vsp.cmn.width");
+        UILabel* wLabel = new UILabel(TL("vsp.cmn.width"));
         wLabel->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
         newImageTabs->tabs[0].wxs.addDrawable(wLabel);
 
-        UILabel* hLabel = new UILabel();
-        hLabel->text = TL("vsp.cmn.height");
+        UILabel* hLabel = new UILabel(TL("vsp.cmn.height"));
         hLabel->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
         newImageTabs->tabs[0].wxs.addDrawable(hLabel);
 
@@ -114,23 +118,19 @@ public:
         tab1TextFieldCHX->setCallbackListener(3, this);
         newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
 
-        UILabel* w2Label = new UILabel();
-        w2Label->text = "Cell width";
+        UILabel* w2Label = new UILabel(TL("vsp.launchpad.tab.cellw"));
         w2Label->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(w2Label);
 
-        UILabel* h2Label = new UILabel();
-        h2Label->text = "Cell height";
+        UILabel* h2Label = new UILabel(TL("vsp.launchpad.tab.cellh"));
         h2Label->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(h2Label);
 
-        UILabel* w2Label2 = new UILabel();
-        w2Label2->text = "x";
+        UILabel* w2Label2 = new UILabel("x");
         w2Label2->position = xySubtract(XY{ 280,120 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(w2Label2);
 
-        UILabel* h2Label2 = new UILabel();
-        h2Label2->text = "x";
+        UILabel* h2Label2 = new UILabel("x");
         h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
         newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
@@ -150,24 +150,28 @@ public:
             UIButton* buttonNewImageRGB = new UIButton();
             buttonNewImageRGB->setCallbackListener(4, this);
             buttonNewImageRGB->position = XY{ 30,90 };
-            buttonNewImageRGB->wxWidth = 120;
+            buttonNewImageRGB->wxWidth = 160;
             buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
             buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
 
             UIButton* buttonNewImagePalettized = new UIButton();
             buttonNewImagePalettized->setCallbackListener(5, this);
-            buttonNewImagePalettized->position = XY{ 160,90 };
+            buttonNewImagePalettized->position = XY{ 200,90 };
             buttonNewImagePalettized->wxWidth = 200;
             buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
             buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
             newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
         }
 
+
+        int startScreenPanelEndpoint = newImageTabs->getDimensions().x + newImageTabs->position.x;
+        startScreenPanelEndpoint = ixmax(560, startScreenPanelEndpoint);
+
         lastOpenFilesPanel = new Panel();
-        lastOpenFilesPanel->wxWidth = 560;
+        lastOpenFilesPanel->wxWidth = startScreenPanelEndpoint;
         lastOpenFilesPanel->wxHeight = 520;
-        lastOpenFilesPanel->position = {570, 75};
+        lastOpenFilesPanel->position = { startScreenPanelEndpoint + 10, 75};
         lastOpenFilesPanel->passThroughMouse = true;
         wxsManager.addDrawable(lastOpenFilesPanel);
 
@@ -218,28 +222,34 @@ public:
                     },
                     g_iconNavbarTabFile
                 }
+            },
+            {
+                SDL_SCANCODE_I,
+                {
+                    TL("vsp.nav.help"),
+                    {},
+                    {
+                        {SDL_SCANCODE_A, { TL("vsp.launchpad.nav.about"),
+                                [](StartScreen* screen) {
+                                    g_addPopup(new PopupAbout());
+                                }
+                            }
+                        },
+                    }
+                }
             }
-        }, { SDL_SCANCODE_F });
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_I });
         wxsManager.addDrawable(navbar);
 
+        if (!platformHasFileAccessPermissions()) {
+            PopupYesNo* permissionPopup = new PopupYesNo(TL("vsp.launchpad.filepermcheck.title"), TL("vsp.launchpad.filepermcheck.desc"));
+            permissionPopup->onFinishCallback = [](PopupYesNo*, bool yes) {
+                if (yes) {
+                    platformRequestFileAccessPermissions();
+                }
+            };
 
-        for (std::string& arg : g_cmdlineArgs) {
-
-            if (arg.substr(0,2) == "--") {
-                std::string option = arg.substr(2);
-                if (option == "no-launchpad") {
-                    this->closeNextTick = true;
-                }
-            }
-            else {
-                if (std::filesystem::exists(convertStringOnWin32(arg))) {
-                    tryLoadFile(arg);
-                }
-                else {
-                    //todo: this notification never fits the whole file name
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Could not find file:\n {}", arg)));
-                }
-            }
+            g_addPopup(permissionPopup);
         }
 
         populateLastOpenFiles();
@@ -251,6 +261,7 @@ public:
     void takeInput(SDL_Event evt) override;
 
     void onReturnToScreen() override {
+        droppingFile = false;
         populateLastOpenFiles();
     }
 
@@ -269,6 +280,7 @@ public:
     
     void populateLastOpenFiles();
     void renderStartupAnim();
+    void renderFileDropAnim();
     void renderBackground();
     void openImageLoadDialog();
     void tryLoadFile(std::string path);

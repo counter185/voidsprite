@@ -23,25 +23,9 @@ public:
     SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0xe0 };
     Timer64 tabSwitchTimer;
     bool nextTabSlideFromTheLeft = false;
+    std::function<void(TabbedView*,int)> onTabSwitchedCallback = NULL;
 
-    TabbedView(std::vector<Tab> tabN, int buttonWidth = 60) {
-        int buttonX = 0;
-        for (int x = 0; x < tabN.size(); x++) {
-            UIButton* nbutton = new UIButton();
-            nbutton->wxWidth = buttonWidth;
-            nbutton->wxHeight = buttonsHeight;
-            nbutton->position = XY{ buttonX, 0 };
-            nbutton->text = tabN[x].name;
-            nbutton->icon = tabN[x].icon;
-            buttonX += nbutton->wxWidth;
-            nbutton->setCallbackListener(x, this);
-            tabButtons.addDrawable(nbutton);
-
-            tabs.push_back(tabN[x]);
-        }
-        updateTabButtons();
-        tabSwitchTimer.start();
-    }
+    TabbedView(std::vector<Tab> tabN, int buttonWidth = 60);
     ~TabbedView() {
         tabButtons.freeAllDrawables();
         for (Tab& t : tabs) {
@@ -54,13 +38,13 @@ public:
     }
 
     void focusOut() override {
-		Drawable::focusOut();
-		tabs[openTab].wxs.forceUnfocus();
-	}
+        Drawable::focusOut();
+        tabs[openTab].wxs.forceUnfocus();
+    }
     void mouseHoverOut() override {
         Drawable::mouseHoverOut();
         tabButtons.forceUnhover();
-		tabs[openTab].wxs.forceUnhover();
+        tabs[openTab].wxs.forceUnhover();
     }
 
     void render(XY position) override {
@@ -97,6 +81,12 @@ public:
                 tabs[openTab].wxs.tryFocusOnPoint(XY{ (int)evt.button.x, (int)evt.button.y }, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
             }
         }
+        else if (evt.type == SDL_EVENT_FINGER_DOWN) {
+            XY touchPos = {(int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH)};
+            if (!tabButtons.tryFocusOnPoint(touchPos, gPosOffset)) {
+                tabs[openTab].wxs.tryFocusOnPoint(touchPos, xyAdd(XY{ 0,buttonsHeight }, gPosOffset));
+            }
+        }
         else if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_TAB) {
             tabs[openTab].wxs.tryFocusOnNextTabbable();
         }
@@ -112,13 +102,16 @@ public:
         if (openTab != evt_id) {
             tabSwitchTimer.start();
             if (openTab < evt_id) {
-				nextTabSlideFromTheLeft = false;
-			}
-			else {
-				nextTabSlideFromTheLeft = true;
-			}
+                nextTabSlideFromTheLeft = false;
+            }
+            else {
+                nextTabSlideFromTheLeft = true;
+            }
         }
         openTab = evt_id;
+        if (onTabSwitchedCallback != NULL) {
+            onTabSwitchedCallback(this, openTab);
+        }
         updateTabButtons();
     }
 
@@ -130,5 +123,21 @@ public:
     }
 
     bool takesMouseWheelEvents() override { return true; }
+    bool takesTouchEvents() override { return true; }
+
+    XY getDimensions() override { 
+        XY ret = { 0,0 };
+        for (Drawable*& a : tabButtons.drawablesList) {
+            XY aPos = a->position;
+            XY aDim = a->getRenderDimensions();
+            if (aPos.x + aDim.x > ret.x) {
+                ret.x = aPos.x + aDim.x;
+            }
+            if (aPos.y + aDim.y > ret.y) {
+                ret.y = aPos.y + aDim.y;
+            }
+        }
+        return ret;
+    };
 };
 

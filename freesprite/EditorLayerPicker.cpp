@@ -65,10 +65,9 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     duplicateBtn->onClickCallback = [this](UIButton*) { caller->duplicateLayer(caller->selLayer); updateLayers(); };
     subWidgets.addDrawable(duplicateBtn);
 
-    UILabel* opacityLabel = new UILabel();
+    UILabel* opacityLabel = new UILabel("Opacity");
     opacityLabel->position = { 7, 67 };
     opacityLabel->fontsize = 16;
-    opacityLabel->text = "Opacity";
     subWidgets.addDrawable(opacityLabel);
 
     opacitySlider = new UISlider();
@@ -93,8 +92,8 @@ void EditorLayerPicker::render(XY position)
     //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     //SDL_RenderFillRect(g_rd, &r);
 
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90};
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90};
+    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, (u8)(focused ? 0xa0 : 0x90)};
+    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, (u8)(focused ? 0xa0 : 0x90)};
     renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
     if (focused) {
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
@@ -129,7 +128,7 @@ void EditorLayerPicker::eventSliderPosFinishedChanging(int evt_id, float value)
 {
     if (evt_id == EVENT_LAYERPICKER_OPACITYSLIDER) {
         caller->layer_setOpacity((uint8_t)(value * 255));
-        //printf("eventSliderPosFinishedChanging, %x\n", (uint8_t)(value * 255));
+        //logprintf("eventSliderPosFinishedChanging, %x\n", (uint8_t)(value * 255));
     }
 }
 

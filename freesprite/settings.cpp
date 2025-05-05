@@ -19,6 +19,10 @@ bool g_saveConfig() {
         file << "autosaveInterval=" << g_config.autosaveInterval << std::endl;
         file << "rowColIndexesStartAt1=" << g_config.rowColIndexesStartAt1 << std::endl;
         file << "language=" << g_config.language << std::endl;
+        file << "vfxEnabled=" << (g_config.vfxEnabled ? "1" : "0") << std::endl;
+        file << "overrideCursor=" << (g_config.overrideCursor ? "1" : "0") << std::endl;
+        file << "visualConfig=" << g_config.customVisualConfigPath << std::endl;
+		file << "useSystemFileDialog=" << (g_config.useSystemFileDialog ? "1" : "0") << std::endl;
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -53,8 +57,8 @@ void g_loadConfig() {
                         int keybind = std::stoi(value);
                         g_config.keybinds[key.substr(key.find(':') + 1)] = keybind;
                     }
-                    catch (std::exception) {
-                        printf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
+                    catch (std::exception&) {
+                        logprintf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
                     }
                 }
                 else if (key == "lastfile") {
@@ -64,8 +68,8 @@ void g_loadConfig() {
         }
 
         if (config.contains("openSavedPath")) { g_config.openSavedPath = config["openSavedPath"] == "1"; }
-        if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception) {} }
-        if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception) {} }
+        if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception&) {} }
+        if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception&) {} }
         if (config.contains("scrollWithTouchpad")) { g_config.scrollWithTouchpad = config["scrollWithTouchpad"] == "1"; }
         if (config.contains("isolateRectOnLockTile")) { g_config.isolateRectOnLockTile = config["isolateRectOnLockTile"] == "1"; }
         if (config.contains("fillToolTileBound")) { g_config.fillToolTileBound = config["fillToolTileBound"] == "1"; }
@@ -73,9 +77,13 @@ void g_loadConfig() {
         if (config.contains("saveLoadFlatImageExtData")) { g_config.saveLoadFlatImageExtData = config["saveLoadFlatImageExtData"] == "1"; }
         if (config.contains("discordRPC")) { g_config.useDiscordRPC = config["discordRPC"] == "1"; }
         if (config.contains("renderer")) { g_config.preferredRenderer = config["renderer"]; }
-        if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception) {} }
+        if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception&) {} }
         if (config.contains("rowColIndexesStartAt1")) { g_config.rowColIndexesStartAt1 = config["rowColIndexesStartAt1"] == "1"; }
         if (config.contains("language")) { g_config.language = config["language"]; }
+        if (config.contains("vfxEnabled")) { g_config.vfxEnabled = config["vfxEnabled"] == "1"; }
+		if (config.contains("overrideCursor")) { g_config.overrideCursor = config["overrideCursor"] == "1"; }
+		if (config.contains("visualConfig")) { g_config.customVisualConfigPath = config["visualConfig"]; }
+		if (config.contains("useSystemFileDialog")) { g_config.useSystemFileDialog = config["useSystemFileDialog"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();

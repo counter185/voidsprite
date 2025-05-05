@@ -3,6 +3,7 @@
 
 #define BRUSH_INT_PROPERTY(name,min,max,defaultvalue) BrushProperty{name,1,min,max,defaultvalue}
 #define BRUSH_DOUBLE_PROPERTY(name,min,max,defaultvalue) BrushProperty{name,2,min,max,defaultvalue}
+#define BRUSH_BOOL_PROPERTY(name,defaultvalue) BrushProperty{name,3,0,1,defaultvalue}
 
 struct BrushProperty {
 	std::string name;
@@ -23,8 +24,8 @@ public:
 	virtual bool isReadOnly() { return false; }
 	virtual bool wantDoublePosPrecision() { return false; }
 	virtual bool overrideRightClick() { return false; }
-	virtual std::string getIconPath() { return VOIDSPRITE_ASSETS_PATH "assets/brush_default.png"; }
-	virtual std::string getName() { return "Base brush"; }
+	virtual std::string getIconPath() { return "brush_default.png"; }
+	virtual std::string getName() { return TL("vsp.brush.undefined"); }
 	virtual std::string getTooltip() { return ""; }
 	virtual XY getSection() { return XY{ 0,0 }; }
 	virtual std::map<std::string, BrushProperty> getProperties() { return {}; }

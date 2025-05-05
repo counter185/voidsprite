@@ -6,11 +6,11 @@ class BrushDiamond :
 	XY startPos = XY{ 0,0 };
 	bool heldDown = false;
 
-	void resetState() {
+	void resetState() override {
 		startPos = XY{ 0,0 };
 	}
-	std::string getName() override { return "1px Diamond"; };
-	std::string getIconPath() override { return VOIDSPRITE_ASSETS_PATH "assets/brush_1pxdiamond.png"; }
+	std::string getName() override { return TL("vsp.brush.diamond"); };
+	std::string getIconPath() override { return "brush_1pxdiamond.png"; }
 	XY getSection() override { return XY{ 1,2 }; }
 
 	void clickPress(MainEditor* editor, XY pos) override;

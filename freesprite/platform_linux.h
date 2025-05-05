@@ -3,10 +3,13 @@
 #include <pwd.h>
 #include <spawn.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
+
+#include "platform_universal.h"
 
 // I gave up on trying to make this work
 // first sdl2 was too old
@@ -20,6 +23,24 @@
 
 extern char **environ;
 
+std::string linux_getCPUName() {
+    std::ifstream cpuInfoFile("/proc/cpuinfo");
+    if (cpuInfoFile.is_open()) {
+        std::string line;
+        while (std::getline(cpuInfoFile, line)) {
+            if (line.find("model name") != std::string::npos) {
+                std::string cpuName = line.substr(line.find(":") + 1);
+                cpuInfoFile.close();
+                return cpuName;
+            }
+        }
+    }
+    else {
+        return "(failed to read /proc/cpuinfo)\n";
+    }
+    
+}
+
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
@@ -27,33 +48,29 @@ void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 }
 void platformInit() {}
 void platformPostInit() {}
 
+//todo
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
+
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
 
-int findIndexByExtension(
-    std::vector<std::pair<std::string, std::string>> &filetypes,
-    std::string filename) {
-    std::transform(filename.begin(), filename.end(), filename.begin(),
-                   ::tolower);
-    for (int x = 0; x < filetypes.size(); x++) {
-        auto &p = filetypes[x];
-        if (filename.size() > p.first.size()) {
-            if (filename.substr(filename.size() - p.first.size()) == p.first) {
-                return x + 1;
-            }
-        }
-    }
-    return -1;
-}
+
 
 void platformTrySaveOtherFile(
     EventCallbackListener *caller,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
+
+    if (!g_config.useSystemFileDialog) {
+        universal_platformTrySaveOtherFile(caller, filetypes, windowTitle, evt_id);
+        return;
+    }
+
     std::vector<std::string> fileTypeStrings;
     for (auto &p : filetypes) {
         fileTypeStrings.push_back(p.second);
@@ -78,6 +95,12 @@ void platformTryLoadOtherFile(
     EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
+
+    if (!g_config.useSystemFileDialog) {
+        universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+        return;
+    }
+
     std::vector<std::string> fileTypeStrings;
     for (auto &p : filetypes) {
         fileTypeStrings.push_back(p.second);
@@ -175,10 +198,64 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
     return ret;
 }
 
-Layer *platformGetImageFromClipboard() { return NULL; }
+bool platformPutImageInClipboard(Layer* l) {
+    return universal_platformPushLayerToClipboard(l);
+}
+
+Layer *platformGetImageFromClipboard() { return universal_platformGetLayerFromClipboard(); }
 
 FILE *platformOpenFile(PlatformNativePathString path,
                        PlatformNativePathString mode) {
     FILE *ret = fopen(path.c_str(), mode.c_str());
     return ret;
 }
+
+std::string platformGetSystemInfo() {
+    std::string ret = "";
+
+    struct utsname buffer;
+    char* p;
+    long ver[16];
+    int i = 0;
+
+    errno = 0;
+    if (uname(&buffer) != 0) {
+        ret += "(Error running uname)\n";
+    }
+    else {
+        ret += std::format("OS: {} {} {}\n", buffer.sysname, buffer.version, buffer.release);
+    }
+
+    auto distroInfo = parseINI("/etc/os-release");
+    std::string distroInfoString =
+        distroInfo.contains("PRETTY_NAME") ? distroInfo["PRETTY_NAME"]
+        : distroInfo.contains("NAME") ? std::format("{} {}", distroInfo["NAME"], distroInfo["VERSION"])
+        : "";
+    if (distroInfoString != "") {
+        ret += std::format("os-release info: {}\n", distroInfoString);
+    }
+
+    ret += std::format("CPU: {}\n", linux_getCPUName());
+    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+
+    //todo: get gpu, maybe the hardware model if possible, distro info
+
+    return ret;
+}
+
+std::vector<RootDirInfo> platformListRootDirectories() {
+    std::vector<RootDirInfo> ret;
+    
+    char *homeDir = getenv("HOME");
+    if (homeDir != NULL) {
+        std::string homeDirStr = homeDir;
+        ret.push_back({"User home", homeDirStr});
+    }
+
+    ret.push_back({"Root", "/"});
+}
+
+bool platformHasFileAccessPermissions() {
+    return true;
+}
+void platformRequestFileAccessPermissions() {}

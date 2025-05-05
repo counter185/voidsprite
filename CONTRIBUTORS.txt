@@ -1,0 +1,5 @@
+// please put your name here if you've contributed to this project in any way
+// this file must be valid C++ since it's getting directly included in PopupAbout
+// * translation credits get added to the about tab automatically if you fill out the correct field in the translation txt file
+"cntrpl\n"
+"\n"

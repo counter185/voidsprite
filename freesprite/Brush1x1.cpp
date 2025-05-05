@@ -3,7 +3,8 @@
 #include "MainEditorPalettized.h"
 
 void Brush1x1::clickPress(MainEditor* editor, XY pos) {
-	int size = editor->toolProperties["brush.squarepixel.size"];
+	int size = (int)(editor->toolProperties["brush.squarepixel.size"]
+		* (editor->toolProperties["brush.squarepixel.pressuresens"] == 1 ? editor->penPressure : 1.0));
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			editor->SetPixel(xyAdd(pos, {i,j}), editor->getActiveColor());
@@ -17,7 +18,7 @@ void Brush1x1::clickDrag(MainEditor* editor, XY from, XY to) {
 
 void Brush1x1::renderOnCanvas(MainEditor* editor, int scale) {
 	XY canvasDrawPoint = editor->canvas.currentDrawPoint;
-	int size = editor->toolProperties["brush.squarepixel.size"];
+	int size = (int)(editor->toolProperties["brush.squarepixel.size"]);
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			XY p = xyAdd(lastMouseMotionPos, { i,j });

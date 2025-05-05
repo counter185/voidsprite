@@ -1,5 +1,5 @@
 project('liblcf', 'cpp',
-  default_options: ['warning_level=3', 'cpp_std=c++20']
+  default_options: ['warning_level=0', 'cpp_std=c++20']
 )
 
 liblcf_sources = files(

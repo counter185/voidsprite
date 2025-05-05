@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source files">
@@ -187,6 +187,9 @@
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UISlider.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="UIDoubleSlider.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="UISVPicker.cpp">
@@ -591,6 +594,33 @@
     <ClCompile Include="ScreenNonogramPlayer.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="io_dibv5.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="vfx.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupChooseExtsToAssoc.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="visual_config.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="log.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="io_png.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupFilePicker.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorTouchToggle.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupExportScaled.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -852,6 +882,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="PopupTextTool.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupAbout.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="ToolRectFlip.h">
@@ -1124,6 +1157,39 @@
     <ClInclude Include="ScreenNonogramPlayer.h">
       <Filter>Header files\screen</Filter>
     </ClInclude>
+    <ClInclude Include="io_dibv5.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupChooseExtsToAssoc.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="visual_config.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_universal.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="io_png.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupFilePicker.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_android.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorTouchToggle.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupExportScaled.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
@@ -1140,6 +1206,12 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="localization\localization_english.txt">
+      <Filter>Header files\localization</Filter>
+    </Text>
+    <Text Include="localization\localization_romanian.txt">
+      <Filter>Header files\localization</Filter>
+    </Text>
+    <Text Include="localization\localization_japanese.txt">
       <Filter>Header files\localization</Filter>
     </Text>
   </ItemGroup>
