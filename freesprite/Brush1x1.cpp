@@ -22,10 +22,19 @@ void Brush1x1::renderOnCanvas(MainEditor* editor, int scale) {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			XY p = xyAdd(lastMouseMotionPos, { i,j });
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-			drawLocalPoint(canvasDrawPoint, p, scale);
-			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-			drawPointOutline(canvasDrawPoint, p, scale);
+
+			if (g_config.brushColorPreview) {
+				SDL_Rect r = editor->canvas.canvasRectToScreenRect({ p.x,p.y,1,1 });
+				SDL_Color c = uint32ToSDLColor(editor->getActiveColor());
+				SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, 0xff);
+				SDL_RenderFillRect(g_rd, &r);
+			}
+			else {
+				SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+				drawLocalPoint(canvasDrawPoint, p, scale);
+				SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+				drawPointOutline(canvasDrawPoint, p, scale);
+			}
 		}
 	}
 }

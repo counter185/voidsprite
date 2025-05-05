@@ -18,6 +18,6 @@ class Brush1pxLine :
 	void clickPress(MainEditor* editor, XY pos) override;
 	void clickDrag(MainEditor* editor, XY from, XY to) override {}
 	void clickRelease(MainEditor* editor, XY pos) override;
-	void renderOnCanvas(XY canvasDrawPoint, int scale) override;
+	void renderOnCanvas(MainEditor* editor, int scale) override;
 };
 

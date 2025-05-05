@@ -23,6 +23,8 @@ bool g_saveConfig() {
         file << "overrideCursor=" << (g_config.overrideCursor ? "1" : "0") << std::endl;
         file << "visualConfig=" << g_config.customVisualConfigPath << std::endl;
 		file << "useSystemFileDialog=" << (g_config.useSystemFileDialog ? "1" : "0") << std::endl;
+        file << "brushColorPreview=" << (g_config.brushColorPreview ? "1" : "0") << std::endl;
+        
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -84,6 +86,7 @@ void g_loadConfig() {
 		if (config.contains("overrideCursor")) { g_config.overrideCursor = config["overrideCursor"] == "1"; }
 		if (config.contains("visualConfig")) { g_config.customVisualConfigPath = config["visualConfig"]; }
 		if (config.contains("useSystemFileDialog")) { g_config.useSystemFileDialog = config["useSystemFileDialog"] == "1"; }
+        if (config.contains("brushColorPreview")) { g_config.brushColorPreview = config["brushColorPreview"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();
