@@ -15,21 +15,37 @@ void Brush1pxLine::clickRelease(MainEditor* editor, XY pos)
 	dragging = false;
 }
 
-void Brush1pxLine::renderOnCanvas(XY canvasDrawPoint, int scale) 
+void Brush1pxLine::renderOnCanvas(MainEditor* editor, int scale)
 {
-
+	XY canvasDrawPoint = editor->canvas.currentDrawPoint;
 	if (dragging) {
 		rasterizeLine(startPos, g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos, [&](XY a) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-			drawLocalPoint(canvasDrawPoint, a, scale);
-			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-			drawPointOutline(canvasDrawPoint, a, scale);
-			});
+			if (g_config.brushColorPreview) {
+				SDL_Rect r = editor->canvas.canvasRectToScreenRect({ a.x,a.y,1,1 });
+				SDL_Color c = uint32ToSDLColor(editor->getActiveColor());
+				SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, 0xff);
+				SDL_RenderFillRect(g_rd, &r);
+			}
+			else {
+				SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+				drawLocalPoint(canvasDrawPoint, a, scale);
+				SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+				drawPointOutline(canvasDrawPoint, a, scale);
+			}
+		});
 	}
 	else {
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-		drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-		SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-		drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+		if (g_config.brushColorPreview) {
+			SDL_Rect r = editor->canvas.canvasRectToScreenRect({ lastMouseMotionPos.x,lastMouseMotionPos.y,1,1 });
+			SDL_Color c = uint32ToSDLColor(editor->getActiveColor());
+			SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, 0xff);
+			SDL_RenderFillRect(g_rd, &r);
+		}
+		else {
+			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+			drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
+			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+			drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+		}
 	}
 }

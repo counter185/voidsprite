@@ -11,6 +11,7 @@ public:
     bool vsync = true;
     bool saveLoadFlatImageExtData = true;
     bool useDiscordRPC = false;
+    bool brushColorPreview = false;
     std::string preferredRenderer =
 #if _WIN32
         "direct3d"

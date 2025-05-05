@@ -1,27 +1,57 @@
 #define ENGLISH_LOC_INCLUDED
-{ "en-us", { "English", {
+{ "en-us", { "English", "", {
     // common strings used in a few different places
     {"vsp.cmn.yes", "Yes"},
     {"vsp.cmn.no", "No"},
     {"vsp.cmn.close", "Close"},
+    {"vsp.cmn.apply", "Apply"},
+    {"vsp.cmn.cancel", "Cancel"},
+    {"vsp.cmn.confirm", "Confirm"},
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
+    {"vsp.cmn.zoomin", "Zoom in"},
+    {"vsp.cmn.zoomout", "Zoom out"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
+    {"vsp.cmn.error.decompressfail", "Failed to decompress data."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
-    {"vsp.cmn.filetype.splitsession", "Split session file."},
+    {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
+    {"vsp.cmn.error.exportfail", "Failed to export file."},
+    {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
+
+    //file type names
+    {"vsp.cmn.filetype.splitsession", "Split session file"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},
+    {"vsp.nav.save", "Save"},
+    {"vsp.nav.help", "Help"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
     {"vsp.rpc.activeworkspaces", "active workspaces"},
 
+    //crash popup
+    {"vsp.fatalerror.title", "fatal error"},
+    {"vsp.fatalerror.body", "An unrecoverable error has occurred.\n"
+                            "Relevant information was saved to the \"voidsprite_log.txt\" file in the app data directory.\n"
+                            "If you're reporting this issue on GitHub, please include that file.\n"
+                            " More details:"},
+
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},
     {"vsp.popup.openimage", "open image"},
+    {"vsp.popup.saveimage", "save image"},
+
+    // default layer names
+    {"vsp.layer.template", "Template Layer"},
+    {"vsp.layer.jxl", "JPEG XL Layer"},
+    {"vsp.layer.xyz", "XYZ Image"},
+    {"vsp.layer.aseprite", "Aseprite Layer"},
+
+    // strings related to main.cpp
+    {"vsp.bgop.inprogress", "Operation in progress. Please wait..."},
 
     // screen: voidsprite launchpad
     {"vsp.launchpad", "voidsprite Launchpad"},
@@ -34,6 +64,8 @@
     {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
     {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
     {"vsp.launchpad.tab.templates", "Templates"},
+    {"vsp.launchpad.tab.cellw", "Cell width"},
+    {"vsp.launchpad.tab.cellh", "Cell height"},
     {"vsp.launchpad.tab.picktemplate", "Select template..."},
     {"vsp.launchpad.tab.creatergb", "Create (RGB)"},
     {"vsp.launchpad.tab.creatergb.tooltip", "Create a new image with full color support."},
@@ -45,6 +77,13 @@
     {"vsp.launchpad.nav.newsplitsession", "New split session..."},
     {"vsp.launchpad.nav.preferences", "Preferences"},
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
+    {"vsp.launchpad.nav.about", "About voidsprite"},
+
+    {"vsp.launchpad.filepermcheck.title", "File access permission required"},
+    {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"
+                                         "Would you like to enable them now?\n\n"
+                                         UTF8_DIAMOND "If you do not enable file access permissions,\n"
+                                         "    you will only be able to save and load files to the data directory."},
 
     {"vsp.launchpad.error.starteditor", "Error starting editor"},
     {"vsp.launchpad.error.oob", "Invalid dimensions. Number out of range."},
@@ -66,15 +105,27 @@
 
     // screen: voidsprite main editor
     {"vsp.maineditor", "Editor"},
+    {"vsp.maineditor.erasermode", "(Erase)"},
 
-    {"vsp.maineditor.file","File"},
+    {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
+    {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
+    {"vsp.maineditor.panel.touchmode.title", "TOUCH MODE"},
+    {"vsp.maineditor.panel.touchmode.pan", "Pan"},
+    {"vsp.maineditor.panel.touchmode.leftclick", "Mouse Left"},
+    {"vsp.maineditor.panel.touchmode.rightclick", "Mouse Right"},
+
+    {"vsp.maineditor.tab.filters", "Filters"},
+    {"vsp.maineditor.tab.render", "Render"},
+    {"vsp.maineditor.tab.view", "View"},
+
     {"vsp.maineditor.saveas","Save As"},
-    {"vsp.maineditor.save","Save"},
     {"vsp.maineditor.exportpal","Export as indexed"},
     {"vsp.maineditor.exportind","Export tiles individually"},
     {"vsp.maineditor.paledit","Open in indexed editor"},
-    {"vsp.maineditor.close","Close"},
     {"vsp.maineditor.preference","Preferences"},
+    {"vsp.maineditor.copyflattoclipboard", "Copy to clipboard"},
+
+    {"vsp.maineditor.nav.exportscaled", "Export scaled"},
 
     {"vsp.maineditor.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},
@@ -98,6 +149,8 @@
     {"vsp.maineditor.removealpha","Remove alpha channel"},
     {"vsp.maineditor.setckey","Set color key"}, // translation note: "color key" here means the color chosen becomes transparent
     {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
+    {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
+    {"vsp.maineditor.nav.layer.clearselection", "Erase selected area"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},
@@ -110,8 +163,153 @@
 
     //screen: spritesheet preview
     {"vsp.spritesheetpreview", "Preview sprites"},
+    {"vsp.spritesheetpreview.timeline", "Timeline"},
 
     //screen: tilemap preview
     {"vsp.tilemappreview", "Preview tiles"},
+
+
+    //popup: settings
+    {"vsp.config.title", "Preferences"},
+    {"vsp.config.notif.saved", "Preferences saved"},
+    {"vsp.config.notif.savefailed", "Failed to save preferences"},
+
+    {"vsp.config.tab.general", "General"},
+    {"vsp.config.tab.visual", "Visual"},
+    {"vsp.config.tab.editor", "Editor"},
+    {"vsp.config.tab.keybinds", "Keybinds"},
+    {"vsp.config.tab.misc", "Misc."},
+
+    {"vsp.config.opt.pngextdata", "Save/load extra data to PNGs"},
+    {"vsp.config.opt.pngextdata.desc", "When enabled, voidsprite will load and save extra data such as canvas comments,\n"
+                                       "tile grid and symmetry to PNGs."},
+    {"vsp.config.opt.discordrpc", "Discord Rich Presence"},
+    {"vsp.config.opt.discordrpc.desc", "When enabled, your activity will be shared as your Discord status.\n"
+                                       "Supported only on Windows."},
+    {"vsp.config.opt.usesystemfilepicker", "Use system file dialog"},
+    {"vsp.config.opt.usesystemfilepicker.desc", "When enabled, opening and saving files will use the system file picker window.\n"
+                                                "Only supported on desktop platforms."},
+    {"vsp.config.opt.lang", "Language (restart required)"},
+    {"vsp.config.opt.vsync", "Vertical sync"},
+    {"vsp.config.opt.vsync.desc", "When enabled, the framerate will be locked to your display's refresh rate.\n"
+                                  "Disabling this will make brushes smoother but also increase energy consumption.\n"
+                                  "voidsprite must be restarted for this change to take effect."},
+    {"vsp.config.opt.bganim", "Animated background"},
+    {"vsp.config.opt.bganim.none", "Off"},
+    {"vsp.config.opt.bganim.sharp", "Sharp"},
+    {"vsp.config.opt.bganim.smooth", "Smooth"},
+    {"vsp.config.opt.bganim.sharpstatic", "Sharp (static)"},
+    {"vsp.config.opt.bganim.smoothstatic", "Smooth (static)"},
+    {"vsp.config.opt.renderer", "Renderer"},
+    {"vsp.config.opt.vfx", "Enable visual effects"},
+    {"vsp.config.opt.vfx.desc", "When disabled, some visual effect animations will not play."},
+    {"vsp.config.opt.cursor", "Override system cursor (restart required)"},
+    {"vsp.config.opt.cursor.desc", "When enabled, voidsprite will use a custom mouse cursor sprite."},
+    {"vsp.config.opt.visualconfig", "Visual configuration (restart required)"},
+    {"vsp.config.opt.reloadfonts", "Reload fonts..."},
+    {"vsp.config.opt.fontsreloaded", "Fonts reloaded"},
+    {"vsp.config.opt.setfileaccess", "Manage file access permissions..."},
+    {"vsp.config.opt.opensavelocation", "Open saved file location"},
+    {"vsp.config.opt.startrowcolidxat1", "Row/column index labels start at 1"},
+    {"vsp.config.opt.altscrolling", "Pan canvas with touchpad"},
+    {"vsp.config.opt.maxundocount", "Max undo history"},
+    {"vsp.config.opt.selectonlocktile", "Isolate rect on locking tile"},
+    {"vsp.config.opt.selectonlocktile.desc", "When locking a tile loop preview (CTRL+Q), Isolate Rect will be activated on the tile's area."},
+    {"vsp.config.opt.lockfilltotiles", "Lock Fill tool to tile size"},
+    {"vsp.config.opt.lockfilltotiles.desc", "When enabled, the Fill tool will not flow past the current tile if a tile size is set."},
+    {"vsp.config.opt.recoveryautosavetime", "Recovery autosave interval (minutes) (0 to disable)"},
+    {"vsp.config.hint.recoveryautosaves", " Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory."},
+
+    {"vsp.config.opt.openappdata", "Open app data directory..."},
+    {"vsp.config.opt.openappdata.desc", "Open the directory where voidsprite stores its data."},
+    {"vsp.config.opt.associateexts", "Associate file extensions..."},
+    {"vsp.config.opt.associateexts.desc", "Choose file types to associate with the currently running instance of voidsprite."},
+    {"vsp.config.associateexts.title", "Associate file extensions"},
+    {"vsp.config.associateexts.desc", "Choose file types to associate"},
+    {"vsp.config.associateexts.success", "File extensions associated."},
+    {"vsp.config.associateexts.error", "Failed to associate file extensions."},
+    {"vsp.config.associateexts.noselect", "No file types selected."},
+    {"vsp.config.associateexts.dontopenlaunchpad", "Don't open voidsprite Launchpad"},
+	
+	{"vsp.config.opt.brushcolorpreview", "Replace brush preview with active color (WIP)"},
+	{"vsp.config.opt.brushcolorpreview.desc", "Replaces the brush preview with the currently selected color."},
+
+    //popup: export scaled
+    {"vsp.exportscaled.integerscale", "Integer scale"},
+    {"vsp.exportscaled.pixelsize", "Pixel size"},
+    {"vsp.exportscaled.resultsize", "Result size: "},
+    {"vsp.exportscaled.invalidsize", "Invalid size."},
+    {"vsp.exportscaled.integerscale.title", "Scale with integer scaling"},
+    {"vsp.exportscaled.pixelsize.title", "Scale to pixel size"},
+    {"vsp.exportscaled.invalidsize", "Invalid size."},
+
+    //popup: apply filter
+    {"vsp.applyfilter.renderingpreview", "Rendering preview..."},
+
+    //popup: quick convert
+    {"vsp.quickconvert.forceindexedtorgb", "Always convert indexed formats to RGB"},
+
+    //popup: about
+    {"vsp.about.title", "About void" UTF8_DIAMOND "sprite"},
+    {"vsp.about.tab.general", "General"},
+    {"vsp.about.tab.systeminfo", "System information"},
+    {"vsp.about.tab.libs", "Libraries"},
+    {"vsp.about.contributors", "Contributors:"},
+    {"vsp.about.translations", "Translation credits:"},
+
+    //popup: file picker
+    {"vsp.filepicker.filename", "File name"},
+    {"vsp.filepicker.overwrite", "Overwrite file?"},
+    {"vsp.filepicker.filenotfound", "File not found."},
+    {"vsp.filepicker.nofilename", "No file name chosen."},
+    {"vsp.filepicker.overwriteconfirm", "This file already exists. Overwrite?"},
+    {"vsp.filepicker.folderreaderror", "Error accessing folder:"},
+
+    //brushes/tools
+    {"vsp.brush.param.size", "Size"},
+    {"vsp.brush.param.pressuresize", "Pressure size"},
+
+    {"vsp.brush.undefined", "Default brush"},
+    {"vsp.brush.squarepixel", "Square Pixel"},
+    {"vsp.brush.squarepixelpxperfect", "1x1 Pixel (Pixel-Perfect)"},
+    {"vsp.brush.squarepixelburst", "1x1 Pixel (burst)"},
+    {"vsp.brush.squarepixelburst.desc", "Hold Mouse Left to draw.\n"
+                                        "While drawing, make arcs with fast mouse movements or holding Mouse Right.\n"
+                                        "This will create interconnecting lines."},
+    {"vsp.brush.squarepixelarcx", "1x1 Pixel (arc X)"},
+    {"vsp.brush.squarepixelarcy", "1x1 Pixel (arc Y)"},
+    {"vsp.brush.line", "1px Line"},
+    {"vsp.brush.line.desc", "Hold Mouse Left at the beginning of the line, then release at the end point"},
+    {"vsp.brush.pathfindline", "1px Pathfind Line"},
+    {"vsp.brush.pathfindline.desc", "Hold Mouse Left at the start point, then release at the end point.\n"
+                                    "Pathfinding will be used to draw it."},
+    {"vsp.brush.roundpixel", "Round Pixel"},
+    {"vsp.brush.rect", "1px Rectangle"},
+    {"vsp.brush.rectfill", "Filled Rectangle"},
+    {"vsp.brush.circle", "1px Circle"},
+    {"vsp.brush.circlearc", "1px Circle (arc)"},
+    {"vsp.brush.diamond", "1px Diamond"},
+    {"vsp.brush.fill", "Fill"},
+    {"vsp.brush.fill.desc", "Mouse Left to fill an area with the current color.\n"
+                            "Mouse Right to fill only the currently selected area."},
+    {"vsp.brush.swapcolor", "Replace color"},
+    {"vsp.brush.swapcolor.desc", "Mouse Left to replace all occurrences of the clicked color with the current active color."},
+    {"vsp.brush.pickcolor", "Color Picker"},
+    {"vsp.brush.pickcolor.desc", "Mouse Left to pick a color from the current layer."},
+    {"vsp.brush.comment", "Add comment"},
+    {"vsp.brush.comment.desc", "Mouse Left to add a comment.\n" 
+                              "Mouse Left in Eraser mode to delete a comment."},
+    {"vsp.brush.guideline", "Add guideline"},
+    {"vsp.brush.guideline.desc", "Mouse Left to place/edit vertical guidelines.\n"
+                                 "Mouse Right to place/edit horizontal guidelines.\n"
+                                 "Use Eraser mode to remove guidelines."},
+    {"vsp.brush.measure", "Measure"},
+    {"vsp.brush.measure.desc", "Select an area with Mouse Left to measure its size in pixels"},
+    {"vsp.brush.xsym", "Set X symmetry"},
+    {"vsp.brush.xsym.desc", "Mouse Left to enable and set the position of the X symmetry line.\n"
+                            "Mouse Right to toggle X symmetry off/on."},
+    {"vsp.brush.ysym", "Set Y symmetry"},
+    {"vsp.brush.ysym.desc", "Mouse Left to enable and set the position of the Y symmetry line.\n"
+                            "Mouse Right to toggle Y symmetry off/on."},
 
 }}},
