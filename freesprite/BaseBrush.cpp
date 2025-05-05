@@ -33,31 +33,57 @@
 
 void BaseBrush::renderOnCanvas(MainEditor* editor, int scale)
 {
-	renderOnCanvas(editor->canvas.currentDrawPoint, scale);
+    renderOnCanvas(editor->canvas.currentDrawPoint, scale);
+}
+
+void BaseBrush::drawWholeSelectedPoint(XY canvasDrawPoint, XY onCanvasPoint, int scale)
+{
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+    drawLocalPoint(canvasDrawPoint, onCanvasPoint, scale);
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+    drawPointOutline(canvasDrawPoint, onCanvasPoint, scale);
+}
+
+void BaseBrush::drawActiveColorPoint(MainEditor* e, XY onCanvasPoint)
+{
+    SDL_Rect r = e->canvas.canvasRectToScreenRect({ onCanvasPoint.x,onCanvasPoint.y,1,1 });
+    SDL_Color c = uint32ToSDLColor(e->getActiveColor());
+    SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, 0xff);
+    SDL_RenderFillRect(g_rd, &r);
+}
+
+void BaseBrush::drawSelectedPoint(MainEditor* e, XY onCanvasPoint)
+{
+    if (g_config.brushColorPreview) {
+        drawActiveColorPoint(e, onCanvasPoint);
+    }
+    else {
+        drawWholeSelectedPoint(e->canvas.currentDrawPoint, onCanvasPoint, e->canvas.scale);
+    }
 }
 
 void BaseBrush::drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale)
 {
-	XY pointFrom = XY{ ixmin(from.x, to.x), ixmin(from.y, to.y) };
-	XY pointTo = XY{ ixmax(from.x, to.x), ixmax(from.y, to.y) };
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
-	SDL_Rect r = { canvasDrawPoint.x + (pointFrom.x * scale), canvasDrawPoint.y + (pointFrom.y * scale), ((pointTo.x - pointFrom.x + 1) * scale), ((pointTo.y - pointFrom.y + 1) * scale) };
-	SDL_RenderFillRect(g_rd, &r);
-	SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0x80);
-	SDL_Rect r2 = r;
-	r2.x++;
-	r2.y++;
-	r2.w -= 2;
-	r2.h -= 2;
-	SDL_RenderDrawRect(g_rd, &r2);
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-	SDL_RenderDrawRect(g_rd, &r);
+    XY pointFrom = XY{ ixmin(from.x, to.x), ixmin(from.y, to.y) };
+    XY pointTo = XY{ ixmax(from.x, to.x), ixmax(from.y, to.y) };
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
+    SDL_Rect r = { canvasDrawPoint.x + (pointFrom.x * scale), canvasDrawPoint.y + (pointFrom.y * scale), ((pointTo.x - pointFrom.x + 1) * scale), ((pointTo.y - pointFrom.y + 1) * scale) };
+    SDL_RenderFillRect(g_rd, &r);
+    SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0x80);
+    SDL_Rect r2 = r;
+    r2.x++;
+    r2.y++;
+    r2.w -= 2;
+    r2.h -= 2;
+    SDL_RenderDrawRect(g_rd, &r2);
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+    SDL_RenderDrawRect(g_rd, &r);
 
-	SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0x80);
-	SDL_RenderDrawLine(g_rd, r.x, r.y + 1, r.x + r.w - 1, r.y + r.h);
-	//SDL_RenderDrawLine(g_rd, r.x + 1, r.y, r.x + r.w, r.y + r.h - 1);
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-	SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + r.w, r.y + r.h);
+    SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0x80);
+    SDL_RenderDrawLine(g_rd, r.x, r.y + 1, r.x + r.w - 1, r.y + r.h);
+    //SDL_RenderDrawLine(g_rd, r.x + 1, r.y, r.x + r.w, r.y + r.h - 1);
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+    SDL_RenderDrawLine(g_rd, r.x, r.y, r.x + r.w, r.y + r.h);
 }
 
 void g_loadBrushes()

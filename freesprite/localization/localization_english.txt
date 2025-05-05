@@ -230,9 +230,9 @@
     {"vsp.config.associateexts.error", "Failed to associate file extensions."},
     {"vsp.config.associateexts.noselect", "No file types selected."},
     {"vsp.config.associateexts.dontopenlaunchpad", "Don't open voidsprite Launchpad"},
-	
-	{"vsp.config.opt.brushcolorpreview", "Replace brush preview with active color (WIP)"},
-	{"vsp.config.opt.brushcolorpreview.desc", "Replaces the brush preview with the currently selected color."},
+    
+    {"vsp.config.opt.brushcolorpreview", "Replace brush preview with active color"},
+    {"vsp.config.opt.brushcolorpreview.desc", "Replaces the brush preview with the currently selected color."},
 
     //popup: export scaled
     {"vsp.exportscaled.integerscale", "Integer scale"},

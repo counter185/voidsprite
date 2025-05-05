@@ -62,6 +62,10 @@ public:
 		//SDL_RenderDrawLine(g_rd, r.x+scale/2, r.y, r.x + scale-1, r.y + scale/2-1);
 	}
 
+	void drawWholeSelectedPoint(XY canvasDrawPoint, XY onCanvasPoint, int scale);
+	void drawActiveColorPoint(MainEditor* e, XY onCanvasPoint);
+	void drawSelectedPoint(MainEditor* e, XY onCanvasPoint);
+
 	void drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale);
 };
 
