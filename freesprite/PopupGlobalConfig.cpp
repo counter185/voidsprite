@@ -397,7 +397,11 @@ void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*
 void PopupGlobalConfig::updateLanguageCredit()
 {
     if (getLocalizations().contains(g_config.language)) {
-        languageCredit->setText(getLocalizations()[g_config.language].langCredit);
+		std::string langCredit = getLocalizations()[g_config.language].langCredit;
+        if (g_config.language != "en-us") {
+            langCredit += std::format("\n[completion: {:.2f}%]", g_getLocCompletionPercentage(g_config.language) * 100);
+        }
+        languageCredit->setText(langCredit);
     }
     else {
         languageCredit->setText("");

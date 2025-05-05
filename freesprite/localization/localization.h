@@ -12,3 +12,4 @@ struct LocalizationData {
 
 std::map<std::string, LocalizationData>& getLocalizations();
 std::string g_getLocString(std::string key);
+double g_getLocCompletionPercentage(std::string locale);

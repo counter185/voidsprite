@@ -37,6 +37,14 @@ std::string g_getLocString(std::string key) {
     }
 }
 
+double g_getLocCompletionPercentage(std::string locale)
+{
+    if (g_localizations.contains(locale)) {
+		return g_localizations[locale].kvs.size() / (double)g_localizations["en-us"].kvs.size();
+    }
+    return 0.0;
+}
+
 //compiler bug workaround
 std::map<std::string, LocalizationData>& getLocalizations() {
     return g_localizations;
