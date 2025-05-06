@@ -42,7 +42,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
 
     std::vector<std::pair<std::string, std::string>> typesInDropdown;
     for (auto& fileType : fileTypes) {
-        typesInDropdown.push_back({fileType.first + " (" + fileType.second + ")", ""});
+        typesInDropdown.push_back({fileType.second + " (" + fileType.first + ")", ""});
     }
     fileTypeDropdown = new UIDropdown(typesInDropdown);
     fileTypeDropdown->position = xyAdd(fileNameLabel->position, { 0, currentFileName->wxHeight + 5 });

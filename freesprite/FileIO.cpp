@@ -3916,10 +3916,34 @@ bool writeBMP(PlatformNativePathString path, Layer* data) {
     return outbmp.WriteToFileP(nfile);
 }
 
+bool writeJPEG(PlatformNativePathString path, Layer* data)
+{
+    if (data->isPalettized) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Indexed image export not supported"));
+        return false;
+    }
+
+    SDL_Surface* surface = SDL_CreateSurface(data->w, data->h, SDL_PIXELFORMAT_ARGB8888);
+    if (surface == NULL) {
+        logerr(std::format("[JPEG] failed to create surface: {}", SDL_GetError()));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
+        return false;
+    }
+    memcpy(surface->pixels, data->pixelData, data->w * data->h * 4);
+
+    std::string u8path = convertStringToUTF8OnWin32(path);
+
+    bool ret = IMG_SaveJPG(surface, u8path.c_str(), 100);
+
+    SDL_FreeSurface(surface);
+
+    return ret;
+}
+
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Indexed image export not implemented"));
         return false;
     }
 
