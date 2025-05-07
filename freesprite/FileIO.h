@@ -80,6 +80,7 @@ bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeJPEG(PlatformNativePathString path, Layer* data);
+bool writeAVIF(PlatformNativePathString path, Layer* data);
 bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeXBM(PlatformNativePathString path, Layer* data);
@@ -291,7 +292,8 @@ inline void g_setupIO() {
         *exSR8,
         *exVTF,
         *exDIBv5,
-        *exJPEG
+        *exJPEG,
+        *exAVIF
         ;
 
     g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -313,6 +315,7 @@ inline void g_setupIO() {
     g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL", ".jxl", &writeJpegXL, FORMAT_RGB));
 #endif
     g_fileExporters.push_back( exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", &writeJPEG));
+    g_fileExporters.push_back( exAVIF = FileExporter::flatExporter("AVIF", ".avif", &writeAVIF));
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
     g_fileExporters.push_back( exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", &writeCaveStoryPBM) );
     g_fileExporters.push_back( exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED) );
@@ -365,6 +368,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG));
     g_fileImporters.push_back(FileImporter::flatImporter("JPEG", ".jpeg", &readSDLImage, exJPEG));
+    g_fileImporters.push_back(FileImporter::flatImporter("AVIF", ".avif", &readSDLImage, exAVIF));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP", ".bmp", &readBMP, exBMP));
     //g_fileImporters.push_back(FileImporter::flatImporter("GIF", ".gif", &readGIF, NULL));
 #if VOIDSPRITE_JXL_ENABLED
