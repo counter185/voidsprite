@@ -18,6 +18,8 @@ Free C++ pixel art editor
 |---|---|:-:|:-:|
 | voidsprite session | .voidsn | ✔ | ✔ |
 | PNG | .png | ✔ | ✔ |
+| JPEG | .jpeg | ✔ | ✔ |
+| AVIF | .avif | ✔ | ✔ |
 | BMP | .bmp | ✔ | 〰(24-bit only) |
 | TGA | .tga | ✔ | 〰(uncomp. 24-bit only) |
 | JPEG XL | .jxl | ✔ | ✔ |
