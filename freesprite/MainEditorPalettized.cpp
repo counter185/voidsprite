@@ -18,6 +18,7 @@
 #include "PopupSetEditorPixelGrid.h"
 #include "PopupGlobalConfig.h"
 #include "PopupExportScaled.h"
+#include "PopupFilePicker.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -446,6 +447,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_R, { "Recenter canvas",
                             [](MainEditor* editor) {
                                 editor->recenterCanvas();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { "Add reference...",
+                            [](MainEditor* editor) {
+                                PopupFilePicker::PlatformAnyImageImportDialog(editor, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE);
                             }
                         }
                     },

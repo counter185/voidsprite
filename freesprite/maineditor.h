@@ -161,6 +161,7 @@ public:
     void eventPopupClosed(int evt_id, BasePopup* p) override;
     void eventTextInputConfirm(int evt_id, std::string text) override;
     void eventColorSet(int evt_id, uint32_t color) override;
+	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerId) override;
 
     void DrawBackground();
     void DrawForeground();
@@ -208,6 +209,7 @@ public:
     void tickAutosave();
     bool usingAltBG();
     void setAltBG(bool useAltBG);
+    void tryAddReference(PlatformNativePathString path);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

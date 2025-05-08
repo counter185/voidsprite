@@ -49,6 +49,25 @@ void ScrollingPanel::handleInput(SDL_Event evt, XY gPosOffset) {
     }
 
     if (!DrawableManager::processInputEventInMultiple({ subWidgets }, evt, xyAdd(gPosOffset, scrollOffset))) {
-        
+        if (evt.type == SDL_EVENT_KEY_DOWN) {
+            switch (evt.key.scancode) {
+                case SDLK_PAGEDOWN:
+                    if (scrollVertically) {
+                        scrollOffset.y -= wxHeight/4*3;
+                    }
+                    else if (scrollHorizontally) {
+                        scrollOffset.x -= wxWidth / 4 * 3;
+                    }
+                    break;
+                case SDLK_PAGEUP:
+                    if (scrollVertically) {
+                        scrollOffset.y += wxHeight/4*3;
+                    }
+                    else if (scrollHorizontally) {
+                        scrollOffset.x += wxWidth / 4 * 3;
+                    }
+                    break;
+            }
+        }
     }
 }

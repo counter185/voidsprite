@@ -621,12 +621,7 @@ void StartScreen::renderBackground()
 
 void StartScreen::openImageLoadDialog()
 {
-    std::vector<std::pair<std::string, std::string>> filetypes;
-    for (FileImporter*& f : g_fileImporters) {
-        filetypes.push_back({ f->extension(), f->name()});
-    }
-
-    platformTryLoadOtherFile(this, filetypes, TL("vsp.popup.openimage"), 0);
+    PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0);
 }
 
 void StartScreen::tryLoadFile(std::string path)

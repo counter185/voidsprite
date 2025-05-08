@@ -60,6 +60,8 @@ struct UIDoubleSliderBounds {
 #define EVENT_TILEMAP_RESIZE 53
 #define EVENT_MAINEDITOR_RESCALELAYER 54
 #define EVENT_MAINEDITOR_EXPORTSCALED 55
+#define EVENT_MAINEDITOR_ADD_REFERENCE 56
+#define EVENT_SPLITSESSION_ADDIMAGE 57
 
 //get rid of this whole system somehow
 // (maybe only leave it for async ops like file popups)

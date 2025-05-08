@@ -35,6 +35,7 @@
 #include "PopupPickColor.h"
 #include "PopupApplyFilter.h"
 #include "PopupExportScaled.h"
+#include "PopupFilePicker.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -961,6 +962,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_F, { "Add reference...",
+                            [](MainEditor* editor) {
+                                PopupFilePicker::PlatformAnyImageImportDialog(editor, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE);
+                            }
+                        }
+                    },
                     {SDL_SCANCODE_B, { "Toggle background color",
                             [](MainEditor* editor) {
                                 editor->backgroundColor.r = ~editor->backgroundColor.r;
@@ -1303,13 +1310,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 
     if (evt.type == SDL_DROPFILE) {
         std::string path = evt.drop.data;
-        MainEditor* ssn = loadAnyIntoSession(path);
-        if (ssn != NULL) {
-            Layer* flat = ssn->flattenImage();
-            Panel* referencePanel = new PanelReference(flat);
-            addWidget(new CollapsableDraggablePanel("REFERENCE", referencePanel));
-            delete ssn;
-        }
+        tryAddReference(convertStringOnWin32(path));
     }
 
     if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.scancode == SDL_SCANCODE_Q) {
@@ -1710,6 +1711,13 @@ void MainEditor::eventColorSet(int evt_id, uint32_t color)
         l->colorKey = color;
         l->colorKeySet = true;
         l->layerDirty = true;
+    }
+}
+
+void MainEditor::eventFileOpen(int evt_id, PlatformNativePathString name, int importerId)
+{
+    if (evt_id == EVENT_MAINEDITOR_ADD_REFERENCE) {
+        tryAddReference(name);
     }
 }
 
@@ -2293,6 +2301,17 @@ bool MainEditor::usingAltBG()
 void MainEditor::setAltBG(bool useAltBG)
 {
     backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
+}
+
+void MainEditor::tryAddReference(PlatformNativePathString path)
+{
+    MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(path));
+    if (ssn != NULL) {
+        Layer* flat = ssn->flattenImage();
+        Panel* referencePanel = new PanelReference(flat);
+        addWidget(new CollapsableDraggablePanel("REFERENCE", referencePanel));
+        delete ssn;
+    }
 }
 
 void MainEditor::moveLayerUp(int index) {

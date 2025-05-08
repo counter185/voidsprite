@@ -43,6 +43,8 @@
     {"vsp.popup.newsplitsession", "create new split session"},
     {"vsp.popup.openimage", "open image"},
     {"vsp.popup.saveimage", "save image"},
+    {"vsp.popup.addreference", "add reference"},
+    {"vsp.popup.addtosplitsession", "add image to split session"},
 
     // default layer names
     {"vsp.layer.template", "Template Layer"},

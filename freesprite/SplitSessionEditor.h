@@ -43,6 +43,7 @@ public:
 
     std::string getName() override { return TL("vsp.splitsessioneditor"); }
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) override;
+	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) override;
     void eventPopupClosed(int evt_id, BasePopup* popup) override;
 
     void drawBackground();

@@ -9,6 +9,7 @@
 #include "ScrollingPanel.h"
 #include "ScreenWideNavBar.h"
 #include "PopupYesNo.h"
+#include "PopupFilePicker.h"
 
 SplitSessionEditor::SplitSessionEditor()
 {
@@ -135,6 +136,26 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
                 if (dragging != -1) {
                     XY endPoint = c.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y});
                     XY targetPosition = xyAdd(loadedImgs[dragging].position, xySubtract(endPoint, draggingStartPixel));
+                    if (targetPosition.x < 0) {
+						int xOffset = -targetPosition.x;
+						for (int i = 0; i < loadedImgs.size(); i++) {
+                            if (i != dragging) {
+                                loadedImgs[i].position.x += xOffset;
+                            }
+						}
+                        c.panCanvas({ -xOffset,0 });
+                        targetPosition.x = 0;
+                    }
+                    if (targetPosition.y < 0) {
+                        int yOffset = -targetPosition.y;
+                        for (int i = 0; i < loadedImgs.size(); i++) {
+                            if (i != dragging) {
+                                loadedImgs[i].position.y += yOffset;
+                            }
+                        }
+                        c.panCanvas({ 0, -yOffset });
+                        targetPosition.y = 0;
+                    }
                     if (targetPosition.x >= 0 && targetPosition.y >= 0) {
                         loadedImgs[dragging].position = targetPosition;
                     }
@@ -165,6 +186,13 @@ void SplitSessionEditor::eventFileSaved(int evt_id, PlatformNativePathString nam
     if (evt_id == 0) {
         outputSPSNFilePath = convertStringToUTF8OnWin32(name);
         recalcRelativePaths();
+    }
+}
+
+void SplitSessionEditor::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
+{
+    if (evt_id == EVENT_SPLITSESSION_ADDIMAGE) {
+        tryAddFile(convertStringToUTF8OnWin32(name));
     }
 }
 
@@ -258,6 +286,11 @@ void SplitSessionEditor::setupWidgets()
                     {SDL_SCANCODE_D, { "Save and open in editor",
                         [](SplitSessionEditor* screen) {
                             screen->trySave(true);
+                        }
+                    }},
+                    {SDL_SCANCODE_A, { "Add file...",
+                        [](SplitSessionEditor* screen) {
+                            PopupFilePicker::PlatformAnyImageWithMatchingExporterImportDialog(screen, TL("vsp.popup.addtosplitsession"), EVENT_SPLITSESSION_ADDIMAGE);
                         }
                     }},
                     {SDL_SCANCODE_F, { "Set output file location",

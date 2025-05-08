@@ -37,6 +37,26 @@ public:
         return new PopupFilePicker(FILEPICKER_SAVEFILE, title, fileTypes);
     }
 
+    static void PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id) {
+        std::vector<std::pair<std::string, std::string>> filetypes;
+        for (FileImporter*& f : g_fileImporters) {
+            filetypes.push_back({ f->extension(), f->name() });
+        }
+
+        platformTryLoadOtherFile(callback, filetypes, title, callback_id);
+    }
+
+    static void PlatformAnyImageWithMatchingExporterImportDialog(EventCallbackListener* callback, std::string title, int callback_id) {
+        std::vector<std::pair<std::string, std::string>> filetypes;
+        for (FileImporter*& f : g_fileImporters) {
+            if (f->getCorrespondingExporter() != NULL) {
+                filetypes.push_back({ f->extension(), f->name() });
+            }
+        }
+
+        platformTryLoadOtherFile(callback, filetypes, title, callback_id);
+    }
+
     void populateRootAndFileList();
 };
 
