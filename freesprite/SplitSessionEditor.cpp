@@ -115,6 +115,9 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
                 if (dragging != -1) {
                     draggingStartPixel = c.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y });
                 }
+                else {
+                    scrollingCanvas = true;
+                }
             }
             else if (evt.button.button == SDL_BUTTON_RIGHT) {
                 int i = findTSSIAt(mousePixelPos);
@@ -133,6 +136,7 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
                 scrollingCanvas = false;
             }
             else if (evt.button.button == SDL_BUTTON_LEFT) {
+                scrollingCanvas = false;
                 if (dragging != -1) {
                     XY endPoint = c.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y});
                     XY targetPosition = xyAdd(loadedImgs[dragging].position, xySubtract(endPoint, draggingStartPixel));
@@ -160,7 +164,7 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
                         loadedImgs[dragging].position = targetPosition;
                     }
                     else {
-                        //todo: make it fix itself
+                        //should not happen now ever
                         g_addNotification(ErrorNotification("Image was placed out of bounds.", ""));
                     }
                     dragging = -1;
