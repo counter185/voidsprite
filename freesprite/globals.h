@@ -268,6 +268,7 @@ struct NavbarSection {
 #define UNDOSTACK_REMOVE_COMMENT 5
 #define UNDOSTACK_SET_OPACITY 6
 #define UNDOSTACK_RESIZE_LAYER 7
+#define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
 struct UndoStackElement {
     Layer* targetlayer = NULL;
     uint32_t type = 0;

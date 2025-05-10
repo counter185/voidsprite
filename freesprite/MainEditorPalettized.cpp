@@ -315,7 +315,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_E,
             {
                 "Edit",
-                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N},
+                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N},
                 {
                     {SDL_SCANCODE_Z, { "Undo",
                             [](MainEditor* editor) {
@@ -338,6 +338,18 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_Y, { "Toggle symmetry: Y",
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"),
+                            [](MainEditor* editor) {
+                                editor->flipAllLayersOnX();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
+                            [](MainEditor* editor) {
+                                editor->flipAllLayersOnY();
                             }
                         }
                     },

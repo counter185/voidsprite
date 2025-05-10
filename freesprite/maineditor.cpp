@@ -782,7 +782,7 @@ void MainEditor::setUpWidgets()
             SDL_SCANCODE_E,
             {
                 TL("vsp.maineditor.edit"),
-                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
+                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
                     {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"),
                             [](MainEditor* editor) {
@@ -805,6 +805,18 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_Y, { TL("vsp.maineditor.symy"),
                             [](MainEditor* editor) {
                                 editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"),
+                            [](MainEditor* editor) {
+                                editor->flipAllLayersOnX();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
+                            [](MainEditor* editor) {
+                                editor->flipAllLayersOnY();
                             }
                         }
                     },
@@ -1236,7 +1248,7 @@ void MainEditor::initToolParameters()
                 case 3: //bool
                     {
                         UICheckbox* chkbx = new UICheckbox("", this->toolProperties[key] == 1);
-						chkbx->position = { x, 3 };
+                        chkbx->position = { x, 3 };
                         chkbx->onStateChangeCallback = [this, key, valueLabel](UICheckbox* c, bool state) {
                             this->toolProperties[key] = state ? 1 : 0;
                         };
@@ -1564,7 +1576,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 break;
             case SDL_EVENT_PEN_AXIS:
                 if (evt.paxis.axis == 0) {  //should always be the pressure axis
-					penPressure = evt.paxis.value;
+                    penPressure = evt.paxis.value;
                 }
                 break;
         }
@@ -1943,11 +1955,18 @@ void MainEditor::discardEndOfUndoStack() {
                 delete l.targetlayer;
                 break;
             case UNDOSTACK_RESIZE_LAYER:
-                UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
-                for (int x = 0; x < layers.size(); x++) {
-                    tracked_free(resizeLayerData[x].oldData);
+                {
+                    UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
+                    for (int x = 0; x < layers.size(); x++) {
+                        tracked_free(resizeLayerData[x].oldData);
+                    }
+                    delete resizeLayerData;
                 }
-                delete resizeLayerData;
+                break;
+            case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
+                for (Layer* ll : layers) {
+                    ll->discardLastUndo();
+                }
                 break;
         }
 
@@ -2079,6 +2098,7 @@ void MainEditor::undo()
                 layerPicker->updateLayers();
                 break;
             case UNDOSTACK_RESIZE_LAYER:
+            {
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
                     //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
@@ -2096,6 +2116,12 @@ void MainEditor::undo()
                 l.extdata = tileDimensions.x;
                 l.extdata2 = tileDimensions.y;
                 tileDimensions = td;
+            }
+                break;
+            case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
+                for (Layer* ll : layers) {
+                    ll->undo();
+                }
                 break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2155,6 +2181,7 @@ void MainEditor::redo()
             layerPicker->updateLayers();
             break;
         case UNDOSTACK_RESIZE_LAYER:
+        {
             UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
             for (int x = 0; x < layers.size(); x++) {
                 //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
@@ -2172,6 +2199,12 @@ void MainEditor::redo()
             l.extdata = tileDimensions.x;
             l.extdata2 = tileDimensions.y;
             tileDimensions = td;
+        }
+            break;
+        case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
+            for (Layer* ll : layers) {
+                ll->redo();
+            }
             break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2479,6 +2512,24 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
     }
 
     return ret;
+}
+
+void MainEditor::flipAllLayersOnX()
+{
+    addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ALL_LAYER_DATA_MODIFIED });
+    for (Layer* l : layers) {
+        l->commitStateToUndoStack();
+        l->flipHorizontally();
+    }
+}
+
+void MainEditor::flipAllLayersOnY()
+{
+    addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ALL_LAYER_DATA_MODIFIED });
+    for (Layer* l : layers) {
+        l->commitStateToUndoStack();
+        l->flipVertically();
+    }
 }
 
 void MainEditor::rescaleAllLayersFromCommand(XY size) {

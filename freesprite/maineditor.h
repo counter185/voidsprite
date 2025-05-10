@@ -161,7 +161,7 @@ public:
     void eventPopupClosed(int evt_id, BasePopup* p) override;
     void eventTextInputConfirm(int evt_id, std::string text) override;
     void eventColorSet(int evt_id, uint32_t color) override;
-	void eventFileOpen(int evt_id, PlatformNativePathString name, int importerId) override;
+    void eventFileOpen(int evt_id, PlatformNativePathString name, int importerId) override;
 
     void DrawBackground();
     void DrawForeground();
@@ -244,6 +244,8 @@ public:
     void layer_selectCurrentAlpha();
     virtual Layer* flattenImage();
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
+    void flipAllLayersOnX();
+    void flipAllLayersOnY();
     void rescaleAllLayersFromCommand(XY size);
     void resizeAllLayersFromCommand(XY size, bool byTile = false);
     void resizzeAllLayersByTilecountFromCommand(XY size);
