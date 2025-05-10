@@ -7,10 +7,14 @@ void ScrollingPanel::render(XY position) {
     bgColor.fill(r);
 
     //DEBUG: show bounds
-    /*XY endpoint = getInsideAreaWH();
-    SDL_SetRenderDrawColor(g_rd, 0xff, 0, 0, 0x80);
-    SDL_Rect r2 = { position.x + scrollOffset.x, position.y + scrollOffset.y, endpoint.x, endpoint.y };
-    SDL_RenderDrawRect(g_rd, &r2);*/
+#if _DEBUG
+    if (g_debugConfig.debugShowScrollPanelBounds) {
+        XY endpoint = getInsideAreaWH();
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0, 0, 0x80);
+        SDL_Rect r2 = { position.x + scrollOffset.x, position.y + scrollOffset.y, endpoint.x, endpoint.y };
+        SDL_RenderDrawRect(g_rd, &r2);
+    }
+#endif
 
     if (clipElementsToSize) {
         g_pushClip(r);

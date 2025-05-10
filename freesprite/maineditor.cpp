@@ -251,6 +251,15 @@ void MainEditor::render() {
         SDL_RenderFillRect(g_rd, &patternRect);
         SDL_RenderCopy(g_rd, currentPattern->cachedIcon, NULL, &patternRect);
     }
+    if (g_config.showPenPressure && leftMouseHold && penPressure > 0 && penPressure < 1) {
+        SDL_Rect pressureIndicatorBounds = { g_mouseX - 50, g_mouseY - 60, 100, 15 };
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
+        SDL_RenderFillRect(g_rd, &pressureIndicatorBounds);
+        SDL_Rect pressureBar = offsetRect(pressureIndicatorBounds, -2);
+        pressureBar.w *= penPressure;
+        SDL_SetRenderDrawColor(g_rd, 255,255,255, 0xa0);
+        SDL_RenderFillRect(g_rd, &pressureBar);
+    }
 }
 
 void MainEditor::tick() {

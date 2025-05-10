@@ -43,7 +43,10 @@ PopupGlobalConfig::PopupGlobalConfig()
         {TL("vsp.config.tab.visual")}, 
         {TL("vsp.config.tab.editor")}, 
         {TL("vsp.config.tab.keybinds")}, 
-        {TL("vsp.config.tab.misc")}
+        {TL("vsp.config.tab.misc")},
+#if _DEBUG
+        {"DEBUG"}
+#endif
     }, 90);
     configTabs->position = XY{ 10,50 };
     wxsManager.addDrawable(configTabs);
@@ -155,44 +158,55 @@ PopupGlobalConfig::PopupGlobalConfig()
         EDITOR TAB
         -------------------------
     */
+
+    ScrollingPanel* editorSettingsPanel = new ScrollingPanel();
+    editorSettingsPanel->position = { 0,0 };
+    editorSettingsPanel->wxWidth = wxWidth - 20;
+    editorSettingsPanel->wxHeight = wxHeight - 140;
+    editorSettingsPanel->scrollVertically = true;
+    editorSettingsPanel->scrollHorizontally = false;
+    configTabs->tabs[2].wxs.addDrawable(editorSettingsPanel);
+
     posInTab = { 0,10 };
 
-	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1, &posInTab));
-	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad, &posInTab));
 
     UILabel* lbl2 = new UILabel(TL("vsp.config.opt.maxundocount"));
     lbl2->position = posInTab;
-    configTabs->tabs[2].wxs.addDrawable(lbl2);
+    editorSettingsPanel->subWidgets.addDrawable(lbl2);
     UITextField* tf2 = new UITextField();
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y};
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.maxUndoHistory));
     tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
-    configTabs->tabs[2].wxs.addDrawable(tf2);
+    editorSettingsPanel->subWidgets.addDrawable(tf2);
     posInTab.y += 35;
 
-	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile, &posInTab));
-	configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
-    configTabs->tabs[2].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview, &posInTab));
 
     lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;
-    configTabs->tabs[2].wxs.addDrawable(lbl2);
+    editorSettingsPanel->subWidgets.addDrawable(lbl2);
     tf2 = new UITextField();
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y };
     tf2->wxWidth = 80;
     tf2->setText(std::to_string(g_config.autosaveInterval));
     tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
-    configTabs->tabs[2].wxs.addDrawable(tf2);
+    editorSettingsPanel->subWidgets.addDrawable(tf2);
     posInTab.y += 35;
     lbl2 = new UILabel(TL("vsp.config.hint.recoveryautosaves"));
     lbl2->fontsize = 14;
     lbl2->color = { 255,255,255,0xa0 };
     lbl2->position = xySubtract(posInTab, {0,4});
-    configTabs->tabs[2].wxs.addDrawable(lbl2);
+    editorSettingsPanel->subWidgets.addDrawable(lbl2);
     posInTab.y += 35;
+
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showpenpressure"), TL("vsp.config.opt.showpenpressure.desc"), &g_config.showPenPressure, &posInTab));
 
     /*
         -------------------------
@@ -282,7 +296,16 @@ PopupGlobalConfig::PopupGlobalConfig()
     posInTab.y += 35;
 #endif
 
-
+    /*
+        -------------------------
+        DEBUG TAB
+        -------------------------
+    */
+#if _DEBUG
+    posInTab = { 0,10 };
+    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab));
+    posInTab.y += 35;
+#endif
     
 
     UIButton* closeButton = actionButton(TL("vsp.cmn.close"), 140);
@@ -398,7 +421,7 @@ void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*
 void PopupGlobalConfig::updateLanguageCredit()
 {
     if (getLocalizations().contains(g_config.language)) {
-		std::string langCredit = getLocalizations()[g_config.language].langCredit;
+        std::string langCredit = getLocalizations()[g_config.language].langCredit;
         if (g_config.language != "en-us") {
             langCredit += std::format("\n[completion: {:.2f}%]", g_getLocCompletionPercentage(g_config.language) * 100);
         }

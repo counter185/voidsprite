@@ -4,6 +4,7 @@
 XY UILabel::statSize() { 
     if (!cachedSizeValid) {
         cachedSize = g_fnt->StatStringDimensions(text, fontsize);
+        cachedSize.y += 6;  //todo
         cachedSizeValid = true;
     }
     return cachedSize;

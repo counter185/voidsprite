@@ -41,10 +41,10 @@ class UICheckbox :
 private:
     UICheckbox(std::string text);
 public:
-    UILabel* label;
-    UICheckboxButton* checkbox;
+    UILabel* label = NULL;
+    UICheckboxButton* checkbox = NULL;
 
-	std::function<void(UICheckbox*, bool)> onStateChangeCallback = NULL;
+    std::function<void(UICheckbox*, bool)> onStateChangeCallback = NULL;
 
     UICheckbox(std::string text, bool* linkTo);
     UICheckbox(std::string text, bool defaultState);
@@ -54,14 +54,16 @@ public:
     }
 
     void eventButtonPressed(int evt_id) override {
-		if (evt_id == 0) {
-			if (onStateChangeCallback != NULL) {
-				onStateChangeCallback(this, isChecked());
-			}
+        if (evt_id == 0) {
+            if (onStateChangeCallback != NULL) {
+                onStateChangeCallback(this, isChecked());
+            }
             else if (callback != NULL) {
                 callback->eventCheckboxToggled(callback_id, isChecked());
             }
-		}
-	}
+        }
+    }
+
+    XY getDimensions() override;
 };
 

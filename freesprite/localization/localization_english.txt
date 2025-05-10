@@ -226,6 +226,8 @@
     {"vsp.config.opt.lockfilltotiles.desc", "When enabled, the Fill tool will not flow past the current tile if a tile size is set."},
     {"vsp.config.opt.recoveryautosavetime", "Recovery autosave interval (minutes) (0 to disable)"},
     {"vsp.config.hint.recoveryautosaves", " Unsaved sessions will be periodically saved to \"autosaves\" in the app data directory."},
+    {"vsp.config.opt.showpenpressure", "Show pen pressure indicator"},
+    {"vsp.config.opt.showpenpressure.desc", "When using a pressure-sensitive pen, a bar showing the current pressure will be displayed."},
 
     {"vsp.config.opt.openappdata", "Open app data directory..."},
     {"vsp.config.opt.openappdata.desc", "Open the directory where voidsprite stores its data."},

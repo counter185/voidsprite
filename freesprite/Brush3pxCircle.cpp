@@ -23,7 +23,11 @@ void Brush3pxCircle::clickDrag(MainEditor* editor, XY from, XY to)
 }
 
 void Brush3pxCircle::renderOnCanvas(MainEditor* editor, int scale) {
+    bool pressureSensitivity = editor->toolProperties["brush.circlepixel.pressuresens"] == 1;
     int size = editor->toolProperties["brush.circlepixel.size"];
+    if (pressureSensitivity && editor->leftMouseHold) {
+        size = (int)(size * editor->penPressure);
+    }
     rasterizeCirclePoint(lastMouseMotionPos, size, [this, editor, scale](XY p) {
         drawSelectedPoint(editor, p);
     });

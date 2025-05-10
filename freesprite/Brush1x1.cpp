@@ -3,8 +3,8 @@
 #include "MainEditorPalettized.h"
 
 void Brush1x1::clickPress(MainEditor* editor, XY pos) {
-    int size = (int)(editor->toolProperties["brush.squarepixel.size"]
-        * (editor->toolProperties["brush.squarepixel.pressuresens"] == 1 ? editor->penPressure : 1.0));
+    int size = (int)(round(editor->toolProperties["brush.squarepixel.size"]
+        * (editor->toolProperties["brush.squarepixel.pressuresens"] == 1 ? editor->penPressure : 1.0)));
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             editor->SetPixel(xyAdd(pos, {i,j}), editor->getActiveColor());

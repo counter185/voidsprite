@@ -32,6 +32,7 @@ public:
         true
 #endif   
         ;
+    bool showPenPressure = true;
 
     std::vector<std::string> lastOpenFiles;
 
@@ -39,9 +40,16 @@ public:
     std::map<std::string, SDL_Keycode> keybinds;
 };
 
+struct DebugSettings {
+    bool debugShowScrollPanelBounds = false;
+};
+
 inline bool g_configWasLoaded = false;
 inline GlobalConfig g_config;
 inline std::vector<std::string> g_availableRenderersNow;
+#if _DEBUG
+inline DebugSettings g_debugConfig{};
+#endif
 
 bool g_saveConfig();
 void g_loadConfig();
