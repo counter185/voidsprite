@@ -106,6 +106,19 @@ void DrawableManager::removeDrawable(Drawable* d, bool free) {
     }
 }
 
+void DrawableManager::removeDrawableWithoutUnfocus(Drawable* d, bool free)
+{
+    for (int x = 0; x < drawablesList.size(); x++) {
+        if (drawablesList[x] == d) {
+            if (free) {
+                delete drawablesList[x];
+            }
+            drawablesList.erase(drawablesList.begin() + x);
+            return;
+        }
+    }
+}
+
 void DrawableManager::renderAll(XY offset) {
     //tickAnchors();
 
@@ -118,7 +131,7 @@ void DrawableManager::renderAll(XY offset) {
 }
 
 void DrawableManager::moveToFront(Drawable* d) {
-    removeDrawable(d, false);
+    removeDrawableWithoutUnfocus(d, false);
     addDrawable(d);
 }
 

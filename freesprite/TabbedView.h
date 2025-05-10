@@ -124,6 +124,7 @@ public:
 
     bool takesMouseWheelEvents() override { return true; }
     bool takesTouchEvents() override { return true; }
+    bool shouldMoveToFrontOnFocus() override { return true; }
 
     XY getDimensions() override { 
         XY ret = { 0,0 };

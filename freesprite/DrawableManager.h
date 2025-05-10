@@ -5,6 +5,8 @@
 
 class DrawableManager
 {
+private:
+	void removeDrawableWithoutUnfocus(Drawable* d, bool free = true);
 public:
 	std::vector<Drawable*> drawablesList;
 

@@ -5,71 +5,12 @@
 
 void UITextField::render(XY pos)
 {
-	SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
-	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, focused ? 0xff : 0x80);
-	SDL_RenderFillRect(g_rd, &drawrect);
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-	SDL_RenderDrawRect(g_rd, &drawrect);
-
-	if (focused) {
-		double lineAnimPercent = XM1PW3P1(focusTimer.percentElapsedTime(500));
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
-		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
-		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
-		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
-
-		
-		SDL_SetTextInputArea(g_wd, &drawrect, 0);
-
-		if (imeCandidates.size() > 0) {
-			XY imeCandsOrigin = xyAdd(pos, { 0, wxHeight });
-			for (int i = 0; i < imeCandidates.size(); i++) {
-				g_ttp->addTooltip(Tooltip{ imeCandsOrigin, imeCandidates[i], i == imeCandidateIndex ? SDL_Color{0,255,0,255} : SDL_Color{ 255,255,255,255 }, XM1PW3P1(imeCandidatesTimer.percentElapsedTime(400))});
-				imeCandsOrigin.y += 30;
-			}
-			
-		}
+	renderTextField(pos);
+#if __ANDROID__
+	if (!SDL_IsDeXMode() && focused) {
+		renderOnScreenTextField();
 	}
-
-	if (hovered) {
-		renderGradient(drawrect, 0x08FFFFFF, 0x08FFFFFF, 0x20D3F4FF, 0x20D3F4FF);
-		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
-		SDL_RenderDrawRect(g_rd, &drawrect);
-
-		if (!tooltip.empty() && hoverTimer.percentElapsedTime(1000) == 1.0f) {
-			g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, 1000) });
-		}
-	}
-	
-	if (!isColorField || !isValidOrPartialColor() || text.empty()) {
-		g_fnt->RenderString(text + (focused ? "_" : ""), pos.x + 2, pos.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) });
-	}
-	else {
-		int textPtr = 0;
-		XY origin = xyAdd(pos, { 2,2 });
-		if (text[0] == '#') {
-			origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{0x80,0x80,0x80,255});
-			textPtr++;
-		}
-		origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{255,0x32,0x32,255});
-		textPtr += 2;
-		if (textPtr < text.size()) {
-			origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{0x50,255,0x50,255});
-			textPtr += 2;
-		}
-		if (textPtr < text.size()) {
-			origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{0x18,0x9A,255,255});
-			textPtr += 2;
-		}
-		if (textPtr < text.size()) {
-			origin = g_fnt->RenderString(text.substr(textPtr), origin.x, origin.y);
-		}
-		if (focused) {
-			g_fnt->RenderString("_", origin.x, origin.y);
-		
-		}
-	}
+#endif
 }
 
 void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
@@ -139,6 +80,90 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
 		}
 		imeCandidateIndex = evt.edit_candidates.selected_candidate;
 	}
+}
+
+void UITextField::renderTextField(XY at)
+{
+	SDL_Rect drawrect = { at.x, at.y, wxWidth, wxHeight };
+	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, focused ? 0xff : 0x80);
+	SDL_RenderFillRect(g_rd, &drawrect);
+	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+	SDL_RenderDrawRect(g_rd, &drawrect);
+
+	if (focused) {
+		double lineAnimPercent = XM1PW3P1(focusTimer.percentElapsedTime(500));
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
+		drawLine(XY{ drawrect.x, drawrect.y }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
+		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x, drawrect.y + drawrect.h }, lineAnimPercent);
+		drawLine(XY{ drawrect.x + drawrect.w, drawrect.y + drawrect.h }, XY{ drawrect.x + drawrect.w, drawrect.y }, lineAnimPercent);
+
+
+		SDL_SetTextInputArea(g_wd, &drawrect, 0);
+
+		if (imeCandidates.size() > 0) {
+			XY imeCandsOrigin = xyAdd(at, { 0, wxHeight });
+			for (int i = 0; i < imeCandidates.size(); i++) {
+				g_ttp->addTooltip(Tooltip{ imeCandsOrigin, imeCandidates[i], i == imeCandidateIndex ? SDL_Color{0,255,0,255} : SDL_Color{ 255,255,255,255 }, XM1PW3P1(imeCandidatesTimer.percentElapsedTime(400)) });
+				imeCandsOrigin.y += 30;
+			}
+
+		}
+	}
+
+	if (hovered) {
+		renderGradient(drawrect, 0x08FFFFFF, 0x08FFFFFF, 0x20D3F4FF, 0x20D3F4FF);
+		SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
+		SDL_RenderDrawRect(g_rd, &drawrect);
+
+		if (!tooltip.empty() && hoverTimer.percentElapsedTime(1000) == 1.0f) {
+			g_ttp->addTooltip(Tooltip{ xyAdd(at, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, 1000) });
+		}
+	}
+
+	if (!isColorField || !isValidOrPartialColor() || text.empty()) {
+		g_fnt->RenderString(text + (focused ? "_" : ""), at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) });
+	}
+	else {
+		int textPtr = 0;
+		XY origin = xyAdd(at, { 2,2 });
+		if (text[0] == '#') {
+			origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{ 0x80,0x80,0x80,255 });
+			textPtr++;
+		}
+		origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 255,0x32,0x32,255 });
+		textPtr += 2;
+		if (textPtr < text.size()) {
+			origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 0x50,255,0x50,255 });
+			textPtr += 2;
+		}
+		if (textPtr < text.size()) {
+			origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 0x18,0x9A,255,255 });
+			textPtr += 2;
+		}
+		if (textPtr < text.size()) {
+			origin = g_fnt->RenderString(text.substr(textPtr), origin.x, origin.y);
+		}
+		if (focused) {
+			g_fnt->RenderString("_", origin.x, origin.y);
+
+		}
+	}
+}
+
+void UITextField::renderOnScreenTextField()
+{
+	XY onScreenPos = { g_windowW / 2, g_windowH / 6 };
+	onScreenPos.x -= wxWidth / 2;
+	onScreenPos.y -= wxHeight / 2;
+
+	double focusTime = focusTimer.percentElapsedTime(600);
+	g_pushClip({ 0,0,g_windowW, g_windowH });
+	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xd0 * focusTime);
+	SDL_RenderFillRect(g_rd, (SDL_Rect*)NULL);
+
+	renderTextField(onScreenPos);
+	g_popClip();
 }
 
 bool UITextField::isValidOrPartialColor()
