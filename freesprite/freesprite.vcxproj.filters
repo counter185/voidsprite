@@ -1190,6 +1190,9 @@
     <ClInclude Include="PopupExportScaled.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
+    <ClInclude Include="TemplatePixelIllustration.h">
+      <Filter>Header files\templates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

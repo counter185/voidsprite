@@ -46,6 +46,9 @@
     {"vsp.popup.addreference", "add reference"},
     {"vsp.popup.addtosplitsession", "add image to split session"},
 
+    // templates
+    {"vsp.template.pixelillustration", "pixel illustration"},
+
     // default layer names
     {"vsp.layer.template", "Template Layer"},
     {"vsp.layer.jxl", "JPEG XL Layer"},

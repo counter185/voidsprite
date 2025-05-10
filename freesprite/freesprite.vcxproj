@@ -433,6 +433,7 @@
     <ClInclude Include="shiftjis.h" />
     <ClInclude Include="splitsession.h" />
     <ClInclude Include="SplitSessionEditor.h" />
+    <ClInclude Include="TemplatePixelIllustration.h" />
     <ClInclude Include="TemplateRPG2KBattleAnim.h" />
     <ClInclude Include="TemplateRPG2KChipset.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />

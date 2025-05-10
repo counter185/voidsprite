@@ -27,6 +27,7 @@
 #include "TemplateRPG2KChipset.h"
 #include "TemplateRPG2KFaceset.h"
 #include "TemplateRPG2KSystem.h"
+#include "TemplatePixelIllustration.h"
 
 #include "BaseFilter.h"
 
@@ -512,12 +513,16 @@ int main(int argc, char** argv)
 
         // load templates
         g_templates = {
+            new TemplatePixelIllustration({256, 144}),
+            new TemplatePixelIllustration({426, 240}),
+            new TemplatePixelIllustration({640, 360}),
+            new TemplatePixelIllustration({853, 480}),
             new TemplateRPG2KCharset(),
             new TemplateRPG2KChipset(),
             new TemplateRPG2KFaceset(),
             new TemplateRPG2KSystem(),
             new TemplateRPG2KBattleAnim(),
-            new TemplateMC64x32Skin()
+            new TemplateMC64x32Skin(),
         };
         int customTemplates = 0;
         auto customTemplatePaths = joinVectors({
