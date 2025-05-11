@@ -1,16 +1,41 @@
 #include "UILayerButton.h"
+#include "EventCallbackListener.h"
 
-void UILayerButton::eventButtonPressed(int evt_id)
-{
-    if (callback == NULL) {
-        return;
-    }
-    if (evt_id == 0) {
-        callback->eventGeneric(callback_id, 0, 0);
-    }
-    else if (evt_id == 1) {
-        callback->eventGeneric(callback_id, 1, 0);
-    }
+UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
+    wxWidth = 240;
+    wxHeight = 30;
+
+    layer = linkedLayer;
+
+    mainButton = new LayerActiveButton(layer);
+    mainButton->text = mainName;
+    mainButton->position = XY{ 0,0 };
+    mainButton->wxWidth = 200;
+    mainButton->onClickCallback = [this](UIButton*) { 
+        if (onMainButtonClickedCallback != NULL) {
+            onMainButtonClickedCallback(this);
+        }
+        else if (callback != NULL) {
+            callback->eventGeneric(callback_id, 0, 0);
+        }
+    };
+    subWidgets.addDrawable(mainButton);
+
+    hideButton = new UIButton();
+    //hideButton->text = "H";
+    hideButton->tooltip = "Hide";
+    hideButton->icon = g_iconLayerHide;
+    hideButton->position = XY{ mainButton->wxWidth + 10,0 };
+    hideButton->wxWidth = 30;
+    hideButton->onClickCallback = [this](UIButton*) { 
+        if (onHideButtonClickedCallback != NULL) {
+            onHideButtonClickedCallback(this);
+        }
+        else if (callback != NULL) {
+            callback->eventGeneric(callback_id, 1, 0);
+        }
+    };
+    subWidgets.addDrawable(hideButton);
 }
 
 void LayerActiveButton::render(XY at)

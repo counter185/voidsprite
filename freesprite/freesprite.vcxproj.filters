@@ -1193,6 +1193,9 @@
     <ClInclude Include="TemplatePixelIllustration.h">
       <Filter>Header files\templates</Filter>
     </ClInclude>
+    <ClInclude Include="layerlist.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

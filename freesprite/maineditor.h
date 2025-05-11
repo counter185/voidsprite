@@ -8,6 +8,7 @@
 #include "SpritesheetPreviewScreen.h"
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
+#include "layerlist.h"
 
 enum EditorUnsavedChanges : int {
     NO_UNSAVED_CHANGES = 0,
@@ -58,6 +59,7 @@ public:
     //std::vector<Frame*> frames;
 
     std::vector<Layer*> layers;
+    LayerListCompound layerList;
     int selLayer = 0;
 
     std::vector<UndoStackElement> undoStack, redoStack;

@@ -388,6 +388,7 @@
     <ClInclude Include="io_png.h" />
     <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="json\json.hpp" />
+    <ClInclude Include="layerlist.h" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="localization\localization.h" />
     <ClInclude Include="log.h" />
