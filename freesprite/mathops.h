@@ -471,7 +471,7 @@ public:
     }
     static bool close(void* userdata) {
         delete ((StreamObjs*)userdata)->stream;
-        delete userdata;
+        delete ((StreamObjs*)userdata);
         return true;
     }
 
