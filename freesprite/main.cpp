@@ -633,9 +633,14 @@ int main(int argc, char** argv)
         SDL_MaximizeWindow(g_wd);
 #endif
 
+        uint64_t ticksBegin = SDL_GetTicks64();
+
+        int lastFrameCount = 0;
+        int rtFrameCount = 0;
+        u64 frameCountTimestamp = 0;
+
         SDL_Event evt;
         while (!screenStack.empty()) {
-            uint64_t ticksBegin = SDL_GetTicks64();
             while (SDL_PollEvent(&evt)) {
                 evt = scaleScreenPositionsInEvent(evt);
                 DrawableManager::processHoverEventInMultiple({ overlayWidgets }, evt);
@@ -831,25 +836,30 @@ int main(int argc, char** argv)
             g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
                 { 255, 255, 255, 100 }, 14);
             origin.y -= 16;
+            //g_fnt->RenderString(std::format("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
+            //origin.y -= 16;
 #endif
 
+            XY nextStatusBarOrigin = { g_windowW, g_windowH - 26 };
+
             //draw the screen icons
-            XY screenIcons = { g_windowW, g_windowH - 10 };
-            screenIcons = xySubtract(screenIcons, XY{ (int)(26 * screenStack.size()), 16 });
-            XY screenIconOrigin = screenIcons;
+            //XY screenIcons = { g_windowW, g_windowH - 10 };
+            nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(26 * screenStack.size()), 0 });
+            XY screenIconOrigin = nextStatusBarOrigin;
 
             for (int x = 0; x < screenStack.size(); x++) {
                 BaseScreen* s = screenStack[x];
                 //this is where screen icons were rendered
-                screenButtons[x]->position = screenIcons;
-                screenIcons.x += 26;
+                screenButtons[x]->position = screenIconOrigin;
+                screenIconOrigin.x += 26;
             }
             overlayWidgets.renderAll();
             //todo: make this a uilabel
             if (!screenStack.empty()) {
                 std::string screenName = screenStack[currentScreen]->getName();
                 int statW = g_fnt->StatStringDimensions(screenName, 16).x;
-                g_fnt->RenderString(screenStack[currentScreen]->getName(), g_windowW - (10 + statW), g_windowH - 55, { 255,255,255,255 }, 16);
+                XY screenNameOrigin = xySubtract({ g_windowW, g_windowH }, { 10 + statW, 55 });
+                g_fnt->RenderString(screenStack[currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
             }
 
             //draw battery icon
@@ -857,9 +867,11 @@ int main(int argc, char** argv)
             int batterySeconds, batteryPercent;
             SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
             if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
-                XY batteryOrigin = xySubtract(screenIconOrigin, { 120, 0 });
+                XY batteryOrigin = xySubtract(nextStatusBarOrigin, { 120, 0 });
                 XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
                 XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
+
+                nextStatusBarOrigin = xySubtract(batteryOrigin, { 30,0 });
 
                 SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
                 SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
@@ -889,6 +901,12 @@ int main(int argc, char** argv)
                 else if (powerstate == SDL_POWERSTATE_ERROR) {
                     g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
                 }
+            }
+
+            if (g_config.showFPS) {
+                XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 60, 0 });
+                nextStatusBarOrigin = fpsOrigin;
+				g_fnt->RenderString(std::format("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
             }
 
             g_tickNotifications();
@@ -925,10 +943,20 @@ int main(int argc, char** argv)
             if (!g_windowFocused) {
                 SDL_Delay(45);
             }
-            uint64_t ticksEnd = SDL_GetTicks64();
+            uint64_t ticksEnd = SDL_GetTicks64(); 
+
+            rtFrameCount++;
+            u64 frameTimestampNow = SDL_GetTicks64() / 1000;
+            if (frameTimestampNow != frameCountTimestamp) {
+                frameCountTimestamp = frameTimestampNow;
+                lastFrameCount = rtFrameCount;
+                rtFrameCount = 0;
+            }
 
             g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
             g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
+
+            ticksBegin = SDL_GetTicks64();
 
             //tl strings shouldn't be read every frame
             static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");

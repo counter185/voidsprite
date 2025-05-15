@@ -81,7 +81,7 @@ extern "C" {
     #endif
 #endif
 
-#define ARRAY2DPOINT(arr,x,y,w) arr[(y)*w+(x)]
+#define ARRAY2DPOINT(arr,x,y,w) (arr)[(y)*w+(x)]
 
 #define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_JP "appfontjp-NotoSansJP-Medium.ttf"

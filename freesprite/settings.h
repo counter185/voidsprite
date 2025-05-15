@@ -33,6 +33,7 @@ public:
 #endif   
         ;
     bool showPenPressure = true;
+    bool showFPS = false;
 
     std::vector<std::string> lastOpenFiles;
 

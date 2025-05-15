@@ -90,7 +90,7 @@ Layer* readPNG(png_structp png, png_infop info) {
         }
 
         png_bytepp rows = new png_bytep[height];
-        for (int y = 0; y < height; y++) {
+        for (u32 y = 0; y < height; y++) {
             rows[y] = new png_byte[png_get_rowbytes(png, info)];
         }
         png_read_image(png, rows);
@@ -106,7 +106,7 @@ Layer* readPNG(png_structp png, png_infop info) {
                 //: are those all of them?
             }
         }
-        for (int y = 0; y < height; y++) {
+        for (u32 y = 0; y < height; y++) {
             delete[] rows[y];
         }
         delete[] rows;

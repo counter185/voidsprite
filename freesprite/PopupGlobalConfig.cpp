@@ -122,6 +122,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     posInTab.y += 35;
 
     configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
+    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS, &posInTab));
     configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();

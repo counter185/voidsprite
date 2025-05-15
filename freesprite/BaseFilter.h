@@ -159,3 +159,24 @@ public:
         };
     }
 };
+
+class FilterJPEG : public BaseFilter {
+public:
+    std::string name() override { return "JPEG compression"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("quality", 1, 100, 50),
+        };
+    }
+};
+class FilterAVIF : public BaseFilter {
+public:
+    std::string name() override { return "AVIF compression"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("quality", 1, 100, 50),
+        };
+    }
+};

@@ -210,6 +210,8 @@
     {"vsp.config.opt.renderer", "Renderer"},
     {"vsp.config.opt.vfx", "Enable visual effects"},
     {"vsp.config.opt.vfx.desc", "When disabled, some visual effect animations will not play."},
+    {"vsp.config.opt.showfps", "Show FPS"},
+    {"vsp.config.opt.showfps.desc", "When enabled, the current framerate will be displayed."},
     {"vsp.config.opt.cursor", "Override system cursor (restart required)"},
     {"vsp.config.opt.cursor.desc", "When enabled, voidsprite will use a custom mouse cursor sprite."},
     {"vsp.config.opt.visualconfig", "Visual configuration (restart required)"},

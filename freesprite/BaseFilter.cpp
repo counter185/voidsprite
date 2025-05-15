@@ -17,6 +17,8 @@ void g_loadFilters()
     g_filters.push_back(new FilterOutline());
     g_filters.push_back(new FilterBrightnessContrast());
     g_filters.push_back(new FilterQuantize());
+    g_filters.push_back(new FilterJPEG());
+    g_filters.push_back(new FilterAVIF());
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
@@ -397,6 +399,69 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
         else {
             ppx[x] = 0xFF000000 | remap[ppx[x] & 0xFFFFFF];
         }
+    }
+    return c;
+}
+
+Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
+{
+	int quality = std::stoi(options["quality"]);
+	Layer* c = copy(src);
+	SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
+    if (srf != NULL) {
+        SDL_LockSurface(srf);
+        for (int y = 0; y < c->h; y++) {
+			memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), c->w * 4);
+        }
+        SDL_UnlockSurface(srf);
+        SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew();
+		IMG_SaveJPG_IO(srf, stream, false, quality);
+        SDL_DestroySurface(srf);
+		SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET);
+		srf = IMG_LoadJPG_IO(stream);
+        SDL_CloseIO(stream);
+
+        if (srf != NULL) {
+            SDL_Surface* srf2 = SDL_ConvertSurface(srf, SDL_PIXELFORMAT_ARGB8888);
+            SDL_DestroySurface(srf);
+            srf = srf2;
+            for (int y = 0; y < ixmin(srf->h, c->h); y++) {
+				memcpy(&(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
+            }
+        }
+		SDL_FreeSurface(srf);
+    }
+    return c;
+
+}
+
+Layer* FilterAVIF::run(Layer* src, std::map<std::string, std::string> options)
+{
+    int quality = std::stoi(options["quality"]);
+    Layer* c = copy(src);
+    SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
+    if (srf != NULL) {
+        SDL_LockSurface(srf);
+        for (int y = 0; y < c->h; y++) {
+            memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), c->w * 4);
+        }
+        SDL_UnlockSurface(srf);
+        SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew();
+        IMG_SaveAVIF_IO(srf, stream, false, quality);
+        SDL_DestroySurface(srf);
+        SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET);
+        srf = IMG_LoadAVIF_IO(stream);
+        SDL_CloseIO(stream);
+
+        if (srf != NULL) {
+            SDL_Surface* srf2 = SDL_ConvertSurface(srf, SDL_PIXELFORMAT_ARGB8888);
+            SDL_DestroySurface(srf);
+            srf = srf2;
+            for (int y = 0; y < ixmin(srf->h, c->h); y++) {
+                memcpy(&(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
+            }
+        }
+        SDL_FreeSurface(srf);
     }
     return c;
 }
