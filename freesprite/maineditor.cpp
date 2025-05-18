@@ -1484,6 +1484,21 @@ void MainEditor::takeInput(SDL_Event evt) {
                             passthroughBrushKeybinds = false;
                             // colorPicker->toggleEraser();
                             break;
+                        case SDL_SCANCODE_INSERT:
+                            if (g_ctrlModifier) {
+                                if (colorPicker->colorTextField != NULL) {
+                                    wxsManager.forceFocusOn(colorPicker);
+                                    colorPicker->subWidgets.forceFocusOn(colorPicker->colorTextField);
+                                    colorPicker->colorTextField->setText("");
+                                }
+                            }
+                            else {
+                                if (colorPicker->blendModeButton != NULL) {
+                                    colorPicker->blendModeButton->click();
+                                }
+                            }
+                            passthroughBrushKeybinds = false;
+                            break;
                         case SDL_SCANCODE_DELETE:
                             layer_clearSelectedArea();
                             passthroughBrushKeybinds = false;
