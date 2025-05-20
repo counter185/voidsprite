@@ -121,6 +121,8 @@ You can also build the program as a Flatpak, see [Flatpak README](https://github
 | RAM | 2 GB (comfortable minimum) | 8 GB |  
 | Input | - | Wintab/Windows Ink-compatible tablet |  
 
+◆Windows: Visual C++ 2019 runtime is required: [Download](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
 ### Android
 
 |  | Minimum | Recommended/Tested compatible |  
