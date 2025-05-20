@@ -36,11 +36,11 @@ Free C++ pixel art editor
 | Aseprite Sprite | .aseprite .ase | 〰*(Frame 1 only) | ✔ |
 | Piskel | .piskel | 〰 | ✔ |
 
-\* **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
-\* **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.  
-\* **VTF** - no mipmaps are imported or exported. Formats: I8, IA88, A8, RGB565,BGR888,RGB888, BGRA8888, RGBA8888, ARGB8888, ABGR8888, DXT1, DXT3, DXT5  
-\* **DIBv5**: JPEG, RLE4 and RLE8 subformats currently not supported.  
-\* **Aseprite** - experimental. Only frame 1 is loaded. Layer blend modes and tilemaps are not available here.
+◆ **OpenRaster**: advanced features from painting programs like layer blend modes, etc. are not available here. Exporting the thumbnail will not work until color quantization is implemented.  
+◆ **Pixel Studio sessions**: a 1:1 read of this format requires accurately implementing every tool from that program. For the best experience, wipe the undo history before attempting an import (`Functions` -> `Resize canvas` -> `Resize` -> `Yes`). Animation is not supported.  
+◆ **VTF** - no mipmaps are imported or exported. Formats: I8, IA88, A8, RGB565,BGR888,RGB888, BGRA8888, RGBA8888, ARGB8888, ABGR8888, DXT1, DXT3, DXT5  
+◆ **DIBv5**: JPEG, RLE4 and RLE8 subformats currently not supported.  
+◆ **Aseprite** - experimental. Only frame 1 is loaded. Layer blend modes and tilemaps are not available here.
 
 ### Import only
 
@@ -61,9 +61,9 @@ Free C++ pixel art editor
 | Nintendo 3DS app icon | .cxi | ❔ | ✖ |
 | Every other SDL_Image format | * | ✔ | ✖ |
 
-\* **Wii TPL** - only I4, RGB5A3, RGBA32  
-\* **AETEX** - GXT and Switch ASTC subformats not implemented  
-\* **DDS** - only BC1, BC2, BC3 and BGRA8888
+◆ **Wii TPL** - only I4, RGB5A3, RGBA32  
+◆ **AETEX** - GXT and Switch ASTC subformats not implemented  
+◆ **DDS** - only BC1, BC2, BC3 and BGRA8888
 
 ### Export only
 
@@ -74,15 +74,15 @@ Free C++ pixel art editor
 | HTML Base64 image | .html | ✖ | ✔ |
 | Java BufferedImage | .java | ✖ | 〰* |
 
-\* **Java BufferedImage** - only works for small images. Larger images go beyond the function size limit.  
+◆ **Java BufferedImage** - only works for small images. Larger images go beyond the function size limit.  
 
 ## Installing
 
-You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
+◆ You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
 
 For Windows, get the `voidsprite-build-win64.zip` file.
 
-For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed. You can also try the portable binary from `voidsprite-build-linux.zip`, but this might not work on all systems.
+For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed.
 
 ## Building
 
@@ -108,20 +108,55 @@ By default, the generated output files will be placed in `/tmp/voidsprite`. When
 
 You can also build the program as a Flatpak, see [Flatpak README](https://github.com/counter185/voidsprite/blob/main/freesprite/linux/flatpak/README.md).
 
+## System requirements
+
+### Windows/Linux
+
+|  | Minimum | Recommended/Tested compatible |  
+|---|:-:|:-:|  
+| OS | Windows 7 / Linux with Flatpak | Windows 10 / Ubuntu 24 / Mint 21 |  
+| CPU | any x64 CPU | AMD Ryzen 3 3200G / Intel Core i5-2500K |  
+| GPU | any GPU with Direct3D 9 / OpenGL 3 | Intel HD Graphics 620 / AMD Radeon Vega 8 |  
+| Display | 1280x720 | 1920x1080 |  
+| RAM | 2 GB (comfortable minimum) | 8 GB |  
+| Input | - | Wintab/Windows Ink-compatible tablet |  
+
+### Android
+
+|  | Minimum | Recommended/Tested compatible |  
+|---|:-:|:-:|  
+| OS | Android 5 | Android 9 / Android 14 |  
+| SOC | any x64 or arm64 CPU | Exynos 8895 / Snapdragon 778G |  
+| Display | 1280x720 | 1080p+ tablet |  
+| RAM | 2 GB | 6 GB |  
+| Input | - | Samsung S Pen |  
+
+◆Some tools currently require a mouse  
+◆Compatibility with chromeOS/Chromebooks is unknown  
+◆Devices tested: Galaxy Note 8, Galaxy Tab S7 FE  
+
+### macOS
+|  | Minimum | Recommended/Tested compatible |  
+|---|:-:|:-:|  
+| OS | macOS 13 | TBD |  
+| CPU | Intel 64-bit | TBD |
+| GPU | TBD | TBD |
+| Display | 1280x720 | TBD |  
+
+◆Due to lack of hardware we can't test what works and what doesn't.  
+◆Have a Mac and want to help us out? Join the Discord server below.
+
 ## Community
 
-You may find the [Official Discord server](https://discord.gg/c5SndMJKj2) here.
-
-[Itch.io page](https://cntrpl.itch.io/voidsprite)
-
-[BlueSky page](https://voidsprite.bsky.social/)
+◆ [Official Discord server](https://discord.gg/c5SndMJKj2)  
+◆ [Itch.io page](https://cntrpl.itch.io/voidsprite)  
+◆ [BlueSky page](https://voidsprite.bsky.social/)
 
 ## Donate
 
-You can support the project by donating on [itch.io](https://cntrpl.itch.io/voidsprite/purchase)
+◆ You can support the project by donating on [itch.io](https://cntrpl.itch.io/voidsprite/purchase)
 
 ## Licenses
 
-voidsprite is licensed under GPLv2.
-
-Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory
+◆ voidsprite is licensed under GPLv2.  
+◆ Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory
