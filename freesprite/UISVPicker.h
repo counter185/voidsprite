@@ -10,9 +10,9 @@ public:
 	int wxWidth = 360, wxHeight = 200;
 	bool mouseHeld = false;
 
-	EditorColorPicker* parent;
+	UIColorPicker* parent;
 
-	UISVPicker(EditorColorPicker* parent) {
+	UISVPicker(UIColorPicker* parent) {
 		this->parent = parent;
 	}
 

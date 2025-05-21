@@ -316,6 +316,7 @@
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UICheckbox.cpp" />
     <ClCompile Include="UIColorInputField.cpp" />
+    <ClCompile Include="UIColorPicker.cpp" />
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UIDropdown.cpp" />
     <ClCompile Include="UIHueSlider.cpp" />
@@ -508,6 +509,7 @@
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UICheckbox.h" />
     <ClInclude Include="UIColorInputField.h" />
+    <ClInclude Include="UIColorPicker.h" />
     <ClInclude Include="UIColorSlider.h" />
     <ClInclude Include="UIDropdown.h" />
     <ClInclude Include="UIHueSlider.h" />

@@ -6,7 +6,7 @@
 #include "UIColorInputField.h"
 #include "FileIO.h"
 
-PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c)
+PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c) : EditorColorPicker()
 {
     caller = c;
     upcastCaller = c;

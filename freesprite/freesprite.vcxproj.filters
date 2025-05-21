@@ -621,6 +621,9 @@
     <ClCompile Include="PopupExportScaled.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="UIColorPicker.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1192,6 +1195,9 @@
     </ClInclude>
     <ClInclude Include="TemplatePixelIllustration.h">
       <Filter>Header files\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="UIColorPicker.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

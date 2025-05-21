@@ -1,6 +1,6 @@
 #include "UIHueSlider.h"
 #include "mathops.h"
-#include "EditorColorPicker.h"
+#include "UIColorPicker.h"
 
 
 void UIHueSlider::onSliderPosChanged()

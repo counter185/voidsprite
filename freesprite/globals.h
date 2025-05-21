@@ -149,8 +149,10 @@ class UISlider;
 class UITextField;
 class UICheckbox;
 class UIDropdown;
+class UIColorPicker;
 class Panel;
 class ScrollingPanel;
+class TabbedView;
 
 //filters
 class BaseFilter;
