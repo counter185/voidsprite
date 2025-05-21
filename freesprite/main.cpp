@@ -369,6 +369,24 @@ int main(int argc, char** argv)
         g_wd = SDL_CreateWindow(windowTitle.c_str(), g_windowW, g_windowH, windowFlags);
         lastWindowTitle = windowTitle;
         g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
+        while (g_rd == NULL) {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Renderer failed: {}", useRenderer)));
+            logerr(std::format("Failed to create renderer: {}\n  {}", useRenderer, SDL_GetError()));
+            g_availableRenderersNow.erase(std::remove(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), useRenderer), g_availableRenderersNow.end());
+            if (g_availableRenderersNow.empty()) {
+                logerr("No renderers available");
+                std::string errorTitle = std::format("voidsprite: {}", TL("vsp.error.norenderer.title"));
+                std::string errorMsg = TL("vsp.error.norenderer.body");
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
+                return 1;
+            }
+            else {
+                useRenderer = g_availableRenderersNow[0];
+                g_config.preferredRenderer = useRenderer;
+                loginfo(std::format("Trying renderer: {}", useRenderer));
+                g_rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
+            }
+        }
         SDL_SetRenderVSync(g_rd, g_config.vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
         loginfo("Passed SDL_Init");
         platformInit();
@@ -906,7 +924,7 @@ int main(int argc, char** argv)
             if (g_config.showFPS) {
                 XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 60, 0 });
                 nextStatusBarOrigin = fpsOrigin;
-				g_fnt->RenderString(std::format("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
+                g_fnt->RenderString(std::format("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
             }
 
             g_tickNotifications();

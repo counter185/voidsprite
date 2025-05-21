@@ -38,6 +38,11 @@
                             "Relevant information was saved to the \"voidsprite_log.txt\" file in the app data directory.\n"
                             "If you're reporting this issue on GitHub, please include that file.\n"
                             " More details:"},
+    {"vsp.error.norenderer.title", "renderer error"},
+    {"vsp.error.norenderer.body", "A fatal error has occurred.\n"
+                                  "Every available renderer has failed to initialize and voidsprite cannot start.\n"
+                                  "Ensure you have the proper graphics drivers installed."},
+
 
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},
