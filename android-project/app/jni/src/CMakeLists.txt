@@ -193,6 +193,7 @@ add_library(main SHARED
         voidsprite/UICheckbox.cpp
         voidsprite/UIColorInputField.cpp
         voidsprite/UIColorSlider.cpp
+        voidsprite/UIColorPicker.cpp
         voidsprite/UIDoubleSlider.cpp
         voidsprite/UIDropdown.cpp
         voidsprite/UIHueSlider.cpp
