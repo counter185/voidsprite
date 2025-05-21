@@ -395,6 +395,9 @@ void MainEditor::drawIsolatedFragment()
 {
     if (isolateEnabled) {
 
+		int xincrement = canvas.scale == 1 ? 3 : canvas.scale < 6 ? 2 : 1;
+        int vincrement = canvas.scale <= 2 ? 4 : canvas.scale <= 5 ? 2 : 1;
+
         isolatedFragment.forEachScanline([&](ScanlineMapElement sme) {
             SDL_Rect r = canvas.canvasRectToScreenRect({ sme.origin.x, sme.origin.y, sme.size.x, 1 });
             XY p1 = {r.x,r.y};
@@ -402,14 +405,28 @@ void MainEditor::drawIsolatedFragment()
             XY p3 = { r.x + r.w, r.y + canvas.scale/2};
             XY p4 = { r.x + r.w, r.y + canvas.scale };
 
+			if (r.y + r.h < 0 || r.y >= g_windowH || r.x >= g_windowW) {
+				return;
+			}
+
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-            SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
-            SDL_RenderDrawLine(g_rd, p3.x, p3.y, p4.x, p4.y);
+            bool shouldDrawVLine = true;
+            if (canvas.scale <= 5) {
+                shouldDrawVLine =
+                    !isolatedFragment.pointExists(xySubtract(sme.origin, { 0,1 }))
+                    //|| !isolatedFragment.pointExists(xyAdd(sme.origin, { 0,1 }))
+                    || sme.origin.y % vincrement == 0;
+            }
+
+            if (shouldDrawVLine) {
+                SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
+                SDL_RenderDrawLine(g_rd, p3.x, p3.y, p4.x, p4.y);
+            }
 
             XY origin = sme.origin;
             XY p2p = { r.x,r.y + canvas.scale };
 
-            for (int x = 0; x < sme.size.x; x++) {
+            for (int x = 0; x < sme.size.x; x += xincrement) {
                 XY pointNow = xyAdd(origin, { x,0 });
                 if (!isolatedFragment.pointExists(xySubtract(pointNow, { 0,1 }))) {
                     //top line
