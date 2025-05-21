@@ -141,7 +141,7 @@ void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
         PopupPickColor* ppc = new PopupPickColor("Pick color", std::format("Select color for palette index {}", evt_id-200), true);
         ppc->setCallbackListener(evt_id, this);
         uint32_t palCol = upcastCaller->palette[evt_id - 200];
-        ppc->colorInput->setPickedColor(palCol);
+        ppc->setRGB(palCol);
         ppc->setAlpha(palCol >> 24);
         g_addPopup(ppc);
     }

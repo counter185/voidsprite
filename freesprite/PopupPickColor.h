@@ -9,15 +9,18 @@ class PopupPickColor :
 {
 public:
     
-    UIColorInputField* colorInput;
+    //UIColorInputField* colorInput;
+    UIColorPicker* colorPicker = NULL;
     UITextField* alphaInput = NULL;
 
     PopupPickColor(std::string tt, std::string tx, bool acceptAlpha = false);
 
-    void eventButtonPressed(int evt_id) override;
     void eventTextInput(int evt_id, std::string data) override;
 
+    void render() override;
+
     void updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value);
+    void setRGB(u32 rgb);
     void setAlpha(uint8_t a);
 
     uint32_t getColor();
