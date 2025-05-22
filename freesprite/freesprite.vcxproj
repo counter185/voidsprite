@@ -390,6 +390,7 @@
     <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="LayerPalettized.h" />
+    <ClInclude Include="license.h" />
     <ClInclude Include="localization\localization.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="main.h" />

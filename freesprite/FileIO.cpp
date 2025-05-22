@@ -836,6 +836,15 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
     return compressedData;
 }
 
+std::vector<u8> base64ToBytes(std::string b64)
+{
+	std::string decoded = base64::from_base64(b64);
+	std::vector<u8> ret;
+	ret.resize(decoded.size());
+	memcpy(ret.data(), decoded.data(), decoded.size());
+	return ret;
+}
+
 void zlibFile(PlatformNativePathString path)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);

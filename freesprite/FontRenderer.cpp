@@ -70,6 +70,9 @@ XY TextRenderer::RenderString(std::string text, int x, int y, SDL_Color col, int
         if (target == '\n') {
             drawX = x;
             drawY += size;
+            if (drawY > g_windowH) {
+                break;
+            }
         }
         else {
             bool shouldDraw = ParseUTF8(target, &nextUTFBytes, currentUTF8Sym);

@@ -1199,6 +1199,9 @@
     <ClInclude Include="UIColorPicker.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
+    <ClInclude Include="license.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

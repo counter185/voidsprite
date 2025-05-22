@@ -6,6 +6,7 @@
 #include "ScrollingPanel.h"
 #include "TabbedView.h"
 #include "FileIO.h"
+#include "license.h"
 
 inline std::string listOfContributors = ""
 #if __ANDROID__
@@ -37,7 +38,8 @@ public:
         std::vector<std::pair<std::string, std::string>> aboutTabContents = {
             {TL("vsp.about.tab.general"), generalTabContents},
             {TL("vsp.about.tab.systeminfo"), platformGetSystemInfo()},
-            {TL("vsp.about.tab.libs"), getAllLibsVersions()}
+            {TL("vsp.about.tab.libs"), getAllLibsVersions()},
+            {TL("vsp.about.tab.fonts"), getFontLicense()},
         };
 
         std::vector<Tab> generatedTabs;
@@ -53,14 +55,14 @@ public:
         for (auto& [tabName, tabContents] : aboutTabContents) {
             ScrollingPanel* aboutView = new ScrollingPanel();
             aboutView->position = {0,0};
-            aboutView->wxWidth = wxWidth - 10;
+            aboutView->wxWidth = wxWidth - 20;
             aboutView->wxHeight = wxHeight - 120;
-            aboutTabs->tabs[i].wxs.addDrawable(aboutView);
+            aboutTabs->tabs[i++].wxs.addDrawable(aboutView);
 
             UILabel* primaryText = new UILabel(tabContents);
             primaryText->position = {5,5};
             primaryText->fontsize = 16;
-            aboutTabs->tabs[i++].wxs.addDrawable(primaryText);
+            aboutView->subWidgets.addDrawable(primaryText);
 
         }
         makeTitleAndDesc(TL("vsp.about.title"), "");

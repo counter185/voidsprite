@@ -268,8 +268,9 @@
     //popup: about
     {"vsp.about.title", "About void" UTF8_DIAMOND "sprite"},
     {"vsp.about.tab.general", "General"},
-    {"vsp.about.tab.systeminfo", "System information"},
+    {"vsp.about.tab.systeminfo", "System"},
     {"vsp.about.tab.libs", "Libraries"},
+    {"vsp.about.tab.fonts", "Fonts"},
     {"vsp.about.contributors", "Contributors:"},
     {"vsp.about.translations", "Translation credits:"},
 
