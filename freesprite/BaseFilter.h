@@ -180,3 +180,15 @@ public:
         };
     }
 };
+
+class FilterKernelTransformation : public BaseFilter {
+protected:
+    std::vector<std::vector<int>> kernel;
+    int scale = 16;
+    std::string n = "Kernel transformation";
+public:
+    FilterKernelTransformation(std::string filterName, std::vector<std::vector<int>> k) : n(filterName), kernel(k) {}
+
+    std::string name() override { return n; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+};

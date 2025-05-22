@@ -19,6 +19,13 @@ void g_loadFilters()
     g_filters.push_back(new FilterQuantize());
     g_filters.push_back(new FilterJPEG());
     g_filters.push_back(new FilterAVIF());
+    /*g_filters.push_back(new FilterKernelTransformation("Kernel blur", {
+        {1,1,1,1,1},
+        {1,0,0,0,1},
+        {1,0,0,0,1},
+        {1,0,0,0,1},
+        {1,1,1,1,1}
+    }));*/
 
 
     g_renderFilters.push_back(new GenNoiseFilter());
@@ -463,5 +470,43 @@ Layer* FilterAVIF::run(Layer* src, std::map<std::string, std::string> options)
         }
         SDL_FreeSurface(srf);
     }
+    return c;
+}
+
+Layer* FilterKernelTransformation::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    int kerH = kernel.size();
+    int kerW = kernel[0].size();
+    int scale = this->scale;
+    int w = c->w;
+    int h = c->h;
+    int k = kerH;
+    int d = k / 2;
+    for (int x = d; x < w - d; x++) {
+        for (int y = d; y < h - d; y++) {
+            int temp[4] = {0,0,0,0};
+
+            for (int a = 0; a < k; a++) {
+                for (int b = 0; b < k; b++) {
+                    auto xn = x + a - d;
+                    auto yn = y + b - d;
+                    SDL_Color pixel = uint32ToSDLColor(src->getPixelAt({ xn, yn }));
+                    temp[0] += pixel.r * kernel[a][b];
+                    temp[1] += pixel.g * kernel[a][b];
+                    temp[2] += pixel.b * kernel[a][b];
+                    temp[3] += pixel.a * kernel[a][b];
+                }
+            }
+
+            temp[0] /= scale;
+            temp[1] /= scale;
+            temp[2] /= scale;
+            temp[3] /= scale;
+            c->setPixel({ x,y }, sdlcolorToUint32({(u8)temp[0], (u8)temp[1], (u8)temp[2], (u8)temp[3]}));
+        }
+    }
+
+
     return c;
 }
