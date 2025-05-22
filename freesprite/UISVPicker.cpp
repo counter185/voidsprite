@@ -57,6 +57,7 @@ void UISVPicker::handleInput(SDL_Event evt, XY gPosOffset)
         if (evt.button.button == 1) {
             mouseHeld = evt.button.down;
         }
+        break;
     case SDL_MOUSEMOTION:
         if (mouseHeld) {
             XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);

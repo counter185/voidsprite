@@ -4,6 +4,8 @@
 class PalettizedEditorColorPicker :
     public EditorColorPicker
 {
+protected:
+    PalettizedEditorColorPicker() {}
 public:
 	MainEditorPalettized* upcastCaller;
     TabbedView* colorPaletteTabs;
@@ -21,7 +23,7 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventColorSet(int evt_id, uint32_t color) override;
 
-    void setMainEditorColorRGB(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true, std::string dontupdatemodel = "") override {}
+    void colorUpdated(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true, std::string dontupdatemodel = "") override {}
     void updateLastColorButtons() override {}
 
     void updateForcedColorPaletteButtons();

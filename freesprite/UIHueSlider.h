@@ -4,9 +4,9 @@
 class UIHueSlider : public UIColorSlider
 {
 public:
-	EditorColorPicker* parent;
+	UIColorPicker* parent;
 
-	UIHueSlider(EditorColorPicker* parent) {
+	UIHueSlider(UIColorPicker* parent) {
 		wxWidth = 360;
 		wxHeight = 20;
 		this->parent = parent;
