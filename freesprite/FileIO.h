@@ -36,6 +36,7 @@ void unZlibFile(PlatformNativePathString path);
 #include "io_rpgm.h"
 #include "io_jxl.h"
 #include "io_dibv5.h"
+#include "io_valve_spr.h"
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
@@ -401,6 +402,14 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
     g_fileImporters.push_back(FileImporter::flatImporter("DDS", ".dds", &readDDS));
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF, exVTF));
+    g_fileImporters.push_back(FileImporter::flatImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED, 
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            u32 num;
+            fread(&num, 4, 1, f);
+            fclose(f);
+            return num == 0x50534449;
+        }));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));

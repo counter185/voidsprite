@@ -624,6 +624,9 @@
     <ClCompile Include="UIColorPicker.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="io_valve_spr.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1201,6 +1204,9 @@
     </ClInclude>
     <ClInclude Include="license.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="io_valve_spr.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
