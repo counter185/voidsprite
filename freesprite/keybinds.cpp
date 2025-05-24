@@ -56,16 +56,17 @@ void g_initKeybinds()
 
     int i = 0;
     for (auto& brush : g_brushes) {
-        g_keybindManager.addKeybind("maineditor", std::format("brush_{}", i++),
-            KeyCombo(std::format("{}: {}", TL("vsp.keybinds.maineditor.switchtobrush"), brush->getName()),
-				KEY_UNASSIGNED, false, false, [brush](void* d) {
-					((MainEditor*)d)->setActiveBrush(brush);
-				}
-            ));
+        KeyCombo kc = KeyCombo(std::format("{}: {}", TL("vsp.keybinds.maineditor.switchtobrush"), brush->getName()),
+            KEY_UNASSIGNED, false, false, [brush](void* d) {
+                ((MainEditor*)d)->setActiveBrush(brush);
+            }
+        );
+        kc.icon = brush->cachedIcon;
+        g_keybindManager.addKeybind("maineditor", std::format("brush_{}", i++), kc);
     }
 
 
     for (std::string& kb : g_config.keybinds) {
-		g_keybindManager.deserializeKeybindLine(kb);
+        g_keybindManager.deserializeKeybindLine(kb);
     }
 }

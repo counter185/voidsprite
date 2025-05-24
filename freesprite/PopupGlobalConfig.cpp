@@ -12,6 +12,7 @@
 #include "discord_rpc.h"
 #include "PopupChooseExtsToAssoc.h"
 #include "keybinds.h"
+#include "vfx.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -223,7 +224,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     posInTab = { 0,10 };
-    ScrollingPanel* keybindsPanel = new ScrollingPanel();
+    keybindsPanel = new ScrollingPanel();
     keybindsPanel->position = posInTab;
     keybindsPanel->wxWidth = wxWidth - 20;
     keybindsPanel->wxHeight = wxHeight - 140;
@@ -231,36 +232,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsPanel->scrollHorizontally = false;
     configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
 
-
-    int y = 0;
-    for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
-        UILabel* regionLabel = new UILabel(keyRegion.displayName);
-        regionLabel->fontsize = 20;
-        regionLabel->position = { 10, y };
-        y += 30;
-        keybindsPanel->subWidgets.addDrawable(regionLabel);
-        auto reservedKeys = keyRegion.reservedKeys;
-
-        for (std::string& keyIDInOrder : keyRegion.orderInSettings) {
-            KeybindButton* btn = new KeybindButton();
-            btn->wxWidth = keybindsPanel->wxWidth - 20;
-            btn->wxHeight = 30;
-            updateKeybindButtonText(&keyRegion.keybinds[keyIDInOrder], btn);
-            btn->position = { 0, y };
-            y += 30;
-            KeyCombo* keyComboPtr = &keyRegion.keybinds[keyIDInOrder];
-            btn->onClickCallback = [this, keyComboPtr, reservedKeys](UIButton* b) {
-                if (!bindingKey) {
-                    bindingKey = true;
-                    this->reservedKeysNow = reservedKeys;
-                    this->currentBindTarget = keyComboPtr;
-                    this->currentBindTargetButton = (KeybindButton*)b;
-                    keyBindingTimer.start();
-                }
-                };
-            keybindsPanel->subWidgets.addDrawable(btn);
-        }
-    }
+    createKeybindButtons();
 
 
     /*
@@ -351,22 +323,78 @@ PopupGlobalConfig::PopupGlobalConfig()
     makeTitleAndDesc(TL("vsp.config.title"));
 }
 
+void PopupGlobalConfig::render()
+{
+    BasePopup::render();
+    if (bindingKey) {
+        XY origin = getPopupOrigin();
+        SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300))) };
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xf0 * keyBindingTimer.percentElapsedTime(200));
+        SDL_RenderFillRect(g_rd, &bgRect);
+
+        static std::string tlPressAnyKeyToBind = TL("vsp.config.bindkey.pressanykey");
+        static std::string tlESCToClear = TL("vsp.config.bindkey.esctoclear");
+
+        g_fnt->RenderString(
+            std::format("{}\n   {}\n\n    {} -> {}{}...\n\n{}", 
+                tlPressAnyKeyToBind, 
+                currentBindTarget->displayName, 
+                currentBindTarget->getKeyComboName(), 
+                g_ctrlModifier ? "Ctrl + " : "", 
+                g_shiftModifier ? "Shift + " : "", 
+                tlESCToClear),
+            bgRect.x + 10, bgRect.y + 30, {255,255,255,255}, 20
+        );
+
+        XY timeoutLineOrigin = { bgRect.x, bgRect.y + bgRect.h - 30 };
+        XY timeoutLineEnd = xyAdd(timeoutLineOrigin, { bgRect.w, 0 });
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+        drawLine(timeoutLineOrigin, timeoutLineEnd, 1.0 - keyBindingTimer.percentElapsedTime(7000));
+
+        if (keyBindingTimer.elapsedTime() > 7000) {
+            bindingKey = false;
+            playPopupCloseVFX();
+        }
+    }
+}
+
 void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
     if (bindingKey) {
         if (evt.type == SDL_EVENT_KEY_DOWN) {
             SDL_Scancode key = evt.key.scancode;
             if (key != SDL_SCANCODE_LSHIFT && key != SDL_SCANCODE_LCTRL) {
-                if (std::find(reservedKeysNow.begin(), reservedKeysNow.end(), key) != reservedKeysNow.end()
+                if (key == SDL_SCANCODE_ESCAPE) {
+                    bindingKey = false;
+                    playPopupCloseVFX();
+                    currentBindTarget->unassign();
+                    updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
+                }
+                else if (std::find(reservedKeysNow.begin(), reservedKeysNow.end(), key) != reservedKeysNow.end()
                     || std::find(g_keybindManager.globalReservedKeys.begin(), g_keybindManager.globalReservedKeys.end(), key) != g_keybindManager.globalReservedKeys.end()) {
                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{} is a reserved key.", std::string(SDL_GetScancodeName(key)))));
+                    bindingKey = false;
+                    playPopupCloseVFX();
                 }
                 else {
                     bindingKey = false;
+                    playPopupCloseVFX();
+
+                    bool ctrl = g_ctrlModifier;
+                    bool shift = g_shiftModifier;
+
+                    bool updateAll = currentBindTargetRegion->unassignAllWith(key, ctrl, shift);
+
                     currentBindTarget->key = key;
-                    currentBindTarget->ctrl = g_ctrlModifier;
-                    currentBindTarget->shift = g_shiftModifier;
-                    updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
+                    currentBindTarget->ctrl = ctrl;
+                    currentBindTarget->shift = shift;
+                    if (updateAll) {
+                        createKeybindButtons();
+                    }
+                    else {
+                        updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
+                    }
                 }
             }
         }
@@ -420,11 +448,49 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
     }
 }
 
+void PopupGlobalConfig::createKeybindButtons()
+{
+    keybindsPanel->subWidgets.freeAllDrawables();
+
+    int y = 0;
+    for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
+        UILabel* regionLabel = new UILabel(keyRegion.displayName);
+        regionLabel->fontsize = 20;
+        regionLabel->position = { 10, y };
+        y += 30;
+        keybindsPanel->subWidgets.addDrawable(regionLabel);
+        auto reservedKeys = keyRegion.reservedKeys;
+
+        for (std::string& keyIDInOrder : keyRegion.orderInSettings) {
+            KeybindButton* btn = new KeybindButton();
+            btn->wxWidth = keybindsPanel->wxWidth - 20;
+            btn->wxHeight = 30;
+            btn->icon = keyRegion.keybinds[keyIDInOrder].icon;
+            updateKeybindButtonText(&keyRegion.keybinds[keyIDInOrder], btn);
+            btn->position = { 0, y };
+            y += 30;
+            KeyCombo* keyComboPtr = &keyRegion.keybinds[keyIDInOrder];
+            KeybindRegion* regionPtr = &keyRegion;
+            btn->onClickCallback = [this, keyComboPtr, regionPtr, reservedKeys](UIButton* b) {
+                if (!bindingKey) {
+                    bindingKey = true;
+                    this->reservedKeysNow = reservedKeys;
+                    this->currentBindTarget = keyComboPtr;
+                    this->currentBindTargetRegion = regionPtr;
+                    this->currentBindTargetButton = (KeybindButton*)b;
+                    keyBindingTimer.start();
+                }
+            };
+            keybindsPanel->subWidgets.addDrawable(btn);
+        }
+    }
+}
+
 void PopupGlobalConfig::updateKeybindButtonText(KeyCombo* keycombo, KeybindButton* btn)
 {
     btn->text = keycombo->displayName;
     btn->keybindText = keycombo->getKeyComboName();
-    btn->keybindTextColor = !keycombo->isUnassigned() ? SDL_Color{ 0x97,0xf1,0xff,0xd0 }
+    btn->keybindTextColor = !keycombo->isUnassigned() ? SDL_Color{ 0x97,0xf1,0xff,0xf0 }
                                                       : SDL_Color{ 255,255,255, 0xa0 };
 }
 

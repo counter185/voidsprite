@@ -48,8 +48,13 @@ void BasePopup::renderDefaultBackground(SDL_Color bgColor) {
     }
 }
 
+void BasePopup::playPopupCloseVFX()
+{
+    g_newVFX(VFX_POPUPCLOSE, 300, 0xFF000000, SDL_Rect{ getPopupOrigin().x, getPopupOrigin().y, wxWidth, wxHeight });
+}
+
 void BasePopup::closePopup() {
-	g_newVFX(VFX_POPUPCLOSE, 300, 0xFF000000, SDL_Rect{ getPopupOrigin().x, getPopupOrigin().y, wxWidth, wxHeight });
+    playPopupCloseVFX();
     g_popDisposeLastPopup(false);
     if (callback != NULL) {
         callback->eventPopupClosed(callback_id, this);

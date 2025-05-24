@@ -51,6 +51,7 @@ protected:
         return XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };
     }
 
+    void playPopupCloseVFX();
     void closePopup();
 
     virtual void defaultInputAction(SDL_Event evt) {}

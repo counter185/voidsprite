@@ -11,6 +11,7 @@ public:
     SDL_Scancode key = KEY_UNASSIGNED;
     bool ctrl = false;
     bool shift = false;
+    SDL_Texture* icon = NULL;
 
     KeyCombo() {}
     KeyCombo(std::string n, std::function<void(void*)> a) : displayName(n), action(a) {}
@@ -46,15 +47,33 @@ public:
     }
 
     bool isUnassigned() {
-		return key == KEY_UNASSIGNED;
+        return key == KEY_UNASSIGNED;
+    }
+
+    void unassign() {
+        key = KEY_UNASSIGNED;
+        ctrl = false;
+        shift = false;
     }
 };
 
-struct KeybindRegion {
+class KeybindRegion {
+public:
     std::string displayName;
     std::vector<SDL_Scancode> reservedKeys;
     std::map<std::string, KeyCombo> keybinds;
     std::vector<std::string> orderInSettings;
+
+    bool unassignAllWith(SDL_Scancode c, bool shift, bool ctrl) {
+        bool ret = false;
+        for (auto& [key, kc] : keybinds) {
+            if (kc.key == c && kc.shift == shift && kc.ctrl == ctrl) {
+                kc.unassign();
+                ret = true;
+            }
+        }
+        return ret;
+    }
 };
 
 class KeybindManager {
@@ -64,7 +83,7 @@ public:
 
     void addKeybind(std::string region, std::string key, KeyCombo kc) {
         regions[region].keybinds[key] = kc;
-		regions[region].orderInSettings.push_back(key);
+        regions[region].orderInSettings.push_back(key);
     }
 
     bool processKeybinds(SDL_Event evt, std::string inRegion, void* caller) {

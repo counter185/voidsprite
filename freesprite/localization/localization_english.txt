@@ -264,6 +264,9 @@
     {"vsp.config.opt.brushcolorpreview", "Replace brush preview with active color"},
     {"vsp.config.opt.brushcolorpreview.desc", "Replaces the brush preview with the currently selected color."},
 
+    {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
+    {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},
+
     //popup: export scaled
     {"vsp.exportscaled.integerscale", "Integer scale"},
     {"vsp.exportscaled.pixelsize", "Pixel size"},

@@ -17,6 +17,7 @@ class PopupGlobalConfig :
     public BasePopup, public EventCallbackListener
 {
 private:
+    ScrollingPanel* keybindsPanel = NULL;
     UILabel* languageCredit = NULL;
     GlobalConfig previousConfig;
     std::vector<std::string> previousKeybinds;
@@ -24,6 +25,7 @@ private:
     Timer64 keyBindingTimer;
     bool bindingKey = false;
     KeyCombo* currentBindTarget = NULL;
+    KeybindRegion* currentBindTargetRegion = NULL;
     KeybindButton* currentBindTargetButton = NULL;
     std::vector<SDL_Scancode> reservedKeysNow = {};
 
@@ -31,11 +33,14 @@ private:
 public:
     PopupGlobalConfig();
 
+    void render() override;
     void takeInput(SDL_Event evt) override;
 
     void eventButtonPressed(int evt_id) override;
     void eventTextInput(int evt_id, std::string text) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
+
+    void createKeybindButtons();
 
     void updateKeybindButtonText(KeyCombo* keycombo, KeybindButton* btn);
     void updateLanguageCredit();
