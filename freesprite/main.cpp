@@ -424,7 +424,6 @@ int main(int argc, char** argv)
         g_setupColorModels();
         g_setupIO();
         g_reloadColorMap();
-        g_initKeybinds();
 
         loginfo("Loading assets");
 
@@ -479,10 +478,6 @@ int main(int argc, char** argv)
         int i = 0;
         for (BaseBrush*& brush : g_brushes) {
             brush->cachedIcon = IMGLoadAssetToTexture(brush->getIconPath());
-            std::string keybindKey = std::format("brush:{}", i++);
-            if (g_config.keybinds.contains(keybindKey)) {
-                brush->keybind = (SDL_Scancode)g_config.keybinds[keybindKey];
-            }
         }
 
         loginfo("Loading patterns");
@@ -580,6 +575,8 @@ int main(int argc, char** argv)
 
         //load filters
         g_loadFilters();
+
+        g_initKeybinds();
 
         loginfo("Loading fonts");
         //load fonts

@@ -1,5 +1,7 @@
 #include "keybinds.h"
 #include "maineditor.h"
+#include "EditorLayerPicker.h"
+#include "BaseBrush.h"
 
 void g_initKeybinds()
 {
@@ -43,4 +45,27 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.cleararea"), SDL_SCANCODE_DELETE, false, false, [](void* d) {
             ((MainEditor*)d)->layer_clearSelectedArea();
         }));
+    g_keybindManager.addKeybind("maineditor", "new_layer", 
+        KeyCombo(TL("vsp.keybinds.maineditor.newlayer"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->newLayer(); ((MainEditor*)d)->layerPicker->updateLayers();
+        }));
+    g_keybindManager.addKeybind("maineditor", "duplicate_layer", 
+        KeyCombo(TL("vsp.keybinds.maineditor.duplicatelayer"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->duplicateLayer(((MainEditor*)d)->selLayer); ((MainEditor*)d)->layerPicker->updateLayers();
+        }));
+
+    int i = 0;
+    for (auto& brush : g_brushes) {
+        g_keybindManager.addKeybind("maineditor", std::format("brush_{}", i++),
+            KeyCombo(std::format("{}: {}", TL("vsp.keybinds.maineditor.switchtobrush"), brush->getName()),
+				KEY_UNASSIGNED, false, false, [brush](void* d) {
+					((MainEditor*)d)->setActiveBrush(brush);
+				}
+            ));
+    }
+
+
+    for (std::string& kb : g_config.keybinds) {
+		g_keybindManager.deserializeKeybindLine(kb);
+    }
 }

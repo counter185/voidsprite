@@ -1,12 +1,14 @@
 #pragma once
 #include "globals.h"
 
+#define KEY_UNASSIGNED SDL_SCANCODE_UNKNOWN
+
 class KeyCombo {
 private:
     std::function<void(void*)> action = NULL;
 public:
     std::string displayName = "Keybind";
-    SDL_Scancode key = SDL_SCANCODE_UNKNOWN;
+    SDL_Scancode key = KEY_UNASSIGNED;
     bool ctrl = false;
     bool shift = false;
 
@@ -16,6 +18,7 @@ public:
 
     bool isHit(SDL_Event evt) {
         return evt.type == SDL_EVENT_KEY_DOWN
+            && key != KEY_UNASSIGNED
             && evt.key.scancode == key
             && ctrl == g_ctrlModifier
             && shift == g_shiftModifier;
@@ -34,12 +37,16 @@ public:
     }
 
     std::string getKeyComboName() {
-        if (key == SDL_SCANCODE_UNKNOWN) {
+        if (key == KEY_UNASSIGNED) {
             return "Unassigned";
         }
         else {
             return std::format("{}{}{}", ctrl ? "Ctrl + " : "", shift ? "Shift + " : "", SDL_GetScancodeName(key));
         }
+    }
+
+    bool isUnassigned() {
+		return key == KEY_UNASSIGNED;
     }
 };
 
@@ -47,6 +54,7 @@ struct KeybindRegion {
     std::string displayName;
     std::vector<SDL_Scancode> reservedKeys;
     std::map<std::string, KeyCombo> keybinds;
+    std::vector<std::string> orderInSettings;
 };
 
 class KeybindManager {
@@ -56,6 +64,7 @@ public:
 
     void addKeybind(std::string region, std::string key, KeyCombo kc) {
         regions[region].keybinds[key] = kc;
+		regions[region].orderInSettings.push_back(key);
     }
 
     bool processKeybinds(SDL_Event evt, std::string inRegion, void* caller) {
@@ -90,9 +99,11 @@ public:
         bool ctrl = splitByPlus[1] == "1";
         bool shift = splitByPlus[2] == "1";
 
-        regions[region].keybinds[keyName].key = (SDL_Scancode)key;
-        regions[region].keybinds[keyName].ctrl = ctrl;
-        regions[region].keybinds[keyName].shift = shift;
+        if (regions[region].keybinds.contains(keyName)) {
+            regions[region].keybinds[keyName].key = (SDL_Scancode)key;
+            regions[region].keybinds[keyName].ctrl = ctrl;
+            regions[region].keybinds[keyName].shift = shift;
+        }
     }
 
     void deserializeKeybinds(std::vector<std::string> lines) {

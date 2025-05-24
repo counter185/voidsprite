@@ -11,6 +11,7 @@
 #include "BaseBrush.h"
 #include "discord_rpc.h"
 #include "PopupChooseExtsToAssoc.h"
+#include "keybinds.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -30,10 +31,17 @@ enum ConfigOptions : int {
     DROPDOWN_VISUAL_CONFIG,
 };
 
+void KeybindButton::render(XY pos)
+{
+    UIButton::render(pos);
+    g_fnt->RenderString(keybindText, pos.x + wxWidth / 2, pos.y + 2, keybindTextColor, 15);
+}
+
 PopupGlobalConfig::PopupGlobalConfig()
 {
     //do not do   previousConfig = g_config  it will crash 
     previousConfig = GlobalConfig(g_config);
+    previousKeybinds = g_keybindManager.serializeKeybinds();
 
     wxHeight = 400;
     wxWidth = 850;
@@ -224,27 +232,34 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
 
 
-    std::vector<KeybindConf> keybindsWithIcons = {
-    };
-    for (BaseBrush* b : g_brushes) {
-        keybindsWithIcons.push_back({ b->getName(), &b->keybind, b->cachedIcon });
-    }
+    int y = 0;
+    for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
+        UILabel* regionLabel = new UILabel(keyRegion.displayName);
+        regionLabel->fontsize = 20;
+        regionLabel->position = { 10, y };
+        y += 30;
+        keybindsPanel->subWidgets.addDrawable(regionLabel);
+        auto reservedKeys = keyRegion.reservedKeys;
 
-    XY scrollPanelPos = { 0,0 };
-    int x = 1000;
-    for (KeybindConf& kk : keybindsWithIcons) {
-        UIButton* b = new UIButton();
-        b->wxWidth = keybindsPanel->wxWidth - 20;
-        b->wxHeight = 30;
-        //b->text = std::format("{} ({})", kk.name, SDL_GetKeyName(*kk.target));
-        b->icon = kk.icon;
-        b->position = scrollPanelPos;
-        b->setCallbackListener(x++, this);
-
-        keybindButtons.push_back({kk, b});
-        updateKeybindButtonText(keybindButtons.back());
-        scrollPanelPos.y += 30;
-        keybindsPanel->subWidgets.addDrawable(b);
+        for (std::string& keyIDInOrder : keyRegion.orderInSettings) {
+            KeybindButton* btn = new KeybindButton();
+            btn->wxWidth = keybindsPanel->wxWidth - 20;
+            btn->wxHeight = 30;
+            updateKeybindButtonText(&keyRegion.keybinds[keyIDInOrder], btn);
+            btn->position = { 0, y };
+            y += 30;
+            KeyCombo* keyComboPtr = &keyRegion.keybinds[keyIDInOrder];
+            btn->onClickCallback = [this, keyComboPtr, reservedKeys](UIButton* b) {
+                if (!bindingKey) {
+                    bindingKey = true;
+                    this->reservedKeysNow = reservedKeys;
+                    this->currentBindTarget = keyComboPtr;
+                    this->currentBindTargetButton = (KeybindButton*)b;
+                    keyBindingTimer.start();
+                }
+                };
+            keybindsPanel->subWidgets.addDrawable(btn);
+        }
     }
 
 
@@ -313,6 +328,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     closeButton->onClickCallback = [this](UIButton*) {
         bool visualConfigChanged = g_config.customVisualConfigPath != previousConfig.customVisualConfigPath;
         g_config = previousConfig;
+        g_keybindManager.deserializeKeybinds(previousKeybinds);
         if (visualConfigChanged) {
             g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath));
             g_reloadFonts();
@@ -337,27 +353,22 @@ PopupGlobalConfig::PopupGlobalConfig()
 
 void PopupGlobalConfig::takeInput(SDL_Event evt)
 {
-    if (bindingKeyIndex != -1) {
-        if (evt.type == SDL_KEYDOWN) {
-            int targetKey = evt.key.scancode == SDL_SCANCODE_LSHIFT ? SDL_SCANCODE_UNKNOWN : evt.key.scancode;
-            if (targetKey != SDL_SCANCODE_ESCAPE) {
-                //find any other keybinds that use this key and reset them
-                bool keyIsReserved = (targetKey != SDL_SCANCODE_UNKNOWN) && (std::find(reservedKeys.begin(), reservedKeys.end(), targetKey) != reservedKeys.end());
-                if (!keyIsReserved) {
-                    for (auto& kb : keybindButtons) {
-                        if (kb.first.target != keybindButtons[bindingKeyIndex].first.target && *kb.first.target == targetKey) {
-                            *kb.first.target = SDL_SCANCODE_UNKNOWN;
-                            updateKeybindButtonText(kb);
-                        }
-                    }
-                    *keybindButtons[bindingKeyIndex].first.target = (SDL_Scancode)targetKey;
+    if (bindingKey) {
+        if (evt.type == SDL_EVENT_KEY_DOWN) {
+            SDL_Scancode key = evt.key.scancode;
+            if (key != SDL_SCANCODE_LSHIFT && key != SDL_SCANCODE_LCTRL) {
+                if (std::find(reservedKeysNow.begin(), reservedKeysNow.end(), key) != reservedKeysNow.end()
+                    || std::find(g_keybindManager.globalReservedKeys.begin(), g_keybindManager.globalReservedKeys.end(), key) != g_keybindManager.globalReservedKeys.end()) {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{} is a reserved key.", std::string(SDL_GetScancodeName(key)))));
                 }
                 else {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{} is a reserved key.", std::string(SDL_GetScancodeName((SDL_Scancode)targetKey)))));
+                    bindingKey = false;
+                    currentBindTarget->key = key;
+                    currentBindTarget->ctrl = g_ctrlModifier;
+                    currentBindTarget->shift = g_shiftModifier;
+                    updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
                 }
             }
-            updateKeybindButtonText(keybindButtons[bindingKeyIndex]);
-            bindingKeyIndex = -1;
         }
     }
     else {
@@ -369,11 +380,6 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
 {
     if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
         platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
-    }
-    else if (evt_id >= 1000) {
-        bindingKey = true;
-        bindingKeyIndex = evt_id - 1000;
-        keybindButtons[bindingKeyIndex].second->text = std::format("{} [SET KEY... (ESC: cancel, LShift: clear)]", keybindButtons[bindingKeyIndex].first.name);
     }
 }
 
@@ -414,9 +420,12 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
     }
 }
 
-void PopupGlobalConfig::updateKeybindButtonText(std::pair<KeybindConf, UIButton*> t)
+void PopupGlobalConfig::updateKeybindButtonText(KeyCombo* keycombo, KeybindButton* btn)
 {
-    t.second->text = std::format("{}    ({})", t.first.name, SDL_GetScancodeName(*t.first.target));
+    btn->text = keycombo->displayName;
+    btn->keybindText = keycombo->getKeyComboName();
+    btn->keybindTextColor = !keycombo->isUnassigned() ? SDL_Color{ 0x97,0xf1,0xff,0xd0 }
+                                                      : SDL_Color{ 255,255,255, 0xa0 };
 }
 
 void PopupGlobalConfig::updateLanguageCredit()

@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "mathops.h"
 #include "BaseBrush.h"
+#include "keybinds.h"
 
 bool g_saveConfig() {
     PlatformNativePathString path = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("config.txt");
@@ -27,15 +28,15 @@ bool g_saveConfig() {
         file << "showPenPressure=" << (g_config.showPenPressure ? "1" : "0") << std::endl;
         file << "showFPS=" << (g_config.showFPS ? "1" : "0") << std::endl;
         
+        auto keybinds = g_keybindManager.serializeKeybinds();
+		for (const std::string& keybind : keybinds) {
+			file << "keybind@=" << keybind << std::endl;
+		}
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
         }
 
-        int x = 0;
-        for (BaseBrush* brush : g_brushes) {
-            file << "keybind:brush:" << x++ << "=" << std::to_string(brush->keybind) << std::endl;
-        }
         file.close();
         return true;
     }
@@ -56,14 +57,8 @@ void g_loadConfig() {
                 std::string value = line.substr(line.find("=") + 1);
                 config[key] = value;
 
-                if (stringStartsWithIgnoreCase(key, "keybind:")) {
-                    try {
-                        int keybind = std::stoi(value);
-                        g_config.keybinds[key.substr(key.find(':') + 1)] = keybind;
-                    }
-                    catch (std::exception&) {
-                        logprintf("bad keybind for %s: %s\n", key.c_str(), value.c_str());
-                    }
+                if (key == "keybind@") {
+					g_config.keybinds.push_back(value);
                 }
                 else if (key == "lastfile") {
                     g_config.lastOpenFiles.push_back(value);

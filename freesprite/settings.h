@@ -37,8 +37,8 @@ public:
 
     std::vector<std::string> lastOpenFiles;
 
-    //this is used only during initial load. not updated at runtime.
-    std::map<std::string, SDL_Keycode> keybinds;
+    //this is only during initial load. not updated at runtime.
+    std::vector<std::string> keybinds;
 };
 
 struct DebugSettings {

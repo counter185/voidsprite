@@ -18,7 +18,7 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
 		loginfo(std::format("[SPR] colors in palette: {}", spr.paletteColorCount));
 		//assuming version 2
 		std::vector<u32> palette;
-		for (u32 i = 0; i < spr.paletteColorCount; i++) {
+		for (short i = 0; i < spr.paletteColorCount; i++) {
 			u8 r, g, b;
 			fread(&r, 1, 1, f);
 			fread(&g, 1, 1, f);

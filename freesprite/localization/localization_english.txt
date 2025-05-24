@@ -60,6 +60,13 @@
     {"vsp.keybinds.maineditor.eraser", "Toggle eraser"},
     {"vsp.keybinds.maineditor.blend", "Toggle blend mode"},
     {"vsp.keybinds.maineditor.focusoncolortextbox", "Focus on color input text field"},
+    {"vsp.keybinds.maineditor.save", "Save"},
+    {"vsp.keybinds.maineditor.saveas", "Save as"},
+    {"vsp.keybinds.maineditor.renamelayer", "Rename current layer"},
+    {"vsp.keybinds.maineditor.cleararea", "Erase selected area"},
+    {"vsp.keybinds.maineditor.newlayer", "New layer"},
+    {"vsp.keybinds.maineditor.duplicatelayer", "Duplicate current layer"},
+    {"vsp.keybinds.maineditor.switchtobrush", "Switch to"},
 
     // default layer names
     {"vsp.layer.template", "Template Layer"},

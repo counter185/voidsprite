@@ -1483,11 +1483,9 @@ void MainEditor::takeInput(SDL_Event evt) {
                     break;
                 case SDL_EVENT_KEY_DOWN:
                     {
-                        bool passthroughBrushKeybinds = true;
                         switch (evt.key.scancode) {
                             case SDL_SCANCODE_K:
                                 if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
-                                    passthroughBrushKeybinds = false;
                                     commitStateToCurrentLayer();
                                     for (int x = 0; x < voidsprite_image_w; x++) {
                                         for (int y = 0; y < voidsprite_image_h; y++) {
@@ -1499,12 +1497,10 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 }
                                 break;
                             case SDL_SCANCODE_RCTRL:
-                                passthroughBrushKeybinds = false;
                                 middleMouseHold = !middleMouseHold;
                                 break;
                             case SDL_SCANCODE_Z:
                                 if (g_ctrlModifier) {
-                                    passthroughBrushKeybinds = false;
                                     if (g_shiftModifier) {
                                         redo();
                                     } else {
@@ -1514,7 +1510,6 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 break;
                             case SDL_SCANCODE_Y:
                                 if (g_ctrlModifier) {
-                                    passthroughBrushKeybinds = false;
                                     redo();
                                 }
                                 break;
@@ -1554,16 +1549,6 @@ void MainEditor::takeInput(SDL_Event evt) {
                                     }
                                 }
                                 break;
-                        }
-                        if (passthroughBrushKeybinds) {
-                            if (evt.key.scancode != SDL_SCANCODE_UNKNOWN) {
-                                for (BaseBrush* b : g_brushes) {
-                                    if (b->keybind == evt.key.scancode) {
-                                        setActiveBrush(b);
-                                        break;
-                                    }
-                                }
-                            }
                         }
                     }
                     break;
