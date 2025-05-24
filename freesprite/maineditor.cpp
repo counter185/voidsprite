@@ -1499,23 +1499,6 @@ void MainEditor::takeInput(SDL_Event evt) {
                             case SDL_SCANCODE_RCTRL:
                                 middleMouseHold = !middleMouseHold;
                                 break;
-                            case SDL_SCANCODE_Z:
-                                if (g_ctrlModifier) {
-                                    if (g_shiftModifier) {
-                                        redo();
-                                    } else {
-                                        undo();
-                                    }
-                                }
-                                break;
-                            case SDL_SCANCODE_Y:
-                                if (g_ctrlModifier) {
-                                    redo();
-                                }
-                                break;
-                            case SDL_SCANCODE_C:
-                                copyLayerToClipboard(getCurrentLayer());
-                                break;
                             case SDL_SCANCODE_Q:
                                 if (g_ctrlModifier) {
                                     if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
