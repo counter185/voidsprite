@@ -15,7 +15,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) : UIColorPicker() {
     eraserButton->icon = g_iconEraser;
     eraserButton->wxWidth = 30;
     eraserButton->tooltip = "Eraser";
-	eraserButton->onClickCallback = [this](UIButton* btn) { toggleEraser(); };
+    eraserButton->onClickCallback = [this](UIButton* btn) { toggleEraser(); };
     subWidgets.addDrawable(eraserButton);
 
     blendModeButton = new UIButton();
@@ -23,12 +23,12 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) : UIColorPicker() {
     blendModeButton->icon = g_iconBlendMode;
     blendModeButton->wxWidth = 30;
     blendModeButton->tooltip = "Alpha blend";
-	blendModeButton->onClickCallback = [this](UIButton* btn) { toggleAlphaBlendMode(); };
+    blendModeButton->onClickCallback = [this](UIButton* btn) { toggleAlphaBlendMode(); };
     subWidgets.addDrawable(blendModeButton);
 
-	onColorChangedCallback = [this](UIColorPicker* from, u32 col) {
-		caller->pickedColor = col;
-	};
+    onColorChangedCallback = [this](UIColorPicker* from, u32 col) {
+        caller->pickedColor = col;
+    };
 
     updateEraserAndAlphaBlendButtons();
 }
@@ -72,8 +72,10 @@ void EditorColorPicker::render(XY position)
 void EditorColorPicker::updateEraserAndAlphaBlendButtons() {
     eraserButton->fill = caller->eraserMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
                                             : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
-    blendModeButton->fill = caller->blendAlphaMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
-                                                   : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
+    if (blendModeButton != NULL) {
+        blendModeButton->fill = caller->blendAlphaMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
+                                                       : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
+    }
 }
 
 void EditorColorPicker::toggleEraser() 

@@ -627,6 +627,9 @@
     <ClCompile Include="io_valve_spr.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="keybinds.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1207,6 +1210,9 @@
     </ClInclude>
     <ClInclude Include="io_valve_spr.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="keybinds.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

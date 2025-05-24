@@ -117,7 +117,8 @@ add_library(main SHARED
         voidsprite/io_piskel.cpp
         voidsprite/io_png.cpp
         voidsprite/io_rpgm.cpp
-		voidsprite/io_valve_spr.cpp
+        voidsprite/io_valve_spr.cpp
+        voidsprite/keybinds.cpp
         voidsprite/Layer.cpp
         voidsprite/LayerPalettized.cpp
         voidsprite/log.cpp

@@ -20,6 +20,7 @@
 #include "background_operation.h"
 #include "discord_rpc.h"
 #include "colormodels.h"
+#include "keybinds.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -423,6 +424,7 @@ int main(int argc, char** argv)
         g_setupColorModels();
         g_setupIO();
         g_reloadColorMap();
+        g_initKeybinds();
 
         loginfo("Loading assets");
 
@@ -596,6 +598,7 @@ int main(int argc, char** argv)
         loginfo("Starting launchpad");
         StartScreen* launchpad = new StartScreen();
         g_addScreen(launchpad, screenStack.empty());
+
         //run command line args
         bool closeLaunchpad = false;
         for (std::string& arg : g_cmdlineArgs) {

@@ -18,6 +18,7 @@
 #include "BaseFilter.h"
 #include "RenderFilter.h"
 #include "PanelReference.h"
+#include "keybinds.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -395,7 +396,7 @@ void MainEditor::drawIsolatedFragment()
 {
     if (isolateEnabled) {
 
-		int xincrement = canvas.scale == 1 ? 3 : canvas.scale < 6 ? 2 : 1;
+        int xincrement = canvas.scale == 1 ? 3 : canvas.scale < 6 ? 2 : 1;
         int vincrement = canvas.scale <= 2 ? 4 : canvas.scale <= 5 ? 2 : 1;
 
         isolatedFragment.forEachScanline([&](ScanlineMapElement sme) {
@@ -405,9 +406,9 @@ void MainEditor::drawIsolatedFragment()
             XY p3 = { r.x + r.w, r.y + canvas.scale/2};
             XY p4 = { r.x + r.w, r.y + canvas.scale };
 
-			if (r.y + r.h < 0 || r.y >= g_windowH || r.x >= g_windowW) {
-				return;
-			}
+            if (r.y + r.h < 0 || r.y >= g_windowH || r.x >= g_windowW) {
+                return;
+            }
 
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
             bool shouldDrawVLine = true;
@@ -1375,255 +1376,228 @@ void MainEditor::takeInput(SDL_Event evt) {
 
         }
 
-        switch (evt.type) {
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-                if (evt.button.button == SDL_BUTTON_LEFT) {
-                    if (middleMouseHold && evt.button.down) {
-                        zoomKeyHeld = true;
-                        zoomKeyTimer.start();
-                        zoomInitial = 0;
-                        zoomOrigin = {(int)evt.button.x, (int)evt.button.y};
-                    } else {
-                        zoomKeyHeld = false;
-                        RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
-                        if (evt.button.which != SDL_PEN_MOUSEID) {
-                            penPressure = 1.0f;
-                        }
-                        if (currentBrush != NULL) {
-                            if (evt.button.down) {
-                                if (!currentBrush->isReadOnly()) {
-                                    commitStateToCurrentLayer();
-                                }
-                                currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                currentBrushMouseDowned = true;
+        if (!g_keybindManager.processKeybinds(evt, "maineditor", this)) {
+            switch (evt.type) {
+                case SDL_MOUSEBUTTONDOWN:
+                case SDL_MOUSEBUTTONUP:
+                    if (evt.button.button == SDL_BUTTON_LEFT) {
+                        if (middleMouseHold && evt.button.down) {
+                            zoomKeyHeld = true;
+                            zoomKeyTimer.start();
+                            zoomInitial = 0;
+                            zoomOrigin = {(int)evt.button.x, (int)evt.button.y};
+                        } else {
+                            zoomKeyHeld = false;
+                            RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
+                            if (evt.button.which != SDL_PEN_MOUSEID) {
+                                penPressure = 1.0f;
                             }
-                            else {
-                                if (currentBrushMouseDowned) {
-                                    currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                    currentBrushMouseDowned = false;
-                                }
-
-                            }
-                        }
-                        mouseHoldPosition = mousePixelTargetPoint;
-                        leftMouseHold = evt.button.down;
-                    }
-                }
-                else if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                    middleMouseHold = evt.button.down;
-                    zoomKeyHeld = false;
-                }
-                else if (evt.button.button == SDL_BUTTON_RIGHT) {
-                    inputMouseRight({ (int)evt.button.x, (int)evt.button.y }, evt.button.down);
-                }
-                break;
-#if __ANDROID__ 
-            //limiting this to android because on pc you can just rebind these buttons however you want
-            case SDL_EVENT_PEN_BUTTON_DOWN:
-            case SDL_EVENT_PEN_BUTTON_UP:
-                if (evt.pbutton.button == 1) {    //this should be the s-pen button
-                    //inputMouseRight({ (int)(evt.button.x * g_windowW), (int)(evt.button.y * g_windowH) }, evt.pbutton.down);
-                }
-                break;
-#endif
-            case SDL_EVENT_PEN_MOTION:
-                //logprintf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
-            case SDL_EVENT_MOUSE_MOTION:
-                if (!penDown || evt.type != SDL_EVENT_MOUSE_MOTION) {
-                    XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
-                                                             : XY{(int)evt.motion.x, (int)evt.motion.y};
-                    if (middleMouseHold && zoomKeyHeld) {
-                        int zoomDiff = xySubtract(xy, zoomOrigin).y / zoomPixelStep;
-                        if (zoomDiff != zoomInitial) {
-                            zoom(zoomDiff-zoomInitial);
-                            zoomInitial = zoomDiff;
-                        }
-                    } else {
-                        RecalcMousePixelTargetPoint(xy.x, xy.y);
-                        if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
-                            canvas.panCanvas({
-                                (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
-                                (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
-                            });
-                        }
-                        else if (leftMouseHold) {
                             if (currentBrush != NULL) {
-                                currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                if (evt.button.down) {
+                                    if (!currentBrush->isReadOnly()) {
+                                        commitStateToCurrentLayer();
+                                    }
+                                    currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                    currentBrushMouseDowned = true;
+                                }
+                                else {
+                                    if (currentBrushMouseDowned) {
+                                        currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                        currentBrushMouseDowned = false;
+                                    }
+
+                                }
                             }
                             mouseHoldPosition = mousePixelTargetPoint;
-                        }
-                        if (currentBrush != NULL) {
-                            currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                            leftMouseHold = evt.button.down;
                         }
                     }
-                }
-                break;
-            case SDL_MOUSEWHEEL:
-                if (g_ctrlModifier && !g_config.scrollWithTouchpad) {
-                    colorPicker->colorUpdatedHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
-                }
-                else if (g_shiftModifier && !g_config.scrollWithTouchpad) {
-                    double newH = dxmin(dxmax(colorPicker->currentH + (360.0 / 12) * evt.wheel.y, 0), 359);
-                    colorPicker->colorUpdatedHSV(newH, colorPicker->currentS, colorPicker->currentV);
-                }
-                else {
-                    if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
-                        canvas.panCanvas({
-                            (int)(-(g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20),
-                            (int)((g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20)
-                        });
+                    else if (evt.button.button == SDL_BUTTON_MIDDLE) {
+                        middleMouseHold = evt.button.down;
+                        zoomKeyHeld = false;
+                    }
+                    else if (evt.button.button == SDL_BUTTON_RIGHT) {
+                        inputMouseRight({ (int)evt.button.x, (int)evt.button.y }, evt.button.down);
+                    }
+                    break;
+    #if __ANDROID__ 
+                //limiting this to android because on pc you can just rebind these buttons however you want
+                case SDL_EVENT_PEN_BUTTON_DOWN:
+                case SDL_EVENT_PEN_BUTTON_UP:
+                    if (evt.pbutton.button == 1) {    //this should be the s-pen button
+                        //inputMouseRight({ (int)(evt.button.x * g_windowW), (int)(evt.button.y * g_windowH) }, evt.pbutton.down);
+                    }
+                    break;
+    #endif
+                case SDL_EVENT_PEN_MOTION:
+                    //logprintf("SDL_EVENT_PEN_MOTION: %i  %i %i\n", evt.type == SDL_EVENT_PEN_MOTION, (int)evt.pmotion.x, (int)evt.pmotion.y);
+                case SDL_EVENT_MOUSE_MOTION:
+                    if (!penDown || evt.type != SDL_EVENT_MOUSE_MOTION) {
+                        XY xy = evt.type == SDL_EVENT_PEN_MOTION ? XY{(int)evt.pmotion.x, (int)evt.pmotion.y}
+                                                                 : XY{(int)evt.motion.x, (int)evt.motion.y};
+                        if (middleMouseHold && zoomKeyHeld) {
+                            int zoomDiff = xySubtract(xy, zoomOrigin).y / zoomPixelStep;
+                            if (zoomDiff != zoomInitial) {
+                                zoom(zoomDiff-zoomInitial);
+                                zoomInitial = zoomDiff;
+                            }
+                        } else {
+                            RecalcMousePixelTargetPoint(xy.x, xy.y);
+                            if (evt.type == SDL_EVENT_MOUSE_MOTION && middleMouseHold) {
+                                canvas.panCanvas({
+                                    (int)(evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
+                                    (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
+                                });
+                            }
+                            else if (leftMouseHold) {
+                                if (currentBrush != NULL) {
+                                    currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                }
+                                mouseHoldPosition = mousePixelTargetPoint;
+                            }
+                            if (currentBrush != NULL) {
+                                currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                            }
+                        }
+                    }
+                    break;
+                case SDL_MOUSEWHEEL:
+                    if (g_ctrlModifier && !g_config.scrollWithTouchpad) {
+                        colorPicker->colorUpdatedHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
+                    }
+                    else if (g_shiftModifier && !g_config.scrollWithTouchpad) {
+                        double newH = dxmin(dxmax(colorPicker->currentH + (360.0 / 12) * evt.wheel.y, 0), 359);
+                        colorPicker->colorUpdatedHSV(newH, colorPicker->currentS, colorPicker->currentV);
                     }
                     else {
-                        zoom(evt.wheel.y);
+                        if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
+                            canvas.panCanvas({
+                                (int)(-(g_shiftModifier ? evt.wheel.y : evt.wheel.x) * 20),
+                                (int)((g_shiftModifier ? -evt.wheel.x : evt.wheel.y) * 20)
+                            });
+                        }
+                        else {
+                            zoom(evt.wheel.y);
+                        }
                     }
-                }
-                break;
-            case SDL_EVENT_KEY_DOWN:
-                {
-                    bool passthroughBrushKeybinds = true;
-                    switch (evt.key.scancode) {
-                        case SDL_SCANCODE_K:
-                            if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
-                                passthroughBrushKeybinds = false;
-                                commitStateToCurrentLayer();
-                                for (int x = 0; x < voidsprite_image_w; x++) {
-                                    for (int y = 0; y < voidsprite_image_h; y++) {
-                                        SetPixel({x, y}, the_creature[x + y * voidsprite_image_w]);
+                    break;
+                case SDL_EVENT_KEY_DOWN:
+                    {
+                        bool passthroughBrushKeybinds = true;
+                        switch (evt.key.scancode) {
+                            case SDL_SCANCODE_K:
+                                if (g_ctrlModifier && g_shiftModifier && getCurrentLayer()->name == "06062000") {
+                                    passthroughBrushKeybinds = false;
+                                    commitStateToCurrentLayer();
+                                    for (int x = 0; x < voidsprite_image_w; x++) {
+                                        for (int y = 0; y < voidsprite_image_h; y++) {
+                                            SetPixel({x, y}, the_creature[x + y * voidsprite_image_w]);
+                                        }
                                     }
+                                    g_addNotification(
+                                        Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
                                 }
-                                g_addNotification(
-                                    Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
-                            }
-                            break;
-                        case SDL_SCANCODE_E:
-                            colorPicker->eraserButton->click();
-                            passthroughBrushKeybinds = false;
-                            // colorPicker->toggleEraser();
-                            break;
-                        case SDL_SCANCODE_INSERT:
-                            if (g_ctrlModifier) {
-                                if (colorPicker->colorTextField != NULL) {
-                                    wxsManager.forceFocusOn(colorPicker);
-                                    colorPicker->subWidgets.forceFocusOn(colorPicker->colorTextField);
-                                    colorPicker->colorTextField->setText("");
-                                }
-                            }
-                            else {
-                                if (colorPicker->blendModeButton != NULL) {
-                                    colorPicker->blendModeButton->click();
-                                }
-                            }
-                            passthroughBrushKeybinds = false;
-                            break;
-                        case SDL_SCANCODE_DELETE:
-                            layer_clearSelectedArea();
-                            passthroughBrushKeybinds = false;
-                            break;
-                        case SDL_SCANCODE_RCTRL:
-                            passthroughBrushKeybinds = false;
-                            middleMouseHold = !middleMouseHold;
-                            break;
-                        case SDL_SCANCODE_Z:
-                            if (g_ctrlModifier) {
+                                break;
+                            case SDL_SCANCODE_RCTRL:
                                 passthroughBrushKeybinds = false;
-                                if (g_shiftModifier) {
-                                    redo();
-                                } else {
-                                    undo();
-                                }
-                            }
-                            break;
-                        case SDL_SCANCODE_Y:
-                            if (g_ctrlModifier) {
-                                passthroughBrushKeybinds = false;
-                                redo();
-                            }
-                            break;
-                        case SDL_SCANCODE_S:
-                            if (g_ctrlModifier) {
-                                passthroughBrushKeybinds = false;
-                                if (g_shiftModifier) {
-                                    trySaveAsImage();
-                                } else {
-                                    trySaveImage();
-                                }
-                            }
-                            break;
-                        case SDL_SCANCODE_C:
-                            copyLayerToClipboard(getCurrentLayer());
-                            break;
-                        case SDL_SCANCODE_Q:
-                            if (g_ctrlModifier) {
-                                if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
-                                    lockedTilePreview = {-1, -1};
-                                } else {
-
-                                    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-                                        XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
-                                        /* XY{
-                                            mouseInCanvasPoint.x / tileDimensions.x,
-                                            mouseInCanvasPoint.y / tileDimensions.y
-                                        };*/
-                                        if (g_config.isolateRectOnLockTile) {
-                                            isolateEnabled = true;
-                                            isolatedFragment.clear();
-                                            isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
-                                                                      tileToLock.y * tileDimensions.y, tileDimensions.x,
-                                                                      tileDimensions.y});
-                                        }
-                                        if (tileToLock.x >= 0 && tileToLock.y >= 0) {
-                                            lockedTilePreview = tileToLock;
-                                            tileLockTimer.start();
-                                        } else {
-                                            g_addNotification(
-                                                ErrorNotification(TL("vsp.cmn.error"), "Tile position out of bounds"));
-                                        }
+                                middleMouseHold = !middleMouseHold;
+                                break;
+                            case SDL_SCANCODE_Z:
+                                if (g_ctrlModifier) {
+                                    passthroughBrushKeybinds = false;
+                                    if (g_shiftModifier) {
+                                        redo();
                                     } else {
-                                        lockedTilePreview = {0, 0};
-                                        tileLockTimer.start();
+                                        undo();
                                     }
                                 }
-                            }
-                            break;
-                        case SDL_SCANCODE_F2:
-                            passthroughBrushKeybinds = false;
-                            layer_promptRename();
-                            break;
-                    }
-                    if (passthroughBrushKeybinds) {
-                        if (evt.key.scancode != SDL_SCANCODE_UNKNOWN) {
-                            for (BaseBrush* b : g_brushes) {
-                                if (b->keybind == evt.key.scancode) {
-                                    setActiveBrush(b);
-                                    break;
+                                break;
+                            case SDL_SCANCODE_Y:
+                                if (g_ctrlModifier) {
+                                    passthroughBrushKeybinds = false;
+                                    redo();
+                                }
+                                break;
+                            case SDL_SCANCODE_C:
+                                copyLayerToClipboard(getCurrentLayer());
+                                break;
+                            case SDL_SCANCODE_Q:
+                                if (g_ctrlModifier) {
+                                    if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
+                                        lockedTilePreview = {-1, -1};
+                                    } else {
+
+                                        if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+                                            XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
+                                            /* XY{
+                                                mouseInCanvasPoint.x / tileDimensions.x,
+                                                mouseInCanvasPoint.y / tileDimensions.y
+                                            };*/
+                                            if (g_config.isolateRectOnLockTile) {
+                                                isolateEnabled = true;
+                                                isolatedFragment.clear();
+                                                isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
+                                                                          tileToLock.y * tileDimensions.y, tileDimensions.x,
+                                                                          tileDimensions.y});
+                                            }
+                                            if (tileToLock.x >= 0 && tileToLock.y >= 0) {
+                                                lockedTilePreview = tileToLock;
+                                                tileLockTimer.start();
+                                            } else {
+                                                g_addNotification(
+                                                    ErrorNotification(TL("vsp.cmn.error"), "Tile position out of bounds"));
+                                            }
+                                        } else {
+                                            lockedTilePreview = {0, 0};
+                                            tileLockTimer.start();
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                        if (passthroughBrushKeybinds) {
+                            if (evt.key.scancode != SDL_SCANCODE_UNKNOWN) {
+                                for (BaseBrush* b : g_brushes) {
+                                    if (b->keybind == evt.key.scancode) {
+                                        setActiveBrush(b);
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                break;
-            case SDL_FINGERMOTION:
-                if (!penDown) {
-                    XY rel = {evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH};
-                    canvas.panCanvas(rel);
-                }
-                break;
-            case SDL_EVENT_PEN_DOWN:
-            case SDL_EVENT_PEN_UP:
-                penDown = evt.ptouch.down;
-                SDL_SetWindowMouseGrab(g_wd, penDown);
-                //loginfo(std::format("new pen state: {}", penDown));
-                break;
-            case SDL_EVENT_PEN_AXIS:
-                if (evt.paxis.axis == 0) {  //should always be the pressure axis
-                    penPressure = evt.paxis.value;
-                }
-                break;
+                    break;
+                case SDL_FINGERMOTION:
+                    if (!penDown) {
+                        XY rel = {evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH};
+                        canvas.panCanvas(rel);
+                    }
+                    break;
+                case SDL_EVENT_PEN_DOWN:
+                case SDL_EVENT_PEN_UP:
+                    penDown = evt.ptouch.down;
+                    SDL_SetWindowMouseGrab(g_wd, penDown);
+                    //loginfo(std::format("new pen state: {}", penDown));
+                    break;
+                case SDL_EVENT_PEN_AXIS:
+                    if (evt.paxis.axis == 0) {  //should always be the pressure axis
+                        penPressure = evt.paxis.value;
+                    }
+                    break;
+            }
         }
     } else {
         leftMouseHold = false;
         penDown = false;
+    }
+}
+
+void MainEditor::focusOnColorInputTextBox()
+{
+    if (colorPicker->colorTextField != NULL) {
+        wxsManager.forceFocusOn(colorPicker);
+        colorPicker->subWidgets.forceFocusOn(colorPicker->colorTextField);
+        colorPicker->colorTextField->setText("");
     }
 }
 

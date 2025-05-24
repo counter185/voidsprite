@@ -12,6 +12,7 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
 			fclose(f);
 			return NULL;
 		}
+		loginfo(std::format("[SPR] frame count: {}", spr.frameNum));
 		loginfo(std::format("[SPR] sprite type: {}", spr.spriteType));
 		loginfo(std::format("[SPR] transparency format: {}", (u32)spr.textFormat));
 		loginfo(std::format("[SPR] colors in palette: {}", spr.paletteColorCount));

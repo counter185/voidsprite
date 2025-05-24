@@ -211,6 +211,7 @@
     <ClCompile Include="io_png.cpp" />
     <ClCompile Include="io_rpgm.cpp" />
     <ClCompile Include="io_valve_spr.cpp" />
+    <ClCompile Include="keybinds.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="localization\localization.cpp" />
     <ClCompile Include="log.cpp" />
@@ -391,6 +392,7 @@
     <ClInclude Include="io_rpgm.h" />
     <ClInclude Include="io_valve_spr.h" />
     <ClInclude Include="json\json.hpp" />
+    <ClInclude Include="keybinds.h" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="license.h" />
     <ClInclude Include="localization\localization.h" />

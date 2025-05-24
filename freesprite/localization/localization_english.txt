@@ -3,6 +3,7 @@
     // common strings used in a few different places
     {"vsp.cmn.yes", "Yes"},
     {"vsp.cmn.no", "No"},
+    {"vsp.cmn.ok", "OK"},
     {"vsp.cmn.close", "Close"},
     {"vsp.cmn.apply", "Apply"},
     {"vsp.cmn.cancel", "Cancel"},
@@ -53,6 +54,12 @@
 
     // templates
     {"vsp.template.pixelillustration", "pixel illustration"},
+
+    //keybinds
+    {"vsp.keybinds.region.maineditor", "Editor"},
+    {"vsp.keybinds.maineditor.eraser", "Toggle eraser"},
+    {"vsp.keybinds.maineditor.blend", "Toggle blend mode"},
+    {"vsp.keybinds.maineditor.focusoncolortextbox", "Focus on color input text field"},
 
     // default layer names
     {"vsp.layer.template", "Template Layer"},

@@ -177,6 +177,7 @@ public:
 
     void inputMouseRight(XY at, bool down);
 
+    void focusOnColorInputTextBox();
     void initLayers();
     virtual void setUpWidgets();
     void makeActionBar();
