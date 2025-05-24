@@ -8,7 +8,7 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
 		SPR_sprite spr;
 		fread(&spr, sizeof(SPR_sprite), 1, f);
 		if (spr.id != 0x50534449) {
-			logprintf("[SPR] Invalid file format\n");
+			logerr(std::format("[SPR] Invalid file format {:08X}\n", spr.id));
 			fclose(f);
 			return NULL;
 		}
@@ -22,7 +22,7 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
 			fread(&r, 1, 1, f);
 			fread(&g, 1, 1, f);
 			fread(&b, 1, 1, f);
-			palette.push_back(PackRGBAtoARGB(r, g, b, 255));
+			palette.push_back(PackRGBAtoARGB(r, g, b, spr.textFormat == SPR_Transparency_IndexAlpha ? i : 255));
 		}
 
 		if (spr.textFormat == SPR_Transparency_AlphaTest && !palette.empty()) {
@@ -36,12 +36,13 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
 			fread(&frame, sizeof(SPR_sprite_frame_header), 1, f);
 
 			LayerPalettized* l = LayerPalettized::tryAllocIndexedLayer(frame.width, frame.height);
-			l->palette = palette;
 			ret = l;
 			if (l == NULL) {
-				logprintf("[SPR] Failed to allocate layer\n");
+				logerr(std::format("[SPR] Failed to allocate layer {}x{}\n", frame.width, frame.height));
 			}
 			else {
+				l->name = "Valve SPR Layer";
+				l->palette = palette;
 				u32* ppx = (u32*)l->pixelData;
 				for (u32 y = 0; y < frame.height; y++) {
 					for (u32 x = 0; x < frame.width; x++) {
