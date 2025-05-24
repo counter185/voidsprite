@@ -922,7 +922,7 @@ int main(int argc, char** argv)
             }
 
             if (g_config.showFPS) {
-                XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 60, 0 });
+                XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
                 nextStatusBarOrigin = fpsOrigin;
                 g_fnt->RenderString(std::format("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
             }
