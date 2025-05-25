@@ -10,10 +10,16 @@ void g_renderNotifications()
     for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
         Notification& notif = *it;
 
-        //background
+        //bounds
         int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xf0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))));
         SDL_Rect r = { notifX, notifY, 400, 60 };
+
+        if (pointInBox({ g_mouseX, g_mouseY }, r)) {
+            notif.timer.setElapsedTime(500);
+        }
+
+        //background
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xf0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))));
         SDL_RenderFillRect(g_rd, &r);
 
         //animated border lines
