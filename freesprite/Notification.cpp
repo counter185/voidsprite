@@ -52,7 +52,7 @@ void g_renderNotifications()
         //text
         g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifY + 15, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
         g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, 16);
-        notifY += 65 * XM1PW3P1(notif.timer.percentElapsedTime(300));
+        notifY += 65 * XM1PW3P1(notif.timer.percentElapsedTime(300) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 
         //pulse outline
         if (g_config.vfxEnabled) {
