@@ -8,7 +8,7 @@ void g_renderNotifications()
     int notifY = 30;
     int notifOriginX = g_windowW - 450;
     for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
-		Notification& notif = *it;
+        Notification& notif = *it;
 
         //background
         int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
@@ -28,6 +28,11 @@ void g_renderNotifications()
         //right line
         drawLine(XY{ r.x + r.w, r.y + r.h }, XY{ r.x + r.w, r.y }, XM1PW3P1(notif.timer.percentElapsedTime(300)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 
+        //top line [timer]
+        XY topLeft = { notifX, notifY };
+        XY topRight = { notifX + r.w, notifY };
+        drawLine(topLeft, topRight, 1.0 - notif.timer.percentElapsedTime(notif.duration));
+
         //icon
         int textX = notifX + 10;
         if (notif.icon != NULL) {
@@ -45,7 +50,7 @@ void g_renderNotifications()
 
         //pulse outline
         if (g_config.vfxEnabled) {
-			double timer800ms = notif.timer.percentElapsedTime(800);
+            double timer800ms = notif.timer.percentElapsedTime(800);
             SDL_SetRenderDrawColor(g_rd, notif.color.r, notif.color.g, notif.color.b, (u8)(0x80 * (1.0 - XM1PW3P1(timer800ms))));
             SDL_Rect rg = offsetRect(r, 1 + 20 * XM1PW3P1(timer800ms));
             SDL_RenderDrawRect(g_rd, &rg);
