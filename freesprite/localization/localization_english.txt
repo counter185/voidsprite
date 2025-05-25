@@ -56,6 +56,15 @@
     {"vsp.template.pixelillustration", "pixel illustration"},
 
     //keybinds
+    {"vsp.keybinds.region.global", "General"},
+    {"vsp.keybinds.global.screenleft", "Previous workspace"},
+    {"vsp.keybinds.global.screenright", "Next workspace"},
+    {"vsp.keybinds.global.setfavworkspace", "Assign favourite workspace"},
+    {"vsp.keybinds.global.switchfavworkspace", "Switch to favourite workspace"},
+    {"vsp.keybinds.global.fullscreen", "Toggle fullscreen"},
+    {"vsp.keybinds.global.renderscaleup", "Increase screen scale"},
+    {"vsp.keybinds.global.renderscaledown", "Decrease screen scale"},
+
     {"vsp.keybinds.region.maineditor", "Editor"},
     {"vsp.keybinds.maineditor.eraser", "Toggle eraser"},
     {"vsp.keybinds.maineditor.blend", "Toggle blend mode"},

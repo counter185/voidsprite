@@ -2,18 +2,48 @@
 #include "maineditor.h"
 #include "EditorLayerPicker.h"
 #include "BaseBrush.h"
+#include "main.h"
 
 void g_initKeybinds()
 {
     g_keybindManager.globalReservedKeys = {
-        SDL_SCANCODE_LEFTBRACKET,
-        SDL_SCANCODE_RIGHTBRACKET,
-        SDL_SCANCODE_F11,
         SDL_SCANCODE_LALT,
     };
 
+    //global keybinds
+    g_keybindManager.newRegion("global", TL("vsp.keybinds.region.global"));
+    g_keybindManager.addKeybind("global", "switch_screen_left",
+        KeyCombo(TL("vsp.keybinds.global.screenleft"), SDL_SCANCODE_LEFTBRACKET, false, false, [](void* d) {
+            main_switchScreenLeft();
+        }));
+    g_keybindManager.addKeybind("global", "switch_screen_right",
+        KeyCombo(TL("vsp.keybinds.global.screenright"), SDL_SCANCODE_RIGHTBRACKET, false, false, [](void* d) {
+            main_switchScreenRight();
+        }));
+    g_keybindManager.addKeybind("global", "set_fav_workspace",
+        KeyCombo(TL("vsp.keybinds.global.setfavworkspace"), SDL_SCANCODE_W, true, false, [](void* d) {
+            main_assignFavScreen();
+        }));
+    g_keybindManager.addKeybind("global", "switch_to_fav_workspace",
+        KeyCombo(TL("vsp.keybinds.global.switchfavworkspace"), SDL_SCANCODE_W, true, true, [](void* d) {
+            main_switchToFavScreen();
+        }));
+    g_keybindManager.addKeybind("global", "fullscreen",
+        KeyCombo(TL("vsp.keybinds.global.fullscreen"), SDL_SCANCODE_F11, false, false, [](void* d) {
+            main_toggleFullscreen();
+        }));
+    g_keybindManager.addKeybind("global", "render_scale_up",
+        KeyCombo(TL("vsp.keybinds.global.renderscaleup"), SDL_SCANCODE_EQUALS, true, false, [](void* d) {
+            main_renderScaleUp();
+        }));
+    g_keybindManager.addKeybind("global", "render_scale_down",
+        KeyCombo(TL("vsp.keybinds.global.renderscaledown"), SDL_SCANCODE_MINUS, true, false, [](void* d) {
+            main_renderScaleDown();
+        }));
+
+
     //main editor keybinds
-    g_keybindManager.regions["maineditor"].displayName = TL("vsp.keybinds.region.maineditor");
+    g_keybindManager.newRegion("maineditor", TL("vsp.keybinds.region.maineditor"));
     g_keybindManager.regions["maineditor"].reservedKeys = {
         SDL_SCANCODE_Q,
     };

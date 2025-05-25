@@ -384,7 +384,18 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     bool ctrl = g_ctrlModifier;
                     bool shift = g_shiftModifier;
 
-                    bool updateAll = currentBindTargetRegion->unassignAllWith(key, ctrl, shift);
+                    bool updateAll = false;
+
+                    if (currentBindTargetRegion->regionKey != "global") {
+                        updateAll =
+                            currentBindTargetRegion->unassignAllWith(key, ctrl, shift)
+                            || g_keybindManager.regions["global"].unassignAllWith(key, ctrl, shift);
+                    }
+                    else {
+                        for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
+                            updateAll |= keyRegion.unassignAllWith(key, ctrl, shift);
+                        }
+                    }
 
                     currentBindTarget->key = key;
                     currentBindTarget->ctrl = ctrl;

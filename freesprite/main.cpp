@@ -129,6 +129,32 @@ void g_switchScreen(int index) {
     }
 }
 
+void main_switchScreenLeft() {
+    if (popupStack.empty()) {
+        if (currentScreen != 0) {
+            if (g_ctrlModifier) {
+                g_switchScreen(0);
+            }
+            else {
+                g_switchScreen(currentScreen - 1);
+            }
+        }
+    }
+}
+void main_switchScreenRight() {
+    if (popupStack.empty()) {
+        if (currentScreen < screenStack.size() - 1) {
+            if (g_ctrlModifier) {
+                g_switchScreen(screenStack.size() - 1);
+            }
+            else {
+                g_switchScreen(currentScreen + 1);
+            }
+        }
+    }
+}
+
+
 void g_reloadFonts() {
     if (g_fnt != NULL) {
         delete g_fnt;
@@ -234,7 +260,7 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path) {
     return ret;
 }
 
-void UpdateViewportScaler(){
+void main_updateViewportScaler(){
     if (viewport != NULL) {
         tracked_destroyTexture(viewport);
     }
@@ -264,7 +290,7 @@ void AutoViewportScale() {
                 : ixmax(2, unscaledWindowSize.x / 1280);
     }
     g_renderScale = newViewportScale;
-    UpdateViewportScaler();
+    main_updateViewportScaler();
 }
 
 void renderbgOpInProgressScreen() {
@@ -283,6 +309,40 @@ void renderbgOpInProgressScreen() {
 
     localttp.addTooltip(Tooltip{ {0,g_windowH - 30 }, bgOpInProgressText, {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
     localttp.renderAll();
+}
+
+void main_toggleFullscreen()
+{
+    fullscreen = !fullscreen;
+    SDL_SetWindowFullscreen(g_wd, fullscreen);
+    g_newVFX(VFX_SCREENSWITCH, 800);
+}
+
+void main_renderScaleUp()
+{
+    g_renderScale++;
+    main_updateViewportScaler();
+}
+
+void main_renderScaleDown()
+{
+    if (g_renderScale-- <= 1) {
+        g_renderScale = 1;
+    }
+    main_updateViewportScaler();
+}
+
+void main_switchToFavScreen()
+{
+    if (popupStack.empty() && favourite && fav_screen < screenStack.size()) {
+        g_switchScreen(fav_screen);
+    }
+}
+
+void main_assignFavScreen()
+{
+    fav_screen = currentScreen;
+    favourite = !favourite;
 }
 
 int main(int argc, char** argv)
@@ -400,7 +460,7 @@ int main(int argc, char** argv)
         g_props = SDL_CreateProperties();
 
         unscaledWindowSize = { g_windowW, g_windowH };
-        UpdateViewportScaler();
+        main_updateViewportScaler();
 
         if (g_config.customVisualConfigPath != "") {
             if (!g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath))) {
@@ -698,7 +758,7 @@ int main(int argc, char** argv)
 #if __ANDROID__
                     AutoViewportScale();
 #else
-                    UpdateViewportScaler();
+                    main_updateViewportScaler();
 #endif
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
@@ -732,68 +792,15 @@ int main(int argc, char** argv)
                     continue;
                 }
 
+                g_keybindManager.processKeybinds(evt, "global", NULL);
+
                 //events that can't fire during bg operation
-                switch (evt.type) {
+                /*switch (evt.type) {
                 case SDL_QUIT:
                     //return 0;
                     break;
-                case SDL_KEYDOWN:
-                    if (popupStack.empty() && evt.key.scancode == SDL_SCANCODE_LEFTBRACKET) {
-                        if (currentScreen != 0) {
-                            if (g_ctrlModifier) {
-                                g_switchScreen(0);
-                            }
-                            else {
-                                g_switchScreen(currentScreen - 1);
-                            }
-                        }
-                    }
-                    else if (popupStack.empty() && evt.key.scancode == SDL_SCANCODE_RIGHTBRACKET) {
-                        if (currentScreen < screenStack.size() - 1) {
-                            if (g_ctrlModifier) {
-                                g_switchScreen(screenStack.size() - 1);
-                            }
-                            else {
-                                g_switchScreen(currentScreen + 1);
-                            }
-                        }
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_W) {
-                        if (g_ctrlModifier) {
-                            if (g_shiftModifier) {
-                                if (popupStack.empty() && favourite && fav_screen < screenStack.size()) {
-                                    g_switchScreen(fav_screen);
-                                }
-                            }
-                            else {
-                                fav_screen = currentScreen;
-                                favourite = !favourite;
-                                //screenSwitchTimer.start();
-                            }
-                        }
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_F11) {
-                        fullscreen = !fullscreen;
-                        SDL_SetWindowFullscreen(g_wd, fullscreen);
-                        g_newVFX(VFX_SCREENSWITCH, 800);
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_EQUALS) {
-                        if (g_ctrlModifier) {
-                            g_renderScale++;
-                            UpdateViewportScaler();
-                        }
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_MINUS) {
-                        if (g_ctrlModifier) {
-                            if (g_renderScale-- <= 1) {
-                                g_renderScale = 1;
-                            }
-                            UpdateViewportScaler();
+                }*/
 
-                        }
-                    }
-                    break;
-                }
                 g_gamepad->TakeEvent(evt);
                 if (!g_bgOpRunning && !DrawableManager::processInputEventInMultiple({ overlayWidgets }, evt)) {
                     if (!popupStack.empty() && popupStack[popupStack.size() - 1]->takesInput()) {

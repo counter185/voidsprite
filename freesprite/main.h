@@ -12,3 +12,12 @@ inline DrawableManager overlayWidgets;
 inline std::vector<ButtonStartScreenSession*> screenButtons;
 
 inline SDL_Texture* screenPreviewFramebuffer = NULL;
+
+void main_updateViewportScaler();
+void main_renderScaleUp();
+void main_renderScaleDown();
+void main_switchToFavScreen();
+void main_assignFavScreen();
+void main_switchScreenLeft();
+void main_switchScreenRight();
+void main_toggleFullscreen();

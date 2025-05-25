@@ -60,6 +60,7 @@ public:
 class KeybindRegion {
 public:
     std::string displayName;
+    std::string regionKey;
     std::vector<SDL_Scancode> reservedKeys;
     std::map<std::string, KeyCombo> keybinds;
     std::vector<std::string> orderInSettings;
@@ -80,6 +81,12 @@ class KeybindManager {
 public:
     std::vector<SDL_Scancode> globalReservedKeys;
     std::map<std::string, KeybindRegion> regions;
+
+    void newRegion(std::string key, std::string displayName) {
+        regions[key] = KeybindRegion();
+        regions[key].regionKey = key;
+        regions[key].displayName = displayName;
+    }
 
     void addKeybind(std::string region, std::string key, KeyCombo kc) {
         regions[region].keybinds[key] = kc;
