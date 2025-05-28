@@ -90,6 +90,9 @@
             android:preferMinimalPostProcessing="true"
             android:exported="true"
             >
+            <layout
+                android:defaultWidth="1280px"
+                android:defaultHeight="720px" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
