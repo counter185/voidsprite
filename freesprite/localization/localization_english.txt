@@ -80,6 +80,7 @@
     {"vsp.keybinds.maineditor.redoalt", "Redo (alternative)"},
     {"vsp.keybinds.maineditor.renamelayer", "Rename current layer"},
     {"vsp.keybinds.maineditor.cleararea", "Erase selected area"},
+    {"vsp.keybinds.maineditor.fillarea", "Fill selected area"},
     {"vsp.keybinds.maineditor.newlayer", "New layer"},
     {"vsp.keybinds.maineditor.duplicatelayer", "Duplicate current layer"},
     {"vsp.keybinds.maineditor.switchtobrush", "Switch to"},
@@ -193,6 +194,7 @@
     {"vsp.maineditor.setckeydesc","Pick a color to set as the color key:"},
     {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
     {"vsp.maineditor.nav.layer.clearselection", "Erase selected area"},
+    {"vsp.maineditor.nav.layer.fillselection", "Fill selected area"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

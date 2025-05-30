@@ -103,6 +103,10 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.cleararea"), SDL_SCANCODE_DELETE, false, false, [](void* d) {
             ((MainEditor*)d)->layer_clearSelectedArea();
         }));
+    g_keybindManager.addKeybind("maineditor", "fill_area", 
+        KeyCombo(TL("vsp.keybinds.maineditor.fillarea"), SDL_SCANCODE_UNKNOWN, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_fillActiveColor();
+        }));
     g_keybindManager.addKeybind("maineditor", "new_layer", 
         KeyCombo(TL("vsp.keybinds.maineditor.newlayer"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->newLayer(); ((MainEditor*)d)->layerPicker->updateLayers();

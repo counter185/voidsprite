@@ -243,6 +243,7 @@ public:
     void layer_outline(bool wholeImage = false);
     void layer_clearSelectedArea();
     void layer_selectCurrentAlpha();
+    void layer_fillActiveColor();
     virtual Layer* flattenImage();
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void flipAllLayersOnX();

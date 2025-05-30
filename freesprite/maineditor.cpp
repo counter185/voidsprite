@@ -965,6 +965,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.layer.fillselection"),
+                            [](MainEditor* editor) {
+                                editor->layer_fillActiveColor();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabLayer
             }
@@ -2834,4 +2840,18 @@ void MainEditor::layer_selectCurrentAlpha()
         }
     }
     isolateEnabled = p > 0;
+}
+
+void MainEditor::layer_fillActiveColor()
+{
+    commitStateToCurrentLayer();
+    if (!isolateEnabled) {
+        getCurrentLayer()->fillRect({ 0,0 }, {canvas.dimensions.x, canvas.dimensions.y}, pickedColor);
+    }
+    else {
+		Layer* currentLayer = getCurrentLayer();
+		isolatedFragment.forEachPoint([this, currentLayer](XY p) {
+            currentLayer->setPixel(p, pickedColor);
+		});
+    }
 }
