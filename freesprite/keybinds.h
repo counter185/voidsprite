@@ -65,7 +65,7 @@ public:
     std::map<std::string, KeyCombo> keybinds;
     std::vector<std::string> orderInSettings;
 
-    bool unassignAllWith(SDL_Scancode c, bool shift, bool ctrl) {
+    bool unassignAllWith(SDL_Scancode c, bool ctrl, bool shift) {
         bool ret = false;
         for (auto& [key, kc] : keybinds) {
             if (kc.key == c && kc.shift == shift && kc.ctrl == ctrl) {
