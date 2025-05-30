@@ -15,6 +15,7 @@ inline void g_startNewOperation(std::function<void()> function) {
     g_bgOpProgress = 0.0;
     threadSet = true;
     g_bgOpThread = std::thread([function]() {
+        srand(time(NULL));
         function();
         g_bgOpRunning = false;
     });

@@ -19,6 +19,7 @@
 #include "RenderFilter.h"
 #include "PanelReference.h"
 #include "keybinds.h"
+#include "background_operation.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -2845,13 +2846,19 @@ void MainEditor::layer_selectCurrentAlpha()
 void MainEditor::layer_fillActiveColor()
 {
     commitStateToCurrentLayer();
-    if (!isolateEnabled) {
-        getCurrentLayer()->fillRect({ 0,0 }, {canvas.dimensions.x, canvas.dimensions.y}, pickedColor);
-    }
-    else {
-		Layer* currentLayer = getCurrentLayer();
-		isolatedFragment.forEachPoint([this, currentLayer](XY p) {
-            currentLayer->setPixel(p, pickedColor);
-		});
-    }
+    g_startNewOperation([this]() {
+        if (!isolateEnabled) {
+            for (int x = 0; x < canvas.dimensions.x; x++) {
+                for (int y = 0; y < canvas.dimensions.y; y++) {
+                    SetPixel({ x,y }, pickedColor, false);
+                }
+            }
+        }
+        else {
+            Layer* currentLayer = getCurrentLayer();
+            isolatedFragment.forEachPoint([this, currentLayer](XY p) {
+                SetPixel(p, pickedColor, false);
+            });
+        }
+    });
 }
