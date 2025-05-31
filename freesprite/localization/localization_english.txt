@@ -303,6 +303,7 @@
     //popup: about
     {"vsp.about.title", "About void" UTF8_DIAMOND "sprite"},
     {"vsp.about.tab.general", "General"},
+    {"vsp.about.tab.contributors", "Contributors"},
     {"vsp.about.tab.systeminfo", "System"},
     {"vsp.about.tab.libs", "Libraries"},
     {"vsp.about.tab.fonts", "Fonts"},

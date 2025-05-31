@@ -25,18 +25,22 @@ public:
         close->onClickCallback = [this](UIButton*){ this->closePopup(); };
 
         std::string generalTabContents =
+            getVSPShortLicense();
+
+        std::string contributorTabContents =
             TL("vsp.about.contributors") + "\n"
             + listOfContributors + "\n\n"
             + TL("vsp.about.translations") + "\n";
 
         for (auto [locale, data] : getLocalizations()) {
             if (data.langCredit != "") {
-                generalTabContents += std::format("{}:  {}", data.langName, data.langCredit);
+                contributorTabContents += std::format("{}:  {}", data.langName, data.langCredit);
             }
         }
 
         std::vector<std::pair<std::string, std::string>> aboutTabContents = {
             {TL("vsp.about.tab.general"), generalTabContents},
+            {TL("vsp.about.tab.contributors"), contributorTabContents},
             {TL("vsp.about.tab.systeminfo"), platformGetSystemInfo()},
             {TL("vsp.about.tab.libs"), getAllLibsVersions()},
             {TL("vsp.about.tab.fonts"), getFontLicense()},
