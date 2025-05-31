@@ -7,6 +7,9 @@ cp freesprite/assets/* android-project/app/src/main/assets/
 cd android-project/app/jni
 
 git clone --recursive https://github.com/libsdl-org/SDL.git
+cd SDL
+git checkout 520d73ae
+cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
 git clone --recursive https://github.com/madler/zlib.git
