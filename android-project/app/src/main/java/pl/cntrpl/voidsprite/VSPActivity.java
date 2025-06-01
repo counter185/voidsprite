@@ -54,6 +54,12 @@ public class VSPActivity extends SDLActivity {
         }
     }
 
+    public static void openUrl(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        activitySingleton.startActivity(intent);
+    }
+
     public static native void passAppdataPathString(String appdataPath);
     public static native void passSystemInformationString(String systemInformation);
 }
