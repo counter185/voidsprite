@@ -22,9 +22,9 @@ using json = nlohmann::json;
 #define PLATFORM "linux64"
 #endif
 
-inline bool updateCheckComplete = false;
-inline bool updateCheckFailed = true;
-inline int githubStars = 0;
+inline std::atomic<bool> updateCheckComplete = false;
+inline std::atomic<bool> updateCheckFailed = true;
+inline std::atomic<int> githubStars = 0;
 inline std::string latestHash = "";
 inline int latestVersionYear = 0;
 inline int latestVersionMonth = 0;
@@ -38,7 +38,7 @@ inline void runUpdateCheck() {
 		json j = json::parse(repoInfoData);
         if (j.is_object() && j.contains("stargazers_count")) {
 			githubStars = j["stargazers_count"].get<int>();
-            loginfo(std::format("GitHub star count: {}", githubStars));
+            loginfo(std::format("GitHub star count: {}", (int)githubStars));
 		}
     }
     catch (std::exception&) {
@@ -110,14 +110,17 @@ inline void runUpdateCheck() {
                         latestHash = GIT_HASH;
                     }
                 }
-                updateCheckFailed = false;
             }
+            updateCheckFailed = false;
         }
         catch (std::exception&) {
             logerr("Failed to get actions data");
             latestHash = GIT_HASH;
 			updateCheckFailed = true;
         }
+    }
+    else {
+        updateCheckFailed = false;
     }
     updateCheckComplete = true;
 }

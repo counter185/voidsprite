@@ -13,6 +13,14 @@
 void StartScreen::tick() {
     if (closeNextTick) {
         g_closeScreen(this);
+        return;
+    }
+
+    if (waitingForUpdateCheckInfo && updateCheckComplete) {
+        if (!updateCheckFailed) {
+            updateCheckFinished();
+        }
+        waitingForUpdateCheckInfo = false;
     }
 }
 
@@ -516,6 +524,10 @@ void StartScreen::renderBackground()
         }
     }
 
+    if (g_config.vfxEnabled && g_config.checkUpdates) {
+        renderBGStars();
+    }
+
     auto timeNow = std::chrono::system_clock::now();
     std::time_t timeNowT = std::chrono::system_clock::to_time_t(timeNow);
     std::tm tmNow;
@@ -622,6 +634,31 @@ void StartScreen::renderBackground()
     //g_fnt->RenderString(std::format("{:02}:{:02}:{:02}", hourNow, minuteNow, secondNow), g_windowW - 120, g_windowH - 70, SDL_Color{255,255,255,0x50});
 }
 
+void StartScreen::renderBGStars()
+{
+    int i = 0;
+    for (LaunchpadBGStar& star : stars) {
+        XY realPosition = bgSpaceTransform(star.pos);
+        XY endPos = bgSpaceTransform(xyAdd(star.pos, { 2,2 }));
+
+        const int blinkDistance = 12;
+        XY center = {star.pos.x + 1, star.pos.y + 1};
+        XY centerInBgSpace = bgSpaceTransform(center);
+        XY p1 = bgSpaceTransform(xyAdd(center, { blinkDistance, -blinkDistance }));
+        XY p2 = bgSpaceTransform(xyAdd(center, { -blinkDistance, blinkDistance }));
+
+        double blinkTimer = star.timer.percentLoopingTime(1500, -star.blinkOffset);
+        u8 alpha = 0x20 + star.opacity * (1.0 - blinkTimer);
+        SDL_SetRenderDrawColor(g_rd, 0xfd, 0xff, 0xab, alpha);
+        drawLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
+
+        SDL_SetRenderDrawColor(g_rd, 0xfd, 0xff, 0xab, alpha / 2);
+        drawLine(p1, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+        drawLine(p2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+        i++;
+    }
+}
+
 void StartScreen::openImageLoadDialog()
 {
     PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0);
@@ -668,6 +705,29 @@ void StartScreen::tryOpenImageFromClipboard()
     }
 }
 
+void StartScreen::updateCheckFinished()
+{
+    genBGStars();
+}
+
 void StartScreen::genBGStars() {
-    //todo
+    stars.clear();
+    for (int x = 0; x < ixmin(githubStars, 200); x++) {
+        LaunchpadBGStar s = {
+            XY{ randomInt(0, 960), randomInt(0,960) },
+            randomInt(1,3),
+            randomInt(0x60,0xa0),
+            randomInt(0, 900),
+        };
+        stars.push_back(s);
+        stars[stars.size()-1].timer.start();
+    }
+}
+
+XY StartScreen::bgSpaceTransform(XY p)
+{
+    return XY {
+        (int)((p.x / 960.0f) * g_windowW),
+        (int)((p.y / 960.0f) * g_windowH)
+    };
 }

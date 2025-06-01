@@ -32,6 +32,7 @@ struct LaunchpadBGStar {
     XY pos;
     int size;
     u8 opacity;
+    int blinkOffset;
     Timer64 timer;
 };
 
@@ -41,6 +42,9 @@ private:
     Timer64 fileDropTimer;
     bool droppingFile = false;
     XY fileDropXY = { -1,-1 };
+
+    bool waitingForUpdateCheckInfo = true;
+    std::vector<LaunchpadBGStar> stars;
 public:
     TabbedView* newImageTabs;
 
@@ -302,9 +306,12 @@ public:
     void renderStartupAnim();
     void renderFileDropAnim();
     void renderBackground();
+    void renderBGStars();
     void openImageLoadDialog();
     void tryLoadFile(std::string path);
     void tryOpenImageFromClipboard();
+    void updateCheckFinished();
     void genBGStars();
+    XY bgSpaceTransform(XY p);
 };
 
