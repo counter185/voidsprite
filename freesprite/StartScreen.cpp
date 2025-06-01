@@ -667,3 +667,7 @@ void StartScreen::tryOpenImageFromClipboard()
         SDL_free(clipboard);
     }
 }
+
+void StartScreen::genBGStars() {
+    //todo
+}

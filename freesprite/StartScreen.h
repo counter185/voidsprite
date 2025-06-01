@@ -32,6 +32,7 @@ struct LaunchpadBGStar {
     XY pos;
     int size;
     u8 opacity;
+    Timer64 timer;
 };
 
 class StartScreen : public BaseScreen, public EventCallbackListener
@@ -302,5 +303,6 @@ public:
     void openImageLoadDialog();
     void tryLoadFile(std::string path);
     void tryOpenImageFromClipboard();
+    void genBGStars();
 };
 
