@@ -22,9 +22,9 @@ void StartScreen::render()
 
     SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
     SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
-    g_fnt->RenderString(std::format("alpha@{}", __DATE__), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
+    g_fnt->RenderString(std::format("alpha@{}\n{}", __DATE__, GIT_HASH), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
-    if (updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
+    if (g_config.checkUpdates && updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
         static std::string tlUpdateAvailable = TL("vsp.launchpad.update.title");
         static std::string tlLatestVer = TL("vsp.launchpad.update.latestver");
         std::string desc = std::format("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));

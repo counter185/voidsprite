@@ -63,7 +63,9 @@ public:
     bool closeNextTick = false;
 
     StartScreen() {
-        g_startNewAsyncOperation([]() { runUpdateCheck(); });
+        if (g_config.checkUpdates) {
+            g_startNewAsyncOperation([]() { runUpdateCheck(); });
+        }
 
         UILabel* title = new UILabel("voidsprite");
         title->position = {10, 40};

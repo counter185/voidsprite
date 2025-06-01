@@ -284,6 +284,8 @@
     
     {"vsp.config.opt.brushcolorpreview", "Replace brush preview with active color"},
     {"vsp.config.opt.brushcolorpreview.desc", "Replaces the brush preview with the currently selected color."},
+    {"vsp.config.opt.checkupdates", "Check for updates at startup"},
+    {"vsp.config.opt.checkupdates.desc", "voidsprite will check for updates at startup and show a message if a new version is available."},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},
