@@ -68,7 +68,7 @@ public:
         }
     }
 
-    void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) override {
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override {
         std::vector<std::reference_wrapper<DrawableManager>> wxss = { tabButtons, tabs[openTab].wxs };
         gPosOffset = xyAdd(gPosOffset, position);
         tabs[openTab].wxs.processMouseWheelEvent(xyAdd(gPosOffset, XY{ 0,buttonsHeight }), mousePos, direction);

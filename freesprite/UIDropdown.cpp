@@ -81,7 +81,7 @@ void UIDropdown::mouseHoverMotion(XY mousePos, XY gPosOffset)
     }
 }
 
-void UIDropdown::mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction)
+void UIDropdown::mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction)
 {
     if (isOpen) {
         if (!wxs.processMouseWheelEvent(xyAdd({ 0, menuYOffset }, xyAdd(gPosOffset, position)), mousePos, direction)) {

@@ -25,7 +25,7 @@ bool DrawableManager::processMouseWheelEventInMultiple(std::vector<std::referenc
     if (evt.type != SDL_MOUSEWHEEL) {
         return false;
     }
-    XY scrollDirection = {evt.wheel.x, evt.wheel.y};
+    XYf scrollDirection = {evt.wheel.x, evt.wheel.y};
 
     for (auto& wxsw : wxss)
     {
@@ -268,7 +268,7 @@ bool DrawableManager::processHoverEvent(XY thisPositionOnScreen, XY mousePos)
     }
     return hoverTarget != NULL;
 }
-bool DrawableManager::processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XY scrollDirection)
+bool DrawableManager::processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XYf scrollDirection)
 {
     Drawable* mouseTarget = NULL;
     for (auto dd = drawablesList.rbegin(); dd != drawablesList.rend(); dd++) {

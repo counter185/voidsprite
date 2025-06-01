@@ -31,7 +31,7 @@ public:
         }
     }
 
-    void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) override
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override
     {
         if (enabled) {
             if (!subWidgets.processMouseWheelEvent(xyAdd(gPosOffset, position), mousePos, direction)) {
@@ -40,6 +40,9 @@ public:
                 }
                 else if (scrollHorizontally) {
                     scrollOffset.x += direction.y * 20;
+                }
+                if (scrollHorizontally) {
+                    scrollOffset.x += direction.x * 20;
                 }
             }
         }

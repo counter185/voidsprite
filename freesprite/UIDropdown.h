@@ -42,7 +42,7 @@ public:
     void focusOut() override;
     void mouseHoverOut() override;
     void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
-    void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) override;
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     bool shouldMoveToFrontOnFocus() override { return true; }
 

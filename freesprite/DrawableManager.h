@@ -34,7 +34,7 @@ public:
 	void forceUnhover();
 	bool mouseInAny(XY thisPositionOnScreen, XY mousePos);
 	bool processHoverEvent(XY thisPositionOnScreen, XY mousePos);
-	bool processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XY scrollDirection);
+	bool processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XYf scrollDirection);
 	//void tickAnchors();
 
 	void freeAllDrawables();

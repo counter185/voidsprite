@@ -33,7 +33,7 @@ public:
 		hoverTimer.start();
 	}
 	virtual void mouseHoverMotion(XY mousePos, XY gPosOffset = {0,0}) {}
-	virtual void mouseWheelEvent(XY mousePos, XY gPosOffset, XY direction) {}
+	virtual void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) {}
 	virtual void focusIn() { 
 		focused = true;
 		focusTimer.start();
