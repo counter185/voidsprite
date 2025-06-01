@@ -940,6 +940,7 @@ int main(int argc, char** argv)
             g_ttp->renderAll();
             g_renderVFX();
 
+            g_cleanUpDoneAsyncThreads();
             if (g_bgOpRunning) {
                 renderbgOpInProgressScreen();
             }
@@ -998,9 +999,7 @@ int main(int argc, char** argv)
             }
         }
 
-        if (threadSet) {
-            g_bgOpThread.join();
-        }
+        g_waitAndRemoveAllBgOpAndAsyncThreads();
 
         g_deinitRPC();
         log_close();

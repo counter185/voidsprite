@@ -148,7 +148,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GIT_HASH=$(GitHash);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -401,6 +401,7 @@
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="memory_tracker.h" />
     <ClInclude Include="MinecraftBlockPreviewScreen.h" />
+    <ClInclude Include="net.h" />
     <ClInclude Include="NineSegmentPatternEditorScreen.h" />
     <ClInclude Include="ninesegmentpatterns.h" />
     <ClInclude Include="palettes.h" />
@@ -523,6 +524,7 @@
     <ClInclude Include="UISlider.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
+    <ClInclude Include="updatecheck.h" />
     <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="vfx.h" />
     <ClInclude Include="visual_config.h" />

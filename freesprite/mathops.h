@@ -489,3 +489,14 @@ public:
         return SDL_OpenIO(&streamObjs->iface, streamObjs);
     }
 };
+
+class DoOnReturn {
+public:
+	std::function<void()> func;
+	DoOnReturn(std::function<void()> f) : func(f) {}
+    ~DoOnReturn() {
+        if (func != NULL) {
+            func();
+        }
+    }
+};

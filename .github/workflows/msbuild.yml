@@ -19,6 +19,8 @@ env:
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
+
+  GIT_HASH: ${{ github.sha }}
   
   ACTIONS_STEP_DEBUG: true
 
@@ -47,7 +49,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /t:voidsprite /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /t:voidsprite /p:GitHash=${{env.GIT_HASH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
 
     - name: Make build directories and copy devlibs
       working-directory: ${{env.GITHUB_WORKSPACE}}

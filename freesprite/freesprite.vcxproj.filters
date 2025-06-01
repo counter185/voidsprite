@@ -1214,6 +1214,12 @@
     <ClInclude Include="keybinds.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="net.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="updatecheck.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

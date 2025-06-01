@@ -2,12 +2,12 @@
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "FileIO.h"
-#include "PopupMessageBox.h"
 #include "Notification.h"
 #include "CustomTemplate.h"
 #include "ScreenNonogramPlayer.h"
 #include "LayerPalettized.h"
 
+#include "PopupMessageBox.h"
 #include "PopupFilePicker.h"
 
 void StartScreen::tick() {
@@ -24,16 +24,18 @@ void StartScreen::render()
     SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
     g_fnt->RenderString(std::format("alpha@{}", __DATE__), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
+    if (updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
+        std::string msg = "Update available";
+        std::string desc = std::format("Latest version: {}/{}/{} - {}", latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
+        XY position = { logoRect.x, logoRect.y };
+		g_fnt->RenderString(msg + "\n" + desc, position.x, position.y, SDL_Color{0xFC,0xFF,0x84,0x80}, 16);
+    }
+
     SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
     SDL_Color colorBG1 = { 0x30, 0x30, 0x30, 0xa0};
     SDL_Color colorBG2 = { 0x20, 0x20, 0x20, 0xa0};
     SDL_Color colorBG3 = { 0x10, 0x10, 0x10, 0xa0 };
     renderGradient(bgr, sdlcolorToUint32(colorBG3), sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1));
-    /*if (focused) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-    }*/
 
     bgr.x += bgr.w + 10;
     bgr.y += 40;

@@ -24,6 +24,16 @@
 #include "PopupAbout.h"
 #include "PopupYesNo.h"
 
+#include "background_operation.h"
+#include "net.h"
+#include "updatecheck.h"
+
+struct LaunchpadBGStar {
+    XY pos;
+    int size;
+    u8 opacity;
+};
+
 class StartScreen : public BaseScreen, public EventCallbackListener
 {
 private:
@@ -52,6 +62,7 @@ public:
     bool closeNextTick = false;
 
     StartScreen() {
+        g_startNewAsyncOperation([]() { runUpdateCheck(); });
 
         UILabel* title = new UILabel("voidsprite");
         title->position = {10, 40};
