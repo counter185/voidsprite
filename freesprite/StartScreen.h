@@ -45,6 +45,7 @@ private:
 
     bool waitingForUpdateCheckInfo = true;
     std::vector<LaunchpadBGStar> stars;
+    Timer64 updateCheckTimer;
 public:
     TabbedView* newImageTabs;
 

@@ -37,7 +37,15 @@ void StartScreen::render()
         static std::string tlLatestVer = TL("vsp.launchpad.update.latestver");
         std::string desc = std::format("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
         XY position = { logoRect.x, logoRect.y };
-		g_fnt->RenderString(tlUpdateAvailable + "\n" + desc, position.x, position.y, SDL_Color{0xFC,0xFF,0x84,0x80}, 16);
+        double fadeInTimer = updateCheckTimer.percentElapsedTime(800, -400);
+        double fadeInTimer2 = updateCheckTimer.percentElapsedTime(800);
+        g_fnt->RenderString(tlUpdateAvailable, position.x + 14 - 30 * (1.0 - XM1PW3P1(fadeInTimer)), position.y, SDL_Color{ 0xFC,0xFF,0x84,(u8)(0x80 * fadeInTimer) }, 20);
+        g_fnt->RenderString(desc, position.x + 14 - 30 * (1.0 - XM1PW3P1(fadeInTimer2)), position.y + 24, SDL_Color{ 0xFC,0xFF,0x84,(u8)(0x80 * fadeInTimer2) }, 16);
+        XY textB = g_fnt->StatStringDimensions(desc, 16);
+        XY p1 = { position.x + 5, position.y + 5 };
+        XY p2 = xyAdd(p1, { 0, 24 + textB.y });
+        SDL_SetRenderDrawColor(g_rd, 0xFC, 0xFF, 0x84, (u8)(0xd0 * fadeInTimer));
+        drawLine(p1, p2, XM1PW3P1(fadeInTimer2));
     }
 
     SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
@@ -524,7 +532,7 @@ void StartScreen::renderBackground()
         }
     }
 
-    if (g_config.vfxEnabled && g_config.checkUpdates) {
+    if (g_config.vfxEnabled && g_config.checkUpdates && g_config.animatedBackground != 0) {
         renderBGStars();
     }
 
@@ -708,6 +716,7 @@ void StartScreen::tryOpenImageFromClipboard()
 void StartScreen::updateCheckFinished()
 {
     genBGStars();
+    updateCheckTimer.start();
 }
 
 void StartScreen::genBGStars() {
@@ -717,7 +726,7 @@ void StartScreen::genBGStars() {
             XY{ randomInt(0, 960), randomInt(0,960) },
             randomInt(1,3),
             randomInt(0x60,0xa0),
-            randomInt(0, 900),
+            randomInt(0, 1400),
         };
         stars.push_back(s);
         stars[stars.size()-1].timer.start();
