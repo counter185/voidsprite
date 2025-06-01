@@ -32,6 +32,8 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
 void platformOpenFileLocation(PlatformNativePathString path);
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to);
 
+void platformOpenWebpageURL(std::string url);
+
 bool platformHasFileAccessPermissions();
 void platformRequestFileAccessPermissions();
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath();

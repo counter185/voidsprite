@@ -240,6 +240,12 @@ public:
                     TL("vsp.nav.help"),
                     {},
                     {
+                        {SDL_SCANCODE_U, { TL("vsp.launchpad.nav.opennightlylinkdl"),
+                                [](StartScreen* screen) {
+                                    platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main");
+                                }
+                            }
+                        },
                         {SDL_SCANCODE_A, { TL("vsp.launchpad.nav.about"),
                                 [](StartScreen* screen) {
                                     g_addPopup(new PopupAbout());

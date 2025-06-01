@@ -549,3 +549,10 @@ bool platformHasFileAccessPermissions() {
     return true;
 }
 void platformRequestFileAccessPermissions() {}
+
+void platformOpenWebpageURL(std::string url) {
+	if (!stringStartsWithIgnoreCase(url, "http")) {
+		url = "http://" + url;
+	}
+	ShellExecuteW(NULL, L"open", convertStringOnWin32(url).c_str(), NULL, NULL, SW_SHOWNORMAL);
+}

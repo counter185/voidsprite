@@ -182,3 +182,13 @@ void platformRequestFileAccessPermissions() {
         }
     }
 }
+
+void platformOpenWebpageURL(std::string url) {
+    jclass vspactivity = lastJNI->FindClass("pl/cntrpl/voidsprite/VSPActivity");
+    if (vspactivity != nullptr) {
+        jmethodID checkMethod = lastJNI->GetStaticMethodID(vspactivity, "openUrl", "(Ljava/lang/String;)V");
+        if (checkMethod != nullptr) {
+            lastJNI->CallStaticVoidMethod(vspactivity, checkMethod, lastJNI->NewStringUTF(url.c_str()));
+        }
+    }
+}

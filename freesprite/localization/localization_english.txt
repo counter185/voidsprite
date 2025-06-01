@@ -101,6 +101,8 @@
     {"vsp.launchpad.lastfiles", "Last open files"},
     {"vsp.launchpad.welcome1sttime", "Welcome to voidsprite"},
     {"vsp.launchpad.welcomereturning", "Welcome back"},
+    {"vsp.launchpad.update.title", "Update available"},
+    {"vsp.launchpad.update.latestver", "Latest version:"},
 
     {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
     {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
@@ -119,6 +121,7 @@
     {"vsp.launchpad.nav.preferences", "Preferences"},
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
     {"vsp.launchpad.nav.about", "About voidsprite"},
+    {"vsp.launchpad.nav.opennightlylinkdl", "Download latest build on nightly.link"},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},
     {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"

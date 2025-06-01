@@ -259,3 +259,7 @@ bool platformHasFileAccessPermissions() {
     return true;
 }
 void platformRequestFileAccessPermissions() {}
+
+void platformOpenWebpageURL(std::string url) {
+    //todo
+}

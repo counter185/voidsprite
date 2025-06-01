@@ -248,3 +248,12 @@ bool platformHasFileAccessPermissions() {
     return true;
 }
 void platformRequestFileAccessPermissions() {}
+
+void platformOpenWebpageURL(std::string url) {
+    //let's assume this works
+	if (!stringStartsWithIgnoreCase(url, "http")) {
+		url = "http://" + url;
+	}
+	std::string command = "open \"" + url + "\"";
+	system(command.c_str());
+}

@@ -25,10 +25,11 @@ void StartScreen::render()
     g_fnt->RenderString(std::format("alpha@{}", __DATE__), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
     if (updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
-        std::string msg = "Update available";
-        std::string desc = std::format("Latest version: {}/{}/{} - {}", latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
+        static std::string tlUpdateAvailable = TL("vsp.launchpad.update.title");
+        static std::string tlLatestVer = TL("vsp.launchpad.update.latestver");
+        std::string desc = std::format("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
         XY position = { logoRect.x, logoRect.y };
-		g_fnt->RenderString(msg + "\n" + desc, position.x, position.y, SDL_Color{0xFC,0xFF,0x84,0x80}, 16);
+		g_fnt->RenderString(tlUpdateAvailable + "\n" + desc, position.x, position.y, SDL_Color{0xFC,0xFF,0x84,0x80}, 16);
     }
 
     SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };

@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "mathops.h"
 
+//todo: move this to platform?
 #if _WIN32
 
 #include <windows.h>
