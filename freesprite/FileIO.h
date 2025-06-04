@@ -121,7 +121,7 @@ protected:
 class FileExporter : public FileOperation {
 
 public:
-    static FileExporter* sessionExporter(std::string name, std::string extension, bool (*exportFunction)(PlatformNativePathString, MainEditor*), int formatflags = FORMAT_RGB, bool (*canExport)(MainEditor*) = NULL) {
+    static FileExporter* sessionExporter(std::string name, std::string extension, std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(MainEditor*)> canExport = NULL) {
         FileExporter* ret = new FileExporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -131,7 +131,7 @@ public:
         ret->_sessionCheckExportFunction = canExport;
         return ret;
     }
-    static FileExporter* flatExporter(std::string name, std::string extension, bool (*exportFunction)(PlatformNativePathString, Layer*), int formatflags = FORMAT_RGB, bool (*canExport)(Layer*) = NULL) {
+    static FileExporter* flatExporter(std::string name, std::string extension, std::function<bool(PlatformNativePathString, Layer*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(Layer*)> canExport = NULL) {
         FileExporter* ret = new FileExporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -169,16 +169,16 @@ protected:
     int _formatFlags = FORMAT_RGB;
     bool _isSessionExporter = false;
 
-    bool (*_sessionExportFunction)(PlatformNativePathString, MainEditor*) = NULL;
-    bool (*_sessionCheckExportFunction)(MainEditor*) = NULL;
+    std::function<bool(PlatformNativePathString, MainEditor*)> _sessionExportFunction = NULL;
+    std::function<bool(MainEditor*)> _sessionCheckExportFunction = NULL;
 
-    bool (*_flatExportFunction)(PlatformNativePathString, Layer*) = NULL;
-    bool (*_flatCheckExportFunction)(Layer*) = NULL;
+    std::function<bool(PlatformNativePathString, Layer*)> _flatExportFunction = NULL;
+    std::function<bool(Layer*)> _flatCheckExportFunction = NULL;
 };
 class FileImporter : public FileOperation {
 
 public:
-    static FileImporter* sessionImporter(std::string name, std::string extension, MainEditor* (*importFunction)(PlatformNativePathString), FileExporter* reverse = NULL, int formatflags = FORMAT_RGB, bool (*canImport)(PlatformNativePathString) = NULL) {
+    static FileImporter* sessionImporter(std::string name, std::string extension, std::function<MainEditor*(PlatformNativePathString)> importFunction, FileExporter* reverse = NULL, int formatflags = FORMAT_RGB, std::function<bool(PlatformNativePathString)> canImport = NULL) {
         FileImporter* ret = new FileImporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -189,7 +189,7 @@ public:
         ret->_sessionCheckImportFunction = canImport;
         return ret;
     }
-    static FileImporter* flatImporter(std::string name, std::string extension, Layer* (*importFunction)(PlatformNativePathString, uint64_t), FileExporter* reverse = NULL, int formatflags = FORMAT_RGB, bool (*canImport)(PlatformNativePathString) = NULL) {
+    static FileImporter* flatImporter(std::string name, std::string extension, std::function<Layer*(PlatformNativePathString, u64)> importFunction, FileExporter* reverse = NULL, int formatflags = FORMAT_RGB, std::function<bool(PlatformNativePathString)> canImport = NULL) {
         FileImporter* ret = new FileImporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -234,11 +234,10 @@ protected:
     bool _isSessionImporter = false;
     FileExporter* _correspondingExporter = NULL;
 
-    MainEditor* (*_sessionImportFunction)(PlatformNativePathString) = NULL;
-    bool (*_sessionCheckImportFunction)(PlatformNativePathString) = NULL;
-
-    Layer* (*_flatImportFunction)(PlatformNativePathString, uint64_t) = NULL;
-    bool (*_flatCheckImportFunction)(PlatformNativePathString) = NULL;
+    std::function<MainEditor*(PlatformNativePathString)> _sessionImportFunction = NULL;
+    std::function<bool(PlatformNativePathString)> _sessionCheckImportFunction = NULL;
+    std::function<Layer*(PlatformNativePathString, u64)> _flatImportFunction = NULL;
+    std::function<bool(PlatformNativePathString)> _flatCheckImportFunction = NULL;
 };
 class PaletteImporter : public FileOperation {
 public:

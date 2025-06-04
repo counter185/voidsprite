@@ -243,6 +243,7 @@
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
     <ClCompile Include="ScreenNonogramPlayer.cpp" />
     <ClCompile Include="ScreenWideActionBar.cpp" />
+    <ClCompile Include="sdk_impl.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="SplitSessionEditor.cpp" />
     <ClCompile Include="TemplateRPG2KBattleAnim.cpp" />
@@ -435,6 +436,9 @@
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
     <ClInclude Include="ScreenNonogramPlayer.h" />
     <ClInclude Include="ScreenWideActionBar.h" />
+    <ClInclude Include="sdk_impl.h" />
+    <ClInclude Include="sdk_pluginloader.h" />
+    <ClInclude Include="sdk_structs.h" />
     <ClInclude Include="sdl23compat.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="shiftjis.h" />
@@ -528,6 +532,7 @@
     <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="vfx.h" />
     <ClInclude Include="visual_config.h" />
+    <ClInclude Include="voidsprite_sdk.h" />
     <ClInclude Include="zip\miniz.h" />
     <ClInclude Include="zip\zip.h" />
   </ItemGroup>

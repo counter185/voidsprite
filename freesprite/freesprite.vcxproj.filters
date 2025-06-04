@@ -124,6 +124,15 @@
     <Filter Include="Source files\localization">
       <UniqueIdentifier>{4b5a48fc-a3e7-407b-a588-56df8aa3a743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\sdk">
+      <UniqueIdentifier>{f0f662c3-cf50-499f-adca-25c162accf21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\sdk\v1">
+      <UniqueIdentifier>{a3bed906-9269-4138-bb75-29e675fc80d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\sdk">
+      <UniqueIdentifier>{64f20780-4746-4598-b4a3-97c1a7b621aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -629,6 +638,9 @@
     </ClCompile>
     <ClCompile Include="keybinds.cpp">
       <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_impl.cpp">
+      <Filter>Source files\sdk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1219,6 +1231,18 @@
     </ClInclude>
     <ClInclude Include="updatecheck.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="voidsprite_sdk.h">
+      <Filter>Header files\sdk\v1</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_structs.h">
+      <Filter>Header files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_impl.h">
+      <Filter>Header files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk_pluginloader.h">
+      <Filter>Header files\sdk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

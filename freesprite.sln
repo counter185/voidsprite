@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voidsprite", "freesprite\fr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "external_liblcf", "external_liblcf\external_liblcf.vcxproj", "{3C90328F-6187-47D7-9B0E-1499AEA684AF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voidsprite_plugin_sample", "voidsprite_plugin_sample\voidsprite_plugin_sample.vcxproj", "{8C53C289-BFE4-4BF9-895D-90ED291C6564}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{3C90328F-6187-47D7-9B0E-1499AEA684AF}.Release|x64.Build.0 = Release|x64
 		{3C90328F-6187-47D7-9B0E-1499AEA684AF}.Release|x86.ActiveCfg = Release|Win32
 		{3C90328F-6187-47D7-9B0E-1499AEA684AF}.Release|x86.Build.0 = Release|Win32
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Debug|x64.ActiveCfg = Debug|x64
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Debug|x64.Build.0 = Debug|x64
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Debug|x86.ActiveCfg = Debug|Win32
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Debug|x86.Build.0 = Debug|Win32
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x64.ActiveCfg = Release|x64
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x64.Build.0 = Release|x64
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x86.ActiveCfg = Release|Win32
+		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
