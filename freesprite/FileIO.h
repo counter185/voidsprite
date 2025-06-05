@@ -266,6 +266,9 @@ inline std::vector<FileExporter*> g_palettizedFileExporters;
 
 inline std::vector<FileImporter*> g_fileImporters;
 
+inline std::vector<FileImporter*> g_pluginRegisteredFileImporters;
+inline std::vector<FileExporter*> g_pluginRegisteredFileExporters;
+
 inline std::vector<PaletteImporter*> g_paletteImporters;
 
 //used for autosave
@@ -331,6 +334,10 @@ inline void g_setupIO() {
     g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
     g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
     g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
+
+    for (FileExporter* i : g_pluginRegisteredFileExporters) {
+        g_fileExporters.push_back(i);
+    }
 
 
     voidsnExporter = exVOIDSNv5;
@@ -458,6 +465,9 @@ inline void g_setupIO() {
         }));
     g_fileImporters.push_back(FileImporter::flatImporter("PSP/Vita GXT", ".gxt", &readGXT, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("Nintendo 3DS CXI (dump icon)", ".cxi", &read3DSCXIIcon, NULL));
+    for (FileImporter* i : g_pluginRegisteredFileImporters) {
+		g_fileImporters.push_back(i);
+    }
     g_fileImporters.push_back(FileImporter::flatImporter("SDL_Image", "", &readSDLImage));
 
 

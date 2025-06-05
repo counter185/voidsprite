@@ -8,11 +8,13 @@
 
 #define ModuleHandle HMODULE
 inline ModuleHandle platformLoadNativeModule(PlatformNativePathString path) { return LoadLibraryW(path.c_str()); }
+inline void* platformProcAddress(ModuleHandle module, const char* procName) { return (void*)GetProcAddress(module, procName); }
 inline void platformUnloadNativeModule(ModuleHandle module) { FreeLibrary(module); }
 inline std::string moduleExtension = ".dll";
 #else
 #define ModuleHandle void*
 inline ModuleHandle platformLoadNativeModule(PlatformNativePathString path) {return dlopen(path.c_str(), RTLD_LAZY); }
+inline void* platformProcAddress(ModuleHandle module, const char* procName) { return dlsym(module, procName); }
 inline void platformUnloadNativeModule { dlclose(module); }
 inline std::string moduleExtension = ".so";
 #endif
@@ -33,12 +35,12 @@ inline bool loadPluginObject(PlatformNativePathString path) {
 	}
 	VSPPlugin pluginInfo{};
 
-	int (*sdkVersionFunc)() = (int(*)())GetProcAddress(module, "voidspriteSDKVersion");
-	const char* (*getPluginNameFunc)() = (const char* (*)())GetProcAddress(module, "getPluginName");
-	const char* (*getPluginVersionFunc)() = (const char* (*)())GetProcAddress(module, "getPluginVersion");
-	const char* (*getPluginDescriptionFunc)() = (const char* (*)())GetProcAddress(module, "getPluginDescription");
-	const char* (*getPluginAuthorsFunc)() = (const char* (*)())GetProcAddress(module, "getPluginAuthors");
-	void* (*pluginInitFunc)(voidspriteSDK*) = (void* (*)(voidspriteSDK*))GetProcAddress(module, "pluginInit");
+	int (*sdkVersionFunc)() = (int(*)())platformProcAddress(module, "voidspriteSDKVersion");
+	const char* (*getPluginNameFunc)() = (const char* (*)())platformProcAddress(module, "getPluginName");
+	const char* (*getPluginVersionFunc)() = (const char* (*)())platformProcAddress(module, "getPluginVersion");
+	const char* (*getPluginDescriptionFunc)() = (const char* (*)())platformProcAddress(module, "getPluginDescription");
+	const char* (*getPluginAuthorsFunc)() = (const char* (*)())platformProcAddress(module, "getPluginAuthors");
+	void* (*pluginInitFunc)(voidspriteSDK*) = (void* (*)(voidspriteSDK*))platformProcAddress(module, "pluginInit");
 
 	if (sdkVersionFunc == NULL || pluginInitFunc == NULL) {
 		logerr(std::format("Object at path {}\nis not a valid voidsprite plugin", convertStringToUTF8OnWin32(path)));

@@ -4,6 +4,7 @@
 void impl_registerLayerImporter(
 	const char* name,
 	const char* extension,
+	int layerTypes,
 	VSPFileExporter* matchingExporter,
 	VSPLayer* (*importFunction)(char* path),
 	bool (*canImportFunction)(char* path)) {
@@ -16,23 +17,26 @@ void impl_registerLayerImporter(
 	std::function<bool(PlatformNativePathString)> wCanImportFunction =
 		[canImportFunction](PlatformNativePathString path) {
 		std::string convPathUTF8 = convertStringToUTF8OnWin32(path);
-		return canImportFunction((char*)convPathUTF8.c_str());
+		return canImportFunction == NULL ? true : canImportFunction((char*)convPathUTF8.c_str());
 		};
 
+	loginfo(std::format("Registering new file importer: {}  [{}]", std::string(name), std::string(extension)));
 	g_pluginRegisteredFileImporters.push_back(
 		FileImporter::flatImporter(
 			std::string(name),
 			std::string(extension),
 			wImportFunction,
 			matchingExporter,
-			1,
+			layerTypes,
 			wCanImportFunction
 		)
 	);
 }
 
-VSPFileExporter* impl_registerLayerExporter(const char* name,
+VSPFileExporter* impl_registerLayerExporter(
+	const char* name,
 	const char* extension,
+	int layerTypes,
 	bool (*exportFunction)(VSPLayer* layer, char* path),
 	bool (*canExportFunction)(VSPLayer* layer)) {
 
@@ -44,16 +48,18 @@ VSPFileExporter* impl_registerLayerExporter(const char* name,
 
 	std::function<bool(Layer*)> wCanExportFunction =
 		[canExportFunction](Layer* layer) {
-		return canExportFunction(layer);
+		return canExportFunction == NULL ? true : canExportFunction(layer);
 		};
 
+	loginfo(std::format("Registering new file exporter: {}  [{}]", std::string(name), std::string(extension)));
 	FileExporter* exporter = FileExporter::flatExporter(
 		std::string(name),
 		std::string(extension),
 		wExportFunction,
-		1,
+		layerTypes,
 		wCanExportFunction
 	);
+	g_pluginRegisteredFileExporters.push_back(exporter);
 	return exporter;
 }
 
@@ -74,11 +80,16 @@ void impl_layerFree(VSPLayer* layer) {
 	}
 	delete layer;
 }
-bool impl_layerIsIndexed(VSPLayer* layer) {
+VSPLayerInfo* impl_layerGetInfo(VSPLayer* layer) {
 	if (layer == NULL) {
-		return false;
+		return NULL;
 	}
-	return layer->isPalettized;
+	VSPLayerInfo* info = (VSPLayerInfo*)malloc(sizeof(VSPLayerInfo));
+	*info = {};
+	info->type = layer->isPalettized ? VSP_LAYER_INDEXED : VSP_LAYER_RGBA;
+	info->width = layer->w;
+	info->height = layer->h;
+	return info;
 }
 void impl_layerSetPixel(VSPLayer* layer, int x, int y, uint32_t color) {
 	if (layer == NULL) {
