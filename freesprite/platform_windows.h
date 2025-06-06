@@ -21,16 +21,16 @@ int lastFilterIndex = 1;
 
 bool windows_isProcessRunning(std::wstring name) {
     HANDLE hProcessSnap;
-    PROCESSENTRY32 pe32;
+    PROCESSENTRY32W pe32;
     // Take a snapshot of all processes in the system.
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
         return false;
     }
-    pe32.dwSize = sizeof(PROCESSENTRY32);
+    pe32.dwSize = sizeof(PROCESSENTRY32W);
     // Retrieve information about the first process,
     // and exit if unsuccessful
-    if (!Process32First(hProcessSnap, &pe32)) {
+    if (!Process32FirstW(hProcessSnap, &pe32)) {
         CloseHandle(hProcessSnap);     // clean the snapshot object
         return false;
     }
@@ -39,7 +39,7 @@ bool windows_isProcessRunning(std::wstring name) {
             CloseHandle(hProcessSnap);
             return true;
         }
-    } while (Process32Next(hProcessSnap, &pe32));
+    } while (Process32NextW(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
     return false;
 }
@@ -458,7 +458,7 @@ Layer* platformGetImageFromClipboard() {
     }
     HBITMAP bmp = (HBITMAP)dataHandle;
     BITMAP bitmap;
-    GetObject(bmp, sizeof(BITMAP), &bitmap);
+    GetObjectW(bmp, sizeof(BITMAP), &bitmap);
     HDC hdc = GetDC(WINhWnd);
     HDC memDC = CreateCompatibleDC(hdc);
     HBITMAP oldBmp = (HBITMAP)SelectObject(memDC, bmp);
