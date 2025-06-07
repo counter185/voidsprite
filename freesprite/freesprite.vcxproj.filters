@@ -624,9 +624,6 @@
     <ClCompile Include="PopupFilePicker.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
-    <ClCompile Include="EditorTouchToggle.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="PopupExportScaled.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
@@ -641,6 +638,12 @@
     </ClCompile>
     <ClCompile Include="sdk_impl.cpp">
       <Filter>Source files\sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtractDataScreen.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorTouchToggle.cpp">
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1243,6 +1246,9 @@
     </ClInclude>
     <ClInclude Include="sdk_pluginloader.h">
       <Filter>Header files\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtractDataScreen.h">
+      <Filter>Header files\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

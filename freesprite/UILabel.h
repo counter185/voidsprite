@@ -13,7 +13,9 @@ public:
     SDL_Color color = { 255, 255, 255, 255 };
     
     UILabel() {}
-    UILabel(std::string t) : text(t) {}
+    UILabel(std::string t, XY pos = { 0,0 }, int size = 18) : text(t), fontsize(size)  { 
+        this->position = pos; 
+    }
 
     XY statSize();
     XY calcEndpoint();

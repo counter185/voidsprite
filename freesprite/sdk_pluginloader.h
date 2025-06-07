@@ -19,7 +19,7 @@
     inline void* platformProcAddress(ModuleHandle module, const char* procName) { return dlsym(module, procName); }
     inline void platformUnloadNativeModule(ModuleHandle module) { dlclose(module); }
     #if __APPLE__
-	    inline std::string moduleExtension = ".dylib";
+        inline std::string moduleExtension = ".dylib";
     #else
         inline std::string moduleExtension = ".so";
     #endif
@@ -37,6 +37,10 @@ inline bool loadPluginObject(PlatformNativePathString path) {
     ModuleHandle module = platformLoadNativeModule(path);
     if (module == NULL) {
         logerr(std::format("Failed to load plugin: {}", convertStringToUTF8OnWin32(path)));
+#if _WIN32
+        u32 errorCode = GetLastError();
+        logerr(std::format("Error code: {}", errorCode));
+#endif
         return false;
     }
     VSPPlugin pluginInfo{};

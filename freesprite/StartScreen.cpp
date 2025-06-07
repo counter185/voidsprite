@@ -6,6 +6,7 @@
 #include "CustomTemplate.h"
 #include "ScreenNonogramPlayer.h"
 #include "LayerPalettized.h"
+#include "ExtractDataScreen.h"
 
 #include "PopupMessageBox.h"
 #include "PopupFilePicker.h"
@@ -85,6 +86,9 @@ void StartScreen::takeInput(SDL_Event evt)
         }
         else if (stringEndsWithIgnoreCase(filePath, ".unzlib")) {
             zlibFile(convertStringOnWin32(filePath));
+        }
+        else if (stringEndsWithIgnoreCase(filePath, ".data")) {
+            g_addScreen(new ExtractDataScreen(convertStringOnWin32(filePath)));
         }
         else {
             tryLoadFile(filePath);

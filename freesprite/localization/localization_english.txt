@@ -215,6 +215,10 @@
     //screen: tilemap preview
     {"vsp.tilemappreview", "Preview tiles"},
 
+    //screen: extract data
+    {"vsp.extractdata", "Extract data"},
+    {"vsp.extractdata.title", "Extract binary data"},
+
 
     //popup: settings
     {"vsp.config.title", "Preferences"},

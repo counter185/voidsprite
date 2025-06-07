@@ -123,6 +123,7 @@ class MainEditorPalettized;
 class SpritesheetPreviewScreen;
 class TilemapPreviewScreen;
 class MinecraftBlockPreviewScreen;
+class ExtractDataScreen;
 
 //specialized ui elements
 class EditorColorPicker;
