@@ -178,6 +178,7 @@ inline double g_deltaTime = 1.0;
 inline double g_frameDeltaTime = 0.001;
 inline std::vector<NineSegmentPattern*> g_9spatterns;
 inline std::vector<BaseFilter*> g_filters;
+inline std::vector<BaseFilter*> g_pluginFilters;
 inline std::vector<RenderFilter*> g_renderFilters;
 inline bool g_windowFocused = true;
 inline SDL_PropertiesID g_props;

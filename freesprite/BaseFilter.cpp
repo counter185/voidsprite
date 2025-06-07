@@ -27,6 +27,9 @@ void g_loadFilters()
         {1,1,1,1,1}
     }));*/
 
+    for (auto pluginFilter : g_pluginFilters) {
+        g_filters.push_back(pluginFilter);
+    }
 
     g_renderFilters.push_back(new GenNoiseFilter());
     g_renderFilters.push_back(new GenRGBNoiseFilter());

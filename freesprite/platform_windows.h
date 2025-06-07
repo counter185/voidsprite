@@ -296,6 +296,9 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
 
     subDir = appdataDir + L"visualconfigs\\";
     CreateDirectoryW(subDir.c_str(), NULL);
+    
+    subDir = appdataDir + L"plugins\\";
+    CreateDirectoryW(subDir.c_str(), NULL);
 
     return appdataDir;
 }

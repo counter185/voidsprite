@@ -21,6 +21,7 @@
 #include "discord_rpc.h"
 #include "colormodels.h"
 #include "keybinds.h"
+#include "sdk_pluginloader.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -481,6 +482,8 @@ int main(int argc, char** argv)
             }
         }
 
+        g_createVSPSDK();
+        g_loadPlugins();
         g_setupColorModels();
         g_setupIO();
         g_reloadColorMap();
