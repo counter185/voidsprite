@@ -1,6 +1,15 @@
 #include "sdk_impl.h"
 #include "LayerPalettized.h"
 
+VSPFilter* impl_registerFilter(const char* name, void (*filterFunction)(VSPLayer* layer, VSPFilter* filter))
+{
+	FilterExternal* f = new FilterExternal();
+	f->n = std::string(name);
+	f->f = filterFunction;
+	g_pluginFilters.push_back(f);
+	return f;
+}
+
 void impl_registerLayerImporter(
 	const char* name,
 	const char* extension,

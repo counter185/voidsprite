@@ -8,11 +8,13 @@
 #define VSP_LAYER_INDEXED	0b10
 
 #ifndef VSPLayer
-#define VSPLayer void
+struct VSPLayer { char _placeholder; };
 #endif
-
+#ifndef VSPFilter
+struct VSPFilter { char _placeholder; };
+#endif
 #ifndef VSPFileExporter
-#define VSPFileExporter void
+struct VSPFileExporter { char _placeholder; };
 #endif
 
 #pragma pack(push, 1)
@@ -27,6 +29,10 @@ struct voidspriteSDK {
     /// Equivalent to fopen, but takes a UTF-8 encoded path.
     /// </summary>
     FILE* (*util_fopenUTF8)(char* path_utf8, const char* mode) = 0;
+
+    VSPFilter* (*registerFilter)(
+        const char* name,
+        void (*filterFunction)(VSPLayer* layer, VSPFilter* filter)) = 0;
 
     /// <summary>
     /// Registers a new file type importer for single-layer filetypes.
@@ -94,5 +100,16 @@ struct voidspriteSDK {
     /// If the layer is NULL, NULL is returned.
     /// </summary>
     uint32_t* (*layerGetRawPixelData)(VSPLayer* layer) = 0;
+
+    void (*filterNewBoolParameter)(VSPFilter* filter, const char* name, bool defaultValue) = 0;
+    void (*filterNewIntParameter)(VSPFilter* filter, const char* name, int minValue, int maxValue, int defaultValue) = 0;
+    void (*filterNewDoubleParameter)(VSPFilter* filter, const char* name, double minValue, double maxValue, double defaultValue) = 0;
+    void (*filterNewDoubleRangeParameter)(VSPFilter* filter, const char* name, double minValue, double maxValue, double defaultValueLow, double defaultValueHigh, uint32_t color) = 0;
+
+    double (*filterGetDoubleValue)(VSPFilter* filter, const char* name) = 0;
+    int (*filterGetIntValue)(VSPFilter* filter, const char* name) = 0;
+    double (*filterGetRangeValue1)(VSPFilter* filter, const char* name) = 0;
+    double (*filterGetRangeValue2)(VSPFilter* filter, const char* name) = 0;
+    bool (*filterGetBoolValue)(VSPFilter* filter, const char* name) = 0;
 };
 #pragma pack(pop)

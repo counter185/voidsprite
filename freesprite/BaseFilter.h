@@ -1,7 +1,7 @@
 #pragma once
 #include "globals.h"
 
-#define INT_PARAM(name,min,max,def) (FilterParameter{name,min,max,def,PT_INT})
+#define INT_PARAM(name,min,max,def) (FilterParameter{name,(double)(min),(double)(max),(double)(def),PT_INT})
 #define FLOAT_PARAM(name,min,max,def) (FilterParameter{name,min,max,def,PT_FLOAT})
 #define COLORRGB_PARAM(name,def) (FilterParameter{name,0,0,0,PT_COLOR_RGB,def})
 #define COLORL_PARAM(name) (FilterParameter{name,0,255,127,PT_COLOR_L})
