@@ -12,6 +12,8 @@
     inline void platformUnloadNativeModule(ModuleHandle module) { FreeLibrary(module); }
     inline std::string moduleExtension = ".dll";
 #else
+    #include <dlfcn.h>
+
     #define ModuleHandle void*
     inline ModuleHandle platformLoadNativeModule(PlatformNativePathString path) {return dlopen(path.c_str(), RTLD_LAZY); }
     inline void* platformProcAddress(ModuleHandle module, const char* procName) { return dlsym(module, procName); }
