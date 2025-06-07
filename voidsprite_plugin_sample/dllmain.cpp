@@ -36,11 +36,41 @@ VSPLayer* importBIN(char* path)
     return NULL;
 }
 
+// Sample image filter
+void invertFilter(VSPLayer* layer, VSPFilter* filter) {
+    // Get the parameters we have added
+    bool preserveAlpha = vsp->filterGetBoolValue(filter, "preserve alpha");
+
+    // Do any operations on the layer here
+    VSPLayerInfo* info = vsp->layerGetInfo(layer);
+    for (int y = 0; y < info->height; y++) {
+        for (int x = 0; x < info->width; x++) {
+            uint32_t pixel = vsp->layerGetPixel(layer, x, y);
+            uint8_t alpha = (pixel >> 24) & 0xFF;
+            uint32_t invertedPixel = 0xFFFFFFFF - pixel; // Invert the color
+            if (preserveAlpha) {
+                invertedPixel = (alpha << 24) | (invertedPixel & 0xFFFFFF); // Preserve the alpha channel
+            }
+            vsp->layerSetPixel(layer, x, y, invertedPixel);
+        }
+    }
+    free(info);
+}
+
 void pluginInit(voidspriteSDK* sdk)
 {
     vsp = sdk;
-    vsp->registerLayerImporter("BIN file test", ".bin", VSP_LAYER_RGBA, NULL, importBIN, NULL);
+
     printf("Hello from pluginInit\n");
+
+    // Register a sample file importer.
+    vsp->registerLayerImporter("BIN file test", ".bin", VSP_LAYER_RGBA, NULL, importBIN, NULL);
+
+    // Register a sample filter.
+    VSPFilter* f = vsp->registerFilter("Invert colors", invertFilter);
+    // Add parameters to our filter
+    // **If a filter has no parameters, it will execute instantly after choosing it.
+    vsp->filterNewBoolParameter(f, "preserve alpha", true);
 }
 
 const char* getPluginName()

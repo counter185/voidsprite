@@ -23,7 +23,7 @@ public:
 
     double getDoubleValue(const char* name) { return std::stod(optionsNow[std::string(name)]); }
     int getIntValue(const char* name) { return std::stoi(optionsNow[std::string(name)]); }
-    bool getBoolValue(const char* name) { return optionsNow[std::string(name)] == "1"; }
+    bool getBoolValue(const char* name) { return getDoubleValue(name) == 1; }
     double getRangeValue2(const char* name) { return std::stod(optionsNow[std::string(name)]); }
 
     std::string name() override { return n; }
@@ -73,6 +73,7 @@ inline double impl_filterGetRangeValue2(BaseFilter* f, const char* name) { retur
 inline void g_createVSPSDK() {
     voidspriteSDK* v1SDK = new voidspriteSDK();
 	v1SDK->util_fopenUTF8 = [](char* path_utf8, const char* mode) { return platformOpenFile(convertStringOnWin32(path_utf8), convertStringOnWin32(mode)); };
+	v1SDK->registerFilter = impl_registerFilter;
     v1SDK->registerLayerImporter = impl_registerLayerImporter;
     v1SDK->registerLayerExporter = impl_registerLayerExporter;
     v1SDK->layerAllocNew = impl_layerAllocNew;
