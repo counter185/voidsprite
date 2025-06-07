@@ -164,6 +164,7 @@ add_library(main SHARED
         voidsprite/ScreenWideNavBar.cpp
         voidsprite/ScrollingPanel.cpp
         voidsprite/settings.cpp
+        voidsprite/sdk_impl.cpp
         voidsprite/SplitSessionEditor.cpp
         voidsprite/SpritesheetPreviewScreen.cpp
         voidsprite/StartScreen.cpp
