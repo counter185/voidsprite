@@ -18,6 +18,11 @@ inline std::unordered_map<std::string, std::function<void(FILE*, pushPixelFuncti
     {"RGB565",	[](FILE* f, pushPixelFunction ppx) { u16 c; fread(&c, 2, 1, f);     ppx(RGB565toARGB8888(c)); }},
 };
 
+enum PixelOrder : int {
+    PO_XthenY = 0,
+    PO_YthenX = 1,
+};
+
 class ExtractDataParametersPanel : public DraggablePanel {
 private:
     ExtractDataScreen* caller;
@@ -37,6 +42,7 @@ private:
 
     Layer* dataLayer = NULL;
     std::string currentPixelFormat = "RGB24";
+    PixelOrder currentPixelOrder = PO_XthenY;
     XY onCanvasEndPosition = { 0,0 };
     u64 fileOffset = 0;
     u32 layerWidth = 256;
@@ -82,6 +88,12 @@ public:
         if (h < 1) h = 1;
         layerHeight = h;
         dimensionsUpdated();
+    }
+
+    PixelOrder getCurrentPixelOrder() { return currentPixelOrder; }
+    void setCurrentPixelOrder(PixelOrder order) {
+        currentPixelOrder = order;
+        pixelDataChanged = true;
     }
 
     void renderBackground();

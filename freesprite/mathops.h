@@ -334,6 +334,8 @@ private:
     Detiler* sub = NULL;
     XY subLast = { 0,0 };
 public:
+    int height = -1;
+
     Detiler(int width, int pow = 0) {
         squareDim = width;
         thisPower = pow;
@@ -343,16 +345,30 @@ public:
             delete sub;
         }
     }
+
+    static Detiler* detilerStack(std::vector<int> tileSizes) {
+        Detiler* ret = NULL;
+        Detiler** pptr = &ret;
+        for (int& v : tileSizes) {
+            if (v > 1) {
+                *pptr = new Detiler(v);
+                pptr = &((*pptr)->sub);
+            }
+        }
+        return ret;
+    }
+
     XY next() {
         indexNow++;
-        if (indexNow == squareDim * squareDim) {
+        int indexAreaSize = (height <= 0 ? squareDim : height) * squareDim;
+        if (indexNow == indexAreaSize) {
             if (sub == NULL) {
                 sub = new Detiler(squareDim, thisPower + 1);
                 sub->next();
             }
             subLast = sub->next();
         }
-        indexNow %= squareDim * squareDim;
+        indexNow %= indexAreaSize;
         int x = indexNow % squareDim;
         int y = indexNow / squareDim;
         return xyAdd(subLast, {x * ixpow(squareDim, thisPower), y * ixpow(squareDim, thisPower)});

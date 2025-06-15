@@ -8,6 +8,7 @@ class UITextField : public Drawable
 protected:
     std::string text = "";
 public:
+    bool enabled = true;
     std::string tooltip = "";
     bool isNumericField = false;
     bool isColorField = false;
@@ -33,6 +34,8 @@ public:
         SDL_StopTextInput(g_wd);
         imeCandidates.clear();
     }
+
+    bool focusable() override { return enabled; }
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
         return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });

@@ -6,7 +6,7 @@
 ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent) : caller(parent) {
 
     wxWidth = 260;
-    wxHeight = 180;
+    wxHeight = 240;
 
     subWidgets.addDrawable(new UILabel(TL("vsp.extractdata.title"), { 2,2 }, 18));
 
@@ -25,6 +25,22 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     };
     subWidgets.addDrawable(formatDropdown);
     layoutPos.y += 30;
+
+
+    std::vector<std::pair<std::string, std::string>> pixelOrderOptions = {
+        { TL("vsp.extractdata.pixelorder.xtheny"), "" },
+        { TL("vsp.extractdata.pixelorder.ythenx"), "" },
+    };
+    UIDropdown* pixelOrderDropdown = new UIDropdown(pixelOrderOptions);
+    pixelOrderDropdown->position = layoutPos;
+    pixelOrderDropdown->setTextToSelectedItem = true;
+    pixelOrderDropdown->text = pixelOrderOptions[caller->getCurrentPixelOrder()].first;
+    pixelOrderDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int index, std::string sel) {
+        caller->setCurrentPixelOrder((PixelOrder)index);
+    };
+    subWidgets.addDrawable(pixelOrderDropdown);
+    layoutPos.y += 30;
+
 
     UITextField* offsetField = new UITextField();
     offsetField->isNumericField = true;
@@ -161,20 +177,29 @@ void ExtractDataScreen::processLayer()
 {
     fseek(fileHandle, fileOffset, SEEK_SET);
     dataLayer->fillRect({ 0,0 }, { (int)layerWidth, (int)layerHeight }, 0x00000000);
-    u64 dataPtr = 0;
+    XY nextPixelWritePos = { 0,0 };
     u32* ppx = (u32*)dataLayer->pixelData;
+
+
+    std::function<void(Layer*,XY&)> pixelOrderFn = 
+        currentPixelOrder == PO_XthenY ? [](Layer* l, XY& pos) { pos.x++; if (pos.x % l->w == 0) { pos.y++; pos.x = 0; } }
+        : currentPixelOrder == PO_YthenX ? [](Layer* l, XY& pos) { pos.y++; if (pos.y % l->h == 0) { pos.x++; pos.y = 0; } }
+        : [](Layer* l, XY& pos) {};
+
     std::function<void(u32)> pushPixelFn = [&](u32 pixel) {
-        if (dataPtr < layerWidth * layerHeight) {
+        if (nextPixelWritePos.x < layerWidth && nextPixelWritePos.y < layerHeight) {
+            u64 dataPtr = nextPixelWritePos.y * layerWidth + nextPixelWritePos.x;
             ppx[dataPtr] = pixel;
             dataPtr++;
         }
+        pixelOrderFn(dataLayer, nextPixelWritePos);
     };
-    while (!feof(fileHandle) && dataPtr < layerWidth * layerHeight) {
+    while (!feof(fileHandle) && pointInBox(nextPixelWritePos, {0,0, (int)layerWidth, (int)layerHeight})) {
         if (pixelReaders.contains(currentPixelFormat)) {
             pixelReaders[currentPixelFormat](fileHandle, pushPixelFn);
         }
     }
-    onCanvasEndPosition = { (int)(dataPtr % layerWidth), (int)(dataPtr / layerWidth) };
+    onCanvasEndPosition = nextPixelWritePos;
 }
 
 void ExtractDataScreen::renderBackground()

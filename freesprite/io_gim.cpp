@@ -31,6 +31,40 @@ GIMImageBlock imageBlockBEtoLE(GIMImageBlock b) {
             BEtoLE16(b.frame_count)};
 }
 
+//most of this ported over from https://github.com/nickworonekin/puyotools/blob/master/src/PuyoTools.Core/Textures/Gim/GimTextureDecoder.cs#L313
+//sorry
+u32 calcSwizzledOffset(u64 pos, int stride) {
+
+    int x = pos % stride;
+    int y = pos / stride;
+
+    int rowBlocks = stride / 16;
+
+    int blockX = x / 16;
+    int blockY = y / 8;
+
+    int blockIndex = blockX + (blockY * rowBlocks);
+    int blockAddress = blockIndex * 16 * 8;
+
+    return blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16);
+}
+
+//http://homebrew.pixelbath.com/wiki/PSP_texture_swizzling
+u32 unswizzle(u32 offset, u32 log2_w) {
+    if (log2_w <= 4)
+        return offset;
+
+    u32 w_mask = (1 << log2_w) - 1;
+
+    u32 mx = offset & 0xf;
+    u32 my = offset & 0x70;
+
+    u32 by = offset & (~7 << log2_w);
+    u32 bx = offset & ((w_mask & 0xf) << 7);
+
+    return by | (bx >> 3) | (my << (log2_w - 4)) | mx;
+}
+
 std::vector<GIMBlock> readBlockStack(FILE* f, bool BE) {
     std::vector<GIMBlock> ret;
 
@@ -111,7 +145,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 imgBlock = imageBlockBEtoLE(imgBlock);
             }
             int nEntries = imgBlock.w * imgBlock.h;
-            logprintf("palette color format: %x\n", imgBlock.image_format);
+            loginfo(std::format("[GIM] palette color format: {}", imgBlock.image_format));
             u32 next;
             int bpp = 
                 imgBlock.image_format == 0x03 ? 4       //rgba8888
@@ -122,7 +156,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
             u64 pixelStart = block05Offset + imgBlock.pixels_start;
             fseek(f, pixelStart, SEEK_SET);
             if (bpp == 0) {
-                logprintf("unsupported palette color format\n");
+                logerr("[GIM] unsupported palette color format");
             } else {
                 for (int i = 0; i < nEntries; i++) {
                     fread(&next, bpp, 1, f);
@@ -144,6 +178,9 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 }
             }
         }
+        else {
+            logwarn("[GIM] No 0x05 palette block");
+        }
 
         u64 block04Offset = blockMap[0x04].block_data_offset;
         fseek(f, block04Offset, SEEK_SET);
@@ -154,6 +191,8 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
         }
         logprintf("image format: %x\n", imgBlock.image_format);
         logprintf("pixel order: %i\n", imgBlock.pixel_order);  //1 needs to be detiled or something
+        loginfo(std::format("image size: {}x{}", imgBlock.w, imgBlock.h));
+        bool deswizzle = imgBlock.pixel_order == 1;
         Layer* ret = NULL;
         u64 pixelDataSize = imgBlock.pixels_end - imgBlock.pixels_start;
         u64 pixelStart = block04Offset + imgBlock.pixels_start;
@@ -164,9 +203,26 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                     u32* ppx = (u32*)ret->pixelData;
                     fseek(f, pixelStart, SEEK_SET);
                     for (u64 i = 0; i < pixelDataSize; i += 4) {
+                        u64 indexInPixelData = i / 4;
+                        //note: the deswizzling here is diabolical
+                        //one day i will try again
                         u8 px[4];
                         fread(px, 4, 1, f);
-                        ppx[i / 4] = PackRGBAtoARGB(px[0], px[1], px[2], px[3]);
+                        ppx[indexInPixelData] = PackRGBAtoARGB(px[0], px[1], px[2], px[3]);
+                    }
+                }
+                break;
+            case 0x04: // index4
+                {
+                    ret = new LayerPalettized(imgBlock.w, imgBlock.h);
+                    ((LayerPalettized*)ret)->palette = palette;
+                    u32* ppx = (u32*)ret->pixelData;
+                    fseek(f, pixelStart, SEEK_SET);
+                    for (u64 i = 0; i < pixelDataSize; i++) {
+                        u8 px;
+                        fread(&px, 1, 1, f);
+                        ppx[i++] = px & 0x0F;
+                        ppx[i] = (px >> 4) & 0x0F;
                     }
                 }
                 break;
@@ -177,11 +233,18 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                     u32* ppx = (u32*)ret->pixelData;
                     fseek(f, pixelStart, SEEK_SET);
                     for (u64 i = 0; i < pixelDataSize; i++) {
+                        if (deswizzle) {
+                            u64 swizzledOffset = calcSwizzledOffset(i, imgBlock.w);
+                            fseek(f, pixelStart + swizzledOffset, SEEK_SET);
+                        }
                         u8 px;
                         fread(&px, 1, 1, f);
                         ppx[i] = px;
                     }
                 }
+                break;
+            default:
+                logerr(std::format("[GIM] unsupported image format: {:02x}", imgBlock.image_format));
                 break;
         }
 

@@ -218,6 +218,8 @@
     //screen: extract data
     {"vsp.extractdata", "Extract data"},
     {"vsp.extractdata.title", "Extract binary data"},
+    {"vsp.extractdata.pixelorder.xtheny", "X then Y"},
+    {"vsp.extractdata.pixelorder.ythenx", "Y then X"},
 
 
     //popup: settings
