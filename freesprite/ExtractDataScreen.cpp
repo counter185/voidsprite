@@ -2,6 +2,7 @@
 #include "UILabel.h"
 #include "UIDropdown.h"
 #include "UITextField.h"
+#include "UIButton.h"
 
 ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent) : caller(parent) {
 
@@ -19,6 +20,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     UIDropdown* formatDropdown = new UIDropdown(formatOptions);
     formatDropdown->position = layoutPos;
     formatDropdown->setTextToSelectedItem = true;
+    formatDropdown->wxWidth = 160;
     formatDropdown->text = caller->getCurrentPixelFormat();
     formatDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int, std::string selectedItem) {
         caller->setCurrentPixelFormat(selectedItem);
@@ -34,6 +36,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     UIDropdown* pixelOrderDropdown = new UIDropdown(pixelOrderOptions);
     pixelOrderDropdown->position = layoutPos;
     pixelOrderDropdown->setTextToSelectedItem = true;
+    pixelOrderDropdown->wxWidth = 160;
     pixelOrderDropdown->text = pixelOrderOptions[caller->getCurrentPixelOrder()].first;
     pixelOrderDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int index, std::string sel) {
         caller->setCurrentPixelOrder((PixelOrder)index);
@@ -46,7 +49,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     offsetField->isNumericField = true;
     offsetField->setText(std::to_string(caller->getCurrentFileOffset()));
     offsetField->position = layoutPos;
-    offsetField->wxWidth = 150;
+    offsetField->wxWidth = 120;
     offsetField->onTextChangedCallback = [this](UITextField* field, std::string text) {
         u64 newOffset = 0;
         try {
@@ -56,6 +59,25 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
         caller->setCurrentFileOffset(newOffset);
     };
     subWidgets.addDrawable(offsetField);
+
+    UIButton* offsetPlusButton = new UIButton("+");
+    offsetPlusButton->position = { layoutPos.x + 130, layoutPos.y };
+    offsetPlusButton->wxWidth = 30;
+    offsetPlusButton->onClickCallback = [this, offsetField](UIButton*) {
+        offsetField->setText(std::to_string(caller->getCurrentFileOffset() + 1));
+    };
+    subWidgets.addDrawable(offsetPlusButton);
+
+    UIButton* offsetMinusButton = new UIButton("-");
+    offsetMinusButton->position = { layoutPos.x + 165, layoutPos.y };
+    offsetMinusButton->wxWidth = 30;
+    offsetMinusButton->onClickCallback = [this, offsetField](UIButton*) {
+        if (caller->getCurrentFileOffset() > 0) {
+            offsetField->setText(std::to_string(caller->getCurrentFileOffset() - 1));
+        }
+    };
+    subWidgets.addDrawable(offsetMinusButton);
+
     layoutPos.y += 35;
 
     UITextField* wField = new UITextField();
@@ -73,10 +95,28 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     };
     subWidgets.addDrawable(wField);
 
+    wPlusButton = new UIButton("+");
+    wPlusButton->position = { layoutPos.x, layoutPos.y + 30 };
+    wPlusButton->wxWidth = 45;
+    wPlusButton->onClickCallback = [this, wField](UIButton*) {
+        wField->setText(std::to_string(caller->getLayerWidth() + 1));
+    };
+    subWidgets.addDrawable(wPlusButton);
+
+    wMinusButton = new UIButton("-");
+    wMinusButton->position = xyAdd(wPlusButton->position, { 55, 0 });
+    wMinusButton->wxWidth = 45;
+    wMinusButton->onClickCallback = [this, wField](UIButton*) {
+        if (caller->getLayerWidth() > 1) {
+            wField->setText(std::to_string(caller->getLayerWidth() - 1));
+        }
+    };
+    subWidgets.addDrawable(wMinusButton);
+
     UITextField* hField = new UITextField();
     hField->isNumericField = true;
     hField->setText(std::to_string(caller->getLayerHeight()));
-    hField->position = { layoutPos.x + 110, layoutPos.y };
+    hField->position = { layoutPos.x + 120, layoutPos.y };
     hField->wxWidth = 100;
     hField->onTextChangedCallback = [this](UITextField* field, std::string text) {
         int newHeight = 0;
@@ -87,7 +127,26 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
         caller->setLayerHeight(newHeight);
     };
     subWidgets.addDrawable(hField);
-    layoutPos.y += 35;
+
+    hPlusButton = new UIButton("+");
+    hPlusButton->position = { layoutPos.x + 120, layoutPos.y + 30 };
+    hPlusButton->wxWidth = 45;
+    hPlusButton->onClickCallback = [this, hField](UIButton*) {
+        hField->setText(std::to_string(caller->getLayerHeight() + 1));
+    };
+    subWidgets.addDrawable(hPlusButton);
+
+    hMinusButton = new UIButton("-");
+    hMinusButton->position = xyAdd(hPlusButton->position, { 55, 0 });
+    hMinusButton->wxWidth = 45;
+    hMinusButton->onClickCallback = [this, hField](UIButton*) {
+        if (caller->getLayerHeight() > 1) {
+            hField->setText(std::to_string(caller->getLayerHeight() - 1));
+        }
+    };
+    subWidgets.addDrawable(hMinusButton);
+
+    layoutPos.y += 70;
 }
 
 void ExtractDataParametersPanel::render(XY at)
@@ -156,7 +215,20 @@ void ExtractDataScreen::takeInput(SDL_Event evt)
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
         switch (evt.type) {
         case SDL_MOUSEWHEEL:
-            c.zoom(evt.wheel.y);
+            if (g_ctrlModifier || g_shiftModifier) {
+                if (g_ctrlModifier){
+                    for (int i = 0; i < abs(evt.wheel.y); i++) {
+                        (evt.wheel.y > 0 ? parametersPanel->wPlusButton : parametersPanel->wMinusButton)->click();
+                    }
+                }
+                if (g_shiftModifier) {
+                    for (int i = 0; i < abs(evt.wheel.y); i++) {
+                        (evt.wheel.y > 0 ? parametersPanel->hPlusButton : parametersPanel->hMinusButton)->click();
+                    }
+                }
+            } else {
+                c.zoom(evt.wheel.y);
+            }
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:

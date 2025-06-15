@@ -54,10 +54,12 @@ public:
     {
         text = t;
         insertPosition = text.size();
+        if (onTextChangedCallback != NULL) {
+            onTextChangedCallback(this, text);
+        }
     }
     void concatToText(std::string t) {
-        text += t;
-        insertPosition = text.size();
+        setText(text + t);
     }
     bool isValidOrPartialColor();
 };

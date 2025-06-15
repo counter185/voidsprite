@@ -27,6 +27,11 @@ class ExtractDataParametersPanel : public DraggablePanel {
 private:
     ExtractDataScreen* caller;
 public:
+    UIButton *hPlusButton = NULL,
+             *hMinusButton = NULL,
+             *wPlusButton = NULL,
+             *wMinusButton = NULL;
+
     ExtractDataParametersPanel(ExtractDataScreen* parent);
 
     void render(XY at) override;
@@ -49,12 +54,14 @@ private:
     u32 layerHeight = 256;
     bool pixelDataChanged = true;
 
+    ExtractDataParametersPanel* parametersPanel = NULL;
+
 public:
     ExtractDataScreen(PlatformNativePathString file) : filePath(file) {
         c = Canvas(XY{ 1,1 });
-        ExtractDataParametersPanel* panel = new ExtractDataParametersPanel(this);
-        panel->position = { 20, 50 };
-        wxsManager.addDrawable(panel);
+        parametersPanel = new ExtractDataParametersPanel(this);
+        parametersPanel->position = { 20, 50 };
+        wxsManager.addDrawable(parametersPanel);
 
         fileHandle = platformOpenFile(filePath, PlatformFileModeRB);
         dimensionsUpdated();
