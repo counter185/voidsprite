@@ -11,6 +11,11 @@ JNIEnv* lastJNI = NULL;
 JavaVM* lastJVM = NULL;
 jclass vspActivityClass = NULL;
 
+u32 platformSupportedFeatures() {
+    return 
+        VSP_FEATURE_WEB_FETCH;
+}
+
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");

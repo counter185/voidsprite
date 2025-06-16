@@ -21,6 +21,12 @@
 
 // update: WE ARE SO BACK
 
+u32 platformSupportedFeatures() {
+    return 
+        VSP_FEATURE_CLIPBOARD 
+        | VSP_FEATURE_UNRESTRICTED_FILE_SYSTEM;
+}
+
 extern char **environ;
 
 std::string linux_getCPUName() {

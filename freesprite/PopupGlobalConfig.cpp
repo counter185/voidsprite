@@ -68,10 +68,14 @@ PopupGlobalConfig::PopupGlobalConfig()
     XY posInTab = { 0,10 };
     
     configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
+    if (platformSupportsFeature(VSP_FEATURE_DISCORD_RPC)){
+        configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
+    }
     configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog, &posInTab));
     configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath, &posInTab));
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates, &posInTab));
+    if (platformSupportsFeature(VSP_FEATURE_WEB_FETCH)) {
+        configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates, &posInTab));
+    }
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
@@ -251,16 +255,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
 
-    btn = new UIButton();
-    btn->text = TL("vsp.config.opt.associateexts");
-    btn->tooltip = TL("vsp.config.opt.associateexts.desc");
-    btn->position = posInTab;
-    btn->wxWidth = 270;
-    btn->onClickCallback = [this](UIButton*) {
-        g_addPopup(new PopupChooseExtsToAssoc());
-    };
-    configTabs->tabs[4].wxs.addDrawable(btn);
-    posInTab.y += 35;
+    if (platformSupportsFeature(VSP_FEATURE_FILE_ASSOC)) {
+        btn = new UIButton();
+        btn->text = TL("vsp.config.opt.associateexts");
+        btn->tooltip = TL("vsp.config.opt.associateexts.desc");
+        btn->position = posInTab;
+        btn->wxWidth = 270;
+        btn->onClickCallback = [this](UIButton*) {
+            g_addPopup(new PopupChooseExtsToAssoc());
+        };
+        configTabs->tabs[4].wxs.addDrawable(btn);
+        posInTab.y += 35;
+    }
 
     btn = new UIButton();
     btn->text = TL("vsp.config.opt.reloadfonts");

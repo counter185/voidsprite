@@ -18,6 +18,10 @@
 
 #include "platform_universal.h"
 
+u32 platformSupportedFeatures() {
+    return VSP_FEATURE_ALL; //windows is the primary platform and should support everything
+}
+
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;

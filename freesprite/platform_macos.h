@@ -40,6 +40,10 @@ constexpr const char* saveFileAppleScript =
 "copy \\\"err\\\" to stdout\n"
 "end if\n";
 
+u32 platformSupportedFeatures() {
+    return 
+        VSP_FEATURE_UNRESTRICTED_FILE_SYSTEM;
+}
 
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
