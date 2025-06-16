@@ -1,7 +1,6 @@
 #pragma once
 
 #include "globals.h"
-#include "net.h"
 #include "Notification.h"
 
 #include "json/json.hpp"
@@ -33,7 +32,7 @@ inline int latestVersionDay = 0;
 inline void runUpdateCheck() {
     try {
         std::string repoInfoUrl = "https://api.github.com/repos/counter185/voidsprite";
-        std::string repoInfoData = fetchTextFile(repoInfoUrl);
+        std::string repoInfoData = platformFetchTextFile(repoInfoUrl);
 
 		json j = json::parse(repoInfoData);
         if (j.is_object() && j.contains("stargazers_count")) {
@@ -48,7 +47,7 @@ inline void runUpdateCheck() {
     if (!std::string(GIT_HASH).empty()) {
         try {
             std::string artifactsUrl = "https://api.github.com/repos/counter185/voidsprite/actions/artifacts";
-            std::string artifactsData = fetchTextFile(artifactsUrl);
+            std::string artifactsData = platformFetchTextFile(artifactsUrl);
 
             if (artifactsData.empty()) {
                 latestHash = GIT_HASH;

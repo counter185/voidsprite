@@ -4113,7 +4113,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
         }
         else {
             LayerPalettized* upcast = (LayerPalettized*)data;
-            fprintf(outfile, "uint32_t voidsprite_palette data[%ull] = {\n", upcast->palette.size());
+            fprintf(outfile, "uint32_t voidsprite_palette data[%zu] = {\n", upcast->palette.size());
             int x = 0;
             for (uint32_t& col : upcast->palette) {
                 fprintf(outfile, "0x%08X,", col);
@@ -4244,7 +4244,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
                 if (!data->isPalettized && (c & 0xFF000000) == 0) {
                     c = 0;
                 }
-                fprintf(f, "%ull ", 1 - (std::find(uqColors.begin(), uqColors.end(), c) - uqColors.begin()));
+                fprintf(f, "%ld ", 1 - (std::find(uqColors.begin(), uqColors.end(), c) - uqColors.begin()));
             }
             fprintf(f, "\n");
         }

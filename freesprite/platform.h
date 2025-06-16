@@ -16,6 +16,8 @@ void platformPreInit();
 void platformInit();
 void platformPostInit();
 
+void platformDeinit();
+
 struct RootDirInfo {
     std::string friendlyName;
     PlatformNativePathString path;
@@ -33,6 +35,7 @@ void platformOpenFileLocation(PlatformNativePathString path);
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to);
 
 void platformOpenWebpageURL(std::string url);
+std::string platformFetchTextFile(std::string url);
 
 bool platformHasFileAccessPermissions();
 void platformRequestFileAccessPermissions();

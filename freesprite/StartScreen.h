@@ -25,7 +25,6 @@
 #include "PopupYesNo.h"
 
 #include "background_operation.h"
-#include "net.h"
 #include "updatecheck.h"
 
 struct LaunchpadBGStar {

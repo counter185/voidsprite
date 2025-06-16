@@ -1004,6 +1004,9 @@ int main(int argc, char** argv)
 
         g_waitAndRemoveAllBgOpAndAsyncThreads();
 
+        loginfo("Deinit...");
+        platformDeinit();
+
         g_deinitRPC();
         log_close();
 

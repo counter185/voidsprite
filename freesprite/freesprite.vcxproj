@@ -404,7 +404,6 @@
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="memory_tracker.h" />
     <ClInclude Include="MinecraftBlockPreviewScreen.h" />
-    <ClInclude Include="net.h" />
     <ClInclude Include="NineSegmentPatternEditorScreen.h" />
     <ClInclude Include="ninesegmentpatterns.h" />
     <ClInclude Include="palettes.h" />

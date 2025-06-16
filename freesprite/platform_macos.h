@@ -55,6 +55,8 @@ void platformPostInit() {
     g_addNotification(Notification("macOS Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
 }
 
+void platformDeinit() {}
+
 //todo
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
 
@@ -256,4 +258,8 @@ void platformOpenWebpageURL(std::string url) {
 	}
 	std::string command = "open \"" + url + "\"";
 	system(command.c_str());
+}
+
+std::string platformFetchTextFile(std::string url) {
+	throw std::runtime_error("Network operations are not supported on this platform.");
 }

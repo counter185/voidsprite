@@ -53,6 +53,8 @@ void platformPreInit() {
 void platformInit() {}
 void platformPostInit() {}
 
+void platformDeinit() {}
+
 //todo
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
 
@@ -262,4 +264,8 @@ void platformRequestFileAccessPermissions() {}
 
 void platformOpenWebpageURL(std::string url) {
     //todo
+}
+
+std::string platformFetchTextFile(std::string url) {
+	throw std::runtime_error("Network operations are not supported on this platform.");
 }

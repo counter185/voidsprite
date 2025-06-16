@@ -8,6 +8,8 @@
 #include "PopupFilePicker.h"
 
 JNIEnv* lastJNI = NULL;
+JavaVM* lastJVM = NULL;
+jclass vspActivityClass = NULL;
 
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
@@ -27,6 +29,13 @@ void platformPostInit() {
     }
 }
 
+void platformDeinit() {
+    if (vspActivityClass != NULL) {
+        lastJNI->DeleteGlobalRef(vspActivityClass);
+        vspActivityClass = NULL;
+    }
+}
+
 std::string appdataPath = "";
 std::string systemInformation = "Android";
 
@@ -37,6 +46,8 @@ JNIEXPORT void JNICALL
 Java_pl_cntrpl_voidsprite_VSPActivity_passAppdataPathString(JNIEnv *env, jclass clazz,
                                                             jstring appdata_path) {
     lastJNI = env;
+    env->GetJavaVM(&lastJVM);
+    vspActivityClass = (jclass)env->NewGlobalRef(clazz);
     const char *path = env->GetStringUTFChars(appdata_path, 0);
     appdataPath = std::string(path);
     env->ReleaseStringUTFChars(appdata_path, path);
@@ -46,6 +57,8 @@ JNIEXPORT void JNICALL
 Java_pl_cntrpl_voidsprite_VSPActivity_passSystemInformationString(JNIEnv *env, jclass clazz,
                                                                   jstring system_info) {
     lastJNI = env;
+    env->GetJavaVM(&lastJVM);
+    vspActivityClass = (jclass)env->NewGlobalRef(clazz);
     const char* inf = env->GetStringUTFChars(system_info, 0);
     systemInformation = std::string(inf);
     env->ReleaseStringUTFChars(system_info, inf);
@@ -163,32 +176,46 @@ std::vector<RootDirInfo> platformListRootDirectories() {
 }
 
 bool platformHasFileAccessPermissions() {
-    jclass vspactivity = lastJNI->FindClass("pl/cntrpl/voidsprite/VSPActivity");
-    if (vspactivity != nullptr) {
-        jmethodID checkMethod = lastJNI->GetStaticMethodID(vspactivity, "hasFileAccessPermission", "()Z");
-        if (checkMethod != nullptr) {
-            return lastJNI->CallStaticBooleanMethod(vspactivity, checkMethod);
-        }
+    jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "hasFileAccessPermission", "()Z");
+    if (checkMethod != nullptr) {
+        return lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod);
     }
-    return false;
 }
 
 void platformRequestFileAccessPermissions() {
-    jclass vspactivity = lastJNI->FindClass("pl/cntrpl/voidsprite/VSPActivity");
-    if (vspactivity != nullptr) {
-        jmethodID checkMethod = lastJNI->GetStaticMethodID(vspactivity, "requestAllFilesPermission", "()V");
-        if (checkMethod != nullptr) {
-            lastJNI->CallStaticVoidMethod(vspactivity, checkMethod);
-        }
+    jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "requestAllFilesPermission", "()V");
+    if (checkMethod != nullptr) {
+        lastJNI->CallStaticVoidMethod(vspActivityClass, checkMethod);
     }
 }
 
 void platformOpenWebpageURL(std::string url) {
-    jclass vspactivity = lastJNI->FindClass("pl/cntrpl/voidsprite/VSPActivity");
-    if (vspactivity != nullptr) {
-        jmethodID checkMethod = lastJNI->GetStaticMethodID(vspactivity, "openUrl", "(Ljava/lang/String;)V");
-        if (checkMethod != nullptr) {
-            lastJNI->CallStaticVoidMethod(vspactivity, checkMethod, lastJNI->NewStringUTF(url.c_str()));
+    jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "openUrl", "(Ljava/lang/String;)V");
+    if (checkMethod != nullptr) {
+        lastJNI->CallStaticVoidMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(url.c_str()));
+    }
+}
+
+std::string platformFetchTextFile(std::string url) {
+    JNIEnv* jni;
+    lastJVM->AttachCurrentThread(&jni, NULL);
+    auto ab = DoOnReturn([&]() {
+        lastJVM->DetachCurrentThread();
+    });
+
+    jmethodID m = jni->GetStaticMethodID(vspActivityClass, "fetchStringHTTP", "(Ljava/lang/String;)Ljava/lang/String;");
+    if (m != nullptr) {
+        jstring jurl = jni->NewStringUTF(url.c_str());
+        auto aa = DoOnReturn([&]() {
+            jni->DeleteLocalRef(jurl);
+        });
+        jstring result = (jstring)jni->CallStaticObjectMethod(vspActivityClass, m, jurl);
+        if (result != NULL) {
+            const char *resultStr = jni->GetStringUTFChars(result, 0);
+            std::string ret(resultStr);
+            jni->ReleaseStringUTFChars(result, resultStr);
+            return ret;
         }
     }
+    throw std::runtime_error("Failed to fetch text file from URL: " + url);
 }
