@@ -60,7 +60,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     };
     subWidgets.addDrawable(offsetField);
 
-    UIButton* offsetPlusButton = new UIButton("+");
+    offsetPlusButton = new UIButton("+");
     offsetPlusButton->position = { layoutPos.x + 130, layoutPos.y };
     offsetPlusButton->wxWidth = 30;
     offsetPlusButton->onClickCallback = [this, offsetField](UIButton*) {
@@ -68,7 +68,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     };
     subWidgets.addDrawable(offsetPlusButton);
 
-    UIButton* offsetMinusButton = new UIButton("-");
+    offsetMinusButton = new UIButton("-");
     offsetMinusButton->position = { layoutPos.x + 165, layoutPos.y };
     offsetMinusButton->wxWidth = 30;
     offsetMinusButton->onClickCallback = [this, offsetField](UIButton*) {
@@ -215,15 +215,20 @@ void ExtractDataScreen::takeInput(SDL_Event evt)
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
         switch (evt.type) {
         case SDL_MOUSEWHEEL:
-            if (g_ctrlModifier || g_shiftModifier) {
+            if (g_ctrlModifier || g_shiftModifier || zMod) {
                 if (g_ctrlModifier){
-                    for (int i = 0; i < abs(evt.wheel.y); i++) {
+                    for (int i = 0; i < abs(evt.wheel.y) * (qMod ? 10 : 1); i++) {
                         (evt.wheel.y > 0 ? parametersPanel->wPlusButton : parametersPanel->wMinusButton)->click();
                     }
                 }
                 if (g_shiftModifier) {
-                    for (int i = 0; i < abs(evt.wheel.y); i++) {
+                    for (int i = 0; i < abs(evt.wheel.y) * (qMod ? 10 : 1); i++) {
                         (evt.wheel.y > 0 ? parametersPanel->hPlusButton : parametersPanel->hMinusButton)->click();
+                    }
+                }
+                if (zMod) {
+                    for (int i = 0; i < abs(evt.wheel.y) * (qMod ? 10 : 1); i++) {
+                        (evt.wheel.y > 0 ? parametersPanel->offsetPlusButton : parametersPanel->offsetMinusButton)->click();
                     }
                 }
             } else {
@@ -239,6 +244,15 @@ void ExtractDataScreen::takeInput(SDL_Event evt)
         case SDL_MOUSEMOTION:
             if (pan) {
                 c.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
+            }
+            break;
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            if (evt.key.scancode == SDL_SCANCODE_Z) {
+                zMod = (evt.key.type == SDL_KEYDOWN);
+            }
+            if (evt.key.scancode == SDL_SCANCODE_Q) {
+                qMod = (evt.key.type == SDL_KEYDOWN);
             }
             break;
         }

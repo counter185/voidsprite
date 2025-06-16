@@ -30,7 +30,9 @@ public:
     UIButton *hPlusButton = NULL,
              *hMinusButton = NULL,
              *wPlusButton = NULL,
-             *wMinusButton = NULL;
+             *wMinusButton = NULL,
+             *offsetPlusButton = NULL,
+             *offsetMinusButton = NULL;
 
     ExtractDataParametersPanel(ExtractDataScreen* parent);
 
@@ -44,6 +46,8 @@ private:
     FILE* fileHandle = NULL;
     Canvas c;
     bool pan = false;
+    bool zMod = false;
+    bool qMod = false;
 
     Layer* dataLayer = NULL;
     std::string currentPixelFormat = "RGB24";
