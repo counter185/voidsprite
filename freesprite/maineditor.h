@@ -211,6 +211,7 @@ public:
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     void tryAddReference(PlatformNativePathString path);
+    void tryToggleTilePreviewLockAtMousePos();
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

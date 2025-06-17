@@ -40,6 +40,9 @@ inline bool loadPluginObject(PlatformNativePathString path) {
 #if _WIN32
         u32 errorCode = GetLastError();
         logerr(std::format("Error code: {}", errorCode));
+        if (errorCode == 126 && std::filesystem::exists(path)) {
+            logerr("  (Missing dependencies or architecture not compatible)");
+        }
 #endif
         return false;
     }

@@ -65,6 +65,9 @@
     {"vsp.keybinds.global.renderscaleup", "Increase screen scale"},
     {"vsp.keybinds.global.renderscaledown", "Decrease screen scale"},
 
+    {"vsp.keybinds.region.startscreen", "voidsprite Launchpad"},
+    {"vsp.keybinds.startscreen.openclipboard", "Open from clipboard"},
+
     {"vsp.keybinds.region.maineditor", "Editor"},
     {"vsp.keybinds.maineditor.eraser", "Toggle eraser"},
     {"vsp.keybinds.maineditor.blend", "Toggle blend mode"},
@@ -78,12 +81,18 @@
     {"vsp.keybinds.maineditor.undo", "Undo"},
     {"vsp.keybinds.maineditor.redo", "Redo"},
     {"vsp.keybinds.maineditor.redoalt", "Redo (alternative)"},
+    {"vsp.keybinds.maineditor.locktilepreview", "Lock/unlock tile preview"},
     {"vsp.keybinds.maineditor.renamelayer", "Rename current layer"},
     {"vsp.keybinds.maineditor.cleararea", "Erase selected area"},
     {"vsp.keybinds.maineditor.fillarea", "Fill selected area"},
     {"vsp.keybinds.maineditor.newlayer", "New layer"},
     {"vsp.keybinds.maineditor.duplicatelayer", "Duplicate current layer"},
     {"vsp.keybinds.maineditor.switchtobrush", "Switch to"},
+
+    {"vsp.keybinds.region.splitsessioneditor", "Split session editor"},
+    {"vsp.keybinds.splitsessioneditor.importimage", "Add image to split session"},
+    {"vsp.keybinds.splitsessioneditor.save", "Save split session"},
+    {"vsp.keybinds.splitsessioneditor.saveandopen", "Save and open split session in editor"},
 
     // default layer names
     {"vsp.layer.template", "Template Layer"},

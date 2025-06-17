@@ -4731,7 +4731,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
             }
             catch (std::exception&) {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid split session file"));
-               f.close();   //not needed apparently
+                f.close();   //not needed apparently
                 return NULL;
             }
 

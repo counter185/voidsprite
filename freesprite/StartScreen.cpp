@@ -107,35 +107,34 @@ void StartScreen::takeInput(SDL_Event evt)
     }
 
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-        switch (evt.type) {
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-                if (evt.button.button == SDL_BUTTON_LEFT) {
-                    if (evt.button.down) {
-                        SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
-                        if (pointInBox({ (int)evt.button.x, (int)evt.button.y }, logoRect)) {
-                            g_addNotification(Notification("voidsprite alpha", "by counter185 & contributors", 6000, g_iconNotifTheCreature, COLOR_INFO));
+        if (!g_keybindManager.processKeybinds(evt, "startscreen", this)) {
+            switch (evt.type) {
+                case SDL_MOUSEBUTTONDOWN:
+                case SDL_MOUSEBUTTONUP:
+                    if (evt.button.button == SDL_BUTTON_LEFT) {
+                        if (evt.button.down) {
+                            SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
+                            if (pointInBox({ (int)evt.button.x, (int)evt.button.y }, logoRect)) {
+                                g_addNotification(Notification("voidsprite alpha", "by counter185 & contributors", 6000, g_iconNotifTheCreature, COLOR_INFO));
+                            }
                         }
                     }
-                }
-                break;
-            case SDL_MOUSEMOTION:
-                break;
-            case SDL_MOUSEWHEEL:
-                break;
-            case SDL_KEYDOWN:
-                if (evt.key.scancode == SDL_SCANCODE_V && g_ctrlModifier) {
-                    tryOpenImageFromClipboard();
-                }
-                else if (evt.key.scancode == SDL_SCANCODE_N && g_ctrlModifier) {
-                    ScreenNonogramPlayer::StartDebugGame();
-                }
-#if _DEBUG
-                else if (evt.key.scancode == SDL_SCANCODE_INSERT && g_ctrlModifier && g_shiftModifier) {
-                    throw std::exception("** user-initiated test crash");
-                }
-#endif
-                break;
+                    break;
+                case SDL_MOUSEMOTION:
+                    break;
+                case SDL_MOUSEWHEEL:
+                    break;
+                case SDL_KEYDOWN:
+                    if (evt.key.scancode == SDL_SCANCODE_N && g_ctrlModifier) {
+                        ScreenNonogramPlayer::StartDebugGame();
+                    }
+    #if _DEBUG
+                    else if (evt.key.scancode == SDL_SCANCODE_INSERT && g_ctrlModifier && g_shiftModifier) {
+                        throw std::exception("** user-initiated test crash");
+                    }
+    #endif
+                    break;
+            }
         }
     }
 }

@@ -1506,39 +1506,6 @@ void MainEditor::takeInput(SDL_Event evt) {
                             case SDL_SCANCODE_RCTRL:
                                 middleMouseHold = !middleMouseHold;
                                 break;
-                            case SDL_SCANCODE_Q:
-                                if (g_ctrlModifier) {
-                                    if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
-                                        lockedTilePreview = {-1, -1};
-                                    } else {
-
-                                        if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-                                            XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
-                                            /* XY{
-                                                mouseInCanvasPoint.x / tileDimensions.x,
-                                                mouseInCanvasPoint.y / tileDimensions.y
-                                            };*/
-                                            if (g_config.isolateRectOnLockTile) {
-                                                isolateEnabled = true;
-                                                isolatedFragment.clear();
-                                                isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
-                                                                          tileToLock.y * tileDimensions.y, tileDimensions.x,
-                                                                          tileDimensions.y});
-                                            }
-                                            if (tileToLock.x >= 0 && tileToLock.y >= 0) {
-                                                lockedTilePreview = tileToLock;
-                                                tileLockTimer.start();
-                                            } else {
-                                                g_addNotification(
-                                                    ErrorNotification(TL("vsp.cmn.error"), "Tile position out of bounds"));
-                                            }
-                                        } else {
-                                            lockedTilePreview = {0, 0};
-                                            tileLockTimer.start();
-                                        }
-                                    }
-                                }
-                                break;
                         }
                     }
                     break;
@@ -2334,6 +2301,34 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
         Panel* referencePanel = new PanelReference(flat);
         addWidget(new CollapsableDraggablePanel("REFERENCE", referencePanel));
         delete ssn;
+    }
+}
+
+void MainEditor::tryToggleTilePreviewLockAtMousePos() 
+{
+    if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
+        lockedTilePreview = {-1, -1};
+    } else {
+        if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+            XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
+            if (g_config.isolateRectOnLockTile) {
+                isolateEnabled = true;
+                isolatedFragment.clear();
+                isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
+                                          tileToLock.y * tileDimensions.y, tileDimensions.x,
+                                          tileDimensions.y});
+            }
+            if (tileToLock.x >= 0 && tileToLock.y >= 0) {
+                lockedTilePreview = tileToLock;
+                tileLockTimer.start();
+            } else {
+                g_addNotification(
+                    ErrorNotification(TL("vsp.cmn.error"), "Tile position out of bounds"));
+            }
+        } else {
+            lockedTilePreview = {0, 0};
+            tileLockTimer.start();
+        }
     }
 }
 

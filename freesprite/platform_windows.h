@@ -563,10 +563,10 @@ bool platformHasFileAccessPermissions() {
 void platformRequestFileAccessPermissions() {}
 
 void platformOpenWebpageURL(std::string url) {
-	if (!stringStartsWithIgnoreCase(url, "http")) {
-		url = "http://" + url;
-	}
-	ShellExecuteW(NULL, L"open", convertStringOnWin32(url).c_str(), NULL, NULL, SW_SHOWNORMAL);
+    if (!stringStartsWithIgnoreCase(url, "http")) {
+        url = "http://" + url;
+    }
+    ShellExecuteW(NULL, L"open", convertStringOnWin32(url).c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 std::string platformFetchTextFile(std::string url) {
@@ -589,18 +589,18 @@ std::string platformFetchTextFile(std::string url) {
         WINHTTP_NO_PROXY_NAME,
         WINHTTP_NO_PROXY_BYPASS, 0);
     if (!hSession) throw std::runtime_error("WinHttpOpen failed");
-	DoOnReturn a1([&]() {
-		WinHttpCloseHandle(hSession);
-	});
+    DoOnReturn a1([&]() {
+        WinHttpCloseHandle(hSession);
+    });
 
     HINTERNET hConnect = WinHttpConnect(hSession, urlComp.lpszHostName,
         urlComp.nPort, 0);
     if (!hConnect) {
         throw std::runtime_error("WinHttpConnect failed");
     }
-	DoOnReturn a2([&]() {
-		WinHttpCloseHandle(hConnect);
-	});
+    DoOnReturn a2([&]() {
+        WinHttpCloseHandle(hConnect);
+    });
 
     HINTERNET hRequest = WinHttpOpenRequest(hConnect,
         L"GET",

@@ -10,6 +10,7 @@
 #include "ScreenWideNavBar.h"
 #include "PopupYesNo.h"
 #include "PopupFilePicker.h"
+#include "keybinds.h"
 
 SplitSessionEditor::SplitSessionEditor()
 {
@@ -105,82 +106,84 @@ void SplitSessionEditor::takeInput(SDL_Event evt)
     LALT_TO_SUMMON_NAVBAR;
 
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-        switch (evt.type) {
-        case SDL_MOUSEBUTTONDOWN:
-            if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingCanvas = true;
-            }
-            else if (evt.button.button == SDL_BUTTON_LEFT) {
-                dragging = findTSSIAt(mousePixelPos);
-                if (dragging != -1) {
-                    draggingStartPixel = c.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y });
-                }
-                else {
+        if (!g_keybindManager.processKeybinds(evt, "splitsessioneditor", this)) {
+            switch (evt.type) {
+            case SDL_MOUSEBUTTONDOWN:
+                if (evt.button.button == SDL_BUTTON_MIDDLE) {
                     scrollingCanvas = true;
                 }
-            }
-            else if (evt.button.button == SDL_BUTTON_RIGHT) {
-                int i = findTSSIAt(mousePixelPos);
-                if (i >= 0 && i < loadedImgs.size()) {
-
-                    PopupYesNo* newPopup = new PopupYesNo(
-                        "Remove image?",
-                        "Remove the image from the split session?\n " + loadedImgs[i].calcRelativePath);
-                    newPopup->setCallbackListener(10 + i, this);
-                    g_addPopup(newPopup);
-                }
-            }
-            break;
-        case SDL_MOUSEBUTTONUP:
-            if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingCanvas = false;
-            }
-            else if (evt.button.button == SDL_BUTTON_LEFT) {
-                scrollingCanvas = false;
-                if (dragging != -1) {
-                    XY endPoint = c.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y});
-                    XY targetPosition = xyAdd(loadedImgs[dragging].position, xySubtract(endPoint, draggingStartPixel));
-                    if (targetPosition.x < 0) {
-						int xOffset = -targetPosition.x;
-						for (int i = 0; i < loadedImgs.size(); i++) {
-                            if (i != dragging) {
-                                loadedImgs[i].position.x += xOffset;
-                            }
-						}
-                        c.panCanvas({ -xOffset,0 });
-                        targetPosition.x = 0;
-                    }
-                    if (targetPosition.y < 0) {
-                        int yOffset = -targetPosition.y;
-                        for (int i = 0; i < loadedImgs.size(); i++) {
-                            if (i != dragging) {
-                                loadedImgs[i].position.y += yOffset;
-                            }
-                        }
-                        c.panCanvas({ 0, -yOffset });
-                        targetPosition.y = 0;
-                    }
-                    if (targetPosition.x >= 0 && targetPosition.y >= 0) {
-                        loadedImgs[dragging].position = targetPosition;
+                else if (evt.button.button == SDL_BUTTON_LEFT) {
+                    dragging = findTSSIAt(mousePixelPos);
+                    if (dragging != -1) {
+                        draggingStartPixel = c.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y });
                     }
                     else {
-                        //should not happen now ever
-                        g_addNotification(ErrorNotification("Image was placed out of bounds.", ""));
+                        scrollingCanvas = true;
                     }
-                    dragging = -1;
-                    recalcCanvasDimensions();
                 }
+                else if (evt.button.button == SDL_BUTTON_RIGHT) {
+                    int i = findTSSIAt(mousePixelPos);
+                    if (i >= 0 && i < loadedImgs.size()) {
+
+                        PopupYesNo* newPopup = new PopupYesNo(
+                            "Remove image?",
+                            "Remove the image from the split session?\n " + loadedImgs[i].calcRelativePath);
+                        newPopup->setCallbackListener(10 + i, this);
+                        g_addPopup(newPopup);
+                    }
+                }
+                break;
+            case SDL_MOUSEBUTTONUP:
+                if (evt.button.button == SDL_BUTTON_MIDDLE) {
+                    scrollingCanvas = false;
+                }
+                else if (evt.button.button == SDL_BUTTON_LEFT) {
+                    scrollingCanvas = false;
+                    if (dragging != -1) {
+                        XY endPoint = c.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y});
+                        XY targetPosition = xyAdd(loadedImgs[dragging].position, xySubtract(endPoint, draggingStartPixel));
+                        if (targetPosition.x < 0) {
+                            int xOffset = -targetPosition.x;
+                            for (int i = 0; i < loadedImgs.size(); i++) {
+                                if (i != dragging) {
+                                    loadedImgs[i].position.x += xOffset;
+                                }
+                            }
+                            c.panCanvas({ -xOffset,0 });
+                            targetPosition.x = 0;
+                        }
+                        if (targetPosition.y < 0) {
+                            int yOffset = -targetPosition.y;
+                            for (int i = 0; i < loadedImgs.size(); i++) {
+                                if (i != dragging) {
+                                    loadedImgs[i].position.y += yOffset;
+                                }
+                            }
+                            c.panCanvas({ 0, -yOffset });
+                            targetPosition.y = 0;
+                        }
+                        if (targetPosition.x >= 0 && targetPosition.y >= 0) {
+                            loadedImgs[dragging].position = targetPosition;
+                        }
+                        else {
+                            //should not happen now ever
+                            g_addNotification(ErrorNotification("Image was placed out of bounds.", ""));
+                        }
+                        dragging = -1;
+                        recalcCanvasDimensions();
+                    }
+                }
+                break;
+            case SDL_MOUSEMOTION:
+                calcMousePixelPos({ (int)(evt.motion.x), (int)(evt.motion.y) });
+                if (scrollingCanvas) {
+                    c.panCanvas({ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
+                }
+                break;
+            case SDL_MOUSEWHEEL:
+                c.zoom(evt.wheel.y);
+                break;
             }
-            break;
-        case SDL_MOUSEMOTION:
-            calcMousePixelPos({ (int)(evt.motion.x), (int)(evt.motion.y) });
-            if (scrollingCanvas) {
-                c.panCanvas({ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
-            }
-            break;
-        case SDL_MOUSEWHEEL:
-            c.zoom(evt.wheel.y);
-            break;
         }
     }
 }
@@ -294,7 +297,7 @@ void SplitSessionEditor::setupWidgets()
                     }},
                     {SDL_SCANCODE_A, { "Add file...",
                         [](SplitSessionEditor* screen) {
-                            PopupFilePicker::PlatformAnyImageWithMatchingExporterImportDialog(screen, TL("vsp.popup.addtosplitsession"), EVENT_SPLITSESSION_ADDIMAGE);
+                            screen->promptAddImageToSplitSession();
                         }
                     }},
                     {SDL_SCANCODE_F, { "Set output file location",
@@ -452,4 +455,9 @@ bool SplitSessionEditor::trySave(bool openSession)
         g_addNotification(ErrorNotification("Error", "No output file path set."));
     }
     return false;
+}
+
+void SplitSessionEditor::promptAddImageToSplitSession() 
+{
+    PopupFilePicker::PlatformAnyImageWithMatchingExporterImportDialog(this, TL("vsp.popup.addtosplitsession"), EVENT_SPLITSESSION_ADDIMAGE);
 }

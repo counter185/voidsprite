@@ -1,6 +1,8 @@
 #include "keybinds.h"
 #include "maineditor.h"
+#include "SplitSessionEditor.h"
 #include "EditorLayerPicker.h"
+#include "StartScreen.h"
 #include "BaseBrush.h"
 #include "main.h"
 
@@ -39,6 +41,14 @@ void g_initKeybinds()
     g_keybindManager.addKeybind("global", "render_scale_down",
         KeyCombo(TL("vsp.keybinds.global.renderscaledown"), SDL_SCANCODE_MINUS, true, false, [](void* d) {
             main_renderScaleDown();
+        }));
+
+
+    //launchpad keybinds
+    g_keybindManager.newRegion("startscreen", TL("vsp.keybinds.region.startscreen"));
+    g_keybindManager.addKeybind("startscreen", "open_clipboard", 
+        KeyCombo(TL("vsp.keybinds.startscreen.openclipboard"),SDL_SCANCODE_V, true, false, [](void* d) {
+            ((StartScreen*)d)->tryOpenImageFromClipboard();
         }));
 
 
@@ -95,6 +105,10 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.redoalt"), SDL_SCANCODE_Y, true, false, [](void* d) {
             ((MainEditor*)d)->redo();
         }));
+    g_keybindManager.addKeybind("maineditor", "lock_tile_preview", 
+        KeyCombo(TL("vsp.keybinds.maineditor.locktilepreview"), SDL_SCANCODE_Q, true, false, [](void* d) {
+            ((MainEditor*)d)->tryToggleTilePreviewLockAtMousePos();
+        }));
     g_keybindManager.addKeybind("maineditor", "layer_rename", 
         KeyCombo(TL("vsp.keybinds.maineditor.renamelayer"), SDL_SCANCODE_F2, false, false, [](void* d) {
             ((MainEditor*)d)->layer_promptRename();
@@ -115,6 +129,23 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.duplicatelayer"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->duplicateLayer(((MainEditor*)d)->selLayer); ((MainEditor*)d)->layerPicker->updateLayers();
         }));
+
+
+    //split session editor keybinds
+    g_keybindManager.newRegion("splitsessioneditor", TL("vsp.keybinds.region.splitsessioneditor"));
+    g_keybindManager.addKeybind("splitsessioneditor", "import_image",
+        KeyCombo(TL("vsp.keybinds.splitsessioneditor.importimage"), SDL_SCANCODE_O, true, false, [](void* d) {
+            ((SplitSessionEditor*)d)->promptAddImageToSplitSession();
+        }));
+    g_keybindManager.addKeybind("splitsessioneditor", "save",
+        KeyCombo(TL("vsp.keybinds.splitsessioneditor.save"), SDL_SCANCODE_S, true, false, [](void* d) {
+            ((SplitSessionEditor*)d)->trySave(false);
+        }));
+    g_keybindManager.addKeybind("splitsessioneditor", "save_and_open",
+        KeyCombo(TL("vsp.keybinds.splitsessioneditor.saveandopen"), SDL_SCANCODE_Q, true, false, [](void* d) {
+            ((SplitSessionEditor*)d)->trySave(true);
+        }));
+    
 
     int i = 0;
     for (auto& brush : g_brushes) {

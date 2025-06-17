@@ -58,5 +58,6 @@ public:
     void tryAddFile(std::string path);
     void calcMousePixelPos(XY onScreenPos);
     bool trySave(bool openSession = false);
+    void promptAddImageToSplitSession();
 };
 
