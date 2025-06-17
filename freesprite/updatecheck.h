@@ -8,6 +8,7 @@
 using json = nlohmann::json;
 
 #ifndef GIT_HASH
+//change to literally any non-empty string to test the update checker
 #define GIT_HASH ""
 #endif
 
