@@ -77,11 +77,6 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
                         else if (callback != NULL) {
                             callback->eventTextInput(callback_id, text);
                         }
-                        if (onTextChangedConfirmCallback != NULL) {
-                            onTextChangedConfirmCallback(this, text);
-                        } else if (callback != NULL) {
-                            callback->eventTextInputConfirm(callback_id, text);
-                        }
                         SDL_free(clip);
                     } else {
                         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardtextpaste")));
