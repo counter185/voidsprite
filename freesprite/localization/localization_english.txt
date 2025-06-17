@@ -18,6 +18,7 @@
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
     {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
     {"vsp.cmn.error.exportfail", "Failed to export file."},
+    {"vsp.cmn.error.clipboardtextpaste", "No text in clipboard."},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
 
     //file type names

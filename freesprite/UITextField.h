@@ -61,6 +61,7 @@ public:
     void concatToText(std::string t) {
         setText(text + t);
     }
+    bool inputChar(char c);
     bool isValidOrPartialColor();
 };
 

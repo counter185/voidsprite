@@ -2,6 +2,7 @@
 #include "FontRenderer.h"
 #include "EventCallbackListener.h"
 #include "TooltipsLayer.h"
+#include "Notification.h"
 
 void UITextField::render(XY pos)
 {
@@ -53,6 +54,40 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
                     callback->eventTextInput(callback_id, text);
                 }
                 break;
+            case SDL_SCANCODE_C:
+                if (g_ctrlModifier) {
+                    if (SDL_SetClipboardText(text.c_str())) {
+                        g_addNotification(SuccessShortNotification(TL("vsp.cmn.copiedtoclipboard"),""));
+                    } else {
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error.clipboardcopy"), ""));
+                    }
+                }
+                break;
+            case SDL_SCANCODE_V:
+                if (g_ctrlModifier) {
+                    if (char* clip = SDL_GetClipboardText()) {
+                        std::string t = clip;
+                        for (char& c : t) {
+                            inputChar(c);
+                        }
+                        //clean this shit up
+                        if (onTextChangedCallback != NULL) {
+                            onTextChangedCallback(this, text);
+                        }
+                        else if (callback != NULL) {
+                            callback->eventTextInput(callback_id, text);
+                        }
+                        if (onTextChangedConfirmCallback != NULL) {
+                            onTextChangedConfirmCallback(this, text);
+                        } else if (callback != NULL) {
+                            callback->eventTextInputConfirm(callback_id, text);
+                        }
+                        SDL_free(clip);
+                    } else {
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardtextpaste")));
+                    }
+                }
+                break;
         }
     }
     else if (evt.type == SDL_TEXTINPUT) {
@@ -60,11 +95,7 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
         char* nextc = (char*)evt.text.text;
         while (*nextc != '\0') {
             char c = *nextc;
-            if ((isNumericField && c >= '0' && c <= '9')
-                || !isNumericField) {
-                text += c;
-                textAdded = true;
-            }
+            textAdded |= inputChar(c);
             nextc++;
         }
         if (textAdded) {
@@ -86,6 +117,15 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
         }
         imeCandidateIndex = evt.edit_candidates.selected_candidate;
     }
+}
+
+bool UITextField::inputChar(char c) {
+    if ((isNumericField && c >= '0' && c <= '9')
+        || !isNumericField) {
+        text += c;
+        return true;
+    }
+    return false;
 }
 
 void UITextField::renderTextField(XY at)
