@@ -183,11 +183,11 @@ jobs:
         SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd android-project && chmod u+x ./gradlew && ./gradlew app:bundleRelease
+      run: cd android-project && chmod u+x ./gradlew && ./gradlew app:assembleRelease
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build-android
         path: |
-          android-project/app/build/outputs/apk/debug
+          android-project/app/build/outputs/apk/release

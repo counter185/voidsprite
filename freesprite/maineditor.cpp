@@ -445,24 +445,6 @@ void MainEditor::drawIsolatedFragment()
                 }
             }
         });
-
-        /*SDL_Rect r = canvas.canvasRectToScreenRect(isolateRect);/* {
-            canvasCenterPoint.x + isolateRect.x * scale, 
-            canvasCenterPoint.y + isolateRect.y * scale,
-            isolateRect.w * scale,
-            isolateRect.h * scale
-        };
-
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-        SDL_RenderDrawRect(g_rd, &r);
-
-        r.x += 1;
-        r.y += 1;
-        r.w -= 2;
-        r.h -= 2;
-
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        SDL_RenderDrawRect(g_rd, &r);*/
     }
 }
 
