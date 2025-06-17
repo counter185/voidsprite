@@ -4,8 +4,8 @@ project(my_app)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narrowing -Wno-macro-redefined -Wno-switch -Wno-inconsistent-missing-override -Wno-constant-conversion -D VOIDSPRITE_JXL_ENABLED=0")
 
-if(DEFINED GIT_HASH)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D GIT_HASH=$ENV{GIT_HASH}")
+if(DEFINED ENV{GIT_HASH})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D GIT_HASH=\"$ENV{GIT_HASH}\"")
 endif()
 
 if(NOT TARGET SDL3::SDL3)
