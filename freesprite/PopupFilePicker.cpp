@@ -24,10 +24,27 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     fileList->bgColor = Fill::Gradient(0xFF101010, 0xFF101010, 0xFF101010, 0xFF202020);
     wxsManager.addDrawable(fileList);
 
-    currentDirLabel = new UILabel("--file path");
-    currentDirLabel->position = { 10 + driveList->wxWidth, 40 };
-    currentDirLabel->fontsize = 16;
-    wxsManager.addDrawable(currentDirLabel);
+    currentDirField = new UITextField("--file path");
+    currentDirField->position = { 10 + driveList->wxWidth, 40 };
+    currentDirField->fontsize = 16;
+    currentDirField->wxHeight = 26;
+    currentDirField->wxWidth = fileList->wxWidth;
+    currentDirField->onTextChangedConfirmCallback = [this](UITextField* f, std::string a) {
+        PlatformNativePathString p = convertStringOnWin32(a);
+        if (std::filesystem::exists(p)) {
+            if (std::filesystem::is_directory(p)) {
+                this->currentDir = p;
+                this->populateRootAndFileList();
+            } else {
+                f->setText(convertStringToUTF8OnWin32(currentDir));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.notadir")));
+            }
+        } else {
+            f->setText(convertStringToUTF8OnWin32(currentDir));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.nodir")));
+        }
+    };
+    wxsManager.addDrawable(currentDirField);
 
     UILabel* fileNameLabel = new UILabel(TL("vsp.filepicker.filename"));
     fileNameLabel->position = xyAdd(fileList->position, { 0, fileList->wxHeight + 10 });
@@ -112,7 +129,7 @@ void PopupFilePicker::populateRootAndFileList() {
 
     driveList->scrollOffset = { 0,0 };
 
-    currentDirLabel->setText(convertStringToUTF8OnWin32(currentDir));
+    currentDirField->setText(convertStringToUTF8OnWin32(currentDir));
     currentFileName->setText("");
 
     int rootY = 0;

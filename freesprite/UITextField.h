@@ -9,6 +9,7 @@ protected:
     std::string text = "";
 public:
     bool enabled = true;
+    int fontsize = 18;
     std::string tooltip = "";
     bool isNumericField = false;
     bool isColorField = false;
@@ -23,6 +24,11 @@ public:
 
     std::function<void(UITextField*,std::string)> onTextChangedCallback = NULL;
     std::function<void(UITextField*,std::string)> onTextChangedConfirmCallback = NULL;
+
+    UITextField() {}
+    UITextField(std::string a) {
+        setText(a);
+    }
 
     void focusIn() override {
         Drawable::focusIn();

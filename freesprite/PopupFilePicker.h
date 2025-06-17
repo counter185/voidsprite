@@ -17,7 +17,7 @@ class PopupFilePicker : public BasePopup
 private:
     FilePickerMode mode = FILEPICKER_OPENFILE;
     PlatformNativePathString currentDir;
-    UILabel* currentDirLabel = NULL;
+    UITextField* currentDirField = NULL;
     UITextField* currentFileName = NULL;
 protected:
     ScrollingPanel* driveList = NULL;

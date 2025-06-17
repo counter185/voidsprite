@@ -343,6 +343,8 @@
     {"vsp.filepicker.nofilename", "No file name chosen."},
     {"vsp.filepicker.overwriteconfirm", "This file already exists. Overwrite?"},
     {"vsp.filepicker.folderreaderror", "Error accessing folder:"},
+    {"vsp.filepicker.error.notadir", "Path is not a directory."},
+    {"vsp.filepicker.error.nodir", "Directory not found."},
 
     //brushes/tools
     {"vsp.brush.param.size", "Size"},
