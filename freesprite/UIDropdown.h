@@ -45,6 +45,7 @@ public:
     void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     bool shouldMoveToFrontOnFocus() override { return true; }
+    XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
 
     void eventButtonPressed(int evt_id) override;
 

@@ -28,6 +28,7 @@ bool g_saveConfig() {
         file << "showPenPressure=" << (g_config.showPenPressure ? "1" : "0") << std::endl;
         file << "showFPS=" << (g_config.showFPS ? "1" : "0") << std::endl;
         file << "checkUpdates=" << (g_config.checkUpdates ? "1" : "0") << std::endl;
+        file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
         
         auto keybinds = g_keybindManager.serializeKeybinds();
 		for (const std::string& keybind : keybinds) {
@@ -88,6 +89,7 @@ void g_loadConfig() {
         if (config.contains("showPenPressure")) { g_config.showPenPressure = config["showPenPressure"] == "1"; }
         if (config.contains("showFPS")) { g_config.showFPS = config["showFPS"] == "1"; }
         if (config.contains("checkUpdates")) { g_config.showFPS = config["checkUpdates"] == "1"; }
+        if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
 
         g_configWasLoaded = true;
         file.close();

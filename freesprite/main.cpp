@@ -970,7 +970,13 @@ int main(int argc, char** argv)
                 SDL_Delay(3);
             }
             if (!g_windowFocused) {
-                SDL_Delay(45);
+                if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
+                    SDL_Delay(500);
+                }
+                else if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
+                    SDL_Delay(45);
+                }
+                
             }
             uint64_t ticksEnd = SDL_GetTicks64(); 
 

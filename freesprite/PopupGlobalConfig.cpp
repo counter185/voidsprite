@@ -107,37 +107,64 @@ PopupGlobalConfig::PopupGlobalConfig()
         VISUAL TAB
         -------------------------
     */
+    ScrollingPanel* visualSettingsPanel = new ScrollingPanel();
+    visualSettingsPanel->position = { 0,0 };
+    visualSettingsPanel->wxWidth = wxWidth - 20;
+    visualSettingsPanel->wxHeight = wxHeight - 140;
+    visualSettingsPanel->scrollVertically = true;
+    visualSettingsPanel->scrollHorizontally = false;
+    configTabs->tabs[1].wxs.addDrawable(visualSettingsPanel);
+
     posInTab = { 0,10 };
 
-    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync, &posInTab));
+    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync, &posInTab));
 
     UILabel* lbl3 = new UILabel(TL("vsp.config.opt.bganim"));
     lbl3->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl3);
+    visualSettingsPanel->subWidgets.addDrawable(lbl3);
     UIDropdown* dd1 = new UIDropdown({ TL("vsp.config.opt.bganim.none"), TL("vsp.config.opt.bganim.sharp"), TL("vsp.config.opt.bganim.smooth"), TL("vsp.config.opt.bganim.sharpstatic"), TL("vsp.config.opt.bganim.smoothstatic") });
     dd1->position = { ixmax(lbl3->calcEndpoint().x + 30, posInTab.x + 200), posInTab.y };
     dd1->wxWidth = 180;
     dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
     dd1->setTextToSelectedItem = true;
     dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
-    configTabs->tabs[1].wxs.addDrawable(dd1);
+    visualSettingsPanel->subWidgets.addDrawable(dd1);
+    posInTab.y += 35;
+
+    UILabel* lbl7 = new UILabel(TL("vsp.config.opt.powersaver"));
+    lbl7->position = posInTab;
+    visualSettingsPanel->subWidgets.addDrawable(lbl7);
+    UIDropdown* dd3 = new UIDropdown({
+        TL("vsp.config.opt.powersaver.off"),
+        TL("vsp.config.opt.powersaver.mid"),
+        TL("vsp.config.opt.powersaver.max"),
+        TL("vsp.config.opt.powersaver.auto")
+    });
+    dd3->position = { ixmax(lbl7->calcEndpoint().x + 30, posInTab.x + 200), posInTab.y };
+    dd3->wxWidth = 180;
+    dd3->onDropdownItemSelectedCallback = [&](UIDropdown* dd, int index, std::string) {
+        g_config.powerSaverLevel = index;
+    };
+    dd3->setTextToSelectedItem = true;
+    dd3->text = g_config.powerSaverLevel < dd3->items.size() ? dd3->items[g_config.powerSaverLevel] : "--";
+    visualSettingsPanel->subWidgets.addDrawable(dd3);
     posInTab.y += 35;
 
     lbl4 = new UILabel(TL("vsp.config.opt.renderer"));
     lbl4->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl4);
+    visualSettingsPanel->subWidgets.addDrawable(lbl4);
     dd2 = new UIDropdown(g_availableRenderersNow);
     dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 180;
     dd2->setCallbackListener(CHECKBOX_RENDERER, this);
     dd2->setTextToSelectedItem = true;
     dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
-    configTabs->tabs[1].wxs.addDrawable(dd2);
+    visualSettingsPanel->subWidgets.addDrawable(dd2);
     posInTab.y += 35;
 
-    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
-    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS, &posInTab));
-    configTabs->tabs[1].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
+    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
+    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS, &posInTab));
+    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();
     std::vector<std::string> visualConfNames = { getDefaultVisualConf()["meta/name"] };
@@ -146,7 +173,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     }
     lbl4 = new UILabel(TL("vsp.config.opt.visualconfig"));
     lbl4->position = posInTab;
-    configTabs->tabs[1].wxs.addDrawable(lbl4);
+    visualSettingsPanel->subWidgets.addDrawable(lbl4);
     dd2 = new UIDropdown(visualConfNames);
     dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 240;
@@ -165,7 +192,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadFonts();
     };
     dd2->text = fileNameFromPath(visualConfigValue("meta/name"));
-    configTabs->tabs[1].wxs.addDrawable(dd2);
+    visualSettingsPanel->subWidgets.addDrawable(dd2);
     posInTab.y += 35;
 
     /*

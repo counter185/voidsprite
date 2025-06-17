@@ -35,6 +35,10 @@ public:
     bool showPenPressure = true;
     bool showFPS = false;
     bool checkUpdates = true;
+    int powerSaverLevel = 3;    // 0: none
+                                // 1: delay 45 on unfocus
+                                // 2: delay 500 on unfocus
+                                // 3: auto      (0 if no battery, 1 if battery, 2 if battery <15%)
 
     std::vector<std::string> lastOpenFiles;
 
