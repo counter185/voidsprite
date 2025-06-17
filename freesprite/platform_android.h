@@ -185,6 +185,7 @@ bool platformHasFileAccessPermissions() {
     if (checkMethod != nullptr) {
         return lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod);
     }
+    return false;
 }
 
 void platformRequestFileAccessPermissions() {

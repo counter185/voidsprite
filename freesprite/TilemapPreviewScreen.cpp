@@ -765,7 +765,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             bool ss = false;
             PlatformNativePathString filename = path + convertStringOnWin32(std::format("-{}{}", x++, exporter->extension()));
             if (exporter->exportsWholeSession()) {
-                MainEditor* ssn = new MainEditor({ ll });
+                MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
                 ssn->tileDimensions = tileSize;
                 ss = exporter->exportData(filename, ssn);
                 delete ssn;
@@ -781,7 +781,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
     else if (type == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
         Layer* ll = renderLayer(activeTilemap);
         if (exporter->exportsWholeSession()) {
-            MainEditor* ssn = new MainEditor({ ll });
+            MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
             success = exporter->exportData(path, ssn);
             delete ssn;
         }
