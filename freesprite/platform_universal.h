@@ -165,7 +165,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
 
 inline std::string universal_runCommandAndGetOutput(std::string command) {
     std::string output;
-    FILE* pipe = _popen(command.c_str(), "r");
+    FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) {
         logerr("Failed to run command: " + command);
         return "";
@@ -174,6 +174,6 @@ inline std::string universal_runCommandAndGetOutput(std::string command) {
     while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
         output += buffer;
     }
-    _pclose(pipe);
+    pclose(pipe);
     return output;
 }

@@ -7,6 +7,9 @@
 #include <dwmapi.h>
 #endif
 
+#define popen _popen
+#define pclose _pclose
+
 #include <SDL3/SDL_properties.h>
 
 #include <d3d9.h>
