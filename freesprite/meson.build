@@ -46,7 +46,7 @@ dependencies = [
 # Install assets
 if get_option('portable') 
   assets_dir = join_paths(get_option('prefix'), 'bin')
-  cpp_args = '-DVOIDSPRITE_ASSETS_PATH='
+  cpp_args = '-DVOIDSPRITE_ASSETS_PATH=""'
 else
   assets_dir = join_paths(get_option('prefix'), get_option('datadir'), 'voidsprite')
   cpp_args = '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
