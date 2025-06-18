@@ -29,7 +29,7 @@ if [ "$keep" = "false" ] && [ ! "$prefix" ] && [ "$prefix" != "/usr" ]; then if 
 set -e
 if [ "$init" == "1" ] || [ ! -e 'build' ]; then
 	if [ -e 'build' ]; then rm -r 'build'; fi
-	meson setup --prefix="$prefix" -Dgithash="${GIT_HASH}" -Dportable="$portable" --buildtype="$buildtype" build
+	meson setup --prefix="$prefix" -Dgithash="$GIT_HASH" -Dportable="$portable" --buildtype="$buildtype" build
 fi
 meson compile -C build
 meson install --skip-subprojects -C build
