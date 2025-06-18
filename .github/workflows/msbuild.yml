@@ -185,6 +185,15 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: cd android-project && chmod u+x ./gradlew && ./gradlew app:assembleRelease
 
+    - name: clean up
+      working-directory: ${{env.GITHUB_WORKSPACE}}/android-project/app/
+      run: |
+        rm -rf keystore
+        rm build/outputs/apk/release/output-metadata.json
+        rm -rf build/outputs/baselineProfiles
+        mv build/outputs/apk/release/app-release.apk build/outputs/apk/release/voidsprite-release.apk
+        cp -R ../../OPEN_SOURCE_LICENSES build/outputs/apk/release/OPEN_SOURCE_LICENSES
+
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
