@@ -263,6 +263,7 @@ std::vector<RootDirInfo> platformListRootDirectories() {
     }
 
     ret.push_back({"Root", "/"});
+    return ret;
 }
 
 bool platformHasFileAccessPermissions() {

@@ -239,15 +239,36 @@ FILE *platformOpenFile(PlatformNativePathString path,
 }
 
 std::string platformGetSystemInfo() {
-    //todo
     std::string ret = "";
-    ret += "macOS\n";
+    ret += std::format("macOS version {}\n", universal_runCommandAndGetOutput("sw_vers -productVersion"));
+    ret += std::format("{}\n", universal_runCommandAndGetOutput("sysctl -n kern.version"));
+    ret += std::format("System architecture: {}\n", universal_runCommandAndGetOutput("uname -m"));
+    ret += std::format("CPU: {}\n", universal_runCommandAndGetOutput("sysctl -n machdep.cpu.brand_string"));
+    ret += std::format("GPU: {}\n", universal_runCommandAndGetOutput("system_profiler SPDisplaysDataType | grep 'Chipset Model'"));
+    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
     return ret;
 }
 
-//todo
 std::vector<RootDirInfo> platformListRootDirectories() {
-    return {{"",""}};
+    std::vector<RootDirInfo> ret;
+    
+    char *homeDir = getenv("HOME");
+    if (homeDir != NULL) {
+        //it's mac so home should always be there
+        std::string homeDirStr = homeDir;
+        ret.push_back({"User home", homeDirStr});
+    }
+
+    std::string volumes = "/Volumes";
+    for (const auto& entry : std::filesystem::directory_iterator(volumes)) {
+        if (entry.is_directory()) {
+            std::string name = entry.path().filename().string();
+            ret.push_back({name, entry.path().string()});
+        }
+    }
+
+    ret.push_back({"Root", "/"});
+    return ret;
 }
 
 bool platformHasFileAccessPermissions() {

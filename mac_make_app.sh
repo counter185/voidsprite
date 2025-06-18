@@ -15,14 +15,28 @@ sips -z 64 64 freesprite/assets/icon_voidsprite32x32.png --out mac-build-resourc
 iconutil -c icns mac-build-resources/generated/voidsprite.iconset
 cp mac-build-resources/generated/voidsprite.icns voidsprite.app/Contents/Resources/voidsprite.icns
 
-foundlibs=$(otool -L target/release/bin/voidsprite | grep -oE '\t.*\(' | cut -d' ' -f1 | cut -d$'\t' -f2 | grep -v ^'/usr/lib' | grep -v ^'/System/Library')
+evalLibs () {
+    otool -L $1 | grep -oE '\t.*\(' | cut -d' ' -f1 | cut -d$'\t' -f2 | grep -v ^'/usr/lib' | grep -v ^'/System/Library'
+}
 
-for lib in $foundlibs
+copyLib () {
+    libname=$(echo $1 | rev | cut -d'/' -f-1 | rev)
+    cp $1 voidsprite.app/Contents/MacOS/
+    install_name_tool -change $1 @executable_path/$libname voidsprite.app/Contents/MacOS/voidsprite
+}
+
+for lib in $(evalLibs "target/release/bin/voidsprite")
 do
-echo "Copying" $lib
-libname=$(echo $lib | rev | cut -d'/' -f-1 | rev)
-cp $lib voidsprite.app/Contents/MacOS/
-install_name_tool -change $lib @executable_path/$libname voidsprite.app/Contents/MacOS/voidsprite
+    dirname=$(dirname $lib)
+    for sublib in $(evalLibs $lib)
+    do
+        #this will give us some Permission denied errors on duplicate libs but we don't care
+        realpath=${sublib/@rpath/$dirname}
+        echo "- sublib" $realpath
+        copyLib $realpath
+    done
+    echo "Copying" $lib
+    copyLib $lib
 done
 
 mkdir voidsprite.app/Contents/MacOS/assets
