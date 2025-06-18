@@ -163,17 +163,36 @@ inline Layer* universal_platformGetLayerFromClipboard() {
     
 }
 
-inline std::string universal_runCommandAndGetOutput(std::string command) {
+inline std::string universal_runCommandAndGetOutput(std::string command, int* exitCode = NULL) {
     std::string output;
     FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) {
         logerr("Failed to run command: " + command);
+        if (exitCode != NULL) {
+            *exitCode = -1;
+        }
         return "";
     }
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
         output += buffer;
     }
-    pclose(pipe);
+    int ec = pclose(pipe);
+    if (exitCode != NULL) {
+        *exitCode = ec;
+    }
     return output;
+}
+
+inline std::string universal_fetchTextFile(std::string url) {
+    //uses curl
+    std::string command = "curl -s -f \"" + url + "\"";
+    int ec;
+    std::string output = universal_runCommandAndGetOutput(command, &ec);
+    if (ec == 0){
+        return output;
+    }
+    else {
+        throw std::runtime_error("curl failed");
+    }
 }

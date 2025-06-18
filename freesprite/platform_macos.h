@@ -286,5 +286,5 @@ void platformOpenWebpageURL(std::string url) {
 }
 
 std::string platformFetchTextFile(std::string url) {
-	throw std::runtime_error("Network operations are not supported on this platform.");
+	return universal_fetchTextFile(url);
 }
