@@ -17,8 +17,12 @@ void UIColorSlider::render(XY pos)
             renderGradient(subRect, color1, color2, color1, color2);
 
             //debug subgradients
-            //SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 120);
-            //SDL_RenderDrawRect(g_rd, &subRect);
+#if _DEBUG
+            if (g_debugConfig.debugColorSliderGradients) {
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 120);
+                SDL_RenderDrawRect(g_rd, &subRect);
+            }
+#endif
         }
     }
     else if (colors.size() == 1) {

@@ -326,7 +326,7 @@ PopupGlobalConfig::PopupGlobalConfig()
 #if _DEBUG
     posInTab = { 0,10 };
     configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab));
-    posInTab.y += 35;
+    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Debug color slider gradient bounds", "", &g_debugConfig.debugColorSliderGradients, &posInTab));
 #endif
     
 

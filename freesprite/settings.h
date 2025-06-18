@@ -48,6 +48,7 @@ public:
 
 struct DebugSettings {
     bool debugShowScrollPanelBounds = false;
+    bool debugColorSliderGradients = false;
 };
 
 inline bool g_configWasLoaded = false;
