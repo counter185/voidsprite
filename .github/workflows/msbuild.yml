@@ -151,8 +151,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: install g++13
-      run: brew install gcc@13
+    - name: install g++14
+      run: brew install gcc@14
 
     - name: install pkgconfig and cmake
       run: brew install pkgconfig cmake
@@ -161,7 +161,7 @@ jobs:
       run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
 
     - name: run build
-      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
+      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-14 CXX=g++-14 ./mac_build.sh
 
     - name: workaround gh actions artifact file permissions
       run: tar -cvf voidsprite.app.tar -C target/mac_release .
