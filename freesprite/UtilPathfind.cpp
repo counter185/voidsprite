@@ -55,48 +55,6 @@ bool __util_anyEqualsAndGGreater(Node* val, std::vector<Node*> list) {
     return false;
 }
 
-/*char** ReadMapFromFile(std::string filepath, int w, int h) {
-    char** outmap = (char**)tracked_malloc(sizeof(char*) * h);
-    for (int x = 0; x < h; x++) {
-        outmap[x] = (char*)tracked_malloc(sizeof(char) * w);
-    }
-    std::ifstream infile(filepath);
-    if (!infile.good()) {
-        logprintf("FILE OPEN FAIL\n");
-    }
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            int a;
-            infile >> a;
-            outmap[y][x] = (char)a;
-        }
-    }
-    infile.close();
-    return outmap;
-}*/
-
-/*void PrintMap(char** outmap, int w, int h, std::vector<Node> drawNodes = std::vector<Node>()) {
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            int val = outmap[y][x];
-#if PRINT_COLORS
-            if (val == 5) {
-                logprintf("\e[0;31m");
-            }
-            else if (__util_anyEquals_A(Node(x, y), drawNodes)) {
-                logprintf("\e[0;33m");
-                val = 1;
-            }
-            else {
-                logprintf("\e[0;37m");
-            }
-#endif
-            logprintf("%i,", val);
-        }
-        logprintf("\n");
-    }
-}*/
-
 bool CanWalkOnMapPoint(Layer* map, int x, int y, uint32_t col1, uint32_t col2) {
 
     if (x < 0 || y < 0 || x >= map->w || y >= map->h) {

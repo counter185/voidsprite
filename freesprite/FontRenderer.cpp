@@ -1,3 +1,5 @@
+#include <SDL3_ttf/SDL_ttf.h>
+
 #include "FontRenderer.h"
 #include "mathops.h"
 
@@ -45,6 +47,17 @@ bool ParseUTF8(unsigned char ch, int* nextUTFBytes, uint32_t& out) {
     }
 
 }
+
+TTFFontObject::TTFFontObject(TTF_Font* f) : font(f) {
+    isBitmapFont = !TTF_FontIsScalable(f);
+    loginfo(std::format("[TTFFontObject] font: {}, engine: {}", TTF_GetFontFamilyName(f), isBitmapFont ? "bitmap" : "ttf"));
+}
+
+TTFFontObject::~TTFFontObject() {
+        if (font != NULL) {
+            TTF_CloseFont(font);
+        }
+    }
 
 TextRenderer::TextRenderer() {
     /*font = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);

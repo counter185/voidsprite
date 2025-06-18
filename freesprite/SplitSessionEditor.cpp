@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "SplitSessionEditor.h"
 #include "UILabel.h"
 #include "FileIO.h"

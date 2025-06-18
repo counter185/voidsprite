@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL3_image/SDL_image.h>
+
 #include "globals.h"
 #include "EventCallbackListener.h"
 #include "PopupFilePicker.h"

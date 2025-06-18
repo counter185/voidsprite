@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fstream>
+
 #include <jni.h>
 #include "EventCallbackListener.h"
 #include "Notification.h"

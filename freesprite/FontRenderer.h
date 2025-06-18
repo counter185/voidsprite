@@ -82,15 +82,8 @@ private:
     void RenderGlyph(uint32_t a, int size);
     bool isBitmapFont = false;
 public:
-    TTFFontObject(TTF_Font* f) : font(f) {
-        isBitmapFont = !TTF_FontIsScalable(f);
-        loginfo(std::format("[TTFFontObject] font: {}, engine: {}", TTF_GetFontFamilyName(f), isBitmapFont ? "bitmap" : "ttf"));
-    }
-    ~TTFFontObject() override {
-        if (font != NULL) {
-            TTF_CloseFont(font);
-        }
-    }
+    TTFFontObject(TTF_Font* f);
+    ~TTFFontObject() override;
 
     bool hasGlyphForChar(u32 ch, int size) override {
         if (!renderedGlyphs[size].contains(ch)) {

@@ -1,3 +1,5 @@
+#include <SDL3_image/SDL_image.h>
+
 #include "globals.h"
 #include "BaseFilter.h"
 #include "RenderFilter.h"

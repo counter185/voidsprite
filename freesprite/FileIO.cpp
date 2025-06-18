@@ -3,6 +3,10 @@
 #include <windows.h>
 #endif
 
+#include <fstream>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
+
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"

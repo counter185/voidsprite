@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fstream>
+
 #include <pwd.h>
 #include <spawn.h>
 #include <unistd.h>

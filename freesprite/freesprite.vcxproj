@@ -185,6 +185,7 @@
     <ClCompile Include="ButtonStartScreenSession.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="CollapsableDraggablePanel.cpp" />
+    <ClCompile Include="colors.cpp" />
     <ClCompile Include="CustomTemplate.cpp" />
     <ClCompile Include="discord_game_sdk\achievement_manager.cpp" />
     <ClCompile Include="discord_game_sdk\activity_manager.cpp" />

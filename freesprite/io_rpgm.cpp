@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "io_base.h"
 #include "io_rpgm.h"
 

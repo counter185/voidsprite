@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "globals.h"
 #include "visual_config.h"
 #include "mathops.h"

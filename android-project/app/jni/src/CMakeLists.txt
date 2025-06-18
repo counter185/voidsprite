@@ -103,6 +103,7 @@ add_library(main SHARED
         voidsprite/ButtonStartScreenSession.cpp
         voidsprite/Canvas.cpp
         voidsprite/CollapsableDraggablePanel.cpp
+        voidsprite/colors.cpp
         voidsprite/CustomTemplate.cpp
         voidsprite/DraggablePanel.cpp
         voidsprite/drawable.cpp

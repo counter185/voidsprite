@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "globals.h"
 #include "mathops.h"
 #include "BaseBrush.h"

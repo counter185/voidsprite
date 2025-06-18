@@ -105,7 +105,7 @@ void platformTrySaveOtherFile(
             }
         }
         pclose(pipe);
-        std::cout << output;
+        loginfo(output);
         if (output.find(';') != std::string::npos) {
             std::string indexStr = output.substr(0, output.find(';'));
             std::string filename = output.substr(output.find(';') + 1);
@@ -165,7 +165,7 @@ void platformTryLoadOtherFile(
             }
         }
         pclose(pipe);
-        std::cout << output;
+        loginfo(output);
         if (output.find("OK:") != std::string::npos) {
             std::string filename = output.substr(3);
             int index = findIndexByExtension(filetypes, filename);

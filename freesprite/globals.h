@@ -26,15 +26,16 @@
 #include <functional>
 #include <algorithm>
 #include <filesystem>
-#include <iostream>
-#include <fstream>
 #include <regex>
 #include <thread>
 #include <atomic>
+//do not include these here:
+//iostream: use logprintf or loginfo instead
+//fstream: include it in cpp files where needed
+//SDL3_image/SDL_image.h: include it in cpp files where needed
+//SDL3_ttf/SDL_ttf.h: include it in cpp files where needed
 
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
-#include <SDL3_ttf/SDL_ttf.h>
 
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
@@ -45,7 +46,7 @@ extern "C" {
 }
 
 #ifdef __GNUC__
-#define slogprintf_s snlogprintf
+#define sprintf_s snprintf
 #define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),(mode)))==NULL
 #endif
 
@@ -96,6 +97,9 @@ extern "C" {
 #define INT_MAX 2147483647
 #define INT_MIN (-2147483647 - 1)
 #endif
+
+//sdl
+struct TTF_Font;
 
 //util classes
 class EventCallbackListener;

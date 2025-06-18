@@ -1,3 +1,5 @@
+#include <SDL3_ttf/SDL_ttf.h>
+
 #include "ToolText.h"
 #include "PopupTextTool.h"
 #include "UITextField.h"

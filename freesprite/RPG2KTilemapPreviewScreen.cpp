@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <lcf/lmu/reader.h>
 #include <lcf/writer_lcf.h>
 
