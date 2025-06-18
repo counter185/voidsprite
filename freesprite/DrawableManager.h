@@ -1,7 +1,6 @@
 #pragma once
 #include "globals.h"
 #include "drawable.h"
-#include "mathops.h"
 
 class DrawableManager
 {

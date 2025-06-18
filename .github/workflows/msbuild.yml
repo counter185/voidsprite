@@ -151,10 +151,10 @@ jobs:
     - name: Decode Keystore
       env:
         ENCODED_STRING: ${{ secrets.KEYSTORE }}
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
-        mkdir "${TMP_KEYSTORE_FILE_PATH}"
-        echo $KEYSTORE | base64 -di > "${TMP_KEYSTORE_FILE_PATH}"/vsp_keystore.jks
+        mkdir android-project/app/keystore
+        echo $ENCODED_STRING | base64 -di > android-project/app/keystore/vsp_keystore.jks
 
     - name: setup android dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
