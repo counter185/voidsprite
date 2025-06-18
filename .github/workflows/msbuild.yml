@@ -186,8 +186,9 @@ jobs:
       run: cd android-project && chmod u+x ./gradlew && ./gradlew app:assembleRelease
 
     - name: clean up
-      working-directory: ${{env.GITHUB_WORKSPACE}}/android-project/app/
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
+        cd android-project/app
         rm -rf keystore
         rm build/outputs/apk/release/output-metadata.json
         rm -rf build/outputs/baselineProfiles
