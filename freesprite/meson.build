@@ -52,11 +52,6 @@ else
   cpp_args = '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
 endif
 
-if get_option('githash') != ''
-  cpp_args = ' '.join([cpp_args, '-DGIT_HASH="' + get_option('githash') + '"'])
-endif
-
-
 install_subdir('assets', install_dir: assets_dir)
 install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-Medium.ttf', install_dir: assets_dir)
 if host_machine.system() == 'linux'

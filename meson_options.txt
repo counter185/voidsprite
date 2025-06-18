@@ -3,6 +3,3 @@ option('portable', type : 'boolean', value : false,
 
 option('flatpak', type : 'boolean', value: false,
 	   description : 'Flatpak build')
-
-option('githash', type : 'string', value: '',
-          description : 'Current git hash for update tracking')
