@@ -162,6 +162,35 @@ bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std
     }
     return false;
 }
+std::string platformGetFileAssocForExtension(std::string extension) { 
+    HKEY classKey;
+    std::wstring pathW = convertStringOnWin32(std::format("SOFTWARE\\Classes\\{}", extension));
+    std::wstring pathW2 = convertStringOnWin32(std::format("SOFTWARE\\Classes\\{}\\OpenWithProgids", extension));
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, pathW.c_str(), 0, KEY_QUERY_VALUE, &classKey) == ERROR_SUCCESS) {
+        DoOnReturn aa([&](){ RegCloseKey(classKey); });
+        wchar_t className[256];
+        DWORD classNameSize = sizeof(className);
+        memset(className, 0, sizeof(className));
+        if (RegGetValueW(classKey, NULL, NULL, RRF_RT_REG_SZ, NULL, (LPBYTE)className, &classNameSize) == ERROR_SUCCESS) {
+            std::wstring classNameWstr(className);
+            return convertStringToUTF8OnWin32(classNameWstr);
+        }
+        else {
+            HKEY openWithProgidsKey;
+            if (RegOpenKeyExW(HKEY_CURRENT_USER, pathW2.c_str(), 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &openWithProgidsKey) == ERROR_SUCCESS) {
+                DoOnReturn ab([&](){ RegCloseKey(openWithProgidsKey); });
+                DWORD nSubKeys = 0;
+                if (RegQueryInfoKeyW(openWithProgidsKey, NULL, NULL, NULL, NULL, NULL, NULL, &nSubKeys, NULL, NULL, NULL, NULL) == ERROR_SUCCESS) {
+                    if (nSubKeys > 0) {
+                        return "~";
+                    }
+                }
+
+            }
+        }
+    }
+    return "";
+}
 
 void platformTrySaveImageFile(EventCallbackListener* listener) {}
 

@@ -2274,7 +2274,9 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
     if (ssn != NULL) {
         Layer* flat = ssn->flattenImage();
         Panel* referencePanel = new PanelReference(flat);
-        addWidget(new CollapsableDraggablePanel("REFERENCE", referencePanel));
+        CollapsableDraggablePanel* refWPanel = new CollapsableDraggablePanel("REFERENCE", referencePanel);
+        addWidget(refWPanel);
+        refWPanel->playPanelOpenVFX();
         delete ssn;
     }
 }

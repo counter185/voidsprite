@@ -89,6 +89,15 @@ public:
                     }
                 }
                 break;
+            case VFX_PANELOPEN:
+                {
+                    double percent = interpolation(timer.percentElapsedTime(duration));
+                    SDL_Rect panelRect = extData2;
+                    panelRect = offsetRect(panelRect, 30 * percent, 18 * percent);
+                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255 * (1.0-percent));
+                    SDL_RenderDrawRect(g_rd, &panelRect);
+                }
+                break;
         }
     }
     bool expired() {

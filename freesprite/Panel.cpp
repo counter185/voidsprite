@@ -35,3 +35,9 @@ void Panel::mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction)
         subWidgets.processMouseWheelEvent(xyAdd(gPosOffset, position), mousePos, direction);
     }
 }
+
+void Panel::playPanelOpenVFX() 
+{
+    XY dim = getDimensions();
+    g_newVFX(VFX_PANELOPEN, 1000, 0, SDL_Rect{ position.x, position.y, dim.x, dim.y });
+}

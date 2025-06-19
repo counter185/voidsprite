@@ -34,6 +34,9 @@ public:
         collapseButton->onClickCallback = [this](UIButton* btn) { toggleCollapse(); };
         collapseButton->text = "-";
         subWidgets.addDrawable(collapseButton);
+
+        wxWidth = collapsablePanel->wxWidth;
+        wxHeight = collapsablePanel->wxHeight;
     }
 
     void render(XY position) override {

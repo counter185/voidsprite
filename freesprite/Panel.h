@@ -45,5 +45,7 @@ public:
     bool parentFocused() { return parent != NULL && parent->focused; }
     bool thisOrParentFocused() { return parent != NULL ? parentFocused() : focused; }
     Timer64& thisOrParentFocusTimer() { return parent != NULL ? parent->focusTimer : focusTimer; }
+
+    void playPanelOpenVFX();
 };
 

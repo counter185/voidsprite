@@ -38,6 +38,7 @@ struct RootDirInfo {
 std::string platformGetSystemInfo();
 
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs);
+std::string platformGetFileAssocForExtension(std::string extension);
 
 void platformTrySaveImageFile(EventCallbackListener* caller);
 void platformTryLoadImageFile(EventCallbackListener* caller);
