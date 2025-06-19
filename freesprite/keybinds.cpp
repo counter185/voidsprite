@@ -3,7 +3,7 @@
 #include "SplitSessionEditor.h"
 #include "EditorLayerPicker.h"
 #include "StartScreen.h"
-#include "BaseBrush.h"
+#include "brush/BaseBrush.h"
 #include "main.h"
 
 void g_initKeybinds()

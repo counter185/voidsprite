@@ -1,5 +1,5 @@
 #pragma once
-#include "globals.h"
+#include "../globals.h"
 
 Layer* readPNGFromBase64String(std::string b64);
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize);

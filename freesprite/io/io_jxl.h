@@ -1,6 +1,6 @@
 #pragma once
 
-#include "globals.h"
+#include "../globals.h"
 
 #ifndef VOIDSPRITE_JXL_ENABLED
 #define VOIDSPRITE_JXL_ENABLED 1

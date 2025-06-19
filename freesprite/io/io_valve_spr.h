@@ -1,4 +1,5 @@
 #pragma once
+#include "../globals.h"
 
 // below structs copied from
 // https://developer.valvesoftware.com/wiki/SPR

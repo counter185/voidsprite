@@ -19,19 +19,18 @@
 #include <format>
 #include <map>
 #include <unordered_map>
-#include <stack>
 #include <new>
 #include <ctime>
 #include <vector>
 #include <functional>
 #include <algorithm>
 #include <filesystem>
-#include <regex>
-#include <thread>
 #include <atomic>
 //do not include these here:
 //iostream: use logprintf or loginfo instead
 //fstream: include it in cpp files where needed
+//stack: include it in cpp files where needed
+//regex: include it in cpp files where needed
 //SDL3_image/SDL_image.h: include it in cpp files where needed
 //SDL3_ttf/SDL_ttf.h: include it in cpp files where needed
 

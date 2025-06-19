@@ -1,3 +1,5 @@
+#include <stack>
+
 #include <SDL3_image/SDL_image.h>
 
 #include "globals.h"

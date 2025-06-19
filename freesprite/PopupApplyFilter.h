@@ -1,4 +1,6 @@
 #pragma once
+#include <thread>
+
 #include "BasePopup.h"
 #include "EventCallbackListener.h"
 #include "BaseFilter.h"

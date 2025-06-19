@@ -1,4 +1,6 @@
 #pragma once
+#include <thread>
+
 #include "globals.h"
 #include "Timer64.h"
 

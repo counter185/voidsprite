@@ -4,6 +4,7 @@
 #endif
 
 #include <fstream>
+#include <regex>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 

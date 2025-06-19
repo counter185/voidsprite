@@ -1,5 +1,5 @@
 #pragma once
-#include "globals.h"
+#include "../globals.h"
 
 #pragma pack(push, 1)
 struct ASEPRITEHeader {
