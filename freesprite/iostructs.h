@@ -1,5 +1,7 @@
 #pragma once
 
+//todo: get rid of this, move the structs to individual `io_<whatever>.h/.cpp`
+
 #pragma pack(push, 1)
 struct TPLImageOffset {
     uint32_t headerOffset;

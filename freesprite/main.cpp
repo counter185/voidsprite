@@ -10,7 +10,7 @@
 #include "BaseScreen.h"
 #include "StartScreen.h"
 #include "BasePopup.h"
-#include "BaseBrush.h"
+#include "brush/BaseBrush.h"
 #include "Pattern.h"
 #include "Notification.h"
 #include "Gamepad.h"

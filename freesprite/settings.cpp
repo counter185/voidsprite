@@ -2,7 +2,7 @@
 
 #include "globals.h"
 #include "mathops.h"
-#include "BaseBrush.h"
+#include "brush/BaseBrush.h"
 #include "keybinds.h"
 
 bool g_saveConfig() {

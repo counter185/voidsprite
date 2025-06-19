@@ -81,25 +81,38 @@ add_library(main SHARED
         voidsprite/localization/localization.cpp
         voidsprite/pugixml/pugixml.cpp
         voidsprite/zip/zip.c
-        voidsprite/BaseBrush.cpp
         voidsprite/BaseFilter.cpp
         voidsprite/BasePopup.cpp
         voidsprite/BaseScreen.cpp
         voidsprite/BaseTemplate.cpp
-        voidsprite/Brush1pxLine.cpp
-        voidsprite/Brush1pxLinePathfind.cpp
-        voidsprite/Brush1x1.cpp
-        voidsprite/Brush1x1ArcX.cpp
-        voidsprite/Brush1x1ArcY.cpp
-        voidsprite/Brush3pxCircle.cpp
-        voidsprite/Brush9SegmentRect.cpp
-        voidsprite/BrushBezierLine.cpp
-        voidsprite/BrushCircle.cpp
-        voidsprite/BrushDiamond.cpp
-        voidsprite/BrushFill.cpp
-        voidsprite/BrushRect.cpp
-        voidsprite/BrushRectFill.cpp
-        voidsprite/BrushReplaceColor.cpp
+        voidsprite/brush/BaseBrush.cpp
+        voidsprite/brush/Brush1pxLine.cpp
+        voidsprite/brush/Brush1pxLinePathfind.cpp
+        voidsprite/brush/Brush1x1.cpp
+        voidsprite/brush/Brush1x1ArcX.cpp
+        voidsprite/brush/Brush1x1ArcY.cpp
+        voidsprite/brush/Brush3pxCircle.cpp
+        voidsprite/brush/Brush9SegmentRect.cpp
+        voidsprite/brush/BrushBezierLine.cpp
+        voidsprite/brush/BrushCircle.cpp
+        voidsprite/brush/BrushDiamond.cpp
+        voidsprite/brush/BrushFill.cpp
+        voidsprite/brush/BrushRect.cpp
+        voidsprite/brush/BrushRectFill.cpp
+        voidsprite/brush/BrushReplaceColor.cpp
+        voidsprite/brush/ToolColorPicker.cpp
+        voidsprite/brush/ToolComment.cpp
+        voidsprite/brush/ToolGuideline.cpp
+        voidsprite/brush/ToolMeasure.cpp
+        voidsprite/brush/ToolRectClone.cpp
+        voidsprite/brush/ToolRectFlip.cpp
+        voidsprite/brush/ToolRectIsolate.cpp
+        voidsprite/brush/ToolRectMove.cpp
+        voidsprite/brush/ToolRectRotate.cpp
+        voidsprite/brush/ToolRectSwap.cpp
+        voidsprite/brush/ToolSetXSymmetry.cpp
+        voidsprite/brush/ToolSetYSymmetry.cpp
+        voidsprite/brush/ToolText.cpp
         voidsprite/ButtonStartScreenSession.cpp
         voidsprite/Canvas.cpp
         voidsprite/CollapsableDraggablePanel.cpp
@@ -117,14 +130,14 @@ add_library(main SHARED
         voidsprite/FileIO.cpp
         voidsprite/FontRenderer.cpp
         voidsprite/Gamepad.cpp
-        voidsprite/io_aseprite.cpp
-        voidsprite/io_dibv5.cpp
-        voidsprite/io_gim.cpp
-        voidsprite/io_jxl.cpp
-        voidsprite/io_piskel.cpp
-        voidsprite/io_png.cpp
-        voidsprite/io_rpgm.cpp
-        voidsprite/io_valve_spr.cpp
+        voidsprite/io/io_aseprite.cpp
+        voidsprite/io/io_dibv5.cpp
+        voidsprite/io/io_gim.cpp
+        voidsprite/io/io_jxl.cpp
+        voidsprite/io/io_piskel.cpp
+        voidsprite/io/io_png.cpp
+        voidsprite/io/io_rpgm.cpp
+        voidsprite/io/io_valve_spr.cpp
         voidsprite/keybinds.cpp
         voidsprite/Layer.cpp
         voidsprite/LayerPalettized.cpp
@@ -185,19 +198,6 @@ add_library(main SHARED
         voidsprite/TilemapEditorLayerPicker.cpp
         voidsprite/TilemapPreviewScreen.cpp
         voidsprite/Timer64.cpp
-        voidsprite/ToolColorPicker.cpp
-        voidsprite/ToolComment.cpp
-        voidsprite/ToolGuideline.cpp
-        voidsprite/ToolMeasure.cpp
-        voidsprite/ToolRectClone.cpp
-        voidsprite/ToolRectFlip.cpp
-        voidsprite/ToolRectIsolate.cpp
-        voidsprite/ToolRectMove.cpp
-        voidsprite/ToolRectRotate.cpp
-        voidsprite/ToolRectSwap.cpp
-        voidsprite/ToolSetXSymmetry.cpp
-        voidsprite/ToolSetYSymmetry.cpp
-        voidsprite/ToolText.cpp
         voidsprite/TooltipsLayer.cpp
         voidsprite/UIButton.cpp
         voidsprite/UICheckbox.cpp

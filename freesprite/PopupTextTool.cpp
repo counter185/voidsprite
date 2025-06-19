@@ -1,7 +1,7 @@
 #include "PopupTextTool.h"
 #include "globals.h"
 #include "FontRenderer.h"
-#include "ToolText.h"
+#include "brush/ToolText.h"
 #include "UITextField.h"
 #include "UIButton.h"
 #include "UILabel.h"

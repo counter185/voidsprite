@@ -1,4 +1,6 @@
 #pragma once
+#include "globals.h"
+#include "Timer64.h"
 
 inline std::atomic<bool> g_bgOpRunning = false;
 inline std::atomic<double> g_bgOpProgress = 0.0;

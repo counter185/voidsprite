@@ -2,12 +2,9 @@
 #include "drawable.h"
 #include "DrawableManager.h"
 #include "DraggablePanel.h"
-#include "BaseBrush.h"
 #include "UIButton.h"
 #include "EventCallbackListener.h"
 #include "Pattern.h"
-#include "UILabel.h"
-#include "Panel.h"
 #include "ScrollingPanel.h"
 
 class EditorBrushPicker : public DraggablePanel, public EventCallbackListener

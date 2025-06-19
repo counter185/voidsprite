@@ -20,6 +20,7 @@
 #include "PanelReference.h"
 #include "keybinds.h"
 #include "background_operation.h"
+#include "brush/BaseBrush.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"

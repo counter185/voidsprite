@@ -29,14 +29,14 @@ std::vector<u8> base64ToBytes(std::string b64);
 void zlibFile(PlatformNativePathString path);
 void unZlibFile(PlatformNativePathString path);
 
-#include "io_png.h"
-#include "io_aseprite.h"
-#include "io_piskel.h"
-#include "io_gim.h"
-#include "io_rpgm.h"
-#include "io_jxl.h"
-#include "io_dibv5.h"
-#include "io_valve_spr.h"
+#include "io/io_png.h"
+#include "io/io_aseprite.h"
+#include "io/io_piskel.h"
+#include "io/io_gim.h"
+#include "io/io_rpgm.h"
+#include "io/io_jxl.h"
+#include "io/io_dibv5.h"
+#include "io/io_valve_spr.h"
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);

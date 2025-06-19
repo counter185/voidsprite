@@ -1,6 +1,7 @@
 #include "EditorBrushPicker.h"
+#include "brush/BaseBrush.h"
 #include "maineditor.h"
-#include "FontRenderer.h"
+#include "UILabel.h"
 
 EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	this->caller = caller;

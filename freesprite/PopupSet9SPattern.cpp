@@ -1,5 +1,5 @@
 #include "PopupSet9SPattern.h"
-#include "Brush9SegmentRect.h"
+#include "brush/Brush9SegmentRect.h"
 #include "FontRenderer.h"
 
 #include "ScrollingPanel.h"

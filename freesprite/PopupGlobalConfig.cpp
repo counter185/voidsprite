@@ -8,7 +8,6 @@
 #include "Notification.h"
 #include "UIDropdown.h"
 #include "ScrollingPanel.h"
-#include "BaseBrush.h"
 #include "discord_rpc.h"
 #include "PopupChooseExtsToAssoc.h"
 #include "keybinds.h"
