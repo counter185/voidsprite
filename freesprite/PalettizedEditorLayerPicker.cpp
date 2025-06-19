@@ -1,5 +1,6 @@
 #include "PalettizedEditorLayerPicker.h"
 #include "MainEditorPalettized.h"
+#include "UIButton.h"
 
 PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* editor)
 {

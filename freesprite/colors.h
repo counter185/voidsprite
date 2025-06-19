@@ -1,5 +1,4 @@
 #pragma once
-#include "mathops.h"
 
 #define HINT_NEXT_LINE "hint:newline"
 #define HINT_NEXT_LINE_HERE {HINT_NEXT_LINE,0}

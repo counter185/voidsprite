@@ -1,5 +1,6 @@
 #pragma once
 #include "globals.h"
+#include "mathops.h"
 
 #define KEY_UNASSIGNED SDL_SCANCODE_UNKNOWN
 

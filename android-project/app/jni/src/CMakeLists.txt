@@ -128,6 +128,7 @@ add_library(main SHARED
         voidsprite/EditorTouchToggle.cpp
         voidsprite/ExtractDataScreen.cpp
         voidsprite/FileIO.cpp
+        voidsprite/fills.cpp
         voidsprite/FontRenderer.cpp
         voidsprite/Gamepad.cpp
         voidsprite/io/io_aseprite.cpp

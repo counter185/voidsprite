@@ -11,7 +11,7 @@
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
 
-    navbar = new ScreenWideNavBar<TilemapPreviewScreen*>(this,
+    navbar = new ScreenWideNavBar(this,
         {
             {
                 SDL_SCANCODE_F,
@@ -20,32 +20,32 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     {SDL_SCANCODE_O, SDL_SCANCODE_S, SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C},
                     {
                         {SDL_SCANCODE_O, { "Load layout from file",
-                                [](TilemapPreviewScreen* screen) {
-                                    platformTryLoadOtherFile(screen, {{".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "load tile layout", EVENT_TILEMAP_LOADLAYOUT);
+                                [this]() {
+                                    platformTryLoadOtherFile(this, {{".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "load tile layout", EVENT_TILEMAP_LOADLAYOUT);
                                 }
                             }
                         },
                         {SDL_SCANCODE_S, { "Save layout to file",
-                                [](TilemapPreviewScreen* screen) {
-                                    platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "save tile layout", EVENT_TILEMAP_SAVELAYOUT);
+                                [this]() {
+                                    platformTrySaveOtherFile(this, { {".voidtile", "voidtile layout"}, {".pxm", "Cave Story Map PXM"}}, "save tile layout", EVENT_TILEMAP_SAVELAYOUT);
                                 }
                             }
                         },
                         {SDL_SCANCODE_Z, { "Render all layers to image",
-                                [](TilemapPreviewScreen* screen) {
-                                    screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE);
+                                [this]() {
+                                    this->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE);
                                 }
                             }
                         },
                         {SDL_SCANCODE_X, { "Render all layers to separate images",
-                                [](TilemapPreviewScreen* screen) {
-                                    screen->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES);
+                                [this]() {
+                                    this->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES);
                                 }
                             }
                         },
                         {SDL_SCANCODE_C, { "Render current layer to image",
-                                [](TilemapPreviewScreen* screen) {
-                                    screen->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE);
+                                [this]() {
+                                    this->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE);
                                 }
                             }
                         },
@@ -60,8 +60,8 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                     {},
                     {
                         {SDL_SCANCODE_R, { "Resize tilemap",
-                                [](TilemapPreviewScreen* screen) {
-                                    g_addPopup(new PopupTileGeneric(screen, "Resize tilemap", "Enter the new size of the tilemap (in tiles)", screen->tilemapDimensions, EVENT_TILEMAP_RESIZE));
+                                [this]() {
+                                    g_addPopup(new PopupTileGeneric(this, "Resize tilemap", "Enter the new size of the tilemap (in tiles)", this->tilemapDimensions, EVENT_TILEMAP_RESIZE));
                                 }
                             }
                         }

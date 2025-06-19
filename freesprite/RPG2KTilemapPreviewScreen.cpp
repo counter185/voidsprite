@@ -20,7 +20,7 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     layersPanel->position = { 20, 80 };
     wxsManager.addDrawable(layersPanel);
 
-    navbar = new ScreenWideNavBar<RPG2KTilemapPreviewScreen*>(this,
+    navbar = new ScreenWideNavBar(this,
         {
             {
                 SDL_SCANCODE_F,
@@ -29,18 +29,18 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                     {},
                     {
                         {SDL_SCANCODE_O, { "Load layout from file",
-                                [](RPG2KTilemapPreviewScreen* screen) {
-                                    platformTryLoadOtherFile(screen, {{".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
+                                [this]() {
+                                    platformTryLoadOtherFile(this, {{".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                                 }
                             }
                         },
                         {SDL_SCANCODE_E, { "Render to image",
-                                [](RPG2KTilemapPreviewScreen* screen) {
+                                [this]() {
                                     std::vector<std::pair<std::string, std::string>> formats;
                                     for (auto f : g_fileExporters) {
                                         formats.push_back({ f->extension(), f->name()});
                                     }
-                                    platformTrySaveOtherFile(screen, formats, "render LMU map to image", EVENT_LMUPREVIEW_RENDERMAP);
+                                    platformTrySaveOtherFile(this, formats, "render LMU map to image", EVENT_LMUPREVIEW_RENDERMAP);
                                 }
                             }
                         },
@@ -61,9 +61,9 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                     {},
                     {
                         {SDL_SCANCODE_E, { "Toggle Event display",
-                                [](RPG2KTilemapPreviewScreen* screen) {
-                                    screen->eventViewMode = (LMUEventViewMode)(((int)screen->eventViewMode + 1) % 4);
-                                    switch (screen->eventViewMode) {
+                                [this]() {
+                                    this->eventViewMode = (LMUEventViewMode)(((int)this->eventViewMode + 1) % 4);
+                                    switch (this->eventViewMode) {
                                         case LMUEVENTS_HIDE_ALL:
                                             g_addNotification(Notification("All Events hidden","", 1500, NULL, COLOR_INFO));
                                             break;
@@ -81,8 +81,8 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                             }
                         },
                         {SDL_SCANCODE_R, { "Recenter canvas",
-                                [](RPG2KTilemapPreviewScreen* screen) {
-                                    screen->RecenterCanvas();
+                                [this]() {
+                                    this->RecenterCanvas();
                                 }
                             }
                         }

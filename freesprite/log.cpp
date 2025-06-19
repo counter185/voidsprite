@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "mathops.h"
 
 FILE* logFile = NULL;
 PlatformNativePathString logPath;

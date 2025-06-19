@@ -13,7 +13,7 @@ protected:
     PanelMCBlockPreview* panelBig;
     PanelMCBlockPreview* panelSmalm;
 
-    ScreenWideNavBar<MinecraftBlockPreviewScreen*>* navbar = NULL;
+    ScreenWideNavBar* navbar = NULL;
 public: 
     MainEditor* caller;
     Canvas canvas;

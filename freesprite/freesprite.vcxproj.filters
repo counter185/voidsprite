@@ -654,6 +654,9 @@
     <ClCompile Include="log.cpp">
       <Filter>Source files\util</Filter>
     </ClCompile>
+    <ClCompile Include="fills.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">

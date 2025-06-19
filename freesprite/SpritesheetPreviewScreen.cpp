@@ -6,6 +6,7 @@
 #include "EditorSpritesheetPreview.h"
 #include "ScrollingPanel.h"
 #include "PanelSpritesheetPreview.h"
+#include "UIButton.h"
 
 #define N_BUTTONS_ADDED_TO_TIMELINE 3
 #define MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES 120
@@ -23,7 +24,7 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
     panel->position = { 5, 40 };
     wxsManager.addDrawable(panel);
 
-    navbar = new ScreenWideNavBar<SpritesheetPreviewScreen*>(this,
+    navbar = new ScreenWideNavBar(this,
         {
             {
                 SDL_SCANCODE_F,
@@ -32,8 +33,8 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
                     {},
                     {
                         {SDL_SCANCODE_C, { "Close",
-                                [](SpritesheetPreviewScreen* screen) {
-                                    screen->closeNextTick = true;
+                                [this]() {
+                                    this->closeNextTick = true;
                                 }
                             }
                         },

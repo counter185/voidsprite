@@ -9,7 +9,7 @@ NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* paren
     pointUL = { caller->canvas.dimensions.x / 3, caller->canvas.dimensions.y / 3 };
     pointUR = { caller->canvas.dimensions.x / 3 * 2, caller->canvas.dimensions.y / 3 * 2 };
 
-    navbar = new ScreenWideNavBar<NineSegmentPatternEditorScreen*>(this,
+    navbar = new ScreenWideNavBar(this,
         {
             {
                 SDL_SCANCODE_F,
@@ -18,14 +18,14 @@ NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* paren
                     {},
                     {
                         {SDL_SCANCODE_C, { "Close",
-                                [](NineSegmentPatternEditorScreen* screen) {
-                                    screen->closeNextTick = true;
+                                [this]() {
+                                    this->closeNextTick = true;
                                 }
                             }
                         },
                         {SDL_SCANCODE_S, { "Export to 9-segment pattern",
-                                [](NineSegmentPatternEditorScreen* screen) {
-                                    platformTrySaveOtherFile(screen, { {".void9sp", "9-segment pattern file"} }, "save 9-segment pattern", EVENT_9SPEDITOR_SAVE);
+                                [this]() {
+                                    platformTrySaveOtherFile(this, { {".void9sp", "9-segment pattern file"} }, "save 9-segment pattern", EVENT_9SPEDITOR_SAVE);
                                 }
                             }
                         },

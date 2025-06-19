@@ -15,7 +15,7 @@ protected:
     XY pointUL;
     XY pointUR;
 
-    ScreenWideNavBar<NineSegmentPatternEditorScreen*>* navbar = NULL;
+    ScreenWideNavBar* navbar = NULL;
 
     bool closeNextTick = false;
 

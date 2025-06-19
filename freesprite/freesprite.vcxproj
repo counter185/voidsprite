@@ -132,7 +132,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ShowIncludes>true</ShowIncludes>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -206,6 +206,7 @@
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
+    <ClCompile Include="fills.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="io\io_aseprite.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />

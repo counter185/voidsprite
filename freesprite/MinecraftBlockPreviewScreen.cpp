@@ -19,7 +19,7 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
     panelSmalm->position = { 430, 60 };
     parent->addWidget(panelSmalm);
 
-    navbar = new ScreenWideNavBar<MinecraftBlockPreviewScreen*>(this,
+    navbar = new ScreenWideNavBar(this,
         {
             {
                 SDL_SCANCODE_F,
@@ -28,14 +28,14 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
                     {},
                     {
                         {SDL_SCANCODE_R, { "Render to separate workspace",
-                                [](MinecraftBlockPreviewScreen* screen) {
-                                    g_addPopup(new PopupTileGeneric(screen, "Render to workspace", "Image dimensions:", {512,512}, 3));
+                                [this]() {
+                                    g_addPopup(new PopupTileGeneric(this, "Render to workspace", "Image dimensions:", {512,512}, 3));
                                 }
                             }
                         },
                         {SDL_SCANCODE_C, { "Close",
-                                [](MinecraftBlockPreviewScreen* screen) {
-                                    screen->closeNextTick = true;
+                                [this]() {
+                                    this->closeNextTick = true;
                                 }
                             }
                         },

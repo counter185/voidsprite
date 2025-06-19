@@ -6,6 +6,7 @@
 #include "Layer.h"
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
+#include "EventCallbackListener.h"
 
 enum EditorUnsavedChanges : int {
     NO_UNSAVED_CHANGES = 0,
@@ -107,7 +108,7 @@ public:
     const int zoomPixelStep = 50;
     Timer64 zoomKeyTimer;
 
-    ScreenWideNavBar<MainEditor*>* navbar;
+    ScreenWideNavBar* navbar;
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;
@@ -123,7 +124,7 @@ public:
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;
 
-    std::map<SDL_Scancode, NavbarSection<MainEditor*>> mainEditorKeyActions;
+    std::map<SDL_Scancode, NavbarSection> mainEditorKeyActions;
 
     std::vector<uint32_t> lastColors;
 

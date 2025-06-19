@@ -159,7 +159,6 @@ class TabbedView;
 class BaseFilter;
 class RenderFilter;
 
-template <typename T>
 class ScreenWideNavBar;
 
 extern bool g_ctrlModifier, g_shiftModifier;
@@ -249,17 +248,15 @@ struct XYf {
     float x, y;
 };
 
-template <typename T>
 struct NamedOperation {
     std::string name;
-    std::function<void(T)> function;
+    std::function<void()> function;
 };
 
-template <typename T>
 struct NavbarSection {
     std::string name;
     std::vector<SDL_Scancode> order;
-    std::map<SDL_Scancode, NamedOperation<T>> actions;
+    std::map<SDL_Scancode, NamedOperation> actions;
     SDL_Texture* icon = NULL;
     UIButton* button = NULL;
 };

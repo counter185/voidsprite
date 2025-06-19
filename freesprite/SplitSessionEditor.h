@@ -31,7 +31,7 @@ protected:
     ScrollingPanel* subImagesPanel;
     std::vector<tempSplitSessionImage> loadedImgs;
     std::string outputSPSNFilePath = "";
-    ScreenWideNavBar<SplitSessionEditor*>* navbar;
+    ScreenWideNavBar* navbar;
 public:
     SplitSessionEditor();
     SplitSessionEditor(PlatformNativePathString path);

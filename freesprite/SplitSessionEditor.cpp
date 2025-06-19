@@ -275,7 +275,7 @@ void SplitSessionEditor::setupWidgets()
     subImagesPanel->clipElementsToSize = false;
     wxsManager.addDrawable(subImagesPanel);
 
-    navbar = new ScreenWideNavBar<SplitSessionEditor*>(this, {
+    navbar = new ScreenWideNavBar(this, {
         {
             SDL_SCANCODE_F,
             {
@@ -283,28 +283,28 @@ void SplitSessionEditor::setupWidgets()
                 {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_C},
                 {
                     {SDL_SCANCODE_C, { "Close",
-                        [](SplitSessionEditor* screen) {
-                            screen->closeNextTick = true;
+                        [this]() {
+                            this->closeNextTick = true;
                         }
                     }},
                     {SDL_SCANCODE_S, { "Save",
-                        [](SplitSessionEditor* screen) {
-                            screen->trySave();
+                        [this]() {
+                            this->trySave();
                         }
                     }},
                     {SDL_SCANCODE_D, { "Save and open in editor",
-                        [](SplitSessionEditor* screen) {
-                            screen->trySave(true);
+                        [this]() {
+                            this->trySave(true);
                         }
                     }},
                     {SDL_SCANCODE_A, { "Add file...",
-                        [](SplitSessionEditor* screen) {
-                            screen->promptAddImageToSplitSession();
+                        [this]() {
+                            this->promptAddImageToSplitSession();
                         }
                     }},
                     {SDL_SCANCODE_F, { "Set output file location",
-                        [](SplitSessionEditor* screen) {
-                            platformTrySaveOtherFile(screen, {{".voidspsn", "Split session file"}}, "set split session file location", 0);
+                        [this]() {
+                            platformTrySaveOtherFile(this, {{".voidspsn", "Split session file"}}, "set split session file location", 0);
                         }
                     }}
                 },

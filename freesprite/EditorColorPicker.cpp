@@ -5,6 +5,7 @@
 #include "mathops.h"
 #include "ScrollingPanel.h"
 #include "Notification.h"
+#include "TabbedView.h"
 
 EditorColorPicker::EditorColorPicker(MainEditor* c) : UIColorPicker() {
     caller = c;

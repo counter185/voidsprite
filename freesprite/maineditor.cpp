@@ -728,40 +728,40 @@ void MainEditor::setUpWidgets()
                 {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
-                            [](MainEditor* editor) {
-                                editor->trySaveAsImage();
+                            [this]() {
+                                this->trySaveAsImage();
                             }
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.nav.save"),
-                            [](MainEditor* editor) {
-                                editor->trySaveImage();
+                            [this]() {
+                                this->trySaveImage();
                             }
                         }
                     },
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
-                            [](MainEditor* editor) {
-                                PopupExportScaled* popup = new PopupExportScaled(editor);
-                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, editor);
+                            [this]() {
+                                PopupExportScaled* popup = new PopupExportScaled(this);
+                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, this);
                                 g_addPopup(popup);
                             }
                         }
                     },
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.exportpal"),
-                            [](MainEditor* editor) {
-                                editor->tryExportPalettizedImage();
+                            [this]() {
+                                this->tryExportPalettizedImage();
                             }
                         }
                     },
                     {SDL_SCANCODE_A, { TL("vsp.maineditor.exportind"),
-                            [](MainEditor* editor) {
-                                editor->exportTilesIndividually();
+                            [this]() {
+                                this->exportTilesIndividually();
                             }
                         }
                     },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.paledit"),
-                            [](MainEditor* editor) {
-                                MainEditorPalettized* newEditor = editor->toPalettizedSession();
+                            [this]() {
+                                MainEditorPalettized* newEditor = this->toPalettizedSession();
                                 if (newEditor != NULL) {
                                     g_addScreen(newEditor);
                                 }
@@ -769,19 +769,19 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"),
-                            [](MainEditor* editor) {
-                                editor->copyImageToClipboard();
+                            [this]() {
+                                this->copyImageToClipboard();
                             }
                         }
                     },
                     {SDL_SCANCODE_X, { TL("vsp.cmn.close"),
-                            [](MainEditor* editor) {
-                                editor->requestSafeClose();
+                            [this]() {
+                                this->requestSafeClose();
                             }
                         }
                     },
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"),
-                            [](MainEditor* screen) {
+                            [this]() {
                                 g_addPopup(new PopupGlobalConfig());
                             }
                         }
@@ -797,90 +797,90 @@ void MainEditor::setUpWidgets()
                 {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
                     {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"),
-                            [](MainEditor* editor) {
-                                editor->undo();
+                            [this]() {
+                                this->undo();
                             }
                         }
                     },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"),
-                            [](MainEditor* editor) {
-                                editor->redo();
+                            [this]() {
+                                this->redo();
                             }
                         }
                     },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
-                            [](MainEditor* editor) {
-                                editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
+                            [this]() {
+                                this->symmetryEnabled[0] = !this->symmetryEnabled[0];
                             }
                         }
                     },
                     {SDL_SCANCODE_Y, { TL("vsp.maineditor.symy"),
-                            [](MainEditor* editor) {
-                                editor->symmetryEnabled[1] = !editor->symmetryEnabled[1];
+                            [this]() {
+                                this->symmetryEnabled[1] = !this->symmetryEnabled[1];
                             }
                         }
                     },
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"),
-                            [](MainEditor* editor) {
-                                editor->flipAllLayersOnX();
+                            [this]() {
+                                this->flipAllLayersOnX();
                             }
                         }
                     },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
-                            [](MainEditor* editor) {
-                                editor->flipAllLayersOnY();
+                            [this]() {
+                                this->flipAllLayersOnY();
                             }
                         }
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
-                            [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, TL("vsp.maineditor.rescanv"), "New canvas size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
+                            [this]() {
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
-                            [](MainEditor* editor) {
-                                editor->isolateEnabled = false;
+                            [this]() {
+                                this->isolateEnabled = false;
                             }
                         }
                     },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
-                            [](MainEditor* editor) {
-                                if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+                            [this]() {
+                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile size", "New tile size:", XY{ editor->tileDimensions.x, editor->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
+                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile size", "New tile size:", XY{ this->tileDimensions.x, this->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
                                 }
                             }
                         }
                     },
                     {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
-                            [](MainEditor* editor) {
-                                if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+                            [this]() {
+                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(editor, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(editor->canvas.dimensions.x / (float)editor->tileDimensions.x), (int)ceil(editor->canvas.dimensions.y / (float)editor->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
+                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(this->canvas.dimensions.x / (float)this->tileDimensions.x), (int)ceil(this->canvas.dimensions.y / (float)this->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
                                 }
                             }
                         }
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
-                            [](MainEditor* editor) {
-                                g_addPopup(new PopupIntegerScale(editor, TL("vsp.maineditor.intscale"), "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                            [this]() {
+                                g_addPopup(new PopupIntegerScale(this, TL("vsp.maineditor.intscale"), "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.canvscale"),
-                            [](MainEditor* editor) {
-                                g_addPopup(new PopupTileGeneric(editor, TL("vsp.maineditor.canvscale"), "New size:", editor->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
+                            [this]() {
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.canvscale"), "New size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.nineseg"),
-                            [](MainEditor* editor) {
-                                g_addScreen(new NineSegmentPatternEditorScreen(editor));
+                            [this]() {
+                                g_addScreen(new NineSegmentPatternEditorScreen(this));
                             }
                         }
                     },
@@ -895,64 +895,64 @@ void MainEditor::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.flipx"),
-                            [](MainEditor* editor) {
-                                editor->layer_flipHorizontally();
+                            [this]() {
+                                this->layer_flipHorizontally();
                             }
                         }
                     },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipy"),
-                            [](MainEditor* editor) {
-                                editor->layer_flipVertically();
+                            [this]() {
+                                this->layer_flipVertically();
                             }
                         }
                     },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.printcol"),
-                            [](MainEditor* editor) {
-                                g_addNotification(Notification("", std::format("{} colors in current layer", editor->getCurrentLayer()->numUniqueColors(true))));
+                            [this]() {
+                                g_addNotification(Notification("", std::format("{} colors in current layer", this->getCurrentLayer()->numUniqueColors(true))));
                             }
                         }
                     },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.renlayer"),
-                            [](MainEditor* editor) {
-                                editor->layer_promptRename();
+                            [this]() {
+                                this->layer_promptRename();
                             }
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.isolatealpha"),
-                            [](MainEditor* editor) {
-                                editor->layer_selectCurrentAlpha();
+                            [this]() {
+                                this->layer_selectCurrentAlpha();
                             }
                         }
                     },
                     {SDL_SCANCODE_A, { TL("vsp.maineditor.removealpha"),
-                            [](MainEditor* editor) {
-                                editor->layer_setAllAlpha255();
+                            [this]() {
+                                this->layer_setAllAlpha255();
                             }
                         }
                     },
                     {SDL_SCANCODE_K, { TL("vsp.maineditor.setckey"),
-                            [](MainEditor* editor) {
+                            [this]() {
                                 PopupPickColor* newPopup = new PopupPickColor(TL("vsp.maineditor.setckey"), TL("vsp.maineditor.setckeydesc"));
-                                newPopup->setCallbackListener(EVENT_MAINEDITOR_SETCOLORKEY, editor);
+                                newPopup->setCallbackListener(EVENT_MAINEDITOR_SETCOLORKEY, this);
                                 g_addPopup(newPopup);
                             }
                         }
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
-                            [](MainEditor* editor) {
-                                editor->copyLayerToClipboard(editor->getCurrentLayer());
+                            [this]() {
+                                this->copyLayerToClipboard(this->getCurrentLayer());
                             }
                         }
                     },
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
-                            [](MainEditor* editor) {
-                                editor->layer_clearSelectedArea();
+                            [this]() {
+                                this->layer_clearSelectedArea();
                             }
                         }
                     },
                     {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.layer.fillselection"),
-                            [](MainEditor* editor) {
-                                editor->layer_fillActiveColor();
+                            [this]() {
+                                this->layer_fillActiveColor();
                             }
                         }
                     },
@@ -987,119 +987,110 @@ void MainEditor::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
-                            [](MainEditor* editor) {
-                                editor->recenterCanvas();
+                            [this]() {
+                                this->recenterCanvas();
                             }
                         }
                     },
                     {SDL_SCANCODE_F, { "Add reference...",
-                            [](MainEditor* editor) {
-                                PopupFilePicker::PlatformAnyImageImportDialog(editor, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE);
+                            [this]() {
+                                PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE);
                             }
                         }
                     },
                     {SDL_SCANCODE_B, { "Toggle background color",
-                            [](MainEditor* editor) {
-                                editor->backgroundColor.r = ~editor->backgroundColor.r;
-                                editor->backgroundColor.g = ~editor->backgroundColor.g;
-                                editor->backgroundColor.b = ~editor->backgroundColor.b;
+                            [this]() {
+                                this->backgroundColor.r = ~this->backgroundColor.r;
+                                this->backgroundColor.g = ~this->backgroundColor.g;
+                                this->backgroundColor.b = ~this->backgroundColor.b;
                             }
                         }
                     },
                     {SDL_SCANCODE_C, { "Toggle comments",
-                            [](MainEditor* editor) {
-                                (*(int*)&editor->commentViewMode)++;
-                                (*(int*)&editor->commentViewMode) %= 3;
+                            [this]() {
+                                (*(int*)&this->commentViewMode)++;
+                                (*(int*)&this->commentViewMode) %= 3;
                                 g_addNotification(Notification(std::format("{}",
-                                    editor->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
-                                    editor->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
+                                    this->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
+                                    this->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
                                     "All comments shown"), "", 1500
                                 ));
                             }
                         }
                     },
                     {SDL_SCANCODE_G, { "Set pixel grid...",
-                            [](MainEditor* editor) {
-                                g_addPopup(new PopupSetEditorPixelGrid(editor, "Set pixel grid", "Enter grid size <w>x<h>:"));
+                            [this]() {
+                                g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:"));
                             }
                         }
                     },
                     {SDL_SCANCODE_S, { "Open spritesheet preview...",
-                            [](MainEditor* editor) {
-                                //if (editor->spritesheetPreview == NULL) {
-                                    if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
-                                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
-                                        return;
-                                    }
-                                    SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(editor);
-                                    g_addScreen(newScreen);
-                                    //editor->spritesheetPreview = newScreen;
-                                //}
-                                //else {
-                                //    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Spritesheet preview is already open."));
-                                //}
+                            [this]() {
+                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
+                                    return;
+                                }
+                                SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(this);
+                                g_addScreen(newScreen);
                             }
                         }
                     },
                     {SDL_SCANCODE_T, { "Open tileset preview...",
-                            [](MainEditor* editor) {
-                                if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+                            [this]() {
+                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                     return;
                                 }
-                                TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(editor);
+                                TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(this);
                                 g_addScreen(newScreen);
-                                //editor->spritesheetPreview = newScreen;
                             }
                         }
                     },
                     {SDL_SCANCODE_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
-                            [](MainEditor* editor) {
-                                if (!xyEqual(editor->canvas.dimensions, {480, 256})) {
+                            [this]() {
+                                if (!xyEqual(this->canvas.dimensions, {480, 256})) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions must be 480x256"));
                                     return;
                                 }
-                                RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(editor);
+                                RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(this);
                                 g_addScreen(newScreen);
-                                //editor->spritesheetPreview = newScreen;
                             }
                         }
                     },
                     {SDL_SCANCODE_N, { "Open cube preview...",
-                            [](MainEditor* editor) {
-                                if (editor->tileDimensions.x == 0 || editor->tileDimensions.y == 0) {
+                            [this]() {
+                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile grid must be set"));
                                     return;
                                 }
-                                MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(editor);
+                                MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(this);
                                 g_addScreen(newScreen);
                             }
                         }
                     },
                     {SDL_SCANCODE_P, { "Open touch mode panel...",
-                            [](MainEditor* editor) {
-                                if (editor->touchModePanel == NULL) {
-                                    editor->touchModePanel = new EditorTouchToggle(editor);
-                                    editor->touchModePanel->position = { g_windowW - editor->touchModePanel->wxWidth - 10, g_windowH - editor->touchModePanel->wxHeight - 40 };
-                                    editor->addWidget(editor->touchModePanel);
+                            [this]() {
+                                if (this->touchModePanel == NULL) {
+                                    this->touchModePanel = new EditorTouchToggle(this);
+                                    this->touchModePanel->position = { g_windowW - this->touchModePanel->wxWidth - 10, g_windowH - this->touchModePanel->wxHeight - 40 };
+                                    this->addWidget(this->touchModePanel);
                                 }
                             }
                         }
                     },
-    #if _DEBUG
+#if _DEBUG
                     {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
-                            [](MainEditor* editor) {
-                                if (editor->canvas.dimensions.x != editor->canvas.dimensions.y && editor->canvas.dimensions.x / 2 != editor->canvas.dimensions.y) {
+                            [this]() {
+                                if (this->canvas.dimensions.x != this->canvas.dimensions.y && this->canvas.dimensions.x / 2 != this->canvas.dimensions.y) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
                                     return;
                                 }
-                                MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(editor);
+                                MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(this);
                                 g_addScreen(newScreen);
-                                //editor->spritesheetPreview = newScreen;
                             }
                         }
                     },
-    #endif
+#endif
                 },
                 g_iconNavbarTabView
             }
@@ -1114,8 +1105,8 @@ void MainEditor::setUpWidgets()
     int i = 0;
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDL_SCANCODE_Q].actions[keyorder[i++]] = {
-            filter->name(), [filter](MainEditor* editor) {
-                PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
+            filter->name(), [this, filter]() {
+                PopupApplyFilter* newPopup = new PopupApplyFilter(this, this->getCurrentLayer(), filter);
                 g_addPopup(newPopup);
                 if (filter->getParameters().size() == 0) {
                     newPopup->applyAndClose();
@@ -1127,8 +1118,8 @@ void MainEditor::setUpWidgets()
     i = 0;
     for (auto& filter : g_renderFilters) {
         mainEditorKeyActions[SDL_SCANCODE_R].actions[keyorder[i++]] = {
-            filter->name(), [filter](MainEditor* editor) {
-                PopupApplyFilter* newPopup = new PopupApplyFilter(editor, editor->getCurrentLayer(), filter);
+            filter->name(), [this, filter]() {
+                PopupApplyFilter* newPopup = new PopupApplyFilter(this, this->getCurrentLayer(), filter);
                 g_addPopup(newPopup);
                 if (filter->getParameters().size() == 0) {
                     newPopup->applyAndClose();
@@ -1156,7 +1147,7 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
-    navbar = new ScreenWideNavBar<MainEditor*>(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V });
+    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
     makeActionBar();

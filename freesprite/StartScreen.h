@@ -58,7 +58,7 @@ public:
     UITextField* tab1TextFieldCWX;
     UITextField* tab1TextFieldCHX;
 
-    ScreenWideNavBar<StartScreen*>* navbar;
+    ScreenWideNavBar* navbar;
 
     Panel* lastOpenFilesPanel;
 
@@ -193,7 +193,7 @@ public:
         lastOpenFilesPanel->passThroughMouse = true;
         wxsManager.addDrawable(lastOpenFilesPanel);
 
-        navbar = new ScreenWideNavBar<StartScreen*>(this, 
+        navbar = new ScreenWideNavBar(this, 
         {
             {
                 SDL_SCANCODE_F,
@@ -202,37 +202,37 @@ public:
                     {SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P},
                     {
                         {SDL_SCANCODE_O, { TL("vsp.nav.open"),
-                                [](StartScreen* screen) {
-                                    screen->openImageLoadDialog();
+                                [this]() {
+                                    this->openImageLoadDialog();
                                 }
                             }
                         },
                         {SDL_SCANCODE_V, { TL("vsp.launchpad.nav.openclipboard"),
-                                [](StartScreen* screen) {
-                                    screen->tryOpenImageFromClipboard();
+                                [this]() {
+                                    this->tryOpenImageFromClipboard();
                                 }
                             }
                         },
                         {SDL_SCANCODE_E, { TL("vsp.launchpad.nav.quickconvert"),
-                                [](StartScreen* screen) {
+                                [this]() {
                                     g_addPopup(new PopupQuickConvert(TL("vsp.launchpad.nav.quickconvert"), TL("vsp.launchpad.quickconvert.desc")));
                                 }
                             }
                         },
                         {SDL_SCANCODE_S, { TL("vsp.launchpad.nav.newsplitsession"),
-                                [](StartScreen* screen) {
-                                    platformTrySaveOtherFile(screen, {{".voidspsn", TL("vsp.cmn.filetype.splitsession")}}, TL("vsp.popup.newsplitsession"), 0);
+                                [this]() {
+                                    platformTrySaveOtherFile(this, {{".voidspsn", TL("vsp.cmn.filetype.splitsession")}}, TL("vsp.popup.newsplitsession"), 0);
                                 }
                             }
                         },
                         {SDL_SCANCODE_P, { TL("vsp.launchpad.nav.preferences"),
-                                [](StartScreen* screen) {
+                                [this]() {
                                     g_addPopup(new PopupGlobalConfig());
                                 }
                             }
                         },
                         {SDL_SCANCODE_R, { TL("vsp.launchpad.nav.recoveryautosaves"),
-                                [](StartScreen* screen) {
+                                [this]() {
                                     g_addPopup(new PopupListRecoveryAutosaves());
                                 }
                             }
@@ -248,13 +248,13 @@ public:
                     {},
                     {
                         {SDL_SCANCODE_U, { TL("vsp.launchpad.nav.opennightlylinkdl"),
-                                [](StartScreen* screen) {
+                                [this]() {
                                     platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main");
                                 }
                             }
                         },
                         {SDL_SCANCODE_A, { TL("vsp.launchpad.nav.about"),
-                                [](StartScreen* screen) {
+                                [this]() {
                                     g_addPopup(new PopupAbout());
                                 }
                             }

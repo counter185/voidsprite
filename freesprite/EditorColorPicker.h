@@ -1,17 +1,6 @@
 #pragma once
-#include "drawable.h"
-#include "DrawableManager.h"
 #include "UIColorPicker.h"
-#include "EventCallbackListener.h"
-#include "UIHueSlider.h"
-#include "UIColorSlider.h"
-#include "UISVPicker.h"
-#include "UITextField.h"
 #include "UIButton.h"
-#include "TabbedView.h"
-#include "UILabel.h"
-#include "DraggablePanel.h"
-#include "colormodels.h"
 
 
 class EditorColorPicker : public UIColorPicker
