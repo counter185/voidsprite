@@ -5,6 +5,10 @@
 
 class ScreenWideNavBar : public Panel
 {
+private:
+    std::vector<UIButton*> submenuActionsNow;
+protected:
+    const SDL_Scancode SCANCODE_NONE = (SDL_Scancode)-1;
 public:
     BaseScreen* parent;
     Panel* submenuPanel;
@@ -21,7 +25,7 @@ public:
 
     void focusOut() override {
         Panel::focusOut();
-        openSubmenu((SDL_Scancode)-1);
+        openSubmenu(SCANCODE_NONE);
     }
     bool shouldMoveToFrontOnFocus() override { return true; }
 

@@ -26,15 +26,15 @@ ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, Na
     for (auto& editorSection : submenuOrder) {
         UIButton* sectionButton = new UIButton();
         sectionButton->position = { x, 1 };
-        sectionButton->text = keyBinds[editorSection].name + std::format("({})", SDL_GetScancodeName(editorSection));
+        sectionButton->text = keyBinds[editorSection].name;
         sectionButton->fill = Fill::Gradient(0x70424242, 0x70424242, 0x70000000, 0x70000000);
         sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
         sectionButton->wxWidth = xDist - 10;
         if (keyBinds[editorSection].icon != NULL) {
             sectionButton->icon = keyBinds[editorSection].icon;
         }
-		sectionButton->onClickCallback = [=](UIButton* btn) {
-			openSubmenu(editorSection);
+		sectionButton->onClickCallback = [this, editorSection](UIButton* btn) {
+			this->openSubmenu(editorSection);
 		};
         keyBinds[editorSection].button = sectionButton;
         subWidgets.addDrawable(sectionButton);
@@ -45,17 +45,43 @@ ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, Na
 void ScreenWideNavBar::render(XY position) {
     wxWidth = g_windowW;
 
+    //fill navbar background
     SDL_Rect r = SDL_Rect{ 0,0,g_windowW, wxHeight };
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, focused ? 0xa0 : 0x90);
     SDL_RenderFillRect(g_rd, &r);
 
     if (focused) {
+        if (currentSubmenuOpen == SCANCODE_NONE) {
+            for (auto& [scancode, section] : keyBinds) {
+                if (section.button != NULL) {
+                    XY underButton = xyAdd(section.button->position, { 0, (int)(section.button->wxHeight * XM1PW3P1(focusTimer.percentElapsedTime(200))) });
+                    SDL_Rect underButtonRect = { underButton.x, underButton.y, section.button->wxWidth, 60 };
+					Fill::ThreePointVerticalGradient(0xFF000000, 0xFF000000, 0xE0000000, 0xE0000000, 0x00000000, 0x00000000).fill(underButtonRect);
+                    g_fnt->RenderString(std::format("[{}]", SDL_GetScancodeName(scancode)), underButton.x + 5, underButton.y, {200,200,200,(u8)(220 * focusTimer.percentElapsedTime(200))}, 26);
+                }
+            }
+        }
+        else {
+            int i = 0;
+            for (auto& [subScancode, action] : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
+                if (i >= submenuActionsNow.size() || submenuPanel == NULL) {
+                    logerr("[ScreenWideNavBar] this should not happen");
+                }
+                else {
+                    UIButton* btn = submenuActionsNow[i];
+                    XY buttonEndpoint = xyAdd(xyAdd(submenuPanel->position, btn->position), { (int)(btn->wxWidth - 30 + (30 * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)))), 0 });
+					SDL_Rect rightOfButtonRect = { buttonEndpoint.x, buttonEndpoint.y, 90, btn->wxHeight };
+					Fill::Gradient(0xFF000000, 0x00000000, 0xFF000000, 0x00000000).fill(rightOfButtonRect);
+					g_fnt->RenderString(std::format("[{}]", SDL_GetScancodeName(subScancode)), buttonEndpoint.x + 5, buttonEndpoint.y, { 230, 230, 230, (u8)(220 * submenuOpenTimer.percentElapsedTime(200)) }, 18);
+                }
+                i++;
+            }
+        }
+
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
         drawLine(XY{ 0, wxHeight }, XY{ g_windowW, wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(600)));
-        //SDL_RenderDrawLine(g_rd, 0, wxHeight, g_windowW, wxHeight);
     }
     submenuPanel->position.y = (int)(30 * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)));
-    //subWxs.renderAll(xySubtract(position, { 0,  }));
     subWidgets.renderAll(position);
 }
 
@@ -73,16 +99,18 @@ inline void ScreenWideNavBar::handleInput(SDL_Event evt, XY gPosOffset) {
 }
 
 void ScreenWideNavBar::tryPressHotkey(SDL_Scancode k) {
-    if (currentSubmenuOpen == -1) {
+    if (currentSubmenuOpen == SCANCODE_NONE) {
         if (keyBinds.contains(k)) {
             //openSubmenu(k);
             keyBinds[k].button->click();
-
+        }
+        else if (k == SDL_SCANCODE_ESCAPE) {
+            parentManager->forceUnfocus();
         }
     }
     else {
         if (k == SDL_SCANCODE_ESCAPE) {
-            openSubmenu((SDL_Scancode)-1);
+            openSubmenu(SCANCODE_NONE);
         }
         else {
             doSubmenuAction(k);
@@ -92,49 +120,58 @@ void ScreenWideNavBar::tryPressHotkey(SDL_Scancode k) {
 
 void ScreenWideNavBar::openSubmenu(SDL_Scancode which) {
     if (currentSubmenuOpen == which) {
-        currentSubmenuOpen = (SDL_Scancode)-1;
+        currentSubmenuOpen = SCANCODE_NONE;
         updateCurrentSubmenu();
         return;
     }
-    currentSubmenuOpen = (SDL_Scancode)-1;
+    currentSubmenuOpen = SCANCODE_NONE;
     submenuOpenTimer.start();
     updateCurrentSubmenu();
-    if (which != -1) {
+    if (which != SCANCODE_NONE) {
         currentSubmenuOpen = which;
         updateCurrentSubmenu();
     }
 }
 
 void ScreenWideNavBar::doSubmenuAction(SDL_Scancode which) {
-    if (currentSubmenuOpen != -1 && keyBinds[(SDL_Scancode)currentSubmenuOpen].actions.contains(which)) {
+    if (currentSubmenuOpen != SCANCODE_NONE && keyBinds[(SDL_Scancode)currentSubmenuOpen].actions.contains(which)) {
         keyBinds[(SDL_Scancode)currentSubmenuOpen].actions[which].function();
-        openSubmenu((SDL_Scancode)-1);
+        openSubmenu(SCANCODE_NONE);
         parentManager->forceUnfocus();
     }
 }
 
 void ScreenWideNavBar::updateCurrentSubmenu() {
-    if (currentSubmenuOpen == -1) {
+    if (currentSubmenuOpen == SCANCODE_NONE) {
         submenuPanel->subWidgets.freeAllDrawables();
+        submenuActionsNow.clear();
         submenuPanel->enabled = false;
     }
     else {
         submenuPanel->enabled = true;
+		submenuActionsNow.clear();
         int y = 0;
         int x = 10 + (std::find(submenuOrder.begin(), submenuOrder.end(), currentSubmenuOpen) - submenuOrder.begin()) * 120;
         submenuPanel->position = { x, 0 };
 
-        for (auto& option : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
-            UIButton* newBtn = new UIButton();
+        //find the button width
+        int buttonW = 30;
+        for (auto& [scancode, action] : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
+            buttonW = ixmax(g_fnt->StatStringDimensions(action.name, 18).x + 40, buttonW);
+        }
+
+        //generate the buttons
+        for (auto& [scancode, action] : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
+            UIButton* newBtn = new UIButton(action.name);
             std::vector<SDL_Scancode> order = keyBinds[(SDL_Scancode)currentSubmenuOpen].order;
-            newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), option.first) - order.begin()) * newBtn->wxHeight) };
+            newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), scancode) - order.begin()) * newBtn->wxHeight) };
             y += newBtn->wxHeight;
-            newBtn->wxWidth = 320;
+            newBtn->wxWidth = buttonW;
             newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);
-            newBtn->text = option.second.name + std::format(" ({})", SDL_GetScancodeName((SDL_Scancode)option.first));
-			newBtn->onClickCallback = [=](UIButton*) {
-				doSubmenuAction((SDL_Scancode)option.first);
+			newBtn->onClickCallback = [this, scancode](UIButton*) {
+				this->doSubmenuAction((SDL_Scancode)scancode);
 			};
+			submenuActionsNow.push_back(newBtn);
             submenuPanel->subWidgets.addDrawable(newBtn);
         }
     }
