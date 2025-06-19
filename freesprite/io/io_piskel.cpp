@@ -1,5 +1,6 @@
 #include "io_base.h"
 #include "io_piskel.h"
+#include "io_png.h"
 
 #include "../json/json.hpp"
 #include "../base64/base64.hpp"

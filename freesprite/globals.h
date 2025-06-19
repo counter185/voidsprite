@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef _MSVC_LANG
+#pragma warning(disable : 4018) //signed/unsigned mismatch
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #pragma warning(disable : 4838)
@@ -39,10 +40,6 @@
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
 #endif
-
-extern "C" {
-#include <zlib.h>
-}
 
 #ifdef __GNUC__
 #define sprintf_s snprintf

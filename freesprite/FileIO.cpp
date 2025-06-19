@@ -28,6 +28,8 @@
 #include "RPG2KTilemapPreviewScreen.h"
 #include "PopupMessageBox.h"
 
+#include <zlib.h>
+
 using json = nlohmann::json;
 
 enum VTFFORMAT

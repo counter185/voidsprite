@@ -5,6 +5,7 @@
 #include "UIButton.h"
 #include "maineditor.h"
 #include "Notification.h"
+#include "UISlider.h"
 
 class PopupSetEditorPixelGrid :
     public BasePopup, public EventCallbackListener

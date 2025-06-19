@@ -2,6 +2,7 @@
 #include "maineditor.h"
 #include "SplitSessionEditor.h"
 #include "EditorLayerPicker.h"
+#include "EditorColorPicker.h"
 #include "StartScreen.h"
 #include "brush/BaseBrush.h"
 #include "main.h"

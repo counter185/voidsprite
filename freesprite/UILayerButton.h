@@ -3,7 +3,6 @@
 #include "DrawableManager.h"
 #include "EventCallbackListener.h"
 #include "Panel.h"
-#include "UIButton.h"
 
 class LayerActiveButton : public UIButton {
 private:

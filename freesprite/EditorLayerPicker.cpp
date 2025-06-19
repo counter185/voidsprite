@@ -7,6 +7,7 @@
 #include "maineditor.h"
 #include "Panel.h"
 #include "UISlider.h"
+#include "UILabel.h"
 
 EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     caller = editor;

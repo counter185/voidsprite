@@ -1,5 +1,6 @@
 #include "io_base.h"
 #include "io_dibv5.h"
+#include "io_png.h"
 
 Layer* readDIBv5FromMem(u8* mem, u64 size)
 {

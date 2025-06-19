@@ -3,6 +3,7 @@
 #include "Notification.h"
 #include "PopupYesNo.h"
 #include "UIDropdown.h"
+#include "FileIO.h"
 
 PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vector<std::pair<std::string, std::string>> ftypes) : mode(m), fileTypes(ftypes) {
     setSize({ 960, 540 });
@@ -121,6 +122,26 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     makeTitleAndDesc("voidsprite: " + title, "");
 
     populateRootAndFileList();
+}
+
+void PopupFilePicker::PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id) {
+    std::vector<std::pair<std::string, std::string>> filetypes;
+    for (FileImporter*& f : g_fileImporters) {
+        filetypes.push_back({ f->extension(), f->name() });
+    }
+
+    platformTryLoadOtherFile(callback, filetypes, title, callback_id);
+}
+
+void PopupFilePicker::PlatformAnyImageWithMatchingExporterImportDialog(EventCallbackListener* callback, std::string title, int callback_id) {
+    std::vector<std::pair<std::string, std::string>> filetypes;
+    for (FileImporter*& f : g_fileImporters) {
+        if (f->getCorrespondingExporter() != NULL) {
+            filetypes.push_back({ f->extension(), f->name() });
+        }
+    }
+
+    platformTryLoadOtherFile(callback, filetypes, title, callback_id);
 }
 
 void PopupFilePicker::populateRootAndFileList() {

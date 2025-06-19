@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "FileIO.h"
 
 std::vector<NamedColorPalette> g_baseNamedColorMap = {
     {

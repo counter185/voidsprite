@@ -4,6 +4,7 @@
 #include "TabbedView.h"
 #include "ScrollingPanel.h"
 #include "Notification.h"
+#include "FileIO.h"
 
 #if _WIN32
 #include <windows.h>

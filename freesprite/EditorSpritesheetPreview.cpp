@@ -1,6 +1,7 @@
 #include "EditorSpritesheetPreview.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
+#include "SpritesheetPreviewScreen.h"
 
 void EditorSpritesheetPreview::render(XY at)
 {

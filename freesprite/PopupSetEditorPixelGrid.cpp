@@ -1,6 +1,7 @@
 #include "PopupSetEditorPixelGrid.h"
 #include "FontRenderer.h"
 #include "UIDropdown.h"
+#include "UISlider.h"
 
 PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx) 
 {

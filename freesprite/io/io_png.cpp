@@ -7,6 +7,9 @@
 #include <libpng/png.h>
 #endif
 
+#include <zlib.h>
+
+
 #include "io_base.h"
 #include "io_png.h"
 

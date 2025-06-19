@@ -4,6 +4,7 @@
 #include "maineditor.h"
 #include "Notification.h"
 #include "PopupYesNo.h"
+#include "FileIO.h"
 
 PopupListRecoveryAutosaves::PopupListRecoveryAutosaves()
 {

@@ -11,6 +11,7 @@
 #include "FileIO.h"
 #include "CollapsableDraggablePanel.h"
 #include "EditorTouchToggle.h"
+#include "SpritesheetPreviewScreen.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"

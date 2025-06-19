@@ -3,9 +3,7 @@
 #include "BaseScreen.h"
 #include "splitsession.h"
 #include "DrawableManager.h"
-#include "EditorColorPicker.h"
 #include "Layer.h"
-#include "SpritesheetPreviewScreen.h"
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
 

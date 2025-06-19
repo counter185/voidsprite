@@ -1,7 +1,9 @@
 #include <fstream>
+#include <zlib.h>
 
 #include "io_base.h"
 #include "io_rpgm.h"
+#include "io_png.h"
 
 #include "../RPG2KTilemapPreviewScreen.h"
 

@@ -1,6 +1,7 @@
 #include "PanelReference.h"
 #include "UIButton.h"
 #include "UIDropdown.h"
+#include "Layer.h"
 
 PanelReference::PanelReference(Layer* t)
 {

@@ -1,5 +1,9 @@
+#include <zlib.h>
+
 #include "io_base.h"
 #include "io_aseprite.h"
+
+#include "../FileIO.h"
 
 
 MainEditor* readAsepriteASE(PlatformNativePathString path)

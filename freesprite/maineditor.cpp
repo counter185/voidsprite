@@ -3,6 +3,7 @@
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
 #include "EditorLayerPicker.h"
+#include "EditorColorPicker.h"
 #include "EditorTouchToggle.h"
 #include "CollapsableDraggablePanel.h"
 #include "ScreenWideNavBar.h"

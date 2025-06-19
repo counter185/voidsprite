@@ -1,4 +1,5 @@
 #include "UILayerButton.h"
+#include "Layer.h"
 
 void UILayerButton::eventButtonPressed(int evt_id)
 {
