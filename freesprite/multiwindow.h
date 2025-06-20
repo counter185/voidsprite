@@ -206,13 +206,13 @@ public:
         }
         scaledWindowSize.x = unscaledWindowSize.x / g_renderScale;
         scaledWindowSize.y = unscaledWindowSize.y / g_renderScale;
-        screenPreviewFB = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+        screenPreviewFB = tracked_createTexture(rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
         SDL_SetTextureScaleMode(screenPreviewFB, SDL_SCALEMODE_LINEAR);
         if (g_renderScale == 1) {
             viewport = NULL;
         }
         else {
-            viewport = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+            viewport = tracked_createTexture(rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
         }
 
         if (g_currentWindow == this) {

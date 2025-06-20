@@ -42,7 +42,6 @@
 int g_windowW = 1280;
 int g_windowH = 720;
 XY unscaledWindowSize = {g_windowW, g_windowH};
-SDL_Texture* viewport = NULL;
 std::string g_programDirectory = "";
 
 SDL_Window* g_wd;
@@ -842,9 +841,9 @@ int main(int argc, char** argv)
                 //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
 
 
-                if (viewport != NULL) {
+                if (wd->viewport != NULL) {
                     g_popRenderTarget();
-                    SDL_RenderCopy(g_rd, viewport, NULL, NULL);
+                    SDL_RenderCopy(g_rd, wd->viewport, NULL, NULL);
                 }
 
                 //g_fnt->RenderString(std::format("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);

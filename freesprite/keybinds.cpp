@@ -23,10 +23,12 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.global.screenright"), SDL_SCANCODE_RIGHTBRACKET, false, false, [](void* d) {
             //main_switchScreenRight();
         }));
-    g_keybindManager.addKeybind("global", "new_window",
-        KeyCombo(TL("vsp.keybinds.global.newwindow"), SDL_SCANCODE_RIGHT, true, false, [](void* d) {
-            main_newWindow("");
-        }));
+    if (platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
+        g_keybindManager.addKeybind("global", "new_window",
+            KeyCombo(TL("vsp.keybinds.global.newwindow"), SDL_SCANCODE_RIGHT, true, false, [](void* d) {
+                main_newWindow("");
+            }));
+    }
     g_keybindManager.addKeybind("global", "set_fav_workspace",
         KeyCombo(TL("vsp.keybinds.global.setfavworkspace"), SDL_SCANCODE_W, true, false, [](void* d) {
             main_assignFavScreen();
