@@ -87,9 +87,8 @@ void g_addScreen(BaseScreen* a, bool switchTo)
 
 void g_closeScreen(BaseScreen* screen) {
     for (auto& [id, wd] : g_windows) {
-        if (wd->closeScreen(screen)) {
-            break;
-        }
+        //we have to iterate over all windows to close all subscreens too
+        wd->closeScreen(screen);
     }
 }
 
@@ -195,9 +194,11 @@ void main_newWindow(std::string title) {
         VSPWindow* oldWindow = g_currentWindow;
         newWindow->thisWindowsTurn();
         newWindow->initFonts();
+        newWindow->updateViewportScaler();
         g_currentWindow = newWindow;
         g_newVFX(VFX_SCREENSWITCH, 800);
         newWindow->addScreen(new StartScreen(), true);
+        loginfo(std::format("Opening window ID {}", newWindow->windowID));
         if (oldWindow != NULL) {
            oldWindow->thisWindowsTurn();
         }
@@ -589,6 +590,7 @@ int main(int argc, char** argv)
 
         SDL_Event evt;
         while (!g_windows.empty()) {
+            bool firedQuitEventThisFrame = false;
             while (SDL_PollEvent(&evt)) {
                 VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
                 wdTarget->thisWindowsTurn();
@@ -662,6 +664,16 @@ int main(int argc, char** argv)
                     break;
                 }
 
+                //ensure only one quit/close event per frame
+                if (evt.type == SDL_EVENT_QUIT || evt.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
+                    if (!firedQuitEventThisFrame) {
+                        firedQuitEventThisFrame = true;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+
                 if (g_bgOpRunning) {
                     continue;
                 }
@@ -694,6 +706,7 @@ int main(int argc, char** argv)
 
                 //close window if it has no screens left
                 if (wd->screenStack.empty()){
+                    loginfo(std::format("Closing window ID {}", wd->windowID));
                     delete wd;
                     g_windows.erase(wit++);
                     continue;

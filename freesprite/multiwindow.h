@@ -262,7 +262,7 @@ public:
                     g_switchScreen(currentScreen - 1);
                 }
                 x--;
-                return true;
+                //return true;
             }
         }
         return false;
