@@ -263,7 +263,7 @@ public:
                 g_closeScreen(screenStack[x]);
                 x = 0;
             }
-            if (screenStack[x] == screen) {
+            if (!screenStack.empty() && screenStack[x] == screen) {
                 delete screenStack[x];
                 if (x == currentScreen) {
                     g_newVFX(VFX_SCREENCLOSE, 500);
