@@ -111,6 +111,7 @@ class FileImporter;
 class FileExporter;
 struct NineSegmentPattern;
 class DrawableManager;
+class VSPWindow;
 
 //templates
 class BaseTemplate;
@@ -165,6 +166,8 @@ extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
 inline int g_renderScale = 1;
 extern std::string g_programDirectory;
+inline VSPWindow* g_currentWindow = NULL;
+inline VSPWindow* g_mainWindow = NULL;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
@@ -222,7 +225,6 @@ inline SDL_Texture* g_mainlogo = NULL,
 void g_addNotification(Notification a);
 
 void g_addScreen(BaseScreen* a, bool switchTo = true);
-void g_closeLastScreen();
 void g_closeScreen(BaseScreen* screen);
 void g_switchScreen(int index);
 

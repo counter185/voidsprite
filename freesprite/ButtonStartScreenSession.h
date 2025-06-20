@@ -7,8 +7,10 @@ class ButtonStartScreenSession :
 {
 public:
     int correspondingScreen = -1;
+    VSPWindow* targetWindow = NULL;
     
-    ButtonStartScreenSession(int screenIndex) {
+    ButtonStartScreenSession(VSPWindow* parent, int screenIndex) {
+		targetWindow = parent;
         correspondingScreen = screenIndex;
         wxWidth = 16;
         wxHeight = 16;

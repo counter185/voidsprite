@@ -1259,6 +1259,9 @@
     <ClInclude Include="EventCallbackListener.h">
       <Filter>Header files\util</Filter>
     </ClInclude>
+    <ClInclude Include="multiwindow.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

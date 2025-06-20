@@ -17,11 +17,15 @@ void g_initKeybinds()
     g_keybindManager.newRegion("global", TL("vsp.keybinds.region.global"));
     g_keybindManager.addKeybind("global", "switch_screen_left",
         KeyCombo(TL("vsp.keybinds.global.screenleft"), SDL_SCANCODE_LEFTBRACKET, false, false, [](void* d) {
-            main_switchScreenLeft();
+            //main_switchScreenLeft();
         }));
     g_keybindManager.addKeybind("global", "switch_screen_right",
         KeyCombo(TL("vsp.keybinds.global.screenright"), SDL_SCANCODE_RIGHTBRACKET, false, false, [](void* d) {
-            main_switchScreenRight();
+            //main_switchScreenRight();
+        }));
+    g_keybindManager.addKeybind("global", "new_window",
+        KeyCombo(TL("vsp.keybinds.global.newwindow"), SDL_SCANCODE_RIGHT, true, false, [](void* d) {
+            main_newWindow("");
         }));
     g_keybindManager.addKeybind("global", "set_fav_workspace",
         KeyCombo(TL("vsp.keybinds.global.setfavworkspace"), SDL_SCANCODE_W, true, false, [](void* d) {
