@@ -15,3 +15,4 @@ void main_assignFavScreen();
 void main_toggleFullscreen();
 
 void main_newWindow(std::string title);
+void main_currentWorkspaceToNewWindow(std::string title);

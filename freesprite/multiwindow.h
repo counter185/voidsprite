@@ -244,6 +244,19 @@ public:
         overlayWidgets.addDrawable(screenButton);
     }
 
+    void detachScreen(BaseScreen* screen) {
+        auto index = std::find(screenStack.begin(), screenStack.end(), screen);
+        if (index != screenStack.end()) {
+			int i = index - screenStack.begin();
+            screenStack.erase(index);
+			overlayWidgets.removeDrawable(screenButtons[screenButtons.size()-1]);
+            screenButtons.pop_back();
+            if (currentScreen >= screenStack.size()) {
+                switchScreen(currentScreen - 1);
+            }
+        }
+    }
+
     bool closeScreen(BaseScreen* screen) {
         for (int x = 0; x < screenStack.size(); x++) {
             if (screenStack[x]->isSubscreenOf() == screen) {
@@ -259,7 +272,7 @@ public:
                 overlayWidgets.removeDrawable(screenButtons[screenButtons.size() - 1]);
                 screenButtons.pop_back();
                 if (currentScreen >= screenStack.size()) {
-                    g_switchScreen(currentScreen - 1);
+                    switchScreen(currentScreen - 1);
                 }
                 x--;
                 //return true;

@@ -65,6 +65,8 @@
     {"vsp.keybinds.global.fullscreen", "Toggle fullscreen"},
     {"vsp.keybinds.global.renderscaleup", "Increase screen scale"},
     {"vsp.keybinds.global.renderscaledown", "Decrease screen scale"},
+    {"vsp.keybinds.global.newwindow", "New window"},
+    {"vsp.keybinds.global.detachworkspace", "Detach workspace into a new window"},
 
     {"vsp.keybinds.region.startscreen", "voidsprite Launchpad"},
     {"vsp.keybinds.startscreen.openclipboard", "Open from clipboard"},

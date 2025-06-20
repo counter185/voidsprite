@@ -208,6 +208,32 @@ void main_newWindow(std::string title) {
     }
 }
 
+void main_currentWorkspaceToNewWindow(std::string title)
+{
+    if (g_currentWindow != NULL && !g_currentWindow->screenStack.empty()) {
+		BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
+        VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
+        if (newWindow != NULL) {
+            g_currentWindow->detachScreen(currentScreen);
+            newWindow->addToWindowList();
+            VSPWindow* oldWindow = g_currentWindow;
+            newWindow->thisWindowsTurn();
+            newWindow->initFonts();
+            newWindow->updateViewportScaler();
+            g_currentWindow = newWindow;
+            g_newVFX(VFX_SCREENSWITCH, 800);
+            newWindow->addScreen(currentScreen, true);
+                        loginfo(std::format("Opening window ID {}", newWindow->windowID));
+            if (oldWindow != NULL) {
+                oldWindow->thisWindowsTurn();
+            }
+        }
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.windowcreationfailed")));
+    }
+}
+
 void main_renderScaleUp()
 {
     g_renderScale++;

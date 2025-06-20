@@ -28,6 +28,10 @@ void g_initKeybinds()
             KeyCombo(TL("vsp.keybinds.global.newwindow"), SDL_SCANCODE_RIGHT, true, false, [](void* d) {
                 main_newWindow("");
             }));
+        g_keybindManager.addKeybind("global", "detach_workspace",
+            KeyCombo(TL("vsp.keybinds.global.detachworkspace"), SDL_SCANCODE_UP, true, false, [](void* d) {
+                main_currentWorkspaceToNewWindow("");
+            }));
     }
     g_keybindManager.addKeybind("global", "set_fav_workspace",
         KeyCombo(TL("vsp.keybinds.global.setfavworkspace"), SDL_SCANCODE_W, true, false, [](void* d) {
