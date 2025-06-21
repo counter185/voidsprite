@@ -234,6 +234,19 @@ void main_currentWorkspaceToNewWindow(std::string title)
     }
 }
 
+void main_attachCurrentWorkspaceToMainWindow() {
+    if (g_mainWindow != NULL && g_currentWindow != g_mainWindow) {
+        BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
+		g_currentWindow->detachScreen(currentScreen);
+		g_mainWindow->addScreen(currentScreen, true);
+		g_newVFX(VFX_SCREENSWITCH, 800);
+		loginfo(std::format("Attaching workspace to main window ID {}", g_mainWindow->windowID));
+	}
+	else {
+        logerr("attachCurrentWorkspaceToMainWindow failed");
+    }
+}
+
 void main_renderScaleUp()
 {
     g_renderScale++;

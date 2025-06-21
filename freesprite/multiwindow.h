@@ -56,6 +56,9 @@ public:
         if (viewport != NULL) {
             tracked_destroyTexture(viewport);
         }
+        if (fnt != NULL) {
+            delete fnt;
+        }
         for (BaseScreen* screen : screenStack) {
             delete screen;
         }
