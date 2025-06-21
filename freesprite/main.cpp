@@ -210,8 +210,8 @@ void main_newWindow(std::string title) {
 
 void main_currentWorkspaceToNewWindow(std::string title)
 {
-    if (g_currentWindow != NULL && !g_currentWindow->screenStack.empty()) {
-		BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
+    if (g_currentWindow != NULL && !g_currentWindow->screenStack.empty() && g_currentWindow->popupStack.empty()) {
+        BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
         VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
         if (newWindow != NULL) {
             g_currentWindow->detachScreen(currentScreen);
@@ -237,12 +237,12 @@ void main_currentWorkspaceToNewWindow(std::string title)
 void main_attachCurrentWorkspaceToMainWindow() {
     if (g_mainWindow != NULL && g_currentWindow != g_mainWindow) {
         BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
-		g_currentWindow->detachScreen(currentScreen);
-		g_mainWindow->addScreen(currentScreen, true);
-		g_newVFX(VFX_SCREENSWITCH, 800);
-		loginfo(std::format("Attaching workspace to main window ID {}", g_mainWindow->windowID));
-	}
-	else {
+        g_currentWindow->detachScreen(currentScreen);
+        g_mainWindow->addScreen(currentScreen, true);
+        g_newVFX(VFX_SCREENSWITCH, 800);
+        loginfo(std::format("Attaching workspace to main window ID {}", g_mainWindow->windowID));
+    }
+    else {
         logerr("attachCurrentWorkspaceToMainWindow failed");
     }
 }
@@ -630,6 +630,11 @@ int main(int argc, char** argv)
         SDL_Event evt;
         while (!g_windows.empty()) {
             bool firedQuitEventThisFrame = false;
+            bool anyPopupsOpen = false;
+            for (auto& [id, wd] : g_windows) {
+                anyPopupsOpen |= wd->hasPopupsOpen();
+            }
+
             while (SDL_PollEvent(&evt)) {
                 VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
                 if (wdTarget == NULL) {
@@ -643,7 +648,7 @@ int main(int argc, char** argv)
                 //events that can fire during bg operation
                 switch (evt.type) {
                 case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-					evt.type = SDL_EVENT_QUIT;
+                    evt.type = SDL_EVENT_QUIT;
                     break;
                 case SDL_EVENT_KEY_DOWN:
                     if (evt.key.scancode == SDL_SCANCODE_AC_BACK) {
@@ -716,7 +721,7 @@ int main(int argc, char** argv)
                     }
                 }
 
-                if (g_bgOpRunning) {
+                if (g_bgOpRunning || (anyPopupsOpen && !wdTarget->hasPopupsOpen())) {
                     continue;
                 }
 
@@ -890,6 +895,12 @@ int main(int argc, char** argv)
                 g_renderVFX();
 
                 g_cleanUpDoneAsyncThreads();
+                if (anyPopupsOpen && !wd->hasPopupsOpen()) {
+                    SDL_Rect wdrect = { 0, 0, g_windowW, g_windowH };
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+                    SDL_RenderFillRect(g_rd, &wdrect);
+                }
+
                 if (g_bgOpRunning) {
                     renderbgOpInProgressScreen();
                 }

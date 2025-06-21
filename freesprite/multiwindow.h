@@ -89,6 +89,10 @@ public:
         }
     }
 
+    bool hasPopupsOpen() {
+        return !popupStack.empty();
+    }
+
     void initFonts() {
         if (fnt != NULL) {
             delete fnt;
@@ -250,9 +254,9 @@ public:
     void detachScreen(BaseScreen* screen) {
         auto index = std::find(screenStack.begin(), screenStack.end(), screen);
         if (index != screenStack.end()) {
-			int i = index - screenStack.begin();
+            int i = index - screenStack.begin();
             screenStack.erase(index);
-			overlayWidgets.removeDrawable(screenButtons[screenButtons.size()-1]);
+            overlayWidgets.removeDrawable(screenButtons[screenButtons.size()-1]);
             screenButtons.pop_back();
             if (currentScreen >= screenStack.size()) {
                 switchScreen(currentScreen - 1);
