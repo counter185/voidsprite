@@ -4,23 +4,24 @@
 #include "BaseScreen.h"
 #include "TooltipsLayer.h"
 #include "FontRenderer.h"
+#include "multiwindow.h"
 
 void ButtonStartScreenSession::render(XY pos)
 {
-    if (correspondingScreen >= 0 && correspondingScreen < screenStack.size()) {
-        tooltip = screenStack[correspondingScreen]->getName();
+    if (correspondingScreen >= 0 && correspondingScreen < targetWindow->screenStack.size()) {
+        tooltip = targetWindow->screenStack[correspondingScreen]->getName();
     }
 
-    int squareW = (int)(wxWidth * (screenSwitchTimer.started && correspondingScreen == currentScreen ? XM1PW3P1(screenSwitchTimer.percentElapsedTime(300)) : 1));
+    int squareW = (int)(wxWidth * (screenSwitchTimer.started && correspondingScreen == targetWindow->currentScreen ? XM1PW3P1(screenSwitchTimer.percentElapsedTime(300)) : 1));
     SDL_Rect r = {
         pos.x,
         pos.y,
         squareW, squareW
     };
 
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, correspondingScreen == currentScreen ? 0x80 : 0x20);
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, correspondingScreen == targetWindow->currentScreen ? 0x80 : 0x20);
     if (favourite && correspondingScreen == fav_screen) {
-        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, correspondingScreen == currentScreen ? 0x80 : 0x20);
+        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, correspondingScreen == targetWindow->currentScreen ? 0x80 : 0x20);
 
     }
     SDL_RenderFillRect(g_rd, &r);
@@ -31,8 +32,8 @@ void ButtonStartScreenSession::render(XY pos)
 
 void ButtonStartScreenSession::click()
 {
-    if (popupStack.empty()) {
-        if (correspondingScreen >= 0 && correspondingScreen < screenStack.size()) {
+    if (targetWindow->popupStack.empty()) {
+        if (correspondingScreen >= 0 && correspondingScreen < targetWindow->screenStack.size()) {
             g_switchScreen(correspondingScreen);
         }
         else {
@@ -44,18 +45,18 @@ void ButtonStartScreenSession::click()
 
 void ButtonStartScreenSession::renderTooltip(XY pos)
 {
-    if (popupStack.empty()) {
+    if (targetWindow->popupStack.empty()) {
         if (hovered) {
             if (!tooltip.empty() && (instantTooltip || hoverTimer.percentElapsedTime(1000) == 1.0f)) {
                 XY bounds = g_fnt->StatStringDimensions(tooltip);
                 g_ttp->addTooltip(Tooltip{ xySubtract(pos, {0, bounds.y + 14}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });
             }
-            if (screenPreviewFramebuffer != NULL && currentScreen != correspondingScreen) {
+            if (screenPreviewFramebuffer != NULL && targetWindow->currentScreen != correspondingScreen) {
                 g_pushRenderTarget(screenPreviewFramebuffer);
                 SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
                 SDL_RenderClear(g_rd);
                 g_ttp->takeTooltips = false;
-                screenStack[correspondingScreen]->render();
+                targetWindow->screenStack[correspondingScreen]->render();
                 g_ttp->takeTooltips = true;
                 g_popRenderTarget();
 

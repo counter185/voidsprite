@@ -263,7 +263,7 @@ void PopupApplyFilter::applyAndClose()
         else {
             memcpy(target->pixelData, copy->pixelData, 4 * target->w * target->h);
         }
-        target->layerDirty = true;
+        target->markLayerDirty();
         delete copy;
     });
     closePopup();

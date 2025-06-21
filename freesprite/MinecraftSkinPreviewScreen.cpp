@@ -25,7 +25,9 @@ void MinecraftSkinPreviewScreen::renderBox(XY positionOnScreen, XY wholeSkinDime
 
 	int indices[] = { 0,1,2,0,2,3 };
 
-	SDL_RenderGeometry(g_rd, caller->layers[0]->tex, headBox, 4, indices, 6);
+	caller->layers[0]->prerender();
+
+	SDL_RenderGeometry(g_rd, caller->layers[0]->tex[g_rd], headBox, 4, indices, 6);
 }
 
 void MinecraftSkinPreviewScreen::render()

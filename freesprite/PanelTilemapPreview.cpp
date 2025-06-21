@@ -52,7 +52,8 @@ void PanelTilemapPreview::render(XY position)
     SDL_Rect tileClip = caller->caller->getPaddedTilePosAndDimensions(caller->pickedTile); 
 
     for (Layer* l : caller->caller->layers) {
-        SDL_RenderCopy(g_rd, l->tex, &tileClip, &tileDraw);
+        l->prerender();
+        SDL_RenderCopy(g_rd, l->tex[g_rd], &tileClip, &tileDraw);
     }
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x90);
     SDL_RenderDrawRect(g_rd, &tileDraw);

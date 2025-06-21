@@ -26,6 +26,7 @@
 
 #include "background_operation.h"
 #include "updatecheck.h"
+#include "main.h"
 
 struct LaunchpadBGStar {
     XY pos;
@@ -242,27 +243,36 @@ public:
                 }
             },
             {
+                SDL_SCANCODE_W,
+                {
+                    TL("vsp.nav.window"),
+                    {},
+                    {
+                        {SDL_SCANCODE_N, {TL("vsp.launchpad.nav.newwindow"),
+                                [this]() { main_newWindow(""); }
+                            }
+                        },
+                    }
+                }
+            },
+            {
                 SDL_SCANCODE_I,
                 {
                     TL("vsp.nav.help"),
                     {},
                     {
                         {SDL_SCANCODE_U, { TL("vsp.launchpad.nav.opennightlylinkdl"),
-                                [this]() {
-                                    platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main");
-                                }
+                                [this]() { platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main"); }
                             }
                         },
                         {SDL_SCANCODE_A, { TL("vsp.launchpad.nav.about"),
-                                [this]() {
-                                    g_addPopup(new PopupAbout());
-                                }
+                                [this]() { g_addPopup(new PopupAbout()); }
                             }
                         },
                     }
                 }
             }
-        }, { SDL_SCANCODE_F, SDL_SCANCODE_I });
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_I });
         wxsManager.addDrawable(navbar);
 
         if (!platformHasFileAccessPermissions()) {

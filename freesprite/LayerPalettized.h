@@ -38,13 +38,16 @@ public:
 	void updateTexture() override {
 		uint8_t* pixels;
 		int pitch;
-		if (texDimensions.x != w || texDimensions.y != h) {
-			tracked_destroyTexture(tex);
-            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-			texDimensions = XY{ w,h };
-			SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+		if (tex[g_rd] == NULL || !xyEqual(texDimensions[g_rd], XY{w,h})) {
+			if (tex[g_rd] != NULL) {
+				tracked_destroyTexture(tex[g_rd]);
+			}
+            tex[g_rd] = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+			texDimensions[g_rd] = XY{ w,h };
+			layerDirty[g_rd] = true;
+			SDL_SetTextureBlendMode(tex[g_rd], SDL_BLENDMODE_BLEND);
 		}
-		SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
+		SDL_LockTexture(tex[g_rd], NULL, (void**)&pixels, &pitch);
 		//memcpy(pixels, pixelData, w * h * 4);
 		uint32_t* pxd = (uint32_t*)pixels;
 		int32_t* pxd2 = (int32_t*)pixelData;
@@ -66,8 +69,8 @@ public:
 				}
 			}
 		}
-		SDL_UnlockTexture(tex);
-		layerDirty = false;
+		SDL_UnlockTexture(tex[g_rd]);
+		layerDirty[g_rd] = false;
 	}
 
 	bool allocMemory() override {

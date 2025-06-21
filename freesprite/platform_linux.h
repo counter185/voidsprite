@@ -27,7 +27,8 @@ u32 platformSupportedFeatures() {
     return
         VSP_FEATURE_CLIPBOARD
         | VSP_FEATURE_UNRESTRICTED_FILE_SYSTEM
-        | VSP_FEATURE_WEB_FETCH;
+        | VSP_FEATURE_WEB_FETCH
+        | VSP_FEATURE_MULTIWINDOW;
 }
 
 extern char **environ;
