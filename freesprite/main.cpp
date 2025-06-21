@@ -619,6 +619,9 @@ int main(int argc, char** argv)
             bool firedQuitEventThisFrame = false;
             while (SDL_PollEvent(&evt)) {
                 VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
+                if (wdTarget == NULL) {
+                    continue;
+                }
                 wdTarget->thisWindowsTurn();
 
                 evt = scaleScreenPositionsInEvent(evt);
@@ -738,6 +741,10 @@ int main(int argc, char** argv)
                 //close window if it has no screens left
                 if (wd->screenStack.empty()){
                     loginfo(std::format("Closing window ID {}", wd->windowID));
+                    if (wd->isMainWindow) {
+                        loginfo("   -the main window was closed");
+                        g_mainWindow = NULL;
+                    }
                     delete wd;
                     g_windows.erase(wit++);
                     continue;
