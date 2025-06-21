@@ -727,6 +727,11 @@ int main(int argc, char** argv)
                 }
             }
 
+            g_windowFocused = false;
+            for (auto& [id, w] : g_windows) {
+                g_windowFocused |= ((SDL_GetWindowFlags(w->wd) & SDL_WINDOW_INPUT_FOCUS) != 0);
+            }
+
             for (auto wit = g_windows.cbegin(); wit != g_windows.cend(); ) {
                 VSPWindow* wd = (*wit).second;
 
@@ -740,8 +745,6 @@ int main(int argc, char** argv)
                 ++wit;
 
                 wd->thisWindowsTurn();
-
-                g_windowFocused = (SDL_GetWindowFlags(g_wd) & SDL_WINDOW_INPUT_FOCUS) != 0;
 
                 if (!wd->popupStack.empty()) {
                     wd->popupStack[wd->popupStack.size() - 1]->tick();
