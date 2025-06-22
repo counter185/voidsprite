@@ -398,46 +398,48 @@ int main(int argc, char** argv)
 
         loginfo("Loading assets");
 
-        g_mainlogo = new ReldTex( [](SDL_Renderer* rd) { IMGLoadAssetToTexture("mainlogo.png", rd); } );
-        g_iconLayerAdd = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_add.png", rd); } );
-        g_iconLayerDelete = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_delete.png", rd); } );
-        g_iconLayerUp = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_up.png", rd); } );
-        g_iconLayerDown = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_down.png", rd); } );
-        g_iconLayerDownMerge = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_downmerge.png", rd); } );
-        g_iconLayerDuplicate = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_duplicate.png", rd); } );
-        g_iconLayerHide = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_layer_hide.png", rd); } );
-        g_iconEraser = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_eraser.png", rd); } );
-        g_iconBlendMode = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_blendmode.png", rd); } );
-        g_iconColorRGB = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_color_rgb.png", rd); } );
-        g_iconColorHSV = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_color_hsv.png", rd); } );
-        g_iconColorVisual = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_color_visual.png", rd); } );
-        g_iconNavbarTabFile = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("tab_file.png", rd); } );
-        g_iconNavbarTabEdit = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("tab_edit.png", rd); } );
-        g_iconNavbarTabLayer = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("tab_layer.png", rd); } );
-        g_iconNavbarTabView = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("tab_view.png", rd); } );
-        g_iconComment = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_message.png", rd); } );
-        g_iconMenuPxDim = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("menu_pxdim.png", rd); } );
-        g_iconMenuSpritesheet = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("menu_sptl.png", rd); } );
-        g_iconMenuTemplates = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("menu_templates.png", rd); } );
-        g_iconNotifError = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("notif_error.png", rd); } );
-        g_iconNotifSuccess = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("notif_success.png", rd); } );
-        g_iconNewColor = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_newcolor.png", rd); } );
-        g_iconActionBarUndo = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("actionbar_undo.png", rd); } );
-        g_iconActionBarRedo = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("actionbar_redo.png", rd); } );
-        g_iconActionBarZoomIn = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("actionbar_zoomin.png", rd); } );
-        g_iconActionBarZoomOut = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("actionbar_zoomout.png", rd); } );
-        g_iconActionBarSave = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("actionbar_save.png", rd); } );
-        g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); } );
+        g_mainlogo = new ReldTex( [](SDL_Renderer* rd) { return IMGLoadAssetToTexture("mainlogo.png", rd); } );
+        g_iconLayerAdd = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_add.png", rd); } );
+        g_iconLayerDelete = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_delete.png", rd); } );
+        g_iconLayerUp = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_up.png", rd); } );
+        g_iconLayerDown = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_down.png", rd); } );
+        g_iconLayerDownMerge = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_downmerge.png", rd); } );
+        g_iconLayerDuplicate = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_duplicate.png", rd); } );
+        g_iconLayerHide = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_hide.png", rd); } );
+        g_iconEraser = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_eraser.png", rd); } );
+        g_iconBlendMode = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_blendmode.png", rd); } );
+        g_iconColorRGB = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_color_rgb.png", rd); } );
+        g_iconColorHSV = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_color_hsv.png", rd); } );
+        g_iconColorVisual = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_color_visual.png", rd); } );
+        g_iconNavbarTabFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("tab_file.png", rd); } );
+        g_iconNavbarTabEdit = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("tab_edit.png", rd); } );
+        g_iconNavbarTabLayer = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("tab_layer.png", rd); } );
+        g_iconNavbarTabView = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("tab_view.png", rd); } );
+        g_iconComment = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_message.png", rd); } );
+        g_iconMenuPxDim = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("menu_pxdim.png", rd); } );
+        g_iconMenuSpritesheet = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("menu_sptl.png", rd); } );
+        g_iconMenuTemplates = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("menu_templates.png", rd); } );
+        g_iconNotifError = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("notif_error.png", rd); } );
+        g_iconNotifSuccess = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("notif_success.png", rd); } );
+        g_iconNewColor = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_newcolor.png", rd); } );
+        g_iconActionBarUndo = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_undo.png", rd); } );
+        g_iconActionBarRedo = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_redo.png", rd); } );
+        g_iconActionBarZoomIn = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomin.png", rd); } );
+        g_iconActionBarZoomOut = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomout.png", rd); } );
+        g_iconActionBarSave = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_save.png", rd); } );
+        g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); } );
         //SDL_SetTextureColorMod(g_iconFilePickerDirectory, 0xFF, 0xFC, 0x7B);
-        g_iconFilePickerFile = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_filepicker_file.png", rd); } );
+        g_iconFilePickerFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_file.png", rd); } );
         //SDL_SetTextureColorMod(g_iconFilePickerFile, 0x80, 0x80, 0x80);
-        g_iconFilePickerSupportedFile = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture("icon_filepicker_supportedfile.png", rd); } );
+        g_iconFilePickerSupportedFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_supportedfile.png", rd); } );
 
-        SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
-        memcpy(srf->pixels, the_creature, 50 * 50 * 4);
-        g_iconNotifTheCreature = tracked_createTextureFromSurface(g_rd, srf);
-        SDL_FreeSurface(srf);
-        //SDL_Texture* the_creature = IMGLoadToTexture(VOIDSPRITE_ASSETS_PATH "assets/kaosekai.png");
+        g_iconNotifTheCreature = new ReldTex([](SDL_Renderer* rd) { 
+            SDL_Surface* srf = SDL_CreateSurface(50, 50, SDL_PIXELFORMAT_ARGB8888);
+            memcpy(srf->pixels, the_creature, 50 * 50 * 4);
+            SDL_Texture* ret = tracked_createTextureFromSurface(g_rd, srf); 
+            SDL_FreeSurface(srf);
+            return ret;
+        });
 
         g_gamepad = new Gamepad();
         g_gamepad->TryCaptureGamepad();
@@ -448,7 +450,7 @@ int main(int argc, char** argv)
         g_loadBrushes();
         int i = 0;
         for (BaseBrush*& brush : g_brushes) {
-            brush->cachedIcon = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture(brush->getIconPath(); } ));
+            brush->cachedIcon = new ReldTex([brush](SDL_Renderer* rd) { return IMGLoadAssetToTexture(brush->getIconPath()); } );
         }
 
         loginfo("Loading patterns");

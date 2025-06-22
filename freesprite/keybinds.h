@@ -12,7 +12,7 @@ public:
     SDL_Scancode key = KEY_UNASSIGNED;
     bool ctrl = false;
     bool shift = false;
-    SDL_Texture* icon = NULL;
+    HotReloadableTexture* icon = NULL;
 
     KeyCombo() {}
     KeyCombo(std::string n, std::function<void(void*)> a) : displayName(n), action(a) {}

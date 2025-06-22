@@ -30,7 +30,7 @@ void StartScreen::render()
     renderBackground();
 
     SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
-    SDL_RenderCopy(g_rd, g_mainlogo, NULL, &logoRect);
+    SDL_RenderCopy(g_rd, g_mainlogo->get(g_rd), NULL, &logoRect);
     g_fnt->RenderString(std::format("alpha@{}\n{}", __DATE__, std::string(GIT_HASH).substr(0,7)), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
     if (g_config.checkUpdates && updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {

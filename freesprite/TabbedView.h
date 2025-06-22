@@ -7,7 +7,7 @@
 
 struct Tab {
     std::string name;
-    SDL_Texture* icon = NULL;
+    HotReloadableTexture* icon = NULL;
     DrawableManager wxs;
 };
 

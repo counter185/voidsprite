@@ -18,5 +18,5 @@ u32 visualConfigHexU32(std::string key);
 SDL_Color visualConfigColor(std::string key);
 void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, std::string path);
 
-SDL_Texture* getVisualConfigTexture(std::string key);
+SDL_Texture* getVisualConfigTexture(std::string key, SDL_Renderer* rd);
 void clearVisualConfigTextureCache();

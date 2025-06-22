@@ -38,9 +38,10 @@ void UIButton::render(XY pos)
 
 	int textX = pos.x + 5;
 	if (icon != NULL) {
-		SDL_SetTextureAlphaMod(icon, 0xff);
+		SDL_Texture* icn = icon->get(g_rd);
+		SDL_SetTextureAlphaMod(icn, 0xff);
 		SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
-		SDL_RenderCopy(g_rd, icon, NULL, &iconRect);
+		SDL_RenderCopy(g_rd, icn, NULL, &iconRect);
 		textX += iconRect.w;
 	}
 

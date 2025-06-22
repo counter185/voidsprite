@@ -180,12 +180,13 @@ void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, s
     fileout.close();
 }
 
-SDL_Texture* getVisualConfigTexture(std::string key) {
+SDL_Texture* getVisualConfigTexture(std::string key, SDL_Renderer* rd = NULL) {
+	rd = rd == NULL ? g_rd : rd;
     if (visualConfigTextureCache.contains(key)) {
         return visualConfigTextureCache[key];
     }
     else {
-        SDL_Texture* tex = IMGLoadAssetToTexture(key);
+        SDL_Texture* tex = IMGLoadAssetToTexture(key, rd);
         visualConfigTextureCache[key] = tex;
         return tex;
     }

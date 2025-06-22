@@ -19,7 +19,7 @@ public:
     u32 fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR = 0xFFFFFFFF;
     u32 fillGradientML, fillGradientMR = 0xFFFFFFFF;
     std::string fillTextureVCKey = "";
-    SDL_Texture* fillTexture = NULL;
+    HotReloadableTexture* fillTexture = NULL;
 
     static Fill Solid(u32 color)
     {
@@ -47,7 +47,7 @@ public:
         r.fillGradientDR = dr;
         return r;
     }
-    static Fill Texture(SDL_Texture* tex)
+    static Fill Texture(HotReloadableTexture* tex)
     { 
         Fill r(FILL_TEXTURE);
         r.fillTexture = tex;

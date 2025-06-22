@@ -258,7 +258,8 @@ public:
 		}
 	}
 
-    SDL_Texture* get(SDL_Renderer* rd) {
+    SDL_Texture* get(SDL_Renderer* rd = NULL) {
+		rd = rd == NULL ? g_rd : rd;
         if (!generatedTextures.contains(rd)) {
 			generatedTextures[rd] = loadFunction(rd);
         }
@@ -283,7 +284,7 @@ struct NavbarSection {
     std::string name;
     std::vector<SDL_Scancode> order;
     std::map<SDL_Scancode, NamedOperation> actions;
-    SDL_Texture* icon = NULL;
+    HotReloadableTexture* icon = NULL;
     UIButton* button = NULL;
 };
 
@@ -315,7 +316,7 @@ struct NineSegmentPattern {
     u32* pixelData;
     XY point1, point2;
     std::string name = "Default pattern";
-    SDL_Texture* cachedTexture = NULL;
+    HotReloadableTexture* cachedTexture = NULL;
 };
 
 #include "log.h"
