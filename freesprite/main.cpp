@@ -98,9 +98,12 @@ void g_switchScreen(int index)
 }
 
 void g_reloadFonts() {
+    VSPWindow* currentWd = g_currentWindow;
     for (auto& [id, wd] : g_windows) {
+        wd->thisWindowsTurn();
         wd->initFonts();
     }
+    currentWd->thisWindowsTurn();
 }
 
 std::vector<SDL_Rect> clips;
@@ -722,6 +725,17 @@ int main(int argc, char** argv)
                     else {
                         continue;
                     }
+                }
+
+                //focus on the window that has popups open
+                if (anyPopupsOpen && !wdTarget->hasPopupsOpen() && evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                    for (auto& [id, w] : g_windows) {
+                        if (w->hasPopupsOpen()) {
+                            SDL_RaiseWindow(w->wd);
+                            break;
+                        }
+                    }
+                    
                 }
 
                 if (g_bgOpRunning || (anyPopupsOpen && !wdTarget->hasPopupsOpen())) {

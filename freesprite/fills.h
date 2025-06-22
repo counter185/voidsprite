@@ -1,6 +1,6 @@
 #pragma once
 
-SDL_Texture* getVisualConfigTexture(std::string key);
+SDL_Texture* getVisualConfigTexture(std::string key, SDL_Renderer* rd = NULL);
 
 enum FillType {
     FILL_INVALID = 0,
@@ -61,6 +61,11 @@ public:
     }
 
     Fill(SDL_Color c);
+    ~Fill() {
+        if (fillTexture != NULL) {
+            delete fillTexture;
+        }
+    }
 
     void fill(SDL_Rect r);
 
