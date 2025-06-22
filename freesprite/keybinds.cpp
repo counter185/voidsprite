@@ -6,6 +6,7 @@
 #include "StartScreen.h"
 #include "brush/BaseBrush.h"
 #include "main.h"
+#include "multiwindow.h"
 
 void g_initKeybinds()
 {
@@ -17,11 +18,11 @@ void g_initKeybinds()
     g_keybindManager.newRegion("global", TL("vsp.keybinds.region.global"));
     g_keybindManager.addKeybind("global", "switch_screen_left",
         KeyCombo(TL("vsp.keybinds.global.screenleft"), SDL_SCANCODE_LEFTBRACKET, false, false, [](void* d) {
-            //main_switchScreenLeft();
+            g_currentWindow->switchScreenLeft();
         }));
     g_keybindManager.addKeybind("global", "switch_screen_right",
         KeyCombo(TL("vsp.keybinds.global.screenright"), SDL_SCANCODE_RIGHTBRACKET, false, false, [](void* d) {
-            //main_switchScreenRight();
+            g_currentWindow->switchScreenRight();
         }));
     if (platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
         g_keybindManager.addKeybind("global", "new_window",
