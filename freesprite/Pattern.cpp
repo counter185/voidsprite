@@ -6,7 +6,7 @@
 
 void Pattern::tryLoadIcon()
 {
-    cachedIcon = IMGLoadAssetToTexture(getIconPath());
+    cachedIcon = new ReldTex([](SDL_Renderer* rd) { IMGLoadAssetToTexture(getIconPath(); } ));
 }
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)

@@ -19,7 +19,7 @@ struct BrushProperty {
 class BaseBrush
 {
 public:
-	SDL_Texture* cachedIcon = NULL;
+	HotReloadableTexture* cachedIcon = NULL;
 	XY lastMouseMotionPos = XY{ 0,0 };
 
 	virtual void resetState() {}
