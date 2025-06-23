@@ -166,6 +166,12 @@ StartScreen::StartScreen() {
     lastOpenFilesPanel->passThroughMouse = true;
     wxsManager.addDrawable(lastOpenFilesPanel);
 
+	std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_I };
+    if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
+		navbarOrder.erase(std::remove(navbarOrder.begin(), navbarOrder.end(), SDL_SCANCODE_W), navbarOrder.end());
+        // remove the window tab if we shouldn't be able to use it
+    }
+
     navbar = new ScreenWideNavBar(this,
         {
             {
@@ -213,7 +219,7 @@ StartScreen::StartScreen() {
                     }
                 }
             }
-        }, { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_I });
+        }, navbarOrder);
     wxsManager.addDrawable(navbar);
 
     if (!platformHasFileAccessPermissions()) {
