@@ -6,7 +6,7 @@
 
 void Pattern::tryLoadIcon()
 {
-    cachedIcon = IMGLoadAssetToTexture(getIconPath());
+    cachedIcon = new ReldTex([this](SDL_Renderer* rd) { return IMGLoadAssetToTexture(getIconPath()); } );
 }
 
 CustomPattern* CustomPattern::load(PlatformNativePathString path)
@@ -58,15 +58,18 @@ bool CustomPattern::canDrawAt(XY position)
 void CustomPattern::tryLoadIcon()
 {
     if (bitmap != NULL) {
-        cachedIcon = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
-        int bitmapPitch;
-        uint32_t* iconBitmap;
-        SDL_LockTexture(cachedIcon, NULL, (void**)&iconBitmap, &bitmapPitch);
-        for (int y = 0; y < 22; y++) {
-            for (int x = 0; x < 22; x++) {
-                iconBitmap[x + y * 22] = canDrawAt({x/2,y/2}) ? 0xffffffff : 0x00000000;
+        cachedIcon = new HotReloadableTexture([this](SDL_Renderer* rd) {
+            SDL_Texture* ret = tracked_createTexture(rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 22, 22);
+            int bitmapPitch;
+            uint32_t* iconBitmap;
+            SDL_LockTexture(ret, NULL, (void**)&iconBitmap, &bitmapPitch);
+            for (int y = 0; y < 22; y++) {
+                for (int x = 0; x < 22; x++) {
+                    iconBitmap[x + y * 22] = canDrawAt({ x / 2,y / 2 }) ? 0xffffffff : 0x00000000;
+                }
             }
-        }
-        SDL_UnlockTexture(cachedIcon);
+            SDL_UnlockTexture(ret);
+            return ret;
+        });
     }
 }

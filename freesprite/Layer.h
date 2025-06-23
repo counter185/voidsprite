@@ -15,10 +15,11 @@ public:
     std::vector<uint8_t*> undoQueue;
     std::vector<uint8_t*> redoQueue;
     int w = -1, h = -1;
-    SDL_Texture* tex = NULL;
-    XY texDimensions = {0,0};
-    bool layerDirty = true;
     bool bgOpFinished = false;
+
+    std::map<SDL_Renderer*,SDL_Texture*> tex;
+    std::map<SDL_Renderer*,XY> texDimensions;
+    std::map<SDL_Renderer*,bool> layerDirty;
 
     std::string name = "Layer";
     bool hidden = false;
@@ -53,7 +54,9 @@ public:
         for (uint8_t*& r : redoQueue) {
             tracked_free(r);
         }
-        tracked_destroyTexture(tex);
+        for (auto& [rd, t] : tex) {
+            tracked_destroyTexture(t);
+        }
     }
 
     /// <summary>
@@ -82,29 +85,30 @@ public:
         pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
         if (pixelData != NULL) {
             memset(pixelData, 0, w * h * 4);
-            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-            texDimensions = XY{ w,h };
-            SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-            if (tex == NULL) {
-                tracked_free(pixelData);
-                pixelData = NULL;
-                return false;
-            }
             return true;
         }
         return false;
     }
 
+    void markLayerDirty() {
+        for (auto& [rd, dirty] : layerDirty) {
+            layerDirty[rd] = true;
+        }
+    }
+
     virtual void updateTexture() {
         uint8_t* pixels;
         int pitch;
-        if (texDimensions.x != w || texDimensions.y != h) {
-            tracked_destroyTexture(tex);
-            tex = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-            texDimensions = XY{ w,h };
-            SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+        if (tex[g_rd] == NULL || !xyEqual(texDimensions[g_rd], XY{w,h})) {
+            if (tex[g_rd] != NULL) {
+                tracked_destroyTexture(tex[g_rd]);
+            }
+            tex[g_rd] = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+            texDimensions[g_rd] = XY{ w,h };
+            layerDirty[g_rd] = true;
+            SDL_SetTextureBlendMode(tex[g_rd], SDL_BLENDMODE_BLEND);
         }
-        SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
+        SDL_LockTexture(tex[g_rd], NULL, (void**)&pixels, &pitch);
         if (pitch == w*4) {
             memcpy(pixels, pixelData, w * h * 4);
         } else {
@@ -130,33 +134,31 @@ public:
                 }
             }*/
         }
-        SDL_UnlockTexture(tex);
-        layerDirty = false;
+        SDL_UnlockTexture(tex[g_rd]);
+        layerDirty[g_rd] = false;
     }
 
-    void render(SDL_Rect where, uint8_t alpha = 255) {
-        SDL_Texture* target = effectPreviewTexture ? effectPreviewTexture : tex;
-        if (layerDirty) {
+    void prerender() {
+        if (!tex.contains(g_rd) || !layerDirty.contains(g_rd) || tex[g_rd] == NULL || layerDirty[g_rd]) {
             updateTexture();
         }
         if (bgOpFinished) {
             updateTexture();
             bgOpFinished = false;
         }
+    }
+
+    void render(SDL_Rect where, uint8_t alpha = 255) {
+        SDL_Texture* target = effectPreviewTexture ? effectPreviewTexture : tex[g_rd];
+        prerender();
         SDL_SetTextureAlphaMod(target, alpha);
         SDL_RenderCopy(g_rd, target, NULL, &where);
     }
 
     void render(SDL_Rect where, SDL_Rect clip, uint8_t alpha = 255) {
-        if (layerDirty) {
-            updateTexture();
-        }
-        if (bgOpFinished) {
-            updateTexture();
-            bgOpFinished = false;
-        }
-        SDL_SetTextureAlphaMod(tex, alpha);
-        SDL_RenderCopy(g_rd, tex, &clip, &where);
+        prerender();
+        SDL_SetTextureAlphaMod(tex[g_rd], alpha);
+        SDL_RenderCopy(g_rd, tex[g_rd], &clip, &where);
     }
 
     SDL_Texture* renderToTexture() {
@@ -190,7 +192,7 @@ public:
         if (position.x >= 0 && position.x < w
             && position.y >= 0 && position.y < h) {
             intpxdata[position.x + (position.y * w)] = color;
-            layerDirty = true;
+            markLayerDirty();
         }
     }
     void fillRect(XY from, XY to, uint32_t color) {
@@ -245,7 +247,7 @@ public:
                 ARRAY2DPOINT(px32, region.x + x, region.y + y, w) = p;
             }
         }
-        layerDirty = true;
+        markLayerDirty();
     }
     void flipVertically(SDL_Rect region = { -1,-1,-1,-1 }) {
         if (region.w == -1) {
@@ -259,7 +261,7 @@ public:
                 ARRAY2DPOINT(px32, region.x + x, region.y + region.h-1-y, w) = p;
             }
         }
-        layerDirty = true;
+        markLayerDirty();
     }
 
     void discardRedoStack() {
@@ -290,7 +292,7 @@ public:
             redoQueue.push_back(pixelData);
             pixelData = undoQueue[undoQueue.size() - 1];
             undoQueue.pop_back();
-            layerDirty = true;
+            markLayerDirty();
         }
     }
     void redo() {
@@ -298,7 +300,7 @@ public:
             undoQueue.push_back(pixelData);
             pixelData = redoQueue[redoQueue.size()-1];
             redoQueue.pop_back();
-            layerDirty = true;
+            markLayerDirty();
         }
     }
 
@@ -382,7 +384,7 @@ public:
         for (uint64_t x = 0; x < w * h; x++) {
             px32[x] |= 0xff000000;
         }
-        layerDirty = true;
+        markLayerDirty();
     }
 
     void replaceColor(uint32_t from, uint32_t to, ScanlineMap* isolate = NULL) {
@@ -394,7 +396,7 @@ public:
                 }
             }
         }
-        layerDirty = true;
+        markLayerDirty();
     }
 
     void paintBucket(XY at, u32 color);
@@ -407,7 +409,7 @@ public:
         for (u64 dataPtr = 0; dataPtr < w * h; dataPtr++) {
             px32[dataPtr] = hsvShift(px32[dataPtr], shift);
         }
-        layerDirty = true;
+        markLayerDirty();
     }
 
     void shiftLayerHSL(hsl shift) {
@@ -418,7 +420,7 @@ public:
         for (u64 dataPtr = 0; dataPtr < w * h; dataPtr++) {
             px32[dataPtr] = hslShift(px32[dataPtr], shift);
         }
-        layerDirty = true;
+        markLayerDirty();
     }
 
     virtual Layer* trim(SDL_Rect r);

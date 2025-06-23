@@ -222,6 +222,7 @@
     <ClCompile Include="log.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
     <ClCompile Include="MinecraftBlockPreviewScreen.cpp" />
+    <ClCompile Include="multiwindow.cpp" />
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp" />
     <ClCompile Include="NotifSound.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
@@ -408,6 +409,7 @@
     <ClInclude Include="MainEditorPalettized.h" />
     <ClInclude Include="memory_tracker.h" />
     <ClInclude Include="MinecraftBlockPreviewScreen.h" />
+    <ClInclude Include="multiwindow.h" />
     <ClInclude Include="NineSegmentPatternEditorScreen.h" />
     <ClInclude Include="ninesegmentpatterns.h" />
     <ClInclude Include="palettes.h" />

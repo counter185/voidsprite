@@ -20,7 +20,7 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"maineditor/bg_alt", Fill::Gradient(0xFFDFDFDF,0xFFDFDFDF,0xFFDFDFDF,0xFF808080).serialize()},
 };
 
-std::map<std::string, SDL_Texture*> visualConfigTextureCache = {};
+std::map<SDL_Renderer*, std::map<std::string, SDL_Texture*>> visualConfigTextureCache = {};
 
 std::unordered_map<std::string, std::string> customVisualConfig = {};
 PlatformNativePathString customVisualConfigRoot;
@@ -58,8 +58,8 @@ u32 visualConfigHexU32(std::string key)
 
 SDL_Color visualConfigColor(std::string key)
 {
-	u32 hex = visualConfigHexU32(key);
-	return uint32ToSDLColor(hex);
+    u32 hex = visualConfigHexU32(key);
+    return uint32ToSDLColor(hex);
 }
 
 void evalVisualConfigJsonTree(nlohmann::json& object, std::unordered_map<std::string, std::string>& target, std::string jsonPathNow = "") {
@@ -180,20 +180,23 @@ void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, s
     fileout.close();
 }
 
-SDL_Texture* getVisualConfigTexture(std::string key) {
-    if (visualConfigTextureCache.contains(key)) {
-        return visualConfigTextureCache[key];
+SDL_Texture* getVisualConfigTexture(std::string key, SDL_Renderer* rd) {
+    rd = rd == NULL ? g_rd : rd;
+    if (visualConfigTextureCache[rd].contains(key)) {
+        return visualConfigTextureCache[rd][key];
     }
     else {
-        SDL_Texture* tex = IMGLoadAssetToTexture(key);
-        visualConfigTextureCache[key] = tex;
+        SDL_Texture* tex = IMGLoadAssetToTexture(key, rd);
+        visualConfigTextureCache[rd][key] = tex;
         return tex;
     }
 }
 
 void clearVisualConfigTextureCache() {
-    for (auto& [key, tex] : visualConfigTextureCache) {
-        tracked_destroyTexture(tex);
+    for (auto& [rd, texmap] : visualConfigTextureCache) {
+        for (auto& [key, tex] : texmap) {
+            tracked_destroyTexture(tex);
+        }
     }
     visualConfigTextureCache.clear();
 }

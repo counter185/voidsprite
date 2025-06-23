@@ -29,6 +29,7 @@
     {"vsp.nav.open", "Open"},
     {"vsp.nav.save", "Save"},
     {"vsp.nav.help", "Help"},
+    {"vsp.nav.window", "Window"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
@@ -65,6 +66,9 @@
     {"vsp.keybinds.global.fullscreen", "Toggle fullscreen"},
     {"vsp.keybinds.global.renderscaleup", "Increase screen scale"},
     {"vsp.keybinds.global.renderscaledown", "Decrease screen scale"},
+    {"vsp.keybinds.global.newwindow", "New window"},
+    {"vsp.keybinds.global.detachworkspace", "Detach workspace into a new window"},
+    {"vsp.keybinds.global.attachtomainwindow", "Attach workspace to main window"},
 
     {"vsp.keybinds.region.startscreen", "voidsprite Launchpad"},
     {"vsp.keybinds.startscreen.openclipboard", "Open from clipboard"},
@@ -132,6 +136,7 @@
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
     {"vsp.launchpad.nav.about", "About voidsprite"},
     {"vsp.launchpad.nav.opennightlylinkdl", "Download latest build on nightly.link"},
+    {"vsp.launchpad.nav.newwindow", "New window"},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},
     {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"

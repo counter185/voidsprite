@@ -14,7 +14,7 @@ public:
     std::string text;
     std::string tooltip;
     int wxWidth = 250, wxHeight = 30;
-    SDL_Texture* icon = NULL;
+    HotReloadableTexture* icon = NULL;
     bool fullWidthIcon = false;
     bool instantTooltip = false;
     

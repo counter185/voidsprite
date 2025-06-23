@@ -243,17 +243,17 @@ void MainEditor::render() {
 
     if (eraserMode) {
         SDL_Rect eraserRect = { g_mouseX + 6, g_mouseY - 30, 28, 28 };
-        SDL_SetTextureAlphaMod(g_iconEraser, 0xa0);
+        SDL_SetTextureAlphaMod(g_iconEraser->get(), 0xa0);
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
         SDL_RenderFillRect(g_rd, &eraserRect);
-        SDL_RenderCopy(g_rd, g_iconEraser, NULL, &eraserRect);
+        SDL_RenderCopy(g_rd, g_iconEraser->get(), NULL, &eraserRect);
     }
     if (currentPattern != NULL && currentPattern != g_patterns[0]) {
         SDL_Rect patternRect = { g_mouseX + 38, g_mouseY - 30, 22, 22 };
-        SDL_SetTextureAlphaMod(currentPattern->cachedIcon, 0xa0);
+        SDL_SetTextureAlphaMod(currentPattern->cachedIcon->get(), 0xa0);
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
         SDL_RenderFillRect(g_rd, &patternRect);
-        SDL_RenderCopy(g_rd, currentPattern->cachedIcon, NULL, &patternRect);
+        SDL_RenderCopy(g_rd, currentPattern->cachedIcon->get(), NULL, &patternRect);
     }
     if (g_config.showPenPressure && leftMouseHold && penPressure > 0 && penPressure < 1) {
         SDL_Rect pressureIndicatorBounds = { g_mouseX - 50, g_mouseY - 60, 100, 15 };
@@ -671,8 +671,8 @@ void MainEditor::renderComments()
     for (CommentData& c : comments) {
         XY onScreenPosition = canvas.canvasPointToScreenPoint(c.position); //xyAdd(origin, { c.position.x * scale, c.position.y * scale });
         SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
-        SDL_SetTextureAlphaMod(g_iconComment, 0x80);
-        SDL_RenderCopy(g_rd, g_iconComment, NULL, &iconRect);
+        SDL_SetTextureAlphaMod(g_iconComment->get(g_rd), 0x80);
+        SDL_RenderCopy(g_rd, g_iconComment->get(g_rd), NULL, &iconRect);
         if (commentViewMode == COMMENTMODE_SHOW_ALL || (commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32)) {
             if (!c.hovered) {
                 c.animTimer.start();
@@ -1654,7 +1654,7 @@ void MainEditor::eventColorSet(int evt_id, uint32_t color)
         Layer* l = getCurrentLayer();
         l->colorKey = color;
         l->colorKeySet = true;
-        l->layerDirty = true;
+        l->markLayerDirty();
     }
 }
 
@@ -2039,7 +2039,7 @@ void MainEditor::undo()
                     layers[x]->pixelData = resizeLayerData[x].oldData;
                     layers[x]->w = resizeLayerData[x].oldDimensions.x;
                     layers[x]->h = resizeLayerData[x].oldDimensions.y;
-                    layers[x]->layerDirty = true;
+                    layers[x]->markLayerDirty();
                     resizeLayerData[x].oldData = oldData;
                     resizeLayerData[x].oldDimensions = oldDimensions;
                 }
@@ -2122,7 +2122,7 @@ void MainEditor::redo()
                 layers[x]->pixelData = resizeLayerData[x].oldData;
                 layers[x]->w = resizeLayerData[x].oldDimensions.x;
                 layers[x]->h = resizeLayerData[x].oldDimensions.y;
-                layers[x]->layerDirty = true;
+                layers[x]->markLayerDirty();
                 resizeLayerData[x].oldData = oldData;
                 resizeLayerData[x].oldDimensions = oldDimensions;
             }
@@ -2352,7 +2352,7 @@ void MainEditor::mergeLayerDown(int index)
     commitStateToLayer(bottomLayer);
     Layer* merged = mergeLayers(bottomLayer, topLayer);
     memcpy(bottomLayer->pixelData, merged->pixelData, bottomLayer->w * bottomLayer->h * 4);
-    bottomLayer->layerDirty = true;
+    bottomLayer->markLayerDirty();
     delete merged;
     
 }
@@ -2363,7 +2363,7 @@ void MainEditor::duplicateLayer(int index)
     Layer* newL = newLayer();
     memcpy(newL->pixelData, currentLayer->pixelData, currentLayer->w * currentLayer->h * 4);
     newL->name = "Copy:" + currentLayer->name;
-    newL->layerDirty = true;
+    newL->markLayerDirty();
 }
 
 void MainEditor::layer_flipHorizontally()
@@ -2511,7 +2511,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
         delete sc;
         layers[x]->w = size.x;
         layers[x]->h = size.y;
-        layers[x]->layerDirty = true;
+        layers[x]->markLayerDirty();
     }
     canvas.dimensions = {layers[0]->w, layers[0]->h};
 
@@ -2547,7 +2547,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
         else {
             layerResizeData[x].oldData = layers[x]->resize(size);
         }
-        layers[x]->layerDirty = true;
+        layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
     
@@ -2569,7 +2569,7 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
         layerResizeData[x].oldData = layers[x]->resizeByTileCount(tileDimensions, size);
-        layers[x]->layerDirty = true;
+        layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
 
@@ -2596,7 +2596,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
         layerResizeData[x].oldData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
-        layers[x]->layerDirty = true;
+        layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
 

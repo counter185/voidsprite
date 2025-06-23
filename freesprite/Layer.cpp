@@ -20,7 +20,7 @@ void Layer::blit(Layer* sourceLayer, XY position)
         }
     }
 
-    layerDirty = true;
+    markLayerDirty();
 }
 
 void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast)
@@ -78,7 +78,7 @@ Layer* Layer::copy()
     Layer* ret = new Layer(w, h);
     ret->name = name;
     ret->colorKey = colorKey;
-    ret->layerDirty = true;
+    ret->markLayerDirty();
     memcpy(ret->pixelData, pixelData, w * h * 4);
     return ret;
 }
@@ -342,5 +342,5 @@ void Layer::clear(ScanlineMap* area)
             }
         });
     }
-    layerDirty = true;
+    markLayerDirty();
 }

@@ -43,7 +43,8 @@ void NineSegmentPatternEditorScreen::render()
 
     SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x * canvasZoom, caller->canvas.dimensions.y * canvasZoom };
     for (Layer*& l : caller->layers) {
-        SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
+        l->prerender();
+        SDL_RenderCopy(g_rd, l->tex[g_rd], NULL, &canvasRenderRect);
     }
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xD0);
     SDL_Rect r2 = canvasRenderRect;

@@ -26,7 +26,7 @@ void Fill::fill(SDL_Rect r) {
         renderGradient({ r.x,r.y + r.h / 2,r.w,r.h / 2 }, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
         break;
     case FILL_TEXTURE:
-        SDL_RenderCopy(g_rd, (fillTexture == NULL ? getVisualConfigTexture(fillTextureVCKey) : fillTexture), NULL, &r);
+        SDL_RenderCopy(g_rd, getVisualConfigTexture(fillTextureVCKey), NULL, &r);
         break;
     }
 }

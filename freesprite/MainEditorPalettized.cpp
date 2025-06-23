@@ -228,7 +228,7 @@ void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
 void MainEditorPalettized::updatePalette() {
     for (Layer*& l : layers) {
         ((LayerPalettized*)l)->palette = palette;
-        ((LayerPalettized*)l)->layerDirty = true;
+        ((LayerPalettized*)l)->markLayerDirty();
     }
 
     ((PalettizedEditorColorPicker*)colorPicker)->updateForcedColorPaletteButtons();

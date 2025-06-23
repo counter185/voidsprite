@@ -45,7 +45,10 @@ public:
     void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     bool shouldMoveToFrontOnFocus() override { return true; }
-    XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
+    XY getDimensions() override { 
+        //temporary fix
+        return XY{ wxWidth, wxHeight + (isOpen ? menuHeight : 0)};
+    };
 
     void eventButtonPressed(int evt_id) override;
 

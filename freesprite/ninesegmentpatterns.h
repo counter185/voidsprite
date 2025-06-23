@@ -2,8 +2,11 @@
 
 inline void cacheTexture(NineSegmentPattern& p) {
     if (p.pixelData != NULL) {
-        p.cachedTexture = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, p.dimensions.x, p.dimensions.y);
-        SDL_UpdateTexture(p.cachedTexture, NULL, p.pixelData, p.dimensions.x * 4);
+        p.cachedTexture = new ReldTex([p](SDL_Renderer* rd) {
+            SDL_Texture* ret = tracked_createTexture(rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, p.dimensions.x, p.dimensions.y);
+            SDL_UpdateTexture(ret, NULL, p.pixelData, p.dimensions.x * 4);
+            return ret;
+        }); 
     }
 }
 

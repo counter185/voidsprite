@@ -105,12 +105,12 @@ public:
     }
 };
 
-std::vector<VFX> currentVfxs;
+std::map<VSPWindow*, std::vector<VFX>> currentVfxs;
 
 void g_newVFX(VFXType type, u32 durationMS, u32 extData1, SDL_Rect extData2, std::vector<u32> moreExtData)
 {
     if (g_config.vfxEnabled) {
-        currentVfxs.push_back(VFX(type, durationMS, extData1, extData2, moreExtData));
+        currentVfxs[g_currentWindow].push_back(VFX(type, durationMS, extData1, extData2, moreExtData));
         if (type == VFX_SCREENSWITCH) {
             screenSwitchTimer.start();
         }
@@ -119,12 +119,19 @@ void g_newVFX(VFXType type, u32 durationMS, u32 extData1, SDL_Rect extData2, std
 
 void g_renderVFX() {
     if (g_config.vfxEnabled) {
-        for (int i = 0; i < currentVfxs.size(); i++) {
-            currentVfxs[i].render();
-            if (currentVfxs[i].expired()) {
-                currentVfxs.erase(currentVfxs.begin() + i);
+		std::vector<VFX>& targetVFX = currentVfxs[g_currentWindow];
+        for (int i = 0; i < targetVFX.size(); i++) {
+            targetVFX[i].render();
+            if (targetVFX[i].expired()) {
+                targetVFX.erase(targetVFX.begin() + i);
                 i--;
             }
         }
     }
+}
+
+void g_removeVFXWindow(VSPWindow* wd) {
+	if (currentVfxs.contains(wd)) {
+		currentVfxs.erase(wd);
+	}
 }

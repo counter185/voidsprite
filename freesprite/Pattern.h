@@ -4,7 +4,7 @@
 class Pattern
 {
 public:
-	SDL_Texture* cachedIcon = NULL;
+	HotReloadableTexture* cachedIcon = NULL;
 
 	virtual std::string getIconPath() { return "pattern_default.png"; }
 	virtual std::string getName() { return "Pattern"; }

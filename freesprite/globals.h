@@ -111,6 +111,8 @@ class FileImporter;
 class FileExporter;
 struct NineSegmentPattern;
 class DrawableManager;
+class VSPWindow;
+class HotReloadableTexture;
 
 //templates
 class BaseTemplate;
@@ -154,17 +156,18 @@ class UIColorPicker;
 class Panel;
 class ScrollingPanel;
 class TabbedView;
+class ScreenWideNavBar;
 
 //filters
 class BaseFilter;
 class RenderFilter;
 
-class ScreenWideNavBar;
-
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
 inline int g_renderScale = 1;
 extern std::string g_programDirectory;
+inline VSPWindow* g_currentWindow = NULL;
+inline VSPWindow* g_mainWindow = NULL;
 extern SDL_Window* g_wd;
 extern SDL_Renderer* g_rd;
 extern TextRenderer* g_fnt;
@@ -185,7 +188,7 @@ inline SDL_PropertiesID g_props;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
-inline SDL_Texture* g_mainlogo = NULL,
+inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconLayerAdd = NULL,
    *g_iconLayerDelete = NULL,
    *g_iconLayerUp = NULL,
@@ -222,7 +225,6 @@ inline SDL_Texture* g_mainlogo = NULL,
 void g_addNotification(Notification a);
 
 void g_addScreen(BaseScreen* a, bool switchTo = true);
-void g_closeLastScreen();
 void g_closeScreen(BaseScreen* screen);
 void g_switchScreen(int index);
 
@@ -239,7 +241,32 @@ void g_popRenderTarget();
 void g_reloadFonts();
 
 SDL_Texture* IMGLoadToTexture(std::string path);
-SDL_Texture* IMGLoadAssetToTexture(std::string path);
+SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd = NULL);
+
+void tracked_destroyTexture(SDL_Texture* t);
+class HotReloadableTexture {
+private:
+    std::map<SDL_Renderer*, SDL_Texture*> generatedTextures;
+public:
+    std::function<SDL_Texture* (SDL_Renderer*)> loadFunction;
+    std::function<void(SDL_Texture*)> unloadFunction = [](SDL_Texture* t) { tracked_destroyTexture(t); };
+
+    HotReloadableTexture(std::function<SDL_Texture* (SDL_Renderer*)> load) : loadFunction(load) {}
+	~HotReloadableTexture() {
+		for (auto& [renderer, texture] : generatedTextures) {
+			unloadFunction(texture);
+		}
+	}
+
+    SDL_Texture* get(SDL_Renderer* rd = NULL) {
+		rd = rd == NULL ? g_rd : rd;
+        if (!generatedTextures.contains(rd)) {
+			generatedTextures[rd] = loadFunction(rd);
+        }
+        return generatedTextures[rd];
+    }
+};
+#define ReldTex HotReloadableTexture
 
 struct XY {
     int x, y;
@@ -257,7 +284,7 @@ struct NavbarSection {
     std::string name;
     std::vector<SDL_Scancode> order;
     std::map<SDL_Scancode, NamedOperation> actions;
-    SDL_Texture* icon = NULL;
+    HotReloadableTexture* icon = NULL;
     UIButton* button = NULL;
 };
 
@@ -289,7 +316,7 @@ struct NineSegmentPattern {
     u32* pixelData;
     XY point1, point2;
     std::string name = "Default pattern";
-    SDL_Texture* cachedTexture = NULL;
+    HotReloadableTexture* cachedTexture = NULL;
 };
 
 #include "log.h"
