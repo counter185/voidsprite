@@ -27,15 +27,19 @@ void g_initKeybinds()
     if (platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
         g_keybindManager.addKeybind("global", "new_window",
             KeyCombo(TL("vsp.keybinds.global.newwindow"), SDL_SCANCODE_RIGHT, true, false, [](void* d) {
-                main_newWindow("");
+                main_newWindow();
             }));
         g_keybindManager.addKeybind("global", "detach_workspace",
             KeyCombo(TL("vsp.keybinds.global.detachworkspace"), SDL_SCANCODE_UP, true, false, [](void* d) {
-                main_currentWorkspaceToNewWindow("");
+                main_currentWorkspaceToNewWindow();
             }));
         g_keybindManager.addKeybind("global", "attach_to_main_window",
             KeyCombo(TL("vsp.keybinds.global.attachtomainwindow"), SDL_SCANCODE_LEFT, true, false, [](void* d) {
                 main_attachCurrentWorkspaceToMainWindow();
+            }));
+        g_keybindManager.addKeybind("global", "rename_window",
+            KeyCombo(TL("vsp.keybinds.global.renamewindow"), SDL_SCANCODE_F2, true, false, [](void* d) {
+                main_promptRenameCurrentWindow();
             }));
     }
     g_keybindManager.addKeybind("global", "set_fav_workspace",

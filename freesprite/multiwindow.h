@@ -20,6 +20,7 @@ public:
     SDL_Texture* viewport = NULL;
     TextRenderer* fnt = NULL;
     std::string lastWindowTitle = "";
+    std::string windowTitle = "";
 
     int mouseX = 0, mouseY = 0;
 
@@ -58,6 +59,12 @@ public:
         if (rd != NULL) {
             SDL_SetRenderVSync(rd, vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
         }
+    }
+
+    void setWindowTitle(std::string wdTitle) {
+		windowTitle = wdTitle;
+		std::string finalWdTitle = UTF8_DIAMOND + wdTitle;
+		SDL_SetWindowTitle(wd, finalWdTitle.c_str());
     }
 
     bool tryCreateRenderer();

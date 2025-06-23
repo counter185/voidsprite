@@ -18,6 +18,7 @@
 #include "FileIO.h"
 #include "TooltipsLayer.h"
 #include "ButtonStartScreenSession.h"
+#include "PopupTextBox.h"
 #include "CustomTemplate.h"
 #include "ninesegmentpatterns.h"
 #include "background_operation.h"
@@ -193,7 +194,8 @@ void main_toggleFullscreen()
     g_newVFX(VFX_SCREENSWITCH, 800);
 }
 
-void main_newWindow(std::string title) {
+void main_newWindow() {
+    std::string title = std::format("<{}>", g_windows.size());
     VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
     if (newWindow != NULL) {
         newWindow->addToWindowList();
@@ -214,29 +216,35 @@ void main_newWindow(std::string title) {
     }
 }
 
-void main_currentWorkspaceToNewWindow(std::string title)
+void main_currentWorkspaceToNewWindow()
 {
-    if (g_currentWindow != NULL && !g_currentWindow->screenStack.empty() && g_currentWindow->popupStack.empty()) {
-        BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
-        VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
-        if (newWindow != NULL) {
-            g_currentWindow->detachScreen(currentScreen);
-            newWindow->addToWindowList();
-            VSPWindow* oldWindow = g_currentWindow;
-            newWindow->thisWindowsTurn();
-            newWindow->initFonts();
-            newWindow->updateViewportScaler();
-            g_currentWindow = newWindow;
-            g_newVFX(VFX_SCREENSWITCH, 800);
-            newWindow->addScreen(currentScreen, true);
-                        loginfo(std::format("Opening window ID {}", newWindow->windowID));
-            if (oldWindow != NULL) {
-                oldWindow->thisWindowsTurn();
+	std::string title = std::format("<{}>", g_windows.size());
+    if (g_currentWindow != NULL && g_currentWindow->popupStack.empty()) {
+        if (g_currentWindow->screenStack.size() > 1) {
+            BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
+            VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
+            if (newWindow != NULL) {
+                g_currentWindow->detachScreen(currentScreen);
+                newWindow->addToWindowList();
+                VSPWindow* oldWindow = g_currentWindow;
+                newWindow->thisWindowsTurn();
+                newWindow->initFonts();
+                newWindow->updateViewportScaler();
+                g_currentWindow = newWindow;
+                g_newVFX(VFX_SCREENSWITCH, 800);
+                newWindow->addScreen(currentScreen, true);
+                loginfo(std::format("Opening window ID {}", newWindow->windowID));
+                if (oldWindow != NULL) {
+                    oldWindow->thisWindowsTurn();
+                }
             }
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.lastscreendetach")));
         }
     }
     else {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.windowcreationfailed")));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.windowcreationfailed")));
     }
 }
 
@@ -250,6 +258,27 @@ void main_attachCurrentWorkspaceToMainWindow() {
     }
     else {
         logerr("attachCurrentWorkspaceToMainWindow failed");
+    }
+}
+
+void main_promptRenameCurrentWindow()
+{
+	VSPWindow* target = g_currentWindow;
+    if (target != NULL) {
+        if (!target->isMainWindow) {
+			PopupTextBox* renamePopup = new PopupTextBox(TL("vsp.window.renamewindow"), "", target->windowTitle);
+            renamePopup->allowEmptyText = true;
+            renamePopup->onTextInputConfirmedCallback = [target](PopupTextBox*, std::string text) {
+                target->setWindowTitle(text);
+            };
+			g_addPopup(renamePopup);
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.renamemainwindowfail")));
+        }
+	}
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.renamewindowfail")));
     }
 }
 

@@ -13,6 +13,7 @@ VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     wd = SDL_CreateWindow(title.c_str(), size.x, size.y, flags);
     windowID = SDL_GetWindowID(wd);
     tryCreateRenderer();
+    setWindowTitle(title);
     setVsync(g_config.vsync);
     unscaledWindowSize = scaledWindowSize = size;
 }

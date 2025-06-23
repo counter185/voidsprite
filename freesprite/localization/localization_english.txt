@@ -35,6 +35,13 @@
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
     {"vsp.rpc.activeworkspaces", "active workspaces"},
 
+    //multiwindow-related strings
+    {"vsp.window.error.renamewindowfail", "Cannot rename this window"},
+    {"vsp.window.error.renamemainwindowfail", "Main window cannot be renamed"},
+    {"vsp.window.error.windowcreationfailed", "Window creation failed"},
+    {"vsp.window.error.lastscreendetach", "Cannot detach last workspace"},
+    {"vsp.window.renamewindow", "Rename window"},
+
     //crash popup
     {"vsp.fatalerror.title", "fatal error"},
     {"vsp.fatalerror.body", "An unrecoverable error has occurred.\n"
@@ -69,6 +76,7 @@
     {"vsp.keybinds.global.newwindow", "New window"},
     {"vsp.keybinds.global.detachworkspace", "Detach workspace into a new window"},
     {"vsp.keybinds.global.attachtomainwindow", "Attach workspace to main window"},
+    {"vsp.keybinds.global.renamewindow", "Rename current window"},
 
     {"vsp.keybinds.region.startscreen", "voidsprite Launchpad"},
     {"vsp.keybinds.startscreen.openclipboard", "Open from clipboard"},

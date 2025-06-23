@@ -201,7 +201,7 @@ StartScreen::StartScreen() {
                     TL("vsp.nav.window"),
                     {},
                     {
-                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.newwindow"), [this]() { main_newWindow("");} } },
+                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.newwindow"), [this]() { main_newWindow();} } },
                     }
                 }
             },
@@ -228,7 +228,7 @@ StartScreen::StartScreen() {
             if (yes) {
                 platformRequestFileAccessPermissions();
             }
-            };
+        };
 
         g_addPopup(permissionPopup);
     }
