@@ -780,6 +780,7 @@ int main(int argc, char** argv)
                         loginfo("   -the main window was closed");
                         g_mainWindow = NULL;
                     }
+                    g_removeVFXWindow(wd);
                     delete wd;
                     g_windows.erase(wit++);
                     continue;
