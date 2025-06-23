@@ -149,6 +149,7 @@ add_library(main SHARED
         voidsprite/mathops.cpp
         voidsprite/MinecraftBlockPreviewScreen.cpp
         voidsprite/MinecraftSkinPreviewScreen.cpp
+        voidsprite/multiwindow.cpp
         voidsprite/NineSegmentPatternEditorScreen.cpp
         voidsprite/Notification.cpp
         voidsprite/NotifSound.cpp

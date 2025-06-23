@@ -3,11 +3,13 @@
 
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "BaseScreen.h"
 #include "StartScreen.h"
+#include "PopupQuickConvert.h"
 #include "BasePopup.h"
 #include "brush/BaseBrush.h"
 #include "Pattern.h"
