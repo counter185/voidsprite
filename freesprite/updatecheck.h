@@ -67,7 +67,7 @@ inline void runUpdateCheck() {
                         try {
                             if (artifact.is_object()) {
                                 std::string name = artifact["name"];
-                                if (name.find(PLATFORM) == std::string::npos) {
+                                if (name.find(PLATFORM) == std::string::npos || artifact["workflow_run"]["head_branch"] != "main") {
                                     continue;
                                 }
                                 std::string createdAt = artifact["created_at"];
