@@ -1737,7 +1737,10 @@ void MainEditor::trySaveImage()
 {
     bool result = false;
     if (splitSessionData.set) {
-        result = saveSplitSession(lastConfirmedSavePath, this);
+        if (saveSplitSession(lastConfirmedSavePath, this)) {
+            result = true;
+            changesSinceLastSave = NO_UNSAVED_CHANGES;
+        }
     }
     else {
         lastWasSaveAs = false;
