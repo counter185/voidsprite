@@ -144,6 +144,7 @@
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
     {"vsp.launchpad.nav.about", "About voidsprite"},
     {"vsp.launchpad.nav.opennightlylinkdl", "Download latest build on nightly.link"},
+    {"vsp.launchpad.nav.webmanual", "Open web manual"},
     {"vsp.launchpad.nav.newwindow", "New window"},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},

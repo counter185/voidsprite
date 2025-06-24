@@ -166,7 +166,7 @@ StartScreen::StartScreen() {
     lastOpenFilesPanel->passThroughMouse = true;
     wxsManager.addDrawable(lastOpenFilesPanel);
 
-	std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_I };
+	std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_H };
     if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
 		navbarOrder.erase(std::remove(navbarOrder.begin(), navbarOrder.end(), SDL_SCANCODE_W), navbarOrder.end());
         // remove the window tab if we shouldn't be able to use it
@@ -206,7 +206,7 @@ StartScreen::StartScreen() {
                 }
             },
             {
-                SDL_SCANCODE_I,
+                SDL_SCANCODE_H,
                 {
                     TL("vsp.nav.help"),
                     {},
@@ -216,6 +216,7 @@ StartScreen::StartScreen() {
                             }
                         },
                         { SDL_SCANCODE_A,{ TL("vsp.launchpad.nav.about"), [this]() { g_addPopup(new PopupAbout());} } },
+                        { SDL_SCANCODE_H,{ TL("vsp.launchpad.nav.webmanual"), [this]() { platformOpenWebpageURL("https://counter185.github.io/voidsprite-web-manual"); }}},
                     }
                 }
             }
