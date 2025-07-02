@@ -46,6 +46,8 @@ struct Guideline {
 struct IsolatedFragmentPoint {
     XY onCanvasPixelPosition;
     u8 directions = 0;
+    u8 directions2x = 0;
+    u8 directions4x = 0;
 };
 
 /*struct Frame {

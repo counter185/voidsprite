@@ -405,11 +405,21 @@ void MainEditor::evalIsolatedFragmentRender()
         for (int x = 0; x < sme.size.x; x++) {
             XY onCanvasPoint = xyAdd(sme.origin, { x,0 });
             IsolatedFragmentPoint newRenderPoint;
-            newRenderPoint.directions |= !isolatedFragment.pointExists(xySubtract(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_UP : 0;
-            newRenderPoint.directions |= !isolatedFragment.pointExists(xyAdd(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_DOWN : 0;
+            bool hasPointAbove = isolatedFragment.pointExists(xySubtract(onCanvasPoint, { 0,1 }));
+            bool hasPointBelow = isolatedFragment.pointExists(xyAdd(onCanvasPoint, { 0,1 }));
+            newRenderPoint.directions |= !hasPointAbove ? FRAGMENT_DIRECTION_UP : 0;
+            newRenderPoint.directions |= !hasPointBelow ? FRAGMENT_DIRECTION_DOWN : 0;
             newRenderPoint.directions |= (x == 0) ? FRAGMENT_DIRECTION_LEFT : 0;
             newRenderPoint.directions |= (x == (sme.size.x - 1)) ? FRAGMENT_DIRECTION_RIGHT : 0;
             if (newRenderPoint.directions != 0) {
+                newRenderPoint.directions2x = newRenderPoint.directions;
+                newRenderPoint.directions2x &= ((x & 1) != 0) ? ~(FRAGMENT_DIRECTION_UP | FRAGMENT_DIRECTION_DOWN) : 0xff;
+                newRenderPoint.directions2x &= (hasPointAbove && hasPointBelow && (sme.origin.y & 1) != 0) ? ~(FRAGMENT_DIRECTION_LEFT | FRAGMENT_DIRECTION_RIGHT) : 0xff;
+
+                newRenderPoint.directions4x = newRenderPoint.directions2x;
+                newRenderPoint.directions4x &= ((x & 0b11) != 0) ? ~(FRAGMENT_DIRECTION_UP | FRAGMENT_DIRECTION_DOWN) : 0xff;
+                newRenderPoint.directions4x &= (hasPointAbove && hasPointBelow && (sme.origin.y & 0b11) != 0) ? ~(FRAGMENT_DIRECTION_LEFT | FRAGMENT_DIRECTION_RIGHT) : 0xff;
+
                 newRenderPoint.onCanvasPixelPosition = onCanvasPoint;
                 renderedIsolatedFragmentPoints.push_back(newRenderPoint);
             }
@@ -425,13 +435,16 @@ void MainEditor::drawIsolatedFragment()
         int xincrement = canvas.scale == 1 ? 3 : canvas.scale < 6 ? 2 : 1;
         int vincrement = canvas.scale <= 2 ? 4 : canvas.scale <= 5 ? 2 : 1;
 
-        int ySkip = canvas.scale <= 4 ? (canvas.scale == 1 ? 0b11 : 0b1) : 0;
+        int scale = canvas.scale <= 4 ? (canvas.scale == 1 ? 2 : 1) : 0;
 
         if (shouldUpdateRenderedIsolatedFragmentPoints) {
             evalIsolatedFragmentRender();
         }
         for (IsolatedFragmentPoint& fp : renderedIsolatedFragmentPoints) {
-            if ((fp.onCanvasPixelPosition.y & ySkip) != 0) {
+            u8 scaledDirections = scale == 2 ? fp.directions4x :
+                                  scale == 1 ? fp.directions2x 
+                                  : fp.directions;
+            if (scaledDirections == 0) {
                 continue;
             }
             XY onScreenPoint = canvas.canvasPointToScreenPoint(fp.onCanvasPixelPosition);
@@ -443,17 +456,17 @@ void MainEditor::drawIsolatedFragment()
                 continue;
             }
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-            if (fp.directions & FRAGMENT_DIRECTION_UP) {
-                drawLine(onScreenPoint, xyAdd(onScreenPoint, { onScreenPointRect.w / 2, 0 }));
+            if (scaledDirections & FRAGMENT_DIRECTION_UP) {
+                drawLine(onScreenPoint, xyAdd(onScreenPoint, { onScreenPointRect.w / (scale ? 1 : 2), 0 }));
             }
-            if (fp.directions & FRAGMENT_DIRECTION_DOWN) {
-                drawLine(xyAdd(onScreenPoint, {0, onScreenPointRect.h}), xyAdd(onScreenPoint, { onScreenPointRect.w / 2, onScreenPointRect.h }));
+            if (scaledDirections & FRAGMENT_DIRECTION_DOWN) {
+                drawLine(xyAdd(onScreenPoint, {0, onScreenPointRect.h}), xyAdd(onScreenPoint, { onScreenPointRect.w / (scale ? 1 : 2), onScreenPointRect.h }));
             }
-            if (fp.directions & FRAGMENT_DIRECTION_LEFT) {
-                drawLine(onScreenPoint, xyAdd(onScreenPoint, { 0, onScreenPointRect.h / (ySkip != 0 ? 1 : 2) }));
+            if (scaledDirections & FRAGMENT_DIRECTION_LEFT) {
+                drawLine(onScreenPoint, xyAdd(onScreenPoint, { 0, onScreenPointRect.h / (scale ? 1 : 2) }));
             }
-            if (fp.directions & FRAGMENT_DIRECTION_RIGHT) {
-                drawLine(xyAdd(onScreenPoint, { onScreenPointRect.w, 0 }), xyAdd(onScreenPoint, { onScreenPointRect.w, onScreenPointRect.h / (ySkip != 0 ? 1 : 2) }));
+            if (scaledDirections & FRAGMENT_DIRECTION_RIGHT) {
+                drawLine(xyAdd(onScreenPoint, { onScreenPointRect.w, 0 }), xyAdd(onScreenPoint, { onScreenPointRect.w, onScreenPointRect.h / (scale ? 1 : 2) }));
             }
         }
     }
