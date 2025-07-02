@@ -399,23 +399,19 @@ void MainEditor::evalIsolatedFragmentRender()
 {
     renderedIsolatedFragmentPoints.clear();
     isolatedFragment.forEachScanline([&](ScanlineMapElement sme) {
-        std::vector<IsolatedFragmentPoint> newRenderPoints;
         if (sme.size.x == 0) {
             return;
         }
-        newRenderPoints.resize(sme.size.x);
-
-        newRenderPoints[0].directions = FRAGMENT_DIRECTION_LEFT;
-        newRenderPoints[sme.size.x - 1].directions |= FRAGMENT_DIRECTION_RIGHT;
         for (int x = 0; x < sme.size.x; x++) {
             XY onCanvasPoint = xyAdd(sme.origin, { x,0 });
-            newRenderPoints[x].onCanvasPixelPosition = onCanvasPoint;
-            newRenderPoints[x].directions |= !isolatedFragment.pointExists(xySubtract(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_UP : 0;
-            newRenderPoints[x].directions |= !isolatedFragment.pointExists(xyAdd(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_DOWN : 0;
-            newRenderPoints[x].directions |= x == 0 ? FRAGMENT_DIRECTION_LEFT : 0;
-            newRenderPoints[x].directions |= x == (sme.size.x - 1) ? FRAGMENT_DIRECTION_RIGHT : 0;
-            if (newRenderPoints[x].directions != 0) {
-                renderedIsolatedFragmentPoints.push_back(newRenderPoints[x]);
+            IsolatedFragmentPoint newRenderPoint;
+            newRenderPoint.directions |= !isolatedFragment.pointExists(xySubtract(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_UP : 0;
+            newRenderPoint.directions |= !isolatedFragment.pointExists(xyAdd(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_DOWN : 0;
+            newRenderPoint.directions |= (x == 0) ? FRAGMENT_DIRECTION_LEFT : 0;
+            newRenderPoint.directions |= (x == (sme.size.x - 1)) ? FRAGMENT_DIRECTION_RIGHT : 0;
+            if (newRenderPoint.directions != 0) {
+                newRenderPoint.onCanvasPixelPosition = onCanvasPoint;
+                renderedIsolatedFragmentPoints.push_back(newRenderPoint);
             }
         }
     });
