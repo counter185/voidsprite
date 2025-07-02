@@ -395,6 +395,33 @@ void MainEditor::drawSymmetryLines() {
     }
 }
 
+void MainEditor::evalIsolatedFragmentRender()
+{
+    renderedIsolatedFragmentPoints.clear();
+    isolatedFragment.forEachScanline([&](ScanlineMapElement sme) {
+        std::vector<IsolatedFragmentPoint> newRenderPoints;
+        if (sme.size.x == 0) {
+            return;
+        }
+        newRenderPoints.resize(sme.size.x);
+
+        newRenderPoints[0].directions = FRAGMENT_DIRECTION_LEFT;
+        newRenderPoints[sme.size.x - 1].directions |= FRAGMENT_DIRECTION_RIGHT;
+        for (int x = 0; x < sme.size.x; x++) {
+            XY onCanvasPoint = xyAdd(sme.origin, { x,0 });
+            newRenderPoints[x].onCanvasPixelPosition = onCanvasPoint;
+            newRenderPoints[x].directions |= !isolatedFragment.pointExists(xySubtract(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_UP : 0;
+            newRenderPoints[x].directions |= !isolatedFragment.pointExists(xyAdd(onCanvasPoint, { 0,1 })) ? FRAGMENT_DIRECTION_DOWN : 0;
+            newRenderPoints[x].directions |= x == 0 ? FRAGMENT_DIRECTION_LEFT : 0;
+            newRenderPoints[x].directions |= x == (sme.size.x - 1) ? FRAGMENT_DIRECTION_RIGHT : 0;
+            if (newRenderPoints[x].directions != 0) {
+                renderedIsolatedFragmentPoints.push_back(newRenderPoints[x]);
+            }
+        }
+    });
+    shouldUpdateRenderedIsolatedFragmentPoints = false;
+}
+
 void MainEditor::drawIsolatedFragment()
 {
     if (isolateEnabled) {
@@ -402,51 +429,37 @@ void MainEditor::drawIsolatedFragment()
         int xincrement = canvas.scale == 1 ? 3 : canvas.scale < 6 ? 2 : 1;
         int vincrement = canvas.scale <= 2 ? 4 : canvas.scale <= 5 ? 2 : 1;
 
-        isolatedFragment.forEachScanline([&](ScanlineMapElement sme) {
-            SDL_Rect r = canvas.canvasRectToScreenRect({ sme.origin.x, sme.origin.y, sme.size.x, 1 });
-            XY p1 = {r.x,r.y};
-            XY p2 = { r.x, r.y + canvas.scale/2 };
-            XY p3 = { r.x + r.w, r.y + canvas.scale/2};
-            XY p4 = { r.x + r.w, r.y + canvas.scale };
+        int ySkip = canvas.scale <= 4 ? (canvas.scale == 1 ? 0b11 : 0b1) : 0;
 
-            if (r.y + r.h < 0 || r.y >= g_windowH || r.x >= g_windowW) {
-                return;
+        if (shouldUpdateRenderedIsolatedFragmentPoints) {
+            evalIsolatedFragmentRender();
+        }
+        for (IsolatedFragmentPoint& fp : renderedIsolatedFragmentPoints) {
+            if ((fp.onCanvasPixelPosition.y & ySkip) != 0) {
+                continue;
             }
-
+            XY onScreenPoint = canvas.canvasPointToScreenPoint(fp.onCanvasPixelPosition);
+            SDL_Rect onScreenPointRect = canvas.canvasRectToScreenRect({ fp.onCanvasPixelPosition.x, fp.onCanvasPixelPosition.y, 1,1 });
+            if (onScreenPoint.y > g_windowH) {
+                break;
+            }
+            else if (onScreenPointRect.y + onScreenPointRect.h < 0) {
+                continue;
+            }
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-            bool shouldDrawVLine = true;
-            if (canvas.scale <= 5) {
-                shouldDrawVLine =
-                    !isolatedFragment.pointExists(xySubtract(sme.origin, { 0,1 }))
-                    //|| !isolatedFragment.pointExists(xyAdd(sme.origin, { 0,1 }))
-                    || sme.origin.y % vincrement == 0;
+            if (fp.directions & FRAGMENT_DIRECTION_UP) {
+                drawLine(onScreenPoint, xyAdd(onScreenPoint, { onScreenPointRect.w / 2, 0 }));
             }
-
-            if (shouldDrawVLine) {
-                SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
-                SDL_RenderDrawLine(g_rd, p3.x, p3.y, p4.x, p4.y);
+            if (fp.directions & FRAGMENT_DIRECTION_DOWN) {
+                drawLine(xyAdd(onScreenPoint, {0, onScreenPointRect.h}), xyAdd(onScreenPoint, { onScreenPointRect.w / 2, onScreenPointRect.h }));
             }
-
-            XY origin = sme.origin;
-            XY p2p = { r.x,r.y + canvas.scale };
-
-            for (int x = 0; x < sme.size.x; x += xincrement) {
-                XY pointNow = xyAdd(origin, { x,0 });
-                if (!isolatedFragment.pointExists(xySubtract(pointNow, { 0,1 }))) {
-                    //top line
-                    XY p11 = xyAdd(p1, { x * canvas.scale, 0 });
-                    XY p12 = xyAdd(p11, { canvas.scale / 2, 0 });
-                    SDL_RenderDrawLine(g_rd, p11.x, p11.y, p12.x, p12.y);
-
-                }
-                if (!isolatedFragment.pointExists(xyAdd(pointNow, { 0,1 }))) {
-                    //bottom line
-                    XY p21 = xyAdd(p2p, { x * canvas.scale, 0 });
-                    XY p22 = xyAdd(p21, { canvas.scale / 2, 0 });
-                    SDL_RenderDrawLine(g_rd, p21.x, p21.y, p22.x, p22.y);
-                }
+            if (fp.directions & FRAGMENT_DIRECTION_LEFT) {
+                drawLine(onScreenPoint, xyAdd(onScreenPoint, { 0, onScreenPointRect.h / (ySkip != 0 ? 1 : 2) }));
             }
-        });
+            if (fp.directions & FRAGMENT_DIRECTION_RIGHT) {
+                drawLine(xyAdd(onScreenPoint, { onScreenPointRect.w, 0 }), xyAdd(onScreenPoint, { onScreenPointRect.w, onScreenPointRect.h / (ySkip != 0 ? 1 : 2) }));
+            }
+        }
     }
 }
 
@@ -2297,6 +2310,7 @@ void MainEditor::tryToggleTilePreviewLockAtMousePos()
                 isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
                                           tileToLock.y * tileDimensions.y, tileDimensions.x,
                                           tileDimensions.y});
+                shouldUpdateRenderedIsolatedFragmentPoints = true;
             }
             if (tileToLock.x >= 0 && tileToLock.y >= 0) {
                 lockedTilePreview = tileToLock;
@@ -2815,6 +2829,7 @@ void MainEditor::layer_selectCurrentAlpha()
             }
         }
     }
+    shouldUpdateRenderedIsolatedFragmentPoints = true;
     isolateEnabled = p > 0;
 }
 

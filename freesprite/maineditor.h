@@ -39,6 +39,15 @@ struct Guideline {
     int position;
 };
 
+#define FRAGMENT_DIRECTION_UP 0b0001
+#define FRAGMENT_DIRECTION_DOWN 0b0010
+#define FRAGMENT_DIRECTION_LEFT 0b0100
+#define FRAGMENT_DIRECTION_RIGHT 0b1000
+struct IsolatedFragmentPoint {
+    XY onCanvasPixelPosition;
+    u8 directions;
+};
+
 /*struct Frame {
     std::vector<Layer*> layers;
     std::vector<CommentData> comments;
@@ -47,6 +56,8 @@ struct Guideline {
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 protected:
+    std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
+
     MainEditor() {}
 public:
     bool isPalettized = false;
@@ -141,6 +152,8 @@ public:
     u64 editTime = 0;
     u64 lastTimestamp = -1;
 
+    bool shouldUpdateRenderedIsolatedFragmentPoints = false;
+
     Timer64 autosaveTimer;
 
     MainEditor(XY dimensions);
@@ -167,6 +180,7 @@ public:
     void renderComments();
     void renderUndoStack();
     void drawSymmetryLines();
+    void evalIsolatedFragmentRender();
     void drawIsolatedFragment();
     void drawTileGrid();
     void renderGuidelines();

@@ -826,6 +826,7 @@ int main(int argc, char** argv)
                 if (!wd->screenStack.empty()) {
                     wd->screenStack[wd->currentScreen]->tick();
                 }
+                g_runMainThreadOperations();
 
                 if (wd->viewport != NULL) {
                     g_pushRenderTarget(wd->viewport);
