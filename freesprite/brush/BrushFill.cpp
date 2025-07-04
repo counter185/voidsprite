@@ -259,7 +259,7 @@ void BrushRaycastFill::clickPress(MainEditor* editor, XY pos)
                 iPos = newIPos;
                 if (colorEqual(currentLayer->getPixelAt(newIPos), colorNow, editor->isPalettized)) {
                     evalPoints.addPoint(iPos);
-                    currentLayer->setPixel(iPos, activeColor);
+                    editor->SetPixel(iPos, activeColor);
                 }
                 else {
                     break;
