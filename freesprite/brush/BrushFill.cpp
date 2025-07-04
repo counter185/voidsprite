@@ -1,6 +1,14 @@
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "BrushFill.h"
+
 #include "../background_operation.h"
 #include "../FontRenderer.h"
+
+bool colorEqual(u32 c1, u32 c2, bool indexed) {
+    return (c1 == c2) || (!indexed && (c1 >> 24) == 0 && (c2 >> 24) == 0);
+}
 
 bool BrushFill::closedListContains(XY a)
 {
@@ -96,7 +104,7 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
                     openListElement.y / editor->tileDimensions.y,
                 };
             if (editor->isInBounds(openListElement)
-                && (pixelRn == previewSearchingColor || (!editor->isPalettized && pixelRn >> 24 == 0 && previewSearchingColor >> 24 == 0))
+                && colorEqual(pixelRn, previewSearchingColor, editor->isPalettized)
                 && !closedListContains(openListElement)
                 && (editor->tileDimensions.x == 0 || !g_config.fillToolTileBound || xyEqual(tilePosSelected, tilePos))) {
                 XY p[] = {
@@ -220,4 +228,43 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
     drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
     drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+}
+
+void BrushRaycastFill::clickPress(MainEditor* editor, XY pos)
+{
+    g_startNewOperation([this, editor, pos]() {
+
+        double precision = dxmax(1, editor->toolProperties["brush.rtfill.precision"]);
+
+        u32 activeColor = editor->getActiveColor();
+        Layer* currentLayer = editor->getCurrentLayer();
+        u32 colorNow = currentLayer->getPixelAt(pos);
+
+        ScanlineMap evalPoints;
+        evalPoints.iPromiseNotToPutDuplicatePoints = true;
+
+        for (double x = 0; x < 360; x += (1 / precision)) {
+            double angle = x * M_PI / 180.0;
+            XYd rayVector = { cos(angle), sin(angle) };
+            XYd rayPos = { pos.x, pos.y };
+            XY iPos = { rayPos.x, rayPos.y };
+
+            while (editor->isInBounds(iPos)) {
+                rayPos.x += rayVector.x;
+                rayPos.y += rayVector.y;
+                XY newIPos = { (int)round(rayPos.x), (int)round(rayPos.y) };
+                if (evalPoints.pointExists(newIPos)) {
+                    continue;
+                }
+                iPos = newIPos;
+                if (colorEqual(currentLayer->getPixelAt(newIPos), colorNow, editor->isPalettized)) {
+                    evalPoints.addPoint(iPos);
+                    currentLayer->setPixel(iPos, activeColor);
+                }
+                else {
+                    break;
+                }
+            }
+        }
+    });
 }

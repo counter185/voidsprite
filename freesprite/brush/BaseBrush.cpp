@@ -104,6 +104,7 @@ void g_loadBrushes()
     g_brushes.push_back(new BrushCircleArc());
     g_brushes.push_back(new BrushDiamond());
     g_brushes.push_back(new BrushFill());
+    g_brushes.push_back(new BrushRaycastFill());
     g_brushes.push_back(new BrushReplaceColor());
     g_brushes.push_back(new ToolColorPicker());
     g_brushes.push_back(new ToolRectIsolate());

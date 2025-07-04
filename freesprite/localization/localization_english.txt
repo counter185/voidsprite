@@ -363,6 +363,7 @@
     //brushes/tools
     {"vsp.brush.param.size", "Size"},
     {"vsp.brush.param.pressuresize", "Pressure size"},
+    {"vsp.brush.param.precision", "Precision"},
 
     {"vsp.brush.undefined", "Default brush"},
     {"vsp.brush.squarepixel", "Square Pixel"},
@@ -387,6 +388,8 @@
     {"vsp.brush.fill", "Fill"},
     {"vsp.brush.fill.desc", "Mouse Left to fill an area with the current color.\n"
                             "Mouse Right to fill only the currently selected area."},
+    {"vsp.brush.raycastfill", "Raycast Fill"},
+    {"vsp.brush.raycastfill.desc", "Fills the nearby area with line-of-sight raycasts."},
     {"vsp.brush.swapcolor", "Replace color"},
     {"vsp.brush.swapcolor.desc", "Mouse Left to replace all occurrences of the clicked color with the current active color."},
     {"vsp.brush.pickcolor", "Color Picker"},

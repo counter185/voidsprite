@@ -274,6 +274,9 @@ struct XY {
 struct XYf {
     float x, y;
 };
+struct XYd {
+    double x, y;
+};
 
 struct NamedOperation {
     std::string name;
