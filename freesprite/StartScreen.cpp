@@ -591,6 +591,7 @@ void StartScreen::renderStartupAnim()
 void StartScreen::renderFileDropAnim()
 {
     if (droppingFile) {
+        g_fullFramerateThisFrame = true;
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0 * fileDropTimer.percentElapsedTime(200));
         SDL_Rect r = { 0,0,g_windowW,g_windowH };
         SDL_RenderFillRect(g_rd, &r);

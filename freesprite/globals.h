@@ -165,7 +165,8 @@ class RenderFilter;
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;
 inline int g_renderScale = 1;
-extern std::string g_programDirectory;
+inline std::string g_programDirectory;
+inline std::string g_programExePath;
 inline VSPWindow* g_currentWindow = NULL;
 inline VSPWindow* g_mainWindow = NULL;
 extern SDL_Window* g_wd;
@@ -184,6 +185,7 @@ inline std::vector<BaseFilter*> g_filters;
 inline std::vector<BaseFilter*> g_pluginFilters;
 inline std::vector<RenderFilter*> g_renderFilters;
 inline bool g_windowFocused = true;
+inline bool g_fullFramerateThisFrame = false;
 inline SDL_PropertiesID g_props;
 
 extern std::vector<std::string> g_cmdlineArgs;

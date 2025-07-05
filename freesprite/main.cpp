@@ -45,7 +45,6 @@
 int g_windowW = 1280;
 int g_windowH = 720;
 XY unscaledWindowSize = {g_windowW, g_windowH};
-std::string g_programDirectory = "";
 
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
@@ -320,6 +319,32 @@ void main_assignFavScreen()
     */
 }
 
+#ifndef _WIN32
+#define MSG void
+#endif
+bool main_WindowsMessageHook(void* userdata, MSG* msg) {
+#if _WIN32
+    if (msg->message == WM_USER + 1) {
+        main_newWindow();
+        return false;
+    }
+    else if (msg->message == WM_COPYDATA) {
+		COPYDATASTRUCT* data = (COPYDATASTRUCT*)msg->lParam;
+        if (data->cbData > 8 && strncmp((char*)data->lpData, "vspdata", 7) == 0) {
+            std::string cmdString = "";
+            cmdString.resize(data->cbData);
+            memcpy(&cmdString[0], data->lpData, data->cbData);
+
+            loginfo(std::format("Received window command: {}", cmdString));
+            return false;
+        }
+    }
+    return true;
+#else
+    return true;
+#endif
+}
+
 int main(int argc, char** argv)
 {
     try {
@@ -352,9 +377,10 @@ int main(int argc, char** argv)
         }
 #if __ANDROID__
         g_programDirectory = "";
+        g_programExePath = "";
 #else
-        g_programDirectory = std::string(argv[0]);
-        g_programDirectory = g_programDirectory.substr(0, g_programDirectory.find_last_of("/\\"));
+		g_programExePath = std::string(argv[0]);
+        g_programDirectory = g_programExePath.substr(0, g_programExePath.find_last_of("/\\"));
         g_programDirectory += _WIN32 ? "\\" : "/";
 #endif
         loginfo(std::format("Program directory: {}", g_programDirectory));
@@ -363,13 +389,12 @@ int main(int argc, char** argv)
         srand(time(NULL));
 
         loginfo("Library versions:\n" + getAllLibsVersions());
-
-        platformPreInit();
-
         loginfo("System information:\n" + platformGetSystemInfo());
 
         g_loadConfig();
         loginfo("Config loaded");
+
+        platformPreInit();
 
         SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
         int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
@@ -399,6 +424,8 @@ int main(int argc, char** argv)
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
+
+        SDL_SetWindowsMessageHook(main_WindowsMessageHook, NULL);
 
         g_props = SDL_CreateProperties();
 
@@ -666,6 +693,7 @@ int main(int argc, char** argv)
 
         SDL_Event evt;
         while (!g_windows.empty()) {
+            g_fullFramerateThisFrame = false;
             bool firedQuitEventThisFrame = false;
             bool anyPopupsOpen = false;
             for (auto& [id, wd] : g_windows) {
@@ -976,7 +1004,7 @@ int main(int argc, char** argv)
                 if (!g_config.vsync) {
                     SDL_Delay(3);
                 }
-                if (!g_windowFocused) {
+                if (!g_windowFocused && !g_fullFramerateThisFrame) {
                     if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
                         SDL_Delay(500);
                     }

@@ -31,6 +31,7 @@ bool g_saveConfig() {
         file << "showFPS=" << (g_config.showFPS ? "1" : "0") << std::endl;
         file << "checkUpdates=" << (g_config.checkUpdates ? "1" : "0") << std::endl;
         file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
+		file << "singleInstance=" << (g_config.singleInstance ? "1" : "0") << std::endl;
         
         auto keybinds = g_keybindManager.serializeKeybinds();
 		for (const std::string& keybind : keybinds) {
@@ -92,6 +93,7 @@ void g_loadConfig() {
         if (config.contains("showFPS")) { g_config.showFPS = config["showFPS"] == "1"; }
         if (config.contains("checkUpdates")) { g_config.showFPS = config["checkUpdates"] == "1"; }
         if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
+		if (config.contains("singleInstance")) { g_config.singleInstance = config["singleInstance"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();

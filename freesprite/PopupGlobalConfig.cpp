@@ -75,6 +75,9 @@ PopupGlobalConfig::PopupGlobalConfig()
     if (platformSupportsFeature(VSP_FEATURE_WEB_FETCH)) {
         configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates, &posInTab));
     }
+    if (platformSupportsFeature(VSP_FEATURE_INSTANCE_IPC)) {
+        configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.singleinstance"), TL("vsp.config.opt.singleinstance.desc"), &g_config.singleInstance, &posInTab));
+    }
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {

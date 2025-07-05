@@ -266,6 +266,9 @@
     {"vsp.config.opt.usesystemfilepicker", "Use system file dialog"},
     {"vsp.config.opt.usesystemfilepicker.desc", "When enabled, opening and saving files will use the system file picker window.\n"
                                                 "Only supported on desktop platforms."},
+    {"vsp.config.opt.singleinstance", "Single instance"},
+    {"vsp.config.opt.singleinstance.desc", "When enabled, new instances of voidsprite will open a new window of an already open instance instead.\n"
+                                           "*No effect if directly opening a file."},
     {"vsp.config.opt.lang", "Language (restart required)"},
     {"vsp.config.opt.vsync", "Vertical sync"},
     {"vsp.config.opt.vsync.desc", "When enabled, the framerate will be locked to your display's refresh rate.\n"

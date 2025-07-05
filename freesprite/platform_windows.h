@@ -29,7 +29,8 @@ HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
 
-bool windows_isProcessRunning(std::wstring name) {
+int windows_numProcessesRunning(std::wstring name) {
+    int ret = 0;
     HANDLE hProcessSnap;
     PROCESSENTRY32W pe32;
     // Take a snapshot of all processes in the system.
@@ -42,16 +43,19 @@ bool windows_isProcessRunning(std::wstring name) {
     // and exit if unsuccessful
     if (!Process32FirstW(hProcessSnap, &pe32)) {
         CloseHandle(hProcessSnap);     // clean the snapshot object
-        return false;
+        return 0;
     }
     do {
         if (name == pe32.szExeFile) {
-            CloseHandle(hProcessSnap);
-            return true;
+            ret++;
         }
     } while (Process32NextW(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
-    return false;
+    return ret;
+}
+
+bool windows_isProcessRunning(std::wstring name) {
+	return windows_numProcessesRunning(name) > 0;
 }
 
 std::string windows_readStringFromRegistry(HKEY rootKey, std::wstring path, std::wstring keyname) {
@@ -80,7 +84,67 @@ std::string windows_getActiveGPUName() {
     return ret;
 }
 
-void platformPreInit() {}
+HWND windows_getProcessMainWindow(DWORD pid) {
+    struct result {
+        DWORD targetPid = 0;
+        DWORD foundPid = 0;
+		HWND foundHwnd = NULL;
+    };
+    result res{};
+    res.targetPid = pid;
+
+    EnumWindows([](HWND hwnd, LPARAM lparam) {
+		result* r = (result*)lparam;
+        DWORD pidNow;
+        if (GetWindowThreadProcessId(hwnd, &pidNow) && pidNow == r->targetPid) {
+			r->foundHwnd = hwnd;
+            return FALSE;
+        }
+        return TRUE;
+    }, (LPARAM)&res);
+
+    return res.foundHwnd;
+}
+
+void platformPreInit() {
+    auto thisPID = GetCurrentProcessId();
+    std::wstring thisExeName = convertStringOnWin32(fileNameFromPath(g_programExePath));
+
+    if (g_config.singleInstance && g_cmdlineArgs.size() == 0) {
+        //find any other already running instances and send wm_user+0 to them
+        HANDLE hProcessSnap;
+        PROCESSENTRY32W pe32;
+        hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
+        if (hProcessSnap != INVALID_HANDLE_VALUE) {
+            pe32.dwSize = sizeof(PROCESSENTRY32W);
+            if (Process32FirstW(hProcessSnap, &pe32)) {
+                do {
+                    if (thisPID != pe32.th32ProcessID && lstrcmpW(pe32.szExeFile, thisExeName.c_str()) == 0) {
+                        //find main window
+                        HWND hWnd = windows_getProcessMainWindow(pe32.th32ProcessID);
+                        if (hWnd != NULL) {
+                            //send message to window
+
+                            //the code below would be ideal but sdl does not support sendmessage and wm_copydata does not support postmessage
+                            //so we can't send strings
+                            /*std::string command = "vspdata:newwindow";
+                            COPYDATASTRUCT cds;
+                            cds.dwData = 0;
+                            cds.cbData = (DWORD)(command.size() + 1);
+                            cds.lpData = (PVOID)command.c_str();
+                            LRESULT res = SendMessageW(hWnd, WM_COPYDATA, 0, (LPARAM)&cds);*/
+
+                            PostMessageW(hWnd, WM_USER + 1, 0, 0);
+                            loginfo(std::format("{}", GetLastError()));
+                            exit(0);
+                        }
+                    }
+                } while (Process32NextW(hProcessSnap, &pe32));
+            }
+            CloseHandle(hProcessSnap);
+        }
+    }
+}
 void platformInit() {}
 void platformPostInit() {
     static bool d = false;

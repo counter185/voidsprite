@@ -39,6 +39,7 @@ public:
                                 // 1: delay 45 on unfocus
                                 // 2: delay 500 on unfocus
                                 // 3: auto      (0 if no battery, 1 if battery, 2 if battery <15%)
+    bool singleInstance = true;
 
     std::vector<std::string> lastOpenFiles;
 

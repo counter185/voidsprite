@@ -3,7 +3,6 @@ inline int fav_screen = 0;
 inline bool favourite = false;
 inline std::map<int, VSPWindow*> g_windows;
 inline Timer64 screenSwitchTimer;
-
 inline SDL_Texture* screenPreviewFramebuffer = NULL;
 
 void main_renderScaleUp();
