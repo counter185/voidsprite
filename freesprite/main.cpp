@@ -319,11 +319,8 @@ void main_assignFavScreen()
     */
 }
 
-#ifndef _WIN32
-#define MSG void
-#endif
-bool main_WindowsMessageHook(void* userdata, MSG* msg) {
 #if _WIN32
+bool main_WindowsMessageHook(void* userdata, MSG* msg) {
     if (msg->message == WM_USER + 1) {
         main_newWindow();
         return false;
@@ -340,10 +337,8 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
         }
     }
     return true;
-#else
-    return true;
-#endif
 }
+#endif
 
 int main(int argc, char** argv)
 {
@@ -425,7 +420,9 @@ int main(int argc, char** argv)
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
+#if _WIN32
         SDL_SetWindowsMessageHook(main_WindowsMessageHook, NULL);
+#endif
 
         g_props = SDL_CreateProperties();
 
