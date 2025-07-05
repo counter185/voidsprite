@@ -30,16 +30,38 @@ inline int latestVersionYear = 0;
 inline int latestVersionMonth = 0;
 inline int latestVersionDay = 0;
 
+inline bool didRunFinish(std::string commitHash) {
+    try {
+        std::string runsUrl = "https://api.github.com/repos/counter185/voidsprite/actions/runs";
+        std::string runsData = platformFetchTextFile(runsUrl);
+        json j = json::parse(runsData);
+        if (j.is_object() && j.contains("workflow_runs")) {
+            for (auto& runs : j["workflow_runs"]) {
+                if (runs["head_sha"] == commitHash) {
+                    if (runs["status"] == "in_progress") {
+                        loginfo(std::format("updatecheck: run {} is currently in progress...", std::string(runs["head_sha"])));
+                    }
+                    return runs["status"] == "completed" && runs["conclusion"] == "success";
+                }
+            }
+        }
+    }
+    catch (std::exception&) {
+        logerr("Failed to get runs data");
+    }
+    return false;
+}
+
 inline void runUpdateCheck() {
     try {
         std::string repoInfoUrl = "https://api.github.com/repos/counter185/voidsprite";
         std::string repoInfoData = platformFetchTextFile(repoInfoUrl);
 
-		json j = json::parse(repoInfoData);
+        json j = json::parse(repoInfoData);
         if (j.is_object() && j.contains("stargazers_count")) {
-			githubStars = j["stargazers_count"].get<int>();
+            githubStars = j["stargazers_count"].get<int>();
             loginfo(std::format("GitHub star count: {}", (int)githubStars));
-		}
+        }
     }
     catch (std::exception&) {
         logerr("Failed to get repository data");
@@ -88,12 +110,14 @@ inline void runUpdateCheck() {
                                     (yearNow == latestYear && monthNow == latestMonth && dayNow == latestDay && hourNow > latestHr) ||
                                     (yearNow == latestYear && monthNow == latestMonth && dayNow == latestDay && hourNow == latestHr && minuteNow > latestMin)) {
 
-                                    latestHashNow = headSha;
-                                    latestYear = yearNow;
-                                    latestMonth = monthNow;
-                                    latestDay = dayNow;
-                                    latestHr = hourNow;
-                                    latestMin = minuteNow;
+                                    if (didRunFinish(headSha)) {
+                                        latestHashNow = headSha;
+                                        latestYear = yearNow;
+                                        latestMonth = monthNow;
+                                        latestDay = dayNow;
+                                        latestHr = hourNow;
+                                        latestMin = minuteNow;
+                                    }
                                 }
                             }
                         }
@@ -116,7 +140,7 @@ inline void runUpdateCheck() {
         catch (std::exception&) {
             logerr("Failed to get actions data");
             latestHash = GIT_HASH;
-			updateCheckFailed = true;
+            updateCheckFailed = true;
         }
     }
     else {
