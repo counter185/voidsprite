@@ -88,9 +88,9 @@ For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requir
 
 ### Windows
 
-1. Go to `freesprite/devlibs` and extract `devlibs.7z` to the current directory (right click `devlibs.7z` > `Extract here`).
-2. Go back to the repository root and run the `copy_devlibs.bat` script
-3. Open `freesprite.sln` with Visual Studio and build/run like any other C++ program
+1. Run the `setup_windows_devlibs.bat` script
+2. Open `freesprite.sln` with Visual Studio and build/run like any other C++ program  
+*Only x64 builds work right now, 32-bit Windows targets do not compile
 
 ### Linux
 
