@@ -6,7 +6,7 @@ base_localization_file = 'localization_english.txt'
 
 target_localization_file = sys.argv[1] if len(sys.argv) > 1 else input("Localization file name: >")
 
-keyregex = re.compile(r'\{"([^"]+)",\s*(?:"[^"]+"\s*)+\}')
+keyregex = re.compile(r'\{"([^"]+)",\s*[^\}]+\}')
 
 def find_keys_in_file(filename):
     ret = {}
