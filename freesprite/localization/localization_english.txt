@@ -367,6 +367,7 @@
     {"vsp.brush.param.size", "Size"},
     {"vsp.brush.param.pressuresize", "Pressure size"},
     {"vsp.brush.param.precision", "Precision"},
+    {"vsp.brush.param.invert", "Invert"},
 
     {"vsp.brush.undefined", "Default brush"},
     {"vsp.brush.squarepixel", "Square Pixel"},

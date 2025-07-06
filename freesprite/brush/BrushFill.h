@@ -42,7 +42,8 @@ public:
     std::map<std::string, BrushProperty> getProperties() override
     {
         return {
-            {"brush.rtfill.precision", BRUSH_INT_PROPERTY(TL("vsp.brush.param.precision"),1,30,8)}
+            {"brush.rtfill.precision", BRUSH_INT_PROPERTY(TL("vsp.brush.param.precision"),1,30,8)},
+            {"brush.rtfill.invert", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.invert"),0)}
         };
     }
 

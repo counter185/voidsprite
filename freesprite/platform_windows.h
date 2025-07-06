@@ -55,7 +55,7 @@ int windows_numProcessesRunning(std::wstring name) {
 }
 
 bool windows_isProcessRunning(std::wstring name) {
-	return windows_numProcessesRunning(name) > 0;
+    return windows_numProcessesRunning(name) > 0;
 }
 
 std::string windows_readStringFromRegistry(HKEY rootKey, std::wstring path, std::wstring keyname) {
@@ -88,16 +88,16 @@ HWND windows_getProcessMainWindow(DWORD pid) {
     struct result {
         DWORD targetPid = 0;
         DWORD foundPid = 0;
-		HWND foundHwnd = NULL;
+        HWND foundHwnd = NULL;
     };
     result res{};
     res.targetPid = pid;
 
     EnumWindows([](HWND hwnd, LPARAM lparam) {
-		result* r = (result*)lparam;
+        result* r = (result*)lparam;
         DWORD pidNow;
         if (GetWindowThreadProcessId(hwnd, &pidNow) && pidNow == r->targetPid) {
-			r->foundHwnd = hwnd;
+            r->foundHwnd = hwnd;
             return FALSE;
         }
         return TRUE;

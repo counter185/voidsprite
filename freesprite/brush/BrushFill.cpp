@@ -235,6 +235,7 @@ void BrushRaycastFill::clickPress(MainEditor* editor, XY pos)
     g_startNewOperation([this, editor, pos]() {
 
         double precision = dxmax(1, editor->toolProperties["brush.rtfill.precision"]);
+        bool invert = editor->toolProperties["brush.rtfill.invert"] != 0;
 
         u32 activeColor = editor->getActiveColor();
         Layer* currentLayer = editor->getCurrentLayer();
@@ -259,12 +260,22 @@ void BrushRaycastFill::clickPress(MainEditor* editor, XY pos)
                 iPos = newIPos;
                 if (colorEqual(currentLayer->getPixelAt(newIPos), colorNow, editor->isPalettized)) {
                     evalPoints.addPoint(iPos);
-                    editor->SetPixel(iPos, activeColor);
+                    if (!invert) {
+                        editor->SetPixel(iPos, activeColor);
+                    }
                 }
                 else {
                     break;
                 }
             }
+        }
+
+        if (invert) {
+            currentLayer->wandSelectWithOperationAt(pos, [editor, activeColor, &evalPoints](XY point) {
+                if (!evalPoints.pointExists(point)) {
+                    editor->SetPixel(point, activeColor);
+                }
+            });
         }
     });
 }
