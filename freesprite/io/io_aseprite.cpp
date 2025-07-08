@@ -212,7 +212,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         }
 
                         LayerPalettized* subLayer = new LayerPalettized(kv.second.size.x, kv.second.size.y);
-                        u32* px = (u32*)subLayer->pixelData;
+                        u32* px = subLayer->pixels32();
                         for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
                             u8 pixel = kv.second.pixelData[pxp];
                             px[pxp] = pixel;
@@ -238,7 +238,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         }
 
                         Layer* subLayer = new Layer(kv.second.size.x, kv.second.size.y);
-                        u32* px = (u32*)subLayer->pixelData;
+                        u32* px = subLayer->pixels32();
                         if (header.colorDepth == 32) {
                             ASEPRITERGBAPixel* srcpx = (ASEPRITERGBAPixel*)kv.second.pixelData;
                             for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
@@ -383,7 +383,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
 
             u8* newPixelData;
             u64 dataSize;
-            u32* ppx = (u32*)l->pixelData;
+            u32* ppx = l->pixels32();
             if (editor->isPalettized) {
                 newPixelData = (u8*)tracked_malloc(l->w * l->h * 4);
                 std::transform(ppx, ppx + l->w * l->h, newPixelData, [](u32 a) { return a == -1 ? 0 : (u8)a; });
@@ -391,7 +391,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
             }
             else {
                 newPixelData = (u8*)tracked_malloc(l->w * l->h * 4);
-                SDL_ConvertPixels(l->w, l->h, SDL_PIXELFORMAT_ARGB8888, l->pixelData, l->w * 4, SDL_PIXELFORMAT_ABGR8888, newPixelData, l->w * 4);
+                SDL_ConvertPixels(l->w, l->h, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), l->w * 4, SDL_PIXELFORMAT_ABGR8888, newPixelData, l->w * 4);
                 dataSize = l->w * l->h * 4;
             }
             auto compressedData = compressZlib(newPixelData, dataSize);

@@ -44,7 +44,7 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
             int nPixels = ixmin(clipSource.w, w - position.x) * 4;
             memcpy(
                 pixelData + ((y + position.y) * w * 4) + (position.x * 4),
-                sourceLayer->pixelData + ((y + clipSource.y) * sourceLayer->w * 4) + (clipSource.x * 4),
+                sourceLayer->pixels8() + ((y + clipSource.y) * sourceLayer->w * 4) + (clipSource.x * 4),
                 nPixels
             );
             /*if (sourceLayer->colorKeySet) {
@@ -58,7 +58,7 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
 void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
 {
     u32* px32 = (u32*)pixelData;
-    u32* srcpx32 = (u32*)sourceLayer->pixelData;
+    u32* srcpx32 = sourceLayer->pixels32();
     XY originSrc = XY{sourceTile.x * tileSize.x, sourceTile.y * tileSize.y};
     XY originDst = XY{dstTile.x * tileSize.x, dstTile.y * tileSize.y};
     for (int y = 0; y < tileSize.y; y++) {
@@ -79,7 +79,7 @@ Layer* Layer::copy()
     ret->name = name;
     ret->colorKey = colorKey;
     ret->markLayerDirty();
-    memcpy(ret->pixelData, pixelData, w * h * 4);
+    memcpy(ret->pixels32(), pixelData, w * h * 4);
     return ret;
 }
 

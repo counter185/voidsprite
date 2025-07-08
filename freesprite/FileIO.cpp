@@ -107,7 +107,7 @@ std::map<std::string, std::string> parseINI(PlatformNativePathString path)
 void detile(Layer* ret, XY tileSize) {
 
     Layer* t = new Layer(ret->w, ret->h);
-    memcpy(t->pixelData, ret->pixelData, 4 * t->w * t->h);
+    memcpy(t->pixels32(), ret->pixels32(), 4 * t->w * t->h);
     //t->blitTile(ret, { 0,1 }, { 1,0 }, tileSize);
     Detiler dt(2);
     for (int y = 0; y < ceil(ret->h / (double)tileSize.y); y++) {
@@ -117,12 +117,12 @@ void detile(Layer* ret, XY tileSize) {
         }
     }
     
-    memcpy(ret->pixelData, t->pixelData, 4 * t->w * t->h);
+    memcpy(ret->pixels32(), t->pixels32(), 4 * t->w * t->h);
     delete t;
 }
 
 int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth, int blockHeight) {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     /*int skip = 232;
     int skipHowMany = 24;
     int skipCounter = 0;*/
@@ -232,7 +232,7 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
         }
     }
 
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (uint64_t i = 0; i < width * height; i++) {
         //pxd[i] = PackRGBAtoARGB(colorTable[i], colorTable[i], colorTable[i], 255);
         pxd[i] = colorTable[i];
@@ -299,7 +299,7 @@ uint8_t* DecompressMarioPaintSRM(FILE* f)
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile)
 {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             // Extract color endpoints
@@ -380,7 +380,7 @@ void DeXT1(Layer* ret, int width, int height, FILE* infile)
     }
 }
 void DeXT23(Layer* ret, int width, int height, FILE* infile) {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             // Extract color endpoints
@@ -482,7 +482,7 @@ void DeXT23(Layer* ret, int width, int height, FILE* infile) {
     }
 }
 void DeXT45(Layer* ret, int width, int height, FILE* infile) {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             //gonna be real i have no idea what's going on here
@@ -631,7 +631,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF A8 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 a;
                 fread(&a, 1, 1, infile);
@@ -643,7 +643,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF I8 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 i;
                 fread(&i, 1, 1, infile);
@@ -655,7 +655,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF IA88 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 i;
                 u8 a;
@@ -669,7 +669,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF BGRA Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 fread(pxp + dataP, 4, 1, infile);
             }
@@ -679,7 +679,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF RGBA Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 uint8_t ch[4];
                 fread(ch, 4, 1, infile);
@@ -692,7 +692,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF ARGB Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 uint8_t ch[4];
                 fread(ch, 4, 1, infile);
@@ -705,7 +705,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF ABGR Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 uint8_t ch[4];
                 fread(ch, 4, 1, infile);
@@ -718,7 +718,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF RGB Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 c[3];
                 fread(c, 3, 1, infile);
@@ -730,7 +730,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF RGB565 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 c[2];
                 fread(c, 2, 1, infile);
@@ -742,7 +742,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF BGR Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 fread(pxp + dataP, 3, 1, infile);
                 pxp[dataP] |= 0xFF000000;
@@ -770,7 +770,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         //no idea how to make this work
         ret->name = "VTF RGBA16f Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u16 ch[4];
                 fread(ch, 2, 4, infile);
@@ -1212,7 +1212,7 @@ MainEditor* deserializePixelStudioSession(json j)
                         lightness / 10000.0f
                     };
                     logprintf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
-                    u32* px32 = (u32*)nlayer->pixelData;
+                    u32* px32 = nlayer->pixels32();
                     for (u64 dataPtr = 0; dataPtr < nlayer->w * nlayer->h; dataPtr++) {
                         px32[dataPtr] = hslShiftPixelStudioCompat(px32[dataPtr], shift);
                     }
@@ -1326,7 +1326,7 @@ Layer* readBMP(PlatformNativePathString path, uint64_t seek)
     Layer* nlayer = new Layer(w, h);
     nlayer->name = "BMP Layer";
     unsigned long dataPtr = 0;
-    uint32_t* pxData32 = (uint32_t*)nlayer->pixelData;
+    uint32_t* pxData32 = nlayer->pixels32();
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             RGBApixel px = nbmp.GetPixel(x,y);
@@ -1782,7 +1782,7 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
             {
                 ret = new Layer(desc.width, desc.height);
                 ret->name = "DDS BGRA Layer";
-                uint32_t* pxd = (uint32_t*)ret->pixelData;
+                uint32_t* pxd = ret->pixels32();
                 for (uint64_t d = 0; d < desc.width * desc.height; d++) {
                     uint32_t bgra;
                     fread(&bgra, 4, 1, infile);
@@ -1953,7 +1953,7 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek)
         //fseek(infile, 1, SEEK_CUR);
         Layer* ret = new Layer(hdr.Width, hdr.Height);
         ret->name = "MSP1.0/2.0 Layer";
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         uint64_t dataPointer = 0;
         while (dataPointer < hdr.Width*hdr.Height && ftell(infile) < fileLength) {
             uint8_t RunType;
@@ -2026,7 +2026,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
         LayerPalettized* ret = new LayerPalettized(320, 200);
         ret->palette = g_palettes[PALETTE_DEFAULT];
         ret->name = "SPK Layer";
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         uint64_t layerPointer = 0;
         uint16_t a;
         bool reachedImageEnd = false;
@@ -2079,7 +2079,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
         LayerPalettized* ret = new LayerPalettized(320, 200);
         ret->palette = g_palettes[PALETTE_DEFAULT];
         ret->name = "BDY Layer";
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         uint32_t* end = pxd + (320 * 200);
         bool reachedImageEnd = false;
         while (!reachedImageEnd && !feof(f)) {
@@ -2119,7 +2119,7 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         ret->palette = g_palettes[PALETTE_DEFAULT];
         for (int x = 0; x < 320 * 200; x++) {
             uint8_t pixel;
@@ -2419,7 +2419,7 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
         l->palette = pal;*/
         l->palette = g_palettes["Slim Render (8-bit)"];
 
-        u32* ppx = (u32*)l->pixelData;
+        u32* ppx = l->pixels32();
         for (int dataPointer = 0; dataPointer < l->w * l->h; dataPointer++) {
             uint8_t byte;
             fread(&byte, 1, 1, f);
@@ -2437,7 +2437,7 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
     auto nsp = read9SegmentPattern(path);
     if (nsp.first) {
         Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
-        memcpy(nlayer->pixelData, nsp.second.pixelData, nlayer->w * nlayer->h * 4);
+        memcpy(nlayer->pixels32(), nsp.second.pixelData, nlayer->w * nlayer->h * 4);
         tracked_free(nsp.second.pixelData);
         nlayer->name = "Pattern Layer";
         return nlayer;
@@ -2493,7 +2493,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
         //aand we have arrived at the `Texture segment` just look at that view
         ret = new Layer(128, 128);
         ret->name = "PS2 ICN Layer";
-        u32* ppx = (u32*)ret->pixelData;
+        u32* ppx = ret->pixels32();
 
         if (header.textureType == 0x07) {
             
@@ -2636,7 +2636,7 @@ Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek)
                 Detiler detiler(2);
                 ret = new Layer(48, 48);
                 ret->name = "3DS CXI Icon Layer";
-                u32* pxd = (u32*)ret->pixelData;
+                u32* pxd = ret->pixels32();
                 for (int x = 0; x < 48 * 48; x++) {
                     ret->setPixel(detiler.next(), RGB565toARGB8888(rgb565Data[x]));
                 }
@@ -3145,7 +3145,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     fread(&nlayers, 4, 1, infile);
                     for (int x = 0; x < nlayers; x++) {
                         Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                        fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
                         layers.push_back(newLayer);
                     }
                     MainEditor* ret = new MainEditor(layers);
@@ -3176,7 +3176,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         Layer* newLayer = new Layer(dimensions.x, dimensions.y);
                         newLayer->name = std::string(name);
                         tracked_free(name);
-                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                        fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
                         layers.push_back(newLayer);
                     }
                     MainEditor* ret = new MainEditor(layers);
@@ -3243,7 +3243,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
 
                             //voidsn version 5+ uses zlib compression
                             if (voidsnversion < 5) {
-                                fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                                fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
                             }
                             else {
                                 uint64_t compressedLength = 0;
@@ -3251,7 +3251,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                                 uint8_t* compressedData = new uint8_t[compressedLength];
                                 fread(compressedData, compressedLength, 1, infile);
                                 uint64_t dstLength = newLayer->w * newLayer->h * 4;
-                                uncompress(newLayer->pixelData, (uLongf*)&dstLength, compressedData, compressedLength);
+                                uncompress(newLayer->pixels8(), (uLongf*)&dstLength, compressedData, compressedLength);
                                 delete[] compressedData;
                             }
 
@@ -3290,7 +3290,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             tracked_free(name);
 
                             if (voidsnversion < 5) {
-                                fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
+                                fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
                             }
                             else {
                                 uint64_t compressedLength = 0;
@@ -3298,7 +3298,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                                 uint8_t* compressedData = new uint8_t[compressedLength];
                                 fread(compressedData, compressedLength, 1, infile);
                                 uint64_t dstLength = newLayer->w * newLayer->h * 4;
-                                uncompress(newLayer->pixelData, (uLongf*)&dstLength, compressedData, compressedLength);
+                                uncompress(newLayer->pixels8(), (uLongf*)&dstLength, compressedData, compressedLength);
                                 delete[] compressedData;
                             }
 
@@ -3456,7 +3456,7 @@ bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector
             if (lr->w * lr->h != projDimensions.x * projDimensions.y) {
                 logprintf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+            fwrite(lr->pixels32(), lr->w * lr->h, 4, outfile);
         }
 
         fclose(outfile);
@@ -3497,7 +3497,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
             fwrite(&nvalBuffer, 4, 1, outfile);
             fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
 
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+            fwrite(lr->pixels32(), lr->w * lr->h, 4, outfile);
         }
 
         fclose(outfile);
@@ -3579,7 +3579,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
             fwrite(&lr->colorKey, 4, 1, outfile);
 
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+            fwrite(lr->pixels32(), lr->w * lr->h, 4, outfile);
         }
 
         fclose(outfile);
@@ -3671,7 +3671,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
             fwrite(&lr->colorKey, 4, 1, outfile);
 
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
+            fwrite(lr->pixels32(), lr->w * lr->h, 4, outfile);
         }
 
         fclose(outfile);
@@ -3776,7 +3776,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             uint64_t maxCompressedDataSize = compressBound(lr->w * lr->h * 4);
             uint64_t compressedDataSize = maxCompressedDataSize;
             uint8_t* compressedData = new uint8_t[maxCompressedDataSize];
-            int res = compress(compressedData, (uLongf*)&compressedDataSize, lr->pixelData, lr->w * lr->h * 4);
+            int res = compress(compressedData, (uLongf*)&compressedDataSize, lr->pixels8(), lr->w * lr->h * 4);
 
             fwrite(&compressedDataSize, 8, 1, outfile);
             fwrite(compressedData, compressedDataSize, 1, outfile);
@@ -3945,7 +3945,7 @@ bool writeJPEG(PlatformNativePathString path, Layer* data)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
         return false;
     }
-    memcpy(surface->pixels, data->pixelData, data->w * data->h * 4);
+    memcpy(surface->pixels, data->pixels32(), data->w * data->h * 4);
 
     std::string u8path = convertStringToUTF8OnWin32(path);
 
@@ -3969,7 +3969,7 @@ bool writeAVIF(PlatformNativePathString path, Layer* data)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
         return false;
     }
-    memcpy(surface->pixels, data->pixelData, data->w * data->h * 4);
+    memcpy(surface->pixels, data->pixels32(), data->w * data->h * 4);
 
     std::string u8path = convertStringToUTF8OnWin32(path);
 
@@ -4025,7 +4025,7 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
         fprintf(f, "#define voidsprite_export_height %i\n", data->h);
         fprintf(f, "static unsigned char voidsprite_export_bits[] = {\n");
 
-        uint32_t* pxd = (uint32_t*)data->pixelData;
+        uint32_t* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < (int)ceil(ixmax(data->w, 8) / 8.0); x++) {
                 XY origin = { x * 8, y };
@@ -4108,7 +4108,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 
         if (!data->isPalettized) {
             fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
-            uint32_t* pxd = (uint32_t*)data->pixelData;
+            uint32_t* pxd = data->pixels32();
             uint64_t dp = 0;
             for (int y = 0; y < data->h; y++) {
                 for (int x = 0; x < data->w; x++) {
@@ -4131,7 +4131,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
             fprintf(outfile, "\n};\n\n");
 
             fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
-            uint32_t* pxd = (uint32_t*)data->pixelData;
+            uint32_t* pxd = data->pixels32();
             uint64_t dp = 0;
             for (int y = 0; y < data->h; y++) {
                 for (int x = 0; x < data->w; x++) {
@@ -4160,13 +4160,14 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
         fprintf(outfile, "#from PIL import Image\n\n");
         uint64_t dataPixelPointer = 0;
         fprintf(outfile, "voidsprite_image = np.array([\n");
+        u8* pixelData = data->pixelData;
         for (int y = 0; y < data->h; y++){
             fprintf(outfile, "    [");
             for (int x = 0; x < data->w; x++){
-                uint8_t b = data->pixelData[dataPixelPointer++];
-                uint8_t g = data->pixelData[dataPixelPointer++];
-                uint8_t r = data->pixelData[dataPixelPointer++];
-                uint8_t a = data->pixelData[dataPixelPointer++];
+                uint8_t b = pixelData[dataPixelPointer++];
+                uint8_t g = pixelData[dataPixelPointer++];
+                uint8_t r = pixelData[dataPixelPointer++];
+                uint8_t a = pixelData[dataPixelPointer++];
                 fprintf(outfile, "[%i,%i,%i,%i],", r,g,b,a);
             }
             fprintf(outfile, "],\n");
@@ -4244,7 +4245,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
         fprintf(f, "# File generated by voidsprite\n");
         fprintf(f, "%i %i\n", data->w, data->h);
 
-        uint32_t* pxd = (uint32_t*)data->pixelData;
+        uint32_t* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < data->w; x++) {
                 uint32_t c = pxd[x + y * data->w];
@@ -4277,7 +4278,7 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data)
         fprintf(f, "%i %i\n", data->w, data->h);
         fprintf(f, "256\n");
 
-        u32* pxd = (u32*)data->pixelData;
+        u32* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < data->w; x++) {
                 u32 c = pxd[x + y * data->w];
@@ -4311,7 +4312,7 @@ bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data)
         fprintf(f, "%i %i\n", data->w, data->h);
         fprintf(f, "255\n");
 
-        u32* pxd = (u32*)data->pixelData;
+        u32* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < data->w; x++) {
                 u32 c = pxd[x + y * data->w];
@@ -4345,7 +4346,7 @@ bool writeSR8(PlatformNativePathString path, Layer* data)
 
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
-        u32* ppx = (u32*)data->pixelData;
+        u32* ppx = data->pixels32();
         for (int x = 0; x < 16 * 16; x++) {
             u8 byte = ppx[x];
             fwrite(&byte, 1, 1, f);
@@ -4486,8 +4487,8 @@ bool writeVTF(PlatformNativePathString path, Layer* data)
         header.lowResImageHeight = lowResDimensions.y;
 
         fwrite(&header,64, 1, f);
-        fwrite(lowResImage->pixelData, lowResDimensions.x * lowResDimensions.y, 4, f);
-        fwrite(data->pixelData, data->w * data->h, 4, f);
+        fwrite(lowResImage->pixels32(), lowResDimensions.x * lowResDimensions.y, 4, f);
+        fwrite(data->pixels32(), data->w * data->h, 4, f);
         delete lowResImage;
         fclose(f);
         return true;
@@ -4704,7 +4705,7 @@ bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1,
         for (u32& w : writes) {
             fwrite(&w, 4, 1, outfile);
         }
-        fwrite(data->pixelData, data->w * data->h, 4, outfile);
+        fwrite(data->pixels32(), data->w * data->h, 4, outfile);
 
         fclose(outfile);
         return true;

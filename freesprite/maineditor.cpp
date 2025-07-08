@@ -95,7 +95,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
     Layer* nlayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     layers.push_back(nlayer);
-    SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, canvas.dimensions.x*4);
+    SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixels32(), canvas.dimensions.x*4);
 
     setUpWidgets();
     recenterCanvas();
@@ -1689,7 +1689,7 @@ void MainEditor::eventFileOpen(int evt_id, PlatformNativePathString name, int im
 
 void MainEditor::FillTexture() {
     Layer* l = getCurrentLayer();
-    int* pixels = (int*)l->pixelData;
+    int* pixels = (int*)l->pixels32();
     //int pitch;
     //SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
     for (int x = 0; x < l->w; x++) {
@@ -2377,7 +2377,7 @@ void MainEditor::mergeLayerDown(int index)
     deleteLayer(index);
     commitStateToLayer(bottomLayer);
     Layer* merged = mergeLayers(bottomLayer, topLayer);
-    memcpy(bottomLayer->pixelData, merged->pixelData, bottomLayer->w * bottomLayer->h * 4);
+    memcpy(bottomLayer->pixels32(), merged->pixels32(), bottomLayer->w * bottomLayer->h * 4);
     bottomLayer->markLayerDirty();
     delete merged;
     
@@ -2387,7 +2387,7 @@ void MainEditor::duplicateLayer(int index)
 {
     Layer* currentLayer = layers[index];
     Layer* newL = newLayer();
-    memcpy(newL->pixelData, currentLayer->pixelData, currentLayer->w * currentLayer->h * 4);
+    memcpy(newL->pixels32(), currentLayer->pixels32(), currentLayer->w * currentLayer->h * 4);
     newL->name = "Copy:" + currentLayer->name;
     newL->markLayerDirty();
 }
@@ -2440,15 +2440,15 @@ Layer* MainEditor::flattenImage()
     Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (ret != NULL) {
         int x = 0;
-        uint32_t* retppx = (uint32_t*)ret->pixelData;
+        uint32_t* retppx = ret->pixels32();
         for (Layer*& l : layers) {
             if (l->hidden) {
                 continue;
             }
-            uint32_t* ppx = (uint32_t*)l->pixelData;
+            uint32_t* ppx = l->pixels32();
             if (x++ == 0) {
                 if (l->layerAlpha == 255) {
-                    memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+                    memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4);
                 }
                 else {
                     for (uint64_t p = 0; p < l->w * l->h; p++) {
@@ -2488,10 +2488,10 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 {
     Layer* ret = new Layer(bottom->w, bottom->h);
 
-    memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);
+    memcpy(ret->pixels32(), bottom->pixels32(), bottom->w * bottom->h * 4);
 
-    uint32_t* ppx = (uint32_t*)top->pixelData;
-    uint32_t* retppx = (uint32_t*)ret->pixelData;
+    uint32_t* ppx = top->pixels32();
+    uint32_t* retppx = ret->pixels32();
     for (uint64_t p = 0; p < ret->w * ret->h; p++) {
         uint32_t pixel = ppx[p];
         uint32_t srcPixel = retppx[p];
@@ -2664,8 +2664,8 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
                 newLayer->hidden = l->hidden;
                 newLayer->palette = palette;
 
-                uint32_t* ppx = (uint32_t*)l->pixelData;
-                uint32_t* outpx = (uint32_t*)newLayer->pixelData;
+                uint32_t* ppx = l->pixels32();
+                uint32_t* outpx = newLayer->pixels32();
                 for (uint64_t p = 0; p < l->w * l->h; p++) {
                     outpx[p] = std::find(palette.begin(), palette.end(), ppx[p]) - palette.begin();
                 }

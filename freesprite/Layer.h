@@ -2,6 +2,11 @@
 #include "globals.h"
 #include "mathops.h"
 
+struct LayerVariant {
+    std::string name;
+    u8* pixelData = NULL;
+};
+
 class Layer
 {
 protected:
@@ -17,6 +22,7 @@ public:
     int w = -1, h = -1;
     bool bgOpFinished = false;
 
+    //please clean this up some day
     std::map<SDL_Renderer*,SDL_Texture*> tex;
     std::map<SDL_Renderer*,XY> texDimensions;
     std::map<SDL_Renderer*,bool> layerDirty;
@@ -234,6 +240,20 @@ public:
     virtual uint32_t getVisualPixelAt(XY position, bool ignoreLayerAlpha = true) {
         return getPixelAt(position, ignoreLayerAlpha);
     }
+
+	/// <summary>
+	/// Returns a pointer to the current pixel data of this layer as a uint32 pointer
+	/// </summary>
+	u32* pixels32() {
+		return (u32*)pixelData;
+	}
+
+	/// <summary>
+	/// Returns a pointer to the current pixel data of this layer as a uint8 pointer
+	/// </summary>
+	u8* pixels8() {
+		return (u8*)pixels32();
+	}
 
     void flipHorizontally(SDL_Rect region = {-1,-1,-1,-1}) {
         if (region.w == -1) {

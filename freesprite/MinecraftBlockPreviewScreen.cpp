@@ -179,7 +179,7 @@ void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
     drawIsometricBlock({0, 0, wh.x, wh.y});
     Layer* l = new Layer(wh.x, wh.y);
     SDL_Surface* nsrf = SDL_RenderReadPixels(g_rd, NULL);
-    SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixelData, wh.x*4);
+    SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), wh.x*4);
     SDL_FreeSurface(nsrf);
 
     g_popRenderTarget();
