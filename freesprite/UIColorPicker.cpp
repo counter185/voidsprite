@@ -351,18 +351,39 @@ void UIColorPicker::reloadColorLists()
         palettePanel->subWidgets.addDrawable(nameLabel);
         yNow += 30;
         int xNow = 0;
+        
+        //check if we should create large color buttons
+        int lineCount = 1;
+        int currentCountInLine = 0;
+        int maxCountInLine = 0;
+        for (auto& color : p.colorMap) {
+            if (color.first == HINT_NEXT_LINE) {
+                currentCountInLine = 0;
+                lineCount++;
+            }
+            else {
+                if (++currentCountInLine > maxCountInLine) {
+                    maxCountInLine = currentCountInLine;
+                }
+            }
+        }
+        bool largeColorButtons = maxCountInLine < 8;
+
+        int itemHeight = largeColorButtons ? 32 : 20;
+
+        //create all the color buttons
         for (auto& color : p.colorMap) {
             if (color.first == HINT_NEXT_LINE) {
                 xNow = 0;
-                yNow += 20;
+                yNow += itemHeight;
                 continue;
             }
 
             ColorPickerColorButton* b = new ColorPickerColorButton(this, color.second);
             b->position = XY{ xNow, yNow };
             b->tooltip = color.first;
-            b->wxWidth = 24;
-            b->wxHeight = 20;
+            b->wxWidth = largeColorButtons ? 48 : 24;
+            b->wxHeight = itemHeight;
             palettePanel->subWidgets.addDrawable(b);
             xNow += b->wxWidth;
             if (xNow + b->wxWidth >= palettePanel->wxWidth) {
@@ -370,7 +391,7 @@ void UIColorPicker::reloadColorLists()
                 yNow += b->wxHeight;
             }
         }
-        yNow += 30;
+        yNow += itemHeight+10;
     }
 
     UIButton* loadNewButton = new UIButton("Load palette...");
@@ -580,10 +601,10 @@ void UIColorPicker::colorUpdated(SDL_Color col, bool updateHSVSliders, bool upda
     };
 
     colorTextField->setText(std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
-	colorNowU32 = rgbColor;
-	if (onColorChangedCallback) {
-		onColorChangedCallback(this, rgbColor);
-	}
+    colorNowU32 = rgbColor;
+    if (onColorChangedCallback) {
+        onColorChangedCallback(this, rgbColor);
+    }
 
     updateColorModelSliders(dontUpdateThisColorModel);
 }
