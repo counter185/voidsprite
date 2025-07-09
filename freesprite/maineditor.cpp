@@ -1009,9 +1009,7 @@ void MainEditor::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
-                            [this]() {
-                                this->recenterCanvas();
-                            }
+                            [this]() { this->recenterCanvas(); }
                         }
                     },
                     {SDL_SCANCODE_F, { "Add reference...",
@@ -1041,9 +1039,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_G, { "Set pixel grid...",
-                            [this]() {
-                                g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:"));
-                            }
+                            [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
                     {SDL_SCANCODE_S, { "Open spritesheet preview...",
@@ -1915,7 +1911,9 @@ void MainEditor::discardEndOfUndoStack() {
                 {
                     UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                     for (int x = 0; x < layers.size(); x++) {
-                        tracked_free(resizeLayerData[x].oldData);
+                        for (auto& variant : resizeLayerData[x].oldLayerData) {
+                            tracked_free(variant.pixelData);
+                        }
                     }
                     delete resizeLayerData;
                 }
@@ -1997,7 +1995,9 @@ void MainEditor::discardRedoStack()
             case UNDOSTACK_RESIZE_LAYER:
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
-                    tracked_free(resizeLayerData[x].oldData);
+                    for (auto& variant : resizeLayerData[x].oldLayerData) {
+                        tracked_free(variant.pixelData);
+                    }
                 }
                 delete resizeLayerData;
                 break;
@@ -2059,13 +2059,13 @@ void MainEditor::undo()
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
                     //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                    uint8_t* oldData = layers[x]->pixelData;
+                    std::vector<LayerVariant> oldData = layers[x]->layerData;
                     XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                    layers[x]->pixelData = resizeLayerData[x].oldData;
+                    layers[x]->layerData = resizeLayerData[x].oldLayerData;
                     layers[x]->w = resizeLayerData[x].oldDimensions.x;
                     layers[x]->h = resizeLayerData[x].oldDimensions.y;
                     layers[x]->markLayerDirty();
-                    resizeLayerData[x].oldData = oldData;
+                    resizeLayerData[x].oldLayerData = oldData;
                     resizeLayerData[x].oldDimensions = oldDimensions;
                 }
                 canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2142,13 +2142,13 @@ void MainEditor::redo()
             UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
             for (int x = 0; x < layers.size(); x++) {
                 //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                uint8_t* oldData = layers[x]->pixelData;
+                std::vector<LayerVariant> oldData = layers[x]->layerData;
                 XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                layers[x]->pixelData = resizeLayerData[x].oldData;
+                layers[x]->layerData = resizeLayerData[x].oldLayerData;
                 layers[x]->w = resizeLayerData[x].oldDimensions.x;
                 layers[x]->h = resizeLayerData[x].oldDimensions.y;
                 layers[x]->markLayerDirty();
-                resizeLayerData[x].oldData = oldData;
+                resizeLayerData[x].oldLayerData = oldData;
                 resizeLayerData[x].oldDimensions = oldDimensions;
             }
             canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2530,7 +2530,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{layers[x]->w, layers[x]->h};
-        layerResizeData[x].oldData = layers[x]->pixelData;
+        layerResizeData[x].oldLayerData = layers[x]->layerData;
         Layer* sc = layers[x]->copyScaled(size);
         layers[x]->pixelData = (u8*)tracked_malloc(size.x * size.y * 4);
         memcpy(layers[x]->pixelData, sc->pixelData, size.x * size.y * 4);

@@ -43,8 +43,8 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
         else {
             int nPixels = ixmin(clipSource.w, w - position.x) * 4;
             memcpy(
-                pixelData + ((y + position.y) * w * 4) + (position.x * 4),
-                sourceLayer->pixels8() + ((y + clipSource.y) * sourceLayer->w * 4) + (clipSource.x * 4),
+                &ARRAY2DPOINT(pixels32(), position.x, y + position.y, w),
+                &ARRAY2DPOINT(sourceLayer->pixels32(), clipSource.x, y + clipSource.y, sourceLayer->w),
                 nPixels
             );
             /*if (sourceLayer->colorKeySet) {
@@ -57,7 +57,7 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
 
 void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
 {
-    u32* px32 = (u32*)pixelData;
+    u32* px32 = pixels32();
     u32* srcpx32 = sourceLayer->pixels32();
     XY originSrc = XY{sourceTile.x * tileSize.x, sourceTile.y * tileSize.y};
     XY originDst = XY{dstTile.x * tileSize.x, dstTile.y * tileSize.y};
@@ -75,24 +75,16 @@ void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
 
 Layer* Layer::copy()
 {
-    Layer* ret = new Layer(w, h);
-    ret->name = name;
-    ret->colorKey = colorKey;
-    ret->markLayerDirty();
-    memcpy(ret->pixels32(), pixelData, w * h * 4);
-    return ret;
-}
-
-Layer* Layer::copyWithNoTextureInit()
-{
-    Layer* ret = new Layer();
-    ret->w = w;
-    ret->h = h;
-    ret->pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
-    ret->name = name;
-    ret->colorKey = colorKey;
-    memcpy(ret->pixelData, pixelData, w * h * 4);
-    return ret;
+    auto variantsCopy = copyAllVariants();
+    if (variantsCopy.size() > 0) {
+        Layer* ret = new Layer(w, h, variantsCopy);
+        ret->name = name;
+		ret->currentLayerVariant = currentLayerVariant;
+		ret->colorKey = colorKey;
+        ret->markLayerDirty();
+        return ret;
+    }
+    return NULL;
 }
 
 //i don't even know if this works
