@@ -268,7 +268,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
             for (int i = 0; i < 7; i++) {
                 vertices[i].color.a = l->layerAlpha / 255.0f;
             }
-            int r = SDL_RenderGeometry(g_rd, l->tex[g_rd], vertices, 7, indicesTop, 6);
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesTop, 6);
         }
     }
 
@@ -299,7 +299,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
             for (int i = 0; i < 7; i++) {
                 vertices[i].color.a = l->layerAlpha / 255.0f;
             }
-            int r = SDL_RenderGeometry(g_rd, l->tex[g_rd], vertices, 7, indicesSideLeft, 6);
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesSideLeft, 6);
         }
     }
 
@@ -330,7 +330,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
             for (int i = 0; i < 7; i++) {
                 vertices[i].color.a = l->layerAlpha / 255.0f;
             }
-            int r = SDL_RenderGeometry(g_rd, l->tex[g_rd], vertices, 7, indicesSideRight, 6);
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesSideRight, 6);
         }
     }
     

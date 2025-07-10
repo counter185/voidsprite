@@ -2531,9 +2531,9 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{layers[x]->w, layers[x]->h};
         layerResizeData[x].oldLayerData = layers[x]->layerData;
-        Layer* sc = layers[x]->copyScaled(size);
-        layers[x]->pixelData = (u8*)tracked_malloc(size.x * size.y * 4);
-        memcpy(layers[x]->pixelData, sc->pixelData, size.x * size.y * 4);
+        Layer* sc = layers[x]->copyAllVariantsScaled(size);
+        layers[x]->layerData = sc->layerData;
+        sc->layerData = {};
         delete sc;
         layers[x]->w = size.x;
         layers[x]->h = size.y;

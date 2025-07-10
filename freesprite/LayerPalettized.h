@@ -18,6 +18,12 @@ public:
 		h = height;
 		allocMemory();
 	}
+	LayerPalettized(int width, int height, std::vector<LayerVariant> variants) {
+		w = width;
+		h = height;
+		isPalettized = true;
+		layerData = variants;
+	}
 
 	static LayerPalettized* tryAllocIndexedLayer(int width, int height) {
 		if (width > 0 && height > 0) {
@@ -82,10 +88,10 @@ public:
 		return false;
 	}
 
-	uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) override {
+	uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true, LayerVariant* targetVariant = NULL) override {
 		if (position.x >= 0 && position.x < w
 			&& position.y >= 0 && position.y < h) {
-			uint32_t* intpxdata = pixels32();
+			uint32_t* intpxdata = targetVariant == NULL ? pixels32() : (u32*)targetVariant->pixelData;
 			uint32_t pixel = intpxdata[position.x + (position.y * w)];
 			//uint8_t alpha = (((pixel >> 24) / 255.0f) * (ignoreLayerAlpha ? 1.0f : (layerAlpha / 255.0f))) * 255;
 			//pixel = (pixel & 0x00ffffff) | (alpha << 24);

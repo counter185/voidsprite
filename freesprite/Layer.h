@@ -235,8 +235,8 @@ public:
     void blit(Layer* sourceLayer, XY position, SDL_Rect clip, bool fast = false);
     void blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize);
 
-    void setPixel(XY position, uint32_t color) {
-        uint32_t* intpxdata = pixels32();
+    void setPixel(XY position, u32 color, LayerVariant* targetVariant = NULL) {
+        u32* intpxdata = targetVariant == NULL ? pixels32() : (u32*)targetVariant->pixelData;
         if (position.x >= 0 && position.x < w
             && position.y >= 0 && position.y < h) {
             intpxdata[position.x + (position.y * w)] = color;
@@ -265,10 +265,10 @@ public:
         drawLine(XY{ from.x, to.y }, to, color);
     }
 
-    virtual uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true) {
+    virtual uint32_t getPixelAt(XY position, bool ignoreLayerAlpha = true, LayerVariant* targetVariant = NULL) {
         if (position.x >= 0 && position.x < w
             && position.y >= 0 && position.y < h) {
-            uint32_t* intpxdata = pixels32();
+            uint32_t* intpxdata = targetVariant == NULL ? pixels32() : (u32*)targetVariant->pixelData;
             uint32_t pixel = intpxdata[position.x + (position.y * w)];
             uint8_t alpha = (((pixel >> 24) / 255.0f) * (ignoreLayerAlpha ? 1.0f : (layerAlpha / 255.0f))) * 255;
             pixel = (pixel & 0x00ffffff) | (alpha << 24);
@@ -441,8 +441,9 @@ public:
 
     }
 
-    Layer* copy();
-    Layer* copyScaled(XY dimensions);
+    Layer* copyCurrentVariant();
+    Layer* copyCurrentVariantScaled(XY dimensions);
+    Layer* copyAllVariantsScaled(XY dimensions);
 
     void setAllAlpha255() {
         u32* px32 = pixels32();

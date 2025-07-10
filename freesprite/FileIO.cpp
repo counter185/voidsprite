@@ -3836,7 +3836,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "Thumbnails/thumbnail.png"); 
         {
             Layer* flat = editor->flattenImage();
-            Layer* flatScaled = flat->copyScaled(XY{255,255});
+            Layer* flatScaled = flat->copyCurrentVariantScaled(XY{255,255});
             delete flat;
             std::vector<u8> pngData = writePNGToMem(flatScaled);
             zip_entry_write(zip, pngData.data(), pngData.size());
@@ -4160,7 +4160,7 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
         fprintf(outfile, "#from PIL import Image\n\n");
         uint64_t dataPixelPointer = 0;
         fprintf(outfile, "voidsprite_image = np.array([\n");
-        u8* pixelData = data->pixelData;
+        u8* pixelData = data->pixels8();
         for (int y = 0; y < data->h; y++){
             fprintf(outfile, "    [");
             for (int x = 0; x < data->w; x++){
@@ -4461,7 +4461,7 @@ bool writeVTF(PlatformNativePathString path, Layer* data)
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
         XY lowResDimensions = data->w > 32 || data->h > 32 ? XY{32, 32} : XY{data->w, data->h};
-        Layer* lowResImage = data->copyScaled(lowResDimensions);
+        Layer* lowResImage = data->copyCurrentVariantScaled(lowResDimensions);
 
         VTFHEADER header;
         memset(&header, 0, sizeof(VTFHEADER));

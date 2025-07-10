@@ -73,14 +73,14 @@ void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
     }
 }
 
-Layer* Layer::copy()
+Layer* Layer::copyCurrentVariant()
 {
     auto variantsCopy = copyAllVariants();
     if (variantsCopy.size() > 0) {
         Layer* ret = new Layer(w, h, variantsCopy);
         ret->name = name;
-		ret->currentLayerVariant = currentLayerVariant;
-		ret->colorKey = colorKey;
+        ret->currentLayerVariant = currentLayerVariant;
+        ret->colorKey = colorKey;
         ret->markLayerDirty();
         return ret;
     }
@@ -88,18 +88,18 @@ Layer* Layer::copy()
 }
 
 //i don't even know if this works
-Layer* Layer::copyScaled(XY dimensions)
+Layer* Layer::copyCurrentVariantScaled(XY dimensions)
 {
     bool shouldIntegerScale = 
         ixmax(dimensions.x, w) % ixmin(dimensions.x, w) == 0
-		&& ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
+        && ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
 
     Layer* newLayer = NULL;
     if (isPalettized) {
         newLayer = LayerPalettized::tryAllocIndexedLayer(dimensions.x, dimensions.y);
-		if (newLayer != NULL) {
-			((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
-		}
+        if (newLayer != NULL) {
+            ((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
+        }
     }
     else {
         newLayer = tryAllocLayer(dimensions.x, dimensions.y);
@@ -129,16 +129,84 @@ Layer* Layer::copyScaled(XY dimensions)
         }
         else {
             loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w,h, dimensions.x, dimensions.y));
-			bool downscale = dimensions.x < w || dimensions.y < h;
-			int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
-			int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
+            bool downscale = dimensions.x < w || dimensions.y < h;
+            int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
+            int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
 
             for (int y = 0; y < newLayer->h; y++) {
                 for (int x = 0; x < newLayer->w; x++) {
                     XY samplePoint =
                         !downscale ? XY{ x / scaleFactorX, y / scaleFactorY }
-				                   : XY{ x * scaleFactorX, y * scaleFactorY };
+                                   : XY{ x * scaleFactorX, y * scaleFactorY };
                     newLayer->setPixel({ x, y }, getPixelAt(samplePoint));
+                }
+            }
+        }
+    }
+    return newLayer;
+}
+
+Layer* Layer::copyAllVariantsScaled(XY dimensions)
+{
+    bool shouldIntegerScale =
+        ixmax(dimensions.x, w) % ixmin(dimensions.x, w) == 0
+        && ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
+
+    Layer* newLayer = NULL;
+
+    std::vector<LayerVariant> scaledVariants;
+    for (LayerVariant& variant : layerData) {
+        LayerVariant newVariant = variant;
+        newVariant.pixelData = (u8*)tracked_malloc(dimensions.x * dimensions.y * 4, "Layers");
+    }
+
+    if (isPalettized) {
+        newLayer = new LayerPalettized(dimensions.x, dimensions.y, scaledVariants);
+        if (newLayer != NULL) {
+            ((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
+        }
+    }
+    else {
+        newLayer = new Layer(dimensions.x, dimensions.y, scaledVariants);
+        if (newLayer != NULL) {
+            newLayer->layerAlpha = layerAlpha;
+        }
+    }
+
+    if (newLayer != NULL) {
+        newLayer->name = name;
+        newLayer->colorKey = colorKey;
+        newLayer->colorKeySet = colorKeySet;
+        newLayer->hidden = hidden;
+
+        if (!shouldIntegerScale) {
+            loginfo(std::format("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            for (int v = 0; v < layerData.size(); v++) {
+                for (int y = 0; y < newLayer->h; y++) {
+                    for (int x = 0; x < newLayer->w; x++) {
+                        XY samplePoint = {
+                            w * (x / (float)newLayer->w),
+                            h * (y / (float)newLayer->h)
+                        };
+                        newLayer->setPixel({ x, y }, getPixelAt(samplePoint, true, &layerData[v]), &scaledVariants[v]);
+                    }
+                }
+            }
+        }
+        else {
+            loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            bool downscale = dimensions.x < w || dimensions.y < h;
+            int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
+            int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
+
+            for (int v = 0; v < layerData.size(); v++) {
+                for (int y = 0; y < newLayer->h; y++) {
+                    for (int x = 0; x < newLayer->w; x++) {
+                        XY samplePoint =
+                            !downscale ? XY{ x / scaleFactorX, y / scaleFactorY }
+                        : XY{ x * scaleFactorX, y * scaleFactorY };
+                        newLayer->setPixel({ x, y }, getPixelAt(samplePoint, true, &layerData[v]), &scaledVariants[v]);
+                    }
                 }
             }
         }
@@ -176,7 +244,7 @@ Layer* Layer::trim(SDL_Rect r)
 
 std::vector<LayerVariant> Layer::resize(XY to)
 {
-	std::vector<LayerVariant> oldVariants = layerData;
+    std::vector<LayerVariant> oldVariants = layerData;
     std::vector<LayerVariant> scaledVariants;
 
     for (auto& variant : layerData) {
@@ -189,8 +257,8 @@ std::vector<LayerVariant> Layer::resize(XY to)
             }
         }
         LayerVariant variantCopy = variant;
-		variantCopy.pixelData = (uint8_t*)newPixelData;
-		scaledVariants.push_back(variantCopy);
+        variantCopy.pixelData = (uint8_t*)newPixelData;
+        scaledVariants.push_back(variantCopy);
     }
     
     layerData = scaledVariants;

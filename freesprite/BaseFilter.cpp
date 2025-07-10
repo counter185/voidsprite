@@ -45,7 +45,7 @@ Layer* BaseFilter::copy(Layer* src)
     if (src == NULL) {
         return NULL;
     }
-    return src->copy();
+    return src->copyCurrentVariant();
 }
 
 Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
