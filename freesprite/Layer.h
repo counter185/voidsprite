@@ -108,10 +108,15 @@ public:
         return false;
     }
 
-    bool newLayerVariant() {
+    LayerVariant allocNewVariant() {
         LayerVariant newVariant;
         newVariant.name = "";
         newVariant.pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
+        return newVariant;
+    }
+
+    bool newLayerVariant() {
+        LayerVariant newVariant = allocNewVariant();
         if (newVariant.pixelData != NULL) {
             layerData.push_back(newVariant);
             currentLayerVariant = layerData.size() - 1;
@@ -491,11 +496,11 @@ public:
     /// </summary>
     /// <param name="to">Target dimensions</param>
     /// <returns>Old pixel data</returns>
-    u8* resize(XY to);
-    u8* resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
-    u8* resizeByTileCount(XY tileSizesNow, XY newTileCount);
-    u8* integerScale(XY scale);
-    u8* integerDownscale(XY scale);
+    std::vector<LayerVariant> resize(XY to);
+    std::vector<LayerVariant> resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
+    std::vector<LayerVariant> resizeByTileCount(XY tileSizesNow, XY newTileCount);
+    std::vector<LayerVariant> integerScale(XY scale);
+    std::vector<LayerVariant> integerDownscale(XY scale);
 
     ScanlineMap wandSelectAt(XY pos);
     void wandSelectWithOperationAt(XY pos, std::function<void(XY)> foreachPoint);

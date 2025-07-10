@@ -2568,10 +2568,10 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
         if (byTile) {
-            layerResizeData[x].oldData = layers[x]->resizeByTileSizes(tileDimensions, size);
+            layerResizeData[x].oldLayerData = layers[x]->resizeByTileSizes(tileDimensions, size);
         }
         else {
-            layerResizeData[x].oldData = layers[x]->resize(size);
+            layerResizeData[x].oldLayerData = layers[x]->resize(size);
         }
         layers[x]->markLayerDirty();
     }
@@ -2594,7 +2594,7 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldData = layers[x]->resizeByTileCount(tileDimensions, size);
+        layerResizeData[x].oldLayerData = layers[x]->resizeByTileCount(tileDimensions, size);
         layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2621,7 +2621,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
+        layerResizeData[x].oldLayerData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
         layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
