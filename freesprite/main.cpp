@@ -535,6 +535,8 @@ int main(int argc, char** argv)
         g_patterns.push_back(new PatternSquares2px());
         g_patterns.push_back(new PatternSquares3px());
         g_patterns.push_back(new PatternSquares4px());
+        g_patterns.push_back(new PatternHT1());
+        g_patterns.push_back(new PatternHT2());
         g_patterns.push_back(new PatternRandom(2));
         g_patterns.push_back(new PatternRandom(4));
         g_patterns.push_back(new PatternRandom(8));

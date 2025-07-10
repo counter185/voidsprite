@@ -188,6 +188,28 @@ class PatternSquares4px : public Pattern
 	bool canDrawAt(XY position) override { return (position.x % 5) != 0 && (position.y % 5) != 0; }
 };
 
+class PatternHT1 : public Pattern
+{
+	std::string getIconPath() override { return "pattern_ht1.png"; }
+	std::string getName() override { return "Diagonal half-dithering"; }
+	bool canDrawAt(XY position) override { 
+		int lpx = position.x % 8;
+		int lpy = position.y % 8;
+		return (lpx + lpy) % 2 == 0 && (lpy) < (-lpx + 7);
+	}
+};
+
+class PatternHT2 : public Pattern
+{
+	std::string getIconPath() override { return "pattern_ht2.png"; }
+	std::string getName() override { return "Central dither"; }
+	bool canDrawAt(XY position) override { 
+		int lpx = position.x % 4;
+		int lpy = position.y % 4;
+		return lpx % 2 == 0 && lpy % 2 == 0 && (lpy == 2 || lpx == 2);
+	}
+};
+
 class PatternRandom : public Pattern
 {
 	int d;
