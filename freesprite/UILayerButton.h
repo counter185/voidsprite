@@ -13,6 +13,14 @@ public:
 	void render(XY at) override;
 };
 
+class LayerVariantButton : public UIButton {
+private:
+	Layer* ll = NULL;
+	int variantIndex = -1;
+public:
+	LayerVariantButton(Layer* l, int variantIndex);
+};
+
 class UILayerButton : public Panel, public EventCallbackListener
 {
 private:
@@ -20,29 +28,9 @@ private:
 public:
 	UIButton* mainButton;
 	UIButton* hideButton;
+	std::vector<LayerVariantButton*> variantButtons;
 
-	UILayerButton(std::string mainName, Layer* linkedLayer) {
-		wxWidth = 240;
-		wxHeight = 30;
-
-		layer = linkedLayer;
-
-		mainButton = new LayerActiveButton(layer);
-		mainButton->text = mainName;
-		mainButton->position = XY{ 0,0 };
-		mainButton->wxWidth = 200;
-		mainButton->setCallbackListener(0, this);
-		subWidgets.addDrawable(mainButton);
-
-		hideButton = new UIButton();
-		//hideButton->text = "H";
-		hideButton->tooltip = "Hide";
-		hideButton->icon = g_iconLayerHide;
-		hideButton->position = XY{ mainButton->wxWidth + 10,0 };
-		hideButton->wxWidth = 30;
-		hideButton->setCallbackListener(1, this);
-		subWidgets.addDrawable(hideButton);
-	}
+	UILayerButton(std::string mainName, Layer* linkedLayer);
 
 	void eventButtonPressed(int evt_id) override;
 	bool takesMouseWheelEvents() override { return false; }

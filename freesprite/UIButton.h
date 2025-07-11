@@ -17,6 +17,7 @@ public:
     HotReloadableTexture* icon = NULL;
     bool fullWidthIcon = false;
     bool instantTooltip = false;
+    int fontSize = 18;
     
     Fill fill = FILL_BUTTON_CHECKED_DEFAULT;
     SDL_Color colorTextFocused = SDL_Color{ 255,255,255,0xff };

@@ -861,9 +861,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
-                            [this]() {
-                                this->isolateEnabled = false;
-                            }
+                            [this]() { this->isolateEnabled = false; }
                         }
                     },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
@@ -917,15 +915,11 @@ void MainEditor::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.flipx"),
-                            [this]() {
-                                this->layer_flipHorizontally();
-                            }
+                            [this]() { this->layer_flipHorizontally(); }
                         }
                     },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipy"),
-                            [this]() {
-                                this->layer_flipVertically();
-                            }
+                            [this]() { this->layer_flipVertically(); }
                         }
                     },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.printcol"),
@@ -935,21 +929,15 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.renlayer"),
-                            [this]() {
-                                this->layer_promptRename();
-                            }
+                            [this]() { this->layer_promptRename(); }
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.isolatealpha"),
-                            [this]() {
-                                this->layer_selectCurrentAlpha();
-                            }
+                            [this]() { this->layer_selectCurrentAlpha(); }
                         }
                     },
                     {SDL_SCANCODE_A, { TL("vsp.maineditor.removealpha"),
-                            [this]() {
-                                this->layer_setAllAlpha255();
-                            }
+                            [this]() { this->layer_setAllAlpha255(); }
                         }
                     },
                     {SDL_SCANCODE_K, { TL("vsp.maineditor.setckey"),
@@ -967,15 +955,15 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
-                            [this]() {
-                                this->layer_clearSelectedArea();
-                            }
+                            [this]() { this->layer_clearSelectedArea(); }
                         }
                     },
                     {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.layer.fillselection"),
-                            [this]() {
-                                this->layer_fillActiveColor();
-                            }
+                            [this]() { this->layer_fillActiveColor(); }
+                        }
+                    },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),
+                            [this]() { this->layer_newVariant(); }
                         }
                     },
                 },
@@ -1993,6 +1981,7 @@ void MainEditor::discardRedoStack()
                 delete l.targetlayer;
                 break;
             case UNDOSTACK_RESIZE_LAYER:
+            {
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
                     for (auto& variant : resizeLayerData[x].oldLayerData) {
@@ -2000,6 +1989,14 @@ void MainEditor::discardRedoStack()
                     }
                 }
                 delete resizeLayerData;
+            }
+                break;
+            case UNDOSTACK_CREATE_LAYER_VARIANT:
+            {
+                LayerVariant v = *(LayerVariant*)l.extdata4;
+                delete (LayerVariant*)l.extdata4;
+                tracked_free(v.pixelData);
+            }
                 break;
         }
     }
@@ -2079,6 +2076,16 @@ void MainEditor::undo()
                 for (Layer* ll : layers) {
                     ll->undo();
                 }
+                break;
+            case UNDOSTACK_CREATE_LAYER_VARIANT:
+                int variantIndex = l.extdata;
+                LayerVariant v = l.targetlayer->layerData[variantIndex];
+                l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
+                l.extdata4 = new LayerVariant(v);
+                if (variantIndex == l.targetlayer->currentLayerVariant) {
+                    l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size()-1));
+                }
+                layerPicker->updateLayers();
                 break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2162,6 +2169,14 @@ void MainEditor::redo()
             for (Layer* ll : layers) {
                 ll->redo();
             }
+            break;
+        case UNDOSTACK_CREATE_LAYER_VARIANT:
+            int variantIndex = l.extdata;
+            LayerVariant v = *(LayerVariant*)l.extdata4;
+            delete (LayerVariant*)l.extdata4;
+            l.extdata4 = NULL;
+            l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, v);
+            layerPicker->updateLayers();
             break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2401,6 +2416,21 @@ void MainEditor::layer_flipVertically()
 {
     commitStateToCurrentLayer();
     getCurrentLayer()->flipVertically();
+}
+
+void MainEditor::layer_newVariant()
+{
+    Layer* clayer = getCurrentLayer();
+    clayer->newLayerVariant();
+    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
+    layerPicker->updateLayers();
+}
+
+void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
+{
+    if (layer->switchVariant(variantIndex)) {
+        layerPicker->updateLayers();
+    }
 }
 
 void MainEditor::layer_setOpacity(uint8_t opacity) {

@@ -36,6 +36,8 @@ enum EditorTouchMode : int {
 #define UNDOSTACK_SET_OPACITY 6
 #define UNDOSTACK_RESIZE_LAYER 7
 #define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
+#define UNDOSTACK_CREATE_LAYER_VARIANT 9
+#define UNDOSTACK_DELETE_LAYER_VARIANT 10
 struct UndoStackElement {
     Layer* targetlayer = NULL;
     uint32_t type = 0;
@@ -268,9 +270,9 @@ public:
     void mergeLayerDown(int index);
     void duplicateLayer(int index);
     void switchActiveLayer(int index);
-    Layer* getCurrentLayer() {
-        return layers[selLayer];
-    }
+    Layer* getCurrentLayer() { return layers[selLayer]; }
+    void layer_newVariant();
+	void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename();
     void layer_flipHorizontally();

@@ -115,6 +115,9 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     else if (data1 == 1) {
         caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;
     }
+    else if (data1 == 2) {
+        caller->layer_switchVariant(caller->layers[evt_id], data2);
+    }
     updateLayers();
 }
 
@@ -144,7 +147,7 @@ void EditorLayerPicker::updateLayers()
         layerButton->hideButton->fill = (l->hidden ? Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF) : SDL_Color{0,0,0,0x80});
         layerButton->position = { 0, yposition };
         layerButton->mainButton->fill = (caller->selLayer == lid ? Fill::Gradient(0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF) : SDL_Color{ 0,0,0,0x80 });
-        yposition += 30;
+        yposition += layerButton->getDimensions().y;
         layerButton->setCallbackListener(lid, this);
         layerListPanel->subWidgets.addDrawable(layerButton);
     }
