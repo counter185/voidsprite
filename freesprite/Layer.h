@@ -124,9 +124,19 @@ public:
         if (newVariant.pixelData != NULL) {
             layerData.push_back(newVariant);
             currentLayerVariant = layerData.size() - 1;
-            return true;
         }
-        return false;
+        return newVariant.pixelData != NULL;
+    }
+    bool duplicateVariant() {
+        LayerVariant newVariant = allocNewVariant();
+        if (newVariant.pixelData != NULL) {
+            memcpy(newVariant.pixelData, pixels32(), w * h * 4);
+            newVariant.name = layerData[currentLayerVariant].name + " copy";
+            layerData.push_back(newVariant);
+            currentLayerVariant = layerData.size() - 1;
+            markLayerDirty();
+        }
+        return newVariant.pixelData != NULL;
     }
     bool switchVariant(int variantIndex) {
         if (layerData.size() > variantIndex && variantIndex >= 0) {

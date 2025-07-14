@@ -966,6 +966,10 @@ void MainEditor::setUpWidgets()
                             [this]() { this->layer_newVariant(); }
                         }
                     },
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
+                            [this]() { this->layer_duplicateVariant(); }
+                        }
+                    },
                 },
                 g_iconNavbarTabLayer
             }
@@ -2422,6 +2426,14 @@ void MainEditor::layer_newVariant()
 {
     Layer* clayer = getCurrentLayer();
     clayer->newLayerVariant();
+    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
+    layerPicker->updateLayers();
+}
+
+void MainEditor::layer_duplicateVariant()
+{
+    Layer* clayer = getCurrentLayer();
+    clayer->duplicateVariant();
     addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
     layerPicker->updateLayers();
 }
