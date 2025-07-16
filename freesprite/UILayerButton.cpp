@@ -4,6 +4,7 @@
 UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
     wxWidth = 240;
     wxHeight = 30;
+    sizeToContent = true;
 
     layer = linkedLayer;
 
@@ -23,19 +24,39 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
     hideButton->setCallbackListener(1, this);
     subWidgets.addDrawable(hideButton);
 
-    if (layer != NULL) {
+    if (layer != NULL && layer->layerData.size() > 1) {
         int variantY = mainButton->wxHeight;
         for (int v = 0; v < layer->layerData.size(); v++) {
+            Panel* p = new Panel();
+            p->sizeToContent = true;
+            p->passThroughMouse = true;
+            p->position = XY{ 0, variantY };
+
             LayerVariantButton* vbtn = new LayerVariantButton(layer, v);
-            vbtn->position = XY{ 30, variantY };
-            vbtn->wxWidth = wxWidth - 30;
+            vbtn->position = XY{ 30, 0 };
+            vbtn->wxWidth = wxWidth - 50;
             vbtn->onClickCallback = [this, v](UIButton* btn) {
                 if (callback != NULL) {
                     callback->eventGeneric(callback_id, 2, v);
                 }
             };
             variantButtons.push_back(vbtn);
-            subWidgets.addDrawable(vbtn);
+            p->subWidgets.addDrawable(vbtn);
+
+            UIButton* delbtn = new UIButton();
+            delbtn->text = "-";
+            delbtn->tooltip = "Delete variant";
+            delbtn->wxWidth = 20;
+            delbtn->wxHeight = vbtn->wxHeight;
+            delbtn->position = XY{ vbtn->wxWidth + 30, 0 };
+            delbtn->onClickCallback = [this, v](UIButton* btn) {
+                if (callback != NULL) {
+                    callback->eventGeneric(callback_id, 3, v);
+                }
+            };
+            p->subWidgets.addDrawable(delbtn);
+
+            subWidgets.addDrawable(p);
 
             variantY += vbtn->wxHeight;
         }
@@ -88,6 +109,6 @@ LayerVariantButton::LayerVariantButton(Layer* l, int variantIndex) : UIButton(),
     wxHeight = 24;
     fontSize = 14;
     if (l->currentLayerVariant == variantIndex) {
-		fill = Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF);
+        fill = Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF);
     }
 }

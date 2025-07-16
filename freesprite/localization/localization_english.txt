@@ -222,6 +222,8 @@
     {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
     {"vsp.maineditor.nav.layer.clearselection", "Erase selected area"},
     {"vsp.maineditor.nav.layer.fillselection", "Fill selected area"},
+    {"vsp.maineditor.nav.layer.newvariant", "New empty layer variant"},
+    {"vsp.maineditor.nav.layer.copyvariant", "Duplicate current layer variant"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

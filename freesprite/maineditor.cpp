@@ -818,18 +818,8 @@ void MainEditor::setUpWidgets()
                 TL("vsp.maineditor.edit"),
                 {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
-                    {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"),
-                            [this]() {
-                                this->undo();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"),
-                            [this]() {
-                                this->redo();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"), [this]() { this->undo(); } } },
+                    {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"), [this]() { this->redo(); } } },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
                             [this]() {
                                 this->symmetryEnabled[0] = !this->symmetryEnabled[0];
@@ -842,12 +832,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"),
-                            [this]() {
-                                this->flipAllLayersOnX();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"), [this]() { this->flipAllLayersOnX(); } } },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
                             [this]() {
                                 this->flipAllLayersOnY();
@@ -1915,6 +1900,10 @@ void MainEditor::discardEndOfUndoStack() {
                     ll->discardLastUndo();
                 }
                 break;
+            case UNDOSTACK_DELETE_LAYER_VARIANT:
+				tracked_free(((LayerVariant*)l.extdata4)->pixelData);
+				delete (LayerVariant*)l.extdata4;
+                break;
         }
 
         undoStack.erase(undoStack.begin());
@@ -2082,13 +2071,26 @@ void MainEditor::undo()
                 }
                 break;
             case UNDOSTACK_CREATE_LAYER_VARIANT:
+            {
                 int variantIndex = l.extdata;
                 LayerVariant v = l.targetlayer->layerData[variantIndex];
                 l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
                 l.extdata4 = new LayerVariant(v);
                 if (variantIndex == l.targetlayer->currentLayerVariant) {
-                    l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size()-1));
+                    l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
                 }
+                layerPicker->updateLayers();
+            }
+                break;
+            case UNDOSTACK_DELETE_LAYER_VARIANT:
+                int variantIndex = l.extdata;
+				LayerVariant* deletedVariant = (LayerVariant*)l.extdata4;
+				l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, *deletedVariant);
+				delete deletedVariant;
+                if (variantIndex == l.targetlayer->currentLayerVariant) {
+                    l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+                }
+                l.extdata4 = NULL;
                 layerPicker->updateLayers();
                 break;
         }
@@ -2175,12 +2177,24 @@ void MainEditor::redo()
             }
             break;
         case UNDOSTACK_CREATE_LAYER_VARIANT:
+        {
             int variantIndex = l.extdata;
             LayerVariant v = *(LayerVariant*)l.extdata4;
             delete (LayerVariant*)l.extdata4;
             l.extdata4 = NULL;
             l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, v);
             layerPicker->updateLayers();
+        }
+            break;
+        case UNDOSTACK_DELETE_LAYER_VARIANT:
+			int variantIndex = l.extdata;
+			LayerVariant* vv = new LayerVariant;
+			*vv = l.targetlayer->layerData[variantIndex];
+			l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
+			l.extdata4 = vv;
+			if (variantIndex <= l.targetlayer->currentLayerVariant) {
+				l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+			}
             break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2436,6 +2450,20 @@ void MainEditor::layer_duplicateVariant()
     clayer->duplicateVariant();
     addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
     layerPicker->updateLayers();
+}
+
+void MainEditor::layer_removeVariant(Layer* layer, int variantIndex)
+{
+    if (layer->layerData.size() > 1) {
+        LayerVariant v = layer->layerData[variantIndex];
+        layer->layerData.erase(layer->layerData.begin() + variantIndex);
+        LayerVariant* vv = new LayerVariant(v);
+        addToUndoStack(UndoStackElement{ layer, UNDOSTACK_DELETE_LAYER_VARIANT, variantIndex,0,"", vv});
+        if (variantIndex <= layer->currentLayerVariant) {
+            layer->switchVariant(ixmin(variantIndex, layer->layerData.size() - 1));
+		}
+        layerPicker->updateLayers();
+    }
 }
 
 void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)

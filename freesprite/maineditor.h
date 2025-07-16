@@ -273,6 +273,7 @@ public:
     Layer* getCurrentLayer() { return layers[selLayer]; }
     void layer_newVariant();
     void layer_duplicateVariant();
+    void layer_removeVariant(Layer* layer, int variantIndex);
     void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename();

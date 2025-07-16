@@ -118,6 +118,9 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     else if (data1 == 2) {
         caller->layer_switchVariant(caller->layers[evt_id], data2);
     }
+    else if (data1 == 3) {
+        caller->layer_removeVariant(caller->layers[evt_id], data2);
+    }
     updateLayers();
 }
 

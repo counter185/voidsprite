@@ -10,6 +10,7 @@ public:
     int wxHeight = 0;
     bool enabled = true;
     DrawableManager subWidgets;
+    bool sizeToContent = false;
 
     ~Panel() {
         subWidgets.freeAllDrawables();
@@ -39,7 +40,7 @@ public:
     bool takesMouseWheelEvents() override { return true; }
     bool takesTouchEvents() override { return true; }
 
-    XY getDimensions() override { return XY{ wxWidth,wxHeight }; };
+    XY getDimensions() override { return sizeToContent ? getContentBoxSize() : XY{ wxWidth,wxHeight }; };
 
     Panel* getTopmostParent() { return parent != NULL ? parent->getTopmostParent() : this; }
     bool parentFocused() { return parent != NULL && parent->focused; }
@@ -47,5 +48,19 @@ public:
     Timer64& thisOrParentFocusTimer() { return parent != NULL ? parent->focusTimer : focusTimer; }
 
     void playPanelOpenVFX();
+    XY getContentBoxSize() {
+        XY ret = { 0,0 };
+        for (Drawable*& a : subWidgets.drawablesList) {
+            XY aPos = a->position;
+            XY aDim = a->getRenderDimensions();
+            if (aPos.x + aDim.x > ret.x) {
+                ret.x = aPos.x + aDim.x;
+            }
+            if (aPos.y + aDim.y > ret.y) {
+                ret.y = aPos.y + aDim.y;
+            }
+        }
+        return ret;
+    }
 };
 
