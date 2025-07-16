@@ -217,7 +217,7 @@ void main_newWindow() {
 
 void main_currentWorkspaceToNewWindow()
 {
-	std::string title = std::format("<{}>", g_windows.size());
+    std::string title = std::format("<{}>", g_windows.size());
     if (g_currentWindow != NULL && g_currentWindow->popupStack.empty()) {
         if (g_currentWindow->screenStack.size() > 1) {
             BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
@@ -262,20 +262,20 @@ void main_attachCurrentWorkspaceToMainWindow() {
 
 void main_promptRenameCurrentWindow()
 {
-	VSPWindow* target = g_currentWindow;
+    VSPWindow* target = g_currentWindow;
     if (target != NULL) {
         if (!target->isMainWindow) {
-			PopupTextBox* renamePopup = new PopupTextBox(TL("vsp.window.renamewindow"), "", target->windowTitle);
+            PopupTextBox* renamePopup = new PopupTextBox(TL("vsp.window.renamewindow"), "", target->windowTitle);
             renamePopup->allowEmptyText = true;
             renamePopup->onTextInputConfirmedCallback = [target](PopupTextBox*, std::string text) {
                 target->setWindowTitle(text);
             };
-			g_addPopup(renamePopup);
+            g_addPopup(renamePopup);
         }
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.renamemainwindowfail")));
         }
-	}
+    }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.renamewindowfail")));
     }
@@ -326,7 +326,7 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
         return false;
     }
     else if (msg->message == WM_COPYDATA) {
-		COPYDATASTRUCT* data = (COPYDATASTRUCT*)msg->lParam;
+        COPYDATASTRUCT* data = (COPYDATASTRUCT*)msg->lParam;
         if (data->cbData > 8 && strncmp((char*)data->lpData, "vspdata", 7) == 0) {
             std::string cmdString = "";
             cmdString.resize(data->cbData);
@@ -374,7 +374,7 @@ int main(int argc, char** argv)
         g_programDirectory = "";
         g_programExePath = "";
 #else
-		g_programExePath = std::string(argv[0]);
+        g_programExePath = std::string(argv[0]);
         g_programDirectory = g_programExePath.substr(0, g_programExePath.find_last_of("/\\"));
         g_programDirectory += _WIN32 ? "\\" : "/";
 #endif
@@ -1026,13 +1026,19 @@ int main(int argc, char** argv)
                 ticksBegin = SDL_GetTicks64();
 
                 if (wd->isMainWindow) {
+
+                    int numOverallWorkspaces = 0;
+                    for (auto& [id, w] : g_windows) {
+                        numOverallWorkspaces += w->screenStack.size();
+                    }
+
                     //tl strings shouldn't be read every frame
                     static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
                     static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
 
                     g_updateRPC(
-                        wd->screenStack.size() == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", wd->screenStack.size(), tlActiveWorkspacesString),
-                        wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
+                        numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
+                        numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
                     );
                     std::string newWindowTitle = windowTitle + std::format("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
                     if (newWindowTitle != wd->lastWindowTitle) {
