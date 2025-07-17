@@ -37,6 +37,7 @@ void unZlibFile(PlatformNativePathString path);
 #include "io/io_jxl.h"
 #include "io/io_dibv5.h"
 #include "io/io_valve_spr.h"
+#include "io/io_voidsprite.h"
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
@@ -67,16 +68,10 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
-MainEditor* readVOIDSN(PlatformNativePathString path);
 
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
-bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
-bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
@@ -97,7 +92,6 @@ bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
 bool writeVTF(PlatformNativePathString path, Layer* data);
 
-std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name);
