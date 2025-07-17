@@ -289,15 +289,9 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
     if (outfile != NULL) {
         uint8_t voidsnVersion = 0x05;
         fwrite(&voidsnVersion, 1, 1, outfile);
-        uint32_t nvalBuffer;
 
-        nvalBuffer = editor->canvas.dimensions.x;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->canvas.dimensions.y;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
-        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
+        voidsnWriteU32(outfile, editor->canvas.dimensions.x);
+        voidsnWriteU32(outfile, editor->canvas.dimensions.y);
 
         std::string commentsData = editor->makeCommentDataString();
 
@@ -350,16 +344,14 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
         }
 
-        nvalBuffer = extData.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
+        voidsnWriteU32(outfile, extData.size());
 
         for (auto& [key, value] : extData) {
             voidsnWriteString(outfile, key);
             voidsnWriteString(outfile, value);
         }
 
-        nvalBuffer = editor->layers.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
+        voidsnWriteU32(outfile, editor->layers.size());
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
@@ -393,8 +385,6 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
         uint8_t voidsnVersion = 0x06;
         fwrite(&voidsnVersion, 1, 1, outfile);
         fwrite("voidsprite", sizeof("voidsprite"), 1, outfile);
-
-        uint32_t nvalBuffer;
 
         voidsnWriteU32(outfile, editor->canvas.dimensions.x);
         voidsnWriteU32(outfile, editor->canvas.dimensions.y);

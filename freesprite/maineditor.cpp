@@ -955,6 +955,10 @@ void MainEditor::setUpWidgets()
                             [this]() { this->layer_duplicateVariant(); }
                         }
                     },
+                    {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),
+                            [this]() { this->layer_promptRenameCurrentVariant(); }
+                        }
+                    },
                 },
                 g_iconNavbarTabLayer
             }
@@ -2471,6 +2475,19 @@ void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
     if (layer->switchVariant(variantIndex)) {
         layerPicker->updateLayers();
     }
+}
+
+void MainEditor::layer_promptRenameCurrentVariant()
+{
+	Layer* clayer = getCurrentLayer();
+	int layerVariantIndex = clayer->currentLayerVariant;
+	std::string nameNow = clayer->layerData[layerVariantIndex].name;
+    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", nameNow);
+    ninput->onTextInputConfirmedCallback = [this,clayer,layerVariantIndex](PopupTextBox* p, std::string newName) {
+		clayer->layerData[layerVariantIndex].name = newName;
+        layerPicker->updateLayers();
+	};
+    g_addPopup(ninput);
 }
 
 void MainEditor::layer_setOpacity(uint8_t opacity) {
