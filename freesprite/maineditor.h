@@ -118,6 +118,8 @@ public:
     bool leftMouseHold = false;
     bool middleMouseHold = false;
     Timer64 layerSwitchTimer;
+    Timer64 variantSwitchTimer;
+    bool lastVariantSwitchWasRight = false;
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;

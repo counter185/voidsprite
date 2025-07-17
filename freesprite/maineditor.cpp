@@ -145,9 +145,20 @@ void MainEditor::render() {
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
     for (int x = 0; x < layers.size(); x++) {
         Layer* imgLayer = layers[x];
+        bool isCurrentActiveLayer = (selLayer == x);
         if (!imgLayer->hidden) {
             uint8_t alpha = imgLayer->layerAlpha;
-            imgLayer->render(canvasRenderRect, (layerSwitchTimer.started && x == selLayer) ? (uint8_t)(alpha * XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300))) : alpha);
+            SDL_Rect renderRect = canvasRenderRect;
+            double layerFadeIn = layerSwitchTimer.started ? XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300)) : 1.0;
+            if (variantSwitchTimer.started && isCurrentActiveLayer) {
+                double percent = XM1PW3P1(variantSwitchTimer.percentElapsedTime(400));
+                renderRect.x += (lastVariantSwitchWasRight ? 1.0 : -1.0) * (40.0 * (1.0 - percent));
+                layerFadeIn *= percent;
+            }
+            if (!isCurrentActiveLayer) {
+                layerFadeIn = 1.0;
+            }
+            imgLayer->render(renderRect, (uint8_t)(alpha * layerFadeIn));
         }
     }
 
@@ -1905,8 +1916,8 @@ void MainEditor::discardEndOfUndoStack() {
                 }
                 break;
             case UNDOSTACK_DELETE_LAYER_VARIANT:
-				tracked_free(((LayerVariant*)l.extdata4)->pixelData);
-				delete (LayerVariant*)l.extdata4;
+                tracked_free(((LayerVariant*)l.extdata4)->pixelData);
+                delete (LayerVariant*)l.extdata4;
                 break;
         }
 
@@ -2081,18 +2092,18 @@ void MainEditor::undo()
                 l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
                 l.extdata4 = new LayerVariant(v);
                 if (variantIndex == l.targetlayer->currentLayerVariant) {
-                    l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
                 }
                 layerPicker->updateLayers();
             }
                 break;
             case UNDOSTACK_DELETE_LAYER_VARIANT:
                 int variantIndex = l.extdata;
-				LayerVariant* deletedVariant = (LayerVariant*)l.extdata4;
-				l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, *deletedVariant);
-				delete deletedVariant;
+                LayerVariant* deletedVariant = (LayerVariant*)l.extdata4;
+                l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, *deletedVariant);
+                delete deletedVariant;
                 if (variantIndex == l.targetlayer->currentLayerVariant) {
-                    l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
                 }
                 l.extdata4 = NULL;
                 layerPicker->updateLayers();
@@ -2191,14 +2202,14 @@ void MainEditor::redo()
         }
             break;
         case UNDOSTACK_DELETE_LAYER_VARIANT:
-			int variantIndex = l.extdata;
-			LayerVariant* vv = new LayerVariant;
-			*vv = l.targetlayer->layerData[variantIndex];
-			l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
-			l.extdata4 = vv;
-			if (variantIndex <= l.targetlayer->currentLayerVariant) {
-				l.targetlayer->switchVariant(ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
-			}
+            int variantIndex = l.extdata;
+            LayerVariant* vv = new LayerVariant;
+            *vv = l.targetlayer->layerData[variantIndex];
+            l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
+            l.extdata4 = vv;
+            if (variantIndex <= l.targetlayer->currentLayerVariant) {
+                layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+            }
             break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2464,29 +2475,34 @@ void MainEditor::layer_removeVariant(Layer* layer, int variantIndex)
         LayerVariant* vv = new LayerVariant(v);
         addToUndoStack(UndoStackElement{ layer, UNDOSTACK_DELETE_LAYER_VARIANT, variantIndex,0,"", vv});
         if (variantIndex <= layer->currentLayerVariant) {
-            layer->switchVariant(ixmin(variantIndex, layer->layerData.size() - 1));
-		}
+            layer_switchVariant(layer, ixmin(variantIndex, layer->layerData.size() - 1));
+        }
         layerPicker->updateLayers();
     }
 }
 
 void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
 {
+    int vidxNow = layer->currentLayerVariant;
     if (layer->switchVariant(variantIndex)) {
         layerPicker->updateLayers();
+        if (layer == getCurrentLayer()) {
+            variantSwitchTimer.start();
+            lastVariantSwitchWasRight = vidxNow < variantIndex;
+        }
     }
 }
 
 void MainEditor::layer_promptRenameCurrentVariant()
 {
-	Layer* clayer = getCurrentLayer();
-	int layerVariantIndex = clayer->currentLayerVariant;
-	std::string nameNow = clayer->layerData[layerVariantIndex].name;
+    Layer* clayer = getCurrentLayer();
+    int layerVariantIndex = clayer->currentLayerVariant;
+    std::string nameNow = clayer->layerData[layerVariantIndex].name;
     PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", nameNow);
     ninput->onTextInputConfirmedCallback = [this,clayer,layerVariantIndex](PopupTextBox* p, std::string newName) {
-		clayer->layerData[layerVariantIndex].name = newName;
+        clayer->layerData[layerVariantIndex].name = newName;
         layerPicker->updateLayers();
-	};
+    };
     g_addPopup(ninput);
 }
 
