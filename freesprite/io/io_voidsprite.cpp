@@ -6,6 +6,48 @@
 #include <zlib.h>
 
 
+void voidsnWriteU32(FILE* f, u32 num)
+{
+    u32 nvalBuffer = num;
+    fwrite(&nvalBuffer, 4, 1, f);
+}
+
+void voidsnWriteU64(FILE* f, u64 num)
+{
+    u64 nvalBuffer = num;
+    fwrite(&nvalBuffer, 8, 1, f);
+}
+
+void voidsnWriteString(FILE* f, std::string str)
+{
+    u32 nvalBuffer = str.size();
+    voidsnWriteU32(f, nvalBuffer);
+    fwrite(str.c_str(), nvalBuffer, 1, f);
+}
+
+u32 voidsnReadU32(FILE* f)
+{
+    u32 nvalBuffer;
+    fread(&nvalBuffer, 4, 1, f);
+    return nvalBuffer;
+}
+
+u64 voidsnReadU64(FILE* f)
+{
+    u64 nvalBuffer;
+    fread(&nvalBuffer, 8, 1, f);
+    return nvalBuffer;
+}
+
+std::string voidsnReadString(FILE* f)
+{
+    u32 nvalBuffer = voidsnReadU32(f);
+    std::string ret;
+    ret.resize(nvalBuffer);
+    fread(ret.data(), nvalBuffer, 1, f);
+    return ret;
+}
+
 bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
     if (data[0]->isPalettized) {
@@ -68,9 +110,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logprintf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+            voidsnWriteString(outfile, lr->name);
 
             fwrite(lr->pixels32(), lr->w * lr->h, 4, outfile);
         }
@@ -131,13 +171,9 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         nvalBuffer = extData.size();
         fwrite(&nvalBuffer, 4, 1, outfile);
 
-        for (auto& extDPair : extData) {
-            nvalBuffer = extDPair.first.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
-            nvalBuffer = extDPair.second.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
+        for (auto& [key, value] : extData) {
+            voidsnWriteString(outfile, key);
+            voidsnWriteString(outfile, value);
         }
 
         nvalBuffer = editor->layers.size();
@@ -147,9 +183,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+            voidsnWriteString(outfile, lr->name);
 
             fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
             fwrite(&lr->colorKey, 4, 1, outfile);
@@ -223,13 +257,9 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         nvalBuffer = extData.size();
         fwrite(&nvalBuffer, 4, 1, outfile);
 
-        for (auto& extDPair : extData) {
-            nvalBuffer = extDPair.first.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
-            nvalBuffer = extDPair.second.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
+        for (auto& [key, value] : extData) {
+            voidsnWriteString(outfile, key);
+            voidsnWriteString(outfile, value);
         }
 
         nvalBuffer = editor->layers.size();
@@ -239,9 +269,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+            voidsnWriteString(outfile, lr->name);
 
             fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
             fwrite(&lr->colorKey, 4, 1, outfile);
@@ -325,13 +353,9 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         nvalBuffer = extData.size();
         fwrite(&nvalBuffer, 4, 1, outfile);
 
-        for (auto& extDPair : extData) {
-            nvalBuffer = extDPair.first.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
-            nvalBuffer = extDPair.second.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
+        for (auto& [key, value] : extData) {
+            voidsnWriteString(outfile, key);
+            voidsnWriteString(outfile, value);
         }
 
         nvalBuffer = editor->layers.size();
@@ -341,9 +365,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
+            voidsnWriteString(outfile, lr->name);
 
             fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
             fwrite(&lr->colorKey, 4, 1, outfile);
@@ -356,6 +378,123 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             fwrite(&compressedDataSize, 8, 1, outfile);
             fwrite(compressedData, compressedDataSize, 1, outfile);
             delete[] compressedData;
+        }
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        uint8_t voidsnVersion = 0x06;
+        fwrite(&voidsnVersion, 1, 1, outfile);
+        fwrite("voidsprite", sizeof("voidsprite"), 1, outfile);
+
+        uint32_t nvalBuffer;
+
+        voidsnWriteU32(outfile, editor->canvas.dimensions.x);
+        voidsnWriteU32(outfile, editor->canvas.dimensions.y);
+
+        std::string commentsData = editor->makeCommentDataString();
+
+        std::string guidelinesData;
+        guidelinesData += std::format("{};", editor->guidelines.size());
+        for (Guideline& g : editor->guidelines) {
+            guidelinesData += std::format("{}-{};", g.vertical ? "v" : "h", g.position);
+        }
+
+        std::string layerVisibilityData = "";
+        for (Layer*& lr : editor->layers) {
+            layerVisibilityData += lr->hidden ? '0' : '1';
+        }
+
+        fwrite("/VOIDSN.META/", 1, 13, outfile);
+        std::map<std::string, std::string> extData = {
+            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
+            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
+            {"tile.dim.padrx", std::to_string(editor->tileGridPaddingBottomRight.x)},
+            {"tile.dim.padby", std::to_string(editor->tileGridPaddingBottomRight.y)},
+            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.x", std::to_string(editor->symmetryPositions.x)},
+            {"sym.y", std::to_string(editor->symmetryPositions.y)},
+            {"comments", commentsData},
+            {"layer.selected", std::to_string(editor->selLayer)},
+            {"layer.visibility", layerVisibilityData},
+            {"palette.enabled", editor->isPalettized ? "1" : "0"},
+            {"guidelines", guidelinesData},
+            {"edit.time", std::to_string(editor->editTime)},
+            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
+        };
+
+        if (editor->isPalettized) {
+            MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
+            std::string paletteData = "";
+            paletteData += std::format("{};", upcastEditor->palette.size());
+            for (uint32_t& c : upcastEditor->palette) {
+                paletteData += std::format("{:08X};", c);
+            }
+            extData["palette.colors"] = paletteData;
+
+            extData["palette.index"] = std::to_string(upcastEditor->pickedPaletteIndex);
+        }
+        else {
+            std::string layerOpacityData = "";
+            for (Layer*& lr : editor->layers) {
+                layerOpacityData += std::to_string(lr->layerAlpha) + ';';
+            }
+            extData["layer.opacity"] = layerOpacityData;
+            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
+        }
+
+        voidsnWriteU32(outfile, extData.size());
+
+        for (auto& [key, value] : extData) {
+            voidsnWriteString(outfile, key);
+            voidsnWriteString(outfile, value);
+        }
+
+        voidsnWriteU32(outfile, editor->layers.size());
+
+        struct VOIDSNLayerData {
+            std::string dataName;
+            u64 dataSize;
+            void* dataPtr;
+            bool hintDelete = false;
+        };
+
+        for (Layer*& lr : editor->layers) {
+            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
+                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+            }
+            std::vector<VOIDSNLayerData> layerData = {
+                {"name", (u64)lr->name.size(), lr->name.data()},
+                {"colorKeySet", 1, (void*)(lr->colorKeySet ? "\1" : "\0")},
+                {"colorKey", 4, &lr->colorKey},
+                {"currentVariant", 4, &lr->currentLayerVariant},
+            };
+            for (LayerVariant& lv : lr->layerData) {
+                u64 maxCompressedDataSize = compressBound(lr->w * lr->h * 4);
+                u64 compressedDataSize = maxCompressedDataSize;
+                u8* compressedData = (u8*)tracked_malloc(maxCompressedDataSize, "Temp.memory");
+                int res = compress(compressedData, (uLongf*)&compressedDataSize, lv.pixelData, lr->w * lr->h * 4);
+
+                layerData.push_back({ "variant." + lv.name, compressedDataSize, compressedData, true });
+            }
+
+            voidsnWriteU32(outfile, layerData.size());
+            for (VOIDSNLayerData& ld : layerData) {
+                voidsnWriteString(outfile, ld.dataName);
+                voidsnWriteU64(outfile, ld.dataSize);
+                fwrite(ld.dataPtr, ld.dataSize, 1, outfile);
+
+                if (ld.hintDelete) {
+                    tracked_free(ld.dataPtr);
+                }
+            }
         }
 
         fclose(outfile);
@@ -424,10 +563,22 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
         case 3:
         case 4:
         case 5:
+        case 6:
         {
+            if (voidsnversion >= 6) {
+                char voidspriteHeader[11];
+                fread(voidspriteHeader, 11, 1, infile);
+                // this should equal "voidsprite"
+                if (memcmp(voidspriteHeader, "voidsprite", 11) != 0) {
+                    logerr("INVALID VOIDSN HEADER\n");
+                    fclose(infile);
+                    return NULL;
+                }
+            }
+
             XY dimensions;
-            fread(&dimensions.x, 4, 1, infile);
-            fread(&dimensions.y, 4, 1, infile);
+            dimensions.x = voidsnReadU32(infile);
+            dimensions.y = voidsnReadU32(infile);
 
             char metaHeader[13];
             fread(metaHeader, 13, 1, infile);
@@ -435,68 +586,18 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
                 logprintf("INVALID META HEADER\n");
             }
-            int nExtData;
-            fread(&nExtData, 4, 1, infile);
+            int nExtData = voidsnReadU32(infile);
             std::map<std::string, std::string> extData;
             for (int x = 0; x < nExtData; x++) {
-                int keySize;
-                fread(&keySize, 4, 1, infile);
-                std::string key;
-                key.resize(keySize);
-                fread(&key[0], keySize, 1, infile);
-                int valSize;
-                fread(&valSize, 4, 1, infile);
-                std::string val;
-                val.resize(valSize);
-                fread(&val[0], valSize, 1, infile);
+                std::string key = voidsnReadString(infile);
+                std::string val = voidsnReadString(infile);
                 extData[key] = val;
             }
 
             bool isPalettized = extData.contains("palette.enabled") && extData.contains("palette.colors") && std::stoi(extData["palette.enabled"]) == 1;
 
-            int nlayers;
-            fread(&nlayers, 4, 1, infile);
-
-            MainEditor* ret;
-            if (!isPalettized) {
-                std::vector<Layer*> layers;
-                for (int x = 0; x < nlayers; x++) {
-                    int nameLen;
-                    fread(&nameLen, 4, 1, infile);
-                    char* name = (char*)tracked_malloc(nameLen + 1);
-                    memset(name, 0, nameLen + 1);
-                    fread(name, nameLen, 1, infile);
-
-                    Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-                    newLayer->name = std::string(name);
-
-                    char colorKeySet;
-                    fread(&colorKeySet, 1, 1, infile);
-                    newLayer->colorKeySet = colorKeySet == '\1';
-                    fread(&newLayer->colorKey, 4, 1, infile);
-
-                    tracked_free(name);
-
-                    //voidsn version 5+ uses zlib compression
-                    if (voidsnversion < 5) {
-                        fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
-                    }
-                    else {
-                        uint64_t compressedLength = 0;
-                        fread(&compressedLength, 8, 1, infile);
-                        uint8_t* compressedData = new uint8_t[compressedLength];
-                        fread(compressedData, compressedLength, 1, infile);
-                        uint64_t dstLength = newLayer->w * newLayer->h * 4;
-                        uncompress(newLayer->pixels8(), (uLongf*)&dstLength, compressedData, compressedLength);
-                        delete[] compressedData;
-                    }
-
-                    layers.push_back(newLayer);
-                }
-                ret = new MainEditor(layers);
-            }
-            else {
-                std::vector<uint32_t> palette;
+            std::vector<uint32_t> palette;
+            if (isPalettized) {
                 std::string paletteString = extData["palette.colors"];
                 int nextSC = paletteString.find_first_of(';');
                 int paletteColors = std::stoi(paletteString.substr(0, nextSC));
@@ -506,43 +607,108 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     palette.push_back(std::stoul(paletteString.substr(0, nextSC), NULL, 16));
                     paletteString = paletteString.substr(nextSC + 1);
                 }
+            }
 
-                std::vector<LayerPalettized*> layers;
-                for (int x = 0; x < nlayers; x++) {
-                    int nameLen;
-                    fread(&nameLen, 4, 1, infile);
-                    char* name = (char*)tracked_malloc(nameLen + 1);
-                    memset(name, 0, nameLen + 1);
-                    fread(name, nameLen, 1, infile);
+            int nlayers = voidsnReadU32(infile);
 
-                    LayerPalettized* newLayer = new LayerPalettized(dimensions.x, dimensions.y);
-                    newLayer->name = std::string(name);
+            MainEditor* ret;
+            std::vector<Layer*> layers;
+            for (int x = 0; x < nlayers; x++) {
 
-                    char colorKeySet;
-                    fread(&colorKeySet, 1, 1, infile);
-                    newLayer->colorKeySet = colorKeySet == '\1';
-                    fread(&newLayer->colorKey, 4, 1, infile);
+                if (voidsnversion >= 6) {
+                    std::vector<LayerVariant> layerData;
+                    Layer* newLayer = isPalettized ? new LayerPalettized(dimensions.x, dimensions.y, layerData)
+                        : new Layer(dimensions.x, dimensions.y, layerData);
 
-                    tracked_free(name);
+                    u32 numLayerData = voidsnReadU32(infile);
+                    for (u32 i = 0; i < numLayerData; i++) {
+                        std::string dataName = voidsnReadString(infile);
+                        u64 dataSize = voidsnReadU64(infile);
+                        u8* data = (u8*)tracked_malloc(dataSize, "Temp.memory");
+                        fread(data, dataSize, 1, infile);
 
-                    if (voidsnversion < 5) {
-                        fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
+                        if (dataName == "name") {
+                            newLayer->name.resize(dataSize);
+                            memcpy(newLayer->name.data(), data, dataSize);
+                        }
+                        else if (dataName == "colorKey") {
+                            newLayer->colorKey = *(u32*)data;
+                        }
+                        else if (dataName == "colorKeySet") {
+                            newLayer->colorKeySet = data[0] == '\1';
+                        }
+                        else if (dataName == "currentVariant") {
+                            newLayer->currentLayerVariant = *(u32*)data;
+                        }
+                        else if (stringStartsWithIgnoreCase(dataName, "variant.")) {
+                            std::string variantName = dataName.substr(8);
+                            LayerVariant newVariant;
+                            newVariant.name = variantName;
+							newVariant.pixelData = (u8*)tracked_malloc(dimensions.x * dimensions.y * 4, "Layers");
+							u64 decompressedDataSize = dimensions.x * dimensions.y * 4;
+							uncompress(newVariant.pixelData, (uLongf*)&decompressedDataSize, data, dataSize);
+
+                            layerData.push_back(newVariant);
+                        }
+                        tracked_free(data);
+                    }
+
+                    if (layerData.size() > 0) {
+                        newLayer->layerData = layerData;
+                        layers.push_back(newLayer);
                     }
                     else {
-                        uint64_t compressedLength = 0;
-                        fread(&compressedLength, 8, 1, infile);
-                        uint8_t* compressedData = new uint8_t[compressedLength];
-                        fread(compressedData, compressedLength, 1, infile);
-                        uint64_t dstLength = newLayer->w * newLayer->h * 4;
-                        uncompress(newLayer->pixels8(), (uLongf*)&dstLength, compressedData, compressedLength);
-                        delete[] compressedData;
+                        logerr(std::format("No variants in layer: {}", newLayer->name));
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Error reading layer {}", newLayer->name)));
                     }
-
-                    newLayer->palette = palette;
-                    layers.push_back(newLayer);
                 }
+                else {
+                    std::string layerName = voidsnReadString(infile);
+                    Layer* newLayer = isPalettized ? LayerPalettized::tryAllocIndexedLayer(dimensions.x, dimensions.y)
+                        : Layer::tryAllocLayer(dimensions.x, dimensions.y);
+                    if (newLayer != NULL) {
+                        newLayer->name = layerName;
 
-                ret = new MainEditorPalettized(layers);
+                        char colorKeySet;
+                        fread(&colorKeySet, 1, 1, infile);
+                        newLayer->colorKeySet = colorKeySet == '\1';
+                        newLayer->colorKey = voidsnReadU32(infile);
+
+                        //voidsn version 5+ uses zlib compression
+                        if (voidsnversion < 5) {
+                            fread(newLayer->pixels32(), newLayer->w * newLayer->h, 4, infile);
+                        }
+                        else {
+
+                            uint64_t compressedLength = voidsnReadU64(infile);
+                            uint8_t* compressedData = new uint8_t[compressedLength];
+                            fread(compressedData, compressedLength, 1, infile);
+                            uint64_t dstLength = newLayer->w * newLayer->h * 4;
+                            uncompress(newLayer->pixels8(), (uLongf*)&dstLength, compressedData, compressedLength);
+                            delete[] compressedData;
+                        }
+
+                        if (isPalettized) {
+                            ((LayerPalettized*)newLayer)->palette = palette;
+                        }
+                        layers.push_back(newLayer);
+                    }
+                    else {
+                        logerr(std::format("Failed to allocate layer: {}", layerName));
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
+                    }
+                }
+            }
+            if (isPalettized) {
+                std::vector<LayerPalettized*> indexedLayers;
+                //cast all layers to LayerPalettized*
+                std::transform(layers.begin(), layers.end(), std::back_inserter(indexedLayers), [](Layer* l) {
+                    return (LayerPalettized*)l;
+                });
+                ret = new MainEditorPalettized(indexedLayers);
+            }
+            else {
+                ret = new MainEditor(layers);
             }
 
             if (extData.contains("tile.dim.x")) { ret->tileDimensions.x = std::stoi(extData["tile.dim.x"]); }

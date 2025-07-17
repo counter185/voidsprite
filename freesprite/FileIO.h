@@ -270,6 +270,7 @@ inline FileExporter* voidsnExporter = NULL;
 
 inline void g_setupIO() {
     FileExporter
+        *exVOIDSNv6,
         *exVOIDSNv5,
         *exVOIDSNv4,
         *exVOIDSNv3,
@@ -294,7 +295,8 @@ inline void g_setupIO() {
         *exAVIF
         ;
 
-    g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", &writeVOIDSNv3) );
     g_fileExporters.push_back( exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2) );
@@ -336,7 +338,8 @@ inline void g_setupIO() {
 
     voidsnExporter = exVOIDSNv5;
 
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v6", ".voidsnv6", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v4", ".voidsnv4", &readVOIDSN, exVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED));
