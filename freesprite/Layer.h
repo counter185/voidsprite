@@ -379,8 +379,9 @@ public:
     void undo() {
         if (!undoQueue.empty()) {
             LayerUndoData& lastUndo = undoQueue[undoQueue.size() - 1];
-            redoQueue.push_back({ lastUndo.variantIndex, pixels8()});
-            layerData[lastUndo.variantIndex].pixelData = lastUndo.data;
+            LayerVariant& targetVariant = layerData[lastUndo.variantIndex];
+            redoQueue.push_back({ lastUndo.variantIndex, targetVariant.pixelData});
+            targetVariant.pixelData = lastUndo.data;
             undoQueue.pop_back();
             markLayerDirty();
         }
@@ -388,8 +389,9 @@ public:
     void redo() {
         if (!redoQueue.empty()) {
             LayerUndoData& lastRedo = redoQueue[redoQueue.size() - 1];
-            undoQueue.push_back({ lastRedo.variantIndex, pixels8()});
-            layerData[lastRedo.variantIndex].pixelData = lastRedo.data;
+            LayerVariant& targetVariant = layerData[lastRedo.variantIndex];
+            undoQueue.push_back({ lastRedo.variantIndex, targetVariant.pixelData});
+            targetVariant.pixelData = lastRedo.data;
             redoQueue.pop_back();
             markLayerDirty();
         }

@@ -2210,6 +2210,7 @@ void MainEditor::redo()
             if (variantIndex <= l.targetlayer->currentLayerVariant) {
                 layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
             }
+            layerPicker->updateLayers();
             break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
