@@ -27,6 +27,31 @@ enum EditorTouchMode : int {
     TOUCHMODE_MAX
 };
 
+#define UNDOSTACK_LAYER_DATA_MODIFIED 0
+#define UNDOSTACK_CREATE_LAYER 1
+#define UNDOSTACK_DELETE_LAYER 2
+#define UNDOSTACK_MOVE_LAYER 3
+#define UNDOSTACK_ADD_COMMENT 4
+#define UNDOSTACK_REMOVE_COMMENT 5
+#define UNDOSTACK_SET_OPACITY 6
+#define UNDOSTACK_RESIZE_LAYER 7
+#define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
+#define UNDOSTACK_CREATE_LAYER_VARIANT 9
+#define UNDOSTACK_DELETE_LAYER_VARIANT 10
+struct UndoStackElement {
+    Layer* targetlayer = NULL;
+    uint32_t type = 0;
+    int extdata = 0;
+    int extdata2 = 0;
+    std::string extdata3 = "";
+    void* extdata4 = NULL;
+};
+
+struct UndoStackResizeLayerElement {
+    XY oldDimensions;
+    std::vector<LayerVariant> oldLayerData;
+};
+
 struct CommentData {
     XY position;
     std::string data;
@@ -93,6 +118,8 @@ public:
     bool leftMouseHold = false;
     bool middleMouseHold = false;
     Timer64 layerSwitchTimer;
+    Timer64 variantSwitchTimer;
+    bool lastVariantSwitchWasRight = false;
     Timer64 undoTimer;
     bool lastUndoWasRedo = false;
     bool hideUI = false;
@@ -245,9 +272,7 @@ public:
     void mergeLayerDown(int index);
     void duplicateLayer(int index);
     void switchActiveLayer(int index);
-    Layer* getCurrentLayer() {
-        return layers[selLayer];
-    }
+    Layer* getCurrentLayer() { return layers[selLayer]; }
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename();
     void layer_flipHorizontally();
@@ -271,6 +296,12 @@ public:
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
+
+    void layer_newVariant();
+    void layer_duplicateVariant();
+    void layer_removeVariant(Layer* layer, int variantIndex);
+    void layer_switchVariant(Layer* layer, int variantIndex);
+    void layer_promptRenameCurrentVariant();
 
     bool canAddCommentAt(XY a);
     void addComment(CommentData c);

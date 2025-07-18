@@ -265,7 +265,7 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
 
         for (Layer*& l : caller->layers) {
             l->prerender();
-            SDL_RenderCopy(g_rd, l->tex[g_rd], &layersClipArea, &spriteDrawArea);
+            SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, &layersClipArea, &spriteDrawArea);
         }
     }
 }

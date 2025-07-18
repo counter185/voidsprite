@@ -98,7 +98,7 @@ Layer* readPNG(png_structp png, png_infop info) {
         }
         png_read_image(png, rows);
 
-        uint32_t* pxData = (uint32_t*)ret2->pixelData;
+        uint32_t* pxData = ret2->pixels32();
         for (u32 y = 0; y < height; y++) {
             for (u32 x = 0; x < width; x++) {
                 pxData[y * width + x] =
@@ -136,23 +136,24 @@ Layer* readPNG(png_structp png, png_infop info) {
 
         ret = new Layer(width, height);
         ret->name = "PNG Image";
+        u8* pixelData = ret->pixels8();
 
         int imagePointer = 0;
         for (uint32_t y = 0; y < height; y++) {
             if (numchannels == 4) {
-                memcpy(ret->pixelData + (y * numchannels * width), rows[y], width * numchannels);
+                memcpy(pixelData + (y * numchannels * width), rows[y], width * numchannels);
             }
             else if (numchannels == 3) {
                 int currentRowPointer = 0;
                 for (uint32_t x = 0; x < width; x++) {
-                    ret->pixelData[imagePointer++] = 0xff;
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    ret->pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    pixelData[imagePointer++] = 0xff;
+                    pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    pixelData[imagePointer++] = rows[y][currentRowPointer++];
                 }
             }
             else {
-                logprintf("WHAT\n");
+                logerr("WHAT\n");
                 delete ret;
                 png_destroy_read_struct(&png, &info, NULL);
                 return NULL;
@@ -161,8 +162,8 @@ Layer* readPNG(png_structp png, png_infop info) {
 
         if (numchannels == 4) {
             SDL_Surface* convSrf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR8888);
-            memcpy(convSrf->pixels, ret->pixelData, height * width * 4);
-            SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, width * 4);
+            memcpy(convSrf->pixels, ret->pixels32(), height * width * 4);
+            SDL_ConvertPixels(width, height, SDL_PIXELFORMAT_ABGR8888, convSrf->pixels, convSrf->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixels32(), width * 4);
             SDL_FreeSurface(convSrf);
         }
 
@@ -248,7 +249,7 @@ std::vector<u8> writePNGToMem(Layer* data)
         png_write_info(outpng, outpnginfo);
 
         uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
-        SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
+        SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixels32(), data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
 
         png_bytepp rows = new png_bytep[data->h];
         for (int y = 0; y < data->h; y++) {
@@ -278,7 +279,7 @@ std::vector<u8> writePNGToMem(Layer* data)
         png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
         png_write_info(outpng, outpnginfo);
 
-        int32_t* pixelData32 = (int32_t*)pltLayer->pixelData;
+        int32_t* pixelData32 = (int32_t*)pltLayer->pixels32();
         png_bytepp rows = new png_bytep[data->h];
         for (int y = 0; y < data->h; y++) {
             png_bytep row = new png_byte[data->w];
@@ -360,7 +361,7 @@ bool writePNG(PlatformNativePathString path, Layer* data)
             png_write_info(outpng, outpnginfo);
 
             uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
-            SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixelData, data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
+            SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixels32(), data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
 
             png_bytepp rows = new png_bytep[data->h];
             for (int y = 0; y < data->h; y++) {
@@ -390,7 +391,7 @@ bool writePNG(PlatformNativePathString path, Layer* data)
             png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
             png_write_info(outpng, outpnginfo);
 
-            int32_t* pixelData32 = (int32_t*)pltLayer->pixelData;
+            int32_t* pixelData32 = (int32_t*)pltLayer->pixels32();
             png_bytepp rows = new png_bytep[data->h];
             for (int y = 0; y < data->h; y++) {
                 png_bytep row = new png_byte[data->w];

@@ -1,6 +1,68 @@
 #include "UILayerButton.h"
 #include "Layer.h"
 
+UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
+    wxWidth = 240;
+    wxHeight = 30;
+    sizeToContent = true;
+
+    layer = linkedLayer;
+
+    mainButton = new LayerActiveButton(layer);
+    mainButton->text = mainName;
+    mainButton->position = XY{ 0,0 };
+    mainButton->wxWidth = 200;
+    mainButton->setCallbackListener(0, this);
+    subWidgets.addDrawable(mainButton);
+
+    hideButton = new UIButton();
+    //hideButton->text = "H";
+    hideButton->tooltip = "Hide";
+    hideButton->icon = g_iconLayerHide;
+    hideButton->position = XY{ mainButton->wxWidth + 10,0 };
+    hideButton->wxWidth = 30;
+    hideButton->setCallbackListener(1, this);
+    subWidgets.addDrawable(hideButton);
+
+    if (layer != NULL && layer->layerData.size() > 1) {
+        int variantY = mainButton->wxHeight;
+        for (int v = 0; v < layer->layerData.size(); v++) {
+            Panel* p = new Panel();
+            p->sizeToContent = true;
+            p->passThroughMouse = true;
+            p->position = XY{ 0, variantY };
+
+            LayerVariantButton* vbtn = new LayerVariantButton(layer, v);
+            vbtn->position = XY{ 30, 0 };
+            vbtn->wxWidth = wxWidth - 50;
+            vbtn->onClickCallback = [this, v](UIButton* btn) {
+                if (callback != NULL) {
+                    callback->eventGeneric(callback_id, 2, v);
+                }
+            };
+            variantButtons.push_back(vbtn);
+            p->subWidgets.addDrawable(vbtn);
+
+            UIButton* delbtn = new UIButton();
+            delbtn->text = "-";
+            delbtn->tooltip = "Delete variant";
+            delbtn->wxWidth = 20;
+            delbtn->wxHeight = vbtn->wxHeight;
+            delbtn->position = XY{ vbtn->wxWidth + 30, 0 };
+            delbtn->onClickCallback = [this, v](UIButton* btn) {
+                if (callback != NULL) {
+                    callback->eventGeneric(callback_id, 3, v);
+                }
+            };
+            p->subWidgets.addDrawable(delbtn);
+
+            subWidgets.addDrawable(p);
+
+            variantY += vbtn->wxHeight;
+        }
+    }
+}
+
 void UILayerButton::eventButtonPressed(int evt_id)
 {
     if (callback == NULL) {
@@ -40,4 +102,13 @@ void LayerActiveButton::render(XY at)
         g_popClip();
     }
     UIButton::render(at);
+}
+
+LayerVariantButton::LayerVariantButton(Layer* l, int variantIndex) : UIButton(), ll(l), variantIndex(variantIndex) {
+    text = l->layerData[variantIndex].name;
+    wxHeight = 24;
+    fontSize = 14;
+    if (l->currentLayerVariant == variantIndex) {
+        fill = Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF);
+    }
 }

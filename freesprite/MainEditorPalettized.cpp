@@ -440,6 +440,18 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),
+                            [this]() { this->layer_newVariant(); }
+                        }
+                    },
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
+                            [this]() { this->layer_duplicateVariant(); }
+                        }
+                    },
+                    {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),
+                            [this]() { this->layer_promptRenameCurrentVariant(); }
+                        }
+                    },
                     //todo: fix it (make it so that the -1 index never gets passed)
                     /*{SDL_SCANCODE_C, {TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
                             [](MainEditor* editor) {
@@ -651,13 +663,13 @@ Layer* MainEditorPalettized::mergeLayers(Layer* bottom, Layer* top)
     ret->palette = palette;
 
     if (!bottom->isPalettized || !top->isPalettized) {
-        logprintf("UH OH\n");
+        logerr("UH OH\n");
     }
 
-    memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);
+    memcpy(ret->pixels32(), bottom->pixels32(), bottom->w * bottom->h * 4);
 
-    uint32_t* ppx = (uint32_t*)top->pixelData;
-    uint32_t* retppx = (uint32_t*)ret->pixelData;
+    uint32_t* ppx = top->pixels32();
+    uint32_t* retppx = ret->pixels32();
     for (uint64_t p = 0; p < ret->w * ret->h; p++) {
         uint32_t pixel = ppx[p];
         uint32_t srcPixel = retppx[p];
@@ -705,7 +717,7 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
     int32_t* indices = makeFlatIndicesTable();
 
     Layer* flatAndRGBConvertedLayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
-    uint32_t* intpxdata = (uint32_t*)flatAndRGBConvertedLayer->pixelData;
+    uint32_t* intpxdata = flatAndRGBConvertedLayer->pixels32();
     for (int y = 0; y < canvas.dimensions.y; y++) {
         for (int x = 0; x < canvas.dimensions.x; x++) {
             intpxdata[x + y * canvas.dimensions.x] = palette[indices[x + y * canvas.dimensions.x]];
@@ -719,7 +731,7 @@ Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
 {
     int32_t* indices = makeFlatIndicesTable();
     LayerPalettized* flatLayer = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
-    memcpy(flatLayer->pixelData, indices, canvas.dimensions.x * canvas.dimensions.y * 4);
+    memcpy(flatLayer->pixels32(), indices, canvas.dimensions.x * canvas.dimensions.y * 4);
     flatLayer->palette = palette;
     tracked_free(indices);
     return flatLayer;

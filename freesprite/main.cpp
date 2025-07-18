@@ -1028,13 +1028,19 @@ int main(int argc, char** argv)
                 ticksBegin = SDL_GetTicks64();
 
                 if (wd->isMainWindow) {
+
+                    int numOverallWorkspaces = 0;
+                    for (auto& [id, w] : g_windows) {
+                        numOverallWorkspaces += w->screenStack.size();
+                    }
+
                     //tl strings shouldn't be read every frame
                     static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
                     static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
 
                     g_updateRPC(
-                        wd->screenStack.size() == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", wd->screenStack.size(), tlActiveWorkspacesString),
-                        wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
+                        numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
+                        numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
                     );
                     std::string newWindowTitle = windowTitle + std::format("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
                     if (newWindowTitle != wd->lastWindowTitle) {

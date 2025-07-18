@@ -53,7 +53,7 @@ void PanelTilemapPreview::render(XY position)
 
     for (Layer* l : caller->caller->layers) {
         l->prerender();
-        SDL_RenderCopy(g_rd, l->tex[g_rd], &tileClip, &tileDraw);
+        SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, &tileClip, &tileDraw);
     }
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x90);
     SDL_RenderDrawRect(g_rd, &tileDraw);

@@ -37,6 +37,7 @@ void unZlibFile(PlatformNativePathString path);
 #include "io/io_jxl.h"
 #include "io/io_dibv5.h"
 #include "io/io_valve_spr.h"
+#include "io/io_voidsprite.h"
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
@@ -67,16 +68,10 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
-MainEditor* readVOIDSN(PlatformNativePathString path);
 
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
-bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
-bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
@@ -97,7 +92,6 @@ bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
 bool writeVTF(PlatformNativePathString path, Layer* data);
 
-std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name);
@@ -276,6 +270,7 @@ inline FileExporter* voidsnExporter = NULL;
 
 inline void g_setupIO() {
     FileExporter
+        *exVOIDSNv6,
         *exVOIDSNv5,
         *exVOIDSNv4,
         *exVOIDSNv3,
@@ -300,7 +295,8 @@ inline void g_setupIO() {
         *exAVIF
         ;
 
-    g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED) );
+    g_fileExporters.push_back( exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED) );
     g_fileExporters.push_back( exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", &writeVOIDSNv3) );
     g_fileExporters.push_back( exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2) );
@@ -342,7 +338,8 @@ inline void g_setupIO() {
 
     voidsnExporter = exVOIDSNv5;
 
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v6", ".voidsnv6", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v4", ".voidsnv4", &readVOIDSN, exVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED));

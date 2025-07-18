@@ -264,7 +264,7 @@ void ExtractDataScreen::processLayer()
     fseek(fileHandle, fileOffset, SEEK_SET);
     dataLayer->fillRect({ 0,0 }, { (int)layerWidth, (int)layerHeight }, 0x00000000);
     XY nextPixelWritePos = { 0,0 };
-    u32* ppx = (u32*)dataLayer->pixelData;
+    u32* ppx = dataLayer->pixels32();
 
 
     std::function<void(Layer*,XY&)> pixelOrderFn = 

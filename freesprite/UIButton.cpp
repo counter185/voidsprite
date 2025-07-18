@@ -45,7 +45,7 @@ void UIButton::render(XY pos)
 		textX += iconRect.w;
 	}
 
-	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
+	g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor, fontSize);
 
 	renderTooltip(pos);
 }

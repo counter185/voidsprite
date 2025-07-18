@@ -9,7 +9,7 @@ void ScrollingPanel::render(XY position) {
     //DEBUG: show bounds
 #if _DEBUG
     if (g_debugConfig.debugShowScrollPanelBounds) {
-        XY endpoint = getInsideAreaWH();
+        XY endpoint = getContentBoxSize();
         SDL_SetRenderDrawColor(g_rd, 0xff, 0, 0, 0x80);
         SDL_Rect r2 = { position.x + scrollOffset.x, position.y + scrollOffset.y, endpoint.x, endpoint.y };
         SDL_RenderDrawRect(g_rd, &r2);
@@ -22,7 +22,7 @@ void ScrollingPanel::render(XY position) {
     subWidgets.renderAll(xyAdd(position, scrollOffset));
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-    XY area = getInsideAreaWH();
+    XY area = getContentBoxSize();
     if (scrollVertically && area.y > wxHeight) {
         int lineH = (int)(ixpow(wxHeight, 2) / (double)area.y);
         XY scrollbarOrigin = { position.x + wxWidth - 3,  position.y + (int)((-scrollOffset.y / (double)area.y) * wxHeight) };

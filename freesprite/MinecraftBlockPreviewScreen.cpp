@@ -179,7 +179,7 @@ void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
     drawIsometricBlock({0, 0, wh.x, wh.y});
     Layer* l = new Layer(wh.x, wh.y);
     SDL_Surface* nsrf = SDL_RenderReadPixels(g_rd, NULL);
-    SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixelData, wh.x*4);
+    SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), wh.x*4);
     SDL_FreeSurface(nsrf);
 
     g_popRenderTarget();
@@ -268,7 +268,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
             for (int i = 0; i < 7; i++) {
                 vertices[i].color.a = l->layerAlpha / 255.0f;
             }
-            int r = SDL_RenderGeometry(g_rd, l->tex[g_rd], vertices, 7, indicesTop, 6);
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesTop, 6);
         }
     }
 
@@ -299,7 +299,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
             for (int i = 0; i < 7; i++) {
                 vertices[i].color.a = l->layerAlpha / 255.0f;
             }
-            int r = SDL_RenderGeometry(g_rd, l->tex[g_rd], vertices, 7, indicesSideLeft, 6);
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesSideLeft, 6);
         }
     }
 
@@ -330,7 +330,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
             for (int i = 0; i < 7; i++) {
                 vertices[i].color.a = l->layerAlpha / 255.0f;
             }
-            int r = SDL_RenderGeometry(g_rd, l->tex[g_rd], vertices, 7, indicesSideRight, 6);
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesSideRight, 6);
         }
     }
     

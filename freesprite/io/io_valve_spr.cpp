@@ -44,7 +44,7 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
 			else {
 				l->name = "Valve SPR Layer";
 				l->palette = palette;
-				u32* ppx = (u32*)l->pixelData;
+				u32* ppx = l->pixels32();
 				for (u32 y = 0; y < frame.height; y++) {
 					for (u32 x = 0; x < frame.width; x++) {
 						u8 px;

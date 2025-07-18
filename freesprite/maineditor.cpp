@@ -95,7 +95,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 
     Layer* nlayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     layers.push_back(nlayer);
-    SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixelData, canvas.dimensions.x*4);
+    SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixels32(), canvas.dimensions.x*4);
 
     setUpWidgets();
     recenterCanvas();
@@ -145,9 +145,20 @@ void MainEditor::render() {
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
     for (int x = 0; x < layers.size(); x++) {
         Layer* imgLayer = layers[x];
+        bool isCurrentActiveLayer = (selLayer == x);
         if (!imgLayer->hidden) {
             uint8_t alpha = imgLayer->layerAlpha;
-            imgLayer->render(canvasRenderRect, (layerSwitchTimer.started && x == selLayer) ? (uint8_t)(alpha * XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300))) : alpha);
+            SDL_Rect renderRect = canvasRenderRect;
+            double layerFadeIn = layerSwitchTimer.started ? XM1PW3P1(layerSwitchTimer.percentElapsedTime(1300)) : 1.0;
+            if (variantSwitchTimer.started && isCurrentActiveLayer) {
+                double percent = XM1PW3P1(variantSwitchTimer.percentElapsedTime(400));
+                renderRect.x += (lastVariantSwitchWasRight ? 1.0 : -1.0) * (40.0 * (1.0 - percent));
+                layerFadeIn *= percent;
+            }
+            if (!isCurrentActiveLayer) {
+                layerFadeIn = 1.0;
+            }
+            imgLayer->render(renderRect, (uint8_t)(alpha * layerFadeIn));
         }
     }
 
@@ -818,18 +829,8 @@ void MainEditor::setUpWidgets()
                 TL("vsp.maineditor.edit"),
                 {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
-                    {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"),
-                            [this]() {
-                                this->undo();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"),
-                            [this]() {
-                                this->redo();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"), [this]() { this->undo(); } } },
+                    {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"), [this]() { this->redo(); } } },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
                             [this]() {
                                 this->symmetryEnabled[0] = !this->symmetryEnabled[0];
@@ -842,12 +843,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"),
-                            [this]() {
-                                this->flipAllLayersOnX();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"), [this]() { this->flipAllLayersOnX(); } } },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
                             [this]() {
                                 this->flipAllLayersOnY();
@@ -861,9 +857,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
-                            [this]() {
-                                this->isolateEnabled = false;
-                            }
+                            [this]() { this->isolateEnabled = false; }
                         }
                     },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
@@ -917,15 +911,11 @@ void MainEditor::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.flipx"),
-                            [this]() {
-                                this->layer_flipHorizontally();
-                            }
+                            [this]() { this->layer_flipHorizontally(); }
                         }
                     },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipy"),
-                            [this]() {
-                                this->layer_flipVertically();
-                            }
+                            [this]() { this->layer_flipVertically(); }
                         }
                     },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.printcol"),
@@ -935,21 +925,15 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.renlayer"),
-                            [this]() {
-                                this->layer_promptRename();
-                            }
+                            [this]() { this->layer_promptRename(); }
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.isolatealpha"),
-                            [this]() {
-                                this->layer_selectCurrentAlpha();
-                            }
+                            [this]() { this->layer_selectCurrentAlpha(); }
                         }
                     },
                     {SDL_SCANCODE_A, { TL("vsp.maineditor.removealpha"),
-                            [this]() {
-                                this->layer_setAllAlpha255();
-                            }
+                            [this]() { this->layer_setAllAlpha255(); }
                         }
                     },
                     {SDL_SCANCODE_K, { TL("vsp.maineditor.setckey"),
@@ -967,15 +951,23 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
-                            [this]() {
-                                this->layer_clearSelectedArea();
-                            }
+                            [this]() { this->layer_clearSelectedArea(); }
                         }
                     },
                     {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.layer.fillselection"),
-                            [this]() {
-                                this->layer_fillActiveColor();
-                            }
+                            [this]() { this->layer_fillActiveColor(); }
+                        }
+                    },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),
+                            [this]() { this->layer_newVariant(); }
+                        }
+                    },
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
+                            [this]() { this->layer_duplicateVariant(); }
+                        }
+                    },
+                    {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),
+                            [this]() { this->layer_promptRenameCurrentVariant(); }
                         }
                     },
                 },
@@ -1009,9 +1001,7 @@ void MainEditor::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
-                            [this]() {
-                                this->recenterCanvas();
-                            }
+                            [this]() { this->recenterCanvas(); }
                         }
                     },
                     {SDL_SCANCODE_F, { "Add reference...",
@@ -1041,9 +1031,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_G, { "Set pixel grid...",
-                            [this]() {
-                                g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:"));
-                            }
+                            [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
                     {SDL_SCANCODE_S, { "Open spritesheet preview...",
@@ -1689,7 +1677,7 @@ void MainEditor::eventFileOpen(int evt_id, PlatformNativePathString name, int im
 
 void MainEditor::FillTexture() {
     Layer* l = getCurrentLayer();
-    int* pixels = (int*)l->pixelData;
+    int* pixels = (int*)l->pixels32();
     //int pitch;
     //SDL_LockTexture(mainTexture, NULL, (void**)&pixels, &pitch);
     for (int x = 0; x < l->w; x++) {
@@ -1915,7 +1903,9 @@ void MainEditor::discardEndOfUndoStack() {
                 {
                     UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                     for (int x = 0; x < layers.size(); x++) {
-                        tracked_free(resizeLayerData[x].oldData);
+                        for (auto& variant : resizeLayerData[x].oldLayerData) {
+                            tracked_free(variant.pixelData);
+                        }
                     }
                     delete resizeLayerData;
                 }
@@ -1924,6 +1914,10 @@ void MainEditor::discardEndOfUndoStack() {
                 for (Layer* ll : layers) {
                     ll->discardLastUndo();
                 }
+                break;
+            case UNDOSTACK_DELETE_LAYER_VARIANT:
+                tracked_free(((LayerVariant*)l.extdata4)->pixelData);
+                delete (LayerVariant*)l.extdata4;
                 break;
         }
 
@@ -1995,11 +1989,22 @@ void MainEditor::discardRedoStack()
                 delete l.targetlayer;
                 break;
             case UNDOSTACK_RESIZE_LAYER:
+            {
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
-                    tracked_free(resizeLayerData[x].oldData);
+                    for (auto& variant : resizeLayerData[x].oldLayerData) {
+                        tracked_free(variant.pixelData);
+                    }
                 }
                 delete resizeLayerData;
+            }
+                break;
+            case UNDOSTACK_CREATE_LAYER_VARIANT:
+            {
+                LayerVariant v = *(LayerVariant*)l.extdata4;
+                delete (LayerVariant*)l.extdata4;
+                tracked_free(v.pixelData);
+            }
                 break;
         }
     }
@@ -2059,13 +2064,13 @@ void MainEditor::undo()
                 UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
                 for (int x = 0; x < layers.size(); x++) {
                     //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                    uint8_t* oldData = layers[x]->pixelData;
+                    std::vector<LayerVariant> oldData = layers[x]->layerData;
                     XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                    layers[x]->pixelData = resizeLayerData[x].oldData;
+                    layers[x]->layerData = resizeLayerData[x].oldLayerData;
                     layers[x]->w = resizeLayerData[x].oldDimensions.x;
                     layers[x]->h = resizeLayerData[x].oldDimensions.y;
                     layers[x]->markLayerDirty();
-                    resizeLayerData[x].oldData = oldData;
+                    resizeLayerData[x].oldLayerData = oldData;
                     resizeLayerData[x].oldDimensions = oldDimensions;
                 }
                 canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2079,6 +2084,29 @@ void MainEditor::undo()
                 for (Layer* ll : layers) {
                     ll->undo();
                 }
+                break;
+            case UNDOSTACK_CREATE_LAYER_VARIANT:
+            {
+                int variantIndex = l.extdata;
+                LayerVariant v = l.targetlayer->layerData[variantIndex];
+                l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
+                l.extdata4 = new LayerVariant(v);
+                if (variantIndex == l.targetlayer->currentLayerVariant) {
+                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+                }
+                layerPicker->updateLayers();
+            }
+                break;
+            case UNDOSTACK_DELETE_LAYER_VARIANT:
+                int variantIndex = l.extdata;
+                LayerVariant* deletedVariant = (LayerVariant*)l.extdata4;
+                l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, *deletedVariant);
+                delete deletedVariant;
+                if (variantIndex == l.targetlayer->currentLayerVariant) {
+                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+                }
+                l.extdata4 = NULL;
+                layerPicker->updateLayers();
                 break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2142,13 +2170,13 @@ void MainEditor::redo()
             UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
             for (int x = 0; x < layers.size(); x++) {
                 //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                uint8_t* oldData = layers[x]->pixelData;
+                std::vector<LayerVariant> oldData = layers[x]->layerData;
                 XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                layers[x]->pixelData = resizeLayerData[x].oldData;
+                layers[x]->layerData = resizeLayerData[x].oldLayerData;
                 layers[x]->w = resizeLayerData[x].oldDimensions.x;
                 layers[x]->h = resizeLayerData[x].oldDimensions.y;
                 layers[x]->markLayerDirty();
-                resizeLayerData[x].oldData = oldData;
+                resizeLayerData[x].oldLayerData = oldData;
                 resizeLayerData[x].oldDimensions = oldDimensions;
             }
             canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2162,6 +2190,27 @@ void MainEditor::redo()
             for (Layer* ll : layers) {
                 ll->redo();
             }
+            break;
+        case UNDOSTACK_CREATE_LAYER_VARIANT:
+        {
+            int variantIndex = l.extdata;
+            LayerVariant v = *(LayerVariant*)l.extdata4;
+            delete (LayerVariant*)l.extdata4;
+            l.extdata4 = NULL;
+            l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, v);
+            layerPicker->updateLayers();
+        }
+            break;
+        case UNDOSTACK_DELETE_LAYER_VARIANT:
+            int variantIndex = l.extdata;
+            LayerVariant* vv = new LayerVariant;
+            *vv = l.targetlayer->layerData[variantIndex];
+            l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
+            l.extdata4 = vv;
+            if (variantIndex <= l.targetlayer->currentLayerVariant) {
+                layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+            }
+            layerPicker->updateLayers();
             break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2377,7 +2426,7 @@ void MainEditor::mergeLayerDown(int index)
     deleteLayer(index);
     commitStateToLayer(bottomLayer);
     Layer* merged = mergeLayers(bottomLayer, topLayer);
-    memcpy(bottomLayer->pixelData, merged->pixelData, bottomLayer->w * bottomLayer->h * 4);
+    memcpy(bottomLayer->pixels32(), merged->pixels32(), bottomLayer->w * bottomLayer->h * 4);
     bottomLayer->markLayerDirty();
     delete merged;
     
@@ -2387,7 +2436,7 @@ void MainEditor::duplicateLayer(int index)
 {
     Layer* currentLayer = layers[index];
     Layer* newL = newLayer();
-    memcpy(newL->pixelData, currentLayer->pixelData, currentLayer->w * currentLayer->h * 4);
+    memcpy(newL->pixels32(), currentLayer->pixels32(), currentLayer->w * currentLayer->h * 4);
     newL->name = "Copy:" + currentLayer->name;
     newL->markLayerDirty();
 }
@@ -2401,6 +2450,64 @@ void MainEditor::layer_flipVertically()
 {
     commitStateToCurrentLayer();
     getCurrentLayer()->flipVertically();
+}
+
+void MainEditor::layer_newVariant()
+{
+    Layer* clayer = getCurrentLayer();
+    clayer->newLayerVariant();
+    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
+    layerPicker->updateLayers();
+}
+
+void MainEditor::layer_duplicateVariant()
+{
+    Layer* clayer = getCurrentLayer();
+    clayer->duplicateVariant();
+    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
+    layerPicker->updateLayers();
+}
+
+void MainEditor::layer_removeVariant(Layer* layer, int variantIndex)
+{
+    if (layer->layerData.size() > 1) {
+        LayerVariant v = layer->layerData[variantIndex];
+        layer->layerData.erase(layer->layerData.begin() + variantIndex);
+        LayerVariant* vv = new LayerVariant(v);
+        addToUndoStack(UndoStackElement{ layer, UNDOSTACK_DELETE_LAYER_VARIANT, variantIndex,0,"", vv});
+        if (variantIndex <= layer->currentLayerVariant) {
+            layer_switchVariant(layer, ixmin(variantIndex, layer->layerData.size() - 1));
+        }
+        layerPicker->updateLayers();
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.maineditor.error.dellastvariant")));
+    }
+}
+
+void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
+{
+    int vidxNow = layer->currentLayerVariant;
+    if (layer->switchVariant(variantIndex)) {
+        layerPicker->updateLayers();
+        if (layer == getCurrentLayer()) {
+            variantSwitchTimer.start();
+            lastVariantSwitchWasRight = vidxNow < variantIndex;
+        }
+    }
+}
+
+void MainEditor::layer_promptRenameCurrentVariant()
+{
+    Layer* clayer = getCurrentLayer();
+    int layerVariantIndex = clayer->currentLayerVariant;
+    std::string nameNow = clayer->layerData[layerVariantIndex].name;
+    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", nameNow);
+    ninput->onTextInputConfirmedCallback = [this,clayer,layerVariantIndex](PopupTextBox* p, std::string newName) {
+        clayer->layerData[layerVariantIndex].name = newName;
+        layerPicker->updateLayers();
+    };
+    g_addPopup(ninput);
 }
 
 void MainEditor::layer_setOpacity(uint8_t opacity) {
@@ -2440,15 +2547,15 @@ Layer* MainEditor::flattenImage()
     Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (ret != NULL) {
         int x = 0;
-        uint32_t* retppx = (uint32_t*)ret->pixelData;
+        uint32_t* retppx = ret->pixels32();
         for (Layer*& l : layers) {
             if (l->hidden) {
                 continue;
             }
-            uint32_t* ppx = (uint32_t*)l->pixelData;
+            uint32_t* ppx = l->pixels32();
             if (x++ == 0) {
                 if (l->layerAlpha == 255) {
-                    memcpy(ret->pixelData, l->pixelData, l->w * l->h * 4);
+                    memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4);
                 }
                 else {
                     for (uint64_t p = 0; p < l->w * l->h; p++) {
@@ -2488,10 +2595,10 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 {
     Layer* ret = new Layer(bottom->w, bottom->h);
 
-    memcpy(ret->pixelData, bottom->pixelData, bottom->w * bottom->h * 4);
+    memcpy(ret->pixels32(), bottom->pixels32(), bottom->w * bottom->h * 4);
 
-    uint32_t* ppx = (uint32_t*)top->pixelData;
-    uint32_t* retppx = (uint32_t*)ret->pixelData;
+    uint32_t* ppx = top->pixels32();
+    uint32_t* retppx = ret->pixels32();
     for (uint64_t p = 0; p < ret->w * ret->h; p++) {
         uint32_t pixel = ppx[p];
         uint32_t srcPixel = retppx[p];
@@ -2530,10 +2637,10 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{layers[x]->w, layers[x]->h};
-        layerResizeData[x].oldData = layers[x]->pixelData;
-        Layer* sc = layers[x]->copyScaled(size);
-        layers[x]->pixelData = (u8*)tracked_malloc(size.x * size.y * 4);
-        memcpy(layers[x]->pixelData, sc->pixelData, size.x * size.y * 4);
+        layerResizeData[x].oldLayerData = layers[x]->layerData;
+        Layer* sc = layers[x]->copyAllVariantsScaled(size);
+        layers[x]->layerData = sc->layerData;
+        sc->layerData = {};
         delete sc;
         layers[x]->w = size.x;
         layers[x]->h = size.y;
@@ -2568,10 +2675,10 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
         if (byTile) {
-            layerResizeData[x].oldData = layers[x]->resizeByTileSizes(tileDimensions, size);
+            layerResizeData[x].oldLayerData = layers[x]->resizeByTileSizes(tileDimensions, size);
         }
         else {
-            layerResizeData[x].oldData = layers[x]->resize(size);
+            layerResizeData[x].oldLayerData = layers[x]->resize(size);
         }
         layers[x]->markLayerDirty();
     }
@@ -2594,7 +2701,7 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldData = layers[x]->resizeByTileCount(tileDimensions, size);
+        layerResizeData[x].oldLayerData = layers[x]->resizeByTileCount(tileDimensions, size);
         layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2621,7 +2728,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
     for (int x = 0; x < layers.size(); x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
+        layerResizeData[x].oldLayerData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
         layers[x]->markLayerDirty();
     }
     canvas.dimensions = { layers[0]->w, layers[0]->h };
@@ -2664,8 +2771,8 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
                 newLayer->hidden = l->hidden;
                 newLayer->palette = palette;
 
-                uint32_t* ppx = (uint32_t*)l->pixelData;
-                uint32_t* outpx = (uint32_t*)newLayer->pixelData;
+                uint32_t* ppx = l->pixels32();
+                uint32_t* outpx = newLayer->pixels32();
                 for (uint64_t p = 0; p < l->w * l->h; p++) {
                     outpx[p] = std::find(palette.begin(), palette.end(), ppx[p]) - palette.begin();
                 }
@@ -2807,7 +2914,7 @@ void MainEditor::layer_outline(bool wholeImage)
                     }
                 }
             }
-            if (neighborCount > 0 && neighborCount != 4) {
+            if (neighborCount > 0) {
                 l->setPixel(newPos, getActiveColor());
             }
         }

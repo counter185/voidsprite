@@ -55,7 +55,7 @@ Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
             nLayer->palette.push_back(PackRGBAtoARGB(r, g, b,255));
         }
 
-        uint32_t* pxData = (uint32_t*)nLayer->pixelData;
+        uint32_t* pxData = nLayer->pixels32();
         for (int x = 0; x < imgW * imgH; x++) {
             //pxData[x] = colorPalette[decompBytes[filePtr++]];
             pxData[x] = decompBytes[filePtr++];
@@ -119,7 +119,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
 
         //write pixel data
         uint8_t* pxPalleteData = (uint8_t*)tracked_malloc(data->w * data->h);
-        uint32_t* pixelData32 = (uint32_t*)data->pixelData;
+        uint32_t* pixelData32 = data->pixels32();
         if (data->isPalettized) {
             for (uint64_t x = 0; x < data->w * data->h; x++) {
                 pxPalleteData[x] = (uint8_t)(pixelData32[x]);

@@ -101,6 +101,11 @@
     {"vsp.keybinds.maineditor.newlayer", "New layer"},
     {"vsp.keybinds.maineditor.duplicatelayer", "Duplicate current layer"},
     {"vsp.keybinds.maineditor.switchtobrush", "Switch to"},
+    {"vsp.keybinds.maineditor.newlayervariant", "New layer variant"},
+    {"vsp.keybinds.maineditor.duplicatelayervariant", "Duplicate layer variant"},
+    {"vsp.keybinds.maineditor.deletelayervariant", "Delete layer variant"},
+    {"vsp.keybinds.maineditor.prevlayervariant", "Previous layer variant"},
+    {"vsp.keybinds.maineditor.nextlayervariant", "Next layer variant"},
 
     {"vsp.keybinds.region.splitsessioneditor", "Split session editor"},
     {"vsp.keybinds.splitsessioneditor.importimage", "Add image to split session"},
@@ -186,6 +191,8 @@
     {"vsp.maineditor.tab.render", "Render"},
     {"vsp.maineditor.tab.view", "View"},
 
+    {"vsp.maineditor.error.dellastvariant", "Cannot delete last layer variant"},
+
     {"vsp.maineditor.saveas","Save As"},
     {"vsp.maineditor.exportpal","Export as indexed"},
     {"vsp.maineditor.exportind","Export tiles individually"},
@@ -222,6 +229,9 @@
     {"vsp.maineditor.nav.layer.copylayertoclipboard","Copy layer to clipboard"},
     {"vsp.maineditor.nav.layer.clearselection", "Erase selected area"},
     {"vsp.maineditor.nav.layer.fillselection", "Fill selected area"},
+    {"vsp.maineditor.nav.layer.newvariant", "New empty layer variant"},
+    {"vsp.maineditor.nav.layer.copyvariant", "Duplicate current layer variant"},
+    {"vsp.maineditor.nav.layer.renvariant", "Rename current layer variant"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

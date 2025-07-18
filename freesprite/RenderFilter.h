@@ -19,7 +19,7 @@ public:
         u8 range_max = std::stoul(options["range.max"]);
 
         Layer* c = copy(src);
-        u32* px = (u32*)c->pixelData;
+        u32* px = c->pixels32();
 
         for (int i = 0; i < c->w * c->h; i++) {
             if (grayscale) {
@@ -74,7 +74,7 @@ public:
         }
 
         Layer* c = copy(src);
-        u32* px = (u32*)c->pixelData;
+        u32* px = c->pixels32();
 
         for (int i = 0; i < c->w * c->h; i++) {
             px[i] = PackRGBAtoARGB(

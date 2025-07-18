@@ -19,7 +19,6 @@
 
 #include "globals.h"
 #include "Notification.h"
-#include "EditorLayerPicker.h"
 #include "splitsession.h"
 #include "FileIO.h"
 #include "maineditor.h"
@@ -107,7 +106,7 @@ std::map<std::string, std::string> parseINI(PlatformNativePathString path)
 void detile(Layer* ret, XY tileSize) {
 
     Layer* t = new Layer(ret->w, ret->h);
-    memcpy(t->pixelData, ret->pixelData, 4 * t->w * t->h);
+    memcpy(t->pixels32(), ret->pixels32(), 4 * t->w * t->h);
     //t->blitTile(ret, { 0,1 }, { 1,0 }, tileSize);
     Detiler dt(2);
     for (int y = 0; y < ceil(ret->h / (double)tileSize.y); y++) {
@@ -117,12 +116,12 @@ void detile(Layer* ret, XY tileSize) {
         }
     }
     
-    memcpy(ret->pixelData, t->pixelData, 4 * t->w * t->h);
+    memcpy(ret->pixels32(), t->pixels32(), 4 * t->w * t->h);
     delete t;
 }
 
 int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth, int blockHeight) {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     /*int skip = 232;
     int skipHowMany = 24;
     int skipCounter = 0;*/
@@ -232,7 +231,7 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
         }
     }
 
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (uint64_t i = 0; i < width * height; i++) {
         //pxd[i] = PackRGBAtoARGB(colorTable[i], colorTable[i], colorTable[i], 255);
         pxd[i] = colorTable[i];
@@ -299,7 +298,7 @@ uint8_t* DecompressMarioPaintSRM(FILE* f)
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile)
 {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             // Extract color endpoints
@@ -380,7 +379,7 @@ void DeXT1(Layer* ret, int width, int height, FILE* infile)
     }
 }
 void DeXT23(Layer* ret, int width, int height, FILE* infile) {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             // Extract color endpoints
@@ -482,7 +481,7 @@ void DeXT23(Layer* ret, int width, int height, FILE* infile) {
     }
 }
 void DeXT45(Layer* ret, int width, int height, FILE* infile) {
-    uint32_t* pxd = (uint32_t*)ret->pixelData;
+    uint32_t* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             //gonna be real i have no idea what's going on here
@@ -631,7 +630,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF A8 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 a;
                 fread(&a, 1, 1, infile);
@@ -643,7 +642,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF I8 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 i;
                 fread(&i, 1, 1, infile);
@@ -655,7 +654,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF IA88 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 i;
                 u8 a;
@@ -669,7 +668,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF BGRA Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 fread(pxp + dataP, 4, 1, infile);
             }
@@ -679,7 +678,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF RGBA Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 uint8_t ch[4];
                 fread(ch, 4, 1, infile);
@@ -692,7 +691,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF ARGB Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 uint8_t ch[4];
                 fread(ch, 4, 1, infile);
@@ -705,7 +704,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF ABGR Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 uint8_t ch[4];
                 fread(ch, 4, 1, infile);
@@ -718,7 +717,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF RGB Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 c[3];
                 fread(c, 3, 1, infile);
@@ -730,7 +729,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF RGB565 Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u8 c[2];
                 fread(c, 2, 1, infile);
@@ -742,7 +741,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         ret = new Layer(width, height);
         ret->name = "VTF BGR Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 fread(pxp + dataP, 3, 1, infile);
                 pxp[dataP] |= 0xFF000000;
@@ -770,7 +769,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         //no idea how to make this work
         ret->name = "VTF RGBA16f Layer";
         {
-            uint32_t* pxp = (uint32_t*)ret->pixelData;
+            uint32_t* pxp = ret->pixels32();
             for (uint64_t dataP = 0; dataP < ret->w * ret->h; dataP++) {
                 u16 ch[4];
                 fread(ch, 2, 4, infile);
@@ -1212,7 +1211,7 @@ MainEditor* deserializePixelStudioSession(json j)
                         lightness / 10000.0f
                     };
                     logprintf("hsl shift by  h:%lf s:%lf l:%lf\n", shift.h, shift.s, shift.l);
-                    u32* px32 = (u32*)nlayer->pixelData;
+                    u32* px32 = nlayer->pixels32();
                     for (u64 dataPtr = 0; dataPtr < nlayer->w * nlayer->h; dataPtr++) {
                         px32[dataPtr] = hslShiftPixelStudioCompat(px32[dataPtr], shift);
                     }
@@ -1326,7 +1325,7 @@ Layer* readBMP(PlatformNativePathString path, uint64_t seek)
     Layer* nlayer = new Layer(w, h);
     nlayer->name = "BMP Layer";
     unsigned long dataPtr = 0;
-    uint32_t* pxData32 = (uint32_t*)nlayer->pixelData;
+    uint32_t* pxData32 = nlayer->pixels32();
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             RGBApixel px = nbmp.GetPixel(x,y);
@@ -1782,7 +1781,7 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
             {
                 ret = new Layer(desc.width, desc.height);
                 ret->name = "DDS BGRA Layer";
-                uint32_t* pxd = (uint32_t*)ret->pixelData;
+                uint32_t* pxd = ret->pixels32();
                 for (uint64_t d = 0; d < desc.width * desc.height; d++) {
                     uint32_t bgra;
                     fread(&bgra, 4, 1, infile);
@@ -1953,7 +1952,7 @@ Layer* readMSP(PlatformNativePathString path, uint64_t seek)
         //fseek(infile, 1, SEEK_CUR);
         Layer* ret = new Layer(hdr.Width, hdr.Height);
         ret->name = "MSP1.0/2.0 Layer";
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         uint64_t dataPointer = 0;
         while (dataPointer < hdr.Width*hdr.Height && ftell(infile) < fileLength) {
             uint8_t RunType;
@@ -2026,7 +2025,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
         LayerPalettized* ret = new LayerPalettized(320, 200);
         ret->palette = g_palettes[PALETTE_DEFAULT];
         ret->name = "SPK Layer";
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         uint64_t layerPointer = 0;
         uint16_t a;
         bool reachedImageEnd = false;
@@ -2079,7 +2078,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
         LayerPalettized* ret = new LayerPalettized(320, 200);
         ret->palette = g_palettes[PALETTE_DEFAULT];
         ret->name = "BDY Layer";
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         uint32_t* end = pxd + (320 * 200);
         bool reachedImageEnd = false;
         while (!reachedImageEnd && !feof(f)) {
@@ -2119,7 +2118,7 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        uint32_t* pxd = (uint32_t*)ret->pixelData;
+        uint32_t* pxd = ret->pixels32();
         ret->palette = g_palettes[PALETTE_DEFAULT];
         for (int x = 0; x < 320 * 200; x++) {
             uint8_t pixel;
@@ -2419,7 +2418,7 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
         l->palette = pal;*/
         l->palette = g_palettes["Slim Render (8-bit)"];
 
-        u32* ppx = (u32*)l->pixelData;
+        u32* ppx = l->pixels32();
         for (int dataPointer = 0; dataPointer < l->w * l->h; dataPointer++) {
             uint8_t byte;
             fread(&byte, 1, 1, f);
@@ -2437,7 +2436,7 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
     auto nsp = read9SegmentPattern(path);
     if (nsp.first) {
         Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
-        memcpy(nlayer->pixelData, nsp.second.pixelData, nlayer->w * nlayer->h * 4);
+        memcpy(nlayer->pixels32(), nsp.second.pixelData, nlayer->w * nlayer->h * 4);
         tracked_free(nsp.second.pixelData);
         nlayer->name = "Pattern Layer";
         return nlayer;
@@ -2493,7 +2492,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
         //aand we have arrived at the `Texture segment` just look at that view
         ret = new Layer(128, 128);
         ret->name = "PS2 ICN Layer";
-        u32* ppx = (u32*)ret->pixelData;
+        u32* ppx = ret->pixels32();
 
         if (header.textureType == 0x07) {
             
@@ -2636,7 +2635,7 @@ Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek)
                 Detiler detiler(2);
                 ret = new Layer(48, 48);
                 ret->name = "3DS CXI Icon Layer";
-                u32* pxd = (u32*)ret->pixelData;
+                u32* pxd = ret->pixels32();
                 for (int x = 0; x < 48 * 48; x++) {
                     ret->setPixel(detiler.next(), RGB565toARGB8888(rgb565Data[x]));
                 }
@@ -3128,263 +3127,6 @@ MainEditor* readPixelStudioPSX(PlatformNativePathString path)
     return NULL;
 }
 
-MainEditor* readVOIDSN(PlatformNativePathString path)
-{
-    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
-    if (infile != NULL) {
-        uint8_t voidsnversion;
-        fread(&voidsnversion, 1, 1, infile);
-        switch (voidsnversion) {
-            case 1:
-                {
-                    XY dimensions;
-                    fread(&dimensions.x, 4, 1, infile);
-                    fread(&dimensions.y, 4, 1, infile);
-                    std::vector<Layer*> layers;
-                    int nlayers;
-                    fread(&nlayers, 4, 1, infile);
-                    for (int x = 0; x < nlayers; x++) {
-                        Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
-                        layers.push_back(newLayer);
-                    }
-                    MainEditor* ret = new MainEditor(layers);
-                    fclose(infile);
-                    return ret;
-                }
-                break;
-            case 2:
-                {
-                    XY dimensions;
-                    fread(&dimensions.x, 4, 1, infile);
-                    fread(&dimensions.y, 4, 1, infile);
-
-                    XY tiledimensions;
-                    fread(&tiledimensions.x, 4, 1, infile);
-                    fread(&tiledimensions.y, 4, 1, infile);
-
-                    std::vector<Layer*> layers;
-                    int nlayers;
-                    fread(&nlayers, 4, 1, infile);
-                    for (int x = 0; x < nlayers; x++) {
-                        int nameLen;
-                        fread(&nameLen, 4, 1, infile);
-                        char* name = (char*)tracked_malloc(nameLen+1);
-                        memset(name, 0, nameLen + 1);
-                        fread(name, nameLen, 1, infile);
-
-                        Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-                        newLayer->name = std::string(name);
-                        tracked_free(name);
-                        fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
-                        layers.push_back(newLayer);
-                    }
-                    MainEditor* ret = new MainEditor(layers);
-                    ret->tileDimensions = tiledimensions;
-                    fclose(infile);
-                    return ret;
-                }
-                break;       
-            case 3:
-            case 4:
-            case 5:
-                {
-                    XY dimensions;
-                    fread(&dimensions.x, 4, 1, infile);
-                    fread(&dimensions.y, 4, 1, infile);
-
-                    char metaHeader[13];
-                    fread(metaHeader, 13, 1, infile);
-                    // this should equal /VOIDSN.META/
-                    if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
-                        logprintf("INVALID META HEADER\n");
-                    }
-                    int nExtData;
-                    fread(&nExtData, 4, 1, infile);
-                    std::map<std::string, std::string> extData;
-                    for (int x = 0; x < nExtData; x++) {
-                        int keySize;
-                        fread(&keySize, 4, 1, infile);
-                        std::string key;
-                        key.resize(keySize);
-                        fread(&key[0], keySize, 1, infile);
-                        int valSize;
-                        fread(&valSize, 4, 1, infile);
-                        std::string val;
-                        val.resize(valSize);
-                        fread(&val[0], valSize, 1, infile);
-                        extData[key] = val;
-                    }
-
-                    bool isPalettized = extData.contains("palette.enabled") && extData.contains("palette.colors") && std::stoi(extData["palette.enabled"]) == 1;
-
-                    int nlayers;
-                    fread(&nlayers, 4, 1, infile);
-
-                    MainEditor* ret;
-                    if (!isPalettized) {
-                        std::vector<Layer*> layers;
-                        for (int x = 0; x < nlayers; x++) {
-                            int nameLen;
-                            fread(&nameLen, 4, 1, infile);
-                            char* name = (char*)tracked_malloc(nameLen + 1);
-                            memset(name, 0, nameLen + 1);
-                            fread(name, nameLen, 1, infile);
-
-                            Layer* newLayer = new Layer(dimensions.x, dimensions.y);
-                            newLayer->name = std::string(name);
-
-                            char colorKeySet;
-                            fread(&colorKeySet, 1, 1, infile);
-                            newLayer->colorKeySet = colorKeySet == '\1';
-                            fread(&newLayer->colorKey, 4, 1, infile);
-
-                            tracked_free(name);
-
-                            //voidsn version 5+ uses zlib compression
-                            if (voidsnversion < 5) {
-                                fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
-                            }
-                            else {
-                                uint64_t compressedLength = 0;
-                                fread(&compressedLength, 8, 1, infile);
-                                uint8_t* compressedData = new uint8_t[compressedLength];
-                                fread(compressedData, compressedLength, 1, infile);
-                                uint64_t dstLength = newLayer->w * newLayer->h * 4;
-                                uncompress(newLayer->pixelData, (uLongf*)&dstLength, compressedData, compressedLength);
-                                delete[] compressedData;
-                            }
-
-                            layers.push_back(newLayer);
-                        }
-                        ret = new MainEditor(layers);
-                    }
-                    else {
-                        std::vector<uint32_t> palette;
-                        std::string paletteString = extData["palette.colors"];
-                        int nextSC = paletteString.find_first_of(';');
-                        int paletteColors = std::stoi(paletteString.substr(0, nextSC));
-                        paletteString = paletteString.substr(nextSC + 1);
-                        for (int x = 0; x < paletteColors; x++) {
-                            nextSC = paletteString.find_first_of(';');
-                            palette.push_back(std::stoul(paletteString.substr(0, nextSC), NULL, 16));
-                            paletteString = paletteString.substr(nextSC + 1);
-                        }
-
-                        std::vector<LayerPalettized*> layers;
-                        for (int x = 0; x < nlayers; x++) {
-                            int nameLen;
-                            fread(&nameLen, 4, 1, infile);
-                            char* name = (char*)tracked_malloc(nameLen + 1);
-                            memset(name, 0, nameLen + 1);
-                            fread(name, nameLen, 1, infile);
-
-                            LayerPalettized* newLayer = new LayerPalettized(dimensions.x, dimensions.y);
-                            newLayer->name = std::string(name);
-
-                            char colorKeySet;
-                            fread(&colorKeySet, 1, 1, infile);
-                            newLayer->colorKeySet = colorKeySet == '\1';
-                            fread(&newLayer->colorKey, 4, 1, infile);
-
-                            tracked_free(name);
-
-                            if (voidsnversion < 5) {
-                                fread(newLayer->pixelData, newLayer->w * newLayer->h, 4, infile);
-                            }
-                            else {
-                                uint64_t compressedLength = 0;
-                                fread(&compressedLength, 8, 1, infile);
-                                uint8_t* compressedData = new uint8_t[compressedLength];
-                                fread(compressedData, compressedLength, 1, infile);
-                                uint64_t dstLength = newLayer->w * newLayer->h * 4;
-                                uncompress(newLayer->pixelData, (uLongf*)&dstLength, compressedData, compressedLength);
-                                delete[] compressedData;
-                            }
-
-                            newLayer->palette = palette;
-                            layers.push_back(newLayer);
-                        }
-
-                        ret = new MainEditorPalettized(layers);
-                    }
-
-                    if (extData.contains("tile.dim.x")) { ret->tileDimensions.x = std::stoi(extData["tile.dim.x"]); }
-                    if (extData.contains("tile.dim.y")) { ret->tileDimensions.y = std::stoi(extData["tile.dim.y"]); }
-                    if (extData.contains("tile.dim.padrx")) { ret->tileGridPaddingBottomRight.x = std::stoi(extData["tile.dim.padrx"]); }
-                    if (extData.contains("tile.dim.padby")) { ret->tileGridPaddingBottomRight.y = std::stoi(extData["tile.dim.padby"]); }
-                    if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
-                    if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
-                    if (extData.contains("layer.selected")) { ret->selLayer = std::stoi(extData["layer.selected"]); }
-                    if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
-                    if (extData.contains("editor.altbg")) { ret->setAltBG(extData["editor.altbg"] == "1"); }
-                    if (extData.contains("sym.enabled")) { 
-                        ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
-                        ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
-                    }
-                    if (extData.contains("layer.visibility")) {
-                        std::string layerVisibilityData = extData["layer.visibility"];
-                        for (int x = 0; x < nlayers && x < layerVisibilityData.size(); x++) {
-                            ret->layers[x]->hidden = layerVisibilityData[x] == '0';
-                        }
-                        ret->layerPicker->updateLayers();
-                    }
-                    if (extData.contains("comments")) {
-                        std::string commentsData = extData["comments"];
-                        ret->comments = ret->parseCommentDataString(commentsData);
-                    }
-                    if (extData.contains("guidelines")) {
-                        std::string guidelinesData = extData["guidelines"];
-                        try {
-                            int nextSC = guidelinesData.find_first_of(';');
-                            int guidelinesCount = std::stoi(guidelinesData.substr(0, nextSC));
-                            guidelinesData = guidelinesData.substr(nextSC + 1);
-                            for (int x = 0; x < guidelinesCount; x++) {
-                                Guideline newGD;
-                                nextSC = guidelinesData.find_first_of(';');
-                                std::string gdString = guidelinesData.substr(0, nextSC);
-                                newGD.vertical = guidelinesData.substr(0, guidelinesData.find_first_of('-')) == "v";
-                                newGD.position = std::stoi(guidelinesData.substr(guidelinesData.find_first_of('-') + 1));
-                                ret->guidelines.push_back(newGD);
-                                guidelinesData = guidelinesData.substr(nextSC + 1);
-                            }
-                        }
-                        catch (std::exception&) {
-                        }
-                    }
-                    if (!ret->isPalettized && extData.contains("layer.opacity")) {
-                        std::string layerOpacityData = extData["layer.opacity"];
-                        for (int x = 0; x < nlayers; x++) {
-                            int nextSC = layerOpacityData.find_first_of(';');
-                            ret->layers[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
-                            ret->layers[x]->lastConfirmedlayerAlpha = ret->layers[x]->layerAlpha;
-                            layerOpacityData = layerOpacityData.substr(nextSC + 1);
-                        }
-                        ret->layerPicker->updateLayers();
-                    }
-                    if (!ret->isPalettized && extData.contains("activecolor")) {
-                        uint32_t c = std::stoul(extData["activecolor"], NULL, 16);
-                        ret->setActiveColor(c);
-                    }
-                    if (ret->isPalettized && extData.contains("palette.index")) {
-                        ((MainEditorPalettized*)ret)->pickedPaletteIndex = std::stoi(extData["palette.index"]);
-                    }
-                    fclose(infile);
-                    return ret;
-                }
-                break;
-            default:
-                logprintf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("VOIDSN file v{} not supported", voidsnversion)));
-                fclose(infile);
-                return NULL;
-        }
-
-        fclose(infile);
-    }
-    return NULL;
-}
-
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter)
 {
     MainEditor* ssn = loadAnyIntoSession(utf8path, outputFoundImporter);
@@ -3429,364 +3171,6 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
         }
     }
     return NULL;
-}
-
-bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
-{
-    if (data[0]->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
-        return false;
-    }
-
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        uint8_t voidsnVersion = 0x01;
-        fwrite(&voidsnVersion, 1, 1, outfile);
-        uint32_t nvalBuffer;
-
-        nvalBuffer = projDimensions.x;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = projDimensions.y;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        nvalBuffer = data.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (Layer*& lr : data) {
-            if (lr->w * lr->h != projDimensions.x * projDimensions.y) {
-                logprintf("[VOIDSNv1] INVALID LAYER DIMENSIONS (THIS IS BAD)");
-            }
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
-        }
-
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
-
-bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
-{
-    if (editor->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
-        return false;
-    }
-
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        uint8_t voidsnVersion = 0x02;
-        fwrite(&voidsnVersion, 1, 1, outfile);
-        uint32_t nvalBuffer;
-
-        nvalBuffer = editor->canvas.dimensions.x;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->canvas.dimensions.y;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        fwrite(&editor->tileDimensions.x, 4, 1, outfile);
-        fwrite(&editor->tileDimensions.y, 4, 1, outfile);
-
-        nvalBuffer = editor->layers.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
-            }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
-
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
-        }
-
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
-
-bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
-{
-    if (editor->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
-        return false;
-    }
-
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        uint8_t voidsnVersion = 0x03;
-        fwrite(&voidsnVersion, 1, 1, outfile);
-        uint32_t nvalBuffer;
-
-        nvalBuffer = editor->canvas.dimensions.x;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->canvas.dimensions.y;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
-        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
-
-        std::string commentsData = editor->makeCommentDataString();
-
-        std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
-            layerVisibilityData += lr->hidden ? '0' : '1';
-        }
-
-        std::string layerOpacityData = "";
-        for (Layer*& lr : editor->layers) {
-            layerOpacityData += std::to_string(lr->layerAlpha) + ';';
-        }
-
-        fwrite("/VOIDSN.META/", 1, 13, outfile);
-        std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
-            {"comments", commentsData},
-            {"layer.selected", std::to_string(editor->selLayer)},
-            {"layer.visibility", layerVisibilityData},
-            {"layer.opacity", layerOpacityData},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
-        };
-
-        nvalBuffer = extData.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (auto& extDPair : extData) {
-            nvalBuffer = extDPair.first.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
-            nvalBuffer = extDPair.second.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
-        }
-
-        nvalBuffer = editor->layers.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
-            }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
-
-            fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
-            fwrite(&lr->colorKey, 4, 1, outfile);
-
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
-        }
-
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
-
-bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
-{
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        uint8_t voidsnVersion = 0x04;
-        fwrite(&voidsnVersion, 1, 1, outfile);
-        uint32_t nvalBuffer;
-
-        nvalBuffer = editor->canvas.dimensions.x;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->canvas.dimensions.y;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
-        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
-
-        std::string commentsData = editor->makeCommentDataString();
-
-        std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
-            layerVisibilityData += lr->hidden ? '0' : '1';
-        }
-
-        fwrite("/VOIDSN.META/", 1, 13, outfile);
-        std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
-            {"comments", commentsData},
-            {"layer.selected", std::to_string(editor->selLayer)},
-            {"layer.visibility", layerVisibilityData},
-            {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
-        };
-
-        if (editor->isPalettized) {
-            MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
-            std::string paletteData = "";
-            paletteData += std::format("{};", upcastEditor->palette.size());
-            for (uint32_t& c : upcastEditor->palette) {
-                paletteData += std::format("{:08X};", c);
-            }
-            extData["palette.colors"] = paletteData;
-
-            extData["palette.index"] = std::to_string(upcastEditor->pickedPaletteIndex);
-        }
-        else {
-            std::string layerOpacityData = "";
-            for (Layer*& lr : editor->layers) {
-                layerOpacityData += std::to_string(lr->layerAlpha) + ';';
-            }
-            extData["layer.opacity"] = layerOpacityData;
-            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
-        }
-
-        nvalBuffer = extData.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (auto& extDPair : extData) {
-            nvalBuffer = extDPair.first.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
-            nvalBuffer = extDPair.second.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
-        }
-
-        nvalBuffer = editor->layers.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
-            }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
-
-            fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
-            fwrite(&lr->colorKey, 4, 1, outfile);
-
-            fwrite(lr->pixelData, lr->w * lr->h, 4, outfile);
-        }
-
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
-
-bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
-{
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        uint8_t voidsnVersion = 0x05;
-        fwrite(&voidsnVersion, 1, 1, outfile);
-        uint32_t nvalBuffer;
-
-        nvalBuffer = editor->canvas.dimensions.x;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-        nvalBuffer = editor->canvas.dimensions.y;
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
-        //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
-
-        std::string commentsData = editor->makeCommentDataString();
-
-        std::string guidelinesData;
-        guidelinesData += std::format("{};", editor->guidelines.size());
-        for (Guideline& g : editor->guidelines) {
-            guidelinesData += std::format("{}-{};", g.vertical ? "v" : "h", g.position);
-        }
-
-        std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
-            layerVisibilityData += lr->hidden ? '0' : '1';
-        }
-
-        fwrite("/VOIDSN.META/", 1, 13, outfile);
-        std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
-            {"tile.dim.padrx", std::to_string(editor->tileGridPaddingBottomRight.x)},
-            {"tile.dim.padby", std::to_string(editor->tileGridPaddingBottomRight.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
-            {"comments", commentsData},
-            {"layer.selected", std::to_string(editor->selLayer)},
-            {"layer.visibility", layerVisibilityData},
-            {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"guidelines", guidelinesData},
-            {"edit.time", std::to_string(editor->editTime)},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
-        };
-
-        if (editor->isPalettized) {
-            MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
-            std::string paletteData = "";
-            paletteData += std::format("{};", upcastEditor->palette.size());
-            for (uint32_t& c : upcastEditor->palette) {
-                paletteData += std::format("{:08X};", c);
-            }
-            extData["palette.colors"] = paletteData;
-
-            extData["palette.index"] = std::to_string(upcastEditor->pickedPaletteIndex);
-        }
-        else {
-            std::string layerOpacityData = "";
-            for (Layer*& lr : editor->layers) {
-                layerOpacityData += std::to_string(lr->layerAlpha) + ';';
-            }
-            extData["layer.opacity"] = layerOpacityData;
-            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
-        }
-
-        nvalBuffer = extData.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (auto& extDPair : extData) {
-            nvalBuffer = extDPair.first.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.first.c_str(), nvalBuffer, 1, outfile);
-            nvalBuffer = extDPair.second.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(extDPair.second.c_str(), nvalBuffer, 1, outfile);
-        }
-
-        nvalBuffer = editor->layers.size();
-        fwrite(&nvalBuffer, 4, 1, outfile);
-
-        for (Layer*& lr : editor->layers) {
-            if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
-            }
-            nvalBuffer = lr->name.size();
-            fwrite(&nvalBuffer, 4, 1, outfile);
-            fwrite(lr->name.c_str(), nvalBuffer, 1, outfile);
-
-            fwrite(lr->colorKeySet ? "\1" : "\0", 1, 1, outfile);
-            fwrite(&lr->colorKey, 4, 1, outfile);
-
-            uint64_t maxCompressedDataSize = compressBound(lr->w * lr->h * 4);
-            uint64_t compressedDataSize = maxCompressedDataSize;
-            uint8_t* compressedData = new uint8_t[maxCompressedDataSize];
-            int res = compress(compressedData, (uLongf*)&compressedDataSize, lr->pixelData, lr->w * lr->h * 4);
-
-            fwrite(&compressedDataSize, 8, 1, outfile);
-            fwrite(compressedData, compressedDataSize, 1, outfile);
-            delete[] compressedData;
-        }
-
-        fclose(outfile);
-        return true;
-    }
-    return false;
 }
 
 bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
@@ -3836,7 +3220,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "Thumbnails/thumbnail.png"); 
         {
             Layer* flat = editor->flattenImage();
-            Layer* flatScaled = flat->copyScaled(XY{255,255});
+            Layer* flatScaled = flat->copyCurrentVariantScaled(XY{255,255});
             delete flat;
             std::vector<u8> pngData = writePNGToMem(flatScaled);
             zip_entry_write(zip, pngData.data(), pngData.size());
@@ -3945,7 +3329,7 @@ bool writeJPEG(PlatformNativePathString path, Layer* data)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
         return false;
     }
-    memcpy(surface->pixels, data->pixelData, data->w * data->h * 4);
+    memcpy(surface->pixels, data->pixels32(), data->w * data->h * 4);
 
     std::string u8path = convertStringToUTF8OnWin32(path);
 
@@ -3969,7 +3353,7 @@ bool writeAVIF(PlatformNativePathString path, Layer* data)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
         return false;
     }
-    memcpy(surface->pixels, data->pixelData, data->w * data->h * 4);
+    memcpy(surface->pixels, data->pixels32(), data->w * data->h * 4);
 
     std::string u8path = convertStringToUTF8OnWin32(path);
 
@@ -4025,7 +3409,7 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
         fprintf(f, "#define voidsprite_export_height %i\n", data->h);
         fprintf(f, "static unsigned char voidsprite_export_bits[] = {\n");
 
-        uint32_t* pxd = (uint32_t*)data->pixelData;
+        uint32_t* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < (int)ceil(ixmax(data->w, 8) / 8.0); x++) {
                 XY origin = { x * 8, y };
@@ -4108,7 +3492,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
 
         if (!data->isPalettized) {
             fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
-            uint32_t* pxd = (uint32_t*)data->pixelData;
+            uint32_t* pxd = data->pixels32();
             uint64_t dp = 0;
             for (int y = 0; y < data->h; y++) {
                 for (int x = 0; x < data->w; x++) {
@@ -4131,7 +3515,7 @@ bool writeCHeader(PlatformNativePathString path, Layer* data)
             fprintf(outfile, "\n};\n\n");
 
             fprintf(outfile, "uint32_t voidsprite_image_data[] = {\n");
-            uint32_t* pxd = (uint32_t*)data->pixelData;
+            uint32_t* pxd = data->pixels32();
             uint64_t dp = 0;
             for (int y = 0; y < data->h; y++) {
                 for (int x = 0; x < data->w; x++) {
@@ -4160,13 +3544,14 @@ bool writePythonNPArray(PlatformNativePathString path, Layer* data)
         fprintf(outfile, "#from PIL import Image\n\n");
         uint64_t dataPixelPointer = 0;
         fprintf(outfile, "voidsprite_image = np.array([\n");
+        u8* pixelData = data->pixels8();
         for (int y = 0; y < data->h; y++){
             fprintf(outfile, "    [");
             for (int x = 0; x < data->w; x++){
-                uint8_t b = data->pixelData[dataPixelPointer++];
-                uint8_t g = data->pixelData[dataPixelPointer++];
-                uint8_t r = data->pixelData[dataPixelPointer++];
-                uint8_t a = data->pixelData[dataPixelPointer++];
+                uint8_t b = pixelData[dataPixelPointer++];
+                uint8_t g = pixelData[dataPixelPointer++];
+                uint8_t r = pixelData[dataPixelPointer++];
+                uint8_t a = pixelData[dataPixelPointer++];
                 fprintf(outfile, "[%i,%i,%i,%i],", r,g,b,a);
             }
             fprintf(outfile, "],\n");
@@ -4244,7 +3629,7 @@ bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data)
         fprintf(f, "# File generated by voidsprite\n");
         fprintf(f, "%i %i\n", data->w, data->h);
 
-        uint32_t* pxd = (uint32_t*)data->pixelData;
+        uint32_t* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < data->w; x++) {
                 uint32_t c = pxd[x + y * data->w];
@@ -4277,7 +3662,7 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data)
         fprintf(f, "%i %i\n", data->w, data->h);
         fprintf(f, "256\n");
 
-        u32* pxd = (u32*)data->pixelData;
+        u32* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < data->w; x++) {
                 u32 c = pxd[x + y * data->w];
@@ -4311,7 +3696,7 @@ bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data)
         fprintf(f, "%i %i\n", data->w, data->h);
         fprintf(f, "255\n");
 
-        u32* pxd = (u32*)data->pixelData;
+        u32* pxd = data->pixels32();
         for (int y = 0; y < data->h; y++) {
             for (int x = 0; x < data->w; x++) {
                 u32 c = pxd[x + y * data->w];
@@ -4345,7 +3730,7 @@ bool writeSR8(PlatformNativePathString path, Layer* data)
 
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
-        u32* ppx = (u32*)data->pixelData;
+        u32* ppx = data->pixels32();
         for (int x = 0; x < 16 * 16; x++) {
             u8 byte = ppx[x];
             fwrite(&byte, 1, 1, f);
@@ -4460,7 +3845,7 @@ bool writeVTF(PlatformNativePathString path, Layer* data)
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
         XY lowResDimensions = data->w > 32 || data->h > 32 ? XY{32, 32} : XY{data->w, data->h};
-        Layer* lowResImage = data->copyScaled(lowResDimensions);
+        Layer* lowResImage = data->copyCurrentVariantScaled(lowResDimensions);
 
         VTFHEADER header;
         memset(&header, 0, sizeof(VTFHEADER));
@@ -4486,46 +3871,13 @@ bool writeVTF(PlatformNativePathString path, Layer* data)
         header.lowResImageHeight = lowResDimensions.y;
 
         fwrite(&header,64, 1, f);
-        fwrite(lowResImage->pixelData, lowResDimensions.x * lowResDimensions.y, 4, f);
-        fwrite(data->pixelData, data->w * data->h, 4, f);
+        fwrite(lowResImage->pixels32(), lowResDimensions.x * lowResDimensions.y, 4, f);
+        fwrite(data->pixels32(), data->w * data->h, 4, f);
         delete lowResImage;
         fclose(f);
         return true;
     }
     return false;
-}
-
-std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name)
-{
-    FILE* f = platformOpenFile(name, PlatformFileModeRB);
-    if (f != NULL) {
-        char header[7];
-        fread(header, 7, 1, f);
-        if (memcmp(header, "VOIDPLT", 7) == 0) {
-            uint8_t fileversion;
-            fread(&fileversion, 1, 1, f);
-            if (fileversion == 1) {
-                std::vector<uint32_t> newPalette;
-                uint32_t count;
-                fread(&count, 1, 4, f);
-                for (int x = 0; x < count; x++) {
-                    uint32_t col;
-                    fread(&col, 1, 4, f);
-                    newPalette.push_back(col);
-                }
-                fclose(f);
-                return { true, newPalette };
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported VOIDPLT file version"));
-            }
-        }
-        else {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid palette file"));
-        }
-        fclose(f);
-    }
-    return { false, {} };
 }
 
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name)
@@ -4704,7 +4056,7 @@ bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1,
         for (u32& w : writes) {
             fwrite(&w, 4, 1, outfile);
         }
-        fwrite(data->pixelData, data->w * data->h, 4, outfile);
+        fwrite(data->pixels32(), data->w * data->h, 4, outfile);
 
         fclose(outfile);
         return true;

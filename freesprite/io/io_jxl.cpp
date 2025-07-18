@@ -104,7 +104,7 @@ Layer* readJpegXL(PlatformNativePathString path, u64 seek)
         if (w > 0 && h > 0 && pixelData != NULL) {
             ret = new Layer(w, h);
             ret->name = TL("vsp.layer.jxl");
-            SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ABGR8888, pixelData, 4 * w, SDL_PIXELFORMAT_ARGB8888, ret->pixelData, 4 * w);
+            SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ABGR8888, pixelData, 4 * w, SDL_PIXELFORMAT_ARGB8888, ret->pixels32(), 4 * w);
         }
         tracked_free(pixelData);
         fclose(f);
@@ -125,7 +125,7 @@ bool writeJpegXL(PlatformNativePathString path, Layer* data)
             return false;
         }
         SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888,
-            data->pixelData, data->w * 4,
+            data->pixels32(), data->w * 4,
             SDL_PIXELFORMAT_ABGR8888, abgrPixels, data->w * 4);
 
         //below code is raw fucking paste from chatgpt because i gave up
