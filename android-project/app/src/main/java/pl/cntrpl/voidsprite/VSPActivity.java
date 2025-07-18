@@ -1,5 +1,6 @@
 package pl.cntrpl.voidsprite;
 
+import android.Manifest;
 import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
@@ -7,6 +8,8 @@ import android.content.Intent;
 import android.os.Environment;
 import android.provider.Settings;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
 
 import java.net.URI;
@@ -45,7 +48,8 @@ public class VSPActivity extends SDLActivity {
     }
 
     public static boolean hasFileAccessPermission() {
-        return Build.VERSION.SDK_INT < 30 || Environment.isExternalStorageManager();
+        return Build.VERSION.SDK_INT >= 30 ? Environment.isExternalStorageManager()
+                : (ContextCompat.checkSelfPermission(activitySingleton, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED);
     }
 
     public static void requestAllFilesPermission() {
@@ -53,6 +57,8 @@ public class VSPActivity extends SDLActivity {
             Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
             intent.setData(Uri.parse("package:" + packageName));
             activitySingleton.startActivity(intent);
+        } else {
+            ActivityCompat.requestPermissions(activitySingleton, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 1);
         }
     }
 
