@@ -149,6 +149,36 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.duplicatelayer"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->duplicateLayer(((MainEditor*)d)->selLayer); ((MainEditor*)d)->layerPicker->updateLayers();
         }));
+    g_keybindManager.addKeybind("maineditor", "layer_variant_new",
+        KeyCombo(TL("vsp.keybinds.maineditor.newlayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_newVariant();
+        }));
+    g_keybindManager.addKeybind("maineditor", "layer_variant_duplicate",
+        KeyCombo(TL("vsp.keybinds.maineditor.duplicatelayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_duplicateVariant();
+        }));
+    g_keybindManager.addKeybind("maineditor", "layer_variant_delete",
+        KeyCombo(TL("vsp.keybinds.maineditor.deletelayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_removeVariant(((MainEditor*)d)->getCurrentLayer(), ((MainEditor*)d)->getCurrentLayer()->currentLayerVariant);
+        }));
+    g_keybindManager.addKeybind("maineditor", "layer_variant_prev",
+        KeyCombo(TL("vsp.keybinds.maineditor.prevlayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
+            Layer* l = ((MainEditor*)d)->getCurrentLayer();
+            int vNow = l->currentLayerVariant;
+            int vMax = l->layerData.size()-1;
+            if (vNow-- == 0) {
+                vNow = vMax;
+            }
+            ((MainEditor*)d)->layer_switchVariant(l, vNow);
+        }));
+    g_keybindManager.addKeybind("maineditor", "layer_variant_next",
+        KeyCombo(TL("vsp.keybinds.maineditor.nextlayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
+            Layer* l = ((MainEditor*)d)->getCurrentLayer();
+            int vNow = l->currentLayerVariant;
+            vNow++;
+            vNow %= l->layerData.size();
+            ((MainEditor*)d)->layer_switchVariant(l, vNow);
+        }));
 
 
     //split session editor keybinds

@@ -2480,6 +2480,9 @@ void MainEditor::layer_removeVariant(Layer* layer, int variantIndex)
         }
         layerPicker->updateLayers();
     }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.maineditor.error.dellastvariant")));
+    }
 }
 
 void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
