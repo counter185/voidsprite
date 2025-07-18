@@ -6,7 +6,9 @@ class LayerPalettized :
     public Layer
 {
 protected:
-    LayerPalettized() : Layer() {}
+    LayerPalettized() : Layer() {
+        isPalettized = true;
+    }
 public:
     std::vector<uint32_t> palette;
 

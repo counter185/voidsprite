@@ -2911,7 +2911,7 @@ void MainEditor::layer_outline(bool wholeImage)
                     }
                 }
             }
-            if (neighborCount > 0 && neighborCount != 4) {
+            if (neighborCount > 0) {
                 l->setPixel(newPos, getActiveColor());
             }
         }

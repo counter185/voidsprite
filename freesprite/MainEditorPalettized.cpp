@@ -440,6 +440,18 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),
+                            [this]() { this->layer_newVariant(); }
+                        }
+                    },
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
+                            [this]() { this->layer_duplicateVariant(); }
+                        }
+                    },
+                    {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),
+                            [this]() { this->layer_promptRenameCurrentVariant(); }
+                        }
+                    },
                     //todo: fix it (make it so that the -1 index never gets passed)
                     /*{SDL_SCANCODE_C, {TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
                             [](MainEditor* editor) {
