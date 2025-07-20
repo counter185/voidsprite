@@ -21,7 +21,7 @@ env:
   BUILD_CONFIGURATION: Release
 
   GIT_HASH: ${{ github.sha }}
-  GIT_BRANCH: ${{ github.ref_name }}
+  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
   
   ACTIONS_STEP_DEBUG: true
 
