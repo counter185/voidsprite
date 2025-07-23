@@ -485,10 +485,16 @@ int main(int argc, char** argv)
         g_iconActionBarZoomIn = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomin.png", rd); } );
         g_iconActionBarZoomOut = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomout.png", rd); } );
         g_iconActionBarSave = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_save.png", rd); } );
-        g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); } );
-        //SDL_SetTextureColorMod(g_iconFilePickerDirectory, 0xFF, 0xFC, 0x7B);
-        g_iconFilePickerFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_file.png", rd); } );
-        //SDL_SetTextureColorMod(g_iconFilePickerFile, 0x80, 0x80, 0x80);
+        g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { 
+            auto r = IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); 
+            SDL_SetTextureColorMod(r, 0xFF, 0xFC, 0x7B);
+            return r;
+        });
+        g_iconFilePickerFile = new ReldTex([](SDL_Renderer* rd) { 
+            auto r = IMGLoadAssetToTexture("icon_filepicker_file.png", rd); 
+            SDL_SetTextureColorMod(r, 0x80, 0x80, 0x80);
+            return r;
+        });
         g_iconFilePickerSupportedFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_supportedfile.png", rd); } );
 
         g_iconNotifTheCreature = new ReldTex([](SDL_Renderer* rd) { 
