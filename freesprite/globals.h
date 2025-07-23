@@ -220,6 +220,7 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconActionBarZoomIn = NULL,
    *g_iconActionBarZoomOut = NULL,
    *g_iconActionBarSave = NULL,
+   *g_iconFilePickerLink = NULL,
    *g_iconFilePickerDirectory = NULL,
    *g_iconFilePickerFile = NULL,
    *g_iconFilePickerSupportedFile = NULL;

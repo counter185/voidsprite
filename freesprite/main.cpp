@@ -485,6 +485,11 @@ int main(int argc, char** argv)
         g_iconActionBarZoomIn = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomin.png", rd); } );
         g_iconActionBarZoomOut = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomout.png", rd); } );
         g_iconActionBarSave = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_save.png", rd); } );
+        g_iconFilePickerLink = new ReldTex([](SDL_Renderer* rd) {
+            auto r = IMGLoadAssetToTexture("icon_filepicker_link.png", rd); 
+            SDL_SetTextureColorMod(r, 0xC3, 0xDB, 0xFF);
+            return r;
+        });
         g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { 
             auto r = IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); 
             SDL_SetTextureColorMod(r, 0xFF, 0xFC, 0x7B);
