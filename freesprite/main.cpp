@@ -485,10 +485,21 @@ int main(int argc, char** argv)
         g_iconActionBarZoomIn = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomin.png", rd); } );
         g_iconActionBarZoomOut = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_zoomout.png", rd); } );
         g_iconActionBarSave = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("actionbar_save.png", rd); } );
-        g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); } );
-        //SDL_SetTextureColorMod(g_iconFilePickerDirectory, 0xFF, 0xFC, 0x7B);
-        g_iconFilePickerFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_file.png", rd); } );
-        //SDL_SetTextureColorMod(g_iconFilePickerFile, 0x80, 0x80, 0x80);
+        g_iconFilePickerLink = new ReldTex([](SDL_Renderer* rd) {
+            auto r = IMGLoadAssetToTexture("icon_filepicker_link.png", rd); 
+            SDL_SetTextureColorMod(r, 0xC3, 0xDB, 0xFF);
+            return r;
+        });
+        g_iconFilePickerDirectory = new ReldTex([](SDL_Renderer* rd) { 
+            auto r = IMGLoadAssetToTexture("icon_filepicker_directory.png", rd); 
+            SDL_SetTextureColorMod(r, 0xFF, 0xFC, 0x7B);
+            return r;
+        });
+        g_iconFilePickerFile = new ReldTex([](SDL_Renderer* rd) { 
+            auto r = IMGLoadAssetToTexture("icon_filepicker_file.png", rd); 
+            SDL_SetTextureColorMod(r, 0x80, 0x80, 0x80);
+            return r;
+        });
         g_iconFilePickerSupportedFile = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_filepicker_supportedfile.png", rd); } );
 
         g_iconNotifTheCreature = new ReldTex([](SDL_Renderer* rd) { 
@@ -1028,13 +1039,19 @@ int main(int argc, char** argv)
                 ticksBegin = SDL_GetTicks64();
 
                 if (wd->isMainWindow) {
+
+                    int numOverallWorkspaces = 0;
+                    for (auto& [id, w] : g_windows) {
+                        numOverallWorkspaces += w->screenStack.size();
+                    }
+
                     //tl strings shouldn't be read every frame
                     static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
                     static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
 
                     g_updateRPC(
-                        wd->screenStack.size() == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", wd->screenStack.size(), tlActiveWorkspacesString),
-                        wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
+                        numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
+                        numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
                     );
                     std::string newWindowTitle = windowTitle + std::format("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
                     if (newWindowTitle != wd->lastWindowTitle) {

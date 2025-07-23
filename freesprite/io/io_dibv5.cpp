@@ -14,7 +14,7 @@ Layer* readDIBv5FromMem(u8* mem, u64 size)
             case 0:         //BI_RGB
                 ret = Layer::tryAllocLayer(header.bV5Width, header.bV5Height);
                 if (ret != NULL) {
-                    u32* ppx = (u32*)ret->pixelData;
+                    u32* ppx = ret->pixels32();
                     u8* srcpx = (u8*)mem + startOffset;
                     u64 y = 0;
                     for (u64 x = 0; x < ret->w * ret->h && (startOffset+y < size); x++) {
@@ -37,7 +37,7 @@ Layer* readDIBv5FromMem(u8* mem, u64 size)
                     u32 aMask = header.bV5AlphaMask;
                     ret = Layer::tryAllocLayer(header.bV5Width, header.bV5Height);
                     if (ret != NULL) {
-                        u32* ppx = (u32*)ret->pixelData;
+                        u32* ppx = ret->pixels32();
                         u32* srcpx = (u32*)(mem + startOffset);
                         for (u64 x = 0; x < ret->w * ret->h; x++) {
                             u32 nextSrcPixel = srcpx[x];

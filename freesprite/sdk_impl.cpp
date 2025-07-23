@@ -116,5 +116,5 @@ uint32_t* impl_layerGetRawPixelData(VSPLayer* layer) {
 	if (layer == NULL) {
 		return NULL;
 	}
-	return (uint32_t*)layer->pixelData;
+	return layer->pixels32();
 }

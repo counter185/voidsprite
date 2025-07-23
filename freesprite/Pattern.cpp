@@ -39,7 +39,7 @@ CustomPattern::CustomPattern(LayerPalettized* from)
     if (from != NULL) {
         bitmap = (uint8_t*)tracked_malloc(from->w * from->h, "Patterns");
         for (uint64_t p = 0; p < from->w * from->h; p++) {
-            bitmap[p] = ((uint32_t*)from->pixelData)[p] == 0 ? 0 : 1;
+            bitmap[p] = (from->pixels32())[p] == 0 ? 0 : 1;
         }
         bitmapDimensions = XY{ from->w, from->h };
     }

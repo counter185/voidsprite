@@ -8,6 +8,9 @@ add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
 if(DEFINED ENV{GIT_HASH})
     add_definitions(-DGIT_HASH="$ENV{GIT_HASH}")
 endif()
+if(DEFINED ENV{GIT_BRANCH})
+    add_definitions(-DGIT_BRANCH="$ENV{GIT_BRANCH}")
+endif()
 
 if(NOT TARGET SDL3::SDL3)
     find_package(SDL3 CONFIG)
@@ -139,6 +142,7 @@ add_library(main SHARED
         voidsprite/io/io_png.cpp
         voidsprite/io/io_rpgm.cpp
         voidsprite/io/io_valve_spr.cpp
+        voidsprite/io/io_voidsprite.cpp
         voidsprite/keybinds.cpp
         voidsprite/Layer.cpp
         voidsprite/LayerPalettized.cpp

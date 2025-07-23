@@ -1087,7 +1087,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
                 g_addNotification(ErrorNotification("Error", "SDL_RenderReadPixels failed"));
             }
             SDL_ConvertPixels(blitLayer->w, blitLayer->h, newSrf->format, newSrf->pixels, newSrf->pitch,
-                              SDL_PIXELFORMAT_ARGB8888, blitLayer->pixelData, blitLayer->w * 4);
+                              SDL_PIXELFORMAT_ARGB8888, blitLayer->pixels32(), blitLayer->w * 4);
             SDL_FreeSurface(newSrf);
             g_popRenderTarget();
             tracked_destroyTexture(newTexture);

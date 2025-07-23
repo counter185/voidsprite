@@ -152,7 +152,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GIT_HASH="$(GitHash)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GIT_HASH="$(GitHash)";GIT_BRANCH="$(GitBranch)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ShowIncludes>false</ShowIncludes>
@@ -220,6 +220,7 @@
     <ClCompile Include="io\io_png.cpp" />
     <ClCompile Include="io\io_rpgm.cpp" />
     <ClCompile Include="io\io_valve_spr.cpp" />
+    <ClCompile Include="io\io_voidsprite.cpp" />
     <ClCompile Include="keybinds.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="localization\localization.cpp" />
@@ -403,6 +404,7 @@
     <ClInclude Include="io\io_png.h" />
     <ClInclude Include="io\io_rpgm.h" />
     <ClInclude Include="io\io_valve_spr.h" />
+    <ClInclude Include="io\io_voidsprite.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="keybinds.h" />
     <ClInclude Include="LayerPalettized.h" />

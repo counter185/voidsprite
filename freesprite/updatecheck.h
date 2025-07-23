@@ -12,6 +12,10 @@ using json = nlohmann::json;
 #define GIT_HASH ""
 #endif
 
+#ifndef GIT_BRANCH
+#define GIT_BRANCH  UTF8_DIAMOND "dev"
+#endif
+
 #if _WIN32
 #define PLATFORM "win64"
 #elif __APPLE__
@@ -89,7 +93,9 @@ inline void runUpdateCheck() {
                         try {
                             if (artifact.is_object()) {
                                 std::string name = artifact["name"];
-                                if (name.find(PLATFORM) == std::string::npos || artifact["workflow_run"]["head_branch"] != "main") {
+                                std::string branchName = artifact["workflow_run"]["head_branch"];
+                                if (name.find(PLATFORM) == std::string::npos 
+                                    || (branchName != "main" && branchName != GIT_BRANCH)) {
                                     continue;
                                 }
                                 std::string createdAt = artifact["created_at"];

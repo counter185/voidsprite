@@ -153,6 +153,7 @@ void PopupFilePicker::populateRootAndFileList() {
     currentDirField->setText(convertStringToUTF8OnWin32(currentDir));
     currentFileName->setText("");
 
+    //root dir buttons
     int rootY = 0;
     for (auto& rootDir : rootDirs) {
         UIButton* btn = new UIButton(rootDir.friendlyName);
@@ -167,6 +168,7 @@ void PopupFilePicker::populateRootAndFileList() {
         rootY += btn->wxHeight;
     }
 
+    //file buttons
     int fileY = 5;
     UIButton* btn = new UIButton("..");
     btn->position = { 5, fileY };
@@ -187,15 +189,17 @@ void PopupFilePicker::populateRootAndFileList() {
             std::string displayFileName;
             bool isDirectory;
             bool matchesExtension;
+            bool isLink;
         };
         std::vector<FilePickerFileEntry> fileEntries = {};
         for (auto& file : std::filesystem::directory_iterator(currentDir)) {
             std::string utf8name = convertStringToUTF8OnWin32(file.path().filename());
             fileEntries.push_back({
                 file.path().filename(),
-				utf8name,
-				file.is_directory(),
-                stringEndsWithIgnoreCase(utf8name, targetExtension)
+                utf8name,
+                file.is_directory(),
+                stringEndsWithIgnoreCase(utf8name, targetExtension),
+                file.is_symlink()
             });
         }
 
@@ -219,15 +223,23 @@ void PopupFilePicker::populateRootAndFileList() {
             btn->wxWidth = g_fnt->StatStringDimensions(btn->text).x + 15 + 30;
             btn->wxHeight = 30;
 
-            btn->icon =
-                fileEntry.isDirectory ? g_iconFilePickerDirectory
-                                      : matchesExtension ? g_iconFilePickerSupportedFile
-                                      : g_iconFilePickerFile;
+            SDL_Color primaryColor = fileEntry.isLink ? SDL_Color{ 0xC3, 0xDB, 0xFF, 0xFF }
+                                     : fileEntry.isDirectory ? SDL_Color{ 0xFF, 0xFC, 0x7B, 0xFF }
+                                     : matchesExtension ? SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF }
+                                     : SDL_Color{ 0x80, 0x80, 0x80, 0xFF };
 
-            btn->colorTextFocused = btn->colorTextUnfocused =
-                fileEntry.isDirectory ? SDL_Color{0xFF, 0xFC, 0x7B, 0xFF}
-                                      : matchesExtension ? SDL_Color{0xFF, 0xFF, 0xFF, 0xFF}
-                                      : SDL_Color{0xFF, 0xFF, 0xFF, 0x80};
+            u32 primaryColorU32 = sdlcolorToUint32(primaryColor);
+
+            btn->icon =
+                fileEntry.isLink ? g_iconFilePickerLink
+                : fileEntry.isDirectory ? g_iconFilePickerDirectory
+                : matchesExtension ? g_iconFilePickerSupportedFile
+                : g_iconFilePickerFile;
+
+            btn->colorTextFocused = btn->colorTextUnfocused = primaryColor;
+            
+            u32 fillBGPrimary = alphaBlend(0xD0000000, modAlpha(primaryColorU32, 0x30));
+            btn->fill = Fill::Gradient(fillBGPrimary, 0xD0000000, fillBGPrimary, 0xD0000000);
 
             PlatformNativePathString wFileName = fileEntry.realFileName;
             std::string fileName = fileEntry.displayFileName;

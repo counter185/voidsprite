@@ -43,8 +43,8 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
         else {
             int nPixels = ixmin(clipSource.w, w - position.x) * 4;
             memcpy(
-                pixelData + ((y + position.y) * w * 4) + (position.x * 4),
-                sourceLayer->pixelData + ((y + clipSource.y) * sourceLayer->w * 4) + (clipSource.x * 4),
+                &ARRAY2DPOINT(pixels32(), position.x, y + position.y, w),
+                &ARRAY2DPOINT(sourceLayer->pixels32(), clipSource.x, y + clipSource.y, sourceLayer->w),
                 nPixels
             );
             /*if (sourceLayer->colorKeySet) {
@@ -57,8 +57,8 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
 
 void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
 {
-    u32* px32 = (u32*)pixelData;
-    u32* srcpx32 = (u32*)sourceLayer->pixelData;
+    u32* px32 = pixels32();
+    u32* srcpx32 = sourceLayer->pixels32();
     XY originSrc = XY{sourceTile.x * tileSize.x, sourceTile.y * tileSize.y};
     XY originDst = XY{dstTile.x * tileSize.x, dstTile.y * tileSize.y};
     for (int y = 0; y < tileSize.y; y++) {
@@ -73,40 +73,33 @@ void Layer::blitTile(Layer* sourceLayer, XY sourceTile, XY dstTile, XY tileSize)
     }
 }
 
-Layer* Layer::copy()
+Layer* Layer::copyCurrentVariant()
 {
-    Layer* ret = new Layer(w, h);
-    ret->name = name;
-    ret->colorKey = colorKey;
-    ret->markLayerDirty();
-    memcpy(ret->pixelData, pixelData, w * h * 4);
-    return ret;
-}
-
-Layer* Layer::copyWithNoTextureInit()
-{
-    Layer* ret = new Layer();
-    ret->w = w;
-    ret->h = h;
-    ret->pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
-    ret->name = name;
-    ret->colorKey = colorKey;
-    memcpy(ret->pixelData, pixelData, w * h * 4);
-    return ret;
+    auto variantsCopy = copyAllVariants();
+    if (variantsCopy.size() > 0) {
+        Layer* ret = new Layer(w, h, variantsCopy);
+        ret->name = name;
+        ret->currentLayerVariant = currentLayerVariant;
+        ret->colorKey = colorKey;
+        ret->markLayerDirty();
+        return ret;
+    }
+    return NULL;
 }
 
 //i don't even know if this works
-Layer* Layer::copyScaled(XY dimensions)
+Layer* Layer::copyCurrentVariantScaled(XY dimensions)
 {
     bool shouldIntegerScale = 
         ixmax(dimensions.x, w) % ixmin(dimensions.x, w) == 0
-		&& ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
+        && ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
+
     Layer* newLayer = NULL;
     if (isPalettized) {
         newLayer = LayerPalettized::tryAllocIndexedLayer(dimensions.x, dimensions.y);
-		if (newLayer != NULL) {
-			((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
-		}
+        if (newLayer != NULL) {
+            ((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
+        }
     }
     else {
         newLayer = tryAllocLayer(dimensions.x, dimensions.y);
@@ -136,16 +129,84 @@ Layer* Layer::copyScaled(XY dimensions)
         }
         else {
             loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w,h, dimensions.x, dimensions.y));
-			bool downscale = dimensions.x < w || dimensions.y < h;
-			int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
-			int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
+            bool downscale = dimensions.x < w || dimensions.y < h;
+            int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
+            int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
 
             for (int y = 0; y < newLayer->h; y++) {
                 for (int x = 0; x < newLayer->w; x++) {
                     XY samplePoint =
                         !downscale ? XY{ x / scaleFactorX, y / scaleFactorY }
-				                   : XY{ x * scaleFactorX, y * scaleFactorY };
+                                   : XY{ x * scaleFactorX, y * scaleFactorY };
                     newLayer->setPixel({ x, y }, getPixelAt(samplePoint));
+                }
+            }
+        }
+    }
+    return newLayer;
+}
+
+Layer* Layer::copyAllVariantsScaled(XY dimensions)
+{
+    bool shouldIntegerScale =
+        ixmax(dimensions.x, w) % ixmin(dimensions.x, w) == 0
+        && ixmax(dimensions.y, h) % ixmin(dimensions.y, h) == 0;
+
+    Layer* newLayer = NULL;
+
+    std::vector<LayerVariant> scaledVariants;
+    for (LayerVariant& variant : layerData) {
+        LayerVariant newVariant = variant;
+        newVariant.pixelData = (u8*)tracked_malloc(dimensions.x * dimensions.y * 4, "Layers");
+    }
+
+    if (isPalettized) {
+        newLayer = new LayerPalettized(dimensions.x, dimensions.y, scaledVariants);
+        if (newLayer != NULL) {
+            ((LayerPalettized*)newLayer)->palette = ((LayerPalettized*)this)->palette;
+        }
+    }
+    else {
+        newLayer = new Layer(dimensions.x, dimensions.y, scaledVariants);
+        if (newLayer != NULL) {
+            newLayer->layerAlpha = layerAlpha;
+        }
+    }
+
+    if (newLayer != NULL) {
+        newLayer->name = name;
+        newLayer->colorKey = colorKey;
+        newLayer->colorKeySet = colorKeySet;
+        newLayer->hidden = hidden;
+
+        if (!shouldIntegerScale) {
+            loginfo(std::format("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            for (int v = 0; v < layerData.size(); v++) {
+                for (int y = 0; y < newLayer->h; y++) {
+                    for (int x = 0; x < newLayer->w; x++) {
+                        XY samplePoint = {
+                            w * (x / (float)newLayer->w),
+                            h * (y / (float)newLayer->h)
+                        };
+                        newLayer->setPixel({ x, y }, getPixelAt(samplePoint, true, &layerData[v]), &scaledVariants[v]);
+                    }
+                }
+            }
+        }
+        else {
+            loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            bool downscale = dimensions.x < w || dimensions.y < h;
+            int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
+            int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
+
+            for (int v = 0; v < layerData.size(); v++) {
+                for (int y = 0; y < newLayer->h; y++) {
+                    for (int x = 0; x < newLayer->w; x++) {
+                        XY samplePoint =
+                            !downscale ? XY{ x / scaleFactorX, y / scaleFactorY }
+                        : XY{ x * scaleFactorX, y * scaleFactorY };
+                        newLayer->setPixel({ x, y }, getPixelAt(samplePoint, true, &layerData[v]), &scaledVariants[v]);
+                    }
                 }
             }
         }
@@ -181,23 +242,32 @@ Layer* Layer::trim(SDL_Rect r)
     return newLayer;
 }
 
-uint8_t* Layer::resize(XY to)
+std::vector<LayerVariant> Layer::resize(XY to)
 {
-    uint32_t* newPixelData = (uint32_t*)tracked_malloc(to.x * to.y * 4, "Layers");
-    uint32_t* pixelDataNow = (uint32_t*)pixelData;
-    memset(newPixelData, 0, to.x * to.y * 4);
-    for (int y = 0; y < ixmin(h, to.y); y++) {
-        for (int x = 0; x < ixmin(w, to.x); x++) {
-            newPixelData[x + (y * to.x)] = pixelDataNow[x + (y * w)];
+    std::vector<LayerVariant> oldVariants = layerData;
+    std::vector<LayerVariant> scaledVariants;
+
+    for (auto& variant : layerData) {
+        uint32_t* newPixelData = (uint32_t*)tracked_malloc(to.x * to.y * 4, "Layers");
+        uint32_t* pixelDataNow = (uint32_t*)variant.pixelData;
+        memset(newPixelData, 0, to.x * to.y * 4);
+        for (int y = 0; y < ixmin(h, to.y); y++) {
+            for (int x = 0; x < ixmin(w, to.x); x++) {
+                ARRAY2DPOINT(newPixelData, x, y, to.x) = ARRAY2DPOINT(pixelDataNow, x, y, w);
+            }
         }
+        LayerVariant variantCopy = variant;
+        variantCopy.pixelData = (uint8_t*)newPixelData;
+        scaledVariants.push_back(variantCopy);
     }
-    pixelData = (uint8_t*)newPixelData;
+    
+    layerData = scaledVariants;
     w = to.x;
     h = to.y;
-    return (uint8_t*)pixelDataNow;
+    return oldVariants;
 }
 
-uint8_t* Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
+std::vector<LayerVariant> Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
 {
     XY sizeNow = XY{w, h};
     XY newTilesCount = XY{
@@ -209,86 +279,123 @@ uint8_t* Layer::resizeByTileSizes(XY tileSizesNow, XY targetTileSize)
         targetTileSize.y * newTilesCount.y
     };
 
-    uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
-    uint32_t* oldPixelData = (uint32_t*)pixelData;
-    memset(newPixelData, 0, newSize.x * newSize.y * 4);
-    for (int tileY = 0; tileY < newTilesCount.y; tileY++) {
-        for (int tileX = 0; tileX < newTilesCount.x; tileX++) {
-            
-            XY oldTilePos = XY{tileX * tileSizesNow.x, tileY * tileSizesNow.y};
-            XY newTilePos = XY{tileX * targetTileSize.x, tileY * targetTileSize.y};
-            for (int y = 0; y < ixmin(tileSizesNow.y, targetTileSize.y); y++) {
-                for (int x = 0; x < ixmin(tileSizesNow.x, targetTileSize.x); x++) {
-                    if (oldTilePos.x + x < sizeNow.x && oldTilePos.y + y < sizeNow.y) {
-                        newPixelData[(newTilePos.x + x) + ((newTilePos.y + y) * newSize.x)] = oldPixelData[(oldTilePos.x + x) + ((oldTilePos.y + y) * w)];
+    std::vector<LayerVariant> oldVariants = layerData;
+    std::vector<LayerVariant> scaledVariants;
+
+    for (auto& variant : layerData) {
+        uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
+        uint32_t* oldPixelData = (uint32_t*)variant.pixelData;
+        memset(newPixelData, 0, newSize.x * newSize.y * 4);
+        for (int tileY = 0; tileY < newTilesCount.y; tileY++) {
+            for (int tileX = 0; tileX < newTilesCount.x; tileX++) {
+
+                XY oldTilePos = XY{ tileX * tileSizesNow.x, tileY * tileSizesNow.y };
+                XY newTilePos = XY{ tileX * targetTileSize.x, tileY * targetTileSize.y };
+                for (int y = 0; y < ixmin(tileSizesNow.y, targetTileSize.y); y++) {
+                    for (int x = 0; x < ixmin(tileSizesNow.x, targetTileSize.x); x++) {
+                        if (oldTilePos.x + x < sizeNow.x && oldTilePos.y + y < sizeNow.y) {
+                            newPixelData[(newTilePos.x + x) + ((newTilePos.y + y) * newSize.x)] = oldPixelData[(oldTilePos.x + x) + ((oldTilePos.y + y) * w)];
+                        }
                     }
                 }
             }
         }
+        LayerVariant variantCopy = variant;
+        variantCopy.pixelData = (uint8_t*)newPixelData;
+        scaledVariants.push_back(variantCopy);
     }
-    pixelData = (uint8_t*)newPixelData;
+
+    layerData = scaledVariants;
     w = newSize.x;
     h = newSize.y;
-    return (uint8_t*)oldPixelData;
+    return oldVariants;
 }
 
-uint8_t* Layer::resizeByTileCount(XY tileSizesNow, XY newTileCount)
+std::vector<LayerVariant> Layer::resizeByTileCount(XY tileSizesNow, XY newTileCount)
 {
     XY newSize = XY{
         tileSizesNow.x * newTileCount.x,
         tileSizesNow.y * newTileCount.y
     };
-    uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
-    uint32_t* oldPixelData = (uint32_t*)pixelData;
-    memset(newPixelData, 0, newSize.x * newSize.y * 4);
-    for (int y = 0; y < ixmin(h, newSize.y); y++) {
-        memcpy(newPixelData + (y * newSize.x), oldPixelData + (y * w), ixmin(w, newSize.x) * 4);
-        /*for (int x = 0; x < ixmin(w, newSize.x); x++) {
-            newPixelData[x + (y * newSize.x)] = oldPixelData[x + (y * w)];
-        }*/
+
+    std::vector<LayerVariant> oldVariants = layerData;
+    std::vector<LayerVariant> scaledVariants;
+
+    for (auto& variant : layerData) {
+        uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
+        uint32_t* oldPixelData = (uint32_t*)variant.pixelData;
+        memset(newPixelData, 0, newSize.x * newSize.y * 4);
+        for (int y = 0; y < ixmin(h, newSize.y); y++) {
+            memcpy(newPixelData + (y * newSize.x), oldPixelData + (y * w), ixmin(w, newSize.x) * 4);
+        }
+        LayerVariant variantCopy = variant;
+        variantCopy.pixelData = (uint8_t*)newPixelData;
+        scaledVariants.push_back(variantCopy);
     }
-    pixelData = (uint8_t*)newPixelData;
+
+    layerData = scaledVariants;
     w = newSize.x;
     h = newSize.y;
-    return (uint8_t*)oldPixelData;
+    return oldVariants;
 }
 
-uint8_t* Layer::integerScale(XY scale)
+std::vector<LayerVariant> Layer::integerScale(XY scale)
 {
     XY newSize = { w * scale.x, h * scale.y };
-    uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
-    uint32_t* oldPixelData = (uint32_t*)pixelData;
-    memset(newPixelData, 0, newSize.x * newSize.y * 4);
-    for (int y = 0; y < newSize.y; y++) {
-        for (int x = 0; x < newSize.x; x++) {
-            newPixelData[x + (y * newSize.x)] = oldPixelData[(x / scale.x) + ((y / scale.y) * w)];
-        }
-    }
-    pixelData = (uint8_t*)newPixelData;
-    w = newSize.x;
-    h = newSize.y;
-    return (uint8_t*)oldPixelData;
-}
 
-uint8_t* Layer::integerDownscale(XY scale)
-{
-    if (w % scale.x == 0 && h % scale.y == 0) {
-        XY newSize = { w / scale.x, h / scale.y };
+    std::vector<LayerVariant> oldVariants = layerData;
+    std::vector<LayerVariant> scaledVariants;
+
+    for (auto& variant : layerData) {
         uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
-        uint32_t* oldPixelData = (uint32_t*)pixelData;
+        uint32_t* oldPixelData = (uint32_t*)variant.pixelData;
         memset(newPixelData, 0, newSize.x * newSize.y * 4);
         for (int y = 0; y < newSize.y; y++) {
             for (int x = 0; x < newSize.x; x++) {
-                newPixelData[x + (y * newSize.x)] = oldPixelData[(x * scale.x) + ((y * scale.y) * w)];
+                newPixelData[x + (y * newSize.x)] = oldPixelData[(x / scale.x) + ((y / scale.y) * w)];
             }
         }
-        pixelData = (uint8_t*)newPixelData;
+        LayerVariant variantCopy = variant;
+        variantCopy.pixelData = (uint8_t*)newPixelData;
+        scaledVariants.push_back(variantCopy);
+    }
+
+    layerData = scaledVariants;
+    w = newSize.x;
+    h = newSize.y;
+    return oldVariants;
+}
+
+std::vector<LayerVariant> Layer::integerDownscale(XY scale)
+{
+    if (w % scale.x == 0 && h % scale.y == 0) {
+
+        XY newSize = { w / scale.x, h / scale.y };
+
+        std::vector<LayerVariant> oldVariants = layerData;
+        std::vector<LayerVariant> scaledVariants;
+        
+        for (auto& variant : layerData) {
+            uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
+            uint32_t* oldPixelData = (uint32_t*)variant.pixelData;
+            memset(newPixelData, 0, newSize.x * newSize.y * 4);
+            for (int y = 0; y < newSize.y; y++) {
+                for (int x = 0; x < newSize.x; x++) {
+                    newPixelData[x + (y * newSize.x)] = oldPixelData[(x * scale.x) + ((y * scale.y) * w)];
+                }
+            }
+            LayerVariant variantCopy = variant;
+            variantCopy.pixelData = (uint8_t*)newPixelData;
+            scaledVariants.push_back(variantCopy);
+        }
+
+        layerData = scaledVariants;
         w = newSize.x;
         h = newSize.y;
-        return (uint8_t*)oldPixelData;
+        return oldVariants;
     }
     else {
-        return NULL;
+        return {};
     }
 }
 
@@ -332,10 +439,10 @@ void Layer::wandSelectWithOperationAt(XY pos, std::function<void(XY)> foreachPoi
 void Layer::clear(ScanlineMap* area)
 {
     if (area == NULL) {
-        memset(pixelData, isPalettized ? -1 : 0, w * h * 4);
+        memset(pixels32(), isPalettized ? -1 : 0, w * h * 4);
     }
     else {
-        u32* ppx = (u32*)pixelData;
+        u32* ppx = pixels32();
         area->forEachPoint([&](XY p) {
             if (pointInBox(p, SDL_Rect{ 0,0,w,h })) {
                 ARRAY2DPOINT(ppx, p.x, p.y, w) = isPalettized ? -1 : 0x00000000;

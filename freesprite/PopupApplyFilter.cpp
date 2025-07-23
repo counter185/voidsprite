@@ -252,8 +252,8 @@ void PopupApplyFilter::applyAndClose()
         Layer* copy = targetFilter->run(target, parameterMap);
         session->commitStateToCurrentLayer();
         if (session->isolateEnabled) {
-            u32* srcpx = (u32*)copy->pixelData;
-            u32* dstpx = (u32*)target->pixelData;
+            u32* srcpx = copy->pixels32();
+            u32* dstpx = target->pixels32();
             session->isolatedFragment.forEachPoint([&](XY a) {
                 if (pointInBox(a, { 0,0,target->w,target->h })) {
                     ARRAY2DPOINT(dstpx, a.x, a.y, target->w) = ARRAY2DPOINT(srcpx, a.x, a.y, target->w);
@@ -261,7 +261,7 @@ void PopupApplyFilter::applyAndClose()
             });
         }
         else {
-            memcpy(target->pixelData, copy->pixelData, 4 * target->w * target->h);
+            memcpy(target->pixels32(), copy->pixels32(), 4 * target->w * target->h);
         }
         target->markLayerDirty();
         delete copy;
@@ -308,7 +308,7 @@ void PopupApplyFilter::updatePreview()
         u32* pppx = (u32*)ppx;
         u32* previewPx = (u32*)previewPixelData;
         if (session->isolateEnabled) {
-            memcpy(ppx, target->pixelData, 4 * target->w * target->h);
+            memcpy(ppx, target->pixels32(), 4 * target->w * target->h);
             session->isolatedFragment.forEachPoint([&](XY a) {
                 if (pointInBox(a, { 0,0,target->w,target->h })) {
                     ARRAY2DPOINT(pppx, a.x, a.y, target->w) = ARRAY2DPOINT(previewPx, a.x, a.y, target->w);
@@ -349,7 +349,7 @@ void PopupApplyFilter::previewRenderThread()
             std::map<std::string, std::string> parameterMap = makeParameterMap();
             threadHasNewParameters = false;
             Layer* l = targetFilter->run(target, parameterMap);
-            memcpy(previewPixelData, l->pixelData, 4 * target->w * target->h);
+            memcpy(previewPixelData, l->pixels32(), 4 * target->w * target->h);
             pixelDataDirty = true;
             delete l;
             nowRendering = false;

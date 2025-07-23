@@ -45,7 +45,7 @@ Layer* BaseFilter::copy(Layer* src)
     if (src == NULL) {
         return NULL;
     }
-    return src->copyWithNoTextureInit();
+    return src->copyCurrentVariant();
 }
 
 Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
@@ -125,7 +125,7 @@ Layer* FilterForEachPixel::run(Layer* src, std::map<std::string, std::string> op
 Layer* FilterSwapRGBToBGR::run(Layer* src, std::map<std::string, std::string> options)
 {
     Layer* c = copy(src);
-    SDL_ConvertPixels(c->w, c->h, SDL_PIXELFORMAT_ARGB8888, src->pixelData, c->w * 4, SDL_PIXELFORMAT_ABGR8888, c->pixelData, c->w * 4);
+    SDL_ConvertPixels(c->w, c->h, SDL_PIXELFORMAT_ARGB8888, src->pixels32(), c->w * 4, SDL_PIXELFORMAT_ABGR8888, c->pixels32(), c->w * 4);
     return c;
 }
 
@@ -163,8 +163,8 @@ Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> op
         ch -= hFragment;
         splitPoints.push(c->w * hPoint + wDistance);
     }
-    u32* ppx = (u32*)c->pixelData;
-    u32* srcPpx = (u32*)src->pixelData;
+    u32* ppx = c->pixels32();
+    u32* srcPpx = src->pixels32();
     u64 dataPtr = 0;
     u64 srcDataPtr = 0;
     int currentRepeats = 0;
@@ -290,7 +290,7 @@ Layer* FilterBrightnessContrast::run(Layer* src, std::map<std::string, std::stri
     double brightness = std::stod(options["brightness"]);
     double contrast = std::stod(options["contrast"]);
 
-    u32* ppx = (u32*)c->pixelData;
+    u32* ppx = c->pixels32();
     for (u64 x = 0; x < c->w * c->h; x++) {
         SDL_Color px = uint32ToSDLColor(ppx[x]);
         px.r = ixmax(0, ixmin(255, (int)(px.r * contrast + brightness)));
@@ -380,7 +380,7 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
     if (colors.size() <= numColors) {
         return copy(src);
     }
-    u32* pppx = (u32*)src->pixelData;
+    u32* pppx = src->pixels32();
     bool oneColorWillBeAlpha = numColors > 1 && std::any_of(pppx, pppx + src->w * src->h, [](u32 a) { return (a & 0xff000000) == 0; });
     if (oneColorWillBeAlpha) {
         numColors--;
@@ -405,7 +405,7 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
         }
     }
     Layer* c = copy(src);
-    u32* ppx = (u32*)c->pixelData;
+    u32* ppx = c->pixels32();
     for (u64 x = 0; x < c->w * c->h; x++) {
         if (oneColorWillBeAlpha && (ppx[x] & 0xFF000000) == 0) {
             ppx[x] = 0;
@@ -425,7 +425,7 @@ Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
     if (srf != NULL) {
         SDL_LockSurface(srf);
         for (int y = 0; y < c->h; y++) {
-			memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), c->w * 4);
+			memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), c->w * 4);
         }
         SDL_UnlockSurface(srf);
         SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew();
@@ -440,7 +440,7 @@ Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
             SDL_DestroySurface(srf);
             srf = srf2;
             for (int y = 0; y < ixmin(srf->h, c->h); y++) {
-				memcpy(&(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
+				memcpy(&(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
             }
         }
 		SDL_FreeSurface(srf);
@@ -457,7 +457,7 @@ Layer* FilterAVIF::run(Layer* src, std::map<std::string, std::string> options)
     if (srf != NULL) {
         SDL_LockSurface(srf);
         for (int y = 0; y < c->h; y++) {
-            memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), c->w * 4);
+            memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), c->w * 4);
         }
         SDL_UnlockSurface(srf);
         SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew();
@@ -472,7 +472,7 @@ Layer* FilterAVIF::run(Layer* src, std::map<std::string, std::string> options)
             SDL_DestroySurface(srf);
             srf = srf2;
             for (int y = 0; y < ixmin(srf->h, c->h); y++) {
-                memcpy(&(ARRAY2DPOINT(c->pixelData, 0, y, c->w * 4)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
+                memcpy(&(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
             }
         }
         SDL_FreeSurface(srf);

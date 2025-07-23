@@ -220,6 +220,7 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconActionBarZoomIn = NULL,
    *g_iconActionBarZoomOut = NULL,
    *g_iconActionBarSave = NULL,
+   *g_iconFilePickerLink = NULL,
    *g_iconFilePickerDirectory = NULL,
    *g_iconFilePickerFile = NULL,
    *g_iconFilePickerSupportedFile = NULL;
@@ -291,29 +292,6 @@ struct NavbarSection {
     std::map<SDL_Scancode, NamedOperation> actions;
     HotReloadableTexture* icon = NULL;
     UIButton* button = NULL;
-};
-
-#define UNDOSTACK_LAYER_DATA_MODIFIED 0
-#define UNDOSTACK_CREATE_LAYER 1
-#define UNDOSTACK_DELETE_LAYER 2
-#define UNDOSTACK_MOVE_LAYER 3
-#define UNDOSTACK_ADD_COMMENT 4
-#define UNDOSTACK_REMOVE_COMMENT 5
-#define UNDOSTACK_SET_OPACITY 6
-#define UNDOSTACK_RESIZE_LAYER 7
-#define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
-struct UndoStackElement {
-    Layer* targetlayer = NULL;
-    uint32_t type = 0;
-    int extdata = 0;
-    int extdata2 = 0;
-    std::string extdata3 = "";
-    void* extdata4 = NULL;
-};
-
-struct UndoStackResizeLayerElement {
-    XY oldDimensions;
-    uint8_t* oldData;
 };
 
 struct NineSegmentPattern {

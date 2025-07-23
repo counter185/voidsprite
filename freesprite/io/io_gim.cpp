@@ -200,7 +200,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
             case 0x03:  // rgba8888
                 {
                     ret = new Layer(imgBlock.w, imgBlock.h);
-                    u32* ppx = (u32*)ret->pixelData;
+                    u32* ppx = ret->pixels32();
                     fseek(f, pixelStart, SEEK_SET);
                     for (u64 i = 0; i < pixelDataSize; i += 4) {
                         u64 indexInPixelData = i / 4;
@@ -216,7 +216,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 {
                     ret = new LayerPalettized(imgBlock.w, imgBlock.h);
                     ((LayerPalettized*)ret)->palette = palette;
-                    u32* ppx = (u32*)ret->pixelData;
+                    u32* ppx = ret->pixels32();
                     fseek(f, pixelStart, SEEK_SET);
                     for (u64 i = 0; i < pixelDataSize; i++) {
                         u8 px;
@@ -230,7 +230,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 {
                     ret = new LayerPalettized(imgBlock.w, imgBlock.h);
                     ((LayerPalettized*)ret)->palette = palette;
-                    u32* ppx = (u32*)ret->pixelData;
+                    u32* ppx = ret->pixels32();
                     fseek(f, pixelStart, SEEK_SET);
                     for (u64 i = 0; i < pixelDataSize; i++) {
                         if (deswizzle) {

@@ -51,7 +51,7 @@ public:
     bool takesTouchEvents() override { return true; }
 
     void updateBounds() {
-        XY insideArea = getInsideAreaWH();
+        XY insideArea = getContentBoxSize();
 
         if (scrollHorizontally) {
             if (insideArea.x > wxWidth) {
@@ -81,21 +81,6 @@ public:
             }
         }
 
-    }
-
-    XY getInsideAreaWH() {
-        XY ret = { 0,0 };
-        for (Drawable*& a : subWidgets.drawablesList) {
-            XY aPos = a->position;
-            XY aDim = a->getRenderDimensions();
-            if (aPos.x + aDim.x > ret.x) {
-                ret.x = aPos.x + aDim.x;
-            }
-            if (aPos.y + aDim.y > ret.y) {
-                ret.y = aPos.y + aDim.y;
-            }
-        }
-        return ret;
     }
 
 };

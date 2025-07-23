@@ -119,7 +119,7 @@ VOIDSNv4 is identical to v3, but adds support for palettized images.
 The image is palettized if the extended data key `palette.enabled` == `"1"`  
 The palette colors can then be found in the ext. data key `palette.colors`, which is a formatted string:  
 `"<num colors>;<HEX COLOR 1>;<HEX COLOR 2>;<HEX COLOR 3>;..."`  
-`pixelData` becomes an array of int32 indexes. An index can be `-1`, meaning it's fully transparent.
+`pixelData` becomes an array of int32 indices. An index can be `-1`, meaning it's fully transparent.
 
 ### voidsprite Session v5 (.voidsnv5)
 
@@ -136,3 +136,45 @@ For each layer:
 | 4 | uint32_t | `colorKey` |
 | 8 | uint64_t | `sizeOfCompressedData` |
 | `sizeOfCompressedData` | uint8_t[`sizeOfCompressedData`] | `compressedPixelData` |
+
+### voidsprite Session v6 (.voidsnv6)
+
+`versionNumber` will be equal to `0x06`  
+VOIDSNv6 adds a magic value to the header and gives every layer unique extended data.
+
+#### Required types:
+
+##### `VOIDSNLayerData`:
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| &lt;variable&gt; | `VOIDSNString` | `dataName` |
+| 8 | uint64_t | dataSize |
+| `dataSize` | uint8_t[`dataSize`] | `data` |
+
+#### File:
+
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| 11 | char[11] | `magic` |
+| 4 | uint32_t | `imageWidth` |
+| 4 | uint32_t | `imageHeight` |
+| 13 | char[13] | `extendedDataHeader` |
+| 4 | uint32_t | `extendedDataCount` |
+| &lt;variable&gt; | `VOIDSNExtData`[`extendedDataCount`] | `extendedData` |
+| 4 | uint32_t | `numberOfLayers` |
+
+`magic` should be the string `voidsprite` followed by a 00 byte
+
+For each layer:
+
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| 4 | uint32_t | `dataValuesCount` |
+| &lt;variable&gt; | `VOIDSNLayerData`[`dataValuesCount`] | `dataValues` |
+
+#### Data values:
+`name`: Name of the layer. (data is a UTF-8 string)  
+`colorKeySet`: Does the layer have a color key enabled? (data is one byte, 0 or 1)  
+`colorKey`: Color key of the layer, if it has one. (data is a 4-byte color value)  
+`currentVariant`: Index of the currently active layer variant. (data is a 4-byte integer)
+`variant.<name>`: Pixel data of a layer variant. (data is a zlib-compressed ARGB pixel data array)

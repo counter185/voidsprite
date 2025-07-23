@@ -36,7 +36,7 @@ Layer* TemplateMC64x32Skin::generate()
 {
     Layer* nlayer = new Layer(64, 32);
     nlayer->name = TL("vsp.layer.template");
-    memset(nlayer->pixelData, 0x00, 64 * 32 * 4);
+    memset(nlayer->pixels32(), 0x00, 64 * 32 * 4);
 
     uint32_t headColors[2] = { 0xFF062608, 0xff1b591f };
     uint32_t hatColors[2] = { 0xFF042030, 0xff1b3459 };
