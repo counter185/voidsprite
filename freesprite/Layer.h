@@ -110,11 +110,12 @@ public:
     }
 
     virtual LayerVariant allocNewVariant() {
+        u64 size = w * h * 4ull;
         LayerVariant newVariant;
         newVariant.name = "Variant";
-        newVariant.pixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
+        newVariant.pixelData = (uint8_t*)tracked_malloc(size, "Layers");
         if (newVariant.pixelData != NULL) {
-            memset(newVariant.pixelData, 0, w * h * 4);
+            memset(newVariant.pixelData, 0, size);
         }
         return newVariant;
     }
@@ -169,7 +170,7 @@ public:
 
     virtual void updateTexture() {
         uint8_t* pixels;
-        int pitch;
+        u32 pitch;
         if (renderData[g_rd].tex == NULL || !xyEqual(renderData[g_rd].texDimensions, XY{w,h})) {
             if (renderData[g_rd].tex != NULL) {
                 tracked_destroyTexture(renderData[g_rd].tex);
@@ -179,7 +180,7 @@ public:
             renderData[g_rd].layerDirty = true;
             SDL_SetTextureBlendMode(renderData[g_rd].tex, SDL_BLENDMODE_BLEND);
         }
-        SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, &pitch);
+        SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, (int*)&pitch);
         if (pitch == w*4) {
             memcpy(pixels, pixels32(), w * h * 4);
         } else {

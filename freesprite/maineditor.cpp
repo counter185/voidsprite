@@ -2555,7 +2555,7 @@ Layer* MainEditor::flattenImage()
             uint32_t* ppx = l->pixels32();
             if (x++ == 0) {
                 if (l->layerAlpha == 255) {
-                    memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4);
+                    memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4ull);
                 }
                 else {
                     for (uint64_t p = 0; p < l->w * l->h; p++) {
