@@ -4,11 +4,11 @@ Free C++ pixel art editor
 
 ![Preview image](README_ASSETS/img_preview_1.png)
 
-## Supported file formats
+## ◆Supported file formats
 
 ◆ The list of supported file formats has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/index.html?page=compatibility).
 
-## Installing
+## ◆Installing
 
 ◆ You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
 
@@ -16,7 +16,7 @@ For Windows, get the `voidsprite-build-win64.zip` file.
 
 For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed.
 
-## Building
+## ◆Building
 
 ### Windows
 
@@ -40,21 +40,30 @@ By default, the generated output files will be placed in `/tmp/voidsprite`. When
 
 You can also build the program as a Flatpak, see [Flatpak README](https://github.com/counter185/voidsprite/blob/main/freesprite/linux/flatpak/README.md).
 
-## System requirements
+## ◆System requirements
 
 ◆ The system requirements table has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/index.html?page=requirements).
 
-## Community
+## ◆Community
 
 ◆ [Official Discord server](https://discord.gg/c5SndMJKj2)  
 ◆ [Itch.io page](https://cntrpl.itch.io/voidsprite)  
 ◆ [BlueSky page](https://voidsprite.bsky.social/)
 
-## Donate
+## ◆Contribute
+
+voidsprite is open for community contributions. Here are some ways you can help:
+
+- Open PRs to contribute to the code
+- Open Issues (or report them on Discord) to help get bugs and other problems fixed
+- Share your custom [Patterns](community-patterns) and [Templates](community-templates)
+- Translate voidsprite into your language. [More details](freesprite/localization)
+
+## ◆Donate
 
 ◆ You can support the project by donating on [itch.io](https://cntrpl.itch.io/voidsprite/purchase)
 
-## Licenses
+## ◆Licenses
 
 ◆ voidsprite is licensed under GPLv2.  
 ◆ Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory
