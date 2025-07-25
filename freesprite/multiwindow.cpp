@@ -75,7 +75,19 @@ void VSPWindow::initFonts() {
             { 0x3000, 0x30FF },   // CJK Symbols and Punctuation, hiragana, katakana
             { 0xFF00, 0xFFEF },   // Halfwidth and Fullwidth Forms
             { 0x4E00, 0x9FAF }    // CJK Unified Ideographs
-            });
+        });
+    }
+
+    TTF_Font* fontCYR = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_CYR).c_str(), 18);
+    fontCYR = fontCYR == NULL ? TTF_OpenFont(FONT_PATH_CYR, 18) : fontCYR;
+    if (fontCYR != NULL) {
+        fnt->AddFont(fontCYR, {
+            { 0x0400, 0x052F }, // Cyryllic + supplement
+            { 0x2DE0, 0x2DFF }, // Cyryllic Extended-A
+            { 0xA640, 0xA69F }, // Cyryllic Extended-B
+            { 0x1C80, 0x1C8F }, // Cyryllic Extended-C
+			{ 0x1E030, 0x1E08F }    // Cyryllic Extended-D
+        });
     }
 
     std::string customFont = visualConfigValue("general/font");

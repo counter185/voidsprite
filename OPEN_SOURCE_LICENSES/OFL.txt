@@ -1,4 +1,4 @@
-** The fonts `Noto Sans JP` and `Mplus Rounded` included with voidsprite
+** The fonts `Noto Sans JP`, `M PLUS Rounded 1c` and `Zen Kaku Gothic New` included with voidsprite
 are licensed under OFL
 
 ------------------
