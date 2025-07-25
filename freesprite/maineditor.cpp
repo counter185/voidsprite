@@ -29,6 +29,7 @@
 #include "SpritesheetPreviewScreen.h"
 #include "NineSegmentPatternEditorScreen.h"
 #include "MinecraftBlockPreviewScreen.h"
+#include "ViewSessionScreen.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupTextBox.h"
@@ -1032,6 +1033,12 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_G, { "Set pixel grid...",
                             [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
+                        }
+                    },
+                    {SDL_SCANCODE_V, { "Preview in separate workspace...",
+                            [this]() {
+                                g_addScreen(new ViewSessionScreen(this));
+                            }
                         }
                     },
                     {SDL_SCANCODE_S, { "Open spritesheet preview...",

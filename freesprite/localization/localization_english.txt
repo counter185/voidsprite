@@ -255,6 +255,9 @@
     {"vsp.extractdata.pixelorder.xtheny", "X then Y"},
     {"vsp.extractdata.pixelorder.ythenx", "Y then X"},
 
+    //screen: fullscreen preview
+    {"vsp.fullscreenpreview", "Fullscreen preview"},
+
 
     //popup: settings
     {"vsp.config.title", "Preferences"},

@@ -342,6 +342,7 @@
     <ClCompile Include="UITextField.cpp" />
     <ClCompile Include="UtilPathfind.cpp" />
     <ClCompile Include="vfx.cpp" />
+    <ClCompile Include="ViewSessionScreen.cpp" />
     <ClCompile Include="visual_config.cpp" />
     <ClCompile Include="zip\zip.c" />
   </ItemGroup>
@@ -544,6 +545,7 @@
     <ClInclude Include="updatecheck.h" />
     <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="vfx.h" />
+    <ClInclude Include="ViewSessionScreen.h" />
     <ClInclude Include="visual_config.h" />
     <ClInclude Include="voidsprite_sdk.h" />
     <ClInclude Include="zip\miniz.h" />

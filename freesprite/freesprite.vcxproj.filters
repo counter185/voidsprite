@@ -663,6 +663,9 @@
     <ClCompile Include="io\io_voidsprite.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="ViewSessionScreen.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1270,6 +1273,9 @@
     </ClInclude>
     <ClInclude Include="io\io_voidsprite.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewSessionScreen.h">
+      <Filter>Header files\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

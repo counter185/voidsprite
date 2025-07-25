@@ -12,6 +12,7 @@
 #include "CollapsableDraggablePanel.h"
 #include "EditorTouchToggle.h"
 #include "SpritesheetPreviewScreen.h"
+#include "ViewSessionScreen.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -537,6 +538,12 @@ void MainEditorPalettized::setUpWidgets()
                                 }
                                 RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(this);
                                 g_addScreen(newScreen);
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_V, { "Preview in separate workspace...",
+                            [this]() {
+                                g_addScreen(new ViewSessionScreen(this));
                             }
                         }
                     },

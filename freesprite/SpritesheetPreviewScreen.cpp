@@ -72,7 +72,7 @@ void SpritesheetPreviewScreen::render()
     drawBackground();
 
     canvas.dimensions = caller->canvas.dimensions;
-    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();// { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x* canvasZoom, caller->canvas.dimensions.y* canvasZoom };
+    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
     for (Layer*& l : caller->layers) {
         l->render(canvasRenderRect, l->layerAlpha);
     }

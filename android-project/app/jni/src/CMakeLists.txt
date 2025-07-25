@@ -221,6 +221,7 @@ add_library(main SHARED
         voidsprite/UtilPathfind.cpp
         voidsprite/vfx.cpp
         voidsprite/visual_config.cpp
+        voidsprite/ViewSessionScreen.cpp
 )
 target_link_libraries(main PRIVATE SDL3::SDL3)
 target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)
