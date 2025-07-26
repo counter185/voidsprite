@@ -168,14 +168,54 @@ void platformPostInit() {
 
 void platformDeinit() {}
 
-bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) {
-
+bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> additionalArgs) {
     //add the program into hkey_classes_root
     WCHAR path[MAX_PATH];
     if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) {
         HKEY classesRootKey;
         if (RegOpenKeyW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", &classesRootKey) != ERROR_SUCCESS) {
-            logprintf("failed to open hkey_classes_root\n");
+            logerr("failed to open hkey_classes_root");
+            return false;
+        }
+        std::wstring pathWstr = path;
+        for (auto& arg : additionalArgs) {
+            pathWstr += L" " + convertStringOnWin32(arg);
+        }
+        pathWstr += L" \"%1\"";
+
+        std::wstring prot = convertStringOnWin32(uriProtocol);
+
+        HKEY voidspriteRootKey;
+        if (RegCreateKeyExW(classesRootKey, prot.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &voidspriteRootKey, NULL) == ERROR_SUCCESS) {
+            HKEY hKey;
+			RegSetValueExW(voidspriteRootKey, L"URL Protocol", 0, REG_SZ, (const BYTE*)L"", sizeof(L""));
+            if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size() + 1) * sizeof(wchar_t));
+                RegCloseKey(hKey);
+            }
+            RegCloseKey(voidspriteRootKey);
+        }
+        else {
+            logerr("failed to create key in hkey_classes_root");
+            RegCloseKey(classesRootKey);
+            return false;
+        }
+        RegCloseKey(classesRootKey);
+
+        return true;
+    }
+    return false;
+}
+
+bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) {
+
+    //add the program into hkey_classes_root
+    //todo: reuse registerURI here
+    WCHAR path[MAX_PATH];
+    if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) {
+        HKEY classesRootKey;
+        if (RegOpenKeyW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", &classesRootKey) != ERROR_SUCCESS) {
+            logerr("failed to open hkey_classes_root");
             return false;
         }
         std::wstring pathWstr = path;
@@ -200,7 +240,7 @@ bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std
             RegCloseKey(voidspriteRootKey);
         }
         else {
-            logprintf("failed to create voidsprite key in hkey_classes_root\n");
+            logerr("failed to create voidsprite key in hkey_classes_root");
             RegCloseKey(classesRootKey);
             return false;
         }

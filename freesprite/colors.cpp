@@ -307,6 +307,10 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
 {
     if (stringStartsWithIgnoreCase(url, "lospec-palette://")) {
         url = url.substr(17);
+
+        //windows for some reason
+        while (stringEndsWithIgnoreCase(url, "/")) { url.pop_back(); }
+
         g_startNewAsyncOperation([url]() {
             std::string dlUrl = std::format("https://lospec.com/palette-list/{}.json", url);
             auto outputFile = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(std::format("palettes/{}.voidplt", url));

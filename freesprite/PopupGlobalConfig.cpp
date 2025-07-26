@@ -295,6 +295,23 @@ PopupGlobalConfig::PopupGlobalConfig()
         };
         configTabs->tabs[4].wxs.addDrawable(btn);
         posInTab.y += 35;
+
+        btn = new UIButton();
+        btn->text = TL("vsp.config.opt.associatelospec");
+        btn->tooltip = TL("vsp.config.opt.associatelospec.desc");
+        btn->position = posInTab;
+        btn->wxWidth = 270;
+        btn->onClickCallback = [this](UIButton*) {
+            if (platformRegisterURI("lospec-palette", { "--no-launchpad" })) {
+                g_addNotification(SuccessShortNotification(TL("vsp.config.uri.success"), ""));
+            }
+            else {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.config.uri.error")));
+                logerr("failed to register lospec-palette:// uri");
+            }
+        };
+        configTabs->tabs[4].wxs.addDrawable(btn);
+        posInTab.y += 35;
     }
 
     btn = new UIButton();
@@ -307,6 +324,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     };
     configTabs->tabs[4].wxs.addDrawable(btn);
     posInTab.y += 35;
+
+    btn = new UIButton();
+    btn->text = TL("vsp.config.opt.reloadcolorlist");
+    btn->position = posInTab;
+    btn->wxWidth = 270;
+    btn->onClickCallback = [this](UIButton*) {
+        g_reloadColorMap();
+        g_addNotification(SuccessShortNotification(TL("vsp.config.opt.colorlistreloaded"), ""));
+        };
+    configTabs->tabs[4].wxs.addDrawable(btn);
+    posInTab.y += 35;
+
 
 #if __ANDROID__
     btn = new UIButton();

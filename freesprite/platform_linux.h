@@ -67,6 +67,7 @@ void platformDeinit() {}
 
 //todo
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
+bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> additionalArgs) { return false; }
 std::string platformGetFileAssocForExtension(std::string extension) { return "";}
 
 void platformTrySaveImageFile(EventCallbackListener *caller) {}

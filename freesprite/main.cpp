@@ -689,6 +689,7 @@ int main(int argc, char** argv)
         }
         //run lospec downloads
         for (auto& url : lospecDlTargets) {
+            loginfo(std::format("Running lospec download: {}", url));
             g_downloadAndInstallPaletteFromLospec(url);
         }
 
