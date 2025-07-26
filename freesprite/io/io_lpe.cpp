@@ -43,5 +43,49 @@ MainEditor* readLPE(PlatformNativePathString path)
 
 bool writeLPE(PlatformNativePathString path, MainEditor* editor)
 {
+    std::ofstream outfile(path);
+
+    if (outfile.is_open()) {
+        json o = json::object();
+        o["canvasWidth"] = editor->canvas.dimensions.x;
+        o["canvasHeight"] = editor->canvas.dimensions.y;
+        o["editorMode"] = "Advanced";
+        o["colors"] = json::array();
+        o["colors"].array().push_back(std::format("#{:06X}", editor->getActiveColor() & 0xFFFFFF));
+        for (int x = 0; x < ixmin(32, editor->lastColors.size()); x++) {
+            o["colors"].array().push_back(std::format("#{:06X}", editor->lastColors[x] & 0xFFFFFF));
+        }
+        o["selectedLayer"] = editor->selLayer;
+        o["layers"] = json::array();
+        int i = 0;
+        for (auto it = editor->layers.rbegin(); it != editor->layers.rend(); it++) {
+            Layer* l = *it;
+            json layerObj = json::object();
+            layerObj["canvas"] = json::object();
+            layerObj["context"] = json::object();
+            layerObj["context"]["mozImageSmoothingEnabled"] = false;
+            layerObj["context"]["willReadFrequently"] = true;
+            layerObj["isSelected"] = editor->selLayer == i;
+            layerObj["isVisible"] = !l->hidden;
+            layerObj["isLocked"] = false;
+            layerObj["oldLayerName"] = nullptr;
+            layerObj["menuEntry"] = json::object();
+            layerObj["id"] = std::format("layer{}", i);
+            layerObj["name"] = l->name;
+
+            std::vector<u8> pngBytes = writePNGToMem(l);
+            std::string fileBuffer;
+            fileBuffer.resize(pngBytes.size());
+            memcpy(fileBuffer.data(), pngBytes.data(), pngBytes.size());
+            layerObj["src"] = "data:image/png;base64," + base64::to_base64(fileBuffer);
+
+            o["layers"].push_back(layerObj);
+            i++;
+        }
+
+        outfile << o.dump();
+        outfile.close();
+        return true;
+    }
     return false;
 }
