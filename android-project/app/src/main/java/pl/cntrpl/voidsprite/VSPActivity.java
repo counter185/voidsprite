@@ -16,6 +16,8 @@ import java.net.URI;
 
 import org.libsdl.app.SDLActivity;
 
+import pl.cntrpl.voidsprite.util.Utils;
+
 public class VSPActivity extends SDLActivity {
 
     public static String packageName = "";
@@ -69,29 +71,7 @@ public class VSPActivity extends SDLActivity {
     }
 
     public static String fetchStringHTTP(String url) {
-        try {
-            java.net.URL urlObj = new URI(url).toURL();
-            java.net.HttpURLConnection connection = (java.net.HttpURLConnection) urlObj.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.connect();
-
-            if (connection.getResponseCode() == 200) {
-                java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line).append("\n");
-                }
-                reader.close();
-                return response.toString().trim();
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            return null;
-        }
+        return Utils.fetchStringHTTP(url);
     }
 
     public static native void passAppdataPathString(String appdataPath);
