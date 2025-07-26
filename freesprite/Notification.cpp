@@ -2,11 +2,13 @@
 #include "FontRenderer.h"
 
 std::vector<Notification> g_notifications;
+bool renderingNotifications = false;
 
 void g_renderNotifications()
 {
     int notifY = 30;
     int notifOriginX = g_windowW - 450;
+    renderingNotifications = true;
     for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
         Notification& notif = *it;
 
@@ -42,7 +44,7 @@ void g_renderNotifications()
         //icon
         int textX = notifX + 10;
         if (notif.icon != NULL && notif.icon->get(g_rd) != NULL) {
-			SDL_Texture* iconTex = notif.icon->get(g_rd);
+            SDL_Texture* iconTex = notif.icon->get(g_rd);
             SDL_Rect iconRect = { notifX + 5, notifY + 5, 50, 50 };
             SDL_SetTextureAlphaMod(iconTex, (uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 200)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))));
             SDL_RenderCopy(g_rd, iconTex, NULL, &iconRect);
@@ -68,11 +70,17 @@ void g_renderNotifications()
             }
         }
     }
+    renderingNotifications = false;
 }
 
 void g_addNotification(Notification a) {
-    g_notifications.push_back(a);
-    loginfo(std::format("New notification:\n  {} | {}", a.title, a.message));
+    if (!renderingNotifications) {
+        g_notifications.push_back(a);
+        loginfo(std::format("New notification:\n  {} | {}", a.title, a.message));
+    }
+    else {
+        logerr("Failed to post notification (currently rendering notifications)");
+    }
 }
 void g_tickNotifications() {
     for (int x = 0; x < g_notifications.size(); x++) {

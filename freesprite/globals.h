@@ -74,7 +74,7 @@
     #if __ANDROID__
     #define VOIDSPRITE_ASSETS_SUBDIR ""
     #else
-    #define VOIDSPRITE_ASSETS_SUBDIR "/assets/"
+    #define VOIDSPRITE_ASSETS_SUBDIR "assets/"
     #endif
 #endif
 

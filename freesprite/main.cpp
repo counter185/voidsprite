@@ -1,6 +1,8 @@
 
 #include "globals.h"
 
+#include <queue>
+
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -345,29 +347,33 @@ int main(int argc, char** argv)
     try {
         std::chrono::time_point<std::chrono::system_clock> startupTime = std::chrono::system_clock::now();
 
-        log_init();
-        bool convert = false, convertReadingSrc = false;
-        std::vector<std::pair<std::string, std::string>> convertTargets;
+        std::queue<std::string> argsQueue;
+        for (int i = 1; i < argc; i++) {
+            argsQueue.push(std::string(argv[i]));
+        }
 
-        for (int arg = 1; arg < argc; arg++) {
-            std::string a = std::string(argv[arg]);
-            if (a == "--convert") {
-                convert = true;
-                convertReadingSrc = true;
-            }
-            else if (convert) {
-                if (convertReadingSrc) {
-                    convertTargets.push_back({ a, "" });
-                    convertReadingSrc = false;
+        log_init();
+        
+        std::vector<std::pair<std::string, std::string>> convertTargets;
+        std::vector<std::string> lospecDlTargets;
+
+        while (!argsQueue.empty()) {
+            std::string command = argsQueue.front(); argsQueue.pop();
+            if (command == "--convert") {
+                if (argsQueue.size() >= 2) {
+                    std::string convertSrc = argsQueue.front(); argsQueue.pop();
+                    std::string convertDst = argsQueue.front(); argsQueue.pop();
+                    convertTargets.push_back({ convertSrc, convertDst });
                 }
                 else {
-                    convertTargets[convertTargets.size() - 1].second = a;
-                    convertReadingSrc = false;
-                    convert = false;
+                    logerr("Not enough arguments for --convert operation\n  *Needed 2: <source> <destination>");
                 }
             }
+            else if (stringStartsWithIgnoreCase(command, "lospec-palette://")) {
+                lospecDlTargets.push_back(command);
+            }
             else {
-                g_cmdlineArgs.push_back(a);
+                g_cmdlineArgs.push_back(command);
             }
         }
 #if __ANDROID__
@@ -375,8 +381,14 @@ int main(int argc, char** argv)
         g_programExePath = "";
 #else
         g_programExePath = std::string(argv[0]);
-        g_programDirectory = g_programExePath.substr(0, g_programExePath.find_last_of("/\\"));
-        g_programDirectory += _WIN32 ? "\\" : "/";
+        auto findLastPathSep = g_programExePath.find_last_of("/\\");
+        if (findLastPathSep == std::string::npos) {
+            g_programExePath = "";
+        }
+        else {
+            g_programDirectory = g_programExePath.substr(0, findLastPathSep);
+            g_programDirectory += _WIN32 ? "\\" : "/";
+        }
 #endif
         loginfo(std::format("Program directory: {}", g_programDirectory));
         //g_addNotification(Notification("", g_programDirectory));
@@ -674,6 +686,10 @@ int main(int argc, char** argv)
         for (auto& c : convertTargets) {
             MainEditor* sn = loadAnyIntoSession(c.first);
             PopupQuickConvert::doQuickConvert(sn, convertStringOnWin32(c.second));
+        }
+        //run lospec downloads
+        for (auto& url : lospecDlTargets) {
+            g_downloadAndInstallPaletteFromLospec(url);
         }
 
         if (customPatterns > 0) {

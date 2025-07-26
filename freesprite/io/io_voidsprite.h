@@ -19,3 +19,4 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor);
 MainEditor* readVOIDSN(PlatformNativePathString path);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
+bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette);

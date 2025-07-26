@@ -809,3 +809,21 @@ std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString n
     }
     return { false, {} };
 }
+
+bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fwrite("VOIDPLT", 1, 7, outfile);
+        //file version 1
+        fwrite("\x1", 1, 1, outfile);
+
+        voidsnWriteU32(outfile, palette.size());
+        for (u32& c : palette) {
+            voidsnWriteU32(outfile, c);
+        }
+        fclose(outfile);
+        return true;
+    }
+	return false;
+}

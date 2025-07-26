@@ -1,5 +1,11 @@
+#include "json/json.hpp"
+
 #include "globals.h"
 #include "FileIO.h"
+#include "colors.h"
+#include "background_operation.h"
+#include "Notification.h"
+#include "io/io_voidsprite.h"
 
 std::vector<NamedColorPalette> g_baseNamedColorMap = {
     {
@@ -288,12 +294,53 @@ void g_reloadColorMap() {
                     g_namedColorMap.push_back(ncp);
                 }
                 else {
-                    //g_addNotification(ErrorNotification("Palette Import Error", "Could not import palette from " + fileName));
-                    logprintf("palette load failed\n");
+                    logerr(std::format("Failed to load palette: {}", fileName));
                 }
             }
         }
     }
 
     g_generateColorMap();
+}
+
+void g_downloadAndInstallPaletteFromLospec(std::string url)
+{
+    if (stringStartsWithIgnoreCase(url, "lospec-palette://")) {
+        url = url.substr(17);
+        g_startNewAsyncOperation([url]() {
+            std::string dlUrl = std::format("https://lospec.com/palette-list/{}.json", url);
+            auto outputFile = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(std::format("palettes/{}.voidplt", url));
+            try {
+                std::string response = platformFetchTextFile(dlUrl);
+                nlohmann::json j = nlohmann::json::parse(response);
+                std::string name = j["name"].get<std::string>();
+                std::vector<std::string> colors;
+                for (auto& color : j["colors"]) {
+                    colors.push_back(color.get<std::string>());
+                }
+                std::vector<u32> colorsU32;
+                std::transform(colors.begin(), colors.end(), std::back_inserter(colorsU32), [](const std::string& color) {
+                    return 0xFF000000 | std::stoul(color, nullptr, 16);
+                });
+                if (writePltVOIDPLT(outputFile, colorsU32)) {
+                    g_startNewMainThreadOperation([]() {
+                        g_addNotification(SuccessNotification(TL("vsp.success.lospecpaletteinstalled"), ""));
+                        g_reloadColorMap();
+                    });
+                }
+                else {
+                    throw std::runtime_error("Failed to write palette file");
+                }
+            }
+            catch (std::exception& e) {
+                g_startNewMainThreadOperation([e]() {
+                    logerr(std::format("Failed to download palette from lospec:\n {}", e.what()));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.error.lospecdlfail")));
+                });
+            }
+        });
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.error.invalidlospecpaletteurl")));
+    }
 }

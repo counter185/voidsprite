@@ -53,6 +53,10 @@
                                   "Every available renderer has failed to initialize and voidsprite cannot start.\n"
                                   "Ensure you have the proper graphics drivers installed."},
 
+    //other non-common errors/strings not related to any screen
+    {"vsp.error.lospecdlfail", "Lospec download failed"},
+    {"vsp.error.invalidlospecpaletteurl", "Invalid Lospec URL"},
+    {"vsp.success.lospecpaletteinstalled", "Lospec palette installed"},
 
     // popup titles
     {"vsp.popup.newsplitsession", "create new split session"},

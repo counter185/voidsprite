@@ -15,3 +15,4 @@ inline std::vector<NamedColorPalette> g_namedColorMap = {};
 
 void g_generateColorMap();
 void g_reloadColorMap();
+void g_downloadAndInstallPaletteFromLospec(std::string url);
