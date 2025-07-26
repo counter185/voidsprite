@@ -156,7 +156,8 @@ public:
                 return _flatExportFunction(path, (Layer*)data);
             }
         }
-        catch (std::exception&) {
+        catch (std::exception& e) {
+            logerr(std::format("Data export failed:\n {}", e.what()));
             return false;
         }
     }
