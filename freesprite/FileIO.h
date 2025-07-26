@@ -32,6 +32,7 @@ void unZlibFile(PlatformNativePathString path);
 #include "io/io_png.h"
 #include "io/io_aseprite.h"
 #include "io/io_piskel.h"
+#include "io/io_lpe.h"
 #include "io/io_gim.h"
 #include "io/io_rpgm.h"
 #include "io/io_jxl.h"
@@ -349,6 +350,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Lospec Pixel Editor", ".lpe", &readLPE, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, exPiskel));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString path) {

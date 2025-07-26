@@ -666,6 +666,9 @@
     <ClCompile Include="ViewSessionScreen.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_lpe.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1276,6 +1279,9 @@
     </ClInclude>
     <ClInclude Include="ViewSessionScreen.h">
       <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_lpe.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
