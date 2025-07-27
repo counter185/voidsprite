@@ -138,6 +138,9 @@
     {"vsp.launchpad.update.title", "Update available"},
     {"vsp.launchpad.update.latestver", "Latest version:"},
 
+    {"vsp.launchpad.ctx.removefromlast", "Remove from last open file history"},
+    {"vsp.launchpad.ctx.clearlast", "Clear last open file history"},
+
     {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
     {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
     {"vsp.launchpad.tab.templates", "Templates"},

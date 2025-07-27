@@ -63,3 +63,5 @@ bool g_saveConfig();
 void g_loadConfig();
 
 void g_tryPushLastFilePath(std::string a);
+void g_removeFromLastOpenFiles(std::string a);
+void g_clearLastOpenFiles();

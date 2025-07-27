@@ -8,6 +8,7 @@
 #include "LayerPalettized.h"
 #include "ExtractDataScreen.h"
 
+#include "PopupContextMenu.h"
 #include "PopupMessageBox.h"
 #include "PopupFilePicker.h"
 #include "PopupAbout.h"
@@ -166,9 +167,9 @@ StartScreen::StartScreen() {
     lastOpenFilesPanel->passThroughMouse = true;
     wxsManager.addDrawable(lastOpenFilesPanel);
 
-	std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_H };
+    std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_H };
     if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
-		navbarOrder.erase(std::remove(navbarOrder.begin(), navbarOrder.end(), SDL_SCANCODE_W), navbarOrder.end());
+        navbarOrder.erase(std::remove(navbarOrder.begin(), navbarOrder.end(), SDL_SCANCODE_W), navbarOrder.end());
         // remove the window tab if we shouldn't be able to use it
     }
 
@@ -554,6 +555,13 @@ void StartScreen::populateLastOpenFiles()
         button->wxWidth = textDim.x;
         button->onClickCallback = [this, lastPath](UIButton*) {
             this->tryLoadFile(lastPath);
+        };
+        button->onRightClickCallback = [this, lastPath](UIButton* button) {
+            g_openContextMenu({
+                {TL("vsp.nav.open"), [this, lastPath, button]() { button->click(); }},
+                {TL("vsp.launchpad.ctx.removefromlast"), [this, lastPath]() { g_removeFromLastOpenFiles(lastPath); populateLastOpenFiles(); }},
+                {TL("vsp.launchpad.ctx.clearlast"), [this, lastPath]() { g_clearLastOpenFiles(); populateLastOpenFiles(); }},
+            });
         };
         button->fill = Fill::Gradient(0x60000000, 0x60000000, 0x90909090, 0x90000000);
         origin.y += 30;

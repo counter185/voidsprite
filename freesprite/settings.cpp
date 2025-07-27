@@ -31,12 +31,12 @@ bool g_saveConfig() {
         file << "showFPS=" << (g_config.showFPS ? "1" : "0") << std::endl;
         file << "checkUpdates=" << (g_config.checkUpdates ? "1" : "0") << std::endl;
         file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
-		file << "singleInstance=" << (g_config.singleInstance ? "1" : "0") << std::endl;
+        file << "singleInstance=" << (g_config.singleInstance ? "1" : "0") << std::endl;
         
         auto keybinds = g_keybindManager.serializeKeybinds();
-		for (const std::string& keybind : keybinds) {
-			file << "keybind@=" << keybind << std::endl;
-		}
+        for (const std::string& keybind : keybinds) {
+            file << "keybind@=" << keybind << std::endl;
+        }
 
         for (std::string& p : g_config.lastOpenFiles) {
             file << "lastfile=" << p << std::endl;
@@ -63,7 +63,7 @@ void g_loadConfig() {
                 config[key] = value;
 
                 if (key == "keybind@") {
-					g_config.keybinds.push_back(value);
+                    g_config.keybinds.push_back(value);
                 }
                 else if (key == "lastfile") {
                     g_config.lastOpenFiles.push_back(value);
@@ -93,7 +93,7 @@ void g_loadConfig() {
         if (config.contains("showFPS")) { g_config.showFPS = config["showFPS"] == "1"; }
         if (config.contains("checkUpdates")) { g_config.showFPS = config["checkUpdates"] == "1"; }
         if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
-		if (config.contains("singleInstance")) { g_config.singleInstance = config["singleInstance"] == "1"; }
+        if (config.contains("singleInstance")) { g_config.singleInstance = config["singleInstance"] == "1"; }
 
         g_configWasLoaded = true;
         file.close();
@@ -112,4 +112,17 @@ void g_tryPushLastFilePath(std::string a) {
         }
         g_saveConfig();
     }
+}
+
+void g_removeFromLastOpenFiles(std::string a) {
+    auto pos = std::find(g_config.lastOpenFiles.begin(), g_config.lastOpenFiles.end(), a);
+    if (pos != g_config.lastOpenFiles.end()) {
+        g_config.lastOpenFiles.erase(pos);
+        g_saveConfig();
+    }
+}
+
+void g_clearLastOpenFiles() {
+    g_config.lastOpenFiles.clear();
+    g_saveConfig();
 }
