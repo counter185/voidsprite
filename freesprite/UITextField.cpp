@@ -3,6 +3,7 @@
 #include "EventCallbackListener.h"
 #include "TooltipsLayer.h"
 #include "Notification.h"
+#include "PopupContextMenu.h"
 
 void UITextField::render(XY pos)
 {
@@ -46,41 +47,16 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
                 }
                 break;
             case SDL_SCANCODE_DELETE:
-                text = "";
-                if (onTextChangedCallback != NULL) {
-                    onTextChangedCallback(this, text);
-                }
-                else if (callback != NULL) {
-                    callback->eventTextInput(callback_id, text);
-                }
+                clearText();
                 break;
             case SDL_SCANCODE_C:
                 if (g_ctrlModifier) {
-                    if (SDL_SetClipboardText(text.c_str())) {
-                        g_addNotification(SuccessShortNotification(TL("vsp.cmn.copiedtoclipboard"),""));
-                    } else {
-                        g_addNotification(ErrorNotification(TL("vsp.cmn.error.clipboardcopy"), ""));
-                    }
+                    copyToClipboard();
                 }
                 break;
             case SDL_SCANCODE_V:
                 if (g_ctrlModifier) {
-                    if (char* clip = SDL_GetClipboardText()) {
-                        std::string t = clip;
-                        for (char& c : t) {
-                            inputChar(c);
-                        }
-                        //clean this shit up
-                        if (onTextChangedCallback != NULL) {
-                            onTextChangedCallback(this, text);
-                        }
-                        else if (callback != NULL) {
-                            callback->eventTextInput(callback_id, text);
-                        }
-                        SDL_free(clip);
-                    } else {
-                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardtextpaste")));
-                    }
+                    pasteFromClipboard();
                 }
                 break;
         }
@@ -111,6 +87,26 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
             imeCandidates.push_back(evt.edit_candidates.candidates[x]);
         }
         imeCandidateIndex = evt.edit_candidates.selected_candidate;
+    }
+    else if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        if (evt.button.button == SDL_BUTTON_RIGHT) {
+            g_openContextMenu({
+                {TL("vsp.cmn.copy"), [this]() { copyToClipboard(); }},
+				{TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); }},
+				{TL("vsp.cmn.erase"), [this]() { clearText(); }},
+            });
+        }
+    }
+}
+
+void UITextField::clearText()
+{
+    text = "";
+    if (onTextChangedCallback != NULL) {
+        onTextChangedCallback(this, text);
+    }
+    else if (callback != NULL) {
+        callback->eventTextInput(callback_id, text);
     }
 }
 
@@ -216,4 +212,35 @@ bool UITextField::isValidOrPartialColor()
         }
     }
     return true;
+}
+
+void UITextField::copyToClipboard()
+{
+    if (SDL_SetClipboardText(text.c_str())) {
+        g_addNotification(SuccessShortNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error.clipboardcopy"), ""));
+    }
+}
+
+void UITextField::pasteFromClipboard()
+{
+    if (char* clip = SDL_GetClipboardText()) {
+        std::string t = clip;
+        for (char& c : t) {
+            inputChar(c);
+        }
+        //clean this shit up
+        if (onTextChangedCallback != NULL) {
+            onTextChangedCallback(this, text);
+        }
+        else if (callback != NULL) {
+            callback->eventTextInput(callback_id, text);
+        }
+        SDL_free(clip);
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardtextpaste")));
+    }
 }

@@ -9,7 +9,7 @@ struct LayerVariant {
 
 struct LayerPerRendererData {
     SDL_Texture* tex = NULL;
-    XY texDimensions;
+    XY texDimensions = {-1,-1};
     bool layerDirty = true;
 };
 

@@ -1,5 +1,6 @@
 #include "UILayerButton.h"
 #include "Layer.h"
+#include "PopupContextMenu.h"
 
 UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
     wxWidth = 240;
@@ -39,6 +40,15 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
                 if (callback != NULL) {
                     callback->eventGeneric(callback_id, 2, v);
                 }
+            };
+            vbtn->onRightClickCallback = [this, v](UIButton* btn) {
+                g_openContextMenu({
+                    {"Delete variant", [this, v]() {
+                        if (callback != NULL) {
+                            callback->eventGeneric(callback_id, 3, v);
+                        }
+                    }}
+                });
             };
             variantButtons.push_back(vbtn);
             p->subWidgets.addDrawable(vbtn);

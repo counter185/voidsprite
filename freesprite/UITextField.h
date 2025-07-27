@@ -69,5 +69,8 @@ public:
     }
     bool inputChar(char c);
     bool isValidOrPartialColor();
+    void copyToClipboard();
+	void pasteFromClipboard();
+    void clearText();
 };
 

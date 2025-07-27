@@ -10,6 +10,8 @@
 class BasePopup :
     public BaseScreen
 {
+protected:
+    bool usesWholeScreen = false;
 public:
     virtual ~BasePopup() = default;
     Timer64 startTimer;
@@ -48,10 +50,10 @@ protected:
     virtual void renderDefaultBackground(SDL_Color bgColor = SDL_Color{0,0,0,0xD0});
 
     virtual XY getPopupOrigin() {
-        return XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };
+        return usesWholeScreen ? XY{0,0} : XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };
     }
 
-    void playPopupCloseVFX();
+    virtual void playPopupCloseVFX();
     void closePopup();
 
     virtual void defaultInputAction(SDL_Event evt) {}
