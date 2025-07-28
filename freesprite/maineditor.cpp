@@ -1914,7 +1914,7 @@ void MainEditor::discardEndOfUndoStack() {
                             tracked_free(variant.pixelData);
                         }
                     }
-                    delete resizeLayerData;
+                    delete[] resizeLayerData;
                 }
                 break;
             case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:

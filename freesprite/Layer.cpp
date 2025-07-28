@@ -158,6 +158,7 @@ Layer* Layer::copyAllVariantsScaled(XY dimensions)
     for (LayerVariant& variant : layerData) {
         LayerVariant newVariant = variant;
         newVariant.pixelData = (u8*)tracked_malloc(dimensions.x * dimensions.y * 4, "Layers");
+        scaledVariants.push_back(newVariant);
     }
 
     if (isPalettized) {
