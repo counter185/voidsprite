@@ -7,11 +7,15 @@ void UIColorSlider::render(XY pos)
     if (colors.size() > 1) {
         int splits = ixmax(colors.size(), 2) - 1;
         double wSplit = (double) wxWidth / splits;
+        int wSplitInt = (int)wSplit;
 
         for (int x = 0; x < splits; x++) {
             SDL_Rect subRect = drawrect;
-            subRect.w = (x == splits - 1) ? wxWidth - ((splits-1)*wSplit) : wSplit;
-            subRect.x = pos.x + x * wSplit;
+            subRect.w = wSplitInt;
+            if (x == (splits - 1)) {
+                subRect.w = wxWidth - (wSplitInt * x);
+            }
+            subRect.x = pos.x + x * wSplitInt;
             u32 color1 = colors[x] | 0xFF000000;
             u32 color2 = colors[x + 1] | 0xFF000000;
             renderGradient(subRect, color1, color2, color1, color2);

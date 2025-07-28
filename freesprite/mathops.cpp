@@ -551,17 +551,13 @@ void renderGradient(SDL_Rect bounds, uint32_t colorUL, uint32_t colorUR, uint32_
 {
     SDL_Vertex verts[4];
     verts[0].position = xytofp({ bounds.x, bounds.y });
-    verts[0].color = toFColor({(uint8_t)((colorUL & 0xFF0000) >> 16), (uint8_t)((colorUL & 0x00FF00) >> 8),
-                              (uint8_t)(colorUL & 0x0000FF), (uint8_t)((colorUL & 0xFF000000) >> 24)});
+    verts[0].color = toFColor(uint32ToSDLColor(colorUL));
     verts[1].position = xytofp({ bounds.x + bounds.w, bounds.y });
-    verts[1].color = toFColor({(uint8_t)((colorUR & 0xFF0000) >> 16), (uint8_t)((colorUR & 0x00FF00) >> 8),
-                              (uint8_t)(colorUR & 0x0000FF), (uint8_t)((colorUR & 0xFF000000) >> 24)});
+    verts[1].color = toFColor(uint32ToSDLColor(colorUR));
     verts[2].position = xytofp({ bounds.x, bounds.y + bounds.h });
-    verts[2].color = toFColor({(uint8_t)((colorDL & 0xFF0000) >> 16), (uint8_t)((colorDL & 0x00FF00) >> 8),
-                              (uint8_t)(colorDL & 0x0000FF), (uint8_t)((colorDL & 0xFF000000) >> 24)});
+    verts[2].color = toFColor(uint32ToSDLColor(colorDL));
     verts[3].position = xytofp({ bounds.x + bounds.w, bounds.y + bounds.h });
-    verts[3].color = toFColor({(uint8_t)((colorDR & 0xFF0000) >> 16), (uint8_t)((colorDR & 0x00FF00) >> 8),
-                              (uint8_t)(colorDR & 0x0000FF), (uint8_t)((colorDR & 0xFF000000) >> 24)});
+    verts[3].color = toFColor(uint32ToSDLColor(colorDR));
 
     int indices[6] = { 0, 1, 2, 1, 3, 2 };
     SDL_RenderGeometry(g_rd, NULL, verts, 4, indices, 6);
