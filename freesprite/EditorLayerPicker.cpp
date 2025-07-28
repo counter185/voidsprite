@@ -116,6 +116,9 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
         caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;
     }
     else if (data1 == 2) {
+        if (caller->selLayer != evt_id) {
+            caller->switchActiveLayer(evt_id);
+        }
         caller->layer_switchVariant(caller->layers[evt_id], data2);
     }
     else if (data1 == 3) {
