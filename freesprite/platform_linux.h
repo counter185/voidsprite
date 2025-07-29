@@ -282,3 +282,7 @@ void platformOpenWebpageURL(std::string url) {
 std::string platformFetchTextFile(std::string url) {
 	return universal_fetchTextFile(url);
 }
+
+std::vector<u8> platformFetchBinFile(std::string url) {
+    return universal_fetchBinFile(url);
+}

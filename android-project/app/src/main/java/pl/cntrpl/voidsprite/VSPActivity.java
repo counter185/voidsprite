@@ -73,6 +73,9 @@ public class VSPActivity extends SDLActivity {
     public static String fetchStringHTTP(String url) {
         return Utils.fetchStringHTTP(url);
     }
+    public static byte[] fetchDataHTTP(String url) {
+        return Utils.fetchDataHTTP(url);
+    }
 
     public static native void passAppdataPathString(String appdataPath);
     public static native void passSystemInformationString(String systemInformation);

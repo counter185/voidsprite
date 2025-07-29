@@ -52,6 +52,7 @@ bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to
 
 void platformOpenWebpageURL(std::string url);
 std::string platformFetchTextFile(std::string url);
+std::vector<u8> platformFetchBinFile(std::string url);
 
 bool platformHasFileAccessPermissions();
 void platformRequestFileAccessPermissions();

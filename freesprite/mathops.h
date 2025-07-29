@@ -429,61 +429,61 @@ public:
     };
 
     static Sint64 size(void* userdata) {
-		return ((StreamObjs*)userdata)->stream->data.size();
+        return ((StreamObjs*)userdata)->stream->data.size();
     }
     static Sint64 seek(void* userdata, Sint64 offset, SDL_IOWhence whence) {
-		StreamObjs* streamObjs = (StreamObjs*)userdata;
-		SDLVectorU8IOStream* stream = streamObjs->stream;
-		Sint64 newPos = 0;
-		switch (whence) {
-		case SDL_IO_SEEK_SET:
-			newPos = offset;
-			break;
-		case SDL_IO_SEEK_CUR:
-			newPos = stream->pos + offset;
-			break;
-		case SDL_IO_SEEK_END:
-			newPos = stream->data.size() + offset;
-			break;
-		}
-		if (newPos < 0) {
-			newPos = 0;
-		}
-		if (newPos > (Sint64)stream->data.size()) {
-			newPos = stream->data.size();
-		}
-		stream->pos = newPos;
-		return stream->pos;
+        StreamObjs* streamObjs = (StreamObjs*)userdata;
+        SDLVectorU8IOStream* stream = streamObjs->stream;
+        Sint64 newPos = 0;
+        switch (whence) {
+        case SDL_IO_SEEK_SET:
+            newPos = offset;
+            break;
+        case SDL_IO_SEEK_CUR:
+            newPos = stream->pos + offset;
+            break;
+        case SDL_IO_SEEK_END:
+            newPos = stream->data.size() + offset;
+            break;
+        }
+        if (newPos < 0) {
+            newPos = 0;
+        }
+        if (newPos > (Sint64)stream->data.size()) {
+            newPos = stream->data.size();
+        }
+        stream->pos = newPos;
+        return stream->pos;
     }
     static size_t read(void* userdata, void* ptr, size_t size, SDL_IOStatus* status) {
-		StreamObjs* streamObjs = (StreamObjs*)userdata;
-		SDLVectorU8IOStream* stream = streamObjs->stream;
+        StreamObjs* streamObjs = (StreamObjs*)userdata;
+        SDLVectorU8IOStream* stream = streamObjs->stream;
         if (stream->pos + size > stream->data.size()) {
             size = stream->data.size() - stream->pos;
         }
-		if (size == 0) {
-			*status = SDL_IO_STATUS_EOF;
-			return 0;
-		}
-		memcpy(ptr, stream->data.data() + stream->pos, size);
-		stream->pos += size;
-		*status = SDL_IO_STATUS_READY;
-		return size;
+        if (size == 0) {
+            *status = SDL_IO_STATUS_EOF;
+            return 0;
+        }
+        memcpy(ptr, stream->data.data() + stream->pos, size);
+        stream->pos += size;
+        *status = SDL_IO_STATUS_READY;
+        return size;
     }
     static size_t write(void* userdata, const void* ptr, size_t size, SDL_IOStatus* status) {
-		StreamObjs* streamObjs = (StreamObjs*)userdata;
-		SDLVectorU8IOStream* stream = streamObjs->stream;
-		if (stream->pos + size > stream->data.size()) {
-			stream->data.resize(stream->pos + size);
-		}
-		memcpy(stream->data.data() + stream->pos, ptr, size);
-		*status = SDL_IO_STATUS_READY;
-		stream->pos += size;
-		return size;
+        StreamObjs* streamObjs = (StreamObjs*)userdata;
+        SDLVectorU8IOStream* stream = streamObjs->stream;
+        if (stream->pos + size > stream->data.size()) {
+            stream->data.resize(stream->pos + size);
+        }
+        memcpy(stream->data.data() + stream->pos, ptr, size);
+        *status = SDL_IO_STATUS_READY;
+        stream->pos += size;
+        return size;
     }
     static bool flush(void* userdata, SDL_IOStatus* status) {
-		*status = SDL_IO_STATUS_READY;
-		return true;
+        *status = SDL_IO_STATUS_READY;
+        return true;
     }
     static bool close(void* userdata) {
         delete ((StreamObjs*)userdata)->stream;
@@ -492,15 +492,15 @@ public:
     }
 
     static SDL_IOStream* OpenNew() {
-		StreamObjs* streamObjs = new StreamObjs();
+        StreamObjs* streamObjs = new StreamObjs();
         SDL_INIT_INTERFACE(&streamObjs->iface);
-		streamObjs->stream = new SDLVectorU8IOStream();
+        streamObjs->stream = new SDLVectorU8IOStream();
         streamObjs->iface.size = SDLVectorU8IOStream::size;
-		streamObjs->iface.seek = SDLVectorU8IOStream::seek;
-		streamObjs->iface.read = SDLVectorU8IOStream::read;
-		streamObjs->iface.write = SDLVectorU8IOStream::write;
-		streamObjs->iface.flush = SDLVectorU8IOStream::flush;
-		streamObjs->iface.close = SDLVectorU8IOStream::close;
+        streamObjs->iface.seek = SDLVectorU8IOStream::seek;
+        streamObjs->iface.read = SDLVectorU8IOStream::read;
+        streamObjs->iface.write = SDLVectorU8IOStream::write;
+        streamObjs->iface.flush = SDLVectorU8IOStream::flush;
+        streamObjs->iface.close = SDLVectorU8IOStream::close;
 
         return SDL_OpenIO(&streamObjs->iface, streamObjs);
     }
@@ -508,11 +508,16 @@ public:
 
 class DoOnReturn {
 public:
-	std::function<void()> func;
-	DoOnReturn(std::function<void()> f) : func(f) {}
+    std::function<void()> func;
+    DoOnReturn(std::function<void()> f) : func(f) {}
     ~DoOnReturn() {
         if (func != NULL) {
-            func();
+            try {
+                func();
+            }
+            catch (std::exception& e) {
+                logerr(std::format("[DoOnReturn] failed:\n {}", e.what()));
+            }
         }
     }
 };

@@ -11,6 +11,7 @@
 #include "PopupContextMenu.h"
 #include "PopupMessageBox.h"
 #include "PopupFilePicker.h"
+#include "PopupTextBox.h"
 #include "PopupAbout.h"
 #include "PopupYesNo.h"
 #include "UIButton.h"
@@ -191,7 +192,8 @@ StartScreen::StartScreen() {
                             }
                         },
                         { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
-                        { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } }
+                        { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
+                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}}
                     },
                     g_iconNavbarTabFile
                 }
@@ -896,6 +898,78 @@ void StartScreen::renderBGStars()
 void StartScreen::openImageLoadDialog()
 {
     PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0);
+}
+
+void StartScreen::promptOpenFromURL()
+{
+    PopupTextBox* urlPrompt = new PopupTextBox(TL("vsp.launchpad.popup.openfromurl"), TL("vsp.launchpad.popup.openfromurl.desc"));
+    urlPrompt->onTextInputConfirmedCallback = [this](PopupTextBox*, std::string url) {
+        if (stringStartsWithIgnoreCase(url, "http://")
+            || stringStartsWithIgnoreCase(url, "https://")) {
+            tryLoadURL(url);
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.badurl")));
+        }
+    };
+    g_addPopup(urlPrompt);
+}
+
+void StartScreen::tryLoadURL(std::string url)
+{
+    g_startNewOperation([url]() {
+        try {
+            std::vector<u8> data = platformFetchBinFile(url);
+            PlatformNativePathString temp = newTempFile();
+            FILE* f = platformOpenFile(temp, PlatformFileModeWB);
+            if (f == NULL) {
+                logerr("failed to open temp file");
+                throw std::runtime_error("Failed to open temporary file for writing");
+            }
+            fwrite(data.data(), 1, data.size(), f);
+            fclose(f);
+            
+
+            g_startNewMainThreadOperation([temp]() {
+                DoOnReturn a([temp]() { std::filesystem::remove(temp); });
+
+                void* importedData = NULL;
+                bool importedDataIsSession = false;
+                for (auto& importer : g_fileImporters) {
+                    if (importer->hasCheckFunction() && importer->canImport(temp)) {
+                        importedData = importer->importData(temp);
+                        if (importedData != NULL) {
+                            importedDataIsSession = importer->importsWholeSession();
+                            break;
+                        }
+                    }
+                }
+
+                if (importedData == NULL) {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.unsupportedformat")));
+                }
+                else {
+                    MainEditor* outSession = NULL;
+                    if (importedDataIsSession) {
+                        outSession = (MainEditor*)importedData;
+                    }
+                    else {
+                        Layer* nlayer = (Layer*)importedData;
+                        outSession = nlayer->isPalettized ? new MainEditorPalettized((LayerPalettized*)nlayer)
+                                     : new MainEditor(nlayer);
+                    }
+                    g_addScreen(outSession);
+                }
+            });
+
+        }
+        catch (std::exception& e) {
+            g_startNewMainThreadOperation([url, e]() {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.urlfetchfail")));
+                logerr(std::format("Failed to fetch URL {}\n {}", url, e.what()));
+            });
+        }
+    });
 }
 
 void StartScreen::tryLoadFile(std::string path)

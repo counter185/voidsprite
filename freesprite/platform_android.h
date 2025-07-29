@@ -229,3 +229,27 @@ std::string platformFetchTextFile(std::string url) {
     }
     throw std::runtime_error("Failed to fetch text file from URL: " + url);
 }
+
+std::vector<u8> platformFetchBinFile(std::string url) {
+    JNIEnv* jni;
+    lastJVM->AttachCurrentThread(&jni, NULL);
+    auto ab = DoOnReturn([&]() {
+        lastJVM->DetachCurrentThread();
+    });
+
+    jmethodID m = jni->GetStaticMethodID(vspActivityClass, "fetchDataHTTP", "(Ljava/lang/String;)[B");
+    if (m != nullptr) {
+        jstring jurl = jni->NewStringUTF(url.c_str());
+        auto aa = DoOnReturn([&]() {
+            jni->DeleteLocalRef(jurl);
+        });
+        jbyteArray result = (jbyteArray)jni->CallStaticObjectMethod(vspActivityClass, m, jurl);
+        if (result != NULL) {
+            jsize len = jni->GetArrayLength(result);
+            std::vector<u8> ret(len);
+            jni->GetByteArrayRegion(result, 0, len, (jbyte*)ret.data());
+            return ret;
+        }
+    }
+    throw std::runtime_error("Failed to fetch binary file from URL: " + url);
+}

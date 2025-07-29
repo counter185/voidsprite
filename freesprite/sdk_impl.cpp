@@ -23,11 +23,14 @@ void impl_registerLayerImporter(
 		std::string convPathUTF8 = convertStringToUTF8OnWin32(path);
 		return importFunction((char*)convPathUTF8.c_str());
 	};
-	std::function<bool(PlatformNativePathString)> wCanImportFunction =
-		[canImportFunction](PlatformNativePathString path) {
-		std::string convPathUTF8 = convertStringToUTF8OnWin32(path);
-		return canImportFunction == NULL ? true : canImportFunction((char*)convPathUTF8.c_str());
-		};
+	std::function<bool(PlatformNativePathString)> wCanImportFunction = NULL;
+	if (canImportFunction != NULL) {
+		wCanImportFunction = 
+			[canImportFunction](PlatformNativePathString path) {
+				std::string convPathUTF8 = convertStringToUTF8OnWin32(path);
+				return canImportFunction((char*)convPathUTF8.c_str());
+			};
+	}
 
 	loginfo(std::format("Registering new file importer: {}  [{}]", std::string(name), std::string(extension)));
 	g_pluginRegisteredFileImporters.push_back(

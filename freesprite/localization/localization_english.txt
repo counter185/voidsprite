@@ -22,6 +22,7 @@
     {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
     {"vsp.cmn.error.exportfail", "Failed to export file."},
     {"vsp.cmn.error.clipboardtextpaste", "No text in clipboard."},
+    {"vsp.cmn.error.unsupportedformat", "Unsupported format"},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
 
     //file type names
@@ -161,6 +162,10 @@
     {"vsp.launchpad.nav.opennightlylinkdl", "Download latest build on nightly.link"},
     {"vsp.launchpad.nav.webmanual", "Open web manual"},
     {"vsp.launchpad.nav.newwindow", "New window"},
+    {"vsp.launchpad.nav.openurl", "Open from URL"},
+
+    {"vsp.launchpad.popup.openfromurl", "Open from URL"},
+    {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},
     {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"
@@ -173,6 +178,8 @@
     {"vsp.launchpad.error.no_dims", "Input the canvas dimensions."},
     {"vsp.launchpad.error.clipboard_no_image", "No image in clipboard."},
     {"vsp.launchpad.error.templatefail", "Failed to load template."},
+    {"vsp.launchpad.error.urlfetchfail", "Failed to download file from URL"},
+    {"vsp.launchpad.error.badurl", "Invalid URL"},
 
     {"vsp.launchpad.quickconvert.desc", "Select the format to export the image to.\n"
                                         "Drag a file into this window to convert to the same directory."},

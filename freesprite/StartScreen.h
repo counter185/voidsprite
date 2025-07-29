@@ -76,6 +76,8 @@ public:
     void renderBackground();
     void renderBGStars();
     void openImageLoadDialog();
+    void promptOpenFromURL();
+    void tryLoadURL(std::string url);
     void tryLoadFile(std::string path);
     void tryOpenImageFromClipboard();
     void updateCheckFinished();

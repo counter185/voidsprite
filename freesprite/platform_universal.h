@@ -196,3 +196,16 @@ inline std::string universal_fetchTextFile(std::string url) {
         throw std::runtime_error("curl failed");
     }
 }
+
+inline std::vector<u8> universal_fetchBinFile(std::string url) {
+    //uses curl
+    std::string command = "curl -s -f \"" + url + "\"";
+    int ec;
+    std::string output = universal_runCommandAndGetOutput(command, &ec);
+    if (ec == 0) {
+        return std::vector<u8>(output.begin(), output.end());
+    }
+    else {
+        throw std::runtime_error("curl failed");
+    }
+}

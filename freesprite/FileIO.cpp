@@ -844,11 +844,11 @@ std::vector<u8> compressZlib(u8* data, size_t dataSize)
 
 std::vector<u8> base64ToBytes(std::string b64)
 {
-	std::string decoded = base64::from_base64(b64);
-	std::vector<u8> ret;
-	ret.resize(decoded.size());
-	memcpy(ret.data(), decoded.data(), decoded.size());
-	return ret;
+    std::string decoded = base64::from_base64(b64);
+    std::vector<u8> ret;
+    ret.resize(decoded.size());
+    memcpy(ret.data(), decoded.data(), decoded.size());
+    return ret;
 }
 
 void zlibFile(PlatformNativePathString path)
@@ -904,6 +904,27 @@ void unZlibFile(PlatformNativePathString path)
     } else {
         g_addNotification(SuccessNotification("Success", "Zlib file decompressed"));
     }
+}
+
+std::function<bool(PlatformNativePathString)> magicVerify(u64 at, std::string header)
+{
+    return [at, header](PlatformNativePathString p) {
+        FILE* f = platformOpenFile(p, PlatformFileModeRB);
+        if (f == NULL) { return false; }
+        fseek(f, at, SEEK_SET);
+        std::string magic;
+        magic.resize(header.size());
+        fread(&magic[0], 1, header.size(), f);
+        fclose(f);
+        return magic == header;
+    };
+}
+
+PlatformNativePathString newTempFile()
+{
+    PlatformNativePathString tempPath = platformEnsureDirAndGetConfigFilePath();
+    PlatformNativePathString tempFileName = tempPath + convertStringOnWin32(std::format("/temp-{}", randomUUID()));
+	return tempFileName;
 }
 
 json serializePixelStudioSession(MainEditor* data) {

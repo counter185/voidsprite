@@ -33,6 +33,29 @@ public class Utils {
         }
     }
 
+    public static byte[] fetchDataHTTP(String url) {
+        try {
+            java.net.URL urlObj = new URI(url).toURL();
+            java.net.HttpURLConnection connection = (java.net.HttpURLConnection) urlObj.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.connect();
+
+            if (connection.getResponseCode() == 200) {
+                java.io.InputStream inputStream = connection.getInputStream();
+                int dataSize = connection.getContentLength();
+                byte[] data = new byte[dataSize];
+                inputStream.read(data);
+                return data;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static void writeU32(FileOutputStream out, int u32) {
         byte[] bytes = new byte[4];
         bytes[0] = (byte) (u32 & 0xFF);
