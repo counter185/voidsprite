@@ -672,6 +672,9 @@
     <ClCompile Include="PopupContextMenu.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_openraster.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1288,6 +1291,9 @@
     </ClInclude>
     <ClInclude Include="PopupContextMenu.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_openraster.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

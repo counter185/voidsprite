@@ -217,6 +217,7 @@
     <ClCompile Include="io\io_gim.cpp" />
     <ClCompile Include="io\io_jxl.cpp" />
     <ClCompile Include="io\io_lpe.cpp" />
+    <ClCompile Include="io\io_openraster.cpp" />
     <ClCompile Include="io\io_piskel.cpp" />
     <ClCompile Include="io\io_png.cpp" />
     <ClCompile Include="io\io_rpgm.cpp" />
@@ -404,6 +405,7 @@
     <ClInclude Include="io\io_gim.h" />
     <ClInclude Include="io\io_jxl.h" />
     <ClInclude Include="io\io_lpe.h" />
+    <ClInclude Include="io\io_openraster.h" />
     <ClInclude Include="io\io_piskel.h" />
     <ClInclude Include="io\io_png.h" />
     <ClInclude Include="io\io_rpgm.h" />

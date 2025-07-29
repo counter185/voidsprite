@@ -139,6 +139,7 @@ add_library(main SHARED
         voidsprite/io/io_gim.cpp
         voidsprite/io/io_jxl.cpp
         voidsprite/io/io_lpe.cpp
+        voidsprite/io/io_openraster.cpp
         voidsprite/io/io_piskel.cpp
         voidsprite/io/io_png.cpp
         voidsprite/io/io_rpgm.cpp

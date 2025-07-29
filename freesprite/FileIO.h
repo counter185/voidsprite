@@ -43,6 +43,7 @@ PlatformNativePathString newTempFile();
 #include "io/io_dibv5.h"
 #include "io/io_valve_spr.h"
 #include "io/io_voidsprite.h"
+#include "io/io_openraster.h"
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
@@ -70,14 +71,12 @@ Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
-MainEditor* readOpenRaster(PlatformNativePathString path);
 MainEditor* readPixelStudioPSP(PlatformNativePathString path);
 MainEditor* readPixelStudioPSX(PlatformNativePathString path);
 
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
-bool writeOpenRaster(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data);
 bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data);
 bool writeBMP(PlatformNativePathString path, Layer* data);
