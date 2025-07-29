@@ -12,9 +12,11 @@ void g_renderNotifications()
     for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
         Notification& notif = *it;
 
+        bool compactNotification = (notif.title.empty() || notif.message.empty()) && notif.icon == NULL;
+
         //bounds
         int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
-        SDL_Rect r = { notifX, notifY, 400, 60 };
+        SDL_Rect r = { notifX, notifY, 400, compactNotification ? 30 : 60 };
 
         if (pointInBox({ g_mouseX, g_mouseY }, r)) {
             notif.timer.setElapsedTime(500);
@@ -53,9 +55,11 @@ void g_renderNotifications()
         }
 
         //text
-        g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifY + 15, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) });
-        g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifY + 15, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, 16);
-        notifY += 65 * XM1PW3P1(notif.timer.percentElapsedTime(300) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
+        int notifTextMidpoint = notifY + (compactNotification ? 3 : 15);
+        int fontSize = compactNotification ? 16 : 18;
+        g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize);
+        g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize - 2);
+        notifY += (r.h + 5) * XM1PW3P1(notif.timer.percentElapsedTime(300) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 
         //pulse outline
         if (g_config.vfxEnabled) {
