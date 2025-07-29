@@ -219,6 +219,7 @@
     <ClCompile Include="io\io_lpe.cpp" />
     <ClCompile Include="io\io_openraster.cpp" />
     <ClCompile Include="io\io_piskel.cpp" />
+    <ClCompile Include="io\io_pix2d.cpp" />
     <ClCompile Include="io\io_png.cpp" />
     <ClCompile Include="io\io_rpgm.cpp" />
     <ClCompile Include="io\io_valve_spr.cpp" />
@@ -407,6 +408,7 @@
     <ClInclude Include="io\io_lpe.h" />
     <ClInclude Include="io\io_openraster.h" />
     <ClInclude Include="io\io_piskel.h" />
+    <ClInclude Include="io\io_pix2d.h" />
     <ClInclude Include="io\io_png.h" />
     <ClInclude Include="io\io_rpgm.h" />
     <ClInclude Include="io\io_valve_spr.h" />

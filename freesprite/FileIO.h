@@ -37,6 +37,7 @@ PlatformNativePathString newTempFile();
 #include "io/io_aseprite.h"
 #include "io/io_piskel.h"
 #include "io/io_lpe.h"
+#include "io/io_pix2d.h"
 #include "io/io_gim.h"
 #include "io/io_rpgm.h"
 #include "io/io_jxl.h"
@@ -364,6 +365,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
     g_fileImporters.push_back(FileImporter::sessionImporter("Lospec Pixel Editor", ".lpe", &readLPE, exLPE));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pix2D", ".pix2d", &readPix2D, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, exPiskel));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(4, "\xE0\xA5")));

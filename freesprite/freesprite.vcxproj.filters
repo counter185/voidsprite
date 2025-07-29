@@ -675,6 +675,9 @@
     <ClCompile Include="io\io_openraster.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_pix2d.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1293,6 +1296,9 @@
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="io\io_openraster.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_pix2d.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
