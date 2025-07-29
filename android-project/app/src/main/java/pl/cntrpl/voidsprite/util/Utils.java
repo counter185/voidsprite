@@ -3,10 +3,25 @@ package pl.cntrpl.voidsprite.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
 public class Utils {
+    //backported from openjdk 9 code because old android sdk doesn't have this
+    public static int j9_readNBytes(InputStream stm, byte[] b, int off, int len) throws IOException {
+
+        int n = 0;
+        while (n < len) {
+            int count = stm.read(b, off + n, len - n);
+            if (count < 0)
+                break;
+            n += count;
+        }
+        return n;
+    }
+
     public static String fetchStringHTTP(String url) {
         try {
             java.net.URL urlObj = new URI(url).toURL();
@@ -46,7 +61,7 @@ public class Utils {
                 java.io.InputStream inputStream = connection.getInputStream();
                 int dataSize = connection.getContentLength();
                 byte[] data = new byte[dataSize];
-                inputStream.read(data);
+                j9_readNBytes(inputStream, data, 0, dataSize);
                 return data;
             } else {
                 return null;
