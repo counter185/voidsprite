@@ -27,7 +27,10 @@ public:
     void mouseHoverMotion(XY mousePos, XY gPosOffset) override
     {
         if (enabled) {
-            subWidgets.processHoverEvent(xyAdd(scrollOffset, xyAdd(gPosOffset, position)), mousePos);
+            XY thisPositionOnScreen = xyAdd(gPosOffset, position);
+            if (isMouseIn(thisPositionOnScreen, mousePos)) { 
+                subWidgets.processHoverEvent(xyAdd(scrollOffset, thisPositionOnScreen), mousePos);
+            }
         }
     }
 
