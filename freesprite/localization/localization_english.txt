@@ -112,6 +112,7 @@
     {"vsp.keybinds.maineditor.newlayervariant", "New layer variant"},
     {"vsp.keybinds.maineditor.duplicatelayervariant", "Duplicate layer variant"},
     {"vsp.keybinds.maineditor.deletelayervariant", "Delete layer variant"},
+    {"vsp.keybinds.maineditor.renamelayervariant", "Rename layer variant"},
     {"vsp.keybinds.maineditor.prevlayervariant", "Previous layer variant"},
     {"vsp.keybinds.maineditor.nextlayervariant", "Next layer variant"},
 

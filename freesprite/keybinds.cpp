@@ -161,6 +161,10 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.deletelayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->layer_removeVariant(((MainEditor*)d)->getCurrentLayer(), ((MainEditor*)d)->getCurrentLayer()->currentLayerVariant);
         }));
+    g_keybindManager.addKeybind("maineditor", "layer_variant_rename",
+        KeyCombo(TL("vsp.keybinds.maineditor.renamelayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_promptRenameCurrentVariant();
+        }));
     g_keybindManager.addKeybind("maineditor", "layer_variant_prev",
         KeyCombo(TL("vsp.keybinds.maineditor.prevlayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
             Layer* l = ((MainEditor*)d)->getCurrentLayer();

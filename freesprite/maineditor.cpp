@@ -2509,7 +2509,7 @@ void MainEditor::layer_promptRenameCurrentVariant()
     Layer* clayer = getCurrentLayer();
     int layerVariantIndex = clayer->currentLayerVariant;
     std::string nameNow = clayer->layerData[layerVariantIndex].name;
-    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", nameNow);
+    PopupTextBox* ninput = new PopupTextBox("Rename layer variant", "Enter the new layer variant name:", nameNow);
     ninput->onTextInputConfirmedCallback = [this,clayer,layerVariantIndex](PopupTextBox* p, std::string newName) {
         clayer->layerData[layerVariantIndex].name = newName;
         layerPicker->updateLayers();
