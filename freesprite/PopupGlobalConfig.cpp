@@ -358,6 +358,10 @@ PopupGlobalConfig::PopupGlobalConfig()
     posInTab = { 0,10 };
     configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab));
     configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Debug color slider gradient bounds", "", &g_debugConfig.debugColorSliderGradients, &posInTab));
+    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Test localization", 
+        UTF8_DIAMOND " will appear next to strings that are present in the current localization\n"
+        UTF8_EMPTY_DIAMOND " will appear next to strings that are being pulled as fallback from English",
+        &g_debugConfig.debugTestLocalization, &posInTab));
 #endif
     
 

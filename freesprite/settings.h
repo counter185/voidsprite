@@ -50,14 +50,15 @@ public:
 struct DebugSettings {
     bool debugShowScrollPanelBounds = false;
     bool debugColorSliderGradients = false;
+	bool debugTestLocalization = false;
 };
 
 inline bool g_configWasLoaded = false;
 inline GlobalConfig g_config;
 inline std::vector<std::string> g_availableRenderersNow;
-#if _DEBUG
+
 inline DebugSettings g_debugConfig{};
-#endif
+
 
 bool g_saveConfig();
 void g_loadConfig();
