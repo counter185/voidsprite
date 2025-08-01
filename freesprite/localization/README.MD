@@ -13,6 +13,8 @@ The third string will appear in the settings when the language is chosen and sho
 The language name should be in that language, for example:  
 `{ "pl-pl", { "Polski", "Polish translation by me", {`  
 
+> The translation credits you enter will show up in both Preferences and in the Help > About voidsprite menu.
+
 3. Open `localization.cpp` and add an `#include` to your copied file:
 ```cpp
 std::map<std::string, LocalizationData> g_localizations = {
