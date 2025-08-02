@@ -924,7 +924,7 @@ PlatformNativePathString newTempFile()
 {
     PlatformNativePathString tempPath = platformEnsureDirAndGetConfigFilePath();
     PlatformNativePathString tempFileName = tempPath + convertStringOnWin32(std::format("/temp-{}", randomUUID()));
-	return tempFileName;
+    return tempFileName;
 }
 
 json serializePixelStudioSession(MainEditor* data) {
@@ -3873,6 +3873,35 @@ std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString na
         f.close();
         ret.first = ret.second.size() > 0;
         return ret;
+    }
+    return { false,{} };
+}
+
+std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativePathString name)
+{
+    std::ifstream f(name);
+    if (f.is_open()) {
+        json j = json::parse(f);
+        f.close();
+
+        std::vector<uint32_t> ret;
+
+        auto colors = j["Colors"];
+        for (auto& color : colors) {
+            auto r = color["r"].get<int>();
+            auto g = color["g"].get<int>();
+            auto b = color["b"].get<int>();
+            auto a = color["a"].get<int>();
+
+            ret.push_back(PackRGBAtoARGB(r, g, b, a));
+        }
+
+        if (ret.size() > 0) {
+            return { true, ret };
+        }
+        else {
+            logerr("No colors in Pixel Studio palette file");
+        }
     }
     return { false,{} };
 }

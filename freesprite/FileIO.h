@@ -101,6 +101,7 @@ std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString n
 std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name);
 std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString name);
+std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativePathString name);
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
 bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
@@ -468,6 +469,7 @@ inline void g_setupIO() {
 		magicVerify(0, "JASC-PAL")));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("GIMP GPL palette", ".gpl", &readPltGIMPGPL, 
 		magicVerify(0, "GIMP Palette")));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("Pixel Studio palette", ".palette", &readPltPixelStudioPALETTE));
 
 
 
