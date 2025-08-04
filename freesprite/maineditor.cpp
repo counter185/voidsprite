@@ -1,3 +1,6 @@
+#include <SDL3_net/SDL_net.h>
+#include "json/json.hpp"
+
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "FontRenderer.h"
@@ -49,6 +52,8 @@
 #else
 #include <ctime>
 #endif
+
+using namespace nlohmann;
 
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
 {
@@ -129,6 +134,7 @@ MainEditor::~MainEditor() {
     wxsManager.freeAllDrawables();
     discardUndoStack();
     discardRedoStack();
+    endNetworkSession();
     for (Layer*& imgLayer : layers) {
         delete imgLayer;
     }
@@ -2817,6 +2823,207 @@ void MainEditor::exportTilesIndividually()
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
+    }
+}
+
+void MainEditor::startNetworkSession()
+{
+    if (networkCanvasThread != NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Network session already started"));
+        return;
+    }
+    networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this);
+    if (networkCanvasThread == NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to start network session thread"));
+    }
+}
+
+void MainEditor::networkCanvasServerThread()
+{
+    NET_Server* server = NET_CreateServer(NULL, 6600);
+    if (server == NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
+        return;
+    }
+    while (true) {
+        NET_StreamSocket* clientSocket = NULL;
+        NET_AcceptClient(server, &clientSocket);
+        if (clientSocket == NULL) {
+            SDL_Delay(100);
+        }
+        else {
+            std::thread* responderThread = new std::thread(&MainEditor::networkCanvasServerResponderThread, this, clientSocket);
+            g_startNewMainThreadOperation([this, responderThread]() {
+                this->networkCanvasResponderThreads.push_back(responderThread);
+            });
+        }
+    }
+}
+
+void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
+{
+    //todo: delete this thread from the responder threads list when done
+    NetworkCanvasClientInfo clientInfo;
+
+    while (true) {
+        try {
+            std::string commandStr = networkReadCommand(clientSocket);
+            networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
+        }
+        catch (std::exception& e) {
+            logerr(std::format("Error processing command from client: {}", e.what()));
+            break;
+        }
+    }
+    logerr(std::format("Disconnected from {}"));
+}
+
+void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo)
+{
+    clientInfo->lastReportTime = SDL_GetTicks();
+    if (command == "INFO") {
+        std::string inputString = networkReadString(clientSocket);
+        json inputJson = json::parse(inputString);
+        clientInfo->clientName = inputJson.value("clientName", "Unknown Client");
+        clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
+
+        json infoJson = {
+            {"serverName", "---"},
+            {"canvasWidth", canvas.dimensions.x},
+            {"canvasHeight", canvas.dimensions.y},
+            {"tileGridWidth", tileDimensions.x},
+            {"tileGridHeight", tileDimensions.y},
+            {"layers", json::array()}
+        };
+        for (Layer*& l : layers) {
+            json layerJson = {
+                {"name", l->name},
+                {"hidden", l->hidden},
+                {"opacity", l->layerAlpha}
+            };
+            infoJson["layers"].push_back(layerJson);
+        }
+        networkSendCommand(clientSocket, "INFO");
+        networkSendString(clientSocket, infoJson.dump());
+        
+    }
+    //layer data request
+    else if (command == "LRRQ") {
+        u32 index;
+        networkReadBytes(clientSocket, (u8*)&index, 4);
+
+		Layer* l = layers[index];
+        auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
+		u64 dataSize = compressedData.size();
+		networkSendCommand(clientSocket, "LRDT");
+		networkSendBytes(clientSocket, (u8*)&index, 4);
+		networkSendBytes(clientSocket, (u8*)&dataSize, 8);
+		networkSendBytes(clientSocket, (u8*)&compressedData[0], dataSize);
+    }
+    //layer pixel data update request
+    else if (command == "LRDT") {
+        u32 index;
+		u64 dataSize;
+		networkReadBytes(clientSocket, (u8*)&index, 4);
+		networkReadBytes(clientSocket, (u8*)&dataSize, 8);
+		u8* dataBuffer = (u8*)tracked_malloc(dataSize);
+        if (dataBuffer != NULL) {
+			networkReadBytes(clientSocket, dataBuffer, dataSize);
+            Layer* l = layers[index];
+            auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
+            if (decompressed.size() != l->w * l->h * 4) {
+                logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+            }
+            else {
+                memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
+                l->markLayerDirty();
+            }
+            tracked_free(dataBuffer);
+        }
+        else {
+			logerr("Failed to allocate memory for layer pixel data update");
+        }
+    }
+    else {
+        logerr(std::format("Unknown command from client: {}", command));
+    }
+}
+
+std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
+{
+    std::string commandName;
+    commandName.resize(8);
+    networkReadBytes(socket, (u8*)&commandName[0], 8);
+    if (commandName.substr(0, 4) != "VDNC") {
+        throw std::runtime_error("Invalid command prefix");
+    }
+    else {
+        return commandName.substr(4);
+    }
+}
+
+void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string commandName)
+{
+    std::string fullCommand = "VDNC" + commandName;
+    if (fullCommand.size() > 8) {
+        throw std::runtime_error("Command name too long");
+    }
+    networkSendBytes(socket, (u8*)&fullCommand[0], 8);
+}
+
+bool MainEditor::networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
+{
+    int read = 0;
+    while (read < count) {
+        int bytesRead = NET_ReadFromStreamSocket(socket, buffer + read, count - read);
+        if (bytesRead == -1) {
+            return false;
+        }
+        else {
+            read += bytesRead;
+        }
+    }
+    return true;
+}
+
+void MainEditor::networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
+{
+    NET_WriteToStreamSocket(socket, buffer, count);
+}
+
+void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
+{
+    u32 size = s.size();
+    networkSendBytes(socket, (u8*)&size, 4);
+    if (size < 8000) {
+        networkSendBytes(socket, (u8*)&s[0], size);
+    }
+    else {
+        throw new std::runtime_error("networkSendString: size too big");
+    }
+}
+
+std::string MainEditor::networkReadString(NET_StreamSocket* socket)
+{
+    u32 size;
+    networkReadBytes(socket, (u8*)&size, 4);
+    if (size < 8000) {
+        std::string ret;
+        ret.resize(size);
+        networkReadBytes(socket, (u8*)&ret[0], size);
+        return ret;
+    }
+    else {
+        throw new std::runtime_error("networkReadString: size too big");
+    }
+}
+
+void MainEditor::endNetworkSession()
+{
+    if (networkCanvasThread != NULL) {
+        networkCanvasThread->join();
+        delete networkCanvasThread;
+        networkCanvasThread = NULL;
     }
 }
 

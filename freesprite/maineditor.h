@@ -8,6 +8,11 @@
 #include "Canvas.h"
 #include "EventCallbackListener.h"
 
+namespace std {
+    class thread;
+}
+struct NET_StreamSocket;
+
 enum EditorUnsavedChanges : int {
     NO_UNSAVED_CHANGES = 0,
     CHANGES_RECOVERY_AUTOSAVED = 1,
@@ -73,6 +78,12 @@ struct IsolatedFragmentPoint {
     u8 directions = 0;
     u8 directions2x = 0;
     u8 directions4x = 0;
+};
+
+struct NetworkCanvasClientInfo {
+    std::string clientName = "???";
+    XY cursorPosition = {0,0};
+    u64 lastReportTime = 0;
 };
 
 /*struct Frame {
@@ -185,6 +196,9 @@ public:
 
     Timer64 autosaveTimer;
 
+    std::thread* networkCanvasThread = NULL;
+	std::vector<std::thread*> networkCanvasResponderThreads;
+
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);
@@ -296,6 +310,18 @@ public:
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
+
+    void startNetworkSession();
+    void networkCanvasServerThread();
+    void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
+    void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
+    std::string networkReadCommand(NET_StreamSocket* socket);
+    void networkSendCommand(NET_StreamSocket* socket, std::string commandName);
+    bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
+	void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
+    void networkSendString(NET_StreamSocket* socket, std::string s);
+    std::string networkReadString(NET_StreamSocket* socket);
+	void endNetworkSession();
 
     void layer_newVariant();
     void layer_duplicateVariant();
