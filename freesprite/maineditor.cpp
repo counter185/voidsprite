@@ -1959,7 +1959,9 @@ void MainEditor::commitStateToLayer(Layer* l)
 
 void MainEditor::commitStateToCurrentLayer()
 {
-    commitStateToLayer(getCurrentLayer());
+    if (!layers.empty()) {
+        commitStateToLayer(getCurrentLayer());
+    }
 }
 
 uint32_t MainEditor::pickColorFromAllLayers(XY pos)
@@ -2275,6 +2277,9 @@ void MainEditor::deleteLayer(int index) {
 
 void MainEditor::regenerateLastColors()
 {
+    if (layers.empty()) {
+        return;
+    }
     colorPicker->lastColors.clear();
     colorPicker->lastColorsChanged = true;
     Layer* flatLayer = flattenImage();

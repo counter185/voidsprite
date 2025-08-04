@@ -1,6 +1,9 @@
+#include <SDL3_net/SDL_net.h>
+
 #include "StartScreen.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
+#include "NetworkCanvasMainEditor.h"
 #include "FileIO.h"
 #include "Notification.h"
 #include "CustomTemplate.h"
@@ -180,7 +183,7 @@ StartScreen::StartScreen() {
                 SDL_SCANCODE_F,
                 {
                     TL("vsp.nav.file"),
-                    { SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P },
+                    { SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_N },
                     {
                         { SDL_SCANCODE_O,{ TL("vsp.nav.open"), [this]() { this->openImageLoadDialog();} } },
                         { SDL_SCANCODE_V,{ TL("vsp.launchpad.nav.openclipboard"), [this]() { this->tryOpenImageFromClipboard();} } },
@@ -193,7 +196,8 @@ StartScreen::StartScreen() {
                         },
                         { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
                         { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
-                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}}
+                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
+                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), [this]() { this->promptConnectToNetworkCanvas(); }}}
                     },
                     g_iconNavbarTabFile
                 }
@@ -913,6 +917,31 @@ void StartScreen::promptOpenFromURL()
         }
     };
     g_addPopup(urlPrompt);
+}
+
+void StartScreen::promptConnectToNetworkCanvas()
+{
+    PopupTextBox* prompt = new PopupTextBox(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
+    prompt->onTextInputConfirmedCallback = [this](PopupTextBox*, std::string ip) {
+        g_startNewAsyncOperation([ip]() {
+            NET_Address* addr = NET_ResolveHostname(ip.c_str());
+            if (NET_WaitUntilResolved(addr, 15000) == 1) {
+                NET_StreamSocket* s = NET_CreateClient(addr, 6600);
+                if (NET_WaitUntilConnected(s, -1) == 1) {
+                    g_startNewMainThreadOperation([s]() {
+                        g_addScreen(new NetworkCanvasMainEditor(s));
+                    });
+                }
+                else {
+                    logerr("Connection failed");
+                }
+            }
+            else {
+                logerr("Failed to resolve hostname");
+            }
+        });
+    };
+    g_addPopup(prompt);
 }
 
 void StartScreen::tryLoadURL(std::string url)

@@ -196,6 +196,7 @@ public:
 
     Timer64 autosaveTimer;
 
+    u32 canvasStateID;
     std::atomic<bool> networkRunning = false;
     std::thread* networkCanvasThread = NULL;
     std::vector<std::thread*> networkCanvasResponderThreads;
