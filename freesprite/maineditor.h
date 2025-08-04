@@ -196,8 +196,9 @@ public:
 
     Timer64 autosaveTimer;
 
+    std::atomic<bool> networkRunning = false;
     std::thread* networkCanvasThread = NULL;
-	std::vector<std::thread*> networkCanvasResponderThreads;
+    std::vector<std::thread*> networkCanvasResponderThreads;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
@@ -318,10 +319,10 @@ public:
     std::string networkReadCommand(NET_StreamSocket* socket);
     void networkSendCommand(NET_StreamSocket* socket, std::string commandName);
     bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
-	void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
+    void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendString(NET_StreamSocket* socket, std::string s);
     std::string networkReadString(NET_StreamSocket* socket);
-	void endNetworkSession();
+    void endNetworkSession();
 
     void layer_newVariant();
     void layer_duplicateVariant();

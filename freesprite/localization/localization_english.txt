@@ -250,6 +250,7 @@
     {"vsp.maineditor.nav.layer.newvariant", "New empty layer variant"},
     {"vsp.maineditor.nav.layer.copyvariant", "Duplicate current layer variant"},
     {"vsp.maineditor.nav.layer.renvariant", "Rename current layer variant"},
+    {"vsp.maineditor.startcollab", "Start network canvas server"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

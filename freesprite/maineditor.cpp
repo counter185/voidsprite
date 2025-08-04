@@ -765,7 +765,7 @@ void MainEditor::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 TL("vsp.nav.file"),
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X, SDL_SCANCODE_N},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [this]() {
@@ -825,7 +825,13 @@ void MainEditor::setUpWidgets()
                                 g_addPopup(new PopupGlobalConfig());
                             }
                         }
-                    }
+                    },
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
+                            [this]() {
+                                startNetworkSession();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabFile
             }
@@ -2832,10 +2838,8 @@ void MainEditor::startNetworkSession()
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Network session already started"));
         return;
     }
+    networkRunning = true;
     networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this);
-    if (networkCanvasThread == NULL) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to start network session thread"));
-    }
 }
 
 void MainEditor::networkCanvasServerThread()
@@ -2845,7 +2849,7 @@ void MainEditor::networkCanvasServerThread()
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
         return;
     }
-    while (true) {
+    while (networkRunning) {
         NET_StreamSocket* clientSocket = NULL;
         NET_AcceptClient(server, &clientSocket);
         if (clientSocket == NULL) {
@@ -2858,6 +2862,7 @@ void MainEditor::networkCanvasServerThread()
             });
         }
     }
+    NET_DestroyServer(server);
 }
 
 void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
@@ -2865,7 +2870,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     //todo: delete this thread from the responder threads list when done
     NetworkCanvasClientInfo clientInfo;
 
-    while (true) {
+    while (networkRunning) {
         try {
             std::string commandStr = networkReadCommand(clientSocket);
             networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
@@ -2875,7 +2880,8 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
             break;
         }
     }
-    logerr(std::format("Disconnected from {}"));
+    NET_DestroyStreamSocket(clientSocket);
+    logerr(std::format("Disconnected from {}", clientInfo.clientName));
 }
 
 void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo)
@@ -2912,23 +2918,23 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         u32 index;
         networkReadBytes(clientSocket, (u8*)&index, 4);
 
-		Layer* l = layers[index];
+        Layer* l = layers[index];
         auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
-		u64 dataSize = compressedData.size();
-		networkSendCommand(clientSocket, "LRDT");
-		networkSendBytes(clientSocket, (u8*)&index, 4);
-		networkSendBytes(clientSocket, (u8*)&dataSize, 8);
-		networkSendBytes(clientSocket, (u8*)&compressedData[0], dataSize);
+        u64 dataSize = compressedData.size();
+        networkSendCommand(clientSocket, "LRDT");
+        networkSendBytes(clientSocket, (u8*)&index, 4);
+        networkSendBytes(clientSocket, (u8*)&dataSize, 8);
+        networkSendBytes(clientSocket, (u8*)&compressedData[0], dataSize);
     }
     //layer pixel data update request
     else if (command == "LRDT") {
         u32 index;
-		u64 dataSize;
-		networkReadBytes(clientSocket, (u8*)&index, 4);
-		networkReadBytes(clientSocket, (u8*)&dataSize, 8);
-		u8* dataBuffer = (u8*)tracked_malloc(dataSize);
+        u64 dataSize;
+        networkReadBytes(clientSocket, (u8*)&index, 4);
+        networkReadBytes(clientSocket, (u8*)&dataSize, 8);
+        u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
-			networkReadBytes(clientSocket, dataBuffer, dataSize);
+            networkReadBytes(clientSocket, dataBuffer, dataSize);
             Layer* l = layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
@@ -2941,7 +2947,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             tracked_free(dataBuffer);
         }
         else {
-			logerr("Failed to allocate memory for layer pixel data update");
+            logerr("Failed to allocate memory for layer pixel data update");
         }
     }
     else {
@@ -3020,6 +3026,11 @@ std::string MainEditor::networkReadString(NET_StreamSocket* socket)
 
 void MainEditor::endNetworkSession()
 {
+    networkRunning = false;
+    for (std::thread* responderThread : networkCanvasResponderThreads) {
+        responderThread->join();
+        delete responderThread;
+    }
     if (networkCanvasThread != NULL) {
         networkCanvasThread->join();
         delete networkCanvasThread;
