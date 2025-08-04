@@ -3,6 +3,9 @@
 #include <thread>
 #include <SDL3_net/SDL_net.h>
 #include "json/json.hpp"
+#include "background_operation.h"
+
+#include "EditorLayerPicker.h"
 
 using namespace nlohmann;
 
@@ -31,6 +34,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             receivedInfo = true;
             lastINFOSize = canvasSize;
             lastINFONumLayers = numLayers;
+            canvas.dimensions = canvasSize;
             reallocLayers(canvasSize, numLayers);
         }
 
@@ -41,6 +45,9 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             layer->layerAlpha = l["opacity"];
             layer->hidden = l["hidden"];
         }
+        g_startNewMainThreadOperation([this]() {
+            layerPicker->updateLayers();
+        });
     }
     else if (command == "LRDT") {
         u32 index;
@@ -75,6 +82,7 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
         {"cursorX", 0},
         {"cursorY", 0}
     };
+    networkSendString(clientSocket, infoJson.dump());
 
 }
 
@@ -89,7 +97,9 @@ void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
         newLayer->name = "Network layer";
         layers.push_back(newLayer);
     }
-    initLayers();
+    g_startNewMainThreadOperation([this]() {
+        initLayers();
+    });
 }
 
 NetworkCanvasMainEditor::NetworkCanvasMainEditor(NET_StreamSocket* socket)

@@ -252,6 +252,9 @@
     {"vsp.maineditor.nav.layer.renvariant", "Rename current layer variant"},
     {"vsp.maineditor.startcollab", "Start network canvas server"},
 
+    //screen: network editor
+    {"vsp.collabeditor", "Network Editor"},
+
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},
 

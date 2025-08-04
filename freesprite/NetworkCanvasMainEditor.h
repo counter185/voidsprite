@@ -20,5 +20,7 @@ protected:
 
 public:
     NetworkCanvasMainEditor(NET_StreamSocket* socket);
+
+    std::string getName() override { return TL("vsp.collabeditor"); }
 };
 
