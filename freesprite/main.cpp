@@ -6,6 +6,7 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_net/SDL_net.h>
 
 #include "FontRenderer.h"
 #include "maineditor.h"
@@ -426,6 +427,17 @@ int main(int argc, char** argv)
         g_mainWindow->addToWindowList();
 
         loginfo("Passed SDL_Init");
+
+#if VSP_NETWORKING
+        bool netInit = NET_Init();
+        if (!netInit) {
+            logerr("NET_Init failed: " + std::string(SDL_GetError()));
+        }
+        else {
+            loginfo("Passed NET_Init");
+        }
+#endif
+
         platformInit();
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");

@@ -37,6 +37,10 @@
 
 #include <SDL3/SDL.h>
 
+#ifndef VSP_NETWORKING
+#define VSP_NETWORKING 1
+#endif
+
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
 #endif
