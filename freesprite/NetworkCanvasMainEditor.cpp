@@ -85,8 +85,10 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
                 logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
-                memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
-                l->markLayerDirty();
+                if (!leftMouseHold) {
+                    memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
+                    l->markLayerDirty();
+                }
             }
             tracked_free(dataBuffer);
         }
@@ -132,6 +134,11 @@ void NetworkCanvasMainEditor::networkCanvasSendLocalChanges()
     clientSideChangesMutex.unlock();
 }
 
+void NetworkCanvasMainEditor::networkCanvasSendNewLayerRequest()
+{
+    //todo
+}
+
 void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
 {
     for (Layer*& layer : layers) {
@@ -168,4 +175,10 @@ void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)
     clientSideChangesMutex.lock();
     clientSideChanges[whichLayer] = true;
     clientSideChangesMutex.unlock();
+}
+
+Layer* NetworkCanvasMainEditor::newLayer()
+{
+    networkCanvasSendNewLayerRequest();
+    return NULL;
 }

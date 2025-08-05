@@ -164,6 +164,7 @@
     {"vsp.launchpad.nav.webmanual", "Open web manual"},
     {"vsp.launchpad.nav.newwindow", "New window"},
     {"vsp.launchpad.nav.openurl", "Open from URL"},
+    {"vsp.launchpad.nav.connecttocollab", "Connect to network canvas"},
 
     {"vsp.launchpad.popup.openfromurl", "Open from URL"},
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},

@@ -2859,6 +2859,7 @@ void MainEditor::startNetworkSession()
     }
     networkRunning = true;
     networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this);
+	g_addNotification(SuccessNotification("Network canvas started", ""));
 }
 
 void MainEditor::networkCanvasStateUpdated(int whichLayer)
@@ -2964,6 +2965,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             else {
                 memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                 l->markLayerDirty();
+                networkCanvasStateUpdated(index);
             }
             tracked_free(dataBuffer);
         }

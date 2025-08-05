@@ -23,6 +23,7 @@ protected:
     void networkCanvasProcessCommandFromServer(std::string command);
     void networkCanvasSendInfoRequest();
     void networkCanvasSendLocalChanges();
+    void networkCanvasSendNewLayerRequest();
 
     void reallocLayers(XY size, int numLayers);
 
@@ -32,5 +33,7 @@ public:
     std::string getName() override { return TL("vsp.collabeditor"); }
 
     void networkCanvasStateUpdated(int whichLayer) override;
+
+    Layer* newLayer() override;
 };
 
