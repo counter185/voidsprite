@@ -22,6 +22,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
                 commandBuffer = "";
             }
             if ((ticksNow - lastCanvasUpdate) > 64) {
+                networkCanvasSendInfoRequest();
                 networkSendCommand(clientSocket, "UPDD");
                 lastCanvasUpdate = ticksNow;
 
@@ -67,7 +68,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             layer->layerAlpha = l["opacity"];
             layer->hidden = l["hidden"];
         }
-        g_startNewMainThreadOperation([this]() {
+        mainThreadOps.add([this]() {
             layerPicker->updateLayers();
         });
     }
@@ -85,7 +86,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
                 logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
-                if (!leftMouseHold) {
+                if (index != selLayer || !leftMouseHold) {
                     memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                     l->markLayerDirty();
                 }
@@ -117,8 +118,9 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
     networkSendCommand(clientSocket, "INFO");
     json infoJson = {
         {"clientName", thisClientInfo.clientName},
-        {"cursorX", 0},
-        {"cursorY", 0}
+        {"cursorX", mousePixelTargetPoint.x},
+        {"cursorY", mousePixelTargetPoint.y},
+        {"clientColor", "FFFFFF"}
     };
     networkSendString(clientSocket, infoJson.dump());
 
@@ -181,4 +183,14 @@ Layer* NetworkCanvasMainEditor::newLayer()
 {
     networkCanvasSendNewLayerRequest();
     return NULL;
+}
+
+void NetworkCanvasMainEditor::endClientNetworkSession()
+{
+    networkRunning = false;
+    if (clientThread != NULL) {
+        clientThread->join();
+        delete clientThread;
+        clientThread = NULL;
+	}
 }

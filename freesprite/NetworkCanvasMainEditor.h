@@ -1,11 +1,13 @@
 #pragma once
 #include "maineditor.h"
+#include "operation_queue.h"
 #include <mutex>
 
 class NetworkCanvasMainEditor :
     public MainEditor
 {
 protected:
+    OperationQueue mainThreadOps;
     std::thread* clientThread = NULL;
     NetworkCanvasClientInfo thisClientInfo;
     NET_StreamSocket* clientSocket = NULL;
@@ -29,11 +31,20 @@ protected:
 
 public:
     NetworkCanvasMainEditor(NET_StreamSocket* socket);
+    ~NetworkCanvasMainEditor() {
+        endClientNetworkSession();
+    }
 
     std::string getName() override { return TL("vsp.collabeditor"); }
 
     void networkCanvasStateUpdated(int whichLayer) override;
 
+    void tick() override {
+        mainThreadOps.process();
+        MainEditor::tick();
+    }
+
     Layer* newLayer() override;
+    void endClientNetworkSession();
 };
 

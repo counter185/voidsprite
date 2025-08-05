@@ -784,7 +784,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
         }
         break;
     default:
-        logprintf("IMAGE FORMAT NOT IMPLEMENTED\n");
+        logerr("IMAGE FORMAT NOT IMPLEMENTED");
         break;
     }
     return ret;
@@ -803,7 +803,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
     strm.next_in = data;
     int ret2 = inflateInit(&strm);
     if (ret2 != Z_OK) {
-        logprintf("inflateInit failed\n");
+        logerr("inflateInit failed");
         return ret;
     }
     u8 out[bufferSize];
@@ -813,7 +813,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         strm.next_out = out;
         ret2 = inflate(&strm, Z_NO_FLUSH);
         if (ret2 < 0) {
-            logprintf("inflate error\n");
+            logerr("inflate error");
             break;
         }
         int nextDataSize = bufferSize - strm.avail_out;
@@ -823,7 +823,7 @@ std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
         //ret.insert(ret.end(), out, out + nextDataSize);
     } while (ret2 != Z_STREAM_END);
     inflateEnd(&strm);
-    logprintf("total decompressed size: %lli\n", totalSize);
+    //logprintf("total decompressed size: %lli\n", totalSize);
     return ret;
 }
 

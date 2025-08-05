@@ -428,6 +428,7 @@
     <ClInclude Include="NetworkCanvasMainEditor.h" />
     <ClInclude Include="NineSegmentPatternEditorScreen.h" />
     <ClInclude Include="ninesegmentpatterns.h" />
+    <ClInclude Include="operation_queue.h" />
     <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PalettizedEditorLayerPicker.h" />

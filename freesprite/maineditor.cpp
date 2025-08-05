@@ -180,6 +180,7 @@ void MainEditor::render() {
 
     drawTileGrid();
     drawRowColNumbers();
+    drawNetworkCanvasClients();
     drawIsolatedFragment();
     drawSymmetryLines();
     renderGuidelines();
@@ -644,6 +645,29 @@ void MainEditor::drawRowColNumbers()
             }
         }
     }
+}
+
+void MainEditor::drawNetworkCanvasClients()
+{
+    networkClientsListMutex.lock();
+    for (auto& client : networkClients) {
+        SDL_Rect clientRect = canvas.canvasRectToScreenRect({ client->cursorPosition.x, client->cursorPosition.y, 1,1 });
+        SDL_Color color = uint32ToSDLColor(0xFF000000 | client->clientColor);
+        SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 255);
+		SDL_RenderDrawRect(g_rd, &clientRect);
+        if (xyDistance({ g_mouseX, g_mouseY }, { clientRect.x, clientRect.y }) < 20) {
+            g_ttp->addTooltip(Tooltip{ {clientRect.x + 20, clientRect.y}, client->clientName, color, 1.0 });
+        }
+
+        SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 0xA0);
+        clientRect = offsetRect(clientRect, 5);
+        SDL_RenderDrawRect(g_rd, &clientRect);
+
+        SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 0x40);
+        clientRect = offsetRect(clientRect, 15);
+        SDL_RenderDrawRect(g_rd, &clientRect);
+    }
+    networkClientsListMutex.unlock();
 }
 
 void MainEditor::inputMouseRight(XY at, bool down)
@@ -1670,14 +1694,6 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
     }
 }
 
-void MainEditor::eventTextInputConfirm(int evt_id, std::string text)
-{
-    if (evt_id == EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME) {
-        getCurrentLayer()->name = text;
-        layerPicker->updateLayers();
-    }
-}
-
 void MainEditor::eventColorSet(int evt_id, uint32_t color)
 {
     if (evt_id == EVENT_MAINEDITOR_SETCOLORKEY) {
@@ -2518,6 +2534,7 @@ void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
 {
     int vidxNow = layer->currentLayerVariant;
     if (layer->switchVariant(variantIndex)) {
+        networkCanvasStateUpdated(indexOfLayer(layer));
         layerPicker->updateLayers();
         if (layer == getCurrentLayer()) {
             variantSwitchTimer.start();
@@ -2558,9 +2575,16 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
 
 void MainEditor::layer_promptRename()
 {
-    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", this->getCurrentLayer()->name);
-    ninput->setCallbackListener(EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME, this);
-    g_addPopup(ninput);
+    if (!layers.empty()) {
+        Layer* target = getCurrentLayer();
+        PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", target->name);
+        ninput->onTextInputConfirmedCallback = [this, target](PopupTextBox* p, std::string newName) {
+            target->name = newName;
+            layerPicker->updateLayers();
+            networkCanvasStateUpdated(indexOfLayer(target));
+        };
+        g_addPopup(ninput);
+    }
 }
 
 uint32_t MainEditor::layer_getPixelAt(XY pos)
@@ -2859,7 +2883,7 @@ void MainEditor::startNetworkSession()
     }
     networkRunning = true;
     networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this);
-	g_addNotification(SuccessNotification("Network canvas started", ""));
+    g_addNotification(SuccessNotification("Network canvas started", ""));
 }
 
 void MainEditor::networkCanvasStateUpdated(int whichLayer)
@@ -2870,6 +2894,17 @@ void MainEditor::networkCanvasStateUpdated(int whichLayer)
 void MainEditor::networkCanvasServerThread()
 {
     NET_Server* server = NET_CreateServer(NULL, 6600);
+    //todo make this configurable
+    NetworkCanvasClientInfo selfClientInfo;
+    selfClientInfo.clientName = "Host";
+	selfClientInfo.clientColor = 0xFF0000;
+	selfClientInfo.cursorPosition = { 0, 0 };
+
+    networkClientsListMutex.lock();
+    networkClients.clear();
+	networkClients.push_back(&selfClientInfo);
+	networkClientsListMutex.unlock();
+
     if (server == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
         return;
@@ -2881,6 +2916,13 @@ void MainEditor::networkCanvasServerThread()
             SDL_Delay(100);
         }
         else {
+            NET_Address* clientAddress = NET_GetStreamSocketAddress(clientSocket);
+            NET_GetAddressString(clientAddress);
+            int resolved = NET_WaitUntilResolved(clientAddress, -1);
+            if (resolved == 1) {
+                const char* clientAddressStr = NET_GetAddressString(clientAddress);
+                loginfo(std::format("New client connected: {}", clientAddressStr));
+            }
             std::thread* responderThread = new std::thread(&MainEditor::networkCanvasServerResponderThread, this, clientSocket);
             g_startNewMainThreadOperation([this, responderThread]() {
                 this->networkCanvasResponderThreads.push_back(responderThread);
@@ -2888,12 +2930,19 @@ void MainEditor::networkCanvasServerThread()
         }
     }
     NET_DestroyServer(server);
+    networkClientsListMutex.lock();
+    networkClients.clear();
+    networkClientsListMutex.unlock();
 }
 
 void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
 {
     //todo: delete this thread from the responder threads list when done
     NetworkCanvasClientInfo clientInfo;
+
+    networkClientsListMutex.lock();
+    networkClients.push_back(&clientInfo);
+    networkClientsListMutex.unlock();
 
     while (networkRunning) {
         try {
@@ -2905,6 +2954,10 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
             break;
         }
     }
+    networkClientsListMutex.lock();
+    networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
+    networkClientsListMutex.unlock();
+
     NET_DestroyStreamSocket(clientSocket);
     logerr(std::format("Disconnected from {}", clientInfo.clientName));
 }
@@ -2924,7 +2977,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             {"canvasHeight", canvas.dimensions.y},
             {"tileGridWidth", tileDimensions.x},
             {"tileGridHeight", tileDimensions.y},
-            {"layers", json::array()}
+            {"layers", json::array()},
+            {"clients", json::array()}
         };
         for (Layer*& l : layers) {
             json layerJson = {
@@ -2934,6 +2988,18 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             };
             infoJson["layers"].push_back(layerJson);
         }
+        networkClientsListMutex.lock();
+        for (NetworkCanvasClientInfo* c : networkClients) {
+            json clientJson = {
+                {"clientName", c->clientName},
+                {"cursorX", c->cursorPosition.x},
+                {"cursorY", c->cursorPosition.y},
+                {"clientColor", std::format("{:06X}", c->clientColor)},
+                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)}
+            };
+            infoJson["clients"].push_back(clientJson);
+        }
+        networkClientsListMutex.unlock();
         networkSendCommand(clientSocket, "INFO");
         networkSendString(clientSocket, infoJson.dump());
         
@@ -2963,9 +3029,12 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                 logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
-                memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
-                l->markLayerDirty();
-                networkCanvasStateUpdated(index);
+                if (index != selLayer || !leftMouseHold) {
+                    memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
+                    l->markLayerDirty();
+                    changesSinceLastSave = HAS_UNSAVED_CHANGES;
+                    networkCanvasStateUpdated(index);
+                }
             }
             tracked_free(dataBuffer);
         }

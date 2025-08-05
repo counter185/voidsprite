@@ -1,4 +1,7 @@
 #pragma once
+#include <mutex>
+#include <thread>
+
 #include "globals.h"
 #include "BaseScreen.h"
 #include "splitsession.h"
@@ -8,9 +11,6 @@
 #include "Canvas.h"
 #include "EventCallbackListener.h"
 
-namespace std {
-    class thread;
-}
 struct NET_StreamSocket;
 
 enum EditorUnsavedChanges : int {
@@ -84,6 +84,7 @@ struct NetworkCanvasClientInfo {
     std::string clientName = "???";
     XY cursorPosition = {0,0};
     u64 lastReportTime = 0;
+    u32 clientColor = 0xFFFFFF;
 };
 
 /*struct Frame {
@@ -199,6 +200,8 @@ public:
     u32 canvasStateID;
     std::atomic<bool> networkRunning = false;
     std::thread* networkCanvasThread = NULL;
+    std::mutex networkClientsListMutex;
+    std::vector<NetworkCanvasClientInfo*> networkClients;
     std::vector<std::thread*> networkCanvasResponderThreads;
 
     MainEditor(XY dimensions);
@@ -216,7 +219,6 @@ public:
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
     void eventPopupClosed(int evt_id, BasePopup* p) override;
-    void eventTextInputConfirm(int evt_id, std::string text) override;
     void eventColorSet(int evt_id, uint32_t color) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerId) override;
 
@@ -232,6 +234,7 @@ public:
     void drawSplitSessionFragments();
     void drawZoomLines();
     void drawRowColNumbers();
+    virtual void drawNetworkCanvasClients();
 
     void inputMouseRight(XY at, bool down);
 
@@ -289,7 +292,7 @@ public:
     void duplicateLayer(int index);
     void switchActiveLayer(int index);
     Layer* getCurrentLayer() { return layers[selLayer]; }
-	int indexOfLayer(Layer* l);
+    int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename();
     void layer_flipHorizontally();
@@ -320,7 +323,7 @@ public:
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
     void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
     std::string networkReadCommand(NET_StreamSocket* socket);
-	bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
+    bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
     void networkSendCommand(NET_StreamSocket* socket, std::string commandName);
     bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);

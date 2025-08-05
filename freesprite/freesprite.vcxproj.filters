@@ -1307,6 +1307,9 @@
     <ClInclude Include="NetworkCanvasMainEditor.h">
       <Filter>Header files\screen</Filter>
     </ClInclude>
+    <ClInclude Include="operation_queue.h">
+      <Filter>Header files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
