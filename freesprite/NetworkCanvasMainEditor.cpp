@@ -12,6 +12,7 @@ using namespace nlohmann;
 
 void NetworkCanvasMainEditor::networkCanvasClientThread()
 {
+    
     std::string commandBuffer = "";
     networkCanvasSendInfoRequest();
     while (networkRunning) {
@@ -35,6 +36,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
         }
     }
     networkRunning = false;
+
     NET_DestroyStreamSocket(clientSocket);
     g_startNewMainThreadOperation([this]() {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.disconnected")));
@@ -51,6 +53,8 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         XY canvasSize = XY{ infoJson["canvasWidth"], infoJson["canvasHeight"] };
         int tileGridWidth = infoJson["tileGridWidth"];
         int tileGridHeight = infoJson["tileGridHeight"];
+        int thisUID = infoJson["yourUserIDIs"];
+        thisClientInfo->uid = thisUID;
         auto layerData = infoJson["layers"];
         int numLayers = layerData.size();
         if (!receivedInfo || !xyEqual(canvasSize, lastINFOSize) || lastINFONumLayers != numLayers) {
@@ -68,6 +72,26 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             layer->layerAlpha = l["opacity"];
             layer->hidden = l["hidden"];
         }
+
+        auto userData = infoJson["clients"];
+        networkClientsListMutex.lock();
+        for (auto*& user : networkClients) {
+            delete user;
+        }
+        networkClients.clear();
+        for (auto& user : userData) {
+            NetworkCanvasClientInfo* clientInfo = new NetworkCanvasClientInfo();
+            clientInfo->uid = user["uid"];
+            clientInfo->clientName = user["clientName"];
+            clientInfo->cursorPosition = XY{ user["cursorX"], user["cursorY"] };
+            clientInfo->lastReportTime = user["lastReportTime"];
+            std::string colorString = user["clientColor"];
+            clientInfo->clientColor = std::stoi(colorString, 0, 16);
+            networkClients.push_back(clientInfo);
+        }
+        networkClientsListMutex.unlock();
+
+
         mainThreadOps.add([this]() {
             layerPicker->updateLayers();
         });
@@ -117,7 +141,7 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
 {
     networkSendCommand(clientSocket, "INFO");
     json infoJson = {
-        {"clientName", thisClientInfo.clientName},
+        {"clientName", thisClientInfo->clientName},
         {"cursorX", mousePixelTargetPoint.x},
         {"cursorY", mousePixelTargetPoint.y},
         {"clientColor", "FFFFFF"}
@@ -159,6 +183,7 @@ void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
 
 NetworkCanvasMainEditor::NetworkCanvasMainEditor(NET_StreamSocket* socket)
 {
+    thisClientInfo = new NetworkCanvasClientInfo();
     networkRunning = true;
     canvas.dimensions = { 0,0 };
     clientSocket = socket;
@@ -192,5 +217,9 @@ void NetworkCanvasMainEditor::endClientNetworkSession()
         clientThread->join();
         delete clientThread;
         clientThread = NULL;
-	}
+    }
+    if (thisClientInfo != NULL) {
+        delete thisClientInfo;
+        thisClientInfo = NULL;
+    }
 }

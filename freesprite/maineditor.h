@@ -81,10 +81,11 @@ struct IsolatedFragmentPoint {
 };
 
 struct NetworkCanvasClientInfo {
-    std::string clientName = "???";
+    u32 uid = -1;
+    std::string clientName = "User";
     XY cursorPosition = {0,0};
     u64 lastReportTime = 0;
-    u32 clientColor = 0xFFFFFF;
+    u32 clientColor = 0xC0E1FF;
 };
 
 /*struct Frame {
@@ -203,6 +204,8 @@ public:
     std::mutex networkClientsListMutex;
     std::vector<NetworkCanvasClientInfo*> networkClients;
     std::vector<std::thread*> networkCanvasResponderThreads;
+    NetworkCanvasClientInfo* thisClientInfo = NULL;
+    std::atomic<int> nextClientUID = 0;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);

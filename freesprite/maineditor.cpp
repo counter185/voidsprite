@@ -651,10 +651,14 @@ void MainEditor::drawNetworkCanvasClients()
 {
     networkClientsListMutex.lock();
     for (auto& client : networkClients) {
+        if (thisClientInfo != NULL && client->uid == thisClientInfo->uid) {
+            //skip myself
+            continue;
+        }
         SDL_Rect clientRect = canvas.canvasRectToScreenRect({ client->cursorPosition.x, client->cursorPosition.y, 1,1 });
         SDL_Color color = uint32ToSDLColor(0xFF000000 | client->clientColor);
         SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 255);
-		SDL_RenderDrawRect(g_rd, &clientRect);
+        SDL_RenderDrawRect(g_rd, &clientRect);
         if (xyDistance({ g_mouseX, g_mouseY }, { clientRect.x, clientRect.y }) < 20) {
             g_ttp->addTooltip(Tooltip{ {clientRect.x + 20, clientRect.y}, client->clientName, color, 1.0 });
         }
@@ -2896,14 +2900,17 @@ void MainEditor::networkCanvasServerThread()
     NET_Server* server = NET_CreateServer(NULL, 6600);
     //todo make this configurable
     NetworkCanvasClientInfo selfClientInfo;
+    selfClientInfo.uid = nextClientUID++;
     selfClientInfo.clientName = "Host";
-	selfClientInfo.clientColor = 0xFF0000;
-	selfClientInfo.cursorPosition = { 0, 0 };
+    selfClientInfo.clientColor = 0xFF0000;
+    selfClientInfo.cursorPosition = { 0, 0 };
+
+    thisClientInfo = &selfClientInfo;
 
     networkClientsListMutex.lock();
     networkClients.clear();
-	networkClients.push_back(&selfClientInfo);
-	networkClientsListMutex.unlock();
+    networkClients.push_back(&selfClientInfo);
+    networkClientsListMutex.unlock();
 
     if (server == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
@@ -2939,6 +2946,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
 {
     //todo: delete this thread from the responder threads list when done
     NetworkCanvasClientInfo clientInfo;
+    clientInfo.uid = nextClientUID++;
 
     networkClientsListMutex.lock();
     networkClients.push_back(&clientInfo);
@@ -2972,6 +2980,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
 
         json infoJson = {
+            {"yourUserIDIs", clientInfo->uid},
             {"serverName", "---"},
             {"canvasWidth", canvas.dimensions.x},
             {"canvasHeight", canvas.dimensions.y},
@@ -2989,8 +2998,11 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             infoJson["layers"].push_back(layerJson);
         }
         networkClientsListMutex.lock();
+        thisClientInfo->cursorPosition = mousePixelTargetPoint;
+        thisClientInfo->lastReportTime = SDL_GetTicks();
         for (NetworkCanvasClientInfo* c : networkClients) {
             json clientJson = {
+                {"uid", c->uid},
                 {"clientName", c->clientName},
                 {"cursorX", c->cursorPosition.x},
                 {"cursorY", c->cursorPosition.y},

@@ -9,7 +9,6 @@ class NetworkCanvasMainEditor :
 protected:
     OperationQueue mainThreadOps;
     std::thread* clientThread = NULL;
-    NetworkCanvasClientInfo thisClientInfo;
     NET_StreamSocket* clientSocket = NULL;
 
     bool receivedInfo = false;
