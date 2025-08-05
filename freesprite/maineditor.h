@@ -289,6 +289,7 @@ public:
     void duplicateLayer(int index);
     void switchActiveLayer(int index);
     Layer* getCurrentLayer() { return layers[selLayer]; }
+	int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename();
     void layer_flipHorizontally();
@@ -314,14 +315,17 @@ public:
     virtual void exportTilesIndividually();
 
     void startNetworkSession();
+    virtual void networkCanvasStateUpdated(int whichLayer);
     void networkCanvasServerThread();
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
     void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
     std::string networkReadCommand(NET_StreamSocket* socket);
+	bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
     void networkSendCommand(NET_StreamSocket* socket, std::string commandName);
     bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendString(NET_StreamSocket* socket, std::string s);
+    void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
     std::string networkReadString(NET_StreamSocket* socket);
     void endNetworkSession();
 

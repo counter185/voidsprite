@@ -1414,6 +1414,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 else {
                                     if (currentBrushMouseDowned) {
                                         currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                        networkCanvasStateUpdated(selLayer);
                                         currentBrushMouseDowned = false;
                                     }
 
@@ -1955,6 +1956,7 @@ void MainEditor::commitStateToLayer(Layer* l)
 {
     l->commitStateToUndoStack();
     addToUndoStack(UndoStackElement{ l, UNDOSTACK_LAYER_DATA_MODIFIED });
+    networkCanvasStateUpdated(indexOfLayer(l));
 }
 
 void MainEditor::commitStateToCurrentLayer()
@@ -1988,6 +1990,7 @@ void MainEditor::addToUndoStack(UndoStackElement undo)
     undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
     changesSinceLastSave = HAS_UNSAVED_CHANGES;
+    networkCanvasStateUpdated(indexOfLayer(undo.targetlayer));
 }
 
 void MainEditor::discardUndoStack()
@@ -2132,6 +2135,7 @@ void MainEditor::undo()
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
+        networkCanvasStateUpdated(indexOfLayer(l.targetlayer));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to undo", ""));
@@ -2236,6 +2240,7 @@ void MainEditor::redo()
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
+        networkCanvasStateUpdated(indexOfLayer(l.targetlayer));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to redo", ""));
@@ -2248,7 +2253,7 @@ Layer* MainEditor::newLayer()
     if (nl != NULL) {
         nl->name = std::format("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        logprintf("adding new layer at %i\n", insertAtIdx);
+        //loginfo(std::format("adding new layer at {}", insertAtIdx));
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -2532,6 +2537,15 @@ void MainEditor::layer_promptRenameCurrentVariant()
         layerPicker->updateLayers();
     };
     g_addPopup(ninput);
+}
+
+int MainEditor::indexOfLayer(Layer* l)
+{
+    auto it = std::find(layers.begin(), layers.end(), l);
+    if (it != layers.end()) {
+        return std::distance(layers.begin(), it);
+    }
+    return -1;
 }
 
 void MainEditor::layer_setOpacity(uint8_t opacity) {
@@ -2847,6 +2861,11 @@ void MainEditor::startNetworkSession()
     networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this);
 }
 
+void MainEditor::networkCanvasStateUpdated(int whichLayer)
+{
+    canvasStateID++;
+}
+
 void MainEditor::networkCanvasServerThread()
 {
     NET_Server* server = NET_CreateServer(NULL, 6600);
@@ -2923,13 +2942,10 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         u32 index;
         networkReadBytes(clientSocket, (u8*)&index, 4);
 
-        Layer* l = layers[index];
-        auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
-        u64 dataSize = compressedData.size();
-        networkSendCommand(clientSocket, "LRDT");
-        networkSendBytes(clientSocket, (u8*)&index, 4);
-        networkSendBytes(clientSocket, (u8*)&dataSize, 8);
-        networkSendBytes(clientSocket, (u8*)&compressedData[0], dataSize);
+        if (index < layers.size()) {
+            Layer* l = layers[index];
+            networkCanvasSendLRDT(clientSocket, index, l);
+        }
     }
     //layer pixel data update request
     else if (command == "LRDT") {
@@ -2955,6 +2971,10 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             logerr("Failed to allocate memory for layer pixel data update");
         }
     }
+    else if (command == "UPDD") {
+        networkSendCommand(clientSocket, "UPDD");
+        networkSendBytes(clientSocket, (u8*)&canvasStateID, 4);
+    }
     else {
         logerr(std::format("Unknown command from client: {}", command));
     }
@@ -2966,11 +2986,36 @@ std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
     commandName.resize(8);
     networkReadBytes(socket, (u8*)&commandName[0], 8);
     if (commandName.substr(0, 4) != "VDNC") {
-        throw std::runtime_error("Invalid command prefix");
+        throw std::runtime_error(std::format("Invalid command prefix: {}", commandName));
     }
     else {
         return commandName.substr(4);
     }
+}
+
+bool MainEditor::networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand)
+{
+    int bytesToRead = 8 - outCommand.size();
+    char buffer[9];
+    memset(buffer, 0, 9);
+    int bytesRead = NET_ReadFromStreamSocket(socket, buffer, bytesToRead);
+    if (bytesRead == -1) {
+        throw std::runtime_error("Failed to read from network socket");
+    }
+    outCommand += std::string(buffer, bytesRead);
+    if (outCommand.size() == 8) {
+        std::string cmd = outCommand;
+        outCommand = "";
+
+        if (cmd.substr(0,4) != "VDNC") {
+            logerr("Invalid command prefix: " + cmd);
+            return false;
+        }
+        outCommand = cmd.substr(4);
+        return true;
+    }
+
+    return false;
 }
 
 void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string commandName)
@@ -3010,8 +3055,18 @@ void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
         networkSendBytes(socket, (u8*)&s[0], size);
     }
     else {
-        throw new std::runtime_error("networkSendString: size too big");
+        throw std::runtime_error("networkSendString: size too big");
     }
+}
+
+void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l)
+{
+    auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
+    u64 dataSize = compressedData.size();
+    networkSendCommand(socket, "LRDT");
+    networkSendBytes(socket, (u8*)&index, 4);
+    networkSendBytes(socket, (u8*)&dataSize, 8);
+    networkSendBytes(socket, (u8*)&compressedData[0], dataSize);
 }
 
 std::string MainEditor::networkReadString(NET_StreamSocket* socket)
@@ -3025,7 +3080,7 @@ std::string MainEditor::networkReadString(NET_StreamSocket* socket)
         return ret;
     }
     else {
-        throw new std::runtime_error("networkReadString: size too big");
+        throw std::runtime_error("networkReadString: size too big");
     }
 }
 

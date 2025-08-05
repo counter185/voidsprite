@@ -254,6 +254,7 @@
 
     //screen: network editor
     {"vsp.collabeditor", "Network Editor"},
+    {"vsp.collabeditor.error.disconnected", "Disconnected from server"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

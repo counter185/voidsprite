@@ -6,17 +6,39 @@
 #include "background_operation.h"
 
 #include "EditorLayerPicker.h"
+#include "Notification.h"
 
 using namespace nlohmann;
 
 void NetworkCanvasMainEditor::networkCanvasClientThread()
 {
+    std::string commandBuffer = "";
     networkCanvasSendInfoRequest();
     while (networkRunning) {
-        std::string command = networkReadCommand(clientSocket);
-        networkCanvasProcessCommandFromServer(command);
+        try {
+            u64 ticksNow = SDL_GetTicks();
+            if (networkReadCommandIfAvailable(clientSocket, commandBuffer)) {
+                networkCanvasProcessCommandFromServer(commandBuffer);
+                commandBuffer = "";
+            }
+            if ((ticksNow - lastCanvasUpdate) > 64) {
+                networkSendCommand(clientSocket, "UPDD");
+                lastCanvasUpdate = ticksNow;
+
+                networkCanvasSendLocalChanges();
+            }
+        }
+        catch (std::exception& e) {
+            logerr(std::format("Network client error:\n {}", e.what()));
+            break;
+        }
     }
+    networkRunning = false;
     NET_DestroyStreamSocket(clientSocket);
+    g_startNewMainThreadOperation([this]() {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.disconnected")));
+        g_closeScreen(this);
+    });
 }
 
 void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string command)
@@ -72,6 +94,20 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             logerr("Failed to allocate memory for layer pixel data update");
         }
     }
+    else if (command == "UPDD") {
+        u32 oldStateID = canvasStateID;
+        networkReadBytes(clientSocket, (u8*)&canvasStateID, 4);
+        //loginfo("Received UPDD back");
+        if (oldStateID != canvasStateID || !receivedDataOnce) {
+            loginfo(std::format("{:08X} != {:08X}, updating", oldStateID, canvasStateID));
+            receivedDataOnce = true;
+            networkCanvasSendInfoRequest();
+            for (int i = 0; i < layers.size(); i++) {
+                networkSendCommand(clientSocket, "LRRQ");
+                networkSendBytes(clientSocket, (u8*)&i, 4);
+            }
+        }
+    }
 }
 
 void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
@@ -84,6 +120,16 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
     };
     networkSendString(clientSocket, infoJson.dump());
 
+}
+
+void NetworkCanvasMainEditor::networkCanvasSendLocalChanges()
+{
+    clientSideChangesMutex.lock();
+    for (auto& c : clientSideChanges) {
+        networkCanvasSendLRDT(clientSocket, c.first, layers[c.first]);
+    }
+    clientSideChanges.clear();
+    clientSideChangesMutex.unlock();
 }
 
 void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
@@ -112,4 +158,14 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(NET_StreamSocket* socket)
     setUpWidgets();
     recenterCanvas();
     initLayers();
+}
+
+void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)
+{
+    if (whichLayer == -1) {
+        whichLayer = selLayer;
+    }
+    clientSideChangesMutex.lock();
+    clientSideChanges[whichLayer] = true;
+    clientSideChangesMutex.unlock();
 }
