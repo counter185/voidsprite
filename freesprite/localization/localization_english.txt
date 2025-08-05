@@ -168,6 +168,8 @@
 
     {"vsp.launchpad.popup.openfromurl", "Open from URL"},
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},
+    {"vsp.launchpad.popup.connectcollab", "Connect to network canvas"},
+    {"vsp.launchpad.popup.connectcollab.desc", "Enter the address to connect to"},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},
     {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"

@@ -12,6 +12,7 @@ git checkout 520d73ae
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
+git clone --recursive https://github.com/libsdl-org/SDL_net.git
 git clone --recursive https://github.com/madler/zlib.git
 ln -s "../../../external_liblcf" liblcf 
 cd src
