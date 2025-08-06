@@ -17,6 +17,7 @@
 #include "PopupTextBox.h"
 #include "PopupAbout.h"
 #include "PopupYesNo.h"
+#include "PopupSetupNetworkCanvas.h"
 #include "UIButton.h"
 #include "MainEditorPalettized.h"
 #include "UILabel.h"
@@ -921,23 +922,26 @@ void StartScreen::promptOpenFromURL()
 
 void StartScreen::promptConnectToNetworkCanvas()
 {
-    PopupTextBox* prompt = new PopupTextBox(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
-    prompt->onTextInputConfirmedCallback = [this](PopupTextBox*, std::string ip) {
-        g_startNewAsyncOperation([ip]() {
-            NET_Address* addr = NET_ResolveHostname(ip.c_str());
+    PopupSetupNetworkCanvas* prompt = new PopupSetupNetworkCanvas(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
+    prompt->onInputConfirmCallback = [this](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
+        g_startNewOperation([input]() {
+
+            NET_Address* addr = NET_ResolveHostname(input.ip.c_str());
             if (NET_WaitUntilResolved(addr, 15000) == 1) {
-                NET_StreamSocket* s = NET_CreateClient(addr, 6600);
+                NET_StreamSocket* s = NET_CreateClient(addr, input.port);
                 if (NET_WaitUntilConnected(s, -1) == 1) {
-                    g_startNewMainThreadOperation([s]() {
-                        g_addScreen(new NetworkCanvasMainEditor(s));
+                    g_startNewMainThreadOperation([input,s]() {
+                        g_addScreen(new NetworkCanvasMainEditor(std::format("{} :{}", input.ip, input.port), input, s));
                     });
                 }
                 else {
-                    logerr("Connection failed");
+                    logerr(std::format("Connection to {} failed", input.ip));
+                    g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
                 }
             }
             else {
-                logerr("Failed to resolve hostname");
+                logerr(std::format("Failed to resolve hostname: {}", input.ip));
+                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.badhostname")));
             }
         });
     };

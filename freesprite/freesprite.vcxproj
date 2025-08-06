@@ -253,6 +253,7 @@
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupSet9SPattern.cpp" />
+    <ClCompile Include="PopupSetupNetworkCanvas.cpp" />
     <ClCompile Include="PopupTextTool.cpp" />
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RenderFilter.cpp" />
@@ -453,6 +454,7 @@
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupSet9SPattern.h" />
+    <ClInclude Include="PopupSetupNetworkCanvas.h" />
     <ClInclude Include="PopupTextTool.h" />
     <ClInclude Include="PopupTileGeneric.h" />
     <ClInclude Include="PopupAbout.h" />

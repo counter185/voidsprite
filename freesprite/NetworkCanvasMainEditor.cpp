@@ -39,7 +39,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
 
     NET_DestroyStreamSocket(clientSocket);
     g_startNewMainThreadOperation([this]() {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.disconnected")));
+        g_addNotification(Notification(TL("vsp.collabeditor.error.disconnected"), ""));
         g_closeScreen(this);
     });
 }
@@ -144,7 +144,7 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
         {"clientName", thisClientInfo->clientName},
         {"cursorX", mousePixelTargetPoint.x},
         {"cursorY", mousePixelTargetPoint.y},
-        {"clientColor", "FFFFFF"}
+        {"clientColor", std::format("{:06X}", thisClientInfo->clientColor&0xFFFFFF)}
     };
     networkSendString(clientSocket, infoJson.dump());
 
@@ -181,9 +181,12 @@ void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
     });
 }
 
-NetworkCanvasMainEditor::NetworkCanvasMainEditor(NET_StreamSocket* socket)
+NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NET_StreamSocket* socket)
 {
+    targetIP = displayIP;
     thisClientInfo = new NetworkCanvasClientInfo();
+    thisClientInfo->clientName = userData.username;
+    thisClientInfo->clientColor = userData.userColor;
     networkRunning = true;
     canvas.dimensions = { 0,0 };
     clientSocket = socket;

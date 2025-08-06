@@ -681,6 +681,9 @@
     <ClCompile Include="NetworkCanvasMainEditor.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="PopupSetupNetworkCanvas.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1309,6 +1312,9 @@
     </ClInclude>
     <ClInclude Include="operation_queue.h">
       <Filter>Header files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSetupNetworkCanvas.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

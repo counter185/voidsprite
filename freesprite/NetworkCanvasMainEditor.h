@@ -3,6 +3,8 @@
 #include "operation_queue.h"
 #include <mutex>
 
+#include "PopupSetupNetworkCanvas.h"
+
 class NetworkCanvasMainEditor :
     public MainEditor
 {
@@ -11,6 +13,7 @@ protected:
     std::thread* clientThread = NULL;
     NET_StreamSocket* clientSocket = NULL;
 
+    std::string targetIP;
     bool receivedInfo = false;
     XY lastINFOSize = {};
     int lastINFONumLayers = -1;
@@ -29,12 +32,13 @@ protected:
     void reallocLayers(XY size, int numLayers);
 
 public:
-    NetworkCanvasMainEditor(NET_StreamSocket* socket);
+    NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NET_StreamSocket* socket);
     ~NetworkCanvasMainEditor() {
         endClientNetworkSession();
     }
 
-    std::string getName() override { return TL("vsp.collabeditor"); }
+    std::string getName() override { return TL("vsp.collabeditor") + ": " + targetIP; }
+    std::string getRPCString() override { return TL("vsp.collabeditor"); }
 
     void networkCanvasStateUpdated(int whichLayer) override;
 

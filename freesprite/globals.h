@@ -231,6 +231,7 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconFilePickerSupportedFile = NULL;
 
 void g_addNotification(Notification a);
+void g_addNotificationFromThread(Notification a);
 
 void g_addScreen(BaseScreen* a, bool switchTo = true);
 void g_closeScreen(BaseScreen* screen);

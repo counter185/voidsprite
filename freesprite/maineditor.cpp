@@ -2905,6 +2905,11 @@ void MainEditor::networkCanvasServerThread()
     selfClientInfo.clientColor = 0xFF0000;
     selfClientInfo.cursorPosition = { 0, 0 };
 
+    if (server == NULL) {
+        g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
+        return;
+    }
+
     thisClientInfo = &selfClientInfo;
 
     networkClientsListMutex.lock();
@@ -2912,10 +2917,6 @@ void MainEditor::networkCanvasServerThread()
     networkClients.push_back(&selfClientInfo);
     networkClientsListMutex.unlock();
 
-    if (server == NULL) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
-        return;
-    }
     while (networkRunning) {
         NET_StreamSocket* clientSocket = NULL;
         NET_AcceptClient(server, &clientSocket);
@@ -2967,7 +2968,9 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     networkClientsListMutex.unlock();
 
     NET_DestroyStreamSocket(clientSocket);
+    g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
     logerr(std::format("Disconnected from {}", clientInfo.clientName));
+    
 }
 
 void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo)
@@ -2978,6 +2981,12 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         json inputJson = json::parse(inputString);
         clientInfo->clientName = inputJson.value("clientName", "Unknown Client");
         clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
+        try {
+            clientInfo->clientColor = std::stoi(inputJson.value("clientColor", "C0E1FF"), 0, 16);
+        }
+        catch (std::exception&) {
+            clientInfo->clientColor = 0xC0E1FF; // default color if parsing fails
+        }
 
         json infoJson = {
             {"yourUserIDIs", clientInfo->uid},
