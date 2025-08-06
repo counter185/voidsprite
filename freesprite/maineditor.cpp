@@ -2041,7 +2041,7 @@ void MainEditor::discardRedoStack()
                         tracked_free(variant.pixelData);
                     }
                 }
-                delete resizeLayerData;
+                delete[] resizeLayerData;
             }
                 break;
             case UNDOSTACK_CREATE_LAYER_VARIANT:
