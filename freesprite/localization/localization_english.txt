@@ -224,6 +224,7 @@
     {"vsp.maineditor.preference","Preferences"},
     {"vsp.maineditor.copyflattoclipboard", "Copy to clipboard"},
 
+    {"vsp.maineditor.nav.forceautosave", "Force recovery autosave"},
     {"vsp.maineditor.nav.exportscaled", "Export scaled"},
 
     {"vsp.maineditor.edit","Edit"},
