@@ -320,9 +320,9 @@ public:
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
 
-    void startNetworkSession();
+    virtual void promptStartNetworkSession();
     virtual void networkCanvasStateUpdated(int whichLayer);
-    void networkCanvasServerThread();
+    void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
     void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
     std::string networkReadCommand(NET_StreamSocket* socket);

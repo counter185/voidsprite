@@ -118,6 +118,7 @@ struct NineSegmentPattern;
 class DrawableManager;
 class VSPWindow;
 class HotReloadableTexture;
+class PopupSetNetworkCanvasData;
 
 //templates
 class BaseTemplate;

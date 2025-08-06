@@ -48,6 +48,8 @@ public:
     }
 
     Layer* newLayer() override;
+    void promptStartNetworkSession() override;
+
     void endClientNetworkSession();
 };
 

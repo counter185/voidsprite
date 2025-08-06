@@ -85,8 +85,13 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             clientInfo->clientName = user["clientName"];
             clientInfo->cursorPosition = XY{ user["cursorX"], user["cursorY"] };
             clientInfo->lastReportTime = user["lastReportTime"];
-            std::string colorString = user["clientColor"];
-            clientInfo->clientColor = std::stoi(colorString, 0, 16);
+            try {
+                std::string colorString = user["clientColor"];
+                clientInfo->clientColor = std::stoi(colorString, 0, 16);
+            }
+            catch (std::exception&) {
+                clientInfo->clientColor = 0xC0E1FF;
+            }
             networkClients.push_back(clientInfo);
         }
         networkClientsListMutex.unlock();
@@ -211,6 +216,11 @@ Layer* NetworkCanvasMainEditor::newLayer()
 {
     networkCanvasSendNewLayerRequest();
     return NULL;
+}
+
+void NetworkCanvasMainEditor::promptStartNetworkSession()
+{
+    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Already in a network session"));
 }
 
 void NetworkCanvasMainEditor::endClientNetworkSession()

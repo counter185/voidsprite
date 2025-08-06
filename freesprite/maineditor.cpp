@@ -44,6 +44,7 @@
 #include "PopupApplyFilter.h"
 #include "PopupExportScaled.h"
 #include "PopupFilePicker.h"
+#include "PopupSetupNetworkCanvas.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -856,7 +857,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
                             [this]() {
-                                startNetworkSession();
+                                promptStartNetworkSession();
                             }
                         }
                     },
@@ -2879,15 +2880,19 @@ void MainEditor::exportTilesIndividually()
     }
 }
 
-void MainEditor::startNetworkSession()
+void MainEditor::promptStartNetworkSession()
 {
     if (networkCanvasThread != NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Network session already started"));
         return;
     }
-    networkRunning = true;
-    networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this);
-    g_addNotification(SuccessNotification("Network canvas started", ""));
+    PopupSetupNetworkCanvas* p = new PopupSetupNetworkCanvas(TL("vsp.maineditor.startcollab"), TL("vsp.collabeditor.popup.host.desc"), false, true);
+    p->onInputConfirmCallback = [this](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
+        networkRunning = true;
+        networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this, d);
+        g_addNotification(SuccessNotification("Network canvas started", ""));
+    };
+    g_addPopup(p);
 }
 
 void MainEditor::networkCanvasStateUpdated(int whichLayer)
@@ -2895,14 +2900,14 @@ void MainEditor::networkCanvasStateUpdated(int whichLayer)
     canvasStateID++;
 }
 
-void MainEditor::networkCanvasServerThread()
+void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
-    NET_Server* server = NET_CreateServer(NULL, 6600);
+    NET_Server* server = NET_CreateServer(NULL, startData.port);
     //todo make this configurable
     NetworkCanvasClientInfo selfClientInfo;
     selfClientInfo.uid = nextClientUID++;
-    selfClientInfo.clientName = "Host";
-    selfClientInfo.clientColor = 0xFF0000;
+    selfClientInfo.clientName = startData.username;
+    selfClientInfo.clientColor = startData.userColor;
     selfClientInfo.cursorPosition = { 0, 0 };
 
     if (server == NULL) {
@@ -3015,7 +3020,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                 {"clientName", c->clientName},
                 {"cursorX", c->cursorPosition.x},
                 {"cursorY", c->cursorPosition.y},
-                {"clientColor", std::format("{:06X}", c->clientColor)},
+                {"clientColor", std::format("{:06X}", 0xFFFFFF&c->clientColor)},
                 {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)}
             };
             infoJson["clients"].push_back(clientJson);
