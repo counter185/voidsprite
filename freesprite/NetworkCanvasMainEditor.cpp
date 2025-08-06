@@ -96,7 +96,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         }
         networkClientsListMutex.unlock();
 
-
+        //todo: do this only when the layers update and not every frame
         mainThreadOps.add([this]() {
             layerPicker->updateLayers();
         });
@@ -180,6 +180,9 @@ void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
         Layer* newLayer = new Layer(size.x, size.y);
         newLayer->name = "Network layer";
         layers.push_back(newLayer);
+    }
+    if (selLayer >= layers.size()) {
+        selLayer = ixmax(0, layers.size() - 1);
     }
     g_startNewMainThreadOperation([this]() {
         initLayers();
