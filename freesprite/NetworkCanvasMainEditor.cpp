@@ -40,7 +40,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
     NET_DestroyStreamSocket(clientSocket);
     g_startNewMainThreadOperation([this]() {
         g_addNotification(Notification(TL("vsp.collabeditor.error.disconnected"), ""));
-        g_closeScreen(this);
+        closeNextTick = true;
     });
 }
 

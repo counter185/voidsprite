@@ -2,6 +2,7 @@
 #include "json/json.hpp"
 
 #include "maineditor.h"
+#include "multiwindow.h"
 #include "MainEditorPalettized.h"
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
@@ -334,7 +335,9 @@ void MainEditor::tick() {
     tickAutosave();
 
     if (closeNextTick) {
-        g_closeScreen(this);
+        if (!g_currentWindow->hasPopupsOpen()) {
+            g_closeScreen(this);
+        }
     }
 }
 

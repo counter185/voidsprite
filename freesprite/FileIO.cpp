@@ -7,6 +7,7 @@
 #include <regex>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_net/SDL_net.h>
 
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
@@ -71,6 +72,11 @@ std::string getAllLibsVersions() {
            "." + std::to_string(SDL_IMAGE_MICRO_VERSION) + "\n";
     ret += "SDL_ttf: " + std::to_string(SDL_TTF_MAJOR_VERSION) + "." + std::to_string(SDL_TTF_MINOR_VERSION) + "." +
            std::to_string(SDL_TTF_MICRO_VERSION) + "\n";
+
+#if VSP_NETWORKING
+    ret += "SDL_net: " + std::to_string(SDL_NET_MAJOR_VERSION) + "." + std::to_string(SDL_NET_MINOR_VERSION) + "." +
+           std::to_string(SDL_NET_MICRO_VERSION) + "\n";
+#endif
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
            "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
