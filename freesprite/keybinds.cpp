@@ -113,6 +113,10 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.saveas"), SDL_SCANCODE_S, true, true, [](void* d) {
             ((MainEditor*)d)->trySaveAsImage();
         }));
+    g_keybindManager.addKeybind("maineditor", "force_autosave", 
+        KeyCombo(TL("vsp.keybinds.maineditor.forceautosave"), SDL_SCANCODE_R, true, true, [](void* d) {
+            ((MainEditor*)d)->createRecoveryAutosave();
+        }));
     g_keybindManager.addKeybind("maineditor", "undo", 
         KeyCombo(TL("vsp.keybinds.maineditor.undo"), SDL_SCANCODE_Z, true, false, [](void* d) {
             ((MainEditor*)d)->undo();

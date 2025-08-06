@@ -272,6 +272,7 @@ public:
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     void tickAutosave();
+    void createRecoveryAutosave();
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     void tryAddReference(PlatformNativePathString path);

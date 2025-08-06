@@ -2355,30 +2355,35 @@ void MainEditor::tickAutosave()
     if (g_config.autosaveInterval > 0 && changesSinceLastSave == HAS_UNSAVED_CHANGES) {
         if (autosaveTimer.elapsedTime() > g_config.autosaveInterval * 1000 * 60) {
             autosaveTimer.start();
-            time_t now = time(NULL);
-            tm ltm;
-            // todo: make a platform-specific localtime function
-            #if defined(__unix__) || defined(__APPLE__)
-                localtime_r(&now, &ltm);
-            #elif defined(_WIN32)
-                localtime_s(&ltm, &now);
-            #else
-                ltm = *std::localtime(&now);
-            #endif
-            std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon+1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
-            try {
-                if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
-                    g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
-                    changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
-                }
-                else {
-                    g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
-                }
-            }
-            catch (std::exception e) {
-                g_addNotification(ErrorNotification("Recovery autosave", "Exception during autosave"));
-            }
+            createRecoveryAutosave();
         }
+    }
+}
+
+void MainEditor::createRecoveryAutosave()
+{
+    time_t now = time(NULL);
+    tm ltm;
+    // todo: make a platform-specific localtime function
+#if defined(__unix__) || defined(__APPLE__)
+    localtime_r(&now, &ltm);
+#elif defined(_WIN32)
+    localtime_s(&ltm, &now);
+#else
+    ltm = *std::localtime(&now);
+#endif
+    std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
+    try {
+        if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
+            g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
+            changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
+        }
+        else {
+            g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
+        }
+    }
+    catch (std::exception e) {
+        g_addNotification(ErrorNotification("Recovery autosave", "Exception during autosave"));
     }
 }
 
