@@ -47,7 +47,7 @@ dependencies = [
 # Install assets
 if get_option('portable') 
   assets_dir = join_paths(get_option('prefix'), 'bin')
-  cpp_args = '-DVOIDSPRITE_ASSETS_PATH='
+  cpp_args = '-DVOIDSPRITE_ASSETS_PATH=""'
 else
   assets_dir = join_paths(get_option('prefix'), get_option('datadir'), 'voidsprite')
   cpp_args = '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
@@ -61,7 +61,7 @@ else
 endif
 
 install_subdir('assets', install_dir: assets_dir)
-install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-Medium.ttf', install_dir: assets_dir)
+install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-Medium.ttf', 'appfontcyr-ZenKakuGothicNew-Medium.ttf', install_dir: assets_dir)
 if host_machine.system() == 'linux'
   subdir('linux')
 endif
