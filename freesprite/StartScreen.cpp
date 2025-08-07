@@ -1,5 +1,3 @@
-#include <SDL3_net/SDL_net.h>
-
 #include "StartScreen.h"
 #include "FontRenderer.h"
 #include "maineditor.h"

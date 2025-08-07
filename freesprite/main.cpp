@@ -6,7 +6,6 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_net/SDL_net.h>
 
 #include "FontRenderer.h"
 #include "maineditor.h"
