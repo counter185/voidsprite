@@ -27,6 +27,7 @@ libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'], static: ge
 sdl3_dep = dependency('sdl3', version: '>=3.0.0', fallback: ['sdl3', 'sdl3_dep'], static: get_option('portable'))
 sdl3_ttf_dep = dependency('SDL3_ttf', version: '>=3.0.0', fallback: ['sdl3_ttf', 'sdl3_ttf_dep'], static: get_option('portable'))
 sdl3_image_dep = dependency('SDL3_image', version: '>=3.0.0', fallback: ['sdl3_image', 'sdl3_image_dep'], static: get_option('portable'))
+sdl3_net_dep = dependency('SDL3_net', version: '>=3.0.0', fallback: ['sdl3_net', 'sdl3_net_dep'], static: get_option('portable'), required: false)
 
 libjxl_dep = dependency('libjxl')
 
@@ -40,7 +41,8 @@ dependencies = [
   libtga_dep,
   sdl3_dep,
   sdl3_ttf_dep,
-  sdl3_image_dep
+  sdl3_image_dep,
+  sdl3_net_dep
 ]
 
 # Install assets
@@ -50,6 +52,10 @@ if get_option('portable')
 else
   assets_dir = join_paths(get_option('prefix'), get_option('datadir'), 'voidsprite')
   cpp_args = '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
+endif
+
+if not sdl3_net_dep.found()
+  cpp_args += ' -DVSP_NETWORKING=0'
 endif
 
 install_subdir('assets', install_dir: assets_dir)
