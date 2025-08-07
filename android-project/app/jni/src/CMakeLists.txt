@@ -194,6 +194,7 @@ add_library(main SHARED
         voidsprite/PopupQuickConvert.cpp
         voidsprite/PopupSet9SPattern.cpp
         voidsprite/PopupSetEditorPixelGrid.cpp
+        voidsprite/PopupSetupNetworkCanvas.cpp
         voidsprite/PopupTextBox.cpp
         voidsprite/PopupTextTool.cpp
         voidsprite/PopupTileGeneric.cpp
