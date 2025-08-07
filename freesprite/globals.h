@@ -42,8 +42,10 @@
         #define VSP_NETWORKING 1
     #elif __ANDROID__
         #define VSP_NETWORKING 1
-    #else
+    #elif __APPLE__
         #define VSP_NETWORKING 0
+    #else
+        #define VSP_NETWORKING 1
     #endif
 #endif
 
