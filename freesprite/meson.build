@@ -54,10 +54,10 @@ else
 endif
 
 if sdl3_net_dep.found()
-  cpp_args = cpp_args + ' -DVSP_NETWORKING=1'
+  cpp_args = cpp_args + ',-DVSP_NETWORKING=1'
   dependencies += sdl3_net_dep
 else
-  cpp_args = cpp_args + ' -DVSP_NETWORKING=0'
+  cpp_args = cpp_args + ',-DVSP_NETWORKING=0'
 endif
 
 install_subdir('assets', install_dir: assets_dir)
