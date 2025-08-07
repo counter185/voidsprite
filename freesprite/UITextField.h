@@ -11,6 +11,7 @@ public:
     bool enabled = true;
     int fontsize = 18;
     std::string tooltip = "";
+    std::string placeholderText = "";
     bool isNumericField = false;
     bool isColorField = false;
     int insertPosition = 0;
@@ -70,7 +71,7 @@ public:
     bool inputChar(char c);
     bool isValidOrPartialColor();
     void copyToClipboard();
-	void pasteFromClipboard();
+    void pasteFromClipboard();
     void clearText();
 };
 

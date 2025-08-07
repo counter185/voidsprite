@@ -22,6 +22,10 @@ if(NOT TARGET SDL3_image::SDL3_image)
     find_package(SDL3_image CONFIG)
 endif()
 
+if(NOT TARGET SDL3_net::SDL3_net)
+    find_package(SDL3_net CONFIG)
+endif()
+
 if(NOT TARGET liblcf)
     find_package(liblcf CONFIG)
 endif()
@@ -49,6 +53,13 @@ if(NOT TARGET SDL3_image::SDL3_image)
     add_library(SDL3_image::SDL3_image UNKNOWN IMPORTED)
     set_property(TARGET SDL3_image::SDL3_image PROPERTY IMPORTED_LOCATION "${SDL3_IMAGE_LIBRARY}")
     set_property(TARGET SDL3_image::SDL3_image PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${SDL3_IMAGE_INCLUDE_DIR}")
+endif()
+if(NOT TARGET SDL3_net::SDL3_net)
+    find_library(SDL3_IMAGE_LIBRARY NAMES "SDL3_net")
+    find_path(SDL3_IMAGE_INCLUDE_DIR NAMES "SDL3_net/SDL3_net.h")
+    add_library(SDL3_net::SDL3_net UNKNOWN IMPORTED)
+    set_property(TARGET SDL3_net::SDL3_net PROPERTY IMPORTED_LOCATION "${SDL3_NET_LIBRARY}")
+    set_property(TARGET SDL3_net::SDL3_net PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${SDL3_NET_INCLUDE_DIR}")
 endif()
 
 if(NOT TARGET SDL3::SDL3)
@@ -157,6 +168,7 @@ add_library(main SHARED
         voidsprite/MinecraftBlockPreviewScreen.cpp
         voidsprite/MinecraftSkinPreviewScreen.cpp
         voidsprite/multiwindow.cpp
+        voidsprite/NetworkCanvasMainEditor.cpp
         voidsprite/NineSegmentPatternEditorScreen.cpp
         voidsprite/Notification.cpp
         voidsprite/NotifSound.cpp
@@ -182,6 +194,7 @@ add_library(main SHARED
         voidsprite/PopupQuickConvert.cpp
         voidsprite/PopupSet9SPattern.cpp
         voidsprite/PopupSetEditorPixelGrid.cpp
+        voidsprite/PopupSetupNetworkCanvas.cpp
         voidsprite/PopupTextBox.cpp
         voidsprite/PopupTextTool.cpp
         voidsprite/PopupTileGeneric.cpp
@@ -230,5 +243,6 @@ add_library(main SHARED
 target_link_libraries(main PRIVATE SDL3::SDL3)
 target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)
 target_link_libraries(main PRIVATE SDL3_image::SDL3_image)
+target_link_libraries(main PRIVATE SDL3_net::SDL3_net)
 target_link_libraries(main PRIVATE liblcf)
 target_link_libraries(main PRIVATE ZLIB::ZLIB)

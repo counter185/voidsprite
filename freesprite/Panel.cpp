@@ -11,6 +11,8 @@ bool Panel::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 void Panel::render(XY position)
 {
     if (enabled) {
+        XY renderDimensions = getRenderDimensions();
+        (thisOrParentFocused() ? fillFocused : fillUnfocused).fill({ position.x, position.y, renderDimensions.x, renderDimensions.y });
         subWidgets.renderAll(position);
     }
 }

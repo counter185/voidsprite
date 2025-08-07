@@ -29,6 +29,7 @@ modules:
   - "SDL3.json"
   - "SDL3_image.json"
   - "SDL3_ttf.json"
+  - "SDL3_net.json"
 
   - name: pugixml
     buildsystem: cmake-ninja

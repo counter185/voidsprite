@@ -103,11 +103,16 @@ void Canvas::panCanvas(XY by)
 
 void Canvas::recenter(XY windowDimensions)
 {
+    centerOnPoint({ dimensions.x / 2, dimensions.y / 2 }, windowDimensions);
+}
+
+void Canvas::centerOnPoint(XY point, XY windowDimensions)
+{
     scale = ixmax(scale, minScale);
-    windowDimensions = windowDimensions.x == -1 ? XY{g_windowW, g_windowH} : windowDimensions;
+    windowDimensions = windowDimensions.x == -1 ? XY{ g_windowW, g_windowH } : windowDimensions;
     currentDrawPoint = XY{
-        (windowDimensions.x / 2) - (dimensions.x * scale) / 2,
-        (windowDimensions.y / 2) - (dimensions.y * scale) / 2
+        (windowDimensions.x / 2) - (point.x * scale),
+        (windowDimensions.y / 2) - (point.y * scale)
     };
 }
 
@@ -148,9 +153,9 @@ SDL_Rect Canvas::getTileScreenRectAt(XY canvasTileIndex, XY tileSize)
 {
     return {
         currentDrawPoint.x + canvasTileIndex.x * tileSize.x * scale,
-		currentDrawPoint.y + canvasTileIndex.y * tileSize.y * scale,
-		tileSize.x * scale,
-		tileSize.y * scale
+        currentDrawPoint.y + canvasTileIndex.y * tileSize.y * scale,
+        tileSize.x * scale,
+        tileSize.y * scale
     };
 }
 

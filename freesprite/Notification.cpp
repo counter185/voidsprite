@@ -1,6 +1,6 @@
 #include "Notification.h"
 #include "FontRenderer.h"
-
+#include "background_operation.h"
 std::vector<Notification> g_notifications;
 bool renderingNotifications = false;
 
@@ -85,6 +85,11 @@ void g_addNotification(Notification a) {
     else {
         logerr("Failed to post notification (currently rendering notifications)");
     }
+}
+void g_addNotificationFromThread(Notification a) {
+    g_startNewMainThreadOperation([a]() {
+        g_addNotification(a);
+    });
 }
 void g_tickNotifications() {
     for (int x = 0; x < g_notifications.size(); x++) {

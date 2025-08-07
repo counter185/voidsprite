@@ -158,7 +158,7 @@ void EditorLayerPicker::updateLayers()
         layerListPanel->subWidgets.addDrawable(layerButton);
     }
 
-    if (opacitySlider != NULL) {
+    if (opacitySlider != NULL && !caller->layers.empty()) {
         opacitySlider->sliderPos = caller->getCurrentLayer()->layerAlpha / 255.0f;
     }
 }

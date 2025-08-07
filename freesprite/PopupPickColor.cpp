@@ -13,11 +13,11 @@ PopupPickColor::PopupPickColor(std::string tt, std::string tx, bool acceptAlpha)
     //colorInput->position = XY{ 30, wxHeight / 2 };
     //wxsManager.addDrawable(colorInput);
 
-	colorPicker = new UIColorPicker();
+    colorPicker = new UIColorPicker();
     colorPicker->passThroughMouse = true;
-	colorPicker->position = XY{ 30, wxHeight / 2 - colorPicker->wxHeight/2 };
-	colorPicker->wxWidth = 200;
-	wxsManager.addDrawable(colorPicker);
+    colorPicker->position = XY{ 30, wxHeight / 2 - colorPicker->wxHeight/2 };
+    colorPicker->wxWidth = 200;
+    wxsManager.addDrawable(colorPicker);
 
     if (acceptAlpha) {
         alphaInput = new UITextField();
@@ -30,13 +30,16 @@ PopupPickColor::PopupPickColor(std::string tt, std::string tx, bool acceptAlpha)
     }
 
     actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* btn) {
-        if (callback != NULL) {
+        if (onColorConfirmedCallback != NULL) {
+            onColorConfirmedCallback(this, getColor());
+        }
+        else if (callback != NULL) {
             callback->eventColorSet(callback_id, getColor());
         }
         g_closePopup(this); 
     };
 
-	actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* btn) { g_closePopup(this); };
+    actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* btn) { g_closePopup(this); };
 
     makeTitleAndDesc(tt, tx);
 }
@@ -93,12 +96,12 @@ void PopupPickColor::render()
     XY origin = getPopupOrigin();
     const XY colorBoxSize = { 30,20 };
 
-	SDL_Rect r = SDL_Rect{ origin.x + 8, origin.y + wxHeight - colorBoxSize.y - 8, colorBoxSize.x, colorBoxSize.y };
+    SDL_Rect r = SDL_Rect{ origin.x + 8, origin.y + wxHeight - colorBoxSize.y - 8, colorBoxSize.x, colorBoxSize.y };
     SDL_Color colorNow = uint32ToSDLColor(getColor());
     SDL_SetRenderDrawColor(g_rd, colorNow.r, colorNow.g, colorNow.b, 255);
-	SDL_RenderFillRect(g_rd, &r);
+    SDL_RenderFillRect(g_rd, &r);
     r.x += r.w;
     SDL_RenderDrawRect(g_rd, &r);
     SDL_SetRenderDrawColor(g_rd, colorNow.r, colorNow.g, colorNow.b, colorNow.a);
-	SDL_RenderFillRect(g_rd, &r);
+    SDL_RenderFillRect(g_rd, &r);
 }

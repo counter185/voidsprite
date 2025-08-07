@@ -1,0 +1,25 @@
+{
+    "name": "SDL3_net",
+    "buildsystem": "cmake-ninja",
+    "builddir": true,
+    "config-opts": [
+        "-DCMAKE_VERBOSE_MAKEFILE=ON",
+        "-DCMAKE_BUILD_TYPE:STRING=Release",
+        "-DCMAKE_INSTALL_LIBDIR:PATH=lib"
+    ],
+    "sources": [
+        {
+            "type": "archive",
+            "url": "https://github.com/libsdl-org/SDL_net/archive/10579a91c9f13ce0aa059aac339be5e521341c41.zip",
+            "sha256": "c3040ea1f2398009e62f81560ca25d2ed63a653eaf13048452e7a950ac3fd9b1"
+        }
+    ],
+    "cleanup": [
+        "/include",
+        "/lib/*.la",
+        "/lib/*.a",
+        "/lib/cmake",
+        "/share/aclocal",
+        "/lib/pkgconfig"
+    ]
+}

@@ -11,6 +11,8 @@ public:
     bool enabled = true;
     DrawableManager subWidgets;
     bool sizeToContent = false;
+    Fill fillFocused = Fill::None();
+    Fill fillUnfocused = Fill::None();
 
     ~Panel() {
         subWidgets.freeAllDrawables();

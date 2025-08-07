@@ -251,7 +251,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 "File",
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_E, SDL_SCANCODE_F, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_F, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
                 {
                     {SDL_SCANCODE_D, { "Save as",
                             [this]() {
@@ -262,6 +262,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_S, { "Save",
                             [this]() {
                                 this->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.forceautosave"),
+                            [this]() {
+                                this->createRecoveryAutosave();
                             }
                         }
                     },
