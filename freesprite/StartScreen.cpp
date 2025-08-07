@@ -198,7 +198,9 @@ StartScreen::StartScreen() {
                         { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
                         { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
                         { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
+#if VSP_NETWORKING
                         { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), [this]() { this->promptConnectToNetworkCanvas(); }}}
+#endif
                     },
                     g_iconNavbarTabFile
                 }
@@ -924,6 +926,7 @@ void StartScreen::promptConnectToNetworkCanvas()
 {
     PopupSetupNetworkCanvas* prompt = new PopupSetupNetworkCanvas(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
     prompt->onInputConfirmCallback = [this](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
+#if VSP_NETWORKING
         g_startNewOperation([input]() {
 
             NET_Address* addr = NET_ResolveHostname(input.ip.c_str());
@@ -944,6 +947,9 @@ void StartScreen::promptConnectToNetworkCanvas()
                 g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.badhostname")));
             }
         });
+#else
+		logerr("attempted to connect on non-network build");
+#endif
     };
     g_addPopup(prompt);
 }

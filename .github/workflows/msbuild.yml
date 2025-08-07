@@ -105,74 +105,67 @@ jobs:
   #        path: |
   #          target/debug
           
-  # build-linux64-flatpak:
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-  #     options: --privileged
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - uses: flathub-infra/flatpak-github-actions/flatpak-builder@master
-  #     with:
-  #       bundle: voidsprite-build-linux64-flatpak.flatpak
-  #       manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
-  #       cache-key: flatpak-builder-${{ github.sha }}
+  build-linux64-flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+    steps:
+    - uses: actions/checkout@v4
+    - uses: flathub-infra/flatpak-github-actions/flatpak-builder@master
+      with:
+        bundle: voidsprite-build-linux64-flatpak.flatpak
+        manifest-path: freesprite/linux/flatpak/com.github.counter185.voidsprite.yml
+        cache-key: flatpak-builder-${{ github.sha }}
         
-  # build-mac-x64:
-  #   runs-on: macos-13
+  build-mac-x64:
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v4
+    - name: install g++13
+      run: brew install gcc@13
+    - name: install pkgconfig and cmake
+      run: brew install pkgconfig cmake
+    - name: install devlibs
+      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
+    - name: run build
+      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
+    - name: workaround gh actions artifact file permissions
+      run: tar -cvf voidsprite.app.tar -C target/mac_release .
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: voidsprite-build-mac-intel64
+        path: |
+          voidsprite.app.tar
 
-  #   steps:
-  #   - uses: actions/checkout@v4
+  build-mac-arm64:
+    runs-on: macos-15
 
-  #   - name: install g++13
-  #     run: brew install gcc@13
+    steps:
+    - uses: actions/checkout@v4
 
-  #   - name: install pkgconfig and cmake
-  #     run: brew install pkgconfig cmake
+    - name: install g++14
+      run: brew install gcc@14
 
-  #   - name: install devlibs
-  #     run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
+    - name: install pkgconfig and cmake
+      run: brew install pkgconfig cmake
 
-  #   - name: run build
-  #     run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
+    - name: install devlibs
+      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
 
-  #   - name: workaround gh actions artifact file permissions
-  #     run: tar -cvf voidsprite.app.tar -C target/mac_release .
+    - name: run build
+      run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-14 CXX=g++-14 ./mac_build.sh
 
-  #   - name: Push build artifacts
-  #     uses: actions/upload-artifact@v4
-  #     with: 
-  #       name: voidsprite-build-mac-intel64
-  #       path: |
-  #         voidsprite.app.tar
+    - name: workaround gh actions artifact file permissions
+      run: tar -cvf voidsprite.app.tar -C target/mac_release .
 
-  # build-mac-arm64:
-  #   runs-on: macos-15
-
-  #   steps:
-  #   - uses: actions/checkout@v4
-
-  #   - name: install g++14
-  #     run: brew install gcc@14
-
-  #   - name: install pkgconfig and cmake
-  #     run: brew install pkgconfig cmake
-
-  #   - name: install devlibs
-  #     run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
-
-  #   - name: run build
-  #     run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-14 CXX=g++-14 ./mac_build.sh
-
-  #   - name: workaround gh actions artifact file permissions
-  #     run: tar -cvf voidsprite.app.tar -C target/mac_release .
-
-  #   - name: Push build artifacts
-  #     uses: actions/upload-artifact@v4
-  #     with: 
-  #       name: voidsprite-build-mac-arm64
-  #       path: |
-  #         voidsprite.app.tar
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: voidsprite-build-mac-arm64
+        path: |
+          voidsprite.app.tar
   
   build-android:
     runs-on: ubuntu-latest

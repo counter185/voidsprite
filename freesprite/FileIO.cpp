@@ -7,7 +7,6 @@
 #include <regex>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_net/SDL_net.h>
 
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"

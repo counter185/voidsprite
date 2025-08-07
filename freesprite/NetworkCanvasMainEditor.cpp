@@ -1,7 +1,6 @@
 #include "NetworkCanvasMainEditor.h"
 #include "FileIO.h"
 #include <thread>
-#include <SDL3_net/SDL_net.h>
 #include "json/json.hpp"
 #include "background_operation.h"
 
@@ -12,7 +11,7 @@ using namespace nlohmann;
 
 void NetworkCanvasMainEditor::networkCanvasClientThread()
 {
-    
+#if VSP_NETWORKING
     std::string commandBuffer = "";
     networkCanvasSendInfoRequest();
     while (networkRunning) {
@@ -42,6 +41,10 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
         g_addNotification(Notification(TL("vsp.collabeditor.error.disconnected"), ""));
         closeNextTick = true;
     });
+#else
+	logerr("networkCanvasClientThread called on non-network build");
+    closeNextTick = true;
+#endif
 }
 
 void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string command)

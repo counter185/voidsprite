@@ -38,7 +38,19 @@
 #include <SDL3/SDL.h>
 
 #ifndef VSP_NETWORKING
-#define VSP_NETWORKING 1
+    #if _WIN32
+        #define VSP_NETWORKING 1
+    #elif __ANDROID__
+        #define VSP_NETWORKING 1
+    #else
+        #define VSP_NETWORKING 0
+    #endif
+#endif
+
+#if VSP_NETWORKING
+    #include <SDL3_net/SDL_net.h>
+#else
+    struct NET_StreamSocket;
 #endif
 
 #if SDL_MAJOR_VERSION == 3
@@ -262,16 +274,16 @@ public:
     std::function<void(SDL_Texture*)> unloadFunction = [](SDL_Texture* t) { tracked_destroyTexture(t); };
 
     HotReloadableTexture(std::function<SDL_Texture* (SDL_Renderer*)> load) : loadFunction(load) {}
-	~HotReloadableTexture() {
-		for (auto& [renderer, texture] : generatedTextures) {
-			unloadFunction(texture);
-		}
-	}
+    ~HotReloadableTexture() {
+        for (auto& [renderer, texture] : generatedTextures) {
+            unloadFunction(texture);
+        }
+    }
 
     SDL_Texture* get(SDL_Renderer* rd = NULL) {
-		rd = rd == NULL ? g_rd : rd;
+        rd = rd == NULL ? g_rd : rd;
         if (!generatedTextures.contains(rd)) {
-			generatedTextures[rd] = loadFunction(rd);
+            generatedTextures[rd] = loadFunction(rd);
         }
         return generatedTextures[rd];
     }

@@ -5,6 +5,7 @@
 
 #include "PopupSetupNetworkCanvas.h"
 
+
 class NetworkCanvasMainEditor :
     public MainEditor
 {

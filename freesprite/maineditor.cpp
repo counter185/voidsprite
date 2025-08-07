@@ -1,4 +1,3 @@
-#include <SDL3_net/SDL_net.h>
 #include "json/json.hpp"
 
 #include "maineditor.h"
@@ -864,12 +863,14 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+#if VSP_NETWORKING
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
                             [this]() {
                                 promptStartNetworkSession();
                             }
                         }
                     },
+#endif
                 },
                 g_iconNavbarTabFile
             }
@@ -2916,6 +2917,7 @@ void MainEditor::networkCanvasStateUpdated(int whichLayer)
 
 void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
+#if VSP_NETWORKING
     NET_Server* server = NET_CreateServer(NULL, startData.port);
     //todo make this configurable
     NetworkCanvasClientInfo selfClientInfo;
@@ -2960,10 +2962,14 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
     networkClientsListMutex.lock();
     networkClients.clear();
     networkClientsListMutex.unlock();
+#else
+    logerr("Attempted to run network thread in non-network build");
+#endif
 }
 
 void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
 {
+#if VSP_NETWORKING
     //todo: delete this thread from the responder threads list when done
     NetworkCanvasClientInfo clientInfo;
     clientInfo.uid = nextClientUID++;
@@ -2989,6 +2995,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     NET_DestroyStreamSocket(clientSocket);
     g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
     logerr(std::format("Disconnected from {}", clientInfo.clientName));
+#endif
     
 }
 
@@ -3106,6 +3113,7 @@ std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
 
 bool MainEditor::networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand)
 {
+#if VSP_NETWORKING
     int bytesToRead = 8 - outCommand.size();
     char buffer[9];
     memset(buffer, 0, 9);
@@ -3127,6 +3135,9 @@ bool MainEditor::networkReadCommandIfAvailable(NET_StreamSocket* socket, std::st
     }
 
     return false;
+#else
+    return false;
+#endif
 }
 
 void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string commandName)
@@ -3140,6 +3151,7 @@ void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string comman
 
 bool MainEditor::networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
 {
+#if VSP_NETWORKING
     int read = 0;
     while (read < count) {
         int bytesRead = NET_ReadFromStreamSocket(socket, buffer + read, count - read);
@@ -3151,11 +3163,16 @@ bool MainEditor::networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 coun
         }
     }
     return true;
+#else
+    return false;
+#endif
 }
 
 void MainEditor::networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
 {
+#if VSP_NETWORKING
     NET_WriteToStreamSocket(socket, buffer, count);
+#endif
 }
 
 void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
