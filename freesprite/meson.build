@@ -44,20 +44,22 @@ dependencies = [
   sdl3_image_dep
 ]
 
+cpp_args = []
+
 # Install assets
 if get_option('portable') 
   assets_dir = join_paths(get_option('prefix'), 'bin')
-  cpp_args = '-DVOIDSPRITE_ASSETS_PATH=""'
+  cpp_args += '-DVOIDSPRITE_ASSETS_PATH=""'
 else
   assets_dir = join_paths(get_option('prefix'), get_option('datadir'), 'voidsprite')
-  cpp_args = '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
+  cpp_args += '-DVOIDSPRITE_ASSETS_PATH="' + assets_dir + '/"'
 endif
 
 if sdl3_net_dep.found()
-  cpp_args = cpp_args + ',-DVSP_NETWORKING=1'
+  cpp_args += '-DVSP_NETWORKING=1'
   dependencies += sdl3_net_dep
 else
-  cpp_args = cpp_args + ',-DVSP_NETWORKING=0'
+  cpp_args += '-DVSP_NETWORKING=0'
 endif
 
 install_subdir('assets', install_dir: assets_dir)
