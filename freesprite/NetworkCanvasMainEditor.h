@@ -10,7 +10,6 @@ class NetworkCanvasMainEditor :
     public MainEditor
 {
 protected:
-    OperationQueue mainThreadOps;
     std::thread* clientThread = NULL;
     NET_StreamSocket* clientSocket = NULL;
 
@@ -42,11 +41,6 @@ public:
     std::string getRPCString() override { return TL("vsp.collabeditor"); }
 
     void networkCanvasStateUpdated(int whichLayer) override;
-
-    void tick() override {
-        mainThreadOps.process();
-        MainEditor::tick();
-    }
 
     Layer* newLayer() override;
     void promptStartNetworkSession() override;

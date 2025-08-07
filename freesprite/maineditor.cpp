@@ -295,6 +295,8 @@ void MainEditor::tick() {
         hintOpenScreensInInteractiveMode.clear();
     }
 
+    mainThreadOps.process();
+
     if (g_windowFocused) {
         u64 timestampNow = SDL_GetTicks64() / 1000;
         if (lastTimestamp != timestampNow) {
@@ -2904,7 +2906,17 @@ void MainEditor::promptStartNetworkSession()
     PopupSetupNetworkCanvas* p = new PopupSetupNetworkCanvas(TL("vsp.maineditor.startcollab"), TL("vsp.collabeditor.popup.host.desc"), false, true);
     p->onInputConfirmCallback = [this](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
         networkRunning = true;
+        
+        networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this);
+        networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.collabhosthost.title"), networkCanvasHostPanel);
+        networkCanvasHostPanelContainer->position.y = 64;
+        networkCanvasHostPanelContainer->position.x = 420;
+        wxsManager.addDrawable(networkCanvasHostPanelContainer);
+
+        thisClientInfo = new NetworkCanvasClientInfo;
+
         networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this, d);
+
         g_addNotification(SuccessNotification("Network canvas started", ""));
     };
     g_addPopup(p);
@@ -2919,24 +2931,26 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
 #if VSP_NETWORKING
     NET_Server* server = NET_CreateServer(NULL, startData.port);
-    //todo make this configurable
-    NetworkCanvasClientInfo selfClientInfo;
-    selfClientInfo.uid = nextClientUID++;
-    selfClientInfo.clientName = startData.username;
-    selfClientInfo.clientColor = startData.userColor;
-    selfClientInfo.cursorPosition = { 0, 0 };
+
+    thisClientInfo->uid = nextClientUID++;
+    thisClientInfo->clientName = startData.username;
+    thisClientInfo->clientColor = startData.userColor;
+    thisClientInfo->cursorPosition = { 0, 0 };
 
     if (server == NULL) {
         g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
         return;
     }
 
-    thisClientInfo = &selfClientInfo;
-
     networkClientsListMutex.lock();
     networkClients.clear();
-    networkClients.push_back(&selfClientInfo);
+    networkClients.push_back(thisClientInfo);
     networkClientsListMutex.unlock();
+
+    mainThreadOps.add([this]() {
+        networkCanvasHostPanel->updateClientList();
+    });
+    
 
     while (networkRunning) {
         NET_StreamSocket* clientSocket = NULL;
@@ -2993,6 +3007,9 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     networkClientsListMutex.unlock();
 
     NET_DestroyStreamSocket(clientSocket);
+    mainThreadOps.add([this]() {
+        networkCanvasHostPanel->updateClientList();
+    });
     g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
     logerr(std::format("Disconnected from {}", clientInfo.clientName));
 #endif
@@ -3003,12 +3020,19 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
 {
     clientInfo->lastReportTime = SDL_GetTicks();
     if (command == "INFO") {
+        bool anyDataUpdated = false;
         std::string inputString = networkReadString(clientSocket);
         json inputJson = json::parse(inputString);
-        clientInfo->clientName = inputJson.value("clientName", "Unknown Client");
+
+        std::string newClientName = inputJson.value("clientName", "Unknown Client");
+        anyDataUpdated |= (newClientName != clientInfo->clientName);
+        clientInfo->clientName = newClientName;
+
         clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
         try {
-            clientInfo->clientColor = std::stoi(inputJson.value("clientColor", "C0E1FF"), 0, 16);
+            u32 newClientColor = std::stoi(inputJson.value("clientColor", "C0E1FF"), 0, 16);
+            anyDataUpdated |= (newClientColor != clientInfo->clientColor);
+            clientInfo->clientColor = newClientColor;
         }
         catch (std::exception&) {
             clientInfo->clientColor = 0xC0E1FF; // default color if parsing fails
@@ -3047,6 +3071,13 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             infoJson["clients"].push_back(clientJson);
         }
         networkClientsListMutex.unlock();
+
+        if (anyDataUpdated) {
+            mainThreadOps.add([this]() {
+                networkCanvasHostPanel->updateClientList();
+            });
+        }
+
         networkSendCommand(clientSocket, "INFO");
         networkSendString(clientSocket, infoJson.dump());
         
@@ -3224,6 +3255,15 @@ void MainEditor::endNetworkSession()
         delete networkCanvasThread;
         networkCanvasThread = NULL;
     }
+    if (thisClientInfo != NULL) {
+        delete thisClientInfo;
+        thisClientInfo = NULL;
+    }
+    if (networkCanvasHostPanelContainer != NULL) {
+        removeWidget(networkCanvasHostPanelContainer);
+        networkCanvasHostPanelContainer = NULL;
+        networkCanvasHostPanel = NULL;
+    }
 }
 
 bool MainEditor::canAddCommentAt(XY a)
@@ -3380,4 +3420,53 @@ void MainEditor::layer_fillActiveColor()
             });
         }
     });
+}
+
+EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller)
+{
+    parent = caller;
+    wxWidth = 300;
+    wxHeight = 200;
+    fillFocused = Fill::Gradient(0x90101010, 0x90303030, 0x90303030, 0x90303030);
+    fillUnfocused = Fill::Gradient(0xA0101010, 0xA0303030, 0xA0303030, 0xA0303030);
+
+    clientList = new ScrollingPanel();
+    clientList->position = { 5, 30 };
+    clientList->wxWidth = wxWidth - 10;
+    clientList->wxHeight = wxHeight - 35;
+    subWidgets.addDrawable(clientList);
+
+}
+
+void EditorNetworkCanvasHostPanel::render(XY position)
+{
+    Panel::render(position);
+    if (!enabled) {
+        return;
+    }
+    if (thisOrParentFocused()) {
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
+        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+    }
+}
+
+void EditorNetworkCanvasHostPanel::updateClientList()
+{
+    clientList->subWidgets.freeAllDrawables();
+    int clientY = 0;
+    parent->networkClientsListMutex.lock();
+    for (auto*& client : parent->networkClients) {
+        UIButton* clientButton = new UIButton();
+        clientButton->text = std::string(client == parent->thisClientInfo ? UTF8_DIAMOND : "") + client->clientName;
+        clientButton->colorTextFocused = clientButton->colorTextUnfocused = uint32ToSDLColor(0xFF000000|client->clientColor);
+        clientButton->position = { 0, clientY };
+        clientButton->onClickCallback = [this, client](UIButton* b) {
+            parent->canvas.centerOnPoint(client->cursorPosition);
+        };
+        clientList->subWidgets.addDrawable(clientButton);
+
+        clientY += 30;
+    }
+    parent->networkClientsListMutex.unlock();
 }

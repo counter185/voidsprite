@@ -206,6 +206,7 @@
 
     {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
     {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
+    {"vsp.maineditor.panel.collabhosthost.title", "NETWORK CANVAS"},
     {"vsp.maineditor.panel.touchmode.title", "TOUCH MODE"},
     {"vsp.maineditor.panel.touchmode.pan", "Pan"},
     {"vsp.maineditor.panel.touchmode.leftclick", "Mouse Left"},

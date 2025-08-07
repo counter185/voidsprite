@@ -21,6 +21,12 @@ public:
     std::string fillTextureVCKey = "";
     HotReloadableTexture* fillTexture = NULL;
 
+    static Fill None()
+    {
+        Fill r(FILL_INVALID);
+        return r;
+    }
+
     static Fill Solid(u32 color)
     {
         Fill r(FILL_SOLID);

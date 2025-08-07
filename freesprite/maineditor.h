@@ -10,6 +10,7 @@
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
 #include "EventCallbackListener.h"
+#include "operation_queue.h"
 
 struct NET_StreamSocket;
 
@@ -93,6 +94,18 @@ struct NetworkCanvasClientInfo {
     std::vector<CommentData> comments;
 };*/
 
+class EditorNetworkCanvasHostPanel : public Panel {
+protected:
+    MainEditor* parent = NULL;
+    ScrollingPanel* clientList = NULL;
+public:
+    EditorNetworkCanvasHostPanel(MainEditor* caller);
+
+    void render(XY position) override;
+
+    void updateClientList();
+};
+
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 protected:
@@ -101,6 +114,8 @@ protected:
     MainEditor() {}
 public:
     bool isPalettized = false;
+
+    OperationQueue mainThreadOps;
 
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
     std::vector<CommentData> comments;
@@ -206,6 +221,8 @@ public:
     std::vector<std::thread*> networkCanvasResponderThreads;
     NetworkCanvasClientInfo* thisClientInfo = NULL;
     std::atomic<int> nextClientUID = 0;
+    EditorNetworkCanvasHostPanel* networkCanvasHostPanel = NULL;
+    Panel* networkCanvasHostPanelContainer = NULL;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);

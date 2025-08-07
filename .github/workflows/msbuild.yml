@@ -136,6 +136,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with: 
         name: voidsprite-build-mac-intel64
+        retention-days: 1
         path: |
           voidsprite.app.tar
 
@@ -164,6 +165,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with: 
         name: voidsprite-build-mac-arm64
+        retention-days: 1
         path: |
           voidsprite.app.tar
   
