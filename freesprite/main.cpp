@@ -306,19 +306,12 @@ void main_renderScaleDown()
 //todo fix these
 void main_switchToFavScreen()
 {
-    /*
-    if (popupStack.empty() && favourite && fav_screen < screenStack.size()) {
-        g_switchScreen(fav_screen);
-    }
-    */
+    g_currentWindow->switchToFavScreen();
 }
 
 void main_assignFavScreen()
 {
-    /*
-    fav_screen = currentScreen;
-    favourite = !favourite;
-    */
+    g_currentWindow->assignFavScreen();
 }
 
 #if _WIN32
