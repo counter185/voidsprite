@@ -44,6 +44,7 @@
     {"vsp.window.error.renamemainwindowfail", "Main window cannot be renamed"},
     {"vsp.window.error.windowcreationfailed", "Window creation failed"},
     {"vsp.window.error.lastscreendetach", "Cannot detach last workspace"},
+    {"vsp.window.error.nofavscreen", "No favourite screen assigned"},
     {"vsp.window.renamewindow", "Rename window"},
 
     //crash popup
