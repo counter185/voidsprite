@@ -306,11 +306,11 @@ public:
     void redo();
 
     virtual Layer* newLayer();
-    void deleteLayer(int index);
-    void moveLayerUp(int index);
-    void moveLayerDown(int index);
-    void mergeLayerDown(int index);
-    void duplicateLayer(int index);
+    virtual void deleteLayer(int index);
+    virtual void moveLayerUp(int index);
+    virtual void moveLayerDown(int index);
+    virtual void mergeLayerDown(int index);
+    virtual void duplicateLayer(int index);
     void switchActiveLayer(int index);
     Layer* getCurrentLayer() { return layers[selLayer]; }
     int indexOfLayer(Layer* l);

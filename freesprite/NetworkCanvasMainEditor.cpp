@@ -224,6 +224,26 @@ Layer* NetworkCanvasMainEditor::newLayer()
     return NULL;
 }
 
+void NetworkCanvasMainEditor::deleteLayer(int index)
+{
+}
+
+void NetworkCanvasMainEditor::moveLayerUp(int index)
+{
+}
+
+void NetworkCanvasMainEditor::moveLayerDown(int index)
+{
+}
+
+void NetworkCanvasMainEditor::mergeLayerDown(int index)
+{
+}
+
+void NetworkCanvasMainEditor::duplicateLayer(int index)
+{
+}
+
 void NetworkCanvasMainEditor::promptStartNetworkSession()
 {
     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Already in a network session"));

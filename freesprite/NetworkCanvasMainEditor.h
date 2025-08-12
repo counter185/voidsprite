@@ -43,6 +43,11 @@ public:
     void networkCanvasStateUpdated(int whichLayer) override;
 
     Layer* newLayer() override;
+    void deleteLayer(int index) override;
+    void moveLayerUp(int index) override;
+    void moveLayerDown(int index) override;
+    void mergeLayerDown(int index) override;
+    void duplicateLayer(int index) override;
     void promptStartNetworkSession() override;
 
     void endClientNetworkSession();
