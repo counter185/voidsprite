@@ -48,8 +48,14 @@ public:
     void moveLayerDown(int index) override;
     void mergeLayerDown(int index) override;
     void duplicateLayer(int index) override;
+    void rescaleAllLayersFromCommand(XY size) override;
+    void resizeAllLayersFromCommand(XY size, bool byTile = false) override;
+    void resizzeAllLayersByTilecountFromCommand(XY size) override;
+    void integerScaleAllLayersFromCommand(XY scale, bool downscale = false) override;
+
     void promptStartNetworkSession() override;
 
+    void postErrorHostOnly();
     void endClientNetworkSession();
 };
 

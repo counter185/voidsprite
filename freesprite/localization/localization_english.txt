@@ -265,6 +265,7 @@
     {"vsp.collabeditor", "Network Editor"},
     {"vsp.collabeditor.error.disconnected", "Disconnected from server"},
     {"vsp.collabeditor.error.emptyip", "IP cannot be empty"},
+    {"vsp.collabeditor.error.hostonly", "Only the host may perform this action"},
     {"vsp.collabeditor.popup.ip.placeholder", "Enter IP..."},
     {"vsp.collabeditor.popup.username", "Username"},
     {"vsp.collabeditor.popup.usercolor", "User color"},

@@ -226,27 +226,57 @@ Layer* NetworkCanvasMainEditor::newLayer()
 
 void NetworkCanvasMainEditor::deleteLayer(int index)
 {
+    postErrorHostOnly();
 }
 
 void NetworkCanvasMainEditor::moveLayerUp(int index)
 {
+    postErrorHostOnly();
 }
 
 void NetworkCanvasMainEditor::moveLayerDown(int index)
 {
+    postErrorHostOnly();
 }
 
 void NetworkCanvasMainEditor::mergeLayerDown(int index)
 {
+    postErrorHostOnly();
 }
 
 void NetworkCanvasMainEditor::duplicateLayer(int index)
 {
+    postErrorHostOnly();
+}
+
+void NetworkCanvasMainEditor::rescaleAllLayersFromCommand(XY size)
+{
+    postErrorHostOnly();
+}
+
+void NetworkCanvasMainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
+{
+    postErrorHostOnly();
+}
+
+void NetworkCanvasMainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
+{
+    postErrorHostOnly();
+}
+
+void NetworkCanvasMainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
+{
+    postErrorHostOnly();
 }
 
 void NetworkCanvasMainEditor::promptStartNetworkSession()
 {
     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Already in a network session"));
+}
+
+void NetworkCanvasMainEditor::postErrorHostOnly()
+{
+	g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.hostonly")));
 }
 
 void NetworkCanvasMainEditor::endClientNetworkSession()

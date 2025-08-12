@@ -22,10 +22,13 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     tboxX->wxWidth = 120;
     tboxX->setText(std::to_string(defaultValues.x));
     tboxX->onTextChangedCallback = [this](UITextField* txf, std::string data) {
-        if (!txf->textEmpty()) {
-            result.x = std::stoi(data);
-            resultUpdated(result);
+        try {
+            if (!txf->textEmpty()) {
+                result.x = std::stoi(data);
+                resultUpdated(result);
+            }
         }
+        catch (std::exception&) {}
     };
     
     wxsManager.addDrawable(tboxX);
@@ -36,10 +39,13 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     tboxY->wxWidth = 120;
     tboxY->setText(std::to_string(defaultValues.y));
     tboxY->onTextChangedCallback = [this](UITextField* txf, std::string data) {
-        if (!txf->textEmpty()) {
-            result.y = std::stoi(data);
-            resultUpdated(result);
+        try {
+            if (!txf->textEmpty()) {
+                result.y = std::stoi(data);
+                resultUpdated(result);
+            }
         }
+        catch (std::exception&) {}
     };
     tboxY->onTextChangedConfirmCallback = [this](UITextField*, std::string data) {
         eventButtonPressed(0);

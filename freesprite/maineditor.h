@@ -331,10 +331,10 @@ public:
     void flipAllLayersOnX();
     void flipAllLayersOnY();
 
-    void rescaleAllLayersFromCommand(XY size);
-    void resizeAllLayersFromCommand(XY size, bool byTile = false);
-    void resizzeAllLayersByTilecountFromCommand(XY size);
-    void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
+    virtual void rescaleAllLayersFromCommand(XY size);
+    virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);
+    virtual void resizzeAllLayersByTilecountFromCommand(XY size);
+    virtual void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
