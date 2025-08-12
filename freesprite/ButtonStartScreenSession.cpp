@@ -12,16 +12,29 @@ void ButtonStartScreenSession::render(XY pos)
         tooltip = targetWindow->screenStack[correspondingScreen]->getName();
     }
 
-    int squareW = (int)(wxWidth * (screenSwitchTimer.started && correspondingScreen == targetWindow->currentScreen ? XM1PW3P1(screenSwitchTimer.percentElapsedTime(300)) : 1));
+    bool isLinked = targetWindow->screenStack[correspondingScreen]->isSubscreenOf() != NULL;
+    bool isActive = correspondingScreen == targetWindow->currentScreen;
+
+    int squareW = (int)(wxWidth * (screenSwitchTimer.started && isActive ? XM1PW3P1(screenSwitchTimer.percentElapsedTime(300)) : 1));
     SDL_Rect r = {
         pos.x,
         pos.y,
         squareW, squareW
     };
+    
+    if (isLinked) {
+        SDL_SetRenderDrawColor(g_rd, 0x93, 0xD2, 0xFF, isActive ? 255 : 0x60);
+        drawLine({ r.x, r.y }, { r.x,r.y + r.h-1 });
+        drawLine({ r.x, r.y }, { r.x + r.w-1,r.y });
+        r.x += 2;
+        r.y += 2;
+        r.w -= 2;
+        r.h -= 2;
+    }
 
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, correspondingScreen == targetWindow->currentScreen ? 0x80 : 0x20);
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, isActive ? 0x80 : 0x20);
     if (g_currentWindow->favScreen != NULL && correspondingScreen == g_currentWindow->indexOfScreen(g_currentWindow->favScreen)) {
-        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, correspondingScreen == targetWindow->currentScreen ? 0x80 : 0x20);
+        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, isActive ? 0x80 : 0x20);
 
     }
     SDL_RenderFillRect(g_rd, &r);
