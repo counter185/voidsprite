@@ -253,6 +253,11 @@ Layer* Layer::trim(SDL_Rect r)
 
 LayerScaleData Layer::scaleGeneric(XY newSize, std::function<void(u32*,u32*)> operation)
 {
+    if (4ull * (u64)newSize.x * (u64)newSize.y > 1000000000ull) {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+        logerr("[scaleGeneric] massive resize attempted");
+        return { false };
+    }
     std::vector<LayerVariant> oldVariants = layerData;
     std::vector<LayerVariant> scaledVariants;
 

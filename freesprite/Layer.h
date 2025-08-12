@@ -536,6 +536,7 @@ public:
     LayerScaleData scaleGeneric(XY newSize, std::function<void(u32* pxNow,u32* pxNew)>);
     LayerScaleData resize(XY to);
     LayerScaleData resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
+    //todo:update this one too
     std::vector<LayerVariant> resizeByTileCount(XY tileSizesNow, XY newTileCount);
     LayerScaleData integerScale(XY scale);
     LayerScaleData integerDownscale(XY scale);
