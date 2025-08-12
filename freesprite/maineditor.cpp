@@ -1,4 +1,7 @@
+#include "json/json.hpp"
+
 #include "maineditor.h"
+#include "multiwindow.h"
 #include "MainEditorPalettized.h"
 #include "FontRenderer.h"
 #include "EditorBrushPicker.h"
@@ -41,6 +44,7 @@
 #include "PopupApplyFilter.h"
 #include "PopupExportScaled.h"
 #include "PopupFilePicker.h"
+#include "PopupSetupNetworkCanvas.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -49,6 +53,8 @@
 #else
 #include <ctime>
 #endif
+
+using namespace nlohmann;
 
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
 {
@@ -129,6 +135,7 @@ MainEditor::~MainEditor() {
     wxsManager.freeAllDrawables();
     discardUndoStack();
     discardRedoStack();
+    endNetworkSession();
     for (Layer*& imgLayer : layers) {
         delete imgLayer;
     }
@@ -174,6 +181,7 @@ void MainEditor::render() {
 
     drawTileGrid();
     drawRowColNumbers();
+    drawNetworkCanvasClients();
     drawIsolatedFragment();
     drawSymmetryLines();
     renderGuidelines();
@@ -287,6 +295,8 @@ void MainEditor::tick() {
         hintOpenScreensInInteractiveMode.clear();
     }
 
+    mainThreadOps.process();
+
     if (g_windowFocused) {
         u64 timestampNow = SDL_GetTicks64() / 1000;
         if (lastTimestamp != timestampNow) {
@@ -326,7 +336,9 @@ void MainEditor::tick() {
     tickAutosave();
 
     if (closeNextTick) {
-        g_closeScreen(this);
+        if (!g_currentWindow->hasPopupsOpen()) {
+            g_closeScreen(this);
+        }
     }
 }
 
@@ -640,6 +652,33 @@ void MainEditor::drawRowColNumbers()
     }
 }
 
+void MainEditor::drawNetworkCanvasClients()
+{
+    networkClientsListMutex.lock();
+    for (auto& client : networkClients) {
+        if (thisClientInfo != NULL && client->uid == thisClientInfo->uid) {
+            //skip myself
+            continue;
+        }
+        SDL_Rect clientRect = canvas.canvasRectToScreenRect({ client->cursorPosition.x, client->cursorPosition.y, 1,1 });
+        SDL_Color color = uint32ToSDLColor(0xFF000000 | client->clientColor);
+        SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 255);
+        SDL_RenderDrawRect(g_rd, &clientRect);
+        if (xyDistance({ g_mouseX, g_mouseY }, { clientRect.x, clientRect.y }) < 20) {
+            g_ttp->addTooltip(Tooltip{ {clientRect.x + 20, clientRect.y}, client->clientName, color, 1.0 });
+        }
+
+        SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 0xA0);
+        clientRect = offsetRect(clientRect, 5);
+        SDL_RenderDrawRect(g_rd, &clientRect);
+
+        SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 0x40);
+        clientRect = offsetRect(clientRect, 15);
+        SDL_RenderDrawRect(g_rd, &clientRect);
+    }
+    networkClientsListMutex.unlock();
+}
+
 void MainEditor::inputMouseRight(XY at, bool down)
 {
     RecalcMousePixelTargetPoint(at.x, at.y);
@@ -759,7 +798,7 @@ void MainEditor::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 TL("vsp.nav.file"),
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_W, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X, SDL_SCANCODE_N},
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [this]() {
@@ -770,6 +809,12 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_S, { TL("vsp.nav.save"),
                             [this]() {
                                 this->trySaveImage();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.forceautosave"),
+                            [this]() {
+                                this->createRecoveryAutosave();
                             }
                         }
                     },
@@ -819,7 +864,15 @@ void MainEditor::setUpWidgets()
                                 g_addPopup(new PopupGlobalConfig());
                             }
                         }
-                    }
+                    },
+#if VSP_NETWORKING
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
+                            [this]() {
+                                promptStartNetworkSession();
+                            }
+                        }
+                    },
+#endif
                 },
                 g_iconNavbarTabFile
             }
@@ -885,7 +938,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
                             [this]() {
-                                g_addPopup(new PopupIntegerScale(this, TL("vsp.maineditor.intscale"), "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(this, TL("vsp.maineditor.intscale"), "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
@@ -1402,6 +1455,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 else {
                                     if (currentBrushMouseDowned) {
                                         currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                        networkCanvasStateUpdated(selLayer);
                                         currentBrushMouseDowned = false;
                                     }
 
@@ -1654,14 +1708,6 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
     } 
     else if (evt_id == EVENT_MAINEDITOR_RESCALELAYER) {
         rescaleAllLayersFromCommand(((PopupTileGeneric*)p)->result);
-    }
-}
-
-void MainEditor::eventTextInputConfirm(int evt_id, std::string text)
-{
-    if (evt_id == EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME) {
-        getCurrentLayer()->name = text;
-        layerPicker->updateLayers();
     }
 }
 
@@ -1943,11 +1989,14 @@ void MainEditor::commitStateToLayer(Layer* l)
 {
     l->commitStateToUndoStack();
     addToUndoStack(UndoStackElement{ l, UNDOSTACK_LAYER_DATA_MODIFIED });
+    networkCanvasStateUpdated(indexOfLayer(l));
 }
 
 void MainEditor::commitStateToCurrentLayer()
 {
-    commitStateToLayer(getCurrentLayer());
+    if (!layers.empty()) {
+        commitStateToLayer(getCurrentLayer());
+    }
 }
 
 uint32_t MainEditor::pickColorFromAllLayers(XY pos)
@@ -1974,6 +2023,7 @@ void MainEditor::addToUndoStack(UndoStackElement undo)
     undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
     changesSinceLastSave = HAS_UNSAVED_CHANGES;
+    networkCanvasStateUpdated(indexOfLayer(undo.targetlayer));
 }
 
 void MainEditor::discardUndoStack()
@@ -2003,7 +2053,7 @@ void MainEditor::discardRedoStack()
                         tracked_free(variant.pixelData);
                     }
                 }
-                delete resizeLayerData;
+                delete[] resizeLayerData;
             }
                 break;
             case UNDOSTACK_CREATE_LAYER_VARIANT:
@@ -2118,6 +2168,7 @@ void MainEditor::undo()
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
+        networkCanvasStateUpdated(indexOfLayer(l.targetlayer));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to undo", ""));
@@ -2222,6 +2273,7 @@ void MainEditor::redo()
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
+        networkCanvasStateUpdated(indexOfLayer(l.targetlayer));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to redo", ""));
@@ -2234,7 +2286,7 @@ Layer* MainEditor::newLayer()
     if (nl != NULL) {
         nl->name = std::format("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        logprintf("adding new layer at %i\n", insertAtIdx);
+        //loginfo(std::format("adding new layer at {}", insertAtIdx));
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -2263,6 +2315,9 @@ void MainEditor::deleteLayer(int index) {
 
 void MainEditor::regenerateLastColors()
 {
+    if (layers.empty()) {
+        return;
+    }
     colorPicker->lastColors.clear();
     colorPicker->lastColorsChanged = true;
     Layer* flatLayer = flattenImage();
@@ -2312,30 +2367,35 @@ void MainEditor::tickAutosave()
     if (g_config.autosaveInterval > 0 && changesSinceLastSave == HAS_UNSAVED_CHANGES) {
         if (autosaveTimer.elapsedTime() > g_config.autosaveInterval * 1000 * 60) {
             autosaveTimer.start();
-            time_t now = time(NULL);
-            tm ltm;
-            // todo: make a platform-specific localtime function
-            #if defined(__unix__) || defined(__APPLE__)
-                localtime_r(&now, &ltm);
-            #elif defined(_WIN32)
-                localtime_s(&ltm, &now);
-            #else
-                ltm = *std::localtime(&now);
-            #endif
-            std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon+1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
-            try {
-                if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
-                    g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
-                    changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
-                }
-                else {
-                    g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
-                }
-            }
-            catch (std::exception e) {
-                g_addNotification(ErrorNotification("Recovery autosave", "Exception during autosave"));
-            }
+            createRecoveryAutosave();
         }
+    }
+}
+
+void MainEditor::createRecoveryAutosave()
+{
+    time_t now = time(NULL);
+    tm ltm;
+    // todo: make a platform-specific localtime function
+#if defined(__unix__) || defined(__APPLE__)
+    localtime_r(&now, &ltm);
+#elif defined(_WIN32)
+    localtime_s(&ltm, &now);
+#else
+    ltm = *std::localtime(&now);
+#endif
+    std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
+    try {
+        if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
+            g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
+            changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
+        }
+        else {
+            g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
+        }
+    }
+    catch (std::exception e) {
+        g_addNotification(ErrorNotification("Recovery autosave", "Exception during autosave"));
     }
 }
 
@@ -2496,6 +2556,7 @@ void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
 {
     int vidxNow = layer->currentLayerVariant;
     if (layer->switchVariant(variantIndex)) {
+        networkCanvasStateUpdated(indexOfLayer(layer));
         layerPicker->updateLayers();
         if (layer == getCurrentLayer()) {
             variantSwitchTimer.start();
@@ -2517,6 +2578,15 @@ void MainEditor::layer_promptRenameCurrentVariant()
     g_addPopup(ninput);
 }
 
+int MainEditor::indexOfLayer(Layer* l)
+{
+    auto it = std::find(layers.begin(), layers.end(), l);
+    if (it != layers.end()) {
+        return std::distance(layers.begin(), it);
+    }
+    return -1;
+}
+
 void MainEditor::layer_setOpacity(uint8_t opacity) {
     Layer* clayer = getCurrentLayer();
     addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_SET_OPACITY, clayer->lastConfirmedlayerAlpha, opacity });
@@ -2527,9 +2597,16 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
 
 void MainEditor::layer_promptRename()
 {
-    PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", this->getCurrentLayer()->name);
-    ninput->setCallbackListener(EVENT_MAINEDITOR_SET_CURRENT_LAYER_NAME, this);
-    g_addPopup(ninput);
+    if (!layers.empty()) {
+        Layer* target = getCurrentLayer();
+        PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", target->name);
+        ninput->onTextInputConfirmedCallback = [this, target](PopupTextBox* p, std::string newName) {
+            target->name = newName;
+            layerPicker->updateLayers();
+            networkCanvasStateUpdated(indexOfLayer(target));
+        };
+        g_addPopup(ninput);
+    }
 }
 
 uint32_t MainEditor::layer_getPixelAt(XY pos)
@@ -2678,17 +2755,37 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
         }
     }
 
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
-    for (int x = 0; x < layers.size(); x++) {
+    int nLayers = layers.size();
+    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
+    for (int x = 0; x < nLayers; x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        if (byTile) {
-            layerResizeData[x].oldLayerData = layers[x]->resizeByTileSizes(tileDimensions, size);
+        layerResizeData[x].oldLayerData = layers[x]->layerData;
+    }
+
+    std::map<Layer*, LayerScaleData> createdVariants;
+
+    for (int x = 0; x < nLayers; x++) {
+        Layer* target = layers[x];
+        LayerScaleData scaleResult = byTile ? layers[x]->resizeByTileSizes(tileDimensions, size) : layers[x]->resize(size);
+        if (scaleResult.success) {
+            createdVariants[target] = scaleResult;
         }
         else {
-            layerResizeData[x].oldLayerData = layers[x]->resize(size);
+            for (auto& [layer, variants] : createdVariants) {
+                for (auto& variant : variants.scaledVariants) {
+                    tracked_free(variant.pixelData);
+                }
+            }
+            return;
         }
-        layers[x]->markLayerDirty();
+        
+        target->markLayerDirty();
     }
+
+    for (auto& [layer, variants] : createdVariants) {
+        layer->setLayerData(variants.scaledVariants, variants.newSize);
+    }
+
     canvas.dimensions = { layers[0]->w, layers[0]->h };
     
     UndoStackElement undoData{};
@@ -2732,12 +2829,37 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         return;
     }
 
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
-    for (int x = 0; x < layers.size(); x++) {
+    int nLayers = layers.size();
+    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
+    for (int x = 0; x < nLayers; x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldLayerData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
-        layers[x]->markLayerDirty();
+        layerResizeData[x].oldLayerData = layers[x]->layerData;
     }
+
+    std::map<Layer*, LayerScaleData> createdVariants;
+
+    for (int x = 0; x < nLayers; x++) {
+        Layer* target = layers[x];
+        LayerScaleData scaleResult = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
+        if (scaleResult.success) {
+            createdVariants[target] = scaleResult;
+        }
+        else {
+            for (auto& [layer, variants] : createdVariants) {
+                for (auto& variant : variants.scaledVariants) {
+                    tracked_free(variant.pixelData);
+                }
+            }
+            return;
+        }
+
+        target->markLayerDirty();
+    }
+
+    for (auto& [layer, variants] : createdVariants) {
+        layer->setLayerData(variants.scaledVariants, variants.newSize);
+    }
+
     canvas.dimensions = { layers[0]->w, layers[0]->h };
 
     UndoStackElement undoData{};
@@ -2817,6 +2939,375 @@ void MainEditor::exportTilesIndividually()
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
+    }
+}
+
+void MainEditor::promptStartNetworkSession()
+{
+    if (networkCanvasThread != NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Network session already started"));
+        return;
+    }
+    PopupSetupNetworkCanvas* p = new PopupSetupNetworkCanvas(TL("vsp.maineditor.startcollab"), TL("vsp.collabeditor.popup.host.desc"), false, true);
+    p->onInputConfirmCallback = [this](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
+        networkRunning = true;
+        
+        networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this);
+        networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.collabhosthost.title"), networkCanvasHostPanel);
+        networkCanvasHostPanelContainer->position.y = 64;
+        networkCanvasHostPanelContainer->position.x = 420;
+        wxsManager.addDrawable(networkCanvasHostPanelContainer);
+
+        thisClientInfo = new NetworkCanvasClientInfo;
+
+        networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this, d);
+
+        g_addNotification(SuccessNotification("Network canvas started", ""));
+    };
+    g_addPopup(p);
+}
+
+void MainEditor::networkCanvasStateUpdated(int whichLayer)
+{
+    canvasStateID++;
+}
+
+void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
+{
+#if VSP_NETWORKING
+    NET_Server* server = NET_CreateServer(NULL, startData.port);
+
+    thisClientInfo->uid = nextClientUID++;
+    thisClientInfo->clientName = startData.username;
+    thisClientInfo->clientColor = startData.userColor;
+    thisClientInfo->cursorPosition = { 0, 0 };
+
+    if (server == NULL) {
+        g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), "Failed to create network server"));
+        return;
+    }
+
+    networkClientsListMutex.lock();
+    networkClients.clear();
+    networkClients.push_back(thisClientInfo);
+    networkClientsListMutex.unlock();
+
+    mainThreadOps.add([this]() {
+        networkCanvasHostPanel->updateClientList();
+    });
+    
+
+    while (networkRunning) {
+        NET_StreamSocket* clientSocket = NULL;
+        NET_AcceptClient(server, &clientSocket);
+        if (clientSocket == NULL) {
+            SDL_Delay(100);
+        }
+        else {
+            NET_Address* clientAddress = NET_GetStreamSocketAddress(clientSocket);
+            NET_GetAddressString(clientAddress);
+            int resolved = NET_WaitUntilResolved(clientAddress, -1);
+            if (resolved == 1) {
+                const char* clientAddressStr = NET_GetAddressString(clientAddress);
+                loginfo(std::format("New client connected: {}", clientAddressStr));
+            }
+            std::thread* responderThread = new std::thread(&MainEditor::networkCanvasServerResponderThread, this, clientSocket);
+            g_startNewMainThreadOperation([this, responderThread]() {
+                this->networkCanvasResponderThreads.push_back(responderThread);
+            });
+        }
+    }
+    NET_DestroyServer(server);
+    networkClientsListMutex.lock();
+    networkClients.clear();
+    networkClientsListMutex.unlock();
+#else
+    logerr("Attempted to run network thread in non-network build");
+#endif
+}
+
+void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
+{
+#if VSP_NETWORKING
+    //todo: delete this thread from the responder threads list when done
+    NetworkCanvasClientInfo clientInfo;
+    clientInfo.uid = nextClientUID++;
+
+    networkClientsListMutex.lock();
+    networkClients.push_back(&clientInfo);
+    networkClientsListMutex.unlock();
+
+    while (networkRunning) {
+        try {
+            std::string commandStr = networkReadCommand(clientSocket);
+            networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
+        }
+        catch (std::exception& e) {
+            logerr(std::format("Error processing command from client: {}", e.what()));
+            break;
+        }
+    }
+    networkClientsListMutex.lock();
+    networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
+    networkClientsListMutex.unlock();
+
+    NET_DestroyStreamSocket(clientSocket);
+    mainThreadOps.add([this]() {
+        networkCanvasHostPanel->updateClientList();
+    });
+    g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
+    logerr(std::format("Disconnected from {}", clientInfo.clientName));
+#endif
+    
+}
+
+void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo)
+{
+    clientInfo->lastReportTime = SDL_GetTicks();
+    if (command == "INFO") {
+        bool anyDataUpdated = false;
+        std::string inputString = networkReadString(clientSocket);
+        json inputJson = json::parse(inputString);
+
+        std::string newClientName = inputJson.value("clientName", "Unknown Client");
+        anyDataUpdated |= (newClientName != clientInfo->clientName);
+        clientInfo->clientName = newClientName;
+
+        clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
+        try {
+            u32 newClientColor = std::stoi(inputJson.value("clientColor", "C0E1FF"), 0, 16);
+            anyDataUpdated |= (newClientColor != clientInfo->clientColor);
+            clientInfo->clientColor = newClientColor;
+        }
+        catch (std::exception&) {
+            clientInfo->clientColor = 0xC0E1FF; // default color if parsing fails
+        }
+
+        json infoJson = {
+            {"yourUserIDIs", clientInfo->uid},
+            {"serverName", "---"},
+            {"canvasWidth", canvas.dimensions.x},
+            {"canvasHeight", canvas.dimensions.y},
+            {"tileGridWidth", tileDimensions.x},
+            {"tileGridHeight", tileDimensions.y},
+            {"layers", json::array()},
+            {"clients", json::array()}
+        };
+        for (Layer*& l : layers) {
+            json layerJson = {
+                {"name", l->name},
+                {"hidden", l->hidden},
+                {"opacity", l->layerAlpha}
+            };
+            infoJson["layers"].push_back(layerJson);
+        }
+        networkClientsListMutex.lock();
+        thisClientInfo->cursorPosition = mousePixelTargetPoint;
+        thisClientInfo->lastReportTime = SDL_GetTicks();
+        for (NetworkCanvasClientInfo* c : networkClients) {
+            json clientJson = {
+                {"uid", c->uid},
+                {"clientName", c->clientName},
+                {"cursorX", c->cursorPosition.x},
+                {"cursorY", c->cursorPosition.y},
+                {"clientColor", std::format("{:06X}", 0xFFFFFF&c->clientColor)},
+                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)}
+            };
+            infoJson["clients"].push_back(clientJson);
+        }
+        networkClientsListMutex.unlock();
+
+        if (anyDataUpdated) {
+            mainThreadOps.add([this]() {
+                networkCanvasHostPanel->updateClientList();
+            });
+        }
+
+        networkSendCommand(clientSocket, "INFO");
+        networkSendString(clientSocket, infoJson.dump());
+        
+    }
+    //layer data request
+    else if (command == "LRRQ") {
+        u32 index;
+        networkReadBytes(clientSocket, (u8*)&index, 4);
+
+        if (index < layers.size()) {
+            Layer* l = layers[index];
+            networkCanvasSendLRDT(clientSocket, index, l);
+        }
+    }
+    //layer pixel data update request
+    else if (command == "LRDT") {
+        u32 index;
+        u64 dataSize;
+        networkReadBytes(clientSocket, (u8*)&index, 4);
+        networkReadBytes(clientSocket, (u8*)&dataSize, 8);
+        u8* dataBuffer = (u8*)tracked_malloc(dataSize);
+        if (dataBuffer != NULL) {
+            networkReadBytes(clientSocket, dataBuffer, dataSize);
+            Layer* l = layers[index];
+            auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
+            if (decompressed.size() != l->w * l->h * 4) {
+                logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+            }
+            else {
+                if (index != selLayer || !leftMouseHold) {
+                    memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
+                    l->markLayerDirty();
+                    changesSinceLastSave = HAS_UNSAVED_CHANGES;
+                    networkCanvasStateUpdated(index);
+                }
+            }
+            tracked_free(dataBuffer);
+        }
+        else {
+            logerr("Failed to allocate memory for layer pixel data update");
+        }
+    }
+    else if (command == "UPDD") {
+        networkSendCommand(clientSocket, "UPDD");
+        networkSendBytes(clientSocket, (u8*)&canvasStateID, 4);
+    }
+    else {
+        logerr(std::format("Unknown command from client: {}", command));
+    }
+}
+
+std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
+{
+    std::string commandName;
+    commandName.resize(8);
+    networkReadBytes(socket, (u8*)&commandName[0], 8);
+    if (commandName.substr(0, 4) != "VDNC") {
+        throw std::runtime_error(std::format("Invalid command prefix: {}", commandName));
+    }
+    else {
+        return commandName.substr(4);
+    }
+}
+
+bool MainEditor::networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand)
+{
+#if VSP_NETWORKING
+    int bytesToRead = 8 - outCommand.size();
+    char buffer[9];
+    memset(buffer, 0, 9);
+    int bytesRead = NET_ReadFromStreamSocket(socket, buffer, bytesToRead);
+    if (bytesRead == -1) {
+        throw std::runtime_error("Failed to read from network socket");
+    }
+    outCommand += std::string(buffer, bytesRead);
+    if (outCommand.size() == 8) {
+        std::string cmd = outCommand;
+        outCommand = "";
+
+        if (cmd.substr(0,4) != "VDNC") {
+            logerr("Invalid command prefix: " + cmd);
+            return false;
+        }
+        outCommand = cmd.substr(4);
+        return true;
+    }
+
+    return false;
+#else
+    return false;
+#endif
+}
+
+void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string commandName)
+{
+    std::string fullCommand = "VDNC" + commandName;
+    if (fullCommand.size() > 8) {
+        throw std::runtime_error("Command name too long");
+    }
+    networkSendBytes(socket, (u8*)&fullCommand[0], 8);
+}
+
+bool MainEditor::networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
+{
+#if VSP_NETWORKING
+    int read = 0;
+    while (read < count) {
+        int bytesRead = NET_ReadFromStreamSocket(socket, buffer + read, count - read);
+        if (bytesRead == -1) {
+            return false;
+        }
+        else {
+            read += bytesRead;
+        }
+    }
+    return true;
+#else
+    return false;
+#endif
+}
+
+void MainEditor::networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
+{
+#if VSP_NETWORKING
+    NET_WriteToStreamSocket(socket, buffer, count);
+#endif
+}
+
+void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
+{
+    u32 size = s.size();
+    networkSendBytes(socket, (u8*)&size, 4);
+    if (size < 8000) {
+        networkSendBytes(socket, (u8*)&s[0], size);
+    }
+    else {
+        throw std::runtime_error("networkSendString: size too big");
+    }
+}
+
+void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l)
+{
+    auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
+    u64 dataSize = compressedData.size();
+    networkSendCommand(socket, "LRDT");
+    networkSendBytes(socket, (u8*)&index, 4);
+    networkSendBytes(socket, (u8*)&dataSize, 8);
+    networkSendBytes(socket, (u8*)&compressedData[0], dataSize);
+}
+
+std::string MainEditor::networkReadString(NET_StreamSocket* socket)
+{
+    u32 size;
+    networkReadBytes(socket, (u8*)&size, 4);
+    if (size < 8000) {
+        std::string ret;
+        ret.resize(size);
+        networkReadBytes(socket, (u8*)&ret[0], size);
+        return ret;
+    }
+    else {
+        throw std::runtime_error("networkReadString: size too big");
+    }
+}
+
+void MainEditor::endNetworkSession()
+{
+    networkRunning = false;
+    for (std::thread* responderThread : networkCanvasResponderThreads) {
+        responderThread->join();
+        delete responderThread;
+    }
+    if (networkCanvasThread != NULL) {
+        networkCanvasThread->join();
+        delete networkCanvasThread;
+        networkCanvasThread = NULL;
+    }
+    if (thisClientInfo != NULL) {
+        delete thisClientInfo;
+        thisClientInfo = NULL;
+    }
+    if (networkCanvasHostPanelContainer != NULL) {
+        removeWidget(networkCanvasHostPanelContainer);
+        networkCanvasHostPanelContainer = NULL;
+        networkCanvasHostPanel = NULL;
     }
 }
 
@@ -2974,4 +3465,53 @@ void MainEditor::layer_fillActiveColor()
             });
         }
     });
+}
+
+EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller)
+{
+    parent = caller;
+    wxWidth = 300;
+    wxHeight = 200;
+    fillFocused = Fill::Gradient(0x90101010, 0x90303030, 0x90303030, 0x90303030);
+    fillUnfocused = Fill::Gradient(0xA0101010, 0xA0303030, 0xA0303030, 0xA0303030);
+
+    clientList = new ScrollingPanel();
+    clientList->position = { 5, 30 };
+    clientList->wxWidth = wxWidth - 10;
+    clientList->wxHeight = wxHeight - 35;
+    subWidgets.addDrawable(clientList);
+
+}
+
+void EditorNetworkCanvasHostPanel::render(XY position)
+{
+    Panel::render(position);
+    if (!enabled) {
+        return;
+    }
+    if (thisOrParentFocused()) {
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
+        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
+    }
+}
+
+void EditorNetworkCanvasHostPanel::updateClientList()
+{
+    clientList->subWidgets.freeAllDrawables();
+    int clientY = 0;
+    parent->networkClientsListMutex.lock();
+    for (auto*& client : parent->networkClients) {
+        UIButton* clientButton = new UIButton();
+        clientButton->text = std::string(client == parent->thisClientInfo ? UTF8_DIAMOND : "") + client->clientName;
+        clientButton->colorTextFocused = clientButton->colorTextUnfocused = uint32ToSDLColor(0xFF000000|client->clientColor);
+        clientButton->position = { 0, clientY };
+        clientButton->onClickCallback = [this, client](UIButton* b) {
+            parent->canvas.centerOnPoint(client->cursorPosition);
+        };
+        clientList->subWidgets.addDrawable(clientButton);
+
+        clientY += 30;
+    }
+    parent->networkClientsListMutex.unlock();
 }

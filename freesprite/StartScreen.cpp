@@ -1,6 +1,7 @@
 #include "StartScreen.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
+#include "NetworkCanvasMainEditor.h"
 #include "FileIO.h"
 #include "Notification.h"
 #include "CustomTemplate.h"
@@ -14,6 +15,7 @@
 #include "PopupTextBox.h"
 #include "PopupAbout.h"
 #include "PopupYesNo.h"
+#include "PopupSetupNetworkCanvas.h"
 #include "UIButton.h"
 #include "MainEditorPalettized.h"
 #include "UILabel.h"
@@ -180,7 +182,7 @@ StartScreen::StartScreen() {
                 SDL_SCANCODE_F,
                 {
                     TL("vsp.nav.file"),
-                    { SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P },
+                    { SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_N },
                     {
                         { SDL_SCANCODE_O,{ TL("vsp.nav.open"), [this]() { this->openImageLoadDialog();} } },
                         { SDL_SCANCODE_V,{ TL("vsp.launchpad.nav.openclipboard"), [this]() { this->tryOpenImageFromClipboard();} } },
@@ -193,7 +195,10 @@ StartScreen::StartScreen() {
                         },
                         { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
                         { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
-                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}}
+                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
+#if VSP_NETWORKING
+                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), [this]() { this->promptConnectToNetworkCanvas(); }}}
+#endif
                     },
                     g_iconNavbarTabFile
                 }
@@ -913,6 +918,38 @@ void StartScreen::promptOpenFromURL()
         }
     };
     g_addPopup(urlPrompt);
+}
+
+void StartScreen::promptConnectToNetworkCanvas()
+{
+    PopupSetupNetworkCanvas* prompt = new PopupSetupNetworkCanvas(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
+    prompt->onInputConfirmCallback = [this](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
+#if VSP_NETWORKING
+        g_startNewOperation([input]() {
+
+            NET_Address* addr = NET_ResolveHostname(input.ip.c_str());
+            if (NET_WaitUntilResolved(addr, 15000) == 1) {
+                NET_StreamSocket* s = NET_CreateClient(addr, input.port);
+                if (NET_WaitUntilConnected(s, -1) == 1) {
+                    g_startNewMainThreadOperation([input,s]() {
+                        g_addScreen(new NetworkCanvasMainEditor(std::format("{} :{}", input.ip, input.port), input, s));
+                    });
+                }
+                else {
+                    logerr(std::format("Connection to {} failed", input.ip));
+                    g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
+                }
+            }
+            else {
+                logerr(std::format("Failed to resolve hostname: {}", input.ip));
+                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.badhostname")));
+            }
+        });
+#else
+		logerr("attempted to connect on non-network build");
+#endif
+    };
+    g_addPopup(prompt);
 }
 
 void StartScreen::tryLoadURL(std::string url)

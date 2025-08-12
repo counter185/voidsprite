@@ -20,7 +20,7 @@ void ButtonStartScreenSession::render(XY pos)
     };
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, correspondingScreen == targetWindow->currentScreen ? 0x80 : 0x20);
-    if (favourite && correspondingScreen == fav_screen) {
+    if (g_currentWindow->favScreen != NULL && correspondingScreen == g_currentWindow->indexOfScreen(g_currentWindow->favScreen)) {
         SDL_SetRenderDrawColor(g_rd, 0, 255, 0, correspondingScreen == targetWindow->currentScreen ? 0x80 : 0x20);
 
     }

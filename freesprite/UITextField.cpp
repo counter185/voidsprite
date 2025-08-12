@@ -92,8 +92,8 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
         if (evt.button.button == SDL_BUTTON_RIGHT) {
             g_openContextMenu({
                 {TL("vsp.cmn.copy"), [this]() { copyToClipboard(); }},
-				{TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); }},
-				{TL("vsp.cmn.erase"), [this]() { clearText(); }},
+                {TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); }},
+                {TL("vsp.cmn.erase"), [this]() { clearText(); }},
             });
         }
     }
@@ -156,6 +156,10 @@ void UITextField::renderTextField(XY at)
         if (!tooltip.empty() && hoverTimer.percentElapsedTime(1000) == 1.0f) {
             g_ttp->addTooltip(Tooltip{ xyAdd(at, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, 1000) });
         }
+    }
+
+    if (text.empty() && !placeholderText.empty()) {
+        g_fnt->RenderString(placeholderText, at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(u8)(textColor.a / 4) }, fontsize);
     }
 
     if (!isColorField || !isValidOrPartialColor() || text.empty()) {

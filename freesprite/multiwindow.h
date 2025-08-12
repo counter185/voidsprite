@@ -22,6 +22,8 @@ public:
     std::string lastWindowTitle = "";
     std::string windowTitle = "";
 
+    BaseScreen* favScreen = NULL;
+
     int mouseX = 0, mouseY = 0;
 
     DrawableManager overlayWidgets;
@@ -62,9 +64,9 @@ public:
     }
 
     void setWindowTitle(std::string wdTitle) {
-		windowTitle = wdTitle;
-		std::string finalWdTitle = UTF8_DIAMOND + wdTitle;
-		SDL_SetWindowTitle(wd, finalWdTitle.c_str());
+        windowTitle = wdTitle;
+        std::string finalWdTitle = UTF8_DIAMOND + wdTitle;
+        SDL_SetWindowTitle(wd, finalWdTitle.c_str());
     }
 
     bool tryCreateRenderer();
@@ -83,4 +85,9 @@ public:
 
     void switchScreenLeft();
     void switchScreenRight();
+
+    int indexOfScreen(BaseScreen* screen);
+
+    void assignFavScreen();
+    void switchToFavScreen();
 };

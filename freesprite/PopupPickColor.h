@@ -9,6 +9,8 @@ class PopupPickColor :
 {
 public:
     
+    std::function<void(PopupPickColor*, u32)> onColorConfirmedCallback = NULL;
+
     //UIColorInputField* colorInput;
     UIColorPicker* colorPicker = NULL;
     UITextField* alphaInput = NULL;

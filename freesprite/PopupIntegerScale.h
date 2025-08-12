@@ -5,7 +5,11 @@ class PopupIntegerScale :
 {
 public:
     UICheckbox* downscaleCheckbox;
+    UILabel* outputScaleLabel;
+    XY sizeNow;
 
-    PopupIntegerScale(EventCallbackListener* callback, std::string tt, std::string tx, XY defaultValues, int event_id);
+    PopupIntegerScale(EventCallbackListener* callback, std::string tt, std::string tx, XY sizeNow, XY defaultValues, int event_id);
+
+    void resultUpdated(XY result) override;
 };
 

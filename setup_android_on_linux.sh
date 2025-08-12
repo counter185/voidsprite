@@ -11,7 +11,12 @@ cd SDL
 git checkout 520d73ae
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
+cd SDL_image
+git checkout release-3.2.4
+cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
+#git clone --recursive https://github.com/libsdl-org/SDL_net.git
+git clone --recursive https://github.com/counter185/SDL_net-android21.git SDL_net
 git clone --recursive https://github.com/madler/zlib.git
 ln -s "../../../external_liblcf" liblcf 
 cd src

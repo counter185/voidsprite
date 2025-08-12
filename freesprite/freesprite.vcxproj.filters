@@ -678,6 +678,12 @@
     <ClCompile Include="io\io_pix2d.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkCanvasMainEditor.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupSetupNetworkCanvas.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1300,6 +1306,15 @@
     </ClInclude>
     <ClInclude Include="io\io_pix2d.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkCanvasMainEditor.h">
+      <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="operation_queue.h">
+      <Filter>Header files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSetupNetworkCanvas.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

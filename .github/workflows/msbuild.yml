@@ -120,29 +120,23 @@ jobs:
         
   build-mac-x64:
     runs-on: macos-13
-
     steps:
     - uses: actions/checkout@v4
-
     - name: install g++13
       run: brew install gcc@13
-
     - name: install pkgconfig and cmake
       run: brew install pkgconfig cmake
-
     - name: install devlibs
       run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
-
     - name: run build
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=gcc-13 CXX=g++-13 ./mac_build.sh
-
     - name: workaround gh actions artifact file permissions
       run: tar -cvf voidsprite.app.tar -C target/mac_release .
-
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: voidsprite-build-mac-intel64
+        retention-days: 1
         path: |
           voidsprite.app.tar
 
@@ -171,9 +165,68 @@ jobs:
       uses: actions/upload-artifact@v4
       with: 
         name: voidsprite-build-mac-arm64
+        retention-days: 1
         path: |
           voidsprite.app.tar
   
+  mac-merge-into-universal:
+    runs-on: macos-15
+
+    needs: [build-mac-x64, build-mac-arm64]
+    steps:
+      - name: download x64 build
+        uses: actions/download-artifact@v4
+        with:
+          name: voidsprite-build-mac-intel64
+      - name: rename x64 build
+        run: |
+          mv voidsprite.app.tar voidsprite-x64.app.tar
+      
+      - name: download arm64 build
+        uses: actions/download-artifact@v4
+        with:
+          name: voidsprite-build-mac-arm64
+      - name: rename arm64 build
+        run: |
+          mv voidsprite.app.tar voidsprite-arm64.app.tar
+
+      - name: unpack
+        run: |
+          mkdir x64 && mkdir arm64
+          tar -xvf voidsprite-x64.app.tar -C ./x64
+          tar -xvf voidsprite-arm64.app.tar -C ./arm64
+
+      - name: merge
+        run: |
+          lipo -create -output voidsprite ./x64/voidsprite.app/Contents/MacOS/voidsprite ./arm64/voidsprite.app/Contents/MacOS/voidsprite
+          mkdir voidsprite-universal.app
+          mkdir voidsprite-universal.app/Contents
+          mkdir voidsprite-universal.app/Contents/MacOS
+          mkdir voidsprite-universal.app/Contents/MacOS/assets
+          mkdir voidsprite-universal.app/Contents/Resources
+          cp -R ./x64/voidsprite.app/OPEN_SOURCE_LICENSES voidsprite-universal.app/OPEN_SOURCE_LICENSES
+          cp -R ./x64/voidsprite.app/Contents/Resources/* voidsprite-universal.app/Contents/Resources/
+          cp -R ./x64/voidsprite.app/Contents/Resources/* voidsprite-universal.app/Contents/Resources/
+          cp -R ./x64/voidsprite.app/Contents/MacOS/*.ttf voidsprite-universal.app/Contents/MacOS/
+          cp -R ./x64/voidsprite.app/Contents/MacOS/assets/* voidsprite-universal.app/Contents/MacOS/assets/
+          cp ./x64/voidsprite.app/Contents/Info.plist voidsprite-universal.app/Contents/Info.plist
+          cp voidsprite voidsprite-universal.app/Contents/MacOS/voidsprite
+          find ./x64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ lipo ./x64/voidsprite.app/Contents/MacOS/@ ./arm64/voidsprite.app/Contents/MacOS/@ -output ./voidsprite-universal.app/Contents/MacOS/@ -create
+          chmod +x ./voidsprite-universal.app/Contents/MacOS/voidsprite
+          
+      - name: create tar
+        run: |
+          mkdir mac-release
+          mv voidsprite-universal.app mac-release/voidsprite-universal.app
+          tar -cvf voidsprite-universal.app.tar -C mac-release .
+
+      - name: Push build artifacts
+        uses: actions/upload-artifact@v4
+        with: 
+          name: voidsprite-build-mac-universal
+          path: |
+            voidsprite-universal.app.tar
+
   build-android:
     runs-on: ubuntu-latest
 

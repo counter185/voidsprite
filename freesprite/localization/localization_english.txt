@@ -44,6 +44,7 @@
     {"vsp.window.error.renamemainwindowfail", "Main window cannot be renamed"},
     {"vsp.window.error.windowcreationfailed", "Window creation failed"},
     {"vsp.window.error.lastscreendetach", "Cannot detach last workspace"},
+    {"vsp.window.error.nofavscreen", "No favourite screen assigned"},
     {"vsp.window.renamewindow", "Rename window"},
 
     //crash popup
@@ -99,6 +100,7 @@
     {"vsp.keybinds.maineditor.copyimage", "Copy whole image to clipboard"},
     {"vsp.keybinds.maineditor.save", "Save"},
     {"vsp.keybinds.maineditor.saveas", "Save as"},
+    {"vsp.keybinds.maineditor.forceautosave", "Force recovery autosave"},
     {"vsp.keybinds.maineditor.undo", "Undo"},
     {"vsp.keybinds.maineditor.redo", "Redo"},
     {"vsp.keybinds.maineditor.redoalt", "Redo (alternative)"},
@@ -164,9 +166,12 @@
     {"vsp.launchpad.nav.webmanual", "Open web manual"},
     {"vsp.launchpad.nav.newwindow", "New window"},
     {"vsp.launchpad.nav.openurl", "Open from URL"},
+    {"vsp.launchpad.nav.connecttocollab", "Connect to network canvas [BETA]"},
 
     {"vsp.launchpad.popup.openfromurl", "Open from URL"},
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},
+    {"vsp.launchpad.popup.connectcollab", "Connect to network canvas"},
+    {"vsp.launchpad.popup.connectcollab.desc", "Enter the address to connect to"},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},
     {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"
@@ -181,6 +186,8 @@
     {"vsp.launchpad.error.templatefail", "Failed to load template."},
     {"vsp.launchpad.error.urlfetchfail", "Failed to download file from URL"},
     {"vsp.launchpad.error.badurl", "Invalid URL"},
+    {"vsp.launchpad.error.connectfail", "Connection failed"},
+    {"vsp.launchpad.error.badhostname", "Invalid host name"},
 
     {"vsp.launchpad.quickconvert.desc", "Select the format to export the image to.\n"
                                         "Drag a file into this window to convert to the same directory."},
@@ -200,6 +207,7 @@
 
     {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
     {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
+    {"vsp.maineditor.panel.collabhosthost.title", "NETWORK CANVAS"},
     {"vsp.maineditor.panel.touchmode.title", "TOUCH MODE"},
     {"vsp.maineditor.panel.touchmode.pan", "Pan"},
     {"vsp.maineditor.panel.touchmode.leftclick", "Mouse Left"},
@@ -218,6 +226,7 @@
     {"vsp.maineditor.preference","Preferences"},
     {"vsp.maineditor.copyflattoclipboard", "Copy to clipboard"},
 
+    {"vsp.maineditor.nav.forceautosave", "Force recovery autosave"},
     {"vsp.maineditor.nav.exportscaled", "Export scaled"},
 
     {"vsp.maineditor.edit","Edit"},
@@ -250,6 +259,17 @@
     {"vsp.maineditor.nav.layer.newvariant", "New empty layer variant"},
     {"vsp.maineditor.nav.layer.copyvariant", "Duplicate current layer variant"},
     {"vsp.maineditor.nav.layer.renvariant", "Rename current layer variant"},
+    {"vsp.maineditor.startcollab", "Start network canvas server [BETA]"},
+
+    //screen: network editor
+    {"vsp.collabeditor", "Network Editor"},
+    {"vsp.collabeditor.error.disconnected", "Disconnected from server"},
+    {"vsp.collabeditor.error.emptyip", "IP cannot be empty"},
+    {"vsp.collabeditor.error.hostonly", "Only the host may perform this action"},
+    {"vsp.collabeditor.popup.ip.placeholder", "Enter IP..."},
+    {"vsp.collabeditor.popup.username", "Username"},
+    {"vsp.collabeditor.popup.usercolor", "User color"},
+    {"vsp.collabeditor.popup.host.desc", "Input the port number to use"},
 
     //screen: 3d cube preview
     {"vsp.cubepreview", "Preview cube"},

@@ -306,19 +306,12 @@ void main_renderScaleDown()
 //todo fix these
 void main_switchToFavScreen()
 {
-    /*
-    if (popupStack.empty() && favourite && fav_screen < screenStack.size()) {
-        g_switchScreen(fav_screen);
-    }
-    */
+    g_currentWindow->switchToFavScreen();
 }
 
 void main_assignFavScreen()
 {
-    /*
-    fav_screen = currentScreen;
-    favourite = !favourite;
-    */
+    g_currentWindow->assignFavScreen();
 }
 
 #if _WIN32
@@ -426,6 +419,17 @@ int main(int argc, char** argv)
         g_mainWindow->addToWindowList();
 
         loginfo("Passed SDL_Init");
+
+#if VSP_NETWORKING
+        bool netInit = NET_Init();
+        if (!netInit) {
+            logerr("NET_Init failed: " + std::string(SDL_GetError()));
+        }
+        else {
+            loginfo("Passed NET_Init");
+        }
+#endif
+
         platformInit();
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");

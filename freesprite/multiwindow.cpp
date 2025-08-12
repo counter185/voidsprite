@@ -86,7 +86,7 @@ void VSPWindow::initFonts() {
             { 0x2DE0, 0x2DFF }, // Cyryllic Extended-A
             { 0xA640, 0xA69F }, // Cyryllic Extended-B
             { 0x1C80, 0x1C8F }, // Cyryllic Extended-C
-			{ 0x1E030, 0x1E08F }    // Cyryllic Extended-D
+            { 0x1E030, 0x1E08F }    // Cyryllic Extended-D
         });
     }
 
@@ -219,6 +219,9 @@ void VSPWindow::addScreen(BaseScreen* a, bool switchTo) {
 }
 
 void VSPWindow::detachScreen(BaseScreen* screen) {
+    if (favScreen == screen) {
+        favScreen = NULL;
+    }
     auto index = std::find(screenStack.begin(), screenStack.end(), screen);
     if (index != screenStack.end()) {
         int i = index - screenStack.begin();
@@ -232,6 +235,9 @@ void VSPWindow::detachScreen(BaseScreen* screen) {
 }
 
 bool VSPWindow::closeScreen(BaseScreen* screen) {
+    if (favScreen == screen) {
+        favScreen = NULL;
+    }
     for (int x = 0; x < screenStack.size(); x++) {
         if (screenStack[x]->isSubscreenOf() == screen) {
             g_closeScreen(screenStack[x]);
@@ -290,4 +296,38 @@ void VSPWindow::switchScreenRight() {
             }
         }
     }
+}
+
+int VSPWindow::indexOfScreen(BaseScreen* screen)
+{
+    return std::find(screenStack.begin(), screenStack.end(), screen) - screenStack.begin();
+}
+
+void VSPWindow::assignFavScreen()
+{
+    BaseScreen* screenNow = screenStack[currentScreen];
+    if (favScreen == screenNow) {
+        favScreen = NULL;
+    }
+    else {
+        favScreen = screenNow;
+    }
+    screenSwitchTimer.start();
+}
+
+void VSPWindow::switchToFavScreen()
+{
+    if (favScreen != NULL) {
+        int index = std::find(screenStack.begin(), screenStack.end(), favScreen) - screenStack.begin();
+        if (index < screenStack.size()) {
+            g_switchScreen(index);
+        }
+        else {
+            logerr("[VSPWindow] fav screen out of range");
+        }
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.nofavscreen")));
+    }
+
 }

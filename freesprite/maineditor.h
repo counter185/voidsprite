@@ -1,4 +1,7 @@
 #pragma once
+#include <mutex>
+#include <thread>
+
 #include "globals.h"
 #include "BaseScreen.h"
 #include "splitsession.h"
@@ -7,6 +10,9 @@
 #include "ScreenWideNavBar.h"
 #include "Canvas.h"
 #include "EventCallbackListener.h"
+#include "operation_queue.h"
+
+struct NET_StreamSocket;
 
 enum EditorUnsavedChanges : int {
     NO_UNSAVED_CHANGES = 0,
@@ -75,10 +81,30 @@ struct IsolatedFragmentPoint {
     u8 directions4x = 0;
 };
 
+struct NetworkCanvasClientInfo {
+    u32 uid = -1;
+    std::string clientName = "User";
+    XY cursorPosition = {0,0};
+    u64 lastReportTime = 0;
+    u32 clientColor = 0xC0E1FF;
+};
+
 /*struct Frame {
     std::vector<Layer*> layers;
     std::vector<CommentData> comments;
 };*/
+
+class EditorNetworkCanvasHostPanel : public Panel {
+protected:
+    MainEditor* parent = NULL;
+    ScrollingPanel* clientList = NULL;
+public:
+    EditorNetworkCanvasHostPanel(MainEditor* caller);
+
+    void render(XY position) override;
+
+    void updateClientList();
+};
 
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
@@ -88,6 +114,8 @@ protected:
     MainEditor() {}
 public:
     bool isPalettized = false;
+
+    OperationQueue mainThreadOps;
 
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
     std::vector<CommentData> comments;
@@ -185,6 +213,17 @@ public:
 
     Timer64 autosaveTimer;
 
+    u32 canvasStateID;
+    std::atomic<bool> networkRunning = false;
+    std::thread* networkCanvasThread = NULL;
+    std::mutex networkClientsListMutex;
+    std::vector<NetworkCanvasClientInfo*> networkClients;
+    std::vector<std::thread*> networkCanvasResponderThreads;
+    NetworkCanvasClientInfo* thisClientInfo = NULL;
+    std::atomic<int> nextClientUID = 0;
+    EditorNetworkCanvasHostPanel* networkCanvasHostPanel = NULL;
+    Panel* networkCanvasHostPanelContainer = NULL;
+
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);
@@ -200,7 +239,6 @@ public:
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
     void eventPopupClosed(int evt_id, BasePopup* p) override;
-    void eventTextInputConfirm(int evt_id, std::string text) override;
     void eventColorSet(int evt_id, uint32_t color) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerId) override;
 
@@ -216,6 +254,7 @@ public:
     void drawSplitSessionFragments();
     void drawZoomLines();
     void drawRowColNumbers();
+    virtual void drawNetworkCanvasClients();
 
     void inputMouseRight(XY at, bool down);
 
@@ -250,6 +289,7 @@ public:
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     void tickAutosave();
+    void createRecoveryAutosave();
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     void tryAddReference(PlatformNativePathString path);
@@ -266,13 +306,14 @@ public:
     void redo();
 
     virtual Layer* newLayer();
-    void deleteLayer(int index);
-    void moveLayerUp(int index);
-    void moveLayerDown(int index);
-    void mergeLayerDown(int index);
-    void duplicateLayer(int index);
+    virtual void deleteLayer(int index);
+    virtual void moveLayerUp(int index);
+    virtual void moveLayerDown(int index);
+    virtual void mergeLayerDown(int index);
+    virtual void duplicateLayer(int index);
     void switchActiveLayer(int index);
     Layer* getCurrentLayer() { return layers[selLayer]; }
+    int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename();
     void layer_flipHorizontally();
@@ -289,13 +330,29 @@ public:
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void flipAllLayersOnX();
     void flipAllLayersOnY();
-    void rescaleAllLayersFromCommand(XY size);
-    void resizeAllLayersFromCommand(XY size, bool byTile = false);
-    void resizzeAllLayersByTilecountFromCommand(XY size);
-    void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
+
+    virtual void rescaleAllLayersFromCommand(XY size);
+    virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);
+    virtual void resizzeAllLayersByTilecountFromCommand(XY size);
+    virtual void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
+
+    virtual void promptStartNetworkSession();
+    virtual void networkCanvasStateUpdated(int whichLayer);
+    void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
+    void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
+    void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
+    std::string networkReadCommand(NET_StreamSocket* socket);
+    bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
+    void networkSendCommand(NET_StreamSocket* socket, std::string commandName);
+    bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
+    void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
+    void networkSendString(NET_StreamSocket* socket, std::string s);
+    void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
+    std::string networkReadString(NET_StreamSocket* socket);
+    void endNetworkSession();
 
     void layer_newVariant();
     void layer_duplicateVariant();

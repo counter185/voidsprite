@@ -77,6 +77,7 @@ public:
     void renderBGStars();
     void openImageLoadDialog();
     void promptOpenFromURL();
+    void promptConnectToNetworkCanvas();
     void tryLoadURL(std::string url);
     void tryLoadFile(std::string path);
     void tryOpenImageFromClipboard();
