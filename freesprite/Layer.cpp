@@ -367,93 +367,35 @@ std::vector<LayerVariant> Layer::resizeByTileCount(XY tileSizesNow, XY newTileCo
     return oldVariants;
 }
 
-std::vector<LayerVariant> Layer::integerScale(XY scale)
+LayerScaleData Layer::integerScale(XY scale)
 {
     XY newSize = { w * scale.x, h * scale.y };
 
-    std::vector<LayerVariant> oldVariants = layerData;
-    std::vector<LayerVariant> scaledVariants;
-
-    std::vector<u32*> pxdsCreated;
-
-    for (auto& variant : layerData) {
-        uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
-
-        if (newPixelData != NULL) {
-            pxdsCreated.push_back(newPixelData);
-        }
-        else {
-            logerr("integerScale malloc fail");
-            g_addNotification(NOTIF_MALLOC_FAIL);
-            for (u32*& pxds : pxdsCreated) {
-                tracked_free(pxds);
-            }
-            return {};
-        }
-
-        uint32_t* oldPixelData = (uint32_t*)variant.pixelData;
-        memset(newPixelData, 0, newSize.x * newSize.y * 4);
+    return scaleGeneric(newSize, [&](u32* pxNow, u32* pxNew) {
         for (int y = 0; y < newSize.y; y++) {
             for (int x = 0; x < newSize.x; x++) {
-                newPixelData[x + (y * newSize.x)] = oldPixelData[(x / scale.x) + ((y / scale.y) * w)];
+                pxNew[x + (y * newSize.x)] = pxNow[(x / scale.x) + ((y / scale.y) * w)];
             }
         }
-        LayerVariant variantCopy = variant;
-        variantCopy.pixelData = (uint8_t*)newPixelData;
-        scaledVariants.push_back(variantCopy);
-    }
-
-    layerData = scaledVariants;
-    w = newSize.x;
-    h = newSize.y;
-    return oldVariants;
+    });
 }
 
-std::vector<LayerVariant> Layer::integerDownscale(XY scale)
+LayerScaleData Layer::integerDownscale(XY scale)
 {
     if (w % scale.x == 0 && h % scale.y == 0) {
 
         XY newSize = { w / scale.x, h / scale.y };
 
-        std::vector<LayerVariant> oldVariants = layerData;
-        std::vector<LayerVariant> scaledVariants;
-        
-        std::vector<u32*> pxdsCreated;
-
-        for (auto& variant : layerData) {
-            uint32_t* newPixelData = (uint32_t*)tracked_malloc(newSize.x * newSize.y * 4, "Layers");
-
-            if (newPixelData != NULL) {
-                pxdsCreated.push_back(newPixelData);
-            }
-            else {
-                logerr("integerDownscale malloc fail");
-                g_addNotification(NOTIF_MALLOC_FAIL);
-                for (u32*& pxds : pxdsCreated) {
-                    tracked_free(pxds);
-                }
-                return {};
-            }
-
-            uint32_t* oldPixelData = (uint32_t*)variant.pixelData;
-            memset(newPixelData, 0, newSize.x * newSize.y * 4);
+        return scaleGeneric(newSize, [&](u32* pxNow, u32* pxNew) {
             for (int y = 0; y < newSize.y; y++) {
                 for (int x = 0; x < newSize.x; x++) {
-                    newPixelData[x + (y * newSize.x)] = oldPixelData[(x * scale.x) + ((y * scale.y) * w)];
+                    pxNew[x + (y * newSize.x)] = pxNow[(x * scale.x) + ((y * scale.y) * w)];
                 }
             }
-            LayerVariant variantCopy = variant;
-            variantCopy.pixelData = (uint8_t*)newPixelData;
-            scaledVariants.push_back(variantCopy);
-        }
-
-        layerData = scaledVariants;
-        w = newSize.x;
-        h = newSize.y;
-        return oldVariants;
+        });
     }
     else {
-        return {};
+        return {false};
     }
 }
 

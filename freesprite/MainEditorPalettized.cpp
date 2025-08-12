@@ -397,7 +397,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDL_SCANCODE_N, { "Integer scale canvas",
                             [this]() {
-                                g_addPopup(new PopupIntegerScale(this, "Integer scale canvas", "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(this, "Integer scale canvas", "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },

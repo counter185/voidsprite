@@ -8,6 +8,7 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
 
     this->popupEvtID = event_id;
     this->callback = callback;
+    this->result = defaultValues;
 
     UIButton* nbutton = actionButton(TL("vsp.cmn.apply"));
     nbutton->setCallbackListener(0, this);
@@ -17,27 +18,35 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
 
     tboxX = new UITextField();
     tboxX->position = XY{ 20, 80 };
-    tboxX->setText(std::to_string(defaultValues.x));
     tboxX->isNumericField = true;
     tboxX->wxWidth = 120;
+    tboxX->setText(std::to_string(defaultValues.x));
+    tboxX->onTextChangedCallback = [this](UITextField* txf, std::string data) {
+        if (!txf->textEmpty()) {
+            result.x = std::stoi(data);
+            resultUpdated(result);
+        }
+    };
+    
     wxsManager.addDrawable(tboxX);
 
     tboxY = new UITextField();
     tboxY->position = XY{ 160, 80 };
-    tboxY->setText(std::to_string(defaultValues.y));
     tboxY->isNumericField = true;
     tboxY->wxWidth = 120;
-    tboxY->setCallbackListener(2, this);
+    tboxY->setText(std::to_string(defaultValues.y));
+    tboxY->onTextChangedCallback = [this](UITextField* txf, std::string data) {
+        if (!txf->textEmpty()) {
+            result.y = std::stoi(data);
+            resultUpdated(result);
+        }
+    };
+    tboxY->onTextChangedConfirmCallback = [this](UITextField*, std::string data) {
+        eventButtonPressed(0);
+    };
     wxsManager.addDrawable(tboxY);
 
     makeTitleAndDesc(tt, tx);
-}
-
-void PopupTileGeneric::eventTextInputConfirm(int evt_id, std::string data)
-{
-    if (evt_id == 2) {
-        eventButtonPressed(0);
-    }
 }
 
 void PopupTileGeneric::eventButtonPressed(int evt_id) {

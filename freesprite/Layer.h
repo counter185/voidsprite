@@ -533,12 +533,12 @@ public:
     /// </summary>
     /// <param name="to">Target dimensions</param>
     /// <returns>Old pixel data</returns>
-    LayerScaleData scaleGeneric(XY newSize, std::function<void(u32*,u32*)>);
+    LayerScaleData scaleGeneric(XY newSize, std::function<void(u32* pxNow,u32* pxNew)>);
     LayerScaleData resize(XY to);
     LayerScaleData resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
     std::vector<LayerVariant> resizeByTileCount(XY tileSizesNow, XY newTileCount);
-    std::vector<LayerVariant> integerScale(XY scale);
-    std::vector<LayerVariant> integerDownscale(XY scale);
+    LayerScaleData integerScale(XY scale);
+    LayerScaleData integerDownscale(XY scale);
 
     ScanlineMap wandSelectAt(XY pos);
     void wandSelectWithOperationAt(XY pos, std::function<void(XY)> foreachPoint);

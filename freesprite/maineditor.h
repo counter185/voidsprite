@@ -330,6 +330,7 @@ public:
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void flipAllLayersOnX();
     void flipAllLayersOnY();
+
     void rescaleAllLayersFromCommand(XY size);
     void resizeAllLayersFromCommand(XY size, bool byTile = false);
     void resizzeAllLayersByTilecountFromCommand(XY size);

@@ -938,7 +938,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
                             [this]() {
-                                g_addPopup(new PopupIntegerScale(this, TL("vsp.maineditor.intscale"), "Scale:", XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(this, TL("vsp.maineditor.intscale"), "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
@@ -2829,12 +2829,37 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         return;
     }
 
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
-    for (int x = 0; x < layers.size(); x++) {
+    int nLayers = layers.size();
+    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
+    for (int x = 0; x < nLayers; x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldLayerData = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
-        layers[x]->markLayerDirty();
+        layerResizeData[x].oldLayerData = layers[x]->layerData;
     }
+
+    std::map<Layer*, LayerScaleData> createdVariants;
+
+    for (int x = 0; x < nLayers; x++) {
+        Layer* target = layers[x];
+        LayerScaleData scaleResult = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
+        if (scaleResult.success) {
+            createdVariants[target] = scaleResult;
+        }
+        else {
+            for (auto& [layer, variants] : createdVariants) {
+                for (auto& variant : variants.scaledVariants) {
+                    tracked_free(variant.pixelData);
+                }
+            }
+            return;
+        }
+
+        target->markLayerDirty();
+    }
+
+    for (auto& [layer, variants] : createdVariants) {
+        layer->setLayerData(variants.scaledVariants, variants.newSize);
+    }
+
     canvas.dimensions = { layers[0]->w, layers[0]->h };
 
     UndoStackElement undoData{};
