@@ -166,7 +166,7 @@
     {"vsp.launchpad.nav.webmanual", "Open web manual"},
     {"vsp.launchpad.nav.newwindow", "New window"},
     {"vsp.launchpad.nav.openurl", "Open from URL"},
-    {"vsp.launchpad.nav.connecttocollab", "Connect to network canvas"},
+    {"vsp.launchpad.nav.connecttocollab", "Connect to network canvas [BETA]"},
 
     {"vsp.launchpad.popup.openfromurl", "Open from URL"},
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},
@@ -259,7 +259,7 @@
     {"vsp.maineditor.nav.layer.newvariant", "New empty layer variant"},
     {"vsp.maineditor.nav.layer.copyvariant", "Duplicate current layer variant"},
     {"vsp.maineditor.nav.layer.renvariant", "Rename current layer variant"},
-    {"vsp.maineditor.startcollab", "Start network canvas server"},
+    {"vsp.maineditor.startcollab", "Start network canvas server [BETA]"},
 
     //screen: network editor
     {"vsp.collabeditor", "Network Editor"},
