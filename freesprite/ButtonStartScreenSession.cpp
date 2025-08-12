@@ -24,12 +24,12 @@ void ButtonStartScreenSession::render(XY pos)
     
     if (isLinked) {
         SDL_SetRenderDrawColor(g_rd, 0x93, 0xD2, 0xFF, isActive ? 255 : 0x60);
-        drawLine({ r.x, r.y }, { r.x,r.y + r.h-1 });
-        drawLine({ r.x, r.y }, { r.x + r.w-1,r.y });
+        drawLine({ r.x, r.y }, { r.x,r.y + r.h-2 });
+        drawLine({ r.x, r.y }, { r.x + r.w-2,r.y });
         r.x += 2;
         r.y += 2;
-        r.w -= 2;
-        r.h -= 2;
+        r.w -= 3;
+        r.h -= 3;
     }
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, isActive ? 0x80 : 0x20);
