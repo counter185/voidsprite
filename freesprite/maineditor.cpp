@@ -2755,17 +2755,37 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
         }
     }
 
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[layers.size()];
-    for (int x = 0; x < layers.size(); x++) {
+    int nLayers = layers.size();
+    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
+    for (int x = 0; x < nLayers; x++) {
         layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        if (byTile) {
-            layerResizeData[x].oldLayerData = layers[x]->resizeByTileSizes(tileDimensions, size);
+        layerResizeData[x].oldLayerData = layers[x]->layerData;
+    }
+
+    std::map<Layer*, LayerScaleData> createdVariants;
+
+    for (int x = 0; x < nLayers; x++) {
+        Layer* target = layers[x];
+        LayerScaleData scaleResult = byTile ? layers[x]->resizeByTileSizes(tileDimensions, size) : layers[x]->resize(size);
+        if (scaleResult.success) {
+            createdVariants[target] = scaleResult;
         }
         else {
-            layerResizeData[x].oldLayerData = layers[x]->resize(size);
+            for (auto& [layer, variants] : createdVariants) {
+                for (auto& variant : variants.scaledVariants) {
+                    tracked_free(variant.pixelData);
+                }
+            }
+            return;
         }
-        layers[x]->markLayerDirty();
+        
+        target->markLayerDirty();
     }
+
+    for (auto& [layer, variants] : createdVariants) {
+        layer->setLayerData(variants.scaledVariants, variants.newSize);
+    }
+
     canvas.dimensions = { layers[0]->w, layers[0]->h };
     
     UndoStackElement undoData{};

@@ -18,6 +18,12 @@ struct LayerUndoData {
     u8* data;
 };
 
+struct LayerScaleData {
+    bool success = false;
+    XY newSize;
+    std::vector<LayerVariant> scaledVariants;
+};
+
 class Layer
 {
 protected:
@@ -161,6 +167,8 @@ public:
         }
         return ret;
     }
+
+    void setLayerData(std::vector<LayerVariant> data, XY dimensions);
 
     void markLayerDirty() {
         for (auto& [rd, dirty] : renderData) {
@@ -525,8 +533,9 @@ public:
     /// </summary>
     /// <param name="to">Target dimensions</param>
     /// <returns>Old pixel data</returns>
-    std::vector<LayerVariant> resize(XY to);
-    std::vector<LayerVariant> resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
+    LayerScaleData scaleGeneric(XY newSize, std::function<void(u32*,u32*)>);
+    LayerScaleData resize(XY to);
+    LayerScaleData resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
     std::vector<LayerVariant> resizeByTileCount(XY tileSizesNow, XY newTileCount);
     std::vector<LayerVariant> integerScale(XY scale);
     std::vector<LayerVariant> integerDownscale(XY scale);
