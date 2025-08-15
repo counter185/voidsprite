@@ -344,7 +344,7 @@ inline void g_setupIO() {
     }
 
 
-    voidsnExporter = exVOIDSNv5;
+    voidsnExporter = exVOIDSNv6;
 
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString p) {
