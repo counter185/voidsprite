@@ -47,6 +47,8 @@ void PopupListRecoveryAutosaves::refreshList()
     for (auto& f : autosaveFiles) {
         UIButton* b = new UIButton();
         b->text = fileNameFromPath(convertStringToUTF8OnWin32(f));
+        b->icon = g_iconFilePickerSupportedFile;
+        b->tooltip = bytesToFriendlyString(std::filesystem::file_size(f));
         b->position = XY{ 0,x };
         x += 30;
         b->wxWidth = scrollPanel->wxWidth - 40;
