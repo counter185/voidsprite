@@ -33,9 +33,9 @@ ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, Na
         if (keyBinds[editorSection].icon != NULL) {
             sectionButton->icon = keyBinds[editorSection].icon;
         }
-		sectionButton->onClickCallback = [this, editorSection](UIButton* btn) {
-			this->openSubmenu(editorSection);
-		};
+        sectionButton->onClickCallback = [this, editorSection](UIButton* btn) {
+            this->openSubmenu(editorSection);
+        };
         keyBinds[editorSection].button = sectionButton;
         subWidgets.addDrawable(sectionButton);
         x += xDist;
@@ -56,7 +56,7 @@ void ScreenWideNavBar::render(XY position) {
                 if (section.button != NULL) {
                     XY underButton = xyAdd(section.button->position, { 0, (int)(section.button->wxHeight * XM1PW3P1(focusTimer.percentElapsedTime(200))) });
                     SDL_Rect underButtonRect = { underButton.x, underButton.y, section.button->wxWidth, 60 };
-					Fill::ThreePointVerticalGradient(0xFF000000, 0xFF000000, 0xE0000000, 0xE0000000, 0x00000000, 0x00000000).fill(underButtonRect);
+                    Fill::ThreePointVerticalGradient(0xFF000000, 0xFF000000, 0xE0000000, 0xE0000000, 0x00000000, 0x00000000).fill(underButtonRect);
                     g_fnt->RenderString(std::format("[{}]", SDL_GetScancodeName(scancode)), underButton.x + 5, underButton.y, {200,200,200,(u8)(220 * focusTimer.percentElapsedTime(200))}, 26);
                 }
             }
@@ -70,9 +70,9 @@ void ScreenWideNavBar::render(XY position) {
                 else {
                     UIButton* btn = submenuActionsNow[i];
                     XY buttonEndpoint = xyAdd(xyAdd(submenuPanel->position, btn->position), { (int)(btn->wxWidth - 30 + (30 * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)))), 0 });
-					SDL_Rect rightOfButtonRect = { buttonEndpoint.x, buttonEndpoint.y, 90, btn->wxHeight };
-					Fill::Gradient(0xFF000000, 0x00000000, 0xFF000000, 0x00000000).fill(rightOfButtonRect);
-					g_fnt->RenderString(std::format("[{}]", SDL_GetScancodeName(subScancode)), buttonEndpoint.x + 5, buttonEndpoint.y, { 230, 230, 230, (u8)(220 * submenuOpenTimer.percentElapsedTime(200)) }, 18);
+                    SDL_Rect rightOfButtonRect = { buttonEndpoint.x, buttonEndpoint.y, 90, btn->wxHeight };
+                    Fill::Gradient(0xFF000000, 0x00000000, 0xFF000000, 0x00000000).fill(rightOfButtonRect);
+                    g_fnt->RenderString(std::format("[{}]", SDL_GetScancodeName(subScancode)), buttonEndpoint.x + 5, buttonEndpoint.y, { 230, 230, 230, (u8)(220 * submenuOpenTimer.percentElapsedTime(200)) }, 18);
                 }
                 i++;
             }
@@ -149,29 +149,32 @@ void ScreenWideNavBar::updateCurrentSubmenu() {
     }
     else {
         submenuPanel->enabled = true;
-		submenuActionsNow.clear();
-        int y = 0;
-        int x = 10 + (std::find(submenuOrder.begin(), submenuOrder.end(), currentSubmenuOpen) - submenuOrder.begin()) * 120;
-        submenuPanel->position = { x, 0 };
+        auto submenuNow = keyBinds[(SDL_Scancode)currentSubmenuOpen];
+        submenuActionsNow.clear();
+        XY submenuOrigin = { submenuNow.button->position.x, 0 };
 
         //find the button width
         int buttonW = 30;
-        for (auto& [scancode, action] : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
+        for (auto& [scancode, action] : submenuNow.actions) {
             buttonW = ixmax(g_fnt->StatStringDimensions(action.name, 18).x + 40, buttonW);
         }
+        if ((submenuOrigin.x + buttonW) > g_windowW) {
+            submenuOrigin.x = g_windowW - buttonW;
+        }
+        submenuPanel->position = { submenuOrigin.x, 0 };
 
         //generate the buttons
-        for (auto& [scancode, action] : keyBinds[(SDL_Scancode)currentSubmenuOpen].actions) {
+        for (auto& [scancode, action] : submenuNow.actions) {
             UIButton* newBtn = new UIButton(action.name);
-            std::vector<SDL_Scancode> order = keyBinds[(SDL_Scancode)currentSubmenuOpen].order;
-            newBtn->position = XY{ 0, order.empty() ? y : (int)((std::find(order.begin(), order.end(), scancode) - order.begin()) * newBtn->wxHeight) };
-            y += newBtn->wxHeight;
+            std::vector<SDL_Scancode> order = submenuNow.order;
+            newBtn->position = XY{ 0, order.empty() ? submenuOrigin.y : (int)((std::find(order.begin(), order.end(), scancode) - order.begin()) * newBtn->wxHeight) };
+            submenuOrigin.y += newBtn->wxHeight;
             newBtn->wxWidth = buttonW;
             newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);
-			newBtn->onClickCallback = [this, scancode](UIButton*) {
-				this->doSubmenuAction((SDL_Scancode)scancode);
-			};
-			submenuActionsNow.push_back(newBtn);
+            newBtn->onClickCallback = [this, scancode](UIButton*) {
+                this->doSubmenuAction((SDL_Scancode)scancode);
+            };
+            submenuActionsNow.push_back(newBtn);
             submenuPanel->subWidgets.addDrawable(newBtn);
         }
     }
