@@ -36,6 +36,7 @@ PlatformNativePathString newTempFile();
 #include "io/io_png.h"
 #include "io/io_aseprite.h"
 #include "io/io_piskel.h"
+#include "io/io_pixil.h"
 #include "io/io_lpe.h"
 #include "io/io_pix2d.h"
 #include "io/io_gim.h"
@@ -348,7 +349,7 @@ inline void g_setupIO() {
 
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString p) {
-			return magicVerify(1, "voidsprite")(p) || magicVerify(9, "/VOIDSN.META/")(p)
+            return magicVerify(1, "voidsprite")(p) || magicVerify(9, "/VOIDSN.META/")(p)
                    || magicVerify(0, "\x01")(p) || magicVerify(0, "\x02")(p);
         }));
     g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v6", ".voidsnv6", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
@@ -368,6 +369,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("Lospec Pixel Editor", ".lpe", &readLPE, exLPE));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pix2D", ".pix2d", &readPix2D, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, exPiskel));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pixil", ".pixil", &readPIXIL, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(4, "\xE0\xA5")));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
@@ -455,7 +457,7 @@ inline void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("PSP/Vita GXT", ".gxt", &readGXT, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("Nintendo 3DS CXI (dump icon)", ".cxi", &read3DSCXIIcon, NULL));
     for (FileImporter* i : g_pluginRegisteredFileImporters) {
-		g_fileImporters.push_back(i);
+        g_fileImporters.push_back(i);
     }
     g_fileImporters.push_back(FileImporter::flatImporter("SDL_Image", "", &readSDLImage, NULL, FORMAT_RGB, 
         [](PlatformNativePathString p) {return true; }));
@@ -464,11 +466,11 @@ inline void g_setupIO() {
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("paint.net palette", ".txt", &readPltPDNTXT,
-		magicVerify(0, ";paint.net Palette File")));
+        magicVerify(0, ";paint.net Palette File")));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("JASC-PAL palette", ".pal", &readPltJASCPAL, 
-		magicVerify(0, "JASC-PAL")));
+        magicVerify(0, "JASC-PAL")));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("GIMP GPL palette", ".gpl", &readPltGIMPGPL, 
-		magicVerify(0, "GIMP Palette")));
+        magicVerify(0, "GIMP Palette")));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("Pixel Studio palette", ".palette", &readPltPixelStudioPALETTE));
 
 

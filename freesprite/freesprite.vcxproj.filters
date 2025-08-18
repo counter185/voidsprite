@@ -684,6 +684,9 @@
     <ClCompile Include="PopupSetupNetworkCanvas.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_pixil.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1315,6 +1318,9 @@
     </ClInclude>
     <ClInclude Include="PopupSetupNetworkCanvas.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_pixil.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

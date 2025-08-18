@@ -45,7 +45,8 @@ Layer* readPNGFromBase64String(std::string b64)
             uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
             return readPNGFromMem(imageData, pixelsb64.size());
         }
-        catch (std::exception&) {
+        catch (std::exception& e) {
+            logerr(std::format("Error reading base64 string:\n {}", e.what()));
             return NULL;
         }
     }
