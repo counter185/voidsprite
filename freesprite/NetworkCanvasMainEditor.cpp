@@ -68,6 +68,8 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             reallocLayers(canvasSize, numLayers);
         }
 
+        tileDimensions = { ixmax(0, tileGridWidth), ixmax(0, tileGridHeight) };
+
         int i = 0;
         for (auto& l : layerData) {
             Layer* layer = layers[i++];
