@@ -196,6 +196,7 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSet
 {
     targetIP = displayIP;
     thisClientInfo = new NetworkCanvasClientInfo();
+    thisClientInfo->clientIP = "localhost";
     thisClientInfo->clientName = userData.username;
     thisClientInfo->clientColor = userData.userColor;
     networkRunning = true;

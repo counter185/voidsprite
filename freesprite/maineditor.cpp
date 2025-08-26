@@ -2942,6 +2942,19 @@ void MainEditor::exportTilesIndividually()
     }
 }
 
+std::string MainEditor::networkGetSocketAddress(NET_StreamSocket* sock)
+{
+    NET_Address* addr = NET_GetStreamSocketAddress(sock);
+    DoOnReturn a([&]() { NET_UnrefAddress(addr); });
+    NET_GetAddressString(addr);
+    int resolved = NET_WaitUntilResolved(addr, -1);
+    if (resolved == 1) {
+        const char* clientAddressStr = NET_GetAddressString(addr);
+        return clientAddressStr != NULL ? std::string(clientAddressStr) : "<address unknown>";
+    }
+    return "<address unknown>";
+}
+
 void MainEditor::promptStartNetworkSession()
 {
     if (networkCanvasThread != NULL) {
@@ -2959,6 +2972,7 @@ void MainEditor::promptStartNetworkSession()
         wxsManager.addDrawable(networkCanvasHostPanelContainer);
 
         thisClientInfo = new NetworkCanvasClientInfo;
+        thisClientInfo->clientIP = "localhost";
 
         networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this, d);
 
@@ -3004,13 +3018,7 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
             SDL_Delay(100);
         }
         else {
-            NET_Address* clientAddress = NET_GetStreamSocketAddress(clientSocket);
-            NET_GetAddressString(clientAddress);
-            int resolved = NET_WaitUntilResolved(clientAddress, -1);
-            if (resolved == 1) {
-                const char* clientAddressStr = NET_GetAddressString(clientAddress);
-                loginfo(std::format("New client connected: {}", clientAddressStr));
-            }
+            loginfo(std::format("New client connected: {}", networkGetSocketAddress(clientSocket)));
             std::thread* responderThread = new std::thread(&MainEditor::networkCanvasServerResponderThread, this, clientSocket);
             g_startNewMainThreadOperation([this, responderThread]() {
                 this->networkCanvasResponderThreads.push_back(responderThread);
@@ -3032,6 +3040,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     //todo: delete this thread from the responder threads list when done
     NetworkCanvasClientInfo clientInfo;
     clientInfo.uid = nextClientUID++;
+    clientInfo.clientIP = networkGetSocketAddress(clientSocket);
 
     networkClientsListMutex.lock();
     networkClients.push_back(&clientInfo);
@@ -3504,6 +3513,7 @@ void EditorNetworkCanvasHostPanel::updateClientList()
     for (auto*& client : parent->networkClients) {
         UIButton* clientButton = new UIButton();
         clientButton->text = std::string(client == parent->thisClientInfo ? UTF8_DIAMOND : "") + client->clientName;
+        clientButton->tooltip = client->clientIP;
         clientButton->colorTextFocused = clientButton->colorTextUnfocused = uint32ToSDLColor(0xFF000000|client->clientColor);
         clientButton->position = { 0, clientY };
         clientButton->onClickCallback = [this, client](UIButton* b) {

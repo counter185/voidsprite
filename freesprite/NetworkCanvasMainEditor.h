@@ -53,6 +53,7 @@ public:
     void resizzeAllLayersByTilecountFromCommand(XY size) override;
     void integerScaleAllLayersFromCommand(XY scale, bool downscale = false) override;
 
+    void tickAutosave() override {};    //don't do local recovery autosaves in client sessions... (maybe an option in settings?)
     void promptStartNetworkSession() override;
 
     void postErrorHostOnly();

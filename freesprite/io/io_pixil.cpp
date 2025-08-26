@@ -35,7 +35,7 @@ MainEditor* readPIXIL(PlatformNativePathString path)
                 try {
                     double opacity = std::stod(layer["opacity"].get<std::string>());
                 }
-                catch (std::exception& e) {
+                catch (std::exception&) {
                     double opacity = layer["opacity"].get<double>();
                 }
                 std::string base64Data = layer["src"];

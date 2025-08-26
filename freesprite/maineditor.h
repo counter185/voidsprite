@@ -84,6 +84,7 @@ struct IsolatedFragmentPoint {
 struct NetworkCanvasClientInfo {
     u32 uid = -1;
     std::string clientName = "User";
+    std::string clientIP = "??";
     XY cursorPosition = {0,0};
     u64 lastReportTime = 0;
     u32 clientColor = 0xC0E1FF;
@@ -288,7 +289,7 @@ public:
     virtual uint32_t getActiveColor();
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
-    void tickAutosave();
+    virtual void tickAutosave();
     void createRecoveryAutosave();
     bool usingAltBG();
     void setAltBG(bool useAltBG);
@@ -339,6 +340,7 @@ public:
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
 
+    std::string networkGetSocketAddress(NET_StreamSocket* sock);
     virtual void promptStartNetworkSession();
     virtual void networkCanvasStateUpdated(int whichLayer);
     void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
