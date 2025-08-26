@@ -88,6 +88,9 @@ struct NetworkCanvasClientInfo {
     XY cursorPosition = {0,0};
     u64 lastReportTime = 0;
     u32 clientColor = 0xC0E1FF;
+
+    //host hints
+    bool hostKick = false;
 };
 
 /*struct Frame {
@@ -354,6 +357,7 @@ public:
     void networkSendString(NET_StreamSocket* socket, std::string s);
     void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
     std::string networkReadString(NET_StreamSocket* socket);
+    void networkCanvasKickUID(u32 uid);
     void endNetworkSession();
 
     void layer_newVariant();

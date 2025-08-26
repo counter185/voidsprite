@@ -44,6 +44,7 @@
 #include "PopupApplyFilter.h"
 #include "PopupExportScaled.h"
 #include "PopupFilePicker.h"
+#include "PopupContextMenu.h"
 #include "PopupSetupNetworkCanvas.h"
 
 #if defined(__unix__)
@@ -3046,7 +3047,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     networkClients.push_back(&clientInfo);
     networkClientsListMutex.unlock();
 
-    while (networkRunning) {
+    while (networkRunning && !clientInfo.hostKick) {
         try {
             std::string commandStr = networkReadCommand(clientSocket);
             networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
@@ -3297,6 +3298,22 @@ std::string MainEditor::networkReadString(NET_StreamSocket* socket)
     }
 }
 
+void MainEditor::networkCanvasKickUID(u32 uid)
+{
+    if (thisClientInfo != NULL && thisClientInfo->uid == uid) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.kickhost")));
+        return;
+    }
+    networkClientsListMutex.lock();
+    for (auto& client : networkClients) {
+        if (client->uid == uid) {
+            client->hostKick = true;
+            break;
+        }
+    }
+    networkClientsListMutex.unlock();
+}
+
 void MainEditor::endNetworkSession()
 {
     networkRunning = false;
@@ -3518,6 +3535,16 @@ void EditorNetworkCanvasHostPanel::updateClientList()
         clientButton->position = { 0, clientY };
         clientButton->onClickCallback = [this, client](UIButton* b) {
             parent->canvas.centerOnPoint(client->cursorPosition);
+        };
+        u32 uid = client->uid;
+        clientButton->onRightClickCallback = [this, uid](UIButton* b) {
+            g_openContextMenu({
+                {TL("vsp.collabeditor.ctx.kickuser"),
+                    [this, uid](){
+                        parent->networkCanvasKickUID(uid);
+                    }
+                }
+            });
         };
         clientList->subWidgets.addDrawable(clientButton);
 
