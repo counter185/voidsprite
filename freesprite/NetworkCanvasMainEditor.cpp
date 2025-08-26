@@ -42,7 +42,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
         closeNextTick = true;
     });
 #else
-	logerr("networkCanvasClientThread called on non-network build");
+    logerr("networkCanvasClientThread called on non-network build");
     closeNextTick = true;
 #endif
 }
@@ -277,7 +277,7 @@ void NetworkCanvasMainEditor::promptStartNetworkSession()
 
 void NetworkCanvasMainEditor::postErrorHostOnly()
 {
-	g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.hostonly")));
+    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.hostonly")));
 }
 
 void NetworkCanvasMainEditor::endClientNetworkSession()

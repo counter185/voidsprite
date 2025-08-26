@@ -2945,6 +2945,7 @@ void MainEditor::exportTilesIndividually()
 
 std::string MainEditor::networkGetSocketAddress(NET_StreamSocket* sock)
 {
+#if VSP_NETWORKING
     NET_Address* addr = NET_GetStreamSocketAddress(sock);
     DoOnReturn a([&]() { NET_UnrefAddress(addr); });
     NET_GetAddressString(addr);
@@ -2954,6 +2955,8 @@ std::string MainEditor::networkGetSocketAddress(NET_StreamSocket* sock)
         return clientAddressStr != NULL ? std::string(clientAddressStr) : "<address unknown>";
     }
     return "<address unknown>";
+#endif
+    return "";
 }
 
 void MainEditor::promptStartNetworkSession()
