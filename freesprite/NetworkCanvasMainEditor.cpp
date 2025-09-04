@@ -6,6 +6,7 @@
 
 #include "EditorLayerPicker.h"
 #include "Notification.h"
+#include "CollapsableDraggablePanel.h"
 
 using namespace nlohmann;
 
@@ -103,6 +104,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
 
         //todo: do this only when the layers update and not every frame
         mainThreadOps.add([this]() {
+            networkCanvasHostPanel->updateClientList();
             layerPicker->updateLayers();
         });
     }
@@ -209,6 +211,12 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSet
     setUpWidgets();
     recenterCanvas();
     initLayers();
+
+    networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this, true);
+    networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.collabhosthost.title"), networkCanvasHostPanel);
+    networkCanvasHostPanelContainer->position.y = 64;
+    networkCanvasHostPanelContainer->position.x = 420;
+    wxsManager.addDrawable(networkCanvasHostPanelContainer);
 }
 
 void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)

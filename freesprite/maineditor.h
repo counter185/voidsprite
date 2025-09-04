@@ -102,8 +102,9 @@ class EditorNetworkCanvasHostPanel : public Panel {
 protected:
     MainEditor* parent = NULL;
     ScrollingPanel* clientList = NULL;
+    bool clientSide = false;
 public:
-    EditorNetworkCanvasHostPanel(MainEditor* caller);
+    EditorNetworkCanvasHostPanel(MainEditor* caller, bool clientSide = false);
 
     void render(XY position) override;
 

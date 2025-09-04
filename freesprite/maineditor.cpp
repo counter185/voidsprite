@@ -3496,8 +3496,9 @@ void MainEditor::layer_fillActiveColor()
     });
 }
 
-EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller)
+EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller, bool clientSide)
 {
+    this->clientSide = clientSide;
     parent = caller;
     wxWidth = 300;
     wxHeight = 200;
@@ -3532,23 +3533,25 @@ void EditorNetworkCanvasHostPanel::updateClientList()
     parent->networkClientsListMutex.lock();
     for (auto*& client : parent->networkClients) {
         UIButton* clientButton = new UIButton();
-        clientButton->text = std::string(client == parent->thisClientInfo ? UTF8_DIAMOND : "") + client->clientName;
-        clientButton->tooltip = client->clientIP;
+        clientButton->text = std::string((clientSide ? (client->uid == parent->thisClientInfo->uid) : (client == parent->thisClientInfo)) ? UTF8_DIAMOND : "") + client->clientName;
         clientButton->colorTextFocused = clientButton->colorTextUnfocused = uint32ToSDLColor(0xFF000000|client->clientColor);
         clientButton->position = { 0, clientY };
         clientButton->onClickCallback = [this, client](UIButton* b) {
             parent->canvas.centerOnPoint(client->cursorPosition);
         };
         u32 uid = client->uid;
-        clientButton->onRightClickCallback = [this, uid](UIButton* b) {
-            g_openContextMenu({
-                {TL("vsp.collabeditor.ctx.kickuser"),
-                    [this, uid](){
-                        parent->networkCanvasKickUID(uid);
+        if (!clientSide) {
+            clientButton->tooltip = client->clientIP;
+            clientButton->onRightClickCallback = [this, uid](UIButton* b) {
+                g_openContextMenu({
+                    {TL("vsp.collabeditor.ctx.kickuser"),
+                        [this, uid]() {
+                            parent->networkCanvasKickUID(uid);
+                        }
                     }
-                }
-            });
-        };
+                    });
+                };
+        }
         clientList->subWidgets.addDrawable(clientButton);
 
         clientY += 30;
