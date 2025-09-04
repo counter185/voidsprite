@@ -125,7 +125,7 @@ jobs:
     - name: install g++13
       run: brew install gcc@13
     - name: install pkgconfig and cmake
-      run: brew install pkgconfig cmake
+      run: brew install pkgconfig
     - name: install devlibs
       run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
     - name: run build
@@ -150,7 +150,7 @@ jobs:
       run: brew install gcc@14
 
     - name: install pkgconfig and cmake
-      run: brew install pkgconfig cmake
+      run: brew install pkgconfig
 
     - name: install devlibs
       run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
