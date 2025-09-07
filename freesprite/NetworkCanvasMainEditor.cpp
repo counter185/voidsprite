@@ -46,7 +46,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
     networkRunning = false;
 
     NET_DestroyStreamSocket(clientSocket);
-    g_startNewMainThreadOperation([this]() {
+    mainThreadOps.add([this]() {
         g_addNotification(Notification(TL("vsp.collabeditor.error.disconnected"), ""));
         closeNextTick = true;
     });
@@ -163,7 +163,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
     else if (command == "CHTD") {
         std::string jsonStr = networkReadString(clientSocket);
         networkCanvasCurrentChatState->fromJson(jsonStr);
-        g_startNewMainThreadOperation([this]() {
+        mainThreadOps.add([this]() {
             if (networkCanvasChatPanel != NULL) {
                 networkCanvasChatPanel->updateChat();
             }
@@ -213,7 +213,7 @@ void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
     if (selLayer >= layers.size()) {
         selLayer = ixmax(0, layers.size() - 1);
     }
-    g_startNewMainThreadOperation([this]() {
+    mainThreadOps.add([this]() {
         initLayers();
     });
 }

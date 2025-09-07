@@ -3368,7 +3368,7 @@ void MainEditor::networkCanvasSystemMessage(std::string msg)
     msgEntry.messageColor = 0xFFFFF682;
     msgEntry.timestamp = std::time(nullptr);
     ((NetworkCanvasChatHostState*)(networkCanvasCurrentChatState))->newMessage(msgEntry);
-    g_startNewMainThreadOperation([this]() {
+    mainThreadOps.add([this]() {
         if (networkCanvasChatPanel != NULL) {
             networkCanvasChatPanel->updateChat();
         }
