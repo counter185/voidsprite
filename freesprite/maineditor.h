@@ -107,6 +107,8 @@ public:
     std::vector<NetworkCanvasChatMessage> messages;
     std::atomic<u32> messagesState = 0;
 
+    virtual ~NetworkCanvasChatState() = default;
+
     void fromJson(std::string jsonStr);
 };
 class NetworkCanvasChatHostState : public NetworkCanvasChatState {
@@ -127,8 +129,8 @@ public:
 class EditorNetworkCanvasChatPanel : public Panel {
 protected:
     MainEditor* parent = NULL;
-	ScrollingPanel* chatMsgPanel = NULL;
-	bool clientSide = false;
+    ScrollingPanel* chatMsgPanel = NULL;
+    bool clientSide = false;
 public:
     EditorNetworkCanvasChatPanel(MainEditor* caller, bool clientSide = false);
 
@@ -269,7 +271,7 @@ public:
     EditorNetworkCanvasChatPanel* networkCanvasChatPanel = NULL;
     Panel* networkCanvasHostPanelContainer = NULL;
     Panel* networkCanvasChatPanelContainer = NULL;
-	NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
+    NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
@@ -401,6 +403,7 @@ public:
     void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
     std::string networkReadString(NET_StreamSocket* socket);
     void networkCanvasKickUID(u32 uid);
+    void networkCanvasSystemMessage(std::string msg);
     virtual void networkCanvasChatSendCallback(std::string content);
     void endNetworkSession();
 

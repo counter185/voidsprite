@@ -29,13 +29,14 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
 
                 networkCanvasSendLocalChanges();
             }
-            chatMsgQueueMutex.lock();
-            if (!chatMsgQueue.empty()) {
-                networkSendCommand(clientSocket, "CHTQ");
-				networkSendString(clientSocket, chatMsgQueue.front());
-				chatMsgQueue.pop();
+            {
+                std::lock_guard<std::mutex> guard(chatMsgQueueMutex);
+                if (!chatMsgQueue.empty()) {
+                    networkSendCommand(clientSocket, "CHTQ");
+                    networkSendString(clientSocket, chatMsgQueue.front());
+                    chatMsgQueue.pop();
+                }
             }
-            chatMsgQueueMutex.unlock();
         }
         catch (std::exception& e) {
             logerr(std::format("Network client error:\n {}", e.what()));
@@ -259,9 +260,9 @@ void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)
 
 void NetworkCanvasMainEditor::networkCanvasChatSendCallback(std::string content)
 {
-	chatMsgQueueMutex.lock();
-	chatMsgQueue.push(content);
-	chatMsgQueueMutex.unlock();
+    chatMsgQueueMutex.lock();
+    chatMsgQueue.push(content);
+    chatMsgQueueMutex.unlock();
 }
 
 Layer* NetworkCanvasMainEditor::newLayer()
@@ -336,5 +337,9 @@ void NetworkCanvasMainEditor::endClientNetworkSession()
     if (thisClientInfo != NULL) {
         delete thisClientInfo;
         thisClientInfo = NULL;
+    }
+    if (networkCanvasCurrentChatState != NULL) {
+        delete networkCanvasCurrentChatState;
+        networkCanvasCurrentChatState = NULL;
     }
 }

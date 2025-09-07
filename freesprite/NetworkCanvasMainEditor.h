@@ -24,7 +24,7 @@ protected:
     std::map<int,bool> clientSideChanges;
 
     std::queue<std::string> chatMsgQueue;
-	std::mutex chatMsgQueueMutex;
+    std::mutex chatMsgQueueMutex;
 
     void networkCanvasClientThread();
     void networkCanvasProcessCommandFromServer(std::string command);

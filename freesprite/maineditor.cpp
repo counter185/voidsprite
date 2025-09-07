@@ -3053,6 +3053,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     NetworkCanvasClientInfo clientInfo;
     clientInfo.uid = nextClientUID++;
     clientInfo.clientIP = networkGetSocketAddress(clientSocket);
+    bool receivedName = false;
 
     networkClientsListMutex.lock();
     networkClients.push_back(&clientInfo);
@@ -3062,6 +3063,10 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         try {
             std::string commandStr = networkReadCommand(clientSocket);
             networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
+            if (!receivedName && commandStr == "INFO") {
+                receivedName = true;
+                networkCanvasSystemMessage(std::format("{} connected", clientInfo.clientName));
+            }
         }
         catch (std::exception& e) {
             logerr(std::format("Error processing command from client: {}", e.what()));
@@ -3077,6 +3082,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         networkCanvasHostPanel->updateClientList();
     });
     g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
+    networkCanvasSystemMessage(std::format("{} disconnected", clientInfo.clientName));
     logerr(std::format("Disconnected from {}", clientInfo.clientName));
 #endif
     
@@ -3198,18 +3204,20 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
     }
     else if (command == "CHTQ") {
         std::string message = networkReadString(clientSocket);
-        NetworkCanvasChatMessage msg;
-        msg.fromColor = clientInfo->clientColor;
-        msg.fromName = clientInfo->clientName;
-        msg.message = message;
-        msg.messageColor = 0xFFFFFFFF;
-        msg.timestamp = std::time(nullptr);
-        ((NetworkCanvasChatHostState*)(networkCanvasCurrentChatState))->newMessage(msg);
-        g_startNewMainThreadOperation([this]() {
-            if (networkCanvasChatPanel != NULL) {
-                networkCanvasChatPanel->updateChat();
-            }
-        });
+        if (message.size() < 720) {
+            NetworkCanvasChatMessage msg;
+            msg.fromColor = clientInfo->clientColor;
+            msg.fromName = clientInfo->clientName;
+            msg.message = message;
+            msg.messageColor = 0xFFFFFFFF;
+            msg.timestamp = std::time(nullptr);
+            ((NetworkCanvasChatHostState*)(networkCanvasCurrentChatState))->newMessage(msg);
+            g_startNewMainThreadOperation([this]() {
+                if (networkCanvasChatPanel != NULL) {
+                    networkCanvasChatPanel->updateChat();
+                }
+            });
+        }
     }
     else {
         logerr(std::format("Unknown command from client: {}", command));
@@ -3319,7 +3327,7 @@ std::string MainEditor::networkReadString(NET_StreamSocket* socket)
 {
     u32 size;
     networkReadBytes(socket, (u8*)&size, 4);
-    if (size < 8000) {
+    if (size < 128000) {
         std::string ret;
         ret.resize(size);
         networkReadBytes(socket, (u8*)&ret[0], size);
@@ -3339,6 +3347,7 @@ void MainEditor::networkCanvasKickUID(u32 uid)
     networkClientsListMutex.lock();
     for (auto& client : networkClients) {
         if (client->uid == uid) {
+            networkCanvasSystemMessage(std::format("{} kicked", client->clientName));
             client->hostKick = true;
             break;
         }
@@ -3346,16 +3355,38 @@ void MainEditor::networkCanvasKickUID(u32 uid)
     networkClientsListMutex.unlock();
 }
 
+void MainEditor::networkCanvasSystemMessage(std::string msg)
+{
+    NetworkCanvasChatMessage msgEntry;
+    msgEntry.fromColor = 0xFF;
+    msgEntry.fromName = "";
+    msgEntry.message = std::format(UTF8_DIAMOND "{}", msg);
+    if (msgEntry.message.size() > 720) {
+        msgEntry.message = msgEntry.message.substr(0, 717);
+        msgEntry.message += "...";
+    }
+    msgEntry.messageColor = 0xFFFFF682;
+    msgEntry.timestamp = std::time(nullptr);
+    ((NetworkCanvasChatHostState*)(networkCanvasCurrentChatState))->newMessage(msgEntry);
+    g_startNewMainThreadOperation([this]() {
+        if (networkCanvasChatPanel != NULL) {
+            networkCanvasChatPanel->updateChat();
+        }
+    });
+}
+
 void MainEditor::networkCanvasChatSendCallback(std::string content)
 {
-    NetworkCanvasChatMessage msg;
-    msg.fromName = thisClientInfo->clientName;
-    msg.fromColor = thisClientInfo->clientColor;
-    msg.message = content;
-    msg.messageColor = 0xFFFFFFFF;
-    msg.timestamp = std::time(nullptr);
-    ((NetworkCanvasChatHostState*)networkCanvasCurrentChatState)->newMessage(msg);
-    networkCanvasChatPanel->updateChat();
+    if (content.size() < 720) {
+        NetworkCanvasChatMessage msg;
+        msg.fromName = thisClientInfo->clientName;
+        msg.fromColor = thisClientInfo->clientColor;
+        msg.message = content;
+        msg.messageColor = 0xFFFFFFFF;
+        msg.timestamp = std::time(nullptr);
+        ((NetworkCanvasChatHostState*)networkCanvasCurrentChatState)->newMessage(msg);
+        networkCanvasChatPanel->updateChat();
+    }
 }
 
 void MainEditor::endNetworkSession()
@@ -3374,10 +3405,21 @@ void MainEditor::endNetworkSession()
         delete thisClientInfo;
         thisClientInfo = NULL;
     }
+    //are these even required
     if (networkCanvasHostPanelContainer != NULL) {
         removeWidget(networkCanvasHostPanelContainer);
         networkCanvasHostPanelContainer = NULL;
         networkCanvasHostPanel = NULL;
+    }
+    if (networkCanvasChatPanelContainer != NULL) {
+        removeWidget(networkCanvasChatPanelContainer);
+        networkCanvasChatPanelContainer = NULL;
+        networkCanvasChatPanel = NULL;
+    }
+
+    if (networkCanvasCurrentChatState != NULL) {
+        delete networkCanvasCurrentChatState;
+        networkCanvasCurrentChatState = NULL;
     }
 }
 
@@ -3499,17 +3541,9 @@ void MainEditor::layer_selectCurrentAlpha()
     for (int y = 0; y < l->h; y++) {
         for (int x = 0; x < l->w; x++) {
             u32 px = l->getPixelAt({ x,y });
-            if (l->isPalettized) {
-                if (px != -1) {
-                    isolatedFragment.addPoint({ x,y });
-                    p++;
-                }
-            }
-            else {
-                if ((px & 0xFF000000) != 0) {
-                    isolatedFragment.addPoint({ x,y });
-                    p++;
-                }
+            if (l->isPalettized ? (px != -1) : ((px & 0xFF000000) != 0)) {
+                isolatedFragment.addPoint({ x,y });
+                p++;
             }
         }
     }
@@ -3611,8 +3645,8 @@ void NetworkCanvasChatHostState::newMessage(NetworkCanvasChatMessage msg) {
 }
 
 std::string NetworkCanvasChatHostState::toJson() {
+    std::lock_guard<std::mutex> guard(messagesMutex);
     try {
-        messagesMutex.lock();
         json jmsgs = json::array();
         for (auto& msg : messages) {
             jmsgs.push_back(json::object({
@@ -3627,20 +3661,18 @@ std::string NetworkCanvasChatHostState::toJson() {
             { "messages", jmsgs },
             { "state", (u32)messagesState }
         });
-        messagesMutex.unlock();
         return j.dump();
     }
     catch (std::exception&) {
-        messagesMutex.unlock();
         return "{}";
     }
 }
 
 void NetworkCanvasChatState::fromJson(std::string jsonStr)
 {
+    std::lock_guard<std::mutex> guard(messagesMutex);
     try {
         json j = json::parse(jsonStr);
-        messagesMutex.lock();
         messages.clear();
         for (auto& jmsg : j["messages"]) {
             NetworkCanvasChatMessage msg;
@@ -3661,13 +3693,11 @@ void NetworkCanvasChatState::fromJson(std::string jsonStr)
             msg.timestamp = jmsg.value("timestamp", 0);
             messages.push_back(msg);
         }
-        messagesMutex.unlock();
         messagesState = j.value("state", 0);
     }
     catch (std::exception&) {
         messages.clear();
         messagesState = 0;
-        messagesMutex.unlock();
     }
 }
 
@@ -3683,11 +3713,11 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
     chatMsgPanel = new ScrollingPanel();
     chatMsgPanel->position = { 5, 30 };
     chatMsgPanel->wxWidth = wxWidth - 10;
-    chatMsgPanel->wxHeight = wxHeight - 35;
+    chatMsgPanel->wxHeight = wxHeight - 35 - 35;
     subWidgets.addDrawable(chatMsgPanel);
 
     UITextField* inputField = new UITextField();
-    inputField->position = { 5, wxHeight - 30 };
+    inputField->position = { 5, wxHeight - 35 };
     inputField->wxWidth = wxWidth - 10;
     inputField->wxHeight = 30;
 
@@ -3719,17 +3749,42 @@ void EditorNetworkCanvasChatPanel::updateChat()
     parent->networkCanvasCurrentChatState->messagesMutex.lock();
     for (auto& msg : parent->networkCanvasCurrentChatState->messages) {
         UILabel* nameText = new UILabel();
-        nameText->setText(std::format("<{}>: ", msg.fromName));
+        nameText->setText(msg.fromName.empty() ? std::string("") : std::format("<{}>: ", msg.fromName));
         nameText->color = uint32ToSDLColor(0xFF000000 | msg.fromColor);
         nameText->position = { 0, msgY };
+        nameText->fontsize = 14;
         chatMsgPanel->subWidgets.addDrawable(nameText);
 
         UILabel* msgText = new UILabel();
         msgText->setText(msg.message);
         msgText->color = uint32ToSDLColor(0xFF000000 | msg.messageColor);
         msgText->position = { nameText->calcEndpoint().x, msgY};
-        chatMsgPanel->subWidgets.addDrawable(msgText);
-        msgY += 22;
+        msgText->fontsize = 14;
+        if (msgText->calcEndpoint().x > chatMsgPanel->wxWidth) {
+            std::string remainingText = msg.message;
+            UILabel* labelNow = msgText;
+            int xNow = nameText->calcEndpoint().x;
+            while (!remainingText.empty()) {
+                int chrsInLine = 1;
+                while (remainingText.size() > 1 && chrsInLine < remainingText.size() && g_fnt->StatStringEndpoint(remainingText.substr(0, chrsInLine + 1), xNow, 0, 14).x < chatMsgPanel->wxWidth) {
+                    chrsInLine++;
+                }
+                labelNow->setText(remainingText.substr(0, chrsInLine));
+                chatMsgPanel->subWidgets.addDrawable(labelNow);
+                remainingText = remainingText.substr(chrsInLine);
+
+                chrsInLine = std::max(1, chrsInLine);
+                xNow = 0;
+                labelNow = new UILabel();
+                labelNow->position = { 0, msgY += 22 };
+                labelNow->fontsize = 14;
+                labelNow->color = uint32ToSDLColor(0xFF000000 | msg.messageColor);
+            }
+        }
+        else {
+            chatMsgPanel->subWidgets.addDrawable(msgText);
+            msgY += 22;
+        }
     }
     parent->networkCanvasCurrentChatState->messagesMutex.unlock();
     chatMsgPanel->scrollToBottom();
