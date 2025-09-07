@@ -88,15 +88,54 @@ struct NetworkCanvasClientInfo {
     XY cursorPosition = {0,0};
     u64 lastReportTime = 0;
     u32 clientColor = 0xC0E1FF;
+    bool chatTyping = false;
 
     //host hints
     bool hostKick = false;
+};
+
+struct NetworkCanvasChatMessage {
+    std::string fromName;
+    u32 fromColor = 0xFFFFFF;
+    std::string message;
+    u32 messageColor = 0xFFFFFF;
+    u64 timestamp = 0;
+};
+class NetworkCanvasChatState {
+public:
+    std::mutex messagesMutex;
+    std::vector<NetworkCanvasChatMessage> messages;
+    std::atomic<u32> messagesState = 0;
+
+    void fromJson(std::string jsonStr);
+};
+class NetworkCanvasChatHostState : public NetworkCanvasChatState {
+protected:
+    void nextState() {
+        messagesState++;
+    }
+public:
+    void newMessage(NetworkCanvasChatMessage msg);
+    std::string toJson();
 };
 
 /*struct Frame {
     std::vector<Layer*> layers;
     std::vector<CommentData> comments;
 };*/
+
+class EditorNetworkCanvasChatPanel : public Panel {
+protected:
+    MainEditor* parent = NULL;
+	ScrollingPanel* chatMsgPanel = NULL;
+	bool clientSide = false;
+public:
+    EditorNetworkCanvasChatPanel(MainEditor* caller, bool clientSide = false);
+
+    void render(XY position) override;
+
+    void updateChat();
+};
 
 class EditorNetworkCanvasHostPanel : public Panel {
 protected:
@@ -227,7 +266,10 @@ public:
     NetworkCanvasClientInfo* thisClientInfo = NULL;
     std::atomic<int> nextClientUID = 0;
     EditorNetworkCanvasHostPanel* networkCanvasHostPanel = NULL;
+    EditorNetworkCanvasChatPanel* networkCanvasChatPanel = NULL;
     Panel* networkCanvasHostPanelContainer = NULL;
+    Panel* networkCanvasChatPanelContainer = NULL;
+	NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
@@ -359,6 +401,7 @@ public:
     void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
     std::string networkReadString(NET_StreamSocket* socket);
     void networkCanvasKickUID(u32 uid);
+    virtual void networkCanvasChatSendCallback(std::string content);
     void endNetworkSession();
 
     void layer_newVariant();

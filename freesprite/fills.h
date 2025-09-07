@@ -16,8 +16,8 @@ protected:
 public:
     FillType type;
     u32 fillSolidColor = 0xFFFFFFFF;
-    u32 fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR = 0xFFFFFFFF;
-    u32 fillGradientML, fillGradientMR = 0xFFFFFFFF;
+    u32 fillGradientUL = 0xFFFFFFFF, fillGradientUR = 0xFFFFFFFF, fillGradientDL = 0xFFFFFFFF, fillGradientDR = 0xFFFFFFFF;
+    u32 fillGradientML = 0xFFFFFFFF, fillGradientMR = 0xFFFFFFFF;
     std::string fillTextureVCKey = "";
     HotReloadableTexture* fillTexture = NULL;
 

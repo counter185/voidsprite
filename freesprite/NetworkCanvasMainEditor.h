@@ -23,6 +23,9 @@ protected:
     std::mutex clientSideChangesMutex;
     std::map<int,bool> clientSideChanges;
 
+    std::queue<std::string> chatMsgQueue;
+	std::mutex chatMsgQueueMutex;
+
     void networkCanvasClientThread();
     void networkCanvasProcessCommandFromServer(std::string command);
     void networkCanvasSendInfoRequest();
@@ -41,6 +44,7 @@ public:
     std::string getRPCString() override { return TL("vsp.collabeditor"); }
 
     void networkCanvasStateUpdated(int whichLayer) override;
+    void networkCanvasChatSendCallback(std::string content) override;
 
     Layer* newLayer() override;
     void deleteLayer(int index) override;

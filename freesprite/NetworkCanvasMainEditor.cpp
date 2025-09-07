@@ -29,6 +29,13 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
 
                 networkCanvasSendLocalChanges();
             }
+            chatMsgQueueMutex.lock();
+            if (!chatMsgQueue.empty()) {
+                networkSendCommand(clientSocket, "CHTQ");
+				networkSendString(clientSocket, chatMsgQueue.front());
+				chatMsgQueue.pop();
+            }
+            chatMsgQueueMutex.unlock();
         }
         catch (std::exception& e) {
             logerr(std::format("Network client error:\n {}", e.what()));
@@ -58,6 +65,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         int tileGridWidth = infoJson["tileGridWidth"];
         int tileGridHeight = infoJson["tileGridHeight"];
         int thisUID = infoJson["yourUserIDIs"];
+        u32 chatState = infoJson["chatState"];
         thisClientInfo->uid = thisUID;
         auto layerData = infoJson["layers"];
         int numLayers = layerData.size();
@@ -107,6 +115,10 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             networkCanvasHostPanel->updateClientList();
             layerPicker->updateLayers();
         });
+
+        if (chatState != networkCanvasCurrentChatState->messagesState) {
+            networkSendCommand(clientSocket, "CHTS");
+        }
     }
     else if (command == "LRDT") {
         u32 index;
@@ -146,6 +158,15 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
                 networkSendBytes(clientSocket, (u8*)&i, 4);
             }
         }
+    }
+    else if (command == "CHTD") {
+        std::string jsonStr = networkReadString(clientSocket);
+        networkCanvasCurrentChatState->fromJson(jsonStr);
+        g_startNewMainThreadOperation([this]() {
+            if (networkCanvasChatPanel != NULL) {
+                networkCanvasChatPanel->updateChat();
+            }
+        });
     }
 }
 
@@ -212,8 +233,15 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSet
     recenterCanvas();
     initLayers();
 
+    networkCanvasCurrentChatState = new NetworkCanvasChatState;
+    networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
+    networkCanvasChatPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.chat.title"), networkCanvasChatPanel);
+    networkCanvasChatPanelContainer->position.y = 64;
+    networkCanvasChatPanelContainer->position.x = 730;
+    wxsManager.addDrawable(networkCanvasChatPanelContainer);
+
     networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this, true);
-    networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.collabhosthost.title"), networkCanvasHostPanel);
+    networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.host.title"), networkCanvasHostPanel);
     networkCanvasHostPanelContainer->position.y = 64;
     networkCanvasHostPanelContainer->position.x = 420;
     wxsManager.addDrawable(networkCanvasHostPanelContainer);
@@ -227,6 +255,13 @@ void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)
     clientSideChangesMutex.lock();
     clientSideChanges[whichLayer] = true;
     clientSideChangesMutex.unlock();
+}
+
+void NetworkCanvasMainEditor::networkCanvasChatSendCallback(std::string content)
+{
+	chatMsgQueueMutex.lock();
+	chatMsgQueue.push(content);
+	chatMsgQueueMutex.unlock();
 }
 
 Layer* NetworkCanvasMainEditor::newLayer()

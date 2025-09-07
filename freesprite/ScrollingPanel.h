@@ -86,5 +86,15 @@ public:
 
     }
 
+    void scrollToBottom() {
+        XY insideArea = getContentBoxSize();
+        if (insideArea.y > wxHeight) {
+            scrollOffset.y = wxHeight - insideArea.y;
+        }
+        else {
+            scrollOffset.y = 0;
+        }
+	}
+
 };
 
