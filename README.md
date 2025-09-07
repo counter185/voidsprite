@@ -26,7 +26,7 @@ For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requir
 
 ### Linux
 
-1. Install the dependencies and their respective development packages: sdl3, sdl3_ttf, sdl3_image, libpng, pugixml, zlib, liblcf, libjxl, libhwy
+1. Install the dependencies and their respective development packages: sdl3, sdl3_ttf, sdl3_image, sdl3_net, libpng, pugixml, zlib, liblcf, libjxl, libhwy
    * Some dependencies (libpng, pugixml, zlib, liblcf) will be automatically downloaded and built during the build step if not installed - don't worry if your distro does not package them.
    * GCC/G++ 13 or later is required
 2. Install meson (note that version 0.62.2 or higher is required; Ubuntu 22.04 users will want to install a newer version directly from pip with `pip3 install --user meson`)
@@ -39,6 +39,12 @@ By default, the generated output files will be placed in `/tmp/voidsprite`. When
 #### Flatpak
 
 You can also build the program as a Flatpak, see [Flatpak README](https://github.com/counter185/voidsprite/blob/main/freesprite/linux/flatpak/README.md).
+
+### Optional dependencies
+
+Some dependencies can be disabled with build flags:
+- `-DVOIDSPRITE_JXL_ENABLED=0` will disable JPEG XL support (drops `libjxl`, `libhwy` requirement). JPEG XL might still be importable through SDL_image.
+- `-DVSP_NETWORKING=0` will disable all socket-based network features, like network canvas (drops `sdl3_net` requirement). HTTP features like update checks and downloading from Lospec are separate and will still work.
 
 ## ◆System requirements
 
