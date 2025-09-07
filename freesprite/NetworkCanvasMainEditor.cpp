@@ -339,6 +339,7 @@ void NetworkCanvasMainEditor::endClientNetworkSession()
         thisClientInfo = NULL;
     }
     if (networkCanvasCurrentChatState != NULL) {
+        networkCanvasChatPanel = NULL;
         delete networkCanvasCurrentChatState;
         networkCanvasCurrentChatState = NULL;
     }

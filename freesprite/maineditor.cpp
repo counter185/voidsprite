@@ -3412,9 +3412,9 @@ void MainEditor::endNetworkSession()
         networkCanvasHostPanel = NULL;
     }
     if (networkCanvasChatPanelContainer != NULL) {
+        networkCanvasChatPanel = NULL;
         removeWidget(networkCanvasChatPanelContainer);
         networkCanvasChatPanelContainer = NULL;
-        networkCanvasChatPanel = NULL;
     }
 
     if (networkCanvasCurrentChatState != NULL) {
