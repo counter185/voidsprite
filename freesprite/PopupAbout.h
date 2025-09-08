@@ -20,12 +20,14 @@ inline std::string listOfContributors = ""
 class PopupAbout : public BasePopup {
 public:
     PopupAbout() {
-        setSize({800, 350});
+        setSize({800, 450});
         UIButton* close = actionButton(TL("vsp.cmn.close"));
         close->onClickCallback = [this](UIButton*){ this->closePopup(); };
 
         std::string generalTabContents =
-            getVSPShortLicense();
+            getVSPShortLicense()
+            + "\n\n-----\nThe full license text is copied below:\n\n\n"
+            + getVSPFullLicense();
 
         std::string contributorTabContents =
             TL("vsp.about.contributors") + "\n"
@@ -42,7 +44,7 @@ public:
             {TL("vsp.about.tab.general"), generalTabContents},
             {TL("vsp.about.tab.contributors"), contributorTabContents},
             {TL("vsp.about.tab.systeminfo"), platformGetSystemInfo()},
-            {TL("vsp.about.tab.libs"), getAllLibsVersions()},
+            {TL("vsp.about.tab.libs"), getAllLibsVersions() + "\n" + getLibraryLicenses()},
             {TL("vsp.about.tab.fonts"), getFontLicense()},
         };
 

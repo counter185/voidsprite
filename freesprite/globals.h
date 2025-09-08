@@ -258,6 +258,7 @@ void g_closePopup(BasePopup* a);
 
 void g_pushClip(SDL_Rect r);
 void g_popClip();
+SDL_Rect g_currentClip();
 
 void g_pushRenderTarget(SDL_Texture* tex);
 void g_popRenderTarget();

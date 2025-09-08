@@ -120,6 +120,16 @@ void g_popClip() {
     SDL_RenderSetClipRect(g_rd, clips.size() == 0 ? NULL : &clips[clips.size() - 1]);
 }
 
+SDL_Rect g_currentClip()
+{
+    if (clips.empty()) {
+        return { 0,0, g_windowW, g_windowH };
+    }
+    else {
+        return clips.back();
+    }
+}
+
 std::vector<SDL_Texture*> rts;
 void g_pushRenderTarget(SDL_Texture* rt) {
     rts.push_back(rt);

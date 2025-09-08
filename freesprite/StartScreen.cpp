@@ -946,7 +946,7 @@ void StartScreen::promptConnectToNetworkCanvas()
             }
         });
 #else
-		logerr("attempted to connect on non-network build");
+        logerr("attempted to connect on non-network build");
 #endif
     };
     g_addPopup(prompt);
