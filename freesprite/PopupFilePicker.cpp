@@ -31,7 +31,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     currentDirField->position = { 10 + driveList->wxWidth, 40 };
     currentDirField->fontsize = 16;
     currentDirField->wxHeight = 26;
-    currentDirField->wxWidth = fileList->wxWidth;
+    currentDirField->wxWidth = fileList->wxWidth - 30;
     currentDirField->onTextChangedConfirmCallback = [this](UITextField* f, std::string a) {
         PlatformNativePathString p = convertStringOnWin32(a);
         if (std::filesystem::exists(p)) {
@@ -48,6 +48,38 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
         }
     };
     wxsManager.addDrawable(currentDirField);
+
+    //todo: icon
+    UIButton* newFolderButton = new UIButton("+");
+	newFolderButton->tooltip = TL("vsp.filepicker.newfolder");
+	newFolderButton->position = xyAdd(currentDirField->position, { currentDirField->wxWidth, 0 });
+	newFolderButton->wxWidth = 30;
+	newFolderButton->wxHeight = currentDirField->wxHeight;
+    newFolderButton->onClickCallback = [this](UIButton* btn) {
+        PopupTextBox* popup = new PopupTextBox(TL("vsp.filepicker.newfolder"), TL("vsp.filepicker.newfolder.desc"), TL("vsp.filepicker.newfolder.default"), 300);
+		popup->allowEmptyText = false;
+        popup->onTextInputConfirmedCallback = [this](PopupTextBox* popup, std::string text) {
+            PlatformNativePathString newFolderPath = appendPath(currentDir, convertStringOnWin32(popup->tbox->getText()));
+            try {
+                if (std::filesystem::exists(newFolderPath)) {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.folderexists")));
+                }
+                else {
+                    if (std::filesystem::create_directory(newFolderPath)) {
+                        this->populateRootAndFileList();
+                    }
+                    else {
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.cantcreatefolder")));
+                    }
+                }
+            }
+            catch (std::exception& e) {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.cantcreatefolder")));
+            }
+        };
+        g_addPopup(popup);
+	};
+	wxsManager.addDrawable(newFolderButton);
 
     UILabel* fileNameLabel = new UILabel(TL("vsp.filepicker.filename"));
     fileNameLabel->position = xyAdd(fileList->position, { 0, fileList->wxHeight + 10 });
