@@ -606,6 +606,10 @@ void MainEditorPalettized::setUpWidgets()
 
     setActiveBrush(g_brushes[0]);
     currentPattern = g_patterns[0];
+
+    if (g_lastConfirmInputWasTouch) {
+        openTouchModePanel();
+    }
 }
 
 void MainEditorPalettized::trySaveImage()

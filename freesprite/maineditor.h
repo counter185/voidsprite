@@ -310,6 +310,7 @@ public:
     void focusOnColorInputTextBox();
     void initLayers();
     virtual void setUpWidgets();
+    void openTouchModePanel();
     void makeActionBar();
     void initToolParameters();
     void addWidget(Drawable* wx);

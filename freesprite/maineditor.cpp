@@ -1141,11 +1141,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_P, { "Open touch mode panel...",
                             [this]() {
-                                if (this->touchModePanel == NULL) {
-                                    this->touchModePanel = new EditorTouchToggle(this);
-                                    this->touchModePanel->position = { g_windowW - this->touchModePanel->wxWidth - 10, g_windowH - this->touchModePanel->wxHeight - 40 };
-                                    this->addWidget(this->touchModePanel);
-                                }
+                                openTouchModePanel();
                             }
                         }
                     },
@@ -1226,6 +1222,19 @@ void MainEditor::setUpWidgets()
     //this must happen after actionbar init
     setActiveBrush(g_brushes[0]);
     currentPattern = g_patterns[0];
+
+    if (g_lastConfirmInputWasTouch) {
+        openTouchModePanel();
+    }
+}
+
+void MainEditor::openTouchModePanel()
+{
+    if (this->touchModePanel == NULL) {
+        this->touchModePanel = new EditorTouchToggle(this);
+        this->touchModePanel->position = { g_windowW - this->touchModePanel->wxWidth - 10, g_windowH - this->touchModePanel->wxHeight - 40 };
+        this->addWidget(this->touchModePanel);
+    }
 }
 
 void MainEditor::makeActionBar()

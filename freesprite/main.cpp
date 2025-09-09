@@ -361,6 +361,7 @@ int main(int argc, char** argv)
         std::vector<std::string> lospecDlTargets;
 
         while (!argsQueue.empty()) {
+
             std::string command = argsQueue.front(); argsQueue.pop();
             if (command == "--convert") {
                 if (argsQueue.size() >= 2) {
@@ -371,6 +372,13 @@ int main(int argc, char** argv)
                 else {
                     logerr("Not enough arguments for --convert operation\n  *Needed 2: <source> <destination>");
                 }
+            }
+            else if (command == "--console") {
+/*#if _WIN32
+                AttachConsole(ATTACH_PARENT_PROCESS);
+#endif*/
+                //doesn't redirect all the printfs unfortunately
+                //maybe some other time
             }
             else if (stringStartsWithIgnoreCase(command, "lospec-palette://")) {
                 lospecDlTargets.push_back(command);
@@ -799,6 +807,7 @@ int main(int argc, char** argv)
                 case SDL_EVENT_FINGER_DOWN:
                 case SDL_EVENT_FINGER_UP:
                 case SDL_EVENT_FINGER_MOTION:
+                    g_lastConfirmInputWasTouch = true;
                     if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
                         wdTarget->mouseX = evt.tfinger.x * g_windowW;
                         wdTarget->mouseY = evt.tfinger.y * g_windowH;
@@ -813,7 +822,11 @@ int main(int argc, char** argv)
                 case SDL_EVENT_PEN_UP:
                 case SDL_EVENT_PEN_BUTTON_DOWN:
                 case SDL_EVENT_PEN_BUTTON_UP:
+                    g_lastConfirmInputWasTouch = false;
                     lastPenEvent.start();
+                    break;
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                    g_lastConfirmInputWasTouch = false;
                     break;
                 }
 

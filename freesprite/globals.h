@@ -207,6 +207,7 @@ inline std::vector<RenderFilter*> g_renderFilters;
 inline bool g_windowFocused = true;
 inline bool g_fullFramerateThisFrame = false;
 inline SDL_PropertiesID g_props;
+inline bool g_lastConfirmInputWasTouch = false;
 
 extern std::vector<std::string> g_cmdlineArgs;
 
