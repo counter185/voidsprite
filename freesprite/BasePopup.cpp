@@ -55,7 +55,7 @@ void BasePopup::playPopupCloseVFX()
 
 void BasePopup::closePopup() {
     playPopupCloseVFX();
-    g_popDisposeLastPopup(false);
+    g_closePopup(this, false);
     if (callback != NULL) {
         callback->eventPopupClosed(callback_id, this);
     }

@@ -68,18 +68,14 @@ void g_addPopup(BasePopup* a) {
     g_currentWindow->popupStack.push_back(a);
     a->startTimer.start();
 }
-void g_popDisposeLastPopup(bool dispose) {
-    if (dispose) {
-        delete g_currentWindow->popupStack[g_currentWindow->popupStack.size() - 1];
-    }
-    g_currentWindow->popupStack.pop_back();
-}
-void g_closePopup(BasePopup* a) {
-    for (int x = 0; x < g_currentWindow->popupStack.size(); x++) {
-        if (g_currentWindow->popupStack[x] == a) {
+void g_closePopup(BasePopup* a, bool dispose) {
+    auto find = std::find(g_currentWindow->popupStack.begin(), g_currentWindow->popupStack.end(), a);
+    if (find != g_currentWindow->popupStack.end()) {
+        int x = find - g_currentWindow->popupStack.begin();
+        if (dispose) {
             delete g_currentWindow->popupStack[x];
-            g_currentWindow->popupStack.erase(g_currentWindow->popupStack.begin() + x);
         }
+        g_currentWindow->popupStack.erase(g_currentWindow->popupStack.begin() + x);
     }
 }
 

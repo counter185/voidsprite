@@ -4,6 +4,8 @@
 #include "PopupYesNo.h"
 #include "UIDropdown.h"
 #include "FileIO.h"
+#include "PopupContextMenu.h"
+#include "PopupTextBox.h"
 
 PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vector<std::pair<std::string, std::string>> ftypes) : mode(m), fileTypes(ftypes) {
     setSize({ 960, 540 });
@@ -211,7 +213,7 @@ void PopupFilePicker::populateRootAndFileList() {
                 return left.matchesExtension > right.matchesExtension;
             }
             else {
-                return left.displayFileName < right.displayFileName;
+                return stringToLower(left.displayFileName) < stringToLower(right.displayFileName);
             }
         });
 
@@ -222,6 +224,47 @@ void PopupFilePicker::populateRootAndFileList() {
             btn->position = {5, fileY};
             btn->wxWidth = g_fnt->StatStringDimensions(btn->text).x + 15 + 30;
             btn->wxHeight = 30;
+
+            btn->onRightClickCallback = [this, fileEntry](UIButton* btn) {
+                g_openContextMenu({
+                    NamedOperation{TL("vsp.filepicker.deletefile"), 
+                        [this, fileEntry]() {
+                            auto p = appendPath(currentDir, fileEntry.realFileName);
+                            PopupYesNo* popup = new PopupYesNo(TL("vsp.filepicker.deletefile.confirm"), 
+                                std::format("{}\n  {}", TL("vsp.filepicker.deletefile.confirm.desc"), convertStringToUTF8OnWin32(p)));
+                            popup->onFinishCallback = [this, p](PopupYesNo* popup, bool yes) {
+                                if (yes) {
+                                    try {
+                                        std::filesystem::remove_all(p);
+                                        populateRootAndFileList();
+                                    } catch (std::exception& e) {
+                                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{}\n  {}", TL("vsp.filepicker.error.deletefile"), e.what())));
+                                    }
+                                }
+                            };
+                            g_addPopup(popup);
+                        }
+                    },
+                    NamedOperation{TL("vsp.filepicker.renamefile"), 
+                        [this, fileEntry]() {
+                            auto p = appendPath(currentDir, fileEntry.realFileName);
+                            PopupTextBox* popup = new PopupTextBox(TL("vsp.filepicker.renamefile.confirm"), 
+                                std::format("{}\n  {}", TL("vsp.filepicker.renamefile.desc"), fileEntry.displayFileName),
+                                convertStringToUTF8OnWin32(fileEntry.realFileName));
+                            popup->allowEmptyText = false;
+                            popup->onTextInputConfirmedCallback = [this, p](PopupTextBox* popup, std::string newName) {
+                                try {
+                                    std::filesystem::rename(p, appendPath(currentDir, convertStringOnWin32(newName)));
+                                    populateRootAndFileList();
+                                } catch (std::exception& e) {
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{}\n  {}", TL("vsp.filepicker.error.renamefile"), e.what())));
+                                }
+                            };
+                            g_addPopup(popup);
+                        }
+                    },
+                });
+            };
 
             SDL_Color primaryColor = fileEntry.isLink ? SDL_Color{ 0xC3, 0xDB, 0xFF, 0xFF }
                                      : fileEntry.isDirectory ? SDL_Color{ 0xFF, 0xFC, 0x7B, 0xFF }

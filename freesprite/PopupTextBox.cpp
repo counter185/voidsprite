@@ -12,8 +12,10 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, std::string defaultVa
     UIButton* nbutton2 = actionButton(TL("vsp.cmn.cancel"));
     nbutton2->setCallbackListener(1, this);
 
+    XY bodyEndpoint = makeTitleAndDesc(tt, tx);
+
     tbox = new UITextField();
-    tbox->position = XY{ 20, 80 };
+    tbox->position = XY{ 20, ixmax(80, bodyEndpoint.y+10) };
     tbox->wxWidth = textFieldWidth;
     tbox->setCallbackListener(0, this);
     tbox->setText(defaultValue);
@@ -21,5 +23,4 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, std::string defaultVa
 
     wxsManager.forceFocusOn(tbox);
 
-    makeTitleAndDesc(tt, tx);
 }

@@ -421,8 +421,16 @@
     {"vsp.filepicker.nofilename", "No file name chosen."},
     {"vsp.filepicker.overwriteconfirm", "This file already exists. Overwrite?"},
     {"vsp.filepicker.folderreaderror", "Error accessing folder:"},
+    {"vsp.filepicker.deletefile", "Delete"},
+    {"vsp.filepicker.deletefile.confirm", "Delete file?"},
+    {"vsp.filepicker.deletefile.confirm.desc", "This file will be deleted:"},
+    {"vsp.filepicker.renamefile", "Rename"},
+    {"vsp.filepicker.renamefile.confirm", "Rename file?"},
+    {"vsp.filepicker.renamefile.desc", "Choose a new name for this file:"},
     {"vsp.filepicker.error.notadir", "Path is not a directory."},
     {"vsp.filepicker.error.nodir", "Directory not found."},
+    {"vsp.filepicker.error.deletefile", "Failed to delete file."},
+    {"vsp.filepicker.error.renamefile", "Failed to rename file."},
 
     //brushes/tools
     {"vsp.brush.param.size", "Size"},

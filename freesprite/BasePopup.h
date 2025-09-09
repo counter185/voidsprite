@@ -17,7 +17,7 @@ public:
     Timer64 startTimer;
 
     virtual bool takesInput() { return true; }
-	bool takesTouchEvents() override { return true; }
+    bool takesTouchEvents() override { return true; }
 
     void takeInput(SDL_Event evt) override {
         CLOSE_ON_SDL_QUIT;
@@ -58,22 +58,30 @@ protected:
 
     virtual void defaultInputAction(SDL_Event evt) {}
 
-    void makeTitleAndDesc(std::string title = "", std::string desc = "") {
+    XY makeTitleAndDesc(std::string title = "", std::string desc = "") {
         XY titlePos = { 5,5 };
         XY contentPos = { 5,50 };
+
+        XY returnEndpoint = { 0,0 };
 
         if (title != "") {
             UILabel* titleLbl = new UILabel(title);
             titleLbl->position = titlePos;
             titleLbl->fontsize = 22;
             wxsManager.addDrawable(titleLbl);
+            returnEndpoint = titleLbl->calcEndpoint();
+            returnEndpoint.y += 20;
         }
 
         if (desc != "") {
             UILabel* descLbl = new UILabel(desc);
             descLbl->position = contentPos;
             wxsManager.addDrawable(descLbl);
+            returnEndpoint = descLbl->calcEndpoint();
+            returnEndpoint.y += 20;
         }
+        
+        return returnEndpoint;
     }
 
     UIButton* actionButton(std::string text, int width = 120) {

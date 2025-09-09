@@ -254,8 +254,7 @@ void g_closeScreen(BaseScreen* screen);
 void g_switchScreen(int index);
 
 void g_addPopup(BasePopup* a);
-void g_popDisposeLastPopup(bool dispose = true);
-void g_closePopup(BasePopup* a);
+void g_closePopup(BasePopup* a, bool dispose = true);
 
 void g_pushClip(SDL_Rect r);
 void g_popClip();
