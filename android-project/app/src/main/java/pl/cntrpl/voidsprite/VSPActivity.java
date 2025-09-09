@@ -2,6 +2,7 @@ package pl.cntrpl.voidsprite;
 
 import android.Manifest;
 import android.app.Application;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.content.Intent;
@@ -32,20 +33,14 @@ public class VSPActivity extends SDLActivity {
         String appdataPath = getExternalFilesDir(null).getAbsolutePath() + "/";
         passAppdataPathString(appdataPath);
 
-        String systemInformation = "Android " + android.os.Build.VERSION.RELEASE + " (" + android.os.Build.VERSION.SDK_INT + ")\n";
+        String systemInformation = "Android " + android.os.Build.VERSION.RELEASE + " (SDK " + android.os.Build.VERSION.SDK_INT + ")\n";
+        systemInformation += String.format("CPU supported ABIs: %s\n  os.arch: %s\n", String.join(", ", Build.SUPPORTED_ABIS), System.getProperty("os.arch"));
         systemInformation += String.format("%s %s | %s %s\n", Build.MANUFACTURER, Build.PRODUCT, Build.MODEL, Build.DEVICE);
         if (Build.VERSION.SDK_INT >= 31) {
             systemInformation += String.format("SOC: %s %s\n", Build.SOC_MANUFACTURER, Build.SOC_MODEL);
         }
         passSystemInformationString(systemInformation);
 
-        // we need the all files access permission to support split sessions and all the obscure formats
-        /*if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-            startActivity(intent);
-        }*/
-        
         super.main();
     }
 

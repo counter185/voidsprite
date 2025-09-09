@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 project(my_app)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narrowing -Wno-macro-redefined -Wno-switch -Wno-inconsistent-missing-override -Wno-constant-conversion")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narrowing -Wno-macro-redefined -Wno-switch -Wno-inconsistent-missing-override -Wno-constant-conversion -Wl,-z,max-page-size=16384")
 
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
 if(DEFINED ENV{GIT_HASH})
