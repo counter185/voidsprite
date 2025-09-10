@@ -445,6 +445,7 @@
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="platform_universal.h" />
+    <ClInclude Include="platform_vita.h" />
     <ClInclude Include="PopupApplyFilter.h" />
     <ClInclude Include="PopupChooseExtsToAssoc.h" />
     <ClInclude Include="PopupContextMenu.h" />

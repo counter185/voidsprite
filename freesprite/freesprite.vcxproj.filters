@@ -1322,6 +1322,9 @@
     <ClInclude Include="io\io_pixil.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
+    <ClInclude Include="platform_vita.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
