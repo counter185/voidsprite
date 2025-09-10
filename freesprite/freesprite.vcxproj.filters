@@ -687,6 +687,9 @@
     <ClCompile Include="io\io_pixil.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_pixelstudio.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1324,6 +1327,9 @@
     </ClInclude>
     <ClInclude Include="platform_vita.h">
       <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_pixelstudio.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

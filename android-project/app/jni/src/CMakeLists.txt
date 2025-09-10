@@ -152,6 +152,7 @@ add_library(main SHARED
         voidsprite/io/io_lpe.cpp
         voidsprite/io/io_openraster.cpp
         voidsprite/io/io_piskel.cpp
+        voidsprite/io/io_pixelstudio.cpp
         voidsprite/io/io_pixil.cpp
         voidsprite/io/io_pix2d.cpp
         voidsprite/io/io_png.cpp
