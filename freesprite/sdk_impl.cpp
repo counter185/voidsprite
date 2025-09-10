@@ -32,7 +32,7 @@ void impl_registerLayerImporter(
 			};
 	}
 
-	loginfo(std::format("Registering new file importer: {}  [{}]", std::string(name), std::string(extension)));
+	loginfo(frmt("Registering new file importer: {}  [{}]", std::string(name), std::string(extension)));
 	g_pluginRegisteredFileImporters.push_back(
 		FileImporter::flatImporter(
 			std::string(name),
@@ -63,7 +63,7 @@ VSPFileExporter* impl_registerLayerExporter(
 		return canExportFunction == NULL ? true : canExportFunction(layer);
 		};
 
-	loginfo(std::format("Registering new file exporter: {}  [{}]", std::string(name), std::string(extension)));
+	loginfo(frmt("Registering new file exporter: {}  [{}]", std::string(name), std::string(extension)));
 	FileExporter* exporter = FileExporter::flatExporter(
 		std::string(name),
 		std::string(extension),

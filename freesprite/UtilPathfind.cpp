@@ -113,7 +113,7 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
                 delete pathN;
                 pathN = npathN;
             }
-            g_addNotification(SuccessShortNotification(std::format("A* finished in {} steps", step), ""));
+            g_addNotification(SuccessShortNotification(frmt("A* finished in {} steps", step), ""));
             logprintf("genAStar finished in %i steps\n", step);
             return nodePath;
         }

@@ -28,9 +28,9 @@ void PopupIntegerScale::resultUpdated(XY result)
         : XY{ sizeNow.x * result.x, sizeNow.y * result.y };
 
     if (outSize.x == -1 || outSize.y == -1) {
-        outputScaleLabel->setText(std::format("<invalid size>", outSize.x, outSize.y));
+        outputScaleLabel->setText(frmt("<invalid size>", outSize.x, outSize.y));
     }
     else {
-        outputScaleLabel->setText(std::format("Output size: {}x{}", outSize.x, outSize.y));
+        outputScaleLabel->setText(frmt("Output size: {}x{}", outSize.x, outSize.y));
     }
 }

@@ -20,11 +20,11 @@ PopupChooseExtsToAssoc::PopupChooseExtsToAssoc()
         std::string ext = importer->extension();
         if (ext != "" && ext[0] == '.') {
             filetypes[ext] = false;
-            std::string labelText = std::format("{} ({})", importer->name(), importer->extension());
+            std::string labelText = frmt("{} ({})", importer->name(), importer->extension());
             std::string alreadyAssoc = platformGetFileAssocForExtension(ext);
             UICheckbox* cb = new UICheckbox(labelText, false);
             if (alreadyAssoc != "") {
-                cb->label->setText(std::format("{}    [-> {}]", labelText, alreadyAssoc));
+                cb->label->setText(frmt("{}    [-> {}]", labelText, alreadyAssoc));
                 cb->label->color = alreadyAssoc == "voidsprite" ? SDL_Color{0xB3, 0xEA, 0xFF, 0xFF} 
                                    : SDL_Color{0xFC,0xFF,0xB6, 0xFF};
             }

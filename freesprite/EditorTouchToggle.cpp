@@ -35,7 +35,7 @@ EditorTouchToggle::EditorTouchToggle(MainEditor* caller) : parent(caller)
 		(*((int*)&(parent->touchMode)))++;
 		(*((int*)&(parent->touchMode))) %= (int)TOUCHMODE_MAX;
 		btn->text = TL(modeNameKeys[(int)parent->touchMode]);
-		//g_addNotification(Notification("Touch mode changed", std::format("New touch mode: {}", (int)parent->touchMode), 1000));
+		//g_addNotification(Notification("Touch mode changed", frmt("New touch mode: {}", (int)parent->touchMode), 1000));
 	};
 	
 	btn->text = TL(modeNameKeys[(int)parent->touchMode]);

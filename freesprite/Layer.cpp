@@ -123,7 +123,7 @@ Layer* Layer::copyCurrentVariantScaled(XY dimensions)
         newLayer->hidden = hidden;
 
         if (!shouldIntegerScale) {
-            loginfo(std::format("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            loginfo(frmt("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
             for (int y = 0; y < newLayer->h; y++) {
                 for (int x = 0; x < newLayer->w; x++) {
                     XY samplePoint = {
@@ -136,7 +136,7 @@ Layer* Layer::copyCurrentVariantScaled(XY dimensions)
             }
         }
         else {
-            loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w,h, dimensions.x, dimensions.y));
+            loginfo(frmt("Performing integer scale {}x{} -> {}x{}", w,h, dimensions.x, dimensions.y));
             bool downscale = dimensions.x < w || dimensions.y < h;
             int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
             int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);
@@ -189,7 +189,7 @@ Layer* Layer::copyAllVariantsScaled(XY dimensions)
         newLayer->hidden = hidden;
 
         if (!shouldIntegerScale) {
-            loginfo(std::format("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            loginfo(frmt("Performing float-based scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
             for (int v = 0; v < layerData.size(); v++) {
                 for (int y = 0; y < newLayer->h; y++) {
                     for (int x = 0; x < newLayer->w; x++) {
@@ -203,7 +203,7 @@ Layer* Layer::copyAllVariantsScaled(XY dimensions)
             }
         }
         else {
-            loginfo(std::format("Performing integer scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
+            loginfo(frmt("Performing integer scale {}x{} -> {}x{}", w, h, dimensions.x, dimensions.y));
             bool downscale = dimensions.x < w || dimensions.y < h;
             int scaleFactorX = ixmax(dimensions.x, w) / ixmin(dimensions.x, w);
             int scaleFactorY = ixmax(dimensions.y, h) / ixmin(dimensions.y, h);

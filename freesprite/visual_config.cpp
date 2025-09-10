@@ -49,7 +49,7 @@ u32 visualConfigHexU32(std::string key)
             return std::stoul(value, nullptr, 16);
         }
         catch (std::exception& e) {
-            logerr(std::format("Error parsing hex value for key {}: {}", key, e.what()));
+            logerr(frmt("Error parsing hex value for key {}: {}", key, e.what()));
             
         }
     }
@@ -94,12 +94,12 @@ std::unordered_map<std::string, std::string> loadVisualConfig(PlatformNativePath
             return conf;
         }
         catch (std::exception& e) {
-            logerr(std::format("Error reading visual configuration {}:\n  {}", convertStringToUTF8OnWin32(path), e.what()));
+            logerr(frmt("Error reading visual configuration {}:\n  {}", convertStringToUTF8OnWin32(path), e.what()));
             return {};
         }
     }
     else {
-        logerr(std::format("Error opening file for reading: {}", convertStringToUTF8OnWin32(path)));
+        logerr(frmt("Error opening file for reading: {}", convertStringToUTF8OnWin32(path)));
         return {};
     }
 }

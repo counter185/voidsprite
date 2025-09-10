@@ -168,8 +168,8 @@ MainEditor* readLMU(PlatformNativePathString path)
                 std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
                 if (db.get()->chipsets.size() > chipsetIndex) {
                     //chipset_name is the file name
-                    loginfo(std::format("chipset_name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
-                    loginfo(std::format("name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].name)));
+                    loginfo(frmt("chipset_name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
+                    loginfo(frmt("name = {}", std::string(db.get()->chipsets[chipsetIndex - 1].name)));
 
                     PlatformNativePathString chipsetPath = pathDir + convertStringOnWin32("/ChipSet/") + convertStringOnWin32(shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex - 1].chipset_name)));
                     Layer* l = NULL;

@@ -48,7 +48,7 @@ inline void universalSDL_platformTryLoadOtherFile(EventCallbackListener* listene
     dialogCallback = [lsnr, evt_id, &filetypes](void* userdata, const char* const* filelist, int filter) {
         if (filelist != NULL) {
             std::string filenameStr = filelist[0];
-            loginfo(std::format("File selected: {}", filenameStr));
+            loginfo(frmt("File selected: {}", filenameStr));
             EventCallbackListener* listener = (EventCallbackListener*)userdata;
             lsnr->eventFileOpen(evt_id, convertStringOnWin32(filenameStr), findIndexByExtension(filetypes, filenameStr));
         }
@@ -92,7 +92,7 @@ inline bool universal_platformPushLayerToClipboard(Layer* l) {
     u8* pngDataCopy = (u8*)tracked_malloc(fileLength, "Clipboard data");
     memcpy(pngDataCopy, pngData.data(), fileLength);
     SDL_ClipboardDataCallback cb = [](void* userdata, const char* mimetype, size_t* size) {
-        loginfo(std::format("Requested clipboard mime type: {}", mimetype));
+        loginfo(frmt("Requested clipboard mime type: {}", mimetype));
         if (mimetype != NULL) {
             std::string mtype = mimetype;
             if (mtype == "image/png") {
@@ -120,7 +120,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
     size_t numMimeTypes = 0;
     char** mimetypes = SDL_GetClipboardMimeTypes(&numMimeTypes);
     for (size_t i = 0; i < numMimeTypes; ++i) {
-        loginfo(std::format("Found clipboard mimetype: {}", mimetypes[i]));
+        loginfo(frmt("Found clipboard mimetype: {}", mimetypes[i]));
         formats[mimetypes[i]] = true;
     }
 
@@ -146,7 +146,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
                         SDL_FreeSurface(srf);
                     }
                     else {
-                        logerr(std::format("Failed to get clipboard image:\n  {}", SDL_GetError()));
+                        logerr(frmt("Failed to get clipboard image:\n  {}", SDL_GetError()));
                     }
                 }
                 if (ret != NULL) {
@@ -157,7 +157,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
         SDL_free(mimetypes);
     }
     else {
-        logerr(std::format("Failed to get clipboard mimetypes:\n  {}", SDL_GetError()));
+        logerr(frmt("Failed to get clipboard mimetypes:\n  {}", SDL_GetError()));
     }
     return ret;
     

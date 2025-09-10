@@ -280,7 +280,7 @@ void PopupApplyFilter::updateLabels()
                 break;
             case PT_FLOAT:
             default:
-                label->setText(std::format("{:.1f}", p.defaultValue));
+                label->setText(frmt("{:.1f}", p.defaultValue));
                 break;
             case PT_INT_RANGE:
                 label->setText(std::to_string((int)p.defaultValue) + ":" + std::to_string((int)p.defaultValueTwo));

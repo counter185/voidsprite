@@ -145,7 +145,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 imgBlock = imageBlockBEtoLE(imgBlock);
             }
             int nEntries = imgBlock.w * imgBlock.h;
-            loginfo(std::format("[GIM] palette color format: {}", imgBlock.image_format));
+            loginfo(frmt("[GIM] palette color format: {}", imgBlock.image_format));
             u32 next;
             int bpp = 
                 imgBlock.image_format == 0x03 ? 4       //rgba8888
@@ -191,7 +191,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
         }
         logprintf("image format: %x\n", imgBlock.image_format);
         logprintf("pixel order: %i\n", imgBlock.pixel_order);  //1 needs to be detiled or something
-        loginfo(std::format("image size: {}x{}", imgBlock.w, imgBlock.h));
+        loginfo(frmt("image size: {}x{}", imgBlock.w, imgBlock.h));
         bool deswizzle = imgBlock.pixel_order == 1;
         Layer* ret = NULL;
         u64 pixelDataSize = imgBlock.pixels_end - imgBlock.pixels_start;
@@ -244,7 +244,7 @@ Layer* readGIM(PlatformNativePathString path, uint64_t seek) {
                 }
                 break;
             default:
-                logerr(std::format("[GIM] unsupported image format: {:02x}", imgBlock.image_format));
+                logerr(frmt("[GIM] unsupported image format: {:02x}", imgBlock.image_format));
                 break;
         }
 

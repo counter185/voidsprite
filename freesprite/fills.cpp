@@ -34,13 +34,13 @@ void Fill::fill(SDL_Rect r) {
 std::string Fill::serialize() {
     switch (type) {
     case FILL_SOLID:
-        return std::format("fill:solid:{:08X}", fillSolidColor);
+        return frmt("fill:solid:{:08X}", fillSolidColor);
     case FILL_GRADIENT:
-        return std::format("fill:gradient:{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR);
+        return frmt("fill:gradient:{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientDL, fillGradientDR);
     case FILL_3POINTVGRADIENT:
-        return std::format("fill:3pointgradient:{:08X}/{:08X}/{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
+        return frmt("fill:3pointgradient:{:08X}/{:08X}/{:08X}/{:08X}/{:08X}/{:08X}", fillGradientUL, fillGradientUR, fillGradientML, fillGradientMR, fillGradientDL, fillGradientDR);
     case FILL_TEXTURE:
-        return std::format("fill:texture:{}", fillTextureVCKey);
+        return frmt("fill:texture:{}", fillTextureVCKey);
     default:
         return "fill:none";
     }

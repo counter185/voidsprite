@@ -315,7 +315,7 @@ void UIColorPicker::eventSliderPosChanged(int evt_id, float f)
             std::map<std::string, double> componentData;
             for (auto& component : modelData.components) {
                 component.second.valueNow = component.second.valueSlider->getValue(component.second.range.first, component.second.range.second);
-                component.second.valueLabel->setText(std::format("{:.2f}", component.second.valueNow));
+                component.second.valueLabel->setText(frmt("{:.2f}", component.second.valueNow));
                 componentData[component.first] = component.second.valueNow;
             }
 
@@ -444,7 +444,7 @@ void UIColorPicker::updateColorModelSliders(std::string dontUpdate)
             double val = modelColorValue[component.first];
             if (model.first != dontUpdate) {
                 slider->sliderPos = (val - component.second.range.first) / (component.second.range.second - component.second.range.first);
-                label->setText(std::format("{:.2f}", val));
+                label->setText(frmt("{:.2f}", val));
                 component.second.valueNow = val;
             }
             slider->colors = { component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMin),
@@ -600,7 +600,7 @@ void UIColorPicker::colorUpdated(SDL_Color col, bool updateHSVSliders, bool upda
         rgbColor | 0x0000FF
     };
 
-    colorTextField->setText(std::format("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
+    colorTextField->setText(frmt("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
     colorNowU32 = rgbColor;
     if (onColorChangedCallback) {
         onColorChangedCallback(this, rgbColor);

@@ -237,20 +237,20 @@ std::string platformGetSystemInfo() {
         ret += "(Error running uname)\n";
     }
     else {
-        ret += std::format("OS: {} {} {}\n", buffer.sysname, buffer.version, buffer.release);
+        ret += frmt("OS: {} {} {}\n", buffer.sysname, buffer.version, buffer.release);
     }
 
     auto distroInfo = parseINI("/etc/os-release");
     std::string distroInfoString =
         distroInfo.contains("PRETTY_NAME") ? distroInfo["PRETTY_NAME"]
-        : distroInfo.contains("NAME") ? std::format("{} {}", distroInfo["NAME"], distroInfo["VERSION"])
+        : distroInfo.contains("NAME") ? frmt("{} {}", distroInfo["NAME"], distroInfo["VERSION"])
         : "";
     if (distroInfoString != "") {
-        ret += std::format("os-release info: {}\n", distroInfoString);
+        ret += frmt("os-release info: {}\n", distroInfoString);
     }
 
-    ret += std::format("CPU: {}\n", linux_getCPUName());
-    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+    ret += frmt("CPU: {}\n", linux_getCPUName());
+    ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
 
     //todo: get gpu, maybe the hardware model if possible, distro info
 

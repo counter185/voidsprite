@@ -35,7 +35,7 @@ std::string g_getLocString(std::string key) {
         return g_localizations["en-us"].kvs[key];
     }
     else {
-        logerr(std::format("Translation key not found in language {}:\n {}", lang, key));
+        logerr(frmt("Translation key not found in language {}:\n {}", lang, key));
         return std::string("--NO KEY: ") + key;
     }
 }

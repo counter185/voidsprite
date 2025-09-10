@@ -516,7 +516,7 @@ public:
                 func();
             }
             catch (std::exception& e) {
-                logerr(std::format("[DoOnReturn] failed:\n {}", e.what()));
+                logerr(frmt("[DoOnReturn] failed:\n {}", e.what()));
             }
         }
     }

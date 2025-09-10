@@ -91,7 +91,7 @@ void platformTrySaveOtherFile(
         }
     }
     fileTypesString += '}';
-    std::string terminalCode = "printf \"" + std::format(saveFileAppleScript, fileTypesString, windowTitle) + "\" | osascript";
+    std::string terminalCode = "printf \"" + frmt(saveFileAppleScript, fileTypesString, windowTitle) + "\" | osascript";
 
     FILE* pipe = popen(terminalCode.c_str(), "r");
     if (!pipe) {
@@ -151,7 +151,7 @@ void platformTryLoadOtherFile(
         }
     }
     fileTypesString += '}';
-    std::string terminalCode = "printf \"" + std::format(loadFileAppleScript, windowTitle, fileTypesString) + "\" | osascript";
+    std::string terminalCode = "printf \"" + frmt(loadFileAppleScript, windowTitle, fileTypesString) + "\" | osascript";
 
     FILE* pipe = popen(terminalCode.c_str(), "r");
     if (!pipe) {
@@ -244,12 +244,12 @@ FILE *platformOpenFile(PlatformNativePathString path,
 
 std::string platformGetSystemInfo() {
     std::string ret = "";
-    ret += std::format("macOS version {}\n", universal_runCommandAndGetOutput("sw_vers -productVersion"));
-    ret += std::format("{}\n", universal_runCommandAndGetOutput("sysctl -n kern.version"));
-    ret += std::format("System architecture: {}\n", universal_runCommandAndGetOutput("uname -m"));
-    ret += std::format("CPU: {}\n", universal_runCommandAndGetOutput("sysctl -n machdep.cpu.brand_string"));
-    ret += std::format("GPU: {}\n", universal_runCommandAndGetOutput("system_profiler SPDisplaysDataType | grep 'Chipset Model'"));
-    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+    ret += frmt("macOS version {}\n", universal_runCommandAndGetOutput("sw_vers -productVersion"));
+    ret += frmt("{}\n", universal_runCommandAndGetOutput("sysctl -n kern.version"));
+    ret += frmt("System architecture: {}\n", universal_runCommandAndGetOutput("uname -m"));
+    ret += frmt("CPU: {}\n", universal_runCommandAndGetOutput("sysctl -n machdep.cpu.brand_string"));
+    ret += frmt("GPU: {}\n", universal_runCommandAndGetOutput("system_profiler SPDisplaysDataType | grep 'Chipset Model'"));
+    ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
     return ret;
 }
 

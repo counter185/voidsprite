@@ -161,7 +161,7 @@ void TilemapEditorLayerPicker::updateLayers()
         auto& l = caller->tilemap[lid];
         //todo:
         //UILayerButton* layerButton = new UILayerButton(l->name);
-        UILayerButton* layerButton = new UILayerButton(std::format("Layer {}", lid+1), NULL);
+        UILayerButton* layerButton = new UILayerButton(frmt("Layer {}", lid+1), NULL);
         //todo:
         layerButton->hideButton->fill = SDL_Color{ 0,0,0,0x80 };
         layerButton->position = { 5, yposition };

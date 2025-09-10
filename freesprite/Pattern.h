@@ -216,8 +216,8 @@ class PatternRandom : public Pattern
 public:
     PatternRandom(int randomDiv) { d = randomDiv; }
 
-    std::string getIconPath() override { return std::format("pattern_rand_{}.png", d); }
-    std::string getName() override { return std::format("Random ({}%)", (int)((1.0/d) * 100)); }
+    std::string getIconPath() override { return frmt("pattern_rand_{}.png", d); }
+    std::string getName() override { return frmt("Random ({}%)", (int)((1.0/d) * 100)); }
     bool canDrawAt(XY position) override { return (rand() % d) == 0; }
 };
 

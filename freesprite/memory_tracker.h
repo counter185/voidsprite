@@ -69,5 +69,5 @@ inline std::string bytesToFriendlyString(u64 bytes) {
         bytesf /= 1024;
         suffixIndex++;
     }
-    return std::format("{:.4f}{}", bytesf, suffixes[suffixIndex]);
+    return frmt("{:.4f}{}", bytesf, suffixes[suffixIndex]);
 }

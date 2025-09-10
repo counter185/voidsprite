@@ -158,7 +158,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         std::map<std::string, std::string> extData = {
             {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
             {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
@@ -224,7 +224,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         std::map<std::string, std::string> extData = {
             {"tile.dim.x", std::to_string(editor->tileDimensions.x)},
             {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
@@ -237,9 +237,9 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
             std::string paletteData = "";
-            paletteData += std::format("{};", upcastEditor->palette.size());
+            paletteData += frmt("{};", upcastEditor->palette.size());
             for (uint32_t& c : upcastEditor->palette) {
-                paletteData += std::format("{:08X};", c);
+                paletteData += frmt("{:08X};", c);
             }
             extData["palette.colors"] = paletteData;
 
@@ -251,7 +251,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
                 layerOpacityData += std::to_string(lr->layerAlpha) + ';';
             }
             extData["layer.opacity"] = layerOpacityData;
-            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
+            extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
         }
 
         nvalBuffer = extData.size();
@@ -296,9 +296,9 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         std::string commentsData = editor->makeCommentDataString();
 
         std::string guidelinesData;
-        guidelinesData += std::format("{};", editor->guidelines.size());
+        guidelinesData += frmt("{};", editor->guidelines.size());
         for (Guideline& g : editor->guidelines) {
-            guidelinesData += std::format("{}-{};", g.vertical ? "v" : "h", g.position);
+            guidelinesData += frmt("{}-{};", g.vertical ? "v" : "h", g.position);
         }
 
         std::string layerVisibilityData = "";
@@ -312,7 +312,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
             {"tile.dim.padrx", std::to_string(editor->tileGridPaddingBottomRight.x)},
             {"tile.dim.padby", std::to_string(editor->tileGridPaddingBottomRight.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
@@ -327,9 +327,9 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
             std::string paletteData = "";
-            paletteData += std::format("{};", upcastEditor->palette.size());
+            paletteData += frmt("{};", upcastEditor->palette.size());
             for (uint32_t& c : upcastEditor->palette) {
-                paletteData += std::format("{:08X};", c);
+                paletteData += frmt("{:08X};", c);
             }
             extData["palette.colors"] = paletteData;
 
@@ -341,7 +341,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
                 layerOpacityData += std::to_string(lr->layerAlpha) + ';';
             }
             extData["layer.opacity"] = layerOpacityData;
-            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
+            extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
         }
 
         voidsnWriteU32(outfile, extData.size());
@@ -392,9 +392,9 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
         std::string commentsData = editor->makeCommentDataString();
 
         std::string guidelinesData;
-        guidelinesData += std::format("{};", editor->guidelines.size());
+        guidelinesData += frmt("{};", editor->guidelines.size());
         for (Guideline& g : editor->guidelines) {
-            guidelinesData += std::format("{}-{};", g.vertical ? "v" : "h", g.position);
+            guidelinesData += frmt("{}-{};", g.vertical ? "v" : "h", g.position);
         }
 
         std::string layerVisibilityData = "";
@@ -408,7 +408,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
             {"tile.dim.y", std::to_string(editor->tileDimensions.y)},
             {"tile.dim.padrx", std::to_string(editor->tileGridPaddingBottomRight.x)},
             {"tile.dim.padby", std::to_string(editor->tileGridPaddingBottomRight.y)},
-            {"sym.enabled", std::format("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
+            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
@@ -423,9 +423,9 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
             std::string paletteData = "";
-            paletteData += std::format("{};", upcastEditor->palette.size());
+            paletteData += frmt("{};", upcastEditor->palette.size());
             for (uint32_t& c : upcastEditor->palette) {
-                paletteData += std::format("{:08X};", c);
+                paletteData += frmt("{:08X};", c);
             }
             extData["palette.colors"] = paletteData;
 
@@ -437,7 +437,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
                 layerOpacityData += std::to_string(lr->layerAlpha) + ';';
             }
             extData["layer.opacity"] = layerOpacityData;
-            extData["activecolor"] = std::format("{:06X}", editor->pickedColor);
+            extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
         }
 
         voidsnWriteU32(outfile, extData.size());
@@ -648,8 +648,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         layers.push_back(newLayer);
                     }
                     else {
-                        logerr(std::format("No variants in layer: {}", newLayer->name));
-                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Error reading layer {}", newLayer->name)));
+                        logerr(frmt("No variants in layer: {}", newLayer->name));
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Error reading layer {}", newLayer->name)));
                     }
                 }
                 else {
@@ -684,7 +684,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                         layers.push_back(newLayer);
                     }
                     else {
-                        logerr(std::format("Failed to allocate layer: {}", layerName));
+                        logerr(frmt("Failed to allocate layer: {}", layerName));
                         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
                     }
                 }
@@ -767,7 +767,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
         break;
         default:
             logprintf("VOIDSN FILE v%i NOT SUPPORTED\n", voidsnversion);
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("VOIDSN file v{} not supported", voidsnversion)));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("VOIDSN file v{} not supported", voidsnversion)));
             fclose(infile);
             return NULL;
         }

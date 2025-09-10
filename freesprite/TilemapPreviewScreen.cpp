@@ -739,7 +739,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
         int x = 0;
         for (XY**& tileLayer : tilemap) {
             Layer* ll = renderLayer(tileLayer);
-            ll->name += std::format(" {}", x++);
+            ll->name += frmt(" {}", x++);
             layers.push_back(ll);
         }
         MainEditor* newSession = new MainEditor(layers);
@@ -761,9 +761,9 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
         int x = 0;
         for (XY**& tileLayer : tilemap) {
             Layer* ll = renderLayer(tileLayer);
-            ll->name += std::format(" {}", x+1);
+            ll->name += frmt(" {}", x+1);
             bool ss = false;
-            PlatformNativePathString filename = path + convertStringOnWin32(std::format("-{}{}", x++, exporter->extension()));
+            PlatformNativePathString filename = path + convertStringOnWin32(frmt("-{}{}", x++, exporter->extension()));
             if (exporter->exportsWholeSession()) {
                 MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
                 ssn->tileDimensions = tileSize;

@@ -37,7 +37,7 @@ public:
     static VSPWindow* tryCreateWindow(std::string title, XY size, u32 flags) {
         VSPWindow* ret = new VSPWindow(title, size, flags);
         if (ret->wd == NULL || ret->rd == NULL) {
-            logerr(std::format("Failed to create window: {}\n  {}", title, SDL_GetError()));
+            logerr(frmt("Failed to create window: {}\n  {}", title, SDL_GetError()));
             delete ret;
             return NULL;
         }

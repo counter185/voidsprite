@@ -11,6 +11,12 @@
     inline void* platformProcAddress(ModuleHandle module, const char* procName) { return (void*)GetProcAddress(module, procName); }
     inline void platformUnloadNativeModule(ModuleHandle module) { FreeLibrary(module); }
     inline std::string moduleExtension = ".dll";
+#elif VITASDK
+    #define ModuleHandle void*
+    inline ModuleHandle platformLoadNativeModule(PlatformNativePathString path) { return NULL; }
+    inline void* platformProcAddress(ModuleHandle module, const char* procName) { return NULL; }
+    inline void platformUnloadNativeModule(ModuleHandle module) { }
+    inline std::string moduleExtension = ".sprx";
 #else
     #include <dlfcn.h>
 
@@ -36,10 +42,10 @@ inline std::vector<VSPPlugin> g_loadedPlugins;
 inline bool loadPluginObject(PlatformNativePathString path) {
     ModuleHandle module = platformLoadNativeModule(path);
     if (module == NULL) {
-        logerr(std::format("Failed to load plugin: {}", convertStringToUTF8OnWin32(path)));
+        logerr(frmt("Failed to load plugin: {}", convertStringToUTF8OnWin32(path)));
 #if _WIN32
         u32 errorCode = GetLastError();
-        logerr(std::format("Error code: {}", errorCode));
+        logerr(frmt("Error code: {}", errorCode));
         if (errorCode == 126 && std::filesystem::exists(path)) {
             logerr("  (Missing dependencies or architecture not compatible)");
         }
@@ -56,7 +62,7 @@ inline bool loadPluginObject(PlatformNativePathString path) {
     void* (*pluginInitFunc)(voidspriteSDK*) = (void* (*)(voidspriteSDK*))platformProcAddress(module, "pluginInit");
 
     if (sdkVersionFunc == NULL || pluginInitFunc == NULL) {
-        logerr(std::format("Object at path {}\nis not a valid voidsprite plugin", convertStringToUTF8OnWin32(path)));
+        logerr(frmt("Object at path {}\nis not a valid voidsprite plugin", convertStringToUTF8OnWin32(path)));
         platformUnloadNativeModule(module);
         return false;
     }
@@ -68,7 +74,7 @@ inline bool loadPluginObject(PlatformNativePathString path) {
         if (getPluginAuthorsFunc != NULL) { pluginInfo.authors = getPluginAuthorsFunc(); }
 
         if (!g_vspsdks.contains(pluginInfo.sdkVersion)) {
-            logerr(std::format("Plugin {} uses unsupported SDK version {}", pluginInfo.name, pluginInfo.sdkVersion));
+            logerr(frmt("Plugin {} uses unsupported SDK version {}", pluginInfo.name, pluginInfo.sdkVersion));
             platformUnloadNativeModule(module);
             return false;
         }
@@ -76,7 +82,7 @@ inline bool loadPluginObject(PlatformNativePathString path) {
             voidspriteSDK* sdk = g_vspsdks[pluginInfo.sdkVersion];
             pluginInitFunc(sdk);
             g_loadedPlugins.push_back(pluginInfo);
-            loginfo(std::format("Loaded plugin: {} v{} by {}", pluginInfo.name, pluginInfo.version, pluginInfo.authors));
+            loginfo(frmt("Loaded plugin: {} v{} by {}", pluginInfo.name, pluginInfo.version, pluginInfo.authors));
             return true;
         }
     }

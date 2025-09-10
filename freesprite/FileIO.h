@@ -163,7 +163,7 @@ public:
             }
         }
         catch (std::exception& e) {
-            logerr(std::format("Data export failed:\n {}", e.what()));
+            logerr(frmt("Data export failed:\n {}", e.what()));
             return false;
         }
     }

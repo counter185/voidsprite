@@ -405,7 +405,7 @@ void PopupGlobalConfig::render()
         static std::string tlESCToClear = TL("vsp.config.bindkey.esctoclear");
 
         g_fnt->RenderString(
-            std::format("{}\n   {}\n\n    {} -> {}{}...\n\n{}", 
+            frmt("{}\n   {}\n\n    {} -> {}{}...\n\n{}", 
                 tlPressAnyKeyToBind, 
                 currentBindTarget->displayName, 
                 currentBindTarget->getKeyComboName(), 
@@ -442,7 +442,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                 }
                 else if (std::find(reservedKeysNow.begin(), reservedKeysNow.end(), key) != reservedKeysNow.end()
                     || std::find(g_keybindManager.globalReservedKeys.begin(), g_keybindManager.globalReservedKeys.end(), key) != g_keybindManager.globalReservedKeys.end()) {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("{} is a reserved key.", std::string(SDL_GetScancodeName(key)))));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{} is a reserved key.", std::string(SDL_GetScancodeName(key)))));
                     bindingKey = false;
                     playPopupCloseVFX();
                 }
@@ -579,7 +579,7 @@ void PopupGlobalConfig::updateLanguageCredit()
     if (getLocalizations().contains(g_config.language)) {
         std::string langCredit = getLocalizations()[g_config.language].langCredit;
         if (g_config.language != "en-us") {
-            langCredit += std::format("\n[completion: {:.2f}%]", g_getLocCompletionPercentage(g_config.language) * 100);
+            langCredit += frmt("\n[completion: {:.2f}%]", g_getLocCompletionPercentage(g_config.language) * 100);
         }
         languageCredit->setText(langCredit);
     }

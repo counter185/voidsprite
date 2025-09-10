@@ -255,14 +255,14 @@ void StartScreen::render()
 
     std::string line2 = GIT_BRANCH;
     if (std::string(GIT_HASH) != "") {
-        line2 += std::format("-{}", std::string(GIT_HASH).substr(0, 7));
+        line2 += frmt("-{}", std::string(GIT_HASH).substr(0, 7));
     }
-    g_fnt->RenderString(std::format("alpha@{}\n{}", __DATE__, line2), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
+    g_fnt->RenderString(frmt("alpha@{}\n{}", __DATE__, line2), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
     if (g_config.checkUpdates && updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
         static std::string tlUpdateAvailable = TL("vsp.launchpad.update.title");
         static std::string tlLatestVer = TL("vsp.launchpad.update.latestver");
-        std::string desc = std::format("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
+        std::string desc = frmt("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
         XY position = { logoRect.x, logoRect.y };
         double fadeInTimer = updateCheckTimer.percentElapsedTime(800, -400);
         double fadeInTimer2 = updateCheckTimer.percentElapsedTime(800);
@@ -871,8 +871,8 @@ void StartScreen::renderBackground()
         }
     }
 
-    //g_fnt->RenderString(std::format("{:04}-{:02}-{:02}", yearNow, monthNow, dayNow), g_windowW - 120, g_windowH - 90, SDL_Color{255,255,255,0x50});
-    //g_fnt->RenderString(std::format("{:02}:{:02}:{:02}", hourNow, minuteNow, secondNow), g_windowW - 120, g_windowH - 70, SDL_Color{255,255,255,0x50});
+    //g_fnt->RenderString(frmt("{:04}-{:02}-{:02}", yearNow, monthNow, dayNow), g_windowW - 120, g_windowH - 90, SDL_Color{255,255,255,0x50});
+    //g_fnt->RenderString(frmt("{:02}:{:02}:{:02}", hourNow, minuteNow, secondNow), g_windowW - 120, g_windowH - 70, SDL_Color{255,255,255,0x50});
 }
 
 void StartScreen::renderBGStars()
@@ -932,16 +932,16 @@ void StartScreen::promptConnectToNetworkCanvas()
                 NET_StreamSocket* s = NET_CreateClient(addr, input.port);
                 if (NET_WaitUntilConnected(s, -1) == 1) {
                     g_startNewMainThreadOperation([input,s]() {
-                        g_addScreen(new NetworkCanvasMainEditor(std::format("{} :{}", input.ip, input.port), input, s));
+                        g_addScreen(new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
                     });
                 }
                 else {
-                    logerr(std::format("Connection to {} failed", input.ip));
+                    logerr(frmt("Connection to {} failed", input.ip));
                     g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
                 }
             }
             else {
-                logerr(std::format("Failed to resolve hostname: {}", input.ip));
+                logerr(frmt("Failed to resolve hostname: {}", input.ip));
                 g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.badhostname")));
             }
         });
@@ -1003,7 +1003,7 @@ void StartScreen::tryLoadURL(std::string url)
         catch (std::exception& e) {
             g_startNewMainThreadOperation([url, e]() {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.urlfetchfail")));
-                logerr(std::format("Failed to fetch URL {}\n {}", url, e.what()));
+                logerr(frmt("Failed to fetch URL {}\n {}", url, e.what()));
             });
         }
     });
@@ -1053,7 +1053,7 @@ void StartScreen::tryOpenImageFromClipboard()
 void StartScreen::updateCheckFinished()
 {
     if (g_config.checkUpdates && updateCheckComplete && !updateCheckFailed && latestHash == GIT_HASH) {
-        loginfo(std::format("Latest version: {}", latestHash));
+        loginfo(frmt("Latest version: {}", latestHash));
     }
     genBGStars();
     updateCheckTimer.start();

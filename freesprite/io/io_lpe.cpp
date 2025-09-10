@@ -51,9 +51,9 @@ bool writeLPE(PlatformNativePathString path, MainEditor* editor)
         o["canvasHeight"] = editor->canvas.dimensions.y;
         o["editorMode"] = "Advanced";
         o["colors"] = json::array();
-        o["colors"].push_back(std::format("#{:06X}", editor->getActiveColor() & 0xFFFFFF));
+        o["colors"].push_back(frmt("#{:06X}", editor->getActiveColor() & 0xFFFFFF));
         for (int x = 0; x < ixmin(32, editor->lastColors.size()); x++) {
-            o["colors"].push_back(std::format("#{:06X}", editor->lastColors[x] & 0xFFFFFF));
+            o["colors"].push_back(frmt("#{:06X}", editor->lastColors[x] & 0xFFFFFF));
         }
         o["selectedLayer"] = editor->selLayer;
         o["layers"] = json::array();
@@ -70,7 +70,7 @@ bool writeLPE(PlatformNativePathString path, MainEditor* editor)
             layerObj["isLocked"] = false;
             layerObj["oldLayerName"] = nullptr;
             layerObj["menuEntry"] = json::object();
-            layerObj["id"] = std::format("layer{}", i);
+            layerObj["id"] = frmt("layer{}", i);
             layerObj["name"] = l->name;
 
             std::vector<u8> pngBytes = writePNGToMem(l);

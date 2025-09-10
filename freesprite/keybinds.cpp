@@ -207,13 +207,13 @@ void g_initKeybinds()
 
     int i = 0;
     for (auto& brush : g_brushes) {
-        KeyCombo kc = KeyCombo(std::format("{}: {}", TL("vsp.keybinds.maineditor.switchtobrush"), brush->getName()),
+        KeyCombo kc = KeyCombo(frmt("{}: {}", TL("vsp.keybinds.maineditor.switchtobrush"), brush->getName()),
             KEY_UNASSIGNED, false, false, [brush](void* d) {
                 ((MainEditor*)d)->setActiveBrush(brush);
             }
         );
         kc.icon = brush->cachedIcon;
-        g_keybindManager.addKeybind("maineditor", std::format("brush_{}", i++), kc);
+        g_keybindManager.addKeybind("maineditor", frmt("brush_{}", i++), kc);
     }
 
 

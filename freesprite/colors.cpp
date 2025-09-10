@@ -289,12 +289,12 @@ void g_reloadColorMap() {
                     ncp.name = fileName;
                     int i = 0;
                     for (auto& color : colorList) {
-                        ncp.colorMap.push_back({ std::format("{}:{:02x}", fileName, i++), color });
+                        ncp.colorMap.push_back({ frmt("{}:{:02x}", fileName, i++), color });
                     }
                     g_namedColorMap.push_back(ncp);
                 }
                 else {
-                    logerr(std::format("Failed to load palette: {}", fileName));
+                    logerr(frmt("Failed to load palette: {}", fileName));
                 }
             }
         }
@@ -312,8 +312,8 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
         while (stringEndsWithIgnoreCase(url, "/")) { url.pop_back(); }
 
         g_startNewAsyncOperation([url]() {
-            std::string dlUrl = std::format("https://lospec.com/palette-list/{}.json", url);
-            auto outputFile = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(std::format("palettes/{}.voidplt", url));
+            std::string dlUrl = frmt("https://lospec.com/palette-list/{}.json", url);
+            auto outputFile = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(frmt("palettes/{}.voidplt", url));
             try {
                 std::string response = platformFetchTextFile(dlUrl);
                 nlohmann::json j = nlohmann::json::parse(response);
@@ -338,7 +338,7 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
             }
             catch (std::exception& e) {
                 g_startNewMainThreadOperation([e]() {
-                    logerr(std::format("Failed to download palette from lospec:\n {}", e.what()));
+                    logerr(frmt("Failed to download palette from lospec:\n {}", e.what()));
                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.error.lospecdlfail")));
                 });
             }

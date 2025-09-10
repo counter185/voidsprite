@@ -34,7 +34,7 @@ MainEditor* readPix2D(PlatformNativePathString path)
 				projectJson = json::parse(jsonString);
 			}
 			catch (std::exception& e) {
-				logerr(std::format("[Pix2D] Failed to parse project.json:\n {}", e.what()));
+				logerr(frmt("[Pix2D] Failed to parse project.json:\n {}", e.what()));
 			}
 		}
 
@@ -67,11 +67,11 @@ MainEditor* readPix2D(PlatformNativePathString path)
 						layers.push_back(nlayer);
 					}
 					else {
-						logerr(std::format("[Pix2D] Failed to read layer data:\n {}", bitmapFile));
+						logerr(frmt("[Pix2D] Failed to read layer data:\n {}", bitmapFile));
 					}
 				}
 				else {
-					logerr(std::format("[Pix2D] Failed to read layer data:\n {}", bitmapFile));
+					logerr(frmt("[Pix2D] Failed to read layer data:\n {}", bitmapFile));
 				}
 			}
 
@@ -80,7 +80,7 @@ MainEditor* readPix2D(PlatformNativePathString path)
 			}
 		}
 		catch (std::exception& e) {
-			logerr(std::format("[Pix2D] Failed to read project.json:\n {}", e.what()));
+			logerr(frmt("[Pix2D] Failed to read project.json:\n {}", e.what()));
 			return NULL;
 		}
 

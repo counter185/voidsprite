@@ -80,7 +80,7 @@ void g_renderNotifications()
 void g_addNotification(Notification a) {
     if (!renderingNotifications) {
         g_notifications.push_back(a);
-        loginfo(std::format("New notification:\n  {} | {}", a.title, a.message));
+        loginfo(frmt("New notification:\n  {} | {}", a.title, a.message));
     }
     else {
         logerr("Failed to post notification (currently rendering notifications)");

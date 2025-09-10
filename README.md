@@ -45,6 +45,7 @@ You can also build the program as a Flatpak, see [Flatpak README](https://github
 Some dependencies can be disabled with build flags:
 - `-DVOIDSPRITE_JXL_ENABLED=0` will disable JPEG XL support (drops `libjxl`, `libhwy` requirement). JPEG XL might still be importable through SDL_image.
 - `-DVSP_NETWORKING=0` will disable all socket-based network features, like network canvas (drops `sdl3_net` requirement). HTTP features like update checks and downloading from Lospec are separate and will still work.
+- `-DUSE_FMT_FORMAT=1` will use `fmt` for string formatting instead of `std::format`. This drops the requirement for C++20 support, but `fmt` needs to be present.
 
 ## ◆System requirements
 

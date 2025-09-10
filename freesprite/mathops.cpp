@@ -351,7 +351,7 @@ void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel
     int a = dimensions.x / 2;
     bool xEven = dimensions.x % 2 == 0;
     bool yEven = dimensions.y % 2 == 0;
-    //g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}", posMin.x, posMin.y, posMax.x, posMax.y, a, b, xEven, yEven), 50, 50);
+    //g_fnt->RenderString(frmt("min={},{}  max={},{}   a={}  b={},  even={} {}", posMin.x, posMin.y, posMax.x, posMax.y, a, b, xEven, yEven), 50, 50);
 
     XY lastPTL, lastPTR, lastPBL, lastPBR;
     bool lastPointsSet = false;
@@ -431,7 +431,7 @@ void rasterizeSplitEllipse(XY posMin, XY posMax, std::function<void(XY)> forEach
     int a = dimensions.x / 2;
     bool xEven = dimensions.x % 2 == 0;
     bool yEven = dimensions.y % 2 == 0;
-    //g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
+    //g_fnt->RenderString(frmt("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
 
     if (a == 0) {
         return;
@@ -459,7 +459,7 @@ void rasterizeSplitEllipseByY(XY posMin, XY posMax, std::function<void(XY)> forE
     int a = dimensions.x / 2;
     bool xEven = dimensions.x % 2 == 0;
     bool yEven = dimensions.y % 2 == 0;
-    //g_fnt->RenderString(std::format("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
+    //g_fnt->RenderString(frmt("min={},{}  max={},{}   a={}  b={},  even={} {}",posMin.x, posMin.y, posMax.x, posMax.y,  a,b, xEven, yEven), 50, 50);
 
     if (a == 0) {
         return;
@@ -1030,11 +1030,11 @@ std::string secondsTimeToHumanReadable(u64 seconds)
     seconds /= 60;
     u64 h = seconds % 24;
     seconds /= 24;
-    std::string ret = std::format("{:02}:{:02}:{:02}", h, m, s);
+    std::string ret = frmt("{:02}:{:02}:{:02}", h, m, s);
 
     if (seconds > 0) {
         u64 d = seconds;
-        ret = std::format("{}d {}", d, ret);
+        ret = frmt("{}d {}", d, ret);
     }
     return ret;
 }

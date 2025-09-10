@@ -20,7 +20,7 @@ void ToolMeasure::renderOnCanvas(XY canvasDrawPoint, int scale)
 
 		g_ttp->addTooltip(Tooltip{
 			canvasDrawPoint.x + lastMousePos.x * scale + 25, canvasDrawPoint.y + lastMousePos.y * scale,
-			std::format("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1),
+			frmt("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1),
 			{0xff,0xff,0xff,0xff},
 			clickTimer.percentElapsedTime(200)
 		});

@@ -125,7 +125,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                 SDL_Rect clipRect = { x * tileDimensions.x, y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
                 Layer* clip = flatImage->trim(clipRect);
                 if (clip != NULL) {
-                    PlatformNativePathString tileName = name.substr(0, name.find_last_of(convertStringOnWin32("."))) + convertStringOnWin32(std::format("_{}_{}{}", x, y, exporter->extension()));
+                    PlatformNativePathString tileName = name.substr(0, name.find_last_of(convertStringOnWin32("."))) + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
                     if (!exporter->exportsWholeSession()) {
                         exporter->exportData(tileName, clip);
                         delete clip;
@@ -137,7 +137,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                     }
                 }
                 else {
-                    g_addNotification(ErrorNotification("Error", std::format("Failed to export tile {}:{}", x, y)));
+                    g_addNotification(ErrorNotification("Error", frmt("Failed to export tile {}:{}", x, y)));
                 }
             }
         }
@@ -500,7 +500,7 @@ void MainEditorPalettized::setUpWidgets()
                             [this]() {
                                 (*(int*)&this->commentViewMode)++;
                                 (*(int*)&this->commentViewMode) %= 3;
-                                g_addNotification(Notification(std::format("{}",
+                                g_addNotification(Notification(frmt("{}",
                                     this->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
                                     this->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
                                     "All comments shown"), "", 1500
@@ -660,7 +660,7 @@ Layer* MainEditorPalettized::newLayer()
     LayerPalettized* nl = LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nl != NULL) {
         nl->palette = palette;
-        nl->name = std::format("New Layer {}", layers.size() + 1);
+        nl->name = frmt("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
         logprintf("adding new layer at %i\n", insertAtIdx);
         layers.insert(layers.begin() + insertAtIdx, nl);

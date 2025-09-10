@@ -1,10 +1,12 @@
 //libpng must be the first include or else it will cry
 #if _WIN32
-#include "../libpng/png.h"
+    #include "../libpng/png.h"
 #elif __ANDROID__
-#include "../libpng/png.h"
+    #include "../libpng/png.h"
+#elif VITASDK
+    #include "../libpng/png.h"
 #else
-#include <libpng/png.h>
+    #include <libpng/png.h>
 #endif
 
 #include <zlib.h>
@@ -46,7 +48,7 @@ Layer* readPNGFromBase64String(std::string b64)
             return readPNGFromMem(imageData, pixelsb64.size());
         }
         catch (std::exception& e) {
-            logerr(std::format("Error reading base64 string:\n {}", e.what()));
+            logerr(frmt("Error reading base64 string:\n {}", e.what()));
             return NULL;
         }
     }

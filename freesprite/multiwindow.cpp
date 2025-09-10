@@ -140,22 +140,22 @@ bool VSPWindow::tryCreateRenderer() {
         if (name != NULL) {
             std::string renderDriverName = name;
             g_availableRenderersNow.push_back(renderDriverName);
-            loginfo(std::format("Renderer {}: {}", x, renderDriverName));
+            loginfo(frmt("Renderer {}: {}", x, renderDriverName));
         }
     }
     if (std::find(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), g_config.preferredRenderer) == g_availableRenderersNow.end()) {
         g_config.preferredRenderer = GlobalConfig().preferredRenderer;  //reset to default
     }
     std::string useRenderer = g_config.preferredRenderer;
-    loginfo(std::format("Picking renderer: {}", useRenderer));
+    loginfo(frmt("Picking renderer: {}", useRenderer));
     rd = SDL_CreateRenderer(wd, useRenderer.c_str());
     while (rd == NULL) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Renderer failed: {}", useRenderer)));
-        logerr(std::format("Failed to create renderer: {}\n  {}", useRenderer, SDL_GetError()));
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Renderer failed: {}", useRenderer)));
+        logerr(frmt("Failed to create renderer: {}\n  {}", useRenderer, SDL_GetError()));
         g_availableRenderersNow.erase(std::remove(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), useRenderer), g_availableRenderersNow.end());
         if (g_availableRenderersNow.empty()) {
             logerr("No renderers available");
-            std::string errorTitle = std::format("voidsprite: {}", TL("vsp.error.norenderer.title"));
+            std::string errorTitle = frmt("voidsprite: {}", TL("vsp.error.norenderer.title"));
             std::string errorMsg = TL("vsp.error.norenderer.body");
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
             return false;
@@ -163,7 +163,7 @@ bool VSPWindow::tryCreateRenderer() {
         else {
             useRenderer = g_availableRenderersNow[0];
             g_config.preferredRenderer = useRenderer;
-            loginfo(std::format("Trying renderer: {}", useRenderer));
+            loginfo(frmt("Trying renderer: {}", useRenderer));
             rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
         }
     }

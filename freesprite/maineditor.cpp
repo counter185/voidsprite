@@ -705,21 +705,21 @@ void MainEditor::DrawForeground()
 {
     drawBottomBar();
 
-    g_fnt->RenderString(std::format("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
 
-    XY endpoint = g_fnt->RenderString(std::format("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
+    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
     if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-        std::string s = std::format("(t{}:{})", (int)floor(mousePixelTargetPoint.x / (float)tileDimensions.x), (int)floor(mousePixelTargetPoint.y / (float)tileDimensions.y));
+        std::string s = frmt("(t{}:{})", (int)floor(mousePixelTargetPoint.x / (float)tileDimensions.x), (int)floor(mousePixelTargetPoint.y / (float)tileDimensions.y));
         endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 });
     }
 
     if (currentBrush != NULL) {
         static std::string eraserModeText = TL("vsp.maineditor.erasermode");
-        g_fnt->RenderString(std::format("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
     if (currentPattern != NULL) {
-        g_fnt->RenderString(std::format("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        g_fnt->RenderString(frmt("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
     g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ (u8)(255 - backgroundColor.r), (u8)(255 - backgroundColor.g), (u8)(255 - backgroundColor.b), (u8)(g_windowFocused ? 0x40 : 0x30) });
@@ -975,7 +975,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.printcol"),
                             [this]() {
-                                g_addNotification(Notification("", std::format("{} colors in current layer", this->getCurrentLayer()->numUniqueColors(true))));
+                                g_addNotification(Notification("", frmt("{} colors in current layer", this->getCurrentLayer()->numUniqueColors(true))));
                             }
                         }
                     },
@@ -1077,7 +1077,7 @@ void MainEditor::setUpWidgets()
                             [this]() {
                                 (*(int*)&this->commentViewMode)++;
                                 (*(int*)&this->commentViewMode) %= 3;
-                                g_addNotification(Notification(std::format("{}",
+                                g_addNotification(Notification(frmt("{}",
                                     this->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
                                     this->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
                                     "All comments shown"), "", 1500
@@ -1575,7 +1575,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 case SDL_EVENT_PEN_UP:
                     penDown = evt.ptouch.down;
                     SDL_SetWindowMouseGrab(g_wd, penDown);
-                    //loginfo(std::format("new pen state: {}", penDown));
+                    //loginfo(frmt("new pen state: {}", penDown));
                     break;
                 case SDL_EVENT_PEN_AXIS:
                     if (evt.paxis.axis == 0) {  //should always be the pressure axis
@@ -1676,7 +1676,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                 SDL_Rect clipRect = { x * tileDimensions.x, y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
                 Layer* clip = flatImage->trim(clipRect);
                 if (clip != NULL) {
-                    PlatformNativePathString tileName = name + convertStringOnWin32(std::format("_{}_{}{}", x, y, exporter->extension()));
+                    PlatformNativePathString tileName = name + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
                     if (!exporter->exportsWholeSession()) {
                         exporter->exportData(tileName, clip);
                         delete clip;
@@ -1688,7 +1688,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     }
                 }
                 else {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Failed to export tile {}:{}", x,y)));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Failed to export tile {}:{}", x,y)));
                 }
             }
         }
@@ -2294,9 +2294,9 @@ Layer* MainEditor::newLayer()
 {
     Layer* nl = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nl != NULL) {
-        nl->name = std::format("New Layer {}", layers.size() + 1);
+        nl->name = frmt("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        //loginfo(std::format("adding new layer at {}", insertAtIdx));
+        //loginfo(frmt("adding new layer at {}", insertAtIdx));
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
@@ -2389,12 +2389,12 @@ void MainEditor::createRecoveryAutosave()
     // todo: make a platform-specific localtime function
 #if defined(__unix__) || defined(__APPLE__)
     localtime_r(&now, &ltm);
-#elif defined(_WIN32)
+#elif _WIN32
     localtime_s(&ltm, &now);
 #else
     ltm = *std::localtime(&now);
 #endif
-    std::string autosaveName = "autosave_" + std::format("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
+    std::string autosaveName = "autosave_" + frmt("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
     try {
         if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
             g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
@@ -3039,7 +3039,7 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
             SDL_Delay(100);
         }
         else {
-            loginfo(std::format("New client connected: {}", networkGetSocketAddress(clientSocket)));
+            loginfo(frmt("New client connected: {}", networkGetSocketAddress(clientSocket)));
             std::thread* responderThread = new std::thread(&MainEditor::networkCanvasServerResponderThread, this, clientSocket);
             g_startNewMainThreadOperation([this, responderThread]() {
                 this->networkCanvasResponderThreads.push_back(responderThread);
@@ -3074,11 +3074,11 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
             networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
             if (!receivedName && commandStr == "INFO") {
                 receivedName = true;
-                networkCanvasSystemMessage(std::format("{} connected", clientInfo.clientName));
+                networkCanvasSystemMessage(frmt("{} connected", clientInfo.clientName));
             }
         }
         catch (std::exception& e) {
-            logerr(std::format("Error processing command from client: {}", e.what()));
+            logerr(frmt("Error processing command from client: {}", e.what()));
             break;
         }
     }
@@ -3091,8 +3091,8 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         networkCanvasHostPanel->updateClientList();
     });
     g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
-    networkCanvasSystemMessage(std::format("{} disconnected", clientInfo.clientName));
-    logerr(std::format("Disconnected from {}", clientInfo.clientName));
+    networkCanvasSystemMessage(frmt("{} disconnected", clientInfo.clientName));
+    logerr(frmt("Disconnected from {}", clientInfo.clientName));
 #endif
     
 }
@@ -3147,7 +3147,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                 {"clientName", c->clientName},
                 {"cursorX", c->cursorPosition.x},
                 {"cursorY", c->cursorPosition.y},
-                {"clientColor", std::format("{:06X}", 0xFFFFFF&c->clientColor)},
+                {"clientColor", frmt("{:06X}", 0xFFFFFF&c->clientColor)},
                 {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)}
             };
             infoJson["clients"].push_back(clientJson);
@@ -3186,7 +3186,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             Layer* l = layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
-                logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+                logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
                 if (index != selLayer || !leftMouseHold) {
@@ -3229,7 +3229,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         }
     }
     else {
-        logerr(std::format("Unknown command from client: {}", command));
+        logerr(frmt("Unknown command from client: {}", command));
     }
 }
 
@@ -3239,7 +3239,7 @@ std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
     commandName.resize(8);
     networkReadBytes(socket, (u8*)&commandName[0], 8);
     if (commandName.substr(0, 4) != "VDNC") {
-        throw std::runtime_error(std::format("Invalid command prefix: {}", commandName));
+        throw std::runtime_error(frmt("Invalid command prefix: {}", commandName));
     }
     else {
         return commandName.substr(4);
@@ -3356,7 +3356,7 @@ void MainEditor::networkCanvasKickUID(u32 uid)
     networkClientsListMutex.lock();
     for (auto& client : networkClients) {
         if (client->uid == uid) {
-            networkCanvasSystemMessage(std::format("{} kicked", client->clientName));
+            networkCanvasSystemMessage(frmt("{} kicked", client->clientName));
             client->hostKick = true;
             break;
         }
@@ -3369,7 +3369,7 @@ void MainEditor::networkCanvasSystemMessage(std::string msg)
     NetworkCanvasChatMessage msgEntry;
     msgEntry.fromColor = 0xFF;
     msgEntry.fromName = "";
-    msgEntry.message = std::format(UTF8_DIAMOND "{}", msg);
+    msgEntry.message = frmt(UTF8_DIAMOND "{}", msg);
     if (msgEntry.message.size() > 720) {
         msgEntry.message = msgEntry.message.substr(0, 717);
         msgEntry.message += "...";
@@ -3660,9 +3660,9 @@ std::string NetworkCanvasChatHostState::toJson() {
         for (auto& msg : messages) {
             jmsgs.push_back(json::object({
                 { "from", msg.fromName },
-                { "fromColor", std::format("{:06X}", msg.fromColor & 0xFFFFFF) },
+                { "fromColor", frmt("{:06X}", msg.fromColor & 0xFFFFFF) },
                 { "message", msg.message },
-                { "messageColor", std::format("{:06X}", msg.messageColor & 0xFFFFFF) },
+                { "messageColor", frmt("{:06X}", msg.messageColor & 0xFFFFFF) },
                 { "timestamp", msg.timestamp }
                 }));
         }
@@ -3685,7 +3685,7 @@ void NetworkCanvasChatState::fromJson(std::string jsonStr)
         messages.clear();
         for (auto& jmsg : j["messages"]) {
             NetworkCanvasChatMessage msg;
-            msg.fromName = std::format("{}", jmsg.value("from", "???"));
+            msg.fromName = frmt("{}", jmsg.value("from", "???"));
             try {
                 msg.fromColor = std::stoi(jmsg.value("fromColor", "C0E1FF"), 0, 16);
             }
@@ -3758,7 +3758,7 @@ void EditorNetworkCanvasChatPanel::updateChat()
     parent->networkCanvasCurrentChatState->messagesMutex.lock();
     for (auto& msg : parent->networkCanvasCurrentChatState->messages) {
         UILabel* nameText = new UILabel();
-        nameText->setText(msg.fromName.empty() ? std::string("") : std::format("<{}>: ", msg.fromName));
+        nameText->setText(msg.fromName.empty() ? std::string("") : frmt("<{}>: ", msg.fromName));
         nameText->color = uint32ToSDLColor(0xFF000000 | msg.fromColor);
         nameText->position = { 0, msgY };
         nameText->fontsize = 14;

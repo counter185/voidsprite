@@ -14,10 +14,22 @@
 
 //#include <math.h>
 
+#ifndef M_PI
+//had enough
+# define M_PI           3.14159265358979323846
+#endif
+
+#ifdef USE_FMT_FORMAT
+    #include <fmt/format.h>
+    #define frmt fmt::format
+#else
+    #include <format>
+    #define frmt std::format
+#endif
+
 #include <stdarg.h>
 #include <chrono>
 #include <string>
-#include <format>
 #include <map>
 #include <unordered_map>
 #include <new>

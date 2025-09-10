@@ -97,10 +97,10 @@ std::vector<RootDirInfo> android_getStoragePathsFromProcMounts() {
                     if (mountPoint.starts_with("/storage/") &&
                         !mountPoint.starts_with("/storage/emulated")) {
                         ret.push_back(
-                                {std::format("SD: {}", fileNameFromPath(mountPoint)), mountPoint});
+                                {frmt("SD: {}", fileNameFromPath(mountPoint)), mountPoint});
                     } else if (mountPoint.starts_with("/mnt/media_rw")) {
                         ret.push_back(
-                                {std::format("USB: {}", fileNameFromPath(mountPoint)), mountPoint});
+                                {frmt("USB: {}", fileNameFromPath(mountPoint)), mountPoint});
                     }
                 }
             }

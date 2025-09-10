@@ -222,7 +222,7 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
             }
         });
     }
-    //g_fnt->RenderString(std::format("Line DCs {}", lineDrawcalls), 50, 50);
+    //g_fnt->RenderString(frmt("Line DCs {}", lineDrawcalls), 50, 50);
 
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
     drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);

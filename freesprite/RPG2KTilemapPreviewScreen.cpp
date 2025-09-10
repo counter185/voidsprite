@@ -140,7 +140,7 @@ void RPG2KTilemapPreviewScreen::render()
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
     SDL_RenderFillRect(g_rd, &r);
 
-    g_fnt->RenderString(std::format("{}x{} tiles", dimensions.x, dimensions.y), 2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+    g_fnt->RenderString(frmt("{}x{} tiles", dimensions.x, dimensions.y), 2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
 }
 
 void RPG2KTilemapPreviewScreen::tick()
@@ -598,7 +598,7 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
             }
                 break;
             default:
-                g_fnt->RenderString(std::format("w{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
+                g_fnt->RenderString(frmt("w{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
 
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
                 SDL_RenderDrawRect(g_rd, &dst);
@@ -606,7 +606,7 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
             }
         }
         else {
-            g_fnt->RenderString(std::format("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
+            g_fnt->RenderString(frmt("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
 
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
             SDL_RenderDrawRect(g_rd, &dst);
@@ -663,7 +663,7 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
             
         }
     } else {
-        g_fnt->RenderString(std::format("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
+        g_fnt->RenderString(frmt("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
         SDL_RenderDrawRect(g_rd, &dst);
@@ -925,7 +925,7 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
         SDL_RenderCopy(g_rd, tex, &centerTile, &dst);
     }
     else {
-        g_fnt->RenderString(std::format("a{}\n{}", connection, autotileIndex), dst.x, dst.y);
+        g_fnt->RenderString(frmt("a{}\n{}", connection, autotileIndex), dst.x, dst.y);
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
         SDL_RenderDrawRect(g_rd, &dst);
@@ -985,7 +985,7 @@ void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_
         SDL_Rect src = { origin.x, origin.y, 16, 16 };
         SDL_RenderCopy(g_rd, draw, &src, &dst);
         
-        //g_fnt->RenderString(std::format("an{}", index), dst.x, dst.y);
+        //g_fnt->RenderString(frmt("an{}", index), dst.x, dst.y);
         //index = 0x0207 + (((index - 0x0BB8) / 50) << 2) + frame;
         type = 'n';
     }
@@ -1187,7 +1187,7 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 
                     if (newEvt.tex == NULL) {
                         charsetLoadFails += 1;
-                        loginfo(std::format("charset load failed: {}", newEvt.texFileName));
+                        loginfo(frmt("charset load failed: {}", newEvt.texFileName));
                     }
                 }
                 
@@ -1201,7 +1201,7 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
             std::cout << " - charset index: " << evt.pages[0].character_index << ", direction: " << evt.pages[0].character_direction << ", pattern: " << evt.pages[0].character_pattern << "\n";*/
         }
         if (charsetLoadFails > 0) {
-            g_addNotification(ErrorNotification("Error", std::format("Failed to load charsets for {} Events", charsetLoadFails)));
+            g_addNotification(ErrorNotification("Error", frmt("Failed to load charsets for {} Events", charsetLoadFails)));
         }
 
         if (lowerLayerData != NULL) {

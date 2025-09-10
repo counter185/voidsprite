@@ -167,7 +167,7 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd) {
         }
     }
     if (srf == NULL) {
-        logerr(std::format("Failed to load asset: {}", convertStringToUTF8OnWin32(pathList[pathList.size() - 1])));
+        logerr(frmt("Failed to load asset: {}", convertStringToUTF8OnWin32(pathList[pathList.size() - 1])));
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
         return NULL;
     }
@@ -202,7 +202,7 @@ void main_toggleFullscreen()
 }
 
 void main_newWindow() {
-    std::string title = std::format("<{}>", g_windows.size());
+    std::string title = frmt("<{}>", g_windows.size());
     VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
     if (newWindow != NULL) {
         newWindow->addToWindowList();
@@ -213,7 +213,7 @@ void main_newWindow() {
         g_currentWindow = newWindow;
         g_newVFX(VFX_SCREENSWITCH, 800);
         newWindow->addScreen(new StartScreen(), true);
-        loginfo(std::format("Opening window ID {}", newWindow->windowID));
+        loginfo(frmt("Opening window ID {}", newWindow->windowID));
         if (oldWindow != NULL) {
            oldWindow->thisWindowsTurn();
         }
@@ -225,7 +225,7 @@ void main_newWindow() {
 
 void main_currentWorkspaceToNewWindow()
 {
-    std::string title = std::format("<{}>", g_windows.size());
+    std::string title = frmt("<{}>", g_windows.size());
     if (g_currentWindow != NULL && g_currentWindow->popupStack.empty()) {
         if (g_currentWindow->screenStack.size() > 1) {
             BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
@@ -240,7 +240,7 @@ void main_currentWorkspaceToNewWindow()
                 g_currentWindow = newWindow;
                 g_newVFX(VFX_SCREENSWITCH, 800);
                 newWindow->addScreen(currentScreen, true);
-                loginfo(std::format("Opening window ID {}", newWindow->windowID));
+                loginfo(frmt("Opening window ID {}", newWindow->windowID));
                 if (oldWindow != NULL) {
                     oldWindow->thisWindowsTurn();
                 }
@@ -261,7 +261,7 @@ void main_attachCurrentWorkspaceToMainWindow() {
         g_currentWindow->detachScreen(currentScreen);
         g_mainWindow->addScreen(currentScreen, true);
         g_newVFX(VFX_SCREENSWITCH, 800);
-        loginfo(std::format("Attaching workspace to main window ID {}", g_mainWindow->windowID));
+        loginfo(frmt("Attaching workspace to main window ID {}", g_mainWindow->windowID));
     }
     else {
         logerr("attachCurrentWorkspaceToMainWindow failed");
@@ -333,7 +333,7 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
             cmdString.resize(data->cbData);
             memcpy(&cmdString[0], data->lpData, data->cbData);
 
-            loginfo(std::format("Received window command: {}", cmdString));
+            loginfo(frmt("Received window command: {}", cmdString));
             return false;
         }
     }
@@ -397,7 +397,7 @@ int main(int argc, char** argv)
             g_programDirectory += _WIN32 ? "\\" : "/";
         }
 #endif
-        loginfo(std::format("Program directory: {}", g_programDirectory));
+        loginfo(frmt("Program directory: {}", g_programDirectory));
         //g_addNotification(Notification("", g_programDirectory));
 
         srand(time(NULL));
@@ -685,7 +685,7 @@ int main(int argc, char** argv)
                 }
                 else {
                     //todo: this notification never fits the whole file name
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), std::format("Could not find file:\n {}", arg)));
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Could not find file:\n {}", arg)));
                 }
             }
         }
@@ -707,23 +707,23 @@ int main(int argc, char** argv)
         }
         //run lospec downloads
         for (auto& url : lospecDlTargets) {
-            loginfo(std::format("Running lospec download: {}", url));
+            loginfo(frmt("Running lospec download: {}", url));
             g_downloadAndInstallPaletteFromLospec(url);
         }
 
         if (customPatterns > 0) {
-            g_addNotification(Notification(std::format("Loaded {} custom patterns", customPatterns), "", 4000, NULL, COLOR_INFO));
+            g_addNotification(Notification(frmt("Loaded {} custom patterns", customPatterns), "", 4000, NULL, COLOR_INFO));
         }
         if (customTemplates > 0) {
-            g_addNotification(Notification(std::format("Loaded {} custom templates", customTemplates), "", 4000, NULL, COLOR_INFO));
+            g_addNotification(Notification(frmt("Loaded {} custom templates", customTemplates), "", 4000, NULL, COLOR_INFO));
         }
         if (custom9SPatterns > 0) {
-            g_addNotification(Notification(std::format("Loaded {} custom 9seg. patterns", custom9SPatterns), "", 4000, NULL, COLOR_INFO));
+            g_addNotification(Notification(frmt("Loaded {} custom 9seg. patterns", custom9SPatterns), "", 4000, NULL, COLOR_INFO));
         }
 
         auto startupFinish = std::chrono::system_clock::now() - startupTime;
         auto startupDuration = std::chrono::duration_cast<std::chrono::milliseconds>(startupFinish).count();
-        loginfo(std::format("Startup took {}ms", startupDuration));
+        loginfo(frmt("Startup took {}ms", startupDuration));
 
 #if __ANDROID__
         //sometimes it really really doesn't feel like maximizing
@@ -884,7 +884,7 @@ int main(int argc, char** argv)
 
                 //close window if it has no screens left
                 if (wd->screenStack.empty()){
-                    loginfo(std::format("Closing window ID {}", wd->windowID));
+                    loginfo(frmt("Closing window ID {}", wd->windowID));
                     if (wd->isMainWindow) {
                         loginfo("   -the main window was closed");
                         g_mainWindow = NULL;
@@ -936,14 +936,14 @@ int main(int argc, char** argv)
     #if _DEBUG
                 XY origin = { g_windowW - 240, g_windowH - 90 };
                 for (auto& mem : g_named_memmap) {
-                    g_fnt->RenderString(std::format("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
+                    g_fnt->RenderString(frmt("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
                         origin.y, { 255, 255, 255, 100 }, 14);
                     origin.y -= 16;
                 }
-                g_fnt->RenderString(std::format("Textures created: {}", g_allocated_textures), origin.x, origin.y,
+                g_fnt->RenderString(frmt("Textures created: {}", g_allocated_textures), origin.x, origin.y,
                     { 255, 255, 255, 100 }, 14);
                 origin.y -= 16;
-                //g_fnt->RenderString(std::format("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
+                //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
                 //origin.y -= 16;
     #endif
 
@@ -997,7 +997,7 @@ int main(int argc, char** argv)
                     drawLine(statPercent, statPercentLow);
                     drawLine(batteryOrigin, statPercent);
                     drawLine(batteryOriginLow, statPercentLow);
-                    g_fnt->RenderString(std::format("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
+                    g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
 
                     if (powerstate == SDL_POWERSTATE_CHARGING) {
                         g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 });
@@ -1013,7 +1013,7 @@ int main(int argc, char** argv)
                 if (g_config.showFPS) {
                     XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
                     nextStatusBarOrigin = fpsOrigin;
-                    g_fnt->RenderString(std::format("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
+                    g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
                 }
 
                 g_tickNotifications();
@@ -1047,7 +1047,7 @@ int main(int argc, char** argv)
                     SDL_RenderCopy(g_rd, wd->viewport, NULL, NULL);
                 }
 
-                //g_fnt->RenderString(std::format("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
+                //g_fnt->RenderString(frmt("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
 
                 uint64_t ticksNonRenderEnd = SDL_GetTicks64();
                 SDL_RenderPresent(wd->rd);
@@ -1090,10 +1090,10 @@ int main(int argc, char** argv)
                     static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
 
                     g_updateRPC(
-                        numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : std::format("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
+                        numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : frmt("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
                         numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
                     );
-                    std::string newWindowTitle = windowTitle + std::format("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
+                    std::string newWindowTitle = windowTitle + frmt("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
                     if (newWindowTitle != wd->lastWindowTitle) {
                         SDL_SetWindowTitle(g_wd, newWindowTitle.c_str());
                         wd->lastWindowTitle = newWindowTitle;
@@ -1114,11 +1114,11 @@ int main(int argc, char** argv)
     catch (std::exception& e) {
         logerr("-------------------------------------------");
         logerr("voidsprite crashed with an uncaught exception");
-        logerr(std::format("Details: \n {}", e.what()));
+        logerr(frmt("Details: \n {}", e.what()));
         log_close();
         log_duplicateLast();
-        std::string errorTitle = std::format("voidsprite: {}", TL("vsp.fatalerror.title"));
-        std::string errorMsg = std::format("{}\n   {}", TL("vsp.fatalerror.body"), e.what());
+        std::string errorTitle = frmt("voidsprite: {}", TL("vsp.fatalerror.title"));
+        std::string errorMsg = frmt("{}\n   {}", TL("vsp.fatalerror.body"), e.what());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
     }
     return 0;

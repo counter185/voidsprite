@@ -10,7 +10,7 @@ private:
 	std::string name = "";
 public:
 	TemplatePixelIllustration(XY size) : size(size) {
-		name = std::format("{}x{} {}", size.x, size.y, TL("vsp.template.pixelillustration"));
+		name = frmt("{}x{} {}", size.x, size.y, TL("vsp.template.pixelillustration"));
 	}
 	std::string getName() override { return name; };
 	Layer* generate() override {

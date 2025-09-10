@@ -219,7 +219,7 @@ void PopupExportScaled::recalc()
     }
 
     labelOutputSize->setText(
-        resultSize.x >= 0 ? std::format("{}: {}x{}", TL("vsp.exportscaled.resultsize"), resultSize.x, resultSize.y)
+        resultSize.x >= 0 ? frmt("{}: {}x{}", TL("vsp.exportscaled.resultsize"), resultSize.x, resultSize.y)
         : TL("vsp.exportscaled.invalidsize")
     );
 }

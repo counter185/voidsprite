@@ -86,7 +86,7 @@ void ToolGuideline::renderOnCanvas(XY canvasDrawPoint, int scale)
     if (mouseLeftHeld) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
         SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
-        g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY - 40 }, std::format("{}{}", symXPos, symXMiddle ? ".5" : "")});
+        g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY - 40 }, frmt("{}{}", symXPos, symXMiddle ? ".5" : "")});
     }
 
     int symYPos = lastMouseMotionPos.y / 2;
@@ -96,6 +96,6 @@ void ToolGuideline::renderOnCanvas(XY canvasDrawPoint, int scale)
     if (mouseRightHeld) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x20);
         SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
-        g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY + 40 }, std::format("{}{}", symYPos, symYMiddle ? ".5" : "") });
+        g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY + 40 }, frmt("{}{}", symYPos, symYMiddle ? ".5" : "") });
     }
 }

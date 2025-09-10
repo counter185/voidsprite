@@ -39,7 +39,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
             }
         }
         catch (std::exception& e) {
-            logerr(std::format("Network client error:\n {}", e.what()));
+            logerr(frmt("Network client error:\n {}", e.what()));
             break;
         }
     }
@@ -132,7 +132,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             Layer* l = layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
-                logerr(std::format("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+                logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
                 if (index != selLayer || !leftMouseHold) {
@@ -151,7 +151,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         networkReadBytes(clientSocket, (u8*)&canvasStateID, 4);
         //loginfo("Received UPDD back");
         if (oldStateID != canvasStateID || !receivedDataOnce) {
-            loginfo(std::format("{:08X} != {:08X}, updating", oldStateID, canvasStateID));
+            loginfo(frmt("{:08X} != {:08X}, updating", oldStateID, canvasStateID));
             receivedDataOnce = true;
             networkCanvasSendInfoRequest();
             for (int i = 0; i < layers.size(); i++) {
@@ -178,7 +178,7 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
         {"clientName", thisClientInfo->clientName},
         {"cursorX", mousePixelTargetPoint.x},
         {"cursorY", mousePixelTargetPoint.y},
-        {"clientColor", std::format("{:06X}", thisClientInfo->clientColor&0xFFFFFF)}
+        {"clientColor", frmt("{:06X}", thisClientInfo->clientColor&0xFFFFFF)}
     };
     networkSendString(clientSocket, infoJson.dump());
 

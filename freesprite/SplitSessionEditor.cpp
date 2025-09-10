@@ -85,7 +85,7 @@ void SplitSessionEditor::render()
     }
 
     drawBottomBar();
-    g_fnt->RenderString(std::format("Current canvas size: {}x{} ({}%)", c.dimensions.x, c.dimensions.y, c.scale * 100), 2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+    g_fnt->RenderString(frmt("Current canvas size: {}x{} ({}%)", c.dimensions.x, c.dimensions.y, c.scale * 100), 2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
 
     BaseScreen::render();
 

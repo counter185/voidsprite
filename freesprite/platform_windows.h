@@ -135,7 +135,7 @@ void platformPreInit() {
                             LRESULT res = SendMessageW(hWnd, WM_COPYDATA, 0, (LPARAM)&cds);*/
 
                             PostMessageW(hWnd, WM_USER + 1, 0, 0);
-                            loginfo(std::format("{}", GetLastError()));
+                            loginfo(frmt("{}", GetLastError()));
                             exit(0);
                         }
                     }
@@ -268,8 +268,8 @@ bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std
 }
 std::string platformGetFileAssocForExtension(std::string extension) { 
     HKEY classKey;
-    std::wstring pathW = convertStringOnWin32(std::format("SOFTWARE\\Classes\\{}", extension));
-    std::wstring pathW2 = convertStringOnWin32(std::format("SOFTWARE\\Classes\\{}\\OpenWithProgids", extension));
+    std::wstring pathW = convertStringOnWin32(frmt("SOFTWARE\\Classes\\{}", extension));
+    std::wstring pathW2 = convertStringOnWin32(frmt("SOFTWARE\\Classes\\{}\\OpenWithProgids", extension));
     if (RegOpenKeyExW(HKEY_CURRENT_USER, pathW.c_str(), 0, KEY_QUERY_VALUE, &classKey) == ERROR_SUCCESS) {
         DoOnReturn aa([&](){ RegCloseKey(classKey); });
         wchar_t className[256];
@@ -626,7 +626,7 @@ Layer* platformGetImageFromClipboard() {
 
 std::string platformGetSystemInfo() {
     std::string ret;
-    ret += std::format("OS: {} {} {}\n", 
+    ret += frmt("OS: {} {} {}\n", 
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName"), 
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion"), 
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab"));
@@ -638,12 +638,12 @@ std::string platformGetSystemInfo() {
             ret += "  (Running on a compatibility layer?)\n";
         }
     }
-    ret += std::format("System: {} {}\n",
+    ret += frmt("System: {} {}\n",
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemManufacturer"),
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemProductName"));
     ret += "CPU: " + windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", L"ProcessorNameString") + "\n";
     ret += "GPU: " + windows_getActiveGPUName() + "\n";
-    ret += std::format("System memory: {} MiB\n", SDL_GetSystemRAM());
+    ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
 
     return ret;
 }
@@ -676,14 +676,14 @@ std::vector<RootDirInfo> platformListRootDirectories() {
     u32 maskNow = 1;
     for (char drive = 'A'; drive <= 'Z'; drive++) {
         if (logicalDrives & maskNow) {
-            std::wstring drivePath = std::format(L"{}:\\", drive);
+            std::wstring drivePath = frmt(L"{}:\\", drive);
             UINT driveType = GetDriveTypeW(drivePath.c_str());
             if (driveType != DRIVE_NO_ROOT_DIR) {
                 std::string name = 
-                    driveType == DRIVE_RAMDISK ? std::format("RAM Disk {}:\\", drive)
-                    : driveType == DRIVE_CDROM ? std::format("CD-ROM {}:\\", drive)
-                    : driveType == DRIVE_REMOVABLE ? std::format("Removable Drive {}:\\", drive)
-                    : std::format("Drive {}:\\", drive);
+                    driveType == DRIVE_RAMDISK ? frmt("RAM Disk {}:\\", drive)
+                    : driveType == DRIVE_CDROM ? frmt("CD-ROM {}:\\", drive)
+                    : driveType == DRIVE_REMOVABLE ? frmt("Removable Drive {}:\\", drive)
+                    : frmt("Drive {}:\\", drive);
                 ret.push_back({name, drivePath});
             }
         }

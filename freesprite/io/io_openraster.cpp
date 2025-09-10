@@ -31,7 +31,7 @@ void _parseORAStacksRecursively(std::vector<Layer*>* layers, XY dimensions, pugi
                 layers->insert(layers->begin(), sizeCorrectLayer);
             }
             else {
-                logerr(std::format("[OpenRaster] Failed to read layer: {}", pngPath));
+                logerr(frmt("[OpenRaster] Failed to read layer: {}", pngPath));
             }
 
             tracked_free(pngData);
@@ -105,11 +105,11 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         zip_entry_open(zip, "stack.xml");
         {
             std::string xmls = "";
-            xmls += std::format("<image version=\"0.0.1\" xres=\"72\" h=\"{}\" w=\"{}\" yres=\"72\">\n", data[0]->h, data[0]->w);
-            xmls += std::format(" <stack opacity=\"1\" x=\"0\" name=\"root\" y=\"0\" isolation=\"isolate\" composite-op=\"svg:src-over\" visibility=\"visible\">\n");
+            xmls += frmt("<image version=\"0.0.1\" xres=\"72\" h=\"{}\" w=\"{}\" yres=\"72\">\n", data[0]->h, data[0]->w);
+            xmls += frmt(" <stack opacity=\"1\" x=\"0\" name=\"root\" y=\"0\" isolation=\"isolate\" composite-op=\"svg:src-over\" visibility=\"visible\">\n");
             int i = 0;
             for (auto l = data.rbegin(); l != data.rend(); l++) {
-                xmls += std::format("  <layer opacity=\"{}\" x=\"0\" name=\"{}\" y=\"0\" src=\"data/layer{}.png\" composite-op=\"svg:src-over\" visibility=\"{}\"/>\n", (*l)->layerAlpha / 255.0f, (*l)->name, i++, (*l)->hidden ? "hidden" : "visible");
+                xmls += frmt("  <layer opacity=\"{}\" x=\"0\" name=\"{}\" y=\"0\" src=\"data/layer{}.png\" composite-op=\"svg:src-over\" visibility=\"{}\"/>\n", (*l)->layerAlpha / 255.0f, (*l)->name, i++, (*l)->hidden ? "hidden" : "visible");
             }
             xmls += "  </stack>\n";
             xmls += "</image>\n";
@@ -141,7 +141,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         int i = 0;
         for (auto l = data.rbegin(); l != data.rend(); l++) {
             std::vector<u8> pngData = writePNGToMem(*l);
-            std::string fname = std::format("data/layer{}.png", i++);
+            std::string fname = frmt("data/layer{}.png", i++);
             zip_entry_open(zip, fname.c_str());
             zip_entry_write(zip, pngData.data(), pngData.size());
             zip_entry_close(zip);

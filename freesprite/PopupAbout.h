@@ -36,7 +36,7 @@ public:
 
         for (auto [locale, data] : getLocalizations()) {
             if (data.langCredit != "") {
-                contributorTabContents += std::format("{}:  {}", data.langName, data.langCredit);
+                contributorTabContents += frmt("{}:  {}", data.langName, data.langCredit);
             }
         }
 

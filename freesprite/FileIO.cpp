@@ -79,10 +79,10 @@ std::string getAllLibsVersions() {
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
            "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
-    ret += std::format("libpng: {}\n", getlibpngVersion());
+    ret += frmt("libpng: {}\n", getlibpngVersion());
     ret += "zlib: " ZLIB_VERSION "\n";
 #if VOIDSPRITE_JXL_ENABLED
-    ret += std::format("libjxl: {}\n", getlibjxlVersion());
+    ret += frmt("libjxl: {}\n", getlibjxlVersion());
 #endif
     ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
     return ret;
@@ -928,7 +928,7 @@ std::function<bool(PlatformNativePathString)> magicVerify(u64 at, std::string he
 PlatformNativePathString newTempFile()
 {
     PlatformNativePathString tempPath = platformEnsureDirAndGetConfigFilePath();
-    PlatformNativePathString tempFileName = tempPath + convertStringOnWin32(std::format("/temp-{}", randomUUID()));
+    PlatformNativePathString tempFileName = tempPath + convertStringOnWin32(frmt("/temp-{}", randomUUID()));
     return tempFileName;
 }
 
@@ -1246,7 +1246,7 @@ MainEditor* deserializePixelStudioSession(json j)
                 }
                     break;
                 default:
-                    g_addNotification(ErrorNotification("PixelStudio Error", std::format("Tool {} not implemented", tool)));
+                    g_addNotification(ErrorNotification("PixelStudio Error", frmt("Tool {} not implemented", tool)));
                     logprintf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
                     logprintf("\trelevant position data:\n");
                     for (XY& p : positions) {
@@ -1436,7 +1436,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                         DeXT23(ret, imgW, imgH, texfile);
                     }
                     else {
-                        g_addNotification(ErrorNotification("AETEX error", std::format("Compression method {} unsupported", compressionMethod)));
+                        g_addNotification(ErrorNotification("AETEX error", frmt("Compression method {} unsupported", compressionMethod)));
                     }
                     fclose(texfile);
 
@@ -2502,7 +2502,7 @@ Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
             }
         }
         else {
-            //g_addNotification(ErrorNotification("PS2 ICN error", std::format("Unsupported compression type: {}", header.textureType)));
+            //g_addNotification(ErrorNotification("PS2 ICN error", frmt("Unsupported compression type: {}", header.textureType)));
 
             u16 sizeOfCompressedTextureData;
             u64 pxPtr = 0;
@@ -3196,7 +3196,7 @@ bool writeJPEG(PlatformNativePathString path, Layer* data)
 
     SDL_Surface* surface = SDL_CreateSurface(data->w, data->h, SDL_PIXELFORMAT_ARGB8888);
     if (surface == NULL) {
-        logerr(std::format("[JPEG] failed to create surface: {}", SDL_GetError()));
+        logerr(frmt("[JPEG] failed to create surface: {}", SDL_GetError()));
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
         return false;
     }
@@ -3220,7 +3220,7 @@ bool writeAVIF(PlatformNativePathString path, Layer* data)
 
     SDL_Surface* surface = SDL_CreateSurface(data->w, data->h, SDL_PIXELFORMAT_ARGB8888);
     if (surface == NULL) {
-        logerr(std::format("[AVIF] failed to create surface: {}", SDL_GetError()));
+        logerr(frmt("[AVIF] failed to create surface: {}", SDL_GetError()));
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
         return false;
     }
@@ -3447,7 +3447,7 @@ bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data)
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
 
-        std::string javaHeader = std::format("\n\
+        std::string javaHeader = frmt("\n\
 import java.awt.image.BufferedImage;\n\
 \n\
 public class VoidspriteImage {{\n\

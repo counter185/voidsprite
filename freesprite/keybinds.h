@@ -43,7 +43,7 @@ public:
             return "Unassigned";
         }
         else {
-            return std::format("{}{}{}", ctrl ? "Ctrl + " : "", shift ? "Shift + " : "", SDL_GetScancodeName(key));
+            return frmt("{}{}{}", ctrl ? "Ctrl + " : "", shift ? "Shift + " : "", SDL_GetScancodeName(key));
         }
     }
 
@@ -107,7 +107,7 @@ public:
         std::vector<std::string> ret;
         for (auto [region, regionData] : regions) {
             for (auto [key, kc] : regionData.keybinds) {
-                ret.push_back(std::format("{}/{}:{}+{}+{}", region, key, (int)kc.key, kc.ctrl ? "1" : "0", kc.shift ? "1" : "0"));
+                ret.push_back(frmt("{}/{}:{}+{}+{}", region, key, (int)kc.key, kc.ctrl ? "1" : "0", kc.shift ? "1" : "0"));
             }
         }
         return ret;

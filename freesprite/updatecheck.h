@@ -43,7 +43,7 @@ inline bool didRunFinish(std::string commitHash) {
             for (auto& runs : j["workflow_runs"]) {
                 if (runs["head_sha"] == commitHash) {
                     if (runs["status"] == "in_progress") {
-                        loginfo(std::format("updatecheck: run {} is currently in progress...", std::string(runs["head_sha"])));
+                        loginfo(frmt("updatecheck: run {} is currently in progress...", std::string(runs["head_sha"])));
                     }
                     return runs["status"] == "completed" && runs["conclusion"] == "success";
                 }
@@ -64,7 +64,7 @@ inline void runUpdateCheck() {
         json j = json::parse(repoInfoData);
         if (j.is_object() && j.contains("stargazers_count")) {
             githubStars = j["stargazers_count"].get<int>();
-            loginfo(std::format("GitHub star count: {}", (int)githubStars));
+            loginfo(frmt("GitHub star count: {}", (int)githubStars));
         }
     }
     catch (std::exception&) {

@@ -89,7 +89,7 @@ void MinecraftBlockPreviewScreen::render()
 
     drawBottomBar();
 
-    g_fnt->RenderString(std::format("Select the tile to use for: {}", 
+    g_fnt->RenderString(frmt("Select the tile to use for: {}", 
         choosingSide == 0 ? "top side"
         : choosingSide == 1 ? "left side"
         : "right side"),

@@ -9,7 +9,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     wxHeight = 280;
     std::vector<std::string> names;
     for (XY& tileSize : predefinedTileSizes) {  
-        names.push_back(xyEqual(tileSize, { 0,0 }) ? std::string("No grid") : std::format("{}x{}", tileSize.x, tileSize.y));
+        names.push_back(xyEqual(tileSize, { 0,0 }) ? std::string("No grid") : frmt("{}x{}", tileSize.x, tileSize.y));
     }
 
     this->caller = parent;

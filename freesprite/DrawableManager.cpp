@@ -55,7 +55,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             XY touchPos = XY{ (int)(convEvent.tfinger.x * g_windowW), (int)(convEvent.tfinger.y * g_windowH) };
-            //loginfo(std::format("attempting to focus on point from touch event {} {}", touchPos.x, touchPos.y));
+            //loginfo(frmt("attempting to focus on point from touch event {} {}", touchPos.x, touchPos.y));
             if (wxs.tryFocusOnPoint(touchPos, parentOffset)) {
                 break;
             }

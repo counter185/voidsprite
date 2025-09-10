@@ -106,7 +106,7 @@ void PalettizedEditorColorPicker::render(XY position)
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 
-    pickedColorLabel->setText(std::format("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow));
+    pickedColorLabel->setText(frmt("#{}/x{:02X} - #{:08X}", upcastCaller->pickedPaletteIndex, upcastCaller->pickedPaletteIndex, colorNow));
     pickedColorLabel->color = {valCol.r, valCol.g, valCol.b, 0xff};
 
     subWidgets.renderAll(position);
@@ -139,7 +139,7 @@ void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
 {
     if (evt_id >= 200) {
         //todo: open popup to edit the color
-        PopupPickColor* ppc = new PopupPickColor("Pick color", std::format("Select color for palette index {}", evt_id-200), true);
+        PopupPickColor* ppc = new PopupPickColor("Pick color", frmt("Select color for palette index {}", evt_id-200), true);
         ppc->setCallbackListener(evt_id, this);
         uint32_t palCol = upcastCaller->palette[evt_id - 200];
         ppc->setRGB(palCol);
