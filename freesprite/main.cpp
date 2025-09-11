@@ -984,10 +984,17 @@ int main(int argc, char** argv)
                     SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
                     SDL_RenderDrawRect(g_rd, &batteryRect);
 
-                    SDL_Color primaryColor = powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{ 253, 255, 146, 0x80 }
+                    if (batteryPercent <= 10 && powerstate != SDL_POWERSTATE_CHARGING && (SDL_GetTicks64() - wd->lastLowBatteryPulseTime) > 3000) {
+                        wd->lastLowBatteryPulseTime = SDL_GetTicks64();
+                        g_newVFX(VFX_LOWBATTERYPULSE, 2000, 0, batteryRect);
+                    }
+
+                    SDL_Color primaryColor = 
+                        powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{ 253, 255, 146, 0x80 }
                         : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
                         : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
-                    : SDL_Color{ 255,255,255, 0x80 };
+                        : batteryPercent <= 10 ? SDL_Color{255, 0x50, 0x50, 0x80}
+                        : SDL_Color{ 255,255,255, 0x80 };
 
                     SDL_SetRenderDrawColor(g_rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
                     drawLine(batteryOrigin, batteryOriginLow);

@@ -7,6 +7,7 @@ enum VFXType {
     VFX_COLORPICKER,	//ext1: color, ext2: rect
     VFX_POPUPCLOSE,
     VFX_PANELOPEN,
+    VFX_LOWBATTERYPULSE,
 };
 
 void g_newVFX(VFXType type, u32 durationMS, u32 extData1 = 0, SDL_Rect extData2 = { 0,0,0,0 }, std::vector<u32> moreExtData = std::vector<u32>{0});

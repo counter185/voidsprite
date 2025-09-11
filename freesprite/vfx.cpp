@@ -98,6 +98,15 @@ public:
                     SDL_RenderDrawRect(g_rd, &panelRect);
                 }
                 break;
+            case VFX_LOWBATTERYPULSE:
+                {
+                    double percent = interpolation(timer.percentElapsedTime(duration));
+                    SDL_Rect targetRect = extData2;
+                    targetRect = offsetRect(targetRect, 30 * percent, 18 * percent);
+                    SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255 * (1.0 - percent));
+                    SDL_RenderDrawRect(g_rd, &targetRect);
+                }
+                break;
         }
     }
     bool expired() {

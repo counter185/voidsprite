@@ -21,6 +21,7 @@ public:
     TextRenderer* fnt = NULL;
     std::string lastWindowTitle = "";
     std::string windowTitle = "";
+    u64 lastLowBatteryPulseTime = 0;
 
     BaseScreen* favScreen = NULL;
 
