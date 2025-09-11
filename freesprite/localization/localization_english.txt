@@ -271,6 +271,8 @@
     {"vsp.collabeditor.popup.ip.placeholder", "Enter IP..."},
     {"vsp.collabeditor.popup.username", "Username"},
     {"vsp.collabeditor.popup.usercolor", "User color"},
+    {"vsp.collabeditor.popup.password", "Password"},
+    {"vsp.collabeditor.popup.password.none", "No password"},
     {"vsp.collabeditor.popup.host.desc", "Input the port number to use"},
     {"vsp.collabeditor.ctx.kickuser", "Kick user"},
 

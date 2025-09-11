@@ -13,6 +13,8 @@ using namespace nlohmann;
 void NetworkCanvasMainEditor::networkCanvasClientThread()
 {
 #if VSP_NETWORKING
+    networkCanvasSendAUTH();
+
     std::string commandBuffer = "";
     networkCanvasSendInfoRequest();
     while (networkRunning) {
@@ -169,6 +171,10 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             }
         });
     }
+    else if (command == "HSDC") {
+        std::string disconnectReason = networkReadString(clientSocket);
+        g_addNotificationFromThread(ErrorNotification(TL("vsp.collabeditor.error.disconnected"), disconnectReason));
+    }
 }
 
 void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
@@ -199,6 +205,15 @@ void NetworkCanvasMainEditor::networkCanvasSendNewLayerRequest()
     //todo
 }
 
+void NetworkCanvasMainEditor::networkCanvasSendAUTH()
+{
+    networkSendCommand(clientSocket, "AUTH");
+    json authJson = {
+        {"password", networkCanvasPassword}
+    };
+    networkSendString(clientSocket, authJson.dump());
+}
+
 void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
 {
     for (Layer*& layer : layers) {
@@ -225,6 +240,7 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSet
     thisClientInfo->clientIP = "localhost";
     thisClientInfo->clientName = userData.username;
     thisClientInfo->clientColor = userData.userColor;
+    networkCanvasPassword = userData.password;
     networkRunning = true;
     canvas.dimensions = { 0,0 };
     clientSocket = socket;

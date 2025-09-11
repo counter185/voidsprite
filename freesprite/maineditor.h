@@ -272,6 +272,7 @@ public:
     Panel* networkCanvasHostPanelContainer = NULL;
     Panel* networkCanvasChatPanelContainer = NULL;
     NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
+    std::string networkCanvasPassword = "";
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
@@ -396,6 +397,7 @@ public:
     void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
     void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
+    bool networkCanvasProcessAUTHCommand(std::string request);
     std::string networkReadCommand(NET_StreamSocket* socket);
     bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
     void networkSendCommand(NET_StreamSocket* socket, std::string commandName);

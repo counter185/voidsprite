@@ -2993,6 +2993,8 @@ void MainEditor::promptStartNetworkSession()
     p->onInputConfirmCallback = [this](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
         networkRunning = true;
 
+        networkCanvasPassword = d.password;
+
         networkCanvasCurrentChatState = new NetworkCanvasChatHostState;
         networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
         networkCanvasChatPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.chat.title"), networkCanvasChatPanel);
@@ -3073,6 +3075,14 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
 {
 #if VSP_NETWORKING
+    std::string authCommand = networkReadCommand(clientSocket);
+    if (authCommand != "AUTH" || !networkCanvasProcessAUTHCommand(networkReadString(clientSocket))) {
+        networkSendCommand(clientSocket, "HSDC");
+        networkSendString(clientSocket, "Authentication failed");
+        NET_DestroyStreamSocket(clientSocket);
+        return;
+    }
+
     //todo: delete this thread from the responder threads list when done
     NetworkCanvasClientInfo clientInfo;
     clientInfo.uid = nextClientUID++;
@@ -3097,6 +3107,11 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
             break;
         }
     }
+    if (clientInfo.hostKick) {
+        networkSendCommand(clientSocket, "HSDC");
+        networkSendString(clientSocket, "Kicked by host");
+    }
+
     networkClientsListMutex.lock();
     networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
     networkClientsListMutex.unlock();
@@ -3246,6 +3261,19 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
     else {
         logerr(frmt("Unknown command from client: {}", command));
     }
+}
+
+bool MainEditor::networkCanvasProcessAUTHCommand(std::string request)
+{
+    try {
+        json inputJson = json::parse(request);
+        std::string password = inputJson.value("password", "");
+        return networkCanvasPassword == "" || password == networkCanvasPassword;
+        
+    } catch (std::exception&) {
+        return false;
+    }
+    return false;
 }
 
 std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)

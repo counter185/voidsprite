@@ -31,6 +31,7 @@ protected:
     void networkCanvasSendInfoRequest();
     void networkCanvasSendLocalChanges();
     void networkCanvasSendNewLayerRequest();
+    void networkCanvasSendAUTH();
 
     void reallocLayers(XY size, int numLayers);
 

@@ -6,13 +6,14 @@ struct PopupSetNetworkCanvasData {
     int port = 6600;
     std::string username;
     u32 userColor = 0xFFFFFF;
+    std::string password = "";
 };
 
 class PopupSetupNetworkCanvas :
     public BasePopup
 {
 public:
-    UITextField* textboxIP, *textboxPort, *textboxUsername;
+    UITextField* textboxIP, *textboxPort, *textboxUsername, *textboxPassword;
     UIButton* buttonSetUserColor;
     u32 userColor = 0xFFFFFF;
     std::function<void(PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData)> onInputConfirmCallback = NULL;

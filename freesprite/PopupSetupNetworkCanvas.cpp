@@ -6,7 +6,7 @@
 
 PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField, bool portField)
 {
-    wxHeight = 240;
+    wxHeight = 290;
 
     userColor = sdlcolorToUint32(rgb2sdlcolor(hsv2rgb(
         hsv{
@@ -24,6 +24,7 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
                 ret.port = (!portField || textboxPort->textEmpty()) ? 6600 : std::stoi(textboxPort->getText());
                 ret.username = textboxUsername->textEmpty() ? "User" : textboxUsername->getText();
                 ret.userColor = userColor;
+                ret.password = textboxPassword->getText();
                 onInputConfirmCallback(this, ret);
                 closePopup();
             }
@@ -81,6 +82,18 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
         g_addPopup(colorPicker);
     };
     wxsManager.addDrawable(buttonSetUserColor);
+
+
+    UILabel* labelPassword = new UILabel(TL("vsp.collabeditor.popup.password"));
+    labelPassword->position = XY{ 30, 180 };
+    wxsManager.addDrawable(labelPassword);
+
+    textboxPassword = new UITextField();
+    textboxPassword->position = XY{ ixmax(labelPassword->calcEndpoint().x + 30, 90), 180 };
+    textboxPassword->wxWidth = 190;
+    textboxPassword->setText("");
+    textboxPassword->placeholderText = TL("vsp.collabeditor.popup.password.none");
+    wxsManager.addDrawable(textboxPassword);
 
     updateUserColorButton();
 
