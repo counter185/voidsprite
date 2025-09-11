@@ -25,6 +25,7 @@
 #include "keybinds.h"
 #include "background_operation.h"
 #include "brush/BaseBrush.h"
+#include "PanelPreview.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1092,6 +1093,12 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_V, { "Preview in separate workspace...",
                             [this]() {
                                 g_addScreen(new ViewSessionScreen(this));
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_W, { "Open preview panel...",
+                            [this]() {
+                                openPreviewPanel();
                             }
                         }
                     },
@@ -2430,6 +2437,14 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
         refWPanel->playPanelOpenVFX();
         delete ssn;
     }
+}
+
+void MainEditor::openPreviewPanel()
+{
+    Panel* previewPanel = new PanelPreview(this);
+    CollapsableDraggablePanel* previewWPanel = new CollapsableDraggablePanel("PREVIEW", previewPanel);
+    addWidget(previewWPanel);
+    previewWPanel->playPanelOpenVFX();
 }
 
 void MainEditor::tryToggleTilePreviewLockAtMousePos() 

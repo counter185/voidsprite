@@ -178,6 +178,7 @@ add_library(main SHARED
         voidsprite/PalettizedEditorLayerPicker.cpp
         voidsprite/Panel.cpp
         voidsprite/PanelMCBlockPreview.cpp
+        voidsprite/PanelPreview.cpp
         voidsprite/PanelReference.cpp
         voidsprite/PanelRPG2KTilemapPreview.cpp
         voidsprite/PanelSpritesheetPreview.cpp

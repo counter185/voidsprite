@@ -690,6 +690,9 @@
     <ClCompile Include="io\io_pixelstudio.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="PanelPreview.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1330,6 +1333,9 @@
     </ClInclude>
     <ClInclude Include="io\io_pixelstudio.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelPreview.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

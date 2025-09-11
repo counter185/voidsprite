@@ -343,6 +343,7 @@ public:
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     void tryAddReference(PlatformNativePathString path);
+    void openPreviewPanel();
     void tryToggleTilePreviewLockAtMousePos();
 
     void discardEndOfUndoStack();
