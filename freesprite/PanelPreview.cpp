@@ -1,11 +1,22 @@
 #include "PanelPreview.h"
 #include "maineditor.h"
+#include "UIButton.h"
 
 PanelPreview::PanelPreview(MainEditor* t)
 {
     parent = t;
     wxWidth = 400;
     wxHeight = 300;
+
+    UIButton* closeBtn = new UIButton();
+    closeBtn->wxWidth = 30;
+    closeBtn->wxHeight = 20;
+    closeBtn->position = { wxWidth - 5 - closeBtn->wxWidth, 5 };
+    closeBtn->text = "X";
+    closeBtn->onClickCallback = [&](UIButton* caller) {
+        parent->removeWidget(getTopmostParent());
+    };
+    subWidgets.addDrawable(closeBtn);
 }
 
 void PanelPreview::handleInput(SDL_Event evt, XY gPosOffset)

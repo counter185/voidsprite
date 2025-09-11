@@ -574,6 +574,12 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_W, { "Open preview panel...",
+                            [this]() {
+                                openPreviewPanel();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabView
             }
