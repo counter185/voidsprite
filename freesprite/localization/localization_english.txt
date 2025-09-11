@@ -289,6 +289,9 @@
 
     //screen: tilemap preview
     {"vsp.tilemappreview", "Preview tiles"},
+    {"vsp.tilemappreview.title", "Tilemap preview"},
+    {"vsp.tilemappreview.selecttile", "Select tile... [TAB]"},
+    {"vsp.tilemappreview.selectedtile", "Selected tile:"},
 
     //screen: extract data
     {"vsp.extractdata", "Extract data"},

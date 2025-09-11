@@ -3,19 +3,26 @@
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "UILabel.h"
+#include "UIButton.h"
 
 PanelTilemapPreview::PanelTilemapPreview(TilemapPreviewScreen* parent) {
-	caller = parent;
+    caller = parent;
 
     wxWidth = 400;
     wxHeight = 200;
     position = { 20,50 };
 
-    UILabel* ll = new UILabel("Tileset preview");
+    UILabel* ll = new UILabel(TL("vsp.tilemappreview.title"));
     ll->position = { 5,5 };
     subWidgets.addDrawable(ll);
     
-    ll = new UILabel("Selected tile: [TAB] to switch");
+    UIButton* b = new UIButton(TL("vsp.tilemappreview.selecttile"));
+    b->wxWidth = 180;
+    b->position = { wxWidth - b->wxWidth - 10, 5 };
+    b->onClickCallback = ([this](UIButton*) { caller->toggleTileSelect(); caller->forceUnfocusAll(); });
+    subWidgets.addDrawable(b);
+
+    ll = new UILabel(TL("vsp.tilemappreview.selectedtile"));
     ll->position = { 15,60 };
     subWidgets.addDrawable(ll);
 }

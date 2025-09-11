@@ -162,6 +162,11 @@ void TilemapPreviewScreen::render()
         for (Layer* l : caller->layers) {
             l->render(tileSelectRect, l->layerAlpha);
         }
+        for (int x = 1; x < 4; x++) {
+            SDL_Rect offs = offsetRect(tileSelectRect, x);
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xe0/x);
+            SDL_RenderDrawRect(g_rd, &offs);
+        }
 
         SDL_Rect pickedTileRect = {
             tileSelectRect.x + pickedTile.x * caller->tileDimensions.x * tileSelectScale,
@@ -181,7 +186,7 @@ void TilemapPreviewScreen::render()
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
         SDL_RenderDrawRect(g_rd, &hoveredTileRect);
 
-        g_fnt->RenderString("Select tile...", 10, 10);
+        //g_fnt->RenderString("Select tile...", 10, 10);
     }
 
     if (navbar->focused) {
@@ -294,8 +299,7 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             break;
         case SDL_KEYDOWN:
             if (evt.key.scancode == SDL_SCANCODE_TAB) {
-                tileSelectOpen = !tileSelectOpen;
-                tileSelectTimer.start();
+                toggleTileSelect();
             }
             else if (evt.key.scancode == SDL_SCANCODE_LALT) {
                 wxsManager.forceFocusOn(navbar);
@@ -303,6 +307,12 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
             break;
         }
     }
+}
+
+void TilemapPreviewScreen::toggleTileSelect()
+{
+    tileSelectOpen = !tileSelectOpen;
+    tileSelectTimer.start();
 }
 
 BaseScreen* TilemapPreviewScreen::isSubscreenOf()

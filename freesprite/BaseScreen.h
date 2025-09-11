@@ -43,5 +43,9 @@ public:
         this->callback = callback;
         this->callback_id = evt_id;
     }
+
+    void forceUnfocusAll() {
+        wxsManager.forceUnfocus();
+    }
 };
 

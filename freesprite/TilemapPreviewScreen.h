@@ -49,6 +49,7 @@ public:
 	static void drawBackground();
 	void recenterTilemap();
 	void recenterTilePicker();
+	void toggleTileSelect();
 
 	int activeLayerIndex();
 	void switchActiveLayer(int layerIndex);
