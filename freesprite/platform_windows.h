@@ -638,11 +638,21 @@ std::string platformGetSystemInfo() {
             ret += "  (Running on a compatibility layer?)\n";
         }
     }
+
+    std::wstring pcName;
+    u32 pcNameSize = 256;
+    pcName.resize(pcNameSize);
+    if (GetComputerNameW(pcName.data(), (LPDWORD)&pcNameSize)) {
+        pcName.resize(pcNameSize);
+        ret += "Network name: " + convertStringToUTF8OnWin32(pcName) + "\n";
+    }
+
     ret += frmt("System: {} {}\n",
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemManufacturer"),
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemProductName"));
     ret += "CPU: " + windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", L"ProcessorNameString") + "\n";
     ret += "GPU: " + windows_getActiveGPUName() + "\n";
+
     ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
 
     return ret;
