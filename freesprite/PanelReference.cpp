@@ -26,16 +26,19 @@ bool PanelReference::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 
 void PanelReference::handleInput(SDL_Event evt, XY gPosOffset)
 {
+    SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
     if (currentMode == 0) {
-        if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && !subWidgets.mouseInAny(gPosOffset, { (int)evt.button.x, (int)evt.button.y }) && pointInBox({ (int)evt.button.x, (int)evt.button.y }, canvasDraw)) {
+        if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
+            && !subWidgets.mouseInAny(gPosOffset, { (int)evtc.button.x, (int)evtc.button.y }) 
+            && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
             dragging++;
         }
-        else if (dragging > 0 && evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+        else if (dragging > 0 && evtc.type == SDL_EVENT_MOUSE_BUTTON_UP) {
             dragging = 0;
         }
-        else if (dragging && evt.type == SDL_EVENT_MOUSE_MOTION) {
-            c.panCanvas({ (int)evt.motion.xrel, (int)evt.motion.yrel });
+        else if (dragging && evtc.type == SDL_EVENT_MOUSE_MOTION) {
+            c.panCanvas({ (int)evtc.motion.xrel, (int)evtc.motion.yrel });
         }
         else {
             Panel::handleInput(evt, gPosOffset);

@@ -60,10 +60,10 @@ void UISlider::handleInput(SDL_Event evt, XY gPosOffset)
 		case SDL_MOUSEMOTION:
 			if (mouseHeld) {
 				XY mousePos = xySubtract(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, gPosOffset);
-				if (mousePos.y >= 0 && mousePos.y <= wxHeight) {
-					sliderPos = fclamp(0.0f, mousePos.x / (float)wxWidth, 1.0f);
-					this->onSliderPosChanged();
-				}
+				//if (mousePos.y >= 0 && mousePos.y <= wxHeight) {
+				sliderPos = fclamp(0.0f, mousePos.x / (float)wxWidth, 1.0f);
+				this->onSliderPosChanged();
+				//}
 			}
 			break;
 	}
