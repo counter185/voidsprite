@@ -9,7 +9,7 @@ struct LMUEvent {
     std::string name = "";
     std::string texFileName = "";
     int charsetIndex = 0, charsetDirection = 0, charsetPattern = 1;
-    SDL_Texture* tex = NULL;
+    ReldTex* tex = NULL;
 };
 
 enum LMUEventViewMode : int {
@@ -30,8 +30,8 @@ public:
     ScreenWideNavBar* navbar = NULL;
     std::vector<LMUEvent> events;
 
-    std::map<std::string, SDL_Texture*> texturesLoaded;
-    SDL_Texture* callerCanvas = NULL;
+    std::map<std::string, ReldTex*> texturesLoaded;
+    ReldTex* callerCanvas = NULL;
 
     Canvas canvas;
 

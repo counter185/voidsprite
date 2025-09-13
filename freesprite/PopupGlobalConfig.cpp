@@ -362,6 +362,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         UTF8_DIAMOND " will appear next to strings that are present in the current localization\n"
         UTF8_EMPTY_DIAMOND " will appear next to strings that are being pulled as fallback from English",
         &g_debugConfig.debugTestLocalization, &posInTab));
+    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
 #endif
     
 

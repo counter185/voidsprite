@@ -11,6 +11,9 @@
 #include "FileIO.h"
 #include "LayerPalettized.h"
 #include "PanelRPG2KTilemapPreview.h"
+#include "PopupGlobalConfig.h"
+#include "PanelReference.h"
+#include "CollapsableDraggablePanel.h"
 
 RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 {
@@ -44,6 +47,12 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
                                 }
                             }
                         },
+                        {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"),
+                            [this]() {
+                                g_addPopup(new PopupGlobalConfig());
+                            }
+                        }
+                    },
                         /*{SDL_SCANCODE_S, {"Save layout to file",
                                 [](TilemapPreviewScreen* screen) {
                                     platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"} }, "Save tile layout", EVENT_OTHERFILE_SAVEFILE);
@@ -98,8 +107,6 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     memset(lowerLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
     memset(upperLayerData, 0, dimensions.x * dimensions.y * sizeof(uint16_t));
 
-    callerCanvas = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
-
     RecenterCanvas();
 
     //resizeTilemap(32, 32);
@@ -113,11 +120,11 @@ RPG2KTilemapPreviewScreen::~RPG2KTilemapPreviewScreen()
     if (upperLayerData != NULL) {
         delete[] upperLayerData;
     }
-    if (callerCanvas) {
-        tracked_destroyTexture(callerCanvas);
+    if (callerCanvas != NULL) {
+        delete callerCanvas;
     }
     for (auto& tex : texturesLoaded) {
-        tracked_destroyTexture(tex.second);
+        delete tex.second;
     }
 }
 
@@ -269,19 +276,24 @@ void RPG2KTilemapPreviewScreen::RecenterCanvas()
 
 void RPG2KTilemapPreviewScreen::PrerenderCanvas()
 {
-    SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_NONE);
-    g_pushRenderTarget(callerCanvas);
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
-    SDL_RenderClear(g_rd);
-    for (Layer*& l : caller->layers) {
-        if (!l->hidden) {
-            l->render({ 0,0, 480, 256 }, 255);
-            //SDL_RenderCopy(g_rd, l->tex, NULL, NULL);
-        }
+    if (callerCanvas != NULL) {
+        delete callerCanvas;
     }
-    g_popRenderTarget();
-    SDL_SetTextureBlendMode(callerCanvas, SDL_BLENDMODE_BLEND);
-    
+    callerCanvas = new ReldTex([this](SDL_Renderer* rd) {
+        SDL_Texture* tex = tracked_createTexture(rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 480, 256);
+        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE);
+        g_pushRenderTarget(tex);
+        SDL_SetRenderDrawColor(rd, 0, 0, 0, 0);
+        SDL_RenderClear(rd);
+        for (Layer*& l : caller->layers) {
+            if (!l->hidden) {
+                l->render({ 0,0, 480, 256 }, 255);
+            }
+        }
+        g_popRenderTarget();
+        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+        return tex;
+    });
 }
 
 void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t watertileIndex, XY position, SDL_Rect dst, SDL_Texture* tex, int animState)
@@ -597,15 +609,10 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
                 SDL_RenderCopy(g_rd, tex, &src, &dst);
             }
                 break;
-            default:
-                g_fnt->RenderString(frmt("w{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
-
-                SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-                SDL_RenderDrawRect(g_rd, &dst);
-                break;
             }
         }
-        else {
+
+        if (g_debugConfig.debugShowTilesRPG2K) {
             g_fnt->RenderString(frmt("W{:02X}\n{}", connection, watertileIndex), dst.x, dst.y);
 
             SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
@@ -924,7 +931,8 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
         SDL_Rect centerTile = { autotileOrigin.x, autotileOrigin.y, 16, 16 };
         SDL_RenderCopy(g_rd, tex, &centerTile, &dst);
     }
-    else {
+
+    if (g_debugConfig.debugShowTilesRPG2K) {
         g_fnt->RenderString(frmt("a{}\n{}", connection, autotileIndex), dst.x, dst.y);
 
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
@@ -934,7 +942,7 @@ void RPG2KTilemapPreviewScreen::RenderAutoTile(uint8_t connection, uint16_t auto
 
 void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_Rect dst, int animState)
 {
-    SDL_Texture* draw = callerCanvas;
+    SDL_Texture* draw = callerCanvas->get();
 
     char type = 'o';
     uint16_t index = tile;
@@ -1013,7 +1021,7 @@ void RPG2KTilemapPreviewScreen::RenderEvents(XY originPoint, int canvasScale)
                 srcCharsetOrigin.x + (24 * evt.charsetPattern), srcCharsetOrigin.y + (32 * evt.charsetDirection),
                 24, 32 
             };
-            SDL_RenderCopy(g_rd, evt.tex, &srcCharset, &dst);
+            SDL_RenderCopy(g_rd, evt.tex->get(), &srcCharset, &dst);
         }
 
         if (eventViewMode == LMUEVENTS_SHOW_RECTS || eventViewMode == LMUEVENTS_SHOW_INGAME_AND_RECTS) {
@@ -1110,7 +1118,7 @@ Layer* RPG2KTilemapPreviewScreen::RenderWholeMapToTexture()
 bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 {
     for (auto& tx : texturesLoaded) {
-        tracked_destroyTexture(tx.second);
+        delete tx.second;
     }
     texturesLoaded.clear();
     events.clear();
@@ -1150,37 +1158,46 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                 newEvt.charsetPattern = evt.pages[0].character_pattern;
                 //todo: convert texFile from shift-jis to utf8
                 //or even better try to find it from the [EasyRPG] section in the ini file
+                std::string texFileName = newEvt.texFileName;
 
-                if (newEvt.texFileName != "") {
+                if (texFileName != "") {
 
                     if (!texturesLoaded.contains(newEvt.texFileName)) {
+                        
+                        texturesLoaded[newEvt.texFileName] = new ReldTex([directoryOfFile, texFileName](SDL_Renderer* rd) {
 
-                        PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".xyz");
-                        if (std::filesystem::exists(charsetPath)) {
-                            //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
-                            LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
-                            if (nl != NULL) {
-                                nl->palette[0] &= 0xffffff;
-                                nl->updateTexture();
-                                texturesLoaded[newEvt.texFileName] = nl->renderToTexture();
-                                delete nl;
-                            }
-                        }
+                            SDL_Texture* tex = NULL;
 
-                        if (newEvt.tex == NULL) {
-                            charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + newEvt.texFileName + ".png");
+                            PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + texFileName + ".xyz");
                             if (std::filesystem::exists(charsetPath)) {
-                                Layer* nl = readPNG(charsetPath);
+                                //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
+                                LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
                                 if (nl != NULL) {
-                                    if (nl->isPalettized) {
-                                        ((LayerPalettized*)nl)->palette[0] &= 0xffffff;
-                                        ((LayerPalettized*)nl)->updateTexture();
-                                    }
-                                    texturesLoaded[newEvt.texFileName] = nl->renderToTexture();
+                                    nl->palette[0] &= 0xffffff;
+                                    nl->updateTexture();
+                                    tex = nl->renderToTexture();
                                     delete nl;
                                 }
                             }
-                        }
+
+                            if (tex == NULL) {
+                                charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + texFileName + ".png");
+                                if (std::filesystem::exists(charsetPath)) {
+                                    Layer* nl = readPNG(charsetPath);
+                                    if (nl != NULL) {
+                                        if (nl->isPalettized) {
+                                            ((LayerPalettized*)nl)->palette[0] &= 0xffffff;
+                                            ((LayerPalettized*)nl)->updateTexture();
+                                        }
+                                        tex = nl->renderToTexture();
+                                        delete nl;
+                                    }
+                                }
+                            }
+
+                            return tex;
+                        });
+                        
                     }
 
                     newEvt.tex = texturesLoaded[newEvt.texFileName];

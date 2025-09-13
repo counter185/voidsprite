@@ -50,7 +50,8 @@ public:
 struct DebugSettings {
     bool debugShowScrollPanelBounds = false;
     bool debugColorSliderGradients = false;
-	bool debugTestLocalization = false;
+    bool debugTestLocalization = false;
+    bool debugShowTilesRPG2K = false;
 };
 
 inline bool g_configWasLoaded = false;
