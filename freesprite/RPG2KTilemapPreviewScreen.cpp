@@ -14,6 +14,7 @@
 #include "PopupGlobalConfig.h"
 #include "PanelReference.h"
 #include "CollapsableDraggablePanel.h"
+#include "TooltipsLayer.h"
 
 RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 {
@@ -1010,7 +1011,8 @@ void RPG2KTilemapPreviewScreen::RenderRPG2KTile(uint16_t tile, XY position, SDL_
 void RPG2KTilemapPreviewScreen::RenderEvents(XY originPoint, int canvasScale)
 {
     for (LMUEvent& evt : events) {
-        if ((eventViewMode == LMUEVENTS_SHOW_INGAME || eventViewMode == LMUEVENTS_SHOW_INGAME_AND_RECTS) && evt.tex != NULL) {
+        SDL_Texture* tex = evt.tex != NULL ? evt.tex->get() : NULL;
+        if ((eventViewMode == LMUEVENTS_SHOW_INGAME || eventViewMode == LMUEVENTS_SHOW_INGAME_AND_RECTS) && tex != NULL) {
             SDL_Rect dst = { 
                 originPoint.x + evt.pos.x * 16 * canvasScale - 4 * canvasScale,
                 originPoint.y + evt.pos.y * 16 * canvasScale - 16 * canvasScale,
@@ -1021,7 +1023,7 @@ void RPG2KTilemapPreviewScreen::RenderEvents(XY originPoint, int canvasScale)
                 srcCharsetOrigin.x + (24 * evt.charsetPattern), srcCharsetOrigin.y + (32 * evt.charsetDirection),
                 24, 32 
             };
-            SDL_RenderCopy(g_rd, evt.tex->get(), &srcCharset, &dst);
+            SDL_RenderCopy(g_rd, tex, &srcCharset, &dst);
         }
 
         if (eventViewMode == LMUEVENTS_SHOW_RECTS || eventViewMode == LMUEVENTS_SHOW_INGAME_AND_RECTS) {
@@ -1032,6 +1034,22 @@ void RPG2KTilemapPreviewScreen::RenderEvents(XY originPoint, int canvasScale)
             evtRect.h -= 8;
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, evt.tex != NULL ? 0x40 : 0x80);
             SDL_RenderDrawRect(g_rd, &evtRect);
+
+            //draw tooltip
+            XY mousePos = XY{ g_mouseX, g_mouseY };
+            double distanceToRect = xyDistance(mousePos, { evtRect.x + evtRect.w / 2, evtRect.y + evtRect.h / 2 });
+            if ((pointInBox(mousePos, evtRect) || distanceToRect < ixmax(32, canvasScale)) && !forceOptimizationsOff) {
+                evt.tooltipTimer.startIfNotStarted();
+                double time = XM1PW3P1(evt.tooltipTimer.percentElapsedTime(700));
+                g_ttp->addTooltip(Tooltip{ 
+                    XY{evtRect.x, evtRect.y + evtRect.h},
+                    frmt("{}\n(charset: {})\n(index: {}  direction: {})", evt.name, evt.texFileName, evt.charsetIndex, evt.charsetDirection), 
+                    SDL_Color{255,255,255,255}, 
+                    time });
+            }
+            else {
+                evt.tooltipTimer.stop();
+            }
         }
     }
 }

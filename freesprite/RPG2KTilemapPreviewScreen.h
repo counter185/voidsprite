@@ -10,6 +10,7 @@ struct LMUEvent {
     std::string texFileName = "";
     int charsetIndex = 0, charsetDirection = 0, charsetPattern = 1;
     ReldTex* tex = NULL;
+    Timer64 tooltipTimer;
 };
 
 enum LMUEventViewMode : int {
