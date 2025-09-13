@@ -300,7 +300,7 @@ void RPG2KTilemapPreviewScreen::RenderWaterTile(uint8_t connection, uint16_t wat
 {
     int waterAnimLength = 500;
     if (animState == -1) {
-        int animState = SDL_GetTicks64() % (waterAnimLength * 4) / waterAnimLength;
+        animState = (SDL_GetTicks64() % (waterAnimLength * 4)) / waterAnimLength;
         if (animState == 3) {
             animState = 1;
         }
