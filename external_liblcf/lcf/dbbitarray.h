@@ -92,8 +92,8 @@ class DBBitProxyIterator {
 		DBBitProxyIterator operator--(int) { auto iter = *this; --(*this); return iter; }
 
 		void swap(DBBitProxyIterator& o) {
-			std::swap(_proxy._base, o._base);
-			std::swap(_proxy._idx, o._idx);
+			std::swap(_proxy._base, o._proxy._base);
+			std::swap(_proxy._idx, o._proxy._idx);
 		}
 
 		friend bool operator==(DBBitProxyIterator l, DBBitProxyIterator r) { return l->index() == r->index(); }
