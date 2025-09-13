@@ -44,6 +44,7 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
         textboxIP->wxWidth = 180;
         textboxIP->placeholderText = TL("vsp.collabeditor.popup.ip.placeholder");
         wxsManager.addDrawable(textboxIP);
+        wxsManager.forceFocusOn(textboxIP);
     }
 
     if (portField) {
@@ -96,9 +97,6 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
     wxsManager.addDrawable(textboxPassword);
 
     updateUserColorButton();
-
-
-    wxsManager.forceFocusOn(textboxIP);
 
     makeTitleAndDesc(tt, tx);
 }
