@@ -7,11 +7,14 @@ option(USE_FMT_FORMAT "Use fmt::format instead of std::format" OFF)
 if (NOT USE_FMT_FORMAT)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
     add_definitions(-DUSE_FMT_FORMAT=1)
-    find_package(FMT CONFIG)
+    if(NOT TARGET fmt)
+        find_package(fmt CONFIG)
+    endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fdiagnostics-show-option -w")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fdiagnostics-show-option -w -Wno-c++11-narrowing -g")
 
 
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
@@ -85,7 +88,7 @@ file(COPY voidsprite/assets DESTINATION "${CMAKE_BINARY_DIR}/src")
 file(COPY voidsprite/appfont-MPLUSRounded1c-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
 file(COPY voidsprite/appfontcyr-ZenKakuGothicNew-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
 file(COPY voidsprite/appfontjp-NotoSansJP-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
-add_executable(main
+add_executable(voidsprite
         voidsprite/astc_dec/astc_decomp.cpp
         voidsprite/easybmp/EasyBMP.cpp
         voidsprite/libpng/png.c
@@ -257,12 +260,12 @@ add_executable(main
         voidsprite/visual_config.cpp
         voidsprite/ViewSessionScreen.cpp
 )
-target_link_libraries(main PRIVATE SDL3::SDL3)
-target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)
-target_link_libraries(main PRIVATE SDL3_image::SDL3_image)
-target_link_libraries(main PRIVATE SDL3_net::SDL3_net)
-target_link_libraries(main PRIVATE liblcf)
-target_link_libraries(main PRIVATE ZLIB::ZLIB)
+target_link_libraries(voidsprite PRIVATE SDL3::SDL3)
+target_link_libraries(voidsprite PRIVATE SDL3_ttf::SDL3_ttf)
+target_link_libraries(voidsprite PRIVATE SDL3_image::SDL3_image)
+target_link_libraries(voidsprite PRIVATE SDL3_net::SDL3_net)
+target_link_libraries(voidsprite PRIVATE liblcf)
+target_link_libraries(voidsprite PRIVATE ZLIB::ZLIB)
 if (USE_FMT_FORMAT)
-    target_link_libraries(main PRIVATE FMT)
+    target_link_libraries(voidsprite PRIVATE fmt)
 endif()
