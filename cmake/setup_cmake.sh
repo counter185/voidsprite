@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+cd "$(dirname "$(realpath "$0")")"
 git clone --recursive https://github.com/libsdl-org/SDL.git
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
