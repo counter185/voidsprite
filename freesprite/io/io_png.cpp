@@ -5,8 +5,12 @@
     #include "../libpng/png.h"
 #elif VITASDK
     #include "../libpng/png.h"
-#else
+#elif __has_include(<libpng16/png.h>)
+    #include <libpng16/png.h>
+#elif __has_include(<libpng/png.h>)
     #include <libpng/png.h>
+#else
+    #include <png.h>
 #endif
 
 #include <zlib.h>

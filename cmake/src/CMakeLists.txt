@@ -81,7 +81,11 @@ Possible ways to fix this:
 ")
 endif()
 
-add_library(main SHARED
+file(COPY voidsprite/assets DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY voidsprite/appfont-MPLUSRounded1c-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY voidsprite/appfontcyr-ZenKakuGothicNew-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY voidsprite/appfontjp-NotoSansJP-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
+add_executable(main
         voidsprite/astc_dec/astc_decomp.cpp
         voidsprite/easybmp/EasyBMP.cpp
         voidsprite/libpng/png.c
