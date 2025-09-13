@@ -85,6 +85,10 @@ std::string getAllLibsVersions() {
     ret += frmt("libjxl: {}\n", getlibjxlVersion());
 #endif
     ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
+
+#ifdef USE_FMT_FORMAT
+    ret += frmt("fmt: {}\n", FMT_VERSION);
+#endif
     return ret;
 }
 
