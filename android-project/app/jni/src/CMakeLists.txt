@@ -73,7 +73,7 @@ endif()
 file(GLOB_RECURSE CPP_FILES "voidsprite/**/*.cpp")
 file(GLOB_RECURSE C_FILES "voidsprite/**/*.c")
 
-add_executable(main
+add_library(main SHARED
         ${CPP_FILES}
         ${C_FILES}
 )
