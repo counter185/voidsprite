@@ -99,7 +99,7 @@ void Canvas::zoomFromWheelInput(float how_much)
 {
     how_much *= g_config.canvasZoomSensitivity;
     wheelInput += how_much;
-    if (abs(wheelInput) > 1.0f) {
+    if (abs(wheelInput) >= 1.0f) {
         int whole = (int)wheelInput;
         zoom(whole);
         wheelInput -= whole;
