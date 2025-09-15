@@ -89,8 +89,8 @@ file(COPY voidsprite/appfont-MPLUSRounded1c-Medium.ttf DESTINATION "${CMAKE_BINA
 file(COPY voidsprite/appfontcyr-ZenKakuGothicNew-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
 file(COPY voidsprite/appfontjp-NotoSansJP-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
 
-file(GLOB_RECURSE CPP_FILES "voidsprite/**/*.cpp")
-file(GLOB_RECURSE C_FILES "voidsprite/**/*.c")
+file(GLOB_RECURSE CPP_FILES "voidsprite/*.cpp")
+file(GLOB_RECURSE C_FILES "voidsprite/*.c")
 
 add_executable(voidsprite
         ${CPP_FILES}
