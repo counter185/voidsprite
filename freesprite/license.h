@@ -35,6 +35,9 @@ inline std::string getLibraryLicenses() {
         "base64\n"
         "ddspp\n"
         "EasyBMP\n"
+#ifdef USE_FMT_FORMAT
+        "fmt\n"
+#endif
         "giflib\n"
         "json\n"
         "libjxl\n"

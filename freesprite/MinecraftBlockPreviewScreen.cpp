@@ -138,7 +138,7 @@ void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_MOUSEWHEEL:
-            canvas.zoom(evt.wheel.y);
+            canvas.zoomFromWheelInput(evt.wheel.y);
             break;
         }
     }

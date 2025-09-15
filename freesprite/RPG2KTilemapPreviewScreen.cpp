@@ -183,7 +183,7 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
         switch (evt.type) {
         case SDL_MOUSEWHEEL:
-            canvas.zoom(evt.wheel.y);
+            canvas.zoomFromWheelInput(evt.wheel.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:

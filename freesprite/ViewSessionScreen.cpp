@@ -50,7 +50,7 @@ void ViewSessionScreen::takeInput(SDL_Event evt)
             }
             break;
         case SDL_MOUSEWHEEL:
-            c.zoom(evt.wheel.y);
+            c.zoomFromWheelInput(evt.wheel.y);
             break;
         }
     }

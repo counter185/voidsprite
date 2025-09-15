@@ -3,6 +3,8 @@
 
 class Canvas
 {
+private:
+    float wheelInput = 0;
 public:
     XY currentDrawPoint = {0,0};
     XY dimensions = { 0,0 };
@@ -23,6 +25,7 @@ public:
     void drawTileGrid(XY tileSize);
     void zoom(int how_much, XY around);
     void zoom(int how_much) { zoom(how_much, { g_mouseX, g_mouseY }); }
+    void zoomFromWheelInput(float how_much);
     void panCanvas(XY by);
     void recenter(XY windowDimensions = {-1,-1});
     void centerOnPoint(XY point, XY windowDimensions = { -1,-1 });

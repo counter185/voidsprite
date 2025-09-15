@@ -294,7 +294,7 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                 tileSelectScale = ixmax(1, tileSelectScale);
             }
             else {
-                canvas.zoom(evt.wheel.y);
+                canvas.zoomFromWheelInput(evt.wheel.y);
             }
             break;
         case SDL_KEYDOWN:

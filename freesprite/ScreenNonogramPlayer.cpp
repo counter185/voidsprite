@@ -144,7 +144,7 @@ void ScreenNonogramPlayer::takeInput(SDL_Event evt)
 			}
 			break;
 		case SDL_EVENT_MOUSE_WHEEL:
-			c.zoom((int)evt.wheel.y);
+			c.zoomFromWheelInput(evt.wheel.y);
 			break;
 		case SDL_QUIT:
 			g_closeScreen(this);

@@ -95,6 +95,17 @@ void Canvas::zoom(int how_much, XY centerPoint)
     currentDrawPoint = xyAdd(currentDrawPoint, pointDiff);
 }
 
+void Canvas::zoomFromWheelInput(float how_much)
+{
+    how_much *= g_config.canvasZoomSensitivity;
+    wheelInput += how_much;
+    if (abs(wheelInput) > 1.0f) {
+        int whole = (int)wheelInput;
+        zoom(whole);
+        wheelInput -= whole;
+    }
+}
+
 void Canvas::panCanvas(XY by)
 {
     currentDrawPoint.x += by.x;

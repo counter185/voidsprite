@@ -32,7 +32,7 @@ bool g_saveConfig() {
         file << "checkUpdates=" << (g_config.checkUpdates ? "1" : "0") << std::endl;
         file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
         file << "singleInstance=" << (g_config.singleInstance ? "1" : "0") << std::endl;
-		file << "canvasZoomSensitivity" << g_config.canvasZoomSensitivity << std::endl;
+		file << "canvasZoomSensitivity=" << g_config.canvasZoomSensitivity << std::endl;
         file << "debug.testLocalization=" << (g_debugConfig.debugTestLocalization ? "1" : "0") << std::endl;
         
         auto keybinds = g_keybindManager.serializeKeybinds();
