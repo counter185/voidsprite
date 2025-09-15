@@ -889,7 +889,7 @@ std::vector<u8> platformFetchBinFile(std::string url) {
 void platformPrintDocument(Layer* layer) {
     PlatformNativePathString tempPath;
     tempPath.resize(MAX_PATH);
-    int s = GetTempPath2W(tempPath.size(), tempPath.data());
+    int s = GetTempPathW(tempPath.size(), tempPath.data());
     tempPath.resize(s);
 
     PlatformNativePathString tempFile;
