@@ -426,7 +426,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     int newImgH = std::stoi(tab0TextFieldH->getText());
                     LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
                     if (newLayer != NULL) {
-                        newLayer->palette = g_palettes[PALETTE_DEFAULT];
+                        newLayer->palette = g_palettes()[PALETTE_DEFAULT];
                         MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
                         g_addScreen(newMainEditor);
                     }
@@ -451,7 +451,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
                     LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
                     if (newLayer != NULL) {
-                        newLayer->palette = g_palettes[PALETTE_DEFAULT];
+                        newLayer->palette = g_palettes()[PALETTE_DEFAULT];
                         MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
                         newMainEditor->tileDimensions = cellSize;
                         g_addScreen(newMainEditor);

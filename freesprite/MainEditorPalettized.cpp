@@ -26,7 +26,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
     isPalettized = true;
     canvas.dimensions = dimensions;
-    palette = g_palettes[PALETTE_DEFAULT];
+    palette = g_palettes()[PALETTE_DEFAULT];
     LayerPalettized* pltLayer = new LayerPalettized(dimensions.x, dimensions.y);
     pltLayer->palette = palette;
     layers.push_back(pltLayer);

@@ -33,7 +33,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     subWidgets.addDrawable(pickedColorLabel);
 
     std::vector<std::string> palettes;
-    for (auto& pal : g_palettes) {
+    for (auto& pal : g_palettes()) {
         palettes.push_back(pal.first);
     }
 
@@ -151,7 +151,7 @@ void PalettizedEditorColorPicker::eventButtonRightClicked(int evt_id)
 void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
     if (evt_id == EVENT_PALETTECOLORPICKER_PALETTELIST) {
-        upcastCaller->setPalette(g_palettes[name]);
+        upcastCaller->setPalette(g_palettes()[name]);
     }
 }
 

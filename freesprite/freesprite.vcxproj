@@ -236,6 +236,7 @@
     <ClCompile Include="NetworkCanvasMainEditor.cpp" />
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp" />
     <ClCompile Include="NotifSound.cpp" />
+    <ClCompile Include="palettes.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />

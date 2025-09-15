@@ -1642,7 +1642,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
 
             LayerPalettized* l = De4BPPBitplane(256, 174, fullDecompressedData + 0x6000);
             l->name = "Mario Paint Layer";
-            l->palette = g_palettes["Mario Paint"];
+            l->palette = g_palettes()["Mario Paint"];
 
             tracked_free(fullDecompressedData);
             fclose(f);
@@ -1668,7 +1668,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_palettes[PALETTE_DEFAULT];
+        ret->palette = g_palettes()[PALETTE_DEFAULT];
         ret->name = "SPK Layer";
         uint32_t* pxd = ret->pixels32();
         uint64_t layerPointer = 0;
@@ -1721,7 +1721,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_palettes[PALETTE_DEFAULT];
+        ret->palette = g_palettes()[PALETTE_DEFAULT];
         ret->name = "BDY Layer";
         uint32_t* pxd = ret->pixels32();
         uint32_t* end = pxd + (320 * 200);
@@ -1764,7 +1764,7 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
         uint32_t* pxd = ret->pixels32();
-        ret->palette = g_palettes[PALETTE_DEFAULT];
+        ret->palette = g_palettes()[PALETTE_DEFAULT];
         for (int x = 0; x < 320 * 200; x++) {
             uint8_t pixel;
             fread(&pixel, 1, 1, f);
@@ -1863,7 +1863,7 @@ Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek)
                 std::getline(f, line);
             }
             ret = new LayerPalettized(w, h);
-            ((LayerPalettized*)ret)->palette = g_palettes[PALETTE_DEFAULT];
+            ((LayerPalettized*)ret)->palette = g_palettes()[PALETTE_DEFAULT];
             ret->name = "Anymap PGM layer";
 
             for (int y = 0; y < h; y++) {
@@ -1890,7 +1890,7 @@ Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek)
             f >> cols;
             std::getline(f, line);
             ret = new LayerPalettized(w, h);
-            ((LayerPalettized*)ret)->palette = g_palettes[PALETTE_DEFAULT];;
+            ((LayerPalettized*)ret)->palette = g_palettes()[PALETTE_DEFAULT];;
             ret->name = "Anymap PGM layer";
             uint64_t dataPointer = 0;
             while (!f.eof() && dataPointer < w * h) {
@@ -2061,7 +2061,7 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
             pal.push_back((a << 24) + (r << 16) + (g << 8) + b);
         }
         l->palette = pal;*/
-        l->palette = g_palettes["Slim Render (8-bit)"];
+        l->palette = g_palettes()["Slim Render (8-bit)"];
 
         u32* ppx = l->pixels32();
         for (int dataPointer = 0; dataPointer < l->w * l->h; dataPointer++) {
