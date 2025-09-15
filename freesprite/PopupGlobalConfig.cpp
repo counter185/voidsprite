@@ -243,6 +243,8 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showpenpressure"), TL("vsp.config.opt.showpenpressure.desc"), &g_config.showPenPressure, &posInTab));
 
+    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.canvaszoomsens"), "", &g_config.canvasZoomSensitivity, 1, 10, &posInTab));
+
     /*
         -------------------------
         KEYBINDS TAB
@@ -586,6 +588,7 @@ UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tool
 Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position)
 {
     Panel* p = new Panel();
+    p->sizeToContent = true;
     p->position = *position;
     UILabel* lbl = new UILabel(name);
     lbl->position = XY{ 0,0 };
@@ -597,6 +600,8 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
     tf->isNumericField = true;
     tf->position = XY{ 30 + lbl->statSize().x, 0 };
     tf->wxWidth = 40;
+    tf->wxHeight = 25;
+    tf->fontsize = 16;
     tf->setText(std::to_string(valueNow));
     p->subWidgets.addDrawable(tf);
 
@@ -612,7 +617,7 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
         sld->onChangeValueCallback = [target, tf, range, min](UISlider* sld, float val) {
             int vv = min + range * val;
             *target = vv;
-            tf->setText(std::to_string(vv));
+            tf->setText(std::to_string(vv), false);
         };
         p->subWidgets.addDrawable(sld);
     }
@@ -634,7 +639,7 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
         }
     };
     tf->onTextChangedConfirmCallback = [target, min, max](UITextField* tf, std::string text) {
-        tf->setText(std::to_string(*target));
+        tf->setText(std::to_string(*target), false);
     };
 
     position->y += 35;

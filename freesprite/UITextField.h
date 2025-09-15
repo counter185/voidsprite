@@ -57,11 +57,11 @@ public:
 
     bool textEmpty() { return text.empty(); }
     std::string getText() { return text; }
-    void setText(std::string t) 
+    void setText(std::string t, bool runCallback = true) 
     {
         text = t;
         insertPosition = text.size();
-        if (onTextChangedCallback != NULL) {
+        if (runCallback && onTextChangedCallback != NULL) {
             onTextChangedCallback(this, text);
         }
     }

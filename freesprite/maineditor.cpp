@@ -1559,7 +1559,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                             });
                         }
                         else {
-                            zoom(roundf(evt.wheel.y));
+							float wheelY = evt.wheel.y * g_config.canvasZoomSensitivity;
+                            zoom(wheelY);
                         }
                     }
                     break;

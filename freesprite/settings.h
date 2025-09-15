@@ -40,6 +40,7 @@ public:
                                 // 2: delay 500 on unfocus
                                 // 3: auto      (0 if no battery, 1 if battery, 2 if battery <15%)
     bool singleInstance = true;
+    int canvasZoomSensitivity = 1;//1 to 50
 
     std::vector<std::string> lastOpenFiles;
 
