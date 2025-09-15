@@ -1559,7 +1559,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                             });
                         }
                         else {
-                            zoom(evt.wheel.y);
+                            zoom(roundf(evt.wheel.y));
                         }
                     }
                     break;
