@@ -22,5 +22,7 @@ public:
     void eventButtonPressed(int evt_id) override;
 
     virtual void resultUpdated(XY) {}
+
+    virtual bool inputValid() { return true; }
 };
 

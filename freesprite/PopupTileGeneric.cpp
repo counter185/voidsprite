@@ -60,11 +60,16 @@ void PopupTileGeneric::eventButtonPressed(int evt_id) {
         if (!tboxX->textEmpty() && !tboxY->textEmpty()) {
             result.x = std::stoi(tboxX->getText());
             result.y = std::stoi(tboxY->getText());
-            callback->eventPopupClosed(popupEvtID, this);
-            closePopup();
+            if (inputValid()) {
+                callback->eventPopupClosed(popupEvtID, this);
+                closePopup();
+            }
+            else {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.invalidinput")));
+            }
         }
         else {
-            g_addNotification(ErrorNotification("Error", "Both dimensions must be set"));
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Both dimensions must be set"));
         }
     }
     else {

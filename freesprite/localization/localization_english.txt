@@ -23,6 +23,7 @@
     {"vsp.cmn.error.exportfail", "Failed to export file."},
     {"vsp.cmn.error.clipboardtextpaste", "No text in clipboard."},
     {"vsp.cmn.error.unsupportedformat", "Unsupported format"},
+    {"vsp.cmn.error.invalidinput", "Invalid input"},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
 
     //file type names
@@ -229,6 +230,9 @@
 
     {"vsp.maineditor.nav.forceautosave", "Force recovery autosave"},
     {"vsp.maineditor.nav.exportscaled", "Export scaled"},
+    {"vsp.maineditor.nav.print", "Print"},
+    {"vsp.maineditor.nav.print.scale", "Print image"},
+    {"vsp.maineditor.nav.print.scale.desc", "Enter the scale of the printed image"},
 
     {"vsp.maineditor.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},

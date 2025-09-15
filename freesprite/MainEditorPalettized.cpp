@@ -586,6 +586,18 @@ void MainEditorPalettized::setUpWidgets()
         }
     };
 
+    //add print
+    if (platformSupportsFeature(VSP_FEATURE_OS_PRINTER)) {
+        mainEditorKeyActions[SDL_SCANCODE_F].order.insert(mainEditorKeyActions[SDL_SCANCODE_F].order.begin() + 9, SDL_SCANCODE_L);
+        mainEditorKeyActions[SDL_SCANCODE_F].actions[SDL_SCANCODE_L] = {
+            TL("vsp.maineditor.nav.print"),
+            [this]() {
+                PopupIntegerScale* printScalePopup = new PopupIntegerScale(this, TL("vsp.maineditor.nav.print.scale"), TL("vsp.maineditor.nav.print.scale.desc"), canvas.dimensions, {1,1}, EVENT_MAINEDITOR_PRINT, false);
+                g_addPopup(printScalePopup);
+            }
+        };
+    }
+
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
     colorPickerPanel->position.y = 63;

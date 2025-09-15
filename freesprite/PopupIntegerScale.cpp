@@ -1,7 +1,7 @@
 #include "PopupIntegerScale.h"
 #include "UICheckbox.h"
 
-PopupIntegerScale::PopupIntegerScale(EventCallbackListener* callback, std::string tt, std::string tx, XY sizeNow, XY defaultValues, int event_id)
+PopupIntegerScale::PopupIntegerScale(EventCallbackListener* callback, std::string tt, std::string tx, XY sizeNow, XY defaultValues, int event_id, bool allowDownscale)
     : PopupTileGeneric(callback, tt, tx, defaultValues, event_id)
 {
     this->sizeNow = sizeNow;
@@ -12,6 +12,7 @@ PopupIntegerScale::PopupIntegerScale(EventCallbackListener* callback, std::strin
         resultUpdated(result);
     };
     wxsManager.addDrawable(downscaleCheckbox);
+    downscaleCheckbox->enabled = allowDownscale;
 
     outputScaleLabel = new UILabel("");
     outputScaleLabel->position = { 5, wxHeight - 5 - 20 };
@@ -24,7 +25,7 @@ PopupIntegerScale::PopupIntegerScale(EventCallbackListener* callback, std::strin
 void PopupIntegerScale::resultUpdated(XY result)
 {
     XY outSize = downscaleCheckbox->isChecked() ?
-        ((result.x != 0 && result.y != 0 && (sizeNow.x % result.x == 0) && (sizeNow.y % result.y == 0)) ? XY{ sizeNow.x / result.x, sizeNow.y / result.y } : XY{ -1,-1 })
+        ((inputValid() && (sizeNow.x % result.x == 0) && (sizeNow.y % result.y == 0)) ? XY{sizeNow.x / result.x, sizeNow.y / result.y} : XY{-1,-1})
         : XY{ sizeNow.x * result.x, sizeNow.y * result.y };
 
     if (outSize.x == -1 || outSize.y == -1) {
@@ -33,4 +34,9 @@ void PopupIntegerScale::resultUpdated(XY result)
     else {
         outputScaleLabel->setText(frmt("Output size: {}x{}", outSize.x, outSize.y));
     }
+}
+
+bool PopupIntegerScale::inputValid()
+{
+    return result.x != 0 && result.y != 0;
 }

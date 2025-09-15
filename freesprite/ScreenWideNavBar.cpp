@@ -135,9 +135,12 @@ void ScreenWideNavBar::openSubmenu(SDL_Scancode which) {
 
 void ScreenWideNavBar::doSubmenuAction(SDL_Scancode which) {
     if (currentSubmenuOpen != SCANCODE_NONE && keyBinds[(SDL_Scancode)currentSubmenuOpen].actions.contains(which)) {
-        keyBinds[(SDL_Scancode)currentSubmenuOpen].actions[which].function();
-        openSubmenu(SCANCODE_NONE);
-        parentManager->forceUnfocus();
+        auto& action = keyBinds[(SDL_Scancode)currentSubmenuOpen].actions[which];
+        if (action.function != NULL) {
+            action.function();
+            openSubmenu(SCANCODE_NONE);
+            parentManager->forceUnfocus();
+        }
     }
 }
 
@@ -165,17 +168,19 @@ void ScreenWideNavBar::updateCurrentSubmenu() {
 
         //generate the buttons
         for (auto& [scancode, action] : submenuNow.actions) {
-            UIButton* newBtn = new UIButton(action.name);
-            std::vector<SDL_Scancode> order = submenuNow.order;
-            newBtn->position = XY{ 0, order.empty() ? submenuOrigin.y : (int)((std::find(order.begin(), order.end(), scancode) - order.begin()) * newBtn->wxHeight) };
-            submenuOrigin.y += newBtn->wxHeight;
-            newBtn->wxWidth = buttonW;
-            newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);
-            newBtn->onClickCallback = [this, scancode](UIButton*) {
-                this->doSubmenuAction((SDL_Scancode)scancode);
-            };
-            submenuActionsNow.push_back(newBtn);
-            submenuPanel->subWidgets.addDrawable(newBtn);
+            if (action.function != NULL) {
+                UIButton* newBtn = new UIButton(action.name);
+                std::vector<SDL_Scancode> order = submenuNow.order;
+                newBtn->position = XY{ 0, order.empty() ? submenuOrigin.y : (int)((std::find(order.begin(), order.end(), scancode) - order.begin()) * newBtn->wxHeight) };
+                submenuOrigin.y += newBtn->wxHeight;
+                newBtn->wxWidth = buttonW;
+                newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);
+                newBtn->onClickCallback = [this, scancode](UIButton*) {
+                    this->doSubmenuAction((SDL_Scancode)scancode);
+                    };
+                submenuActionsNow.push_back(newBtn);
+                submenuPanel->subWidgets.addDrawable(newBtn);
+            }
         }
     }
 }

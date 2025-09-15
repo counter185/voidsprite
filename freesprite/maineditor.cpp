@@ -800,7 +800,7 @@ void MainEditor::setUpWidgets()
             SDL_SCANCODE_F,
             {
                 TL("vsp.nav.file"),
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_W, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X, SDL_SCANCODE_N},
+                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_W, SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X, SDL_SCANCODE_N },
                 {
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"),
                             [this]() {
@@ -1174,6 +1174,18 @@ void MainEditor::setUpWidgets()
     SDL_Scancode keyorder[] = { SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R, SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_U, SDL_SCANCODE_I, SDL_SCANCODE_O, SDL_SCANCODE_P,
                                SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_H, SDL_SCANCODE_J, SDL_SCANCODE_K, SDL_SCANCODE_L,
                                SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M };
+
+    //add print
+    if (platformSupportsFeature(VSP_FEATURE_OS_PRINTER)) {
+        mainEditorKeyActions[SDL_SCANCODE_F].order.insert(mainEditorKeyActions[SDL_SCANCODE_F].order.begin() + 9, SDL_SCANCODE_L);
+        mainEditorKeyActions[SDL_SCANCODE_F].actions[SDL_SCANCODE_L] = {
+            TL("vsp.maineditor.nav.print"),
+            [this]() {
+                PopupIntegerScale* printScalePopup = new PopupIntegerScale(this, TL("vsp.maineditor.nav.print.scale"), TL("vsp.maineditor.nav.print.scale.desc"), canvas.dimensions, {1,1}, EVENT_MAINEDITOR_PRINT, false);
+                g_addPopup(printScalePopup);
+            }
+        };
+    }
 
     //load filters
     int i = 0;
@@ -1725,6 +1737,24 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
     } 
     else if (evt_id == EVENT_MAINEDITOR_RESCALELAYER) {
         rescaleAllLayersFromCommand(((PopupTileGeneric*)p)->result);
+    }
+    else if (evt_id == EVENT_MAINEDITOR_PRINT) {
+        XY outScale = ((PopupIntegerScale*)p)->result;
+        Layer* flat = flattenImage();
+        if (flat != NULL) {
+            Layer* flatScaled = flat->copyAllVariantsScaled({ flat->w * outScale.x, flat->h * outScale.y });
+            delete flat;
+            if (flatScaled != NULL) {
+                platformPrintDocument(flatScaled);
+                delete flatScaled;
+            }
+            else {
+                g_addNotification(NOTIF_MALLOC_FAIL);
+            }
+        }
+        else {
+            g_addNotification(NOTIF_MALLOC_FAIL);
+        }
     }
 }
 

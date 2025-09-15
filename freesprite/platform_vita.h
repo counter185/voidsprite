@@ -134,3 +134,7 @@ std::vector<u8> platformFetchBinFile(std::string url) {
     //return universal_fetchBinFile(url);
     throw std::runtime_error("Failed to fetch binary file from URL: " + url);
 }
+
+void platformPrintDocument(Layer* editor) {
+
+}

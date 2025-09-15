@@ -286,3 +286,7 @@ std::string platformFetchTextFile(std::string url) {
 std::vector<u8> platformFetchBinFile(std::string url) {
     return universal_fetchBinFile(url);
 }
+
+void platformPrintDocument(Layer* editor) {
+
+}

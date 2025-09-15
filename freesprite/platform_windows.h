@@ -20,6 +20,8 @@
 #include <winhttp.h>
 
 #include "platform_universal.h"
+#include "maineditor.h"
+#include "io/io_png.h"
 
 u32 platformSupportedFeatures() {
     return VSP_FEATURE_ALL; //windows is the primary platform and should support everything
@@ -28,6 +30,7 @@ u32 platformSupportedFeatures() {
 HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
+std::vector<PlatformNativePathString> tempFilesToDeleteOnDeinit;
 
 int windows_numProcessesRunning(std::wstring name) {
     int ret = 0;
@@ -166,7 +169,16 @@ void platformPostInit() {
     }
 }
 
-void platformDeinit() {}
+void platformDeinit() {
+    for (auto& deleteTemp : tempFilesToDeleteOnDeinit) {
+        try {
+            std::filesystem::remove(deleteTemp);
+        }
+        catch (std::exception& e) {
+            logerr(frmt("error deleting temp file\n {}", e.what()));
+        }
+    }
+}
 
 bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> additionalArgs) {
     //add the program into hkey_classes_root
@@ -188,7 +200,7 @@ bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> addit
         HKEY voidspriteRootKey;
         if (RegCreateKeyExW(classesRootKey, prot.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &voidspriteRootKey, NULL) == ERROR_SUCCESS) {
             HKEY hKey;
-			RegSetValueExW(voidspriteRootKey, L"URL Protocol", 0, REG_SZ, (const BYTE*)L"", sizeof(L""));
+            RegSetValueExW(voidspriteRootKey, L"URL Protocol", 0, REG_SZ, (const BYTE*)L"", sizeof(L""));
             if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
                 RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size() + 1) * sizeof(wchar_t));
                 RegCloseKey(hKey);
@@ -872,4 +884,32 @@ std::vector<u8> platformFetchBinFile(std::string url) {
     } while (bytesAvailable > 0);
 
     return responseData;
+}
+
+void platformPrintDocument(Layer* layer) {
+    PlatformNativePathString tempPath;
+    tempPath.resize(MAX_PATH);
+    int s = GetTempPath2W(tempPath.size(), tempPath.data());
+    tempPath.resize(s);
+
+    PlatformNativePathString tempFile;
+    tempFile.resize(MAX_PATH);
+    UINT tempFileLen = GetTempFileNameW(tempPath.c_str(), L"vsp", 0, tempFile.data());
+    tempFile.resize(lstrlenW(tempFile.data()));
+
+    if (tempFileLen != 0) {
+        tempFile += L".png";
+        if (writePNG(tempFile, layer)) {
+            tempFilesToDeleteOnDeinit.push_back(tempFile);
+            ShellExecuteW(WINhWnd, L"print", tempFile.c_str(), L"", L"", FALSE);
+            //todo: delete these temp files
+            loginfo(frmt("Sent print command for: {}", convertStringToUTF8OnWin32(tempFile)));
+        }
+        else {
+            logerr("writepng failed [print]");
+        }
+    }
+    else {
+        logerr("failed to get temp file name");
+    }
 }
