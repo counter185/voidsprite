@@ -12,6 +12,7 @@
 #include "PopupChooseExtsToAssoc.h"
 #include "keybinds.h"
 #include "vfx.h"
+#include "UISlider.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -216,26 +217,16 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad, &posInTab));
 
-    UILabel* lbl2 = new UILabel(TL("vsp.config.opt.maxundocount"));
-    lbl2->position = posInTab;
-    editorSettingsPanel->subWidgets.addDrawable(lbl2);
-    UITextField* tf2 = new UITextField();
-    tf2->isNumericField = true;
-    tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y};
-    tf2->wxWidth = 80;
-    tf2->setText(std::to_string(g_config.maxUndoHistory));
-    tf2->setCallbackListener(TEXTFIELD_MAX_UNDO_HISTORY_SIZE, this);
-    editorSettingsPanel->subWidgets.addDrawable(tf2);
-    posInTab.y += 35;
+    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.maxundocount"), "", &g_config.maxUndoHistory, 1, 150, &posInTab));
 
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview, &posInTab));
 
-    lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
+    UILabel* lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;
     editorSettingsPanel->subWidgets.addDrawable(lbl2);
-    tf2 = new UITextField();
+    UITextField* tf2 = new UITextField();
     tf2->isNumericField = true;
     tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y };
     tf2->wxWidth = 80;
@@ -495,14 +486,6 @@ void PopupGlobalConfig::eventButtonPressed(int evt_id)
 void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
 {
     switch (evt_id) {
-        case TEXTFIELD_MAX_UNDO_HISTORY_SIZE:
-            try {
-                g_config.maxUndoHistory = std::stoi(text);
-            }
-            catch (std::exception&) {
-                g_config.maxUndoHistory = previousConfig.maxUndoHistory;
-            }
-            break;
         case TEXTFIELD_AUTOSAVE_INTERVAL:
             try {
                 g_config.autosaveInterval = std::stoi(text);
@@ -598,4 +581,62 @@ UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tool
     }
     position->y += 35;
     return cb7;
+}
+
+Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position)
+{
+    Panel* p = new Panel();
+    p->position = *position;
+    UILabel* lbl = new UILabel(name);
+    lbl->position = XY{ 0,0 };
+    p->subWidgets.addDrawable(lbl);
+
+    int valueNow = *target;
+
+    UITextField* tf = new UITextField();
+    tf->isNumericField = true;
+    tf->position = XY{ 30 + lbl->statSize().x, 0 };
+    tf->wxWidth = 40;
+    tf->setText(std::to_string(valueNow));
+    p->subWidgets.addDrawable(tf);
+
+    UISlider* sld = NULL;
+
+    if (max != -1 && max != min) {
+        int range = max - min;
+        sld = new UISlider();
+        sld->position = XY{ tf->position.x + tf->wxWidth + 10, 0 };
+        sld->wxWidth = 200;
+        sld->wxHeight = 25;
+        sld->setValue(min, max, valueNow);
+        sld->onChangeValueCallback = [target, tf, range, min](UISlider* sld, float val) {
+            int vv = min + range * val;
+            *target = vv;
+            tf->setText(std::to_string(vv));
+        };
+        p->subWidgets.addDrawable(sld);
+    }
+
+    tf->onTextChangedCallback = [target, min, max, sld](UITextField* tf, std::string text) {
+        try {
+            int val = std::stoi(text);
+            if (max != -1 && max != min) {
+                if (val < min) val = min;
+                if (val > max) val = max;
+                if (sld != NULL) {
+                    sld->setValue(min, max, val);
+                }
+            }
+            *target = val;
+        }
+        catch (std::exception&) {
+            //ignore
+        }
+    };
+    tf->onTextChangedConfirmCallback = [target, min, max](UITextField* tf, std::string text) {
+        tf->setText(std::to_string(*target));
+    };
+
+    position->y += 35;
+    return p;
 }
