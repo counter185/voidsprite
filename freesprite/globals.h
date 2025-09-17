@@ -208,6 +208,7 @@ extern TooltipsLayer* g_ttp;
 extern Gamepad* g_gamepad;
 extern int g_mouseX, g_mouseY;
 extern std::vector<BaseBrush*> g_brushes;
+inline std::vector<BaseBrush*> g_pluginBrushes;
 extern std::vector<Pattern*> g_patterns;
 inline std::vector<BaseTemplate*> g_templates;
 inline double g_deltaTime = 1.0;

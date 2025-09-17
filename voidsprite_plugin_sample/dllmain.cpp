@@ -54,7 +54,7 @@ void invertFilter(VSPLayer* layer, VSPFilter* filter) {
             vsp->layerSetPixel(layer, x, y, invertedPixel);
         }
     }
-    free(info);
+    vsp->util_free(info);
 }
 
 void pluginInit(voidspriteSDK* sdk)
@@ -71,6 +71,18 @@ void pluginInit(voidspriteSDK* sdk)
     // Add parameters to our filter
     // **If a filter has no parameters, it will execute instantly after choosing it.
     vsp->filterNewBoolParameter(f, "preserve alpha", true);
+
+    VSPBrush* b = vsp->registerBrush(
+        "Sample brush",
+        NULL,
+        false,
+        [](VSPBrush*, VSPEditorContext* editor, int x, int y) { 
+            uint32_t color = vsp->editorGetActiveColor(editor);
+            vsp->layerSetPixel(vsp->editorGetActiveLayer(editor), x, y, color);
+        },
+        NULL,
+        NULL
+    );
 }
 
 const char* getPluginName()

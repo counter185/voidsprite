@@ -16,6 +16,12 @@ struct VSPFilter { char _placeholder; };
 #ifndef VSPFileExporter
 struct VSPFileExporter { char _placeholder; };
 #endif
+#ifndef VSPEditorContext
+struct VSPEditorContext { char _placeholder; };
+#endif
+#ifndef VSPBrush
+struct VSPBrush { char _placeholder; };
+#endif
 
 #pragma pack(push, 1)
 struct VSPLayerInfo {
@@ -111,5 +117,30 @@ struct voidspriteSDK {
     double (*filterGetRangeValue1)(VSPFilter* filter, const char* name) = 0;
     double (*filterGetRangeValue2)(VSPFilter* filter, const char* name) = 0;
     bool (*filterGetBoolValue)(VSPFilter* filter, const char* name) = 0;
+
+    void (*util_free)(void*) = 0;
+
+    /// <summary>
+    /// Gets the current active color.
+    /// For RGB sessions, this will be in 0xAARRGGBB format.
+    /// For indexed sessions, this will be an index in the palette.
+    /// If editor is NULL, 0 is returned.
+    /// </summary>
+    uint32_t(*editorGetActiveColor)(VSPEditorContext* editor) = 0;
+    /// <summary>
+    /// Gets the number of layers in the current session.
+    /// </summary>
+    int (*editorGetNumLayers)(VSPEditorContext* editor) = 0;
+    VSPLayer* (*editorGetLayer)(VSPEditorContext* editor, int index) = 0;
+    VSPLayer* (*editorGetActiveLayer)(VSPEditorContext* editor) = 0;
+
+    VSPBrush* (*registerBrush)(
+        const char* name,
+        const char* tooltip,
+        bool doublePosPrecision,
+        void (*clickAt)(VSPBrush*, VSPEditorContext* editor, int x, int y),
+        void (*dragAt)(VSPBrush*, VSPEditorContext* editor, int xFrom, int yFrom, int xTo, int yTo),
+        void (*releaseAt)(VSPBrush*, VSPEditorContext* editor, int x, int y)
+        ) = 0;
 };
 #pragma pack(pop)

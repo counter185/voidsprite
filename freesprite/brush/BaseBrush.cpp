@@ -119,4 +119,8 @@ void g_loadBrushes()
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolMeasure());
     g_brushes.push_back(new ToolText());
+
+    for (auto extbrush : g_pluginBrushes) {
+        g_brushes.push_back(extbrush);
+    }
 }
