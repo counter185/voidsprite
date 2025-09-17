@@ -13,6 +13,7 @@
 #include "keybinds.h"
 #include "vfx.h"
 #include "UISlider.h"
+#include "sdk_pluginloader.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -52,6 +53,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         {TL("vsp.config.tab.visual")}, 
         {TL("vsp.config.tab.editor")}, 
         {TL("vsp.config.tab.keybinds")}, 
+        {TL("vsp.config.tab.plugins")}, 
         {TL("vsp.config.tab.misc")},
 #if _DEBUG
         {"DEBUG"}
@@ -261,6 +263,53 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     createKeybindButtons();
 
+    /*
+        -------------------------
+        PLUGINS TAB
+        -------------------------
+    */
+    posInTab = { 0,10 };
+    ScrollingPanel* pluginsPanel = new ScrollingPanel();
+    pluginsPanel->position = posInTab;
+    pluginsPanel->wxWidth = wxWidth - 20;
+    pluginsPanel->wxHeight = wxHeight - 140;
+    pluginsPanel->scrollVertically = true;
+    pluginsPanel->scrollHorizontally = false;
+    configTabs->tabs[4].wxs.addDrawable(pluginsPanel);
+
+    XY posInPanel = { 5,5 };
+    if (g_loadedPlugins.empty()) {
+        pluginsPanel->subWidgets.addDrawable(new UILabel(TL("vsp.config.tab.plugins.noplugins"), posInPanel));
+    }
+    else {
+        for (auto& pluginInfo : g_loadedPlugins) {
+            UILabel* lbl = new UILabel(frmt("{} v{}", pluginInfo.name, pluginInfo.version), posInPanel);
+            lbl->fontsize = 18;
+            pluginsPanel->subWidgets.addDrawable(lbl);
+            posInPanel.y += 25;
+
+            UILabel* authors = new UILabel(frmt("by {}", pluginInfo.authors));
+            authors->position = xyAdd(lbl->calcEndpoint(), {10, 0});
+            authors->fontsize = 16;
+            authors->color = { 255,255,255,0x80 };
+            pluginsPanel->subWidgets.addDrawable(authors);
+
+            UILabel* desc = new UILabel(pluginInfo.description, posInPanel);
+            desc->fontsize = 16;
+            desc->color = { 255,255,255,0xa0 };
+            pluginsPanel->subWidgets.addDrawable(desc);
+            posInPanel.y += 22;
+
+            UILabel* filename = new UILabel(frmt("{}, sdk {}", pluginInfo.fileName, pluginInfo.sdkVersion), posInPanel);
+            filename->fontsize = 12;
+            filename->color = { 255,255,255,0x80 };
+            pluginsPanel->subWidgets.addDrawable(filename);
+            posInPanel.y += 18;
+
+
+            posInPanel.y += 10;
+        }
+    }
 
     /*
         -------------------------
@@ -274,7 +323,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->position = posInTab;
     btn->wxWidth = 270;
     btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
-    configTabs->tabs[4].wxs.addDrawable(btn);
+    configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
 
     if (platformSupportsFeature(VSP_FEATURE_FILE_ASSOC)) {
@@ -286,7 +335,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         btn->onClickCallback = [this](UIButton*) {
             g_addPopup(new PopupChooseExtsToAssoc());
         };
-        configTabs->tabs[4].wxs.addDrawable(btn);
+        configTabs->tabs[5].wxs.addDrawable(btn);
         posInTab.y += 35;
 
         btn = new UIButton();
@@ -303,7 +352,7 @@ PopupGlobalConfig::PopupGlobalConfig()
                 logerr("failed to register lospec-palette:// uri");
             }
         };
-        configTabs->tabs[4].wxs.addDrawable(btn);
+        configTabs->tabs[5].wxs.addDrawable(btn);
         posInTab.y += 35;
     }
 
@@ -315,7 +364,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadFonts();
         g_addNotification(SuccessShortNotification(TL("vsp.config.opt.fontsreloaded"), ""));
     };
-    configTabs->tabs[4].wxs.addDrawable(btn);
+    configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
 
     btn = new UIButton();
@@ -326,7 +375,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadColorMap();
         g_addNotification(SuccessShortNotification(TL("vsp.config.opt.colorlistreloaded"), ""));
         };
-    configTabs->tabs[4].wxs.addDrawable(btn);
+    configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
 
 
@@ -338,7 +387,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->onClickCallback = [this](UIButton*) {
         platformRequestFileAccessPermissions();
     };
-    configTabs->tabs[4].wxs.addDrawable(btn);
+    configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
 #endif
 
@@ -349,13 +398,13 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
 #if _DEBUG
     posInTab = { 0,10 };
-    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab));
-    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Debug color slider gradient bounds", "", &g_debugConfig.debugColorSliderGradients, &posInTab));
-    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Test localization", 
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab));
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Debug color slider gradient bounds", "", &g_debugConfig.debugColorSliderGradients, &posInTab));
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Test localization", 
         UTF8_DIAMOND " will appear next to strings that are present in the current localization\n"
         UTF8_EMPTY_DIAMOND " will appear next to strings that are being pulled as fallback from English",
         &g_debugConfig.debugTestLocalization, &posInTab));
-    configTabs->tabs[5].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
 #endif
     
 

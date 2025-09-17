@@ -35,6 +35,7 @@ class VSPPlugin {
 public:
     int sdkVersion;
     std::string name, version, description, authors;
+    std::string fileName;
 };
 
 inline std::vector<VSPPlugin> g_loadedPlugins;
@@ -53,6 +54,7 @@ inline bool loadPluginObject(PlatformNativePathString path) {
         return false;
     }
     VSPPlugin pluginInfo{};
+    pluginInfo.fileName = fileNameFromPath(convertStringToUTF8OnWin32(path));
 
     int (*sdkVersionFunc)() = (int(*)())platformProcAddress(module, "voidspriteSDKVersion");
     const char* (*getPluginNameFunc)() = (const char* (*)())platformProcAddress(module, "getPluginName");

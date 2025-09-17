@@ -720,6 +720,9 @@ int main(int argc, char** argv)
         if (custom9SPatterns > 0) {
             g_addNotification(Notification(frmt("Loaded {} custom 9seg. patterns", custom9SPatterns), "", 4000, NULL, COLOR_INFO));
         }
+        if (g_loadedPlugins.size() > 0) {
+            g_addNotification(Notification(frmt("Loaded {} plugins", g_loadedPlugins.size()), "", 4000, NULL, COLOR_INFO));
+        }
 
         auto startupFinish = std::chrono::system_clock::now() - startupTime;
         auto startupDuration = std::chrono::duration_cast<std::chrono::milliseconds>(startupFinish).count();
