@@ -1491,6 +1491,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 }
                             }
                             mouseHoldPosition = mousePixelTargetPoint;
+                            mouseHoldPosition2xP = mousePixelTargetPoint2xP;
                             leftMouseHold = evt.button.down;
                         }
                     }
@@ -1533,9 +1534,12 @@ void MainEditor::takeInput(SDL_Event evt) {
                             }
                             else if (leftMouseHold) {
                                 if (currentBrush != NULL) {
-                                    currentBrush->clickDrag(this, mouseHoldPosition, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                                    currentBrush->clickDrag(this, 
+                                        currentBrush->wantDoublePosPrecision() ? mouseHoldPosition2xP : mouseHoldPosition,
+                                        currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
                                 }
                                 mouseHoldPosition = mousePixelTargetPoint;
+                                mouseHoldPosition2xP = mousePixelTargetPoint2xP;
                             }
                             if (currentBrush != NULL) {
                                 currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);

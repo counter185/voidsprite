@@ -104,6 +104,7 @@ inline uint32_t impl_editorGetActiveColor(VSPEditorContext* editor) { return edi
 inline int impl_editorGetNumLayers(VSPEditorContext* editor) { return editor != NULL ? (int)editor->layers.size() : 0; }
 inline VSPLayer* impl_editorGetLayer(VSPEditorContext* editor, int index) { return (editor != NULL && index >= 0 && index < (int)editor->layers.size()) ? editor->layers[index] : NULL; }
 inline VSPLayer* impl_editorGetActiveLayer(VSPEditorContext* editor) { return editor != NULL ? editor->getCurrentLayer() : NULL; }
+inline void impl_editorSetPixel(VSPEditorContext* editor, int x, int y, uint32_t color) { if (editor != NULL) { editor->SetPixel({x,y}, color); } }
 
 inline void g_createVSPSDK() {
     voidspriteSDK* v1SDK = new voidspriteSDK();
@@ -134,5 +135,6 @@ inline void g_createVSPSDK() {
     v1SDK->editorGetNumLayers = impl_editorGetNumLayers;
     v1SDK->editorGetLayer = impl_editorGetLayer;
     v1SDK->editorGetActiveLayer = impl_editorGetActiveLayer;
+    v1SDK->editorSetPixel = impl_editorSetPixel;
     g_vspsdks[1] = v1SDK;
 }

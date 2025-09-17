@@ -184,6 +184,7 @@ public:
     XY mousePixelTargetPoint = XY{0,0};
     XY mousePixelTargetPoint2xP = XY{ 0,0 };
     XY mouseHoldPosition = XY{ 0,0 };
+    XY mouseHoldPosition2xP = XY{ 0,0 };
     bool closeNextTick = false;
     BaseBrush* currentBrush = NULL;
     bool currentBrushMouseDowned = false;

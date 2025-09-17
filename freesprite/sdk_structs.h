@@ -142,5 +142,7 @@ struct voidspriteSDK {
         void (*dragAt)(VSPBrush*, VSPEditorContext* editor, int xFrom, int yFrom, int xTo, int yTo),
         void (*releaseAt)(VSPBrush*, VSPEditorContext* editor, int x, int y)
         ) = 0;
+
+    void (*editorSetPixel)(VSPEditorContext* editor, int x, int y, uint32_t color) = 0;
 };
 #pragma pack(pop)
