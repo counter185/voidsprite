@@ -98,7 +98,7 @@ struct voidspriteSDK {
     /// For an indexed layer, the pixel will be an index in the palette, or -1 for transparent.
     /// If the layer is NULL or the position is out of bounds, 0 will be returned.
     /// </summary>
-    uint32_t(*layerGetPixel)(VSPLayer* layer, int x, int y) = 0;
+    uint32_t (*layerGetPixel)(VSPLayer* layer, int x, int y) = 0;
     /// <summary>
     /// Returns a pointer to the layer's raw pixel data for faster read/write access.
     /// The size of the data will be width * height * 4 bytes for both RGBA and indexed layers.

@@ -66,6 +66,23 @@ jobs:
         name: voidsprite-build-win64
         path: |
           x64/Release
+
+  build-sdk:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: run script
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: ./build_sdk.ps1
+    
+      - name: Push build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: voidsprite-sdk
+          path: |
+            voidsprite_sdk.h
           
   #  build-linux64:
   #
