@@ -75,7 +75,7 @@ jobs:
 
       - name: run script
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: ./build_sdk.ps1
+        run: .\build_sdk.ps1
     
       - name: Push build artifacts
         uses: actions/upload-artifact@v4
