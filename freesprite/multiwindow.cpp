@@ -157,14 +157,14 @@ bool VSPWindow::tryCreateRenderer() {
             logerr("No renderers available");
             std::string errorTitle = frmt("voidsprite: {}", TL("vsp.error.norenderer.title"));
             std::string errorMsg = TL("vsp.error.norenderer.body");
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), wd);
             return false;
         }
         else {
             useRenderer = g_availableRenderersNow[0];
             g_config.preferredRenderer = useRenderer;
             loginfo(frmt("Trying renderer: {}", useRenderer));
-            rd = SDL_CreateRenderer(g_wd, useRenderer.c_str());
+            rd = SDL_CreateRenderer(wd, useRenderer.c_str());
         }
     }
     SDL_SetRenderDrawBlendMode(rd, SDL_BLENDMODE_BLEND);
