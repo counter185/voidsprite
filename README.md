@@ -73,4 +73,5 @@ voidsprite is open for community contributions. Here are some ways you can help:
 ## ◆Licenses
 
 ◆ voidsprite is licensed under GPLv2.  
-◆ Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory
+◆ Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory  
+◆ All content created with voidsprite (including content created using default templates, filters, patterns, etc.) remains the property of the user who created it.
