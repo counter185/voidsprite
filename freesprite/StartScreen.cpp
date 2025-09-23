@@ -187,9 +187,9 @@ StartScreen::StartScreen() {
                         { SDL_SCANCODE_O,{ TL("vsp.nav.open"), [this]() { this->openImageLoadDialog();} } },
                         { SDL_SCANCODE_V,{ TL("vsp.launchpad.nav.openclipboard"), [this]() { this->tryOpenImageFromClipboard();} } },
                         { SDL_SCANCODE_E,{ TL("vsp.launchpad.nav.quickconvert"), [this]() { g_addPopup(new PopupQuickConvert(TL("vsp.launchpad.nav.quickconvert"), TL("vsp.launchpad.quickconvert.desc"))); } } },
-                        { SDL_SCANCODE_S,{ TL("vsp.launchpad.nav.newsplitsession"),
+                        { SDL_SCANCODE_S,{ TL("vsp.launchpad.nav.newsplitsession:v2"),
                             [this]() {
-                                    platformTrySaveOtherFile(this,{ { ".voidspsn", TL("vsp.cmn.filetype.splitsession") } }, TL("vsp.popup.newsplitsession"), 0);
+                                    platformTrySaveOtherFile(this,{ { ".voidspsn", TL("vsp.cmn.filetype.splitsession") } }, TL("vsp.popup.newsplitsession:v2"), 0);
                                 }
                             }
                         },

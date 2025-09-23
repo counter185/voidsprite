@@ -65,7 +65,7 @@
     {"vsp.success.lospecpaletteinstalled", "Lospec palette installed"},
 
     // popup titles
-    {"vsp.popup.newsplitsession", "create new split session"},
+    {"vsp.popup.newsplitsession:v2", "create/edit split session"},
     {"vsp.popup.openimage", "open image"},
     {"vsp.popup.saveimage", "save image"},
     {"vsp.popup.addreference", "add reference"},
@@ -159,7 +159,7 @@
                                                 "Exporting to palette-only formats will keep the color order as it is in the editor."},
     {"vsp.launchpad.nav.openclipboard", "Open from clipboard"},
     {"vsp.launchpad.nav.quickconvert", "Quick Convert"},
-    {"vsp.launchpad.nav.newsplitsession", "New split session..."},
+    {"vsp.launchpad.nav.newsplitsession:v2", "Create/edit split session..."},
     {"vsp.launchpad.nav.preferences", "Preferences"},
     {"vsp.launchpad.nav.recoveryautosaves", "Recovery autosaves"},
     {"vsp.launchpad.nav.about", "About voidsprite"},

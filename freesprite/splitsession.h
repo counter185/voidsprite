@@ -8,6 +8,7 @@ struct SplitSessionImage {
     std::string originalFileName;
     XY positionInOverallImage = { 0,0 };
     XY dimensions = { 0, 0 };
+    Layer* loadedLayer = NULL;
     FileExporter* exporter = NULL;
 
     Timer64 animTimer;
@@ -15,7 +16,7 @@ struct SplitSessionImage {
 
 struct SplitSessionData {
     bool set = false;
-    XY overallDimensions;
+    XY overallDimensions = {0,0};
     XY tileDimensions = { 0,0 };
     std::vector<SplitSessionImage> images;
 };

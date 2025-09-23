@@ -1,4 +1,5 @@
 #include <fstream>
+#include <regex>
 
 #include "SplitSessionEditor.h"
 #include "UILabel.h"
@@ -14,6 +15,118 @@
 #include "PopupFilePicker.h"
 #include "keybinds.h"
 
+//TODO: standardize this loading process and move it somewhere else
+SplitSessionData loadSplitSessionData(PlatformNativePathString path)
+{
+    std::string utf8path = convertStringToUTF8OnWin32(path);
+    std::string fullDirectory = (utf8path.find('/') != std::string::npos || utf8path.find('\\') != std::string::npos) ? utf8path.substr(0, utf8path.find_last_of("\\/")) : "";
+    if (fullDirectory.length() > 0) {
+        fullDirectory += "/";
+    }
+
+    std::ifstream f(path);
+    if (f.good() && f.is_open()) {
+        SplitSessionData ssn;
+        ssn.set = true;
+        std::string line;
+        std::getline(f, line);
+        if (stringStartsWithIgnoreCase(line, "voidsprite split session file v")) {
+            int version;
+            try {
+                version = std::stoi(line.substr(31));
+            }
+            catch (std::exception&) {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid split session file"));
+                f.close();   //not needed apparently
+                return { false };
+            }
+
+            switch (version) {
+            case 0:
+            {
+                while (!f.eof()) {
+                    std::getline(f, line);
+                    if (stringStartsWithIgnoreCase(line, "#:")) {
+                        //image properties in format: #:filename|x|y
+                        try {
+                            std::string originalFileName = line.substr(2, line.find('|') - 2);
+                            std::string filename = fullDirectory + originalFileName;
+                            int x = std::stoi(line.substr(line.find('|') + 1, line.find('|', line.find('|') + 1) - line.find('|') - 1));
+                            int y = std::stoi(line.substr(line.find('|', line.find('|') + 1) + 1));
+                            SplitSessionImage ssi;
+                            ssi.fileName = filename;
+                            ssi.originalFileName = originalFileName;
+                            ssi.positionInOverallImage = XY{ x,y };
+                            ssi.exporter = NULL;    //todo
+
+                            FileImporter* foundImporter = NULL;
+                            MainEditor* subsn = loadAnyIntoSession(filename, &foundImporter);
+                            if (subsn != NULL) {
+                                ssi.exporter = foundImporter->getCorrespondingExporter();
+                                Layer* nlayer = subsn->flattenImage();
+                                ssi.dimensions = { nlayer->w, nlayer->h };
+                                ssi.loadedLayer = nlayer;
+                                ssn.images.push_back(ssi);
+                                if (x + nlayer->w > ssn.overallDimensions.x) {
+                                    ssn.overallDimensions.x = x + nlayer->w;
+                                }
+                                if (y + nlayer->h > ssn.overallDimensions.y) {
+                                    ssn.overallDimensions.y = y + nlayer->h;
+                                }
+                                delete subsn;
+                            }
+                            else {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
+                            }
+
+                        }
+                        catch (std::exception&) {
+                            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
+                        }
+                    }
+                    else if (stringStartsWithIgnoreCase(line, "comment:")) {
+                        try {
+                            std::string fullData = line.substr(8);
+                            std::regex split("(;([0-9]+);([0-9]+))$");
+                            std::smatch match;
+                            std::regex_search(fullData, match, split);
+                            if (match.size() == 4) {
+                                std::string comment = fullData.substr(0, fullData.size() - match[0].str().size());
+                                int x = std::stoi(match[2].str());
+                                int y = std::stoi(match[3].str());
+                                //comments.push_back(CommentData{ XY{x,y}, comment });
+                            }
+                        }
+                        catch (std::exception&) {
+                            logerr("error reading comment");
+                        }
+                    }
+                    else if (line.find(':')) {
+                        std::string argName = line.substr(0, line.find(':'));
+                        std::string argValue = line.substr(line.find(':') + 1);
+
+                        if (argName == "tiledim.x") {
+                            ssn.tileDimensions.x = std::stoi(argValue);
+                        }
+                        else if (argName == "tiledim.y") {
+                            ssn.tileDimensions.y = std::stoi(argValue);
+                        }
+                    }
+                }
+                return ssn;
+
+            }
+            break;
+            default:
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported split session file version"));
+                f.close();
+                return { false };
+            }
+        }
+    }
+    return { false };
+}
+
 SplitSessionEditor::SplitSessionEditor()
 {
     setupWidgets();
@@ -24,6 +137,9 @@ SplitSessionEditor::SplitSessionEditor(PlatformNativePathString path)
 {
     outputSPSNFilePath = convertStringToUTF8OnWin32(path);
     setupWidgets();
+    if (std::filesystem::exists(path)) {
+        tryLoadExistingSplitSession(path);
+    }
 }
 
 SplitSessionEditor::~SplitSessionEditor()
@@ -248,6 +364,29 @@ void SplitSessionEditor::drawTSSITooltips()
     }
 
     localttp.renderAll();
+}
+
+void SplitSessionEditor::tryLoadExistingSplitSession(PlatformNativePathString path)
+{
+    auto ssn = loadSplitSessionData(path);
+    if (ssn.set) {
+        loadedImgs.clear();
+        
+        for (auto& ssi : ssn.images) {
+            tempSplitSessionImage a;
+            a.loadedLayer = ssi.loadedLayer;
+            a.dims = ssi.dimensions;
+            a.fullOriginalPath = ssi.fileName;
+            a.position = ssi.positionInOverallImage;
+            loadedImgs.push_back(a);
+        }
+        recalcCanvasDimensions();
+        recalcRelativePaths();
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load existing split session file"));
+        return;
+    }
 }
 
 void SplitSessionEditor::setupWidgets()

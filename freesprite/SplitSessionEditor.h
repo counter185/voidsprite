@@ -49,6 +49,7 @@ public:
     void drawBackground();
     void drawTSSITooltips();
 
+    void tryLoadExistingSplitSession(PlatformNativePathString path);
     void setupWidgets();
     int findTSSIAt(XY canvasPosition);
     void recalcCanvasDimensions();
