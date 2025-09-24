@@ -204,8 +204,8 @@ public:
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
-            INT_PARAM("offset.x", 0, lastLayerDims.x, 0),
-            INT_PARAM("offset.y", 0, lastLayerDims.y, 0),
+            INT_PARAM("offset.x", -lastLayerDims.x, lastLayerDims.x, 0),
+            INT_PARAM("offset.y", -lastLayerDims.y, lastLayerDims.y, 0),
             BOOL_PARAM("wrap", 1)
         };
     }
