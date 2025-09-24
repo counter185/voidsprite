@@ -30,6 +30,12 @@ void g_loadFilters()
         {1,0,0,0,1},
         {1,1,1,1,1}
     }));*/
+    /*g_filters.push_back(new FilterKernelTransformation("Kernel sharpen", {
+        {0,-1,0},
+        {-1,5,-1},
+        {0,-1,0}
+    }));*/
+    g_filters.push_back(new FilterOffset());
 
     for (auto pluginFilter : g_pluginFilters) {
         g_filters.push_back(pluginFilter);
@@ -419,20 +425,20 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
 
 Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
 {
-	int quality = std::stoi(options["quality"]);
-	Layer* c = copy(src);
-	SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
+    int quality = std::stoi(options["quality"]);
+    Layer* c = copy(src);
+    SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
     if (srf != NULL) {
         SDL_LockSurface(srf);
         for (int y = 0; y < c->h; y++) {
-			memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), c->w * 4);
+            memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), c->w * 4);
         }
         SDL_UnlockSurface(srf);
         SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew();
-		IMG_SaveJPG_IO(srf, stream, false, quality);
+        IMG_SaveJPG_IO(srf, stream, false, quality);
         SDL_DestroySurface(srf);
-		SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET);
-		srf = IMG_LoadJPG_IO(stream);
+        SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET);
+        srf = IMG_LoadJPG_IO(stream);
         SDL_CloseIO(stream);
 
         if (srf != NULL) {
@@ -440,10 +446,10 @@ Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
             SDL_DestroySurface(srf);
             srf = srf2;
             for (int y = 0; y < ixmin(srf->h, c->h); y++) {
-				memcpy(&(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
+                memcpy(&(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
             }
         }
-		SDL_FreeSurface(srf);
+        SDL_FreeSurface(srf);
     }
     return c;
 
@@ -515,5 +521,39 @@ Layer* FilterKernelTransformation::run(Layer* src, std::map<std::string, std::st
     }
 
 
+    return c;
+}
+
+void FilterOffset::setupParamBounds(Layer* target)
+{
+    lastLayerDims = { target->w, target->h };
+}
+
+Layer* FilterOffset::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+
+    int offsetX = std::stoi(options["offset.x"]); 
+    int offsetY = std::stoi(options["offset.y"]);
+    bool wrap = std::stoi(options["wrap"]);
+
+    for (int x = 0; x < c->w; x++) {
+        for (int y = 0; y < c->h; y++) {
+
+            XY sourcePosition = xySubtract({ x,y }, { offsetX, offsetY });
+            if (!pointInBox(sourcePosition, { 0,0,c->w,c->h })) {
+                if (wrap) {
+                    //sourcePosition will only be negative in this case
+                    sourcePosition = { (c->w + sourcePosition.x) % c->w, (c->h + sourcePosition.y) % c->h };
+                }
+                else {
+                    c->setPixel({ x,y }, 0);
+                    continue;
+                }
+            }
+
+            c->setPixel({ x,y }, src->getPixelAt(sourcePosition));
+        }
+    }
     return c;
 }

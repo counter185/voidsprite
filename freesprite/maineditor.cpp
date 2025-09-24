@@ -1192,7 +1192,9 @@ void MainEditor::setUpWidgets()
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDL_SCANCODE_Q].actions[keyorder[i++]] = {
             filter->name(), [this, filter]() {
-                PopupApplyFilter* newPopup = new PopupApplyFilter(this, this->getCurrentLayer(), filter);
+                Layer* currentLayer = this->getCurrentLayer();
+                filter->setupParamBounds(currentLayer);
+                PopupApplyFilter* newPopup = new PopupApplyFilter(this, currentLayer, filter);
                 g_addPopup(newPopup);
                 if (filter->getParameters().size() == 0) {
                     newPopup->applyAndClose();

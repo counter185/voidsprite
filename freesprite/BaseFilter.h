@@ -34,6 +34,8 @@ class BaseFilter
 public:
     virtual std::string name() { return "Filter"; }
 
+    virtual void setupParamBounds(Layer* target) {}
+
     /// <summary>
     /// Allocates a new layer, copies the source pixels to it and runs the filter on it.
     /// </summary>
@@ -191,4 +193,20 @@ public:
 
     std::string name() override { return n; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+};
+
+class FilterOffset : public BaseFilter {
+protected:
+    XY lastLayerDims = { 100,100 };
+public:
+    std::string name() override { return "Offset"; }
+    void setupParamBounds(Layer* target) override;
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("offset.x", 0, lastLayerDims.x, 0),
+            INT_PARAM("offset.y", 0, lastLayerDims.y, 0),
+            BOOL_PARAM("wrap", 1)
+        };
+    }
 };
