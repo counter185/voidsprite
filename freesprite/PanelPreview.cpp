@@ -64,7 +64,9 @@ void PanelPreview::render(XY at)
     texDraw.x += at.x;
     texDraw.y += at.y;
     for (auto*& layer : parent->layers) {
-        layer->render(texDraw, layer->layerAlpha);
+        if (!layer->hidden) {
+            layer->render(texDraw, layer->layerAlpha);
+        }
     }
 
     renderViewportBound(at);
