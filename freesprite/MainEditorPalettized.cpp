@@ -246,6 +246,8 @@ void MainEditorPalettized::playColorPickerVFX(bool inward)
 
 void MainEditorPalettized::setUpWidgets()
 {
+    compactEditor = g_config.compactEditor;
+
     mainEditorKeyActions = {
         {
             SDL_SCANCODE_F,
@@ -627,6 +629,16 @@ void MainEditorPalettized::setUpWidgets()
 
     if (g_lastConfirmInputWasTouch) {
         openTouchModePanel();
+    }
+
+    if (g_config.compactEditor) {
+        std::vector<CompactEditorSection> createSections = {
+            {colorPickerPanel, g_iconCompactColorPicker},
+            {brushPickerPanel, g_iconCompactToolPicker},
+            {layerPicker, g_iconCompactLayerPicker}
+        };
+
+        SetupCompactEditor(createSections);
     }
 }
 

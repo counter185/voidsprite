@@ -186,6 +186,7 @@ class UICheckbox;
 class UIDropdown;
 class UIColorPicker;
 class Panel;
+class DraggablePanel;
 class ScrollingPanel;
 class TabbedView;
 class ScreenWideNavBar;
@@ -254,6 +255,9 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconActionBarZoomIn = NULL,
    *g_iconActionBarZoomOut = NULL,
    *g_iconActionBarSave = NULL,
+   *g_iconCompactColorPicker = NULL,
+   *g_iconCompactToolPicker = NULL,
+   *g_iconCompactLayerPicker = NULL,
    *g_iconFilePickerLink = NULL,
    *g_iconFilePickerDirectory = NULL,
    *g_iconFilePickerFile = NULL,

@@ -152,10 +152,16 @@ public:
     void updateClientList();
 };
 
+struct CompactEditorSection {
+    DraggablePanel* targetPanel;
+    ReldTex* icon = NULL;
+};
+
 class MainEditor : public BaseScreen, public EventCallbackListener
 {
 protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
+    bool compactEditor = false;
 
     MainEditor() {}
 public:
@@ -312,6 +318,7 @@ public:
     void focusOnColorInputTextBox();
     void initLayers();
     virtual void setUpWidgets();
+    void SetupCompactEditor(std::vector<CompactEditorSection> createSections);
     void openTouchModePanel();
     void makeActionBar();
     void initToolParameters();

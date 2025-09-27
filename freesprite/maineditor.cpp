@@ -319,7 +319,7 @@ void MainEditor::tick() {
     canvas.lockToScreenBounds();
 
     //fuck it we ball
-    if (!g_config.compactEditor && layerPicker != NULL) {
+    if (!compactEditor && layerPicker != NULL) {
         layerPicker->position.x = g_windowW - 260;
     }
 
@@ -795,6 +795,8 @@ void MainEditor::initLayers()
 
 void MainEditor::setUpWidgets()
 {
+    compactEditor = g_config.compactEditor;
+
     mainEditorKeyActions = {
         {
             SDL_SCANCODE_F,
@@ -1249,37 +1251,39 @@ void MainEditor::setUpWidgets()
         openTouchModePanel();
     }
 
-    if (g_config.compactEditor) {
-        struct CompactEditorSection {
-            DraggablePanel* targetPanel;
-        };
-        CompactEditorSection createSections[] = {
-            {colorPickerPanel},
-            {brushPickerPanel},
-            {layerPicker}
-        };
-
-        int y = 120;
-        int h = 80;
-        for (auto& section : createSections) {
-            section.targetPanel->enabled = false;
-
-            UIButton* btn = new UIButton();
-            btn->position = { 0, y };
-            btn->wxWidth = 80;
-            btn->wxHeight = h;
-            section.targetPanel->position = xyAdd(btn->position, { 100, 0 });
-            btn->onClickCallback = [this, section](UIButton* b) {
-                section.targetPanel->enabled = !section.targetPanel->enabled;
-                section.targetPanel->tryMoveOutOfOOB();
-                this->wxsManager.forceFocusOn(section.targetPanel);
-            };
-            wxsManager.addDrawable(btn);
-
-            y += h;
-        }
-
+    if (compactEditor) {
         
+        std::vector<CompactEditorSection> createSections = {
+            {colorPickerPanel, g_iconCompactColorPicker},
+            {brushPickerPanel, g_iconCompactToolPicker},
+            {layerPicker, g_iconCompactLayerPicker}
+        };
+
+        SetupCompactEditor(createSections);
+    }
+}
+
+void MainEditor::SetupCompactEditor(std::vector<CompactEditorSection> createSections)
+{
+    int y = 120;
+    int h = 80;
+    for (auto& section : createSections) {
+        section.targetPanel->enabled = false;
+
+        UIButton* btn = new UIButton();
+		btn->icon = section.icon;
+        btn->position = { 0, y };
+        btn->wxWidth = 80;
+        btn->wxHeight = h;
+        section.targetPanel->position = xyAdd(btn->position, { 100, 0 });
+        btn->onClickCallback = [this, section](UIButton* b) {
+            section.targetPanel->enabled = !section.targetPanel->enabled;
+            section.targetPanel->tryMoveOutOfOOB();
+            this->wxsManager.forceFocusOn(section.targetPanel);
+            };
+        wxsManager.addDrawable(btn);
+
+        y += h;
     }
 }
 
@@ -1298,7 +1302,7 @@ void MainEditor::makeActionBar()
     ScreenWideActionBar* actionbar = new ScreenWideActionBar({});
     actionbar->position = { 0, navbar->wxHeight };
 
-    int actionBarButtonSize = g_config.compactEditor ? 60 : 30;
+    int actionBarButtonSize = compactEditor ? 60 : 30;
 
     int nextNavbarX = 5;
     UIButton* undoButton = new UIButton("", TL("vsp.maineditor.undo"));

@@ -6,24 +6,27 @@
 EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	this->caller = caller;
 
-	wxWidth = 260;
-	wxHeight = 210;
+	int sc = g_config.compactEditor ? 2 : 1;
+
+	wxWidth = 260 *sc;
+	wxHeight = 210 * sc;
 
 	patternPanelBtn = new UIButton();
-	patternPanelBtn->position = { wxWidth - 40 - 10, 10 };
+	
 	patternPanelBtn->text = ">";
-	patternPanelBtn->wxWidth = 40;
-	patternPanelBtn->wxHeight = 24;
+	patternPanelBtn->wxWidth = 40 * sc;
+	patternPanelBtn->wxHeight = 24 * sc;
+	patternPanelBtn->position = { wxWidth - patternPanelBtn->wxWidth - 10, 10 };
 	patternPanelBtn->tooltip = "Open pattern menu";
 	patternPanelBtn->icon = g_patterns[0]->cachedIcon;
 	patternPanelBtn->setCallbackListener(EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU, this);
 	subWidgets.addDrawable(patternPanelBtn);
 
 	editorReplaceBtn = new UIButton();
-	editorReplaceBtn->position = { wxWidth - 20 - 24 - patternPanelBtn->wxWidth, 10 };
 	editorReplaceBtn->text = "R";
-	editorReplaceBtn->wxWidth = 24;
-	editorReplaceBtn->wxHeight = 24;
+	editorReplaceBtn->wxWidth = 24 * sc;
+	editorReplaceBtn->wxHeight = 24 * sc;
+	editorReplaceBtn->position = { wxWidth - 20 - editorReplaceBtn->wxWidth - patternPanelBtn->wxWidth, 10 };
 	editorReplaceBtn->tooltip = "Replace mode\nPixels will only be drawn on opaque areas";
 	editorReplaceBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEREPLACE, this);
 	subWidgets.addDrawable(editorReplaceBtn);
@@ -40,8 +43,8 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	editorInvPatternBtn = new UIButton();
 	editorInvPatternBtn->position = { 160, 5 };
 	editorInvPatternBtn->text = "I";
-	editorInvPatternBtn->wxWidth = 24;
-	editorInvPatternBtn->wxHeight = 24;
+	editorInvPatternBtn->wxWidth = 24 * sc;
+	editorInvPatternBtn->wxHeight = 24 * sc;
 	editorInvPatternBtn->tooltip = "Invert pattern\nThe pattern will be inverted.";
 	editorInvPatternBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEINVERTPATTERN, this);
 	patternMenuPanel->subWidgets.addDrawable(editorInvPatternBtn);
@@ -49,15 +52,15 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	patternMenu = new ScrollingPanel();
 	patternMenu->scrollHorizontally = false;
 	patternMenu->scrollVertically = true;
-	patternMenu->wxWidth = 30 * 6 + 20;
-	patternMenu->wxHeight = 130;
+	patternMenu->wxWidth = 30 * 6 * sc + 20;
+	patternMenu->wxHeight = 130 * sc;
 	patternMenu->position = { 0,35 };
 	patternMenu->bgColor = Fill::Solid(0x80000000);
 	patternMenuPanel->subWidgets.addDrawable(patternMenu);
 
 
 	//create brush buttons
-	XY origin = { 5,40 };
+	XY origin = { 5,40 * sc };
 	XY current = origin;
 	XY currentSection = { 0,0 };
 	int horizontalToolsPerSection = 4;
@@ -72,6 +75,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	brushButtons.resize(g_brushes.size());
 
 	int i = 0;
+	int buttonXSpace = 30 * sc;
 	for (auto& section : sectionMap) {
 		for (auto& indexAndBrush : section.second) {
 			int toolIndex = indexAndBrush.first;
@@ -82,28 +86,28 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 			if (!xyEqual(currentSection, nextSection)) {
 				if (currentSection.x != nextSection.x) {
 					current.y = origin.y;
-					current.x = (30 * horizontalToolsPerSection + 10) * nextSection.x + origin.x;
+					current.x = (buttonXSpace * horizontalToolsPerSection + 10) * nextSection.x + origin.x;
 				}
 				else {
-					current.x = (30 * horizontalToolsPerSection + 10) * currentSection.x + origin.x;
-					current.y += 38;
+					current.x = (buttonXSpace * horizontalToolsPerSection + 10) * currentSection.x + origin.x;
+					current.y += 38 * sc;
 				}
 				currentSection = brush->getSection();
 				i = 0;
 			}
 			if (i++ >= horizontalToolsPerSection) {
-				current.x = (30 * horizontalToolsPerSection + 10) * currentSection.x + origin.x;
-				current.y += 30;
+				current.x = (buttonXSpace * horizontalToolsPerSection + 10) * currentSection.x + origin.x;
+				current.y += 30 * sc;
 				i = 0;
 			}
 
 			newBtn->position = current;
-			current.x += 30;
+			current.x += buttonXSpace;
 			newBtn->icon = brush->cachedIcon;
 			newBtn->tooltip = brush->getName() + (brush->getTooltip() != "" ? ("\n" + brush->getTooltip()) : "");
 			//newBtn->text = brush->getName();
-			newBtn->wxWidth = 26;
-			newBtn->wxHeight = 26;
+			newBtn->wxWidth = 26 * sc;
+			newBtn->wxHeight = 26 * sc;
 			newBtn->colorBorder = brush->overrideRightClick() ? SDL_Color{ 0x00,0xae,0xff,0x80 } : SDL_Color{ 0xff, 0xff, 0xff, 0x50 };
 			newBtn->setCallbackListener(100 + toolIndex, this);
 			brushButtons[toolIndex] = newBtn;
@@ -116,19 +120,20 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 	int px = 5;
 	int py = 0;
 	i = 0;
+	int patternButtonWSpace = 26 * sc;
 	for (Pattern*& pattern : g_patterns) {
 		UIButton* newBtn = new UIButton();
-		if (px + 26 > patternMenu->wxWidth) {
-			py += 26;
+		if (px + patternButtonWSpace > patternMenu->wxWidth) {
+			py += patternButtonWSpace;
 			px = 5;
 		}
 		newBtn->position = XY{ px, py };
-		px += 26;
+		px += patternButtonWSpace;
 		newBtn->icon = pattern->cachedIcon;
 		newBtn->tooltip = pattern->getName();
 		//newBtn->text = brush->getName();
-		newBtn->wxWidth = 24;
-		newBtn->wxHeight = 24;
+		newBtn->wxWidth = 24*sc;
+		newBtn->wxHeight = 24*sc;
 		newBtn->setCallbackListener(200 + i++, this);
 		patternButtons.push_back(newBtn);
 		patternMenu->subWidgets.addDrawable(newBtn);
