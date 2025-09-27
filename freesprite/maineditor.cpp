@@ -319,7 +319,7 @@ void MainEditor::tick() {
     canvas.lockToScreenBounds();
 
     //fuck it we ball
-    if (layerPicker != NULL) {
+    if (!g_config.compactEditor && layerPicker != NULL) {
         layerPicker->position.x = g_windowW - 260;
     }
 
@@ -1216,6 +1216,11 @@ void MainEditor::setUpWidgets()
         };
     }
 
+    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V });
+    wxsManager.addDrawable(navbar);
+
+    makeActionBar();
+
     colorPicker = new EditorColorPicker(this);
     CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.colorpicker.title"), colorPicker);
     colorPickerPanel->position.y = 63;
@@ -1235,17 +1240,46 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
-    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V });
-    wxsManager.addDrawable(navbar);
-
-    makeActionBar();
-
+    
     //this must happen after actionbar init
     setActiveBrush(g_brushes[0]);
     currentPattern = g_patterns[0];
 
     if (g_lastConfirmInputWasTouch) {
         openTouchModePanel();
+    }
+
+    if (g_config.compactEditor) {
+        struct CompactEditorSection {
+            DraggablePanel* targetPanel;
+        };
+        CompactEditorSection createSections[] = {
+            {colorPickerPanel},
+            {brushPickerPanel},
+            {layerPicker}
+        };
+
+        int y = 120;
+        int h = 80;
+        for (auto& section : createSections) {
+            section.targetPanel->enabled = false;
+
+            UIButton* btn = new UIButton();
+            btn->position = { 0, y };
+            btn->wxWidth = 80;
+            btn->wxHeight = h;
+            section.targetPanel->position = xyAdd(btn->position, { 100, 0 });
+            btn->onClickCallback = [this, section](UIButton* b) {
+                section.targetPanel->enabled = !section.targetPanel->enabled;
+                section.targetPanel->tryMoveOutOfOOB();
+                this->wxsManager.forceFocusOn(section.targetPanel);
+            };
+            wxsManager.addDrawable(btn);
+
+            y += h;
+        }
+
+        
     }
 }
 
@@ -1264,51 +1298,53 @@ void MainEditor::makeActionBar()
     ScreenWideActionBar* actionbar = new ScreenWideActionBar({});
     actionbar->position = { 0, navbar->wxHeight };
 
+    int actionBarButtonSize = g_config.compactEditor ? 60 : 30;
+
     int nextNavbarX = 5;
     UIButton* undoButton = new UIButton("", TL("vsp.maineditor.undo"));
     undoButton->icon = g_iconActionBarUndo;
     undoButton->onClickCallback = [this](UIButton* btn) { undo(); };
     undoButton->position = { nextNavbarX,0 };
-    undoButton->wxWidth = 30;
-    undoButton->wxHeight = 30;
+    undoButton->wxWidth = actionBarButtonSize;
+    undoButton->wxHeight = actionBarButtonSize;
     actionbar->addDrawable(undoButton);
-    nextNavbarX += 35;
+    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* redoButton = new UIButton("", TL("vsp.maineditor.redo"));
     redoButton->icon = g_iconActionBarRedo;
     redoButton->onClickCallback = [this](UIButton* btn) { redo(); };
     redoButton->position = { nextNavbarX,0 };
-    redoButton->wxWidth = 30;
-    redoButton->wxHeight = 30;
+    redoButton->wxWidth = actionBarButtonSize;
+    redoButton->wxHeight = actionBarButtonSize;
     actionbar->addDrawable(redoButton);
-    nextNavbarX += 35;
+    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* saveButton = new UIButton("", TL("vsp.nav.save"));
     saveButton->icon = g_iconActionBarSave;
     saveButton->onClickCallback = [this](UIButton* btn) { if (g_shiftModifier) trySaveAsImage(); else trySaveImage(); };
     saveButton->position = { nextNavbarX,0 };
-    saveButton->wxWidth = 30;
-    saveButton->wxHeight = 30;
+    saveButton->wxWidth = actionBarButtonSize;
+    saveButton->wxHeight = actionBarButtonSize;
     actionbar->addDrawable(saveButton);
-    nextNavbarX += 35;
+    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* zoomoutButton = new UIButton("", TL("vsp.cmn.zoomout"));
     zoomoutButton->icon = g_iconActionBarZoomOut;
     zoomoutButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(-1, { g_windowW / 2, g_windowH / 2 }); };
     zoomoutButton->position = { nextNavbarX,0 };
-    zoomoutButton->wxWidth = 30;
-    zoomoutButton->wxHeight = 30;
+    zoomoutButton->wxWidth = actionBarButtonSize;
+    zoomoutButton->wxHeight = actionBarButtonSize;
     actionbar->addDrawable(zoomoutButton);
-    nextNavbarX += 35;
+    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
     zoominButton->icon = g_iconActionBarZoomIn;
     zoominButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(1, {g_windowW/2, g_windowH/2}); };
     zoominButton->position = { nextNavbarX,0 };
-    zoominButton->wxWidth = 30;
-    zoominButton->wxHeight = 30;
+    zoominButton->wxWidth = actionBarButtonSize;
+    zoominButton->wxHeight = actionBarButtonSize;
     actionbar->addDrawable(zoominButton);
-    nextNavbarX += 35;
+    nextNavbarX += actionBarButtonSize + 5;
 
     toolPropertiesPanel = new Panel();
     toolPropertiesPanel->position = { nextNavbarX + 50, 0 };

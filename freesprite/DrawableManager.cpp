@@ -4,7 +4,8 @@
 
 void DrawableManager::processHoverEventInMultiple(std::vector<std::reference_wrapper<DrawableManager>> wxss, SDL_Event evt, XY parentOffset)
 {
-    if (evt.type != SDL_MOUSEMOTION) {
+    SDL_Event cvt = convertTouchToMouseEvent(evt);
+    if (cvt.type != SDL_MOUSEMOTION) {
         return;
     }
     bool found = false;
@@ -15,7 +16,7 @@ void DrawableManager::processHoverEventInMultiple(std::vector<std::reference_wra
             wxs.forceUnhover();
         }
         else {
-            found = wxs.processHoverEvent(parentOffset, { (int)(evt.motion.x), (int)(evt.motion.y) });
+            found = wxs.processHoverEvent(parentOffset, { (int)(cvt.motion.x), (int)(cvt.motion.y) });
         }
     }
 }

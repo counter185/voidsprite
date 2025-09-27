@@ -89,6 +89,8 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
 
 void EditorLayerPicker::render(XY position)
 {
+    if (!enabled) return;
+
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
     //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
     //SDL_RenderFillRect(g_rd, &r);

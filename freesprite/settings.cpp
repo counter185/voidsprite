@@ -32,7 +32,8 @@ bool g_saveConfig() {
         file << "checkUpdates=" << (g_config.checkUpdates ? "1" : "0") << std::endl;
         file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
         file << "singleInstance=" << (g_config.singleInstance ? "1" : "0") << std::endl;
-		file << "canvasZoomSensitivity=" << g_config.canvasZoomSensitivity << std::endl;
+        file << "canvasZoomSensitivity=" << g_config.canvasZoomSensitivity << std::endl;
+        file << "compactEditor=" << (g_config.compactEditor ? "1" : "0") << std::endl;
         file << "debug.testLocalization=" << (g_debugConfig.debugTestLocalization ? "1" : "0") << std::endl;
         
         auto keybinds = g_keybindManager.serializeKeybinds();
@@ -96,7 +97,8 @@ void g_loadConfig() {
         if (config.contains("checkUpdates")) { g_config.showFPS = config["checkUpdates"] == "1"; }
         if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
         if (config.contains("singleInstance")) { g_config.singleInstance = config["singleInstance"] == "1"; }
-		if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
+        if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
+        if (config.contains("compactEditor")) { g_config.compactEditor = config["compactEditor"] == "1"; }
         if (config.contains("debug.testLocalization")) { g_debugConfig.debugTestLocalization = config["debug.testLocalization"] == "1"; }
 
         g_configWasLoaded = true;

@@ -41,6 +41,7 @@ public:
                                 // 3: auto      (0 if no battery, 1 if battery, 2 if battery <15%)
     bool singleInstance = true;
     int canvasZoomSensitivity = 1;//1 to 50
+    bool compactEditor = false;
 
     std::vector<std::string> lastOpenFiles;
 
