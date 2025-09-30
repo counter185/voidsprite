@@ -10,6 +10,7 @@
     {"vsp.cmn.confirm", "Confirm"},
     {"vsp.cmn.width", "Width"},
     {"vsp.cmn.height", "Height"},
+    {"vsp.cmn.opacity", "Opacity"},
     {"vsp.cmn.zoomin", "Zoom in"},
     {"vsp.cmn.zoomout", "Zoom out"},
     {"vsp.cmn.copy", "Copy"},

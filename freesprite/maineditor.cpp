@@ -153,6 +153,15 @@ void MainEditor::render() {
     DrawBackground();
 
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
+    //render references under the canvas
+    for (auto& refPanel : openReferencePanels) {
+        if (refPanel->currentMode == REFERENCE_UNDER_CANVAS) {
+            Layer* p = refPanel->getLayer();
+            SDL_Rect fit = fitInside(canvasRenderRect, { 0,0, p->w, p->h });
+            p->render(fit, (u8)(refPanel->opacity * 255));
+        }
+    }
+    //render all layers
     for (int x = 0; x < layers.size(); x++) {
         Layer* imgLayer = layers[x];
         bool isCurrentActiveLayer = (selLayer == x);
@@ -169,6 +178,13 @@ void MainEditor::render() {
                 layerFadeIn = 1.0;
             }
             imgLayer->render(renderRect, (uint8_t)(alpha * layerFadeIn));
+        }
+    }
+    for (auto& refPanel : openReferencePanels) {
+        if (refPanel->currentMode == REFERENCE_OVER_CANVAS) {
+            Layer* p = refPanel->getLayer();
+            SDL_Rect fit = fitInside(canvasRenderRect, { 0,0, p->w, p->h });
+            p->render(fit, (u8)(refPanel->opacity * 255));
         }
     }
 
@@ -1271,7 +1287,7 @@ void MainEditor::SetupCompactEditor(std::vector<CompactEditorSection> createSect
         section.targetPanel->enabled = false;
 
         UIButton* btn = new UIButton();
-		btn->icon = section.icon;
+        btn->icon = section.icon;
         btn->position = { 0, y };
         btn->wxWidth = 80;
         btn->wxHeight = h;
@@ -1419,6 +1435,11 @@ void MainEditor::addWidget(Drawable* wx)
 void MainEditor::removeWidget(Drawable* wx)
 {
     wxsManager.removeDrawable(wx);
+
+    auto findRefPanel = std::find(openReferencePanels.begin(), openReferencePanels.end(), wx);
+    if (findRefPanel != openReferencePanels.end()) {
+        openReferencePanels.erase(findRefPanel);
+    }
     if (wx == (Drawable*)touchModePanel) {
         touchModePanel = NULL;
     }
@@ -2507,8 +2528,9 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
     MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(path));
     if (ssn != NULL) {
         Layer* flat = ssn->flattenImage();
-        Panel* referencePanel = new PanelReference(flat);
+        PanelReference* referencePanel = new PanelReference(flat);
         CollapsableDraggablePanel* refWPanel = new CollapsableDraggablePanel("REFERENCE", referencePanel);
+        openReferencePanels.push_back(referencePanel);
         addWidget(refWPanel);
         refWPanel->playPanelOpenVFX();
         delete ssn;

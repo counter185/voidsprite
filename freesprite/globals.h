@@ -190,6 +190,7 @@ class DraggablePanel;
 class ScrollingPanel;
 class TabbedView;
 class ScreenWideNavBar;
+class PanelReference;
 
 //filters
 class BaseFilter;

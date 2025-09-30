@@ -162,6 +162,7 @@ class MainEditor : public BaseScreen, public EventCallbackListener
 protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
     bool compactEditor = false;
+    std::vector<PanelReference*> openReferencePanels;
 
     MainEditor() {}
 public:

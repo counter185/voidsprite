@@ -257,15 +257,15 @@ PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNat
         "/"
 #endif
         ;
-	PlatformNativePathString ret = parent;
+    PlatformNativePathString ret = parent;
     if (parent.size() == 0) {
         return subdir;
     }
-	if (parent.size() > 0 && parent[parent.size() - 1] != '/' && parent[parent.size() - 1] != '\\') {
-		ret += separator;
-	}
-	ret += subdir;
-	return ret;
+    if (parent.size() > 0 && parent[parent.size() - 1] != '/' && parent[parent.size() - 1] != '\\') {
+        ret += separator;
+    }
+    ret += subdir;
+    return ret;
 }
 
 XY getSnappedPoint(XY from, XY to) {
@@ -1109,6 +1109,31 @@ SDL_Event scaleScreenPositionsInEvent(SDL_Event src) {
             break;
     }
     return src;
+}
+
+SDL_Rect fitInside(SDL_Rect outer, SDL_Rect inner)
+{
+    if (outer.w == 0 || outer.h == 0 || inner.w == 0 || inner.h == 0) {
+        return SDL_Rect{ 0,0,0,0 };
+    }
+    double aspectOuter = outer.w / (double)outer.h;
+    double aspectInner = inner.w / (double)inner.h;
+    SDL_Rect ret = { 0,0,0,0 };
+    if (aspectOuter > aspectInner) {
+        //letterbox sides
+        ret.h = outer.h;
+        ret.w = (int)(outer.h * aspectInner);
+        ret.x = outer.x + (outer.w - ret.w) / 2;
+        ret.y = outer.y;
+    }
+    else {
+        //letterbox top/bottom
+        ret.w = outer.w;
+        ret.h = (int)(outer.w / aspectInner);
+        ret.x = outer.x;
+        ret.y = outer.y + (outer.h - ret.h) / 2;
+    }
+    return ret;
 }
 
 hsl rgb2hsl(rgb c) {

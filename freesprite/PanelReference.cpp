@@ -1,6 +1,8 @@
 #include "PanelReference.h"
 #include "UIButton.h"
 #include "UIDropdown.h"
+#include "UISlider.h"
+#include "UILabel.h"
 #include "Layer.h"
 
 PanelReference::PanelReference(Layer* t)
@@ -28,7 +30,7 @@ void PanelReference::handleInput(SDL_Event evt, XY gPosOffset)
 {
     SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
-    if (currentMode == 0) {
+    if (currentMode == REFERENCE_PIXEL_PERFECT) {
         if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
             && !subWidgets.mouseInAny(gPosOffset, { (int)evtc.button.x, (int)evtc.button.y }) 
             && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
@@ -67,7 +69,7 @@ void PanelReference::render(XY at)
     }
 
     SDL_Rect canvasDraw = getCanvasDrawRect(at);
-    if (currentMode == 0) { //pixel-perfect
+    if (currentMode == REFERENCE_PIXEL_PERFECT) { //pixel-perfect
         g_pushClip(canvasDraw);
         c.lockToScreenBounds(0, 0, 0, 0, { canvasDraw.w, canvasDraw.h });
         SDL_Rect texDraw = c.getCanvasOnScreenRect();
@@ -76,7 +78,8 @@ void PanelReference::render(XY at)
         previewTex->render(texDraw);
         g_popClip();
     }
-    else if (currentMode == 1) {    //fit
+    else if (currentMode == REFERENCE_FIT) {    //fit
+        //previewTex->render(fitInside(canvasDraw, {0,0,previewTex->w, previewTex->h}));
         previewTex->render(canvasDraw);
     }
 
@@ -87,7 +90,7 @@ void PanelReference::render(XY at)
 void PanelReference::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
     if (evt_id == 0) {
-        currentMode = index;
+        currentMode = (ReferencePanelMode)index;
         initWidgets();
     }
 }
@@ -96,13 +99,29 @@ void PanelReference::initWidgets()
 {
     subWidgets.freeAllDrawables();
 
-    if (currentMode == 0) { //pixel-perfect
+    if (currentMode == REFERENCE_PIXEL_PERFECT) { //pixel-perfect
         wxWidth = 400;
         wxHeight = 300;
     }
-    else if (currentMode == 1) {  //fit
+    else if (currentMode == REFERENCE_FIT) {  //fit
         wxWidth = 400;
         wxHeight = (int)(400.0 / previewTex->w * previewTex->h);
+    }
+    else if (currentMode == REFERENCE_UNDER_CANVAS || currentMode == REFERENCE_OVER_CANVAS) {
+        wxWidth = 400;
+        wxHeight = 80;
+
+        UISlider* opacitySlider = new UISlider();
+        opacitySlider->setValue(0, 1, opacity);
+        opacitySlider->onChangeValueCallback = [this](UISlider* target, float v) {
+            opacity = v;
+        };
+        opacitySlider->position = { this->wxWidth / 2, 35 };
+        opacitySlider->wxWidth = this->wxWidth / 2 - 5;
+        opacitySlider->wxHeight = 20;
+        subWidgets.addDrawable(opacitySlider);
+
+        subWidgets.addDrawable(new UILabel(TL("vsp.cmn.opacity"), { 5, 35 }));
     }
 
     c.recenter({ wxWidth, wxHeight });
@@ -118,7 +137,7 @@ void PanelReference::initWidgets()
         };
     subWidgets.addDrawable(closeBtn);
 
-    std::vector<std::string> modes = {"Pixel-perfect", "Fit"};
+    std::vector<std::string> modes = {"Pixel-perfect", "Fit", "Under canvas", "Over canvas"};
     UIDropdown* modeSwitch = new UIDropdown(modes);
     modeSwitch->text = modes[currentMode];
     modeSwitch->lastClick.start();
@@ -130,5 +149,8 @@ void PanelReference::initWidgets()
 
 SDL_Rect PanelReference::getCanvasDrawRect(XY at)
 {
+    if (currentMode == REFERENCE_UNDER_CANVAS || currentMode == REFERENCE_OVER_CANVAS) {
+        return SDL_Rect{ 0,0,0,0 };
+    }
     return SDL_Rect{ at.x + 5, at.y + 35, wxWidth - 10, wxHeight - 40 };
 }
