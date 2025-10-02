@@ -1,7 +1,7 @@
 #include "BasePopup.h"
 #include "EventCallbackListener.h"
 
-void BasePopup::renderDefaultBackground(SDL_Color bgColor) {
+void BasePopup::renderDefaultBackground() {
 
     int topBarY = g_windowH / 5;
     int bottomBarY = g_windowH / 5 * 4;
@@ -31,8 +31,9 @@ void BasePopup::renderDefaultBackground(SDL_Color bgColor) {
 
     XY origin = getPopupOrigin();
     SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300))) };
-    SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-    SDL_RenderFillRect(g_rd, &bgRect);
+
+    static Fill popupBgFill = visualConfigFill("popup/bg");
+    popupBgFill.fill(bgRect);
 
     u8 alpha = 0x30;
     SDL_Rect bgRect2 = bgRect;

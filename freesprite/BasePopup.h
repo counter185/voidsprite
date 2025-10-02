@@ -47,7 +47,7 @@ protected:
         wxsManager.renderAll(getPopupOrigin());
     }
 
-    virtual void renderDefaultBackground(SDL_Color bgColor = SDL_Color{0,0,0,0xD0});
+    virtual void renderDefaultBackground();
 
     virtual XY getPopupOrigin() {
         return usesWholeScreen ? XY{0,0} : XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };

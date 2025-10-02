@@ -11,6 +11,7 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"meta/description", UTF8_EMPTY_DIAMOND "voidsprite's default visual configuration"},
     {"meta/author", "your name here"},
     {"general/font", ""},
+    {"tooltips/fill", Fill::Gradient(0xFF000000, 0xFF000000, 0xD0000000, 0xD0000000).serialize()},
     {"launchpad/bg", Fill::Gradient(0xFF000000,0xFF000000,0xFF000000,0xFF202020).serialize()},
     {"launchpad/effects_color", "FFFFFFFF"},
     {"launchpad/hours_color", "FFFFFFFF"},
@@ -18,6 +19,8 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"launchpad/seconds_color", "FFFFFFFF"},
     {"maineditor/bg", Fill::Gradient(0xFF000000,0xFF000000,0xFF000000,0xFF202020).serialize()},
     {"maineditor/bg_alt", Fill::Gradient(0xFFDFDFDF,0xFFDFDFDF,0xFFDFDFDF,0xFF808080).serialize()},
+    {"maineditor/comments/fill", Fill::Gradient(0xA0000000, 0xA0000000, 0x70000000, 0x70000000).serialize()},
+    {"popup/bg", Fill::Solid(0xD0000000).serialize()},
 };
 
 std::map<SDL_Renderer*, std::map<std::string, SDL_Texture*>> visualConfigTextureCache = {};

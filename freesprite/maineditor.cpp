@@ -753,10 +753,10 @@ void MainEditor::renderComments()
     if (commentViewMode == COMMENTMODE_HIDE_ALL) {
         return;
     }
+    static Fill commentFill = visualConfigFill("maineditor/comments/fill");
     TooltipsLayer localTtp;
     localTtp.border = false;
-    localTtp.gradientUL = localTtp.gradientUR = 0xA0000000;
-    localTtp.gradientLL = localTtp.gradientLR = 0x70000000;
+    localTtp.tooltipFill = commentFill;
 
     XY origin = canvas.currentDrawPoint;
     for (CommentData& c : comments) {

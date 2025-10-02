@@ -34,7 +34,7 @@ void TooltipsLayer::renderAll()
 		rect.y = ixmax(rect.y, 0);
 		XY rectPos = { rect.x, rect.y };
 
-		renderGradient(rect, gradientUL, gradientUR, gradientLL, gradientLR);
+		tooltipFill.fill(rect);
 		
 		if (border) {
 			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x90);
