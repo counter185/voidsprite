@@ -447,6 +447,7 @@
     {"vsp.filepicker.renamefile", "Rename"},
     {"vsp.filepicker.renamefile.confirm", "Rename file?"},
     {"vsp.filepicker.renamefile.desc", "Choose a new name for this file:"},
+    {"vsp.filepicker.searchlist", "Search results:"},
     {"vsp.filepicker.error.folderexists", "Directory already exists."},
     {"vsp.filepicker.error.cantcreatefolder", "Failed to create directory."},
     {"vsp.filepicker.error.notadir", "Path is not a directory."},

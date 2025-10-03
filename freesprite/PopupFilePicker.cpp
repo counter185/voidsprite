@@ -11,7 +11,6 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     setSize({ 960, 540 });
 
     rootDirs = platformListRootDirectories();
-    currentDir = rootDirs[0].path;
 
     driveList = new ScrollingPanel();
     driveList->position = { 3, 65 };
@@ -37,7 +36,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
         if (std::filesystem::exists(p)) {
             if (std::filesystem::is_directory(p)) {
                 this->currentDir = p;
-                this->populateRootAndFileList();
+                this->populateFileList();
             } else {
                 f->setText(convertStringToUTF8OnWin32(currentDir));
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.notadir")));
@@ -66,7 +65,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
                 }
                 else {
                     if (std::filesystem::create_directory(newFolderPath)) {
-                        this->populateRootAndFileList();
+                        this->populateFileList();
                     }
                     else {
                         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.cantcreatefolder")));
@@ -90,6 +89,12 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     currentFileName->position = ep;
     currentFileName->wxWidth = fileList->wxWidth - 10 - fileNameLabel->getDimensions().x;
     currentFileName->wxHeight = 30;
+    currentFileName->onTextChangedConfirmCallback = [this](UITextField* tf, std::string text) {
+        this->confirmButton->click();
+    };
+    currentFileName->onTextChangedCallback = [this](UITextField* tf, std::string text) {
+        populateFileList();
+    };
     wxsManager.addDrawable(currentFileName);
 
     std::vector<std::pair<std::string, std::string>> typesInDropdown;
@@ -103,8 +108,9 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     fileTypeDropdown->text = typesInDropdown[currentFileTypeIndex].first;
     fileTypeDropdown->onDropdownItemSelectedCallback = [this](UIDropdown* dropdown, int index, std::string item) {
         currentFileTypeIndex = index;
+        filesInCurrentDirValid = false;
         currentFileName->setText("");
-        populateRootAndFileList();
+        populateFileList();
     };
     wxsManager.addDrawable(fileTypeDropdown);
 
@@ -112,8 +118,8 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     cancelButton->onClickCallback = [this](UIButton* btn) {
         this->closePopup();
     };
-    UIButton* okButton = actionButton(TL("vsp.cmn.confirm"));
-    okButton->onClickCallback = [this](UIButton* btn) {
+    confirmButton = actionButton(TL("vsp.cmn.confirm"));
+    confirmButton->onClickCallback = [this](UIButton* btn) {
         PlatformNativePathString fullFilePath = appendPath(currentDir, convertStringOnWin32(currentFileName->getText()));
         if (mode == FILEPICKER_OPENFILE) {
             if (currentFileName->getText().size() == 0 || !std::filesystem::exists(fullFilePath)) {
@@ -155,7 +161,8 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
 
     makeTitleAndDesc("voidsprite: " + title, "");
 
-    populateRootAndFileList();
+    populateRootDirsList();
+    chooseDirectory(currentDir = rootDirs.empty() ? convertStringOnWin32("/") : rootDirs[0].path);
 }
 
 void PopupFilePicker::PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id) {
@@ -178,29 +185,11 @@ void PopupFilePicker::PlatformAnyImageWithMatchingExporterImportDialog(EventCall
     platformTryLoadOtherFile(callback, filetypes, title, callback_id);
 }
 
-void PopupFilePicker::populateRootAndFileList() {
-    driveList->subWidgets.freeAllDrawables();
+void PopupFilePicker::populateFileList() {
+    
     fileList->subWidgets.freeAllDrawables();
 
-    driveList->scrollOffset = { 0,0 };
-
     currentDirField->setText(convertStringToUTF8OnWin32(currentDir));
-    currentFileName->setText("");
-
-    //root dir buttons
-    int rootY = 0;
-    for (auto& rootDir : rootDirs) {
-        UIButton* btn = new UIButton(rootDir.friendlyName);
-        btn->position = { 0, rootY };
-        btn->wxWidth = driveList->wxWidth - 30;
-        btn->wxHeight = 30;
-        btn->onClickCallback = [this, rootDir](UIButton* btn) {
-            currentDir = rootDir.path;
-            populateRootAndFileList();
-        };
-        driveList->subWidgets.addDrawable(btn);
-        rootY += btn->wxHeight;
-    }
 
     //file buttons
     int fileY = 5;
@@ -209,35 +198,77 @@ void PopupFilePicker::populateRootAndFileList() {
     btn->wxWidth = g_fnt->StatStringDimensions("..").x + 20;
     btn->wxHeight = 30;
     btn->onClickCallback = [this](UIButton* btn) {
-        currentDir = std::filesystem::path(currentDir).parent_path();
-        populateRootAndFileList();
+        chooseDirectory(std::filesystem::path(currentDir).parent_path());
     };
     fileList->subWidgets.addDrawable(btn);
     fileY += btn->wxHeight;
 
-    std::string targetExtension = fileTypes[currentFileTypeIndex].first;
-
     try {
-        struct FilePickerFileEntry {
-            PlatformNativePathString realFileName;
-            std::string displayFileName;
-            bool isDirectory;
-            bool matchesExtension;
-            bool isLink;
-        };
-        std::vector<FilePickerFileEntry> fileEntries = {};
+
+        getFilesInCurrentDir();
+
+        std::string searchQuery = stringToLower(currentFileName->getText());
+        std::vector<FilePickerFileEntry> searchResults;
+        for (auto& fileEntry : filesInCurrentDir) {
+            std::string lowerFileName = stringToLower(fileEntry.displayFileName);
+            if (lowerFileName.find(searchQuery) != std::string::npos) {
+                searchResults.push_back(fileEntry);
+            }
+        }
+
+        if (!searchQuery.empty()) {
+            fileList->subWidgets.addDrawable(new UILabel(TL("vsp.filepicker.searchlist"), {5, fileY}));
+            fileY += 30;
+
+            for (auto& searchFileEntry : searchResults) {
+                UIButton* btn = createFileButton(searchFileEntry);
+                btn->position = { 15, fileY };
+                fileList->subWidgets.addDrawable(btn);
+                fileY += btn->wxHeight;
+            }
+
+            fileY += 20;
+        }
+
+        for (auto& fileEntry : filesInCurrentDir) {
+            UIButton* btn = createFileButton(fileEntry);
+            btn->position = { 5, fileY };
+            fileList->subWidgets.addDrawable(btn);
+            fileY += btn->wxHeight;
+        }
+    } catch (std::exception& e) {
+        UILabel* l = new UILabel(frmt("{}\n  {}", TL("vsp.filepicker.folderreaderror"), e.what()));
+        l->position = {5, fileY};
+        fileList->subWidgets.addDrawable(l);
+    }
+}
+
+void PopupFilePicker::chooseDirectory(PlatformNativePathString dir)
+{
+    filesInCurrentDirValid = false;
+    currentDir = dir;
+    currentFileName->setText("");
+    populateFileList();
+}
+
+void PopupFilePicker::getFilesInCurrentDir()
+{
+    if (!filesInCurrentDirValid) {
+        std::string targetExtension = fileTypes[currentFileTypeIndex].first;
+
+        filesInCurrentDir.clear();
         for (auto& file : std::filesystem::directory_iterator(currentDir)) {
             std::string utf8name = convertStringToUTF8OnWin32(file.path().filename());
-            fileEntries.push_back({
+            filesInCurrentDir.push_back({
                 file.path().filename(),
                 utf8name,
                 file.is_directory(),
                 stringEndsWithIgnoreCase(utf8name, targetExtension),
                 file.is_symlink()
-            });
+                });
         }
 
-        std::sort(fileEntries.begin(), fileEntries.end(), [](FilePickerFileEntry& left, FilePickerFileEntry& right) {
+        std::sort(filesInCurrentDir.begin(), filesInCurrentDir.end(), [](FilePickerFileEntry& left, FilePickerFileEntry& right) {
             if (left.isDirectory != right.isDirectory) {
                 return left.isDirectory > right.isDirectory;
             }
@@ -247,93 +278,107 @@ void PopupFilePicker::populateRootAndFileList() {
             else {
                 return stringToLower(left.displayFileName) < stringToLower(right.displayFileName);
             }
+            });
+        filesInCurrentDirValid = true;
+    }
+}
+
+UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
+{
+    bool matchesExtension = fileEntry.matchesExtension;
+
+    UIButton* btn = new UIButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
+    btn->wxWidth = g_fnt->StatStringDimensions(btn->text).x + 15 + 30;
+    btn->wxHeight = 30;
+
+    btn->onRightClickCallback = [this, fileEntry](UIButton* btn) {
+        g_openContextMenu({
+            NamedOperation{TL("vsp.filepicker.deletefile"), 
+                [this, fileEntry]() {
+                    auto p = appendPath(currentDir, fileEntry.realFileName);
+                    PopupYesNo* popup = new PopupYesNo(TL("vsp.filepicker.deletefile.confirm"), 
+                        frmt("{}\n  {}", TL("vsp.filepicker.deletefile.confirm.desc"), convertStringToUTF8OnWin32(p)));
+                    popup->onFinishCallback = [this, p](PopupYesNo* popup, bool yes) {
+                        if (yes) {
+                            try {
+                                std::filesystem::remove_all(p);
+                                populateFileList();
+                            } catch (std::exception& e) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.deletefile"), e.what())));
+                            }
+                        }
+                    };
+                    g_addPopup(popup);
+                }
+            },
+            NamedOperation{TL("vsp.filepicker.renamefile"), 
+                [this, fileEntry]() {
+                    auto p = appendPath(currentDir, fileEntry.realFileName);
+                    PopupTextBox* popup = new PopupTextBox(TL("vsp.filepicker.renamefile.confirm"), 
+                        frmt("{}\n  {}", TL("vsp.filepicker.renamefile.desc"), fileEntry.displayFileName),
+                        convertStringToUTF8OnWin32(fileEntry.realFileName));
+                    popup->allowEmptyText = false;
+                    popup->onTextInputConfirmedCallback = [this, p](PopupTextBox* popup, std::string newName) {
+                        try {
+                            std::filesystem::rename(p, appendPath(currentDir, convertStringOnWin32(newName)));
+                            populateFileList();
+                        } catch (std::exception& e) {
+                            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.renamefile"), e.what())));
+                        }
+                    };
+                    g_addPopup(popup);
+                }
+            },
         });
+    };
 
-        for (auto& fileEntry : fileEntries) {
-            bool matchesExtension = fileEntry.matchesExtension;
+    SDL_Color primaryColor = fileEntry.isLink ? visualConfigColor("popup/filepicker/symlink_color")
+                            : fileEntry.isDirectory ? visualConfigColor("popup/filepicker/directory_color")
+                            : matchesExtension ? visualConfigColor("popup/filepicker/file_matching_color")
+                            : visualConfigColor("popup/filepicker/file_nonmatching_color");
 
-            UIButton* btn = new UIButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
-            btn->position = {5, fileY};
-            btn->wxWidth = g_fnt->StatStringDimensions(btn->text).x + 15 + 30;
-            btn->wxHeight = 30;
+    u32 primaryColorU32 = sdlcolorToUint32(primaryColor);
 
-            btn->onRightClickCallback = [this, fileEntry](UIButton* btn) {
-                g_openContextMenu({
-                    NamedOperation{TL("vsp.filepicker.deletefile"), 
-                        [this, fileEntry]() {
-                            auto p = appendPath(currentDir, fileEntry.realFileName);
-                            PopupYesNo* popup = new PopupYesNo(TL("vsp.filepicker.deletefile.confirm"), 
-                                frmt("{}\n  {}", TL("vsp.filepicker.deletefile.confirm.desc"), convertStringToUTF8OnWin32(p)));
-                            popup->onFinishCallback = [this, p](PopupYesNo* popup, bool yes) {
-                                if (yes) {
-                                    try {
-                                        std::filesystem::remove_all(p);
-                                        populateRootAndFileList();
-                                    } catch (std::exception& e) {
-                                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.deletefile"), e.what())));
-                                    }
-                                }
-                            };
-                            g_addPopup(popup);
-                        }
-                    },
-                    NamedOperation{TL("vsp.filepicker.renamefile"), 
-                        [this, fileEntry]() {
-                            auto p = appendPath(currentDir, fileEntry.realFileName);
-                            PopupTextBox* popup = new PopupTextBox(TL("vsp.filepicker.renamefile.confirm"), 
-                                frmt("{}\n  {}", TL("vsp.filepicker.renamefile.desc"), fileEntry.displayFileName),
-                                convertStringToUTF8OnWin32(fileEntry.realFileName));
-                            popup->allowEmptyText = false;
-                            popup->onTextInputConfirmedCallback = [this, p](PopupTextBox* popup, std::string newName) {
-                                try {
-                                    std::filesystem::rename(p, appendPath(currentDir, convertStringOnWin32(newName)));
-                                    populateRootAndFileList();
-                                } catch (std::exception& e) {
-                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.renamefile"), e.what())));
-                                }
-                            };
-                            g_addPopup(popup);
-                        }
-                    },
-                });
-            };
+    btn->icon =
+        fileEntry.isLink ? g_iconFilePickerLink
+        : fileEntry.isDirectory ? g_iconFilePickerDirectory
+        : matchesExtension ? g_iconFilePickerSupportedFile
+        : g_iconFilePickerFile;
 
-            SDL_Color primaryColor = fileEntry.isLink ? SDL_Color{ 0xC3, 0xDB, 0xFF, 0xFF }
-                                     : fileEntry.isDirectory ? SDL_Color{ 0xFF, 0xFC, 0x7B, 0xFF }
-                                     : matchesExtension ? SDL_Color{ 0xFF, 0xFF, 0xFF, 0xFF }
-                                     : SDL_Color{ 0x80, 0x80, 0x80, 0xFF };
-
-            u32 primaryColorU32 = sdlcolorToUint32(primaryColor);
-
-            btn->icon =
-                fileEntry.isLink ? g_iconFilePickerLink
-                : fileEntry.isDirectory ? g_iconFilePickerDirectory
-                : matchesExtension ? g_iconFilePickerSupportedFile
-                : g_iconFilePickerFile;
-
-            btn->colorTextFocused = btn->colorTextUnfocused = primaryColor;
+    btn->colorTextFocused = btn->colorTextUnfocused = primaryColor;
             
-            u32 fillBGPrimary = alphaBlend(0xD0000000, modAlpha(primaryColorU32, 0x30));
-            btn->fill = Fill::Gradient(fillBGPrimary, 0xD0000000, fillBGPrimary, 0xD0000000);
+    u32 fillBGPrimary = alphaBlend(0xD0000000, modAlpha(primaryColorU32, 0x30));
+    btn->fill = Fill::Gradient(fillBGPrimary, 0xD0000000, fillBGPrimary, 0xD0000000);
 
-            PlatformNativePathString wFileName = fileEntry.realFileName;
-            std::string fileName = fileEntry.displayFileName;
-            if (fileEntry.isDirectory) {
-                btn->onClickCallback = [this, wFileName](UIButton *btn) {
-                    currentDir = appendPath(currentDir, wFileName);
-                    populateRootAndFileList();
-                };
-            } else {
-                btn->onClickCallback = [this, fileName](UIButton *btn) {
-                    currentFileName->setText(fileName);
-                };
-            }
-            fileList->subWidgets.addDrawable(btn);
-            fileY += btn->wxHeight;
-        }
-    } catch (std::exception& e) {
-        UILabel* l = new UILabel(frmt("{}\n  {}", TL("vsp.filepicker.folderreaderror"), e.what()));
-        l->position = {5, fileY};
-        fileList->subWidgets.addDrawable(l);
+    PlatformNativePathString wFileName = fileEntry.realFileName;
+    std::string fileName = fileEntry.displayFileName;
+    if (fileEntry.isDirectory) {
+        btn->onClickCallback = [this, wFileName](UIButton *btn) {
+            chooseDirectory(appendPath(currentDir, wFileName));
+        };
+    } else {
+        btn->onClickCallback = [this, fileName](UIButton *btn) {
+            currentFileName->setText(fileName);
+        };
+    }
+    return btn;
+}
+
+void PopupFilePicker::populateRootDirsList()
+{
+    //root dir buttons
+    driveList->subWidgets.freeAllDrawables();
+    driveList->scrollOffset = { 0,0 };
+    int rootY = 0;
+    for (auto& rootDir : rootDirs) {
+        UIButton* btn = new UIButton(rootDir.friendlyName);
+        btn->position = { 0, rootY };
+        btn->wxWidth = driveList->wxWidth - 30;
+        btn->wxHeight = 30;
+        btn->onClickCallback = [this, rootDir](UIButton* btn) {
+            chooseDirectory(rootDir.path);
+            };
+        driveList->subWidgets.addDrawable(btn);
+        rootY += btn->wxHeight;
     }
 }

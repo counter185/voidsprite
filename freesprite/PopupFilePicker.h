@@ -12,6 +12,14 @@ enum FilePickerMode {
     FILEPICKER_OPENFOLDER
 };
 
+struct FilePickerFileEntry {
+    PlatformNativePathString realFileName;
+    std::string displayFileName;
+    bool isDirectory;
+    bool matchesExtension;
+    bool isLink;
+};
+
 class PopupFilePicker : public BasePopup
 {
 private:
@@ -19,6 +27,7 @@ private:
     PlatformNativePathString currentDir;
     UITextField* currentDirField = NULL;
     UITextField* currentFileName = NULL;
+    UIButton* confirmButton = NULL;
 protected:
     ScrollingPanel* driveList = NULL;
     ScrollingPanel* fileList = NULL;
@@ -27,6 +36,9 @@ protected:
     //first: extension, second: name
     std::vector<std::pair<std::string,std::string>> fileTypes;
     int currentFileTypeIndex = 0;
+
+    std::vector<FilePickerFileEntry> filesInCurrentDir;
+    bool filesInCurrentDirValid = false;
 public:
     PopupFilePicker(FilePickerMode mode, std::string title, std::vector<std::pair<std::string,std::string>> fileTypes);
 
@@ -41,6 +53,11 @@ public:
 
     static void PlatformAnyImageWithMatchingExporterImportDialog(EventCallbackListener* callback, std::string title, int callback_id);
 
-    void populateRootAndFileList();
+    void populateFileList();
+    void populateRootDirsList();
+
+    void chooseDirectory(PlatformNativePathString dir);
+    void getFilesInCurrentDir();
+    UIButton* createFileButton(FilePickerFileEntry entry);;
 };
 

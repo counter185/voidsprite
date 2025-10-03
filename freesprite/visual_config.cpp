@@ -21,6 +21,10 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"maineditor/bg_alt", Fill::Gradient(0xFFDFDFDF,0xFFDFDFDF,0xFFDFDFDF,0xFF808080).serialize()},
     {"maineditor/comments/fill", Fill::Gradient(0xA0000000, 0xA0000000, 0x70000000, 0x70000000).serialize()},
     {"popup/bg", Fill::Solid(0xD0000000).serialize()},
+    {"popup/filepicker/directory_color", "FFFFFC7B"},
+    {"popup/filepicker/file_matching_color", "FFFFFFFF"},
+    {"popup/filepicker/file_nonmatching_color", "FF808080"},
+    {"popup/filepicker/symlink_color", "FFC3DBFF"}
 };
 
 std::map<SDL_Renderer*, std::map<std::string, SDL_Texture*>> visualConfigTextureCache = {};
