@@ -5,6 +5,7 @@ void log_init();
 void log_close();
 void log_duplicateLast();
 
+void loginfo_sync(std::string a);
 void loginfo(std::string a);
 void logwarn(std::string a);
 void logerr(std::string a);

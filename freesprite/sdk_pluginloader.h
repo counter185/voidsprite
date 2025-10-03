@@ -41,9 +41,11 @@ public:
 inline std::vector<VSPPlugin> g_loadedPlugins;
 
 inline bool loadPluginObject(PlatformNativePathString path) {
+    loginfo_sync(frmt("Loading plugin:\n {}", convertStringToUTF8OnWin32(path)));
     ModuleHandle module = platformLoadNativeModule(path);
+    
     if (module == NULL) {
-        logerr(frmt("Failed to load plugin: {}", convertStringToUTF8OnWin32(path)));
+        logerr(frmt("Failed to load plugin"));
 #if _WIN32
         u32 errorCode = GetLastError();
         logerr(frmt("Error code: {}", errorCode));
