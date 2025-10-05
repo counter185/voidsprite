@@ -197,7 +197,7 @@ StartScreen::StartScreen() {
                         { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
                         { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
 #if VSP_NETWORKING
-                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), [this]() { this->promptConnectToNetworkCanvas(); }}}
+                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}}
 #endif
                     },
                     g_iconNavbarTabFile
@@ -925,7 +925,7 @@ void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
     PopupSetupNetworkCanvas* prompt = new PopupSetupNetworkCanvas(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
     prompt->textboxIP->setText(ip);
     prompt->textboxPort->setText(port);
-    prompt->onInputConfirmCallback = [this](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
+    prompt->onInputConfirmCallback = [](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
 #if VSP_NETWORKING
         g_startNewOperation([input]() {
 

@@ -9,6 +9,9 @@ struct RPCLobbyInfo {
 };
 
 #if _WIN32
+#include "StartScreen.h"
+#include "Notification.h"
+#include "background_operation.h"
 #include "discord_game_sdk/discord.h"
 
 inline bool discordInit = false;
@@ -28,7 +31,15 @@ inline void g_initRPC() {
             logwarn("[Discord Game SDK] init failed");
         }
         else {
-            core->ActivityManager().RegisterCommand("voidsprite://connect/");
+            core->ActivityManager().RegisterCommand("voidsprite://");
+            core->ActivityManager().OnActivityJoin.Connect([](char const* sec) {
+                g_startNewMainThreadOperation([sec]() {
+                    StartScreen::promptConnectToNetworkCanvas(sec);
+                });
+            });
+            core->ActivityManager().OnActivityInvite.Connect([](discord::ActivityActionType, discord::User const& usr, discord::Activity const&) {
+                g_addNotificationFromThread(Notification(frmt("{}", usr.GetUsername()), "invited you to a network canvas session", 5000));
+            });
         }
     }
 }

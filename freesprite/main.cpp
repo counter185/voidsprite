@@ -735,7 +735,7 @@ int main(int argc, char** argv)
                         port = portMatch.str().substr(1);
                         ip = spltPath[1].substr(0, spltPath[1].size() - portMatch.str().size());
                     }
-                    launchpad->promptConnectToNetworkCanvas(ip, port);
+                    StartScreen::promptConnectToNetworkCanvas(ip, port);
                 }
 				// voidsprite://openurl/<url>
                 else if (spltPath[0] == "openurl" && spltPath.size() >= 2) {
