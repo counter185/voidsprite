@@ -281,6 +281,10 @@ public:
     Panel* networkCanvasChatPanelContainer = NULL;
     NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
     std::string networkCanvasPassword = "";
+    bool networkCanvasBroadcastRPC = false;
+    std::string networkCanvasLobbyID = "";
+    bool networkCanvasRPCPrivate = false;
+    std::string networkCanvasRPCAddress = "";
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);

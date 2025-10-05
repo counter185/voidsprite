@@ -148,7 +148,9 @@ void platformPreInit() {
         }
     }
 }
-void platformInit() {}
+void platformInit() {
+    platformRegisterURI("voidsprite", {});
+}
 void platformPostInit() {
     static bool d = false;
     if (!d) {
@@ -201,6 +203,12 @@ bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> addit
         if (RegCreateKeyExW(classesRootKey, prot.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &voidspriteRootKey, NULL) == ERROR_SUCCESS) {
             HKEY hKey;
             RegSetValueExW(voidspriteRootKey, L"URL Protocol", 0, REG_SZ, (const BYTE*)L"", sizeof(L""));
+            if (RegCreateKeyExW(voidspriteRootKey, L"DefaultIcon", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+                std::wstring assocIconPath = convertStringOnWin32(pathInProgramDirectory("assets\\icon_fileassoc.ico"));
+
+                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)assocIconPath.c_str(), (assocIconPath.size() + 1) * sizeof(wchar_t));
+                RegCloseKey(hKey);
+            }
             if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
                 RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size() + 1) * sizeof(wchar_t));
                 RegCloseKey(hKey);
@@ -222,7 +230,9 @@ bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> addit
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) {
 
     //add the program into hkey_classes_root
-    //todo: reuse registerURI here
+
+    platformRegisterURI("voidsprite-file", additionalArgs);
+
     WCHAR path[MAX_PATH];
     if (GetModuleFileNameW(NULL, path, MAX_PATH) > 0) {
         HKEY classesRootKey;
@@ -230,44 +240,17 @@ bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std
             logerr("failed to open hkey_classes_root");
             return false;
         }
-        std::wstring pathWstr = path;
-        for (auto& arg : additionalArgs) {
-            pathWstr += L" " + convertStringOnWin32(arg);
-        }
-        pathWstr += L" \"%1\"";
-
-        HKEY voidspriteRootKey;
-        if (RegCreateKeyExW(classesRootKey, L"voidsprite", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &voidspriteRootKey, NULL) == ERROR_SUCCESS) {
-            HKEY hKey;
-            if (RegCreateKeyExW(voidspriteRootKey, L"DefaultIcon", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
-                std::wstring assocIconPath = convertStringOnWin32(pathInProgramDirectory("assets\\icon_fileassoc.ico"));
-                
-                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)assocIconPath.c_str(), (assocIconPath.size()+1) * sizeof(wchar_t));
-                RegCloseKey(hKey);
-            }
-            if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open\\command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
-                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size()+1) * sizeof(wchar_t));
-                RegCloseKey(hKey);
-            }
-            RegCloseKey(voidspriteRootKey);
-        }
-        else {
-            logerr("failed to create voidsprite key in hkey_classes_root");
-            RegCloseKey(classesRootKey);
-            return false;
-        }
-        //RegCloseKey(classesRootKey);
 
         //add all of the filetypes to hkey_classes_root too
         for (auto& ext : extensions) {
             HKEY hKey;
             std::wstring extw = utf8StringToWstring(ext);
             if (RegCreateKeyExW(classesRootKey, extw.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
-                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)L"voidsprite", sizeof(L"voidsprite"));
+                RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)L"voidsprite-file", sizeof(L"voidsprite-file"));
                 RegCloseKey(hKey);
             }
             else {
-                logprintf("failed to create %s key in hkey_classes_root\n", ext.c_str());
+                logerr(frmt("failed to create {} key in hkey_classes_root", ext.c_str()));
                 //RegCloseKey(classesRootKey);
                 //return false;
             }

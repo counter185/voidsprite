@@ -1,12 +1,35 @@
 #include "PopupSetupNetworkCanvas.h"
 #include "UITextField.h"
 #include "UIButton.h"
+#include "UICheckbox.h"
 #include "PopupPickColor.h"
 #include "Notification.h"
 
-PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField, bool portField)
+PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField, bool portField, bool rpcOptions)
 {
     wxHeight = 290;
+
+    if (rpcOptions) {
+        wxHeight = 400;
+
+        UICheckbox* enableRPCCheckbox = new UICheckbox("Broadcast on Discord", &rpcEnabled);
+        enableRPCCheckbox->position = { 30, 220 };
+        wxsManager.addDrawable(enableRPCCheckbox);
+
+        UILabel* lbl = new UILabel("Connection address");
+        lbl->position = XY{ 70, 250 };
+        wxsManager.addDrawable(lbl);
+
+        textboxExternalIP = new UITextField();
+        textboxExternalIP->position = XY{ ixmax(lbl->calcEndpoint().x + 30, 90), 250 };
+        textboxExternalIP->wxWidth = 190;
+        textboxExternalIP->setText("");
+        wxsManager.addDrawable(textboxExternalIP);
+
+        UICheckbox* privateCheckbox = new UICheckbox("Private", &rpcLobbyPrivate);
+        privateCheckbox->position = { 70, 280 };
+        wxsManager.addDrawable(privateCheckbox);
+    }
 
     userColor = sdlcolorToUint32(rgb2sdlcolor(hsv2rgb(
         hsv{

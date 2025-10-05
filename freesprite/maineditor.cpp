@@ -48,6 +48,8 @@
 #include "PopupContextMenu.h"
 #include "PopupSetupNetworkCanvas.h"
 
+#include "discord_rpc.h"
+
 #if defined(__unix__)
 #include <time.h>
 #elif defined(_WIN32)
@@ -352,6 +354,18 @@ void MainEditor::tick() {
     }
 
     tickAutosave();
+
+    if (networkCanvasBroadcastRPC) {
+        RPCLobbyInfo lobbyInfo;
+        lobbyInfo.id = networkCanvasLobbyID;
+        lobbyInfo.isPrivate = networkCanvasRPCPrivate;
+        lobbyInfo.joinSecret = networkCanvasRPCAddress;
+        networkClientsListMutex.lock();
+        lobbyInfo.currentSize = networkClients.size();
+        networkClientsListMutex.unlock();
+        lobbyInfo.maxSize = 16;
+        g_pushRPCLobbyInfo(lobbyInfo);
+    }
 
     if (closeNextTick) {
         if (!g_currentWindow->hasPopupsOpen()) {
@@ -3087,8 +3101,9 @@ void MainEditor::promptStartNetworkSession()
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Network session already started"));
         return;
     }
-    PopupSetupNetworkCanvas* p = new PopupSetupNetworkCanvas(TL("vsp.maineditor.startcollab"), TL("vsp.collabeditor.popup.host.desc"), false, true);
-    p->onInputConfirmCallback = [this](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
+    bool showRPCSettings = platformSupportsFeature(VSP_FEATURE_DISCORD_RPC) && g_config.useDiscordRPC;
+    PopupSetupNetworkCanvas* p = new PopupSetupNetworkCanvas(TL("vsp.maineditor.startcollab"), TL("vsp.collabeditor.popup.host.desc"), false, true, showRPCSettings);
+    p->onInputConfirmCallback = [this, showRPCSettings](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
         networkRunning = true;
 
         networkCanvasPassword = d.password;
@@ -3109,6 +3124,13 @@ void MainEditor::promptStartNetworkSession()
 
         thisClientInfo = new NetworkCanvasClientInfo;
         thisClientInfo->clientIP = "localhost";
+
+        if (showRPCSettings && p->rpcEnabled && g_lockRPCLobbyInfo()) {
+            networkCanvasBroadcastRPC = true;
+            networkCanvasLobbyID = randomUUID();
+            networkCanvasRPCAddress = p->textboxExternalIP->getText();
+            networkCanvasRPCPrivate = p->rpcLobbyPrivate;
+        }
 
         networkCanvasThread = new std::thread(&MainEditor::networkCanvasServerThread, this, d);
 
@@ -3542,6 +3564,12 @@ void MainEditor::networkCanvasChatSendCallback(std::string content)
 void MainEditor::endNetworkSession()
 {
     networkRunning = false;
+
+    if (networkCanvasBroadcastRPC) {
+        g_clearRPCLobbyInfo();
+        networkCanvasBroadcastRPC = false;
+    }
+
     for (std::thread* responderThread : networkCanvasResponderThreads) {
         responderThread->join();
         delete responderThread;
@@ -3923,7 +3951,7 @@ void EditorNetworkCanvasChatPanel::updateChat()
                 chatMsgPanel->subWidgets.addDrawable(labelNow);
                 remainingText = remainingText.substr(chrsInLine);
 
-                chrsInLine = std::max(1, chrsInLine);
+                chrsInLine = ixmax(1, chrsInLine);
                 xNow = 0;
                 labelNow = new UILabel();
                 labelNow->position = { 0, msgY += 22 };

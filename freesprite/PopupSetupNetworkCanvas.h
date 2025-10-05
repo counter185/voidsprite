@@ -16,9 +16,14 @@ public:
     UITextField* textboxIP, *textboxPort, *textboxUsername, *textboxPassword;
     UIButton* buttonSetUserColor;
     u32 userColor = 0xFFFFFF;
+
+    bool rpcEnabled = false;
+    UITextField* textboxExternalIP = NULL;
+    bool rpcLobbyPrivate = false;
+
     std::function<void(PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData)> onInputConfirmCallback = NULL;
 
-    PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField = true, bool portField = true);
+    PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField = true, bool portField = true, bool rpcOptions = false);
 
     void updateUserColorButton();
 };

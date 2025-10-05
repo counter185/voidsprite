@@ -920,9 +920,11 @@ void StartScreen::promptOpenFromURL()
     g_addPopup(urlPrompt);
 }
 
-void StartScreen::promptConnectToNetworkCanvas()
+void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
 {
     PopupSetupNetworkCanvas* prompt = new PopupSetupNetworkCanvas(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
+    prompt->textboxIP->setText(ip);
+    prompt->textboxPort->setText(port);
     prompt->onInputConfirmCallback = [this](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
 #if VSP_NETWORKING
         g_startNewOperation([input]() {

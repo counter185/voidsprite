@@ -2,6 +2,7 @@
 #include "globals.h"
 
 #include <queue>
+#include <regex>
 
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
@@ -355,6 +356,7 @@ int main(int argc, char** argv)
         
         std::vector<std::pair<std::string, std::string>> convertTargets;
         std::vector<std::string> lospecDlTargets;
+        std::vector<std::string> uriTargets;
 
         while (!argsQueue.empty()) {
 
@@ -378,6 +380,10 @@ int main(int argc, char** argv)
             }
             else if (stringStartsWithIgnoreCase(command, "lospec-palette://")) {
                 lospecDlTargets.push_back(command);
+            }
+            else if (stringStartsWithIgnoreCase(command, "voidsprite://")) {
+                std::string path = command.substr(13);
+                uriTargets.push_back(path);
             }
             else {
                 g_cmdlineArgs.push_back(command);
@@ -712,6 +718,31 @@ int main(int argc, char** argv)
         for (auto& url : lospecDlTargets) {
             loginfo(frmt("Running lospec download: {}", url));
             g_downloadAndInstallPaletteFromLospec(url);
+        }
+        //run uris
+        for (auto& uriPath : uriTargets) {
+            std::vector<std::string> spltPath = splitString(uriPath, '/');
+            if (!spltPath.empty()) {
+                // voidsprite://connect/<ip>[:<port>]
+                loginfo_sync(frmt("Processing URI command:\n {}", uriPath));
+                if (spltPath[0] == "connect" && spltPath.size() >= 2) {
+                    std::string ip = spltPath[1];
+                    std::string port = "";
+
+                    std::smatch portMatch;
+                    auto matchedPort = std::regex_search(spltPath[1], portMatch, std::regex("(:[0-9]+)$"));
+                    if (matchedPort) {
+                        port = portMatch.str().substr(1);
+                        ip = spltPath[1].substr(0, spltPath[1].size() - portMatch.str().size());
+                    }
+                    launchpad->promptConnectToNetworkCanvas(ip, port);
+                }
+				// voidsprite://openurl/<url>
+                else if (spltPath[0] == "openurl" && spltPath.size() >= 2) {
+                    std::string p = "openurl/";
+                    launchpad->tryLoadURL(uriPath.substr(p.size()));
+                }
+            }
         }
 
         if (customPatterns > 0) {

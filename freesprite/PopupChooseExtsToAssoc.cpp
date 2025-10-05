@@ -25,7 +25,7 @@ PopupChooseExtsToAssoc::PopupChooseExtsToAssoc()
             UICheckbox* cb = new UICheckbox(labelText, false);
             if (alreadyAssoc != "") {
                 cb->label->setText(frmt("{}    [-> {}]", labelText, alreadyAssoc));
-                cb->label->color = alreadyAssoc == "voidsprite" ? SDL_Color{0xB3, 0xEA, 0xFF, 0xFF} 
+                cb->label->color = alreadyAssoc == "voidsprite-file" ? SDL_Color{0xB3, 0xEA, 0xFF, 0xFF} 
                                    : SDL_Color{0xFC,0xFF,0xB6, 0xFF};
             }
             cb->onStateChangeCallback = [this, ext](UICheckbox* id, bool newState) {
