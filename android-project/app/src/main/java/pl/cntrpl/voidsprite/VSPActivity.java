@@ -14,6 +14,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.libsdl.app.SDLActivity;
 
@@ -24,11 +26,27 @@ public class VSPActivity extends SDLActivity {
     public static String packageName = "";
     public static VSPActivity activitySingleton = null;
 
+    public List<String> mainArgs = new ArrayList<String>();
+
+    @Override
+    protected String[] getArguments() {
+
+        return mainArgs.toArray(new String[0]);
+    }
+
     @Override
     protected void main() {
 
         packageName = getPackageName();
         activitySingleton = this;
+
+        Intent intent = getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                mainArgs.add(uri.toString());
+            }
+        }
 
         String appdataPath = getExternalFilesDir(null).getAbsolutePath() + "/";
         passAppdataPathString(appdataPath);
