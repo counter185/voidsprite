@@ -37,6 +37,11 @@ struct RootDirInfo {
     std::string friendlyName;
     PlatformNativePathString path;
 };
+struct NetworkAdapterInfo {
+    std::string name;
+    std::string thisMachineAddress;
+    std::string broadcastAddress;
+};
 
 std::string platformGetSystemInfo();
 
@@ -67,3 +72,5 @@ Layer* platformGetImageFromClipboard();
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
 
 void platformPrintDocument(Layer* layer);
+
+std::vector<NetworkAdapterInfo> platformGetNetworkAdapters();

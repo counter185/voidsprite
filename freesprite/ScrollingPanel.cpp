@@ -6,6 +6,11 @@ void ScrollingPanel::render(XY position) {
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
     bgColor.fill(r);
 
+    SDL_Color borderColor = uint32ToSDLColor(innerBorderColor);
+    SDL_SetRenderDrawColor(g_rd, borderColor.r, borderColor.g, borderColor.b, borderColor.a);
+    SDL_Rect r2 = offsetRect(r, 1);
+    SDL_RenderDrawRect(g_rd, &r2);
+
     //DEBUG: show bounds
 #if _DEBUG
     if (g_debugConfig.debugShowScrollPanelBounds) {

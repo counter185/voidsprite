@@ -280,11 +280,13 @@ public:
     Panel* networkCanvasHostPanelContainer = NULL;
     Panel* networkCanvasChatPanelContainer = NULL;
     NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
+    int networkCanvasPort = -1;
     std::string networkCanvasPassword = "";
     bool networkCanvasBroadcastRPC = false;
     std::string networkCanvasLobbyID = "";
     bool networkCanvasRPCPrivate = false;
     std::string networkCanvasRPCAddress = "";
+    Timer64 networkCanvasLastLANBroadcast;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);
@@ -422,6 +424,7 @@ public:
     void networkCanvasKickUID(u32 uid);
     void networkCanvasSystemMessage(std::string msg);
     virtual void networkCanvasChatSendCallback(std::string content);
+    void networkCanvasBroadcastToLAN();
     void endNetworkSession();
 
     void layer_newVariant();

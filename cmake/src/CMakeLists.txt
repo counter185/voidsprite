@@ -213,6 +213,7 @@ add_executable(voidsprite
         voidsprite/PopupExportScaled.cpp
         voidsprite/PopupGlobalConfig.cpp
         voidsprite/PopupIntegerScale.cpp
+        voidsprite/PopupListLAN.cpp
         voidsprite/PopupListRecoveryAutosaves.cpp
         voidsprite/PopupMessageBox.cpp
         voidsprite/PopupPickColor.cpp

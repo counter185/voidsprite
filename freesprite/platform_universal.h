@@ -209,3 +209,9 @@ inline std::vector<u8> universal_fetchBinFile(std::string url) {
         throw std::runtime_error("curl failed");
     }
 }
+
+std::vector<NetworkAdapterInfo> universal_platformGetNetworkAdapters() {
+    return {
+        {"Default network adapter", "127.0.0.1", "255.255.255.255"}
+    };
+}

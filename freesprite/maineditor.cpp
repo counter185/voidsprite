@@ -367,6 +367,10 @@ void MainEditor::tick() {
         g_pushRPCLobbyInfo(lobbyInfo);
     }
 
+    if (networkRunning && (!networkCanvasLastLANBroadcast.started || networkCanvasLastLANBroadcast.elapsedTime() > 3000)) {
+        networkCanvasBroadcastToLAN();
+    }
+
     if (closeNextTick) {
         if (!g_currentWindow->hasPopupsOpen()) {
             g_closeScreen(this);
@@ -3107,6 +3111,7 @@ void MainEditor::promptStartNetworkSession()
         networkRunning = true;
 
         networkCanvasPassword = d.password;
+        networkCanvasPort = d.port;
 
         networkCanvasCurrentChatState = new NetworkCanvasChatHostState;
         networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
@@ -3559,6 +3564,32 @@ void MainEditor::networkCanvasChatSendCallback(std::string content)
         ((NetworkCanvasChatHostState*)networkCanvasCurrentChatState)->newMessage(msg);
         networkCanvasChatPanel->updateChat();
     }
+}
+
+void MainEditor::networkCanvasBroadcastToLAN()
+{
+#if VSP_NETWORKING
+    auto adapters = platformGetNetworkAdapters();
+
+    for (auto& adapter : adapters) {
+        NET_Address* addr = NET_ResolveHostname(adapter.broadcastAddress.c_str());
+        NET_Address* addr2 = NET_ResolveHostname(adapter.thisMachineAddress.c_str());
+        NET_WaitUntilResolved(addr, -1);
+        NET_WaitUntilResolved(addr2, -1);
+        //loginfo(frmt("Broadcasting to {}...", NET_GetAddressString(addr)));
+        if (addr != NULL) {
+            DoOnReturn unrefAddr([addr]() {NET_UnrefAddress(addr); });
+            DoOnReturn unrefAddr2([addr2]() {NET_UnrefAddress(addr2); });
+            NET_DatagramSocket* sock = NET_CreateDatagramSocket(addr2, LAN_BROADCAST_PORT);
+            if (sock != NULL) {
+                DoOnReturn freeSock([sock]() { NET_DestroyDatagramSocket(sock); });
+                std::string str = frmt("vspcollab:{}", networkCanvasPort);
+                bool r = NET_SendDatagram(sock, addr, LAN_BROADCAST_PORT, (u8*)str.c_str(), str.size());
+            }
+        }
+    }
+    networkCanvasLastLANBroadcast.start();
+#endif
 }
 
 void MainEditor::endNetworkSession()

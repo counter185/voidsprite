@@ -119,7 +119,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             layerPicker->updateLayers();
         });
 
-        if (chatState != networkCanvasCurrentChatState->messagesState) {
+        if (networkCanvasCurrentChatState != NULL && chatState != networkCanvasCurrentChatState->messagesState) {
             networkSendCommand(clientSocket, "CHTS");
         }
     }

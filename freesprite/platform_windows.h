@@ -1,6 +1,7 @@
 #pragma once
 
 #pragma comment(lib, "winhttp.lib")
+#pragma comment(lib, "iphlpapi.lib")
 
 //no dwmapi on xp
 #if WINDOWS_XP == 0
@@ -18,6 +19,7 @@
 #include <tlhelp32.h>
 #include <commdlg.h>
 #include <winhttp.h>
+#include <iphlpapi.h>
 
 #include "platform_universal.h"
 #include "maineditor.h"
@@ -895,4 +897,51 @@ void platformPrintDocument(Layer* layer) {
     else {
         logerr("failed to get temp file name");
     }
+}
+
+std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
+    std::vector<NetworkAdapterInfo> ret = {};
+
+    IP_ADAPTER_INFO inf;
+    unsigned long infSize = sizeof(inf);
+
+    PIP_ADAPTER_INFO infActual;
+
+    if (GetAdaptersInfo(&inf, &infSize) == ERROR_BUFFER_OVERFLOW) {
+        infActual = (PIP_ADAPTER_INFO)tracked_malloc(infSize);
+    }
+    else {
+        infActual = (PIP_ADAPTER_INFO)tracked_malloc(sizeof(inf));
+    }
+    DoOnReturn f([infActual]() {tracked_free(infActual); });
+
+    if (GetAdaptersInfo(infActual, &infSize) == ERROR_SUCCESS) {
+        PIP_ADAPTER_INFO next = infActual;
+        while (next) {
+            NetworkAdapterInfo newInf{};
+			u32 ipv4 = parseIpAddress(next->IpAddressList.IpAddress.String);
+            if (ipv4 != 0) {
+                /*loginfo(frmt(
+                    "Name: {} /\n     {}\n  IP: {}\n  mask: {}\n",
+                    next->AdapterName,
+                    next->Description,
+                    next->IpAddressList.IpAddress.String,
+                    next->IpAddressList.IpMask.String
+                ));*/
+                newInf.name = next->Description;
+                newInf.thisMachineAddress = next->IpAddressList.IpAddress.String;
+
+				u32 mask = parseIpAddress(next->IpAddressList.IpMask.String);
+                newInf.broadcastAddress = ipToString((ipv4 & mask) | ~mask);
+                ret.push_back(newInf);
+
+                //loginfo(frmt("Network adapter:\n  Name: {}\n  IP: {}\n  Broadcast address: {}\n", 
+                    //newInf.name, newInf.thisMachineAddress, newInf.broadcastAddress));
+            }
+            
+            next = next->Next;
+        }
+    }
+
+    return ret;
 }

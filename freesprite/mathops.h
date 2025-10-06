@@ -129,6 +129,9 @@ SDL_Event scaleScreenPositionsInEvent(SDL_Event src);
 
 SDL_Rect fitInside(SDL_Rect outer, SDL_Rect inner);
 
+u32 parseIpAddress(std::string ipv4);
+std::string ipToString(u32 ipv4);
+
 template<typename T>
 inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
 {

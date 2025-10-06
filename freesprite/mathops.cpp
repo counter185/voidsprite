@@ -1,3 +1,4 @@
+#include <regex>
 #include "globals.h"
 #include "mathops.h"
 #include "FontRenderer.h"
@@ -1134,6 +1135,28 @@ SDL_Rect fitInside(SDL_Rect outer, SDL_Rect inner)
         ret.y = outer.y + (outer.h - ret.h) / 2;
     }
     return ret;
+}
+
+u32 parseIpAddress(std::string ipv4)
+{
+    std::smatch m;
+    std::regex_match(ipv4, m, std::regex("^([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})$"));
+    if (m.size() != 5) {
+        return 0;
+    }
+    int a = std::stoi(m[1]);
+    int b = std::stoi(m[2]);
+    int c = std::stoi(m[3]);
+    int d = std::stoi(m[4]);
+    if (a > 255 || b > 255 || c > 255 || d > 255) {
+        return 0;
+    }
+    return (a << 24) + (b << 16) + (c << 8) + d;
+}
+
+std::string ipToString(u32 ipv4)
+{
+    return frmt("{}.{}.{}.{}", (ipv4 >> 24) & 0xff, (ipv4 >> 16) & 0xff, (ipv4 >> 8) & 0xff, ipv4&0xff);
 }
 
 hsl rgb2hsl(rgb c) {

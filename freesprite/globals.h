@@ -65,6 +65,7 @@
     #include <SDL3_net/SDL_net.h>
 #else
     struct NET_StreamSocket;
+    struct NET_DatagramSocket;
 #endif
 
 #if SDL_MAJOR_VERSION == 3
@@ -119,6 +120,8 @@
 
 #define UTF8_DIAMOND "\xE2\x97\x86"
 #define UTF8_EMPTY_DIAMOND "\xE2\x97\x87"
+
+#define LAN_BROADCAST_PORT 60600
 
 #ifndef INT_MAX
 #define INT_MAX 2147483647

@@ -194,6 +194,7 @@ add_library(main SHARED
         voidsprite/PopupExportScaled.cpp
         voidsprite/PopupGlobalConfig.cpp
         voidsprite/PopupIntegerScale.cpp
+        voidsprite/PopupListLAN.cpp
         voidsprite/PopupListRecoveryAutosaves.cpp
         voidsprite/PopupMessageBox.cpp
         voidsprite/PopupPickColor.cpp

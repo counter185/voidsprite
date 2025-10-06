@@ -13,6 +13,7 @@ public:
     int wxWidth = 200;
     int wxHeight = 200;
     Fill bgColor = Fill::Solid(0xe0000000);
+    u32 innerBorderColor = 0x20FFFFFF;
     bool clipElementsToSize = true;
 
     ScrollingPanel() {

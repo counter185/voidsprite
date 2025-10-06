@@ -5,6 +5,7 @@
 #include "EventCallbackListener.h"
 #include "Notification.h"
 #include "PopupFilePicker.h"
+#include "platform_universal.h"
 
 u32 platformSupportedFeatures() {
     return
@@ -137,4 +138,8 @@ std::vector<u8> platformFetchBinFile(std::string url) {
 
 void platformPrintDocument(Layer* editor) {
 
+}
+
+std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
+    return universal_platformGetNetworkAdapters();
 }

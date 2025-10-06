@@ -16,6 +16,7 @@
 #include "PopupAbout.h"
 #include "PopupYesNo.h"
 #include "PopupSetupNetworkCanvas.h"
+#include "PopupListLAN.h"
 #include "UIButton.h"
 #include "MainEditorPalettized.h"
 #include "UILabel.h"
@@ -197,7 +198,8 @@ StartScreen::StartScreen() {
                         { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
                         { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
 #if VSP_NETWORKING
-                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}}
+                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}},
+                        { SDL_SCANCODE_F,{ TL("vsp.launchpad.nav.findcollabonlan"), []() { g_addPopup(new PopupListLAN()); }}},
 #endif
                     },
                     g_iconNavbarTabFile

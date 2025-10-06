@@ -266,3 +266,7 @@ std::vector<u8> platformFetchBinFile(std::string url) {
 void platformPrintDocument(Layer* editor) {
 
 }
+
+std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
+    return universal_platformGetNetworkAdapters();
+}

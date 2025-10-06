@@ -169,6 +169,7 @@
     {"vsp.launchpad.nav.newwindow", "New window"},
     {"vsp.launchpad.nav.openurl", "Open from URL"},
     {"vsp.launchpad.nav.connecttocollab", "Connect to network canvas [BETA]"},
+    {"vsp.launchpad.nav.findcollabonlan", "Find network sessions on LAN"},
 
     {"vsp.launchpad.popup.openfromurl", "Open from URL"},
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},

@@ -167,11 +167,20 @@ void ScreenWideNavBar::updateCurrentSubmenu() {
         submenuPanel->position = { submenuOrigin.x, 0 };
 
         //generate the buttons
+        int outOfOrderY = submenuNow.order.size() * 30;
         for (auto& [scancode, action] : submenuNow.actions) {
             if (action.function != NULL) {
                 UIButton* newBtn = new UIButton(action.name);
+                newBtn->wxHeight = 30;
                 std::vector<SDL_Scancode> order = submenuNow.order;
-                newBtn->position = XY{ 0, order.empty() ? submenuOrigin.y : (int)((std::find(order.begin(), order.end(), scancode) - order.begin()) * newBtn->wxHeight) };
+                int indexInOrder = (std::find(order.begin(), order.end(), scancode) - order.begin());
+                int yPosition = indexInOrder * 30;
+                //handle bindings that aren't in the order list
+                if (indexInOrder == order.size()) {
+                    yPosition = outOfOrderY;
+                    outOfOrderY += 30;
+                }
+                newBtn->position = XY{ 0, order.empty() ? submenuOrigin.y : (int)(yPosition) };
                 submenuOrigin.y += newBtn->wxHeight;
                 newBtn->wxWidth = buttonW;
                 newBtn->fill = Fill::Gradient(0xEA121212, 0xEA121212, 0xEA000000, 0xEA000000);

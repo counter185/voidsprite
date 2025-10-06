@@ -253,6 +253,7 @@
     <ClCompile Include="PopupFilePicker.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupIntegerScale.cpp" />
+    <ClCompile Include="PopupListLAN.cpp" />
     <ClCompile Include="PopupListRecoveryAutosaves.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
@@ -458,6 +459,7 @@
     <ClInclude Include="PopupFilePicker.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupIntegerScale.h" />
+    <ClInclude Include="PopupListLAN.h" />
     <ClInclude Include="PopupListRecoveryAutosaves.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
