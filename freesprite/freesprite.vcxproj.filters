@@ -697,7 +697,7 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="PopupListLAN.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1344,7 +1344,7 @@
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="PopupListLAN.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
