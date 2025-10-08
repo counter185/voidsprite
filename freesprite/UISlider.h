@@ -11,8 +11,12 @@ public:
     int wxWidth = 250, wxHeight = 40;
     bool mouseHeld = false;
 
+    Fill backgroundFill = Fill::None();
+
     std::function<void(UISlider*, float)> onChangeValueCallback = NULL;
     std::function<void(UISlider*, float)> onChangeValueFinishedCallback = NULL;
+
+    UISlider();
 
     void drawPosIndicator(XY origin);
 

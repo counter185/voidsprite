@@ -41,63 +41,6 @@ void PopupApplyFilter::defaultInputAction(SDL_Event evt)
     }
 }
 
-void PopupApplyFilter::eventButtonPressed(int evt_id)
-{
-    if (evt_id == -1) {
-        // apply
-        applyAndClose();
-    }
-    else if (evt_id == -2) {
-        // cancel
-        closePopup();
-    }
-}
-
-void PopupApplyFilter::eventSliderPosChanged(int evt_id, float value)
-{
-    if ((size_t) evt_id < params.size()) {
-        FilterParameter& p = params[evt_id];
-        switch (p.paramType) {
-            case PT_INT:
-                p.defaultValue = (int)(p.minValue + (p.maxValue - p.minValue) * value);
-                break;
-            case PT_FLOAT:
-                p.defaultValue = p.minValue + (p.maxValue - p.minValue) * value;
-                break;
-            default: break;
-        }
-        updateLabels();
-        threadHasNewParameters = true;
-    }
-}
-
-void PopupApplyFilter::eventDoubleSliderPosChanged(int evt_id, UIDoubleSliderBounds value)
-{
-    if ((size_t) evt_id < params.size()) {
-        FilterParameter& p = params[evt_id];
-        switch (p.paramType) {
-            case PT_INT_RANGE:
-                p.defaultValue = (int)(p.minValue + (p.maxValue - p.minValue) * value.min);
-                p.defaultValueTwo = (int)(p.minValue + (p.maxValue - p.minValue) * value.max);
-                break;
-            default: break;
-        }
-        updateLabels();
-        threadHasNewParameters = true;
-    }
-}
-
-void PopupApplyFilter::eventCheckboxToggled(int evt_id, bool newState)
-{
-    if ((size_t) evt_id < params.size()) {
-        FilterParameter& p = params[evt_id];
-        if (p.paramType == PT_BOOL) {
-            p.defaultValue = newState ? 1 : 0;
-            threadHasNewParameters = true;
-        }
-    }
-}
-
 void PopupApplyFilter::renderFilterPopupBackground()
 {
     SDL_Color bgColor = SDL_Color{ 0,0,0,0xD0 };
@@ -110,24 +53,6 @@ void PopupApplyFilter::renderFilterPopupBackground()
     
     renderGradient({ 0,0,wxWidth + 40,g_windowH }, 0x70000000, 0x70000000, 0xFF000000, 0xFF000000);
     //renderGradient({ 0,g_windowH / 2,g_windowW,g_windowH / 2 }, 0xFF000000, 0xFF000000, 0x70000000, 0x70000000);
-
-    /*SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xA0);
-    drawLine({ 0, topBarY }, { g_windowW, topBarY }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-    drawLine({ g_windowW, bottomBarY }, { 0, bottomBarY }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-
-    int offset = 1;
-
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x60);
-    drawLine({ 0, topBarY - offset }, { g_windowW, topBarY - offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-    drawLine({ g_windowW, bottomBarY + offset }, { 0, bottomBarY + offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-    offset++;
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x20);
-    drawLine({ 0, topBarY - offset }, { g_windowW, topBarY - offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-    drawLine({ g_windowW, bottomBarY + offset }, { 0, bottomBarY + offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-    offset++;
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x0a);
-    drawLine({ 0, topBarY - offset }, { g_windowW, topBarY - offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-    drawLine({ g_windowW, bottomBarY + offset }, { 0, bottomBarY + offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));*/
 
     XY origin = getPopupOrigin();
     SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300))) };
@@ -157,89 +82,17 @@ void PopupApplyFilter::setupWidgets()
     wxsManager.addDrawable(title);
 
     params = targetFilter->getParameters();
-    int y = 50;
-    int i = 0;
-    for (auto& p : params) {
-        UILabel* label = new UILabel(p.name);
-        label->position = XY{10, y + 2};
-        wxsManager.addDrawable(label);
 
-        switch (p.paramType) {
-            case PT_BOOL:
-            {
-                UICheckbox* checkbox = new UICheckbox("", p.defaultValue == 1);
-                checkbox->position = XY{ 250, y };
-                checkbox->setCallbackListener(i, this);
-                wxsManager.addDrawable(checkbox);
-            }
-                break;
-            case PT_INT:
-            case PT_FLOAT:
-            {
-                float v = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
-                UISlider* slider = new UISlider();
-                slider->position = XY{ 285, y };
-                slider->sliderPos = v;
-                slider->wxHeight = 25;
-                slider->setCallbackListener(i, this);
-                wxsManager.addDrawable(slider);
+    Panel* p = generateParameterUI(&params, [this]() {
+        threadHasNewParameters = true;
+	});
+    p->position = { 0, 50 };
+    wxsManager.addDrawable(p);
 
-                UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 84, 0 });
-                paramLabels.push_back(valueLabel);
-                wxsManager.addDrawable(valueLabel);
-            }
-                break;
-            case PT_COLOR_RGB:
-            {
-                UIColorInputField* colorInput = new UIColorInputField();
-                colorInput->position = XY{ 250, y };
-                colorInput->wxHeight = 25;
-                colorInput->setCallbackListener(i, this);
-                wxsManager.addDrawable(colorInput);
-            }
-                break;
-            case PT_INT_RANGE:
-            {
-                float vl = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
-                float vm = (p.defaultValueTwo - p.minValue) / (p.maxValue - p.minValue);
-                UIDoubleSlider* slider = new UIDoubleSlider();
-                slider->position = XY{ 285, y };
-                slider->sliderPos.min = vl;
-                slider->sliderPos.max = vm;
-                slider->bodyColor = p.vU32;
-                slider->wxHeight = 25;
-                slider->setCallbackListener(i, this);
-                wxsManager.addDrawable(slider);
+    setSize({ 550, 50 + p->getContentBoxSize().y + 70});
 
-                UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 84, 0 });
-                paramLabels.push_back(valueLabel);
-                wxsManager.addDrawable(valueLabel);
-            }
-                break;
-        }
-        i++;
-        y += 40;
-    }
-    updateLabels();
-
-    setSize({ 550, y + 70 });
-
-    UIButton* btnApply = new UIButton();
-    btnApply->text = TL("vsp.cmn.apply");
-    btnApply->wxWidth = 100;
-    btnApply->position = XY{wxWidth - 10 - btnApply->wxWidth, wxHeight - 10 - btnApply->wxHeight};
-    btnApply->setCallbackListener(-1, this);
-    wxsManager.addDrawable(btnApply);
-    
-    UIButton* btnCancel = new UIButton();
-    btnCancel->text = TL("vsp.cmn.cancel");
-    btnCancel->wxWidth = 100;
-    btnCancel->position = XY{btnApply->position.x - 10 - btnCancel->wxWidth, wxHeight - 10 - btnCancel->wxHeight};
-    btnCancel->setCallbackListener(-2, this);
-    wxsManager.addDrawable(btnCancel);
-
+    actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* b) { applyAndClose(); };
+    actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b) { closePopup(); };
 }
 
 void PopupApplyFilter::applyAndClose()
@@ -267,26 +120,6 @@ void PopupApplyFilter::applyAndClose()
         delete copy;
     });
     closePopup();
-}
-
-void PopupApplyFilter::updateLabels()
-{
-    for (size_t i = 0; i < paramLabels.size(); i++) {
-        FilterParameter& p = params[i];
-        UILabel* label = paramLabels[i];
-        switch (p.paramType) {
-            case PT_INT:
-                label->setText(std::to_string((int)p.defaultValue));
-                break;
-            case PT_FLOAT:
-            default:
-                label->setText(frmt("{:.1f}", p.defaultValue));
-                break;
-            case PT_INT_RANGE:
-                label->setText(std::to_string((int)p.defaultValue) + ":" + std::to_string((int)p.defaultValueTwo));
-                break;
-        }
-    }
 }
 
 void PopupApplyFilter::setupPreview()
@@ -328,6 +161,9 @@ std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
     std::map<std::string, std::string> parameterMap;
     for (auto& p : params) {
         switch (p.paramType) {
+            case PT_COLOR_RGB:
+				parameterMap[p.name] = frmt("{:08X}", p.vU32);
+                break;
             case PT_INT_RANGE:
                 parameterMap[p.name + ".min"] = std::to_string(p.defaultValue);
                 parameterMap[p.name + ".max"] = std::to_string(p.defaultValueTwo);
@@ -356,4 +192,132 @@ void PopupApplyFilter::previewRenderThread()
         }
         SDL_Delay(1);
     }
+}
+
+Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* params, std::function<void()> valuesChangedCallback)
+{
+    auto updateLabelFn = [](FilterParameter& p, UILabel* l) {
+        switch (p.paramType) {
+            case PT_BOOL:
+                break;
+            case PT_INT:
+                l->setText(std::to_string((int)p.defaultValue));
+                break;
+            case PT_COLOR_L:
+                l->setText(std::to_string((int)p.defaultValue));
+                break;
+            case PT_FLOAT:
+                l->setText(frmt("{:.1f}", p.defaultValue));
+                break;
+            case PT_INT_RANGE:
+                l->setText(std::to_string((int)p.defaultValue) + ":" + std::to_string((int)p.defaultValueTwo));
+                break;
+        }
+    };
+
+    Panel* panel = new Panel();
+    panel->sizeToContent = true;
+    panel->passThroughMouse = true;
+
+    int y = 0;
+    int i = 0;
+    for (auto& p : *params) {
+        UILabel* label = new UILabel(p.name);
+        label->position = XY{ 10, y + 2 };
+        panel->subWidgets.addDrawable(label);
+
+        switch (p.paramType) {
+        case PT_BOOL:
+        {
+            UICheckbox* checkbox = new UICheckbox("", p.defaultValue == 1);
+            checkbox->position = XY{ 250, y };
+            checkbox->onStateChangeCallback = [params, i, valuesChangedCallback](UICheckbox* c, bool v) {
+				params->at(i).defaultValue = v ? 1 : 0;
+                valuesChangedCallback();
+            };
+            panel->subWidgets.addDrawable(checkbox);
+        }
+        break;
+        case PT_COLOR_L:
+        case PT_INT:
+        case PT_FLOAT:
+        {
+            float v = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
+            UISlider* slider = new UISlider();
+            slider->position = XY{ 285, y };
+            slider->sliderPos = v;
+            slider->wxHeight = 25;
+            if (p.paramType == PT_COLOR_L) {
+                slider->backgroundFill = Fill::Gradient(0xA0000000, 0xA0FFFFFF, 0xA0000000, 0xA0FFFFFF);
+			}
+            panel->subWidgets.addDrawable(slider);
+
+            UILabel* valueLabel = new UILabel();
+            valueLabel->position = xySubtract(slider->position, { 84, 0 });
+            panel->subWidgets.addDrawable(valueLabel);
+
+            slider->onChangeValueCallback = [params, i, valueLabel, valuesChangedCallback, updateLabelFn](UISlider* s, float v) {
+                FilterParameter& p = params->at(i);
+                switch (p.paramType) {
+                    case PT_INT:
+                        p.defaultValue = (int)(p.minValue + (p.maxValue - p.minValue) * v);
+                        break;
+                    case PT_COLOR_L:
+                        p.defaultValue = (int)(255 * v);
+                        break;
+                    case PT_FLOAT:
+                        p.defaultValue = p.minValue + (p.maxValue - p.minValue) * v;
+                        break;
+                    default: break;
+                }
+                updateLabelFn(p, valueLabel);
+                valuesChangedCallback();
+            };
+            updateLabelFn(p, valueLabel);
+        }
+        break;
+        case PT_COLOR_RGB:
+        {
+            UIColorInputField* colorInput = new UIColorInputField();
+            colorInput->position = XY{ 250, y };
+            colorInput->wxHeight = 25;
+            colorInput->setColor(p.vU32);
+            panel->subWidgets.addDrawable(colorInput);
+            colorInput->onColorChangedCallback = [params, i, valuesChangedCallback](UIColorInputField* p, u32 c) {
+                params->at(i).vU32 = c;
+                valuesChangedCallback();
+            };
+        }
+        break;
+        case PT_INT_RANGE:
+        {
+            float vl = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
+            float vm = (p.defaultValueTwo - p.minValue) / (p.maxValue - p.minValue);
+            UIDoubleSlider* slider = new UIDoubleSlider();
+            slider->position = XY{ 285, y };
+            slider->sliderPos.min = vl;
+            slider->sliderPos.max = vm;
+            slider->bodyColor = p.vU32;
+            slider->wxHeight = 25;
+            panel->subWidgets.addDrawable(slider);
+
+            UILabel* valueLabel = new UILabel();
+            valueLabel->position = xySubtract(slider->position, { 84, 0 });
+            panel->subWidgets.addDrawable(valueLabel);
+
+            slider->onChangeValueCallback = [params, i, valueLabel, valuesChangedCallback, updateLabelFn](UIDoubleSlider* s, UIDoubleSliderBounds v) {
+                FilterParameter& p = params->at(i);
+                p.defaultValue = (int)(p.minValue + (p.maxValue - p.minValue) * v.min);
+                p.defaultValueTwo = (int)(p.minValue + (p.maxValue - p.minValue) * v.max);
+                updateLabelFn(p, valueLabel);
+                valuesChangedCallback();
+            };
+            updateLabelFn(p, valueLabel);
+        }
+        break;
+        }
+        y += 40;
+        i++;
+    }
+    return panel;
 }

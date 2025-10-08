@@ -134,7 +134,8 @@ public:
     std::vector<FilterParameter> getParameters() override {
         return {
             INT_PARAM("thickness", 1, 50, 1),
-            BOOL_PARAM("corners", 0)
+            BOOL_PARAM("corners", 0),
+            COLORRGB_PARAM("color", 0xFFFFFFFF)
         };
     }
 };

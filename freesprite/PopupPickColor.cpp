@@ -1,8 +1,8 @@
 #include "PopupPickColor.h"
-#include "UIColorInputField.h"
 #include "UIButton.h"
 #include "FontRenderer.h"
 #include "UIColorPicker.h"
+#include "UITextField.h"
 
 PopupPickColor::PopupPickColor(std::string tt, std::string tx, bool acceptAlpha) {
     this->acceptAlpha = acceptAlpha;

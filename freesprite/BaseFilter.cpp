@@ -244,7 +244,7 @@ Layer* FilterOutline::run(Layer* src, std::map<std::string, std::string> options
     Layer* c = copy(src);
     int iterations = std::stoi(options["thickness"]);
     bool corners = std::stoi(options["corners"]);
-    u32 activeColor = std::stoul(options["!editor:activecolor"]);
+    u32 activeColor = std::stoul(options["color"], 0, 16);
 
     for (int i = 0; i < iterations; i++) {
         uint8_t* placePixelData = (uint8_t*)tracked_malloc(c->w * c->h);

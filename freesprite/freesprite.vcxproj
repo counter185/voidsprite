@@ -558,6 +558,7 @@
     <ClInclude Include="UIColorInputField.h" />
     <ClInclude Include="UIColorPicker.h" />
     <ClInclude Include="UIColorSlider.h" />
+    <ClInclude Include="UIDoubleSlider.h" />
     <ClInclude Include="UIDropdown.h" />
     <ClInclude Include="UIHueSlider.h" />
     <ClInclude Include="UILabel.h" />

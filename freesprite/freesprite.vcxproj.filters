@@ -1346,6 +1346,9 @@
     <ClInclude Include="PopupListLAN.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
+    <ClInclude Include="UIDoubleSlider.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

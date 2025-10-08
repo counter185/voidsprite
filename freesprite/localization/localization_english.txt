@@ -432,6 +432,9 @@
     {"vsp.about.contributors", "Contributors:"},
     {"vsp.about.translations", "Translation credits:"},
 
+    //popup: color picker
+    {"vsp.cmn.pickcolor", "Color picker"},
+
     //popup: file picker
     {"vsp.filepicker.filename", "File name"},
     {"vsp.filepicker.overwrite", "Overwrite file?"},
