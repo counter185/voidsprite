@@ -8,6 +8,8 @@ class PopupApplyFilter :
     public BasePopup
 {
 protected:
+    bool sessionDragging = false;
+
     u8* previewPixelData = NULL;
     std::atomic<bool> pixelDataDirty = true;
     SDL_Texture* previewTexture = NULL;

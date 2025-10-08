@@ -36,8 +36,16 @@ void PopupApplyFilter::render() {
 
 void PopupApplyFilter::defaultInputAction(SDL_Event evt)
 {
-    if (evt.type == SDL_QUIT) {
-        closePopup();
+    XY origin = getPopupOrigin();
+    evt = convertTouchToMouseEvent(evt);
+    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && !pointInBox(XY{(int)evt.button.x, (int)evt.button.y}, {origin.x, origin.y, wxWidth, wxHeight})) {
+        sessionDragging = true;
+    }
+    else if (evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+        sessionDragging = false;
+    }
+    else if (evt.type == SDL_EVENT_MOUSE_MOTION && sessionDragging) {
+        session->canvas.panCanvas(XY{(int)evt.motion.xrel, (int)evt.motion.yrel});
     }
 }
 
@@ -85,7 +93,7 @@ void PopupApplyFilter::setupWidgets()
 
     Panel* p = generateParameterUI(&params, [this]() {
         threadHasNewParameters = true;
-	});
+    });
     p->position = { 0, 50 };
     wxsManager.addDrawable(p);
 
@@ -162,7 +170,7 @@ std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
     for (auto& p : params) {
         switch (p.paramType) {
             case PT_COLOR_RGB:
-				parameterMap[p.name] = frmt("{:08X}", p.vU32);
+                parameterMap[p.name] = frmt("{:08X}", p.vU32);
                 break;
             case PT_INT_RANGE:
                 parameterMap[p.name + ".min"] = std::to_string(p.defaultValue);
@@ -232,7 +240,7 @@ Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* param
             UICheckbox* checkbox = new UICheckbox("", p.defaultValue == 1);
             checkbox->position = XY{ 250, y };
             checkbox->onStateChangeCallback = [params, i, valuesChangedCallback](UICheckbox* c, bool v) {
-				params->at(i).defaultValue = v ? 1 : 0;
+                params->at(i).defaultValue = v ? 1 : 0;
                 valuesChangedCallback();
             };
             panel->subWidgets.addDrawable(checkbox);
@@ -249,7 +257,7 @@ Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* param
             slider->wxHeight = 25;
             if (p.paramType == PT_COLOR_L) {
                 slider->backgroundFill = Fill::Gradient(0xA0000000, 0xA0FFFFFF, 0xA0000000, 0xA0FFFFFF);
-			}
+            }
             panel->subWidgets.addDrawable(slider);
 
             UILabel* valueLabel = new UILabel();
