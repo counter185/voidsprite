@@ -47,6 +47,9 @@ void PopupApplyFilter::defaultInputAction(SDL_Event evt)
     else if (evt.type == SDL_EVENT_MOUSE_MOTION && sessionDragging) {
         session->canvas.panCanvas(XY{(int)evt.motion.xrel, (int)evt.motion.yrel});
     }
+    else if (evt.type == SDL_EVENT_MOUSE_WHEEL) {
+        session->canvas.zoomFromWheelInput(evt.wheel.y);
+    }
 }
 
 void PopupApplyFilter::renderFilterPopupBackground()
