@@ -7,6 +7,7 @@
 #include "FileIO.h"
 #include "Notification.h"
 #include "settings.h"
+#include "UILabel.h"
 
 PopupExportScaled::PopupExportScaled(MainEditor* parent)
 {

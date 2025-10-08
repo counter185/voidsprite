@@ -1,5 +1,6 @@
 #include "PopupIntegerScale.h"
 #include "UICheckbox.h"
+#include "UILabel.h"
 
 PopupIntegerScale::PopupIntegerScale(EventCallbackListener* callback, std::string tt, std::string tx, XY sizeNow, XY defaultValues, int event_id, bool allowDownscale)
     : PopupTileGeneric(callback, tt, tx, defaultValues, event_id)

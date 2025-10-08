@@ -5,6 +5,7 @@
 #include "Notification.h"
 #include "PopupYesNo.h"
 #include "FileIO.h"
+#include "UILabel.h"
 
 PopupListRecoveryAutosaves::PopupListRecoveryAutosaves()
 {

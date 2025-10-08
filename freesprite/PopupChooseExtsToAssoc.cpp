@@ -3,6 +3,7 @@
 #include "ScrollingPanel.h"
 #include "UICheckbox.h"
 #include "FileIO.h"
+#include "UILabel.h"
 
 PopupChooseExtsToAssoc::PopupChooseExtsToAssoc()
 {

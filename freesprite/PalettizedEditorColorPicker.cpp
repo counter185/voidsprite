@@ -6,6 +6,7 @@
 #include "UIColorInputField.h"
 #include "FileIO.h"
 #include "TabbedView.h"
+#include "UILabel.h"
 
 PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c) : EditorColorPicker()
 {

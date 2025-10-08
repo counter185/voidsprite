@@ -4,6 +4,7 @@
 #include "UICheckbox.h"
 #include "PopupPickColor.h"
 #include "Notification.h"
+#include "UILabel.h"
 
 PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField, bool portField, bool rpcOptions)
 {
