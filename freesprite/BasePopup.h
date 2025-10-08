@@ -2,8 +2,6 @@
 #include "globals.h"
 #include "BaseScreen.h"
 #include "DrawableManager.h"
-#include "UILabel.h"
-#include "UIButton.h"
 
 #define CLOSE_ON_SDL_QUIT if(evt.type==SDL_EVENT_QUIT){closePopup();return;}
 
@@ -58,44 +56,8 @@ protected:
 
     virtual void defaultInputAction(SDL_Event evt) {}
 
-    XY makeTitleAndDesc(std::string title = "", std::string desc = "") {
-        XY titlePos = { 5,5 };
-        XY contentPos = { 5,50 };
+    XY makeTitleAndDesc(std::string title = "", std::string desc = "");
 
-        XY returnEndpoint = { 0,0 };
-
-        if (title != "") {
-            UILabel* titleLbl = new UILabel(title);
-            titleLbl->position = titlePos;
-            titleLbl->fontsize = 22;
-            wxsManager.addDrawable(titleLbl);
-            returnEndpoint = titleLbl->calcEndpoint();
-            returnEndpoint.y += 20;
-        }
-
-        if (desc != "") {
-            UILabel* descLbl = new UILabel(desc);
-            descLbl->position = contentPos;
-            wxsManager.addDrawable(descLbl);
-            returnEndpoint = descLbl->calcEndpoint();
-            returnEndpoint.y += 20;
-        }
-        
-        return returnEndpoint;
-    }
-
-    UIButton* actionButton(std::string text, int width = 120) {
-        if (!actionButtonXInit) {
-            nextActionButtonX = wxWidth - (width + 10);
-            actionButtonXInit = true;
-        }
-        UIButton* nbutton = new UIButton();
-        nbutton->text = text;
-        nbutton->position = XY{ nextActionButtonX, wxHeight - 40 };
-        nextActionButtonX -= width + 10;
-        nbutton->wxWidth = width;
-        wxsManager.addDrawable(nbutton);
-        return nbutton;
-    }
+    UIButton* actionButton(std::string text, int width = 120);
 };
 

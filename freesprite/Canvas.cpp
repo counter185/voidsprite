@@ -19,7 +19,7 @@ bool Canvas::takeInput(SDL_Event evt)
             }
             break;
         case SDL_MOUSEWHEEL:
-            zoom(evt.wheel.y > 0 ? 1 : -1);
+            zoomFromWheelInput(evt.wheel.y);
             break;
     }
     return false;

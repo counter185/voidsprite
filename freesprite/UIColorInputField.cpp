@@ -20,7 +20,7 @@ UIColorInputField::UIColorInputField(bool alpha)
 	setColor(0xFFFFFFFF);
 }
 
-inline void UIColorInputField::setColor(u32 c)
+void UIColorInputField::setColor(u32 c)
 {
 	pickedColor = c;
 	button->fill = Fill::Solid(pickedColor);
