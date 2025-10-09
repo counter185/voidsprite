@@ -293,15 +293,23 @@ Layer* FilterOutline::run(Layer* src, std::map<std::string, std::string> options
 Layer* FilterBrightnessContrast::run(Layer* src, std::map<std::string, std::string> options)
 {
     Layer* c = copy(src);
+    bool contrastFirst = std::stoi(options["contrast.first"]);
     double brightness = std::stod(options["brightness"]);
     double contrast = std::stod(options["contrast"]);
 
     u32* ppx = c->pixels32();
     for (u64 x = 0; x < c->w * c->h; x++) {
         SDL_Color px = uint32ToSDLColor(ppx[x]);
-        px.r = ixmax(0, ixmin(255, (int)(px.r * contrast + brightness)));
-        px.g = ixmax(0, ixmin(255, (int)(px.g * contrast + brightness)));
-        px.b = ixmax(0, ixmin(255, (int)(px.b * contrast + brightness)));
+        if (contrastFirst) {
+            px.r = ixmax(0, ixmin(255, (int)(px.r * contrast + brightness)));
+            px.g = ixmax(0, ixmin(255, (int)(px.g * contrast + brightness)));
+            px.b = ixmax(0, ixmin(255, (int)(px.b * contrast + brightness)));
+        }
+        else {
+            px.r = ixmax(0, ixmin(255, (int)((px.r + brightness) * contrast)));
+            px.g = ixmax(0, ixmin(255, (int)((px.g + brightness) * contrast)));
+            px.b = ixmax(0, ixmin(255, (int)((px.b + brightness) * contrast)));
+        }
         ppx[x] = sdlcolorToUint32(px);
     }
 

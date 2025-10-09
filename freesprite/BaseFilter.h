@@ -147,7 +147,8 @@ public:
     std::vector<FilterParameter> getParameters() override {
         return {
             INT_PARAM("brightness", -255, 255, 0),
-            FLOAT_PARAM("contrast", 0, 2, 1)
+            FLOAT_PARAM("contrast", 0, 2, 1),
+            BOOL_PARAM("contrast.first", 0)
         };
     }
 };
