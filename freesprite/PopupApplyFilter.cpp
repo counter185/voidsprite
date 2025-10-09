@@ -169,21 +169,8 @@ void PopupApplyFilter::updatePreview()
 
 std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
 {
-    std::map<std::string, std::string> parameterMap;
-    for (auto& p : params) {
-        switch (p.paramType) {
-            case PT_COLOR_RGB:
-                parameterMap[p.name] = frmt("{:08X}", p.vU32);
-                break;
-            case PT_INT_RANGE:
-                parameterMap[p.name + ".min"] = std::to_string(p.defaultValue);
-                parameterMap[p.name + ".max"] = std::to_string(p.defaultValueTwo);
-            break;
-            default:
-                parameterMap[p.name] = std::to_string(p.defaultValue);
-            break;
-        }
-    }
+    std::map<std::string, std::string> parameterMap = buildParameterMap(params);
+    
     parameterMap["!editor:activecolor"] = std::to_string(session->getActiveColor());
     return parameterMap;
 }
@@ -331,4 +318,24 @@ Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* param
         i++;
     }
     return panel;
+}
+
+std::map<std::string, std::string> PopupApplyFilter::buildParameterMap(std::vector<FilterParameter>& params)
+{
+    std::map<std::string, std::string> ret = {};
+    for (auto& p : params) {
+        switch (p.paramType) {
+        case PT_COLOR_RGB:
+            ret[p.name] = frmt("{:08X}", p.vU32);
+            break;
+        case PT_INT_RANGE:
+            ret[p.name + ".min"] = std::to_string(p.defaultValue);
+            ret[p.name + ".max"] = std::to_string(p.defaultValueTwo);
+            break;
+        default:
+            ret[p.name] = std::to_string(p.defaultValue);
+            break;
+        }
+    }
+    return ret;
 }

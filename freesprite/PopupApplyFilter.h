@@ -49,5 +49,6 @@ public:
     void previewRenderThread();
 
     static Panel* generateParameterUI(std::vector<FilterParameter>* params, std::function<void()> valuesChangedCallback);
+    static std::map<std::string, std::string> buildParameterMap(std::vector<FilterParameter>& params);
 };
 
