@@ -1,4 +1,5 @@
 #include <fstream>
+#include "globals.h"
 
 #if VSP_USE_LIBLCF
 #include <lcf/lmu/reader.h>

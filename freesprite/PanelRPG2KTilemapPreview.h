@@ -1,6 +1,6 @@
 #pragma once
-#if VSP_USE_LIBLCF
 #include "globals.h"
+#if VSP_USE_LIBLCF
 #include "DraggablePanel.h"
 #include "RPG2KTilemapPreviewScreen.h"
 #include "EventCallbackListener.h"

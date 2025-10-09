@@ -1,5 +1,6 @@
-#if VSP_USE_LIBLCF
+
 #include "PanelRPG2KTilemapPreview.h"
+#if VSP_USE_LIBLCF
 #include "UIButton.h"
 #include "UILayerButton.h"
 

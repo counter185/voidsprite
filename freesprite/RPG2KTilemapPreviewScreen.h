@@ -1,4 +1,5 @@
 #pragma once
+#include "globals.h"
 #if VSP_USE_LIBLCF
 #include "TilemapPreviewScreen.h"
 #include "EventCallbackListener.h"
