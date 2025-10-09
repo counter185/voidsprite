@@ -1,4 +1,5 @@
 #pragma once
+#if VSP_USE_LIBLCF
 #include "TilemapPreviewScreen.h"
 #include "EventCallbackListener.h"
 #include "ScreenWideNavBar.h"
@@ -68,3 +69,4 @@ public:
     bool LoadLMU(PlatformNativePathString path);
 };
 
+#endif

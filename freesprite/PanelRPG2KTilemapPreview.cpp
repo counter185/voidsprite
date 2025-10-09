@@ -1,3 +1,4 @@
+#if VSP_USE_LIBLCF
 #include "PanelRPG2KTilemapPreview.h"
 #include "UIButton.h"
 #include "UILayerButton.h"
@@ -65,3 +66,5 @@ void PanelRPG2KTilemapPreview::eventGeneric(int evt_id, int data1, int data2)
         }
     }
 }
+
+#endif

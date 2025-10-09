@@ -49,6 +49,10 @@
 
 #include <SDL3/SDL.h>
 
+#ifndef VSP_USE_LIBLCF
+    #define VSP_USE_LIBLCF 1
+#endif
+
 #ifndef VSP_NETWORKING
     #if _WIN32
         #define VSP_NETWORKING 1

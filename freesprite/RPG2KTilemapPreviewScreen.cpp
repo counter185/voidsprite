@@ -1,5 +1,6 @@
 #include <fstream>
 
+#if VSP_USE_LIBLCF
 #include <lcf/lmu/reader.h>
 #include <lcf/writer_lcf.h>
 
@@ -1257,3 +1258,4 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
     }
 }
 
+#endif

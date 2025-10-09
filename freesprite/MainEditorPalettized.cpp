@@ -538,6 +538,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+#if VSP_USE_LIBLCF
                     {SDL_SCANCODE_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
                             [this]() {
                                 if (!xyEqual(this->canvas.dimensions, {480,256})) {
@@ -549,6 +550,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+#endif
                     {SDL_SCANCODE_V, { "Preview in separate workspace...",
                             [this]() {
                                 g_addScreen(new ViewSessionScreen(this));

@@ -7,8 +7,10 @@
 
 #include "../RPG2KTilemapPreviewScreen.h"
 
-#include "lcf/lmu/reader.h"
-#include "lcf/ldb/reader.h"
+#if VSP_USE_LIBLCF
+    #include "lcf/lmu/reader.h"
+    #include "lcf/ldb/reader.h"
+#endif
 
 Layer* readXYZ(PlatformNativePathString path, uint64_t seek)
 {
@@ -150,7 +152,7 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
     return false;
 }
 
-
+#if VSP_USE_LIBLCF
 MainEditor* readLMU(PlatformNativePathString path)
 {
     MainEditor* ret = NULL;
@@ -221,3 +223,4 @@ MainEditor* readLMU(PlatformNativePathString path)
 
     return ret;
 }
+#endif

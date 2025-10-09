@@ -1,4 +1,5 @@
 #pragma once
+#if VSP_USE_LIBLCF
 #include "globals.h"
 #include "DraggablePanel.h"
 #include "RPG2KTilemapPreviewScreen.h"
@@ -19,3 +20,4 @@ public:
     void eventGeneric(int evt_id, int data1, int data2) override;
 };
 
+#endif
