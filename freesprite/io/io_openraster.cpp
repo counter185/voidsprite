@@ -58,7 +58,7 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
 
             zip_entry_open(zip, "stack.xml");
             {
-                char* zipBuffer;
+                char* zipBuffer = NULL;
                 size_t zipBufferSize;
                 zip_entry_read(zip, (void**)&zipBuffer, &zipBufferSize);
 
@@ -91,7 +91,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
     }
 
     std::vector<Layer*> data = editor->layers;
-    char* zipBuffer;
+    char* zipBuffer = NULL;
     size_t zipBufferSize;
 
     zip_t* zip = zip_stream_open(NULL, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');

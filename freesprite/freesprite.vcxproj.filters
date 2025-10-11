@@ -510,46 +510,7 @@
     <ClCompile Include="PopupApplyFilter.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
-    <ClCompile Include="discord_game_sdk\lobby_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\network_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\overlay_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\relationship_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\storage_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\store_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\types.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\user_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\voice_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\achievement_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\activity_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\application_manager.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\core.cpp">
-      <Filter>Source files\external\discord_game_sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="discord_game_sdk\image_manager.cpp">
+    <ClCompile Include="discord_game_sdk\discord_all.cpp">
       <Filter>Source files\external\discord_game_sdk</Filter>
     </ClCompile>
     <ClCompile Include="RenderFilter.cpp">

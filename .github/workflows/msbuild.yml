@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build (win64 and linux64)
+name: Build (all target platforms)
 
 on:
   push:
@@ -29,7 +29,7 @@ permissions:
   contents: read
 
 jobs:
-  build-windows64:
+  build-windows-x64:
     runs-on: windows-latest
 
     steps:
@@ -66,6 +66,44 @@ jobs:
         name: voidsprite-build-win64
         path: |
           x64/Release
+  
+  build-windows-arm64:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Extract voidsprite devlibs
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./setup_windows_devlibs.bat
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /t:voidsprite /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="ARM64" ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Make build directories and copy devlibs
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./copy_devlibs.bat
+      
+    - name: Copy assets
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./copy_assets.bat
+
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: voidsprite-build-win-arm64
+        path: |
+          ARM64/Release
 
   build-sdk:
     runs-on: windows-latest
