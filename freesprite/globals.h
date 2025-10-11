@@ -56,6 +56,14 @@
     #define VSP_DISCORD_RPC 0 
 #endif
 
+#ifndef VSP_DISCORD_RPC
+    #if _WIN32
+        #define VSP_DISCORD_RPC 1
+    #else
+        #define VSP_DISCORD_RPC 0
+    #endif
+#endif
+
 #ifndef VSP_USE_LIBLCF
     #define VSP_USE_LIBLCF 1
 #endif
