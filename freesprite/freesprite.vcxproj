@@ -197,7 +197,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
@@ -243,7 +243,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
@@ -273,7 +273,7 @@
     <ClCompile Include="CollapsableDraggablePanel.cpp" />
     <ClCompile Include="colors.cpp" />
     <ClCompile Include="CustomTemplate.cpp" />
-    <ClCompile Include="discord_game_sdk\discord_all.cpp"/>
+    <ClCompile Include="discord_game_sdk\discord_all.cpp" />
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
