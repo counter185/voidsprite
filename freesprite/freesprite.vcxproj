@@ -273,6 +273,7 @@
     <ClCompile Include="CollapsableDraggablePanel.cpp" />
     <ClCompile Include="colors.cpp" />
     <ClCompile Include="CustomTemplate.cpp" />
+    <ClCompile Include="discord_game_sdk\discord_all.cpp"/>
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
