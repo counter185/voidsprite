@@ -49,6 +49,13 @@
 
 #include <SDL3/SDL.h>
 
+#if _M_ARM64
+    #define VSP_NETWORKING 0
+    #define VSP_USE_LIBLCF 0
+    #define VOIDSPRITE_JXL_ENABLED 0
+    #define VSP_DISCORD_RPC 0 
+#endif
+
 #ifndef VSP_USE_LIBLCF
     #define VSP_USE_LIBLCF 1
 #endif
