@@ -68,7 +68,7 @@ jobs:
           x64/Release
   
   build-windows-arm64:
-    runs-on: windows-11-arm
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
       with:
         name: voidsprite-build-win-arm64
         path: |
-          x64/Release
+          ARM64/Release
 
   build-sdk:
     runs-on: windows-latest
