@@ -137,7 +137,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
                 logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
-                if (index != selLayer || !leftMouseHold) {
+                if (index != selLayer || (!leftMouseHold && (!leftMouseReleaseTimer.started || leftMouseReleaseTimer.elapsedTime() > 300))) {
                     memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                     l->markLayerDirty();
                 }

@@ -5,12 +5,11 @@
 #include "globals.h"
 #include "BaseScreen.h"
 #include "splitsession.h"
-#include "DrawableManager.h"
 #include "Layer.h"
-#include "ScreenWideNavBar.h"
 #include "Canvas.h"
 #include "EventCallbackListener.h"
 #include "operation_queue.h"
+#include "Panel.h"
 
 struct NET_StreamSocket;
 
@@ -197,6 +196,7 @@ public:
     bool currentBrushMouseDowned = false;
     bool invertPattern = false;
     Pattern* currentPattern = NULL;
+    Timer64 leftMouseReleaseTimer;
     bool leftMouseHold = false;
     bool middleMouseHold = false;
     Timer64 layerSwitchTimer;

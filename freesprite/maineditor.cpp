@@ -1569,6 +1569,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                         currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
                                         networkCanvasStateUpdated(selLayer);
                                         currentBrushMouseDowned = false;
+                                        leftMouseReleaseTimer.start();
                                     }
 
                                 }
