@@ -453,3 +453,4 @@ keystore/vsp_keystore.jks
 android-project/keystore/vsp_keystore.jks
 android-project/app/keystore/vsp_keystore.jks
 voidsprite_sdk.h
+freesprite/vsp_unity.cpp
