@@ -270,3 +270,9 @@ void platformPrintDocument(Layer* editor) {
 std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
     return universal_platformGetNetworkAdapters();
 }
+
+std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
+    return {
+        "/system/fonts"
+    };
+}

@@ -945,3 +945,9 @@ std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
 
     return ret;
 }
+
+std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
+    return {
+        L"C:\\Windows\\Fonts"
+    };
+}

@@ -6,6 +6,7 @@ class ToolText :
     public BaseBrush, EventCallbackListener
 {
 public:
+    std::string fontPath = "";
     TTF_Font* font = NULL;
     std::string text = "";
     int textSize = 16;
@@ -24,5 +25,6 @@ public:
     void eventPopupClosed(int evt_id, BasePopup* target) override;
 
     void renderText();
+    bool reloadFont();
 };
 

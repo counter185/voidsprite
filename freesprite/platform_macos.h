@@ -304,3 +304,17 @@ void platformPrintDocument(Layer* editor) {
 std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
     return universal_platformGetNetworkAdapters();
 }
+
+std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
+    std::vector<PlatformNativePathString> ret = {
+        "/Library/Fonts"
+    };
+	std::string homeDir;
+	char* homeDirCStr = getenv("HOME");
+    if (homeDirCStr != NULL) {
+        homeDir = homeDirCStr;
+        ret.push_back(homeDir + "/Library/Fonts");
+	}
+
+    return ret;
+}

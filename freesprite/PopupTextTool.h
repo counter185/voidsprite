@@ -1,19 +1,24 @@
 #pragma once
 #include "BasePopup.h"
 #include "globals.h"
-#include "EventCallbackListener.h"
 
 class PopupTextTool :
-    public BasePopup, EventCallbackListener
+    public BasePopup
 {
+protected:
+    std::vector<std::string> foundFonts;
 public:
-	UITextField* textbox;
-	UITextField* textboxSize;
-	int textSize;
-	ToolText* caller;
+    
+    std::string fontPath = "";
+    UITextField* textbox;
+    UITextField* textboxSize;
+    int textSize;
+    ToolText* caller;
+    UIDropdown* fontsDropdown;
 
     PopupTextTool(ToolText* parent, std::string tt, std::string tx);
+    void defaultInputAction(SDL_Event evt) override;
 
-    void eventButtonPressed(int evt_id) override;
+    std::vector<std::string> listAllSystemFonts();
 };
 

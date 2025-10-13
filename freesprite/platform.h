@@ -74,3 +74,5 @@ FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString m
 void platformPrintDocument(Layer* layer);
 
 std::vector<NetworkAdapterInfo> platformGetNetworkAdapters();
+
+std::vector<PlatformNativePathString> platformGetSystemFontPaths();
