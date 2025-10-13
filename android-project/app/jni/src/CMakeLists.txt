@@ -73,7 +73,28 @@ endif()
 file(GLOB_RECURSE CPP_FILES "voidsprite/*.cpp")
 file(GLOB_RECURSE C_FILES "voidsprite/*.c")
 
-add_library(main SHARED
+if(DEFINED ENV{VSP_UNITY_BUILD})
+    add_library(main SHARED
+        voidsprite/libpng/png.c
+        voidsprite/libpng/pngerror.c
+        voidsprite/libpng/pngget.c
+        voidsprite/libpng/pngmem.c
+        voidsprite/libpng/pngpread.c
+        voidsprite/libpng/pngread.c
+        voidsprite/libpng/pngrio.c
+        voidsprite/libpng/pngrtran.c
+        voidsprite/libpng/pngrutil.c
+        voidsprite/libpng/pngset.c
+        voidsprite/libpng/pngtrans.c
+        voidsprite/libpng/pngwio.c
+        voidsprite/libpng/pngwrite.c
+        voidsprite/libpng/pngwtran.c
+        voidsprite/libpng/pngwutil.c
+        voidsprite/zip/zip.c
+        voidsprite/vsp_unity.cpp
+    )
+else()
+    add_library(main SHARED
         voidsprite/astc_dec/astc_decomp.cpp
         voidsprite/easybmp/EasyBMP.cpp
         voidsprite/libpng/png.c
@@ -91,9 +112,6 @@ add_library(main SHARED
         voidsprite/libpng/pngwrite.c
         voidsprite/libpng/pngwtran.c
         voidsprite/libpng/pngwutil.c
-        voidsprite/libtga/tga.c
-        voidsprite/libtga/tgaread.c
-        voidsprite/libtga/tgawrite.c
         voidsprite/localization/localization.cpp
         voidsprite/pugixml/pugixml.cpp
         voidsprite/zip/zip.c
@@ -246,7 +264,8 @@ add_library(main SHARED
         voidsprite/vfx.cpp
         voidsprite/visual_config.cpp
         voidsprite/ViewSessionScreen.cpp
-)
+    )
+endif()
 target_link_libraries(main PRIVATE SDL3::SDL3)
 target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)
 target_link_libraries(main PRIVATE SDL3_image::SDL3_image)

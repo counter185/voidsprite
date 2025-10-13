@@ -317,8 +317,13 @@ jobs:
         ndk-version: r27c
         link-to-sdk: true
 
+    - name: generate unity build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: chmod u+x ./gen_unity_build.sh && ./gen_unity_build.sh
+
     - name: gradlew build
       env:
+        VSP_UNITY_BUILD: 1
         SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
         SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
