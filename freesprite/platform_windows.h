@@ -24,6 +24,7 @@
 #include "platform_universal.h"
 #include "maineditor.h"
 #include "io/io_png.h"
+#include "Notification.h"
 
 u32 platformSupportedFeatures() {
     return VSP_FEATURE_ALL; //windows is the primary platform and should support everything
@@ -171,6 +172,9 @@ void platformPostInit() {
         //SendMessageW(WINhWnd, WM_PAINT, NULL, NULL);
         d = true;
     }
+#if _M_ARM64
+    g_addNotification(Notification("arm64 Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
+#endif
 }
 
 void platformDeinit() {
