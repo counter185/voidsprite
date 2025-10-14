@@ -36,6 +36,7 @@ void g_loadFilters()
         {0,-1,0}
     }));*/
     g_filters.push_back(new FilterOffset());
+    g_filters.push_back(new FilterRemoveChannels());
 
     for (auto pluginFilter : g_pluginFilters) {
         g_filters.push_back(pluginFilter);
@@ -567,5 +568,26 @@ Layer* FilterOffset::run(Layer* src, std::map<std::string, std::string> options)
             c->setPixel({ x,y }, src->getPixelAt(sourcePosition));
         }
     }
+    return c;
+}
+
+Layer* FilterRemoveChannels::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+
+    bool r = std::stoi(options["remove.r"]);
+    bool g = std::stoi(options["remove.g"]);
+    bool b = std::stoi(options["remove.b"]);
+    bool a = std::stoi(options["remove.a"]);
+
+    for (int x = 0; x < c->w; x++) {
+        for (int y = 0; y < c->h; y++) {
+            u32 px = c->getPixelAt({ x,y }, true);
+            SDL_Color col = uint32ToSDLColor(px);
+
+            c->setPixel({ x,y }, PackRGBAtoARGB(r?0:col.r, g?0:col.g, b?0:col.b, a?0:col.a));
+        }
+    }
+
     return c;
 }

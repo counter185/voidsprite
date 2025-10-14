@@ -213,3 +213,16 @@ public:
         };
     }
 };
+class FilterRemoveChannels : public BaseFilter {
+public:
+    std::string name() override { return "Remove channels"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            BOOL_PARAM("remove.r", 0),
+            BOOL_PARAM("remove.g", 0),
+            BOOL_PARAM("remove.b", 0),
+            BOOL_PARAM("remove.a", 0)
+        };
+    }
+};
