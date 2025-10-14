@@ -77,6 +77,11 @@ add_library(main SHARED
         ${CPP_FILES}
         ${C_FILES}
 )
+set_source_files_properties(${C_FILES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION true)
+set_property(TARGET main PROPERTY UNITY_BUILD true)
+set_property(TARGET main PROPERTY UNITY_BUILD_MODE BATCH)
+set_property(TARGET main PROPERTY UNITY_BUILD_BATCH_SIZE 200)
+
 target_link_libraries(main PRIVATE SDL3::SDL3)
 target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)
 target_link_libraries(main PRIVATE SDL3_image::SDL3_image)
