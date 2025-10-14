@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 project(my_app)
 
 option(USE_FMT_FORMAT "Use fmt::format instead of std::format" OFF)
+set(VOIDSPRITE_ASSETS_PATH "" CACHE STRING "Path to voidsprite assets. Executable directory if empty")
 
 if (NOT USE_FMT_FORMAT)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
@@ -91,6 +92,10 @@ file(COPY voidsprite/appfontjp-NotoSansJP-Medium.ttf DESTINATION "${CMAKE_BINARY
 
 file(GLOB_RECURSE CPP_FILES "voidsprite/*.cpp")
 file(GLOB_RECURSE C_FILES "voidsprite/*.c")
+
+if(NOT VOIDSPRITE_ASSETS_PATH STREQUAL "")
+    add_compile_definitions(VOIDSPRITE_ASSETS_PATH="${VOIDSPRITE_ASSETS_PATH}/")
+endif()
 
 add_executable(voidsprite
         voidsprite/astc_dec/astc_decomp.cpp
