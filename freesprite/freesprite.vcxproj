@@ -154,6 +154,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -173,6 +174,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ShowIncludes>false</ShowIncludes>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -214,6 +216,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ShowIncludes>false</ShowIncludes>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -273,7 +276,10 @@
     <ClCompile Include="CollapsableDraggablePanel.cpp" />
     <ClCompile Include="colors.cpp" />
     <ClCompile Include="CustomTemplate.cpp" />
-    <ClCompile Include="discord_game_sdk\discord_all.cpp" />
+    <ClCompile Include="discord_game_sdk\discord_all.cpp">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
@@ -346,27 +352,73 @@
     <ClCompile Include="brush\ToolRectRotate.cpp" />
     <ClCompile Include="brush\ToolRectSwap.cpp" />
     <ClCompile Include="brush\BrushReplaceColor.cpp" />
-    <ClCompile Include="libpng\png.c" />
-    <ClCompile Include="libpng\pngerror.c" />
-    <ClCompile Include="libpng\pngget.c" />
-    <ClCompile Include="libpng\pngmem.c" />
-    <ClCompile Include="libpng\pngpread.c" />
-    <ClCompile Include="libpng\pngread.c" />
-    <ClCompile Include="libpng\pngrio.c" />
-    <ClCompile Include="libpng\pngrtran.c" />
-    <ClCompile Include="libpng\pngrutil.c" />
-    <ClCompile Include="libpng\pngset.c" />
-    <ClCompile Include="libpng\pngtrans.c" />
-    <ClCompile Include="libpng\pngwio.c" />
-    <ClCompile Include="libpng\pngwrite.c" />
-    <ClCompile Include="libpng\pngwtran.c" />
-    <ClCompile Include="libpng\pngwutil.c" />
+    <ClCompile Include="libpng\png.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngerror.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngget.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngmem.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngpread.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    <ClCompile Include="libpng\pngread.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngrio.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngrtran.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngrutil.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngset.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngtrans.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwio.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwrite.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwtran.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
+    <ClCompile Include="libpng\pngwutil.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="MinecraftSkinPreviewScreen.cpp" />
     <ClCompile Include="ScrollingPanel.cpp" />
     <ClCompile Include="brush\ToolRectMove.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
-    <ClCompile Include="easybmp\EasyBMP.cpp" />
+    <ClCompile Include="easybmp\EasyBMP.cpp">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="EditorBrushPicker.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="EditorLayerPicker.cpp" />
@@ -422,7 +474,9 @@
     <ClCompile Include="vfx.cpp" />
     <ClCompile Include="ViewSessionScreen.cpp" />
     <ClCompile Include="visual_config.cpp" />
-    <ClCompile Include="zip\zip.c" />
+    <ClCompile Include="zip\zip.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="astc_dec\astc_decomp.h" />
