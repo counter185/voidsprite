@@ -99,6 +99,7 @@ public:
             FLOAT_PARAM("hue", -360, 360, 0),
             FLOAT_PARAM("saturation", -100, 100, 0),
             FLOAT_PARAM("value", -100, 100, 0),
+            BOOL_PARAM("colorize", 0)
         };
     }
 };

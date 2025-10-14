@@ -137,6 +137,7 @@ Layer* FilterSwapRGBToBGR::run(Layer* src, std::map<std::string, std::string> op
 
 Layer* FilterAdjustHSV::run(Layer* src, std::map<std::string, std::string> options)
 {
+    bool colorize = std::stoi(options["colorize"]);
     double h = std::stod(options["hue"]);
     double s = std::stod(options["saturation"]) / 100.0;
     double v = std::stod(options["value"]) / 100.0;
@@ -145,6 +146,9 @@ Layer* FilterAdjustHSV::run(Layer* src, std::map<std::string, std::string> optio
     for (int y = 0; y < c->h; y++) {
         for (int x = 0; x < c->w; x++) {
             u32 px = src->getPixelAt({ x, y }, true);
+            if (colorize) {
+                px = hsvShift(px, { 0, -1, 0 });
+            }
             c->setPixel({ x,y }, hsvShift(px, hsvv));
         }
     }
