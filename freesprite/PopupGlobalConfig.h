@@ -46,6 +46,6 @@ public:
     void updateLanguageCredit();
 
     UICheckbox* optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position);
-    Panel* optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position);
+    static Panel* optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position);
 };
 

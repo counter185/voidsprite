@@ -640,6 +640,25 @@ std::string platformGetSystemInfo() {
         }
     }
 
+    SYSTEM_INFO sysinfo;
+    SYSTEM_INFO sysinfoNative;
+    GetSystemInfo(&sysinfo);
+    GetNativeSystemInfo(&sysinfoNative);
+    std::string cpuArch = 
+        sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? "x64"
+        : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM ? "ARM"
+        : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64 ? "ARM64"
+        : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL ? "x86"
+        : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ? "Intel Itanium"   //lmao
+		: "???";
+    std::string cpuArchNative = 
+        sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? "x64"
+        : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM ? "ARM"
+        : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64 ? "ARM64"
+        : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL ? "x86"
+        : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ? "Intel Itanium"
+		: "???";
+
     std::wstring pcName;
     u32 pcNameSize = 256;
     pcName.resize(pcNameSize);
@@ -652,6 +671,7 @@ std::string platformGetSystemInfo() {
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemManufacturer"),
         windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", L"SystemProductName"));
     ret += "CPU: " + windows_readStringFromRegistry(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", L"ProcessorNameString") + "\n";
+    ret += frmt("CPU arch: {} {}\n", cpuArch, cpuArch != cpuArchNative ? frmt("  (real: {})", cpuArchNative) : "");
     ret += "GPU: " + windows_getActiveGPUName() + "\n";
 
     ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
