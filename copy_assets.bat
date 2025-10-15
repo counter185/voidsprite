@@ -24,6 +24,9 @@ copy freesprite\assets\* ARM64\Release\assets\
 copy freesprite\assets\* gcc-build\build\assets
 copy freesprite\assets\* android-project\app\src\main\assets
 
+md Release\OPEN_SOURCE_LICENSES
+copy OPEN_SOURCE_LICENSES Release\OPEN_SOURCE_LICENSES
+
 md x64\Release\OPEN_SOURCE_LICENSES
 copy OPEN_SOURCE_LICENSES x64\Release\OPEN_SOURCE_LICENSES
 
