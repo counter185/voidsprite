@@ -9,8 +9,9 @@
 
 bool pointInBox(XY point, SDL_Rect rect) {
     XY normalP = { point.x - rect.x, point.y - rect.y };
-    return normalP.x >= 0 && normalP.x < rect.w
-        && normalP.y >= 0 && normalP.y < rect.h;
+    return 
+        (rect.w >= 0 ? (normalP.x >= 0) : (normalP.x <= 0)) && normalP.x < rect.w
+        && (rect.h >= 0 ? (normalP.y >= 0) : (normalP.y <= 0)) && normalP.y < rect.h;
 }
 
 double xyDistance(XY p1, XY p2)

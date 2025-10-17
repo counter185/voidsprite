@@ -97,32 +97,47 @@ SDL_Rect PopupFreeformTransform::evalPasteRectChange()
     SDL_Rect pasteRect = targetPasteRect;
     XY dragPoint = getCallerCanvas().screenPointToCanvasPoint({ g_mouseX, g_mouseY });
     XY diff = xySubtract(dragStart, dragPoint);
-    if (draggingCorner == 4) {	//drag
+    if (draggingCorner == 8) {	//drag
         pasteRect.x -= diff.x;
         pasteRect.y -= diff.y;
     }
     else {	//resize
         switch (draggingCorner) {
-        case 0:	//top left
-            pasteRect.x -= diff.x;
-            pasteRect.y -= diff.y;
-            pasteRect.w += diff.x;
-            pasteRect.h += diff.y;
-            break;
-        case 1:	//top right
-            pasteRect.y -= diff.y;
-            pasteRect.w -= diff.x;
-            pasteRect.h += diff.y;
-            break;
-        case 2:	//bottom left
-            pasteRect.x -= diff.x;
-            pasteRect.w += diff.x;
-            pasteRect.h -= diff.y;
-            break;
-        case 3:	//bottom right
-            pasteRect.w -= diff.x;
-            pasteRect.h -= diff.y;
-            break;
+            case 0:	//top left
+                pasteRect.x -= diff.x;
+                pasteRect.y -= diff.y;
+                pasteRect.w += diff.x;
+                pasteRect.h += diff.y;
+                break;
+            case 1:	//top right
+                pasteRect.y -= diff.y;
+                pasteRect.w -= diff.x;
+                pasteRect.h += diff.y;
+                break;
+            case 2:	//bottom left
+                pasteRect.x -= diff.x;
+                pasteRect.w += diff.x;
+                pasteRect.h -= diff.y;
+                break;
+            case 3:	//bottom right
+                pasteRect.w -= diff.x;
+                pasteRect.h -= diff.y;
+                break;
+            case 4: //center top
+                pasteRect.y -= diff.y;
+                pasteRect.h += diff.y;
+                break;
+            case 5: //center right
+                pasteRect.w -= diff.x;
+                break;
+            case 6: //center left
+                pasteRect.x -= diff.x;
+                pasteRect.w += diff.x;
+                break;
+            case 7: //center bottom 
+                pasteRect.h -= diff.y;
+                break;
+
         }
         
     }
@@ -139,10 +154,15 @@ std::pair<int, XY> PopupFreeformTransform::getMouseOverDraggablePoint()
     SDL_Rect rtr = getRenderTargetRect();
     std::vector<std::pair<int, XY>> points;
     const int maxDistance = 30;
-    points.push_back({ 0, {rtr.x, rtr.y} });
-    points.push_back({ 1, {rtr.x + rtr.w, rtr.y} });
-    points.push_back({ 2, {rtr.x, rtr.y + rtr.h} });
-    points.push_back({ 3, {rtr.x + rtr.w, rtr.y + rtr.h} });
+    points.push_back({ 0, {rtr.x, rtr.y} });    //UL
+    points.push_back({ 1, {rtr.x + rtr.w, rtr.y} });    //UR
+    points.push_back({ 2, {rtr.x, rtr.y + rtr.h} });    //DL
+    points.push_back({ 3, {rtr.x + rtr.w, rtr.y + rtr.h} });    //DR
+
+    points.push_back({ 4, {rtr.x + rtr.w / 2, rtr.y} });    //center top
+    points.push_back({ 5, {rtr.x + rtr.w, rtr.y + rtr.h / 2} });    //center right
+    points.push_back({ 6, {rtr.x, rtr.y + rtr.h / 2} });    //center left
+    points.push_back({ 7, {rtr.x + rtr.w / 2, rtr.y + rtr.h} });    //center bottom
 
     for (auto& [id, pos] : points) {
         if (xyDistance({ g_mouseX, g_mouseY }, pos) < maxDistance) {
@@ -150,7 +170,7 @@ std::pair<int, XY> PopupFreeformTransform::getMouseOverDraggablePoint()
         }
     }
     if (pointInBox({ g_mouseX, g_mouseY }, rtr)) {
-        return { 4, {rtr.x + rtr.w / 2, rtr.y + rtr.h / 2} };
+        return { 8, {rtr.x + rtr.w / 2, rtr.y + rtr.h / 2} };
     }
     return { -1,{-1,-1} };
 }
@@ -166,12 +186,24 @@ Canvas& PopupFreeformTransform::getCallerCanvas() { return caller->canvas; }
 void PopupFreeformTransform::paste()
 {
     Layer* pasteSrc;
-    if (!xyEqual({ target->w, target->h }, { targetPasteRect.w, targetPasteRect.h })) {
-        pasteSrc = target->copyCurrentVariantScaled({ targetPasteRect.w, targetPasteRect.h });
+    if (!xyEqual({ target->w, target->h }, { abs(targetPasteRect.w), abs(targetPasteRect.h) })) {
+        pasteSrc = target->copyCurrentVariantScaled({ abs(targetPasteRect.w), abs(targetPasteRect.h) });
     }
     else {
         pasteSrc = target->copyCurrentVariant();
     }
+
+    if (targetPasteRect.w < 0) {
+        pasteSrc->flipHorizontally();
+        targetPasteRect.x += targetPasteRect.w;
+        targetPasteRect.w = -targetPasteRect.w;
+    }
+    if (targetPasteRect.h < 0) {
+        pasteSrc->flipVertically();
+        targetPasteRect.y += targetPasteRect.h;
+        targetPasteRect.h = -targetPasteRect.h;
+    }
+
     Layer* pasteTargetLayer = caller->getCurrentLayer();
     caller->commitStateToLayer(pasteTargetLayer);
     pasteTargetLayer->blit(pasteSrc, { targetPasteRect.x, targetPasteRect.y });
