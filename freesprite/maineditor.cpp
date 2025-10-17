@@ -47,6 +47,7 @@
 #include "PopupFilePicker.h"
 #include "PopupContextMenu.h"
 #include "PopupSetupNetworkCanvas.h"
+#include "PopupFreeformTransform.h"
 
 #include "discord_rpc.h"
 
@@ -2593,6 +2594,19 @@ void MainEditor::tryToggleTilePreviewLockAtMousePos()
             tileLockTimer.start();
         }
     }
+}
+
+void MainEditor::promptPasteImageFromClipboard()
+{
+    Layer* p = platformGetImageFromClipboard();
+    if (p != NULL) {
+        promptPasteImage(p);
+    }
+}
+
+void MainEditor::promptPasteImage(Layer* l)
+{
+    g_addPopup(new PopupFreeformTransform(this, l));
 }
 
 void MainEditor::moveLayerUp(int index) {

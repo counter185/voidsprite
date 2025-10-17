@@ -47,6 +47,8 @@ protected:
 
     virtual void renderDefaultBackground();
 
+    void renderPopupWindow();
+
     virtual XY getPopupOrigin() {
         return usesWholeScreen ? XY{0,0} : XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };
     }

@@ -660,6 +660,9 @@
     <ClCompile Include="PopupListLAN.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="PopupFreeformTransform.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1309,6 +1312,9 @@
     </ClInclude>
     <ClInclude Include="UIDoubleSlider.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupFreeformTransform.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

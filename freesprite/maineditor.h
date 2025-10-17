@@ -361,6 +361,8 @@ public:
     void tryAddReference(PlatformNativePathString path);
     void openPreviewPanel();
     void tryToggleTilePreviewLockAtMousePos();
+    void promptPasteImageFromClipboard();
+    void promptPasteImage(Layer* l);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

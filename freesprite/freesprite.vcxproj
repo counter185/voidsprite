@@ -325,6 +325,7 @@
     <ClCompile Include="PopupContextMenu.cpp" />
     <ClCompile Include="PopupExportScaled.cpp" />
     <ClCompile Include="PopupFilePicker.cpp" />
+    <ClCompile Include="PopupFreeformTransform.cpp" />
     <ClCompile Include="PopupGlobalConfig.cpp" />
     <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupListLAN.cpp" />
@@ -579,6 +580,7 @@
     <ClInclude Include="PopupChooseExtsToAssoc.h" />
     <ClInclude Include="PopupContextMenu.h" />
     <ClInclude Include="PopupExportScaled.h" />
+    <ClInclude Include="PopupFreeformTransform.h" />
     <ClInclude Include="PopupFilePicker.h" />
     <ClInclude Include="PopupGlobalConfig.h" />
     <ClInclude Include="PopupIntegerScale.h" />

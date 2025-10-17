@@ -65,24 +65,7 @@ void PopupApplyFilter::renderFilterPopupBackground()
     renderGradient({ 0,0,wxWidth + 40,g_windowH }, 0x70000000, 0x70000000, 0xFF000000, 0xFF000000);
     //renderGradient({ 0,g_windowH / 2,g_windowW,g_windowH / 2 }, 0xFF000000, 0xFF000000, 0x70000000, 0x70000000);
 
-    XY origin = getPopupOrigin();
-    SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300))) };
-    SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-    SDL_RenderFillRect(g_rd, &bgRect);
-
-    u8 alpha = 0x30;
-    SDL_Rect bgRect2 = bgRect;
-    for (int i = 0; i < 3; i++) {
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, alpha * XM1PW3P1(startTimer.percentElapsedTime(300)));
-        SDL_RenderDrawRect(g_rd, &bgRect2);
-        bgRect2.x--;
-        bgRect2.y--;
-        bgRect2.w += 2;
-        bgRect2.h += 2;
-        alpha /= 3;
-        alpha *= 2;
-    }
-    
+    renderPopupWindow();
 }
 
 void PopupApplyFilter::setupWidgets()

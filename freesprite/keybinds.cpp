@@ -105,6 +105,10 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.copyimage"), SDL_SCANCODE_C, true, true, [](void* d) {
             ((MainEditor*)d)->copyImageToClipboard();
         }));
+    g_keybindManager.addKeybind("maineditor", "paste_image", 
+        KeyCombo(TL("vsp.keybinds.maineditor.pasteimage"), SDL_SCANCODE_V, true, false, [](void* d) {
+            ((MainEditor*)d)->promptPasteImageFromClipboard();
+        }));
     g_keybindManager.addKeybind("maineditor", "save", 
         KeyCombo(TL("vsp.keybinds.maineditor.save"), SDL_SCANCODE_S, true, false, [](void* d) {
             ((MainEditor*)d)->trySaveImage();

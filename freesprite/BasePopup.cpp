@@ -31,6 +31,11 @@ void BasePopup::renderDefaultBackground() {
     drawLine({ 0, topBarY - offset }, { g_windowW, topBarY - offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
     drawLine({ g_windowW, bottomBarY + offset }, { 0, bottomBarY + offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
 
+    renderPopupWindow();
+}
+
+void BasePopup::renderPopupWindow()
+{
     XY origin = getPopupOrigin();
     SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300))) };
 

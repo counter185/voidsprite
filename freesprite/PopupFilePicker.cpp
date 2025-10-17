@@ -74,6 +74,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
             }
             catch (std::exception& e) {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.cantcreatefolder")));
+                logerr(frmt("can't create folder:\n {}", e.what()));
             }
         };
         g_addPopup(popup);
