@@ -240,27 +240,33 @@ bool VSPWindow::closeScreen(BaseScreen* screen) {
     if (favScreen == screen) {
         favScreen = NULL;
     }
+    //close subscreens first
     for (int x = 0; x < screenStack.size(); x++) {
-        if (screenStack[x]->isSubscreenOf() == screen) {
+        if (screenStack[x] != screen && screenStack[x]->isSubscreenOf() == screen) {
+            //do not replace this with closeScreen, screens can be in other windows too
             g_closeScreen(screenStack[x]);
-            x = 0;
-        }
-        if (!screenStack.empty() && screenStack[x] == screen) {
-            delete screenStack[x];
-            if (x == currentScreen) {
-                g_newVFX(VFX_SCREENCLOSE, 500);
-            }
-            screenStack.erase(screenStack.begin() + x);
-            overlayWidgets.removeDrawable(screenButtons[screenButtons.size() - 1]);
-            screenButtons.pop_back();
-            if (currentScreen >= screenStack.size()) {
-                switchScreen(currentScreen - 1);
-            }
             x--;
-            //return true;
         }
     }
-    return false;
+
+    auto index = std::find(screenStack.begin(), screenStack.end(), screen);
+    if (index == screenStack.end()) {
+        return false;
+    }
+    else {
+        int x = index - screenStack.begin();
+        delete screenStack[x];
+        if (x == currentScreen) {
+            g_newVFX(VFX_SCREENCLOSE, 500);
+        }
+        screenStack.erase(screenStack.begin() + x);
+        overlayWidgets.removeDrawable(screenButtons[screenButtons.size() - 1]);
+        screenButtons.pop_back();
+        if (currentScreen >= screenStack.size()) {
+            switchScreen(currentScreen - 1);
+        }
+        return true;
+    }
 }
 
 void VSPWindow::switchScreen(int index) {

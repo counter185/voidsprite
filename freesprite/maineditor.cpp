@@ -1461,7 +1461,7 @@ void MainEditor::addWidget(Drawable* wx)
 
 void MainEditor::removeWidget(Drawable* wx)
 {
-    if (!wxsManager.removeDrawable(wx) && wx->isPanel()) {
+    if (!wxsManager.removeDrawable(wx) && wx != NULL && wx->isPanel()) {
         auto deleteTarget = ((Panel*)wx)->getTopmostParent();
         wxsManager.removeDrawable(deleteTarget);
     }
