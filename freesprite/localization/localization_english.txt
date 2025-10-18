@@ -59,6 +59,7 @@
     {"vsp.error.norenderer.body", "A fatal error has occurred.\n"
                                   "Every available renderer has failed to initialize and voidsprite cannot start.\n"
                                   "Ensure you have the proper graphics drivers installed."},
+    {"vsp.error.pluginfail", "One of the loaded plugins is for a newer version of voidsprite and will not work with this version."},
 
     //other non-common errors/strings not related to any screen
     {"vsp.error.lospecdlfail", "Lospec download failed"},

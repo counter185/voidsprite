@@ -108,7 +108,7 @@ inline void impl_editorSetPixel(VSPEditorContext* editor, int x, int y, uint32_t
 
 inline void panicAndClose() {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "voidsprite",
-        "One of the loaded plugins is for a newer version of voidsprite and will not work with this version.", g_wd);
+        TL("vsp.error.pluginfail").c_str(), g_wd);
     loginfo_sync("hit jump from plugin to placeholder. very bad");
     //expect the stack to be completely broken here so just exit
     exit(1);
