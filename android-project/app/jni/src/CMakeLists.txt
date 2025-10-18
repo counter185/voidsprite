@@ -72,6 +72,7 @@ Possible ways to fix this:
 endif()
 file(GLOB_RECURSE CPP_FILES "voidsprite/*.cpp")
 file(GLOB_RECURSE C_FILES "voidsprite/*.c")
+list(FILTER CPP_FILES EXCLUDE REGEX "voidsprite/(x64/|ARM64/)?(Debug/|Release/).*")
 
 add_library(main SHARED
         ${CPP_FILES}
