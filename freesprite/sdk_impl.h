@@ -106,8 +106,16 @@ inline VSPLayer* impl_editorGetLayer(VSPEditorContext* editor, int index) { retu
 inline VSPLayer* impl_editorGetActiveLayer(VSPEditorContext* editor) { return editor != NULL ? editor->getCurrentLayer() : NULL; }
 inline void impl_editorSetPixel(VSPEditorContext* editor, int x, int y, uint32_t color) { if (editor != NULL) { editor->SetPixel({x,y}, color); } }
 
+inline void panicAndClose() {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "voidsprite",
+        "One of the loaded plugins is for a newer version of voidsprite and will not work with this version.", g_wd);
+    loginfo_sync("hit jump from plugin to placeholder. very bad");
+    //expect the stack to be completely broken here so just exit
+    exit(1);
+}
+
 inline void g_createVSPSDK() {
-    voidspriteSDK* v1SDK = new voidspriteSDK();
+    voidspriteSDK* v1SDK = (voidspriteSDK*)tracked_malloc(sizeof(voidspriteSDK) + sizeof(void*)*100, "Plugins"); //new voidspriteSDK();
     v1SDK->util_fopenUTF8 = [](char* path_utf8, const char* mode) { return platformOpenFile(convertStringOnWin32(path_utf8), convertStringOnWin32(mode)); };
     v1SDK->util_free = [](void* a) { free(a); };
 
@@ -136,5 +144,10 @@ inline void g_createVSPSDK() {
     v1SDK->editorGetLayer = impl_editorGetLayer;
     v1SDK->editorGetActiveLayer = impl_editorGetActiveLayer;
     v1SDK->editorSetPixel = impl_editorSetPixel;
+    //hit panicAndClose if any later function doesn't exist in the current version
+    void** nextPlaceholderJump = (void**)(v1SDK + 1);
+    for (int i = 0; i < 100; i++) {
+        nextPlaceholderJump[i] = (void*)&panicAndClose;
+    }
     g_vspsdks[1] = v1SDK;
 }
