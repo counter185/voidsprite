@@ -1461,7 +1461,10 @@ void MainEditor::addWidget(Drawable* wx)
 
 void MainEditor::removeWidget(Drawable* wx)
 {
-    wxsManager.removeDrawable(wx);
+    if (!wxsManager.removeDrawable(wx) && wx->isPanel()) {
+        auto deleteTarget = ((Panel*)wx)->getTopmostParent();
+        wxsManager.removeDrawable(deleteTarget);
+    }
 
     auto findRefPanel = std::find(openReferencePanels.begin(), openReferencePanels.end(), wx);
     if (findRefPanel != openReferencePanels.end()) {
@@ -2556,7 +2559,7 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
     MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(path));
     if (ssn != NULL) {
         Layer* flat = ssn->flattenImage();
-        PanelReference* referencePanel = new PanelReference(flat);
+        PanelReference* referencePanel = new PanelReference(flat, this);
         CollapsableDraggablePanel* refWPanel = new CollapsableDraggablePanel("REFERENCE", referencePanel);
         openReferencePanels.push_back(referencePanel);
         addWidget(refWPanel);

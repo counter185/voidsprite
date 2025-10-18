@@ -14,6 +14,7 @@ class PanelReference : public Panel, public EventCallbackListener
 {
 private:
     Layer* previewTex = NULL;
+    MainEditor* parent = NULL;
 public:
     Canvas c;
     int dragging = 0;
@@ -21,7 +22,7 @@ public:
 
     ReferencePanelMode currentMode = REFERENCE_PIXEL_PERFECT;
 
-    PanelReference(Layer* t);
+    PanelReference(Layer* t, MainEditor* caller = NULL);
     ~PanelReference();
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;

@@ -89,7 +89,7 @@ void DrawableManager::addDrawable(Drawable* d) {
     }
 }
 
-void DrawableManager::removeDrawable(Drawable* d, bool free) {
+bool DrawableManager::removeDrawable(Drawable* d, bool free) {
     if (focused == d) {
         forceUnfocus();
     }
@@ -102,9 +102,10 @@ void DrawableManager::removeDrawable(Drawable* d, bool free) {
                 delete drawablesList[x];
             }
             drawablesList.erase(drawablesList.begin() + x);
-            return;
+            return true;
         }
     }
+    return false;
 }
 
 void DrawableManager::removeDrawableWithoutUnfocus(Drawable* d, bool free)

@@ -4,10 +4,12 @@
 #include "UISlider.h"
 #include "UILabel.h"
 #include "Layer.h"
+#include "maineditor.h"
 
-PanelReference::PanelReference(Layer* t)
+PanelReference::PanelReference(Layer* t, MainEditor* caller)
 {
     previewTex = t;
+    this->parent = caller;
     c.dimensions = { previewTex->w, previewTex->h };
 
     initWidgets();
@@ -131,10 +133,15 @@ void PanelReference::initWidgets()
     closeBtn->wxHeight = 20;
     closeBtn->position = { wxWidth - 5 - closeBtn->wxWidth, 5 };
     closeBtn->text = "X";
-    closeBtn->onClickCallback = [&](UIButton* caller) {
-        DrawableManager* wxs = getTopmostParent()->parentManager;
-        wxs->removeDrawable(getTopmostParent());
-        };
+    closeBtn->onClickCallback = [this](UIButton* caller) {
+        if (parent != NULL) {
+            parent->removeWidget(this);
+        }
+        else {
+            DrawableManager* wxs = getTopmostParent()->parentManager;
+            wxs->removeDrawable(getTopmostParent());
+        }
+    };
     subWidgets.addDrawable(closeBtn);
 
     std::vector<std::string> modes = {"Pixel-perfect", "Fit", "Under canvas", "Over canvas"};
