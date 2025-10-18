@@ -892,6 +892,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_V, { TL("vsp.cmn.paste"),
+                            [this]() {
+                                this->promptPasteImageFromClipboard();
+                            }
+                        }
+                    },
                     {SDL_SCANCODE_X, { TL("vsp.cmn.close"),
                             [this]() {
                                 this->requestSafeClose();
@@ -2601,6 +2607,9 @@ void MainEditor::promptPasteImageFromClipboard()
     Layer* p = platformGetImageFromClipboard();
     if (p != NULL) {
         promptPasteImage(p);
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.clipboard_no_image")));
     }
 }
 
