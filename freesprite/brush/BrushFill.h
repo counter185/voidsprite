@@ -19,7 +19,7 @@ public:
     MainEditor* lastEditor = NULL;
 
     std::string getName() override { return TL("vsp.brush.fill"); }
-    std::string getTooltip() override { return TL("vsp.brush.fill.desc"); }
+    std::string getTooltip() override { return TL("vsp.brush.fill.desc:v2"); }
     std::string getIconPath() override { return "brush_fill.png"; }
     XY getSection() override { return XY{ 0,1 }; }
 

@@ -491,8 +491,8 @@
     {"vsp.brush.circlearc", "1px Circle (arc)"},
     {"vsp.brush.diamond", "1px Diamond"},
     {"vsp.brush.fill", "Fill"},
-    {"vsp.brush.fill.desc", "Mouse Left to fill an area with the current color.\n"
-                            "Mouse Right to fill only the currently selected area."},
+    {"vsp.brush.fill.desc:v2", "Mouse Left to fill an area with the current color.\n"
+                               "Mouse Right to fill only the currently highlighted area."},
     {"vsp.brush.raycastfill", "Raycast Fill"},
     {"vsp.brush.raycastfill.desc", "Fills the nearby area with line-of-sight raycasts."},
     {"vsp.brush.swapcolor", "Replace color"},
