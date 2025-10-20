@@ -20,7 +20,7 @@ ColorPickerColorButton::ColorPickerColorButton(UIColorPicker* parent, u32 color)
 void ColorPickerColorButton::click()
 {
     UIButton::click();
-    parent->colorUpdated(color);
+    parent->setColorRGB(color);
 }
 
 UIColorPicker::UIColorPicker(int w, int h)
@@ -233,7 +233,6 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
 void UIColorPicker::eventTextInput(int evt_id, std::string data)
 {
     if (evt_id == EVENT_COLORPICKER_TEXTFIELD) {
-        //do something with the text i guess
         if (data.size() == 6 && colorTextField->isValidOrPartialColor()) {
             data = "#" + data;
         }
@@ -241,7 +240,7 @@ void UIColorPicker::eventTextInput(int evt_id, std::string data)
             unsigned int col;
             if (tryRgbStringToColor(data.substr(1), &col)) {
                 col |= 0xff000000;
-                colorUpdated(col);
+                setColorRGB(col);
             }
         }
 
@@ -270,10 +269,10 @@ void UIColorPicker::eventTextInputConfirm(int evt_id, std::string data)
 {
     if (evt_id == EVENT_COLORPICKER_TEXTFIELD) {
         if (data == "rand" || data == "random") {
-            colorUpdated(PackRGBAtoARGB(rand() % 256, rand() % 256, rand() % 256, 255));
+            setColorRGB(PackRGBAtoARGB(rand() % 256, rand() % 256, rand() % 256, 255));
         }
         else if (g_colors.contains(data)) {
-            colorUpdated(g_colors[data]);
+            setColorRGB(g_colors[data]);
         }
     }
 }
@@ -320,7 +319,7 @@ void UIColorPicker::eventSliderPosChanged(int evt_id, float f)
             }
 
             u32 color = mptr->toRGB(componentData);
-            colorUpdated(uint32ToSDLColor(color), true, true, true, modelName);
+            colorUpdatedRGB(uint32ToSDLColor(color), COLORMODELS_SLIDER, modelName);
         }
         break;
     }
@@ -488,79 +487,151 @@ void UIColorPicker::updateHSVTextBoxOnInputEvent(std::string data, double* value
     }
 }
 
+void UIColorPicker::colorUpdatedFromVisualHSV()
+{
+    colorUpdatedHSV(hsv{ currentH, currentS, currentV }, VISUAL_HSV);
+}
+
 void UIColorPicker::colorUpdatedFromHSVSliders()
 {
-    rgb col = hsv2rgb(hsv{ currentH, currentS, currentV });
-    SDL_Color col_b = rgb2sdlcolor(col);
-    colorUpdated(col_b, false, true);
+    colorUpdatedHSV(hsv{ currentH, currentS, currentV }, SLIDERS_HSV_SLIDER);
 }
 
 void UIColorPicker::colorUpdatedFromHSVTextBoxes()
-{
-    rgb col = hsv2rgb(hsv{ currentH, currentS, currentV });
-    SDL_Color col_b = rgb2sdlcolor(col);
-    colorUpdated(col_b, true, true, false);
+{;
+    colorUpdatedHSV(hsv{ currentH, currentS, currentV }, SLIDERS_HSV_TBOX);
 }
 
 void UIColorPicker::colorUpdatedFromRGBSliders()
 {
-    colorUpdated({ currentR, currentG, currentB }, true, false, true);
+    colorUpdatedRGB({ currentR, currentG, currentB }, SLIDERS_RGB_SLIDER);
 }
 
 void UIColorPicker::colorUpdatedFromRGBTextBoxes()
 {
-    colorUpdated({ currentR, currentG, currentB }, true, true, true);
+    colorUpdatedRGB({ currentR, currentG, currentB }, SLIDERS_RGB_TBOX);
 }
 
-void UIColorPicker::colorUpdatedHSV(double h, double s, double v)
+void UIColorPicker::setColorHSV(double h, double s, double v)
 {
-    currentH = h;
-    currentS = s;
-    currentV = v;
-    rgb col = hsv2rgb(hsv{ currentH, currentS, currentV });
-    SDL_Color col_b = rgb2sdlcolor(col);
-    colorUpdated(col_b, true, true);
+    colorUpdatedHSV(hsv{h,s,v}, COLORCHANGE_EXTERNAL);
 }
 
-void UIColorPicker::colorUpdated(u32 col)
+void UIColorPicker::setColorRGB(u32 col)
 {
-    colorUpdated(SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff) });
+    colorUpdatedRGB(SDL_Color{ (uint8_t)((col >> 16) & 0xff), (uint8_t)((col >> 8) & 0xff), (uint8_t)(col & 0xff) }, COLORCHANGE_EXTERNAL);
 }
 
-void UIColorPicker::colorUpdated(SDL_Color col, bool updateHSVSliders, bool updateRGBSliders, bool updateHSVTextBoxes, std::string dontUpdateThisColorModel)
+void UIColorPicker::colorUpdatedRGB(SDL_Color col, ColorChangeSource from, std::string dontUpdateThisColorModel)
 {
     hsv a = rgb2hsv(rgb{ col.r / 255.0f, col.g / 255.0f, col.b / 255.0f });
-    if (updateHSVSliders) {
-        sliderH->sliderPos = (float)(a.h / 360.0f);
-        sliderS->sliderPos = (float)a.s;
-        sliderV->sliderPos = (float)a.v;
-    }
-    if (colorTabs->openTab != 0 || updateHSVSliders) {
-        hueSlider->sliderPos = (float)(a.h / 360.0);
-        satValSlider->sPos = (float)a.s;
-        satValSlider->vPos = (float)a.v;
-    }
-    if (updateHSVSliders) {
-        currentH = (float)a.h;
-        currentS = (float)a.s;
-        currentV = (float)a.v;
-    }
+    colorNowU32 = sdlcolorToUint32(col) | 0xFF000000; //(0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
+
+    currentH = (float)a.h;
+    currentS = (float)a.s;
+    currentV = (float)a.v;
     currentR = col.r;
     currentG = col.g;
     currentB = col.b;
-    if (updateRGBSliders) {
-        sliderR->sliderPos = (float)(col.r / 255.0f);
-        sliderG->sliderPos = (float)(col.g / 255.0f);
-        sliderB->sliderPos = (float)(col.b / 255.0f);
+
+    if (onColorChangedCallback) {
+        onColorChangedCallback(this, colorNowU32);
     }
 
+    updateUIFrom(from, dontUpdateThisColorModel);
+}
+
+void UIColorPicker::colorUpdatedHSV(hsv col, ColorChangeSource from, std::string dontUpdateThisColorModel)
+{
+    rgb a = hsv2rgb(col);
+    SDL_Color b = rgb2sdlcolor(a);
+    colorNowU32 = sdlcolorToUint32(b);
+
+    currentH = col.h;
+    currentS = col.s;
+    currentV = col.v;
+    currentR = b.r;
+    currentG = b.g;
+    currentB = b.b;
+
+    if (onColorChangedCallback) {
+        onColorChangedCallback(this, colorNowU32);
+    }
+
+    updateUIFrom(from, dontUpdateThisColorModel);
+}
+
+void UIColorPicker::updateUIFrom(ColorChangeSource from, std::string dontUpdateThisColorModel)
+{
+    if (from != SLIDERS_HSV_SLIDER) {
+        updateSliderTabHSVSliders();
+    }
+
+    if (from != VISUAL_HSV) {
+        updateVisualTabHSVPicker();
+    }
+
+    if (from != SLIDERS_RGB_SLIDER) {
+        updateSliderTabRGBSliders();
+    }
+
+    if (from != SLIDERS_RGB_TBOX) {
+        updateSliderTabRGBTextboxes();
+    }
+
+    if (from != SLIDERS_HSV_TBOX) {
+        updateSliderTabHSVTextboxes();
+    }
+
+    updateAllSliderColors();
+    colorTextField->setText(frmt("#{:02X}{:02X}{:02X}", currentR, currentG, currentB), false);
+    updateColorModelSliders(dontUpdateThisColorModel);
+}
+
+void UIColorPicker::updateSliderTabRGBTextboxes()
+{
+    txtR->setText(std::to_string(currentR));
+    txtG->setText(std::to_string(currentG));
+    txtB->setText(std::to_string(currentB));
+}
+
+void UIColorPicker::updateSliderTabHSVTextboxes()
+{
+    txtH->setText(std::to_string(currentH));
+    txtS->setText(std::to_string(currentS));
+    txtV->setText(std::to_string(currentV));
+}
+
+void UIColorPicker::updateSliderTabRGBSliders()
+{
+    sliderR->sliderPos = (float)(currentR / 255.0f);
+    sliderG->sliderPos = (float)(currentG / 255.0f);
+    sliderB->sliderPos = (float)(currentB / 255.0f);
+}
+
+void UIColorPicker::updateVisualTabHSVPicker()
+{
+    hueSlider->sliderPos = (float)(currentH / 360.0);
+    satValSlider->sPos = (float)currentS;
+    satValSlider->vPos = (float)currentV;
+}
+
+void UIColorPicker::updateSliderTabHSVSliders()
+{
+    sliderH->sliderPos = (float)(currentH / 360.0f);
+    sliderS->sliderPos = (float)currentS;
+    sliderV->sliderPos = (float)currentV;
+}
+
+void UIColorPicker::updateAllSliderColors()
+{
+    //hsv
     rgb colorSMin = hsv2rgb(hsv{ currentH, 0, currentV });
     rgb colorSMax = hsv2rgb(hsv{ currentH, 1, currentV });
     rgb colorVMin = hsv2rgb(hsv{ currentH, currentS, 0 });
     rgb colorVMax = hsv2rgb(hsv{ currentH, currentS, 1 });
 
-    // todo: make these affected by saturation and value
-    sliderH->colors = {
+    std::vector<u32> hueColors = {
         0xFFFF0000,
         0xFFFFFF00,
         0xFF00FF00,
@@ -569,6 +640,14 @@ void UIColorPicker::colorUpdated(SDL_Color col, bool updateHSVSliders, bool upda
         0xFFFF00FF,
         0xFFFF0000
     };
+    std::transform(hueColors.begin(), hueColors.end(), hueColors.begin(), [this](u32 col) {
+        hsv c = rgb2hsv(u32ToRGB(col));
+        c.s = currentS;
+        c.v = currentV;
+        return sdlcolorToUint32(rgb2sdlcolor(hsv2rgb(c)));
+    });
+
+    sliderH->colors = hueColors;
 
     sliderS->colors = { PackRGBAtoARGB(colorSMin.r * 255, colorSMin.g * 255, colorSMin.b * 255, 255),
                        PackRGBAtoARGB(colorSMax.r * 255, colorSMax.g * 255, colorSMax.b * 255, 255) };
@@ -576,37 +655,19 @@ void UIColorPicker::colorUpdated(SDL_Color col, bool updateHSVSliders, bool upda
     sliderV->colors = { PackRGBAtoARGB(colorVMin.r * 255, colorVMin.g * 255, colorVMin.b * 255, 255),
                        PackRGBAtoARGB(colorVMax.r * 255, colorVMax.g * 255, colorVMax.b * 255, 255) };
 
-    txtR->setText(std::to_string(currentR));
-    txtG->setText(std::to_string(currentG));
-    txtB->setText(std::to_string(currentB));
-    if (updateHSVTextBoxes) {
-        txtH->setText(std::to_string(currentH));
-        txtS->setText(std::to_string(currentS));
-        txtV->setText(std::to_string(currentV));
-    }
-
-    uint32_t rgbColor = sdlcolorToUint32(col) | 0xFF000000; //(0xFF << 24) + (col.r << 16) + (col.g << 8) + col.b;
-
+    //rgb
     sliderR->colors = {
-        rgbColor & 0x00FFFF,
-        rgbColor | 0xFF0000
+       colorNowU32 & 0x00FFFF,
+       colorNowU32 | 0xFF0000
     };
     sliderG->colors = {
-        rgbColor & 0xFF00FF,
-        rgbColor | 0x00FF00
+        colorNowU32 & 0xFF00FF,
+        colorNowU32 | 0x00FF00
     };
     sliderB->colors = {
-        rgbColor & 0xFFFF00,
-        rgbColor | 0x0000FF
+        colorNowU32 & 0xFFFF00,
+        colorNowU32 | 0x0000FF
     };
-
-    colorTextField->setText(frmt("#{:02X}{:02X}{:02X}", col.r, col.g, col.b));
-    colorNowU32 = rgbColor;
-    if (onColorChangedCallback) {
-        onColorChangedCallback(this, rgbColor);
-    }
-
-    updateColorModelSliders(dontUpdateThisColorModel);
 }
 
 #if _WIN32
@@ -630,7 +691,7 @@ void UIColorPicker::openOldWindowsColorPicker()
 
     if (ChooseColor(&cc)) {
         SDL_Color colorbgr = uint32ToSDLColor(cc.rgbResult);
-        colorUpdated(PackRGBAtoARGB(colorbgr.b, colorbgr.g, colorbgr.r, 255));
+        setColorRGB(PackRGBAtoARGB(colorbgr.b, colorbgr.g, colorbgr.r, 255));
         logprintf("win32 picked color: %x\n", cc.rgbResult);
     }
 }

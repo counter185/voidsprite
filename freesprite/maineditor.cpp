@@ -1271,7 +1271,7 @@ void MainEditor::setUpWidgets()
     colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
-    colorPicker->colorUpdated(pickedColor);
+    colorPicker->setColorRGB(pickedColor);
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
@@ -1643,11 +1643,11 @@ void MainEditor::takeInput(SDL_Event evt) {
                     break;
                 case SDL_MOUSEWHEEL:
                     if (g_ctrlModifier && !g_config.scrollWithTouchpad) {
-                        colorPicker->colorUpdatedHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
+                        colorPicker->setColorHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
                     }
                     else if (g_shiftModifier && !g_config.scrollWithTouchpad) {
                         double newH = dxmin(dxmax(colorPicker->currentH + (360.0 / 12) * evt.wheel.y, 0), 359);
-                        colorPicker->colorUpdatedHSV(newH, colorPicker->currentS, colorPicker->currentV);
+                        colorPicker->setColorHSV(newH, colorPicker->currentS, colorPicker->currentV);
                     }
                     else {
                         if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
@@ -2475,7 +2475,7 @@ void MainEditor::regenerateLastColors()
 
 void MainEditor::setActiveColor(uint32_t col)
 {
-    colorPicker->colorUpdated(col);
+    colorPicker->setColorRGB(col);
 }
 
 uint32_t MainEditor::getActiveColor()

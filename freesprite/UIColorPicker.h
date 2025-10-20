@@ -7,6 +7,16 @@
 #include "UIHueSlider.h"
 #include "UISVPicker.h"
 
+enum ColorChangeSource {
+    COLORCHANGE_EXTERNAL = 0,
+    VISUAL_HSV = 1,
+    SLIDERS_RGB_SLIDER = 2,
+    SLIDERS_RGB_TBOX = 3,
+    SLIDERS_HSV_SLIDER = 4,
+    SLIDERS_HSV_TBOX = 5,
+    COLORMODELS_SLIDER = 6
+};
+
 struct ColorModelValue {
     UIColorSlider* valueSlider;
     UILabel* valueLabel;
@@ -33,9 +43,12 @@ class UIColorPicker : public DraggablePanel, public EventCallbackListener
 protected:
     //literally only here so that PalettizedEditorColorPicker doesn't initialize all the widgets
     UIColorPicker(int w, int h);
+
+    virtual void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
+    virtual void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
 public:
     std::function<void(UIColorPicker*, u32)> onColorChangedCallback = NULL;
-	u32 colorNowU32 = 0xFF000000;
+    u32 colorNowU32 = 0xFF000000;
 
     double currentH = 0, currentS = 0, currentV = 0;
     uint8_t currentR = 0, currentG = 0, currentB = 0;
@@ -74,22 +87,36 @@ public:
     void updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value);
     void updateHSVTextBoxOnInputEvent(std::string data, double* value);
 
+    void colorUpdatedFromVisualHSV();
     void colorUpdatedFromHSVSliders();
     void colorUpdatedFromHSVTextBoxes();
     void colorUpdatedFromRGBSliders();
     void colorUpdatedFromRGBTextBoxes();
-    void colorUpdatedHSV(double h, double s, double v);
-    void colorUpdated(u32 color);
-    virtual void colorUpdated(SDL_Color col, bool updateHSVSliders = true, bool updateRGBSliders = true, bool updateHSVTextBoxes = true, std::string dontUpdateThisColorModel = "");
+    void updateUIFrom(ColorChangeSource from, std::string dontUpdateThisColorModel);
+
+    void setColorRGB(u32 color);
+    void setColorHSV(double h, double s, double v);
+
+    void updateSliderTabRGBTextboxes();
+
+    void updateSliderTabHSVTextboxes();
+
+    void updateSliderTabRGBSliders();
+
+    void updateVisualTabHSVPicker();
+
+    void updateSliderTabHSVSliders();
+
+    void updateAllSliderColors();
 
     void editorColorHSliderChanged(double h) {
         currentH = h;
-        colorUpdatedFromHSVSliders();
+        colorUpdatedFromVisualHSV();
     }
     void editorColorSVPickerChanged(double s, double v) {
         currentS = s;
         currentV = v;
-        colorUpdatedFromHSVSliders();
+        colorUpdatedFromVisualHSV();
     }
 
 #if _WIN32

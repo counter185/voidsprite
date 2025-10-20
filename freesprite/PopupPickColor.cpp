@@ -66,7 +66,7 @@ void PopupPickColor::updateRGBTextBoxOnInputEvent(std::string data, uint8_t* val
 
 void PopupPickColor::setRGB(u32 rgb)
 {
-    colorPicker->colorUpdated(rgb);
+    colorPicker->setColorRGB(rgb);
 }
 
 void PopupPickColor::setAlpha(uint8_t a)
