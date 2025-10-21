@@ -5,6 +5,7 @@
 #include "ScrollingPanel.h"
 #include "Notification.h"
 #include "FileIO.h"
+#include "UIStackPanel.h"
 
 #if _WIN32
 #include <windows.h>
@@ -343,14 +344,37 @@ void UIColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int
 void UIColorPicker::reloadColorLists()
 {
     palettePanel->subWidgets.freeAllDrawables();
-    int yNow = 5;
+
+    UIStackPanel* stack = new UIStackPanel();
+    stack->manuallyRecalculateLayout = true;
+    stack->takeMouseWheelEvents = false;
+    stack->position = { 0,0 };
+
+    palettePanel->subWidgets.addDrawable(stack);
+
     for (auto& p : g_namedColorMap) {
+        Panel* pp = new Panel();
+        pp->sizeToContent = true;
+        UIButton* collapseButton = new UIButton("-");
+        collapseButton->position = { 5,10 };
+        collapseButton->wxWidth = 20;
+        collapseButton->wxHeight = 20;
+        pp->subWidgets.addDrawable(collapseButton);
+
+
         UILabel* nameLabel = new UILabel(p.name);
-        nameLabel->position = XY{ 5, yNow };
-        palettePanel->subWidgets.addDrawable(nameLabel);
-        yNow += 30;
+        nameLabel->position = XY{ 30, 10 };
+        pp->subWidgets.addDrawable(nameLabel);
+
+        stack->addWidget(pp);
+
+        int yNow = 0;
         int xNow = 0;
         
+        Panel* colorButtonsPanel = new Panel();
+        colorButtonsPanel->sizeToContent = true;
+        colorButtonsPanel->passThroughMouse = true;
+
         //check if we should create large color buttons
         int lineCount = 1;
         int currentCountInLine = 0;
@@ -383,18 +407,28 @@ void UIColorPicker::reloadColorLists()
             b->tooltip = color.first;
             b->wxWidth = largeColorButtons ? 48 : 24;
             b->wxHeight = itemHeight;
-            palettePanel->subWidgets.addDrawable(b);
+            colorButtonsPanel->subWidgets.addDrawable(b);
             xNow += b->wxWidth;
             if (xNow + b->wxWidth >= palettePanel->wxWidth) {
                 xNow = 0;
                 yNow += b->wxHeight;
             }
         }
-        yNow += itemHeight+10;
+        stack->addWidget(colorButtonsPanel);
+
+        collapseButton->onClickCallback = [colorButtonsPanel, stack](UIButton* btn) {
+            colorButtonsPanel->enabled = !colorButtonsPanel->enabled;
+            btn->text = colorButtonsPanel->enabled ? "-" : "+";
+            stack->recalculateLayout();
+        };
     }
 
+    Panel* otherButtons = new Panel();
+    otherButtons->sizeToContent = true;
+    otherButtons->passThroughMouse = true;
+
     UIButton* loadNewButton = new UIButton("Load palette...");
-    loadNewButton->position = XY{ 5, yNow };
+    loadNewButton->position = XY{ 5, 20 };
     loadNewButton->wxWidth = 140;
     loadNewButton->onClickCallback = [&](UIButton*) {
         std::vector<std::pair<std::string, std::string>> filetypes;
@@ -403,15 +437,15 @@ void UIColorPicker::reloadColorLists()
         }
         platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
         };
-    palettePanel->subWidgets.addDrawable(loadNewButton);
+    otherButtons->subWidgets.addDrawable(loadNewButton);
 
     UIButton* reloadButton = new UIButton("Refresh");
-    reloadButton->position = XY{ 150, yNow };
+    reloadButton->position = XY{ 150, 20 };
     reloadButton->wxWidth = 100;
     reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
-    palettePanel->subWidgets.addDrawable(reloadButton);
+    otherButtons->subWidgets.addDrawable(reloadButton);
 
-    yNow += 35;
+    stack->addWidget(otherButtons);
 }
 
 void UIColorPicker::updateColorModelSliders(std::string dontUpdate)

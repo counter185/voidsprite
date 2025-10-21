@@ -52,6 +52,7 @@ public:
         }
     }
 
+    bool takesMouseWheelEvents() override { return true; }
     bool takesTouchEvents() override { return true; }
 
     void updateBounds() {
@@ -95,7 +96,7 @@ public:
         else {
             scrollOffset.y = 0;
         }
-	}
+    }
 
 };
 

@@ -471,6 +471,7 @@
     <ClCompile Include="UILayerButton.cpp" />
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UIDoubleSlider.cpp" />
+    <ClCompile Include="UIStackPanel.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
     <ClCompile Include="UtilPathfind.cpp" />
@@ -689,6 +690,7 @@
     <ClInclude Include="UILabel.h" />
     <ClInclude Include="UILayerButton.h" />
     <ClInclude Include="UISlider.h" />
+    <ClInclude Include="UIStackPanel.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
     <ClInclude Include="updatecheck.h" />

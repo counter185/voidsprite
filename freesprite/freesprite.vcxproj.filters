@@ -663,6 +663,9 @@
     <ClCompile Include="PopupFreeformTransform.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="UIStackPanel.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1315,6 +1318,9 @@
     </ClInclude>
     <ClInclude Include="PopupFreeformTransform.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="UIStackPanel.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

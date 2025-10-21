@@ -10,7 +10,7 @@ protected:
     void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontupdatemodel = "") override {}
     void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontupdatemodel = "") override {}
 public:
-	MainEditorPalettized* upcastCaller;
+    MainEditorPalettized* upcastCaller;
     TabbedView* colorPaletteTabs;
 
     UILabel* pickedColorLabel = NULL;

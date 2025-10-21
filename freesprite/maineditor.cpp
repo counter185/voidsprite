@@ -57,6 +57,7 @@
 #include <time.h>
 #else
 #include <ctime>
+#include "UIStackPanel.h"
 #endif
 
 using namespace nlohmann;

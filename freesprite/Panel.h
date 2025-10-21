@@ -23,6 +23,7 @@ public:
     /// </summary>
     Panel* parent = NULL;
     bool passThroughMouse = false;
+    bool takeMouseWheelEvents = true;
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     void render(XY position) override;
@@ -39,7 +40,7 @@ public:
     void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
     bool isPanel() override { return true; }
 
-    bool takesMouseWheelEvents() override { return true; }
+    bool takesMouseWheelEvents() override { return takeMouseWheelEvents; }
     bool takesTouchEvents() override { return true; }
 
     XY getDimensions() override { return sizeToContent ? xyAdd(getContentBoxSize(), {1,1}) : XY{ wxWidth,wxHeight }; };
