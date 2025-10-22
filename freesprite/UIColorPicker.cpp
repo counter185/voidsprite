@@ -16,12 +16,9 @@ ColorPickerColorButton::ColorPickerColorButton(UIColorPicker* parent, u32 color)
     this->parent = parent;
     this->color = color;
     this->fill = Fill::Solid(color);
-}
-
-void ColorPickerColorButton::click()
-{
-    UIButton::click();
-    parent->setColorRGB(color);
+    this->onClickCallback = [this](UIButton*) {
+        this->parent->setColorRGB(this->color);
+    };
 }
 
 UIColorPicker::UIColorPicker(int w, int h)
@@ -33,14 +30,22 @@ UIColorPicker::UIColorPicker(int w, int h)
 UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
 {
 
-    colorModeTabs = new TabbedView({ { "Colors" },{ "Last" }, { "Palettes"} }, 85);
+    colorModeTabs = new TabbedView({ 
+        { TL("vsp.maineditor.panel.colorpicker.tab.colors")},
+        { TL("vsp.maineditor.panel.colorpicker.tab.last")},
+        { TL("vsp.maineditor.panel.colorpicker.tab.palettes")}
+        }, 85);
     colorModeTabs->position = XY{ 20,30 };
     subWidgets.addDrawable(colorModeTabs);
 
     //-----------------
     //| Colors tab
 
-    colorTabs = new TabbedView({ { "Visual", g_iconColorVisual },{ "Sliders", g_iconColorHSV }, { "Other" } }, 100);
+    colorTabs = new TabbedView({ 
+        { TL("vsp.maineditor.panel.colorpicker.tab.visual"), g_iconColorVisual},
+        { TL("vsp.maineditor.panel.colorpicker.tab.sliders"), g_iconColorHSV},
+        { TL("vsp.maineditor.panel.colorpicker.tab.other")}
+        }, 100);
     colorTabs->position = XY{ 0,5 };
     colorModeTabs->tabs[0].wxs.addDrawable(colorTabs);
 
@@ -200,7 +205,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
         }
 
 #if _WIN32
-        UIButton* oldColorPickerButton = new UIButton("Win32 color picker...");
+        UIButton* oldColorPickerButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.win32picker"));
         oldColorPickerButton->position = XY{ 5, yNow };
         oldColorPickerButton->wxWidth = 210;
         oldColorPickerButton->onClickCallback = [this](UIButton*) { openOldWindowsColorPicker(); };
@@ -226,7 +231,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     colorTextField->isColorField = true;
     colorTextField->position = XY{ 60, 350 };
     colorTextField->wxWidth = 140;
-    colorTextField->tooltip = "Enter the color here in #RRGGBB format.\nPredefined color names are also supported.";
+    colorTextField->tooltip = TL("vsp.maineditor.panel.colorpicker.colorinput.tooltip");
     colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
     subWidgets.addDrawable(colorTextField);
 }
@@ -352,6 +357,18 @@ void UIColorPicker::reloadColorLists()
 
     palettePanel->subWidgets.addDrawable(stack);
 
+    Panel* topButtonsPanel = new Panel();
+    topButtonsPanel->sizeToContent = true;
+
+    UIButton* toggleAllButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.toggleall"));
+    toggleAllButton->position = XY{ 5, 5 };
+    toggleAllButton->wxWidth = 100;
+    topButtonsPanel->subWidgets.addDrawable(toggleAllButton);
+
+    stack->addWidget(topButtonsPanel);
+
+    std::vector<UIButton*> collapseButtons;
+
     for (auto& p : g_namedColorMap) {
         Panel* pp = new Panel();
         pp->sizeToContent = true;
@@ -360,6 +377,7 @@ void UIColorPicker::reloadColorLists()
         collapseButton->wxWidth = 20;
         collapseButton->wxHeight = 20;
         pp->subWidgets.addDrawable(collapseButton);
+        collapseButtons.push_back(collapseButton);
 
 
         UILabel* nameLabel = new UILabel(p.name);
@@ -427,7 +445,7 @@ void UIColorPicker::reloadColorLists()
     otherButtons->sizeToContent = true;
     otherButtons->passThroughMouse = true;
 
-    UIButton* loadNewButton = new UIButton("Load palette...");
+    UIButton* loadNewButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.loadpalette"));
     loadNewButton->position = XY{ 5, 20 };
     loadNewButton->wxWidth = 140;
     loadNewButton->onClickCallback = [&](UIButton*) {
@@ -435,17 +453,23 @@ void UIColorPicker::reloadColorLists()
         for (auto& importer : g_paletteImporters) {
             filetypes.push_back({ importer->extension(), importer->name() });
         }
-        platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
+        platformTryLoadOtherFile(this, filetypes, TL("vsp.popup.openpalette"), EVENT_PALETTECOLORPICKER_LOADPALETTE);
         };
     otherButtons->subWidgets.addDrawable(loadNewButton);
 
-    UIButton* reloadButton = new UIButton("Refresh");
+    UIButton* reloadButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.refresh"));
     reloadButton->position = XY{ 150, 20 };
     reloadButton->wxWidth = 100;
     reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
     otherButtons->subWidgets.addDrawable(reloadButton);
 
     stack->addWidget(otherButtons);
+
+    toggleAllButton->onClickCallback = [collapseButtons](UIButton*) {
+        for (auto b : collapseButtons) {
+            b->click();
+        }
+    };
 }
 
 void UIColorPicker::updateColorModelSliders(std::string dontUpdate)

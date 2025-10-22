@@ -34,7 +34,6 @@ public:
     u32 color = 0;
 
     ColorPickerColorButton(UIColorPicker* parent, u32 color);
-    void click() override;
 };
 
 

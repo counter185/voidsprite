@@ -72,6 +72,7 @@
     {"vsp.popup.saveimage", "save image"},
     {"vsp.popup.addreference", "add reference"},
     {"vsp.popup.addtosplitsession", "add image to split session"},
+    {"vsp.popup.openpalette", "load palette"},
 
     // templates
     {"vsp.template.pixelillustration", "pixel illustration"},
@@ -210,9 +211,24 @@
     {"vsp.maineditor.erasermode", "(Erase)"},
 
     {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
+    {"vsp.maineditor.panel.colorpicker.tab.colors", "Colors"},
+    {"vsp.maineditor.panel.colorpicker.tab.last", "Last"},
+    {"vsp.maineditor.panel.colorpicker.tab.palettes", "Palettes"},
+    {"vsp.maineditor.panel.colorpicker.tab.palettes.toggleall", "Toggle all"},
+    {"vsp.maineditor.panel.colorpicker.tab.palettes.loadpalette", "Load palette..."},
+    {"vsp.maineditor.panel.colorpicker.tab.palettes.refresh", "Refresh"},
+    {"vsp.maineditor.panel.colorpicker.tab.visual", "Visual"},
+    {"vsp.maineditor.panel.colorpicker.tab.sliders", "Sliders"},
+    {"vsp.maineditor.panel.colorpicker.tab.other", "Other"},
+    {"vsp.maineditor.panel.colorpicker.win32picker", "Win32 color picker..."},
+    {"vsp.maineditor.panel.colorpicker.colorinput.tooltip", "Enter the color here in #RRGGBB format.\n"
+                                                            "Predefined color names are also supported."},
+
+
     {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
     {"vsp.maineditor.panel.netcollab.host.title", "NETWORK CANVAS"},
     {"vsp.maineditor.panel.netcollab.chat.title", "CHAT"},
+
     {"vsp.maineditor.panel.touchmode.title", "TOUCH MODE"},
     {"vsp.maineditor.panel.touchmode.pan", "Pan"},
     {"vsp.maineditor.panel.touchmode.leftclick", "Mouse Left"},
