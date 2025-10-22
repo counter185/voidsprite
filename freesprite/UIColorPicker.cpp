@@ -8,6 +8,8 @@
 #include "UIStackPanel.h"
 #include "PopupPickColor.h"
 #include "PopupYesNo.h"
+#include "PopupTextBox.h"
+#include "io/io_voidsprite.h"
 
 #if _WIN32
 #include <windows.h>
@@ -512,6 +514,32 @@ void UIColorPicker::reloadColorLists()
     reloadButton->wxWidth = 100;
     reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
     otherButtons->subWidgets.addDrawable(reloadButton);
+
+    UIButton* newPaletteButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette"));
+    newPaletteButton->position = XY{ 5, 60 };
+    newPaletteButton->wxWidth = 140;
+    newPaletteButton->onClickCallback = [this](UIButton*) {
+        PopupTextBox* popup = new PopupTextBox(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.title"),
+            TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.desc"), "");
+        popup->onTextInputConfirmedCallback = [this](PopupTextBox*, std::string name) {
+            if (name.find_first_of("/\\") == std::string::npos) {
+                PlatformNativePathString newPalettePath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + name + ".voidplt");
+                if (writePltVOIDPLT(newPalettePath, {})) {
+                    g_reloadColorMap();
+                    reloadColorLists();
+                }
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
+                }
+            }
+            else {
+                //invalid characters in name
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
+            }
+        };
+        g_addPopup(popup);
+    };
+    otherButtons->subWidgets.addDrawable(newPaletteButton);
 
     stack->addWidget(otherButtons);
 
