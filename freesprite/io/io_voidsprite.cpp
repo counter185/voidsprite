@@ -181,7 +181,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             voidsnWriteString(outfile, lr->name);
 
@@ -267,7 +267,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             voidsnWriteString(outfile, lr->name);
 
@@ -355,7 +355,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             voidsnWriteString(outfile, lr->name);
 

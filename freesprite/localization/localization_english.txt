@@ -216,6 +216,7 @@
     {"vsp.maineditor.panel.colorpicker.tab.palettes", "Palettes"},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.toggleall", "Toggle all"},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.loadpalette", "Load palette..."},
+    {"vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip", "Add color"},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.refresh", "Refresh"},
     {"vsp.maineditor.panel.colorpicker.tab.visual", "Visual"},
     {"vsp.maineditor.panel.colorpicker.tab.sliders", "Sliders"},

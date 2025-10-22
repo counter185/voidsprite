@@ -118,6 +118,7 @@ protected:
     std::string _extension = "";
 };
 
+//absolute mess
 class FileExporter : public FileOperation {
 
 public:
@@ -210,21 +211,17 @@ public:
         return _checkImportFunction != NULL ? _checkImportFunction(path) : true;
     }
     virtual void* importData(PlatformNativePathString path) {
-#if !_DEBUG
         try {
-#endif
             if (importsWholeSession()) {
                 return _sessionImportFunction(path);
             }
             else {
                 return _flatImportFunction(path, 0);
             }
-#if !_DEBUG
         }
         catch (std::exception e) {
             return NULL;
         }
-#endif
     }
 protected:
     int _formatFlags = FORMAT_RGB;
@@ -236,20 +233,24 @@ protected:
     std::function<MainEditor*(PlatformNativePathString)> _sessionImportFunction = NULL;
     std::function<Layer*(PlatformNativePathString, u64)> _flatImportFunction = NULL;
 };
+
 class PaletteImporter : public FileOperation {
 public:
     static PaletteImporter* paletteImporter(std::string name, std::string extension, 
         std::function<std::pair<bool, std::vector<uint32_t>>(PlatformNativePathString)> importFunction,
-        std::function<bool(PlatformNativePathString)> canImport = NULL) {
+        std::function<bool(PlatformNativePathString)> canImport = NULL, PaletteExporter* reverse = NULL) {
 
         PaletteImporter* ret = new PaletteImporter();
         ret->_name = name;
         ret->_extension = extension;
         ret->_importFunction = importFunction;
         ret->_canImport = canImport;
+        ret->_correspondingExporter = reverse;
         return ret;
     }
     
+    virtual PaletteExporter* getCorrespondingExporter() { return _correspondingExporter; }
+
     virtual bool canImport(PlatformNativePathString path) {
         return _canImport != NULL ? _canImport(path) : true;
     }
@@ -259,6 +260,36 @@ public:
 protected:
     std::function<std::pair<bool, std::vector<uint32_t>>(PlatformNativePathString)> _importFunction = NULL;
     std::function<bool(PlatformNativePathString)> _canImport = NULL;
+    PaletteExporter* _correspondingExporter = NULL;
+};
+
+class PaletteExporter : public FileOperation {
+
+public:
+    static PaletteExporter* paletteExporter(std::string name, std::string extension, std::function<bool(PlatformNativePathString, std::vector<u32>)> exportFunction) {
+        PaletteExporter* ret = new PaletteExporter();
+        ret->_name = name;
+        ret->_extension = extension;
+        ret->_exportFunction = exportFunction;
+        return ret;
+    }
+
+    virtual bool canExport(void* data) {
+        return true;
+    }
+    // pass pointer to std::vector<u32>
+    virtual bool exportData(PlatformNativePathString path, void* data) {
+        try {
+            std::vector<u32> d = *(std::vector<u32>*)data;
+            return _exportFunction(path, d);
+        }
+        catch (std::exception& e) {
+            logerr(frmt("Data export failed:\n {}", e.what()));
+            return false;
+        }
+    }
+protected:
+    std::function<bool(PlatformNativePathString, std::vector<u32>)> _exportFunction = NULL;
 };
 
 inline std::vector<FileExporter*> g_fileExporters;
@@ -270,6 +301,7 @@ inline std::vector<FileImporter*> g_pluginRegisteredFileImporters;
 inline std::vector<FileExporter*> g_pluginRegisteredFileExporters;
 
 inline std::vector<PaletteImporter*> g_paletteImporters;
+inline std::vector<PaletteExporter*> g_paletteExporters;
 
 //used for autosave
 inline FileExporter* voidsnExporter = NULL;
@@ -464,7 +496,10 @@ inline void g_setupIO() {
         [](PlatformNativePathString p) {return true; }));
 
 
-    g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT));
+    PaletteExporter* exVOIDPLT;
+    g_paletteExporters.push_back( exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", &writePltVOIDPLT));
+
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT, NULL, exVOIDPLT));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("paint.net palette", ".txt", &readPltPDNTXT, NULL));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("JASC-PAL palette", ".pal", &readPltJASCPAL, 

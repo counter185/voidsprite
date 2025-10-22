@@ -287,6 +287,8 @@ void g_reloadColorMap() {
                     auto colorList = result.second;
                     NamedColorPalette ncp;
                     ncp.name = fileName;
+                    ncp.correspondingExporter = palImport->getCorrespondingExporter();
+                    ncp.path = file;
                     int i = 0;
                     for (auto& color : colorList) {
                         ncp.colorMap.push_back({ frmt("{}:{:02x}", fileName, i++), color });
@@ -301,6 +303,18 @@ void g_reloadColorMap() {
     }
 
     g_generateColorMap();
+}
+
+bool g_updateColorMapFile(NamedColorPalette target)
+{
+    if (target.correspondingExporter != NULL && !target.path.empty()) {
+        std::vector<u32> colors;
+        for (auto& color : target.colorMap) {
+            colors.push_back(color.second);
+        }
+        return target.correspondingExporter->exportData(target.path, &colors);
+    }
+    return false;
 }
 
 void g_downloadAndInstallPaletteFromLospec(std::string url)

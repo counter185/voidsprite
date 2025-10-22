@@ -160,6 +160,7 @@ class Timer64;
 class TooltipsLayer;
 class FileImporter;
 class FileExporter;
+class PaletteExporter;
 struct NineSegmentPattern;
 class DrawableManager;
 class VSPWindow;

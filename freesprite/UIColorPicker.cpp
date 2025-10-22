@@ -6,6 +6,8 @@
 #include "Notification.h"
 #include "FileIO.h"
 #include "UIStackPanel.h"
+#include "PopupPickColor.h"
+#include "PopupYesNo.h"
 
 #if _WIN32
 #include <windows.h>
@@ -369,6 +371,7 @@ void UIColorPicker::reloadColorLists()
 
     std::vector<UIButton*> collapseButtons;
 
+
     for (auto& p : g_namedColorMap) {
         Panel* pp = new Panel();
         pp->sizeToContent = true;
@@ -412,11 +415,15 @@ void UIColorPicker::reloadColorLists()
 
         int itemHeight = largeColorButtons ? 32 : 20;
 
+        bool paletteModifiable = p.correspondingExporter != NULL && !p.path.empty();
+
         //create all the color buttons
+        int colorIndex = 0;
         for (auto& color : p.colorMap) {
             if (color.first == HINT_NEXT_LINE) {
                 xNow = 0;
                 yNow += itemHeight;
+                colorIndex++;
                 continue;
             }
 
@@ -425,12 +432,55 @@ void UIColorPicker::reloadColorLists()
             b->tooltip = color.first;
             b->wxWidth = largeColorButtons ? 48 : 24;
             b->wxHeight = itemHeight;
+            if (paletteModifiable) {
+                b->onRightClickCallback = [colorIndex, this, p, color](UIButton*) {
+                    //todo: make this a context menu with remove, move up, move down options
+                    PopupYesNo* popup = new PopupYesNo("Remove color",
+                        frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, color.second, p.name));
+                    popup->onFinishCallback = [this, colorIndex, p](PopupYesNo*, bool result) {
+                        if (result) {
+                            if (p.colorMap.size() > colorIndex) {
+                                NamedColorPalette newP = p;
+                                newP.colorMap.erase(newP.colorMap.begin() + colorIndex);
+                                if (g_updateColorMapFile(newP)) {
+                                    g_reloadColorMap();
+                                    reloadColorLists();
+                                }
+                            }
+                        }
+                    };
+                    g_addPopup(popup);
+                };
+            }
             colorButtonsPanel->subWidgets.addDrawable(b);
             xNow += b->wxWidth;
             if (xNow + b->wxWidth >= palettePanel->wxWidth) {
                 xNow = 0;
                 yNow += b->wxHeight;
             }
+            colorIndex++;
+        }
+
+        //create the + button if applicable
+        if (paletteModifiable) {
+            UIButton* addColorButton = new UIButton("+");
+            addColorButton->wxWidth = 24;
+            addColorButton->wxHeight = 20;
+            addColorButton->position = XY{ xNow, yNow };
+            addColorButton->tooltip = TL("vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip");
+            addColorButton->onClickCallback = [this, p](UIButton*) {
+                PopupPickColor* popup = new PopupPickColor("Add color", "");
+                popup->onColorConfirmedCallback = [this, p](PopupPickColor*, u32 color) {
+                    NamedColorPalette newP = p;
+                    newP.colorMap.push_back(std::pair<std::string, u32>( std::string("newcolor"), color));
+                    if (g_updateColorMapFile(newP)) {
+                        g_reloadColorMap();
+                        reloadColorLists();
+                    }
+                };
+                g_addPopup(popup);
+            };
+            colorButtonsPanel->subWidgets.addDrawable(addColorButton);
         }
         stack->addWidget(colorButtonsPanel);
 
