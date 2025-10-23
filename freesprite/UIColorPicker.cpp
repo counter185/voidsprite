@@ -417,7 +417,7 @@ void UIColorPicker::reloadColorLists()
 
         int itemHeight = largeColorButtons ? 32 : 20;
 
-        bool paletteModifiable = p.correspondingExporter != NULL && !p.path.empty();
+        bool paletteModifiable = canEditPalettes && p.correspondingExporter != NULL && !p.path.empty();
 
         //create all the color buttons
         int colorIndex = 0;
@@ -471,16 +471,19 @@ void UIColorPicker::reloadColorLists()
             addColorButton->position = XY{ xNow, yNow };
             addColorButton->tooltip = TL("vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip");
             addColorButton->onClickCallback = [this, p](UIButton*) {
-                PopupPickColor* popup = new PopupPickColor("Add color", "");
-                popup->onColorConfirmedCallback = [this, p](PopupPickColor*, u32 color) {
-                    NamedColorPalette newP = p;
-                    newP.colorMap.push_back(std::pair<std::string, u32>( std::string("newcolor"), color));
-                    if (g_updateColorMapFile(newP)) {
-                        g_reloadColorMap();
-                        reloadColorLists();
-                    }
-                };
-                g_addPopup(popup);
+                if (!g_shiftModifier) {
+                    PopupPickColor* popup = new PopupPickColor("Add color", "");
+                    popup->colorPicker->canEditPalettes = false;
+                    popup->colorPicker->reloadColorLists();
+                    popup->setRGB(colorNowU32);
+                    popup->onColorConfirmedCallback = [this, p](PopupPickColor*, u32 color) {
+                        addColorToPalette(p, color);
+                        };
+                    g_addPopup(popup);
+                }
+                else {
+                    addColorToPalette(p, colorNowU32);
+                }
             };
             colorButtonsPanel->subWidgets.addDrawable(addColorButton);
         }
@@ -548,6 +551,16 @@ void UIColorPicker::reloadColorLists()
             b->click();
         }
     };
+}
+
+void UIColorPicker::addColorToPalette(NamedColorPalette p, u32 color)
+{
+    NamedColorPalette newP = p;
+    newP.colorMap.push_back(std::pair<std::string, u32>(std::string("newcolor"), color));
+    if (g_updateColorMapFile(newP)) {
+        g_reloadColorMap();
+        reloadColorLists();
+    }
 }
 
 void UIColorPicker::updateColorModelSliders(std::string dontUpdate)

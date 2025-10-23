@@ -737,7 +737,7 @@ int main(int argc, char** argv)
                     }
                     StartScreen::promptConnectToNetworkCanvas(ip, port);
                 }
-				// voidsprite://openurl/<url>
+                // voidsprite://openurl/<url>
                 else if (spltPath[0] == "openurl" && spltPath.size() >= 2) {
                     std::string p = "openurl/";
                     launchpad->tryLoadURL(uriPath.substr(p.size()));
@@ -951,7 +951,14 @@ int main(int argc, char** argv)
                 SDL_RenderClear(g_rd);
 
                 if (!wd->screenStack.empty()) {
-                    wd->screenStack[wd->currentScreen]->render();
+                    if (!wd->popupStack.empty()) {
+                        g_ttp->takeTooltips = false;
+                        wd->screenStack[wd->currentScreen]->render();
+                        g_ttp->takeTooltips = true;
+                    }
+                    else {
+                        wd->screenStack[wd->currentScreen]->render();
+                    }
                 }
 
                 for (BasePopup*& popup : wd->popupStack) {

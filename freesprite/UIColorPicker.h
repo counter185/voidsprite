@@ -40,6 +40,8 @@ public:
 class UIColorPicker : public DraggablePanel, public EventCallbackListener
 {
 protected:
+    bool canEditPalettes = true;
+
     //literally only here so that PalettizedEditorColorPicker doesn't initialize all the widgets
     UIColorPicker(int w, int h);
 
@@ -82,6 +84,7 @@ public:
 
     virtual void updateLastColorButtons() {}
     void reloadColorLists();
+    void addColorToPalette(NamedColorPalette p, u32 color);
     void updateColorModelSliders(std::string dontUpdate = "");
     void updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value);
     void updateHSVTextBoxOnInputEvent(std::string data, double* value);

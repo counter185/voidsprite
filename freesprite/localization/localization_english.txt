@@ -219,7 +219,8 @@
     {"vsp.maineditor.panel.colorpicker.tab.palettes.newpalette", "New palette..."},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.title", "New palette"},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.desc", "Enter the name of the new palette file"},
-    {"vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip", "Add color"},
+    {"vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip", "Add color\n"
+                                                                       "Shift-click to instantly add the current active color."},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.refresh", "Refresh"},
     {"vsp.maineditor.panel.colorpicker.tab.visual", "Visual"},
     {"vsp.maineditor.panel.colorpicker.tab.sliders", "Sliders"},
