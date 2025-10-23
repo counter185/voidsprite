@@ -30,13 +30,14 @@ void g_loadFilters()
         {1,0,0,0,1},
         {1,1,1,1,1}
     }));*/
-    g_filters.push_back(new FilterKernelTransformation("Kernel edge detect", {
+    g_filters.push_back(g_filter_edgeDetect = new FilterKernelTransformation("Kernel edge detect", {
         {0,-1,0},
         {-1,5,-1},
         {0,-1,0}
     }));
     g_filters.push_back(new FilterOffset());
     g_filters.push_back(new FilterRemoveChannels());
+	g_filters.push_back(new FilterAlphaThreshold());
 
     for (auto pluginFilter : g_pluginFilters) {
         g_filters.push_back(pluginFilter);
@@ -586,6 +587,21 @@ Layer* FilterRemoveChannels::run(Layer* src, std::map<std::string, std::string> 
             SDL_Color col = uint32ToSDLColor(px);
 
             c->setPixel({ x,y }, PackRGBAtoARGB(r?0:col.r, g?0:col.g, b?0:col.b, a?0:col.a));
+        }
+    }
+
+    return c;
+}
+
+Layer* FilterAlphaThreshold::run(Layer* src, std::map<std::string, std::string> options)
+{
+    Layer* c = copy(src);
+    int threshold = std::stoi(options["threshold"]);
+
+    for (int x = 0; x < c->w; x++) {
+        for (int y = 0; y < c->h; y++) {
+            SDL_Color col = uint32ToSDLColor(c->getPixelAt({ x,y }, true));
+            c->setPixel({ x,y }, PackRGBAtoARGB(col.r, col.g, col.b, col.a >= threshold ? 255 : 0));
         }
     }
 

@@ -28,6 +28,7 @@ struct FilterParameter {
 };
 
 void g_loadFilters();
+inline BaseFilter* g_filter_edgeDetect = NULL;
 
 class BaseFilter
 {
@@ -230,4 +231,15 @@ public:
             BOOL_PARAM("remove.a", 0)
         };
     }
+};
+
+class FilterAlphaThreshold : public BaseFilter {
+public:
+    std::string name() override { return "Alpha threshold"; }
+	Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("threshold", 0, 255, 128)
+        };
+	}
 };

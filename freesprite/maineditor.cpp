@@ -2848,20 +2848,7 @@ Layer* MainEditor::flattenImage()
 
 Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 {
-    Layer* ret = new Layer(bottom->w, bottom->h);
-
-    memcpy(ret->pixels32(), bottom->pixels32(), bottom->w * bottom->h * 4);
-
-    uint32_t* ppx = top->pixels32();
-    uint32_t* retppx = ret->pixels32();
-    for (uint64_t p = 0; p < ret->w * ret->h; p++) {
-        uint32_t pixel = ppx[p];
-        uint32_t srcPixel = retppx[p];
-        pixel = modAlpha(pixel, (uint8_t)(((pixel>>24)/255.0f) * (top->layerAlpha / 255.0f) * 255));
-        retppx[p] = alphaBlend(srcPixel, pixel);
-    }
-
-    return ret;
+    return Layer::mergeLayers(bottom, top);
 }
 
 void MainEditor::flipAllLayersOnX()

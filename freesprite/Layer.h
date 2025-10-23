@@ -524,8 +524,10 @@ public:
         }
         markLayerDirty();
     }
-
+    
     virtual Layer* trim(SDL_Rect r);
+
+    static Layer* mergeLayers(Layer* bottom, Layer* top);
 
     //all of these below return the old pixel data
     /// <summary>
