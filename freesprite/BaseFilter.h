@@ -196,6 +196,11 @@ public:
 
     std::string name() override { return n; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("scale", 1, 64, 16),
+        };
+    }
 };
 
 class FilterOffset : public BaseFilter {

@@ -30,11 +30,11 @@ void g_loadFilters()
         {1,0,0,0,1},
         {1,1,1,1,1}
     }));*/
-    /*g_filters.push_back(new FilterKernelTransformation("Kernel sharpen", {
+    g_filters.push_back(new FilterKernelTransformation("Kernel edge detect", {
         {0,-1,0},
         {-1,5,-1},
         {0,-1,0}
-    }));*/
+    }));
     g_filters.push_back(new FilterOffset());
     g_filters.push_back(new FilterRemoveChannels());
 
@@ -504,7 +504,7 @@ Layer* FilterKernelTransformation::run(Layer* src, std::map<std::string, std::st
     Layer* c = copy(src);
     int kerH = kernel.size();
     int kerW = kernel[0].size();
-    int scale = this->scale;
+    int scale = (int)std::stod(options["scale"]); //this->scale;
     int w = c->w;
     int h = c->h;
     int k = kerH;
