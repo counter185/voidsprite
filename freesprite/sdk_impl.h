@@ -106,6 +106,18 @@ inline VSPLayer* impl_editorGetLayer(VSPEditorContext* editor, int index) { retu
 inline VSPLayer* impl_editorGetActiveLayer(VSPEditorContext* editor) { return editor != NULL ? editor->getCurrentLayer() : NULL; }
 inline void impl_editorSetPixel(VSPEditorContext* editor, int x, int y, uint32_t color) { if (editor != NULL) { editor->SetPixel({x,y}, color); } }
 
+inline void impl_vspPostNotification(const char* title, const char* message, u32 color, int durationMS) {
+    g_addNotificationFromThread(Notification(title, message, durationMS, NULL, uint32ToSDLColor(color)));
+}
+
+inline void impl_vspPostSuccessNotification(const char* title, const char* message) {
+    g_addNotificationFromThread(SuccessNotification(title, message));
+}
+
+inline void impl_vspPostErrorNotification(const char* title, const char* message) {
+    g_addNotificationFromThread(ErrorNotification(title, message));
+}
+
 inline void panicAndClose() {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "voidsprite",
         TL("vsp.error.pluginfail").c_str(), g_wd);
@@ -144,6 +156,11 @@ inline void g_createVSPSDK() {
     v1SDK->editorGetLayer = impl_editorGetLayer;
     v1SDK->editorGetActiveLayer = impl_editorGetActiveLayer;
     v1SDK->editorSetPixel = impl_editorSetPixel;
+
+    v1SDK->vspPostNotification = impl_vspPostNotification;
+    v1SDK->vspPostSuccessNotification = impl_vspPostSuccessNotification;
+    v1SDK->vspPostErrorNotification = impl_vspPostErrorNotification;
+
     //hit panicAndClose if any later function doesn't exist in the current version
     void** nextPlaceholderJump = (void**)(v1SDK + 1);
     for (int i = 0; i < 100; i++) {

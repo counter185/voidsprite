@@ -144,5 +144,26 @@ struct voidspriteSDK {
         ) = 0;
 
     void (*editorSetPixel)(VSPEditorContext* editor, int x, int y, uint32_t color) = 0;
+
+    /// <summary>
+    /// Posts a notification to all windows with the specified title, message, color (0xAARRGGBB), and duration in milliseconds.
+    /// Text must be encoded in UTF-8.
+    /// It's safe to call this function from a thread.
+    /// </summary>
+    void (*vspPostNotification)(const char* title, const char* message, uint32_t color, int durationMS) = 0;
+    /// <summary>
+    /// Posts a success notification with the specified title and message.
+    /// Text must be encoded in UTF-8.
+    /// The notification will use the #FFD9FFBA color, last 5 seconds and use the success icon.
+    /// It's safe to call this function from a thread.
+    /// </summary>
+    void (*vspPostSuccessNotification)(const char* title, const char* message) = 0;
+    /// <summary>
+    /// Posts an error notification with the specified title and message.
+    /// Text must be encoded in UTF-8.
+    /// The notification will use the #FFFFBABA color, last 5 seconds and use the error icon.
+    /// It's safe to call this function from a thread.
+    /// </summary>
+    void (*vspPostErrorNotification)(const char* title, const char* message) = 0;
 };
 #pragma pack(pop)
