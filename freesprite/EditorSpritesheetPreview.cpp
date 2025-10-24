@@ -8,6 +8,7 @@ void EditorSpritesheetPreview::render(XY at)
 	XY tileSize = caller->caller->tileDimensions;
 	wxWidth = ixmax(80, tileSize.x * caller->canvas.scale) + 8;
 	wxHeight = ixmax(30, tileSize.y * caller->canvas.scale) + 20 + 8;
+	borderColor = visualConfigHexU32("ui/panel/border");
 
 	//XY origin = { g_windowW - wxWidth - 4, g_windowH - wxHeight - 4 - 40 };
 	XY origin = { at.x,at.y };

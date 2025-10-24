@@ -9,6 +9,7 @@ PanelSpritesheetPreview::PanelSpritesheetPreview(SpritesheetPreviewScreen* calle
 
     wxWidth = 320;
     wxHeight = 200;
+    borderColor = visualConfigHexU32("ui/panel/border");
 
     UILabel* titleLabel = new UILabel("Preview sprites");
     titleLabel->position = { 5, 2 };

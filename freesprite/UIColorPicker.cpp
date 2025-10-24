@@ -221,6 +221,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     //| Palettes tab
     palettePanel = new ScrollingPanel();
     palettePanel->position = XY{ 0,5 };
+    palettePanel->fillFocused = palettePanel->fillUnfocused = Fill::Solid(0x40000000);
     palettePanel->scrollHorizontally = false;
     palettePanel->scrollVertically = true;
     palettePanel->wxWidth = 370;

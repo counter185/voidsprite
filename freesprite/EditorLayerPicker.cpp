@@ -14,6 +14,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
 
     wxWidth = 250;
     wxHeight = 400;
+    borderColor = visualConfigHexU32("ui/panel/border");
 
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
@@ -99,9 +100,7 @@ void EditorLayerPicker::render(XY position)
     SDL_Color colorBG2 = { 0x10, 0x10, 0x10, (u8)(focused ? 0xa0 : 0x90)};
     renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
     if (thisOrParentFocused()) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
+        renderFocusBorder(position, SDL_Color{ 255,255,255,255 });
     }
 
     g_fnt->RenderString("LAYERS", position.x + 4, position.y + 1);

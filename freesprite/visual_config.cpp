@@ -27,7 +27,8 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"popup/filepicker/symlink_color", "FFC3DBFF"},
     {"ui/slider/bg", Fill::Solid(0xA0000000).serialize()},
     {"ui/slider/ind_shadow", "FF000000"},
-    {"ui/slider/ind_body", "FFFFFFFF"}
+    {"ui/slider/ind_body", "FFFFFFFF"},
+    {"ui/panel/border", "30FFFFFF"}
 };
 
 std::map<SDL_Renderer*, std::map<std::string, SDL_Texture*>> visualConfigTextureCache = {};

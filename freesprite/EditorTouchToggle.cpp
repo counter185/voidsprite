@@ -8,6 +8,7 @@ EditorTouchToggle::EditorTouchToggle(MainEditor* caller) : parent(caller)
 {
     wxWidth = 180;
     wxHeight = 150;
+	borderColor = visualConfigHexU32("ui/panel/border");
 
 	UILabel* lbl = new UILabel(TL("vsp.maineditor.panel.touchmode.title"));
 	lbl->position = { 5, 2 };

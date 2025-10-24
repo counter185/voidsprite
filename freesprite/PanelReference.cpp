@@ -11,6 +11,7 @@ PanelReference::PanelReference(Layer* t, MainEditor* caller)
     previewTex = t;
     this->parent = caller;
     c.dimensions = { previewTex->w, previewTex->h };
+    borderColor = visualConfigHexU32("ui/panel/border");
 
     initWidgets();
 }

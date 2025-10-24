@@ -12,7 +12,14 @@ void Panel::render(XY position)
 {
     if (enabled) {
         XY renderDimensions = getRenderDimensions();
-        (thisOrParentFocused() ? fillFocused : fillUnfocused).fill({ position.x, position.y, renderDimensions.x, renderDimensions.y });
+        SDL_Rect panelRect = { position.x, position.y, renderDimensions.x, renderDimensions.y };
+        (thisOrParentFocused() ? fillFocused : fillUnfocused).fill(panelRect);
+
+        SDL_Color border = uint32ToSDLColor(this->borderColor);
+        if (border.a != 0) {
+            SDL_SetRenderDrawColor(g_rd, border.r, border.g, border.b, border.a);
+            SDL_RenderDrawRect(g_rd, &panelRect);
+        }
         subWidgets.renderAll(position);
     }
 }
@@ -38,7 +45,40 @@ void Panel::mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction)
     }
 }
 
-void Panel::playPanelOpenVFX() 
+void Panel::renderFocusBorder(XY at, SDL_Color color, double lightup)
+{
+    double percent = XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300));
+    int timedHeight = wxHeight * percent;
+    int timedWidth = wxWidth * percent;
+
+    if (lightup > 0) {
+        renderFocusBorderLightup(at, color, { timedWidth, timedHeight }, lightup);
+    }
+
+    SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 255);
+    drawLine({ at.x, at.y }, { at.x, at.y + wxHeight }, percent);
+    drawLine({ at.x, at.y }, { at.x + wxWidth, at.y }, percent);
+}
+
+void Panel::renderFocusBorderLightup(XY at, SDL_Color c, XY size, double lightup)
+{
+    Fill colorGradient = Fill::Gradient(
+        modAlpha(sdlcolorToUint32(c), (u8)(0x60 * lightup)),
+        modAlpha(sdlcolorToUint32(c), 0),
+        modAlpha(sdlcolorToUint32(c), 0),
+        modAlpha(sdlcolorToUint32(c), 0)
+    );
+    SDL_Rect colorGradientRect = { at.x, at.y, size.x, size.y };
+    colorGradient.fill(colorGradientRect);
+}
+
+void Panel::setDefaultOpaquePanelBackground()
+{
+    fillUnfocused = Fill::Gradient(0x90303030, 0x90101010, 0x90101010, 0x90101010);
+    fillUnfocused = Fill::Gradient(0xA0303030, 0xA0101010, 0xA0101010, 0xA0101010);
+}
+
+void Panel::playPanelOpenVFX()
 {
     XY dim = getDimensions();
     g_newVFX(VFX_PANELOPEN, 1000, 0, SDL_Rect{ position.x, position.y, dim.x, dim.y });

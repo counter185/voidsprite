@@ -10,6 +10,7 @@ PanelMCBlockPreview::PanelMCBlockPreview(MinecraftBlockPreviewScreen* caller, bo
 
 	wxWidth = small ? 180 : 320;
 	wxHeight = small ? 190 : 420;
+    borderColor = visualConfigHexU32("ui/panel/border");
 
 	UILabel* titleLabel = new UILabel("Cube");
     titleLabel->position = {5, 2};

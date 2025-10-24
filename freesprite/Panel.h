@@ -13,6 +13,7 @@ public:
     bool sizeToContent = false;
     Fill fillFocused = Fill::None();
     Fill fillUnfocused = Fill::None();
+    u32 borderColor = 0x00FFFFFF;
 
     ~Panel() {
         subWidgets.freeAllDrawables();
@@ -50,6 +51,9 @@ public:
     bool thisOrParentFocused() { return parent != NULL ? parentFocused() : focused; }
     Timer64& thisOrParentFocusTimer() { return parent != NULL ? parent->focusTimer : focusTimer; }
 
+    void renderFocusBorder(XY at, SDL_Color color, double lightup = 0.0);
+    void renderFocusBorderLightup(XY at, SDL_Color c, XY size, double lightup = 0.0);
+    void setDefaultOpaquePanelBackground();
     void playPanelOpenVFX();
     XY getContentBoxSize() {
         XY ret = { 0,0 };

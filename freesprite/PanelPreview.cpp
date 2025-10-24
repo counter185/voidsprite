@@ -7,6 +7,7 @@ PanelPreview::PanelPreview(MainEditor* t)
     parent = t;
     wxWidth = 400;
     wxHeight = 300;
+    borderColor = visualConfigHexU32("ui/panel/border");
 
     UIButton* closeBtn = new UIButton();
     closeBtn->wxWidth = 30;
