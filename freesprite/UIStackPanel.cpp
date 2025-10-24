@@ -13,6 +13,11 @@ void UIStackPanel::render(XY at)
         recalculateLayout();
     }
     Panel::render(at);
+    if (g_debugConfig.debugShowScrollPanelBounds) {
+        SDL_Rect r = SDL_Rect{ at.x, at.y, contentBoxSize.x, contentBoxSize.y };
+        SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
+        SDL_RenderDrawRect(g_rd, &r);
+    }
 }
 
 void UIStackPanel::addWidget(Drawable* d) {

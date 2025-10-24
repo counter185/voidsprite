@@ -207,6 +207,7 @@ class UICheckbox;
 class UIDropdown;
 class UIColorPicker;
 class Panel;
+class UIStackPanel;
 class DraggablePanel;
 class ScrollingPanel;
 class TabbedView;

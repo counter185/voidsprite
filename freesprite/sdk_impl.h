@@ -6,6 +6,7 @@
 #include "BaseFilter.h"
 #include "maineditor.h"
 #include "brush/BaseBrush.h"
+#include "Notification.h"
 
 #define VSPLayer Layer
 #define VSPFileExporter FileExporter
