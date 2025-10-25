@@ -1435,8 +1435,20 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
                 }
             }
                 break;
+            case ddspp::R8G8_SNORM:
+            {
+                ret = new Layer(desc.width, desc.height);
+                ret->name = "DDS R8G8 Layer";
+                uint32_t* pxd = ret->pixels32();
+                for (uint64_t d = 0; d < desc.width * desc.height; d++) {
+                    u8 rg[2];
+                    fread(&rg, 2, 1, infile);
+                    pxd[d] = PackRGBAtoARGB(rg[0] + 0x80, rg[1] + 0x80, 0x80, 255);
+                }
+            }
+                break;
             default:
-                logprintf("format [%i] not supported\n", desc.format);
+                logerr(frmt("format [{}] not supported", (int)desc.format));
                 break;
         }
 
