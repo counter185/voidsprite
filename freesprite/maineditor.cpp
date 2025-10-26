@@ -356,6 +356,7 @@ void MainEditor::tick() {
     }
 
     tickAutosave();
+    timerSinceLastSave.startIfNotStarted();
 
     if (networkCanvasBroadcastRPC) {
         RPCLobbyInfo lobbyInfo;
@@ -759,12 +760,18 @@ void MainEditor::DrawForeground()
         g_fnt->RenderString(frmt("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
-    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, SDL_Color{ (u8)(255 - backgroundColor.r), (u8)(255 - backgroundColor.g), (u8)(255 - backgroundColor.b), (u8)(g_windowFocused ? 0x40 : 0x30) });
+    SDL_Color textColor = SDL_Color{ (u8)(255 - backgroundColor.r), (u8)(255 - backgroundColor.g), (u8)(255 - backgroundColor.b), 0x60};
+
+    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
 
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
         int fw = g_fnt->StatStringDimensions(unsavedSymbol).x;
-        g_fnt->RenderString(unsavedSymbol, g_windowW - fw - 2, g_windowH - 70, SDL_Color{ 255,255,255,0x70 });
+        g_fnt->RenderString(unsavedSymbol, g_windowW - fw - 2, g_windowH - 70, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 });
+
+        std::string timeString = frmt("({})", secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
+        int fw2 = g_fnt->StatStringDimensions(timeString, 12).x;
+        g_fnt->RenderString(timeString, g_windowW - fw - fw2 - 3, g_windowH - 70, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
     }
 }
 
@@ -1948,6 +1955,7 @@ void MainEditor::trySaveImage()
     if (splitSessionData.set) {
         if (saveSplitSession(lastConfirmedSavePath, this)) {
             result = true;
+            timerSinceLastSave.start();
             changesSinceLastSave = NO_UNSAVED_CHANGES;
         }
     }
@@ -1982,6 +1990,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         lastConfirmedSave = true;
         lastConfirmedSavePath = name;
         lastConfirmedExporter = exporter;
+        timerSinceLastSave.start();
         changesSinceLastSave = NO_UNSAVED_CHANGES;
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);

@@ -266,6 +266,7 @@ public:
     bool shouldUpdateRenderedIsolatedFragmentPoints = false;
 
     Timer64 autosaveTimer;
+    Timer64 timerSinceLastSave;
 
     u32 canvasStateID;
     std::atomic<bool> networkRunning = false;
