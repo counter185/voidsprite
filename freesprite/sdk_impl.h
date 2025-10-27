@@ -28,7 +28,9 @@ public:
     std::function<void(VSPBrush*, VSPEditorContext*, int, int)> fRelease = NULL;
 
     std::string getName() override { return name; }
+    std::string getIconPath() override { return "brush_custom.png"; }
     std::string getTooltip() override { return tooltip; }
+    XY getSection() override { return XY{ 0,3 }; }
     bool wantDoublePosPrecision() override { return wantDoublePrecision; }
 
     void clickPress(MainEditor* editor, XY pos) override { if (fClick != NULL) { fClick(this, editor, pos.x, pos.y); } }

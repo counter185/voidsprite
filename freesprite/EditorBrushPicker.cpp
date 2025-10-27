@@ -62,6 +62,16 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 
     //create brush buttons
     XY origin = { 5,40 * sc };
+
+    ScrollingPanel* brushPanel = new ScrollingPanel();
+    brushPanel->position = origin;
+    brushPanel->wxWidth = wxWidth - 10;
+    brushPanel->wxHeight = wxHeight - origin.y - 5;
+    brushPanel->bgColor = Fill::None();
+    subWidgets.addDrawable(brushPanel);
+
+    origin = { 0,0 };
+
     XY current = origin;
     XY currentSection = { 0,0 };
     int horizontalToolsPerSection = 4;
@@ -112,7 +122,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
             newBtn->colorBorder = brush->overrideRightClick() ? SDL_Color{ 0x00,0xae,0xff,0x80 } : SDL_Color{ 0xff, 0xff, 0xff, 0x50 };
             newBtn->setCallbackListener(100 + toolIndex, this);
             brushButtons[toolIndex] = newBtn;
-            subWidgets.addDrawable(newBtn);
+            brushPanel->subWidgets.addDrawable(newBtn);
         }
     }
     updateActiveBrushButton(caller->currentBrush);
