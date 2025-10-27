@@ -48,6 +48,8 @@ PlatformNativePathString newTempFile();
 #include "io/io_openraster.h"
 #include "io/io_pixelstudio.h"
 
+#include "io/io_palettes.h"
+
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
@@ -94,12 +96,6 @@ bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
 bool writeVTF(PlatformNativePathString path, Layer* data);
-
-std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name);
-std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name);
-std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name);
-std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString name);
-std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativePathString name);
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
 bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
@@ -496,11 +492,14 @@ inline void g_setupIO() {
         [](PlatformNativePathString p) {return true; }));
 
 
-    PaletteExporter* exVOIDPLT;
+    PaletteExporter
+        *exVOIDPLT,
+        *exHexPLT;
     g_paletteExporters.push_back( exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", &writePltVOIDPLT));
+    g_paletteExporters.push_back( exHexPLT = PaletteExporter::paletteExporter("Hex palette", ".hex", &writePltHEX));
 
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT, NULL, exVOIDPLT));
-    g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX, NULL, exHexPLT));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("paint.net palette", ".txt", &readPltPDNTXT, NULL));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("JASC-PAL palette", ".pal", &readPltJASCPAL, 
         magicVerify(0, "JASC-PAL")));
