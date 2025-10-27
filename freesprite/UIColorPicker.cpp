@@ -169,6 +169,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     colorModelsPanel->position = XY{ 0, 5 };
     colorModelsPanel->scrollHorizontally = false;
     colorModelsPanel->scrollVertically = true;
+    colorModelsPanel->bgColor = Fill::Solid(0x40000000);
     colorModelsPanel->wxWidth = 370;
     colorModelsPanel->wxHeight = 250;
     colorTabs->tabs[2].wxs.addDrawable(colorModelsPanel);
@@ -221,7 +222,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     //| Palettes tab
     palettePanel = new ScrollingPanel();
     palettePanel->position = XY{ 0,5 };
-    palettePanel->fillFocused = palettePanel->fillUnfocused = Fill::Solid(0x40000000);
+    palettePanel->bgColor = Fill::Solid(0x40000000);
     palettePanel->scrollHorizontally = false;
     palettePanel->scrollVertically = true;
     palettePanel->wxWidth = 370;
