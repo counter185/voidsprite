@@ -321,6 +321,7 @@
     <ClCompile Include="PanelRPG2KTilemapPreview.cpp" />
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
+    <ClCompile Include="PanelUserInteractable.cpp" />
     <ClCompile Include="PopupApplyFilter.cpp" />
     <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
     <ClCompile Include="PopupContextMenu.cpp" />
@@ -574,6 +575,7 @@
     <ClInclude Include="PanelRPG2KTilemapPreview.h" />
     <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="PanelTilemapPreview.h" />
+    <ClInclude Include="PanelUserInteractable.h" />
     <ClInclude Include="platform_android.h" />
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />

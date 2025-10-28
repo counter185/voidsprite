@@ -669,6 +669,9 @@
     <ClCompile Include="io\io_palettes.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="PanelUserInteractable.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1327,6 +1330,9 @@
     </ClInclude>
     <ClInclude Include="io\io_palettes.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelUserInteractable.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
