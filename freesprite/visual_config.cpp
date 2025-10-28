@@ -28,7 +28,9 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"ui/slider/bg", Fill::Solid(0xA0000000).serialize()},
     {"ui/slider/ind_shadow", "FF000000"},
     {"ui/slider/ind_body", "FFFFFFFF"},
-    {"ui/panel/border", "30FFFFFF"}
+    {"ui/panel/border", "30FFFFFF"},
+    {"ui/panel/bg_unfocused", Fill::Gradient(0x90303030,0x90101010,0x90101010,0x90101010).serialize()},
+    {"ui/panel/bg_focused", Fill::Gradient(0xA0303030,0xA0101010,0xA0101010,0xA0101010).serialize()},
 };
 
 std::map<SDL_Renderer*, std::map<std::string, SDL_Texture*>> visualConfigTextureCache = {};

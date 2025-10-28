@@ -1,13 +1,11 @@
 #pragma once
-#include "DraggablePanel.h"
+#include "PanelUserInteractable.h"
 class EditorTouchToggle :
-    public DraggablePanel
+    public PanelUserInteractable
 {
 protected:
     MainEditor* parent = NULL;
 public:
     EditorTouchToggle(MainEditor* caller);
-
-    void render(XY position) override;
 };
 

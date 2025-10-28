@@ -611,10 +611,9 @@ void MainEditorPalettized::setUpWidgets()
     //regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    auto brushPickerPanel = new CollapsableDraggablePanel("TOOLS", brushPicker);
-    brushPickerPanel->position.y = 454;
-    brushPickerPanel->position.x = 10;
-    wxsManager.addDrawable(brushPickerPanel);
+    brushPicker->position.y = 454;
+    brushPicker->position.x = 10;
+    wxsManager.addDrawable(brushPicker);
 
     layerPicker = new PalettizedEditorLayerPicker(this);
     layerPicker->position = XY{ 440, 80 };
@@ -636,7 +635,7 @@ void MainEditorPalettized::setUpWidgets()
     if (g_config.compactEditor) {
         std::vector<CompactEditorSection> createSections = {
             {colorPickerPanel, g_iconCompactColorPicker},
-            {brushPickerPanel, g_iconCompactToolPicker},
+            {brushPicker, g_iconCompactToolPicker},
             {layerPicker, g_iconCompactLayerPicker}
         };
 

@@ -229,6 +229,7 @@
     {"vsp.maineditor.panel.colorpicker.colorinput.tooltip", "Enter the color here in #RRGGBB format.\n"
                                                             "Predefined color names are also supported."},
 
+    {"vsp.maineditor.panel.layerpicker.title", "LAYERS"},
 
     {"vsp.maineditor.panel.brushpicker.title", "TOOLS"},
     {"vsp.maineditor.panel.netcollab.host.title", "NETWORK CANVAS"},

@@ -152,7 +152,7 @@ public:
 };
 
 struct CompactEditorSection {
-    DraggablePanel* targetPanel;
+    Panel* targetPanel;
     ReldTex* icon = NULL;
 };
 

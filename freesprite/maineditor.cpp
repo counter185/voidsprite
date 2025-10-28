@@ -1283,10 +1283,10 @@ void MainEditor::setUpWidgets()
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.brushpicker.title"), brushPicker);
-    brushPickerPanel->position.y = 454;
-    brushPickerPanel->position.x = 10;
-    wxsManager.addDrawable(brushPickerPanel);
+    //CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.brushpicker.title"), brushPicker);
+    brushPicker->position.y = 454;
+    brushPicker->position.x = 10;
+    wxsManager.addDrawable(brushPicker);
 
     layerPicker = new EditorLayerPicker(this);
     layerPicker->position = XY{ 440, 80 };
@@ -1306,7 +1306,7 @@ void MainEditor::setUpWidgets()
         
         std::vector<CompactEditorSection> createSections = {
             {colorPickerPanel, g_iconCompactColorPicker},
-            {brushPickerPanel, g_iconCompactToolPicker},
+            {brushPicker, g_iconCompactToolPicker},
             {layerPicker, g_iconCompactLayerPicker}
         };
 
@@ -1329,7 +1329,7 @@ void MainEditor::SetupCompactEditor(std::vector<CompactEditorSection> createSect
         section.targetPanel->position = xyAdd(btn->position, { 100, 0 });
         btn->onClickCallback = [this, section](UIButton* b) {
             section.targetPanel->enabled = !section.targetPanel->enabled;
-            section.targetPanel->tryMoveOutOfOOB();
+            //section.targetPanel->tryMoveOutOfOOB();
             this->wxsManager.forceFocusOn(section.targetPanel);
             };
         wxsManager.addDrawable(btn);

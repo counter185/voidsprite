@@ -6,11 +6,14 @@
 EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     this->caller = caller;
 
+    setupDraggable();
+    setupCollapsible();
+    addTitleText(TL("vsp.maineditor.panel.brushpicker.title"));
+
     int sc = g_config.compactEditor ? 2 : 1;
 
     wxWidth = 260 *sc;
     wxHeight = 210 * sc;
-    borderColor = visualConfigHexU32("ui/panel/border");
 
     patternPanelBtn = new UIButton();
     
@@ -21,7 +24,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     patternPanelBtn->tooltip = "Open pattern menu";
     patternPanelBtn->icon = g_patterns[0]->cachedIcon;
     patternPanelBtn->setCallbackListener(EVENT_BRUSHPICKER_TOGGLE_PATTERN_MENU, this);
-    subWidgets.addDrawable(patternPanelBtn);
+    wxsTarget().addDrawable(patternPanelBtn);
 
     editorReplaceBtn = new UIButton();
     editorReplaceBtn->text = "R";
@@ -30,12 +33,12 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     editorReplaceBtn->position = { wxWidth - 20 - editorReplaceBtn->wxWidth - patternPanelBtn->wxWidth, 10 };
     editorReplaceBtn->tooltip = "Replace mode\nPixels will only be drawn on opaque areas";
     editorReplaceBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEREPLACE, this);
-    subWidgets.addDrawable(editorReplaceBtn);
+    wxsTarget().addDrawable(editorReplaceBtn);
 
     patternMenuPanel = new Panel();
     patternMenuPanel->enabled = false;
     patternMenuPanel->position = { wxWidth + 30, 0 };
-    subWidgets.addDrawable(patternMenuPanel);
+    wxsTarget().addDrawable(patternMenuPanel);
 
     UILabel* lbl = new UILabel("PATTERNS");
     lbl->position = { 0, 5 };
@@ -68,7 +71,7 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     brushPanel->wxWidth = wxWidth - 10;
     brushPanel->wxHeight = wxHeight - origin.y - 5;
     brushPanel->bgColor = Fill::None();
-    subWidgets.addDrawable(brushPanel);
+    wxsTarget().addDrawable(brushPanel);
 
     origin = { 0,0 };
 
@@ -153,21 +156,9 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
 
 void EditorBrushPicker::render(XY position)
 {
-    if (!enabled) {
-        return;
-    }
-    SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
-    renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
-    if (thisOrParentFocused()) {
-        renderFocusBorder(position, SDL_Color{ 255,255,255,255 });
-    }
-
     patternMenuPanel->position = xyAdd({ wxWidth, 0 }, XY{ (int)(30 * XM1PW3P1(patternMenuTimer.percentElapsedTime(200))) , 0 });
 
-    DraggablePanel::render(position);
+    PanelUserInteractable::render(position);
 }
 
 void EditorBrushPicker::eventButtonPressed(int evt_id)

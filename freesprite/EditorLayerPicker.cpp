@@ -3,6 +3,7 @@
 #include "mathops.h"
 #include "FontRenderer.h"
 #include "EditorLayerPicker.h"
+#include "ScrollingPanel.h"
 #include "UILayerButton.h"
 #include "maineditor.h"
 #include "Panel.h"
@@ -14,7 +15,10 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
 
     wxWidth = 250;
     wxHeight = 400;
-    borderColor = visualConfigHexU32("ui/panel/border");
+
+    setupDraggable();
+    setupCollapsible();
+    addTitleText(TL("vsp.maineditor.panel.layerpicker.title"));
 
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
@@ -23,7 +27,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     addBtn->icon = g_iconLayerAdd;
     addBtn->tooltip = "New layer";
     addBtn->onClickCallback = [this](UIButton*) { caller->newLayer(); updateLayers(); };
-    subWidgets.addDrawable(addBtn);
+    wxsTarget().addDrawable(addBtn);
 
     UIButton* removeBtn = new UIButton();
     removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
@@ -32,7 +36,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     removeBtn->icon = g_iconLayerDelete;
     removeBtn->tooltip = "Delete layer";
     removeBtn->onClickCallback = [this](UIButton*) { caller->deleteLayer(caller->selLayer); updateLayers(); };
-    subWidgets.addDrawable(removeBtn);
+    wxsTarget().addDrawable(removeBtn);
 
     UIButton* upBtn = new UIButton();
     upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
@@ -40,7 +44,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     upBtn->icon = g_iconLayerUp;
     upBtn->tooltip = "Move layer up";
     upBtn->onClickCallback = [this](UIButton*) { caller->moveLayerUp(caller->selLayer); updateLayers(); };
-    subWidgets.addDrawable(upBtn);
+    wxsTarget().addDrawable(upBtn);
 
     UIButton* downBtn = new UIButton();
     downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
@@ -48,7 +52,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     downBtn->icon = g_iconLayerDown;
     downBtn->tooltip = "Move layer down";
     downBtn->onClickCallback = [this](UIButton*) { caller->moveLayerDown(caller->selLayer); updateLayers(); };
-    subWidgets.addDrawable(downBtn);
+    wxsTarget().addDrawable(downBtn);
 
     UIButton* mergeDownBtn = new UIButton();
     mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
@@ -57,7 +61,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     mergeDownBtn->icon = g_iconLayerDownMerge;
     mergeDownBtn->tooltip = "Merge down";
     mergeDownBtn->onClickCallback = [this](UIButton*) { caller->mergeLayerDown(caller->selLayer); updateLayers(); };
-    subWidgets.addDrawable(mergeDownBtn);
+    wxsTarget().addDrawable(mergeDownBtn);
 
     UIButton* duplicateBtn = new UIButton();
     duplicateBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + mergeDownBtn->wxWidth + 5 + 5 + 5 + 5 + 5 + 5, 30 };
@@ -65,19 +69,19 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     duplicateBtn->icon = g_iconLayerDuplicate;
     duplicateBtn->tooltip = "Duplicate layer";
     duplicateBtn->onClickCallback = [this](UIButton*) { caller->duplicateLayer(caller->selLayer); updateLayers(); };
-    subWidgets.addDrawable(duplicateBtn);
+    wxsTarget().addDrawable(duplicateBtn);
 
     UILabel* opacityLabel = new UILabel(TL("vsp.cmn.opacity"));
     opacityLabel->position = { 7, 67 };
     opacityLabel->fontsize = 16;
-    subWidgets.addDrawable(opacityLabel);
+    wxsTarget().addDrawable(opacityLabel);
 
     opacitySlider = new UISlider();
     opacitySlider->position = { 80, 70 };
     opacitySlider->wxWidth = 165;
     opacitySlider->wxHeight = 20;
     opacitySlider->setCallbackListener(EVENT_LAYERPICKER_OPACITYSLIDER, this);
-    subWidgets.addDrawable(opacitySlider);
+    wxsTarget().addDrawable(opacitySlider);
 
     layerListPanel = new ScrollingPanel();
     layerListPanel->position = { 5, 100 };
@@ -85,27 +89,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     layerListPanel->scrollVertically = true;
     layerListPanel->wxWidth = wxWidth - 10;
     layerListPanel->wxHeight = wxHeight - layerListPanel->position.y - 5;
-    subWidgets.addDrawable(layerListPanel);
-}
-
-void EditorLayerPicker::render(XY position)
-{
-    if (!enabled) return;
-
-    SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
-    //SDL_RenderFillRect(g_rd, &r);
-
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, (u8)(focused ? 0xa0 : 0x90)};
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, (u8)(focused ? 0xa0 : 0x90)};
-    renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
-    if (thisOrParentFocused()) {
-        renderFocusBorder(position, SDL_Color{ 255,255,255,255 });
-    }
-
-    g_fnt->RenderString("LAYERS", position.x + 4, position.y + 1);
-
-    DraggablePanel::render(position);
+    wxsTarget().addDrawable(layerListPanel);
 }
 
 void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)

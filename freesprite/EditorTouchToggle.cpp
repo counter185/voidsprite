@@ -8,20 +8,11 @@ EditorTouchToggle::EditorTouchToggle(MainEditor* caller) : parent(caller)
 {
     wxWidth = 180;
     wxHeight = 150;
-	borderColor = visualConfigHexU32("ui/panel/border");
 
-	UILabel* lbl = new UILabel(TL("vsp.maineditor.panel.touchmode.title"));
-	lbl->position = { 5, 2 };
-	subWidgets.addDrawable(lbl);
-
-	UIButton* closeButton = new UIButton("X");
-	closeButton->position = { wxWidth - 25, 2 };
-	closeButton->wxWidth = 20;
-	closeButton->wxHeight = 20;
-	closeButton->onClickCallback = [this](UIButton* btn) {
-		parent->removeWidget(this);
-	};
-	subWidgets.addDrawable(closeButton);
+	setupDraggable();
+	setupCollapsible();
+	addTitleText(TL("vsp.maineditor.panel.touchmode.title"));
+	setupCloseButton([this]() { parent->removeWidget(this);});
 
 	static std::map<int, std::string> modeNameKeys = {
 			{0, "vsp.maineditor.panel.touchmode.pan"},
@@ -40,21 +31,5 @@ EditorTouchToggle::EditorTouchToggle(MainEditor* caller) : parent(caller)
 	};
 	
 	btn->text = TL(modeNameKeys[(int)parent->touchMode]);
-	subWidgets.addDrawable(btn);
-}
-
-void EditorTouchToggle::render(XY position)
-{
-    SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-
-    u32 colorBG1 = PackRGBAtoARGB(0x30, 0x30, 0x30, focused ? 0xa0 : 0x90);
-    u32 colorBG2 = PackRGBAtoARGB(0x10, 0x10, 0x10, focused ? 0xa0 : 0x90);
-    renderGradient(r, colorBG2, colorBG1, colorBG1, colorBG1);
-    if (thisOrParentFocused()) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-    }
-
-	DraggablePanel::render(position);
+	wxsTarget().addDrawable(btn);
 }

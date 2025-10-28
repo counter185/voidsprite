@@ -2,8 +2,9 @@
 
 bool Panel::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
+    XY dim = getDimensions();
     if (enabled) {
-        return (!passThroughMouse && pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight })) || subWidgets.mouseInAny(thisPositionOnScreen, mousePos);
+        return (!passThroughMouse && pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, dim.x, dim.y })) || subWidgets.mouseInAny(thisPositionOnScreen, mousePos);
     }
     return false;
 }
@@ -13,7 +14,6 @@ void Panel::render(XY position)
     if (enabled) {
         XY renderDimensions = getRenderDimensions();
         SDL_Rect panelRect = { position.x, position.y, renderDimensions.x, renderDimensions.y };
-        (thisOrParentFocused() ? fillFocused : fillUnfocused).fill(panelRect);
 
         SDL_Color border = uint32ToSDLColor(this->borderColor);
         if (border.a != 0) {
@@ -47,17 +47,18 @@ void Panel::mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction)
 
 void Panel::renderFocusBorder(XY at, SDL_Color color, double lightup)
 {
+    XY dimensions = getDimensions();
     double percent = XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300));
-    int timedHeight = wxHeight * percent;
-    int timedWidth = wxWidth * percent;
+    int timedHeight = dimensions.y * percent;
+    int timedWidth = dimensions.x * percent;
 
     if (lightup > 0) {
         renderFocusBorderLightup(at, color, { timedWidth, timedHeight }, lightup);
     }
 
     SDL_SetRenderDrawColor(g_rd, color.r, color.g, color.b, 255);
-    drawLine({ at.x, at.y }, { at.x, at.y + wxHeight }, percent);
-    drawLine({ at.x, at.y }, { at.x + wxWidth, at.y }, percent);
+    drawLine({ at.x, at.y }, { at.x, at.y + dimensions.y }, percent);
+    drawLine({ at.x, at.y }, { at.x + dimensions.x, at.y }, percent);
 }
 
 void Panel::renderFocusBorderLightup(XY at, SDL_Color c, XY size, double lightup)

@@ -3,6 +3,7 @@
 #include "DrawableManager.h"
 #include "Panel.h"
 
+//deprecated: use paneluserinteractable instead
 class DraggablePanel :
     public Panel
 {

@@ -1,13 +1,13 @@
 #pragma once
 #include "drawable.h"
 #include "DrawableManager.h"
-#include "DraggablePanel.h"
+#include "PanelUserInteractable.h"
 #include "UIButton.h"
 #include "EventCallbackListener.h"
 #include "Pattern.h"
 #include "ScrollingPanel.h"
 
-class EditorBrushPicker : public DraggablePanel, public EventCallbackListener
+class EditorBrushPicker : public PanelUserInteractable, public EventCallbackListener
 {
 public:
 	MainEditor* caller;

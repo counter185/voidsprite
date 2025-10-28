@@ -18,6 +18,7 @@ void PanelUserInteractable::setupDraggable()
 void PanelUserInteractable::setupCollapsible()
 {
     collapsible = true;
+    collapsed = false;
     Panel* subPanel = new Panel();
     subPanel->position = { 0,0 };
     subWidgets.addDrawable(subPanel);
@@ -32,12 +33,31 @@ void PanelUserInteractable::setupCollapsible()
     subWidgets.addDrawable(collapseButton);
 }
 
+void PanelUserInteractable::setupCloseButton(std::function<void()> callback)
+{
+    UIButton* closeButton = new UIButton("X");
+    closeButton->position = { wxWidth - 25, 2 };
+    closeButton->wxWidth = 20;
+    closeButton->wxHeight = 20;
+    closeButton->onClickCallback = [callback](UIButton* btn) {
+        callback();
+    };
+    wxsTarget().addDrawable(closeButton);
+}
+
 UILabel* PanelUserInteractable::addTitleText(std::string title)
 {
-    XY labelPosition = { collapsible ? 30 : 5, 5 };
+    XY labelPosition = { collapsible ? 30 : 5, 3 };
     UILabel* label = new UILabel(title, labelPosition);
-    wxsTarget().addDrawable(label);
+    subWidgets.addDrawable(label);
     return label;
+}
+
+PanelUserInteractable::PanelUserInteractable()
+{
+    fillUnfocused = visualConfigFill("ui/panel/bg_unfocused");
+    fillFocused = visualConfigFill("ui/panel/bg_focused");
+    borderColor = visualConfigHexU32("ui/panel/border");
 }
 
 void PanelUserInteractable::handleInput(SDL_Event evt, XY gPosOffset)
@@ -86,24 +106,30 @@ void PanelUserInteractable::processDrag(SDL_Event evt) {
 
 void PanelUserInteractable::tryMoveOutOfOOB()
 {
+    XY dim = getDimensions();
+
     if (position.x < 0) {
         position.x = 0;
     }
     if (position.y < 0) {
         position.y = 0;
     }
-    if (position.x + wxWidth > g_windowW) {
-        position.x = g_windowW - wxWidth;
+    if (position.x + dim.x > g_windowW) {
+        position.x = g_windowW - dim.x;
     }
-    if (position.y + wxHeight > g_windowH) {
-        position.y = g_windowH - wxHeight;
+    if (position.y + dim.y > g_windowH) {
+        position.y = g_windowH - dim.y;
     }
 }
 
 void PanelUserInteractable::toggleCollapse() {
     bool newState = (collapsed = !collapsed);
-    collapsePanel->enabled = newState;
+    collapsePanel->enabled = !newState;
     subWidgets.forceUnfocus();
     focusTimer.start();
     collapseButton->text = newState ? "-" : "+";
+
+    if (draggable) {
+        tryMoveOutOfOOB();
+    }
 }

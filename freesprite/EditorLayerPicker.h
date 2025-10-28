@@ -1,12 +1,9 @@
 #pragma once
 #include "globals.h"
-#include "drawable.h"
-#include "DrawableManager.h"
 #include "EventCallbackListener.h"
-#include "DraggablePanel.h"
-#include "ScrollingPanel.h"
+#include "PanelUserInteractable.h"
 
-class EditorLayerPicker : public DraggablePanel, public EventCallbackListener
+class EditorLayerPicker : public PanelUserInteractable, public EventCallbackListener
 {
 protected:
 	EditorLayerPicker() {};
@@ -16,8 +13,6 @@ public:
 	UISlider* opacitySlider = NULL;
 
 	EditorLayerPicker(MainEditor* editor);
-
-	void render(XY position) override;
 
 	void eventGeneric(int evt_id, int data1, int data2) override;
 	void eventSliderPosChanged(int evt_id, float value) override;
