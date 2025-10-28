@@ -1,9 +1,9 @@
 #pragma once
-#include "Panel.h"
+#include "PanelUserInteractable.h"
 #include "Canvas.h"
 
 class PanelPreview :
-    public Panel
+    public PanelUserInteractable
 {
 private:
     MainEditor* parent;
@@ -14,9 +14,9 @@ public:
     PanelPreview(MainEditor* t);
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
-    void handleInput(SDL_Event evt, XY gPosOffset) override;
+    bool defaultInputAction(SDL_Event evt, XY gPosOffset) override;
 
-    void render(XY at) override;
+    void renderAfterBG(XY at) override;
 
     void initWidgets();
     void renderViewportBound(XY at);

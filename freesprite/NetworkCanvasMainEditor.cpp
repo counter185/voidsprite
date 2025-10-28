@@ -252,16 +252,12 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSet
 
     networkCanvasCurrentChatState = new NetworkCanvasChatState;
     networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
-    networkCanvasChatPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.chat.title"), networkCanvasChatPanel);
-    networkCanvasChatPanelContainer->position.y = 64;
-    networkCanvasChatPanelContainer->position.x = 730;
-    wxsManager.addDrawable(networkCanvasChatPanelContainer);
+    networkCanvasChatPanel->position = { 730, 64 };
+    wxsManager.addDrawable(networkCanvasChatPanel);
 
     networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this, true);
-    networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.host.title"), networkCanvasHostPanel);
-    networkCanvasHostPanelContainer->position.y = 64;
-    networkCanvasHostPanelContainer->position.x = 420;
-    wxsManager.addDrawable(networkCanvasHostPanelContainer);
+    networkCanvasHostPanel->position = { 420, 64 };
+    wxsManager.addDrawable(networkCanvasHostPanel);
 }
 
 void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)

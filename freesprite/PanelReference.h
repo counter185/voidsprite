@@ -1,5 +1,5 @@
 #pragma once
-#include "Panel.h"
+#include "PanelUserInteractable.h"
 #include "Canvas.h"
 #include "EventCallbackListener.h"
 
@@ -10,7 +10,7 @@ enum ReferencePanelMode {
     REFERENCE_OVER_CANVAS = 3,
 };
 
-class PanelReference : public Panel, public EventCallbackListener
+class PanelReference : public PanelUserInteractable, public EventCallbackListener
 {
 private:
     Layer* previewTex = NULL;
@@ -26,9 +26,9 @@ public:
     ~PanelReference();
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
-    void handleInput(SDL_Event evt, XY gPosOffset) override;
+    bool defaultInputAction(SDL_Event evt, XY gPosOffset) override;
 
-    void render(XY at) override;
+    void renderAfterBG(XY at) override;
 
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 

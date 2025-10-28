@@ -7,25 +7,20 @@ PanelPreview::PanelPreview(MainEditor* t)
     parent = t;
     wxWidth = 400;
     wxHeight = 300;
-    borderColor = visualConfigHexU32("ui/panel/border");
 
-    UIButton* closeBtn = new UIButton();
-    closeBtn->wxWidth = 30;
-    closeBtn->wxHeight = 20;
-    closeBtn->position = { wxWidth - 5 - closeBtn->wxWidth, 5 };
-    closeBtn->text = "X";
-    closeBtn->onClickCallback = [&](UIButton* caller) {
+    setupDraggable();
+    setupCollapsible();
+    addTitleText("PREVIEW");
+    setupCloseButton([this]() {
         parent->removeWidget(getTopmostParent());
-    };
-    subWidgets.addDrawable(closeBtn);
+    });
 }
 
-void PanelPreview::handleInput(SDL_Event evt, XY gPosOffset)
+bool PanelPreview::defaultInputAction(SDL_Event evt, XY gPosOffset)
 {
     SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
     if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
-        && !subWidgets.mouseInAny(gPosOffset, { (int)evtc.button.x, (int)evtc.button.y }) 
         && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
         dragging++;
     }
@@ -36,27 +31,17 @@ void PanelPreview::handleInput(SDL_Event evt, XY gPosOffset)
         c.panCanvas({ (int)evtc.motion.xrel, (int)evtc.motion.yrel });
     }
     else {
-        Panel::handleInput(evt, gPosOffset);
+        return false;
     }
+    return true;
 }
 
-void PanelPreview::render(XY at)
+void PanelPreview::renderAfterBG(XY at)
 {
-    c.dimensions = parent->canvas.dimensions;
-
-    if (!enabled) {
+    if (collapsed) {
         return;
     }
-
-    SDL_Rect panelRect = { at.x, at.y, wxWidth, wxHeight };
-
-    renderGradient(panelRect, 0x80000000, 0x80000000, 0x80000000, 0x80404040);
-
-    if (thisOrParentFocused()) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ at.x, at.y }, { at.x, at.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-        drawLine({ at.x, at.y }, { at.x + wxWidth, at.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-    }
+    c.dimensions = parent->canvas.dimensions;
 
     SDL_Rect canvasDraw = getCanvasDrawRect(at);
     g_pushClip(canvasDraw);
@@ -73,8 +58,6 @@ void PanelPreview::render(XY at)
     renderViewportBound(at);
 
     g_popClip();
-
-    Panel::render(at);
 }
 
 SDL_Rect PanelPreview::getCanvasDrawRect(XY at) {
@@ -84,7 +67,7 @@ SDL_Rect PanelPreview::getCanvasDrawRect(XY at) {
 bool PanelPreview::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
     SDL_Rect canvasDraw = getCanvasDrawRect(thisPositionOnScreen);
-    return Panel::isMouseIn(thisPositionOnScreen, mousePos) || (enabled && pointInBox(mousePos, canvasDraw));
+    return PanelUserInteractable::isMouseIn(thisPositionOnScreen, mousePos) || (!collapsed && pointInBox(mousePos, canvasDraw));
 }
 
 void PanelPreview::renderViewportBound(XY at)

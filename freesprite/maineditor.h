@@ -10,6 +10,7 @@
 #include "EventCallbackListener.h"
 #include "operation_queue.h"
 #include "Panel.h"
+#include "PanelUserInteractable.h"
 
 struct NET_StreamSocket;
 
@@ -125,7 +126,7 @@ public:
     std::vector<CommentData> comments;
 };*/
 
-class EditorNetworkCanvasChatPanel : public Panel {
+class EditorNetworkCanvasChatPanel : public PanelUserInteractable {
 protected:
     MainEditor* parent = NULL;
     ScrollingPanel* chatMsgPanel = NULL;
@@ -133,20 +134,16 @@ protected:
 public:
     EditorNetworkCanvasChatPanel(MainEditor* caller, bool clientSide = false);
 
-    void render(XY position) override;
-
     void updateChat();
 };
 
-class EditorNetworkCanvasHostPanel : public Panel {
+class EditorNetworkCanvasHostPanel : public PanelUserInteractable {
 protected:
     MainEditor* parent = NULL;
     ScrollingPanel* clientList = NULL;
     bool clientSide = false;
 public:
     EditorNetworkCanvasHostPanel(MainEditor* caller, bool clientSide = false);
-
-    void render(XY position) override;
 
     void updateClientList();
 };
@@ -278,8 +275,6 @@ public:
     std::atomic<int> nextClientUID = 0;
     EditorNetworkCanvasHostPanel* networkCanvasHostPanel = NULL;
     EditorNetworkCanvasChatPanel* networkCanvasChatPanel = NULL;
-    Panel* networkCanvasHostPanelContainer = NULL;
-    Panel* networkCanvasChatPanelContainer = NULL;
     NetworkCanvasChatState* networkCanvasCurrentChatState = NULL;
     int networkCanvasPort = -1;
     std::string networkCanvasPassword = "";

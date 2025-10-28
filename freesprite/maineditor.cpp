@@ -1283,7 +1283,6 @@ void MainEditor::setUpWidgets()
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    //CollapsableDraggablePanel* brushPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.brushpicker.title"), brushPicker);
     brushPicker->position.y = 454;
     brushPicker->position.x = 10;
     wxsManager.addDrawable(brushPicker);
@@ -2570,10 +2569,9 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
     if (ssn != NULL) {
         Layer* flat = ssn->flattenImage();
         PanelReference* referencePanel = new PanelReference(flat, this);
-        CollapsableDraggablePanel* refWPanel = new CollapsableDraggablePanel("REFERENCE", referencePanel);
         openReferencePanels.push_back(referencePanel);
-        addWidget(refWPanel);
-        refWPanel->playPanelOpenVFX();
+        addWidget(referencePanel);
+        referencePanel->playPanelOpenVFX();
         delete ssn;
     }
 }
@@ -2581,9 +2579,8 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
 void MainEditor::openPreviewPanel()
 {
     Panel* previewPanel = new PanelPreview(this);
-    CollapsableDraggablePanel* previewWPanel = new CollapsableDraggablePanel("PREVIEW", previewPanel);
-    addWidget(previewWPanel);
-    previewWPanel->playPanelOpenVFX();
+    addWidget(previewPanel);
+    previewPanel->playPanelOpenVFX();
 }
 
 void MainEditor::tryToggleTilePreviewLockAtMousePos() 
@@ -3141,17 +3138,15 @@ void MainEditor::promptStartNetworkSession()
 
         networkCanvasCurrentChatState = new NetworkCanvasChatHostState;
         networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
-        networkCanvasChatPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.chat.title"), networkCanvasChatPanel);
-        networkCanvasChatPanelContainer->position.y = 64;
-        networkCanvasChatPanelContainer->position.x = 730;
-        wxsManager.addDrawable(networkCanvasChatPanelContainer);
+        networkCanvasChatPanel->position.y = 64;
+        networkCanvasChatPanel->position.x = 730;
+        wxsManager.addDrawable(networkCanvasChatPanel);
 
         
         networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this);
-        networkCanvasHostPanelContainer = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.netcollab.host.title"), networkCanvasHostPanel);
-        networkCanvasHostPanelContainer->position.y = 64;
-        networkCanvasHostPanelContainer->position.x = 420;
-        wxsManager.addDrawable(networkCanvasHostPanelContainer);
+        networkCanvasHostPanel->position.y = 64;
+        networkCanvasHostPanel->position.x = 420;
+        wxsManager.addDrawable(networkCanvasHostPanel);
 
         thisClientInfo = new NetworkCanvasClientInfo;
         thisClientInfo->clientIP = "localhost";
@@ -3641,15 +3636,13 @@ void MainEditor::endNetworkSession()
         thisClientInfo = NULL;
     }
     //are these even required
-    if (networkCanvasHostPanelContainer != NULL) {
-        removeWidget(networkCanvasHostPanelContainer);
-        networkCanvasHostPanelContainer = NULL;
+    if (networkCanvasHostPanel != NULL) {
+        removeWidget(networkCanvasHostPanel);
         networkCanvasHostPanel = NULL;
     }
-    if (networkCanvasChatPanelContainer != NULL) {
+    if (networkCanvasChatPanel != NULL) {
+        removeWidget(networkCanvasChatPanel);
         networkCanvasChatPanel = NULL;
-        removeWidget(networkCanvasChatPanelContainer);
-        networkCanvasChatPanelContainer = NULL;
     }
 
     if (networkCanvasCurrentChatState != NULL) {
@@ -3812,8 +3805,10 @@ EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller, b
     parent = caller;
     wxWidth = 300;
     wxHeight = 200;
-    fillFocused = Fill::Gradient(0x90101010, 0x90303030, 0x90303030, 0x90303030);
-    fillUnfocused = Fill::Gradient(0xA0101010, 0xA0303030, 0xA0303030, 0xA0303030);
+
+    setupDraggable();
+    setupCollapsible();
+    addTitleText(TL("vsp.maineditor.panel.netcollab.host.title"));
 
     clientList = new ScrollingPanel();
     clientList->position = { 5, 30 };
@@ -3821,19 +3816,6 @@ EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller, b
     clientList->wxHeight = wxHeight - 35;
     subWidgets.addDrawable(clientList);
 
-}
-
-void EditorNetworkCanvasHostPanel::render(XY position)
-{
-    Panel::render(position);
-    if (!enabled) {
-        return;
-    }
-    if (thisOrParentFocused()) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-    }
 }
 
 void EditorNetworkCanvasHostPanel::updateClientList()
@@ -3942,8 +3924,10 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
     this->clientSide = clientSide;
     wxWidth = 300;
     wxHeight = 250;
-    fillFocused = Fill::Gradient(0x90101010, 0x90303030, 0x90303030, 0x90303030);
-    fillUnfocused = Fill::Gradient(0xA0101010, 0xA0303030, 0xA0303030, 0xA0303030);
+
+    setupDraggable();
+    setupCollapsible();
+    addTitleText(TL("vsp.maineditor.panel.netcollab.chat.title"));
 
     chatMsgPanel = new ScrollingPanel();
     chatMsgPanel->position = { 5, 30 };
@@ -3962,19 +3946,6 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
     };
 
     subWidgets.addDrawable(inputField);
-}
-
-void EditorNetworkCanvasChatPanel::render(XY position)
-{
-    Panel::render(position);
-    if (!enabled) {
-        return;
-    }
-    if (thisOrParentFocused()) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(thisOrParentFocusTimer().percentElapsedTime(300)));
-    }
 }
 
 void EditorNetworkCanvasChatPanel::updateChat()

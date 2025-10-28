@@ -12,7 +12,6 @@ private:
     bool dragging = false;
     bool wasDragged = false;
 
-    bool collapsed = false;
     UIButton* collapseButton = NULL;
     Panel* collapsePanel = NULL;
 
@@ -21,6 +20,8 @@ private:
 protected:
     SDL_Color focusBorderColor = { 255,255,255,255 };
     double focusBorderLightup = 0.0;
+
+    bool collapsed = false;
 
     DrawableManager& wxsTarget() { return widgetsTarget != NULL ? widgetsTarget->subWidgets : subWidgets; }
 
@@ -33,6 +34,7 @@ protected:
     UILabel* addTitleText(std::string title);
 
     virtual bool defaultInputAction(SDL_Event evt, XY at) { return false; }
+    virtual void renderAfterBG(XY at) {}
 public:
     PanelUserInteractable();
 
@@ -42,6 +44,7 @@ public:
             if (focused) {
                 renderFocusBorder(at, focusBorderColor, focusBorderLightup);
             }
+            renderAfterBG(at);
             Panel::render(at);
         }
     }
