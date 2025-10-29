@@ -58,7 +58,6 @@ MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
 MinecraftBlockPreviewScreen::~MinecraftBlockPreviewScreen()
 {
     caller->removeWidget(panelSmalm);
-    BaseScreen::~BaseScreen();
 }
 
 void MinecraftBlockPreviewScreen::render()

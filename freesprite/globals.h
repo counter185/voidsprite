@@ -350,6 +350,9 @@ struct XYd {
         return XYd{ x * v, y * v };
     }
 };
+struct XYZd {
+    double x, y, z;
+};
 
 inline XY xydToXy(XYd v) { return XY{ (int)v.x, (int)v.y }; }
 
