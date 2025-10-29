@@ -1104,7 +1104,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_V,
             {
-                TL("vsp.maineditor.tab.view"),
+                TL("vsp.nav.view"),
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
@@ -1205,19 +1205,21 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-#if _DEBUG
                     {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
                             [this]() {
-                                if (this->canvas.dimensions.x != this->canvas.dimensions.y && this->canvas.dimensions.x / 2 != this->canvas.dimensions.y) {
+                                /*if (this->canvas.dimensions.x != this->canvas.dimensions.y && this->canvas.dimensions.x / 2 != this->canvas.dimensions.y) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
                                     return;
+                                }*/
+                                //todo: figure it out
+                                if (!xyEqual(this->canvas.dimensions, {64,64})) {
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Must be 64x64."));
+                                    return;
                                 }
-                                MinecraftSkinPreviewScreen* newScreen = new MinecraftSkinPreviewScreen(this);
-                                g_addScreen(newScreen);
+                                g_addScreen(new MinecraftSkinPreviewScreen(this));
                             }
                         }
                     },
-#endif
                 },
                 g_iconNavbarTabView
             }

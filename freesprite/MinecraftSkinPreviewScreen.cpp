@@ -1,6 +1,9 @@
 #include "MinecraftSkinPreviewScreen.h"
 #include "maineditor.h"
 #include "FontRenderer.h"
+#include "ScreenWideNavBar.h"
+#include "Notification.h"
+#include "background_operation.h"
 
 BaseScreen* MinecraftSkinPreviewScreen::isSubscreenOf()
 {
@@ -159,8 +162,8 @@ void MinecraftSkinPreviewScreen::debugRenderAxes()
 
 void MinecraftSkinPreviewScreen::renderFloorGrid()
 {
-    double lineLength = 30;
-    for (int i = -6; i <= 6; i++) {
+    double lineLength = 60;
+    for (int i = -8; i <= 8; i++) {
         double gridSpaced = i * 4;
         XY proj = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,-lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
         XY proj2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
@@ -168,10 +171,58 @@ void MinecraftSkinPreviewScreen::renderFloorGrid()
         XY projA = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ -lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
         XY projA2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
 
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 30);
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 30 / ixmax(1, abs(i)));
         drawLine(proj, proj2);
         drawLine(projA, projA2);
     }
+}
+
+MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
+    caller = parent;
+    screen00 = { g_windowW / 2, g_windowH / 2 };
+    slimModel = (parent->layers.back()->getPixelAt({ 51, 16 }) & 0xFF000000) == 0;
+
+    navbar = new ScreenWideNavBar(this,
+        {
+            {
+                SDL_SCANCODE_F,
+                {
+                    TL("vsp.nav.file"),
+                    { SDL_SCANCODE_C },
+                    {
+                        { SDL_SCANCODE_C,{ "Close",
+                                [this]() {
+                                    g_startNewMainThreadOperation([this]() {g_closeScreen(this); });
+                                }
+                            } 
+                        },
+                    }, g_iconNavbarTabFile
+                }
+            },
+            {
+                SDL_SCANCODE_V,
+                {
+                    TL("vsp.nav.view"),
+                    { SDL_SCANCODE_S },
+                    {
+                        { SDL_SCANCODE_S,{ "Toggle slim model",
+                                [this]() {
+                                    this->slimModel = !this->slimModel;
+                                    g_addNotification(Notification(
+                                        (this->slimModel ? "Using slim model" : "Using standard model"),
+                                        "",
+                                        1200
+                                    ));
+                                }
+                            } 
+                        },
+                    }, g_iconNavbarTabFile
+                }
+            },
+        },
+        { SDL_SCANCODE_F, SDL_SCANCODE_V }
+    );
+    wxsManager.addDrawable(navbar);
 }
 
 void MinecraftSkinPreviewScreen::render()
@@ -236,10 +287,12 @@ void MinecraftSkinPreviewScreen::render()
         renderFloorGrid();
     }
 
-    g_fnt->RenderString(frmt("alpha rotation: {}", rotAlpha), 5, 5);
-    g_fnt->RenderString(frmt("beta rotation: {}", rotBeta), 5, 25);
+    //g_fnt->RenderString(frmt("alpha rotation: {}", rotAlpha), 5, 5);
+    //g_fnt->RenderString(frmt("beta rotation: {}", rotBeta), 5, 25);
 
     //debugRenderAxes();
+
+    BaseScreen::render();
 }
 
 void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
@@ -249,28 +302,34 @@ void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
         return;
     }
 
-    evt = convertTouchToMouseEvent(evt);
+    LALT_TO_SUMMON_NAVBAR;
 
-    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-        dragging = evt.button.button;
-    }
-    else if (evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
-        dragging = -1;
-    }
-    else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
-        if (dragging == SDL_BUTTON_LEFT) {
-            rotBeta -= evt.motion.xrel;
-            rotAlpha += evt.motion.yrel;
-            if (rotBeta < 0) {
-                rotBeta += 360;
-            }
-            if (rotBeta > 360) {
-                rotBeta -= 360;
-            }
-            rotAlpha = dclamp(-90, rotAlpha, 90);
+    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
+    if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
+
+        evt = convertTouchToMouseEvent(evt);
+
+        if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+            dragging = evt.button.button;
         }
-        else if (dragging == SDL_BUTTON_MIDDLE || dragging == SDL_BUTTON_RIGHT) {
-            screen00 = xyAdd(screen00, { (int)evt.motion.xrel, (int)evt.motion.yrel });
+        else if (evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+            dragging = -1;
+        }
+        else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
+            if (dragging == SDL_BUTTON_LEFT) {
+                rotBeta -= evt.motion.xrel;
+                rotAlpha += evt.motion.yrel;
+                if (rotBeta < 0) {
+                    rotBeta += 360;
+                }
+                if (rotBeta > 360) {
+                    rotBeta -= 360;
+                }
+                rotAlpha = dclamp(-90, rotAlpha, 90);
+            }
+            else if (dragging == SDL_BUTTON_MIDDLE || dragging == SDL_BUTTON_RIGHT) {
+                screen00 = xyAdd(screen00, { (int)evt.motion.xrel, (int)evt.motion.yrel });
+            }
         }
     }
 }

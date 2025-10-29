@@ -36,6 +36,7 @@
     {"vsp.nav.save", "Save"},
     {"vsp.nav.help", "Help"},
     {"vsp.nav.window", "Window"},
+    {"vsp.nav.view", "View"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
@@ -242,7 +243,6 @@
 
     {"vsp.maineditor.tab.filters", "Filters"},
     {"vsp.maineditor.tab.render", "Render"},
-    {"vsp.maineditor.tab.view", "View"},
 
     {"vsp.maineditor.error.dellastvariant", "Cannot delete last layer variant"},
 
