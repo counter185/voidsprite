@@ -670,7 +670,7 @@
       <Filter>Source files\io</Filter>
     </ClCompile>
     <ClCompile Include="PanelUserInteractable.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1332,7 +1332,7 @@
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="PanelUserInteractable.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

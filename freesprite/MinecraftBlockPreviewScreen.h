@@ -7,6 +7,8 @@
 
 class MinecraftBlockPreviewScreen : public BaseScreen, EventCallbackListener
 {
+private:
+    void mapRectToVerts(SDL_Vertex* verts, std::vector<int> indices, SDL_Rect r);
 protected:
     bool closeNextTick = false;
 
@@ -24,6 +26,8 @@ public:
 
     int choosingSide = 0;
     float isometricBlockScale = 5;
+    double isomAlpha = 35.264;
+    double isomBeta = 45;
     bool shadeSides = true;
 
     bool scrollingCanvas = false;
@@ -42,6 +46,8 @@ public:
 
     void renderToWorkspace(XY wh);
     void drawBackground();
-    void drawIsometricBlock(SDL_Rect at);
+    void drawIsometricBlockV2(SDL_Rect at);
+
+    XYd projectPointIsom(double x, double y, double z, double alpha, double beta);
 };
 

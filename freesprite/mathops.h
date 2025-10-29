@@ -132,6 +132,9 @@ SDL_Rect fitInside(SDL_Rect outer, SDL_Rect inner);
 u32 parseIpAddress(std::string ipv4);
 std::string ipToString(u32 ipv4);
 
+#define matrix std::vector<std::vector<double>>
+matrix matrixMultiply(matrix a, matrix b);
+
 template<typename T>
 inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
 {

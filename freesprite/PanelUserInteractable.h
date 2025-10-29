@@ -16,7 +16,6 @@ private:
     Panel* collapsePanel = NULL;
 
     void processDrag(SDL_Event evt);
-    void tryMoveOutOfOOB();
 protected:
     SDL_Color focusBorderColor = { 255,255,255,255 };
     double focusBorderLightup = 0.0;
@@ -44,7 +43,9 @@ public:
             if (focused) {
                 renderFocusBorder(at, focusBorderColor, focusBorderLightup);
             }
-            renderAfterBG(at);
+            if (!collapsible || !collapsed) {
+                renderAfterBG(at);
+            }
             Panel::render(at);
         }
     }
@@ -53,5 +54,6 @@ public:
     XY getDimensions() override { return (collapsible && collapsed) ? XY{wxWidth, 30} : Panel::getDimensions(); }
 
     void toggleCollapse();
+    void tryMoveOutOfOOB();
 };
 

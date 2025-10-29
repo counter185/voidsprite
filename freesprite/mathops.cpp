@@ -1160,6 +1160,31 @@ std::string ipToString(u32 ipv4)
     return frmt("{}.{}.{}.{}", (ipv4 >> 24) & 0xff, (ipv4 >> 16) & 0xff, (ipv4 >> 8) & 0xff, ipv4&0xff);
 }
 
+matrix matrixMultiply(matrix a, matrix b)
+{
+    int resultW = b[0].size();
+    int resultH = a.size();
+
+    if (a[0].size() != b.size()) {
+        //invalid matrix sizes
+        return matrix();
+    }
+
+    matrix result;
+    result.resize(resultH);
+    for (int y = 0; y < resultH; y++) {
+        result[y].resize(resultW);
+        for (int x = 0; x < resultW; x++) {
+            double c = 0;
+            for (int k = 0; k < a[0].size(); k++) {
+                c += a[y][k] * b[k][x];
+            }
+            result[y][x] = c;
+        }
+    }
+    return result;
+}
+
 hsl rgb2hsl(rgb c) {
 
     hsl result;

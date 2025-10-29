@@ -6,49 +6,54 @@
 
 PanelMCBlockPreview::PanelMCBlockPreview(MinecraftBlockPreviewScreen* caller, bool small)
 {
-	this->caller = caller;
+    this->caller = caller;
+    this->small = small;
+    wxWidth = small ? 180 : 320;
+    wxHeight = small ? 200 : 470;
 
-	wxWidth = small ? 180 : 320;
-	wxHeight = small ? 190 : 420;
-    borderColor = visualConfigHexU32("ui/panel/border");
-
-	UILabel* titleLabel = new UILabel("Cube");
-    titleLabel->position = {5, 2};
-    subWidgets.addDrawable(titleLabel);
+    setupDraggable();
+    if (small) {
+        setupCollapsible();
+    }
+    addTitleText("Cube");
+    
 
     if (!small) {
-        UILabel* l = new UILabel("Angle");
-        l->position = { 15, 40 };
-        subWidgets.addDrawable(l);
+        wxsTarget().addDrawable(new UILabel("Angle", XY{ 15, 40 }));
 
+
+        wxsTarget().addDrawable(new UILabel("\xCE\xB1", XY{ 80, 40 }));
         UISlider* isomSlider = new UISlider();
-        isomSlider->position = { 70, 40 };
+        isomSlider->position = { 100, 40 };
         isomSlider->wxWidth = 200;
-        isomSlider->wxHeight = 30;
-        isomSlider->sliderPos = (caller->isometricBlockScale - 2) / 9.0f;
-        isomSlider->setCallbackListener(1, this);
-        subWidgets.addDrawable(isomSlider);
+        isomSlider->wxHeight = 25;
+        isomSlider->setValue(0, 90, caller->isomAlpha);
+        isomSlider->onChangeValueCallback = [caller](UISlider* s, double) {
+            caller->isomAlpha = s->getValue(0, 90);
+        };
+        wxsTarget().addDrawable(isomSlider);
 
-        UICheckbox* shadeCheckbox = new UICheckbox("Shade", caller->shadeSides);
-        shadeCheckbox->position = { 15, 80 };
-        shadeCheckbox->setCallbackListener(2, this);
-        subWidgets.addDrawable(shadeCheckbox);
+
+        wxsTarget().addDrawable(new UILabel("\xCE\xB2", XY{ 80, 80 }));
+        UISlider* betaSlider = new UISlider();
+        betaSlider->position = { 100, 80 };
+        betaSlider->wxWidth = 200;
+        betaSlider->wxHeight = 25;
+        betaSlider->setValue(0, 90, caller->isomBeta);
+        betaSlider->onChangeValueCallback = [caller](UISlider* s, double) {
+            caller->isomBeta = s->getValue(0, 90);
+        };
+        wxsTarget().addDrawable(betaSlider);
+
+        UICheckbox* shadeCheckbox = new UICheckbox("Shade", &caller->shadeSides);
+        shadeCheckbox->position = { 15, 120 };
+        wxsTarget().addDrawable(shadeCheckbox);
     }
 }
 
-void PanelMCBlockPreview::render(XY position)
+void PanelMCBlockPreview::renderAfterBG(XY position)
 {
-    SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
-    renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
-    if (focused) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-    }
-
-    int pad = 10;
+    int pad = small ? 5 : 10;
     int size = wxWidth - pad*2;
 
     SDL_Rect blockRenderBounds = {
@@ -56,21 +61,9 @@ void PanelMCBlockPreview::render(XY position)
         size, size
     };
 
-    caller->drawIsometricBlock(blockRenderBounds);
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x40);
+    SDL_RenderDrawRect(g_rd, &blockRenderBounds);
 
-	DraggablePanel::render(position);
+    caller->drawIsometricBlockV2(blockRenderBounds);
 }
 
-void PanelMCBlockPreview::eventSliderPosChanged(int evt_id, float value)
-{
-    if (evt_id == 1) {
-        caller->isometricBlockScale = 2 + value * 9;
-    }
-}
-
-void PanelMCBlockPreview::eventCheckboxToggled(int evt_id, bool newState)
-{
-    if (evt_id == 2) {
-        caller->shadeSides = newState;
-    }
-}

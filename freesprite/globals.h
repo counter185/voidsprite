@@ -341,7 +341,17 @@ struct XYf {
 };
 struct XYd {
     double x, y;
+
+    XYd operator*(XYd v) {
+        return XYd{ x * v.x, y * v.y };
+    }
+
+    XYd operator*(double v) {
+        return XYd{ x * v, y * v };
+    }
 };
+
+inline XY xydToXy(XYd v) { return XY{ (int)v.x, (int)v.y }; }
 
 struct NamedOperation {
     std::string name;

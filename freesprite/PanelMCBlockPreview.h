@@ -1,18 +1,16 @@
 #pragma once
-#include "DraggablePanel.h"
+#include "PanelUserInteractable.h"
 #include "EventCallbackListener.h"
 
 class PanelMCBlockPreview :
-    public DraggablePanel, EventCallbackListener
+    public PanelUserInteractable, EventCallbackListener
 {
 protected:
     MinecraftBlockPreviewScreen* caller;
+    bool small = false;
 
 public:
     PanelMCBlockPreview(MinecraftBlockPreviewScreen *caller, bool small = false);
-    void render(XY position) override;
-
-    void eventSliderPosChanged(int evt_id, float value) override;
-    void eventCheckboxToggled(int evt_id, bool newState) override;
+    void renderAfterBG(XY position) override;
 };
 

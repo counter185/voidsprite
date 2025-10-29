@@ -4,6 +4,14 @@
 #include "FontRenderer.h"
 #include "PopupTileGeneric.h"
 
+void MinecraftBlockPreviewScreen::mapRectToVerts(SDL_Vertex* verts, std::vector<int> indices, SDL_Rect r)
+{
+    verts[indices[0]].tex_coord = { (float)r.x, (float)r.y };   //top left
+    verts[indices[1]].tex_coord = { (float)r.x + r.w, (float)r.y }; //top right
+    verts[indices[2]].tex_coord = { (float)r.x + r.w, (float)r.y + r.h }; //bottom right
+    verts[indices[3]].tex_coord = { (float)r.x, (float)r.y + r.h }; //bottom left
+}
+
 MinecraftBlockPreviewScreen::MinecraftBlockPreviewScreen(MainEditor* parent)
 {
     caller = parent;
@@ -176,7 +184,7 @@ void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
 
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
     SDL_RenderClear(g_rd);
-    drawIsometricBlock({0, 0, wh.x, wh.y});
+    drawIsometricBlockV2({0, 0, wh.x, wh.y});
     Layer* l = new Layer(wh.x, wh.y);
     SDL_Surface* nsrf = SDL_RenderReadPixels(g_rd, NULL);
     SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), wh.x*4);
@@ -200,139 +208,179 @@ void MinecraftBlockPreviewScreen::drawBackground()
     }
 }
 
-void MinecraftBlockPreviewScreen::drawIsometricBlock(SDL_Rect at)
+void MinecraftBlockPreviewScreen::drawIsometricBlockV2(SDL_Rect at)
 {
-    if (caller->tileDimensions.x == 0 || caller->tileDimensions.y == 0) {
-        return;
-    }
+    double a = isomAlpha * M_PI / 180;
+    double b = isomBeta * M_PI / 180;
 
-    for (auto& l : caller->layers) {
-        l->prerender();
-    }
+    XYd scale = { at.w / 2.0, at.h/2.0 };
+    //XYd scaleToWholeArea = XYd{ 2.0 / sqrt(2.0), 2.0 / sqrt(3.0) };
+    XYd scaleToWholeArea = XYd{ 2.0 / sqrt(3.0), 2.0 / sqrt(3.0) };
+    
+    XY origin00 = { at.x + at.w / 2, at.y + at.h/2 };
 
-    float divSidePoints = isometricBlockScale;
+    double centerX = 0.5, centerZ = 0.5, centerY = 0.5;
 
-    XY p1 = { at.x + at.w / 2, at.y };
-    XY p3 = { at.x + at.w / 2, at.y + at.h };
+    XY p1 =  xyAdd(origin00, xydToXy(projectPointIsom(0-centerX, 0-centerY, 0-centerZ, a, b) * scaleToWholeArea * scale));
+    XY p2 =  xyAdd(origin00, xydToXy(projectPointIsom(1-centerX, 0-centerY, 0-centerZ, a, b) * scaleToWholeArea * scale));
+    XY p3 =  xyAdd(origin00, xydToXy(projectPointIsom(0-centerX, 0-centerY, 1-centerZ, a, b) * scaleToWholeArea * scale));
+    XY p4 =  xyAdd(origin00, xydToXy(projectPointIsom(1-centerX, 0-centerY, 1-centerZ, a, b) * scaleToWholeArea * scale));
 
-    XY p4 = { at.x, at.y + (at.h) / divSidePoints };
-    XY p5 = { at.x, at.y + (at.h) / divSidePoints * (divSidePoints - 1)};
+    XY pL1 = xyAdd(origin00, xydToXy(projectPointIsom(0-centerX, 1-centerY, 0-centerZ, a, b) * scaleToWholeArea * scale));
+    XY pL2 = xyAdd(origin00, xydToXy(projectPointIsom(1-centerX, 1-centerY, 0-centerZ, a, b) * scaleToWholeArea * scale));
+    XY pL3 = xyAdd(origin00, xydToXy(projectPointIsom(0-centerX, 1-centerY, 1-centerZ, a, b) * scaleToWholeArea * scale));
+    XY pL4 = xyAdd(origin00, xydToXy(projectPointIsom(1-centerX, 1-centerY, 1-centerZ, a, b) * scaleToWholeArea * scale));
 
-    XY p2 = { at.x + at.w / 2, at.y + (p4.y - p1.y) * 2 };
+    /*SDL_SetRenderDrawColor(g_rd, 80, 80, 80, 255);
+    drawLine(pL1, pL2);
+    drawLine(pL2, pL4);
+    drawLine(pL4, pL3);
+    drawLine(pL3, pL1);
 
-    XY p4p = { at.x + at.w, p4.y };
-    XY p5p = { at.x + at.w, p5.y };
+    SDL_SetRenderDrawColor(g_rd, 127, 127, 127, 255);
+    drawLine(pL1, p1);
+    drawLine(pL2, p2);
+    drawLine(pL4, p4);
+    drawLine(pL3, p3);
 
-    SDL_Vertex vertices[7] = {
-        {{p1.x, p1.y}},  //p1
-        {{p2.x, p2.y}},  //p2
-        {{p3.x, p3.y}},  //p3            
-        {{p4.x, p4.y}},  //p4
-        {{p5.x, p5.y}},  //p5
-        {{p4p.x, p4p.y}}, //p4'             
-        {{p5p.x, p5p.y}}  //p5'
-    };
-
-    for (int i = 0; i < 7; i++) {
-        vertices[i].color = toFColor(SDL_Color{0xff,0xff,0xff,0xff});
-    }
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+    drawLine(p1, p2);
+    drawLine(p2, p4);
+    drawLine(p4, p3);
+    drawLine(p3, p1);*/
 
     SDL_Rect topTextureRect =
         canvas.getTileRectAt(tileTop, caller->tileDimensions);
-    SDL_Rect sideLeftTextureRect = 
+    SDL_Rect sideLeftTextureRect =
         canvas.getTileRectAt(tileSideLeft, caller->tileDimensions);
     SDL_Rect sideRightTextureRect =
         canvas.getTileRectAt(tileSideRight, caller->tileDimensions);
 
-    int indicesTop[] = { 0, 5, 1, 0, 1, 3 };
-    int indicesSideLeft[] = { 3, 1, 2, 3, 2, 4 };
-    int indicesSideRight[] = { 1, 5, 6, 1, 6, 2 };
+    SDL_Vertex vertices[8] = {
+        {{p1.x, p1.y}},
+        {{p2.x, p2.y}},
+        {{p3.x, p3.y}},            
+        {{p4.x, p4.y}},
+        {{pL1.x, pL1.y}},
+        {{pL2.x, pL2.y}},
+        {{pL3.x, pL3.y}},            
+        {{pL4.x, pL4.y}}
+    };
 
-    //draw top
-    if (!xyEqual(tileTop, { -1,-1 })) {
-        vertices[0].tex_coord = { (float)topTextureRect.x, (float)topTextureRect.y };
-        vertices[5].tex_coord = { (float)topTextureRect.x + topTextureRect.w,
-                                 (float)topTextureRect.y };
-        vertices[1].tex_coord = { (float)topTextureRect.x + topTextureRect.w,
-                                 (float)topTextureRect.y + topTextureRect.h };
-        vertices[3].tex_coord = { (float)topTextureRect.x,
-                                 (float)topTextureRect.y + topTextureRect.h };
-
-        for (int i = 0; i < 7; i++) {
-            vertices[i].tex_coord.x /= (float)caller->canvas.dimensions.x;
-            vertices[i].tex_coord.y /= (float)caller->canvas.dimensions.y;
-        }
-
-        for (Layer*& l : caller->layers) {
-            //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
-            for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha / 255.0f;
-            }
-            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesTop, 6);
-        }
-    }
-
-    //draw left side
-    if (!xyEqual(tileSideLeft, { -1,-1 })) {
-
-        if (shadeSides) {
-            for (int i = 0; i < 7; i++) {
-                vertices[i].color = toFColor(SDL_Color{ 0xff / 4 * 3,0xff / 4 * 3,0xff / 4 * 3, 0xff });
-            }
-        }
-
-        vertices[3].tex_coord = { (float)sideLeftTextureRect.x, (float)sideLeftTextureRect.y };
-        vertices[1].tex_coord = { (float)sideLeftTextureRect.x + sideLeftTextureRect.w,
-                                 (float)sideLeftTextureRect.y };
-        vertices[2].tex_coord = { (float)sideLeftTextureRect.x + sideLeftTextureRect.w,
-                                 (float)sideLeftTextureRect.y + sideLeftTextureRect.h };
-        vertices[4].tex_coord = { (float)sideLeftTextureRect.x,
-                                 (float)sideLeftTextureRect.y + sideLeftTextureRect.h };
-
-        for (int i = 0; i < 7; i++) {
-            vertices[i].tex_coord.x /= (float)caller->canvas.dimensions.x;
-            vertices[i].tex_coord.y /= (float)caller->canvas.dimensions.y;
-        }
-
-        for (Layer*& l : caller->layers) {
-            //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
-            for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha / 255.0f;
-            }
-            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesSideLeft, 6);
-        }
-    }
-
-    //draw right side
-    if (!xyEqual(tileSideRight, { -1,-1 })) {
-
-        if (shadeSides) {
-            for (int i = 0; i < 7; i++) {
-                vertices[i].color = toFColor(SDL_Color{ 0xff / 2, 0xff / 2, 0xff / 2, 0xff });
-            }
-        }
-
-        vertices[1].tex_coord = { (float)sideRightTextureRect.x, (float)sideRightTextureRect.y };
-        vertices[5].tex_coord = { (float)sideRightTextureRect.x + sideRightTextureRect.w,
-                                 (float)sideRightTextureRect.y };
-        vertices[6].tex_coord = { (float)sideRightTextureRect.x + sideRightTextureRect.w,
-                                 (float)sideRightTextureRect.y + sideRightTextureRect.h };
-        vertices[2].tex_coord = { (float)sideRightTextureRect.x,
-                                 (float)sideRightTextureRect.y + sideRightTextureRect.h };
-
-        for (int i = 0; i < 7; i++) {
-            vertices[i].tex_coord.x /= (float)caller->canvas.dimensions.x;
-            vertices[i].tex_coord.y /= (float)caller->canvas.dimensions.y;
-        }
-
-        for (Layer*& l : caller->layers) {
-            //SDL_RenderCopy(g_rd, , NULL, &canvasRenderRect);
-            for (int i = 0; i < 7; i++) {
-                vertices[i].color.a = l->layerAlpha / 255.0f;
-            }
-            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 7, indicesSideRight, 6);
-        }
-    }
     
+
+    int indicesTop[] = { 0, 1, 3, 0, 3, 2 };
+    int indicesSideLeft[] = { 2, 3, 6, 3, 6, 7 };
+    int indicesSideRight[] = { 3,1,7, 1, 7, 5 };
+
+    for (SDL_Vertex& v : vertices) {
+        v.color = SDL_FColor{ 1.0f,1.0f,1.0f,1.0f };
+    }
+
+    if (!xyEqual(tileTop, { -1,-1 })) {
+        mapRectToVerts(vertices, { 0,1,3,2 }, topTextureRect);
+
+        for (SDL_Vertex& v : vertices) {
+            v.tex_coord.x /= (float)caller->canvas.dimensions.x;
+            v.tex_coord.y /= (float)caller->canvas.dimensions.y;
+        }
+
+        for (Layer*& l : caller->layers) {
+            for (SDL_Vertex& v : vertices) {
+                v.color.a = l->layerAlpha / 255.0f;
+            }
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 8, indicesTop, 6);
+        }
+    }
+
+    if (!xyEqual(tileSideLeft, { -1,-1 })) {
+        mapRectToVerts(vertices, { 2,3,7,6 }, sideLeftTextureRect);
+
+        if (shadeSides) {
+            for (SDL_Vertex& v : vertices) {
+                v.color = toFColor(SDL_Color{ 0xff / 4 * 3,0xff / 4 * 3,0xff / 4 * 3, 0xff });
+            }
+        }
+
+        for (SDL_Vertex& v : vertices) {
+            v.tex_coord.x /= (float)caller->canvas.dimensions.x;
+            v.tex_coord.y /= (float)caller->canvas.dimensions.y;
+        }
+
+        for (Layer*& l : caller->layers) {
+            for (SDL_Vertex& v : vertices) {
+                v.color.a = l->layerAlpha / 255.0f;
+            }
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 8, indicesSideLeft, 6);
+        }
+    }
+
+    if (!xyEqual(tileSideRight, { -1,-1 })) {
+        mapRectToVerts(vertices, { 3,1,5,7 }, sideRightTextureRect);
+
+        if (shadeSides) {
+            for (SDL_Vertex& v : vertices) {
+                v.color = toFColor(SDL_Color{ 0xff / 2, 0xff / 2, 0xff / 2, 0xff });
+            }
+        }
+
+        for (SDL_Vertex& v : vertices) {
+            v.tex_coord.x /= (float)caller->canvas.dimensions.x;
+            v.tex_coord.y /= (float)caller->canvas.dimensions.y;
+        }
+
+        for (Layer*& l : caller->layers) {
+            for (SDL_Vertex& v : vertices) {
+                v.color.a = l->layerAlpha / 255.0f;
+            }
+            int r = SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, vertices, 8, indicesSideRight, 6);
+        }
+    }
+
+    /*
+    u32 colors[8] = {
+        0xFFFFFFFF,
+        0xFFFF0000,
+        0xFF00FF00,
+        0xFF0000FF,
+        0xFFFFFF00,
+        0xFF00FFFF,
+        0xFFFF00FF,
+        0xFFA0A0A0,
+    };
+    
+    for (int x = 0; x < 8; x++) {
+        SDL_Color ccc = uint32ToSDLColor(colors[x]);
+        SDL_SetRenderDrawColor(g_rd, ccc.r, ccc.g, ccc.b, ccc.a);
+        SDL_RenderPoint(g_rd, vertices[x].position.x, vertices[x].position.y);
+        g_fnt->RenderString(frmt("{}", x), vertices[x].position.x + 2, vertices[x].position.y + 2, ccc);
+    }*/
+}
+
+XYd MinecraftBlockPreviewScreen::projectPointIsom(double x, double y, double z, double alpha, double beta)
+{
+    matrix a = {
+        {1, 0, 0},
+        {0, cos(alpha), sin(alpha)},
+        {0, -sin(alpha), cos(alpha)}
+    };
+    
+    matrix b = {
+        {cos(beta), 0, -sin(beta)},
+        {0, 1, 0},
+        {sin(beta), 0, cos(beta)}
+    };
+
+    matrix c = { {x}, {y}, {z} };
+
+    matrix xyId = {
+        {1,0,0},
+        {0,1,0},
+        {0,0,0}
+    };
+
+    matrix r = matrixMultiply(xyId, matrixMultiply(matrixMultiply(a, b), c));
+
+    return XYd{ r[0][0], r[1][0] };
 
 }
