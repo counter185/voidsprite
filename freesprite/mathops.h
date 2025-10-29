@@ -106,6 +106,7 @@ float fxmax(float a, float b);
 float fclamp(float vmin, float b, float vmax);
 double dxmin(double a, double b);
 double dxmax(double a, double b);
+double dclamp(double vmin, double b, double vmax);
 
 uint32_t BEtoLE32(uint32_t a);
 uint16_t BEtoLE16(uint16_t a);

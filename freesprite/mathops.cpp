@@ -878,6 +878,8 @@ float fxmax(float a, float b) { return a > b ? a : b; }
 float fclamp(float vmin, float b, float vmax) { return fxmax(vmin, fxmin(b, vmax)); }
 double dxmin(double a, double b) { return a > b ? b : a; }
 double dxmax(double a, double b) { return a > b ? a : b; }
+double dclamp(double vmin, double b, double vmax) { return dxmax(vmin, dxmin(b, vmax)); }
+
 
 uint32_t BEtoLE32(uint32_t a)
 {

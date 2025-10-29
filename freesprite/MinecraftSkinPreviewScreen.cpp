@@ -94,7 +94,7 @@ void MinecraftSkinPreviewScreen::renderBoxOffset(XYZd at, double sizeX, double s
     }
 
     //bottom face
-    if (rotAlpha >= 180) {
+    if (rotAlpha < 0) {
         renderQuad(l00, lx0, l0z, lxz,
             { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y, (int)sizeX, (int)sizeZ }
         );
@@ -157,30 +157,89 @@ void MinecraftSkinPreviewScreen::debugRenderAxes()
     drawLine(center, zpoint);
 }
 
+void MinecraftSkinPreviewScreen::renderFloorGrid()
+{
+    double lineLength = 30;
+    for (int i = -6; i <= 6; i++) {
+        double gridSpaced = i * 4;
+        XY proj = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,-lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
+        XY proj2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
+
+        XY projA = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ -lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
+        XY projA2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 30);
+        drawLine(proj, proj2);
+        drawLine(projA, projA2);
+    }
+}
+
 void MinecraftSkinPreviewScreen::render()
 {
-    //left leg
-    renderBox({ -4,0,0 }, 4, 4, 12, { 4, 16 });
-    //right leg
-    renderBox({ 0,0,0 }, 4, 4, 12, { 20, 48 });
+    renderGradient({ 0,0,g_windowW,g_windowH }, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF202020);
 
-    //left hand
-    int handSizeX = slimModel ? 3 : 4;
-    renderBox({ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, xyAdd({ 40,16 }, { 4,0 }));
-    //body
-    renderBox({ -4,12,0 }, 8, 4, 12, { 20, 16 });
-    renderBoxOffset({ -4,12,0 }, 8, 4, 12, { 20, 32 }, 0.2);
-    //right hand
-    renderBox({ 4,12,0 }, handSizeX, 4, 12, xyAdd({ 32,48 }, { 4,0 }));
-    
-    //head
-    renderBox({ -4,24,-2 }, 8, 8, 8, { 8, 0 });
-    renderBoxOffset({ -4,24,-2 }, 8, 8, 8, { 40, 0 }, 0.2);
+    if (rotAlpha >= 0) {
+        renderFloorGrid();
+    }
+
+    struct BoxRenderListObj {
+        XYZd pos;
+        double sx, sz, sy;
+        XY texturePos;
+        double offs = 0.0;
+    };
+
+    double handSizeX = slimModel ? 3 : 4;
+    std::vector<std::vector<std::vector<BoxRenderListObj>>> renderList = {
+        //legs layer
+        {
+            {BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, { 4, 16 }}},   //left leg
+            {BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, { 20, 48 }}}    //right leg
+        },
+
+        //body layer
+        {
+            {BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, xyAdd({ 40,16 }, { 4,0 })}},    //left arm
+            {
+                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 16 }},        //body
+                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, 0.2}    //body overlay
+            },   
+            {BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, xyAdd({ 32,48 }, { 4,0 })}}   //right arm
+        },
+
+        //head layer
+        {
+            {
+                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 8, 0 }},  //head
+                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 40, 0 }, 0.2} //head overlay
+            }
+        }
+    };
+
+    if (rotAlpha < 0) {
+        std::reverse(renderList.begin(), renderList.end());
+    }
+
+    for (auto& x : renderList) {
+        auto nextLayer = x;
+        if (rotBeta >= 180) {
+            std::reverse(nextLayer.begin(), nextLayer.end());
+        }
+        for (auto& z : nextLayer) {
+            for (auto& y : z) {
+                renderBoxOffset(y.pos, y.sx, y.sz, y.sy, y.texturePos, y.offs);
+            }
+        }
+    }
+
+    if (rotAlpha < 0) {
+        renderFloorGrid();
+    }
 
     g_fnt->RenderString(frmt("alpha rotation: {}", rotAlpha), 5, 5);
     g_fnt->RenderString(frmt("beta rotation: {}", rotBeta), 5, 25);
 
-    debugRenderAxes();
+    //debugRenderAxes();
 }
 
 void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
@@ -190,6 +249,8 @@ void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
         return;
     }
 
+    evt = convertTouchToMouseEvent(evt);
+
     if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         dragging = evt.button.button;
     }
@@ -198,7 +259,7 @@ void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
     }
     else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
         if (dragging == SDL_BUTTON_LEFT) {
-            rotBeta += evt.motion.xrel;
+            rotBeta -= evt.motion.xrel;
             rotAlpha += evt.motion.yrel;
             if (rotBeta < 0) {
                 rotBeta += 360;
@@ -206,14 +267,9 @@ void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
             if (rotBeta > 360) {
                 rotBeta -= 360;
             }
-            if (rotAlpha < 0) {
-                rotAlpha += 360;
-            }
-            if (rotAlpha > 360) {
-                rotAlpha -= 360;
-            }
+            rotAlpha = dclamp(-90, rotAlpha, 90);
         }
-        else if (dragging == SDL_BUTTON_MIDDLE) {
+        else if (dragging == SDL_BUTTON_MIDDLE || dragging == SDL_BUTTON_RIGHT) {
             screen00 = xyAdd(screen00, { (int)evt.motion.xrel, (int)evt.motion.yrel });
         }
     }

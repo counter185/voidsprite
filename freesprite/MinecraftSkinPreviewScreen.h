@@ -32,5 +32,6 @@ public:
     XYd worldSpaceToScreenSpace(XYZd point, double alpha, double beta);
 
     void debugRenderAxes();
+    void renderFloorGrid();
 };
 
