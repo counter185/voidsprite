@@ -67,6 +67,8 @@ SDL_Rect offsetRect(SDL_Rect r, int offsetX, int offsetY);
 double angleBetweenTwoPoints(XY a, XY b);
 XY getSnappedPoint(XY from, XY to);
 
+XYZd xyzdAdd(XYZd p1, XYZd p2);
+
 std::vector<std::string> splitString(std::string a, char b);
 std::string stringToLower(std::string a);
 std::string shiftJIStoUTF8(std::string a);

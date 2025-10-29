@@ -296,6 +296,11 @@ XY getSnappedPoint(XY from, XY to) {
     }
 }
 
+XYZd xyzdAdd(XYZd p1, XYZd p2)
+{
+    return { p1.x + p2.x, p1.y + p2.y, p1.z + p2.z };
+}
+
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc, bool ceilLine)
 {
     if (from.x == to.x) {
