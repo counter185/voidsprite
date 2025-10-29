@@ -12,13 +12,12 @@ private:
     XY screen00 = { 0,0 };
 protected:
     int dragging = 0;
-    bool slimModel = true;
+    bool slimModel = false;
+
+    ScreenWideNavBar* navbar;
 public:
 
-    MinecraftSkinPreviewScreen(MainEditor* parent) {
-        caller = parent;
-        screen00 = { g_windowW / 2, g_windowH / 2 };
-    }
+    MinecraftSkinPreviewScreen(MainEditor* parent);
 
     void render() override;
     void takeInput(SDL_Event evt) override;
