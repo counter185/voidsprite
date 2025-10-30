@@ -13,6 +13,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
 
+import com.jaredrummler.android.device.DeviceName;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ import pl.cntrpl.voidsprite.util.Utils;
 public class VSPActivity extends SDLActivity {
 
     public static String packageName = "";
+    public static String deviceName = "";
     public static VSPActivity activitySingleton = null;
 
     public List<String> mainArgs = new ArrayList<String>();
@@ -51,9 +54,13 @@ public class VSPActivity extends SDLActivity {
         String appdataPath = getExternalFilesDir(null).getAbsolutePath() + "/";
         passAppdataPathString(appdataPath);
 
+        DeviceName.with(this).request((info, error) -> {
+            deviceName = info.getName();
+        });
+
         String systemInformation = "Android " + android.os.Build.VERSION.RELEASE + " (SDK " + android.os.Build.VERSION.SDK_INT + ")\n";
         systemInformation += String.format("CPU supported ABIs: %s\n  os.arch: %s\n", String.join(", ", Build.SUPPORTED_ABIS), System.getProperty("os.arch"));
-        systemInformation += String.format("%s %s | %s %s\n", Build.MANUFACTURER, Build.PRODUCT, Build.MODEL, Build.DEVICE);
+        systemInformation += String.format("%s (%s %s | %s %s)\n", deviceName, Build.MANUFACTURER, Build.PRODUCT, Build.MODEL, Build.DEVICE);
         if (Build.VERSION.SDK_INT >= 31) {
             systemInformation += String.format("SOC: %s %s\n", Build.SOC_MANUFACTURER, Build.SOC_MODEL);
         }
