@@ -9,6 +9,7 @@ private:
 
     double rotAlpha = 35.264;
     double rotBeta = 45;
+    double size = 20;
     XY screen00 = { 0,0 };
 protected:
     int dragging = 0;

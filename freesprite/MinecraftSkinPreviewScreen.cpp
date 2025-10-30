@@ -14,10 +14,10 @@ void MinecraftSkinPreviewScreen::renderQuad(XYZd ul, XYZd ur, XYZd dl, XYZd dr, 
 {
     double alpha = rotAlpha * M_PI / 180;
     double beta = rotBeta * M_PI / 180;
-    XYd ul2d = worldSpaceToScreenSpace(ul, alpha, beta) * 20;
-    XYd ur2d = worldSpaceToScreenSpace(ur, alpha, beta) * 20;
-    XYd dl2d = worldSpaceToScreenSpace(dl, alpha, beta) * 20;
-    XYd dr2d = worldSpaceToScreenSpace(dr, alpha, beta) * 20;
+    XYd ul2d = worldSpaceToScreenSpace(ul, alpha, beta) * size;
+    XYd ur2d = worldSpaceToScreenSpace(ur, alpha, beta) * size;
+    XYd dl2d = worldSpaceToScreenSpace(dl, alpha, beta) * size;
+    XYd dr2d = worldSpaceToScreenSpace(dr, alpha, beta) * size;
 
     SDL_Vertex verts[4] =
     {
@@ -171,11 +171,11 @@ void MinecraftSkinPreviewScreen::renderFloorGrid()
     double lineLength = 60;
     for (int i = -8; i <= 8; i++) {
         double gridSpaced = i * 4;
-        XY proj = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,-lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
-        XY proj2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
+        XY proj = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,-lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * size));
+        XY proj2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ (double)gridSpaced,0,lineLength }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * size));
 
-        XY projA = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ -lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
-        XY projA2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * 20));
+        XY projA = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ -lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * size));
+        XY projA2 = xyAdd(screen00, xydToXy(worldSpaceToScreenSpace({ lineLength, 0, (double)gridSpaced }, rotAlpha * M_PI / 180, rotBeta * M_PI / 180) * size));
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 30 / ixmax(1, abs(i)));
         drawLine(proj, proj2);
@@ -185,7 +185,7 @@ void MinecraftSkinPreviewScreen::renderFloorGrid()
 
 MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
     caller = parent;
-    screen00 = { g_windowW / 2, g_windowH / 2 };
+    screen00 = { g_windowW / 2, g_windowH / 4*3 };
     slimModel = (parent->layers.back()->getPixelAt({ 51, 16 }) & 0xFF000000) == 0;
 
     navbar = new ScreenWideNavBar(this,
@@ -233,7 +233,7 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
                                 }
                             } 
                         },
-                    }, g_iconNavbarTabFile
+                    }, g_iconNavbarTabView
                 }
             },
         },
@@ -347,6 +347,10 @@ void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
             else if (dragging == SDL_BUTTON_MIDDLE || dragging == SDL_BUTTON_RIGHT) {
                 screen00 = xyAdd(screen00, { (int)evt.motion.xrel, (int)evt.motion.yrel });
             }
+        }
+        else if (evt.type == SDL_EVENT_MOUSE_WHEEL) {
+            size += evt.wheel.y;
+			size = dclamp(5, size, 100);
         }
     }
 }
