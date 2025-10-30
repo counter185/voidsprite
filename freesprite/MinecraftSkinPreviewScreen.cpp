@@ -386,7 +386,8 @@ void PanelMCSkinPreview::renderAfterBG(XY at)
     previewArea.y += at.y;
     g_pushClip(previewArea);
     XY modelOrigin = xyAdd(at, { wxWidth / 2, wxHeight / 12 * 11 });
-    parent->renderModel(modelOrigin, 6);
+    double scale = wxHeight / 40.0;
+    parent->renderModel(modelOrigin, scale);
     g_popClip();
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 50);

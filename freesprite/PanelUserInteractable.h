@@ -51,10 +51,10 @@ public:
             if (focused) {
                 renderFocusBorder(at, focusBorderColor, focusBorderLightup);
             }
-            if (resizable) {
-                renderResizeHandle(at);
-            }
             if (!collapsible || !collapsed) {
+                if (resizable) {
+                    renderResizeHandle(at);
+                }
                 renderAfterBG(at);
             }
             Panel::render(at);
