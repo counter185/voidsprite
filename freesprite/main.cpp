@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <regex>
+#include <signal.h>
 
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
@@ -342,9 +343,32 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
 }
 #endif
 
+static void main_handleSIGSEGV(int sig) {
+    //technically unsafe and undefined to call any of these functions
+    //but then what is it gonna do, crash twice?
+    std::string errorTitle = frmt("voidsprite: {}", TL("vsp.fatalerror.title"));
+    std::string errorMsg = TL("vsp.fatalerror.body");
+    logerr("Fatal error: Segmentation fault (SIGSEGV)");
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
+    exit(1);
+}
+
+void main_registerCExceptionHandlers()
+{
+#if _WIN32
+    _set_se_translator([](unsigned int u, _EXCEPTION_POINTERS* pExp) {
+        throw std::runtime_error(frmt("Fatal error: SEH exception code {:X}", u));
+    });
+#else
+    //sigaction might be better
+    signal(SIGSEGV, main_handleSIGSEGV);
+#endif
+}
+
 int main(int argc, char** argv)
 {
     try {
+        main_registerCExceptionHandlers();
         std::chrono::time_point<std::chrono::system_clock> startupTime = std::chrono::system_clock::now();
 
         std::queue<std::string> argsQueue;
