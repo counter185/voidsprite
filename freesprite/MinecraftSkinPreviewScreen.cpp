@@ -12,6 +12,14 @@ BaseScreen* MinecraftSkinPreviewScreen::isSubscreenOf()
 
 void MinecraftSkinPreviewScreen::renderQuad(XY origin00, double scale, XYZd ul, XYZd ur, XYZd dl, XYZd dr, SDL_Rect textureRegion, double shading)
 {
+    textureRegion = {
+        (int)(textureRegion.x * pointScale),
+        (int)(textureRegion.y * pointScale),
+        (int)(textureRegion.w * pointScale),
+        (int)(textureRegion.h * pointScale)
+    };
+
+
     double alpha = rotAlpha * M_PI / 180;
     double beta = rotBeta * M_PI / 180;
     XYd ul2d = worldSpaceToScreenSpace(ul, alpha, beta) * scale;
@@ -49,64 +57,83 @@ void MinecraftSkinPreviewScreen::renderQuad(XY origin00, double scale, XYZd ul, 
         l->prerender();
         SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, verts, 4, indices, 6);
     }
+
+    if (drawWireframe) {
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x90);
+        drawLine(xyAdd(origin00, xydToXy(ul2d)), xyAdd(origin00, xydToXy(ur2d)));
+        drawLine(xyAdd(origin00, xydToXy(ur2d)), xyAdd(origin00, xydToXy(dr2d)));
+        drawLine(xyAdd(origin00, xydToXy(dr2d)), xyAdd(origin00, xydToXy(dl2d)));
+        drawLine(xyAdd(origin00, xydToXy(ul2d)), xyAdd(origin00, xydToXy(dl2d)));
+    }
 }
 
-void MinecraftSkinPreviewScreen::renderBox(XY origin00, double scale, XYZd at, double sizeX, double sizeZ, double sizeY, XY textureBoxOrigin, double offset)
+void MinecraftSkinPreviewScreen::renderBox(XY origin00, double scale, XYZd at, double sizeX, double sizeZ, double sizeY, XY textureBoxOrigin, double offset, bool flipUVX = false)
 {
-    XYZd l00 = xyzdAdd(at, { -offset,   -offset, -offset }),
-        lx0 = xyzdAdd(at,  { sizeX +offset,     -offset, -offset }),
-        lxz = xyzdAdd(at,  { sizeX + offset,     -offset, sizeZ + offset }),
-        l0z = xyzdAdd(at,  { -offset,   -offset, sizeZ + offset });
+    XYZd l00 = xyzdAdd(at, { -offset,        -offset,  -offset }),
+        lx0 = xyzdAdd(at,  { sizeX +offset,  -offset,  -offset }),
+        lxz = xyzdAdd(at,  { sizeX + offset, -offset,  sizeZ + offset }),
+        l0z = xyzdAdd(at,  { -offset,        -offset,  sizeZ + offset });
 
-    XYZd h00 = xyzdAdd(l00, { -offset,sizeY +offset,-offset }),
-        hx0 = xyzdAdd(lx0,  { offset,sizeY +offset,-offset }),
-        hxz = xyzdAdd(lxz,  { offset,sizeY +offset,offset }),
-        h0z = xyzdAdd(l0z,  { -offset,sizeY +offset,offset });
+    XYZd h00 = xyzdAdd(l00, { 0, sizeY +offset*2, 0}),
+        hx0 = xyzdAdd(lx0,  { 0, sizeY +offset*2, 0}),
+        hxz = xyzdAdd(lxz,  { 0, sizeY +offset*2, 0}),
+        h0z = xyzdAdd(l0z,  { 0, sizeY +offset*2, 0});
+
+    SDL_Rect frontFace = { textureBoxOrigin.x, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY };
+    SDL_Rect rightFace = { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY };
+    SDL_Rect leftFace = { textureBoxOrigin.x - (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeZ, (int)sizeY };
+    SDL_Rect backFace = { textureBoxOrigin.x + (int)sizeX + (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY };
+    SDL_Rect bottomFace = { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y, (int)sizeX, (int)sizeZ };
+    SDL_Rect topFace = { textureBoxOrigin.x, textureBoxOrigin.y, (int)sizeX, (int)sizeZ };
+
+    if (flipUVX) {
+        frontFace = uvFlipHorizontal(frontFace);
+        std::swap(leftFace, rightFace);
+        leftFace = uvFlipHorizontal(leftFace);
+        rightFace = uvFlipHorizontal(rightFace);
+        bottomFace = uvFlipHorizontal(bottomFace);
+        topFace = uvFlipHorizontal(topFace);
+        backFace = uvFlipHorizontal(backFace);
+    }
 
     //front face
     if (rotBeta <= 90 || rotBeta >= 270) {
-        renderQuad(origin00, scale, h0z, hxz, l0z, lxz,
-            { textureBoxOrigin.x, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY },
+        renderQuad(origin00, scale, h0z, hxz, l0z, lxz, frontFace,
             shade ? shadeFront : 0.0
         );
     }
 
     //right face
     if (rotBeta >= 0 && rotBeta <= 180) {
-        renderQuad(origin00, scale, hxz, hx0, lxz, lx0,
-            { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY },
+        renderQuad(origin00, scale, hxz, hx0, lxz, lx0, rightFace,
             shade ? shadeRight : 0.0
         );
     }
 
     //left face
     if (rotBeta >= 180) {
-        renderQuad(origin00, scale, h00, h0z, l00, l0z,
-            { textureBoxOrigin.x - (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeZ, (int)sizeY },
+        renderQuad(origin00, scale, h00, h0z, l00, l0z, leftFace,
             shade ? shadeLeft : 0.0
         );
     }
 
     //back face
     if (rotBeta >= 90 && rotBeta <= 270) {
-        renderQuad(origin00, scale, hx0, h00, lx0, l00,
-            { textureBoxOrigin.x + (int)sizeX + (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY },
+        renderQuad(origin00, scale, hx0, h00, lx0, l00, backFace,
             shade ? shadeBack : 0.0
         );
     }
 
     //bottom face
     if (rotAlpha < 0) {
-        renderQuad(origin00, scale, l00, lx0, l0z, lxz,
-            { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y, (int)sizeX, (int)sizeZ },
+        renderQuad(origin00, scale, l00, lx0, l0z, lxz, bottomFace,
             shade ? shadeBottom : 0.0
         );
     }
 
     //top face
     if (rotAlpha >= 0 && rotAlpha <= 180) {
-        renderQuad(origin00, scale, h00, hx0, h0z, hxz,
-            { textureBoxOrigin.x, textureBoxOrigin.y, (int)sizeX, (int)sizeZ },
+        renderQuad(origin00, scale, h00, hx0, h0z, hxz, topFace,
             shade ? shadeTop : 0.0
         );
     }
@@ -142,6 +169,11 @@ XYd MinecraftSkinPreviewScreen::worldSpaceToScreenSpace(XYZd point, double alpha
     return XYd{ r[0][0], r[1][0] };
 }
 
+XY MinecraftSkinPreviewScreen::scaledPoint(XY point)
+{
+    return { (int)(point.x * pointScale), (int)(point.y * pointScale) };
+}
+
 void MinecraftSkinPreviewScreen::debugRenderAxes()
 {
     XY origin = screen00;
@@ -168,24 +200,30 @@ void MinecraftSkinPreviewScreen::renderModel(XY origin00, double scale)
         double sx, sz, sy;
         XY texturePos;
         double offs = 0.0;
+        bool flipX = false;
+        bool render = true;
     };
 
     double handSizeX = slimModel ? 3 : 4;
+
+    XY leftArmTexturePos = xyAdd({ 40,16 }, { 4,0 });
+    XY leftLegTexturePos = { 4,16 };
+
     std::vector<std::vector<std::vector<BoxRenderListObj>>> renderList = {
         //legs layer
         {
-            {BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, { 4, 16 }}},   //left leg
-            {BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, { 20, 48 }}}    //right leg
+            {BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, leftLegTexturePos}},   //left leg
+            {BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, twoByOneSkin ? leftLegTexturePos : XY{ 20, 48 }, 0.0, twoByOneSkin}}    //right leg
         },
 
         //body layer
         {
-            {BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, xyAdd({ 40,16 }, { 4,0 })}},    //left arm
+            {BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, leftArmTexturePos}},    //left arm
             {
                 BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 16 }},        //body
-                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, 0.2}    //body overlay
+                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, 0.2, false, !twoByOneSkin}    //body overlay
             },
-            {BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, xyAdd({ 32,48 }, { 4,0 })}}   //right arm
+            {BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, twoByOneSkin ? leftArmTexturePos : xyAdd({ 32,48 }, { 4,0 }), 0.0, twoByOneSkin}}   //right arm
         },
 
         //head layer
@@ -208,7 +246,9 @@ void MinecraftSkinPreviewScreen::renderModel(XY origin00, double scale)
         }
         for (auto& z : nextLayer) {
             for (auto& y : z) {
-                renderBox(origin00, scale, y.pos, y.sx, y.sz, y.sy, y.texturePos, y.offs);
+                if (y.render) {
+                    renderBox(origin00, scale, y.pos, y.sx, y.sz, y.sy, y.texturePos, y.offs, y.flipX);
+                }
             }
         }
     }
@@ -231,10 +271,35 @@ void MinecraftSkinPreviewScreen::renderFloorGrid()
     }
 }
 
+SDL_Rect MinecraftSkinPreviewScreen::getModelRenderArea(XY at)
+{
+    //todo:fix this
+    XY topLeft;
+    XY bottomRight;
+
+    bottomRight.y = at.y + size * (sqrt(3) / 2);
+    topLeft.y = at.y - size * 32 * (sqrt(3) / 2);
+    topLeft.x = at.x - size * 8 * (sqrt(2) / 2);
+    bottomRight.x = at.x + size * 8 * (sqrt(2) / 2);
+
+    return {
+        topLeft.x, topLeft.y,
+        bottomRight.x - topLeft.x,
+        bottomRight.y - topLeft.y
+    };
+}
+
+SDL_Rect MinecraftSkinPreviewScreen::uvFlipHorizontal(SDL_Rect x)
+{
+    return { x.x + x.w, x.y, -x.w, x.h };
+}
+
 MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
     caller = parent;
-    screen00 = { g_windowW / 2, g_windowH / 4*3 };
-    slimModel = (parent->layers.back()->getPixelAt({ 51, 16 }) & 0xFF000000) == 0;
+    recalcPointScale();
+    screen00 = { g_windowW / 2, g_windowH / 6*5 };
+    twoByOneSkin = parent->canvas.dimensions.x > parent->canvas.dimensions.y;
+    slimModel = (parent->layers.front()->getVisualPixelAt(scaledPoint({ 51, 16 })) & 0xFF000000) == 0;
 
     navbar = new ScreenWideNavBar(this,
         {
@@ -257,8 +322,19 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
                 SDL_SCANCODE_V,
                 {
                     TL("vsp.nav.view"),
-                    { SDL_SCANCODE_S, SDL_SCANCODE_M },
+                    { SDL_SCANCODE_T, SDL_SCANCODE_S, SDL_SCANCODE_M, SDL_SCANCODE_W },
                     {
+                        { SDL_SCANCODE_T, { "Toggle 2:1 texture mode",
+                                [this]() {
+                                    this->twoByOneSkin = !this->twoByOneSkin;
+                                    g_addNotification(Notification(
+                                        (this->shade ? "2:1 texture mode" : "1:1 texture mode"),
+                                        "",
+                                        1200
+                                    ));
+                                }
+                            }
+                        },
                         { SDL_SCANCODE_S, { "Toggle shading",
                                 [this]() {
                                     this->shade = !this->shade;
@@ -275,6 +351,17 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
                                     this->slimModel = !this->slimModel;
                                     g_addNotification(Notification(
                                         (this->slimModel ? "Using slim model" : "Using standard model"),
+                                        "",
+                                        1200
+                                    ));
+                                }
+                            } 
+                        },
+                        { SDL_SCANCODE_W,{ "Toggle wireframe",
+                                [this]() {
+                                    this->drawWireframe = !this->drawWireframe;
+                                    g_addNotification(Notification(
+                                        (this->drawWireframe ? "Wireframe enabled" : "Wireframe disabled"),
                                         "",
                                         1200
                                     ));
@@ -317,6 +404,10 @@ void MinecraftSkinPreviewScreen::render()
 
     //debugRenderAxes();
 
+    /*SDL_Rect debugDrawBounds = getModelRenderArea(screen00);
+    SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
+    SDL_RenderDrawRect(g_rd, &debugDrawBounds);*/
+
     BaseScreen::render();
 }
 
@@ -353,6 +444,20 @@ void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
             size = dclamp(5, size, 100);
         }
     }
+}
+
+void MinecraftSkinPreviewScreen::tick()
+{
+    if (!dimensionsValidForPreview(caller->canvas.dimensions)) {
+        closeThisScreen();
+    }
+    recalcPointScale();
+    BaseScreen::tick();
+}
+
+void MinecraftSkinPreviewScreen::recalcPointScale()
+{
+    pointScale = caller->canvas.dimensions.x / 64.0;
 }
 
 void MinecraftSkinPreviewScreen::rotateFromMouseInput(double xrel, double yrel)

@@ -13,6 +13,7 @@
 #include "EditorTouchToggle.h"
 #include "SpritesheetPreviewScreen.h"
 #include "ViewSessionScreen.h"
+#include "MinecraftSkinPreviewScreen.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -565,6 +566,16 @@ void MainEditorPalettized::setUpWidgets()
                                 }
                                 MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(this);
                                 g_addScreen(newScreen);
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
+                            [this]() {
+                                if (!MinecraftSkinPreviewScreen::dimensionsValidForPreview(this->canvas.dimensions)) {
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
+                                    return;
+                                }
+                                g_addScreen(new MinecraftSkinPreviewScreen(this));
                             }
                         }
                     },

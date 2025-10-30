@@ -1207,13 +1207,8 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
                             [this]() {
-                                /*if (this->canvas.dimensions.x != this->canvas.dimensions.y && this->canvas.dimensions.x / 2 != this->canvas.dimensions.y) {
+                                if (!MinecraftSkinPreviewScreen::dimensionsValidForPreview(this->canvas.dimensions)) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
-                                    return;
-                                }*/
-                                //todo: figure it out
-                                if (!xyEqual(this->canvas.dimensions, {64,64})) {
-                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Must be 64x64."));
                                     return;
                                 }
                                 g_addScreen(new MinecraftSkinPreviewScreen(this));

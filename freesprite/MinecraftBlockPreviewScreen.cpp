@@ -213,7 +213,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlockV2(SDL_Rect at)
     double b = isomBeta * M_PI / 180;
 
     XYd scale = { at.w / 2.0, at.h/2.0 };
-    //XYd scaleToWholeArea = XYd{ 2.0 / sqrt(2.0), 2.0 / sqrt(3.0) };
+    //XYd scaleToWholeArea = XYd{ 2.0 / sqrt(2.0), 2.0 / sqrt(3.0) };   //stretch
     XYd scaleToWholeArea = XYd{ 2.0 / sqrt(3.0), 2.0 / sqrt(3.0) };
     
     XY origin00 = { at.x + at.w / 2, at.y + at.h/2 };

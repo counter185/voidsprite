@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "DrawableManager.h"
+#include "background_operation.h"
 
 #define LALT_TO_SUMMON_NAVBAR if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_LALT) { if (!navbar->focused) wxsManager.forceFocusOn(navbar); else wxsManager.forceUnfocus(); return; }
 
@@ -46,6 +47,10 @@ public:
 
     void forceUnfocusAll() {
         wxsManager.forceUnfocus();
+    }
+
+    void closeThisScreen() {
+        g_startNewMainThreadOperation([this]() { g_closeScreen(this); });
     }
 };
 
