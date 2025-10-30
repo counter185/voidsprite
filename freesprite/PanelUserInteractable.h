@@ -8,14 +8,20 @@ private:
 
     bool draggable = false;
     bool collapsible = false;
+    bool resizable = false;
 
     bool dragging = false;
     bool wasDragged = false;
+
+    const int resizeDistance = 5;
+    bool resizing = false;
+    XY minResizableSize = XY{ 0,0 };
 
     UIButton* collapseButton = NULL;
     Panel* collapsePanel = NULL;
 
     void processDrag(SDL_Event evt);
+    bool processResize(SDL_Event evt);
 protected:
     SDL_Color focusBorderColor = { 255,255,255,255 };
     double focusBorderLightup = 0.0;
@@ -28,12 +34,14 @@ protected:
 
     void setupDraggable();
     void setupCollapsible();
+    void setupResizable(XY minDimensions = XY{ 0,0 });
     void setupCloseButton(std::function<void()> callback);
 
     UILabel* addTitleText(std::string title);
 
     virtual bool defaultInputAction(SDL_Event evt, XY at) { return false; }
     virtual void renderAfterBG(XY at) {}
+    void renderResizeHandle(XY at);
 public:
     PanelUserInteractable();
 
@@ -42,6 +50,9 @@ public:
             drawPanelBackground(at);
             if (focused) {
                 renderFocusBorder(at, focusBorderColor, focusBorderLightup);
+            }
+            if (resizable) {
+                renderResizeHandle(at);
             }
             if (!collapsible || !collapsed) {
                 renderAfterBG(at);

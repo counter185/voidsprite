@@ -376,6 +376,7 @@ PanelMCSkinPreview::PanelMCSkinPreview(MinecraftSkinPreviewScreen* caller) {
     setupDraggable();
     setupCollapsible();
     addTitleText("PREVIEW");
+    setupResizable({ 180, 240 });
 }
 
 void PanelMCSkinPreview::renderAfterBG(XY at)
