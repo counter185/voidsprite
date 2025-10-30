@@ -1,11 +1,27 @@
 #pragma once
 #include "BaseScreen.h"
+#include "PanelUserInteractable.h"
+
+class MinecraftSkinPreviewScreen;
+
+class PanelMCSkinPreview : public PanelUserInteractable {
+private:
+    bool dragging = false;
+public:
+    MinecraftSkinPreviewScreen* parent;
+
+    PanelMCSkinPreview(MinecraftSkinPreviewScreen* caller);
+    void renderAfterBG(XY at) override;
+    SDL_Rect getPreviewAreaRect();
+    bool defaultInputAction(SDL_Event evt, XY at) override;
+};
 
 class MinecraftSkinPreviewScreen :
     public BaseScreen
 {
 private:
     MainEditor* caller;
+    PanelMCSkinPreview* inEditorPanel = NULL;
 
     double rotAlpha = 35.264;
     double rotBeta = 45;
@@ -27,19 +43,21 @@ protected:
 public:
 
     MinecraftSkinPreviewScreen(MainEditor* parent);
+    ~MinecraftSkinPreviewScreen();
 
     void render() override;
     void takeInput(SDL_Event evt) override;
+    void rotateFromMouseInput(double xrel, double yrel);
     BaseScreen* isSubscreenOf() override;
 
     std::string getName() override { return "Preview MC skin"; }
 
-    void renderQuad(XYZd ul, XYZd ur, XYZd dl, XYZd dr, SDL_Rect texture, double shading = 0.0);
-    void renderBox(XYZd at, double sizeX, double sizeZ, double sizeY, XY textureBoxOrigin);
-    void renderBoxOffset(XYZd at, double sizeX, double sizeZ, double sizeY, XY textureBoxOrigin, double offset);
+    void renderQuad(XY origin00, double scale, XYZd ul, XYZd ur, XYZd dl, XYZd dr, SDL_Rect texture, double shading = 0.0);
+    void renderBox(XY origin00, double scale, XYZd at, double sizeX, double sizeZ, double sizeY, XY textureBoxOrigin, double offset);
     XYd worldSpaceToScreenSpace(XYZd point, double alpha, double beta);
 
     void debugRenderAxes();
+    void renderModel(XY origin00, double scale);
     void renderFloorGrid();
 };
 
