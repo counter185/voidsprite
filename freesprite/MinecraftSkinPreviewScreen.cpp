@@ -209,28 +209,42 @@ void MinecraftSkinPreviewScreen::renderModel(XY origin00, double scale)
     XY leftArmTexturePos = xyAdd({ 40,16 }, { 4,0 });
     XY leftLegTexturePos = { 4,16 };
 
+    double overlayOffset = 0.3;
+
     std::vector<std::vector<std::vector<BoxRenderListObj>>> renderList = {
         //legs layer
         {
-            {BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, leftLegTexturePos}},   //left leg
-            {BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, twoByOneSkin ? leftLegTexturePos : XY{ 20, 48 }, 0.0, twoByOneSkin}}    //right leg
+            {
+                BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, leftLegTexturePos},  //left leg
+                BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, XY{ 4, 32 }, overlayOffset, false, !twoByOneSkin},   //left leg overlay
+            },   
+            {
+                BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, twoByOneSkin ? leftLegTexturePos : XY{ 20, 48 }, 0.0, twoByOneSkin},   //right leg
+                BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, XY{ 4, 48 }, overlayOffset, false, !twoByOneSkin},   //right leg overlay
+            }    
         },
 
         //body layer
         {
-            {BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, leftArmTexturePos}},    //left arm
+            {
+                BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, leftArmTexturePos},     //left arm
+                BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, {44,32}, overlayOffset, false, !twoByOneSkin},     //left arm overlay
+            },   
             {
                 BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 16 }},        //body
-                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, 0.2, false, !twoByOneSkin}    //body overlay
+                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, overlayOffset, false, !twoByOneSkin}    //body overlay
             },
-            {BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, twoByOneSkin ? leftArmTexturePos : xyAdd({ 32,48 }, { 4,0 }), 0.0, twoByOneSkin}}   //right arm
+            {
+                BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, twoByOneSkin ? leftArmTexturePos : xyAdd({ 32,48 }, { 4,0 }), 0.0, twoByOneSkin}, //right arm
+                BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, {52, 48}, overlayOffset, false, !twoByOneSkin}   //right arm overlay
+            }   
         },
 
         //head layer
         {
             {
                 BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 8, 0 }},  //head
-                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 40, 0 }, 0.2} //head overlay
+                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 40, 0 }, overlayOffset} //head overlay
             }
         }
     };
@@ -328,7 +342,7 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
                                 [this]() {
                                     this->twoByOneSkin = !this->twoByOneSkin;
                                     g_addNotification(Notification(
-                                        (this->shade ? "2:1 texture mode" : "1:1 texture mode"),
+                                        (this->twoByOneSkin ? "2:1 texture mode" : "1:1 texture mode"),
                                         "",
                                         1200
                                     ));
