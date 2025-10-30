@@ -10,7 +10,7 @@ BaseScreen* MinecraftSkinPreviewScreen::isSubscreenOf()
     return caller;
 }
 
-void MinecraftSkinPreviewScreen::renderQuad(XYZd ul, XYZd ur, XYZd dl, XYZd dr, SDL_Rect textureRegion)
+void MinecraftSkinPreviewScreen::renderQuad(XYZd ul, XYZd ur, XYZd dl, XYZd dr, SDL_Rect textureRegion, double shading)
 {
     double alpha = rotAlpha * M_PI / 180;
     double beta = rotBeta * M_PI / 180;
@@ -28,7 +28,7 @@ void MinecraftSkinPreviewScreen::renderQuad(XYZd ul, XYZd ur, XYZd dl, XYZd dr, 
     };
 
     for (auto& v : verts) {
-        v.color = SDL_FColor{ 1.0f,1.0f,1.0f,1.0f };
+        v.color = SDL_FColor{ (float)(1.0f - shading),(float)(1.0f - shading),(float)(1.0f - shading),1.0f };
     }
 
     verts[0].tex_coord = { (float)textureRegion.x, (float)textureRegion.y };
@@ -71,42 +71,48 @@ void MinecraftSkinPreviewScreen::renderBoxOffset(XYZd at, double sizeX, double s
     //front face
     if (rotBeta <= 90 || rotBeta >= 270) {
         renderQuad(h0z, hxz, l0z, lxz,
-            { textureBoxOrigin.x, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY }
+            { textureBoxOrigin.x, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY },
+            shade ? shadeFront : 0.0
         );
     }
 
     //right face
     if (rotBeta >= 0 && rotBeta <= 180) {
         renderQuad(hxz, hx0, lxz, lx0,
-            { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY }
+            { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY },
+            shade ? shadeRight : 0.0
         );
     }
 
     //left face
     if (rotBeta >= 180) {
         renderQuad(h00, h0z, l00, l0z,
-            { textureBoxOrigin.x - (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeZ, (int)sizeY }
+            { textureBoxOrigin.x - (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeZ, (int)sizeY },
+            shade ? shadeLeft : 0.0
         );
     }
 
     //back face
     if (rotBeta >= 90 && rotBeta <= 270) {
         renderQuad(hx0, h00, lx0, l00,
-            { textureBoxOrigin.x + (int)sizeX + (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY }
+            { textureBoxOrigin.x + (int)sizeX + (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY },
+            shade ? shadeBack : 0.0
         );
     }
 
     //bottom face
     if (rotAlpha < 0) {
         renderQuad(l00, lx0, l0z, lxz,
-            { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y, (int)sizeX, (int)sizeZ }
+            { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y, (int)sizeX, (int)sizeZ },
+            shade ? shadeBottom : 0.0
         );
     }
 
     //top face
     if (rotAlpha >= 0 && rotAlpha <= 180) {
         renderQuad(h00, hx0, h0z, hxz,
-            { textureBoxOrigin.x, textureBoxOrigin.y, (int)sizeX, (int)sizeZ }
+            { textureBoxOrigin.x, textureBoxOrigin.y, (int)sizeX, (int)sizeZ },
+            shade ? shadeTop : 0.0
         );
     }
 }
@@ -203,9 +209,20 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
                 SDL_SCANCODE_V,
                 {
                     TL("vsp.nav.view"),
-                    { SDL_SCANCODE_S },
+                    { SDL_SCANCODE_S, SDL_SCANCODE_M },
                     {
-                        { SDL_SCANCODE_S,{ "Toggle slim model",
+                        { SDL_SCANCODE_S, { "Toggle shading",
+                                [this]() {
+                                    this->shade = !this->shade;
+                                    g_addNotification(Notification(
+                                        (this->shade ? "Shading enabled" : "Shading disabled"),
+                                        "",
+                                        1200
+                                    ));
+                                }
+                            }
+                        },
+                        { SDL_SCANCODE_M,{ "Toggle slim model",
                                 [this]() {
                                     this->slimModel = !this->slimModel;
                                     g_addNotification(Notification(
