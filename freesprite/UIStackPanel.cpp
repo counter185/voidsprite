@@ -1,10 +1,39 @@
 #include "UIStackPanel.h"
 
 
+UIStackPanel* UIStackPanel::FromContent(std::vector<Drawable*> content)
+{
+    UIStackPanel* panel = new UIStackPanel();
+    for (Drawable* d : content) {
+        panel->addWidget(d);
+    }
+    panel->manuallyRecalculateLayout = true;
+    panel->recalculateLayout();
+    return panel;
+}
+
 UIStackPanel::UIStackPanel()
 {
     passThroughMouse = true;
     sizeToContent = true;
+}
+
+UIStackPanel* UIStackPanel::Vertical(int spacing, std::vector<Drawable*> content)
+{
+    auto panel = FromContent(content);
+    panel->orientationVertical = true;
+    panel->spacing = spacing;
+    panel->recalculateLayout();
+    return panel;
+}
+
+UIStackPanel* UIStackPanel::Horizontal(int spacing, std::vector<Drawable*> content)
+{
+    auto panel = FromContent(content);
+    panel->orientationVertical = false;
+    panel->spacing = spacing;
+    panel->recalculateLayout();
+    return panel;
 }
 
 void UIStackPanel::render(XY at)
@@ -32,7 +61,7 @@ void UIStackPanel::recalculateLayout()
         d->position = nextPos;
         if (!d->isPanel() || ((Panel*)d)->enabled) {
             XY size = d->getRenderDimensions();
-            nextPos = xyAdd(nextPos, orientationVertical ? XY{ 0, size.y } : XY{ size.x, 0 });
+            nextPos = xyAdd(nextPos, orientationVertical ? XY{ 0, size.y + spacing } : XY{ size.x + spacing, 0 });
         }
     }
     contentBoxSize = getContentBoxSize();

@@ -15,6 +15,14 @@ public:
     Fill fillUnfocused = Fill::None();
     u32 borderColor = 0x00FFFFFF;
 
+    static Panel* Space(int w, int h) {
+        Panel* p = new Panel();
+        p->wxWidth = w;
+        p->wxHeight = h;
+        p->passThroughMouse = true;
+        return p;
+    }
+
     ~Panel() {
         subWidgets.freeAllDrawables();
     }

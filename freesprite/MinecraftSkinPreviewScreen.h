@@ -16,6 +16,13 @@ public:
     bool defaultInputAction(SDL_Event evt, XY at) override;
 };
 
+class PanelMCSkinPreviewSettings : public PanelUserInteractable {
+private:
+    MinecraftSkinPreviewScreen* parent;
+public:
+    PanelMCSkinPreviewSettings(MinecraftSkinPreviewScreen* caller);
+};
+
 class MinecraftSkinPreviewScreen :
     public BaseScreen
 {
@@ -45,6 +52,22 @@ protected:
 
     ScreenWideNavBar* navbar;
 public:
+
+    double overlayOffsetSize = 0.3;
+
+    bool
+        renderHead = true,
+        renderHeadOverlay = true,
+        renderBody = true,
+        renderBodyOverlay = true,
+        renderLArm = true,
+        renderLArmOverlay = true,
+        renderRArm = true,
+        renderRArmOverlay = true,
+        renderLLeg = true,
+        renderLLegOverlay = true,
+        renderRLeg = true,
+        renderRLegOverlay = true;
 
     MinecraftSkinPreviewScreen(MainEditor* parent);
     ~MinecraftSkinPreviewScreen();

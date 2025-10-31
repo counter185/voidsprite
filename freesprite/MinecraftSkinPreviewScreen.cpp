@@ -4,6 +4,10 @@
 #include "ScreenWideNavBar.h"
 #include "Notification.h"
 #include "background_operation.h"
+#include "UIStackPanel.h"
+#include "UICheckbox.h"
+#include "UISlider.h"
+#include "UILabel.h"
 
 BaseScreen* MinecraftSkinPreviewScreen::isSubscreenOf()
 {
@@ -209,42 +213,40 @@ void MinecraftSkinPreviewScreen::renderModel(XY origin00, double scale)
     XY leftArmTexturePos = xyAdd({ 40,16 }, { 4,0 });
     XY leftLegTexturePos = { 4,16 };
 
-    double overlayOffset = 0.3;
-
     std::vector<std::vector<std::vector<BoxRenderListObj>>> renderList = {
         //legs layer
         {
             {
-                BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, leftLegTexturePos},  //left leg
-                BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, XY{ 4, 32 }, overlayOffset, false, !twoByOneSkin},   //left leg overlay
+                BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, leftLegTexturePos, 0.0, false, renderRLeg},  //left leg
+                BoxRenderListObj{{ -4,0,0 }, 4, 4, 12, XY{ 4, 32 }, overlayOffsetSize, false, !twoByOneSkin && renderRLegOverlay},   //left leg overlay
             },   
             {
-                BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, twoByOneSkin ? leftLegTexturePos : XY{ 20, 48 }, 0.0, twoByOneSkin},   //right leg
-                BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, XY{ 4, 48 }, overlayOffset, false, !twoByOneSkin},   //right leg overlay
+                BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, twoByOneSkin ? leftLegTexturePos : XY{ 20, 48 }, 0.0, twoByOneSkin, renderLLeg},   //right leg
+                BoxRenderListObj{{ 0,0,0 }, 4, 4, 12, XY{ 4, 48 }, overlayOffsetSize, false, !twoByOneSkin && renderLLegOverlay},   //right leg overlay
             }    
         },
 
         //body layer
         {
             {
-                BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, leftArmTexturePos},     //left arm
-                BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, {44,32}, overlayOffset, false, !twoByOneSkin},     //left arm overlay
+                BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, leftArmTexturePos, 0.0, false, renderRArm},     //left arm
+                BoxRenderListObj{{ -4.0 - handSizeX,12,0 }, handSizeX, 4, 12, {44,32}, overlayOffsetSize, false, !twoByOneSkin && renderRArmOverlay},     //left arm overlay
             },   
             {
-                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 16 }},        //body
-                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, overlayOffset, false, !twoByOneSkin}    //body overlay
+                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 16 }, 0.0, false, renderBody},        //body
+                BoxRenderListObj{{ -4,12,0 }, 8, 4, 12, { 20, 32 }, overlayOffsetSize, false, !twoByOneSkin && renderBodyOverlay}    //body overlay
             },
             {
-                BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, twoByOneSkin ? leftArmTexturePos : xyAdd({ 32,48 }, { 4,0 }), 0.0, twoByOneSkin}, //right arm
-                BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, {52, 48}, overlayOffset, false, !twoByOneSkin}   //right arm overlay
+                BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, twoByOneSkin ? leftArmTexturePos : xyAdd({ 32,48 }, { 4,0 }), 0.0, twoByOneSkin, renderLArm}, //right arm
+                BoxRenderListObj{{ 4,12,0 }, handSizeX, 4, 12, {52, 48}, overlayOffsetSize, false, !twoByOneSkin && renderLArmOverlay}   //right arm overlay
             }   
         },
 
         //head layer
         {
             {
-                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 8, 0 }},  //head
-                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 40, 0 }, overlayOffset} //head overlay
+                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 8, 0 }, 0.0, false, renderHead},  //head
+                BoxRenderListObj{{ -4,24,-2 }, 8, 8, 8, { 40, 0 }, overlayOffsetSize, false, renderHeadOverlay} //head overlay
             }
         }
     };
@@ -314,6 +316,10 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
     screen00 = { g_windowW / 2, g_windowH / 6*5 };
     twoByOneSkin = parent->canvas.dimensions.x > parent->canvas.dimensions.y;
     slimModel = (parent->layers.front()->getVisualPixelAt(scaledPoint({ 51, 16 })) & 0xFF000000) == 0;
+
+    PanelMCSkinPreviewSettings* settingsPanel = new PanelMCSkinPreviewSettings(this);
+    settingsPanel->position = { 10, 50 };
+    wxsManager.addDrawable(settingsPanel);
 
     navbar = new ScreenWideNavBar(this,
         {
@@ -542,4 +548,80 @@ bool PanelMCSkinPreview::defaultInputAction(SDL_Event evt, XY at)
         }
     }
     return false;
+}
+
+PanelMCSkinPreviewSettings::PanelMCSkinPreviewSettings(MinecraftSkinPreviewScreen* caller)
+{
+    wxWidth = 220;
+    wxHeight = 500;
+
+    setupDraggable();
+    addTitleText("SETTINGS");
+
+    sizeToContent = true;
+
+    UIStackPanel* hStack = new UIStackPanel();
+    hStack->orientationVertical = false;
+    hStack->position = { 10,40 };
+    hStack->manuallyRecalculateLayout = true;
+    wxsTarget().addDrawable(hStack);
+
+    UIStackPanel* checkboxesStack = new UIStackPanel();
+    checkboxesStack->spacing = 4;
+    checkboxesStack->manuallyRecalculateLayout = true;
+    hStack->addWidget(checkboxesStack);
+
+    UISlider* sliderOffsetSize = new UISlider();
+    sliderOffsetSize->setValue(0.001, 1.0, caller->overlayOffsetSize);
+    sliderOffsetSize->wxHeight = 20;
+    sliderOffsetSize->wxWidth = 150;
+    sliderOffsetSize->onChangeValueCallback = [caller](UISlider* s, double) {
+        caller->overlayOffsetSize = s->getValue(0.001, 1.0);
+    };
+
+    checkboxesStack->addWidget(
+        UIStackPanel::Horizontal(16, {
+            new UILabel("Overlay offset"),
+            sliderOffsetSize
+        })
+    );
+
+    checkboxesStack->addWidget(Panel::Space(2, 16));
+
+    std::vector<std::pair<std::string, bool*>> checkboxesS1 = {
+        {"Head", &caller->renderHead},
+        {"Body", &caller->renderBody},
+        {"Left arm", &caller->renderLArm},
+        {"Right arm", &caller->renderRArm},
+        {"Left leg", &caller->renderLLeg},
+        {"Right leg", &caller->renderRLeg}
+    };
+    std::vector<std::pair<std::string, bool*>> checkboxesS2 = {
+        {"Head overlay", &caller->renderHeadOverlay},
+        {"Body overlay", &caller->renderBodyOverlay},
+        {"Left arm overlay", &caller->renderLArmOverlay},
+        {"Right arm overlay", &caller->renderRArmOverlay},
+        {"Left leg overlay", &caller->renderLLegOverlay},
+        {"Right leg overlay", &caller->renderRLegOverlay},
+    };
+
+    for (auto& [name, target] : checkboxesS1) {
+        UICheckbox* cb = new UICheckbox(name, target);
+        checkboxesStack->addWidget(cb);
+    }
+
+    checkboxesStack->addWidget(Panel::Space(2,16));
+
+    for (auto& [name, target] : checkboxesS2) {
+        UICheckbox* cb = new UICheckbox(name, target);
+        checkboxesStack->addWidget(cb);
+    }
+
+    checkboxesStack->addWidget(Panel::Space(2, 4));
+
+    hStack->addWidget(Panel::Space(12, 4));
+
+    checkboxesStack->recalculateLayout();
+
+    hStack->recalculateLayout();
 }
