@@ -138,7 +138,6 @@ MainEditor::MainEditor(std::vector<Layer*> layers)
 }
 
 MainEditor::~MainEditor() {
-    wxsManager.freeAllDrawables();
     discardUndoStack();
     discardRedoStack();
     endNetworkSession();
@@ -3633,6 +3632,7 @@ void MainEditor::endNetworkSession()
         thisClientInfo = NULL;
     }
     //are these even required
+    //yes
     if (networkCanvasHostPanel != NULL) {
         removeWidget(networkCanvasHostPanel);
         networkCanvasHostPanel = NULL;
@@ -3811,7 +3811,7 @@ EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller, b
     clientList->position = { 5, 30 };
     clientList->wxWidth = wxWidth - 10;
     clientList->wxHeight = wxHeight - 35;
-    subWidgets.addDrawable(clientList);
+    wxsTarget().addDrawable(clientList);
 
 }
 
@@ -3930,7 +3930,7 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
     chatMsgPanel->position = { 5, 30 };
     chatMsgPanel->wxWidth = wxWidth - 10;
     chatMsgPanel->wxHeight = wxHeight - 35 - 35;
-    subWidgets.addDrawable(chatMsgPanel);
+    wxsTarget().addDrawable(chatMsgPanel);
 
     UITextField* inputField = new UITextField();
     inputField->position = { 5, wxHeight - 35 };
@@ -3942,7 +3942,7 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
         inputField->clearText();
     };
 
-    subWidgets.addDrawable(inputField);
+    wxsTarget().addDrawable(inputField);
 }
 
 void EditorNetworkCanvasChatPanel::updateChat()

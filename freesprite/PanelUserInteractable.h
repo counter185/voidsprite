@@ -13,7 +13,7 @@ private:
     bool dragging = false;
     bool wasDragged = false;
 
-    const int resizeDistance = 5;
+    const int resizeDistance = 15;
     bool resizing = false;
     XY minResizableSize = XY{ 0,0 };
 
@@ -22,6 +22,7 @@ private:
 
     void processDrag(SDL_Event evt);
     bool processResize(SDL_Event evt);
+    bool PointInResizeRange(XY pos);
 protected:
     SDL_Color focusBorderColor = { 255,255,255,255 };
     double focusBorderLightup = 0.0;
@@ -45,6 +46,7 @@ protected:
 public:
     PanelUserInteractable();
 
+    bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     void render(XY at) override {
         if (enabled) {
             drawPanelBackground(at);

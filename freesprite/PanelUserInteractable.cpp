@@ -61,14 +61,13 @@ UILabel* PanelUserInteractable::addTitleText(std::string title)
 
 void PanelUserInteractable::renderResizeHandle(XY at)
 {
-    double distance = xyDistance({ g_mouseX, g_mouseY }, xyAdd(position, getDimensions()));
-    if (distance < resizeDistance) {
+    if (PointInResizeRange({ g_mouseX, g_mouseY })) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
         SDL_Rect handleRect = SDL_Rect{
-            at.x + wxWidth - 5,
-            at.y + wxHeight - 5,
-            10,
-            10
+            at.x + wxWidth - resizeDistance,
+            at.y + wxHeight - resizeDistance,
+            resizeDistance*2,
+            resizeDistance*2
         };
         SDL_RenderDrawRect(g_rd, &handleRect);
     }
@@ -79,6 +78,11 @@ PanelUserInteractable::PanelUserInteractable()
     fillUnfocused = visualConfigFill("ui/panel/bg_unfocused");
     fillFocused = visualConfigFill("ui/panel/bg_focused");
     borderColor = visualConfigHexU32("ui/panel/border");
+}
+
+bool PanelUserInteractable::isMouseIn(XY thisPositionOnScreen, XY mousePos)
+{
+	return Panel::isMouseIn(thisPositionOnScreen, mousePos) || (resizable && PointInResizeRange(mousePos));
 }
 
 void PanelUserInteractable::handleInput(SDL_Event evt, XY gPosOffset)
@@ -133,7 +137,7 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
     switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
             if (evt.button.button == SDL_BUTTON_LEFT) {
-                if (xyDistance({ g_mouseX, g_mouseY }, xyAdd(position, getDimensions())) < resizeDistance) {
+                if (PointInResizeRange({ g_mouseX, g_mouseY })) {
                     resizing = true;
                     return true;
                 }
@@ -144,8 +148,8 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
             return false;
         case SDL_MOUSEMOTION:
             if (resizing && (!collapsible || !collapsed)) {
-                wxWidth = ixmax(minResizableSize.x, wxWidth + (int)(evt.motion.xrel));
-                wxHeight = ixmax(minResizableSize.x, wxHeight + (int)(evt.motion.yrel));
+                wxWidth = ixmin(g_windowW, ixmax(minResizableSize.x, wxWidth + (int)(evt.motion.xrel)));
+                wxHeight = ixmin(g_windowH, ixmax(minResizableSize.x, wxHeight + (int)(evt.motion.yrel)));
 
                 tryMoveOutOfOOB();
                 return true;
@@ -167,6 +171,11 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
         */
     }
     return false;
+}
+
+bool PanelUserInteractable::PointInResizeRange(XY pos)
+{
+    return xyDistance(pos, xyAdd(position, getDimensions())) < resizeDistance;
 }
 
 void PanelUserInteractable::tryMoveOutOfOOB()
