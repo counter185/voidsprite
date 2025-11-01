@@ -40,7 +40,7 @@ public:
 
     ScreenWideNavBar* navbar;
 
-    Panel* lastOpenFilesPanel;
+    UIStackPanel* lastOpenFilesPanel;
 
     Timer64 startupAnimTimer;
 

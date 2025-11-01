@@ -17,6 +17,7 @@ std::unordered_map<std::string, std::string> defaultVisualConfig = {
     {"launchpad/hours_color", "FFFFFFFF"},
     {"launchpad/minutes_color", "FFFFFFFF"},
     {"launchpad/seconds_color", "FFFFFFFF"},
+    {"launchpad/last_open_files/bg", Fill::Gradient(0x60000000, 0x60000000, 0x90909090, 0x90000000).serialize()},
     {"maineditor/bg", Fill::Gradient(0xFF000000,0xFF000000,0xFF000000,0xFF202020).serialize()},
     {"maineditor/bg_alt", Fill::Gradient(0xFFDFDFDF,0xFFDFDFDF,0xFFDFDFDF,0xFF808080).serialize()},
     {"maineditor/comments/fill", Fill::Gradient(0xA0000000, 0xA0000000, 0x70000000, 0x70000000).serialize()},

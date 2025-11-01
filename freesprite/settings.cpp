@@ -113,7 +113,7 @@ void g_tryPushLastFilePath(std::string a) {
             g_config.lastOpenFiles.erase(pos);
         }
         g_config.lastOpenFiles.insert(g_config.lastOpenFiles.begin(), a);
-        while (g_config.lastOpenFiles.size() > 7) {
+        while (g_config.lastOpenFiles.size() > 30) {
             g_config.lastOpenFiles.pop_back();
         }
         g_saveConfig();

@@ -28,6 +28,7 @@
 #include "BaseTemplate.h"
 #include "background_operation.h"
 #include "updatecheck.h"
+#include "UIStackPanel.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -164,12 +165,25 @@ StartScreen::StartScreen() {
     int startScreenPanelEndpoint = newImageTabs->getDimensions().x + newImageTabs->position.x;
     startScreenPanelEndpoint = ixmax(560, startScreenPanelEndpoint);
 
-    lastOpenFilesPanel = new Panel();
-    lastOpenFilesPanel->wxWidth = startScreenPanelEndpoint;
-    lastOpenFilesPanel->wxHeight = 520;
-    lastOpenFilesPanel->position = { startScreenPanelEndpoint + 10, 75 };
-    lastOpenFilesPanel->passThroughMouse = true;
-    wxsManager.addDrawable(lastOpenFilesPanel);
+    ScrollingPanel* lastOpenFilesPanelContainer = new ScrollingPanel();
+    lastOpenFilesPanelContainer->bgColor = Fill::None();
+    lastOpenFilesPanelContainer->borderColor = 0x00000000;
+    lastOpenFilesPanelContainer->innerBorderColor = 0x00000000;
+    lastOpenFilesPanelContainer->wxWidth = 630;
+    lastOpenFilesPanelContainer->wxHeight = 210;
+
+    lastOpenFilesPanel = new UIStackPanel();
+    lastOpenFilesPanel->takeMouseWheelEvents = false;
+    lastOpenFilesPanel->manuallyRecalculateLayout = true;
+    lastOpenFilesPanel->position = { 0,0 };
+    lastOpenFilesPanelContainer->subWidgets.addDrawable(lastOpenFilesPanel);
+
+    UIStackPanel* lastOpenFilesSection = UIStackPanel::Vertical(12, {
+        new UILabel(TL("vsp.launchpad.lastfiles"), { 0,0 }, 22),
+        lastOpenFilesPanelContainer
+    });
+    lastOpenFilesSection->position = { startScreenPanelEndpoint + 20, 75 };
+	wxsManager.addDrawable(lastOpenFilesSection);
 
     std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_H };
     if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
@@ -541,17 +555,8 @@ void StartScreen::populateLastOpenFiles()
 {
     lastOpenFilesPanel->subWidgets.freeAllDrawables();
 
-    UILabel* lbl = new UILabel(TL("vsp.launchpad.lastfiles"));
-    lbl->fontsize = 22;
-    lbl->position = {5, 2};
-    lastOpenFilesPanel->subWidgets.addDrawable(lbl);
-
-    XY origin = { 10, 35 };
-
-    int i = 0;
     for (std::string& lastPath : g_config.lastOpenFiles) {
         UIButton* button = new UIButton();
-        button->position = origin;
         button->tooltip = lastPath;
         std::string s = lastPath;
         bool ellipsis = false;
@@ -576,9 +581,8 @@ void StartScreen::populateLastOpenFiles()
                 {TL("vsp.launchpad.ctx.clearlast"), [this, lastPath]() { g_clearLastOpenFiles(); populateLastOpenFiles(); }},
             });
         };
-        button->fill = Fill::Gradient(0x60000000, 0x60000000, 0x90909090, 0x90000000);
-        origin.y += 30;
-        lastOpenFilesPanel->subWidgets.addDrawable(button);
+        button->fill = visualConfigFill("launchpad/last_open_files/bg");
+        lastOpenFilesPanel->addWidget(button);
     }
 }
 
