@@ -2,6 +2,7 @@
 #include "FontRenderer.h"
 #include "maineditor.h"
 #include "NetworkCanvasMainEditor.h"
+#include "ASCIIEditor.h"
 #include "FileIO.h"
 #include "Notification.h"
 #include "CustomTemplate.h"
@@ -331,6 +332,12 @@ void StartScreen::takeInput(SDL_Event evt)
         }
         else if (stringEndsWithIgnoreCase(filePath, ".data")) {
             g_addScreen(new ExtractDataScreen(convertStringOnWin32(filePath)));
+        }
+        else if (stringEndsWithIgnoreCase(filePath, ".nfo")) {
+            ASCIISession* ssn = ASCIISession::fromTXT(convertStringOnWin32(filePath));
+            if (ssn != NULL) {
+                g_addScreen(new ASCIIEditor(ssn));
+            }
         }
         else {
             tryLoadFile(filePath);
