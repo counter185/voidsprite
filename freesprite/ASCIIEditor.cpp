@@ -1,14 +1,16 @@
 #include <fstream>
+#include <SDL3_image/SDL_image.h>
 
 #include "ASCIIEditor.h"
 #include "FontRenderer.h"
+#include "Notification.h"
 
 ASCIIEditor::ASCIIEditor(XY dimensions)
 {
     lastRenderer = g_rd;
     session = new ASCIISession(dimensions);
-    loadDefaultFont();
-    resize(session->getSize());
+    reloadFont();
+    updateCanvasSize();
     c.recenter();
 }
 
@@ -16,27 +18,33 @@ ASCIIEditor::ASCIIEditor(ASCIISession* ssn)
 {
     lastRenderer = g_rd;
     session = ssn;
-    loadDefaultFont();
-    resize(session->getSize());
-	c.recenter();
+    reloadFont();
+    updateCanvasSize();
+    c.recenter();
 }
 
 ASCIIEditor::~ASCIIEditor()
 {
     delete session;
+    if (font != NULL) {
+        delete font;
+    }
 }
 
 void ASCIIEditor::render()
 {
+    renderGradient({ 0,0,g_windowW,g_windowH }, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF202020);
+
     if (lastRenderer != g_rd) {
-        loadDefaultFont();
-		lastRenderer = g_rd;
+        reloadFont();
+        lastRenderer = g_rd;
     }
 
     c.lockToScreenBounds();
 
-	SDL_Rect renderArea = c.getCanvasOnScreenRect();
-	XY glyphSize = font->getGlyphSize();
+    SDL_Rect renderArea = c.getCanvasOnScreenRect();
+    XY glyphSize = font->getGlyphSize();
+    glyphSize = { glyphSize.x * fontScale.x, glyphSize.y * fontScale.y };
 
     int drawcalls = 0;
 
@@ -47,12 +55,15 @@ void ASCIIEditor::render()
         }
         if (yCheck.y + yCheck.h >= 0) {
             for (int x = 0; x < session->getSize().x; x++) {
-                SDL_Rect onScreenRect = c.getTileScreenRectAt({ x,y }, glyphSize);
-                if (onScreenRect.x >= g_windowW) {
-                    break;
+                auto ch = session->get({ x,y });
+                if (!(ch.ch == 0 && !font->skip00) && !(ch.ch == ' ' && !font->skipSpace)) {
+                    SDL_Rect onScreenRect = c.getTileScreenRectAt({ x,y }, glyphSize);
+                    if (onScreenRect.x >= g_windowW) {
+                        break;
+                    }
+                    renderCharOnScreen(ch, onScreenRect);
+                    drawcalls++;
                 }
-                renderCharOnScreen(session->get({ x,y }), onScreenRect);
-                drawcalls++;
             }
         }
     }
@@ -77,8 +88,50 @@ void ASCIIEditor::takeInput(SDL_Event evt)
 
     DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-        c.takeInput(evt);
+        if (evt.type == SDL_EVENT_DROP_FILE) {
+            std::string path = evt.drop.data;
+            PlatformNativePathString npath = convertStringOnWin32(path);
+            if (tryLoadCustomFontBitmap(npath)) {
+                fontBitmapPath = npath;
+                updateCanvasSize();
+            }
+        }
+        else {
+            c.takeInput(evt);
+        }
     }
+}
+
+void ASCIIEditor::updateCanvasSize()
+{
+    XY glyphSize = font->getGlyphSize();
+    XY charCounts = session->getSize();
+    c.dimensions = { charCounts.x * glyphSize.x * fontScale.x, charCounts.y * glyphSize.y * fontScale.y };
+}
+
+void ASCIIEditor::reloadFont() {
+    if (fontBitmapPath.empty() || !tryLoadCustomFontBitmap(fontBitmapPath)) {
+        loadDefaultFont();
+    }
+}
+
+bool ASCIIEditor::tryLoadCustomFontBitmap(PlatformNativePathString path)
+{
+    std::string u8path = convertStringToUTF8OnWin32(path);
+    SDL_Surface* srf = IMG_Load(u8path.c_str());
+    if (srf != NULL) {
+        BitmapFontObject* newFont = new BitmapFontObject(srf, 437);
+        if (font != NULL) {
+            delete font;
+        }
+        glyphCache.clear();
+        font = newFont;
+        return true;
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Error loading custom font page"));
+    }
+    return false;
 }
 
 void ASCIIEditor::loadDefaultFont()
@@ -93,17 +146,19 @@ void ASCIIEditor::loadDefaultFont()
 
 void ASCIIEditor::renderCharOnScreen(ASCIIChar ch, SDL_Rect onScreenRect)
 {
-	XY glyphSize = font->getGlyphSize();
+    XY glyphSize = font->getGlyphSize();
     if (!glyphCache.contains(ch.ch)) {
-		glyphCache[ch.ch] = font->getDirectCodepageGlyph(ch.ch);
+        glyphCache[ch.ch] = font->getDirectCodepageGlyph(ch.ch);
     }
-	SDL_Color bgColor = uint32ToSDLColor(ch.background);
-	SDL_Color fgColor = uint32ToSDLColor(ch.foreground);
+    if ((ch.background & 0xFF000000) != 0) {
+        SDL_Color bgColor = uint32ToSDLColor(ch.background);
+        SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+        SDL_RenderFillRect(g_rd, &onScreenRect);
+    }
+    
+    SDL_Color fgColor = uint32ToSDLColor(ch.foreground);
 
-	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	SDL_RenderFillRect(g_rd, &onScreenRect);
-
-	GlyphData& g = glyphCache[ch.ch];
+    GlyphData& g = glyphCache[ch.ch];
 
     SDL_SetTextureColorMod(g.texture, fgColor.r, fgColor.g, fgColor.b);
     SDL_RenderCopy(g_rd, g.texture, NULL, &onScreenRect);
@@ -112,8 +167,7 @@ void ASCIIEditor::renderCharOnScreen(ASCIIChar ch, SDL_Rect onScreenRect)
 void ASCIIEditor::resize(XY newSize)
 {
     session->resize(newSize);
-    XY glyphSize = font->getGlyphSize();
-    c.dimensions = { newSize.x * glyphSize.x, newSize.y * glyphSize.y };
+    updateCanvasSize();
 }
 
 ASCIISession* ASCIISession::fromTXT(PlatformNativePathString path)

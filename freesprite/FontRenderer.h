@@ -119,6 +119,12 @@ private:
     void RenderGlyph(u32 mapTarget, u16 codepageChar, int integerScale) {
         XY posOnTexture = getCodepageCharPosition(codepageChar);
         SDL_Surface* newSrf = trimSurface(tex, { posOnTexture.x * glyphSize.x, posOnTexture.y * glyphSize.y, glyphSize.x, glyphSize.y });
+        if (codepageChar == 0) {
+            skip00 = surfaceEmpty(newSrf);
+        }
+        if (codepageChar == (u16)' ') {
+            skipSpace = surfaceEmpty(newSrf);
+        }
         SDL_Texture* newTex = tracked_createTextureFromSurface(g_rd, newSrf);
         SDL_SetTextureBlendMode(newTex, SDL_BLENDMODE_BLEND);
         SDL_DestroySurface(newSrf);
@@ -137,7 +143,23 @@ private:
             renderedGlyphs[integerScale][mapTarget] = gd;
         }
     }
+
+    bool surfaceEmpty(SDL_Surface* src) {
+        for (int y = 0; y < src->h; y++) {
+            for (int x = 0; x < src->w; x++) {
+                u8 r, g, b, a;
+                SDL_ReadSurfacePixel(src, x, y, &r, &g, &b, &a);
+                if (a != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 public:
+    bool skip00 = false;
+    bool skipSpace = false;
+
     BitmapFontObject(SDL_Surface* tx, int cp) : tex(tx), codepage(cp) {
         float metrics[2];
         //SDL_GetTextureSize(tx, &metrics[0], &metrics[1]);

@@ -41,7 +41,7 @@ public:
         if (at.x >= newSize.x) newSize.x = at.x + 1;
         if (at.y >= newSize.y) newSize.y = at.y + 1;
         resize(newSize);
-		data[at.y][at.x] = val;
+        data[at.y][at.x] = val;
     }
 
     void resize(XY newSize) {
@@ -64,14 +64,23 @@ protected:
 
     std::map<u8, GlyphData> glyphCache;
 
+    XY fontScale = { 1,1 };
+
+    PlatformNativePathString fontBitmapPath;
+
 public:
     ASCIIEditor(XY dimensions);
     ASCIIEditor(ASCIISession* ssn);
     ~ASCIIEditor();
 
+    std::string getName() override { return "ASCII Editor"; }
+
     void render() override;
     void takeInput(SDL_Event evt) override;
 
+    void updateCanvasSize();
+    void reloadFont();
+    bool tryLoadCustomFontBitmap(PlatformNativePathString path);
     void loadDefaultFont();
     void renderCharOnScreen(ASCIIChar ch, SDL_Rect onScreenRect);
     void resize(XY newSize);
