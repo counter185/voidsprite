@@ -74,6 +74,10 @@ public:
     }
     virtual bool hasGlyphForChar(u32 ch, int size) = 0;
     virtual GlyphData getGlyphForChar(u32 ch, int size) = 0;
+
+    void clearRenderedGlyphs() {
+        renderedGlyphs.clear();
+    }
 };
 
 class TTFFontObject : public FontObject {
@@ -172,6 +176,10 @@ public:
             RenderGlyph(codepageToUnicodeToBmpIndexMap[codepage].getFromB(index), index, 1);
         }
         return renderedGlyphs[1][index];
+    }
+
+    XY getGlyphSize() {
+        return glyphSize;
     }
 };
 

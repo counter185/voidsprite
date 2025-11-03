@@ -3553,6 +3553,220 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
     return true;
 }
 
+void g_setupIO() {
+    FileExporter
+        * exVOIDSNv6,
+        * exVOIDSNv5,
+        * exVOIDSNv4,
+        * exVOIDSNv3,
+        * exVOIDSNv2,
+        * exPixelStudioPSP,
+        * exPixelStudioPSX,
+        * exPiskel,
+        * exLPE,
+        * exAsepriteASE,
+        * exORA,
+        * exPNG,
+        * exBMP,
+        * exCaveStoryPBM,
+        * exXYZ,
+        * exAnymapPBM,
+        * exAnymapPGM,
+        * exAnymapPPM,
+        * exXBM,
+        * exSR8,
+        * exVTF,
+        * exDIBv5,
+        * exJPEG,
+        * exAVIF
+        ;
+
+    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", &writeVOIDSNv3));
+    g_fileExporters.push_back(exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2));
+    g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster));
+    g_fileExporters.push_back(exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", &writePixelStudioPSP));
+    g_fileExporters.push_back(exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", &writePixelStudioPSX));
+    g_fileExporters.push_back(exLPE = FileExporter::sessionExporter("Lospec Pixel Editor", ".lpe", &writeLPE));
+    g_fileExporters.push_back(exPiskel = FileExporter::sessionExporter("Piskel", ".piskel", &writePISKEL));
+    g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
+
+    g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
+
+    g_fileExporters.push_back(exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", &writeBMP));
+#if VOIDSPRITE_JXL_ENABLED
+    FileExporter* exJXL;
+    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL", ".jxl", &writeJpegXL, FORMAT_RGB));
+#endif
+    g_fileExporters.push_back(exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", &writeJPEG));
+    g_fileExporters.push_back(exAVIF = FileExporter::flatExporter("AVIF", ".avif", &writeAVIF));
+    g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
+    g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", &writeCaveStoryPBM));
+    g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exAnymapPGM = FileExporter::flatExporter("Portable Graymap (text) PGM", ".pgm", &writeAnymapTextPGM, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exAnymapPPM = FileExporter::flatExporter("Portable Pixmap (text) PPM", ".ppm", &writeAnymapTextPPM, FORMAT_RGB));
+    g_fileExporters.push_back(exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVTF = FileExporter::flatExporter("VTF", ".vtf", &writeVTF, FORMAT_RGB));
+    g_fileExporters.push_back(exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exDIBv5 = FileExporter::flatExporter("DIBv5 Clipboard Dump", ".dibv5", &writeDIBV5, FORMAT_RGB));
+    g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
+    g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
+    g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
+
+    for (FileExporter* i : g_pluginRegisteredFileExporters) {
+        g_fileExporters.push_back(i);
+    }
+
+
+    voidsnExporter = exVOIDSNv6;
+
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
+        [](PlatformNativePathString p) {
+            return magicVerify(1, "voidsprite")(p) || magicVerify(9, "/VOIDSN.META/")(p)
+                || magicVerify(0, "\x01")(p) || magicVerify(0, "\x02")(p);
+        }));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v6", ".voidsnv6", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(1, "voidsprite")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(9, "/VOIDSN.META/")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v4", ".voidsnv4", &readVOIDSN, exVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(9, "/VOIDSN.META/")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(9, "/VOIDSN.META/")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Split Session", ".voidspsn", &loadSplitSession, NULL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Lospec Pixel Editor", ".lpe", &readLPE, exLPE));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pix2D", ".pix2d", &readPix2D, NULL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, exPiskel));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Pixil", ".pixil", &readPIXIL, NULL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(4, "\xE0\xA5")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(4, "\xE0\xA5")));
+#if VSP_USE_LIBLCF
+    g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
+#endif
+
+    g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
+    g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(0, "\x89PNG\x0D\x0A")));
+    g_fileImporters.push_back(FileImporter::flatImporter("JPEG", ".jpeg", &readSDLImage, exJPEG, FORMAT_RGB, magicVerify(0, "\xFF\xD8")));
+    g_fileImporters.push_back(FileImporter::flatImporter("AVIF", ".avif", &readSDLImage, exAVIF));
+    g_fileImporters.push_back(FileImporter::flatImporter("BMP", ".bmp", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
+    //g_fileImporters.push_back(FileImporter::flatImporter("GIF", ".gif", &readGIF, NULL));
+#if VOIDSPRITE_JXL_ENABLED
+    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));
+#endif
+    g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
+        magicVerify(0, "BM")));
+    g_fileImporters.push_back(FileImporter::flatImporter("RPG2000/2003 XYZ", ".xyz", &readXYZ, exXYZ, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Atrophy Engine AETEX v1/v2", ".aetex", &readAETEX));
+    g_fileImporters.push_back(FileImporter::flatImporter("PS Graphic Image Map GIM", ".gim", &readGIM));
+    g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICN", ".icn", &readPS2ICN));
+    g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICO", ".ico", &readPS2ICN, NULL, FORMAT_RGB,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            fseek(f, 12, SEEK_SET);
+            u32 num;
+            fread(&num, 4, 1, f);
+            fclose(f);
+            return num == 0x3f800000;
+        }));
+    g_fileImporters.push_back(FileImporter::flatImporter("Wii/GC TPL", ".tpl", &readWiiGCTPL));
+    g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
+    g_fileImporters.push_back(FileImporter::flatImporter("DDS", ".dds", &readDDS, NULL, FORMAT_RGB, magicVerify(0, "DDS")));
+    g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF, exVTF));
+    g_fileImporters.push_back(FileImporter::flatImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED,
+        magicVerify(0, "IDSP")));
+    g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
+    g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Slim Render (8-bit) SR8", ".sr8", &readSR8, exSR8, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Windows Shell Scrap SHS", ".shs", &readWinSHS, NULL, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("DIBv5 Clipboard Dump", ".dibv5", &readDIBV5, exDIBv5, FORMAT_RGB));
+    g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            //check if file starts with P1 or P4
+            char c[2];
+            fread(c, 2, 1, f);
+            fclose(f);
+            return c[0] == 'P' && (c[1] == '1' || c[1] == '4');
+        }));
+    g_fileImporters.push_back(FileImporter::flatImporter("Portable graymap PGM", ".pgm", &readAnymapPGM, exAnymapPGM, FORMAT_PALETTIZED,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            //check if file starts with P2 or P5
+            char c[2];
+            fread(c, 2, 1, f);
+            fclose(f);
+            return c[0] == 'P' && (c[1] == '2' || c[1] == '5');
+        }));
+    g_fileImporters.push_back(FileImporter::flatImporter("Portable pixmap PPM", ".ppm", &readAnymapPPM, exAnymapPPM, FORMAT_RGB,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            //check if file starts with P3 or P6
+            char c[2];
+            fread(c, 2, 1, f);
+            fclose(f);
+            return c[0] == 'P' && (c[1] == '3' || c[1] == '6');
+        }));
+    g_fileImporters.push_back(FileImporter::flatImporter("Mario Paint save file SRM", ".srm", &readMarioPaintSRM, NULL, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("Nintendo DS rom (dump banner)", ".nds", &readNDSBanner, NULL));
+    g_fileImporters.push_back(FileImporter::flatImporter("X-Com SPK file", ".spk", &readXComSPK, NULL, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("X-Com BDY file", ".bdy", &readXComBDY, NULL, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("X-Com SCR file", ".scr", &readXComSCR, NULL, FORMAT_PALETTIZED,
+        [](PlatformNativePathString path) {
+            FILE* f = platformOpenFile(path, PlatformFileModeRB);
+            //check if file isn't an exe
+            char c[2];
+            fread(c, 2, 1, f);
+            fseek(f, 0, SEEK_END);
+            uint64_t len = ftell(f);
+            fclose(f);
+            return !(c[0] == 'M' && c[1] == 'Z') && len == (320 * 200);
+        }));
+    g_fileImporters.push_back(FileImporter::flatImporter("PSP/Vita GXT", ".gxt", &readGXT, NULL));
+    g_fileImporters.push_back(FileImporter::flatImporter("Nintendo 3DS CXI (dump icon)", ".cxi", &read3DSCXIIcon, NULL));
+    for (FileImporter* i : g_pluginRegisteredFileImporters) {
+        g_fileImporters.push_back(i);
+    }
+    g_fileImporters.push_back(FileImporter::flatImporter("SDL_Image", "", &readSDLImage, NULL, FORMAT_RGB,
+        [](PlatformNativePathString p) {return true; }));
+
+
+    PaletteExporter
+        * exVOIDPLT,
+        * exHexPLT;
+    g_paletteExporters.push_back(exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", &writePltVOIDPLT));
+    g_paletteExporters.push_back(exHexPLT = PaletteExporter::paletteExporter("Hex palette", ".hex", &writePltHEX));
+
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT, NULL, exVOIDPLT));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX, NULL, exHexPLT));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("paint.net palette", ".txt", &readPltPDNTXT, NULL));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("JASC-PAL palette", ".pal", &readPltJASCPAL,
+        magicVerify(0, "JASC-PAL")));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("GIMP GPL palette", ".gpl", &readPltGIMPGPL,
+        magicVerify(0, "GIMP Palette")));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("Pixel Studio palette", ".palette", &readPltPixelStudioPALETTE));
+
+
+
+    for (auto& exporter : g_fileExporters) {
+        if (exporter->formatFlags() & FORMAT_PALETTIZED) {
+            g_palettizedFileExporters.push_back(exporter);
+        }
+    }
+}
+
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 {
     if (data->isPalettized) {

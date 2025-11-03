@@ -255,6 +255,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ASCIIEditor.cpp" />
     <ClCompile Include="astc_dec\astc_decomp.cpp" />
     <ClCompile Include="brush\BaseBrush.cpp" />
     <ClCompile Include="BaseFilter.cpp" />
@@ -486,6 +487,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ASCIIEditor.h" />
     <ClInclude Include="astc_dec\astc_decomp.h" />
     <ClInclude Include="background_operation.h" />
     <ClInclude Include="base64\base64.hpp" />

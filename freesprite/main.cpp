@@ -151,7 +151,7 @@ SDL_Texture* IMGLoadToTexture(std::string path) {
     return ret;
 }
 
-SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd) {
+SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd) {
     rd = rd == NULL ? g_rd : rd;
     std::vector<PlatformNativePathString> pathList;
     if (!g_usingDefaultVisualConfig()) {
@@ -173,6 +173,11 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
         return NULL;
     }
+    return srf;
+}
+
+SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd) {
+    SDL_Surface* srf = IMGLoadAssetToSurface(path, rd);
     SDL_Texture* ret = tracked_createTextureFromSurface(rd, srf);
     SDL_FreeSurface(srf);
     return ret;

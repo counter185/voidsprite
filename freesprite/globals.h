@@ -150,7 +150,6 @@ struct TTF_Font;
 
 //util classes
 class EventCallbackListener;
-class TextRenderer;
 class Layer;
 class LayerPalettized;
 class Pattern;
@@ -166,6 +165,10 @@ class DrawableManager;
 class VSPWindow;
 class HotReloadableTexture;
 class PopupSetNetworkCanvasData;
+
+//textrenderer
+class TextRenderer;
+class BitmapFontObject;
 
 //templates
 class BaseTemplate;
@@ -306,6 +309,7 @@ void g_popRenderTarget();
 void g_reloadFonts();
 
 SDL_Texture* IMGLoadToTexture(std::string path);
+SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd = NULL);
 SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd = NULL);
 
 void tracked_destroyTexture(SDL_Texture* t);
