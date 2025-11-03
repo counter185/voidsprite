@@ -177,6 +177,7 @@ SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd) {
 }
 
 SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd) {
+    rd = rd == NULL ? g_rd : rd;
     SDL_Surface* srf = IMGLoadAssetToSurface(path, rd);
     SDL_Texture* ret = tracked_createTextureFromSurface(rd, srf);
     SDL_FreeSurface(srf);
