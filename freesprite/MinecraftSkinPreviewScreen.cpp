@@ -84,7 +84,7 @@ void MinecraftSkinPreviewScreen::renderBox(XY origin00, double scale, XYZd at, d
         h0z = xyzdAdd(l0z,  { 0, sizeY +offset*2, 0});
 
     SDL_Rect frontFace = { textureBoxOrigin.x, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY };
-    SDL_Rect rightFace = { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY };
+    SDL_Rect rightFace = { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y + (int)sizeZ, (int)sizeZ, (int)sizeY };
     SDL_Rect leftFace = { textureBoxOrigin.x - (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeZ, (int)sizeY };
     SDL_Rect backFace = { textureBoxOrigin.x + (int)sizeX + (int)sizeZ, textureBoxOrigin.y + (int)sizeZ, (int)sizeX, (int)sizeY };
     SDL_Rect bottomFace = { textureBoxOrigin.x + (int)sizeX, textureBoxOrigin.y, (int)sizeX, (int)sizeZ };
