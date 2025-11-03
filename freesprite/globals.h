@@ -169,6 +169,7 @@ class PopupSetNetworkCanvasData;
 //textrenderer
 class TextRenderer;
 class BitmapFontObject;
+class GlyphData;
 
 //templates
 class BaseTemplate;

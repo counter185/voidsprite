@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseScreen.h"
 #include "Canvas.h"
+#include "FontRenderer.h"
 
 struct ASCIIChar {
     u8 ch = 0;
@@ -60,6 +61,9 @@ protected:
     BitmapFontObject* font = NULL;
     Canvas c;
     SDL_Renderer* lastRenderer = NULL;
+
+    std::map<u8, GlyphData> glyphCache;
+
 public:
     ASCIIEditor(XY dimensions);
     ASCIIEditor(ASCIISession* ssn);

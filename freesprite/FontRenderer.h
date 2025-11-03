@@ -172,10 +172,11 @@ public:
     }
 
     GlyphData getDirectCodepageGlyph(u16 index) {
+        auto unicodeGlyph = codepageToUnicodeToBmpIndexMap[codepage].getFromB(index);
         if (!renderedGlyphs[1].contains(index)) {
-            RenderGlyph(codepageToUnicodeToBmpIndexMap[codepage].getFromB(index), index, 1);
+            RenderGlyph(unicodeGlyph, index, 1);
         }
-        return renderedGlyphs[1][index];
+        return renderedGlyphs[1][unicodeGlyph];
     }
 
     XY getGlyphSize() {

@@ -17,10 +17,10 @@
 #include "base64/base64.hpp"
 #include "json/json.hpp"
 
+#include "FileIO.h"
 #include "globals.h"
 #include "Notification.h"
 #include "splitsession.h"
-#include "FileIO.h"
 #include "maineditor.h"
 #include "MainEditorPalettized.h"
 #include "LayerPalettized.h"

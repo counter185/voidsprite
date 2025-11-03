@@ -69,7 +69,7 @@ void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::
     png_set_text(outpng, outpnginfo, &pngt, 1);
 }
 
-Layer* readPNG(png_structp png, png_infop info) {
+Layer* _readPNG(png_structp png, png_infop info) {
     uint32_t width = png_get_image_width(png, info);
     uint32_t height = png_get_image_height(png, info);
     png_byte color_type = png_get_color_type(png, info);
@@ -216,7 +216,7 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
     //png_set_sig_bytes(png, kPngSignatureLength);
     png_read_info(png, info);
 
-    return readPNG(png, info);
+    return _readPNG(png, info);
 }
 
 //todo: condense this and writePNG into one function
@@ -327,7 +327,7 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
         png_init_io(png, pngfile);
         png_read_info(png, info);
 
-        Layer* ret = readPNG(png, info);
+        Layer* ret = _readPNG(png, info);
         fclose(pngfile);
         return ret;
     }

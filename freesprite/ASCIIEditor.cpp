@@ -38,6 +38,8 @@ void ASCIIEditor::render()
 	SDL_Rect renderArea = c.getCanvasOnScreenRect();
 	XY glyphSize = font->getGlyphSize();
 
+    int drawcalls = 0;
+
     for (int y = 0; y < session->getSize().y; y++) {
         SDL_Rect yCheck = c.getTileScreenRectAt({ 0,y }, glyphSize);
         if (yCheck.y >= g_windowH) {
@@ -46,13 +48,19 @@ void ASCIIEditor::render()
         if (yCheck.y + yCheck.h >= 0) {
             for (int x = 0; x < session->getSize().x; x++) {
                 SDL_Rect onScreenRect = c.getTileScreenRectAt({ x,y }, glyphSize);
+                if (onScreenRect.x >= g_windowW) {
+                    break;
+                }
                 renderCharOnScreen(session->get({ x,y }), onScreenRect);
+                drawcalls++;
             }
         }
     }
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
     c.drawTileGrid(glyphSize);
+
+    g_fnt->RenderString(frmt("dc: {}", drawcalls), 10, 10);
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
     SDL_Rect offs = offsetRect(renderArea, 1);
@@ -78,6 +86,7 @@ void ASCIIEditor::loadDefaultFont()
     if (font != NULL) {
         delete font;
     }
+    glyphCache.clear();
     BitmapFontObject* newFont = new BitmapFontObject(IMGLoadAssetToSurface("codepage437-8x8-voidfont.png"), 437);
     font = newFont;
 }
@@ -85,15 +94,19 @@ void ASCIIEditor::loadDefaultFont()
 void ASCIIEditor::renderCharOnScreen(ASCIIChar ch, SDL_Rect onScreenRect)
 {
 	XY glyphSize = font->getGlyphSize();
-    auto glyphChar = font->getDirectCodepageGlyph(ch.ch);
+    if (!glyphCache.contains(ch.ch)) {
+		glyphCache[ch.ch] = font->getDirectCodepageGlyph(ch.ch);
+    }
 	SDL_Color bgColor = uint32ToSDLColor(ch.background);
 	SDL_Color fgColor = uint32ToSDLColor(ch.foreground);
 
 	SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 	SDL_RenderFillRect(g_rd, &onScreenRect);
 
-    SDL_SetTextureColorMod(glyphChar.texture, fgColor.r, fgColor.g, fgColor.b);
-    SDL_RenderCopy(g_rd, glyphChar.texture, NULL, &onScreenRect);
+	GlyphData& g = glyphCache[ch.ch];
+
+    SDL_SetTextureColorMod(g.texture, fgColor.r, fgColor.g, fgColor.b);
+    SDL_RenderCopy(g_rd, g.texture, NULL, &onScreenRect);
 }
 
 void ASCIIEditor::resize(XY newSize)
