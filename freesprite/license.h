@@ -48,6 +48,7 @@ inline std::string getLibraryLicenses() {
         "s3tc-dxt-decompression\n"
         "SDL3, SDL3_image, SDL3_ttf, SDL3_net\n"
         "AndroidDeviceNames\n"
+        "gzip-hpp\n"
         "\n"
         "The following libraries are only used as dependencies of other libraries:\n"
         "avif [from SDL3_image]\n"

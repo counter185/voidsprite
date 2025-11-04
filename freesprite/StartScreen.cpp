@@ -184,7 +184,7 @@ StartScreen::StartScreen() {
         lastOpenFilesPanelContainer
     });
     lastOpenFilesSection->position = { startScreenPanelEndpoint + 20, 75 };
-	wxsManager.addDrawable(lastOpenFilesSection);
+    wxsManager.addDrawable(lastOpenFilesSection);
 
     std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_H };
     if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
@@ -333,8 +333,15 @@ void StartScreen::takeInput(SDL_Event evt)
         else if (stringEndsWithIgnoreCase(filePath, ".data")) {
             g_addScreen(new ExtractDataScreen(convertStringOnWin32(filePath)));
         }
+        //todo: finish ascii editor and move these somewhere
         else if (stringEndsWithIgnoreCase(filePath, ".nfo")) {
             ASCIISession* ssn = ASCIISession::fromTXT(convertStringOnWin32(filePath));
+            if (ssn != NULL) {
+                g_addScreen(new ASCIIEditor(ssn));
+            }
+        }
+        else if (stringEndsWithIgnoreCase(filePath, ".xp")) {
+            ASCIISession* ssn = ASCIISession::fromRexpaintCompressed(convertStringOnWin32(filePath));
             if (ssn != NULL) {
                 g_addScreen(new ASCIIEditor(ssn));
             }

@@ -8,6 +8,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "gzip/decompress.hpp"
 #include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
@@ -858,6 +859,12 @@ std::vector<u8> base64ToBytes(std::string b64)
     ret.resize(decoded.size());
     memcpy(ret.data(), decoded.data(), decoded.size());
     return ret;
+}
+
+std::vector<u8> decompressGzip(u8* data, size_t dataSize)
+{
+    std::string dec = gzip::decompress((const char*)data, dataSize);
+    return std::vector<u8>(dec.begin(), dec.end());
 }
 
 void zlibFile(PlatformNativePathString path)

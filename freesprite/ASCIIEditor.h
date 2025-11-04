@@ -18,6 +18,7 @@ public:
         resize(dims);
     }
     static ASCIISession* fromTXT(PlatformNativePathString path);
+    static ASCIISession* fromRexpaintCompressed(PlatformNativePathString path);
 
     XY getSize() { return dimensions; }
     ASCIIChar get(XY at) {

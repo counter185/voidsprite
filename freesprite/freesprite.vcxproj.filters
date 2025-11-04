@@ -139,6 +139,9 @@
     <Filter Include="Source files\util">
       <UniqueIdentifier>{eb81430f-a6d1-44c6-9833-f5dc0de8d048}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\gzip">
+      <UniqueIdentifier>{f00f289a-056a-4e54-b187-b504a5fa11b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -1339,6 +1342,12 @@
     </ClInclude>
     <ClInclude Include="ASCIIEditor.h">
       <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="gzip\decompress.hpp">
+      <Filter>Header files\external\gzip</Filter>
+    </ClInclude>
+    <ClInclude Include="gzip\config.hpp">
+      <Filter>Header files\external\gzip</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

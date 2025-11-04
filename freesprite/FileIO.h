@@ -25,6 +25,7 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
 std::vector<u8> compressZlib(u8* data, size_t dataSize);
 std::vector<u8> base64ToBytes(std::string b64);
+std::vector<u8> decompressGzip(u8* data, size_t dataSize);
 
 void zlibFile(PlatformNativePathString path);
 void unZlibFile(PlatformNativePathString path);

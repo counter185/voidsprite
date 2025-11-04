@@ -4,6 +4,7 @@
 #include "ASCIIEditor.h"
 #include "FontRenderer.h"
 #include "Notification.h"
+#include "FileIO.h"
 
 ASCIIEditor::ASCIIEditor(XY dimensions)
 {
@@ -193,6 +194,68 @@ ASCIISession* ASCIISession::fromTXT(PlatformNativePathString path)
 
         infile.close();
         return ret;
+    }
+    return NULL;
+}
+
+#pragma pack(push, 1)
+struct rexpaintChar {
+    u32 ch;
+    u8 fgR;
+    u8 fgG;
+    u8 fgB;
+    u8 bgR;
+    u8 bgG;
+    u8 bgB;
+};
+#pragma pack(pop)
+
+ASCIISession* ASCIISession::fromRexpaintCompressed(PlatformNativePathString path)
+{
+
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        std::vector<u8> fileData;
+        fseek(f, 0, SEEK_END);
+        u64 size = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        fileData.resize(size);
+        fread(&fileData[0], 1, size, f);
+        fclose(f);
+        auto decompressed = decompressGzip(fileData.data(), size);
+
+        if (decompressed.size() >= 16) {
+            u8* next = decompressed.data();
+
+            u32 version = *((u32*)next); next += 4;
+            u32 nLayers = *((u32*)next); next += 4;
+            u32 w = *((u32*)next); next += 4;
+            u32 h = *((u32*)next); next += 4;
+
+            if (decompressed.size() >= nLayers * w * h * sizeof(rexpaintChar) + 16) {
+
+                ASCIISession* ret = new ASCIISession({ (int)w,(int)h });
+
+                for (int l = 0; l < nLayers; l++) {
+                    for (int x = 0; x < w; x++) {
+                        for (int y = 0; y < h; y++) {
+                            rexpaintChar xpChar = *((rexpaintChar*)next); next += sizeof(rexpaintChar);
+
+                            u32 bgColor = PackRGBAtoARGB(xpChar.bgR, xpChar.bgG, xpChar.bgB, 255);
+                            u32 fgColor = PackRGBAtoARGB(xpChar.fgR, xpChar.fgG, xpChar.fgB, 255);
+                            ret->setWithResize({ x,y }, { (u8)xpChar.ch, fgColor, bgColor == 0xFFFF00F ? 0 : bgColor });
+                            if (xpChar.ch > 255) {
+                                logwarn("[XP] character outside codepage");
+                            }
+                        }
+                    }
+
+                    break;  //todo: multiple layers
+                }
+
+                return ret;
+            }
+        }
     }
     return NULL;
 }

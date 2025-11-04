@@ -539,6 +539,8 @@
     <ClInclude Include="ExtractDataScreen.h" />
     <ClInclude Include="fills.h" />
     <ClInclude Include="Gamepad.h" />
+    <ClInclude Include="gzip\config.hpp" />
+    <ClInclude Include="gzip\decompress.hpp" />
     <ClInclude Include="iostructs.h" />
     <ClInclude Include="io\io_aseprite.h" />
     <ClInclude Include="io\io_base.h" />
