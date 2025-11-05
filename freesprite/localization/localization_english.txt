@@ -482,6 +482,9 @@
     {"vsp.filepicker.error.deletefile", "Failed to delete file."},
     {"vsp.filepicker.error.renamefile", "Failed to rename file."},
 
+    //popup: freeform transform
+    {"vsp.freeformtransform.title", "Transform"},
+
     //popup: text tool
     {"vsp.texttool.font", "Font"},
     {"vsp.texttool.fontsize", "Font size"},

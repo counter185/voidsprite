@@ -7,6 +7,7 @@
 #pragma warning(disable : 4838)
 #pragma warning(disable : 4477) //logprintf wrong format argument whatever
 #pragma warning(disable : 4099) //liblcf link without debugging info whatever don't care
+#pragma warning(disable : 4068) //gcc pragmas in gzip-hpp
 
 //macro redefinition warning, remove this line after fully migrating to sdl3
 #pragma warning(disable : 4005)

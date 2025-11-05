@@ -2,6 +2,9 @@
 #include "maineditor.h"
 #include "Layer.h"
 #include "UIButton.h"
+#include "UITextField.h"
+#include "UIStackPanel.h"
+#include "UILabel.h"
 
 PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target)
 {
@@ -9,6 +12,35 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
     this->target = target;
     targetPasteRect = { 0,0, target->w, target->h };
     setSize({ 400, 200 });
+
+    UITextField* txw = new UITextField(std::to_string(target->w));
+    txw->isNumericField = true;
+    txw->wxWidth = 120;
+    txw->onTextChangedCallback = [this](UITextField* t, std::string text) {
+        try {
+            int v = std::stoi(text);
+            targetPasteRect.w = v;
+        }
+        catch (std::exception&) {}
+	};
+
+    UITextField* txh = new UITextField(std::to_string(target->h));
+    txh->isNumericField = true;
+    txh->wxWidth = 120;
+    txh->onTextChangedCallback = [this](UITextField* t, std::string text) {
+        try {
+            int v = std::stoi(text);
+            targetPasteRect.h = v;
+        }
+        catch (std::exception&) {}
+        };
+
+    UIStackPanel* sp = UIStackPanel::Horizontal(12, {
+        new UILabel("Size"),
+        txw, txh
+    });
+    sp->position = { 10, 50 };
+    wxsManager.addDrawable(sp);
 
     makeTitleAndDesc(TL("vsp.freeformtransform.title"));
 
