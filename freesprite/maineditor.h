@@ -51,6 +51,7 @@ struct UndoStackElement {
     int extdata2 = 0;
     std::string extdata3 = "";
     void* extdata4 = NULL;
+    int extdata5 = 0;
 };
 
 struct UndoStackResizeLayerElement {
