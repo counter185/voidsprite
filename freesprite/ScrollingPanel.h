@@ -10,17 +10,17 @@ public:
     bool scrollVertically = true;
     bool scrollHorizontally = true;
     XY scrollOffset = XY{ 0,0 };
-    int wxWidth = 200;
-    int wxHeight = 200;
     Fill bgColor = Fill::Solid(0xe0000000);
     u32 innerBorderColor = 0x20FFFFFF;
     bool clipElementsToSize = true;
 
     ScrollingPanel() {
+        wxWidth = 200;
+        wxHeight = 200;
     }
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
-        return pointInBox(mousePos, { thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
+        return enabled && pointInBox(mousePos, { thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
     }
 
     void render(XY position) override;

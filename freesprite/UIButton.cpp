@@ -90,7 +90,8 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
 			if (touchHoldingDown) {
 				touchHoldingDown = false;
 				XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
-				if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
+				if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })
+					&& xyDistance(touchHoldDownPos, touchPosition) < touchTapMaxDistance) {
 					click();
 				}
 			}

@@ -6,6 +6,8 @@
 class UIDropdown :
     public Drawable, EventCallbackListener
 {
+private:
+    XY lastPosOnScreen{};
 public:
     std::string text;
     int wxWidth = 250, wxHeight = 30;
@@ -21,10 +23,6 @@ public:
     bool isOpen = false;
     bool setTextToSelectedItem = false;
     Timer64 openTimer;
-    int menuYOffset = 0;
-    int menuHeight = 0;
-
-    DrawableManager wxs;
 
     std::vector<std::string> items;
     std::vector<std::string> tooltips;
@@ -35,26 +33,19 @@ public:
     UIDropdown(std::vector<std::pair<std::string, std::string>> items);
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override {
-        return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight }) || (isOpen && wxs.mouseInAny(xyAdd({0, menuYOffset}, thisPositionOnScreen), mousePos));
+        return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
     }
     void render(XY pos) override;
-    void focusIn() override;
-    void focusOut() override;
-    void mouseHoverOut() override;
-    void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
-    void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
-    bool shouldMoveToFrontOnFocus() override { return true; }
     XY getDimensions() override { 
-        //temporary fix
-        return XY{ wxWidth, wxHeight + (isOpen ? menuHeight : 0)};
+        return XY{ wxWidth, wxHeight};
     };
 
     void eventButtonPressed(int evt_id) override;
 
     void renderDropdownIcon(XY pos);
 
-    void genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item) = NULL);
+    std::vector<UIButton*> genButtonsList(UIButton* (*customButtonGenFunction)(std::string name, std::string item) = NULL);
 
     bool takesMouseWheelEvents() override { return true; }
     bool takesTouchEvents() override { return true; }

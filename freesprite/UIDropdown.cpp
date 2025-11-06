@@ -1,11 +1,11 @@
 #include "UIDropdown.h"
 #include "FontRenderer.h"
 #include "UIButton.h"
+#include "PopupContextMenu.h"
 
 UIDropdown::UIDropdown(std::vector<std::string> items)
 {
     this->items = items;
-    genButtons();
 }
 
 UIDropdown::UIDropdown(std::vector<std::pair<std::string, std::string>> items)
@@ -14,11 +14,12 @@ UIDropdown::UIDropdown(std::vector<std::pair<std::string, std::string>> items)
     this->tooltips.resize(items.size());
     std::transform(items.begin(), items.end(), this->items.begin(), [](std::pair<std::string, std::string> p) { return p.first; });
     std::transform(items.begin(), items.end(), this->tooltips.begin(), [](std::pair<std::string, std::string> p) { return p.second; });
-    genButtons();
 }
 
 void UIDropdown::render(XY pos)
 {
+    lastPosOnScreen = pos;
+
     SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
     SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
     SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
@@ -45,93 +46,30 @@ void UIDropdown::render(XY pos)
         textX += iconRect.w;
     }
 
-    g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor);
-
-    if (isOpen) {
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xa0 * openTimer.percentElapsedTime(100)));
-        SDL_RenderFillRect(g_rd, &drawrect);
-        renderDropdownIcon(pos);
-        wxs.renderAll(xyAdd(xySubtract(pos, { 0, (int)((1.0f - openTimer.percentElapsedTime(100)) * wxHeight) }), XY{0, menuYOffset}));
-    }
-    else {
-        renderDropdownIcon(pos);
-    }
-}
-
-void UIDropdown::focusIn()
-{
-}
-
-void UIDropdown::focusOut()
-{
-    isOpen = false;
-    wxs.forceUnhover();
-    wxs.forceUnfocus();
-}
-
-void UIDropdown::mouseHoverOut()
-{
-    wxs.forceUnhover();
-}
-
-void UIDropdown::mouseHoverMotion(XY mousePos, XY gPosOffset)
-{
-    if (isOpen) {
-        wxs.processHoverEvent(xyAdd({0, menuYOffset}, xyAdd(gPosOffset, position)), mousePos);
-    }
-}
-
-void UIDropdown::mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction)
-{
-    if (isOpen) {
-        if (!wxs.processMouseWheelEvent(xyAdd({ 0, menuYOffset }, xyAdd(gPosOffset, position)), mousePos, direction)) {
-            menuYOffset += direction.y * 30;
-            if (menuYOffset > 0) menuYOffset = 0;
-            if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
-        }
-    }
+    g_fnt->RenderString(text, textX, pos.y + 2, textColor);
+    renderDropdownIcon(pos);
 }
 
 void UIDropdown::handleInput(SDL_Event evt, XY gPosOffset)
 {
     SDL_Event cevt = convertTouchToMouseEvent(evt);
 
-    if (isOpen && cevt.type == SDL_MOUSEBUTTONDOWN && cevt.button.button == 1 && cevt.button.down) {
-        wxs.tryFocusOnPoint(XY{ (int)cevt.button.x, (int)cevt.button.y }, xyAdd(gPosOffset, XY{0,menuYOffset}));
-    }
-
-    if (isOpen && evt.type == SDL_EVENT_FINGER_MOTION) {
-        XY motionPos = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
-        XY motionDir = { (int)(evt.tfinger.dx * g_windowW), (int)(evt.tfinger.dy * g_windowH) };
-        if (pointInBox(motionPos, { gPosOffset.x, gPosOffset.y, wxWidth, wxHeight }) 
-            || wxs.mouseInAny(xyAdd({ 0, menuYOffset }, gPosOffset), motionPos)) {
-            menuYOffset += motionDir.y;
-            if (menuYOffset > 0) menuYOffset = 0;
-            if (menuYOffset < -menuHeight + wxHeight) menuYOffset = -menuHeight + wxHeight;
-        }
-    }
-
-    if (!isOpen || !wxs.anyFocused()) {
-        if (cevt.type == SDL_MOUSEBUTTONDOWN) {
-            XY mousePos = xySubtract(XY{ (int)(cevt.motion.x), (int)(cevt.motion.y) }, gPosOffset);
-            if (cevt.button.button == 1 && cevt.button.down) {
-                if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
-                    click();
-                }
-            }
-        }
-        else if (evt.type == SDL_KEYDOWN) {
-            if (evt.key.scancode == SDL_SCANCODE_ESCAPE) {
-                isOpen = false;
-                openTimer.start();
-            }
-            else if (evt.key.scancode == SDL_SCANCODE_SPACE) {
+    if (cevt.type == SDL_MOUSEBUTTONDOWN) {
+        XY mousePos = xySubtract(XY{ (int)(cevt.motion.x), (int)(cevt.motion.y) }, gPosOffset);
+        if (cevt.button.button == 1 && cevt.button.down) {
+            if (pointInBox(mousePos, SDL_Rect{ 0,0,wxWidth,wxHeight })) {
                 click();
             }
         }
     }
-    else {
-        wxs.passInputToFocused(evt, xyAdd(gPosOffset, XY{ 0,menuYOffset }));
+    else if (evt.type == SDL_KEYDOWN) {
+        if (evt.key.scancode == SDL_SCANCODE_ESCAPE) {
+            isOpen = false;
+            openTimer.start();
+        }
+        else if (evt.key.scancode == SDL_SCANCODE_SPACE) {
+            click();
+        }
     }
 }
 
@@ -142,9 +80,9 @@ void UIDropdown::eventButtonPressed(int evt_id)
     }
     isOpen = false;
     if (onDropdownItemSelectedCallback != NULL) {
-		onDropdownItemSelectedCallback(this, evt_id, items[evt_id]);
-	}
-	else if (callback != NULL) {
+        onDropdownItemSelectedCallback(this, evt_id, items[evt_id]);
+    }
+    else if (callback != NULL) {
         callback->eventDropdownItemSelected(callback_id, evt_id, items[evt_id]);
     }
 }
@@ -177,9 +115,9 @@ void UIDropdown::renderDropdownIcon(XY pos)
     }
 }
 
-void UIDropdown::genButtons(UIButton* (*customButtonGenFunction)(std::string name, std::string item))
+std::vector<UIButton*> UIDropdown::genButtonsList(UIButton* (*customButtonGenFunction)(std::string name, std::string item))
 {
-    wxs.freeAllDrawables();
+    std::vector<UIButton*> ret;
 
     for (int y = 0; y < items.size(); y++) {
         if (customButtonGenFunction == NULL) {
@@ -190,27 +128,39 @@ void UIDropdown::genButtons(UIButton* (*customButtonGenFunction)(std::string nam
             btn->fill = colorBGFocused;
             btn->position = { 0, wxHeight + y * btn->wxHeight };
             btn->tooltip = tooltips.size() > y ? tooltips[y] : "";
-            btn->setCallbackListener(y, this);
-            wxs.addDrawable(btn);
+            btn->onClickCallback = [this, y](UIButton* b) {
+                this->eventButtonPressed(y);
+			};
+            ret.push_back(btn);
         }
         else {
             UIButton* btn = customButtonGenFunction(items[y], items[y]);
             btn->position = { 0, wxHeight + y * btn->wxHeight };
-            btn->setCallbackListener(y, this);
-            wxs.addDrawable(btn);
+            btn->onClickCallback = [this, y](UIButton* b) {
+                this->eventButtonPressed(y);
+            };
+            ret.push_back(btn);
         }
     }
 
-    menuHeight = items.size() * wxHeight;
+    return ret;
 }
 
 void UIDropdown::click()
 {
     lastClick.start();
     openTimer.start();
-    isOpen = !isOpen;
+    /*isOpen = !isOpen;
     if (isOpen) {
         wxs.forceUnfocus();
-    }
-    menuYOffset = 0;
+    }*/
+    auto ctxmenu = new PopupContextMenu(genButtonsList());
+    ctxmenu->scrollable = true;
+    ctxmenu->setContextMenuOrigin(xyAdd(lastPosOnScreen, XY{ 0, wxHeight }));
+    ctxmenu->onExitCallback = [this](PopupContextMenu* p) {
+        this->isOpen = false;
+        openTimer.start();
+    };
+    isOpen = true;
+    g_addPopup(ctxmenu);
 }

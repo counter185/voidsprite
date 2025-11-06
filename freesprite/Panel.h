@@ -52,7 +52,10 @@ public:
     bool takesMouseWheelEvents() override { return takeMouseWheelEvents; }
     bool takesTouchEvents() override { return true; }
 
-    XY getDimensions() override { return sizeToContent ? xyAdd(getContentBoxSize(), {1,1}) : XY{ wxWidth,wxHeight }; };
+    XY getDimensions() override { return 
+        !enabled ? XY{0,0}
+        : sizeToContent ? xyAdd(getContentBoxSize(), {1,1}) 
+        : XY{ wxWidth,wxHeight }; };
 
     Panel* getTopmostParent() { return parent != NULL ? parent->getTopmostParent() : this; }
     bool parentFocused() { return parent != NULL && parent->focused; }

@@ -31,7 +31,6 @@ PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
     pickExportFormat->wxHeight = 30;
     pickExportFormat->text = formats[exporterIndex];
     pickExportFormat->setCallbackListener(EVENT_QUICKCONVERT_PICKFORMAT, this);
-    pickExportFormat->genButtons();
     wxsManager.addDrawable(pickExportFormat);
 
     makeTitleAndDesc(tt, tx);

@@ -1,6 +1,11 @@
 #include "ScrollingPanel.h"
 
 void ScrollingPanel::render(XY position) {
+
+    if (!enabled) {
+        return;
+    }
+
     updateBounds();
 
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
@@ -42,6 +47,10 @@ void ScrollingPanel::render(XY position) {
 }
 
 void ScrollingPanel::handleInput(SDL_Event evt, XY gPosOffset) {
+    if (!enabled) {
+        return;
+    }
+
     DrawableManager::processHoverEventInMultiple({ subWidgets }, evt, xyAdd(gPosOffset, scrollOffset));
 
     if (evt.type == SDL_EVENT_FINGER_MOTION) {

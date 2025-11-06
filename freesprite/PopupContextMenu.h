@@ -8,24 +8,41 @@ private:
     XY contentSize = { 0,0 };
     Panel* itemsPanel = NULL;
     std::vector<Drawable*> items;
+    XY scrollMin{};
+    XY scrollMax{};
+
+    void addButtons(std::vector<UIButton*> buttons);
 
 public:
-    PopupContextMenu(std::vector<NamedOperation> actions);
+    bool scrollable = true;
 
+    std::function<void(PopupContextMenu*)> onExitCallback = NULL;
+
+    PopupContextMenu(std::vector<NamedOperation> actions);
+    PopupContextMenu(std::vector<UIButton*> actions);
+
+    bool takesTouchEvents() override { return true; }
     void render() override {
         renderContextMenuBackground();
         renderDrawables();
     }
     void tick() override;
-    void defaultInputAction(SDL_Event evt) override {
-        if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-            closePopup();
-        }
-    }
+	void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
     void playPopupCloseVFX() override;
+
     void renderContextMenuBackground();
+
+    XY getContentSize();
+    void setContextMenuOrigin(XY screenPos);
+    void finish() {
+        if (onExitCallback != NULL) {
+            onExitCallback(this);
+		}
+        closePopup();
+    }
 };
 
 inline static void g_openContextMenu(std::vector<NamedOperation> o) {
-	g_addPopup(new PopupContextMenu(o));
+    g_addPopup(new PopupContextMenu(o));
 }

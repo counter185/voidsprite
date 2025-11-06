@@ -10,6 +10,7 @@ class UIButton : public Drawable
 private:
     bool touchHoldingDown = false;
     XY touchHoldDownPos = { -1,-1 };
+    const double touchTapMaxDistance = 10;
 public:
     std::string text;
     std::string tooltip;
