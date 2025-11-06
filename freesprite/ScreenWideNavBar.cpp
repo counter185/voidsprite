@@ -93,6 +93,9 @@ inline void ScreenWideNavBar::handleInput(SDL_Event evt, XY gPosOffset) {
     if (evt.type == SDL_KEYDOWN) {
         tryPressHotkey(evt.key.scancode);
     }
+    else if (focused && evt.type == SDL_EVENT_WINDOW_FOCUS_LOST && SDL_GetWindowID(g_wd) == evt.window.windowID) {
+        parentManager->forceUnfocus();
+    }
 
     DrawableManager::processInputEventInMultiple({ subWidgets }, evt, position);
 
