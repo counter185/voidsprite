@@ -72,7 +72,11 @@ void ASCIIEditor::render()
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
     c.drawTileGrid(glyphSize);
 
+    renderCurrentTool();
+
+#if _DEBUG
     g_fnt->RenderString(frmt("dc: {}", drawcalls), 10, 10);
+#endif
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
     SDL_Rect offs = offsetRect(renderArea, 1);
@@ -98,9 +102,90 @@ void ASCIIEditor::takeInput(SDL_Event evt)
             }
         }
         else {
-            c.takeInput(evt);
+            if (!inputCurrentTool(evt)) {
+                c.takeInput(evt);
+            }
         }
     }
+}
+
+void ASCIIEditor::renderCurrentTool()
+{
+    XY glyphSize = font->getGlyphSize();
+    switch (inputMode) {
+        case INPUTMODE_TEXTINPUT:
+            {
+                SDL_Rect cursorRect = c.getTileScreenRectAt(cursorPos, { glyphSize.x * fontScale.x, glyphSize.y * fontScale.y });
+                u64 timer = SDL_GetTicks64() % 2000;
+                double alpha = 1.0 - (timer / 2000.0);
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, (u8)(0xa0 * alpha));
+                SDL_RenderFillRect(g_rd, &cursorRect);
+            }
+            break;
+    }
+}
+
+bool ASCIIEditor::inputCurrentTool(SDL_Event evt)
+{
+    XY glyphSize = font->getGlyphSize();
+    switch (inputMode) {
+        case INPUTMODE_TEXTINPUT:
+            if (evt.type == SDL_EVENT_KEY_DOWN) {
+                if (evt.key.scancode == SDL_SCANCODE_BACKSPACE) {
+                    if (cursorPos.x > 0) {
+                        cursorPos.x--;
+                        session->set(cursorPos, { 0, currentForeground, currentBackground });
+                    }
+                    return true;
+                }
+                else if (evt.key.scancode == SDL_SCANCODE_LEFT) {
+                    if (cursorPos.x > 0) {
+                        cursorPos.x--;
+                    }
+                    return true;
+                }
+                else if (evt.key.scancode == SDL_SCANCODE_RIGHT) {
+                    cursorPos.x++;
+                    return true;
+                }
+                else if (evt.key.scancode == SDL_SCANCODE_UP) {
+                    if (cursorPos.y > 0) {
+                        cursorPos.y--;
+                    }
+                    return true;
+                }
+                else if (evt.key.scancode == SDL_SCANCODE_DOWN) {
+                    cursorPos.y++;
+                    return true;
+                }
+            }
+            else if (evt.type == SDL_EVENT_TEXT_INPUT) {
+                std::string text = evt.text.text;
+                std::wstring wtext = utf8StringToWstring(text);
+                for (wchar_t wc : wtext) {
+                    if (codepageToUnicodeToBmpIndexMap[437].containsA((u32)wc)) {
+                        u8 ch = (u8)codepageToUnicodeToBmpIndexMap[437][(u32)wc];
+                        session->setWithResize(cursorPos, { ch, currentForeground, currentBackground });
+                        updateCanvasSize();
+                        cursorPos.x++;
+                    }
+                }
+                return true;
+            }
+            else if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                if (evt.button.button == SDL_BUTTON_LEFT) {
+                    XY mousePos = { evt.button.x, evt.button.y };
+                    XY tilePos = c.getTilePosAt(mousePos, { glyphSize.x * fontScale.x, glyphSize.y * fontScale.y });
+                    if (tilePos.x > 0 && tilePos.y > 0) {
+                        cursorPos = tilePos;
+                        SDL_StartTextInput(g_wd);
+                    }
+                    return true;
+                }
+            }
+            break;
+    }
+    return false;
 }
 
 void ASCIIEditor::updateCanvasSize()

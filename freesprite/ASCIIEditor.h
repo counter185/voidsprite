@@ -9,6 +9,12 @@ struct ASCIIChar {
     u32 background = 0xFF000000;
 };
 
+enum InputMode {
+    INPUTMODE_TEXTINPUT,
+    INPUTMODE_PEN,
+    INPUTMODE_RECT,
+};
+
 class ASCIISession {
 private:
     XY dimensions;
@@ -69,6 +75,12 @@ protected:
 
     PlatformNativePathString fontBitmapPath;
 
+    XY cursorPos = { 0,0 };
+    u32 currentForeground = 0xFFFFFFFF;
+    u32 currentBackground = 0x00000000;
+    u8 selectedChar = 4;
+    InputMode inputMode = INPUTMODE_TEXTINPUT;
+
 public:
     ASCIIEditor(XY dimensions);
     ASCIIEditor(ASCIISession* ssn);
@@ -78,6 +90,10 @@ public:
 
     void render() override;
     void takeInput(SDL_Event evt) override;
+
+    //todo: split this into tool classes when there's enough tools to justify it
+    void renderCurrentTool();
+    bool inputCurrentTool(SDL_Event evt);
 
     void updateCanvasSize();
     void reloadFont();
