@@ -217,6 +217,7 @@ class DraggablePanel;
 class ScrollingPanel;
 class TabbedView;
 class ScreenWideNavBar;
+class ScreenWideActionBar;
 class PanelReference;
 
 //filters

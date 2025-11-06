@@ -229,6 +229,7 @@ public:
     Timer64 zoomKeyTimer;
 
     ScreenWideNavBar* navbar;
+    ScreenWideActionBar* actionbar;
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;

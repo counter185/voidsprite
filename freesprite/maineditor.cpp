@@ -26,6 +26,7 @@
 #include "background_operation.h"
 #include "brush/BaseBrush.h"
 #include "PanelPreview.h"
+#include "UIStackPanel.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1272,14 +1273,14 @@ void MainEditor::setUpWidgets()
 
     colorPicker = new EditorColorPicker(this);
     CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.colorpicker.title"), colorPicker);
-    colorPickerPanel->position.y = 63;
+    colorPickerPanel->position.y = 67;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
     colorPicker->setColorRGB(pickedColor);
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 454;
+    brushPicker->position.y = 458;
     brushPicker->position.x = 10;
     wxsManager.addDrawable(brushPicker);
 
@@ -1345,7 +1346,7 @@ void MainEditor::openTouchModePanel()
 void MainEditor::makeActionBar()
 {
     //action bar
-    ScreenWideActionBar* actionbar = new ScreenWideActionBar({});
+    actionbar = new ScreenWideActionBar({});
     actionbar->position = { 0, navbar->wxHeight };
 
     int actionBarButtonSize = compactEditor ? 60 : 30;
@@ -1357,7 +1358,6 @@ void MainEditor::makeActionBar()
     undoButton->position = { nextNavbarX,0 };
     undoButton->wxWidth = actionBarButtonSize;
     undoButton->wxHeight = actionBarButtonSize;
-    actionbar->addDrawable(undoButton);
     nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* redoButton = new UIButton("", TL("vsp.maineditor.redo"));
@@ -1366,7 +1366,6 @@ void MainEditor::makeActionBar()
     redoButton->position = { nextNavbarX,0 };
     redoButton->wxWidth = actionBarButtonSize;
     redoButton->wxHeight = actionBarButtonSize;
-    actionbar->addDrawable(redoButton);
     nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* saveButton = new UIButton("", TL("vsp.nav.save"));
@@ -1375,7 +1374,6 @@ void MainEditor::makeActionBar()
     saveButton->position = { nextNavbarX,0 };
     saveButton->wxWidth = actionBarButtonSize;
     saveButton->wxHeight = actionBarButtonSize;
-    actionbar->addDrawable(saveButton);
     nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* zoomoutButton = new UIButton("", TL("vsp.cmn.zoomout"));
@@ -1384,7 +1382,6 @@ void MainEditor::makeActionBar()
     zoomoutButton->position = { nextNavbarX,0 };
     zoomoutButton->wxWidth = actionBarButtonSize;
     zoomoutButton->wxHeight = actionBarButtonSize;
-    actionbar->addDrawable(zoomoutButton);
     nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
@@ -1393,10 +1390,16 @@ void MainEditor::makeActionBar()
     zoominButton->position = { nextNavbarX,0 };
     zoominButton->wxWidth = actionBarButtonSize;
     zoominButton->wxHeight = actionBarButtonSize;
-    actionbar->addDrawable(zoominButton);
     nextNavbarX += actionBarButtonSize + 5;
 
+    UIStackPanel* actionsStack = UIStackPanel::Horizontal(5, {
+        undoButton, redoButton, saveButton, zoomoutButton, zoominButton
+    });
+    actionsStack->position = { 5, 5 };
+    actionbar->addDrawable(actionsStack);
+
     toolPropertiesPanel = new Panel();
+    toolPropertiesPanel->sizeToContent = true;
     toolPropertiesPanel->position = { nextNavbarX + 50, 0 };
     actionbar->addDrawable(toolPropertiesPanel);
 
@@ -1455,6 +1458,7 @@ void MainEditor::initToolParameters()
             }
         }
     }
+    actionbar->evalHeight();
 }
 
 void MainEditor::addWidget(Drawable* wx)

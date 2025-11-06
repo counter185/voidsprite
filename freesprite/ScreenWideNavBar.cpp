@@ -46,9 +46,11 @@ void ScreenWideNavBar::render(XY position) {
     wxWidth = g_windowW;
 
     //fill navbar background
+    static Fill bgUnfocused = visualConfigFill("navbar/bg_unfocused");
+    static Fill bgFocused = visualConfigFill("navbar/bg_focused");
+
     SDL_Rect r = SDL_Rect{ 0,0,g_windowW, wxHeight };
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, focused ? 0xa0 : 0x90);
-    SDL_RenderFillRect(g_rd, &r);
+    (focused ? bgFocused : bgUnfocused).fill(r);
 
     if (focused) {
         if (currentSubmenuOpen == SCANCODE_NONE) {

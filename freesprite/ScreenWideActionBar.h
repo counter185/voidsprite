@@ -15,7 +15,17 @@ public:
 
     void render(XY at) override {
         position.x = 0;
-        renderGradient({ 0,at.y, g_windowW, wxHeight }, 0x70000000, 0x70000000, 0x40000000, 0x40000000);
+
+        SDL_Rect bgRect = { 0,at.y, g_windowW, wxHeight };
+        static Fill bg = visualConfigFill("actionbar/bg");
+        bg.fill(bgRect);
+
+        static SDL_Color separator = visualConfigColor("actionbar/separator");
+
+        XY origin = xyAdd(at, { 5,3 });
+        XY end = xyAdd(origin, { 100, 0 });
+        SDL_SetRenderDrawColor(g_rd, separator.r, separator.g, separator.b, separator.a);
+        SDL_RenderDrawLine(g_rd, origin.x, origin.y, end.x, end.y);
 
         Panel::render(at);
     }
