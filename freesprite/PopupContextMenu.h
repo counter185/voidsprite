@@ -14,7 +14,7 @@ private:
     void addButtons(std::vector<UIButton*> buttons);
 
 public:
-    bool scrollable = true;
+    bool scrollable = false;
 
     std::function<void(PopupContextMenu*)> onExitCallback = NULL;
 
