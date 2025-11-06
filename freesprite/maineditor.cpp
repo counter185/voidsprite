@@ -1710,6 +1710,17 @@ void MainEditor::takeInput(SDL_Event evt) {
     }
 }
 
+void MainEditor::dropEverythingYoureDoingAndSave()
+{
+    try {
+        createRecoveryAutosave(frmt("-crash-{}", g_crashsaveIndex++));
+        logerr("crashsave created");
+    }
+    catch (std::exception& e) {
+        logerr(frmt("failed to crashsave:\n {}", e.what()));
+    }
+}
+
 void MainEditor::focusOnColorInputTextBox()
 {
     if (colorPicker->colorTextField != NULL) {
@@ -2522,7 +2533,7 @@ void MainEditor::tickAutosave()
     }
 }
 
-void MainEditor::createRecoveryAutosave()
+void MainEditor::createRecoveryAutosave(std::string insertIntoFilename)
 {
     time_t now = time(NULL);
     tm ltm;
@@ -2534,7 +2545,7 @@ void MainEditor::createRecoveryAutosave()
 #else
     ltm = *std::localtime(&now);
 #endif
-    std::string autosaveName = "autosave_" + frmt("{}-{}-{}--{}-{}-{}", ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
+    std::string autosaveName = "autosave" + frmt("{}_{}-{:02}-{:02}--{:02}-{:02}-{:02}", insertIntoFilename, ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
     try {
         if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
             g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));

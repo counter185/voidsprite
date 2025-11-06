@@ -250,6 +250,7 @@ inline bool g_windowFocused = true;
 inline bool g_fullFramerateThisFrame = false;
 inline SDL_PropertiesID g_props;
 inline bool g_lastConfirmInputWasTouch = false;
+inline int g_crashsaveIndex = 0;
 
 extern std::vector<std::string> g_cmdlineArgs;
 

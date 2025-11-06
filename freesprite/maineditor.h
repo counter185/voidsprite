@@ -294,6 +294,7 @@ public:
     void render() override;
     void tick() override;
     void takeInput(SDL_Event evt) override;
+    void dropEverythingYoureDoingAndSave() override;
 
     std::string getName() override { return TL("vsp.maineditor") + (lastConfirmedSave ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath)) : std::string("")); }
     bool takesTouchEvents() override { return true; }
@@ -352,7 +353,7 @@ public:
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     virtual void tickAutosave();
-    void createRecoveryAutosave();
+    void createRecoveryAutosave(std::string insertIntoFilename = "");
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     void tryAddReference(PlatformNativePathString path);

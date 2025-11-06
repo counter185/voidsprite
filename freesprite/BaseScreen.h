@@ -31,6 +31,9 @@ public:
     virtual bool takesTouchEvents() { return false; }
     virtual void onReturnToScreen() {}
 
+    //called on crash
+    virtual void dropEverythingYoureDoingAndSave() {}
+
     virtual std::string getName() { return "Base screen"; }
     virtual std::string getRPCString() { return getName(); }
 

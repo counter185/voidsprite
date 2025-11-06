@@ -52,8 +52,9 @@
 
     //crash popup
     {"vsp.fatalerror.title", "fatal error"},
-    {"vsp.fatalerror.body", "An unrecoverable error has occurred.\n"
+    {"vsp.fatalerror.body:v2", "An unrecoverable error has occurred.\n"
                             "Relevant information was saved to the \"voidsprite_log.txt\" file in the app data directory.\n"
+                            "Open editor workspaces have been autosaved.\n"
                             "If you're reporting this issue on GitHub, please include that file.\n"
                             " More details:"},
     {"vsp.error.norenderer.title", "renderer error"},

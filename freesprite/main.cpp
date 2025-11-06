@@ -352,11 +352,20 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
 static void main_handleSIGSEGV(int sig) {
     //technically unsafe and undefined to call any of these functions
     //but then what is it gonna do, crash twice?
+    try {
+        for (auto& [id, wd] : g_windows) {
+            for (auto& s : wd->screenStack) {
+                s->dropEverythingYoureDoingAndSave();
+            }
+        }
+    }
+    catch (std::exception&) {}
+
     std::string errorTitle = frmt("voidsprite: {}", TL("vsp.fatalerror.title"));
-    std::string errorMsg = TL("vsp.fatalerror.body");
+    std::string errorMsg = TL("vsp.fatalerror.body:v2");
     logerr("Fatal error: Segmentation fault (SIGSEGV)");
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
-    exit(1);
+    exit(0xC0000005);
 }
 
 void main_registerCExceptionHandlers()
@@ -1193,13 +1202,23 @@ int main(int argc, char** argv)
 
     }
     catch (std::exception& e) {
+
+        try {
+            for (auto& [id, wd] : g_windows) {
+                for (auto& s : wd->screenStack) {
+                    s->dropEverythingYoureDoingAndSave();
+                }
+            }
+        }
+        catch (std::exception&) {}
+
         logerr("-------------------------------------------");
         logerr("voidsprite crashed with an uncaught exception");
         logerr(frmt("Details: \n {}", e.what()));
         log_close();
         log_duplicateLast();
         std::string errorTitle = frmt("voidsprite: {}", TL("vsp.fatalerror.title"));
-        std::string errorMsg = frmt("{}\n   {}", TL("vsp.fatalerror.body"), e.what());
+        std::string errorMsg = frmt("{}\n   {}", TL("vsp.fatalerror.body:v2"), e.what());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
     }
     return 0;
