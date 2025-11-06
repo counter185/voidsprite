@@ -141,7 +141,6 @@ StartScreen::StartScreen() {
     templatesDropdown->text = TL("vsp.launchpad.tab.picktemplate");
     templatesDropdown->setCallbackListener(EVENT_STARTSCREEN_TEMPLATEPICKED, this);
     templatesDropdown->wxWidth = 400;
-    templatesDropdown->genButtons();
     newImageTabs->tabs[2].wxs.addDrawable(templatesDropdown);
 
     for (int x = 0; x < 2; x++) {
