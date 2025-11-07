@@ -92,6 +92,8 @@ public:
     SDL_Rect getModelRenderArea(XY);
     SDL_Rect uvFlipHorizontal(SDL_Rect x);
 
+    void renderToWorkspace();
+
     static bool dimensionsValidForPreview(XY size) {
         return size.x > 0 && size.y > 0
             && size.x % 8 == 0  //allowing downscale up to 1/4

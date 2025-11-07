@@ -190,6 +190,7 @@ void MinecraftBlockPreviewScreen::renderToWorkspace(XY wh)
     SDL_FreeSurface(nsrf);
 
     g_popRenderTarget();
+    tracked_destroyTexture(renderTarget);
 
     MainEditor *newSession = new MainEditor(l);
     g_addScreen(newSession);

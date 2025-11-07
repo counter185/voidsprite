@@ -310,6 +310,26 @@ SDL_Rect MinecraftSkinPreviewScreen::uvFlipHorizontal(SDL_Rect x)
     return { x.x + x.w, x.y, -x.w, x.h };
 }
 
+void MinecraftSkinPreviewScreen::renderToWorkspace()
+{
+    SDL_Texture* renderTarget = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowW, g_windowH);
+    g_pushRenderTarget(renderTarget);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+    SDL_RenderClear(g_rd);
+    renderModel(screen00, size);
+    Layer* l = new Layer(g_windowW, g_windowH);
+    SDL_Surface* nsrf = SDL_RenderReadPixels(g_rd, NULL);
+    SDL_ConvertPixels(g_windowW, g_windowH, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), g_windowW * 4);
+    SDL_FreeSurface(nsrf);
+
+    g_popRenderTarget();
+    tracked_destroyTexture(renderTarget);
+
+    MainEditor* newSession = new MainEditor(l);
+    g_addScreen(newSession);
+}
+
 MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
     caller = parent;
     recalcPointScale();
@@ -327,13 +347,19 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
                 SDL_SCANCODE_F,
                 {
                     TL("vsp.nav.file"),
-                    { SDL_SCANCODE_C },
+                    { SDL_SCANCODE_R, SDL_SCANCODE_C },
                     {
                         { SDL_SCANCODE_C,{ "Close",
                                 [this]() {
                                     g_startNewMainThreadOperation([this]() {g_closeScreen(this); });
                                 }
                             } 
+                        },
+                        {SDL_SCANCODE_R, { "Render to separate workspace",
+                                [this]() {
+                                    renderToWorkspace();
+                                }
+                            }
                         },
                     }, g_iconNavbarTabFile
                 }
