@@ -500,8 +500,7 @@ int main(int argc, char** argv)
 #endif
 
         g_props = SDL_CreateProperties();
-
-        g_mainWindow->unscaledWindowSize = { g_windowW, g_windowH };
+        
         g_mainWindow->updateViewportScaler();
 
         if (g_config.customVisualConfigPath != "") {

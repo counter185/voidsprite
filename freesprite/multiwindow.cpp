@@ -15,7 +15,11 @@ VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     tryCreateRenderer();
     setWindowTitle(title);
     setVsync(g_config.vsync);
+    SDL_GetWindowSize(wd, &size.x, &size.y);
     unscaledWindowSize = scaledWindowSize = size;
+#if __ANDROID__
+    autoViewportScale();
+#endif
 }
 
 VSPWindow::~VSPWindow() {

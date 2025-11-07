@@ -35,10 +35,6 @@ void platformPreInit() {
 }
 void platformInit() {}
 void platformPostInit() {
-    //sometimes it just doesn't do that
-    SDL_Delay(700);
-
-    SDL_MaximizeWindow(g_wd);
     if (!SDL_IsDeXMode() && !SDL_IsTablet()) {
         
         SDL_SetWindowFullscreen(g_wd, true);
