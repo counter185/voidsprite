@@ -127,6 +127,7 @@ int randomInt(int minIncl, int maxExcl);
 std::string randomUUID();
 std::string secondsTimeToHumanReadable(u64 seconds);
 
+SDL_Event handleNumLockInEvent(SDL_Event src);
 SDL_Event convertTouchToMouseEvent(SDL_Event src);
 SDL_Event scaleScreenPositionsInEvent(SDL_Event src);
 

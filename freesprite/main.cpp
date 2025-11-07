@@ -827,6 +827,7 @@ int main(int argc, char** argv)
                 }
                 wdTarget->thisWindowsTurn();
 
+                evt = handleNumLockInEvent(evt);
                 evt = scaleScreenPositionsInEvent(evt);
                 DrawableManager::processHoverEventInMultiple({ g_currentWindow->overlayWidgets }, evt);
 

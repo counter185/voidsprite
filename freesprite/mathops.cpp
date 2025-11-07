@@ -1048,6 +1048,40 @@ std::string secondsTimeToHumanReadable(u64 seconds)
     return ret;
 }
 
+SDL_Event handleNumLockInEvent(SDL_Event src)
+{
+    std::map<u32, u32> scancodeMap = {
+        {SDL_SCANCODE_KP_9, SDL_SCANCODE_PAGEUP},
+        {SDL_SCANCODE_KP_3, SDL_SCANCODE_PAGEDOWN},
+        {SDL_SCANCODE_KP_7, SDL_SCANCODE_HOME},
+        {SDL_SCANCODE_KP_1, SDL_SCANCODE_END},
+        {SDL_SCANCODE_KP_0, SDL_SCANCODE_INSERT}
+    };
+    std::map<u32, u32> keycodeMap = {
+        {SDLK_KP_9, SDLK_PAGEUP},
+        {SDLK_KP_3, SDLK_PAGEDOWN},
+        {SDLK_KP_7, SDLK_HOME},
+        {SDLK_KP_1, SDLK_END},
+        {SDLK_KP_0, SDLK_INSERT}
+    };
+
+    switch (src.type) {
+        case SDL_EVENT_KEY_DOWN:
+        case SDL_EVENT_KEY_UP:
+            if ((src.key.mod & SDL_KMOD_NUM) == 0) {
+                if (scancodeMap.contains(src.key.scancode)) {
+                    src.key.scancode = (SDL_Scancode)scancodeMap[src.key.scancode];
+                }
+                if (keycodeMap.contains(src.key.key)) {
+                    src.key.key = keycodeMap[src.key.key];
+                }
+            }
+            break;
+    }
+
+    return src;
+}
+
 SDL_Event convertTouchToMouseEvent(SDL_Event src)
 {
     SDL_Event ret = src;
