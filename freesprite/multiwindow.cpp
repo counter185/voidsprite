@@ -58,13 +58,55 @@ VSPWindow* VSPWindow::windowEventTarget(SDL_Event evt) {
     }
 }
 
+std::string VSPWindow::findFallbackSystemFont(std::vector<std::string> fonts)
+{
+    auto sysFontPaths = platformGetSystemFontPaths();
+    for (auto& fp : sysFontPaths) {
+        for (auto& fnt : fonts) {
+            std::filesystem::path p = fp;
+            p /= fnt;
+            if (std::filesystem::exists(p)) {
+                return convertStringToUTF8OnWin32(p);
+            }
+        }
+    }
+    return "";
+}
+
 void VSPWindow::initFonts() {
     if (fnt != NULL) {
         delete fnt;
     }
+    
+    std::vector<std::string> fallbackFonts = {
+        "Ubuntu.ttf",
+        "Ubuntu-R.ttf",
+        "LiberationSans-Regular.ttf",
+        "SST-Medium.ttf",
+        "seguisb.ttf",
+        "segoeui.ttf",
+        "tahoma.ttf",
+        "arial.ttf"
+    };
+
+    std::vector<std::string> fallbackFontsJP = {
+        "meiryo.ttc",
+        //"msgothic.ttc",
+        "YuGothB.ttc",
+        "YuGothM.ttc"
+    };
+
     fnt = new TextRenderer();
     TTF_Font* fontDefault = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
     fontDefault = fontDefault == NULL ? TTF_OpenFont(FONT_PATH, 18) : fontDefault;
+    if (fontDefault == NULL) {
+        std::string fallback = findFallbackSystemFont(fallbackFonts);
+        if (fallback != "") {
+            logwarn(frmt("Loading fallback system font: {}", fallback));
+            fontDefault = TTF_OpenFont(fallback.c_str(), 18);
+        }
+    }
+
     if (fontDefault != NULL) {
         fnt->AddFont(fontDefault, { { 0, 0xFFFFFFFF } });
     }
@@ -74,6 +116,13 @@ void VSPWindow::initFonts() {
 
     TTF_Font* fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
     fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
+    if (fontJP == NULL) {
+        std::string fallback = findFallbackSystemFont(fallbackFontsJP);
+        if (fallback != "") {
+            logwarn(frmt("Loading fallback system font: {}", fallback));
+            fontJP = TTF_OpenFont(fallback.c_str(), 18);
+        }
+    }
     if (fontJP != NULL) {
         fnt->AddFont(fontJP, {
             { 0x3000, 0x30FF },   // CJK Symbols and Punctuation, hiragana, katakana
@@ -84,6 +133,7 @@ void VSPWindow::initFonts() {
 
     TTF_Font* fontCYR = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_CYR).c_str(), 18);
     fontCYR = fontCYR == NULL ? TTF_OpenFont(FONT_PATH_CYR, 18) : fontCYR;
+    //should be fine without its own fallback fonts
     if (fontCYR != NULL) {
         fnt->AddFont(fontCYR, {
             { 0x0400, 0x052F }, // Cyryllic + supplement

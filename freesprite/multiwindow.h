@@ -52,6 +52,7 @@ public:
         return !popupStack.empty();
     }
 
+    std::string findFallbackSystemFont(std::vector<std::string> font);
     void initFonts();
 
     void addToWindowList();
