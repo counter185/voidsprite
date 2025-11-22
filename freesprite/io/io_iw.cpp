@@ -27,9 +27,9 @@ Layer* readIWI(PlatformNativePathString path, u64 seek)
     if (f != NULL) {
 
         u64 filesize;
-		fseek(f, 0, SEEK_END);
-		filesize = ftell(f);
-		fseek(f, 0, SEEK_SET);
+        fseek(f, 0, SEEK_END);
+        filesize = ftell(f);
+        fseek(f, 0, SEEK_SET);
 
         IWIFile iwi;
         IWIInfo iwiinf;
@@ -65,11 +65,11 @@ Layer* readIWI(PlatformNativePathString path, u64 seek)
 
         rawMipOffsetTable.resize(nOffsets);
         fread(&rawMipOffsetTable[0], sizeof(u32), nOffsets, f);
-		std::sort(rawMipOffsetTable.begin(), rawMipOffsetTable.end());
-		std::vector<mipOffsetEntry> mipOffsetTable;
+        std::sort(rawMipOffsetTable.begin(), rawMipOffsetTable.end());
+        std::vector<mipOffsetEntry> mipOffsetTable;
         for (int i = 0; i < nOffsets; i++) {
-			u32 thisOffset = rawMipOffsetTable[i];
-			u32 nextOffset = (i + 1 < nOffsets) ? rawMipOffsetTable[i + 1] : filesize;
+            u32 thisOffset = rawMipOffsetTable[i];
+            u32 nextOffset = (i + 1 < nOffsets) ? rawMipOffsetTable[i + 1] : filesize;
             u32 size = nextOffset - thisOffset;
             if (size != 0) {
                 mipOffsetTable.push_back(mipOffsetEntry{
@@ -81,7 +81,7 @@ Layer* readIWI(PlatformNativePathString path, u64 seek)
         //sort by largest size
         std::sort(mipOffsetTable.begin(), mipOffsetTable.end(), [](const mipOffsetEntry& a, const mipOffsetEntry& b) {
             return a.calcSize > b.calcSize;
-		});
+        });
         loginfo("mip offsets:");
         for (auto& offs : mipOffsetTable) {
             loginfo(frmt("  {:08X} size {:08X}", offs.offset, offs.calcSize));
@@ -96,17 +96,21 @@ Layer* readIWI(PlatformNativePathString path, u64 seek)
         }
 
         //let's assume first mipmap is the largest
-		fseek(f, mipOffsetTable[0].offset, SEEK_SET);
+        fseek(f, mipOffsetTable[0].offset, SEEK_SET);
         Layer* ret = Layer::tryAllocLayer(iwiinf.w, iwiinf.h);
         if (ret != NULL) {
             switch (iwiinf.format) {
+                case IWI_FORMAT_ARGB32:
+                    ret->name = "IWI ARGB32 Layer";
+                    fread(ret->pixels32(), 4, iwiinf.w * iwiinf.h, f);
+                    break;
                 case IWI_FORMAT_DXT1:
                     ret->name = "IWI DXT1 Layer";
-					DeXT1(ret, iwiinf.w, iwiinf.h, f);
+                    DeXT1(ret, iwiinf.w, iwiinf.h, f);
                     break;
                 case IWI_FORMAT_DXT3:
                     ret->name = "IWI DXT3 Layer";
-					DeXT23(ret, iwiinf.w, iwiinf.h, f);
+                    DeXT23(ret, iwiinf.w, iwiinf.h, f);
                     break;
                 case IWI_FORMAT_DXT5:
                     ret->name = "IWI DXT5 Layer";
@@ -114,7 +118,7 @@ Layer* readIWI(PlatformNativePathString path, u64 seek)
                     break;
                 default:
                     delete ret;
-					ret = NULL;
+                    ret = NULL;
                     logerr("[IWI] unsupported format");
                     break;
             }
