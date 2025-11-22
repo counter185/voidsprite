@@ -20,8 +20,6 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
 LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 
-Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
-
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
 std::vector<u8> compressZlib(u8* data, size_t dataSize);
 std::vector<u8> base64ToBytes(std::string b64);
@@ -44,7 +42,7 @@ PlatformNativePathString newTempFile();
 #include "io/io_rpgm.h"
 #include "io/io_jxl.h"
 #include "io/io_dibv5.h"
-#include "io/io_valve_spr.h"
+#include "io/io_valve.h"
 #include "io/io_voidsprite.h"
 #include "io/io_openraster.h"
 #include "io/io_pixelstudio.h"
@@ -59,7 +57,6 @@ Layer* readSDLImage(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMSP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
@@ -97,7 +94,6 @@ bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data);
 bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
-bool writeVTF(PlatformNativePathString path, Layer* data);
 
 std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
 bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);

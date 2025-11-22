@@ -123,6 +123,9 @@ Layer* readIWI(PlatformNativePathString path, u64 seek)
                     break;
             }
         }
+        else {
+            logerr("[IWI] failed to allocate layer");
+        }
 
         fclose(f);
         return ret;

@@ -582,7 +582,7 @@
     <ClCompile Include="UIColorPicker.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
-    <ClCompile Include="io\io_valve_spr.cpp">
+    <ClCompile Include="io\io_valve.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
     <ClCompile Include="keybinds.cpp">
@@ -1217,7 +1217,7 @@
     <ClInclude Include="license.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="io\io_valve_spr.h">
+    <ClInclude Include="io\io_valve.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="voidsprite_sdk.h">
