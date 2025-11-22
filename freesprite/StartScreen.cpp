@@ -385,11 +385,23 @@ void StartScreen::takeInput(SDL_Event evt)
                     }
     #if _DEBUG
                     else if (evt.key.scancode == SDL_SCANCODE_INSERT && g_ctrlModifier && g_shiftModifier) {
-                        throw std::exception("** user-initiated test crash");
+                        PopupYesNo* p = new PopupYesNo("Test crash handler", "Testing exception handler. Continue?");
+                        p->onFinishCallback = [](PopupYesNo*, bool yes) {
+                            if (yes) {
+                                throw std::exception("** user-initiated test crash");
+                            }
+                        };
+                        g_addPopup(p);
                     }
                     else if (evt.key.scancode == SDL_SCANCODE_DELETE && g_ctrlModifier && g_shiftModifier) {
-                        int* a = NULL;
-                        *a = 5;
+                        PopupYesNo* p = new PopupYesNo("Test crash handler", "Testing SEH exception handler. Continue?");
+                        p->onFinishCallback = [](PopupYesNo*, bool yes) {
+                            if (yes) {
+                                int* a = NULL;
+                                *a = 5;
+                            }
+                        };
+                        g_addPopup(p);
                     }
     #endif
                     break;
