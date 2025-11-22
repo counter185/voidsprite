@@ -294,6 +294,7 @@
     <ClCompile Include="io\io_aseprite.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />
     <ClCompile Include="io\io_gim.cpp" />
+    <ClCompile Include="io\io_iw.cpp" />
     <ClCompile Include="io\io_jxl.cpp" />
     <ClCompile Include="io\io_lpe.cpp" />
     <ClCompile Include="io\io_openraster.cpp" />
@@ -546,6 +547,7 @@
     <ClInclude Include="io\io_base.h" />
     <ClInclude Include="io\io_dibv5.h" />
     <ClInclude Include="io\io_gim.h" />
+    <ClInclude Include="io\io_iw.h" />
     <ClInclude Include="io\io_jxl.h" />
     <ClInclude Include="io\io_lpe.h" />
     <ClInclude Include="io\io_openraster.h" />

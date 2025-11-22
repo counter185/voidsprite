@@ -48,6 +48,7 @@ PlatformNativePathString newTempFile();
 #include "io/io_voidsprite.h"
 #include "io/io_openraster.h"
 #include "io/io_pixelstudio.h"
+#include "io/io_iw.h"
 
 #include "io/io_palettes.h"
 

@@ -678,6 +678,9 @@
     <ClCompile Include="ASCIIEditor.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_iw.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1348,6 +1351,9 @@
     </ClInclude>
     <ClInclude Include="gzip\config.hpp">
       <Filter>Header files\external\gzip</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_iw.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
