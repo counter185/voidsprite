@@ -555,7 +555,6 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
             else {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
             }
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         }
     }
 }
