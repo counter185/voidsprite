@@ -178,7 +178,6 @@ SDL_Rect PopupFreeformTransform::evalPasteRectChange()
 
 void PopupFreeformTransform::renderDefaultBackground() {
     Fill::Gradient(0xFF000000, 0x00000000, 0x00000000, 0x00000000).fill({ 0,0,g_windowW / 3*2, g_windowH / 3*2 });
-    renderPopupWindow();
 }
 
 std::pair<int, XY> PopupFreeformTransform::getMouseOverDraggablePoint()

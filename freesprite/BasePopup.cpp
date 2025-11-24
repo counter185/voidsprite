@@ -3,6 +3,21 @@
 #include "UILabel.h"
 #include "UIButton.h"
 
+void BasePopup::render() {
+    double animTime = XM1PW3P1(startTimer.percentElapsedTime(300));
+    renderDefaultBackground();
+    if (animTime < 1) {
+        g_fullFramerateThisFrame = true;
+
+        g_pushClip(getPopupAnimatedRect());
+    }
+    renderPopupWindow();
+    renderDrawables();
+    if (animTime < 1) {
+        g_popClip();
+    }
+}
+
 void BasePopup::renderDefaultBackground() {
 
     int topBarY = g_windowH / 5;
@@ -30,14 +45,11 @@ void BasePopup::renderDefaultBackground() {
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x0a);
     drawLine({ 0, topBarY - offset }, { g_windowW, topBarY - offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
     drawLine({ g_windowW, bottomBarY + offset }, { 0, bottomBarY + offset }, XM1PW3P1(startTimer.percentElapsedTime(700)));
-
-    renderPopupWindow();
 }
 
 void BasePopup::renderPopupWindow()
 {
-    XY origin = getPopupOrigin();
-    SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * XM1PW3P1(startTimer.percentElapsedTime(300))) };
+    SDL_Rect bgRect = getPopupAnimatedRect();
 
     static Fill popupBgFill = visualConfigFill("popup/bg");
     popupBgFill.fill(bgRect);
@@ -54,6 +66,14 @@ void BasePopup::renderPopupWindow()
         alpha /= 3;
         alpha *= 2;
     }
+}
+
+SDL_Rect BasePopup::getPopupAnimatedRect()
+{
+    XY origin = getPopupOrigin();
+    double animTime = XM1PW3P1(startTimer.percentElapsedTime(300));
+    SDL_Rect bgRect = SDL_Rect{ origin.x, origin.y, wxWidth, (int)(wxHeight * animTime) };
+    return bgRect;
 }
 
 void BasePopup::playPopupCloseVFX()

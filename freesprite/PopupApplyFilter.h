@@ -39,7 +39,7 @@ public:
         return XY{ 20, BasePopup::getPopupOrigin().y };
     }
 
-    void renderFilterPopupBackground();
+    void renderDefaultBackground() override;
     void setupWidgets();
     void applyAndClose();
     void setupPreview();

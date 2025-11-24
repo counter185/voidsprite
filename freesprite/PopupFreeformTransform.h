@@ -17,7 +17,7 @@ public:
     void render() override;
     void defaultInputAction(SDL_Event evt) override;
     SDL_Rect evalPasteRectChange();
-    void renderDefaultBackground() override;;
+    void renderDefaultBackground() override;
     XY getPopupOrigin() override { return { 10,10 }; };
 
     std::pair<int, XY> getMouseOverDraggablePoint();

@@ -27,8 +27,7 @@ PopupApplyFilter::~PopupApplyFilter() {
 
 void PopupApplyFilter::render() {
     updatePreview();
-    renderFilterPopupBackground();
-    renderDrawables();
+    BasePopup::render();
     if (nowRendering) {
         g_fnt->RenderString(TL("vsp.applyfilter.renderingpreview"), 2, g_windowH - 30, {255,255,255,200});
     }
@@ -52,7 +51,7 @@ void PopupApplyFilter::defaultInputAction(SDL_Event evt)
     }
 }
 
-void PopupApplyFilter::renderFilterPopupBackground()
+void PopupApplyFilter::renderDefaultBackground()
 {
     SDL_Color bgColor = SDL_Color{ 0,0,0,0xD0 };
 
@@ -64,8 +63,6 @@ void PopupApplyFilter::renderFilterPopupBackground()
     
     renderGradient({ 0,0,wxWidth + 40,g_windowH }, 0x70000000, 0x70000000, 0xFF000000, 0xFF000000);
     //renderGradient({ 0,g_windowH / 2,g_windowW,g_windowH / 2 }, 0xFF000000, 0xFF000000, 0x70000000, 0x70000000);
-
-    renderPopupWindow();
 }
 
 void PopupApplyFilter::setupWidgets()

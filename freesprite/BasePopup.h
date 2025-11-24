@@ -25,10 +25,7 @@ public:
         }
     }
 
-    void render() override {
-        renderDefaultBackground();
-        renderDrawables();
-    }
+    void render() override;
 
     void setSize(XY size) {
         wxWidth = size.x;
@@ -52,6 +49,7 @@ protected:
     virtual XY getPopupOrigin() {
         return usesWholeScreen ? XY{0,0} : XY{ g_windowW / 2 - wxWidth / 2, g_windowH / 2 - wxHeight / 2 };
     }
+    SDL_Rect getPopupAnimatedRect();
 
     virtual void playPopupCloseVFX();
     void closePopup();
