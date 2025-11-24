@@ -365,7 +365,12 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     ofna.hwndOwner = WINhWnd;
     std::wstring filterString = L"";
     for (auto& ft : filetypes) {
-        filterString += utf8StringToWstring(ft.second) + L" (" + utf8StringToWstring(ft.first) + L")";
+        if (!ft.first.empty()) {
+            filterString += utf8StringToWstring(frmt("{} ({})", ft.second, ft.first));
+        }
+        else {
+            filterString += utf8StringToWstring(ft.second);
+        }
         filterString.push_back('\0');
         filterString += L"*" + utf8StringToWstring(ft.first);
         filterString.push_back('\0');
@@ -383,9 +388,12 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     std::wstring windowTitleW = L"voidsprite: " + utf8StringToWstring(windowTitle);
     ofna.lpstrTitle = windowTitleW.c_str();
 
-    std::wstring extensionW = utf8StringToWstring(filetypes[0].first);
-    std::wstring extensionWtr = extensionW.substr(1);
-    ofna.lpstrDefExt = extensionWtr.c_str();
+    std::wstring extensionWtr;
+    if (!filetypes[0].first.empty()) {
+        std::wstring extensionW = utf8StringToWstring(filetypes[0].first);
+        extensionWtr = extensionW.substr(1);
+        ofna.lpstrDefExt = extensionWtr.c_str();
+    }
 
     if (GetOpenFileNameW(&ofna)) {
         std::wstring fileName = fileNameBuffer;

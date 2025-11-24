@@ -1113,7 +1113,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_F, { "Add reference...",
                             [this]() {
-                                PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE);
+                                PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE, true);
                             }
                         }
                     },

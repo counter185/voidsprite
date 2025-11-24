@@ -482,6 +482,7 @@
     {"vsp.filepicker.error.nodir", "Directory not found."},
     {"vsp.filepicker.error.deletefile", "Failed to delete file."},
     {"vsp.filepicker.error.renamefile", "Failed to rename file."},
+    {"vsp.filepicker.autofiletype", "Auto-detect file type"},
 
     //popup: freeform transform
     {"vsp.freeformtransform.title", "Transform"},

@@ -1,12 +1,11 @@
 #pragma once
 #include "BasePopup.h"
 #include "UIButton.h"
-#include "EventCallbackListener.h"
 #include "FontRenderer.h"
 #include "UILabel.h"
 
 class PopupYesNo :
-    public BasePopup, public EventCallbackListener
+    public BasePopup
 {
 protected:
     UIButton* nbutton;
@@ -25,22 +24,25 @@ public:
         wxWidth = ixmax(wxWidth, ixmax(g_fnt->StatStringDimensions(tx).x + 20, g_fnt->StatStringDimensions(tt, 22).x + 20));
 
         nbutton = actionButton(TL("vsp.cmn.no"));
-        nbutton->setCallbackListener(false, this);
+        nbutton->onClickCallback = [this](UIButton*) { finish(false); };
+
         UILabel* nl = new UILabel(frmt("[{}]", SDL_GetScancodeName(SDL_SCANCODE_N)), xySubtract(nbutton->position, { 0,16 }), 12);
         nl->color = uint32ToSDLColor(0x60FFFFFF);
         wxsManager.addDrawable(nl);
 
+
         ybutton = actionButton(TL("vsp.cmn.yes"));
-        ybutton->setCallbackListener(true, this);
+        ybutton->onClickCallback = [this](UIButton*) { finish(true); };
+
         UILabel* yl = new UILabel(frmt("[{}]", SDL_GetScancodeName(SDL_SCANCODE_Y)), xySubtract(ybutton->position, { 0,16 }), 12);
         yl->color = uint32ToSDLColor(0x60FFFFFF);
         wxsManager.addDrawable(yl);
     }
 
-    void eventButtonPressed(int evt_id) override {
-        result = evt_id;
+    void finish(bool r) {
+        result = r;
         if (onFinishCallback != NULL) {
-            onFinishCallback(this, evt_id == 1);
+            onFinishCallback(this, result);
         }
         closePopup();
     }

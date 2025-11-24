@@ -526,31 +526,35 @@ void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int 
 
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
-    if (importerIndex == -1) {
-        tryLoadFile(convertStringToUTF8OnWin32(name));
-    } else {
-        importerIndex--;
-        FileImporter* importer = g_fileImporters[importerIndex];
-        void* importedData = importer->importData(name);
-        if (importedData != NULL) {
-            MainEditor* outSession = NULL;
-            if (!importer->importsWholeSession()) {
-                Layer* nlayer = (Layer*)importedData;
-                outSession = !nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer);
-            }
-            else {
-                outSession = (MainEditor*)importedData;
-            }
-
-            if (importer->getCorrespondingExporter() != NULL) {
-                outSession->lastWasSaveAs = false;
-                outSession->lastConfirmedSave = true;
-                outSession->lastConfirmedSavePath = name;
-                outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
-            }
-            g_addScreen(outSession);
+    if (evt_id == 0) {
+        if (importerIndex == -1 || importerIndex == 1) {
+            tryLoadFile(convertStringToUTF8OnWin32(name));
         }
         else {
+            importerIndex -= 2;
+            FileImporter* importer = g_fileImporters[importerIndex];
+            void* importedData = importer->importData(name);
+            if (importedData != NULL) {
+                MainEditor* outSession = NULL;
+                if (!importer->importsWholeSession()) {
+                    Layer* nlayer = (Layer*)importedData;
+                    outSession = !nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer);
+                }
+                else {
+                    outSession = (MainEditor*)importedData;
+                }
+
+                if (importer->getCorrespondingExporter() != NULL) {
+                    outSession->lastWasSaveAs = false;
+                    outSession->lastConfirmedSave = true;
+                    outSession->lastConfirmedSavePath = name;
+                    outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
+                }
+                g_addScreen(outSession);
+            }
+            else {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+            }
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         }
     }
@@ -937,7 +941,7 @@ void StartScreen::renderBGStars()
 
 void StartScreen::openImageLoadDialog()
 {
-    PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0);
+    PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0, true);
 }
 
 void StartScreen::promptOpenFromURL()

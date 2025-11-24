@@ -100,7 +100,12 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
 
     std::vector<std::pair<std::string, std::string>> typesInDropdown;
     for (auto& fileType : fileTypes) {
-        typesInDropdown.push_back({fileType.second + " (" + fileType.first + ")", ""});
+        if (!fileType.first.empty()) {
+            typesInDropdown.push_back({ fileType.second + " (" + fileType.first + ")", "" });
+        }
+        else {
+            typesInDropdown.push_back({ fileType.second, "" });
+        }
     }
     fileTypeDropdown = new UIDropdown(typesInDropdown);
     fileTypeDropdown->position = xyAdd(fileNameLabel->position, { 0, currentFileName->wxHeight + 5 });
@@ -166,8 +171,11 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
     chooseDirectory(currentDir = rootDirs.empty() ? convertStringOnWin32("/") : rootDirs[0].path);
 }
 
-void PopupFilePicker::PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id) {
+void PopupFilePicker::PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id, bool allowAny) {
     std::vector<std::pair<std::string, std::string>> filetypes;
+    if (allowAny) {
+        filetypes.push_back({ "", TL("vsp.filepicker.autofiletype") });
+    }
     for (FileImporter*& f : g_fileImporters) {
         filetypes.push_back({ f->extension(), f->name() });
     }

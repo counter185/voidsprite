@@ -49,7 +49,7 @@ public:
         return new PopupFilePicker(FILEPICKER_SAVEFILE, title, fileTypes);
     }
 
-    static void PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id);
+    static void PlatformAnyImageImportDialog(EventCallbackListener* callback, std::string title, int callback_id, bool allowAny = false);
 
     static void PlatformAnyImageWithMatchingExporterImportDialog(EventCallbackListener* callback, std::string title, int callback_id);
 

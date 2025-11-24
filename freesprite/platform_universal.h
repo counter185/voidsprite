@@ -9,6 +9,11 @@
 int findIndexByExtension(
         std::vector<std::pair<std::string, std::string>> &filetypes,
         std::string filename) {
+    if (filetypes.front().first == "") {
+        //this means first entry is autodetect
+        return 1;
+    }
+
     std::transform(filename.begin(), filename.end(), filename.begin(),
                    ::tolower);
     for (int x = 0; x < filetypes.size(); x++) {
