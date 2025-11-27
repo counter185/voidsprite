@@ -1001,6 +1001,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_COMMA, { TL("vsp.maineditor.rescanv_reorder"),
+                            [this]() {
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.rescanv_reorder"), "New size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER_REORDER_TILES));
+                            }
+                        }
+                    },
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.nineseg"),
                             [this]() {
                                 g_addScreen(new NineSegmentPatternEditorScreen(this));
@@ -1853,6 +1859,9 @@ void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
     } 
     else if (evt_id == EVENT_MAINEDITOR_RESCALELAYER) {
         rescaleAllLayersFromCommand(((PopupTileGeneric*)p)->result);
+    }
+    else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_REORDER_TILES) {
+        resizeAllLayersReorderingTilesFromCommand(((PopupTileGeneric*)p)->result);
     }
     else if (evt_id == EVENT_MAINEDITOR_PRINT) {
         XY outScale = ((PopupIntegerScale*)p)->result;
@@ -2996,6 +3005,53 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
     undoData.extdata4 = layerResizeData;
     undoData.extdata5 = nLayers;
     addToUndoStack(undoData);
+}
+
+void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
+{
+    if (tileDimensions.x == 0 || tileDimensions.y == 0) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile dimensions must be set."));
+        return;
+    }
+    XY oldTileCount = { 
+        (canvas.dimensions.x + (tileDimensions.x - 1)) / tileDimensions.x, 
+        (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
+    };
+    resizeAllLayersFromCommand(size, false);
+    XY newTileCount = {
+        (canvas.dimensions.x + (tileDimensions.x - 1)) / tileDimensions.x,
+        (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
+    };
+    if (!xyEqual(oldTileCount, newTileCount)) {
+        for (Layer* l : layers) {
+            SDL_Rect sourceRect = { 0,0, tileDimensions.x, tileDimensions.y };
+            Layer* temp = l->isPalettized ? LayerPalettized::tryAllocLayer(l->w, l->h)
+                          : Layer::tryAllocLayer(l->w, l->h);
+            if (temp != NULL) {
+                for (int tileInd = 0; tileInd < newTileCount.x * newTileCount.y; tileInd++) {
+                    XY srcTilePos = {
+                        tileInd % oldTileCount.x,
+                        tileInd / oldTileCount.x
+                    };
+                    XY dstTilePos = {
+                        tileInd % newTileCount.x,
+                        tileInd / newTileCount.x
+                    };
+                    SDL_Rect sourceRect = canvas.getTileRectAt(srcTilePos, tileDimensions);
+                    SDL_Rect destRect = canvas.getTileRectAt(dstTilePos, tileDimensions);
+
+                    temp->blit(l, { destRect.x, destRect.y }, sourceRect, true);
+                }
+
+                memcpy(l->pixels32(), temp->pixels32(), l->w * l->h * 4);
+
+                delete temp;
+            }
+            else {
+                logerr("layer malloc failed");
+            }
+        }
+    }
 }
 
 void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)

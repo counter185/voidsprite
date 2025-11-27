@@ -274,6 +274,7 @@
     {"vsp.maineditor.intscale","Integer scale canvas"},
     {"vsp.maineditor.canvscale","Scale canvas"}, // translation note: this and the above feature scale the entire image alongside the canvas
     {"vsp.maineditor.nineseg","Open in 9-segment pattern editor"},
+    {"vsp.maineditor.rescanv_reorder", "Resize canvas and reorder tiles"},
 
     {"vsp.maineditor.layer","Layer"},
     {"vsp.maineditor.flipx","Flip current layer: X axis"},

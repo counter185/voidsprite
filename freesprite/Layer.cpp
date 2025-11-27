@@ -38,6 +38,10 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
     }
 
     for (int y = 0; y < clipSource.h; y++) {
+        if (y + position.y >= h) {
+            break;
+        }
+
         if (!fast || sourceLayer->colorKeySet) {
             for (int x = 0; x < clipSource.w; x++) {
                 u32 px = sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y}, false);
@@ -50,11 +54,13 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
         }
         else {
             int nPixels = ixmin(clipSource.w, w - position.x) * 4;
-            memcpy(
-                &ARRAY2DPOINT(pixels32(), position.x, y + position.y, w),
-                &ARRAY2DPOINT(sourceLayer->pixels32(), clipSource.x, y + clipSource.y, sourceLayer->w),
-                nPixels
-            );
+            if (nPixels > 0 && y + clipSource.y < sourceLayer->h) {
+                memcpy(
+                    &ARRAY2DPOINT(pixels32(), position.x, y + position.y, w),
+                    &ARRAY2DPOINT(sourceLayer->pixels32(), clipSource.x, y + clipSource.y, sourceLayer->w),
+                    nPixels
+                );
+            }
             /*if (sourceLayer->colorKeySet) {
                 replaceColor(sourceLayer->colorKey, 0x000000);
             }*/

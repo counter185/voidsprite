@@ -402,6 +402,7 @@ public:
     virtual void rescaleAllLayersFromCommand(XY size);
     virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);
     virtual void resizzeAllLayersByTilecountFromCommand(XY size);
+    virtual void resizeAllLayersReorderingTilesFromCommand(XY size);
     virtual void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
     MainEditorPalettized* toPalettizedSession();
     void tryExportPalettizedImage();

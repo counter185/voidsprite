@@ -404,6 +404,12 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_COMMA, { TL("vsp.maineditor.rescanv_reorder"),
+                            [this]() {
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.rescanv_reorder"), "New size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER_REORDER_TILES));
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabEdit
             }
