@@ -30,7 +30,7 @@ inline std::string getLibraryLicenses() {
         "  For platforms where this is not applicable, current up to date license information can be found on\n"
         "  github.com/counter185/voidsprite/tree/main/OPEN_SOURCE_LICENSES\n\n"
 
-        "voidsprite uses the following licensed open-source libraries:\n"
+        "voidsprite uses code from the following licensed open-source projects/libraries:\n"
         "astc_dec\n"
         "base64\n"
         "ddspp\n"
@@ -45,6 +45,7 @@ inline std::string getLibraryLicenses() {
         "libpng\n"
         "libtga\n"
         "pugixml\n"
+        "skyline\n"
         "s3tc-dxt-decompression\n"
         "SDL3, SDL3_image, SDL3_ttf, SDL3_net\n"
         "AndroidDeviceNames\n"

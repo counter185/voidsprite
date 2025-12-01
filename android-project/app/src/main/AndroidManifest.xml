@@ -137,9 +137,9 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/vsp_file_provider_paths"/>
         </provider>-->
-        <!--<provider
+        <provider
             android:name=".VSPAppdataProvider"
-            android:authorities="${applicationId}.user"
+            android:authorities="pl.cntrpl.voidsprite.provider"
             android:grantUriPermissions="true"
             android:exported="true"
             android:permission="android.permission.MANAGE_DOCUMENTS"
@@ -147,7 +147,7 @@
             <intent-filter>
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
-        </provider>-->
+        </provider>
 
     </application>
 
