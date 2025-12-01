@@ -37,7 +37,7 @@ void g_loadFilters()
     }));
     g_filters.push_back(new FilterOffset());
     g_filters.push_back(new FilterRemoveChannels());
-	g_filters.push_back(new FilterAlphaThreshold());
+    g_filters.push_back(new FilterAlphaThreshold());
 
     for (auto pluginFilter : g_pluginFilters) {
         g_filters.push_back(pluginFilter);
@@ -207,6 +207,8 @@ Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> op
 
 Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> options)
 {
+    bool sampleOnePoint = std::stoi(options["one sample"]);
+
     Layer* c = copy(src);
     XY pixelSize = { std::stod(options["size.x"]), std::stod(options["size.y"]) };
     int tilesW = (int)ceil(c->w / (double)pixelSize.x);
@@ -217,28 +219,36 @@ Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> option
 
             XY origin = { x * pixelSize.x, y * pixelSize.y };
 
-            u64 rs = 0, gs = 0, bs = 0, as = 0;
-            double aSum = 0;
-            int measures = 0;
-            for (int yy = 0; yy < pixelSize.y; yy++) {
-                for (int xx = 0; xx < pixelSize.x; xx++) {
-                    if (pointInBox(xyAdd(origin, { xx,yy }), { 0,0,c->w,c->h })) {
-                        measures++;
-                        SDL_Color px = uint32ToSDLColor(src->getPixelAt(xyAdd(origin, {xx, yy}), true));
-                        rs += px.r;
-                        gs += px.g;
-                        bs += px.b;
-                        as += px.a;
-                        aSum += px.a / 255.0;
+            u32 outColor = 0;
+
+            if (!sampleOnePoint) {
+                u64 rs = 0, gs = 0, bs = 0, as = 0;
+                double aSum = 0;
+                int measures = 0;
+                for (int yy = 0; yy < pixelSize.y; yy++) {
+                    for (int xx = 0; xx < pixelSize.x; xx++) {
+                        if (pointInBox(xyAdd(origin, { xx,yy }), { 0,0,c->w,c->h })) {
+                            measures++;
+                            SDL_Color px = uint32ToSDLColor(src->getPixelAt(xyAdd(origin, { xx, yy }), true));
+                            rs += px.r;
+                            gs += px.g;
+                            bs += px.b;
+                            as += px.a;
+                            aSum += px.a / 255.0;
+                        }
                     }
                 }
+                rs = aSum > 0 ? (u64)(rs / aSum) : 0;
+                gs = aSum > 0 ? (u64)(gs / aSum) : 0;
+                bs = aSum > 0 ? (u64)(bs / aSum) : 0;
+                as /= measures;
+                outColor = PackRGBAtoARGB(rs, gs, bs, as);
             }
-            rs = aSum > 0 ? (u64)(rs / aSum) : 0;
-            gs = aSum > 0 ? (u64)(gs / aSum) : 0;
-            bs = aSum > 0 ? (u64)(bs / aSum) : 0;
-            as /= measures;
-            c->fillRect(origin, xyAdd(origin, pixelSize), PackRGBAtoARGB(rs, gs, bs, as));
+            else {
+                outColor = src->getPixelAt(origin, true);
+            }
 
+            c->fillRect(origin, xyAdd(origin, pixelSize), outColor);
         }
     }
 
