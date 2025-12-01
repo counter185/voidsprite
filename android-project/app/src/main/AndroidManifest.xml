@@ -139,7 +139,7 @@
         </provider>-->
         <provider
             android:name=".VSPAppdataProvider"
-            android:authorities="pl.cntrpl.voidsprite.provider"
+            android:authorities="${applicationId}.provider"
             android:grantUriPermissions="true"
             android:exported="true"
             android:permission="android.permission.MANAGE_DOCUMENTS"

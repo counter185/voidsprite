@@ -43,7 +43,7 @@ class VSPAppdataProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_SIZE
         )
 
-        const val AUTHORITY : String = "pl.cntrpl.voidsprite.provider"
+        var authority : String = ""
 
         const val ROOT_ID : String = "root"
     }
@@ -51,6 +51,7 @@ class VSPAppdataProvider : DocumentsProvider() {
     override fun onCreate() : Boolean {
         baseDirectory = File(context?.getExternalFilesDir(null)!!.canonicalPath)
         applicationName = context?.applicationInfo?.loadLabel(context!!.packageManager).toString()
+        authority = context?.applicationInfo?.packageName!!
         return true
     }
 
@@ -263,7 +264,7 @@ class VSPAppdataProvider : DocumentsProvider() {
             if (mime != null)
                 return mime
         }
-        return "application/octect-stream"
+        return "application/octet-stream"
     }
 
     override fun queryChildDocuments(parentDocumentId : String?, projection : Array<out String>?, sortOrder : String?) : Cursor {
