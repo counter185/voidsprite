@@ -1,8 +1,3 @@
-
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
-#include <windows.h>
-#endif
-
 #include <fstream>
 #include <regex>
 #include <SDL3_image/SDL_image.h>
@@ -27,6 +22,10 @@
 #include "LayerPalettized.h"
 #include "RPG2KTilemapPreviewScreen.h"
 #include "PopupMessageBox.h"
+
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+    #include <windows.h>
+#endif
 
 #include <zlib.h>
 
