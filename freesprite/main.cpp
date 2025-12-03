@@ -53,6 +53,7 @@ XY unscaledWindowSize = {g_windowW, g_windowH};
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
+int g_touchPointsOnScreen = 0;
 TextRenderer* g_fnt = NULL;
 TooltipsLayer* g_ttp;
 Gamepad* g_gamepad = NULL;
@@ -328,7 +329,7 @@ void main_assignFavScreen()
     g_currentWindow->assignFavScreen();
 }
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 bool main_WindowsMessageHook(void* userdata, MSG* msg) {
     if (msg->message == WM_USER + 1) {
         main_newWindow();
@@ -370,7 +371,7 @@ static void main_handleSIGSEGV(int sig) {
 
 void main_registerCExceptionHandlers()
 {
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
     _set_se_translator([](unsigned int u, _EXCEPTION_POINTERS* pExp) {
         throw std::runtime_error(frmt("Fatal error: SEH exception code {:X}", u));
     });
@@ -463,14 +464,9 @@ int main(int argc, char** argv)
             " " UTF8_DIAMOND " DEBUG"
 #endif
             ;
-        u32 windowFlags =
-#if __ANDROID__
-            SDL_WINDOW_MAXIMIZED |
-#endif
-#if _WIN32
-            SDL_WINDOW_HIDDEN |
-#endif
-            SDL_WINDOW_RESIZABLE;
+        u32 windowFlags = ONPLATFORM(VSP_PLATFORM_ANDROID, SDL_WINDOW_MAXIMIZED, 0) 
+            | ONPLATFORM(VSP_PLATFORM_WIN32, SDL_WINDOW_HIDDEN, 0)
+            | SDL_WINDOW_RESIZABLE;
         g_mainWindow = VSPWindow::tryCreateWindow(windowTitle, { g_windowW, g_windowH }, windowFlags);
         g_mainWindow->isMainWindow = true;
         g_mainWindow->thisWindowsTurn();
@@ -864,11 +860,12 @@ int main(int argc, char** argv)
                     break;
                 case SDL_EVENT_WINDOW_RESIZED:
                     wdTarget->unscaledWindowSize = { evt.window.data1, evt.window.data2 };
-#if __ANDROID__
-                    wdTarget->autoViewportScale();
-#else
-                    wdTarget->updateViewportScaler();
-#endif
+                    if (g_config.autoViewportScale) {
+                        wdTarget->autoViewportScale();
+                    }
+                    else {
+                        wdTarget->updateViewportScaler();
+                    }
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
                     if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
@@ -880,6 +877,7 @@ int main(int argc, char** argv)
                 case SDL_EVENT_FINGER_UP:
                 case SDL_EVENT_FINGER_MOTION:
                     g_lastConfirmInputWasTouch = true;
+                    SDL_GetTouchFingers(evt.tfinger.touchID, &g_touchPointsOnScreen);
                     if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
                         wdTarget->mouseX = evt.tfinger.x * g_windowW;
                         wdTarget->mouseY = evt.tfinger.y * g_windowH;

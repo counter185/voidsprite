@@ -170,6 +170,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS, &posInTab));
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
+    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.autoscale"), TL("vsp.config.opt.autoscale.desc"), &g_config.autoViewportScale, &posInTab));
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();
     std::vector<std::string> visualConfNames = { getDefaultVisualConf()["meta/name"] };

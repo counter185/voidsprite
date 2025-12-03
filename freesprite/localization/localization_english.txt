@@ -428,6 +428,8 @@
     {"vsp.config.opt.checkupdates", "Check for updates at startup"},
     {"vsp.config.opt.checkupdates.desc", "voidsprite will check for updates at startup and show a message if a new version is available."},
     {"vsp.config.opt.canvaszoomsens", "Canvas zoom sensitivity"},
+    {"vsp.config.opt.autoscale", "Automatic screen scale"},
+    {"vsp.config.opt.autoscale.desc", "The screen will scale automatically after the window is resized."},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

@@ -3,13 +3,13 @@
 #include "EventCallbackListener.h"
 #include "FileIO.h"
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 	#include "platform_windows.h"
-#elif __APPLE__
+#elif VSP_PLATFORM == VSP_PLATFORM_MAC
 	#include "platform_macos.h"
-#elif VITASDK
+#elif VSP_PLATFORM == VSP_PLATFORM_VITA
 	#include "platform_vita.h"
-#elif __ANDROID__
+#elif VSP_PLATFORM == VSP_PLATFORM_ANDROID
     #include "platform_android.h"
 #else
 	#include "platform_linux.h"

@@ -2,7 +2,7 @@
 
 class GlobalConfig {
 public:
-    bool openSavedPath = true;
+    bool openSavedPath = ONPLATFORM(VSP_PLATFORM_ANDROID, false, true);
     int animatedBackground = 1; //0:off, 1:sharp, 2:smooth, 3:sharp(static), 4:smooth(static)
     int maxUndoHistory = 20;
     bool scrollWithTouchpad = false;
@@ -12,36 +12,26 @@ public:
     bool saveLoadFlatImageExtData = true;
     bool useDiscordRPC = false;
     bool brushColorPreview = false;
-    std::string preferredRenderer =
-#if _WIN32
-        "direct3d"
-#else
-        ""
-#endif
-        ;
+    std::string preferredRenderer = ONPLATFORM(VSP_PLATFORM_WIN32, "direct3d", "");
     int autosaveInterval = 20;
     bool rowColIndexesStartAt1 = false;
     std::string language = "en-us";
     bool vfxEnabled = true;
     bool overrideCursor = true;
     std::string customVisualConfigPath = "";
-    bool useSystemFileDialog = 
-#if __ANDROID__
-        false
-#else
-        true
-#endif   
-        ;
+    bool useSystemFileDialog = ONPLATFORM(VSP_PLATFORM_ANDROID, false, true);
     bool showPenPressure = true;
     bool showFPS = false;
     bool checkUpdates = true;
-    int powerSaverLevel = 3;    // 0: none
+    int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 2, 3);
+                                // 0: none
                                 // 1: delay 45 on unfocus
                                 // 2: delay 500 on unfocus
                                 // 3: auto      (0 if no battery, 1 if battery, 2 if battery <15%)
     bool singleInstance = true;
     int canvasZoomSensitivity = 1;//1 to 50
     bool compactEditor = false;
+    bool autoViewportScale = ONPLATFORM(VSP_PLATFORM_ANDROID, true, false);
 
     std::vector<std::string> lastOpenFiles;
 

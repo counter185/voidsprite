@@ -1,5 +1,5 @@
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 #include <windows.h>
 #endif
 
@@ -2296,7 +2296,7 @@ Layer* readGXT(PlatformNativePathString path, u64 seek)
 
 Layer* readWinSHS(PlatformNativePathString path, u64 seek)
 {
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
     IStorage* pStorage = nullptr;
     HRESULT hr = StgOpenStorage(path.c_str(), nullptr, STGM_READ | STGM_SHARE_EXCLUSIVE, nullptr, 0, &pStorage);
     if (FAILED(hr)) {

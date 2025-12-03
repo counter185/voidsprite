@@ -50,13 +50,33 @@
 
 #include <SDL3/SDL.h>
 
+#define VSP_PLATFORM_WIN32 1
+#define VSP_PLATFORM_LINUX 2
+#define VSP_PLATFORM_MAC 3
+#define VSP_PLATFORM_ANDROID 4
+#define VSP_PLATFORM_VITA 4
+
+#if _WIN32
+    #define VSP_PLATFORM VSP_PLATFORM_WIN32
+#elif __ANDROID__
+    #define VSP_PLATFORM VSP_PLATFORM_ANDROID
+#elif __APPLE__
+    #define VSP_PLATFORM VSP_PLATFORM_MAC
+#elif VITASDK
+    #define VSP_PLATFORM VSP_PLATFORM_VITA
+#else
+    #define VSP_PLATFORM VSP_PLATFORM_LINUX
+#endif
+
+#define ONPLATFORM(platform,value,other) (VSP_PLATFORM == platform ? value : other)
+
 #if _M_ARM64
     #define VOIDSPRITE_JXL_ENABLED 0
     #define VSP_DISCORD_RPC 0 
 #endif
 
 #ifndef VSP_DISCORD_RPC
-    #if _WIN32
+    #if VSP_PLATFORM == VSP_PLATFORM_WIN32
         #define VSP_DISCORD_RPC 1
     #else
         #define VSP_DISCORD_RPC 0
@@ -68,11 +88,11 @@
 #endif
 
 #ifndef VSP_NETWORKING
-    #if _WIN32
+    #if VSP_PLATFORM == VSP_PLATFORM_WIN32
         #define VSP_NETWORKING 1
-    #elif __ANDROID__
+    #elif VSP_PLATFORM == VSP_PLATFORM_ANDROID
         #define VSP_NETWORKING 1
-    #elif __APPLE__
+    #elif VSP_PLATFORM == VSP_PLATFORM_MAC
         #define VSP_NETWORKING 0
     #else
         #define VSP_NETWORKING 1
@@ -237,6 +257,7 @@ extern TextRenderer* g_fnt;
 extern TooltipsLayer* g_ttp;
 extern Gamepad* g_gamepad;
 extern int g_mouseX, g_mouseY;
+extern int g_touchPointsOnScreen;
 extern std::vector<BaseBrush*> g_brushes;
 inline std::vector<BaseBrush*> g_pluginBrushes;
 extern std::vector<Pattern*> g_patterns;

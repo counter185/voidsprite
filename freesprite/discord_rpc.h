@@ -8,7 +8,7 @@ struct RPCLobbyInfo {
     std::string joinSecret;
 };
 
-#if _WIN32 && VSP_DISCORD_RPC
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32 && VSP_DISCORD_RPC
 #include "StartScreen.h"
 #include "Notification.h"
 #include "background_operation.h"
