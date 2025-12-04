@@ -37,6 +37,7 @@ void KeybindButton::render(XY pos)
 {
     UIButton::render(pos);
     g_fnt->RenderString(keybindText, pos.x + wxWidth / 2, pos.y + 2, keybindTextColor, 15);
+    g_fnt->RenderString(secondKeybindText, pos.x + wxWidth / 4*3, pos.y + 2, secondKeybindTextColor, 15);
 }
 
 PopupGlobalConfig::PopupGlobalConfig()
@@ -523,6 +524,32 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                 }
             }
         }
+        else if (evt.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
+            SDL_GamepadButton btn = (SDL_GamepadButton)evt.gbutton.button;
+            bindingKey = false;
+            playPopupCloseVFX();
+
+            bool updateAll = false;
+
+            if (currentBindTargetRegion->regionKey != "global") {
+                updateAll =
+                    currentBindTargetRegion->unassignAllWith(btn)
+                    || g_keybindManager.regions["global"].unassignAllWith(btn);
+            }
+            else {
+                for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
+                    updateAll |= keyRegion.unassignAllWith(btn);
+                }
+            }
+
+            currentBindTarget->gamepadButton = btn;
+            if (updateAll) {
+                createKeybindButtons();
+            }
+            else {
+                updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
+            }
+        }
     }
     else {
         BasePopup::takeInput(evt);
@@ -609,6 +636,10 @@ void PopupGlobalConfig::updateKeybindButtonText(KeyCombo* keycombo, KeybindButto
     btn->keybindText = keycombo->getKeyComboName();
     btn->keybindTextColor = !keycombo->isUnassigned() ? SDL_Color{ 0x97,0xf1,0xff,0xf0 }
                                                       : SDL_Color{ 255,255,255, 0xa0 };
+
+    btn->secondKeybindText = keycombo->getKeyComboNameForGamepad();
+    btn->secondKeybindTextColor = !keycombo->isGamepadUnassigned() ? SDL_Color{ 0x97,0xf1,0xff,0xf0 }
+                                                                   : SDL_Color{ 255,255,255, 0xa0 };
 }
 
 void PopupGlobalConfig::updateLanguageCredit()

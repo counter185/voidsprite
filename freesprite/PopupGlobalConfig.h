@@ -8,7 +8,9 @@ class KeybindButton : public UIButton
 {
 public:
     std::string keybindText;
+    std::string secondKeybindText;
     SDL_Color keybindTextColor = { 255,255,255,0xa0 };
+    SDL_Color secondKeybindTextColor = { 255,255,255,0xa0 };
 
     void render(XY pos) override;
 };

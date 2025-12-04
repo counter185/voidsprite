@@ -14,16 +14,24 @@ public:
     bool shift = false;
     HotReloadableTexture* icon = NULL;
 
+    SDL_GamepadButton gamepadButton = SDL_GAMEPAD_BUTTON_INVALID;
+
     KeyCombo() {}
     KeyCombo(std::string n, std::function<void(void*)> a) : displayName(n), action(a) {}
-    KeyCombo(std::string n, SDL_Scancode k, bool c, bool s, std::function<void(void*)> a) : displayName(n), key(k), ctrl(c), shift(s), action(a) {}
+    KeyCombo(std::string n, SDL_Scancode k, bool c, bool s, std::function<void(void*)> a) 
+        : displayName(n), key(k), ctrl(c), shift(s), action(a) {}
+    KeyCombo(std::string n, SDL_Scancode k, bool c, bool s, SDL_GamepadButton g, std::function<void(void*)> a) 
+        : displayName(n), key(k), ctrl(c), shift(s), action(a), gamepadButton(g) {}
 
     bool isHit(SDL_Event evt) {
-        return evt.type == SDL_EVENT_KEY_DOWN
-            && key != KEY_UNASSIGNED
-            && evt.key.scancode == key
-            && ctrl == g_ctrlModifier
-            && shift == g_shiftModifier;
+        return (evt.type == SDL_EVENT_KEY_DOWN
+                && key != KEY_UNASSIGNED
+                && evt.key.scancode == key
+                && ctrl == g_ctrlModifier
+                && shift == g_shiftModifier)
+            || (evt.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN
+                && gamepadButton != SDL_GAMEPAD_BUTTON_INVALID
+                && evt.gbutton.button == gamepadButton);
     }
     void execute(void* caller) {
         if (action) {
@@ -47,14 +55,28 @@ public:
         }
     }
 
+    std::string getKeyComboNameForGamepad() {
+        if (gamepadButton == SDL_GAMEPAD_BUTTON_INVALID) {
+            return "Unassigned";
+        }
+        else {
+            return frmt("{}", SDL_GetGamepadStringForButton(gamepadButton));
+        }
+    }
+
     bool isUnassigned() {
         return key == KEY_UNASSIGNED;
+    }
+
+    bool isGamepadUnassigned() {
+        return gamepadButton == SDL_GAMEPAD_BUTTON_INVALID;
     }
 
     void unassign() {
         key = KEY_UNASSIGNED;
         ctrl = false;
         shift = false;
+        gamepadButton = SDL_GAMEPAD_BUTTON_INVALID;
     }
 };
 
@@ -70,6 +92,16 @@ public:
         bool ret = false;
         for (auto& [key, kc] : keybinds) {
             if (kc.key == c && kc.shift == shift && kc.ctrl == ctrl) {
+                kc.unassign();
+                ret = true;
+            }
+        }
+        return ret;
+    }
+    bool unassignAllWith(SDL_GamepadButton btn) {
+        bool ret = false;
+        for (auto& [key, kc] : keybinds) {
+            if (kc.gamepadButton == btn) {
                 kc.unassign();
                 ret = true;
             }
@@ -107,7 +139,8 @@ public:
         std::vector<std::string> ret;
         for (auto [region, regionData] : regions) {
             for (auto [key, kc] : regionData.keybinds) {
-                ret.push_back(frmt("{}/{}:{}+{}+{}", region, key, (int)kc.key, kc.ctrl ? "1" : "0", kc.shift ? "1" : "0"));
+                ret.push_back(frmt("{}/{}:{}+{}+{}:{}", 
+                    region, key, (int)kc.key, kc.ctrl ? "1" : "0", kc.shift ? "1" : "0", (int)kc.gamepadButton));
             }
         }
         return ret;
@@ -125,11 +158,13 @@ public:
         int key = std::stoi(splitByPlus[0]);
         bool ctrl = splitByPlus[1] == "1";
         bool shift = splitByPlus[2] == "1";
+		int gamepadButton = splitByColon.size() >= 3 ? std::stoi(splitByColon[2]) : SDL_GAMEPAD_BUTTON_INVALID;
 
         if (regions[region].keybinds.contains(keyName)) {
             regions[region].keybinds[keyName].key = (SDL_Scancode)key;
             regions[region].keybinds[keyName].ctrl = ctrl;
             regions[region].keybinds[keyName].shift = shift;
+			regions[region].keybinds[keyName].gamepadButton = (SDL_GamepadButton)gamepadButton;
         }
     }
 
