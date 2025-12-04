@@ -68,6 +68,7 @@ double angleBetweenTwoPoints(XY a, XY b);
 XY getSnappedPoint(XY from, XY to);
 
 XYZd xyzdAdd(XYZd p1, XYZd p2);
+double xyzdDistance(XYZd p1, XYZd p2);
 
 std::vector<std::string> splitString(std::string a, char b);
 std::string stringToLower(std::string a);

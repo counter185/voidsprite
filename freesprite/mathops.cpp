@@ -301,6 +301,15 @@ XYZd xyzdAdd(XYZd p1, XYZd p2)
     return { p1.x + p2.x, p1.y + p2.y, p1.z + p2.z };
 }
 
+double xyzdDistance(XYZd p1, XYZd p2)
+{
+    return sqrt(
+        pow(p1.x - p2.x, 2)
+        + pow(p1.y - p2.y, 2)
+        + pow(p1.z - p2.z, 2)
+    );
+}
+
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc, bool ceilLine)
 {
     if (from.x == to.x) {

@@ -244,3 +244,26 @@ public:
         };
     }
 };
+
+class FilterEdgeDetectOutline : public FilterKernelTransformation {
+protected:
+    std::vector<std::vector<int>> kernel;
+    int scale = 16;
+public:
+    FilterEdgeDetectOutline() : FilterKernelTransformation("", 
+        { 
+            {0,-1,0},
+            {-1,5,-1},
+            {0,-1,0} 
+        }) {}
+
+    std::string name() override { return "Edge detect outline"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            INT_PARAM("scale", 1, 64, 16),
+            FLOAT_PARAM("threshold", 0, 100, 60),
+            COLORRGB_PARAM("color", 0xFFFFFFFF),
+        };
+    }
+};

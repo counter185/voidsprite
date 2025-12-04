@@ -38,6 +38,7 @@ void g_loadFilters()
     g_filters.push_back(new FilterOffset());
     g_filters.push_back(new FilterRemoveChannels());
     g_filters.push_back(new FilterAlphaThreshold());
+    g_filters.push_back(new FilterEdgeDetectOutline());
 
     for (auto pluginFilter : g_pluginFilters) {
         g_filters.push_back(pluginFilter);
@@ -615,5 +616,29 @@ Layer* FilterAlphaThreshold::run(Layer* src, std::map<std::string, std::string> 
         }
     }
 
+    return c;
+}
+
+Layer* FilterEdgeDetectOutline::run(Layer* src, std::map<std::string, std::string> options)
+{
+    u32 outlineColor = std::stoul(options["color"], 0, 16);
+    double threshold = std::stod(options["threshold"]) / 100.0;
+
+    Layer* cc = FilterKernelTransformation::run(src, options);
+    Layer* c = copy(src);
+
+    for (int y = 0; y < c->h; y++) {
+        for (int x = 0; x < c->w; x++) {
+            u32 srcc = src->getPixelAt({ x,y }, true);
+            u32 edgec = cc->getPixelAt({ x,y }, true);
+            SDL_Color edgecc = uint32ToSDLColor(srcc);
+            hsl hc = rgb2hsl(u32ToRGB(edgec));
+            if (hc.l >= threshold) {
+                c->setPixel({ x,y }, alphaBlend(srcc, alphaBlend(outlineColor, edgecc.a)));
+            }
+        }
+    }
+
+    delete cc;
     return c;
 }
