@@ -8,7 +8,7 @@ cd android-project/app/jni
 
 git clone --recursive https://github.com/libsdl-org/SDL.git
 cd SDL
-git checkout 520d73ae
+git checkout c61497b
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
 cd SDL_image
