@@ -1,19 +1,24 @@
 #pragma once
 
-#ifdef _MSVC_LANG
-#pragma warning(disable : 4018) //signed/unsigned mismatch
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4267)
-#pragma warning(disable : 4838)
-#pragma warning(disable : 4477) //logprintf wrong format argument whatever
-#pragma warning(disable : 4099) //liblcf link without debugging info whatever don't care
-#pragma warning(disable : 4068) //gcc pragmas in gzip-hpp
+#if defined(_MSVC_LANG)
+    #pragma warning(disable : 4018) //signed/unsigned mismatch
+    #pragma warning(disable : 4244)
+    #pragma warning(disable : 4267)
+    #pragma warning(disable : 4838)
+    #pragma warning(disable : 4477) //logprintf wrong format argument whatever
+    #pragma warning(disable : 4099) //liblcf link without debugging info whatever don't care
+    #pragma warning(disable : 4068) //gcc pragmas in gzip-hpp
 
-//macro redefinition warning, remove this line after fully migrating to sdl3
-#pragma warning(disable : 4005)
+    //macro redefinition warning, remove this line after fully migrating to sdl3
+    #pragma warning(disable : 4005)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic ignored "-Wsign-compare"
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
+    #pragma GCC diagnostic ignored "-Wunused-variable"
+    #pragma GCC diagnostic ignored "-Wmacro-redefined"
+    #pragma GCC diagnostic ignored "-Wmissing-field-initializers" //don't care
+    #pragma GCC diagnostic ignored "-Wswitch"
 #endif
-
-//#include <math.h>
 
 #ifndef M_PI
 //had enough
