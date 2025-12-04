@@ -18,6 +18,7 @@
     #pragma GCC diagnostic ignored "-Wmacro-redefined"
     #pragma GCC diagnostic ignored "-Wmissing-field-initializers" //don't care
     #pragma GCC diagnostic ignored "-Wswitch"
+    #pragma GCC diagnostic ignored "-Wnarrowing"
 #endif
 
 #ifndef M_PI
