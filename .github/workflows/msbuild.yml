@@ -219,12 +219,12 @@ jobs:
       run: sudo apt install cmake clang python3 python3-pip zsync
 
     - name: setup cmake
-      working-directory: ${{env.GITHUB_WORKSPACE}}/cmake
-      run: chmod +x ./setup_cmake.sh && ./setup_cmake.sh && mkdir build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd cmake && chmod +x ./setup_cmake.sh && ./setup_cmake.sh && mkdir build
 
     - name: build
-      working-directory: ${{env.GITHUB_WORKSPACE}}/cmake/build
-      run: CC=clang CXX=clang++ cmake .. && make
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd cmake/build && CC=clang CXX=clang++ cmake .. && make
     
     - uses: actions/setup-python@v6
       with:
@@ -234,8 +234,8 @@ jobs:
     - run: pip install git+https://github.com/AppImageCrafters/appimage-builder.git
 
     - name: appimage
-      working-directory: ${{env.GITHUB_WORKSPACE}}/cmake
-      run: chmod +x ./setup_appimage.sh && ./setup_appimage.sh
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd cmake && chmod +x ./setup_appimage.sh && ./setup_appimage.sh
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
