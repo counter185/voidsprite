@@ -462,3 +462,7 @@ cmake/SDL_net/
 cmake/SDL_ttf/
 cmake/src/voidsprite
 cmake/zlib/
+/cmake/AppDir
+/cmake/appimage-build
+*.zsync
+*.AppImage

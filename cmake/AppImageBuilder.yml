@@ -1,0 +1,59 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
+version: 1
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: pl.cntrpl.voidsprite
+    name: voidsprite
+    icon: vsp-icon.png
+    version: latest
+    exec: usr/bin/voidsprite
+    exec_args: $@
+  files:
+    include:
+    - /tmp/appimage-libs/libSDL3_image.so.0
+    - /tmp/appimage-libs/libSDL3_net.so.0
+    - /tmp/appimage-libs/libSDL3_ttf.so.0
+    - /tmp/appimage-libs/libfmt.so.12
+    - /tmp/appimage-libs/libliblcf.so
+    - /tmp/appimage-libs/libz.so.1
+    - /lib/x86_64-linux-gnu/libXcursor.so.1
+    - /lib/x86_64-linux-gnu/libXi.so.6
+    - /lib/x86_64-linux-gnu/libXrandr.so.2
+    - /lib/x86_64-linux-gnu/libXss.so.1
+    - /lib/x86_64-linux-gnu/libXtst.so.6
+    - /lib/x86_64-linux-gnu/libcurl.so.4
+    - /lib/x86_64-linux-gnu/libdbus-1.so.3
+    - /lib/x86_64-linux-gnu/libdecor-0.so.0
+    - /lib/x86_64-linux-gnu/libnss_mdns4_minimal.so.2
+    - /lib/x86_64-linux-gnu/libudev.so.1
+    - /lib/x86_64-linux-gnu/libwayland-cursor.so.0
+    - /lib/x86_64-linux-gnu/libwayland-egl.so.1
+    - /lib/x86_64-linux-gnu/libxkbcommon.so.0
+    - /usr/lib/locale/locale-archive
+    exclude:
+    - usr/share/man
+    - usr/share/doc/*/README.*
+    - usr/share/doc/*/changelog.*
+    - usr/share/doc/*/NEWS.*
+    - usr/share/doc/*/TODO.*
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+AppImage:
+  arch: x86_64
+  comp: gzip
+  update-information: guess
