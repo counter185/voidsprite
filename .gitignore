@@ -453,3 +453,12 @@ keystore/vsp_keystore.jks
 android-project/keystore/vsp_keystore.jks
 android-project/app/keystore/vsp_keystore.jks
 voidsprite_sdk.h
+/cmake/build
+cmake/fmt/
+cmake/liblcf
+cmake/SDL/
+cmake/SDL_image/
+cmake/SDL_net/
+cmake/SDL_ttf/
+cmake/src/voidsprite
+cmake/zlib/

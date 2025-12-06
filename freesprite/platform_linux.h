@@ -297,7 +297,17 @@ std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
 
 std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
     //todo: iterate over every subfolder in /usr/share/fonts/truetype and add that to the list
-    return {
-        "/usr/share/fonts"
+    std::vector<PlatformNativePathString> ret = {
+        "/usr/share/fonts",
+        "/usr/share/fonts/truetype"
     };
+
+    if (std::filesystem::exists("/usr/share/fonts/truetype")) {
+        for (auto& ff : std::filesystem::directory_iterator("/usr/share/fonts/truetype")) {
+            if (ff.is_directory()) {
+                ret.push_back(ff.path().string());
+            }
+        }
+    }
+    return ret;
 }
