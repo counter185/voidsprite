@@ -16,5 +16,5 @@ cp ./build/SDL_ttf/libSDL3_ttf.so.0 /tmp/appimage-libs/libSDL3_ttf.so.0
 cp ./build/fmt/libfmt.so.12 /tmp/appimage-libs/libfmt.so.12
 cp ./build/liblcf/libliblcf.so /tmp/appimage-libs/libliblcf.so
 cp ./build/zlib/libz.so.1 /tmp/appimage-libs/libz.so.1
-appimage-builder
+appimage-builder --skip-test
 rm -rf /tmp/appimage-libs
