@@ -17,19 +17,19 @@ AppDir:
     - /tmp/appimage-libs/libfmt.so.12
     - /tmp/appimage-libs/libliblcf.so
     - /tmp/appimage-libs/libz.so.1
-    - /lib/x86_64-linux-gnu/libXcursor.so.1
-    - /lib/x86_64-linux-gnu/libXi.so.6
-    - /lib/x86_64-linux-gnu/libXrandr.so.2
-    - /lib/x86_64-linux-gnu/libXss.so.1
-    - /lib/x86_64-linux-gnu/libXtst.so.6
+#    - /lib/x86_64-linux-gnu/libXcursor.so.1
+#    - /lib/x86_64-linux-gnu/libXi.so.6
+#    - /lib/x86_64-linux-gnu/libXrandr.so.2
+#    - /lib/x86_64-linux-gnu/libXss.so.1
+#    - /lib/x86_64-linux-gnu/libXtst.so.6
     - /lib/x86_64-linux-gnu/libcurl.so.4
     - /lib/x86_64-linux-gnu/libdbus-1.so.3
-    - /lib/x86_64-linux-gnu/libdecor-0.so.0
+#    - /lib/x86_64-linux-gnu/libdecor-0.so.0
     - /lib/x86_64-linux-gnu/libnss_mdns4_minimal.so.2
-    - /lib/x86_64-linux-gnu/libudev.so.1
-    - /lib/x86_64-linux-gnu/libwayland-cursor.so.0
-    - /lib/x86_64-linux-gnu/libwayland-egl.so.1
-    - /lib/x86_64-linux-gnu/libxkbcommon.so.0
+#    - /lib/x86_64-linux-gnu/libudev.so.1
+#    - /lib/x86_64-linux-gnu/libwayland-cursor.so.0
+#    - /lib/x86_64-linux-gnu/libwayland-egl.so.1
+#    - /lib/x86_64-linux-gnu/libxkbcommon.so.0
     - /usr/lib/locale/locale-archive
     exclude:
     - usr/share/man
