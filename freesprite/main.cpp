@@ -1024,6 +1024,9 @@ int main(int argc, char** argv)
                 g_fnt->RenderString(frmt("Textures created: {}", g_allocated_textures), origin.x, origin.y,
                     { 255, 255, 255, 100 }, 14);
                 origin.y -= 16;
+                g_fnt->RenderString(frmt("Drawables created: {}", g_createdDrawables), origin.x, origin.y,
+                    { 255, 255, 255, 100 }, 14);
+                origin.y -= 16;
                 //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
                 //origin.y -= 16;
     #endif

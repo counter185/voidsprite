@@ -5,6 +5,8 @@ inline std::map<std::string, u64> g_named_memmap;
 inline std::map<void*, std::pair<u64, std::string>> allocated_mems;
 inline int g_allocated_textures = 0;
 
+inline int g_createdDrawables = 0;
+
 inline SDL_Texture* tracked_createTextureFromSurface(SDL_Renderer* renderer, SDL_Surface* surface) {
     SDL_Texture* ret = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_SetTextureScaleMode(ret, SDL_SCALEMODE_NEAREST);
