@@ -14,6 +14,7 @@
 #include "vfx.h"
 #include "UISlider.h"
 #include "sdk_pluginloader.h"
+#include "UIStackPanel.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -263,6 +264,12 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsPanel->scrollVertically = true;
     keybindsPanel->scrollHorizontally = false;
     configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
+
+    keybindsStack = UIStackPanel::Vertical(0, {});
+    keybindsStack->position = { 0,0 };
+    keybindsStack->passThroughMouse = true;
+    keybindsStack->takeMouseWheelEvents = false;
+    keybindsPanel->subWidgets.addDrawable(keybindsStack);
 
     createKeybindButtons();
 
@@ -594,15 +601,13 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
 
 void PopupGlobalConfig::createKeybindButtons()
 {
-    keybindsPanel->subWidgets.freeAllDrawables();
+    keybindsStack->subWidgets.freeAllDrawables();
 
-    int y = 0;
     for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
         UILabel* regionLabel = new UILabel(keyRegion.displayName);
         regionLabel->fontsize = 20;
-        regionLabel->position = { 10, y };
-        y += 30;
-        keybindsPanel->subWidgets.addDrawable(regionLabel);
+        keybindsStack->subWidgets.addDrawable(UIStackPanel::Horizontal(0, { Panel::Space(8,0), regionLabel }));
+        keybindsStack->subWidgets.addDrawable(Panel::Space(0,4));
         auto reservedKeys = keyRegion.reservedKeys;
 
         for (std::string& keyIDInOrder : keyRegion.orderInSettings) {
@@ -611,8 +616,7 @@ void PopupGlobalConfig::createKeybindButtons()
             btn->wxHeight = 30;
             btn->icon = keyRegion.keybinds[keyIDInOrder].icon;
             updateKeybindButtonText(&keyRegion.keybinds[keyIDInOrder], btn);
-            btn->position = { 0, y };
-            y += 30;
+
             KeyCombo* keyComboPtr = &keyRegion.keybinds[keyIDInOrder];
             KeybindRegion* regionPtr = &keyRegion;
             btn->onClickCallback = [this, keyComboPtr, regionPtr, reservedKeys](UIButton* b) {
@@ -625,9 +629,11 @@ void PopupGlobalConfig::createKeybindButtons()
                     keyBindingTimer.start();
                 }
             };
-            keybindsPanel->subWidgets.addDrawable(btn);
+            keybindsStack->subWidgets.addDrawable(btn);
         }
+        keybindsStack->addWidget(Panel::Space(5, 18));
     }
+    keybindsStack->recalculateLayout();
 }
 
 void PopupGlobalConfig::updateKeybindButtonText(KeyCombo* keycombo, KeybindButton* btn)

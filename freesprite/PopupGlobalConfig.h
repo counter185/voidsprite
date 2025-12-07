@@ -20,6 +20,7 @@ class PopupGlobalConfig :
 {
 private:
     ScrollingPanel* keybindsPanel = NULL;
+    UIStackPanel* keybindsStack = NULL;
     UILabel* languageCredit = NULL;
     GlobalConfig previousConfig;
     std::vector<std::string> previousKeybinds;

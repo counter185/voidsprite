@@ -104,6 +104,7 @@
     {"vsp.keybinds.maineditor.focusoncolortextbox", "Focus on color input text field"},
     {"vsp.keybinds.maineditor.copylayer", "Copy layer to clipboard"},
     {"vsp.keybinds.maineditor.copyimage", "Copy whole image to clipboard"},
+    {"vsp.keybinds.maineditor.pasteimage", "Paste image"},
     {"vsp.keybinds.maineditor.save", "Save"},
     {"vsp.keybinds.maineditor.saveas", "Save as"},
     {"vsp.keybinds.maineditor.forceautosave", "Force recovery autosave"},
