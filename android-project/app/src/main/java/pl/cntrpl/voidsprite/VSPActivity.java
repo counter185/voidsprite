@@ -1,13 +1,19 @@
 package pl.cntrpl.voidsprite;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.content.Intent;
 import android.os.Environment;
+import android.os.Looper;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
+import android.util.Pair;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -15,6 +21,7 @@ import androidx.core.content.PermissionChecker;
 
 import com.jaredrummler.android.device.DeviceName;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +95,65 @@ public class VSPActivity extends SDLActivity {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         activitySingleton.startActivity(intent);
+    }
+
+    public static void openFileLocation(String path) {
+        //todo: fix this unfinished mess that doesn't work
+        //  it can't open specific paths (keeps opening /sdcard/Downloads if you try)
+        //  these are the only paths i can get it to open:
+        //  content://com.android.externalstorage.documents/root/primary/ : opens internal memory root
+        //  content://com.android.externalstorage.documents/root/<drive id>/ : opens external storage root 
+        //  content://pl.cntrpl.voidsprite[.debug].provider/root : opens voidsprite provider root (appdata folder) (doesn't work on android 9)
+        try {
+            String extDataPath = activitySingleton.getExternalFilesDir(null).getAbsolutePath();
+
+            if (new File(path).isFile()) {
+                path = path.substring(0, path.lastIndexOf('/'));
+            }
+
+            if (path.startsWith(extDataPath)) {
+                path = "content://"+ activitySingleton.getPackageName() +".provider/root/" + path.substring(extDataPath.length());
+            }
+            else {
+                /*String contentRoot = "content://com.android.externalstorage.documents/root/";
+                if (path.startsWith("/sdcard/")) {
+                    path = contentRoot + "primary/" + path.substring("/sdcard/".length());
+                } else if (path.startsWith("/storage/emulated/")) {
+                    int trimFrom = path.indexOf('/', "/storage/emulated/".length()) + 1;
+                    path = contentRoot + "primary/" + path.substring(trimFrom);
+                } else if (path.startsWith("/storage/")) {
+                    path = contentRoot + path.substring("/storage/".length());
+                } else {
+                    //idk man
+                    path = contentRoot;
+                }*/
+                //todo: make this work
+                path = "";
+            }
+
+            if (!path.isEmpty()) {
+                ArrayList<Pair<String, String>> fileActivitiesToTry = new ArrayList<>();
+                //ngl i got these package ids by decompiling com.marc.files
+                //android 9 doesn't seem to have the com.google.android.documentsui package and needs the second one
+                fileActivitiesToTry.add(new Pair<>("com.google.android.documentsui", "com.android.documentsui.files.FilesActivity"));
+                fileActivitiesToTry.add(new Pair<>("com.android.documentsui", "com.android.documentsui.files.FilesActivity"));
+
+                for (Pair<String,String> act : fileActivitiesToTry) {
+                    try {
+                        Uri uri = Uri.parse(path);
+                        Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                        i.setComponent(new ComponentName(act.first, act.second));
+                        activitySingleton.startActivity(i);
+                        break;
+                    } catch (Exception ignored) {}
+                }
+            }
+        } catch (Exception e) {
+            new Thread(() -> {
+                Looper.prepare();
+                Toast.makeText(activitySingleton, "Error:\n " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }).start();
+        }
     }
 
     public static String fetchStringHTTP(String url) {
