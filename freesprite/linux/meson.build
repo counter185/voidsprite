@@ -36,3 +36,14 @@ foreach size : ['16x16', '32x32', '64x64', '128x128', '256x256', '512x512']
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', size, 'apps')
   )
 endforeach
+
+# Thumbnailer
+install_data(
+  'voidsprite.thumbnailer',
+  install_dir: join_paths(get_option('datadir'), 'thumbnailer')
+)
+install_data(
+  'voidsprite_thumbnailer',
+  rename: 'thumbnailer',
+  install_dir: join_paths(get_option('datadir'), 'voidsprite')
+)

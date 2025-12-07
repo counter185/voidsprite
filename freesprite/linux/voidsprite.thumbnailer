@@ -1,0 +1,3 @@
+[Thumbnailer Entry]
+Exec=/usr/bin/env sh /usr/share/voidsprite/thumbnailer %i %o
+MimeType=image/x-voidsn
