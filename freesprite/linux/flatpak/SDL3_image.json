@@ -2,6 +2,10 @@
     "name": "SDL3_image",
     "buildsystem": "cmake-ninja",
     "builddir": true,
+    "build-options": {
+        "append-path": "/usr/lib/sdk/llvm18/bin",
+        "prepend-ld-library-path": "/usr/lib/sdk/llvm18/lib"
+    },
     "config-opts": [
         "-DCMAKE_VERBOSE_MAKEFILE=ON",
         "-DCMAKE_BUILD_TYPE:STRING=Release",

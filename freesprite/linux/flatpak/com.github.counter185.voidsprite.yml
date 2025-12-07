@@ -2,6 +2,8 @@ id: com.github.counter185.voidsprite
 runtime: org.freedesktop.Platform
 runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.llvm18
 command: voidsprite
 
 # TODO: filesystem=host should be possible to drop.
@@ -62,6 +64,9 @@ modules:
 
   - name: voidsprite
     buildsystem: meson
+    build-options:
+      - append-path: /usr/lib/sdk/llvm18/bin
+        prepend-ld-library-path: /usr/lib/sdk/llvm18/lib
     sources:
       - type: dir
         path: "../../.."
