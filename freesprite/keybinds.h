@@ -76,6 +76,8 @@ public:
         key = KEY_UNASSIGNED;
         ctrl = false;
         shift = false;
+    }
+    void unassignGamepad() {
         gamepadButton = SDL_GAMEPAD_BUTTON_INVALID;
     }
 };
@@ -102,7 +104,7 @@ public:
         bool ret = false;
         for (auto& [key, kc] : keybinds) {
             if (kc.gamepadButton == btn) {
-                kc.unassign();
+                kc.unassignGamepad();
                 ret = true;
             }
         }

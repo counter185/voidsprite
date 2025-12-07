@@ -329,8 +329,8 @@ void MainEditor::tick() {
 
     if (abs(g_gamepad->gamepadLSX) > 0.05f || abs(g_gamepad->gamepadLSY) > 0.05f) {
         canvas.panCanvas({
-            (int)(g_gamepad->gamepadLSX * 10),
-            (int)(g_gamepad->gamepadLSY * 10)
+            (int)(-g_gamepad->gamepadLSX * 10),
+            (int)(-g_gamepad->gamepadLSY * 10)
         });
         RecalcMousePixelTargetPoint(g_windowW / 2, g_windowH / 2);
         currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);

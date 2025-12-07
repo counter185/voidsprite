@@ -229,6 +229,13 @@ bool stringEndsWithIgnoreCase(std::string c, std::string endsWith)
     return otherString == endsWith;
 }
 
+bool stringContainsIgnoreCase(std::string c, std::string contains)
+{
+    std::transform(c.begin(), c.end(), c.begin(), ::tolower);
+    std::transform(contains.begin(), contains.end(), contains.begin(), ::tolower);
+    return c.find(contains) != std::string::npos;
+}
+
 std::string evalRelativePath(std::string directory, std::string file) {
     std::string basePath = directory.substr(0, directory.find_last_of("/\\") + 1);
     std::string output = "";

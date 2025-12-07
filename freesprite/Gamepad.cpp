@@ -22,7 +22,8 @@ void Gamepad::TryCaptureGamepad()
     }
 
     if (gamepad != NULL) {
-        g_addNotification(Notification("Gamepad connected", SDL_GetGamepadName(gamepad)));
+        std::string name = SDL_GetGamepadName(gamepad);
+        g_addNotification(Notification("Gamepad connected", name, 5000, NULL, uint32ToSDLColor(GetColorForGamepadName(name))));
     }
     
     gamepadConnected = gamepad != NULL;
@@ -60,4 +61,30 @@ void Gamepad::SetLightbar(uint8_t r, uint8_t g, uint8_t b)
     if (gamepad != NULL) {
         SDL_SetGamepadLED(gamepad, r, g, b);
     }
+}
+
+u32 Gamepad::GetColorForGamepadName(std::string name)
+{
+    if (stringContainsIgnoreCase(name, "ps2")
+        || stringContainsIgnoreCase(name, "ps3")
+        || stringContainsIgnoreCase(name, "ps4")
+        || stringContainsIgnoreCase(name, "dualsense")
+        || stringContainsIgnoreCase(name, "dualshock")
+        || stringContainsIgnoreCase(name, "ps vita")) {
+        return 0xFF0000FF;
+    }
+    if (stringContainsIgnoreCase(name, "xbox")
+        || stringContainsIgnoreCase(name, "razer")) {
+        return 0xFF00FF00;
+    }
+    if (stringContainsIgnoreCase(name, "switch")
+        || stringContainsIgnoreCase(name, "joy-con")
+        || stringContainsIgnoreCase(name, "nintendo")
+        || stringContainsIgnoreCase(name, "wii u")) {
+        return 0xFFFF0000;
+    }
+    if (stringContainsIgnoreCase(name, "steam")) {
+        return 0xFF5CCEFF;
+    }
+    return 0xFFFFFFFF;
 }

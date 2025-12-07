@@ -18,7 +18,6 @@ PopupContextMenu::PopupContextMenu(std::vector<NamedOperation> actions)
         button->text = action.name;
         button->onClickCallback = [this, action](UIButton*) {
             action.function();
-            closePopup();
         };
         button->position = { 0,0 };
         genButtons.push_back(button);

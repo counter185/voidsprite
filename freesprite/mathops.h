@@ -81,6 +81,7 @@ PlatformNativePathString convertStringOnWin32(std::string a);
 bool stringStartsWithIgnoreCase(std::string c, std::string startsWith);
 bool stringEndsWithIgnoreCase(std::wstring c, std::wstring endsWith);
 bool stringEndsWithIgnoreCase(std::string c, std::string endsWith);
+bool stringContainsIgnoreCase(std::string c, std::string contains);
 
 std::string evalRelativePath(std::string directory, std::string file);
 std::string fileNameFromPath(std::string fullPath);

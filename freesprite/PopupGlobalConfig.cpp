@@ -491,6 +491,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     bindingKey = false;
                     playPopupCloseVFX();
                     currentBindTarget->unassign();
+                    currentBindTarget->unassignGamepad();
                     updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
                 }
                 else if (std::find(reservedKeysNow.begin(), reservedKeysNow.end(), key) != reservedKeysNow.end()
