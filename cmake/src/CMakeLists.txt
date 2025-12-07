@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 project(my_app)
 
 option(USE_FMT_FORMAT "Use fmt::format instead of std::format" OFF)
+option(VOIDSPRITE_UNITY_BUILD "Use unity build" ON)
 set(VOIDSPRITE_ASSETS_PATH "" CACHE STRING "Path to voidsprite assets. Executable directory if empty")
 
 if (NOT USE_FMT_FORMAT)
@@ -101,10 +102,12 @@ add_executable(voidsprite
         ${CPP_FILES}
         ${C_FILES}
 )
-set_source_files_properties(${C_FILES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION true)
-set_property(TARGET voidsprite PROPERTY UNITY_BUILD true)
-set_property(TARGET voidsprite PROPERTY UNITY_BUILD_MODE BATCH)
-set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 200)
+if(VOIDSPRITE_UNITY_BUILD)
+    set_source_files_properties(${C_FILES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION true)
+    set_property(TARGET voidsprite PROPERTY UNITY_BUILD true)
+    set_property(TARGET voidsprite PROPERTY UNITY_BUILD_MODE BATCH)
+    set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 200)
+endif()
 
 target_link_libraries(voidsprite PRIVATE SDL3::SDL3)
 target_link_libraries(voidsprite PRIVATE SDL3_ttf::SDL3_ttf)

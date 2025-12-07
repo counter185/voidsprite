@@ -1,17 +1,5 @@
 //libpng must be the first include or else it will cry
-#if _WIN32
-    #include "../libpng/png.h"
-#elif __ANDROID__
-    #include "../libpng/png.h"
-#elif VITASDK
-    #include "../libpng/png.h"
-#elif __has_include(<libpng16/png.h>)
-    #include <libpng16/png.h>
-#elif __has_include(<libpng/png.h>)
-    #include <libpng/png.h>
-#else
-    #include <png.h>
-#endif
+#include "../libpng/png.h"
 
 #include <zlib.h>
 
