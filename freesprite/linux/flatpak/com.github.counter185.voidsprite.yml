@@ -52,6 +52,9 @@ modules:
 
   - name: libjxl
     buildsystem: cmake-ninja
+    build-options:
+      - append-path: /usr/lib/sdk/llvm18/bin
+        prepend-ld-library-path: /usr/lib/sdk/llvm18/lib
     sources:
       - type: git
         url: https://github.com/libjxl/libjxl.git
