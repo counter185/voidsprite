@@ -108,7 +108,7 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
 
         for (Layer*& lr : editor->layers) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
-                logprintf("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
+                logerr("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
             voidsnWriteString(outfile, lr->name);
 
@@ -605,9 +605,10 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             std::vector<Layer*> layers;
             for (int x = 0; x < nlayers; x++) {
 
+                Layer* newLayer = NULL;
                 if (voidsnversion >= 6) {
                     std::vector<LayerVariant> layerData;
-                    Layer* newLayer = isPalettized ? new LayerPalettized(dimensions.x, dimensions.y, layerData)
+                    newLayer = isPalettized ? new LayerPalettized(dimensions.x, dimensions.y, layerData)
                         : new Layer(dimensions.x, dimensions.y, layerData);
 
                     u32 numLayerData = voidsnReadU32(infile);
@@ -654,7 +655,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 }
                 else {
                     std::string layerName = voidsnReadString(infile);
-                    Layer* newLayer = isPalettized ? LayerPalettized::tryAllocIndexedLayer(dimensions.x, dimensions.y)
+                    newLayer = isPalettized ? LayerPalettized::tryAllocIndexedLayer(dimensions.x, dimensions.y)
                         : Layer::tryAllocLayer(dimensions.x, dimensions.y);
                     if (newLayer != NULL) {
                         newLayer->name = layerName;
@@ -677,16 +678,16 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             uncompress(newLayer->pixels8(), (uLongf*)&dstLength, compressedData, compressedLength);
                             delete[] compressedData;
                         }
-
-                        if (isPalettized) {
-                            ((LayerPalettized*)newLayer)->palette = palette;
-                        }
                         layers.push_back(newLayer);
                     }
                     else {
                         logerr(frmt("Failed to allocate layer: {}", layerName));
                         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
                     }
+                }
+
+                if (newLayer != NULL && isPalettized) {
+                    ((LayerPalettized*)newLayer)->palette = palette;
                 }
             }
             if (isPalettized) {
