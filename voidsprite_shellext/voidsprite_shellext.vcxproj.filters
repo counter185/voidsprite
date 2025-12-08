@@ -29,49 +29,49 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\adler32.c">
+    <ClCompile Include="zlib\adler32.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\compress.c">
+    <ClCompile Include="zlib\compress.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\crc32.c">
+    <ClCompile Include="zlib\crc32.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\deflate.c">
+    <ClCompile Include="zlib\deflate.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\gzclose.c">
+    <ClCompile Include="zlib\gzclose.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\gzlib.c">
+    <ClCompile Include="zlib\gzlib.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\gzread.c">
+    <ClCompile Include="zlib\gzread.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\gzwrite.c">
+    <ClCompile Include="zlib\gzwrite.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\infback.c">
+    <ClCompile Include="zlib\infback.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\inffast.c">
+    <ClCompile Include="zlib\inffast.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\inflate.c">
+    <ClCompile Include="zlib\inflate.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\inftrees.c">
+    <ClCompile Include="zlib\inftrees.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\trees.c">
+    <ClCompile Include="zlib\trees.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\uncompr.c">
+    <ClCompile Include="zlib\uncompr.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\zlib\zutil.c">
+    <ClCompile Include="zlib\zutil.c">
       <Filter>Pliki źródłowe\zlib</Filter>
     </ClCompile>
     <ClCompile Include="voidsn_read.cpp">
