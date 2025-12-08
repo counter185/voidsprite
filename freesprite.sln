@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "external_liblcf", "external
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voidsprite_plugin_sample", "voidsprite_plugin_sample\voidsprite_plugin_sample.vcxproj", "{8C53C289-BFE4-4BF9-895D-90ED291C6564}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voidsprite_shellext", "voidsprite_shellext\voidsprite_shellext.vcxproj", "{E0C3BD43-0669-439F-9776-AF108DF200B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -55,6 +57,18 @@ Global
 		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x64.Build.0 = Release|x64
 		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x86.ActiveCfg = Release|Win32
 		{8C53C289-BFE4-4BF9-895D-90ED291C6564}.Release|x86.Build.0 = Release|Win32
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Debug|ARM64.ActiveCfg = Debug|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Debug|ARM64.Build.0 = Debug|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Debug|x64.ActiveCfg = Debug|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Debug|x64.Build.0 = Debug|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Debug|x86.ActiveCfg = Debug|Win32
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Debug|x86.Build.0 = Debug|Win32
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Release|ARM64.ActiveCfg = Release|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Release|ARM64.Build.0 = Release|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Release|x64.ActiveCfg = Release|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Release|x64.Build.0 = Release|x64
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Release|x86.ActiveCfg = Release|Win32
+		{E0C3BD43-0669-439F-9776-AF108DF200B1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

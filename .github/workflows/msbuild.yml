@@ -89,6 +89,12 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /t:voidsprite /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
+      
+    - name: Build shell extension
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /t:voidsprite_shellext /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="x64" ${{env.SOLUTION_FILE_PATH}}
 
     - name: Make build directories and copy devlibs
       working-directory: ${{env.GITHUB_WORKSPACE}}

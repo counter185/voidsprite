@@ -31,6 +31,7 @@ inline std::string getLibraryLicenses() {
         "  github.com/counter185/voidsprite/tree/main/OPEN_SOURCE_LICENSES\n\n"
 
         "voidsprite uses code from the following licensed open-source projects/libraries:\n"
+        "zlib\n"
         "astc_dec\n"
         "base64\n"
         "ddspp\n"
