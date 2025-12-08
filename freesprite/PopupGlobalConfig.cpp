@@ -332,7 +332,9 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->tooltip = TL("vsp.config.opt.openappdata.desc");
     btn->position = posInTab;
     btn->wxWidth = 270;
-    btn->setCallbackListener(BUTTON_OPEN_CONFIG_DIR, this);
+    btn->onClickCallback = [this](UIButton*) {
+        platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
+    };
     configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
 
@@ -387,6 +389,30 @@ PopupGlobalConfig::PopupGlobalConfig()
         };
     configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
+
+#if _WIN32
+    std::filesystem::path dllpath = convertStringOnWin32(g_programDirectory);
+    dllpath /= "voidsprite_shellext.dll";
+
+    if (std::filesystem::exists(dllpath)) {
+        btn = new UIButton();
+        btn->text = TL("vsp.config.opt.installshellex");
+        btn->tooltip = TL("vsp.config.opt.installshellex.desc");
+        btn->position = posInTab;
+        btn->wxWidth = 270;
+        btn->onClickCallback = [this, dllpath](UIButton*) {  shellExtensionAction(true); };
+        configTabs->tabs[5].wxs.addDrawable(btn);
+        posInTab.y += 35;
+
+        btn = new UIButton();
+        btn->text = TL("vsp.config.opt.uninstallshellex");
+        btn->position = posInTab;
+        btn->wxWidth = 270;
+        btn->onClickCallback = [this, dllpath](UIButton*) {  shellExtensionAction(false); };
+        configTabs->tabs[5].wxs.addDrawable(btn);
+        posInTab.y += 35;
+    }
+#endif
 
 
 #if __ANDROID__
@@ -564,13 +590,6 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
     }
 }
 
-void PopupGlobalConfig::eventButtonPressed(int evt_id)
-{
-    if (evt_id == BUTTON_OPEN_CONFIG_DIR) {
-        platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
-    }
-}
-
 void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
 {
     switch (evt_id) {
@@ -661,6 +680,45 @@ void PopupGlobalConfig::updateLanguageCredit()
     else {
         languageCredit->setText("");
     }
+}
+
+void PopupGlobalConfig::shellExtensionAction(bool install)
+{
+#if _WIN32
+    std::filesystem::path dllpath = convertStringOnWin32(g_programDirectory);
+    dllpath /= "voidsprite_shellext.dll";
+
+    std::wstring paramString = dllpath.wstring();
+    if (!install) {
+        paramString = L"/u " + paramString;
+    }
+
+    SHELLEXECUTEINFO shExInfo = { 0 };
+    shExInfo.cbSize = sizeof(shExInfo);
+    shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+    shExInfo.hwnd = 0;
+    shExInfo.lpVerb = L"runas";
+    shExInfo.lpFile = L"regsvr32";
+    shExInfo.lpParameters = paramString.c_str();
+    shExInfo.lpDirectory = NULL;
+    shExInfo.nShow = SW_SHOW;
+    shExInfo.hInstApp = 0;
+
+    if (ShellExecuteEx(&shExInfo))
+    {
+        WaitForSingleObject(shExInfo.hProcess, INFINITE);
+        DWORD exitCode = 0;
+        GetExitCodeProcess(shExInfo.hProcess, &exitCode);
+        CloseHandle(shExInfo.hProcess);
+
+        if (exitCode == 0) {
+            g_addNotification(SuccessNotification("Shell extension registered.", ""));
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Failed to register shell extension ({})", exitCode)));
+        }
+    }
+#endif
 }
 
 UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position)

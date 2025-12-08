@@ -39,7 +39,6 @@ public:
     void render() override;
     void takeInput(SDL_Event evt) override;
 
-    void eventButtonPressed(int evt_id) override;
     void eventTextInput(int evt_id, std::string text) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
@@ -47,6 +46,8 @@ public:
 
     void updateKeybindButtonText(KeyCombo* keycombo, KeybindButton* btn);
     void updateLanguageCredit();
+
+    void shellExtensionAction(bool install);
 
     UICheckbox* optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position);
     static Panel* optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position);
