@@ -62,7 +62,7 @@ jobs:
 
     - name: Cleanup
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: del x64\\Release\\*.exp x64\\Release\\*.lib x64\\Release\\*.pdb
+      run: del x64\\Release\\*.exp; del x64\\Release\\*.lib; del x64\\Release\\*.pdb
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
@@ -110,7 +110,7 @@ jobs:
       
     - name: Cleanup
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: del x64\\Release\\*.exp x64\\Release\\*.lib x64\\Release\\*.pdb
+      run: del x64\\Release\\*.exp; del x64\\Release\\*.lib; del x64\\Release\\*.pdb
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
@@ -152,7 +152,7 @@ jobs:
 
     - name: Cleanup
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: del x64\\Release\\*.exp x64\\Release\\*.lib x64\\Release\\*.pdb
+      run: del x64\\Release\\*.exp; del x64\\Release\\*.lib; del x64\\Release\\*.pdb
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
