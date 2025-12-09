@@ -845,7 +845,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                         SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
                         SDL_CloseIO(tgarw);
                         if (tgasrf != NULL) {
-                            ret = new Layer(tgasrf);
+                            ret = Layer::createFromSurface(tgasrf);
                             ret->name = "AETEX TGA Layer";
                         }
                         tracked_free(rawData);
@@ -929,7 +929,7 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
                     SDL_Surface* tgasrf = IMG_LoadTGA_IO(tgarw);
                     SDL_CloseIO(tgarw);
                     tracked_free(tgaData);
-                    return tgasrf == NULL ? NULL : new Layer(tgasrf);
+                    return Layer::createFromSurface(tgasrf);
                 }
             }
         }
@@ -944,7 +944,7 @@ Layer* readSDLImage(PlatformNativePathString path, uint64_t seek)
     std::string p = convertStringToUTF8OnWin32(path);
     SDL_Surface* img = IMG_Load(p.c_str());
 
-    return img == NULL ? NULL : new Layer(img);
+    return Layer::createFromSurface(img);
 }
 
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek)

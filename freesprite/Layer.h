@@ -64,15 +64,6 @@ public:
         h = height;
         layerData = variants;
     }
-    Layer(SDL_Surface* from) : Layer(from->w, from->h) {
-        if (from->format == SDL_PIXELFORMAT_ARGB8888) {
-            memcpy(pixels32(), from->pixels, w * h * 4);
-        }
-        else {
-            SDL_ConvertPixels(w, h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, pixels32(), w * 4);
-            SDL_FreeSurface(from);
-        }
-    }
 
     virtual ~Layer() {
         for (auto& variant : layerData) {
@@ -88,6 +79,8 @@ public:
             tracked_destroyTexture(t.tex);
         }
     }
+
+    static Layer* createFromSurface(SDL_Surface* from);
 
     /// <summary>
     /// Tries to allocate a new layer. If either memory allocation or texture creation fails, frees it and returns NULL.

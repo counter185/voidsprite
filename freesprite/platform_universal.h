@@ -147,7 +147,7 @@ inline Layer* universal_platformGetLayerFromClipboard() {
                     SDL_IOStream* io = SDL_IOFromMem(imageData, dataSize);
                     SDL_Surface* srf = IMG_Load_IO(io, true);
                     if (srf != NULL) {
-                        ret = new Layer(srf);
+                        ret = Layer::createFromSurface(srf);
                         SDL_FreeSurface(srf);
                     }
                     else {

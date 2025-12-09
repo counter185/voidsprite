@@ -2474,7 +2474,6 @@ Layer* MainEditor::newLayer()
     if (nl != NULL) {
         nl->name = frmt("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        //loginfo(frmt("adding new layer at {}", insertAtIdx));
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 

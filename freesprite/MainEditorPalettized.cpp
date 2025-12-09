@@ -14,6 +14,7 @@
 #include "SpritesheetPreviewScreen.h"
 #include "ViewSessionScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
+#include "UndoStack.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -710,11 +711,10 @@ Layer* MainEditorPalettized::newLayer()
         nl->palette = palette;
         nl->name = frmt("New Layer {}", layers.size() + 1);
         int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        logprintf("adding new layer at %i\n", insertAtIdx);
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
-        addToUndoStack(UndoStackElement{ nl, UNDOSTACK_CREATE_LAYER, insertAtIdx });
+        addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));

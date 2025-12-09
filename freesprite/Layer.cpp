@@ -3,6 +3,51 @@
 #include "mathops.h"
 #include "Notification.h"
 
+Layer* Layer::createFromSurface(SDL_Surface* from) {
+    if (from != NULL) {
+        if (SDL_ISPIXELFORMAT_INDEXED(from->format)) {
+            SDL_Palette* p = SDL_GetSurfacePalette(from);
+            if (p != NULL && p->ncolors > 0) {
+                std::vector<u32> palette;
+                for (int i = 0; i < p->ncolors; i++) {
+                    palette.push_back(sdlcolorToUint32(p->colors[i]));
+                }
+                LayerPalettized* ret = new LayerPalettized(from->w, from->h);
+                ret->palette = palette;
+
+                u8* index8 = (u8*)tracked_malloc(from->w * from->h);
+                //don't just memcpy because the pitch may be different
+                SDL_ConvertPixels(from->w, from->h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_INDEX8, index8, from->w);
+
+                u32* ppx = ret->pixels32();
+                for (int y = 0; y < from->h; y++) {
+                    for (int x = 0; x < from->w; x++) {
+                        ARRAY2DPOINT(ppx, x, y, from->w) = ARRAY2DPOINT(index8, x, y, from->w);
+                    }
+                }
+
+                tracked_free(index8);
+
+                return ret;
+            }
+        }
+        else {
+            Layer* ret = new Layer(from->w, from->h);
+            if (from->format == SDL_PIXELFORMAT_ARGB8888) {
+                memcpy(ret->pixels32(), from->pixels, ret->w * ret->h * 4);
+            }
+            else {
+                if (!SDL_ConvertPixels(ret->w, ret->h, from->format, from->pixels, from->pitch, SDL_PIXELFORMAT_ARGB8888, ret->pixels32(), ret->w * 4)) {
+                    logerr(frmt("Failed to convert pixel format when loading from SDL_Surface:\n {}", SDL_GetError()));
+                }
+                SDL_FreeSurface(from);
+            }
+            return ret;
+        }
+    }
+    return NULL;
+}
+
 void Layer::setLayerData(std::vector<LayerVariant> data, XY dimensions)
 {
     layerData = data;
