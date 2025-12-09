@@ -482,6 +482,7 @@
     <ClCompile Include="UIStackPanel.cpp" />
     <ClCompile Include="UISVPicker.cpp" />
     <ClCompile Include="UITextField.cpp" />
+    <ClCompile Include="UndoStack.cpp" />
     <ClCompile Include="UtilPathfind.cpp" />
     <ClCompile Include="vfx.cpp" />
     <ClCompile Include="ViewSessionScreen.cpp" />
@@ -707,6 +708,7 @@
     <ClInclude Include="UIStackPanel.h" />
     <ClInclude Include="UISVPicker.h" />
     <ClInclude Include="UITextField.h" />
+    <ClInclude Include="UndoStack.h" />
     <ClInclude Include="updatecheck.h" />
     <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="vfx.h" />

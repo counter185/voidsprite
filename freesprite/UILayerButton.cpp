@@ -22,25 +22,27 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
 
     if (layer != NULL) {
         mainButton->onRightClickCallback = [this](UIButton* btn) {
+            int cbid = callback_id;
+            EventCallbackListener* cb = callback;
             g_openContextMenu({
-                {"Rename layer", [this]() {
-                    if (callback != NULL) {
-                        callback->eventGeneric(callback_id, LAYEREVENT_PROMPTRENAME, 0);
+                {"Rename layer", [cb,cbid]() {
+                    if (cb != NULL) {
+                        cb->eventGeneric(cbid, LAYEREVENT_PROMPTRENAME, 0);
                     }
                 }},
-                {"Duplicate layer", [this]() {
-                    if (callback != NULL) {
-                        callback->eventGeneric(callback_id, LAYEREVENT_DUPLICATE, 0);
+                {"Duplicate layer", [cb,cbid]() {
+                    if (cb != NULL) {
+                        cb->eventGeneric(cbid, LAYEREVENT_DUPLICATE, 0);
                     }
                 }},
-                {"Delete layer", [this]() {
-                    if (callback != NULL) {
-                        callback->eventGeneric(callback_id, LAYEREVENT_DELETE, 0);
+                {"Delete layer", [cb,cbid]() {
+                    if (cb != NULL) {
+                        cb->eventGeneric(cbid, LAYEREVENT_DELETE, 0);
                     }
                 }},
-                {"Duplicate current variant", [this]() {
-                    if (callback != NULL) {
-                        callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DUPLICATECURRENT, 0);
+                {"Duplicate current variant", [cb,cbid]() {
+                    if (cb != NULL) {
+                        cb->eventGeneric(cbid, LAYEREVENT_VARIANT_DUPLICATECURRENT, 0);
                     }
                 }}
             });
@@ -77,15 +79,17 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
                 }
             };
             vbtn->onRightClickCallback = [this, v](UIButton* btn) {
+                int cbid = callback_id;
+                EventCallbackListener* cb = callback;
                 g_openContextMenu({
-                    {"Delete variant", [this, v]() {
-                        if (callback != NULL) {
-                            callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DELETE, v);
+                    {"Delete variant", [cb,cbid, v]() {
+                        if (cb != NULL) {
+                            cb->eventGeneric(cbid, LAYEREVENT_VARIANT_DELETE, v);
                         }
                     }},
-                    {"Duplicate variant", [this, v]() {
-                        if (callback != NULL) {
-                            callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DUPLICATE, v);
+                    {"Duplicate variant", [cb,cbid, v]() {
+                        if (cb != NULL) {
+                            cb->eventGeneric(cbid, LAYEREVENT_VARIANT_DUPLICATE, v);
                         }
                     }},
                 });

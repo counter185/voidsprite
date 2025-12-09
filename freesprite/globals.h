@@ -192,6 +192,7 @@ class DrawableManager;
 class VSPWindow;
 class HotReloadableTexture;
 class PopupSetNetworkCanvasData;
+class UndoStackElementV2;
 
 //textrenderer
 class TextRenderer;

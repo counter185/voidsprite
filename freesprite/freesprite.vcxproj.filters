@@ -681,6 +681,9 @@
     <ClCompile Include="io\io_iw.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="UndoStack.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1354,6 +1357,9 @@
     </ClInclude>
     <ClInclude Include="io\io_iw.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="UndoStack.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

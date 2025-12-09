@@ -27,6 +27,7 @@
 #include "brush/BaseBrush.h"
 #include "PanelPreview.h"
 #include "UIStackPanel.h"
+#include "UndoStack.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -2120,6 +2121,13 @@ void MainEditor::discardEndOfUndoStack() {
     if (undoStack.size() > 0) {
         UndoStackElement l = undoStack[0];
         switch (l.type) {
+            case UNDOSTACK_V2_ACTION:
+                {
+                    auto e = (UndoStackElementV2*)l.extdata4;
+                    e->discardFromRedo = false;
+                    delete e;
+                }
+                break;
             case UNDOSTACK_LAYER_DATA_MODIFIED:
                 l.targetlayer->discardLastUndo();
                 break;
@@ -2200,6 +2208,15 @@ void MainEditor::addToUndoStack(UndoStackElement undo)
     networkCanvasStateUpdated(indexOfLayer(undo.targetlayer));
 }
 
+void MainEditor::addToUndoStack(UndoStackElementV2* undo)
+{
+    discardRedoStack();
+    undoStack.push_back(UndoStackElement{ NULL, UNDOSTACK_V2_ACTION, 0, 0, "", undo});
+    checkAndDiscardEndOfUndoStack();
+    changesSinceLastSave = HAS_UNSAVED_CHANGES;
+    networkCanvasStateUpdated(indexOfLayer(undo->getAffectedLayer()));
+}
+
 void MainEditor::discardUndoStack()
 {
     while (!undoStack.empty()) {
@@ -2216,8 +2233,12 @@ void MainEditor::discardRedoStack()
     //clear redo stack
     for (UndoStackElement& l : redoStack) {
         switch (l.type) {
-            case UNDOSTACK_CREATE_LAYER:
-                delete l.targetlayer;
+            case UNDOSTACK_V2_ACTION:
+                {
+                    auto e = (UndoStackElementV2*)l.extdata4;
+                    e->discardFromRedo = true;
+                    delete e;
+                }
                 break;
             case UNDOSTACK_RESIZE_LAYER:
             {
@@ -2250,21 +2271,11 @@ void MainEditor::undo()
         UndoStackElement l = undoStack[undoStack.size() - 1];
         undoStack.pop_back();
         switch (l.type) {
+            case UNDOSTACK_V2_ACTION:
+                ((UndoStackElementV2*)l.extdata4)->undo(this);
+                break;
             case UNDOSTACK_LAYER_DATA_MODIFIED:
                 l.targetlayer->undo();
-                break;
-            case UNDOSTACK_CREATE_LAYER:
-            {
-                //remove layer from list
-                auto pos = std::find(layers.begin(), layers.end(), l.targetlayer);
-                if (pos != layers.end()) {
-                    layers.erase(pos);
-                }
-                if (selLayer >= layers.size()) {
-                    switchActiveLayer(layers.size() - 1);
-                }
-                layerPicker->updateLayers();
-            }
                 break;
             case UNDOSTACK_DELETE_LAYER:
                 //add layer to list
@@ -2357,93 +2368,91 @@ void MainEditor::redo()
         UndoStackElement l = redoStack[redoStack.size() - 1];
         redoStack.pop_back();
         switch (l.type) {
-        case UNDOSTACK_LAYER_DATA_MODIFIED:
-            l.targetlayer->redo();
-            break;
-        case UNDOSTACK_CREATE_LAYER:
-            //add layer back to list
-            layers.insert(layers.begin() + l.extdata, l.targetlayer);
-            layerPicker->updateLayers();
-            break;
-        case UNDOSTACK_DELETE_LAYER:
-            //add layer to list
-            for (int x = 0; x < layers.size(); x++) {
-                if (layers[x] == l.targetlayer) {
-                    layers.erase(layers.begin() + x);
-                    break;
+            case UNDOSTACK_V2_ACTION:
+                ((UndoStackElementV2*)l.extdata4)->redo(this);
+                break;
+            case UNDOSTACK_LAYER_DATA_MODIFIED:
+                l.targetlayer->redo();
+                break;
+            case UNDOSTACK_DELETE_LAYER:
+                //add layer to list
+                for (int x = 0; x < layers.size(); x++) {
+                    if (layers[x] == l.targetlayer) {
+                        layers.erase(layers.begin() + x);
+                        break;
+                    }
                 }
+                if (selLayer >= layers.size()) {
+                    switchActiveLayer(layers.size() - 1);
+                }
+                layerPicker->updateLayers();
+                break;
+            case UNDOSTACK_MOVE_LAYER:
+            {
+                Layer* lr = layers[l.extdata];
+                layers.erase(layers.begin() + l.extdata);
+                layers.insert(layers.begin() + l.extdata2, lr);
+                layerPicker->updateLayers();
             }
-            if (selLayer >= layers.size()) {
-                switchActiveLayer(layers.size() - 1);
+                break;
+            case UNDOSTACK_ADD_COMMENT:
+                comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
+                break;
+            case UNDOSTACK_REMOVE_COMMENT:
+                _removeCommentAt({ l.extdata, l.extdata2 });
+                break;
+            case UNDOSTACK_SET_OPACITY:
+                l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
+                l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
+                layerPicker->updateLayers();
+                break;
+            case UNDOSTACK_RESIZE_LAYER:
+            {
+                UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
+                for (int x = 0; x < l.extdata5; x++) {
+                    //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
+                    std::vector<LayerVariant> oldData = layers[x]->layerData;
+                    XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
+                    layers[x]->layerData = resizeLayerData[x].oldLayerData;
+                    layers[x]->w = resizeLayerData[x].oldDimensions.x;
+                    layers[x]->h = resizeLayerData[x].oldDimensions.y;
+                    layers[x]->markLayerDirty();
+                    resizeLayerData[x].oldLayerData = oldData;
+                    resizeLayerData[x].oldDimensions = oldDimensions;
+                }
+                canvas.dimensions = { layers[0]->w, layers[0]->h };
+                XY td = XY{ l.extdata, l.extdata2 };
+                l.extdata = tileDimensions.x;
+                l.extdata2 = tileDimensions.y;
+                tileDimensions = td;
             }
-            layerPicker->updateLayers();
-            break;
-        case UNDOSTACK_MOVE_LAYER:
-        {
-            Layer* lr = layers[l.extdata];
-            layers.erase(layers.begin() + l.extdata);
-            layers.insert(layers.begin() + l.extdata2, lr);
-            layerPicker->updateLayers();
-        }
-            break;
-        case UNDOSTACK_ADD_COMMENT:
-            comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
-            break;
-        case UNDOSTACK_REMOVE_COMMENT:
-            _removeCommentAt({ l.extdata, l.extdata2 });
-            break;
-        case UNDOSTACK_SET_OPACITY:
-            l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
-            l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
-            layerPicker->updateLayers();
-            break;
-        case UNDOSTACK_RESIZE_LAYER:
-        {
-            UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
-            for (int x = 0; x < l.extdata5; x++) {
-                //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                std::vector<LayerVariant> oldData = layers[x]->layerData;
-                XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                layers[x]->layerData = resizeLayerData[x].oldLayerData;
-                layers[x]->w = resizeLayerData[x].oldDimensions.x;
-                layers[x]->h = resizeLayerData[x].oldDimensions.y;
-                layers[x]->markLayerDirty();
-                resizeLayerData[x].oldLayerData = oldData;
-                resizeLayerData[x].oldDimensions = oldDimensions;
+                break;
+            case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
+                for (Layer* ll : layers) {
+                    ll->redo();
+                }
+                break;
+            case UNDOSTACK_CREATE_LAYER_VARIANT:
+            {
+                int variantIndex = l.extdata;
+                LayerVariant v = *(LayerVariant*)l.extdata4;
+                delete (LayerVariant*)l.extdata4;
+                l.extdata4 = NULL;
+                l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, v);
+                layerPicker->updateLayers();
             }
-            canvas.dimensions = { layers[0]->w, layers[0]->h };
-            XY td = XY{ l.extdata, l.extdata2 };
-            l.extdata = tileDimensions.x;
-            l.extdata2 = tileDimensions.y;
-            tileDimensions = td;
-        }
-            break;
-        case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
-            for (Layer* ll : layers) {
-                ll->redo();
-            }
-            break;
-        case UNDOSTACK_CREATE_LAYER_VARIANT:
-        {
-            int variantIndex = l.extdata;
-            LayerVariant v = *(LayerVariant*)l.extdata4;
-            delete (LayerVariant*)l.extdata4;
-            l.extdata4 = NULL;
-            l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, v);
-            layerPicker->updateLayers();
-        }
-            break;
-        case UNDOSTACK_DELETE_LAYER_VARIANT:
-            int variantIndex = l.extdata;
-            LayerVariant* vv = new LayerVariant;
-            *vv = l.targetlayer->layerData[variantIndex];
-            l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
-            l.extdata4 = vv;
-            if (variantIndex <= l.targetlayer->currentLayerVariant) {
-                layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
-            }
-            layerPicker->updateLayers();
-            break;
+                break;
+            case UNDOSTACK_DELETE_LAYER_VARIANT:
+                int variantIndex = l.extdata;
+                LayerVariant* vv = new LayerVariant;
+                *vv = l.targetlayer->layerData[variantIndex];
+                l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
+                l.extdata4 = vv;
+                if (variantIndex <= l.targetlayer->currentLayerVariant) {
+                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
+                }
+                layerPicker->updateLayers();
+                break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
@@ -2469,7 +2478,7 @@ Layer* MainEditor::newLayer()
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
-        addToUndoStack(UndoStackElement{ nl, UNDOSTACK_CREATE_LAYER, insertAtIdx });
+        addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));

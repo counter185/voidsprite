@@ -44,6 +44,7 @@ enum EditorTouchMode : int {
 #define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
 #define UNDOSTACK_CREATE_LAYER_VARIANT 9
 #define UNDOSTACK_DELETE_LAYER_VARIANT 10
+#define UNDOSTACK_V2_ACTION 11
 struct UndoStackElement {
     Layer* targetlayer = NULL;
     uint32_t type = 0;
@@ -368,6 +369,7 @@ public:
     void commitStateToLayer(Layer* l);
     void commitStateToCurrentLayer();
     void addToUndoStack(UndoStackElement undo);
+    void addToUndoStack(UndoStackElementV2* undo);
     void discardUndoStack();
     void discardRedoStack();
     void undo();
