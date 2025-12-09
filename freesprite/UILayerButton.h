@@ -21,7 +21,7 @@ public:
     LayerVariantButton(Layer* l, int variantIndex);
 };
 
-class UILayerButton : public Panel, public EventCallbackListener
+class UILayerButton : public Panel
 {
 private:
     Layer* layer;
@@ -32,7 +32,6 @@ public:
 
     UILayerButton(std::string mainName, Layer* linkedLayer);
 
-    void eventButtonPressed(int evt_id) override;
     bool takesMouseWheelEvents() override { return false; }
 };
 

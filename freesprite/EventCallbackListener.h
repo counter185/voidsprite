@@ -64,6 +64,16 @@ struct UIDoubleSliderBounds {
 #define EVENT_MAINEDITOR_PRINT 58
 #define EVENT_MAINEDITOR_RESIZELAYER_REORDER_TILES 59
 
+#define LAYEREVENT_SWITCH 0
+#define LAYEREVENT_TOGGLE_HIDE 1
+#define LAYEREVENT_VARIANT_SWITCH 2
+#define LAYEREVENT_VARIANT_DELETE 3
+#define LAYEREVENT_DUPLICATE 4
+#define LAYEREVENT_DELETE 5
+#define LAYEREVENT_PROMPTRENAME 6
+#define LAYEREVENT_VARIANT_DUPLICATECURRENT 7
+#define LAYEREVENT_VARIANT_DUPLICATE 8
+
 //get rid of this whole system somehow
 // (maybe only leave it for async ops like file popups)
 class EventCallbackListener {

@@ -134,16 +134,23 @@ public:
         }
         return newVariant.pixelData != NULL;
     }
-    bool duplicateVariant() {
-        LayerVariant newVariant = allocNewVariant();
-        if (newVariant.pixelData != NULL) {
-            memcpy(newVariant.pixelData, pixels32(), w * h * 4);
-            newVariant.name = layerData[currentLayerVariant].name + " copy";
-            layerData.push_back(newVariant);
-            currentLayerVariant = layerData.size() - 1;
-            markLayerDirty();
+    bool duplicateVariant(int index) {
+        if (layerData.size() > index) {
+            LayerVariant& copyTarget = layerData[index];
+            LayerVariant newVariant = allocNewVariant();
+            if (newVariant.pixelData != NULL) {
+                memcpy(newVariant.pixelData, copyTarget.pixelData, w * h * 4);
+                newVariant.name = copyTarget.name + " copy";
+                layerData.push_back(newVariant);
+                currentLayerVariant = layerData.size() - 1;
+                markLayerDirty();
+            }
+            return newVariant.pixelData != NULL;
         }
-        return newVariant.pixelData != NULL;
+        return false;
+    }
+    bool duplicateVariant() {
+        duplicateVariant(currentLayerVariant);
     }
     bool switchVariant(int variantIndex) {
         if (layerData.size() > variantIndex && variantIndex >= 0) {

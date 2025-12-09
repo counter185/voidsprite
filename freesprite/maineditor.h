@@ -373,6 +373,7 @@ public:
     void undo();
     void redo();
 
+    Layer* layerAt(int index);
     virtual Layer* newLayer();
     virtual void deleteLayer(int index);
     virtual void moveLayerUp(int index);
@@ -383,7 +384,8 @@ public:
     Layer* getCurrentLayer() { return layers[selLayer]; }
     int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
-    void layer_promptRename();
+    void layer_promptRename(int index);
+    void layer_promptRenameCurrent();
     void layer_flipHorizontally();
     void layer_flipVertically();
     uint32_t layer_getPixelAt(XY pos);
@@ -430,7 +432,9 @@ public:
     void endNetworkSession();
 
     void layer_newVariant();
-    void layer_duplicateVariant();
+    void layer_duplicateActiveVariant();
+    void layer_duplicateActiveVariant(Layer* layer);
+    void layer_duplicateVariant(Layer* layer, int variantIndex);
     void layer_removeVariant(Layer* layer, int variantIndex);
     void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_promptRenameCurrentVariant();

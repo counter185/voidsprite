@@ -13,8 +13,39 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
     mainButton->text = mainName;
     mainButton->position = XY{ 0,0 };
     mainButton->wxWidth = 200;
-    mainButton->setCallbackListener(0, this);
+    mainButton->onClickCallback = [this](UIButton* btn) {
+        if (callback != NULL) {
+            callback->eventGeneric(callback_id, LAYEREVENT_SWITCH, 0);
+        }
+    };
     subWidgets.addDrawable(mainButton);
+
+    if (layer != NULL) {
+        mainButton->onRightClickCallback = [this](UIButton* btn) {
+            g_openContextMenu({
+                {"Rename layer", [this]() {
+                    if (callback != NULL) {
+                        callback->eventGeneric(callback_id, LAYEREVENT_PROMPTRENAME, 0);
+                    }
+                }},
+                {"Duplicate layer", [this]() {
+                    if (callback != NULL) {
+                        callback->eventGeneric(callback_id, LAYEREVENT_DUPLICATE, 0);
+                    }
+                }},
+                {"Delete layer", [this]() {
+                    if (callback != NULL) {
+                        callback->eventGeneric(callback_id, LAYEREVENT_DELETE, 0);
+                    }
+                }},
+                {"Duplicate current variant", [this]() {
+                    if (callback != NULL) {
+                        callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DUPLICATECURRENT, 0);
+                    }
+                }}
+            });
+        };
+    }
 
     hideButton = new UIButton();
     //hideButton->text = "H";
@@ -22,7 +53,11 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
     hideButton->icon = g_iconLayerHide;
     hideButton->position = XY{ mainButton->wxWidth + 10,0 };
     hideButton->wxWidth = 30;
-    hideButton->setCallbackListener(1, this);
+    hideButton->onClickCallback = [this](UIButton* btn) {
+        if (callback != NULL) {
+            callback->eventGeneric(callback_id, LAYEREVENT_TOGGLE_HIDE, 0);
+        }
+    };
     subWidgets.addDrawable(hideButton);
 
     if (layer != NULL && layer->layerData.size() > 1) {
@@ -38,16 +73,21 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
             vbtn->wxWidth = wxWidth - 50;
             vbtn->onClickCallback = [this, v](UIButton* btn) {
                 if (callback != NULL) {
-                    callback->eventGeneric(callback_id, 2, v);
+                    callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_SWITCH, v);
                 }
             };
             vbtn->onRightClickCallback = [this, v](UIButton* btn) {
                 g_openContextMenu({
                     {"Delete variant", [this, v]() {
                         if (callback != NULL) {
-                            callback->eventGeneric(callback_id, 3, v);
+                            callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DELETE, v);
                         }
-                    }}
+                    }},
+                    {"Duplicate variant", [this, v]() {
+                        if (callback != NULL) {
+                            callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DUPLICATE, v);
+                        }
+                    }},
                 });
             };
             variantButtons.push_back(vbtn);
@@ -61,7 +101,7 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
             delbtn->position = XY{ vbtn->wxWidth + 30, 0 };
             delbtn->onClickCallback = [this, v](UIButton* btn) {
                 if (callback != NULL) {
-                    callback->eventGeneric(callback_id, 3, v);
+                    callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DELETE, v);
                 }
             };
             p->subWidgets.addDrawable(delbtn);
@@ -70,19 +110,6 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
 
             variantY += vbtn->wxHeight;
         }
-    }
-}
-
-void UILayerButton::eventButtonPressed(int evt_id)
-{
-    if (callback == NULL) {
-        return;
-    }
-    if (evt_id == 0) {
-        callback->eventGeneric(callback_id, 0, 0);
-    }
-    else if (evt_id == 1) {
-        callback->eventGeneric(callback_id, 1, 0);
     }
 }
 

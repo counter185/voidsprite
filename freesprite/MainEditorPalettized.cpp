@@ -434,7 +434,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDL_SCANCODE_R, { "Rename current layer",
                             [this]() {
-                                this->layer_promptRename();
+                                this->layer_promptRenameCurrent();
                             }
                         }
                     },
@@ -461,7 +461,7 @@ void MainEditorPalettized::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
-                            [this]() { this->layer_duplicateVariant(); }
+                            [this]() { this->layer_duplicateActiveVariant(); }
                         }
                     },
                     {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),

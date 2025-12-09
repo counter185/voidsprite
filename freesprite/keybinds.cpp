@@ -139,7 +139,7 @@ void g_initKeybinds()
         }));
     g_keybindManager.addKeybind("maineditor", "layer_rename", 
         KeyCombo(TL("vsp.keybinds.maineditor.renamelayer"), SDL_SCANCODE_F2, false, false, [](void* d) {
-            ((MainEditor*)d)->layer_promptRename();
+            ((MainEditor*)d)->layer_promptRenameCurrent();
         }));
     g_keybindManager.addKeybind("maineditor", "clear_area", 
         KeyCombo(TL("vsp.keybinds.maineditor.cleararea"), SDL_SCANCODE_DELETE, false, false, [](void* d) {
@@ -163,7 +163,7 @@ void g_initKeybinds()
         }));
     g_keybindManager.addKeybind("maineditor", "layer_variant_duplicate",
         KeyCombo(TL("vsp.keybinds.maineditor.duplicatelayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {
-            ((MainEditor*)d)->layer_duplicateVariant();
+            ((MainEditor*)d)->layer_duplicateActiveVariant();
         }));
     g_keybindManager.addKeybind("maineditor", "layer_variant_delete",
         KeyCombo(TL("vsp.keybinds.maineditor.deletelayervariant"), KEY_UNASSIGNED, false, false, [](void* d) {

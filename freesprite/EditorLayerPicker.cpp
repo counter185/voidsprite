@@ -94,21 +94,37 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
 
 void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
 {
-    if (data1 == 0) {
+	//evt_id : layer index
+    if (data1 == LAYEREVENT_SWITCH) {
         caller->switchActiveLayer(evt_id);
     }
-    else if (data1 == 1) {
+    else if (data1 == LAYEREVENT_TOGGLE_HIDE) {
         caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;
     }
-    else if (data1 == 2) {
+    else if (data1 == LAYEREVENT_VARIANT_SWITCH) {
         if (caller->selLayer != evt_id) {
             caller->switchActiveLayer(evt_id);
         }
         caller->layer_switchVariant(caller->layers[evt_id], data2);
     }
-    else if (data1 == 3) {
+    else if (data1 == LAYEREVENT_VARIANT_DELETE) {
         caller->layer_removeVariant(caller->layers[evt_id], data2);
     }
+    else if (data1 == LAYEREVENT_DUPLICATE) {
+        caller->duplicateLayer(evt_id);
+    }
+    else if (data1 == LAYEREVENT_DELETE) {
+        caller->deleteLayer(evt_id);
+	}
+    else if (data1 == LAYEREVENT_PROMPTRENAME) {
+        caller->layer_promptRename(evt_id);
+    }
+    else if (data1 == LAYEREVENT_VARIANT_DUPLICATECURRENT) {
+        caller->layer_duplicateActiveVariant(caller->layerAt(evt_id));
+	}
+    else if (data1 == LAYEREVENT_VARIANT_DUPLICATE) {
+        caller->layer_duplicateVariant(caller->layerAt(evt_id), data2);
+	}
     updateLayers();
 }
 

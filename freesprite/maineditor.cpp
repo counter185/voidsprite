@@ -1038,7 +1038,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.renlayer"),
-                            [this]() { this->layer_promptRename(); }
+                            [this]() { this->layer_promptRenameCurrent(); }
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.isolatealpha"),
@@ -1076,7 +1076,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
-                            [this]() { this->layer_duplicateVariant(); }
+                            [this]() { this->layer_duplicateActiveVariant(); }
                         }
                     },
                     {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),
@@ -2454,6 +2454,11 @@ void MainEditor::redo()
     }
 }
 
+Layer* MainEditor::layerAt(int index)
+{
+    return layers.size() > index ? layers[index] : NULL;
+}
+
 Layer* MainEditor::newLayer()
 {
     Layer* nl = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
@@ -2724,12 +2729,23 @@ void MainEditor::layer_newVariant()
     layerPicker->updateLayers();
 }
 
-void MainEditor::layer_duplicateVariant()
+void MainEditor::layer_duplicateActiveVariant()
 {
-    Layer* clayer = getCurrentLayer();
-    clayer->duplicateVariant();
-    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
-    layerPicker->updateLayers();
+    layer_duplicateActiveVariant(getCurrentLayer());
+}
+
+void MainEditor::layer_duplicateActiveVariant(Layer* clayer)
+{
+    layer_duplicateVariant(clayer, clayer->currentLayerVariant);
+}
+
+void MainEditor::layer_duplicateVariant(Layer* clayer, int variantIndex)
+{
+    if (clayer != NULL) {
+        clayer->duplicateVariant(variantIndex);
+        addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, (int)clayer->layerData.size()-1});
+        layerPicker->updateLayers();
+    }
 }
 
 void MainEditor::layer_removeVariant(Layer* layer, int variantIndex)
@@ -2792,10 +2808,10 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
     clayer->lastConfirmedlayerAlpha = clayer->layerAlpha;
 }
 
-void MainEditor::layer_promptRename()
+void MainEditor::layer_promptRename(int index)
 {
-    if (!layers.empty()) {
-        Layer* target = getCurrentLayer();
+    if (!layers.empty() && layers.size() > index) {
+        Layer* target = layers[index];
         PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", target->name);
         ninput->onTextInputConfirmedCallback = [this, target](PopupTextBox* p, std::string newName) {
             target->name = newName;
@@ -2804,6 +2820,11 @@ void MainEditor::layer_promptRename()
         };
         g_addPopup(ninput);
     }
+}
+
+void MainEditor::layer_promptRenameCurrent()
+{
+    layer_promptRename(selLayer);
 }
 
 uint32_t MainEditor::layer_getPixelAt(XY pos)
