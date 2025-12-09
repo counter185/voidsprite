@@ -61,23 +61,25 @@ public:
         uint32_t* pxd = (uint32_t*)pixels;
         int32_t* pxd2 = (int32_t*)pixels32();
 
-        for (uint64_t index = 0; index < w * h; index++) {
-            if (pxd2[index] < 0 || pxd2[index] >= palette.size()) {
-                pxd[index] = 0;
-            }
-            else {
-                pxd[index] = palette[pxd2[index]];
-            }
-        }
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int32_t srcIndex = ARRAY2DPOINT(pxd2, x, y, w);
+                u32* dstPixel = (u32*)&ARRAY2DPOINT((u8*)pxd, x * 4, y, pitch);
 
-        if (colorKeySet) {
-            uint32_t* px32 = pixels32();
-            for (uint64_t p = 0; p < w * h; p++) {
-                if ((px32[p] & 0xffffff) == (colorKey & 0xFFFFFF)) {
-                    pixels[p * 4 + 3] = 0;
+                if (srcIndex < 0 || srcIndex >= palette.size()) {
+                    *dstPixel = 0;
+                }
+                else {
+                    u32 color = palette[srcIndex];
+                    //do we need this (can't set color key in indexed mode anyway)?
+                    if (colorKeySet && (color & 0xFFFFFF) == (colorKey & 0xFFFFFF)) {
+                        color &= 0x00FFFFFF;
+                    }
+                    *dstPixel = color;
                 }
             }
         }
+
         SDL_UnlockTexture(renderData[g_rd].tex);
         renderData[g_rd].layerDirty = false;
     }
