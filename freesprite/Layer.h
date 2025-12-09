@@ -189,14 +189,7 @@ public:
             SDL_SetTextureBlendMode(renderData[g_rd].tex, SDL_BLENDMODE_BLEND);
         }
         SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, (int*)&pitch);
-        if (pitch == w*4) {
-            memcpy(pixels, pixels32(), w * h * 4);
-        } else {
-            for (int y = 0; y < h; y++) {
-                memcpy(pixels + y * pitch, pixels32() + y * w * 4, w* 4);
-            }
-        }
-        //memcpy(pixels, pixelData, w * h * 4);
+        copyPixelsToTexture(pixels32(), w, h, pixels, pitch);
 
         //todo respect the pitch in the below too
         if (colorKeySet) {

@@ -47,6 +47,7 @@ SDL_Color uint32ToSDLColor(u32 c);
 uint32_t modAlpha(uint32_t color, uint8_t alpha);
 
 SDL_Surface* trimSurface(SDL_Surface* target, SDL_Rect dims);
+void copyPixelsToTexture(u32* pixels, int w, int h, u8* dst, int dstPitch);
 
 u32 hsvShift(u32 color, hsv shift);
 u32 hslShift(u32 color, hsl shift);

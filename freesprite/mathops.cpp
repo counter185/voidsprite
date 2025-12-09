@@ -789,6 +789,20 @@ SDL_Surface* trimSurface(SDL_Surface* target, SDL_Rect dims)
     return ret;
 }
 
+void copyPixelsToTexture(u32* pixels, int w, int h, u8* dst, int dstPitch)
+{
+    if (dstPitch == w * 4) {
+        memcpy(dst, pixels, w * h * 4);
+    }
+    else {
+        for (int y = 0; y < h; y++) {
+            u8* dstScanline = &ARRAY2DPOINT(dst, 0, y, dstPitch);
+            u32* srcScanline = &ARRAY2DPOINT(pixels, 0, y, w);
+            memcpy(dstScanline, srcScanline, w * 4);
+        }
+    }
+}
+
 u32 hsvShift(u32 color, hsv shift)
 {
     rgb colorRGB = { (float)((color & 0xFF0000) >> 16) / 255.0f, (float)((color & 0x00FF00) >> 8) / 255.0f, (float)(color & 0x0000FF) / 255.0f };

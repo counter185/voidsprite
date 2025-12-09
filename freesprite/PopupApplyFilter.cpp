@@ -129,18 +129,17 @@ void PopupApplyFilter::updatePreview()
         u8* ppx;
         int pitch;
         SDL_LockTexture(previewTexture, NULL, (void**)&ppx, &pitch);
-        u32* pppx = (u32*)ppx;
         u32* previewPx = (u32*)previewPixelData;
         if (session->isolateEnabled) {
-            memcpy(ppx, target->pixels32(), 4 * target->w * target->h);
+            copyPixelsToTexture(target->pixels32(), target->w, target->h, ppx, pitch);
             session->isolatedFragment.forEachPoint([&](XY a) {
                 if (pointInBox(a, { 0,0,target->w,target->h })) {
-                    ARRAY2DPOINT(pppx, a.x, a.y, target->w) = ARRAY2DPOINT(previewPx, a.x, a.y, target->w);
+                    ARRAY2DPOINT(ppx, a.x*4, a.y, pitch) = ARRAY2DPOINT(previewPx, a.x, a.y, target->w);
                 }
             });
         }
         else {
-            memcpy(ppx, previewPixelData, 4 * target->w * target->h);
+            copyPixelsToTexture((u32*)previewPixelData, target->w, target->h, ppx, pitch);
         }
         SDL_UnlockTexture(previewTexture);
         pixelDataDirty = false;

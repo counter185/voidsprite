@@ -49,7 +49,7 @@ void ToolRectClone::clickRelease(MainEditor* editor, XY pos)
 		uint32_t* pixels;
 		int pitch;
 		SDL_LockTexture(cacheClonePreview, NULL, (void**)&pixels, &pitch);
-		memcpy(pixels, clonedArea, copyIndex*4);
+		copyPixelsToTexture(clonedArea, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h, (u8*)pixels, pitch);
 		SDL_UnlockTexture(cacheClonePreview);
 		SDL_SetTextureBlendMode(cacheClonePreview, SDL_BLENDMODE_BLEND);
 		SDL_SetTextureAlphaMod(cacheClonePreview, 0x60);
