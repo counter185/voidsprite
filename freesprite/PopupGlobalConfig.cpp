@@ -272,7 +272,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsStack->takeMouseWheelEvents = false;
     keybindsPanel->subWidgets.addDrawable(keybindsStack);
 
-    createKeybindButtons();
+    createKeybindButtons("");
 
     /*
         -------------------------
@@ -551,7 +551,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     currentBindTarget->ctrl = ctrl;
                     currentBindTarget->shift = shift;
                     if (updateAll) {
-                        createKeybindButtons();
+                        createKeybindButtons("");
                     }
                     else {
                         updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
@@ -579,7 +579,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 
             currentBindTarget->gamepadButton = btn;
             if (updateAll) {
-                createKeybindButtons();
+                createKeybindButtons("");
             }
             else {
                 updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
@@ -620,7 +620,7 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
     }
 }
 
-void PopupGlobalConfig::createKeybindButtons()
+void PopupGlobalConfig::createKeybindButtons(std::string filterName)
 {
     keybindsStack->subWidgets.freeAllDrawables();
 
@@ -632,25 +632,27 @@ void PopupGlobalConfig::createKeybindButtons()
         auto reservedKeys = keyRegion.reservedKeys;
 
         for (std::string& keyIDInOrder : keyRegion.orderInSettings) {
-            KeybindButton* btn = new KeybindButton();
-            btn->wxWidth = keybindsPanel->wxWidth - 20;
-            btn->wxHeight = 30;
-            btn->icon = keyRegion.keybinds[keyIDInOrder].icon;
-            updateKeybindButtonText(&keyRegion.keybinds[keyIDInOrder], btn);
+            if (filterName == "" || stringContainsIgnoreCase(keyRegion.keybinds[keyIDInOrder].displayName, filterName)) {
+                KeybindButton* btn = new KeybindButton();
+                btn->wxWidth = keybindsPanel->wxWidth - 20;
+                btn->wxHeight = 30;
+                btn->icon = keyRegion.keybinds[keyIDInOrder].icon;
+                updateKeybindButtonText(&keyRegion.keybinds[keyIDInOrder], btn);
 
-            KeyCombo* keyComboPtr = &keyRegion.keybinds[keyIDInOrder];
-            KeybindRegion* regionPtr = &keyRegion;
-            btn->onClickCallback = [this, keyComboPtr, regionPtr, reservedKeys](UIButton* b) {
-                if (!bindingKey) {
-                    bindingKey = true;
-                    this->reservedKeysNow = reservedKeys;
-                    this->currentBindTarget = keyComboPtr;
-                    this->currentBindTargetRegion = regionPtr;
-                    this->currentBindTargetButton = (KeybindButton*)b;
-                    keyBindingTimer.start();
-                }
-            };
-            keybindsStack->subWidgets.addDrawable(btn);
+                KeyCombo* keyComboPtr = &keyRegion.keybinds[keyIDInOrder];
+                KeybindRegion* regionPtr = &keyRegion;
+                btn->onClickCallback = [this, keyComboPtr, regionPtr, reservedKeys](UIButton* b) {
+                    if (!bindingKey) {
+                        bindingKey = true;
+                        this->reservedKeysNow = reservedKeys;
+                        this->currentBindTarget = keyComboPtr;
+                        this->currentBindTargetRegion = regionPtr;
+                        this->currentBindTargetButton = (KeybindButton*)b;
+                        keyBindingTimer.start();
+                    }
+                    };
+                keybindsStack->subWidgets.addDrawable(btn);
+            }
         }
         keybindsStack->addWidget(Panel::Space(5, 18));
     }

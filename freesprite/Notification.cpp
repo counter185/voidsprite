@@ -4,11 +4,9 @@
 std::vector<Notification> g_notifications;
 bool renderingNotifications = false;
 
-void g_renderNotifications()
-{
+void g_calcNotifBounds() {
     int notifY = 30;
     int notifOriginX = g_windowW - 450;
-    renderingNotifications = true;
     for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
         Notification& notif = *it;
 
@@ -16,11 +14,32 @@ void g_renderNotifications()
 
         //bounds
         int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
-        SDL_Rect r = { notifX, notifY, 400, compactNotification ? 30 : 60 };
+        notif.boundsRect = { notifX, notifY, 400, compactNotification ? 30 : 60 };
 
-        if (pointInBox({ g_mouseX, g_mouseY }, r)) {
-            notif.timer.setElapsedTime(500);
-        }
+        SDL_Rect closeBounds = notif.boundsRect;
+        closeBounds.w /= 6;
+        closeBounds.x += notif.boundsRect.w - closeBounds.w;
+        notif.closeBoundsRect = closeBounds;
+
+        notifY += (notif.boundsRect.h + 5) 
+            * XM1PW3P1(notif.timer.percentElapsedTime(300)  //start
+            * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));   //end
+    }
+}
+
+void g_renderNotifications()
+{
+    g_calcNotifBounds();
+
+    renderingNotifications = true;
+    for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
+        Notification& notif = *it;
+
+        bool compactNotification = (notif.title.empty() || notif.message.empty()) && notif.icon == NULL;
+
+        SDL_Rect r = notif.boundsRect;
+        int notifX = r.x;
+        int notifY = r.y;
 
         //background
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (uint8_t)(0xf0 * XM1PW3P1(notif.timer.percentElapsedTime(200) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)))));
@@ -43,6 +62,25 @@ void g_renderNotifications()
         XY topRight = { notifX + r.w, notifY };
         drawLine(topLeft, topRight, 1.0 - notif.timer.percentElapsedTime(notif.duration));
 
+        //close bounds
+        if (!notif.ignoreMouseTimeExtend && pointInBox({ g_mouseX, g_mouseY }, notif.boundsRect)) {
+            if (pointInBox({ g_mouseX, g_mouseY }, notif.closeBoundsRect)) {
+                renderGradient(notif.closeBoundsRect, modAlpha(color, 0x30), modAlpha(color, 0x10), modAlpha(color, 0x30), modAlpha(color, 0x10));
+            }
+
+            SDL_SetRenderDrawColor(g_rd, notif.color.r, notif.color.g, notif.color.b, 0xa0);
+            XY closeTL = { notif.closeBoundsRect.x, notif.closeBoundsRect.y };
+            XY closeBL = { notif.closeBoundsRect.x, notif.closeBoundsRect.y + notif.closeBoundsRect.h };
+            drawLine(closeTL, closeBL, 1.0);
+
+            XY centerPoint = { 
+                notif.closeBoundsRect.x + notif.closeBoundsRect.w / 2,
+                notif.closeBoundsRect.y + notif.closeBoundsRect.h / 2
+            };
+            drawLine(xyAdd(centerPoint, {-10,-10}), xyAdd(centerPoint, { 10,10 }), 1.0);
+            drawLine(xyAdd(centerPoint, {10,-10}), xyAdd(centerPoint, { -10,10 }), 1.0);
+        }
+
         //icon
         int textX = notifX + 10;
         if (notif.icon != NULL && notif.icon->get(g_rd) != NULL) {
@@ -59,7 +97,6 @@ void g_renderNotifications()
         int fontSize = compactNotification ? 16 : 18;
         g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize);
         g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize - 2);
-        notifY += (r.h + 5) * XM1PW3P1(notif.timer.percentElapsedTime(300) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));
 
         //pulse outline
         if (g_config.vfxEnabled) {
@@ -93,9 +130,35 @@ void g_addNotificationFromThread(Notification a) {
 }
 void g_tickNotifications() {
     for (int x = 0; x < g_notifications.size(); x++) {
-        if (g_notifications[x].timer.elapsedTime() > g_notifications[x].duration) {
+        Notification& notif = g_notifications[x];
+
+        //extend time if hovered
+        if (!notif.ignoreMouseTimeExtend && pointInBox({ g_mouseX, g_mouseY }, notif.boundsRect)) {
+            notif.timer.setElapsedTime(500);
+        }
+
+        //remove if expired
+        if (notif.timer.elapsedTime() > notif.duration) {
             g_notifications.erase(g_notifications.begin() + x);
             x--;
         }
     }
+}
+
+bool g_takeInputNotifications(SDL_Event evt)
+{
+    evt = convertTouchToMouseEvent(evt);
+    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        for (int x = 0; x < g_notifications.size(); x++) {
+            Notification& notif = g_notifications[x];
+            if (pointInBox({ (int)evt.button.x, (int)evt.button.y }, notif.boundsRect)) {
+                if (!notif.ignoreMouseTimeExtend && pointInBox({ (int)evt.button.x, (int)evt.button.y }, notif.closeBoundsRect)) {
+                    notif.timer.setElapsedTime(notif.duration - 500);
+                    notif.ignoreMouseTimeExtend = true;
+                }
+                return true;
+            }
+        }
+    }
+    return false;
 }

@@ -935,13 +935,19 @@ int main(int argc, char** argv)
                 }*/
 
                 g_gamepad->TakeEvent(evt);
-                if (!g_bgOpRunning && !DrawableManager::processInputEventInMultiple({ wdTarget->overlayWidgets }, evt)) {
+                if (!g_bgOpRunning 
+                    && !g_takeInputNotifications(evt)   //pass events to notifications
+                    && !DrawableManager::processInputEventInMultiple({ wdTarget->overlayWidgets }, evt) //pass events to overlay
+                    ) {
+
                     if (!wdTarget->popupStack.empty() && wdTarget->popupStack[wdTarget->popupStack.size() - 1]->takesInput()) {
+                        //pass event to popup
                         BasePopup* popup = wdTarget->popupStack[wdTarget->popupStack.size() - 1];
                         popup->takeInput(popup->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
                     }
                     else {
                         if (!wdTarget->screenStack.empty()) {
+                            //pass event to screen
                             wdTarget->screenStack[wdTarget->currentScreen]->takeInput(wdTarget->screenStack[wdTarget->currentScreen]->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
                         }
                     }

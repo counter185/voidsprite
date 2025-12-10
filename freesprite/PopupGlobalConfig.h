@@ -42,7 +42,7 @@ public:
     void eventTextInput(int evt_id, std::string text) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
-    void createKeybindButtons();
+    void createKeybindButtons(std::string filterName);
 
     void updateKeybindButtonText(KeyCombo* keycombo, KeybindButton* btn);
     void updateLanguageCredit();

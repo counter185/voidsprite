@@ -24,8 +24,13 @@ public:
 		this->color = color;
 		timer.start();
 	}
+
+	SDL_Rect boundsRect = { 0,0,0,0 };
+	SDL_Rect closeBoundsRect = { 0,0,0,0 };
+	bool ignoreMouseTimeExtend = false;
 };
 
 
 void g_renderNotifications();
 void g_tickNotifications();
+bool g_takeInputNotifications(SDL_Event evt);
