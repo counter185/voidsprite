@@ -258,10 +258,20 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     posInTab = { 0,10 };
+    configTabs->tabs[3].wxs.addDrawable(new UILabel(TL("vsp.config.tab.keybinds.search"), posInTab));
+    keybindSearchField = new UITextField("");
+    keybindSearchField->position = xyAdd(posInTab, {120,0});
+    keybindSearchField->onTextChangedCallback = [this](UITextField* tf, std::string newText) {
+        createKeybindButtons(newText);
+        keybindsPanel->scrollOffset.y = 0;
+    };
+    configTabs->tabs[3].wxs.addDrawable(keybindSearchField);
+    posInTab.y += 40;
+
     keybindsPanel = new ScrollingPanel();
     keybindsPanel->position = posInTab;
     keybindsPanel->wxWidth = wxWidth - 20;
-    keybindsPanel->wxHeight = wxHeight - 140;
+    keybindsPanel->wxHeight = wxHeight - 130 - posInTab.y;
     keybindsPanel->scrollVertically = true;
     keybindsPanel->scrollHorizontally = false;
     configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
@@ -272,7 +282,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsStack->takeMouseWheelEvents = false;
     keybindsPanel->subWidgets.addDrawable(keybindsStack);
 
-    createKeybindButtons("");
+    createKeybindButtons(keybindSearchField->getText());
 
     /*
         -------------------------
@@ -551,7 +561,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     currentBindTarget->ctrl = ctrl;
                     currentBindTarget->shift = shift;
                     if (updateAll) {
-                        createKeybindButtons("");
+                        createKeybindButtons(keybindSearchField->getText());
                     }
                     else {
                         updateKeybindButtonText(currentBindTarget, currentBindTargetButton);
@@ -579,7 +589,7 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
 
             currentBindTarget->gamepadButton = btn;
             if (updateAll) {
-                createKeybindButtons("");
+                createKeybindButtons(keybindSearchField->getText());
             }
             else {
                 updateKeybindButtonText(currentBindTarget, currentBindTargetButton);

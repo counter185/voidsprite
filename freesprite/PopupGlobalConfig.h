@@ -24,6 +24,7 @@ private:
     UILabel* languageCredit = NULL;
     GlobalConfig previousConfig;
     std::vector<std::string> previousKeybinds;
+    UITextField* keybindSearchField = NULL;
 
     Timer64 keyBindingTimer;
     bool bindingKey = false;

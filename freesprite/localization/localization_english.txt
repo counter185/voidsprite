@@ -350,6 +350,7 @@
     {"vsp.config.tab.misc", "Misc."},
 
     {"vsp.config.tab.plugins.noplugins", "No plugins were loaded"},
+    {"vsp.config.tab.keybinds.search", "Search"},
 
     {"vsp.config.opt.pngextdata", "Save/load extra data to PNGs"},
     {"vsp.config.opt.pngextdata.desc", "When enabled, voidsprite will load and save extra data such as canvas comments,\n"
