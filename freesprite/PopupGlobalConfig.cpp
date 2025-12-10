@@ -544,17 +544,31 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
                     bool ctrl = g_ctrlModifier;
                     bool shift = g_shiftModifier;
 
-                    bool updateAll = false;
+                    std::vector<KeyCombo*> unassignTargets;
 
                     if (currentBindTargetRegion->regionKey != "global") {
-                        updateAll =
-                            currentBindTargetRegion->unassignAllWith(key, ctrl, shift)
-                            || g_keybindManager.regions["global"].unassignAllWith(key, ctrl, shift);
+                        unassignTargets = joinVectors({ 
+                            unassignTargets,
+                            currentBindTargetRegion->findAllKeysWith(key,ctrl,shift),
+                            g_keybindManager.regions["global"].findAllKeysWith(key, ctrl, shift)
+                        });
                     }
                     else {
                         for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
-                            updateAll |= keyRegion.unassignAllWith(key, ctrl, shift);
+                            unassignTargets = joinVectors({ 
+                                unassignTargets,
+                                keyRegion.findAllKeysWith(key, ctrl, shift)
+                            });
                         }
+                    }
+
+                    bool updateAll = !unassignTargets.empty();
+                    for (auto& unassigned : unassignTargets) {
+                        g_addNotification(WarningNotification(
+                            "Unassigned:",
+                            unassigned->displayName
+                        ));
+                        unassigned->unassign();
                     }
 
                     currentBindTarget->key = key;
@@ -574,17 +588,30 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
             bindingKey = false;
             playPopupCloseVFX();
 
-            bool updateAll = false;
+            std::vector<KeyCombo*> unassignTargets;
 
             if (currentBindTargetRegion->regionKey != "global") {
-                updateAll =
-                    currentBindTargetRegion->unassignAllWith(btn)
-                    || g_keybindManager.regions["global"].unassignAllWith(btn);
+                unassignTargets = joinVectors({ 
+                    unassignTargets,
+                    currentBindTargetRegion->findAllKeysWith(btn),
+                    g_keybindManager.regions["global"].findAllKeysWith(btn)
+                });
             }
             else {
                 for (auto& [regionName, keyRegion] : g_keybindManager.regions) {
-                    updateAll |= keyRegion.unassignAllWith(btn);
+                    unassignTargets = joinVectors({
+                        unassignTargets,
+                        keyRegion.findAllKeysWith(btn)
+                    });
                 }
+            }
+            bool updateAll = !unassignTargets.empty();
+            for (auto& unassigned : unassignTargets) {
+                g_addNotification(WarningNotification(
+                    "Unassigned:",
+                    unassigned->displayName
+                ));
+                unassigned->unassignGamepad();
             }
 
             currentBindTarget->gamepadButton = btn;

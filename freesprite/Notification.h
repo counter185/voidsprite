@@ -3,6 +3,7 @@
 #include "Timer64.h"
 
 #define ErrorNotification(a,b) Notification(a,b,5000*(g_config.longErrorNotifs ? 3 : 1),g_iconNotifError,SDL_Color{0xFF,0xBA,0xBA,255})
+#define WarningNotification(a,b) Notification(a,b,5000,NULL,SDL_Color{0xFE,0xFF,0x48,255})
 #define SuccessNotification(a,b) Notification(a,b,4000,g_iconNotifSuccess,SDL_Color{0xD9,0xFF,0xBA,255})
 #define SuccessShortNotification(a,b) Notification(a,b,1500,g_iconNotifSuccess,SDL_Color{0xD9,0xFF,0xBA,255})
 

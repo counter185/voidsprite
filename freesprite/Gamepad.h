@@ -8,6 +8,7 @@ public:
 
     bool gamepadConnected = false;
     SDL_Gamepad* gamepad = NULL;
+    std::string gamepadName = "";
     void TryCaptureGamepad();
     void TakeEvent(SDL_Event evt);
     void SetLightbar(uint8_t r, uint8_t g, uint8_t b);

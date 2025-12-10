@@ -90,23 +90,38 @@ public:
     std::map<std::string, KeyCombo> keybinds;
     std::vector<std::string> orderInSettings;
 
-    bool unassignAllWith(SDL_Scancode c, bool ctrl, bool shift) {
-        bool ret = false;
+    std::vector<KeyCombo*> findAllKeysWith(SDL_Scancode c, bool ctrl, bool shift) {
+        std::vector<KeyCombo*> ret;
         for (auto& [key, kc] : keybinds) {
             if (kc.key == c && kc.shift == shift && kc.ctrl == ctrl) {
-                kc.unassign();
-                ret = true;
+                ret.push_back(&kc);
             }
+        }
+        return ret;
+    }
+    std::vector<KeyCombo*> findAllKeysWith(SDL_GamepadButton btn) {
+        std::vector<KeyCombo*> ret;
+        for (auto& [key, kc] : keybinds) {
+            if (kc.gamepadButton == btn) {
+                ret.push_back(&kc);
+            }
+        }
+        return ret;
+    }
+
+    bool unassignAllWith(SDL_Scancode c, bool ctrl, bool shift) {
+        bool ret = false;
+        for (auto*& kc : findAllKeysWith(c,ctrl,shift)) {
+            kc->unassign();
+            ret = true;
         }
         return ret;
     }
     bool unassignAllWith(SDL_GamepadButton btn) {
         bool ret = false;
-        for (auto& [key, kc] : keybinds) {
-            if (kc.gamepadButton == btn) {
-                kc.unassignGamepad();
-                ret = true;
-            }
+        for (auto*& kc : findAllKeysWith(btn)) {
+            kc->unassignGamepad();
+            ret = true;
         }
         return ret;
     }
@@ -160,13 +175,13 @@ public:
         int key = std::stoi(splitByPlus[0]);
         bool ctrl = splitByPlus[1] == "1";
         bool shift = splitByPlus[2] == "1";
-		int gamepadButton = splitByColon.size() >= 3 ? std::stoi(splitByColon[2]) : SDL_GAMEPAD_BUTTON_INVALID;
+        int gamepadButton = splitByColon.size() >= 3 ? std::stoi(splitByColon[2]) : SDL_GAMEPAD_BUTTON_INVALID;
 
         if (regions[region].keybinds.contains(keyName)) {
             regions[region].keybinds[keyName].key = (SDL_Scancode)key;
             regions[region].keybinds[keyName].ctrl = ctrl;
             regions[region].keybinds[keyName].shift = shift;
-			regions[region].keybinds[keyName].gamepadButton = (SDL_GamepadButton)gamepadButton;
+            regions[region].keybinds[keyName].gamepadButton = (SDL_GamepadButton)gamepadButton;
         }
     }
 

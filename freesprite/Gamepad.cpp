@@ -10,11 +10,17 @@ void Gamepad::TryCaptureGamepad()
         if (n > 0) {
             for (int x = 0; x < n && gamepad == NULL; x++) {
                 gamepad = SDL_OpenGamepad(ids[x]);
+                auto* gamepadNewName = SDL_GetGamepadName(gamepad);
+                
                 if (gamepad == NULL) {
-                    logerr(frmt("Error opening gamepad {}:\n {}", SDL_GetGamepadNameForID(ids[x]), SDL_GetError()));
+                    auto* gamepadIDName = SDL_GetGamepadNameForID(ids[x]);
+                    logerr(frmt("Error opening gamepad {}:\n {}", (gamepadIDName != NULL ? gamepadIDName : ""), SDL_GetError()));
                 }
                 else {
-                    loginfo(frmt("Connected gamepad: {}", SDL_GetGamepadName(gamepad)));
+                    if (gamepadNewName != NULL) {
+                        gamepadName = std::string(gamepadNewName);
+                    }
+                    loginfo(frmt("Connected gamepad: {}", gamepadName));
                 }
             }
         }
@@ -22,7 +28,7 @@ void Gamepad::TryCaptureGamepad()
     }
 
     if (gamepad != NULL) {
-        std::string name = SDL_GetGamepadName(gamepad);
+        std::string name = gamepadName;
         g_addNotification(Notification("Gamepad connected", name, 5000, NULL, uint32ToSDLColor(GetColorForGamepadName(name))));
     }
     
