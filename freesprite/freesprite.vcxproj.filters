@@ -684,6 +684,9 @@
     <ClCompile Include="UndoStack.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UIHueWheel.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1360,6 +1363,9 @@
     </ClInclude>
     <ClInclude Include="UndoStack.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIHueWheel.h">
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

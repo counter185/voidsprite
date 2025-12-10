@@ -31,6 +31,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"compactEditor", &g_config.compactEditor },
         {"autoScreenScale", &g_config.autoViewportScale},
         {"longErrorNotifs", &g_config.longErrorNotifs},
+        {"hueWheelInsteadOfSlider", &g_config.hueWheelInsteadOfSlider},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

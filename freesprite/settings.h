@@ -33,6 +33,7 @@ public:
     bool compactEditor = false;
     bool autoViewportScale = ONPLATFORM(VSP_PLATFORM_ANDROID, true, false);
     bool longErrorNotifs = false;
+    bool hueWheelInsteadOfSlider = false;
 
     std::vector<std::string> lastOpenFiles;
 
@@ -45,6 +46,7 @@ struct DebugSettings {
     bool debugColorSliderGradients = false;
     bool debugTestLocalization = false;
     bool debugShowTilesRPG2K = false;
+    bool debugColorWheel = false;
 };
 
 inline bool g_configWasLoaded = false;

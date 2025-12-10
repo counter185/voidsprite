@@ -238,6 +238,7 @@ class UITextField;
 class UICheckbox;
 class UIDropdown;
 class UIColorPicker;
+class UIHueWheel;
 class Panel;
 class UIStackPanel;
 class DraggablePanel;

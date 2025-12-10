@@ -54,6 +54,7 @@ public:
     double currentH = 0, currentS = 0, currentV = 0;
     uint8_t currentR = 0, currentG = 0, currentB = 0;
 
+    UIHueWheel* hueWheel = NULL;
     UIHueSlider* hueSlider = NULL;
     UISVPicker* satValSlider = NULL;
     UITextField* colorTextField = NULL;

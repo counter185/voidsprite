@@ -475,6 +475,7 @@
     <ClCompile Include="UIColorSlider.cpp" />
     <ClCompile Include="UIDropdown.cpp" />
     <ClCompile Include="UIHueSlider.cpp" />
+    <ClCompile Include="UIHueWheel.cpp" />
     <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UILayerButton.cpp" />
     <ClCompile Include="UISlider.cpp" />
@@ -702,6 +703,7 @@
     <ClInclude Include="UIDoubleSlider.h" />
     <ClInclude Include="UIDropdown.h" />
     <ClInclude Include="UIHueSlider.h" />
+    <ClInclude Include="UIHueWheel.h" />
     <ClInclude Include="UILabel.h" />
     <ClInclude Include="UILayerButton.h" />
     <ClInclude Include="UISlider.h" />

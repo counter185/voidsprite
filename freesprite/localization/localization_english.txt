@@ -437,6 +437,9 @@
     {"vsp.config.opt.canvaszoomsens", "Canvas zoom sensitivity"},
     {"vsp.config.opt.autoscale", "Automatic screen scale"},
     {"vsp.config.opt.autoscale.desc", "The screen will scale automatically after the window is resized."},
+    {"vsp.config.opt.huewheel", "Use hue wheel instead of slider"},
+    {"vsp.config.opt.huewheel.desc", "The Visual color picker will use a wheel for hue instead of a slider.\n"
+                                     "Does not apply to any currently open editor workspaces."},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

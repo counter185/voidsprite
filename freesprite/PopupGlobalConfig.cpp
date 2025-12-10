@@ -229,6 +229,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.compacteditor"), TL("vsp.config.opt.compacteditor.desc"), &g_config.compactEditor, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.huewheel"), TL("vsp.config.opt.huewheel.desc"), &g_config.hueWheelInsteadOfSlider, &posInTab));
 
     UILabel* lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;
@@ -452,6 +453,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         UTF8_EMPTY_DIAMOND " will appear next to strings that are being pulled as fallback from English",
         &g_debugConfig.debugTestLocalization, &posInTab));
     configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Debug color wheel geometry", "", &g_debugConfig.debugColorWheel, &posInTab));
 #endif
     
 

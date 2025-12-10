@@ -1,5 +1,6 @@
 #pragma once
 #include "globals.h"
+#include "Layer.h"
 
 class UndoStackElementV2 {
 public:

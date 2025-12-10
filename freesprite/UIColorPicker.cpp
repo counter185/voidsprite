@@ -9,6 +9,7 @@
 #include "PopupPickColor.h"
 #include "PopupYesNo.h"
 #include "PopupTextBox.h"
+#include "UIHueWheel.h"
 #include "io/io_voidsprite.h"
 
 #if _WIN32
@@ -37,7 +38,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     colorModeTabs = new TabbedView({ 
         { TL("vsp.maineditor.panel.colorpicker.tab.colors")},
         { TL("vsp.maineditor.panel.colorpicker.tab.last")},
-        { TL("vsp.maineditor.panel.colorpicker.tab.palettes")}
+        { TL("vsp.maineditor.panel.colorpicker.tab.palettes")},
         }, 85);
     colorModeTabs->position = XY{ 20,30 };
     subWidgets.addDrawable(colorModeTabs);
@@ -56,12 +57,29 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     //   -------------------
     //   | Visual tab
 
-    hueSlider = new UIHueSlider(this);
-    hueSlider->position = XY{ 0,10 };
-    colorTabs->tabs[0].wxs.addDrawable(hueSlider);
-
     satValSlider = new UISVPicker(this);
-    satValSlider->position = XY{ 0,40 };
+
+    if (g_config.hueWheelInsteadOfSlider) {
+        hueWheel = new UIHueWheel(this);
+        hueWheel->wxWidth = 230;
+        hueWheel->wxHeight = 230;
+        hueWheel->position = { 10,10 };
+        colorTabs->tabs[0].wxs.addDrawable(hueWheel);
+
+        SDL_Rect innerRect = hueWheel->innerRect();
+
+        satValSlider->position = xyAdd(hueWheel->position, XY{ innerRect.x, innerRect.y });
+        satValSlider->wxWidth = innerRect.w;
+        satValSlider->wxHeight = innerRect.h;
+    }
+    else {
+
+        hueSlider = new UIHueSlider(this);
+        hueSlider->position = XY{ 0,10 };
+        colorTabs->tabs[0].wxs.addDrawable(hueSlider);
+
+        satValSlider->position = XY{ 0,40 };
+    }
     colorTabs->tabs[0].wxs.addDrawable(satValSlider);
 
     //   -------------------
@@ -218,6 +236,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
         yNow += 35;
 #endif
     }
+
     //-----------------
     //| Palettes tab
     palettePanel = new ScrollingPanel();
@@ -762,7 +781,12 @@ void UIColorPicker::updateSliderTabRGBSliders()
 
 void UIColorPicker::updateVisualTabHSVPicker()
 {
-    hueSlider->sliderPos = (float)(currentH / 360.0);
+    if (hueSlider != NULL) {
+        hueSlider->sliderPos = (float)(currentH / 360.0);
+    }
+    if (hueWheel != NULL) {
+        hueWheel->value = currentH;
+    }
     satValSlider->sPos = (float)currentS;
     satValSlider->vPos = (float)currentV;
 }
