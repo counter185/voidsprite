@@ -30,6 +30,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"singleInstance", &g_config.singleInstance },
         {"compactEditor", &g_config.compactEditor },
         {"autoScreenScale", &g_config.autoViewportScale},
+        {"longErrorNotifs", &g_config.longErrorNotifs},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

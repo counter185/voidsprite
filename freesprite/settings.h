@@ -32,6 +32,7 @@ public:
     int canvasZoomSensitivity = 1;//1 to 50
     bool compactEditor = false;
     bool autoViewportScale = ONPLATFORM(VSP_PLATFORM_ANDROID, true, false);
+    bool longErrorNotifs = false;
 
     std::vector<std::string> lastOpenFiles;
 
