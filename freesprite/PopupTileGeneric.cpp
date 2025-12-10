@@ -53,6 +53,8 @@ PopupTileGeneric::PopupTileGeneric(EventCallbackListener* callback, std::string 
     wxsManager.addDrawable(tboxY);
 
     makeTitleAndDesc(tt, tx);
+
+    wxsManager.forceFocusOn(tboxX);
 }
 
 void PopupTileGeneric::eventButtonPressed(int evt_id) {

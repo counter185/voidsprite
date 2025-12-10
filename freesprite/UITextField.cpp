@@ -37,7 +37,17 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
                 break;
             case SDL_SCANCODE_BACKSPACE:
                 if (!text.empty()) {
-                    text = text.substr(0, text.size() - 1);
+                    if (g_ctrlModifier) {
+                        auto lastSpacePos = text.find_last_of(' ');
+                        if (lastSpacePos == std::string::npos) {
+                            lastSpacePos = 0;
+                        }
+                        text = text.substr(0, lastSpacePos);
+                    }
+                    else {
+                        text = text.substr(0, text.size() - 1);
+                    }
+
                     if (onTextChangedCallback != NULL) {
                         onTextChangedCallback(this, text);
                     }
