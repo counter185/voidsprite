@@ -18,7 +18,7 @@ void UIHueWheel::render(XY at)
     double r = outerDistance();
     double r2 = innerDistance();
 
-    double accuracy = 13;
+    double accuracy = 12;
 
     std::vector<SDL_Vertex> vertexBuffer;
 
@@ -29,8 +29,8 @@ void UIHueWheel::render(XY at)
         double vecX = cos(rad);
         double vecY = sin(rad);
 
-        XY longerPos = xyAdd(origin, { (int)(vecX * r), (int)(vecY * r) });
-        XY shorterPos = xyAdd(origin, { (int)(vecX * r2), (int)(vecY * r2) });
+        XY longerPos = xyAdd(origin, { (int)round(vecX * r), (int)round(vecY * r) });
+        XY shorterPos = xyAdd(origin, { (int)round(vecX * r2), (int)round(vecY * r2) });
 
         SDL_Color col = rgb2sdlcolor(hsv2rgb(hsv{ a, 1.0, 1.0 }));
 
@@ -66,6 +66,14 @@ void UIHueWheel::render(XY at)
             SDL_RenderLines(g_rd, fps.data(), 4);
         }
 #endif
+    }
+
+    //draw outline
+    for (int i = 0; i < vertexBuffer.size() - 2; i++) {
+        XY cPos = { (int)vertexBuffer[i].position.x, (int)vertexBuffer[i].position.y };
+        XY cNextPos = { (int)vertexBuffer[i + 2].position.x, (int)vertexBuffer[i + 2].position.y };
+        SDL_SetRenderDrawColor(g_rd, 255,255,255, 80);
+        drawLine(cPos, cNextPos, 1.0);
     }
 
     if (g_debugConfig.debugColorWheel) {

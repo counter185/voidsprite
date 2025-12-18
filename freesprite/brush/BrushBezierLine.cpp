@@ -31,8 +31,13 @@ void BrushBezierLine::rightClickPress(MainEditor* editor, XY pos)
 {
     if (points.size() > 1) {
         editor->commitStateToCurrentLayer();
+        int size = (int)(editor->toolProperties["brush.bezierline.size"]);
+        bool round = editor->toolProperties["brush.bezierline.round"] == 1;
+
         rasterizeBezierCurve(points, [&](XY a) {
-            editor->SetPixel(a, editor->getActiveColor());
+            rasterizePoint(a, size, [&](XY p) {
+                editor->SetPixel(p, editor->getActiveColor());
+            }, round);
         });
     }
 
@@ -40,20 +45,16 @@ void BrushBezierLine::rightClickPress(MainEditor* editor, XY pos)
     points.clear();
 }
 
-void BrushBezierLine::renderOnCanvas(XY canvasDrawPoint, int scale)
+void BrushBezierLine::renderOnCanvas(MainEditor* editor, int scale)
 {
+    XY canvasDrawPoint = editor->canvas.currentDrawPoint;
+
     rasterizeBezierCurve(points, [&](XY a) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x50);
-        drawLocalPoint(canvasDrawPoint, a, scale);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x50);
-        drawPointOutline(canvasDrawPoint, a, scale);
+        drawSelectedPoint(editor, a);
     });
 
     for (XY& p : points) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-        drawLocalPoint(canvasDrawPoint, p, scale);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        drawPointOutline(canvasDrawPoint, p, scale);
+        drawSelectedPoint(editor, p);
     }
 
     for (int x = 0; x < (int)points.size() - 1; x++) {
@@ -67,8 +68,5 @@ void BrushBezierLine::renderOnCanvas(XY canvasDrawPoint, int scale)
         SDL_RenderDrawLine(g_rd, osp1.x, osp1.y, osp2.x, osp2.y);
     }
 
-    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
-    drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-    drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+    drawSelectedPoint(editor, lastMouseMotionPos);
 }

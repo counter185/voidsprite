@@ -32,6 +32,7 @@ void BrushRect::clickRelease(MainEditor* editor, XY pos)
                     }, round);
                 });
             }
+            editor->getCurrentLayer()->bgOpFinished = true;
         });
     }
 }

@@ -31,11 +31,8 @@ class Brush1x1PixelPerfect : public BaseBrush
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override;
     void clickRelease(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale) override {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-        drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+    void renderOnCanvas(MainEditor* editor, int scale) override {
+        drawSelectedPoint(editor, lastMouseMotionPos);
     }
 };
 
@@ -58,11 +55,8 @@ class Brush1x1Burst : public BaseBrush
     bool overrideRightClick() override { return true; }
     void rightClickPress(MainEditor* editor, XY pos) override;
     void rightClickRelease(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-        drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+    void renderOnCanvas(MainEditor* editor, int scale) {
+        drawSelectedPoint(editor, lastMouseMotionPos);
     }
 };
 

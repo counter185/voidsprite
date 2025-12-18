@@ -2,92 +2,87 @@
 
 void BrushCircle::clickPress(MainEditor* editor, XY pos)
 {
-	startPos = pos;
-	heldDown = true;
+    startPos = pos;
+    heldDown = true;
 }
 
 void BrushCircle::clickRelease(MainEditor* editor, XY pos)
 {
-	XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y)};
-	XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
-	rasterizeEllipse(posMin, posMax, [&](XY a) {
-		editor->SetPixel(a, editor->getActiveColor());
-	});
-	heldDown = false;
+    XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
+    XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
+
+    int size = (int)(editor->toolProperties["brush.circle.size"]);
+    bool round = editor->toolProperties["brush.circle.round"] == 1;
+
+    rasterizeEllipse(posMin, posMax, [&](XY a) {
+        rasterizePoint(a, size, [&](XY p) {
+            editor->SetPixel(p, editor->getActiveColor());
+        }, round);
+    });
+    heldDown = false;
 }
 
-void BrushCircle::renderOnCanvas(XY canvasDrawPoint, int scale)
+void BrushCircle::renderOnCanvas(MainEditor* editor, int scale)
 {
-	if (heldDown) {
-		XY posMin = { ixmin(lastMouseMotionPos.x, startPos.x), ixmin(lastMouseMotionPos.y, startPos.y) };
-		XY posMax = { ixmax(lastMouseMotionPos.x, startPos.x), ixmax(lastMouseMotionPos.y, startPos.y) };
-		rasterizeEllipse(posMin, posMax, [&](XY a) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-			drawLocalPoint(canvasDrawPoint, a, scale);
-			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-			drawPointOutline(canvasDrawPoint, a, scale);
-			});
-	}
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-	drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-	drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+    if (heldDown) {
+        XY posMin = { ixmin(lastMouseMotionPos.x, startPos.x), ixmin(lastMouseMotionPos.y, startPos.y) };
+        XY posMax = { ixmax(lastMouseMotionPos.x, startPos.x), ixmax(lastMouseMotionPos.y, startPos.y) };
+        rasterizeEllipse(posMin, posMax, [&](XY a) {
+            drawSelectedPoint(editor, a);
+        });
+    }
+
+    drawSelectedPoint(editor, lastMouseMotionPos);
 }
 
 void BrushCircleArc::clickPress(MainEditor* editor, XY pos)
 {
-	startPos = pos;
-	heldDown = true;
-	rightClicked = false;
+    startPos = pos;
+    heldDown = true;
+    rightClicked = false;
 }
 
 void BrushCircleArc::clickRelease(MainEditor* editor, XY pos)
 {
-	if (heldDown && !rightClicked) {
-		XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
-		XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
-		rasterizeSplitEllipse(posMin, posMax, [&](XY a) {
-			editor->SetPixel(a, editor->getActiveColor());
-			});
-		heldDown = false;
-	}
+    if (heldDown && !rightClicked) {
+        XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
+        XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
+        rasterizeSplitEllipse(posMin, posMax, [&](XY a) {
+            editor->SetPixel(a, editor->getActiveColor());
+        });
+        heldDown = false;
+    }
 }
 
-void BrushCircleArc::renderOnCanvas(XY canvasDrawPoint, int scale)
+void BrushCircleArc::renderOnCanvas(MainEditor* editor, int scale)
 {
-	//logprintf("held down: %i right clicked: %i\n", heldDown, rightClicked);
-	if (heldDown) {
-		XY posMin = { ixmin(lastMouseMotionPos.x, startPos.x), ixmin(lastMouseMotionPos.y, startPos.y) };
-		XY posMax = { ixmax(lastMouseMotionPos.x, startPos.x), ixmax(lastMouseMotionPos.y, startPos.y) };
-		(rightClicked ? &rasterizeSplitEllipseByY : &rasterizeSplitEllipse)(posMin, posMax, [&](XY a) {
-			SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-			drawLocalPoint(canvasDrawPoint, a, scale);
-			SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-			drawPointOutline(canvasDrawPoint, a, scale);
-		});
-	}
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-	drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-	drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+    //logprintf("held down: %i right clicked: %i\n", heldDown, rightClicked);
+    if (heldDown) {
+        XY posMin = { ixmin(lastMouseMotionPos.x, startPos.x), ixmin(lastMouseMotionPos.y, startPos.y) };
+        XY posMax = { ixmax(lastMouseMotionPos.x, startPos.x), ixmax(lastMouseMotionPos.y, startPos.y) };
+        (rightClicked ? &rasterizeSplitEllipseByY : &rasterizeSplitEllipse)(posMin, posMax, [&](XY a) {
+            drawSelectedPoint(editor, a);
+        });
+    }
+    drawSelectedPoint(editor, lastMouseMotionPos);
 }
 
 void BrushCircleArc::rightClickPress(MainEditor* editor, XY pos)
 {
-	startPos = pos;
-	heldDown = true;
-	rightClicked = true;
+    startPos = pos;
+    heldDown = true;
+    rightClicked = true;
 }
 
 void BrushCircleArc::rightClickRelease(MainEditor* editor, XY pos)
 {
-	if (heldDown && rightClicked) {
-		editor->commitStateToCurrentLayer();
-		XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
-		XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
-		rasterizeSplitEllipseByY(posMin, posMax, [&](XY a) {
-			editor->SetPixel(a, editor->getActiveColor());
-			});
-		heldDown = false;
-	}
+    if (heldDown && rightClicked) {
+        editor->commitStateToCurrentLayer();
+        XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
+        XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
+        rasterizeSplitEllipseByY(posMin, posMax, [&](XY a) {
+            editor->SetPixel(a, editor->getActiveColor());
+        });
+        heldDown = false;
+    }
 }

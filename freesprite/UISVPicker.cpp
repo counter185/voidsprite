@@ -46,6 +46,9 @@ void UISVPicker::render(XY pos)
     renderGradient(pickerRect, modAlpha(c, 0), modAlpha(c, 255), modAlpha(c,0), modAlpha(c,255));
     renderGradient(pickerRect, 0x00000000, 0x00000000, 0xFF000000, 0xFF000000);
 
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
+    SDL_RenderDrawRect(g_rd, &pickerRect);
+
     drawPosIndicator(pos);
 }
 
