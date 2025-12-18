@@ -171,9 +171,6 @@
     <ClCompile Include="brush\Brush1x1.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
-    <ClCompile Include="brush\Brush3pxCircle.cpp">
-      <Filter>Source files\brushes</Filter>
-    </ClCompile>
     <ClCompile Include="brush\BrushRect.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
@@ -705,9 +702,6 @@
       <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="brush\Brush1x1.h">
-      <Filter>Header files\brushes</Filter>
-    </ClInclude>
-    <ClInclude Include="brush\Brush3pxCircle.h">
       <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="brush\BrushRect.h">

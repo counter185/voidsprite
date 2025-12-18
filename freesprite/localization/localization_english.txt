@@ -509,9 +509,11 @@
     {"vsp.brush.param.pressuresize", "Pressure size"},
     {"vsp.brush.param.precision", "Precision"},
     {"vsp.brush.param.invert", "Invert"},
+    {"vsp.brush.param.round", "Round"},
+    {"vsp.brush.param.gradsize", "Increasing size"},
 
     {"vsp.brush.undefined", "Default brush"},
-    {"vsp.brush.squarepixel", "Square Pixel"},
+    {"vsp.brush.squarepixel", "Pixel"},
     {"vsp.brush.squarepixelpxperfect", "1x1 Pixel (Pixel-Perfect)"},
     {"vsp.brush.squarepixelburst", "1x1 Pixel (burst)"},
     {"vsp.brush.squarepixelburst.desc", "Hold Mouse Left to draw.\n"
@@ -519,13 +521,12 @@
                                         "This will create interconnecting lines."},
     {"vsp.brush.squarepixelarcx", "1x1 Pixel (arc X)"},
     {"vsp.brush.squarepixelarcy", "1x1 Pixel (arc Y)"},
-    {"vsp.brush.line", "1px Line"},
+    {"vsp.brush.line:v2", "Line"},
     {"vsp.brush.line.desc", "Hold Mouse Left at the beginning of the line, then release at the end point"},
     {"vsp.brush.pathfindline", "1px Pathfind Line"},
     {"vsp.brush.pathfindline.desc", "Hold Mouse Left at the start point, then release at the end point.\n"
                                     "Pathfinding will be used to draw it."},
-    {"vsp.brush.roundpixel", "Round Pixel"},
-    {"vsp.brush.rect", "1px Rectangle"},
+    {"vsp.brush.rect:v2", "Rectangle"},
     {"vsp.brush.rectfill", "Filled Rectangle"},
     {"vsp.brush.circle", "1px Circle"},
     {"vsp.brush.circlearc", "1px Circle (arc)"},

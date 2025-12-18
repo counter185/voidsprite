@@ -269,7 +269,6 @@
     <ClCompile Include="brush\Brush1x1.cpp" />
     <ClCompile Include="brush\Brush1x1ArcX.cpp" />
     <ClCompile Include="brush\Brush1x1ArcY.cpp" />
-    <ClCompile Include="brush\Brush3pxCircle.cpp" />
     <ClCompile Include="brush\Brush9SegmentRect.cpp" />
     <ClCompile Include="brush\BrushBezierLine.cpp" />
     <ClCompile Include="brush\BrushCircle.cpp" />
@@ -506,7 +505,6 @@
     <ClInclude Include="brush\Brush1x1.h" />
     <ClInclude Include="brush\Brush1x1ArcX.h" />
     <ClInclude Include="brush\Brush1x1ArcY.h" />
-    <ClInclude Include="brush\Brush3pxCircle.h" />
     <ClInclude Include="brush\Brush9SegmentRect.h" />
     <ClInclude Include="brush\BrushBezierLine.h" />
     <ClInclude Include="brush\BrushCircle.h" />

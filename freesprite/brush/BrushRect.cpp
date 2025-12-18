@@ -2,31 +2,63 @@
 
 void BrushRect::clickPress(MainEditor* editor, XY pos)
 {
-	heldDown = true;
-	lastMousePos = pos;
-	startPos = pos;
+    heldDown = true;
+    lastMousePos = pos;
+    startPos = pos;
 }
 
 void BrushRect::clickRelease(MainEditor* editor, XY pos)
 {
-	if (heldDown) {
-		heldDown = false;
-		pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
-		editor->DrawLine(startPos, XY{ pos.x, startPos.y }, editor->getActiveColor());
-		editor->DrawLine(startPos, XY{ startPos.x, pos.y }, editor->getActiveColor());
-		editor->DrawLine(pos, XY{ pos.x, startPos.y }, editor->getActiveColor());
-		editor->DrawLine(pos, XY{ startPos.x, pos.y }, editor->getActiveColor());
-	}
+    if (heldDown) {
+        heldDown = false;
+
+        int size = (int)(editor->toolProperties["brush.pxrect.size"]);
+        bool round = editor->toolProperties["brush.pxrect.round"] == 1;
+
+        pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
+
+        g_startNewOperation([this, editor, pos, round, size]() {
+            for (auto& [start, end] :
+                std::vector<std::pair<XY, XY>>{
+                    {startPos, XY{ pos.x, startPos.y }},
+                    {startPos, XY{ startPos.x, pos.y }},
+                    {pos, XY{ pos.x, startPos.y }},
+                    {pos, XY{ startPos.x, pos.y }}
+                })
+            {
+                rasterizeLine(start, end, [&](XY p) {
+                    rasterizePoint(p, size, [&](XY pp) {
+                        editor->SetPixel(pp, editor->getActiveColor());
+                    }, round);
+                });
+            }
+        });
+    }
 }
 
-void BrushRect::renderOnCanvas(XY canvasDrawPoint, int scale)
+void BrushRect::renderOnCanvas(MainEditor* editor, int scale)
 {
-	if (heldDown) {
-		drawPixelRect(startPos, g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos, canvasDrawPoint, scale);
-	}
+    XY canvasDrawPoint = editor->canvas.currentDrawPoint;
 
-	SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-	drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
-	SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-	drawPointOutline(canvasDrawPoint, lastMouseMotionPos, scale);
+    if (heldDown) {
+        int size = (int)(editor->toolProperties["brush.pxrect.size"]);
+        bool round = editor->toolProperties["brush.pxrect.round"] == 1;
+
+        XY endPoint = g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos;
+        drawPixelRect(startPos, endPoint, canvasDrawPoint, scale);
+
+        for (XY& p : 
+            std::vector<XY>{
+                startPos, endPoint,
+                {startPos.x, endPoint.y}, 
+                {endPoint.x, startPos.y}
+            }) 
+        {
+            rasterizePoint(p, size, [&](XY pp) {
+                drawSelectedPoint(editor, pp);
+            }, round);
+        }
+    }
+
+    drawSelectedPoint(editor, lastMouseMotionPos);
 }

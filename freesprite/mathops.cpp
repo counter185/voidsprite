@@ -317,6 +317,37 @@ double xyzdDistance(XYZd p1, XYZd p2)
     );
 }
 
+void rasterizePoint(XY point, int thickness, std::function<void(XY)> forEachPixel, bool round)
+{
+    if (round && thickness > 2) {
+        rasterizeCirclePoint(point, thickness, forEachPixel);
+    }
+    else {
+        XY origin = { point.x - thickness / 2, point.y - thickness / 2 };
+        for (int y = 0; y < thickness; y++) {
+            for (int x = 0; x < thickness; x++) {
+                forEachPixel(XY{ origin.x + x,  origin.y + y });
+            }
+        }
+    }
+}
+
+void rasterizeCirclePoint(XY point, int r, std::function<void(XY)> forEachPoint)
+{
+    int halfSize = r / 2;
+    //bool sizeOdd = r % 2;
+    XY origin = { point.x - halfSize, point.y - halfSize };
+    for (int x = 0; x < r; x++) {
+        for (int y = 0; y < r; y++) {
+            int dx = x - halfSize;
+            int dy = y - halfSize;
+            if (dx * dx + dy * dy <= halfSize * halfSize) {
+                forEachPoint(xyAdd(origin, { x,y }));
+            }
+        }
+    }
+}
+
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc, bool ceilLine)
 {
     if (from.x == to.x) {

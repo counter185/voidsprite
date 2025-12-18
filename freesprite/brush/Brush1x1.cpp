@@ -3,11 +3,11 @@
 void Brush1x1::clickPress(MainEditor* editor, XY pos) {
     int size = (int)(round(editor->toolProperties["brush.squarepixel.size"]
         * (editor->toolProperties["brush.squarepixel.pressuresens"] == 1 ? editor->penPressure : 1.0)));
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            editor->SetPixel(xyAdd(pos, {i,j}), editor->getActiveColor());
-        }
-    }
+    bool round = editor->toolProperties["brush.squarepixel.round"] == 1;
+
+    rasterizePoint(pos, size, [&](XY p) {
+        editor->SetPixel(p, editor->getActiveColor());
+    }, round);
 }
 
 void Brush1x1::clickDrag(MainEditor* editor, XY from, XY to) {
@@ -17,13 +17,11 @@ void Brush1x1::clickDrag(MainEditor* editor, XY from, XY to) {
 void Brush1x1::renderOnCanvas(MainEditor* editor, int scale) {
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
     int size = (int)(editor->toolProperties["brush.squarepixel.size"]);
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            XY p = xyAdd(lastMouseMotionPos, { i,j });
+    bool round = editor->toolProperties["brush.squarepixel.round"] == 1;
 
-            drawSelectedPoint(editor, p);
-        }
-    }
+    rasterizePoint(lastMouseMotionPos, size, [&](XY p) {
+        drawSelectedPoint(editor, p);
+    }, round);
 }
 
 void Brush1x1PixelPerfect::clickPress(MainEditor* editor, XY pos)

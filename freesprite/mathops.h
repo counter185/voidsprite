@@ -88,6 +88,8 @@ std::string evalRelativePath(std::string directory, std::string file);
 std::string fileNameFromPath(std::string fullPath);
 PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNativePathString subdir);
 
+void rasterizePoint(XY point, int thickness, std::function<void(XY)> forEachPixel, bool round = false);
+void rasterizeCirclePoint(XY point, int r, std::function<void(XY)> forEachPoint);
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0, bool ceilLine = false);
 void rasterizeDiamond(XY from, XY to, std::function<void(XY)> forEachPixel);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);

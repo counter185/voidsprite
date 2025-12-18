@@ -4,7 +4,6 @@
 #include "Brush1x1.h"
 #include "Brush1x1ArcX.h"
 #include "Brush1x1ArcY.h"
-#include "Brush3pxCircle.h"
 #include "Brush1pxLine.h"
 #include "BrushRect.h"
 #include "BrushRectFill.h"
@@ -93,7 +92,6 @@ void g_loadBrushes()
     g_brushes.push_back(new Brush1x1Burst());
     g_brushes.push_back(new Brush1x1ArcX());
     g_brushes.push_back(new Brush1x1ArcY());
-    g_brushes.push_back(new Brush3pxCircle());
     g_brushes.push_back(new Brush1pxLine());
     g_brushes.push_back(new Brush1pxLinePathfind());
     g_brushes.push_back(new BrushBezierLine());

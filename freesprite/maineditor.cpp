@@ -1947,7 +1947,7 @@ void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, ui
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
     rasterizeLine(from, to, [&](XY a)->void {
         SetPixel(a, color);
-        });
+    });
 }
 
 void MainEditor::copyImageToClipboard()
