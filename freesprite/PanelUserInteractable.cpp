@@ -41,8 +41,8 @@ void PanelUserInteractable::setupResizable(XY minDimensions)
 
 void PanelUserInteractable::setupCloseButton(std::function<void()> callback)
 {
-    UIButton* closeButton = new UIButton("X");
-    closeButton->position = { wxWidth - 25, 2 };
+    closeButton = new UIButton("X");
+    repositionCloseButton();
     closeButton->wxWidth = 20;
     closeButton->wxHeight = 20;
     closeButton->onClickCallback = [callback](UIButton* btn) {
@@ -73,6 +73,13 @@ void PanelUserInteractable::renderResizeHandle(XY at)
     }
 }
 
+void PanelUserInteractable::repositionCloseButton()
+{
+    if (closeButton != NULL) {
+        closeButton->position = { wxWidth - 25, 2 };
+    }
+}
+
 PanelUserInteractable::PanelUserInteractable()
 {
     fillUnfocused = visualConfigFill("ui/panel/bg_unfocused");
@@ -82,7 +89,7 @@ PanelUserInteractable::PanelUserInteractable()
 
 bool PanelUserInteractable::isMouseIn(XY thisPositionOnScreen, XY mousePos)
 {
-	return Panel::isMouseIn(thisPositionOnScreen, mousePos) || (resizable && PointInResizeRange(mousePos));
+    return Panel::isMouseIn(thisPositionOnScreen, mousePos) || (resizable && PointInResizeRange(mousePos));
 }
 
 void PanelUserInteractable::handleInput(SDL_Event evt, XY gPosOffset)
@@ -150,6 +157,7 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
             if (resizing && (!collapsible || !collapsed)) {
                 wxWidth = ixmin(g_windowW, ixmax(minResizableSize.x, wxWidth + (int)(evt.motion.xrel)));
                 wxHeight = ixmin(g_windowH, ixmax(minResizableSize.x, wxHeight + (int)(evt.motion.yrel)));
+                repositionCloseButton();
 
                 tryMoveOutOfOOB();
                 return true;

@@ -10,6 +10,7 @@ PanelPreview::PanelPreview(MainEditor* t)
 
     setupDraggable();
     setupCollapsible();
+    setupResizable({ 150,100 });
     addTitleText("PREVIEW");
     setupCloseButton([this]() {
         parent->removeWidget(getTopmostParent());
@@ -55,9 +56,14 @@ void PanelPreview::renderAfterBG(XY at)
         }
     }
 
+    renderImageBound(at);
+
     renderViewportBound(at);
 
     g_popClip();
+
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
+    SDL_RenderDrawRect(g_rd, &canvasDraw);
 }
 
 SDL_Rect PanelPreview::getCanvasDrawRect(XY at) {
@@ -74,11 +80,11 @@ void PanelPreview::renderViewportBound(XY at)
 {
     SDL_Rect texDraw = c.getCanvasOnScreenRect();
 
-	XY topLeft = parent->canvas.screenPointToCanvasPoint({ 0, 0 });
+    XY topLeft = parent->canvas.screenPointToCanvasPoint({ 0, 0 });
     XY bottomRight = parent->canvas.screenPointToCanvasPoint({ g_windowW, g_windowH });
 
-	XY scaledTopLeft = c.canvasPointToScreenPoint(topLeft);
-	XY scaledBottomRight = c.canvasPointToScreenPoint(bottomRight);
+    XY scaledTopLeft = c.canvasPointToScreenPoint(topLeft);
+    XY scaledBottomRight = c.canvasPointToScreenPoint(bottomRight);
 
     SDL_Rect scaledRect = {
         scaledTopLeft.x + at.x,
@@ -88,7 +94,7 @@ void PanelPreview::renderViewportBound(XY at)
     };
 
     SDL_SetRenderDrawColor(g_rd, 0, 0, 0xff, 0xd0);
-	SDL_RenderDrawRect(g_rd, &scaledRect);
+    SDL_RenderDrawRect(g_rd, &scaledRect);
 
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0xd0);
     XY scaledMousePos = c.canvasPointToScreenPoint(parent->mousePixelTargetPoint);
@@ -110,4 +116,20 @@ void PanelPreview::renderViewportBound(XY at)
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0xd0 / (i + 3));
         SDL_RenderDrawRect(g_rd, &offsRect);
     }
+}
+
+void PanelPreview::renderImageBound(XY at)
+{
+    XY scaledTopLeft = c.canvasPointToScreenPoint({0,0});
+    XY scaledBottomRight = c.canvasPointToScreenPoint(parent->canvas.dimensions);
+
+    SDL_Rect scaledRect = {
+        scaledTopLeft.x + at.x,
+        scaledTopLeft.y + at.y,
+        scaledBottomRight.x - scaledTopLeft.x,
+        scaledBottomRight.y - scaledTopLeft.y
+    };
+
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0, 0x80);
+    SDL_RenderDrawRect(g_rd, &scaledRect);
 }

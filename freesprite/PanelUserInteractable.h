@@ -20,6 +20,8 @@ private:
     UIButton* collapseButton = NULL;
     Panel* collapsePanel = NULL;
 
+    UIButton* closeButton = NULL;
+
     void processDrag(SDL_Event evt);
     bool processResize(SDL_Event evt);
     bool PointInResizeRange(XY pos);
@@ -43,6 +45,7 @@ protected:
     virtual bool defaultInputAction(SDL_Event evt, XY at) { return false; }
     virtual void renderAfterBG(XY at) {}
     void renderResizeHandle(XY at);
+    void repositionCloseButton();
 public:
     PanelUserInteractable();
 

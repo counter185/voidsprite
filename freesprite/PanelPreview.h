@@ -20,6 +20,7 @@ public:
 
     void initWidgets();
     void renderViewportBound(XY at);
+    void renderImageBound(XY at);
     SDL_Rect getCanvasDrawRect(XY at);
 };
 
