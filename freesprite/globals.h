@@ -35,7 +35,7 @@
 #endif
 
 #if defined(__clang_version__)
-    #define VSP_COMPILER_VERSION std::string(__clang_version__)
+    #define VSP_COMPILER_VERSION std::string("clang" __clang_version__)
 #elif defined(__GNUC__)
     #define VSP_COMPILER_VERSION std::string("GCC " __VERSION__)
 #elif defined(_MSC_FULL_VER)
