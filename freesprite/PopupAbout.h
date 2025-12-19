@@ -43,7 +43,10 @@ public:
         std::vector<std::pair<std::string, std::string>> aboutTabContents = {
             {TL("vsp.about.tab.general"), generalTabContents},
             {TL("vsp.about.tab.contributors"), contributorTabContents},
-            {TL("vsp.about.tab.systeminfo"), platformGetSystemInfo()},
+            {TL("vsp.about.tab.systeminfo"), 
+                VSP_COMPILER_VERSION + "\n"
+                + platformGetSystemInfo()
+            },
             {TL("vsp.about.tab.libs"), getAllLibsVersions() + "\n" + getLibraryLicenses()},
             {TL("vsp.about.tab.fonts"), getFontLicense()},
         };

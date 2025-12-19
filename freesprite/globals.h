@@ -34,6 +34,17 @@
     #define frmt std::format
 #endif
 
+#if defined(__clang_version__)
+    #define VSP_COMPILER_VERSION __clang_version__
+#elif defined(__GNUC__)
+    #define VSP_COMPILER_VERSION ("GCC " __VERSION__)
+#elif defined(_MSC_FULL_VER)
+    #define VSP_COMPILER_VERSION ("MSVC " + std::to_string(_MSC_VER/100)+"."+std::to_string(_MSC_VER%100)+"."+std::to_string(_MSC_FULL_VER).substr(4))
+#else
+    #define VSP_COMPILER_VERSION ""
+#endif
+
+
 #include <stdarg.h>
 #include <chrono>
 #include <string>
