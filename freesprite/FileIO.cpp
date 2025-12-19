@@ -3325,6 +3325,8 @@ void g_setupIO() {
         }));
     g_fileImporters.push_back(FileImporter::flatImporter("IW Engine IWI", ".iwi", &readIWI, NULL, FORMAT_RGB, 
         magicVerify(0, "IWi")));
+    g_fileImporters.push_back(FileImporter::flatImporter("XNA XNB", ".xnb", &readXNB, NULL, FORMAT_RGB, 
+        magicVerify(0, "XNB")));
     g_fileImporters.push_back(FileImporter::flatImporter("Wii/GC TPL", ".tpl", &readWiiGCTPL));
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
     g_fileImporters.push_back(FileImporter::flatImporter("DDS", ".dds", &readDDS, NULL, FORMAT_RGB, magicVerify(0, "DDS")));

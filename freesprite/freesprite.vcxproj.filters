@@ -684,6 +684,9 @@
     <ClCompile Include="UIHueWheel.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_xna.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1360,6 +1363,9 @@
     </ClInclude>
     <ClInclude Include="UIHueWheel.h">
       <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_xna.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

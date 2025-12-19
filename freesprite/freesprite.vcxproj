@@ -306,6 +306,7 @@
     <ClCompile Include="io\io_valve.cpp" />
     <ClCompile Include="io\io_voidsprite.cpp" />
     <ClCompile Include="io\io_palettes.cpp" />
+    <ClCompile Include="io\io_xna.cpp" />
     <ClCompile Include="keybinds.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="localization\localization.cpp" />
@@ -560,6 +561,7 @@
     <ClInclude Include="io\io_valve.h" />
     <ClInclude Include="io\io_voidsprite.h" />
     <ClInclude Include="io\io_palettes.h" />
+    <ClInclude Include="io\io_xna.h" />
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="keybinds.h" />
     <ClInclude Include="LayerPalettized.h" />
