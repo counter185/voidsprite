@@ -350,15 +350,20 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
 }
 #endif
 
+void main_saveAllScreens()
+{
+    for (auto& [id, wd] : g_windows) {
+        for (auto& s : wd->screenStack) {
+            s->dropEverythingYoureDoingAndSave();
+        }
+    }
+}
+
 static void main_handleSIGSEGV(int sig) {
     //technically unsafe and undefined to call any of these functions
     //but then what is it gonna do, crash twice?
     try {
-        for (auto& [id, wd] : g_windows) {
-            for (auto& s : wd->screenStack) {
-                s->dropEverythingYoureDoingAndSave();
-            }
-        }
+        main_saveAllScreens();
     }
     catch (std::exception&) {}
 
@@ -367,6 +372,15 @@ static void main_handleSIGSEGV(int sig) {
     logerr("Fatal error: Segmentation fault (SIGSEGV)");
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
     exit(0xC0000005);
+}
+
+static void main_handleSIGTERM(int sig) {
+    try {
+        main_saveAllScreens();
+    }
+    catch (std::exception&) {}
+    loginfo_sync("Received SIGTERM, exiting");
+    exit(0);
 }
 
 void main_registerCExceptionHandlers()
@@ -378,6 +392,7 @@ void main_registerCExceptionHandlers()
 #else
     //sigaction might be better
     signal(SIGSEGV, main_handleSIGSEGV);
+    signal(SIGTERM, main_handleSIGTERM);
 #endif
 }
 
