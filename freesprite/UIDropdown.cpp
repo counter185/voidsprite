@@ -23,10 +23,15 @@ void UIDropdown::render(XY pos)
     SDL_Rect drawrect = { pos.x, pos.y, wxWidth, wxHeight };
     SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
     SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+
     SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
     SDL_RenderFillRect(g_rd, &drawrect);
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
     SDL_RenderDrawRect(g_rd, &drawrect);
+
+    SDL_Rect drawRectHalf = drawrect;
+    drawrect.h /= 2;
+    Fill::Gradient(0x10FFFFFF, 0x00FFFFFF, 0x10FFFFFF, 0x00FFFFFF).fill(drawRectHalf);
 
     if (lastClick.started) {
         double lineAnimPercent = 1.0 - XM1PW3P1(lastClick.percentElapsedTime(200));
@@ -130,7 +135,7 @@ std::vector<UIButton*> UIDropdown::genButtonsList(UIButton* (*customButtonGenFun
             btn->tooltip = tooltips.size() > y ? tooltips[y] : "";
             btn->onClickCallback = [this, y](UIButton* b) {
                 this->eventButtonPressed(y);
-			};
+            };
             ret.push_back(btn);
         }
         else {

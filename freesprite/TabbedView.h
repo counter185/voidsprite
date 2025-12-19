@@ -19,8 +19,8 @@ public:
     std::vector<Tab> tabs;
     int buttonsHeight = 30;
     int openTab = 0;
-    SDL_Color tabUnfocusedColor = SDL_Color{ 0,0,0,0x30 };
-    SDL_Color tabFocusedColor = SDL_Color{ 0,0,0,0xe0 };
+    Fill tabUnfocusedFill = visualConfigFill("ui/tabs/bg_unfocused");
+    Fill tabFocusedFill = visualConfigFill("ui/tabs/bg_focused");
     Timer64 tabSwitchTimer;
     bool nextTabSlideFromTheLeft = false;
     std::function<void(TabbedView*,int)> onTabSwitchedCallback = NULL;
@@ -118,7 +118,7 @@ public:
     void updateTabButtons() {
         for (int x = 0; x < tabButtons.drawablesList.size(); x++) {
             UIButton* btn = (UIButton*)tabButtons.drawablesList[x];
-            btn->fill = openTab == x ? tabFocusedColor : tabUnfocusedColor;
+            btn->fill = openTab == x ? tabFocusedFill : tabUnfocusedFill;
         }
     }
 
