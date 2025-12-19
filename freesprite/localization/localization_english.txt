@@ -158,6 +158,7 @@
     {"vsp.launchpad.tab.cellw", "Cell width"},
     {"vsp.launchpad.tab.cellh", "Cell height"},
     {"vsp.launchpad.tab.picktemplate", "Select template..."},
+    {"vsp.launchpad.tab.rgbfill", "Fill"},
     {"vsp.launchpad.tab.creatergb", "Create (RGB)"},
     {"vsp.launchpad.tab.creatergb.tooltip", "Create a new image with full color support."},
     {"vsp.launchpad.tab.createindexed", "Create (Indexed)"},

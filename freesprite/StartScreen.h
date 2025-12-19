@@ -65,11 +65,16 @@ public:
         }
     }
 
-    void eventButtonPressed(int evt_id) override;
     void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
     
+    void NewRGBSession(u32 fill = 0x00000000);
+    void NewIndexedSession();
+    void tryLoadURL(std::string url);
+    void tryLoadFile(std::string path);
+    void tryOpenImageFromClipboard();
+
     void populateLastOpenFiles();
     void renderStartupAnim();
     void renderFileDropAnim();
@@ -78,9 +83,6 @@ public:
     void openImageLoadDialog();
     void promptOpenFromURL();
     static void promptConnectToNetworkCanvas(std::string ip = "", std::string port = "");
-    void tryLoadURL(std::string url);
-    void tryLoadFile(std::string path);
-    void tryOpenImageFromClipboard();
     void updateCheckFinished();
     void genBGStars();
     XY bgSpaceTransform(XY p);

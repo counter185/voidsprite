@@ -6,15 +6,16 @@ class UIColorInputField :
     public Panel
 {
 protected:
-	UIButton* button = NULL;
-	u32 pickedColor;
-	bool allowAlpha = false;
+    u32 pickedColor;
+    bool allowAlpha = false;
 public:
-	std::function<void(UIColorInputField*, u32)> onColorChangedCallback = NULL;
+    UIButton* button = NULL;
 
-	UIColorInputField(bool alpha = false);
+    std::function<void(UIColorInputField*, u32)> onColorChangedCallback = NULL;
 
-	u32 getColor() { return pickedColor; }
-	void setColor(u32 c);
+    UIColorInputField(bool alpha = false);
+
+    u32 getColor() { return pickedColor; }
+    void setColor(u32 c);
 };
 

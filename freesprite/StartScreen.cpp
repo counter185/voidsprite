@@ -30,6 +30,7 @@
 #include "background_operation.h"
 #include "updatecheck.h"
 #include "UIStackPanel.h"
+#include "UIColorInputField.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -144,17 +145,26 @@ StartScreen::StartScreen() {
     newImageTabs->tabs[2].wxs.addDrawable(templatesDropdown);
 
     for (int x = 0; x < 2; x++) {
+
+        newImageTabs->tabs[x].wxs.addDrawable(new UILabel(TL("vsp.launchpad.tab.rgbfill"), {30,100}));
+
+        UIColorInputField* rgbFillField = new UIColorInputField(true);
+        rgbFillField->setColor(0);
+        rgbFillField->position = { 110,100 };
+        rgbFillField->button->wxWidth = 80;
+        newImageTabs->tabs[x].wxs.addDrawable(rgbFillField);
+
         UIButton* buttonNewImageRGB = new UIButton();
-        buttonNewImageRGB->setCallbackListener(4, this);
-        buttonNewImageRGB->position = XY{ 30,90 };
+        buttonNewImageRGB->onClickCallback = [this, rgbFillField](UIButton*) { NewRGBSession(rgbFillField->getColor()); };
+        buttonNewImageRGB->position = XY{ 30,140 };
         buttonNewImageRGB->wxWidth = 160;
         buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
         buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
         newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
 
         UIButton* buttonNewImagePalettized = new UIButton();
-        buttonNewImagePalettized->setCallbackListener(5, this);
-        buttonNewImagePalettized->position = XY{ 200,90 };
+        buttonNewImagePalettized->onClickCallback = [this](UIButton*) { NewIndexedSession(); };
+        buttonNewImagePalettized->position = XY{ 230,140 };
         buttonNewImagePalettized->wxWidth = 200;
         buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
         buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
@@ -410,9 +420,9 @@ void StartScreen::takeInput(SDL_Event evt)
     }
 }
 
-void StartScreen::eventButtonPressed(int evt_id) {
-    if (evt_id == 4) {
-        switch (newImageTabs->openTab) {
+void StartScreen::NewRGBSession(u32 fill)
+{
+    switch (newImageTabs->openTab) {
         case 0:
             if (!tab0TextFieldW->textEmpty() && !tab0TextFieldH->textEmpty()) {
                 try {
@@ -420,6 +430,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     int newImgH = std::stoi(tab0TextFieldH->getText());
                     Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
                     if (newLayer != NULL) {
+                        std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
                         MainEditor* newMainEditor = new MainEditor(newLayer);
                         g_addScreen(newMainEditor);
                     }
@@ -444,6 +455,7 @@ void StartScreen::eventButtonPressed(int evt_id) {
                     int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
                     Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
                     if (newLayer != NULL) {
+                        std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
                         MainEditor* newMainEditor = new MainEditor(newLayer);
                         newMainEditor->tileDimensions = cellSize;
                         g_addScreen(newMainEditor);
@@ -460,10 +472,12 @@ void StartScreen::eventButtonPressed(int evt_id) {
                 g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
-        }
     }
-    if (evt_id == 5) {
-        switch (newImageTabs->openTab) {
+}
+
+void StartScreen::NewIndexedSession()
+{
+    switch (newImageTabs->openTab) {
         case 0:
             if (!tab0TextFieldW->textEmpty() && !tab0TextFieldH->textEmpty()) {
                 try {
@@ -513,7 +527,6 @@ void StartScreen::eventButtonPressed(int evt_id) {
                 g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
-        }
     }
 }
 
