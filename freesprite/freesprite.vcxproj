@@ -589,6 +589,7 @@
     <ClInclude Include="PanelTilemapPreview.h" />
     <ClInclude Include="PanelUserInteractable.h" />
     <ClInclude Include="platform_android.h" />
+    <ClInclude Include="platform_emscripten.h" />
     <ClInclude Include="platform_linux.h" />
     <ClInclude Include="platform_macos.h" />
     <ClInclude Include="platform_universal.h" />

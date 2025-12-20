@@ -1367,6 +1367,9 @@
     <ClInclude Include="io\io_xna.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
+    <ClInclude Include="platform_emscripten.h">
+      <Filter>Header files\platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">
