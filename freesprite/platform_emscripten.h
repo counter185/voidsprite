@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <emscripten/emscripten.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
@@ -14,9 +15,13 @@ u32 platformSupportedFeatures() {
 
 extern char **environ;
 
+EM_JS(char*, emGetUserAgent, (), {
+    return stringToNewUTF8(navigator.userAgent);
+});
 
 void platformPreInit() {
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
+    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/temp");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/templates");
     std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
@@ -101,12 +106,16 @@ FILE *platformOpenFile(PlatformNativePathString path,
 }
 
 std::string platformGetSystemInfo() {
-    std::string ret = "Emscripten";
+    char* ua = emGetUserAgent();
+    std::string ret = "Emscripten\n";
+    ret += ua;
+    free(ua);
     return ret;
 }
 
 std::vector<RootDirInfo> platformListRootDirectories() {
     std::vector<RootDirInfo> ret = {
+        {"Temp. storage", "/vsp/temp"},
         {"MEMFS Root", "/"}
     };
     return ret;

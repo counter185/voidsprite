@@ -1788,6 +1788,9 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                 delete rgbConvEditor;
 
                 if (result) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                    emDownloadFile(lastConfirmedSavePath);
+#endif
                     if (lastWasSaveAs && g_config.openSavedPath) {
                         platformOpenFileLocation(lastConfirmedSavePath);
                     }
@@ -1821,6 +1824,9 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                     PlatformNativePathString tileName = name + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
                     if (!exporter->exportsWholeSession()) {
                         exporter->exportData(tileName, clip);
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                        emDownloadFile(tileName);
+#endif
                         delete clip;
                     }
                     else {
@@ -2012,6 +2018,9 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         lastConfirmedExporter = exporter;
         timerSinceLastSave.start();
         changesSinceLastSave = NO_UNSAVED_CHANGES;
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+        emDownloadFile(lastConfirmedSavePath);
+#endif
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }

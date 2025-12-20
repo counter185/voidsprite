@@ -27,6 +27,36 @@
     #include <windows.h>
 #endif
 
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+#include <emscripten/emscripten.h>
+
+EM_JS(void, emPromptDownloadFileFromMemFS, (char* fileName), {
+    try {
+        var fileNameStr = UTF8ToString(fileName);
+
+        var mimetype = "application/octet-stream";
+        var content = Module.FS.readFile(fileNameStr);
+
+        var newA = document.createElement('a');
+        newA.download = fileNameStr;
+        newA.href = URL.createObjectURL(new Blob([content, {type: mimetype}]));
+        newA.style = "display: none;";
+        document.body.appendChild(newA);
+
+        newA.click();
+
+        setTimeout(()=>{
+            document.body.removeChild(newA);
+            URL.revokeObjectURL(newA.href);
+        }, 15000);
+    } catch(e) {}
+});
+
+void emDownloadFile(PlatformNativePathString path) {
+    emPromptDownloadFileFromMemFS((char*)path.c_str());
+}
+#endif
+
 #include <zlib.h>
 
 using json = nlohmann::json;
@@ -569,12 +599,13 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
     }
 }
 
-std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize)
+//COMPILE WITH -O2 OR ELSE EMSCRIPTEN CRASHES THE MOMENT THIS FUNCTION GETS CALLED
+std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, u64 dataSize)
 {
-    const u32 bufferSize = 65536;
+    const u32 bufferSize = ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 2048, 65536);
 
     std::vector<u8> ret;
-    z_stream strm;
+    z_stream strm{};
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;

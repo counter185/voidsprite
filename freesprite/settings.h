@@ -4,7 +4,7 @@ class GlobalConfig {
 public:
     bool openSavedPath = ONPLATFORM(VSP_PLATFORM_ANDROID, false, true);
     int animatedBackground = 1; //0:off, 1:sharp, 2:smooth, 3:sharp(static), 4:smooth(static)
-    int maxUndoHistory = 20;
+    int maxUndoHistory = ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 15, 20);
     bool scrollWithTouchpad = false;
     bool isolateRectOnLockTile = false;
     bool fillToolTileBound = true;
@@ -23,7 +23,8 @@ public:
     bool showPenPressure = true;
     bool showFPS = false;
     bool checkUpdates = true;
-    int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 2, 3);
+    int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 2,
+                          ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 1, 3));
                                 // 0: none
                                 // 1: delay 45 on unfocus
                                 // 2: delay 500 on unfocus

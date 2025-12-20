@@ -77,6 +77,9 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
         if (exporterId < g_palettizedFileExporters.size()) {
             FileExporter* actualExporterID = g_palettizedFileExporters[exporterId];
             if (trySaveWithExporter(name, actualExporterID)) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                emDownloadFile(lastConfirmedSavePath);
+#endif
                 g_tryPushLastFilePath(convertStringToUTF8OnWin32(name));
             }
         }
@@ -101,6 +104,9 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
             }
 
             if (result) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                emDownloadFile(lastConfirmedSavePath);
+#endif
                 if (lastWasSaveAs && g_config.openSavedPath) {
                     platformOpenFileLocation(lastConfirmedSavePath);
                 }
@@ -130,6 +136,9 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                     PlatformNativePathString tileName = name.substr(0, name.find_last_of(convertStringOnWin32("."))) + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
                     if (!exporter->exportsWholeSession()) {
                         exporter->exportData(tileName, clip);
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                        emDownloadFile(tileName);
+#endif
                         delete clip;
                     }
                     else {
@@ -682,6 +691,9 @@ bool MainEditorPalettized::trySaveWithExporter(PlatformNativePathString name, Fi
         lastConfirmedSavePath = name;
         lastConfirmedExporter = exporter;
         changesSinceLastSave = NO_UNSAVED_CHANGES;
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+        emDownloadFile(lastConfirmedSavePath);
+#endif
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }

@@ -153,10 +153,6 @@ SplitSessionEditor::~SplitSessionEditor()
 
 void SplitSessionEditor::tick()
 {
-    if (closeNextTick) {
-        g_closeScreen(this);
-        return;
-    }
     c.lockToScreenBounds(0, 0, 0, 0);
 }
 
@@ -423,7 +419,7 @@ void SplitSessionEditor::setupWidgets()
                 {
                     {SDL_SCANCODE_C, { "Close",
                         [this]() {
-                            this->closeNextTick = true;
+                            closeThisScreen();
                         }
                     }},
                     {SDL_SCANCODE_S, { "Save",

@@ -338,6 +338,14 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
                     g_addPopup(popup);
                 }
             },
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+            NamedOperation{"Download",
+                [this, fileEntry]() {
+                    auto p = appendPath(currentDir, fileEntry.realFileName);
+                    emDownloadFile(p);
+                }
+            },
+#endif
         });
     };
 

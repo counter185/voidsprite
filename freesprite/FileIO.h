@@ -20,7 +20,7 @@ int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile,
 
 LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 
-std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, size_t dataSize);
+std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, u64 dataSize);
 std::vector<u8> compressZlib(u8* data, size_t dataSize);
 std::vector<u8> base64ToBytes(std::string b64);
 std::vector<u8> decompressGzip(u8* data, size_t dataSize);
@@ -31,6 +31,10 @@ void unZlibFile(PlatformNativePathString path);
 std::function<bool(PlatformNativePathString)> magicVerify(u64 at, std::string header);
 
 PlatformNativePathString newTempFile();
+
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+void emDownloadFile(PlatformNativePathString path);
+#endif
 
 #include "io/io_png.h"
 #include "io/io_aseprite.h"

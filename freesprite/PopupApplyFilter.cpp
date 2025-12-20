@@ -115,16 +115,20 @@ void PopupApplyFilter::applyAndClose()
 
 void PopupApplyFilter::setupPreview()
 {
+//can't have threads on emscripten
+#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
     previewPixelData = (u8*)tracked_malloc(4 * target->w * target->h);
     previewTexture = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, target->w, target->h);
     SDL_SetTextureBlendMode(previewTexture, SDL_BLENDMODE_BLEND);
     target->effectPreviewTexture = previewTexture;
 
     previewRenderThreadObj = std::thread(&PopupApplyFilter::previewRenderThread, this);
+#endif
 }
 
 void PopupApplyFilter::updatePreview()
 {
+#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
     if (pixelDataDirty) {
         u8* ppx;
         int pitch;
@@ -144,6 +148,7 @@ void PopupApplyFilter::updatePreview()
         SDL_UnlockTexture(previewTexture);
         pixelDataDirty = false;
     }
+#endif
 }
 
 std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()

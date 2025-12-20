@@ -804,6 +804,12 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Not implemented"));
     }
 
+    if (success) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+        emDownloadFile(path);
+#endif
+    }
+
     g_addNotification(
         success ? SuccessNotification("Success", "Rendered map to image")
         : ErrorNotification(TL("vsp.cmn.error"), "Error rendering map to image")
