@@ -9,9 +9,11 @@ add_subdirectory(SDL)
 add_subdirectory(SDL_image)
 #add_subdirectory(SDL_mixer)
 add_subdirectory(SDL_ttf)
-add_subdirectory(SDL_net)
 
-add_subdirectory(liblcf)
+if (NOT DEFINED EMSCRIPTEN)
+    add_subdirectory(SDL_net)
+    add_subdirectory(liblcf)
+endif()
 
 add_subdirectory(zlib)
 add_subdirectory(fmt)

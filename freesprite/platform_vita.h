@@ -63,7 +63,7 @@ void platformOpenFileLocation(PlatformNativePathString path) {
 }
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
-    return "ux0:/data/voidsprite";
+    return "ux0:/data/voidsprite/";
 }
 
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {

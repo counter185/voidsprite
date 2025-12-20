@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+mkdir build
+cd build
+emcmake cmake .. -DUSE_FMT_FORMAT=ON -DSDLTTF_VENDORED=ON -DVSP_NETWORKING=OFF -DVOIDSPRITE_JXL_ENABLED=OFF -DVSP_USE_LIBLCF=OFF

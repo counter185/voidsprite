@@ -3,6 +3,8 @@
 //automatically generated
 
 inline std::map<uint16_t, std::string> shiftjisToUTF8Map = {
+#ifndef __EMSCRIPTEN
+//???????????????????????/
     { 0x20, "\x20" },
     { 0x21, "\x21" },
     { 0x22, "\x22" },
@@ -6902,5 +6904,6 @@ inline std::map<uint16_t, std::string> shiftjisToUTF8Map = {
     { 0xEA9F, "\xe5\xa0\xaf" },
     { 0xEAA0, "\xe6\xa7\x87" },
     { 0xEAA1, "\xe9\x81\x99" },
-    { 0xEAA2, "\xe7\x91\xa4" },
+    { 0xEAA2, "\xe7\x91\xa4" }
+#endif
 };

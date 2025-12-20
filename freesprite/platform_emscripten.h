@@ -63,7 +63,7 @@ void platformOpenFileLocation(PlatformNativePathString path) {
 }
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
-    return "/vsp";
+    return "/vsp/";
 }
 
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {
@@ -118,7 +118,8 @@ bool platformHasFileAccessPermissions() {
 void platformRequestFileAccessPermissions() {}
 
 void platformOpenWebpageURL(std::string url) {
-    //todo
+    std::string js = frmt("window.open(\"{}\", \"_blank\")", url);
+    emscripten_run_script(js.c_str());
 }
 
 std::string platformFetchTextFile(std::string url) {

@@ -22,6 +22,9 @@ struct AsyncOp {
 inline std::vector<AsyncOp*> g_asyncOpThreads;
 
 inline void g_startNewOperation(std::function<void()> function) {
+#if __EMSCRIPTEN__
+    function();
+#else
     g_bgOpRunning = true;
     if (threadSet) {
         g_bgOpThread.join();
@@ -34,9 +37,13 @@ inline void g_startNewOperation(std::function<void()> function) {
         function();
         g_bgOpRunning = false;
     });
+#endif
 }
 
 inline void g_startNewAsyncOperation(std::function<void()> function) {
+#if __EMSCRIPTEN__
+    function();
+#else
     AsyncOp* op = new AsyncOp();
     g_asyncOpThreads.push_back(op);
     op->thread = new std::thread([function, op]() {
@@ -44,6 +51,7 @@ inline void g_startNewAsyncOperation(std::function<void()> function) {
         function();
         op->done = true;
     });
+#endif
 }
 
 inline void g_startNewMainThreadOperation(std::function<void()> function) {
