@@ -44,6 +44,10 @@
 
 #include "ee_creature.h"
 
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+    #include <emscripten/emscripten.h>
+#endif
+
 #include "main.h"
 
 int g_windowW = 1280;
@@ -396,6 +400,406 @@ void main_registerCExceptionHandlers()
 #endif
 }
 
+std::string windowTitle = "";
+uint64_t ticksBegin = SDL_GetTicks64();
+int lastFrameCount = 0;
+int rtFrameCount = 0;
+u64 frameCountTimestamp = 0;
+
+void g_mainLoop() {
+
+    SDL_Event evt;
+
+    g_fullFramerateThisFrame = false;
+    bool firedQuitEventThisFrame = false;
+    bool anyPopupsOpen = false;
+    for (auto& [id, wd] : g_windows) {
+        anyPopupsOpen |= wd->hasPopupsOpen();
+    }
+
+    while (SDL_PollEvent(&evt)) {
+        VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
+        if (wdTarget == NULL) {
+            continue;
+        }
+        wdTarget->thisWindowsTurn();
+
+        evt = handleNumLockInEvent(evt);
+        evt = scaleScreenPositionsInEvent(evt);
+        DrawableManager::processHoverEventInMultiple({ g_currentWindow->overlayWidgets }, evt);
+
+        //events that can fire during bg operation
+        switch (evt.type) {
+        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            evt.type = SDL_EVENT_QUIT;
+            break;
+        case SDL_EVENT_KEY_DOWN:
+            if (evt.key.scancode == SDL_SCANCODE_AC_BACK) {
+                evt.type = SDL_EVENT_QUIT;
+            }
+            else if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
+                g_ctrlModifier = true;
+            }
+            else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
+                g_shiftModifier = true;
+            }
+            break;
+        case SDL_EVENT_KEY_UP:
+            if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
+                g_ctrlModifier = false;
+            }
+            else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
+                g_shiftModifier = false;
+            }
+            break;
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
+#if __ANDROID__
+            if (!SDL_IsDeXMode()) {
+                SDL_MaximizeWindow(g_wd);
+            }
+#endif
+            break;
+        case SDL_EVENT_WINDOW_RESIZED:
+            wdTarget->unscaledWindowSize = { evt.window.data1, evt.window.data2 };
+            if (g_config.autoViewportScale) {
+                wdTarget->autoViewportScale();
+            }
+            else {
+                wdTarget->updateViewportScaler();
+            }
+            break;
+        case SDL_EVENT_MOUSE_MOTION:
+            if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
+                wdTarget->mouseX = (int)(evt.motion.x);
+                wdTarget->mouseY = (int)(evt.motion.y);
+            }
+            break;
+        case SDL_EVENT_FINGER_DOWN:
+        case SDL_EVENT_FINGER_UP:
+        case SDL_EVENT_FINGER_MOTION:
+            g_lastConfirmInputWasTouch = true;
+            SDL_GetTouchFingers(evt.tfinger.touchID, &g_touchPointsOnScreen);
+            if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
+                wdTarget->mouseX = evt.tfinger.x * g_windowW;
+                wdTarget->mouseY = evt.tfinger.y * g_windowH;
+            }
+            break;
+        case SDL_EVENT_PEN_MOTION:
+            lastPenEvent.start();
+            wdTarget->mouseX = (int)(evt.pmotion.x);
+            wdTarget->mouseY = (int)(evt.pmotion.y);
+            break;
+        case SDL_EVENT_PEN_DOWN:
+        case SDL_EVENT_PEN_UP:
+        case SDL_EVENT_PEN_BUTTON_DOWN:
+        case SDL_EVENT_PEN_BUTTON_UP:
+            g_lastConfirmInputWasTouch = false;
+            lastPenEvent.start();
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            g_lastConfirmInputWasTouch = false;
+            break;
+        }
+
+        //ensure only one quit/close event per frame
+        if (evt.type == SDL_EVENT_QUIT || evt.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
+            if (!firedQuitEventThisFrame) {
+                firedQuitEventThisFrame = true;
+            }
+            else {
+                continue;
+            }
+        }
+
+        //focus on the window that has popups open
+        if (anyPopupsOpen && !wdTarget->hasPopupsOpen() && evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+            for (auto& [id, w] : g_windows) {
+                if (w->hasPopupsOpen()) {
+                    SDL_RaiseWindow(w->wd);
+                    break;
+                }
+            }
+
+        }
+
+        if (g_bgOpRunning || (anyPopupsOpen && !wdTarget->hasPopupsOpen())) {
+            continue;
+        }
+
+        g_keybindManager.processKeybinds(evt, "global", NULL);
+
+        //events that can't fire during bg operation
+        /*switch (evt.type) {
+        case SDL_QUIT:
+            //return 0;
+            break;
+        }*/
+
+        g_gamepad->TakeEvent(evt);
+        if (!g_bgOpRunning
+            && !g_takeInputNotifications(evt)   //pass events to notifications
+            && !DrawableManager::processInputEventInMultiple({ wdTarget->overlayWidgets }, evt) //pass events to overlay
+            ) {
+
+            if (!wdTarget->popupStack.empty() && wdTarget->popupStack[wdTarget->popupStack.size() - 1]->takesInput()) {
+                //pass event to popup
+                BasePopup* popup = wdTarget->popupStack[wdTarget->popupStack.size() - 1];
+                popup->takeInput(popup->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
+            }
+            else {
+                if (!wdTarget->screenStack.empty()) {
+                    //pass event to screen
+                    wdTarget->screenStack[wdTarget->currentScreen]->takeInput(wdTarget->screenStack[wdTarget->currentScreen]->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
+                }
+            }
+        }
+    }
+
+    g_windowFocused = false;
+    for (auto& [id, w] : g_windows) {
+        g_windowFocused |= ((SDL_GetWindowFlags(w->wd) & SDL_WINDOW_INPUT_FOCUS) != 0);
+    }
+
+    for (auto wit = g_windows.cbegin(); wit != g_windows.cend(); ) {
+        VSPWindow* wd = (*wit).second;
+
+        //close window if it has no screens left
+        if (wd->screenStack.empty()) {
+            loginfo(frmt("Closing window ID {}", wd->windowID));
+            if (wd->isMainWindow) {
+                loginfo("   -the main window was closed");
+                g_mainWindow = NULL;
+            }
+            g_removeVFXWindow(wd);
+            delete wd;
+            g_windows.erase(wit++);
+            continue;
+        }
+        ++wit;
+
+        wd->thisWindowsTurn();
+
+        if (!wd->popupStack.empty()) {
+            wd->popupStack[wd->popupStack.size() - 1]->tick();
+        }
+        if (!wd->screenStack.empty()) {
+            wd->screenStack[wd->currentScreen]->tick();
+        }
+        g_runMainThreadOperations();
+
+        if (wd->viewport != NULL) {
+            g_pushRenderTarget(wd->viewport);
+        }
+
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
+        SDL_RenderClear(g_rd);
+
+        if (!wd->screenStack.empty()) {
+            if (!wd->popupStack.empty()) {
+                g_ttp->takeTooltips = false;
+                wd->screenStack[wd->currentScreen]->render();
+                g_ttp->takeTooltips = true;
+            }
+            else {
+                wd->screenStack[wd->currentScreen]->render();
+            }
+        }
+
+        for (BasePopup*& popup : wd->popupStack) {
+            if (popup != wd->popupStack[wd->popupStack.size() - 1]) {
+                g_ttp->takeTooltips = false;
+                popup->render();
+                g_ttp->takeTooltips = true;
+            }
+            else {
+                popup->render();
+            }
+        }
+
+        /*if (!popupStack.empty()) {
+            popupStack[popupStack.size() - 1]->render();
+        }*/
+
+
+#if _DEBUG
+        XY origin = { g_windowW - 240, g_windowH - 90 };
+        for (auto& mem : g_named_memmap) {
+            g_fnt->RenderString(frmt("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
+                origin.y, { 255, 255, 255, 100 }, 14);
+            origin.y -= 16;
+        }
+        g_fnt->RenderString(frmt("Textures created: {}", g_allocated_textures), origin.x, origin.y,
+            { 255, 255, 255, 100 }, 14);
+        origin.y -= 16;
+        g_fnt->RenderString(frmt("Drawables created: {}", g_createdDrawables), origin.x, origin.y,
+            { 255, 255, 255, 100 }, 14);
+        origin.y -= 16;
+        //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
+        //origin.y -= 16;
+#endif
+
+        XY nextStatusBarOrigin = { g_windowW, g_windowH - 26 };
+
+        //draw the screen icons
+        //XY screenIcons = { g_windowW, g_windowH - 10 };
+        nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(26 * wd->screenStack.size()), 0 });
+        XY screenIconOrigin = nextStatusBarOrigin;
+
+        for (int x = 0; x < wd->screenStack.size(); x++) {
+            BaseScreen* s = wd->screenStack[x];
+            //this is where screen icons were rendered
+            wd->screenButtons[x]->position = screenIconOrigin;
+            screenIconOrigin.x += 26;
+        }
+        wd->overlayWidgets.renderAll();
+        //todo: make this a uilabel
+        if (!wd->screenStack.empty()) {
+            std::string screenName = wd->screenStack[wd->currentScreen]->getName();
+            int statW = g_fnt->StatStringDimensions(screenName, 16).x;
+            XY screenNameOrigin = xySubtract({ g_windowW, g_windowH }, { 10 + statW, 55 });
+            g_fnt->RenderString(wd->screenStack[wd->currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
+        }
+
+        //draw battery icon
+        int batteryRectW = 60;
+        int batterySeconds, batteryPercent;
+        SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
+        if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
+            XY batteryOrigin = xySubtract(nextStatusBarOrigin, { 120, 0 });
+            XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
+            XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
+
+            nextStatusBarOrigin = xySubtract(batteryOrigin, { 30,0 });
+
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
+            SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
+            SDL_RenderDrawRect(g_rd, &batteryRect);
+
+            if (batteryPercent <= 10 && powerstate != SDL_POWERSTATE_CHARGING && (SDL_GetTicks64() - wd->lastLowBatteryPulseTime) > 3000) {
+                wd->lastLowBatteryPulseTime = SDL_GetTicks64();
+                g_newVFX(VFX_LOWBATTERYPULSE, 2000, 0, batteryRect);
+            }
+
+            SDL_Color primaryColor =
+                powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{ 253, 255, 146, 0x80 }
+                : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
+                : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
+                : batteryPercent <= 10 ? SDL_Color{ 255, 0x50, 0x50, 0x80 }
+            : SDL_Color{ 255,255,255, 0x80 };
+
+            SDL_SetRenderDrawColor(g_rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
+            drawLine(batteryOrigin, batteryOriginLow);
+            drawLine(batteryEnd, xyAdd(batteryOriginLow, { batteryRectW, 0 }));
+            XY statPercent = statLineEndpoint(batteryOrigin, xyAdd(batteryOrigin, { batteryRectW, 0 }), batteryPercent / 100.0);
+            XY statPercentLow = { statPercent.x, batteryOriginLow.y };
+            drawLine(statPercent, statPercentLow);
+            drawLine(batteryOrigin, statPercent);
+            drawLine(batteryOriginLow, statPercentLow);
+            g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
+
+            if (powerstate == SDL_POWERSTATE_CHARGING) {
+                g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 });
+            }
+            else if (powerstate == SDL_POWERSTATE_CHARGED) {
+                g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
+            }
+            else if (powerstate == SDL_POWERSTATE_ERROR) {
+                g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
+            }
+        }
+
+        if (g_config.showFPS) {
+            XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
+            nextStatusBarOrigin = fpsOrigin;
+            g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
+        }
+
+        g_tickNotifications();
+        g_renderNotifications();
+
+        g_ttp->renderAll();
+        g_renderVFX();
+
+        g_cleanUpDoneAsyncThreads();
+        if (anyPopupsOpen && !wd->hasPopupsOpen()) {
+            SDL_Rect wdrect = { 0, 0, g_windowW, g_windowH };
+            SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+            SDL_RenderFillRect(g_rd, &wdrect);
+        }
+
+        if (g_bgOpRunning) {
+            renderbgOpInProgressScreen();
+        }
+        else {
+            //draw the mouse position 4x4 square
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+            SDL_Rect temp = { g_mouseX, g_mouseY, 4, 4 };
+            SDL_RenderFillRect(g_rd, &temp);
+        }
+
+        //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
+
+
+        if (wd->viewport != NULL) {
+            g_popRenderTarget();
+            SDL_RenderCopy(g_rd, wd->viewport, NULL, NULL);
+        }
+
+        //g_fnt->RenderString(frmt("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
+
+        uint64_t ticksNonRenderEnd = SDL_GetTicks64();
+        SDL_RenderPresent(wd->rd);
+        if (!g_config.vsync) {
+            SDL_Delay(3);
+        }
+        if (!g_windowFocused && !g_fullFramerateThisFrame) {
+            if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
+                SDL_Delay(500);
+            }
+            else if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
+                SDL_Delay(45);
+            }
+
+        }
+        uint64_t ticksEnd = SDL_GetTicks64();
+
+        rtFrameCount++;
+        u64 frameTimestampNow = SDL_GetTicks64() / 1000;
+        if (frameTimestampNow != frameCountTimestamp) {
+            frameCountTimestamp = frameTimestampNow;
+            lastFrameCount = rtFrameCount;
+            rtFrameCount = 0;
+        }
+
+        g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
+        g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
+
+        ticksBegin = SDL_GetTicks64();
+
+        if (wd->isMainWindow) {
+
+            int numOverallWorkspaces = 0;
+            for (auto& [id, w] : g_windows) {
+                numOverallWorkspaces += w->screenStack.size();
+            }
+
+            //tl strings shouldn't be read every frame
+            static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
+            static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
+
+            g_updateRPC(
+                numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : frmt("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
+                numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
+            );
+            std::string newWindowTitle = windowTitle + frmt("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
+            if (newWindowTitle != wd->lastWindowTitle) {
+                SDL_SetWindowTitle(g_wd, newWindowTitle.c_str());
+                wd->lastWindowTitle = newWindowTitle;
+            }
+        }
+    }
+}
+
 int main(int argc, char** argv)
 {
     try {
@@ -474,7 +878,7 @@ int main(int argc, char** argv)
         SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
         int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
         //IMG_Init(-1);   //😈time to get evil
-        std::string windowTitle = "void" UTF8_DIAMOND "sprite"
+        windowTitle = "void" UTF8_DIAMOND "sprite"
 #if _DEBUG
             " " UTF8_DIAMOND " DEBUG"
 #endif
@@ -816,402 +1220,11 @@ int main(int argc, char** argv)
         SDL_MaximizeWindow(g_wd);
 #endif
 
-        uint64_t ticksBegin = SDL_GetTicks64();
-
-        int lastFrameCount = 0;
-        int rtFrameCount = 0;
-        u64 frameCountTimestamp = 0;
-
-        SDL_Event evt;
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+        emscripten_set_main_loop(g_mainLoop, 0, 1);
+#else
         while (!g_windows.empty()) {
-            g_fullFramerateThisFrame = false;
-            bool firedQuitEventThisFrame = false;
-            bool anyPopupsOpen = false;
-            for (auto& [id, wd] : g_windows) {
-                anyPopupsOpen |= wd->hasPopupsOpen();
-            }
-
-            while (SDL_PollEvent(&evt)) {
-                VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
-                if (wdTarget == NULL) {
-                    continue;
-                }
-                wdTarget->thisWindowsTurn();
-
-                evt = handleNumLockInEvent(evt);
-                evt = scaleScreenPositionsInEvent(evt);
-                DrawableManager::processHoverEventInMultiple({ g_currentWindow->overlayWidgets }, evt);
-
-                //events that can fire during bg operation
-                switch (evt.type) {
-                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                    evt.type = SDL_EVENT_QUIT;
-                    break;
-                case SDL_EVENT_KEY_DOWN:
-                    if (evt.key.scancode == SDL_SCANCODE_AC_BACK) {
-                        evt.type = SDL_EVENT_QUIT;
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
-                        g_ctrlModifier = true;
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
-                        g_shiftModifier = true;
-                    }
-                    break;
-                case SDL_EVENT_KEY_UP:
-                    if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
-                        g_ctrlModifier = false;
-                    }
-                    else if (evt.key.scancode == SDL_SCANCODE_LSHIFT) {
-                        g_shiftModifier = false;
-                    }
-                    break;
-                case SDL_EVENT_WINDOW_FOCUS_GAINED:
-#if __ANDROID__
-                    if (!SDL_IsDeXMode()) {
-                        SDL_MaximizeWindow(g_wd);
-                    }
-#endif
-                    break;
-                case SDL_EVENT_WINDOW_RESIZED:
-                    wdTarget->unscaledWindowSize = { evt.window.data1, evt.window.data2 };
-                    if (g_config.autoViewportScale) {
-                        wdTarget->autoViewportScale();
-                    }
-                    else {
-                        wdTarget->updateViewportScaler();
-                    }
-                    break;
-                case SDL_EVENT_MOUSE_MOTION:
-                    if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
-                        wdTarget->mouseX = (int)(evt.motion.x);
-                        wdTarget->mouseY = (int)(evt.motion.y);
-                    }
-                    break;
-                case SDL_EVENT_FINGER_DOWN:
-                case SDL_EVENT_FINGER_UP:
-                case SDL_EVENT_FINGER_MOTION:
-                    g_lastConfirmInputWasTouch = true;
-                    SDL_GetTouchFingers(evt.tfinger.touchID, &g_touchPointsOnScreen);
-                    if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
-                        wdTarget->mouseX = evt.tfinger.x * g_windowW;
-                        wdTarget->mouseY = evt.tfinger.y * g_windowH;
-                    }
-                    break;
-                case SDL_EVENT_PEN_MOTION:
-                    lastPenEvent.start();
-                    wdTarget->mouseX = (int)(evt.pmotion.x);
-                    wdTarget->mouseY = (int)(evt.pmotion.y);
-                    break;
-                case SDL_EVENT_PEN_DOWN:
-                case SDL_EVENT_PEN_UP:
-                case SDL_EVENT_PEN_BUTTON_DOWN:
-                case SDL_EVENT_PEN_BUTTON_UP:
-                    g_lastConfirmInputWasTouch = false;
-                    lastPenEvent.start();
-                    break;
-                case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    g_lastConfirmInputWasTouch = false;
-                    break;
-                }
-
-                //ensure only one quit/close event per frame
-                if (evt.type == SDL_EVENT_QUIT || evt.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
-                    if (!firedQuitEventThisFrame) {
-                        firedQuitEventThisFrame = true;
-                    }
-                    else {
-                        continue;
-                    }
-                }
-
-                //focus on the window that has popups open
-                if (anyPopupsOpen && !wdTarget->hasPopupsOpen() && evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-                    for (auto& [id, w] : g_windows) {
-                        if (w->hasPopupsOpen()) {
-                            SDL_RaiseWindow(w->wd);
-                            break;
-                        }
-                    }
-                    
-                }
-
-                if (g_bgOpRunning || (anyPopupsOpen && !wdTarget->hasPopupsOpen())) {
-                    continue;
-                }
-
-                g_keybindManager.processKeybinds(evt, "global", NULL);
-
-                //events that can't fire during bg operation
-                /*switch (evt.type) {
-                case SDL_QUIT:
-                    //return 0;
-                    break;
-                }*/
-
-                g_gamepad->TakeEvent(evt);
-                if (!g_bgOpRunning 
-                    && !g_takeInputNotifications(evt)   //pass events to notifications
-                    && !DrawableManager::processInputEventInMultiple({ wdTarget->overlayWidgets }, evt) //pass events to overlay
-                    ) {
-
-                    if (!wdTarget->popupStack.empty() && wdTarget->popupStack[wdTarget->popupStack.size() - 1]->takesInput()) {
-                        //pass event to popup
-                        BasePopup* popup = wdTarget->popupStack[wdTarget->popupStack.size() - 1];
-                        popup->takeInput(popup->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
-                    }
-                    else {
-                        if (!wdTarget->screenStack.empty()) {
-                            //pass event to screen
-                            wdTarget->screenStack[wdTarget->currentScreen]->takeInput(wdTarget->screenStack[wdTarget->currentScreen]->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
-                        }
-                    }
-                }
-            }
-
-            g_windowFocused = false;
-            for (auto& [id, w] : g_windows) {
-                g_windowFocused |= ((SDL_GetWindowFlags(w->wd) & SDL_WINDOW_INPUT_FOCUS) != 0);
-            }
-
-            for (auto wit = g_windows.cbegin(); wit != g_windows.cend(); ) {
-                VSPWindow* wd = (*wit).second;
-
-                //close window if it has no screens left
-                if (wd->screenStack.empty()){
-                    loginfo(frmt("Closing window ID {}", wd->windowID));
-                    if (wd->isMainWindow) {
-                        loginfo("   -the main window was closed");
-                        g_mainWindow = NULL;
-                    }
-                    g_removeVFXWindow(wd);
-                    delete wd;
-                    g_windows.erase(wit++);
-                    continue;
-                }
-                ++wit;
-
-                wd->thisWindowsTurn();
-
-                if (!wd->popupStack.empty()) {
-                    wd->popupStack[wd->popupStack.size() - 1]->tick();
-                }
-                if (!wd->screenStack.empty()) {
-                    wd->screenStack[wd->currentScreen]->tick();
-                }
-                g_runMainThreadOperations();
-
-                if (wd->viewport != NULL) {
-                    g_pushRenderTarget(wd->viewport);
-                }
-
-                SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
-                SDL_RenderClear(g_rd);
-
-                if (!wd->screenStack.empty()) {
-                    if (!wd->popupStack.empty()) {
-                        g_ttp->takeTooltips = false;
-                        wd->screenStack[wd->currentScreen]->render();
-                        g_ttp->takeTooltips = true;
-                    }
-                    else {
-                        wd->screenStack[wd->currentScreen]->render();
-                    }
-                }
-
-                for (BasePopup*& popup : wd->popupStack) {
-                    if (popup != wd->popupStack[wd->popupStack.size() - 1]) {
-                        g_ttp->takeTooltips = false;
-                        popup->render();
-                        g_ttp->takeTooltips = true;
-                    }
-                    else {
-                        popup->render();
-                    }
-                }
-
-                /*if (!popupStack.empty()) {
-                    popupStack[popupStack.size() - 1]->render();
-                }*/
-
-
-    #if _DEBUG
-                XY origin = { g_windowW - 240, g_windowH - 90 };
-                for (auto& mem : g_named_memmap) {
-                    g_fnt->RenderString(frmt("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
-                        origin.y, { 255, 255, 255, 100 }, 14);
-                    origin.y -= 16;
-                }
-                g_fnt->RenderString(frmt("Textures created: {}", g_allocated_textures), origin.x, origin.y,
-                    { 255, 255, 255, 100 }, 14);
-                origin.y -= 16;
-                g_fnt->RenderString(frmt("Drawables created: {}", g_createdDrawables), origin.x, origin.y,
-                    { 255, 255, 255, 100 }, 14);
-                origin.y -= 16;
-                //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
-                //origin.y -= 16;
-    #endif
-
-                XY nextStatusBarOrigin = { g_windowW, g_windowH - 26 };
-
-                //draw the screen icons
-                //XY screenIcons = { g_windowW, g_windowH - 10 };
-                nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(26 * wd->screenStack.size()), 0 });
-                XY screenIconOrigin = nextStatusBarOrigin;
-
-                for (int x = 0; x < wd->screenStack.size(); x++) {
-                    BaseScreen* s = wd->screenStack[x];
-                    //this is where screen icons were rendered
-                    wd->screenButtons[x]->position = screenIconOrigin;
-                    screenIconOrigin.x += 26;
-                }
-                wd->overlayWidgets.renderAll();
-                //todo: make this a uilabel
-                if (!wd->screenStack.empty()) {
-                    std::string screenName = wd->screenStack[wd->currentScreen]->getName();
-                    int statW = g_fnt->StatStringDimensions(screenName, 16).x;
-                    XY screenNameOrigin = xySubtract({ g_windowW, g_windowH }, { 10 + statW, 55 });
-                    g_fnt->RenderString(wd->screenStack[wd->currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
-                }
-
-                //draw battery icon
-                int batteryRectW = 60;
-                int batterySeconds, batteryPercent;
-                SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
-                if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
-                    XY batteryOrigin = xySubtract(nextStatusBarOrigin, { 120, 0 });
-                    XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
-                    XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
-
-                    nextStatusBarOrigin = xySubtract(batteryOrigin, { 30,0 });
-
-                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
-                    SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
-                    SDL_RenderDrawRect(g_rd, &batteryRect);
-
-                    if (batteryPercent <= 10 && powerstate != SDL_POWERSTATE_CHARGING && (SDL_GetTicks64() - wd->lastLowBatteryPulseTime) > 3000) {
-                        wd->lastLowBatteryPulseTime = SDL_GetTicks64();
-                        g_newVFX(VFX_LOWBATTERYPULSE, 2000, 0, batteryRect);
-                    }
-
-                    SDL_Color primaryColor = 
-                        powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{ 253, 255, 146, 0x80 }
-                        : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
-                        : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
-                        : batteryPercent <= 10 ? SDL_Color{255, 0x50, 0x50, 0x80}
-                        : SDL_Color{ 255,255,255, 0x80 };
-
-                    SDL_SetRenderDrawColor(g_rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
-                    drawLine(batteryOrigin, batteryOriginLow);
-                    drawLine(batteryEnd, xyAdd(batteryOriginLow, { batteryRectW, 0 }));
-                    XY statPercent = statLineEndpoint(batteryOrigin, xyAdd(batteryOrigin, { batteryRectW, 0 }), batteryPercent / 100.0);
-                    XY statPercentLow = { statPercent.x, batteryOriginLow.y };
-                    drawLine(statPercent, statPercentLow);
-                    drawLine(batteryOrigin, statPercent);
-                    drawLine(batteryOriginLow, statPercentLow);
-                    g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
-
-                    if (powerstate == SDL_POWERSTATE_CHARGING) {
-                        g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 });
-                    }
-                    else if (powerstate == SDL_POWERSTATE_CHARGED) {
-                        g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
-                    }
-                    else if (powerstate == SDL_POWERSTATE_ERROR) {
-                        g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
-                    }
-                }
-
-                if (g_config.showFPS) {
-                    XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
-                    nextStatusBarOrigin = fpsOrigin;
-                    g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
-                }
-
-                g_tickNotifications();
-                g_renderNotifications();
-
-                g_ttp->renderAll();
-                g_renderVFX();
-
-                g_cleanUpDoneAsyncThreads();
-                if (anyPopupsOpen && !wd->hasPopupsOpen()) {
-                    SDL_Rect wdrect = { 0, 0, g_windowW, g_windowH };
-                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-                    SDL_RenderFillRect(g_rd, &wdrect);
-                }
-
-                if (g_bgOpRunning) {
-                    renderbgOpInProgressScreen();
-                }
-                else {
-                    //draw the mouse position 4x4 square
-                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-                    SDL_Rect temp = { g_mouseX, g_mouseY, 4, 4 };
-                    SDL_RenderFillRect(g_rd, &temp);
-                }
-
-                //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
-
-
-                if (wd->viewport != NULL) {
-                    g_popRenderTarget();
-                    SDL_RenderCopy(g_rd, wd->viewport, NULL, NULL);
-                }
-
-                //g_fnt->RenderString(frmt("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
-
-                uint64_t ticksNonRenderEnd = SDL_GetTicks64();
-                SDL_RenderPresent(wd->rd);
-                if (!g_config.vsync) {
-                    SDL_Delay(3);
-                }
-                if (!g_windowFocused && !g_fullFramerateThisFrame) {
-                    if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
-                        SDL_Delay(500);
-                    }
-                    else if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
-                        SDL_Delay(45);
-                    }
-                    
-                }
-                uint64_t ticksEnd = SDL_GetTicks64(); 
-
-                rtFrameCount++;
-                u64 frameTimestampNow = SDL_GetTicks64() / 1000;
-                if (frameTimestampNow != frameCountTimestamp) {
-                    frameCountTimestamp = frameTimestampNow;
-                    lastFrameCount = rtFrameCount;
-                    rtFrameCount = 0;
-                }
-
-                g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
-                g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
-
-                ticksBegin = SDL_GetTicks64();
-
-                if (wd->isMainWindow) {
-
-                    int numOverallWorkspaces = 0;
-                    for (auto& [id, w] : g_windows) {
-                        numOverallWorkspaces += w->screenStack.size();
-                    }
-
-                    //tl strings shouldn't be read every frame
-                    static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
-                    static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
-
-                    g_updateRPC(
-                        numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : frmt("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
-                        numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
-                    );
-                    std::string newWindowTitle = windowTitle + frmt("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
-                    if (newWindowTitle != wd->lastWindowTitle) {
-                        SDL_SetWindowTitle(g_wd, newWindowTitle.c_str());
-                        wd->lastWindowTitle = newWindowTitle;
-                    }
-                }
-            }
+            g_mainLoop();
         }
 
         g_waitAndRemoveAllBgOpAndAsyncThreads();
@@ -1221,7 +1234,7 @@ int main(int argc, char** argv)
 
         g_deinitRPC();
         log_close();
-
+#endif
     }
     catch (std::exception& e) {
 
