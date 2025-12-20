@@ -17,6 +17,7 @@ class BrushBezierLine :
     {
         return {
             {"brush.bezierline.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
+            {"brush.bezierline.gradsize", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.gradsize"),0)},
             {"brush.bezierline.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
         };
     }

@@ -32,12 +32,20 @@ void BrushBezierLine::rightClickPress(MainEditor* editor, XY pos)
     if (points.size() > 1) {
         editor->commitStateToCurrentLayer();
         int size = (int)(editor->toolProperties["brush.bezierline.size"]);
-        bool round = editor->toolProperties["brush.bezierline.round"] == 1;
+        bool roundB = editor->toolProperties["brush.bezierline.round"] == 1;
+        bool gradualSize = editor->toolProperties["brush.bezierline.gradsize"] == 1;
+
+        XY startPos = points.front();
+        XY endPos = points.back();
 
         rasterizeBezierCurve(points, [&](XY a) {
-            rasterizePoint(a, size, [&](XY p) {
+            int tsize = size;
+            if (gradualSize) {
+                tsize = (int)round(size * dxmax(0, xyDistance(a, endPos) / xyDistance(startPos, endPos)));
+            }
+            rasterizePoint(a, tsize, [&](XY p) {
                 editor->SetPixel(p, editor->getActiveColor());
-            }, round);
+            }, roundB);
         });
     }
 
