@@ -1,8 +1,9 @@
 #include "Brush1x1.h"
 
 void Brush1x1::clickPress(MainEditor* editor, XY pos) {
+    bool pressureSize = editor->toolProperties["brush.squarepixel.pressuresens"] == 1;
     int size = (int)(round(editor->toolProperties["brush.squarepixel.size"]
-        * (editor->toolProperties["brush.squarepixel.pressuresens"] == 1 ? editor->penPressure : 1.0)));
+        * (pressureSize ? editor->penPressure : 1.0)));
     bool round = editor->toolProperties["brush.squarepixel.round"] == 1;
 
     rasterizePoint(pos, size, [&](XY p) {
@@ -16,7 +17,9 @@ void Brush1x1::clickDrag(MainEditor* editor, XY from, XY to) {
 
 void Brush1x1::renderOnCanvas(MainEditor* editor, int scale) {
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
-    int size = (int)(editor->toolProperties["brush.squarepixel.size"]);
+    bool pressureSize = editor->toolProperties["brush.squarepixel.pressuresens"] == 1;
+    int size = (int)(round(editor->toolProperties["brush.squarepixel.size"]
+        * (pressureSize ? editor->penPressure : 1.0)));
     bool round = editor->toolProperties["brush.squarepixel.round"] == 1;
 
     rasterizePoint(lastMouseMotionPos, size, [&](XY p) {
