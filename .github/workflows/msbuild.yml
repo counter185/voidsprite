@@ -394,7 +394,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         mkdir release
-        cp cmake/build/src/voidsprite.html release/voidsprite.html
+        cp cmake/build/src/voidsprite.html release/index.html
         cp cmake/build/src/voidsprite.js release/voidsprite.js
         cp cmake/build/src/voidsprite.wasm release/voidsprite.wasm
         cp -R OPEN_SOURCE_LICENSES release/OPEN_SOURCE_LICENSES
