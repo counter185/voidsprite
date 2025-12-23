@@ -374,6 +374,37 @@ jobs:
           path: |
             voidsprite-universal.app.tar
 
+  build-emscipten:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: mymindstorm/setup-emsdk@v14
+
+    - name: setup cmake
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd cmake && chmod +x ./setup_cmake.sh && ./setup_cmake.sh && ./setup_emscripten.sh
+    
+    - name: setup emscripten build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd cmake/build && emmake make
+    
+    - name: gather artifacts
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        mkdir release
+        cp cmake/build/src/voidsprite.html release/voidsprite.html
+        cp cmake/build/src/voidsprite.js release/voidsprite.js
+        cp cmake/build/src/voidsprite.wasm release/voidsprite.wasm
+        cp -R OPEN_SOURCE_LICENSES release/OPEN_SOURCE_LICENSES
+    
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: voidsprite-build-emscripten
+        path: release
+
   build-android:
     runs-on: ubuntu-latest
 
