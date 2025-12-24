@@ -2456,6 +2456,30 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
     return NULL;
 }
 
+bool tryInstallPalette(PlatformNativePathString path)
+{
+    for (auto& paletteImporter : g_paletteImporters) {
+        std::string conv = convertStringToUTF8OnWin32(path);
+        std::string fileName = fileNameFromPath(conv);
+        if (stringEndsWithIgnoreCase(conv, paletteImporter->extension()) && paletteImporter->canImport(path)) {
+            auto result = paletteImporter->importPalette(path);
+            if (result.first) {
+                try {
+                    std::filesystem::copy_file(path, std::filesystem::path(platformEnsureDirAndGetConfigFilePath()) / "palettes" / fileName,
+                        std::filesystem::copy_options::overwrite_existing);
+                }
+                catch (std::exception& e) {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.copyfail")));
+                    logerr(frmt("Failed to copy palette to config folder:\n {}", e.what()));
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool writeBMP(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {

@@ -358,7 +358,7 @@ public:
     void createRecoveryAutosave(std::string insertIntoFilename = "");
     bool usingAltBG();
     void setAltBG(bool useAltBG);
-    void tryAddReference(PlatformNativePathString path);
+    bool tryAddReference(PlatformNativePathString path);
     void openPreviewPanel();
     void tryToggleTilePreviewLockAtMousePos();
     void promptPasteImageFromClipboard();

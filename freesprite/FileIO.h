@@ -84,6 +84,8 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
 
+bool tryInstallPalette(PlatformNativePathString path);
+
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeJPEG(PlatformNativePathString path, Layer* data);
 bool writeAVIF(PlatformNativePathString path, Layer* data);

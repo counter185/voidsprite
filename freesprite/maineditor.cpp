@@ -1537,7 +1537,13 @@ void MainEditor::takeInput(SDL_Event evt) {
 
     if (evt.type == SDL_DROPFILE) {
         std::string path = evt.drop.data;
-        tryAddReference(convertStringOnWin32(path));
+        if (!tryAddReference(convertStringOnWin32(path))) {
+            if (tryInstallPalette(convertStringOnWin32(path))) {
+                g_addNotification(SuccessNotification(TL("vsp.launchpad.paletteinstall"), fileNameFromPath(path)));
+                g_reloadColorMap();
+                colorPicker->reloadColorLists();
+            }
+        }
     }
 
     if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.scancode == SDL_SCANCODE_Q) {
@@ -2605,7 +2611,7 @@ void MainEditor::setAltBG(bool useAltBG)
     backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
 }
 
-void MainEditor::tryAddReference(PlatformNativePathString path)
+bool MainEditor::tryAddReference(PlatformNativePathString path)
 {
     MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(path));
     if (ssn != NULL) {
@@ -2615,7 +2621,9 @@ void MainEditor::tryAddReference(PlatformNativePathString path)
         addWidget(referencePanel);
         referencePanel->playPanelOpenVFX();
         delete ssn;
+        return true;
     }
+    return false;
 }
 
 void MainEditor::openPreviewPanel()

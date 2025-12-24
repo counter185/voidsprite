@@ -22,6 +22,7 @@
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
     {"vsp.cmn.error.clipboardcopy", "Failed to copy to clipboard."},
     {"vsp.cmn.error.exportfail", "Failed to export file."},
+    {"vsp.cmn.error.copyfail", "Failed to copy file."},
     {"vsp.cmn.error.clipboardtextpaste", "No text in clipboard."},
     {"vsp.cmn.error.unsupportedformat", "Unsupported format"},
     {"vsp.cmn.error.invalidinput", "Invalid input"},
@@ -148,6 +149,7 @@
     {"vsp.launchpad.welcomereturning", "Welcome back"},
     {"vsp.launchpad.update.title", "Update available"},
     {"vsp.launchpad.update.latestver", "Latest version:"},
+    {"vsp.launchpad.paletteinstall", "Palette installed"},
 
     {"vsp.launchpad.ctx.removefromlast", "Remove from last open file history"},
     {"vsp.launchpad.ctx.clearlast", "Clear last open file history"},

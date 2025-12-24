@@ -373,6 +373,9 @@ void UIColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int
 
 void UIColorPicker::reloadColorLists()
 {
+    if (palettePanel == NULL) {
+        return;
+    }
     palettePanel->subWidgets.freeAllDrawables();
 
     UIStackPanel* stack = new UIStackPanel();
