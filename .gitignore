@@ -466,3 +466,5 @@ cmake/zlib/
 /cmake/appimage-build
 *.zsync
 *.AppImage
+web-build/voidsprite.js
+web-build/voidsprite.wasm

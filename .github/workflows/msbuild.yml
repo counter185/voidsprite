@@ -393,17 +393,16 @@ jobs:
     - name: gather artifacts
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        mkdir release
-        cp cmake/build/src/voidsprite.html release/index.html
-        cp cmake/build/src/voidsprite.js release/voidsprite.js
-        cp cmake/build/src/voidsprite.wasm release/voidsprite.wasm
-        cp -R OPEN_SOURCE_LICENSES release/OPEN_SOURCE_LICENSES
+        cp cmake/build/src/voidsprite.js web-build/voidsprite.js
+        cp cmake/build/src/voidsprite.wasm web-build/voidsprite.wasm
+        cp -R OPEN_SOURCE_LICENSES web-build/OPEN_SOURCE_LICENSES
+#       html is already in the folder
     
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: voidsprite-build-emscripten
-        path: release
+        path: web-build
 
   build-android:
     runs-on: ubuntu-latest
