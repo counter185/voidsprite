@@ -356,6 +356,7 @@ void StartScreen::takeInput(SDL_Event evt)
             }
         }
         else if (tryInstallPalette(convertStringOnWin32(filePath))) {
+            g_reloadColorMap();
             g_addNotification(SuccessNotification(TL("vsp.launchpad.paletteinstall"), fileNameFromPath(filePath)));
         }
         else {

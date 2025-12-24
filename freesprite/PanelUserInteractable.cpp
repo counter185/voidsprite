@@ -209,7 +209,7 @@ void PanelUserInteractable::toggleCollapse() {
     collapsePanel->enabled = !newState;
     subWidgets.forceUnfocus();
     focusTimer.start();
-    collapseButton->text = newState ? "-" : "+";
+    collapseButton->text = newState ? "+" : "-";
 
     if (draggable) {
         tryMoveOutOfOOB();
