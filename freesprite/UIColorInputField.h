@@ -16,6 +16,6 @@ public:
     UIColorInputField(bool alpha = false);
 
     u32 getColor() { return pickedColor; }
-    void setColor(u32 c);
+    void setColor(u32 c, bool runCallback = true);
 };
 

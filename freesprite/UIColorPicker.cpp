@@ -10,6 +10,7 @@
 #include "PopupYesNo.h"
 #include "PopupTextBox.h"
 #include "UIHueWheel.h"
+#include "UIColorInputField.h"
 #include "io/io_voidsprite.h"
 
 #if _WIN32
@@ -39,6 +40,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
         { TL("vsp.maineditor.panel.colorpicker.tab.colors")},
         { TL("vsp.maineditor.panel.colorpicker.tab.last")},
         { TL("vsp.maineditor.panel.colorpicker.tab.palettes")},
+        { TL("vsp.maineditor.panel.colorpicker.tab.mix")},
         }, 85);
     colorModeTabs->position = XY{ 20,30 };
     subWidgets.addDrawable(colorModeTabs);
@@ -250,6 +252,37 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     colorModeTabs->tabs[2].wxs.addDrawable(palettePanel);
 
 
+    //-----------------
+    //| Mix tab
+
+    colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("A", {20, 25}));
+    mix1Input = new UIColorInputField();
+    mix1Input->position = XY{ 20, 50 };
+    mix1Input->button->wxWidth = 100;
+    mix1Input->onColorChangedCallback = [this](UIColorInputField* uic, u32 c) {
+        colorUpdatedFromMixInput();
+    };
+    colorModeTabs->tabs[3].wxs.addDrawable(mix1Input);
+
+    colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("B", { 200, 25 }));
+    mix2Input = new UIColorInputField();
+    mix2Input->position = XY{ 200, 50 };
+    mix2Input->button->wxWidth = 100;
+    mix2Input->onColorChangedCallback = [this](UIColorInputField* uic, u32 c) {
+        colorUpdatedFromMixInput();
+    };
+    colorModeTabs->tabs[3].wxs.addDrawable(mix2Input);
+
+    colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("+", { 150, 50 }));
+
+    mixSlider = new UIColorSlider();
+    mixSlider->position = XY{ 40, 120 };
+    mixSlider->wxWidth = 240;
+    mixSlider->onChangeValueCallback = [this](UISlider* s, float f) {
+        colorUpdatedFromMixInput();
+    };
+    colorModeTabs->tabs[3].wxs.addDrawable(mixSlider);
+
     //widgets outside of tabs
 
     colorTextField = new UITextField();
@@ -259,6 +292,12 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     colorTextField->tooltip = TL("vsp.maineditor.panel.colorpicker.colorinput.tooltip");
     colorTextField->setCallbackListener(EVENT_COLORPICKER_TEXTFIELD, this);
     subWidgets.addDrawable(colorTextField);
+}
+
+void UIColorPicker::colorUpdatedFromMixInput()
+{
+    auto color = alphaBlend(modAlpha(this->mix1Input->getColor(), 255), modAlpha(this->mix2Input->getColor(), (u8)(mixSlider->sliderPos * 255)));
+    this->colorUpdatedRGB(uint32ToSDLColor(color), MIX_SLIDER);
 }
 
 void UIColorPicker::eventTextInput(int evt_id, std::string data)
@@ -756,6 +795,12 @@ void UIColorPicker::updateUIFrom(ColorChangeSource from, std::string dontUpdateT
         updateSliderTabHSVTextboxes();
     }
 
+    if (from != MIX_SLIDER) {
+        mixSlider->setValue(0,1,0);
+        mix1Input->setColor(colorNowU32, false);
+        mix2Input->setColor(colorNowU32, false);
+    }
+
     updateAllSliderColors();
     colorTextField->setText(frmt("#{:02X}{:02X}{:02X}", currentR, currentG, currentB), false);
     updateColorModelSliders(dontUpdateThisColorModel);
@@ -845,6 +890,12 @@ void UIColorPicker::updateAllSliderColors()
     sliderB->colors = {
         colorNowU32 & 0xFFFF00,
         colorNowU32 | 0x0000FF
+    };
+
+    //mix
+    mixSlider->colors = {
+        modAlpha(mix1Input->getColor(), 255),
+        modAlpha(mix2Input->getColor(), 255)
     };
 }
 

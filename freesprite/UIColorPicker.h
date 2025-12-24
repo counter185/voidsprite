@@ -14,7 +14,8 @@ enum ColorChangeSource {
     SLIDERS_RGB_TBOX = 3,
     SLIDERS_HSV_SLIDER = 4,
     SLIDERS_HSV_TBOX = 5,
-    COLORMODELS_SLIDER = 6
+    COLORMODELS_SLIDER = 6,
+    MIX_SLIDER = 7
 };
 
 struct ColorModelValue {
@@ -74,6 +75,10 @@ public:
     TabbedView* colorTabs = NULL;
     ScrollingPanel* palettePanel = NULL;
 
+    UIColorInputField* mix1Input = NULL;
+    UIColorInputField* mix2Input = NULL;
+    UIColorSlider* mixSlider = NULL;
+
     std::vector<std::pair<std::string, ColorModelData>> colorModels;
 
     UIColorPicker();
@@ -95,6 +100,7 @@ public:
     void colorUpdatedFromHSVTextBoxes();
     void colorUpdatedFromRGBSliders();
     void colorUpdatedFromRGBTextBoxes();
+    void colorUpdatedFromMixInput();
     void updateUIFrom(ColorChangeSource from, std::string dontUpdateThisColorModel);
 
     void setColorRGB(u32 color);

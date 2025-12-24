@@ -24,11 +24,11 @@ UIColorInputField::UIColorInputField(bool alpha)
     setColor(0xFFFFFFFF);
 }
 
-void UIColorInputField::setColor(u32 c)
+void UIColorInputField::setColor(u32 c, bool runCallback)
 {
     pickedColor = c;
     button->fill = Fill::Solid(pickedColor);
-    if (onColorChangedCallback != NULL) {
+    if (runCallback && onColorChangedCallback != NULL) {
         onColorChangedCallback(this, pickedColor);
     }
 }

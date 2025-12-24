@@ -228,6 +228,7 @@
     {"vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip", "Add color\n"
                                                                        "Shift-click to instantly add the current active color."},
     {"vsp.maineditor.panel.colorpicker.tab.palettes.refresh", "Refresh"},
+    {"vsp.maineditor.panel.colorpicker.tab.mix", "Mix"},
     {"vsp.maineditor.panel.colorpicker.tab.visual", "Visual"},
     {"vsp.maineditor.panel.colorpicker.tab.sliders", "Sliders"},
     {"vsp.maineditor.panel.colorpicker.tab.other", "Other"},
