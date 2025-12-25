@@ -36,7 +36,16 @@ void BrushBezierLine::rightClickPress(MainEditor* editor, XY pos)
         bool gradualSize = editor->toolProperties["brush.bezierline.gradsize"] == 1;
 
         XY startPos = points.front();
-        XY endPos = points.back();
+
+        double longestDist = 0;
+        XY endPos = startPos;
+        for (auto& p : points) {
+            double dist = xyDistance(startPos, p);
+            if (dist > longestDist) {
+                longestDist = dist;
+                endPos = p;
+            }
+        }
 
         rasterizeBezierCurve(points, [&](XY a) {
             int tsize = size;
