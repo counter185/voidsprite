@@ -35,7 +35,7 @@ public:
         for (auto& e : elements) {
             e->redo(editor);
         }
-	}
+    }
 };
 
 class UndoLayerCreated : public UndoStackElementV2 {
@@ -56,4 +56,23 @@ public:
     void redo(MainEditor* editor) override;
 };
 
+class UndoLayersResized : public UndoStackElementV2 {
+private:
+    XY oldDimensions, newDimensions;
+    XY oldTileSize, newTileSize;
+public:
+    std::map<Layer*, std::vector<LayerVariant>> storedLayerData;
 
+    UndoLayersResized(XY oldDim, XY newDim, XY oldTiles, XY newTiles) 
+        : oldDimensions(oldDim), newDimensions(newDim), oldTileSize(oldTiles), newTileSize(newTiles) {}
+    ~UndoLayersResized() {
+        for (auto& [layer, data] : storedLayerData) {
+            for (auto& v : data) {
+                delete v.pixelData;
+            }
+        }
+    }
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+};

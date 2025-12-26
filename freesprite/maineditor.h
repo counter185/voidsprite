@@ -40,7 +40,6 @@ enum EditorTouchMode : int {
 #define UNDOSTACK_ADD_COMMENT 4
 #define UNDOSTACK_REMOVE_COMMENT 5
 #define UNDOSTACK_SET_OPACITY 6
-#define UNDOSTACK_RESIZE_LAYER 7
 #define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
 #define UNDOSTACK_CREATE_LAYER_VARIANT 9
 #define UNDOSTACK_DELETE_LAYER_VARIANT 10
@@ -404,6 +403,7 @@ public:
     void flipAllLayersOnY();
 
     virtual void rescaleAllLayersFromCommand(XY size);
+    //todo: split byTile into two functions
     virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);
     virtual void resizzeAllLayersByTilecountFromCommand(XY size);
     virtual void resizeAllLayersReorderingTilesFromCommand(XY size);

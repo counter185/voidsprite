@@ -2149,17 +2149,6 @@ void MainEditor::discardEndOfUndoStack() {
             case UNDOSTACK_DELETE_LAYER:
                 delete l.targetlayer;
                 break;
-            case UNDOSTACK_RESIZE_LAYER:
-                {
-                    UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
-                    for (int x = 0; x < l.extdata5; x++) {
-                        for (auto& variant : resizeLayerData[x].oldLayerData) {
-                            tracked_free(variant.pixelData);
-                        }
-                    }
-                    delete[] resizeLayerData;
-                }
-                break;
             case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
                 for (Layer* ll : layers) {
                     ll->discardLastUndo();
@@ -2255,17 +2244,6 @@ void MainEditor::discardRedoStack()
                     delete e;
                 }
                 break;
-            case UNDOSTACK_RESIZE_LAYER:
-            {
-                UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
-                for (int x = 0; x < l.extdata5; x++) {
-                    for (auto& variant : resizeLayerData[x].oldLayerData) {
-                        tracked_free(variant.pixelData);
-                    }
-                }
-                delete[] resizeLayerData;
-            }
-                break;
             case UNDOSTACK_CREATE_LAYER_VARIANT:
             {
                 LayerVariant v = *(LayerVariant*)l.extdata4;
@@ -2315,27 +2293,6 @@ void MainEditor::undo()
                 l.targetlayer->layerAlpha = (uint8_t)l.extdata;
                 l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
                 layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_RESIZE_LAYER:
-            {
-                UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
-                for (int x = 0; x < l.extdata5; x++) {
-                    //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                    std::vector<LayerVariant> oldData = layers[x]->layerData;
-                    XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                    layers[x]->layerData = resizeLayerData[x].oldLayerData;
-                    layers[x]->w = resizeLayerData[x].oldDimensions.x;
-                    layers[x]->h = resizeLayerData[x].oldDimensions.y;
-                    layers[x]->markLayerDirty();
-                    resizeLayerData[x].oldLayerData = oldData;
-                    resizeLayerData[x].oldDimensions = oldDimensions;
-                }
-                canvas.dimensions = { layers[0]->w, layers[0]->h };
-                XY td = XY{ l.extdata, l.extdata2 };
-                l.extdata = tileDimensions.x;
-                l.extdata2 = tileDimensions.y;
-                tileDimensions = td;
-            }
                 break;
             case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
                 for (Layer* ll : layers) {
@@ -2420,27 +2377,6 @@ void MainEditor::redo()
                 l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
                 l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
                 layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_RESIZE_LAYER:
-            {
-                UndoStackResizeLayerElement* resizeLayerData = (UndoStackResizeLayerElement*)l.extdata4;
-                for (int x = 0; x < l.extdata5; x++) {
-                    //memcpy(layers[x]->pixelData, resizeLayerData[x].oldData, resizeLayerData[x].oldW * resizeLayerData[x].oldH * 4);
-                    std::vector<LayerVariant> oldData = layers[x]->layerData;
-                    XY oldDimensions = XY{ layers[x]->w, layers[x]->h };
-                    layers[x]->layerData = resizeLayerData[x].oldLayerData;
-                    layers[x]->w = resizeLayerData[x].oldDimensions.x;
-                    layers[x]->h = resizeLayerData[x].oldDimensions.y;
-                    layers[x]->markLayerDirty();
-                    resizeLayerData[x].oldLayerData = oldData;
-                    resizeLayerData[x].oldDimensions = oldDimensions;
-                }
-                canvas.dimensions = { layers[0]->w, layers[0]->h };
-                XY td = XY{ l.extdata, l.extdata2 };
-                l.extdata = tileDimensions.x;
-                l.extdata2 = tileDimensions.y;
-                tileDimensions = td;
-            }
                 break;
             case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
                 for (Layer* ll : layers) {
@@ -2947,28 +2883,23 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
         return;
     }
 
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, size, tileDimensions, tileDimensions);
+
     //todo: detect if copyscaled or malloc fails
     int nElements = layers.size();
     UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nElements];
-    for (int x = 0; x < nElements; x++) {
-        layerResizeData[x].oldDimensions = XY{layers[x]->w, layers[x]->h};
-        layerResizeData[x].oldLayerData = layers[x]->layerData;
-        Layer* sc = layers[x]->copyAllVariantsScaled(size);
-        layers[x]->layerData = sc->layerData;
+    for (Layer* l : layers) {
+        undoData->storedLayerData[l] = l->layerData;
+        Layer* sc = l->copyAllVariantsScaled(size);
+        l->layerData = sc->layerData;
         sc->layerData = {};
         delete sc;
-        layers[x]->w = size.x;
-        layers[x]->h = size.y;
-        layers[x]->markLayerDirty();
+        l->w = size.x;
+        l->h = size.y;
+        l->markLayerDirty();
     }
-    canvas.dimensions = {layers[0]->w, layers[0]->h};
+    canvas.dimensions = size;
 
-    UndoStackElement undoData{};
-    undoData.type = UNDOSTACK_RESIZE_LAYER;
-    undoData.extdata = tileDimensions.x;
-    undoData.extdata2 = tileDimensions.y;
-    undoData.extdata4 = layerResizeData;
-    undoData.extdata5 = nElements;
     addToUndoStack(undoData);
 }
 
@@ -2987,18 +2918,10 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
         }
     }
 
-    int nLayers = layers.size();
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
-    for (int x = 0; x < nLayers; x++) {
-        layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldLayerData = layers[x]->layerData;
-    }
-
     std::map<Layer*, LayerScaleData> createdVariants;
 
-    for (int x = 0; x < nLayers; x++) {
-        Layer* target = layers[x];
-        LayerScaleData scaleResult = byTile ? layers[x]->resizeByTileSizes(tileDimensions, size) : layers[x]->resize(size);
+    for (Layer* target : layers) {
+        LayerScaleData scaleResult = byTile ? target->resizeByTileSizes(tileDimensions, size) : target->resize(size);
         if (scaleResult.success) {
             createdVariants[target] = scaleResult;
         }
@@ -3014,42 +2937,38 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
         target->markLayerDirty();
     }
 
+    XY newSize = createdVariants[layers[0]].newSize;
+
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, byTile ? size : tileDimensions);
+    for (Layer*& l : layers) {
+        undoData->storedLayerData[l] = l->layerData;
+    }
+
     for (auto& [layer, variants] : createdVariants) {
         layer->setLayerData(variants.scaledVariants, variants.newSize);
     }
 
-    canvas.dimensions = { layers[0]->w, layers[0]->h };
-    
-    UndoStackElement undoData{};
-    undoData.type = UNDOSTACK_RESIZE_LAYER;
-    undoData.extdata = tileDimensions.x;
-    undoData.extdata2 = tileDimensions.y;
-    undoData.extdata4 = layerResizeData;
-    undoData.extdata5 = nLayers;
-    addToUndoStack(undoData);
-
+    canvas.dimensions = newSize;
     if (byTile) {
         tileDimensions = size;
     }
+    
+    addToUndoStack(undoData);
+
 }
 
 void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 {
-    int nLayers = layers.size();
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
-    for (int x = 0; x < nLayers; x++) {
-        layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldLayerData = layers[x]->resizeByTileCount(tileDimensions, size);
-        layers[x]->markLayerDirty();
-    }
-    canvas.dimensions = { layers[0]->w, layers[0]->h };
+    XY newSize = { size.x * tileDimensions.x, size.y * tileDimensions.y };
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, tileDimensions);
 
-    UndoStackElement undoData{};
-    undoData.type = UNDOSTACK_RESIZE_LAYER;
-    undoData.extdata = tileDimensions.x;
-    undoData.extdata2 = tileDimensions.y;
-    undoData.extdata4 = layerResizeData;
-    undoData.extdata5 = nLayers;
+    int nLayers = layers.size();
+    for (Layer* l : layers) {
+        undoData->storedLayerData[l] = l->resizeByTileCount(tileDimensions, size);
+        l->markLayerDirty();
+    }
+    canvas.dimensions = newSize;
+
     addToUndoStack(undoData);
 }
 
@@ -3111,18 +3030,15 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         return;
     }
 
-    int nLayers = layers.size();
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nLayers];
-    for (int x = 0; x < nLayers; x++) {
-        layerResizeData[x].oldDimensions = XY{ layers[x]->w, layers[x]->h };
-        layerResizeData[x].oldLayerData = layers[x]->layerData;
-    }
+    XY newSize = downscale ? XY{ canvas.dimensions.x / scale.x, canvas.dimensions.y / scale.y }
+                           : XY{ canvas.dimensions.x * scale.x, canvas.dimensions.y * scale.y };
+    XY newTileSize = downscale ? XY{ tileDimensions.x / scale.x, tileDimensions.y / scale.y }
+                               : XY{ tileDimensions.x * scale.x, tileDimensions.y * scale.y };
 
     std::map<Layer*, LayerScaleData> createdVariants;
 
-    for (int x = 0; x < nLayers; x++) {
-        Layer* target = layers[x];
-        LayerScaleData scaleResult = downscale ? layers[x]->integerDownscale(scale) : layers[x]->integerScale(scale);
+    for (Layer*& target : layers) {
+        LayerScaleData scaleResult = downscale ? target->integerDownscale(scale) : target->integerScale(scale);
         if (scaleResult.success) {
             createdVariants[target] = scaleResult;
         }
@@ -3138,20 +3054,19 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         target->markLayerDirty();
     }
 
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, newTileSize);
+    for (Layer*& l : layers) {
+        undoData->storedLayerData[l] = l->layerData;
+    }
+
     for (auto& [layer, variants] : createdVariants) {
         layer->setLayerData(variants.scaledVariants, variants.newSize);
     }
 
     canvas.dimensions = { layers[0]->w, layers[0]->h };
+    tileDimensions = newTileSize;
 
-    UndoStackElement undoData{};
-    undoData.type = UNDOSTACK_RESIZE_LAYER;
-    undoData.extdata = tileDimensions.x;
-    undoData.extdata2 = tileDimensions.y;
-    undoData.extdata4 = layerResizeData;
-    undoData.extdata5 = nLayers;
     addToUndoStack(undoData);
-    tileDimensions = downscale ? XY{tileDimensions.x / scale.x, tileDimensions.y / scale.y} : XY{tileDimensions.x * scale.x, tileDimensions.y * scale.y};
 }
 
 MainEditorPalettized* MainEditor::toPalettizedSession()
