@@ -33,21 +33,6 @@ enum EditorTouchMode : int {
     TOUCHMODE_MAX
 };
 
-//get rid of all of it
-#define UNDOSTACK_ADD_COMMENT 4
-#define UNDOSTACK_REMOVE_COMMENT 5
-#define UNDOSTACK_SET_OPACITY 6
-#define UNDOSTACK_V2_ACTION 11
-struct UndoStackElement {
-    Layer* targetlayer = NULL;
-    uint32_t type = 0;
-    int extdata = 0;
-    int extdata2 = 0;
-    std::string extdata3 = "";
-    void* extdata4 = NULL;
-    int extdata5 = 0;
-};
-
 struct CommentData {
     XY position;
     std::string data;
@@ -164,7 +149,7 @@ public:
     std::vector<Layer*> layers;
     int selLayer = 0;
 
-    std::vector<UndoStackElement> undoStack, redoStack;
+    std::vector<UndoStackElementV2*> undoStack, redoStack;
 
     XY tileDimensions = XY{ 0,0 };
     u8 tileGridAlpha = 0x40;
@@ -356,7 +341,6 @@ public:
     void checkAndDiscardEndOfUndoStack();
     void commitStateToLayer(Layer* l);
     void commitStateToCurrentLayer();
-    void addToUndoStack(UndoStackElement undo);
     void addToUndoStack(UndoStackElementV2* undo);
     void discardUndoStack();
     void discardRedoStack();

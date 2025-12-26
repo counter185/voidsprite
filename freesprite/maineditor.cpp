@@ -2146,12 +2146,9 @@ void MainEditor::recenterCanvas()
 
 void MainEditor::discardEndOfUndoStack() {
     if (!undoStack.empty()) {
-        UndoStackElement& l = undoStack.front();
-        if (l.type == UNDOSTACK_V2_ACTION) {
-            auto e = (UndoStackElementV2*)l.extdata4;
-            e->discardFromRedo = false;
-            delete e;
-        }
+        auto*& e = undoStack.front();
+        e->discardFromRedo = false;
+        delete e;
 
         undoStack.erase(undoStack.begin());
     }
@@ -2195,23 +2192,12 @@ uint32_t MainEditor::pickColorFromAllLayers(XY pos)
     return c;
 }
 
-void MainEditor::addToUndoStack(UndoStackElement undo)
-{
-    lastUndoWasRedo = true;
-    undoTimer.start();
-    discardRedoStack();
-    undoStack.push_back(undo);
-    checkAndDiscardEndOfUndoStack();
-    changesSinceLastSave = HAS_UNSAVED_CHANGES;
-    networkCanvasStateUpdated(indexOfLayer(undo.targetlayer));
-}
-
 void MainEditor::addToUndoStack(UndoStackElementV2* undo)
 {
     lastUndoWasRedo = true;
     undoTimer.start();
     discardRedoStack();
-    undoStack.push_back(UndoStackElement{ NULL, UNDOSTACK_V2_ACTION, 0, 0, "", undo});
+    undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
     changesSinceLastSave = HAS_UNSAVED_CHANGES;
     networkCanvasStateUpdated(indexOfLayer(undo->getAffectedLayer()));
@@ -2227,12 +2213,9 @@ void MainEditor::discardUndoStack()
 void MainEditor::discardRedoStack()
 {
     //clear redo stack
-    for (UndoStackElement& l : redoStack) {
-        if (l.type == UNDOSTACK_V2_ACTION) {
-            auto e = (UndoStackElementV2*)l.extdata4;
-            e->discardFromRedo = true;
-            delete e;
-        }
+    for (auto& e : redoStack) {
+        e->discardFromRedo = true;
+        delete e;
     }
     redoStack.clear();
 }
@@ -2242,18 +2225,12 @@ void MainEditor::undo()
     if (!undoStack.empty()) {
         undoTimer.start();
         lastUndoWasRedo = false;
-        UndoStackElement& l = undoStack.back();
+        auto*& l = undoStack.back();
+        l->undo(this);
         undoStack.pop_back();
-        switch (l.type) {
-            case UNDOSTACK_V2_ACTION:
-                if (l.extdata4 != NULL) {
-                    ((UndoStackElementV2*)l.extdata4)->undo(this);
-                }
-                break;
-        }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
-        networkCanvasStateUpdated(indexOfLayer(l.targetlayer));
+        networkCanvasStateUpdated(indexOfLayer(l->getAffectedLayer()));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to undo", ""));
@@ -2265,16 +2242,12 @@ void MainEditor::redo()
     if (!redoStack.empty()) {
         undoTimer.start();
         lastUndoWasRedo = true;
-        UndoStackElement l = redoStack[redoStack.size() - 1];
+        auto*& l = redoStack.back();
+        l->redo(this);
         redoStack.pop_back();
-        switch (l.type) {
-            case UNDOSTACK_V2_ACTION:
-                ((UndoStackElementV2*)l.extdata4)->redo(this);
-                break;
-        }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
-        networkCanvasStateUpdated(indexOfLayer(l.targetlayer));
+        networkCanvasStateUpdated(indexOfLayer(l->getAffectedLayer()));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to redo", ""));
