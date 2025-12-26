@@ -51,26 +51,6 @@ void UndoLayersResized::redo(MainEditor* editor)
 }
 
 
-void UndoLayerRemoved::undo(MainEditor* editor)
-{
-    editor->layers.insert(editor->layers.begin() + insertAt, l);
-    editor->layerPicker->updateLayers();
-}
-
-void UndoLayerRemoved::redo(MainEditor* editor)
-{
-    //remove layer from list
-    auto pos = std::find(editor->layers.begin(), editor->layers.end(), l);
-    if (pos != editor->layers.end()) {
-        editor->layers.erase(pos);
-    }
-    if (editor->selLayer >= editor->layers.size()) {
-        editor->switchActiveLayer(editor->layers.size() - 1);
-    }
-    editor->layerPicker->updateLayers();
-}
-
-
 void UndoLayerModified::undo(MainEditor* editor)
 {
     if (storedData != NULL) {
@@ -116,5 +96,36 @@ void UndoLayerVariantCreated::undo(MainEditor* editor)
 void UndoLayerVariantCreated::redo(MainEditor* editor)
 {
     l->layerData.insert(l->layerData.begin() + variantIndex, storedVariant);
+    if (variantIndex == l->currentLayerVariant) {
+        editor->layer_switchVariant(l, ixmin(variantIndex, l->layerData.size() - 1));
+    }
     editor->layerPicker->updateLayers();
+}
+
+void UndoLayerOpacityChanged::undo(MainEditor* editor)
+{
+    l->layerAlpha = l->lastConfirmedlayerAlpha = oldOpacity;
+    editor->layerPicker->updateLayers();
+}
+
+void UndoLayerOpacityChanged::redo(MainEditor* editor)
+{
+    l->layerAlpha = l->lastConfirmedlayerAlpha = newOpacity;
+    editor->layerPicker->updateLayers();
+}
+
+void UndoCommentAdded::undo(MainEditor* editor)
+{
+    auto findAtPos = std::find_if(editor->comments.begin(), editor->comments.end(),
+        [this](CommentData& c) {
+            return xyEqual(c.position, comment.position);
+        });
+    if (findAtPos != editor->comments.end()) {
+        editor->comments.erase(findAtPos);
+    }
+}
+
+void UndoCommentAdded::redo(MainEditor* editor)
+{
+    editor->comments.push_back(comment);
 }

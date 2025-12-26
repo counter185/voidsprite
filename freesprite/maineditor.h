@@ -33,11 +33,10 @@ enum EditorTouchMode : int {
     TOUCHMODE_MAX
 };
 
+//get rid of all of it
 #define UNDOSTACK_ADD_COMMENT 4
 #define UNDOSTACK_REMOVE_COMMENT 5
 #define UNDOSTACK_SET_OPACITY 6
-#define UNDOSTACK_ALL_LAYER_DATA_MODIFIED 8
-#define UNDOSTACK_DELETE_LAYER_VARIANT 10
 #define UNDOSTACK_V2_ACTION 11
 struct UndoStackElement {
     Layer* targetlayer = NULL;
@@ -47,11 +46,6 @@ struct UndoStackElement {
     std::string extdata3 = "";
     void* extdata4 = NULL;
     int extdata5 = 0;
-};
-
-struct UndoStackResizeLayerElement {
-    XY oldDimensions;
-    std::vector<LayerVariant> oldLayerData;
 };
 
 struct CommentData {

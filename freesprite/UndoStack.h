@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "Layer.h"
+#include "maineditor.h"
 
 class UndoStackElementV2 {
 public:
@@ -79,13 +80,14 @@ public:
 };
 
 class UndoLayerCreated : public UndoStackElementV2 {
-private:
+protected:
     Layer* l;
     int insertAt;
+    bool deleteOnRedo = true;
 public:
     UndoLayerCreated(Layer* l, int insertAt) : l(l), insertAt(insertAt) {}
     ~UndoLayerCreated() {
-        if (discardFromRedo) {
+        if (deleteOnRedo == discardFromRedo) {
             delete l;
         }
     }
@@ -98,22 +100,14 @@ public:
     std::string name() override { return TL("vsp.undo.layercreated"); }
 };
 
-class UndoLayerRemoved : public UndoStackElementV2 {
-private:
-    Layer* l;
-    int insertAt;
+class UndoLayerRemoved : public UndoLayerCreated {
 public:
-    UndoLayerRemoved(Layer* l, int insertAt) : l(l), insertAt(insertAt) {}
-    ~UndoLayerRemoved() {
-        if (!discardFromRedo) {
-            delete l;
-        }
+    UndoLayerRemoved(Layer* l, int insertAt) : UndoLayerCreated(l,insertAt) {
+        deleteOnRedo = false;
     }
 
-    Layer* getAffectedLayer() override { return l; }
-
-    void undo(MainEditor* editor) override;
-    void redo(MainEditor* editor) override;
+    void undo(MainEditor* editor) override { UndoLayerCreated::redo(editor); };
+    void redo(MainEditor* editor) override { UndoLayerCreated::undo(editor); };
 
     std::string name() override { return TL("vsp.undo.layerremoved"); }
 };
@@ -155,15 +149,17 @@ public:
 };
 
 class UndoLayerVariantCreated : public UndoStackElementV2 {
-private:
+protected:
     Layer* l;
     int variantIndex;
     LayerVariant storedVariant;
+
+    bool deleteOnRedo = true;
 public:
     UndoLayerVariantCreated(Layer* l, int variantIndex) : l(l), variantIndex(variantIndex) {}
     ~UndoLayerVariantCreated()
     {
-        if (discardFromRedo) {
+        if (deleteOnRedo == discardFromRedo) {
             tracked_free(storedVariant.pixelData);
         }
     }
@@ -171,4 +167,48 @@ public:
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
     std::string name() override { return TL("vsp.undo.layervariantcreated"); }
+};
+
+class UndoLayerVariantRemoved : public UndoLayerVariantCreated {
+
+public:
+    UndoLayerVariantRemoved(Layer* l, int variantIndex, LayerVariant storedVariant) 
+        : UndoLayerVariantCreated(l, variantIndex)
+    {
+        this->storedVariant = storedVariant;
+        deleteOnRedo = false;
+    }
+
+    void undo(MainEditor* editor) override { UndoLayerVariantCreated::redo(editor); };
+    void redo(MainEditor* editor) override { UndoLayerVariantCreated::undo(editor); };
+};
+
+class UndoLayerOpacityChanged : public UndoStackElementV2 {
+private:
+    Layer* l;
+    uint8_t oldOpacity, newOpacity;
+public:
+    UndoLayerOpacityChanged(Layer* l, uint8_t oldOpacity, uint8_t newOpacity)
+        : l(l), oldOpacity(oldOpacity), newOpacity(newOpacity) { }
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+};
+
+class UndoCommentAdded : public UndoStackElementV2 {
+protected:
+    CommentData comment;
+public:
+    UndoCommentAdded(CommentData c) : comment(c) {}
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+};
+
+class UndoCommentRemoved : public UndoCommentAdded {
+public:
+    UndoCommentRemoved(CommentData c) : UndoCommentAdded(c) {}
+
+    void undo(MainEditor* editor) override { UndoCommentAdded::redo(editor); };
+    void redo(MainEditor* editor) override { UndoCommentAdded::undo(editor); };
 };

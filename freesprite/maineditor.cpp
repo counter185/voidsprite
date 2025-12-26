@@ -2145,20 +2145,12 @@ void MainEditor::recenterCanvas()
 }
 
 void MainEditor::discardEndOfUndoStack() {
-    if (undoStack.size() > 0) {
-        UndoStackElement l = undoStack[0];
-        switch (l.type) {
-            case UNDOSTACK_V2_ACTION:
-                {
-                    auto e = (UndoStackElementV2*)l.extdata4;
-                    e->discardFromRedo = false;
-                    delete e;
-                }
-                break;
-            case UNDOSTACK_DELETE_LAYER_VARIANT:
-                tracked_free(((LayerVariant*)l.extdata4)->pixelData);
-                delete (LayerVariant*)l.extdata4;
-                break;
+    if (!undoStack.empty()) {
+        UndoStackElement& l = undoStack.front();
+        if (l.type == UNDOSTACK_V2_ACTION) {
+            auto e = (UndoStackElementV2*)l.extdata4;
+            e->discardFromRedo = false;
+            delete e;
         }
 
         undoStack.erase(undoStack.begin());
@@ -2236,14 +2228,10 @@ void MainEditor::discardRedoStack()
 {
     //clear redo stack
     for (UndoStackElement& l : redoStack) {
-        switch (l.type) {
-            case UNDOSTACK_V2_ACTION:
-                {
-                    auto e = (UndoStackElementV2*)l.extdata4;
-                    e->discardFromRedo = true;
-                    delete e;
-                }
-                break;
+        if (l.type == UNDOSTACK_V2_ACTION) {
+            auto e = (UndoStackElementV2*)l.extdata4;
+            e->discardFromRedo = true;
+            delete e;
         }
     }
     redoStack.clear();
@@ -2254,35 +2242,13 @@ void MainEditor::undo()
     if (!undoStack.empty()) {
         undoTimer.start();
         lastUndoWasRedo = false;
-        UndoStackElement l = undoStack[undoStack.size() - 1];
+        UndoStackElement& l = undoStack.back();
         undoStack.pop_back();
         switch (l.type) {
             case UNDOSTACK_V2_ACTION:
                 if (l.extdata4 != NULL) {
                     ((UndoStackElementV2*)l.extdata4)->undo(this);
                 }
-                break;
-            case UNDOSTACK_ADD_COMMENT:
-                _removeCommentAt({ l.extdata, l.extdata2 });
-                break;
-            case UNDOSTACK_REMOVE_COMMENT:
-                comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
-                break;
-            case UNDOSTACK_SET_OPACITY:
-                l.targetlayer->layerAlpha = (uint8_t)l.extdata;
-                l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
-                layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_DELETE_LAYER_VARIANT:
-                int variantIndex = l.extdata;
-                LayerVariant* deletedVariant = (LayerVariant*)l.extdata4;
-                l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, *deletedVariant);
-                delete deletedVariant;
-                if (variantIndex == l.targetlayer->currentLayerVariant) {
-                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
-                }
-                l.extdata4 = NULL;
-                layerPicker->updateLayers();
                 break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2304,28 +2270,6 @@ void MainEditor::redo()
         switch (l.type) {
             case UNDOSTACK_V2_ACTION:
                 ((UndoStackElementV2*)l.extdata4)->redo(this);
-                break;
-            case UNDOSTACK_ADD_COMMENT:
-                comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
-                break;
-            case UNDOSTACK_REMOVE_COMMENT:
-                _removeCommentAt({ l.extdata, l.extdata2 });
-                break;
-            case UNDOSTACK_SET_OPACITY:
-                l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
-                l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
-                layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_DELETE_LAYER_VARIANT:
-                int variantIndex = l.extdata;
-                LayerVariant* vv = new LayerVariant;
-                *vv = l.targetlayer->layerData[variantIndex];
-                l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
-                l.extdata4 = vv;
-                if (variantIndex <= l.targetlayer->currentLayerVariant) {
-                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
-                }
-                layerPicker->updateLayers();
                 break;
         }
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
@@ -2637,8 +2581,7 @@ void MainEditor::layer_removeVariant(Layer* layer, int variantIndex)
     if (layer->layerData.size() > 1) {
         LayerVariant v = layer->layerData[variantIndex];
         layer->layerData.erase(layer->layerData.begin() + variantIndex);
-        LayerVariant* vv = new LayerVariant(v);
-        addToUndoStack(UndoStackElement{ layer, UNDOSTACK_DELETE_LAYER_VARIANT, variantIndex,0,"", vv});
+        addToUndoStack(new UndoLayerVariantRemoved(layer, variantIndex, v));
         if (variantIndex <= layer->currentLayerVariant) {
             layer_switchVariant(layer, ixmin(variantIndex, layer->layerData.size() - 1));
         }
@@ -2686,8 +2629,7 @@ int MainEditor::indexOfLayer(Layer* l)
 
 void MainEditor::layer_setOpacity(uint8_t opacity) {
     Layer* clayer = getCurrentLayer();
-    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_SET_OPACITY, clayer->lastConfirmedlayerAlpha, opacity });
-    //logprintf("added to undo stack: %i, %i\n", clayer->lastConfirmedlayerAlpha, opacity);
+    addToUndoStack(new UndoLayerOpacityChanged(clayer, clayer->lastConfirmedlayerAlpha, opacity));
     clayer->layerAlpha = opacity;
     clayer->lastConfirmedlayerAlpha = clayer->layerAlpha;
 }
@@ -2814,7 +2756,6 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
 
     //todo: detect if copyscaled or malloc fails
     int nElements = layers.size();
-    UndoStackResizeLayerElement* layerResizeData = new UndoStackResizeLayerElement[nElements];
     for (Layer* l : layers) {
         undoData->storedLayerData[l] = l->layerData;
         Layer* sc = l->copyAllVariantsScaled(size);
@@ -3626,27 +3567,22 @@ bool MainEditor::canAddCommentAt(XY a)
 void MainEditor::addComment(CommentData c)
 {
     if (canAddCommentAt(c.position)) {
-        addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ADD_COMMENT, c.position.x, c.position.y, c.data });
         comments.push_back(c);
+        addToUndoStack(new UndoCommentAdded(c));
     }
 }
 
 void MainEditor::addCommentAt(XY a, std::string c)
 {
-    if (canAddCommentAt(a)) {
-        addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ADD_COMMENT, a.x, a.y, c });
-
-        CommentData newComment = { a, c };
-        comments.push_back(newComment);
-    }
+    CommentData newComment = { a, c };
+    addComment(newComment);
 }
 
 void MainEditor::removeCommentAt(XY a)
 {
     CommentData c = _removeCommentAt(a);
     if (c.data[0] != '\1') {
-
-        addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_REMOVE_COMMENT, a.x, a.y, c.data });
+        addToUndoStack(new UndoCommentRemoved(c));
     }
 }
 
@@ -3659,7 +3595,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
             return c;
         }
     }
-    logprintf("_removeComment NOT FOUND\n");
+    logerr("_removeComment NOT FOUND\n");
     //shitass workaround tell noone thanks
     //@hirano185 hey girlie check this out!
     return { {0,0}, "\1" };
