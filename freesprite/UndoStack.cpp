@@ -21,6 +21,7 @@ void UndoLayerCreated::redo(MainEditor* editor)
     editor->layerPicker->updateLayers();
 }
 
+
 void UndoLayersResized::undo(MainEditor* editor)
 {
     for (auto& [layer, data] : storedLayerData) {
@@ -84,4 +85,36 @@ void UndoLayerModified::undo(MainEditor* editor)
 void UndoLayerModified::redo(MainEditor* editor)
 {
     undo(editor);
+}
+
+
+void UndoLayerReordered::undo(MainEditor* editor)
+{
+    editor->layers.erase(editor->layers.begin() + newIndex);
+    editor->layers.insert(editor->layers.begin() + oldIndex, l);
+    editor->layerPicker->updateLayers();
+}
+
+void UndoLayerReordered::redo(MainEditor* editor)
+{
+    editor->layers.erase(editor->layers.begin() + oldIndex);
+    editor->layers.insert(editor->layers.begin() + newIndex, l);
+    editor->layerPicker->updateLayers();
+}
+
+
+void UndoLayerVariantCreated::undo(MainEditor* editor)
+{
+    storedVariant = l->layerData[variantIndex];
+    l->layerData.erase(l->layerData.begin() + variantIndex);
+    if (variantIndex == l->currentLayerVariant) {
+        editor->layer_switchVariant(l, ixmin(variantIndex, l->layerData.size() - 1));
+    }
+    editor->layerPicker->updateLayers();
+}
+
+void UndoLayerVariantCreated::redo(MainEditor* editor)
+{
+    l->layerData.insert(l->layerData.begin() + variantIndex, storedVariant);
+    editor->layerPicker->updateLayers();
 }

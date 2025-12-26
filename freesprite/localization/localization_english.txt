@@ -39,6 +39,12 @@
     {"vsp.nav.window", "Window"},
     {"vsp.nav.view", "View"},
 
+    //undo op names 
+    {"vsp.undo.layermodified", "Layer modified"},
+    {"vsp.undo.layercreated", "Layer created"},
+    {"vsp.undo.layerremoved", "Layer removed"},
+    {"vsp.undo.layersresized", "Canvas resized"},
+
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},
     {"vsp.rpc.activeworkspaces", "active workspaces"},
@@ -215,6 +221,7 @@
     // screen: voidsprite main editor
     {"vsp.maineditor", "Editor"},
     {"vsp.maineditor.erasermode", "(Erase)"},
+    {"vsp.maineditor.undostack", "Undo history"},
 
     {"vsp.maineditor.panel.colorpicker.title", "COLOR PICKER"},
     {"vsp.maineditor.panel.colorpicker.tab.colors", "Colors"},

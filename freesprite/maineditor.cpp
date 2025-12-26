@@ -811,21 +811,37 @@ void MainEditor::renderUndoStack()
 {
     XY center = { g_windowW / 2, g_windowH - 40 };
 
+    double mouseDistance = xyDistance({ g_mouseX, g_mouseY }, center);
+
     int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * 5 * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
     center.x += xOffset;
 
-    uint8_t lineShade = backgroundColor.r == 0x00 ? 0xff : 0x00;
+    uint8_t lineShade = !usingAltBG() ? 0xff : 0x00;
+
+    XY undoOrigin = xySubtract(center, { 10, 0 });
+    XY redoOrigin = xyAdd(center, { 10, 0 });
 
     for (int x = 0; x < undoStack.size(); x++) {
+        int xPos = undoOrigin.x - x * 10;
         SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30);
-        SDL_RenderDrawLine(g_rd, center.x - (x + 1) * 10, center.y, center.x - (x + 1) * 10, center.y - 10);
+        SDL_RenderDrawLine(g_rd, xPos, center.y, xPos, center.y - 10);
     }
+
     for (int x = 0; x < redoStack.size(); x++) {
+        int xPos = redoOrigin.x + x * 10;
         SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30);
-        SDL_RenderDrawLine(g_rd, center.x + (x + 1) * 10, center.y, center.x + (x + 1) * 10, center.y - 10);
+        SDL_RenderDrawLine(g_rd, xPos, center.y, xPos, center.y - 10);
     }
+
+    //center line
     SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x50);
     SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
+
+    if (mouseDistance < 40) {
+        static std::string undoText = TL("vsp.maineditor.undostack");
+        int xw = g_fnt->StatStringDimensions(undoText, 14).x;
+        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35, SDL_Color{ lineShade,lineShade,lineShade,0x50 }, 14);
+    }
 }
 
 void MainEditor::initLayers()
@@ -2189,6 +2205,8 @@ uint32_t MainEditor::pickColorFromAllLayers(XY pos)
 
 void MainEditor::addToUndoStack(UndoStackElement undo)
 {
+    lastUndoWasRedo = true;
+    undoTimer.start();
     discardRedoStack();
     undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
@@ -2198,6 +2216,8 @@ void MainEditor::addToUndoStack(UndoStackElement undo)
 
 void MainEditor::addToUndoStack(UndoStackElementV2* undo)
 {
+    lastUndoWasRedo = true;
+    undoTimer.start();
     discardRedoStack();
     undoStack.push_back(UndoStackElement{ NULL, UNDOSTACK_V2_ACTION, 0, 0, "", undo});
     checkAndDiscardEndOfUndoStack();
@@ -2224,13 +2244,6 @@ void MainEditor::discardRedoStack()
                     delete e;
                 }
                 break;
-            case UNDOSTACK_CREATE_LAYER_VARIANT:
-            {
-                LayerVariant v = *(LayerVariant*)l.extdata4;
-                delete (LayerVariant*)l.extdata4;
-                tracked_free(v.pixelData);
-            }
-                break;
         }
     }
     redoStack.clear();
@@ -2249,14 +2262,6 @@ void MainEditor::undo()
                     ((UndoStackElementV2*)l.extdata4)->undo(this);
                 }
                 break;
-            case UNDOSTACK_MOVE_LAYER:
-            {
-                Layer* lr = layers[l.extdata2];
-                layers.erase(layers.begin() + l.extdata2);
-                layers.insert(layers.begin() + l.extdata, lr);
-                layerPicker->updateLayers();
-            }
-                break;
             case UNDOSTACK_ADD_COMMENT:
                 _removeCommentAt({ l.extdata, l.extdata2 });
                 break;
@@ -2267,18 +2272,6 @@ void MainEditor::undo()
                 l.targetlayer->layerAlpha = (uint8_t)l.extdata;
                 l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
                 layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_CREATE_LAYER_VARIANT:
-            {
-                int variantIndex = l.extdata;
-                LayerVariant v = l.targetlayer->layerData[variantIndex];
-                l.targetlayer->layerData.erase(l.targetlayer->layerData.begin() + variantIndex);
-                l.extdata4 = new LayerVariant(v);
-                if (variantIndex == l.targetlayer->currentLayerVariant) {
-                    layer_switchVariant(l.targetlayer, ixmin(variantIndex, l.targetlayer->layerData.size() - 1));
-                }
-                layerPicker->updateLayers();
-            }
                 break;
             case UNDOSTACK_DELETE_LAYER_VARIANT:
                 int variantIndex = l.extdata;
@@ -2312,14 +2305,6 @@ void MainEditor::redo()
             case UNDOSTACK_V2_ACTION:
                 ((UndoStackElementV2*)l.extdata4)->redo(this);
                 break;
-            case UNDOSTACK_MOVE_LAYER:
-            {
-                Layer* lr = layers[l.extdata];
-                layers.erase(layers.begin() + l.extdata);
-                layers.insert(layers.begin() + l.extdata2, lr);
-                layerPicker->updateLayers();
-            }
-                break;
             case UNDOSTACK_ADD_COMMENT:
                 comments.push_back(CommentData{ {l.extdata, l.extdata2}, l.extdata3 });
                 break;
@@ -2330,16 +2315,6 @@ void MainEditor::redo()
                 l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
                 l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
                 layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_CREATE_LAYER_VARIANT:
-            {
-                int variantIndex = l.extdata;
-                LayerVariant v = *(LayerVariant*)l.extdata4;
-                delete (LayerVariant*)l.extdata4;
-                l.extdata4 = NULL;
-                l.targetlayer->layerData.insert(l.targetlayer->layerData.begin() + variantIndex, v);
-                layerPicker->updateLayers();
-            }
                 break;
             case UNDOSTACK_DELETE_LAYER_VARIANT:
                 int variantIndex = l.extdata;
@@ -2575,7 +2550,7 @@ void MainEditor::moveLayerUp(int index) {
         switchActiveLayer(selLayer + 1);
     }
 
-    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_MOVE_LAYER, index, index + 1 });
+    addToUndoStack(new UndoLayerReordered(clayer, index, index + 1));
 }
 
 void MainEditor::moveLayerDown(int index) {
@@ -2591,7 +2566,7 @@ void MainEditor::moveLayerDown(int index) {
         switchActiveLayer(selLayer-1);
     }
 
-    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_MOVE_LAYER, index, index - 1 });
+    addToUndoStack(new UndoLayerReordered(clayer, index, index - 1));
 }
 
 void MainEditor::mergeLayerDown(int index)
@@ -2634,7 +2609,7 @@ void MainEditor::layer_newVariant()
 {
     Layer* clayer = getCurrentLayer();
     clayer->newLayerVariant();
-    addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, clayer->currentLayerVariant });
+    addToUndoStack(new UndoLayerVariantCreated(clayer, clayer->currentLayerVariant));
     layerPicker->updateLayers();
 }
 
@@ -2652,7 +2627,7 @@ void MainEditor::layer_duplicateVariant(Layer* clayer, int variantIndex)
 {
     if (clayer != NULL) {
         clayer->duplicateVariant(variantIndex);
-        addToUndoStack(UndoStackElement{ clayer, UNDOSTACK_CREATE_LAYER_VARIANT, (int)clayer->layerData.size()-1});
+        addToUndoStack(new UndoLayerVariantCreated(clayer, clayer->layerData.size() - 1));
         layerPicker->updateLayers();
     }
 }

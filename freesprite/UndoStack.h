@@ -13,12 +13,16 @@ public:
 
     virtual void undo(MainEditor* editor) = 0;
     virtual void redo(MainEditor* editor) = 0;
+
+    virtual std::string name() { return "Undo operation"; }
 };
 
 class UndoStackComposite : public UndoStackElementV2 {
 private:
     std::vector<UndoStackElementV2*> elements;
 public:
+    std::string opName = "Multiple undo operations";
+
     UndoStackComposite(std::vector<UndoStackElementV2*> e) : elements(e) {}
     ~UndoStackComposite() {
         for (auto& e : elements) {
@@ -36,6 +40,8 @@ public:
             e->redo(editor);
         }
     }
+
+    std::string name() override { return opName; }
 };
 
 class UndoLayerModified : public UndoStackElementV2 {
@@ -47,7 +53,7 @@ public:
     static UndoLayerModified* fromCurrentState(Layer* l) {
         int variantIndex = l->currentLayerVariant;
         u64 size = (u64)l->w * (u64)l->h * 4ull;
-        u8* dataCopy = (u8*)tracked_malloc(size, "Layer");
+        u8* dataCopy = (u8*)tracked_malloc(size, "Layers");
         if (dataCopy != NULL) {
             memcpy(dataCopy, l->layerData[variantIndex].pixelData, size);
         }
@@ -68,6 +74,8 @@ public:
     Layer* getAffectedLayer() override { return l; }
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.layermodified"); }
 };
 
 class UndoLayerCreated : public UndoStackElementV2 {
@@ -86,6 +94,8 @@ public:
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.layercreated"); }
 };
 
 class UndoLayerRemoved : public UndoStackElementV2 {
@@ -104,6 +114,8 @@ public:
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.layerremoved"); }
 };
 
 class UndoLayersResized : public UndoStackElementV2 {
@@ -125,4 +137,38 @@ public:
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.layersresized"); }
+};
+
+class UndoLayerReordered : public UndoStackElementV2 {
+private:
+    Layer* l;
+    int oldIndex, newIndex;
+public:
+    UndoLayerReordered(Layer* l, int oldIndex, int newIndex) : l(l), oldIndex(oldIndex), newIndex(newIndex) {}
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.layerreordered"); }
+};
+
+class UndoLayerVariantCreated : public UndoStackElementV2 {
+private:
+    Layer* l;
+    int variantIndex;
+    LayerVariant storedVariant;
+public:
+    UndoLayerVariantCreated(Layer* l, int variantIndex) : l(l), variantIndex(variantIndex) {}
+    ~UndoLayerVariantCreated()
+    {
+        if (discardFromRedo) {
+            tracked_free(storedVariant.pixelData);
+        }
+    }
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+    std::string name() override { return TL("vsp.undo.layervariantcreated"); }
 };
