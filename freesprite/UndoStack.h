@@ -27,8 +27,8 @@ public:
     }
 
     void undo(MainEditor* editor) override {
-        for (int i = (int)elements.size() - 1; i >= 0; i--) {
-            elements[i]->undo(editor);
+        for (auto& e : elements) {
+            e->undo(editor);
         }
     }
     void redo(MainEditor* editor) override {
@@ -36,6 +36,38 @@ public:
             e->redo(editor);
         }
     }
+};
+
+class UndoLayerModified : public UndoStackElementV2 {
+private:
+    Layer* l;
+    int targetVariant;
+    u8* storedData;
+public:
+    static UndoLayerModified* fromCurrentState(Layer* l) {
+        int variantIndex = l->currentLayerVariant;
+        u64 size = (u64)l->w * (u64)l->h * 4ull;
+        u8* dataCopy = (u8*)tracked_malloc(size, "Layer");
+        if (dataCopy != NULL) {
+            memcpy(dataCopy, l->layerData[variantIndex].pixelData, size);
+        }
+        else {
+            logerr("[UndoLayerModified] MALLOC FAILED");
+        }
+        return new UndoLayerModified(l, variantIndex, dataCopy);
+    }
+
+    UndoLayerModified(Layer* l, int targetVariant, u8* storedData) 
+        : l(l), targetVariant(targetVariant), storedData(storedData) {
+    }
+    ~UndoLayerModified() {
+        if (storedData != NULL) {
+            tracked_free(storedData);
+        }
+    }
+    Layer* getAffectedLayer() override { return l; }
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
 };
 
 class UndoLayerCreated : public UndoStackElementV2 {
@@ -46,6 +78,24 @@ public:
     UndoLayerCreated(Layer* l, int insertAt) : l(l), insertAt(insertAt) {}
     ~UndoLayerCreated() {
         if (discardFromRedo) {
+            delete l;
+        }
+    }
+
+    Layer* getAffectedLayer() override { return l; }
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+};
+
+class UndoLayerRemoved : public UndoStackElementV2 {
+private:
+    Layer* l;
+    int insertAt;
+public:
+    UndoLayerRemoved(Layer* l, int insertAt) : l(l), insertAt(insertAt) {}
+    ~UndoLayerRemoved() {
+        if (!discardFromRedo) {
             delete l;
         }
     }

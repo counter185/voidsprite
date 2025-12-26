@@ -830,10 +830,6 @@ void MainEditor::renderUndoStack()
 
 void MainEditor::initLayers()
 {
-    for (Layer*& l : layers) {
-        l->commitStateToUndoStack();
-    }
-
     layerPicker->updateLayers();
 }
 
@@ -2143,17 +2139,6 @@ void MainEditor::discardEndOfUndoStack() {
                     delete e;
                 }
                 break;
-            case UNDOSTACK_LAYER_DATA_MODIFIED:
-                l.targetlayer->discardLastUndo();
-                break;
-            case UNDOSTACK_DELETE_LAYER:
-                delete l.targetlayer;
-                break;
-            case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
-                for (Layer* ll : layers) {
-                    ll->discardLastUndo();
-                }
-                break;
             case UNDOSTACK_DELETE_LAYER_VARIANT:
                 tracked_free(((LayerVariant*)l.extdata4)->pixelData);
                 delete (LayerVariant*)l.extdata4;
@@ -2173,8 +2158,7 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 
 void MainEditor::commitStateToLayer(Layer* l)
 {
-    l->commitStateToUndoStack();
-    addToUndoStack(UndoStackElement{ l, UNDOSTACK_LAYER_DATA_MODIFIED });
+    addToUndoStack(UndoLayerModified::fromCurrentState(l));
     networkCanvasStateUpdated(indexOfLayer(l));
 }
 
@@ -2230,10 +2214,6 @@ void MainEditor::discardUndoStack()
 
 void MainEditor::discardRedoStack()
 {
-    for (Layer*& x : layers) {
-        x->discardRedoStack();
-    }
-
     //clear redo stack
     for (UndoStackElement& l : redoStack) {
         switch (l.type) {
@@ -2265,15 +2245,9 @@ void MainEditor::undo()
         undoStack.pop_back();
         switch (l.type) {
             case UNDOSTACK_V2_ACTION:
-                ((UndoStackElementV2*)l.extdata4)->undo(this);
-                break;
-            case UNDOSTACK_LAYER_DATA_MODIFIED:
-                l.targetlayer->undo();
-                break;
-            case UNDOSTACK_DELETE_LAYER:
-                //add layer to list
-                layers.insert(layers.begin() + l.extdata, l.targetlayer);
-                layerPicker->updateLayers();
+                if (l.extdata4 != NULL) {
+                    ((UndoStackElementV2*)l.extdata4)->undo(this);
+                }
                 break;
             case UNDOSTACK_MOVE_LAYER:
             {
@@ -2293,11 +2267,6 @@ void MainEditor::undo()
                 l.targetlayer->layerAlpha = (uint8_t)l.extdata;
                 l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
                 layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
-                for (Layer* ll : layers) {
-                    ll->undo();
-                }
                 break;
             case UNDOSTACK_CREATE_LAYER_VARIANT:
             {
@@ -2343,22 +2312,6 @@ void MainEditor::redo()
             case UNDOSTACK_V2_ACTION:
                 ((UndoStackElementV2*)l.extdata4)->redo(this);
                 break;
-            case UNDOSTACK_LAYER_DATA_MODIFIED:
-                l.targetlayer->redo();
-                break;
-            case UNDOSTACK_DELETE_LAYER:
-                //add layer to list
-                for (int x = 0; x < layers.size(); x++) {
-                    if (layers[x] == l.targetlayer) {
-                        layers.erase(layers.begin() + x);
-                        break;
-                    }
-                }
-                if (selLayer >= layers.size()) {
-                    switchActiveLayer(layers.size() - 1);
-                }
-                layerPicker->updateLayers();
-                break;
             case UNDOSTACK_MOVE_LAYER:
             {
                 Layer* lr = layers[l.extdata];
@@ -2377,11 +2330,6 @@ void MainEditor::redo()
                 l.targetlayer->layerAlpha = (uint8_t)l.extdata2;
                 l.targetlayer->lastConfirmedlayerAlpha = l.targetlayer->layerAlpha;
                 layerPicker->updateLayers();
-                break;
-            case UNDOSTACK_ALL_LAYER_DATA_MODIFIED:
-                for (Layer* ll : layers) {
-                    ll->redo();
-                }
                 break;
             case UNDOSTACK_CREATE_LAYER_VARIANT:
             {
@@ -2448,7 +2396,7 @@ void MainEditor::deleteLayer(int index) {
         switchActiveLayer(layers.size() - 1);
     }
 
-    addToUndoStack(UndoStackElement{ layerAtPos, UNDOSTACK_DELETE_LAYER, index });
+    addToUndoStack(new UndoLayerRemoved(layerAtPos, index));
 }
 
 void MainEditor::regenerateLastColors()
@@ -2861,20 +2809,24 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 
 void MainEditor::flipAllLayersOnX()
 {
-    addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ALL_LAYER_DATA_MODIFIED });
-    for (Layer* l : layers) {
-        l->commitStateToUndoStack();
+    std::vector<UndoStackElementV2*> undos;
+    for (auto* l : layers) {
+        undos.push_back(UndoLayerModified::fromCurrentState(l));
         l->flipHorizontally();
     }
+
+    addToUndoStack(new UndoStackComposite(undos));
 }
 
 void MainEditor::flipAllLayersOnY()
 {
-    addToUndoStack(UndoStackElement{ NULL, UNDOSTACK_ALL_LAYER_DATA_MODIFIED });
-    for (Layer* l : layers) {
-        l->commitStateToUndoStack();
+    std::vector<UndoStackElementV2*> undos;
+    for (auto* l : layers) {
+        undos.push_back(UndoLayerModified::fromCurrentState(l));
         l->flipVertically();
     }
+
+    addToUndoStack(new UndoStackComposite(undos));
 }
 
 void MainEditor::rescaleAllLayersFromCommand(XY size) {

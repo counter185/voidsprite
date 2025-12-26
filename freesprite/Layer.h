@@ -36,8 +36,6 @@ public:
     std::vector<LayerVariant> layerData;
     int currentLayerVariant = 0;
 
-    std::vector<LayerUndoData> undoQueue;
-    std::vector<LayerUndoData> redoQueue;
     int w = -1, h = -1;
     bool bgOpFinished = false;
 
@@ -68,12 +66,6 @@ public:
     virtual ~Layer() {
         for (auto& variant : layerData) {
             tracked_free(variant.pixelData);
-        }
-        for (auto& u : undoQueue) {
-            tracked_free(u.data);
-        }
-        for (auto& r : redoQueue) {
-            tracked_free(r.data);
         }
         for (auto& [rd, t] : renderData) {
             tracked_destroyTexture(t.tex);
@@ -353,50 +345,6 @@ public:
             }
         }
         markLayerDirty();
-    }
-
-    void discardRedoStack() {
-        for (auto& redoD : redoQueue) {
-            tracked_free(redoD.data);
-        }
-        redoQueue.clear();
-    }
-    void discardLastUndo() {
-        if (!undoQueue.empty()) {
-            tracked_free(undoQueue[0].data);
-            undoQueue.erase(undoQueue.begin());
-        }
-    }
-    void commitStateToUndoStack() {
-        discardRedoStack();
-        uint8_t* copiedPixelData = (uint8_t*)tracked_malloc(w * h * 4, "Layers");
-        if (copiedPixelData != NULL) {
-            memcpy(copiedPixelData, currentVariant().pixelData, w * h * 4);
-            undoQueue.push_back({ currentLayerVariant, copiedPixelData });
-        }
-        else {
-            logprintf("malloc FAILED we are FUCKED\n");
-        }
-    }
-    void undo() {
-        if (!undoQueue.empty()) {
-            LayerUndoData& lastUndo = undoQueue[undoQueue.size() - 1];
-            LayerVariant& targetVariant = layerData[lastUndo.variantIndex];
-            redoQueue.push_back({ lastUndo.variantIndex, targetVariant.pixelData});
-            targetVariant.pixelData = lastUndo.data;
-            undoQueue.pop_back();
-            markLayerDirty();
-        }
-    }
-    void redo() {
-        if (!redoQueue.empty()) {
-            LayerUndoData& lastRedo = redoQueue[redoQueue.size() - 1];
-            LayerVariant& targetVariant = layerData[lastRedo.variantIndex];
-            undoQueue.push_back({ lastRedo.variantIndex, targetVariant.pixelData});
-            targetVariant.pixelData = lastRedo.data;
-            redoQueue.pop_back();
-            markLayerDirty();
-        }
     }
 
     unsigned int numUniqueColors(bool onlyRGB = false) {
