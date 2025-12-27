@@ -195,7 +195,7 @@ StartScreen::StartScreen() {
     lastOpenFilesSection->position = { startScreenPanelEndpoint + 20, 75 };
     wxsManager.addDrawable(lastOpenFilesSection);
 
-    std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_H };
+    std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_V, SDL_SCANCODE_H };
     if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
         navbarOrder.erase(std::remove(navbarOrder.begin(), navbarOrder.end(), SDL_SCANCODE_W), navbarOrder.end());
         // remove the window tab if we shouldn't be able to use it
@@ -236,6 +236,19 @@ StartScreen::StartScreen() {
                     {},
                     {
                         { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.newwindow"), [this]() { main_newWindow();} } },
+                    }
+                }
+            },
+            {
+                SDL_SCANCODE_V,
+                {
+                    TL("vsp.nav.view"),
+                    {},
+                    {
+                        { SDL_SCANCODE_F, { TL("vsp.launchpad.nav.togglefullscreen"),
+                                []() { main_toggleFullscreen(); }
+                            }
+                        }
                     }
                 }
             },
