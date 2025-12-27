@@ -16,6 +16,7 @@
     {"vsp.cmn.copy", "Copy"},
     {"vsp.cmn.paste", "Paste"},
     {"vsp.cmn.erase", "Erase"},
+    {"vsp.cmn.discard", "Discard"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
     {"vsp.cmn.error.decompressfail", "Failed to decompress data."},
@@ -305,6 +306,10 @@
     {"vsp.maineditor.nav.layer.copyvariant", "Duplicate current layer variant"},
     {"vsp.maineditor.nav.layer.renvariant", "Rename current layer variant"},
     {"vsp.maineditor.startcollab", "Start network canvas server [BETA]"},
+
+    {"vsp.maineditor.popup.safeclose", "Close this session?"},
+    {"vsp.maineditor.popup.safeclose.desc", "There are unsaved changes."},
+    {"vsp.maineditor.popup.safeclose.desc2", "Time since last save:"},
 
     //screen: network editor
     {"vsp.collabeditor", "Network Editor"},

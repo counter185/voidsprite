@@ -329,6 +329,7 @@
     <ClCompile Include="PanelTilemapPreview.cpp" />
     <ClCompile Include="PanelUserInteractable.cpp" />
     <ClCompile Include="PopupApplyFilter.cpp" />
+    <ClCompile Include="PopupChooseAction.cpp" />
     <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
     <ClCompile Include="PopupContextMenu.cpp" />
     <ClCompile Include="PopupExportScaled.cpp" />
@@ -595,6 +596,7 @@
     <ClInclude Include="platform_universal.h" />
     <ClInclude Include="platform_vita.h" />
     <ClInclude Include="PopupApplyFilter.h" />
+    <ClInclude Include="PopupChooseAction.h" />
     <ClInclude Include="PopupChooseExtsToAssoc.h" />
     <ClInclude Include="PopupContextMenu.h" />
     <ClInclude Include="PopupExportScaled.h" />

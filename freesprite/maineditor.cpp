@@ -50,6 +50,7 @@
 #include "PopupContextMenu.h"
 #include "PopupSetupNetworkCanvas.h"
 #include "PopupFreeformTransform.h"
+#include "PopupChooseAction.h"
 
 #include "discord_rpc.h"
 
@@ -1516,9 +1517,18 @@ bool MainEditor::requestSafeClose() {
         return true;
     }
     else {
-        PopupYesNo* newPopup = new PopupYesNo("Close the project?", "You have unsaved changes! ");
-        newPopup->setCallbackListener(EVENT_MAINEDITOR_CONFIRM_CLOSE, this);
-        g_addPopup(newPopup);
+        
+        std::string timeSinceLastSaveStr = frmt("{} {}", TL("vsp.maineditor.popup.safeclose.desc2"), secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
+
+        g_addPopup(new PopupChooseAction(
+            TL("vsp.maineditor.popup.safeclose"),
+            frmt("{}\n\n{}", TL("vsp.maineditor.popup.safeclose.desc"), timeSinceLastSaveStr),
+            {
+                { SDL_SCANCODE_N, { TL("vsp.cmn.cancel"), [this]() {}}},
+                { SDL_SCANCODE_C, { TL("vsp.cmn.discard"), [this]() { closeThisScreen(); }}},
+                { SDL_SCANCODE_S, { TL("vsp.nav.save"), [this]() { trySaveImage(); }}},
+            }
+        ));
     }
     return false;
 }
@@ -1865,12 +1875,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 
 void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 {
-    if (evt_id == EVENT_MAINEDITOR_CONFIRM_CLOSE) {
-        if (((PopupYesNo*)p)->result) {
-            g_closeScreen(this);
-        }
-    }
-    else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER) {
+    if (evt_id == EVENT_MAINEDITOR_RESIZELAYER) {
         resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result, false);
     }
     else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILE) {

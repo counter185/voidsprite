@@ -687,6 +687,9 @@
     <ClCompile Include="io\io_xna.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="PopupChooseAction.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1369,6 +1372,9 @@
     </ClInclude>
     <ClInclude Include="platform_emscripten.h">
       <Filter>Header files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupChooseAction.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
