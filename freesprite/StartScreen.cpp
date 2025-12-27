@@ -390,6 +390,7 @@ void StartScreen::takeInput(SDL_Event evt)
 
     if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
         if (!g_keybindManager.processKeybinds(evt, "startscreen", this)) {
+            evt = convertTouchToMouseEvent(evt);
             switch (evt.type) {
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:

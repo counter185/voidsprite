@@ -58,6 +58,7 @@ public:
     }
 
     std::string getName() override { return TL("vsp.launchpad"); }
+    bool takesTouchEvents() { return true; }
 
     void eventTextInputConfirm(int evt_id, std::string data) override {
         if (evt_id == 3) {
