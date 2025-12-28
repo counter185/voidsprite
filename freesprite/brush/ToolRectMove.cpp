@@ -3,53 +3,85 @@
 
 void ToolRectMove::clickPress(MainEditor* editor, XY pos)
 {
-	mouseDown = true;
-	mouseDownPoint = pos;
+    mouseDown = true;
+    mouseDownPoint = pos;
 }
 
 void ToolRectMove::clickRelease(MainEditor* editor, XY pos)
 {
-	mouseDown = false;
-	int xmin = ixmin(pos.x, mouseDownPoint.x);
-	int xmax = ixmax(pos.x, mouseDownPoint.x) + 1;
-	int ymin = ixmin(pos.y, mouseDownPoint.y);
-	int ymax = ixmax(pos.y, mouseDownPoint.y) + 1;
-	clonedAreaPointAndDimensions = SDL_Rect{ xmin, ymin, xmax - xmin, ymax - ymin };
-	if (clonedArea != NULL) {
-		tracked_free(clonedArea);
-		tracked_destroyTexture(cacheClonePreview);
-	}
-	clonedArea = (uint32_t*)tracked_malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4, "Temp. mem.");
-	if (clonedArea == NULL) {
-		g_addNotification(NOTIF_MALLOC_FAIL);
-		return;
-	}
-	uint64_t copyIndex = 0;
-	for (int y = ymin; y < ymax; y++) {
-		for (int x = xmin; x < xmax; x++) {
-			clonedArea[copyIndex++] = editor->layer_getPixelAt(XY{ x,y });
-			editor->SetPixel(XY{ x,y }, !editor->isPalettized ? 0x00000000 : -1);
-		}
-	}
-	cacheClonePreview = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h);
-	uint32_t* pixels;
-	int pitch;
-	SDL_LockTexture(cacheClonePreview, NULL, (void**)&pixels, &pitch);
-	copyPixelsToTexture(clonedArea, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h, (u8*)pixels, pitch);
-	SDL_UnlockTexture(cacheClonePreview);
-	SDL_SetTextureBlendMode(cacheClonePreview, SDL_BLENDMODE_BLEND);
-	SDL_SetTextureAlphaMod(cacheClonePreview, 0x60);
+    mouseDown = false;
+    int xmin = ixmin(pos.x, mouseDownPoint.x);
+    int xmax = ixmax(pos.x, mouseDownPoint.x) + 1;
+    int ymin = ixmin(pos.y, mouseDownPoint.y);
+    int ymax = ixmax(pos.y, mouseDownPoint.y) + 1;
+    clonedAreaPointAndDimensions = SDL_Rect{ xmin, ymin, xmax - xmin, ymax - ymin };
+    if (clonedArea != NULL) {
+        tracked_free(clonedArea);
+        tracked_destroyTexture(cacheClonePreview);
+    }
+    clonedArea = (uint32_t*)tracked_malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4, "Temp. mem.");
+    if (clonedArea == NULL) {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+        return;
+    }
+    uint64_t copyIndex = 0;
+    for (int y = ymin; y < ymax; y++) {
+        for (int x = xmin; x < xmax; x++) {
+            clonedArea[copyIndex++] = editor->layer_getPixelAt(XY{ x,y });
+            editor->SetPixel(XY{ x,y }, !editor->isPalettized ? 0x00000000 : -1);
+        }
+    }
+    clonedAreaIsIndexed = editor->isPalettized;
+
+    u32* visualPixels = (u32*)tracked_malloc(clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4, "Temp. mem.");
+    if (visualPixels == NULL) {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+        return;
+    }
+    if (editor->isPalettized) {
+        indexedPalette = ((MainEditorPalettized*)editor)->palette;
+        for (uint64_t p = 0; p < clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h; p++) {
+            int32_t cidx = (int32_t)clonedArea[p];
+            if (cidx < 0 || cidx >= indexedPalette.size()) {
+                visualPixels[p] = 0x00000000;
+            }
+            else {
+                visualPixels[p] = indexedPalette[cidx];
+            }
+        }
+    }
+    else {
+        memcpy(visualPixels, clonedArea, clonedAreaPointAndDimensions.w * clonedAreaPointAndDimensions.h * 4);
+    }
+    cacheClonePreview = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h);
+    uint32_t* pixels;
+    int pitch;
+    SDL_LockTexture(cacheClonePreview, NULL, (void**)&pixels, &pitch);
+    copyPixelsToTexture(visualPixels, clonedAreaPointAndDimensions.w, clonedAreaPointAndDimensions.h, (u8*)pixels, pitch);
+    tracked_free(visualPixels);
+    SDL_UnlockTexture(cacheClonePreview);
+    SDL_SetTextureBlendMode(cacheClonePreview, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureAlphaMod(cacheClonePreview, 0x60);
 }
 
 void ToolRectMove::rightClickPress(MainEditor* editor, XY pos)
 {
-	if (clonedArea != NULL) {
-		editor->commitStateToCurrentLayer();
-		uint64_t dataPointer = 0;
-		for (int y = 0; y < clonedAreaPointAndDimensions.h; y++) {
-			for (int x = 0; x < clonedAreaPointAndDimensions.w; x++) {
-				editor->SetPixel(xyAdd(pos, XY{ x,y }), clonedArea[dataPointer++], false);
-			}
-		}
-	}
+    if (editor->isPalettized && !clonedAreaIsIndexed) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste RGB data into a indexed image."));
+        return;
+    }
+
+    if (clonedArea != NULL) {
+        editor->commitStateToCurrentLayer();
+        uint64_t dataPointer = 0;
+        for (int y = 0; y < clonedAreaPointAndDimensions.h; y++) {
+            for (int x = 0; x < clonedAreaPointAndDimensions.w; x++) {
+                u32 pixel = clonedArea[dataPointer++];
+                if (!editor->isPalettized && clonedAreaIsIndexed) {
+                    pixel = ((s32)pixel < 0 || pixel >= indexedPalette.size()) ? 0 : indexedPalette[pixel];
+                }
+                editor->SetPixel(xyAdd(pos, XY{ x,y }), pixel, false);
+            }
+        }
+    }
 }

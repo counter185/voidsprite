@@ -8,6 +8,8 @@ class ToolRectMove :
     XY mouseDownPoint = XY{ 0,0 };
 
     uint32_t* clonedArea = NULL;
+    bool clonedAreaIsIndexed = false;
+    std::vector<u32> indexedPalette;
     SDL_Rect clonedAreaPointAndDimensions;
     SDL_Texture* cacheClonePreview = NULL;
 

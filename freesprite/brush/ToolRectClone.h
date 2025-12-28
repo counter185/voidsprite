@@ -11,6 +11,8 @@ class ToolRectClone :
     XY prevReleasePoint = XY{0, 0};
 
     u32* clonedArea = NULL;
+    bool clonedAreaIsIndexed = false;
+    std::vector<u32> indexedPalette;
     SDL_Rect clonedAreaPointAndDimensions;
     SDL_Texture* cacheClonePreview = NULL;
 
