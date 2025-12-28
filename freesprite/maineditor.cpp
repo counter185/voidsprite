@@ -749,13 +749,17 @@ void MainEditor::DrawForeground()
 
     XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
     if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-        std::string s = frmt("(t{}:{})", (int)floor(mousePixelTargetPoint.x / (float)tileDimensions.x), (int)floor(mousePixelTargetPoint.y / (float)tileDimensions.y));
+        std::string s = frmt("(t{}:{} in{}:{})", 
+            (int)floor(mousePixelTargetPoint.x / (float)tileDimensions.x), 
+            (int)floor(mousePixelTargetPoint.y / (float)tileDimensions.y),
+            mousePixelTargetPoint.x%tileDimensions.x,
+            mousePixelTargetPoint.y%tileDimensions.y);
         endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 });
     }
 
     if (currentBrush != NULL) {
         static std::string eraserModeText = TL("vsp.maineditor.erasermode");
-        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 10, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 30, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
     if (currentPattern != NULL) {
