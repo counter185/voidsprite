@@ -364,7 +364,7 @@ public:
     void deleteFrame(int index);
     void switchFrame(int index);
 
-    std::vector<Layer*>& getLayerStack() { return frames[activeFrame]->layers; }
+    std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
     Layer* layerAt(int index);
     virtual Layer* newLayer();
     virtual void deleteLayer(int index);

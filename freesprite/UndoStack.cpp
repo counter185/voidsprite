@@ -1,11 +1,12 @@
 #include "UndoStack.h"
 #include "maineditor.h"
 #include "EditorLayerPicker.h"
+#include "EditorFramePicker.h"
 
 void UndoLayerCreated::undo(MainEditor* editor)
 {
     //remove layer from list
-    auto& layers = editor->getLayerStack();
+    auto& layers = f->layers;
     auto pos = std::find(layers.begin(), layers.end(), l);
     if (pos != layers.end()) {
         layers.erase(pos);
@@ -18,7 +19,7 @@ void UndoLayerCreated::undo(MainEditor* editor)
 
 void UndoLayerCreated::redo(MainEditor* editor)
 {
-    auto& layers = editor->getLayerStack();
+    auto& layers = f->layers;
     layers.insert(layers.begin() + insertAt, l);
     editor->layerPicker->updateLayers();
 }
@@ -132,4 +133,22 @@ void UndoCommentAdded::undo(MainEditor* editor)
 void UndoCommentAdded::redo(MainEditor* editor)
 {
     editor->comments.push_back(comment);
+}
+
+
+void UndoFrameCreated::undo(MainEditor* editor)
+{
+    editor->frames.erase(editor->frames.begin() + insertAt);
+    if (editor->activeFrame >= editor->frames.size()) {
+        editor->activeFrame = editor->frames.size() - 1;
+    }
+    editor->framePicker->createFrameButtons();
+    editor->layerPicker->updateLayers();
+}
+
+void UndoFrameCreated::redo(MainEditor* editor)
+{
+    editor->frames.insert(editor->frames.begin() + insertAt, f);
+    editor->framePicker->createFrameButtons();
+    editor->layerPicker->updateLayers();
 }

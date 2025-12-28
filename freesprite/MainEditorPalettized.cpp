@@ -751,7 +751,7 @@ Layer* MainEditorPalettized::newLayer()
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
-        addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
+        addToUndoStack(new UndoLayerCreated(getCurrentFrame(), nl, insertAtIdx));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));

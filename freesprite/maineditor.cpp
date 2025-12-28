@@ -2289,6 +2289,7 @@ void MainEditor::newFrame()
     frames.push_back(nFrame);
     loginfo("new frame added");
     framePicker->createFrameButtons();
+    addToUndoStack(new UndoFrameCreated(nFrame, frames.size() - 1));
 }
 
 void MainEditor::duplicateFrame()
@@ -2324,7 +2325,7 @@ Layer* MainEditor::newLayer()
         layerStack.insert(layerStack.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
-        addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
+        addToUndoStack(new UndoLayerCreated(getCurrentFrame(), nl, insertAtIdx));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
@@ -2345,7 +2346,7 @@ void MainEditor::deleteLayer(int index) {
         switchActiveLayer(layers.size() - 1);
     }
 
-    addToUndoStack(new UndoLayerRemoved(layerAtPos, index));
+    addToUndoStack(new UndoLayerRemoved(getCurrentFrame(), layerAtPos, index));
 }
 
 void MainEditor::regenerateLastColors()
