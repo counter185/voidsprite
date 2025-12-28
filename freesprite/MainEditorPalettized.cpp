@@ -15,6 +15,7 @@
 #include "ViewSessionScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
 #include "UndoStack.h"
+#include "EditorFramePicker.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -665,6 +666,10 @@ void MainEditorPalettized::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
+    framePicker = new EditorFramePicker(this);
+    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67 };
+    wxsManager.addDrawable(framePicker);
+
     navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
@@ -681,7 +686,8 @@ void MainEditorPalettized::setUpWidgets()
         std::vector<CompactEditorSection> createSections = {
             {colorPickerPanel, g_iconCompactColorPicker},
             {brushPicker, g_iconCompactToolPicker},
-            {layerPicker, g_iconCompactLayerPicker}
+            {layerPicker, g_iconCompactLayerPicker},
+            {framePicker, NULL}
         };
 
         SetupCompactEditor(createSections);

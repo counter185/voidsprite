@@ -690,6 +690,9 @@
     <ClCompile Include="PopupChooseAction.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="EditorFramePicker.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1375,6 +1378,9 @@
     </ClInclude>
     <ClInclude Include="PopupChooseAction.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorFramePicker.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

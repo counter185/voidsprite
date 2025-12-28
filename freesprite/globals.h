@@ -230,6 +230,7 @@ class ExtractDataScreen;
 class EditorColorPicker;
 class EditorBrushPicker;
 class EditorLayerPicker;
+class EditorFramePicker;
 class EditorSpritesheetPreview;
 class EditorTouchToggle;
 class TilemapEditorLayerPicker;

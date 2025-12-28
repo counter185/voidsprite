@@ -286,6 +286,7 @@
       <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <ClCompile Include="DraggablePanel.cpp" />
+    <ClCompile Include="EditorFramePicker.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
     <ClCompile Include="fills.cpp" />
@@ -538,6 +539,7 @@
     <ClInclude Include="discord_game_sdk\voice_manager.h" />
     <ClInclude Include="discord_rpc.h" />
     <ClInclude Include="DraggablePanel.h" />
+    <ClInclude Include="EditorFramePicker.h" />
     <ClInclude Include="EditorTouchToggle.h" />
     <ClInclude Include="ExtractDataScreen.h" />
     <ClInclude Include="fills.h" />

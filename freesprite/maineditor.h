@@ -216,6 +216,7 @@ public:
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;
+    EditorFramePicker* framePicker;
 
     SDL_Color backgroundColor = SDL_Color{ 0,0,0,255 };
 

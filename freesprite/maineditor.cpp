@@ -28,6 +28,7 @@
 #include "PanelPreview.h"
 #include "UIStackPanel.h"
 #include "UndoStack.h"
+#include "EditorFramePicker.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1326,6 +1327,9 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
+    framePicker = new EditorFramePicker(this);
+    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67};
+    wxsManager.addDrawable(framePicker);
     
     //this must happen after actionbar init
     setActiveBrush(g_brushes[0]);
@@ -1340,7 +1344,8 @@ void MainEditor::setUpWidgets()
         std::vector<CompactEditorSection> createSections = {
             {colorPickerPanel, g_iconCompactColorPicker},
             {brushPicker, g_iconCompactToolPicker},
-            {layerPicker, g_iconCompactLayerPicker}
+            {layerPicker, g_iconCompactLayerPicker},
+            {framePicker, NULL}
         };
 
         SetupCompactEditor(createSections);
@@ -2283,6 +2288,7 @@ void MainEditor::newFrame()
     nFrame->layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
     frames.push_back(nFrame);
     loginfo("new frame added");
+    framePicker->createFrameButtons();
 }
 
 void MainEditor::duplicateFrame()
@@ -2300,6 +2306,7 @@ void MainEditor::switchFrame(int index)
     loginfo(frmt("switching to frame {}", index));
     selLayer = getCurrentFrame()->activeLayer;
     layerPicker->updateLayers();
+    framePicker->createFrameButtons();
 }
 
 Layer* MainEditor::layerAt(int index)
