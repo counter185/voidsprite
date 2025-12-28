@@ -1535,7 +1535,7 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 
 bool MainEditor::requestSafeClose() {
     if (changesSinceLastSave == NO_UNSAVED_CHANGES) {
-        closeNextTick = true;
+        closeThisScreen();
         return true;
     }
     else {

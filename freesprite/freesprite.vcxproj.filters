@@ -691,7 +691,7 @@
       <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="EditorFramePicker.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1380,7 +1380,7 @@
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="EditorFramePicker.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
