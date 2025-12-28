@@ -179,13 +179,13 @@ void MainEditorPalettized::SetPixel(XY position, uint32_t color, bool pushToLast
         int symmetryXPoint = symmetryPositions.x / 2;
         bool symXPointIsCentered = symmetryPositions.x % 2;
         int symmetryFlippedX = symmetryXPoint + (symmetryXPoint - position.x) - (symXPointIsCentered ? 0 : 1);
-        SetPixel(XY{ symmetryFlippedX, position.y }, color, symmetry | 0b10);
+        SetPixel(XY{ symmetryFlippedX, position.y }, color, false, symmetry | 0b10);
     }
     if (symmetryEnabled[1] && !(symmetry & 0b1)) {
         int symmetryYPoint = symmetryPositions.y / 2;
         bool symYPointIsCentered = symmetryPositions.y % 2;
         int symmetryFlippedY = symmetryYPoint + (symmetryYPoint - position.y) - (symYPointIsCentered ? 0 : 1);
-        SetPixel(XY{ position.x, symmetryFlippedY }, color, symmetry | 0b1);
+        SetPixel(XY{ position.x, symmetryFlippedY }, color, false, symmetry | 0b1);
     }
 }
 
