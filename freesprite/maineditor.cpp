@@ -140,6 +140,21 @@ MainEditor::MainEditor(std::vector<Layer*> layers)
     
 }
 
+MainEditor::MainEditor(std::vector<Frame*> fframes)
+{
+    Layer*& firstLayer = fframes.front()->layers.front();
+    canvas.dimensions = { firstLayer->w, firstLayer->h };
+    for (auto*& f : frames) {
+        delete f;
+    }
+    frames = fframes;
+
+    setUpWidgets();
+    recenterCanvas();
+    initLayers();
+    
+}
+
 MainEditor::~MainEditor() {
     discardUndoStack();
     discardRedoStack();
@@ -2283,7 +2298,7 @@ void MainEditor::switchFrame(int index)
     getCurrentFrame()->activeLayer = selLayer;
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
     loginfo(frmt("switching to frame {}", index));
-	selLayer = getCurrentFrame()->activeLayer;
+    selLayer = getCurrentFrame()->activeLayer;
     layerPicker->updateLayers();
 }
 

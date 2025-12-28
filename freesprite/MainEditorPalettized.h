@@ -14,6 +14,7 @@ public:
     MainEditorPalettized(XY dimensions);
     MainEditorPalettized(LayerPalettized* layer);
     MainEditorPalettized(std::vector<LayerPalettized*> layers);
+    MainEditorPalettized(std::vector<Frame*> framess);
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
 

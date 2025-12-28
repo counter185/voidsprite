@@ -273,6 +273,7 @@ public:
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);
     MainEditor(std::vector<Layer*> layers);
+    MainEditor(std::vector<Frame*> frames);
     ~MainEditor();
 
     void render() override;

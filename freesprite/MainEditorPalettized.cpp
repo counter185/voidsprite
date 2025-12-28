@@ -67,6 +67,21 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layerss
     initLayers();
 }
 
+MainEditorPalettized::MainEditorPalettized(std::vector<Frame*> framess)
+{
+    for (auto*& f : frames) {
+        delete f;
+    }
+    frames = framess;
+    //todo: check if these are all indexed layers
+
+    palette = ((LayerPalettized*)frames.front()->layers.front())->palette;
+
+    setUpWidgets();
+    recenterCanvas();
+    initLayers();
+}
+
 void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId)
 {
     if (evt_id == EVENT_PALETTIZEDEDITOR_SAVEFILE) {
