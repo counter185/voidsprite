@@ -103,10 +103,10 @@ bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor)
         fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        nvalBuffer = editor->layers.size();
+        nvalBuffer = editor->getLayerStack().size();
         fwrite(&nvalBuffer, 4, 1, outfile);
 
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logerr("[VOIDSNv2] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
@@ -145,12 +145,12 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         std::string commentsData = editor->makeCommentDataString();
 
         std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             layerVisibilityData += lr->hidden ? '0' : '1';
         }
 
         std::string layerOpacityData = "";
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             layerOpacityData += std::to_string(lr->layerAlpha) + ';';
         }
 
@@ -176,10 +176,10 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             voidsnWriteString(outfile, value);
         }
 
-        nvalBuffer = editor->layers.size();
+        nvalBuffer = editor->getLayerStack().size();
         fwrite(&nvalBuffer, 4, 1, outfile);
 
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
@@ -216,7 +216,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         std::string commentsData = editor->makeCommentDataString();
 
         std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             layerVisibilityData += lr->hidden ? '0' : '1';
         }
 
@@ -247,7 +247,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         }
         else {
             std::string layerOpacityData = "";
-            for (Layer*& lr : editor->layers) {
+            for (Layer*& lr : editor->getLayerStack()) {
                 layerOpacityData += std::to_string(lr->layerAlpha) + ';';
             }
             extData["layer.opacity"] = layerOpacityData;
@@ -262,10 +262,10 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             voidsnWriteString(outfile, value);
         }
 
-        nvalBuffer = editor->layers.size();
+        nvalBuffer = editor->getLayerStack().size();
         fwrite(&nvalBuffer, 4, 1, outfile);
 
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
@@ -302,7 +302,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         }
 
         std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             layerVisibilityData += lr->hidden ? '0' : '1';
         }
 
@@ -337,7 +337,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         }
         else {
             std::string layerOpacityData = "";
-            for (Layer*& lr : editor->layers) {
+            for (Layer*& lr : editor->getLayerStack()) {
                 layerOpacityData += std::to_string(lr->layerAlpha) + ';';
             }
             extData["layer.opacity"] = layerOpacityData;
@@ -351,9 +351,9 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             voidsnWriteString(outfile, value);
         }
 
-        voidsnWriteU32(outfile, editor->layers.size());
+        voidsnWriteU32(outfile, editor->getLayerStack().size());
 
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
@@ -398,7 +398,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
         }
 
         std::string layerVisibilityData = "";
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             layerVisibilityData += lr->hidden ? '0' : '1';
         }
 
@@ -433,7 +433,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
         }
         else {
             std::string layerOpacityData = "";
-            for (Layer*& lr : editor->layers) {
+            for (Layer*& lr : editor->getLayerStack()) {
                 layerOpacityData += std::to_string(lr->layerAlpha) + ';';
             }
             extData["layer.opacity"] = layerOpacityData;
@@ -447,7 +447,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
             voidsnWriteString(outfile, value);
         }
 
-        voidsnWriteU32(outfile, editor->layers.size());
+        voidsnWriteU32(outfile, editor->getLayerStack().size());
 
         struct VOIDSNLayerData {
             std::string dataName;
@@ -456,7 +456,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
             bool hintDelete = false;
         };
 
-        for (Layer*& lr : editor->layers) {
+        for (Layer*& lr : editor->getLayerStack()) {
             if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                 logprintf("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
             }
@@ -718,7 +718,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             if (extData.contains("layer.visibility")) {
                 std::string layerVisibilityData = extData["layer.visibility"];
                 for (int x = 0; x < nlayers && x < layerVisibilityData.size(); x++) {
-                    ret->layers[x]->hidden = layerVisibilityData[x] == '0';
+                    ret->getLayerStack()[x]->hidden = layerVisibilityData[x] == '0';
                 }
                 ret->layerPicker->updateLayers();
             }
@@ -749,8 +749,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 std::string layerOpacityData = extData["layer.opacity"];
                 for (int x = 0; x < nlayers; x++) {
                     int nextSC = layerOpacityData.find_first_of(';');
-                    ret->layers[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
-                    ret->layers[x]->lastConfirmedlayerAlpha = ret->layers[x]->layerAlpha;
+                    ret->getLayerStack()[x]->layerAlpha = (uint8_t)std::stoi(layerOpacityData.substr(0, nextSC));
+                    ret->getLayerStack()[x]->lastConfirmedlayerAlpha = ret->getLayerStack()[x]->layerAlpha;
                     layerOpacityData = layerOpacityData.substr(nextSC + 1);
                 }
                 ret->layerPicker->updateLayers();

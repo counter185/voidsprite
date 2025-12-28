@@ -288,7 +288,7 @@ void RPG2KTilemapPreviewScreen::PrerenderCanvas()
         g_pushRenderTarget(tex);
         SDL_SetRenderDrawColor(rd, 0, 0, 0, 0);
         SDL_RenderClear(rd);
-        for (Layer*& l : caller->layers) {
+        for (Layer*& l : caller->getLayerStack()) {
             if (!l->hidden) {
                 l->render({ 0,0, 480, 256 }, 255);
             }

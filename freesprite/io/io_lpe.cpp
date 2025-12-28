@@ -58,7 +58,7 @@ bool writeLPE(PlatformNativePathString path, MainEditor* editor)
         o["selectedLayer"] = editor->selLayer;
         o["layers"] = json::array();
         int i = 0;
-        for (auto it = editor->layers.rbegin(); it != editor->layers.rend(); it++) {
+        for (auto it = editor->getLayerStack().rbegin(); it != editor->getLayerStack().rend(); it++) {
             Layer* l = *it;
             json layerObj = json::object();
             layerObj["canvas"] = json::object();

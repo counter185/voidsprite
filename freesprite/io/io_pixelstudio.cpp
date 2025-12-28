@@ -335,7 +335,7 @@ json serializePixelStudioSession(MainEditor* data) {
     frame["ActiveLayerIndex"] = data->selLayer;
     frame["Layers"] = json::array();
 
-    for (Layer*& l : data->layers) {
+    for (Layer*& l : data->getLayerStack()) {
         json layer = json::object();
         layer["Id"] = randomUUID();
         layer["Name"] = l->name;

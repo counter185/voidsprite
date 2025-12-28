@@ -97,7 +97,7 @@ MainEditor::MainEditor(XY dimensions) {
 
     canvas.dimensions = { dimensions.x, dimensions.y };
     //canvasCenterPoint = XY{ texW / 2, texH / 2 };
-    layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
+    getLayerStack().push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
     FillTexture();
 
     setUpWidgets();
@@ -110,7 +110,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
     canvas.dimensions = { srf->w, srf->h };
 
     Layer* nlayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
-    layers.push_back(nlayer);
+    getLayerStack().push_back(nlayer);
     SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixels32(), canvas.dimensions.x*4);
 
     setUpWidgets();
@@ -121,7 +121,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 MainEditor::MainEditor(Layer* layer)
 {
     canvas.dimensions = { layer->w, layer->h };
-    layers.push_back(layer);
+    getLayerStack().push_back(layer);
     loadSingleLayerExtdata(layer);
 
     setUpWidgets();
@@ -132,7 +132,7 @@ MainEditor::MainEditor(Layer* layer)
 MainEditor::MainEditor(std::vector<Layer*> layers)
 {
     canvas.dimensions = { layers[0]->w, layers[0]->h };
-    this->layers = layers;
+    this->getLayerStack() = layers;
 
     setUpWidgets();
     recenterCanvas();
@@ -144,8 +144,8 @@ MainEditor::~MainEditor() {
     discardUndoStack();
     discardRedoStack();
     endNetworkSession();
-    for (Layer*& imgLayer : layers) {
-        delete imgLayer;
+    for (Frame*& frame : frames) {
+        delete frame;
     }
     for (BaseScreen*& unopenedScreen : hintOpenScreensInInteractiveMode) {
         delete unopenedScreen;
@@ -168,9 +168,8 @@ void MainEditor::render() {
         }
     }
     //render all layers
-    for (int x = 0; x < layers.size(); x++) {
-        Layer* imgLayer = layers[x];
-        bool isCurrentActiveLayer = (selLayer == x);
+    for (Layer* imgLayer : getLayerStack()) {
+        bool isCurrentActiveLayer = imgLayer == getCurrentLayer();
         if (!imgLayer->hidden) {
             uint8_t alpha = imgLayer->layerAlpha;
             SDL_Rect renderRect = canvasRenderRect;
@@ -241,8 +240,7 @@ void MainEditor::render() {
                         continue;
                     }
 
-                    for (int x = 0; x < layers.size(); x++) {
-                        Layer* imgLayer = layers[x];
+                    for (Layer* imgLayer : getLayerStack()) {
                         if (!imgLayer->hidden) {
                             uint8_t alpha = imgLayer->layerAlpha;
                             XY position = { tileRect.x + (xx * canvas.scale * paddedTileRect.w),
@@ -2178,7 +2176,7 @@ void MainEditor::commitStateToLayer(Layer* l)
 
 void MainEditor::commitStateToCurrentLayer()
 {
-    if (!layers.empty()) {
+    if (!getLayerStack().empty()) {
         commitStateToLayer(getCurrentLayer());
     }
 }
@@ -2186,11 +2184,12 @@ void MainEditor::commitStateToCurrentLayer()
 uint32_t MainEditor::pickColorFromAllLayers(XY pos)
 {
     uint32_t c = 0;
-    for (int x = layers.size() - 1; x >= 0; x--) {
-        if (layers[x]->hidden) {
+    auto& layerStack = getLayerStack();
+    for (int x = layerStack.size() - 1; x >= 0; x--) {
+        if (layerStack[x]->hidden) {
             continue;
         }
-        uint32_t nextC = layers[x]->getPixelAt(pos, false);
+        uint32_t nextC = layerStack[x]->getPixelAt(pos, false);
         if ((c & 0xff000000) == 0 && (nextC & 0xff000000) == (0xff<<24)) {
             return nextC;
         }
@@ -2263,18 +2262,44 @@ void MainEditor::redo()
     }
 }
 
+void MainEditor::newFrame()
+{
+    Frame* nFrame = new Frame();
+    nFrame->layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
+    frames.push_back(nFrame);
+    loginfo("new frame added");
+}
+
+void MainEditor::duplicateFrame()
+{
+}
+
+void MainEditor::deleteFrame(int index)
+{
+}
+
+void MainEditor::switchFrame(int index)
+{
+    getCurrentFrame()->activeLayer = selLayer;
+    activeFrame = ixmax(0, ixmin(frames.size()-1, index));
+    loginfo(frmt("switching to frame {}", index));
+	selLayer = getCurrentFrame()->activeLayer;
+    layerPicker->updateLayers();
+}
+
 Layer* MainEditor::layerAt(int index)
 {
-    return layers.size() > index ? layers[index] : NULL;
+    return getLayerStack().size() > index ? getLayerStack()[index] : NULL;
 }
 
 Layer* MainEditor::newLayer()
 {
     Layer* nl = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nl != NULL) {
-        nl->name = frmt("New Layer {}", layers.size() + 1);
-        int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        layers.insert(layers.begin() + insertAtIdx, nl);
+        auto& layerStack = getLayerStack();
+        nl->name = frmt("New Layer {}", layerStack.size() + 1);
+        int insertAtIdx = std::find(layerStack.begin(), layerStack.end(), getCurrentLayer()) - layerStack.begin() + 1;
+        layerStack.insert(layerStack.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
         addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
@@ -2286,11 +2311,12 @@ Layer* MainEditor::newLayer()
 }
 
 void MainEditor::deleteLayer(int index) {
-    if (layers.size() <= 1) {
+    if (getLayerStack().size() <= 1) {
         g_addNotification(ErrorNotification("Can't delete the last layer", ""));
         return;
     }
 
+    auto& layers = getLayerStack();
     Layer* layerAtPos = layers[index];
     layers.erase(layers.begin() + index);
     if (selLayer >= layers.size()) {
@@ -2302,7 +2328,7 @@ void MainEditor::deleteLayer(int index) {
 
 void MainEditor::regenerateLastColors()
 {
-    if (layers.empty()) {
+    if (getLayerStack().empty()) {
         return;
     }
     colorPicker->lastColors.clear();
@@ -2464,6 +2490,7 @@ void MainEditor::promptPasteImage(Layer* l)
 }
 
 void MainEditor::moveLayerUp(int index) {
+    auto& layers = getLayerStack();
     if (index >= layers.size()-1) {
         return;
     }
@@ -2483,6 +2510,7 @@ void MainEditor::moveLayerDown(int index) {
     if (index  <= 0) {
         return;
     }
+    auto& layers = getLayerStack();
 
     Layer* clayer = layers[index];
     layers.erase(layers.begin() + index);
@@ -2500,6 +2528,8 @@ void MainEditor::mergeLayerDown(int index)
     if (index == 0) {
         return;
     }
+    auto& layers = getLayerStack();
+
     Layer* topLayer = layers[index];
     Layer* bottomLayer = layers[index - 1];
     deleteLayer(index);
@@ -2508,11 +2538,11 @@ void MainEditor::mergeLayerDown(int index)
     memcpy(bottomLayer->pixels32(), merged->pixels32(), bottomLayer->w * bottomLayer->h * 4);
     bottomLayer->markLayerDirty();
     delete merged;
-    
 }
 
 void MainEditor::duplicateLayer(int index)
 {
+    auto& layers = getLayerStack();
     Layer* currentLayer = layers[index];
     Layer* newL = newLayer();
     memcpy(newL->pixels32(), currentLayer->pixels32(), currentLayer->w * currentLayer->h * 4);
@@ -2602,6 +2632,7 @@ void MainEditor::layer_promptRenameCurrentVariant()
 
 int MainEditor::indexOfLayer(Layer* l)
 {
+    auto& layers = getLayerStack();
     auto it = std::find(layers.begin(), layers.end(), l);
     if (it != layers.end()) {
         return std::distance(layers.begin(), it);
@@ -2618,6 +2649,7 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
 
 void MainEditor::layer_promptRename(int index)
 {
+    auto& layers = getLayerStack();
     if (!layers.empty() && layers.size() > index) {
         Layer* target = layers[index];
         PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", target->name);
@@ -2658,7 +2690,7 @@ Layer* MainEditor::flattenImage()
     if (ret != NULL) {
         int x = 0;
         uint32_t* retppx = ret->pixels32();
-        for (Layer*& l : layers) {
+        for (Layer*& l : getLayerStack()) {
             if (l->hidden) {
                 continue;
             }
@@ -2709,7 +2741,7 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 void MainEditor::flipAllLayersOnX()
 {
     std::vector<UndoStackElementV2*> undos;
-    for (auto* l : layers) {
+    for (auto* l : getLayerStack()) {
         undos.push_back(UndoLayerModified::fromCurrentState(l));
         l->flipHorizontally();
     }
@@ -2720,7 +2752,7 @@ void MainEditor::flipAllLayersOnX()
 void MainEditor::flipAllLayersOnY()
 {
     std::vector<UndoStackElementV2*> undos;
-    for (auto* l : layers) {
+    for (auto* l : getLayerStack()) {
         undos.push_back(UndoLayerModified::fromCurrentState(l));
         l->flipVertically();
     }
@@ -2735,6 +2767,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     }
 
     UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, size, tileDimensions, tileDimensions);
+    auto& layers = getLayerStack();
 
     //todo: detect if copyscaled or malloc fails
     int nElements = layers.size();
@@ -2767,6 +2800,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
             return;
         }
     }
+    auto& layers = getLayerStack();
 
     std::map<Layer*, LayerScaleData> createdVariants;
 
@@ -2809,6 +2843,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 
 void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 {
+    auto& layers = getLayerStack();
     XY newSize = { size.x * tileDimensions.x, size.y * tileDimensions.y };
     UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, tileDimensions);
 
@@ -2838,7 +2873,7 @@ void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
         (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
     };
     if (!xyEqual(oldTileCount, newTileCount)) {
-        for (Layer* l : layers) {
+        for (Layer* l : getLayerStack()) {
             SDL_Rect sourceRect = { 0,0, tileDimensions.x, tileDimensions.y };
             Layer* temp = l->isPalettized ? LayerPalettized::tryAllocLayer(l->w, l->h)
                           : Layer::tryAllocLayer(l->w, l->h);
@@ -2879,6 +2914,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions not divisible."));
         return;
     }
+    auto& layers = getLayerStack();
 
     XY newSize = downscale ? XY{ canvas.dimensions.x / scale.x, canvas.dimensions.y / scale.y }
                            : XY{ canvas.dimensions.x * scale.x, canvas.dimensions.y * scale.y };
@@ -2926,6 +2962,8 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
         return NULL;
     }
     else {
+        auto& layers = getLayerStack();
+
         std::map<uint32_t, bool> usedColors;
         for (Layer*& l : layers) {
             std::vector<uint32_t> cols = l->getUniqueColors();
@@ -3190,7 +3228,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             {"layers", json::array()},
             {"clients", json::array()}
         };
-        for (Layer*& l : layers) {
+        for (Layer*& l : getLayerStack()) {
             json layerJson = {
                 {"name", l->name},
                 {"hidden", l->hidden},
@@ -3229,8 +3267,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         u32 index;
         networkReadBytes(clientSocket, (u8*)&index, 4);
 
-        if (index < layers.size()) {
-            Layer* l = layers[index];
+        if (index < getLayerStack().size()) {
+            Layer* l = getLayerStack()[index];
             networkCanvasSendLRDT(clientSocket, index, l);
         }
     }
@@ -3243,7 +3281,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(clientSocket, dataBuffer, dataSize);
-            Layer* l = layers[index];
+            Layer* l = getLayerStack()[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
                 logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));

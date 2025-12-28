@@ -104,8 +104,8 @@ inline double impl_filterGetDoubleValue(BaseFilter* f, const char* name) { retur
 inline double impl_filterGetRangeValue2(BaseFilter* f, const char* name) { return f != NULL ? ((FilterExternal*)f)->getRangeValue2(name) : 0.0; }
 
 inline uint32_t impl_editorGetActiveColor(VSPEditorContext* editor) { return editor != NULL ? editor->getActiveColor() : 0; }
-inline int impl_editorGetNumLayers(VSPEditorContext* editor) { return editor != NULL ? (int)editor->layers.size() : 0; }
-inline VSPLayer* impl_editorGetLayer(VSPEditorContext* editor, int index) { return (editor != NULL && index >= 0 && index < (int)editor->layers.size()) ? editor->layers[index] : NULL; }
+inline int impl_editorGetNumLayers(VSPEditorContext* editor) { return editor != NULL ? (int)editor->getLayerStack().size() : 0; }
+inline VSPLayer* impl_editorGetLayer(VSPEditorContext* editor, int index) { return (editor != NULL && index >= 0 && index < (int)editor->getLayerStack().size()) ? editor->getLayerStack()[index] : NULL; }
 inline VSPLayer* impl_editorGetActiveLayer(VSPEditorContext* editor) { return editor != NULL ? editor->getCurrentLayer() : NULL; }
 inline void impl_editorSetPixel(VSPEditorContext* editor, int x, int y, uint32_t color) { if (editor != NULL) { editor->SetPixel({x,y}, color); } }
 

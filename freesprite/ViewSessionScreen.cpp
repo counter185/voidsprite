@@ -20,7 +20,7 @@ void ViewSessionScreen::render()
 	background.fill({ 0,0,g_windowW, g_windowH });
 
 	SDL_Rect canvasRenderRect = c.getCanvasOnScreenRect();
-	for (Layer*& l : caller->layers) {
+	for (Layer*& l : caller->getLayerStack()) {
 		l->render(canvasRenderRect, l->layerAlpha);
 	}
 }

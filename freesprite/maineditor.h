@@ -96,10 +96,18 @@ public:
     std::string toJson();
 };
 
-/*struct Frame {
+class Frame {
+public:
     std::vector<Layer*> layers;
-    std::vector<CommentData> comments;
-};*/
+    int activeLayer = 0;
+    //std::vector<CommentData> comments;
+
+    ~Frame() {
+        for (Layer* l : layers) {
+            delete l;
+        }
+    }
+};
 
 class EditorNetworkCanvasChatPanel : public PanelUserInteractable {
 protected:
@@ -134,6 +142,7 @@ protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
     bool compactEditor = false;
     std::vector<PanelReference*> openReferencePanels;
+    //std::vector<Layer*> layers;
 
     MainEditor() {}
 public:
@@ -144,9 +153,9 @@ public:
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
     std::vector<CommentData> comments;
 
-    //std::vector<Frame*> frames;
+    int activeFrame = 0;
+    std::vector<Frame*> frames = { new Frame() };
 
-    std::vector<Layer*> layers;
     int selLayer = 0;
 
     std::vector<UndoStackElementV2*> undoStack, redoStack;
@@ -347,6 +356,13 @@ public:
     void undo();
     void redo();
 
+    Frame* getCurrentFrame() { return frames[activeFrame]; }
+    void newFrame();
+    void duplicateFrame();
+    void deleteFrame(int index);
+    void switchFrame(int index);
+
+    std::vector<Layer*>& getLayerStack() { return frames[activeFrame]->layers; }
     Layer* layerAt(int index);
     virtual Layer* newLayer();
     virtual void deleteLayer(int index);
@@ -355,7 +371,7 @@ public:
     virtual void mergeLayerDown(int index);
     virtual void duplicateLayer(int index);
     void switchActiveLayer(int index);
-    Layer* getCurrentLayer() { return layers[selLayer]; }
+    Layer* getCurrentLayer() { return getLayerStack()[selLayer]; }
     int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename(int index);

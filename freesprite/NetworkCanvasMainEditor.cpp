@@ -84,7 +84,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
 
         int i = 0;
         for (auto& l : layerData) {
-            Layer* layer = layers[i++];
+            Layer* layer = getLayerStack()[i++];
             layer->name = l["name"];
             layer->layerAlpha = l["opacity"];
             layer->hidden = l["hidden"];
@@ -131,7 +131,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(clientSocket, dataBuffer, dataSize);
-            Layer* l = layers[index];
+            Layer* l = getLayerStack()[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
                 logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
@@ -156,7 +156,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             loginfo(frmt("{:08X} != {:08X}, updating", oldStateID, canvasStateID));
             receivedDataOnce = true;
             networkCanvasSendInfoRequest();
-            for (int i = 0; i < layers.size(); i++) {
+            for (int i = 0; i < getLayerStack().size(); i++) {
                 networkSendCommand(clientSocket, "LRRQ");
                 networkSendBytes(clientSocket, (u8*)&i, 4);
             }
@@ -194,7 +194,7 @@ void NetworkCanvasMainEditor::networkCanvasSendLocalChanges()
 {
     clientSideChangesMutex.lock();
     for (auto& c : clientSideChanges) {
-        networkCanvasSendLRDT(clientSocket, c.first, layers[c.first]);
+        networkCanvasSendLRDT(clientSocket, c.first, getLayerStack()[c.first]);
     }
     clientSideChanges.clear();
     clientSideChangesMutex.unlock();
@@ -216,6 +216,7 @@ void NetworkCanvasMainEditor::networkCanvasSendAUTH()
 
 void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
 {
+	auto& layers = getLayerStack();
     for (Layer*& layer : layers) {
         delete layer;
     }

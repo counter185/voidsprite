@@ -306,7 +306,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         header.gridHeight = editor->tileDimensions.y;
         fwrite(&header, sizeof(ASEPRITEHeader), 1, f);
 
-        int estimatedNumChunks = 1 + editor->layers.size() * 2 + (editor->isPalettized ? 1 : 0);
+        int estimatedNumChunks = 1 + editor->getLayerStack().size() * 2 + (editor->isPalettized ? 1 : 0);
         u64 bytesInFramePosition = ftell(f);
         u32 bytesInFrame = sizeof(ASEPRITEFrameHeader);
         ASEPRITEFrameHeader frameHeader{};
@@ -351,7 +351,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         }
 
         //layer chunks
-        for (Layer*& l : editor->layers) {
+        for (Layer*& l : editor->getLayerStack()) {
             numChunks++;
             chunkHeader.size = 6 + sizeof(ASEPRITELayerChunkFragment0) + 2 + l->name.size();
             chunkHeader.type = 0x2004;
@@ -369,7 +369,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
 
         //cel chunks
         int i = 0;
-        for (Layer*& l : editor->layers) {
+        for (Layer*& l : editor->getLayerStack()) {
             numChunks++;
             chunkHeader.type = 0x2005;
 

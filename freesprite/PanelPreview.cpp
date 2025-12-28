@@ -50,7 +50,7 @@ void PanelPreview::renderAfterBG(XY at)
     SDL_Rect texDraw = c.getCanvasOnScreenRect();
     texDraw.x += at.x;
     texDraw.y += at.y;
-    for (auto*& layer : parent->layers) {
+    for (auto*& layer : parent->getLayerStack()) {
         if (!layer->hidden) {
             layer->render(texDraw, layer->layerAlpha);
         }

@@ -191,6 +191,18 @@ void g_initKeybinds()
             vNow %= l->layerData.size();
             ((MainEditor*)d)->layer_switchVariant(l, vNow);
         }));
+    g_keybindManager.addKeybind("maineditor", "frame_new",
+        KeyCombo(TL("vsp.keybinds.maineditor.newframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->newFrame();
+        }));
+    g_keybindManager.addKeybind("maineditor", "frame_prev",
+        KeyCombo(TL("vsp.keybinds.maineditor.prevframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->switchFrame(((MainEditor*)d)->activeFrame-1);
+        }));
+    g_keybindManager.addKeybind("maineditor", "frame_next",
+        KeyCombo(TL("vsp.keybinds.maineditor.nextframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->switchFrame(((MainEditor*)d)->activeFrame+1);
+        }));
 
 
     //split session editor keybinds

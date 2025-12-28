@@ -66,7 +66,7 @@ void MinecraftBlockPreviewScreen::render()
 
     canvas.dimensions = caller->canvas.dimensions;
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();// { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x* canvasZoom, caller->canvas.dimensions.y* canvasZoom };
-    for (Layer*& l : caller->layers) {
+    for (Layer*& l : caller->getLayerStack()) {
         l->render(canvasRenderRect, l->layerAlpha);
         //SDL_RenderCopy(g_rd, l->tex, NULL, &canvasRenderRect);
     }
@@ -285,7 +285,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlockV2(SDL_Rect at)
             v.tex_coord.y /= (float)caller->canvas.dimensions.y;
         }
 
-        for (Layer*& l : caller->layers) {
+        for (Layer*& l : caller->getLayerStack()) {
             for (SDL_Vertex& v : vertices) {
                 v.color.a = l->layerAlpha / 255.0f;
             }
@@ -307,7 +307,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlockV2(SDL_Rect at)
             v.tex_coord.y /= (float)caller->canvas.dimensions.y;
         }
 
-        for (Layer*& l : caller->layers) {
+        for (Layer*& l : caller->getLayerStack()) {
             for (SDL_Vertex& v : vertices) {
                 v.color.a = l->layerAlpha / 255.0f;
             }
@@ -329,7 +329,7 @@ void MinecraftBlockPreviewScreen::drawIsometricBlockV2(SDL_Rect at)
             v.tex_coord.y /= (float)caller->canvas.dimensions.y;
         }
 
-        for (Layer*& l : caller->layers) {
+        for (Layer*& l : caller->getLayerStack()) {
             for (SDL_Vertex& v : vertices) {
                 v.color.a = l->layerAlpha / 255.0f;
             }

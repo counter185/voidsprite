@@ -5,19 +5,21 @@
 void UndoLayerCreated::undo(MainEditor* editor)
 {
     //remove layer from list
-    auto pos = std::find(editor->layers.begin(), editor->layers.end(), l);
-    if (pos != editor->layers.end()) {
-        editor->layers.erase(pos);
+    auto& layers = editor->getLayerStack();
+    auto pos = std::find(layers.begin(), layers.end(), l);
+    if (pos != layers.end()) {
+        layers.erase(pos);
     }
-    if (editor->selLayer >= editor->layers.size()) {
-        editor->switchActiveLayer(editor->layers.size() - 1);
+    if (editor->selLayer >= layers.size()) {
+        editor->switchActiveLayer(layers.size() - 1);
     }
     editor->layerPicker->updateLayers();
 }
 
 void UndoLayerCreated::redo(MainEditor* editor)
 {
-    editor->layers.insert(editor->layers.begin() + insertAt, l);
+    auto& layers = editor->getLayerStack();
+    layers.insert(layers.begin() + insertAt, l);
     editor->layerPicker->updateLayers();
 }
 
@@ -70,15 +72,17 @@ void UndoLayerModified::redo(MainEditor* editor)
 
 void UndoLayerReordered::undo(MainEditor* editor)
 {
-    editor->layers.erase(editor->layers.begin() + newIndex);
-    editor->layers.insert(editor->layers.begin() + oldIndex, l);
+    auto& layers = editor->getLayerStack();
+    layers.erase(layers.begin() + newIndex);
+    layers.insert(layers.begin() + oldIndex, l);
     editor->layerPicker->updateLayers();
 }
 
 void UndoLayerReordered::redo(MainEditor* editor)
 {
-    editor->layers.erase(editor->layers.begin() + oldIndex);
-    editor->layers.insert(editor->layers.begin() + newIndex, l);
+    auto& layers = editor->getLayerStack();
+    layers.erase(layers.begin() + oldIndex);
+    layers.insert(layers.begin() + newIndex, l);
     editor->layerPicker->updateLayers();
 }
 

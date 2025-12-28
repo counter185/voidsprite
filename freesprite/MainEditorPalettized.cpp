@@ -31,7 +31,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
     palette = g_palettes()[PALETTE_DEFAULT];
     LayerPalettized* pltLayer = new LayerPalettized(dimensions.x, dimensions.y);
     pltLayer->palette = palette;
-    layers.push_back(pltLayer);
+    getLayerStack().push_back(pltLayer);
 
     setUpWidgets();
     recenterCanvas();
@@ -43,7 +43,7 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
     isPalettized = true;
     canvas.dimensions = { layer->w, layer->h };
 
-    layers.push_back(layer);
+    getLayerStack().push_back(layer);
     palette = layer->palette;
 
     setUpWidgets();
@@ -51,15 +51,16 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
     initLayers();
 }
 
-MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layers)
+MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layerss)
 {
     //all layers must have the same palette assigned!!!
+    auto& layers = getLayerStack();
     isPalettized = true;
     canvas.dimensions = { layers[0]->w, layers[0]->h };
-    for (auto& l : layers) {
-        this->layers.push_back(l);
+    for (auto& l : layerss) {
+        layers.push_back(l);
     }
-    palette = layers[0]->palette;
+    palette = layerss[0]->palette;
 
     setUpWidgets();
     recenterCanvas();
@@ -204,6 +205,7 @@ void MainEditorPalettized::setActiveColor(uint32_t col)
 
 uint32_t MainEditorPalettized::pickColorFromAllLayers(XY pos)
 {
+    auto& layers = getLayerStack();
     for (int x = layers.size() - 1; x >= 0; x--) {
         if (layers[x]->hidden) {
             continue;
@@ -238,6 +240,7 @@ void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
 }
 
 void MainEditorPalettized::updatePalette() {
+    auto& layers = getLayerStack();
     for (Layer*& l : layers) {
         ((LayerPalettized*)l)->palette = palette;
         ((LayerPalettized*)l)->markLayerDirty();
@@ -718,6 +721,7 @@ Layer* MainEditorPalettized::flattenImage()
 
 Layer* MainEditorPalettized::newLayer()
 {
+    auto& layers = getLayerStack();
     LayerPalettized* nl = LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nl != NULL) {
         nl->palette = palette;
@@ -774,7 +778,7 @@ int32_t* MainEditorPalettized::makeFlatIndicesTable()
 {
     int32_t* indices = (int32_t*)tracked_malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
     memset(indices, 0, canvas.dimensions.x * canvas.dimensions.y * 4);
-    for (Layer*& l : layers) {
+    for (Layer*& l : getLayerStack()) {
         if (!l->hidden) {
             for (int y = 0; y < canvas.dimensions.y; y++) {
                 for (int x = 0; x < canvas.dimensions.x; x++) {
@@ -851,7 +855,7 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 MainEditor* MainEditorPalettized::toRGBSession()
 {
     std::vector<Layer*> rgbLayers;
-    for (Layer*& ll : layers) {
+    for (Layer*& ll : getLayerStack()) {
         rgbLayers.push_back(((LayerPalettized*)ll)->toRGB());
     }
     MainEditor* newEditor = new MainEditor(rgbLayers);

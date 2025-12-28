@@ -54,7 +54,7 @@ void MinecraftSkinPreviewScreen::renderQuad(XY origin00, double scale, XYZd ul, 
     }
 
     int indices[] = {0,1,2,2,1,3};
-    for (Layer* l : caller->layers) {
+    for (Layer* l : caller->getLayerStack()) {
         for (SDL_Vertex& v : verts) {
             v.color.a = l->layerAlpha / 255.0f;
         }
@@ -335,7 +335,7 @@ MinecraftSkinPreviewScreen::MinecraftSkinPreviewScreen(MainEditor* parent) {
     recalcPointScale();
     screen00 = { g_windowW / 2, g_windowH / 6*5 };
     twoByOneSkin = parent->canvas.dimensions.x > parent->canvas.dimensions.y;
-    slimModel = (parent->layers.front()->getVisualPixelAt(scaledPoint({ 51, 16 })) & 0xFF000000) == 0;
+    slimModel = (parent->getLayerStack().front()->getVisualPixelAt(scaledPoint({ 51, 16 })) & 0xFF000000) == 0;
 
     PanelMCSkinPreviewSettings* settingsPanel = new PanelMCSkinPreviewSettings(this);
     settingsPanel->position = { 10, 50 };
