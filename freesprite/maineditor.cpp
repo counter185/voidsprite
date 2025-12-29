@@ -335,6 +335,16 @@ void MainEditor::tick() {
 
     mainThreadOps.process();
 
+    if (frameAnimationPlaying && frameAnimMSPerFrame > 0) {
+        u64 elapsed = frameAnimationStartTimer.elapsedTime();
+        elapsed /= frameAnimMSPerFrame;
+        elapsed %= frames.size();
+        int targetFrame = (int)elapsed;
+        if (targetFrame != activeFrame) {
+            switchFrame(targetFrame);
+        }
+    }
+
     if (g_windowFocused) {
         u64 timestampNow = SDL_GetTicks64() / 1000;
         if (lastTimestamp != timestampNow) {
@@ -2344,6 +2354,12 @@ void MainEditor::switchFrame(int index)
     selLayer = getCurrentFrame()->activeLayer;
     layerPicker->updateLayers();
     framePicker->createFrameButtons();
+}
+
+void MainEditor::toggleFrameAnimation()
+{
+    frameAnimationPlaying = !frameAnimationPlaying;
+    frameAnimationStartTimer.start();
 }
 
 Layer* MainEditor::layerAt(int index)

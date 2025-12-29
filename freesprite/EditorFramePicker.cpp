@@ -8,8 +8,8 @@
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
-    wxWidth = 210;
-    wxHeight = 80;
+    wxWidth = 240;
+    wxHeight = 120;
     parent = caller;
 
     setupDraggable();
@@ -20,13 +20,24 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         this->enabled = false;
     });
 
+    UIButton* playpauseBtn = new UIButton("P", "Play/pause");
+    playpauseBtn->wxWidth = 30;
+    playpauseBtn->wxHeight = 30;
+    playpauseBtn->onClickCallback = [this](UIButton* btn) {
+        parent->toggleFrameAnimation();
+    };
+
+    UIStackPanel* topRow = UIStackPanel::Horizontal(4, { playpauseBtn });
+
     frameButtonPanel = new ScrollingPanel();
-    frameButtonPanel->position = { 5,30 };
-    frameButtonPanel->wxWidth = 200;
-    frameButtonPanel->wxHeight = 45;
+    frameButtonPanel->wxWidth = wxWidth - 10;
+    frameButtonPanel->wxHeight = 50;
     frameButtonPanel->scrollHorizontally = true;
     frameButtonPanel->scrollVertically = false;
-    wxsTarget().addDrawable(frameButtonPanel);
+
+    UIStackPanel* content = UIStackPanel::Vertical(4, { topRow, frameButtonPanel });
+    content->position = { 5, 30 };
+    wxsTarget().addDrawable(content);
 
     frameButtonStack = UIStackPanel::Horizontal(0, {});
     frameButtonStack->position = { 0, 0 };

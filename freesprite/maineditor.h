@@ -182,6 +182,9 @@ public:
 
     int activeFrame = 0;
     std::vector<Frame*> frames = { new Frame() };
+    Timer64 frameAnimationStartTimer;
+    bool frameAnimationPlaying = false;
+    int frameAnimMSPerFrame = 200;
 
     int selLayer = 0;
 
@@ -394,6 +397,7 @@ public:
     void duplicateFrame(int index);
     void deleteFrame(int index);
     void switchFrame(int index);
+    void toggleFrameAnimation();
 
     std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
     Layer* layerAt(int index);
