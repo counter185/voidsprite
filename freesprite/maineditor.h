@@ -292,7 +292,11 @@ public:
     void takeInput(SDL_Event evt) override;
     void dropEverythingYoureDoingAndSave() override;
 
-    std::string getName() override { return TL("vsp.maineditor") + (lastConfirmedSave ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath)) : std::string("")); }
+    std::string getName() override { 
+        return TL("vsp.maineditor") 
+            + ((lastConfirmedSave || splitSessionData.set) ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
+                : std::string("")); 
+    }
     bool takesTouchEvents() override { return true; }
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
