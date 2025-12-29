@@ -40,9 +40,26 @@ struct CommentData {
     bool hovered = false;
 };
 
-struct Guideline {
+class Guideline {
+public:
     bool vertical;
     int position;
+
+    std::string Serialize() {
+        return frmt("{}-{}", vertical ? "v" : "h", position);
+    }
+    static Guideline Deserialize(std::string str) {
+        Guideline g;
+        auto splt = splitString(str, '-');
+        if (splt.size() != 2) {
+            throw std::runtime_error("Invalid guideline string");
+        }
+        else {
+            g.vertical = (splt[0] == "v");
+            g.position = std::stoi(splt[1]);
+            return g;
+        }
+    }
 };
 
 #define FRAGMENT_DIRECTION_UP 0b0001

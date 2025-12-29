@@ -2336,7 +2336,7 @@ void MainEditor::deleteFrame(int index)
 
 void MainEditor::switchFrame(int index)
 {
-    if (activeFrame < frames.size()) {
+    if (activeFrame >= 0 && activeFrame < frames.size()) {
         getCurrentFrame()->activeLayer = selLayer;
     }
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
