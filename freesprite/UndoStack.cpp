@@ -1,5 +1,6 @@
 #include "UndoStack.h"
 #include "maineditor.h"
+#include "MainEditorPalettized.h"
 #include "EditorLayerPicker.h"
 #include "EditorFramePicker.h"
 
@@ -22,6 +23,9 @@ void UndoLayerCreated::redo(MainEditor* editor)
     auto& layers = f->layers;
     layers.insert(layers.begin() + insertAt, l);
     editor->layerPicker->updateLayers();
+    if (editor->isPalettized) {
+        ((MainEditorPalettized*)editor)->updatePalette();
+    }
 }
 
 

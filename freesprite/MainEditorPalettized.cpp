@@ -256,10 +256,12 @@ void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
 }
 
 void MainEditorPalettized::updatePalette() {
-    auto& layers = getLayerStack();
-    for (Layer*& l : layers) {
-        ((LayerPalettized*)l)->palette = palette;
-        ((LayerPalettized*)l)->markLayerDirty();
+    for (auto& frame : frames) {
+        auto& layers = frame->layers;
+        for (Layer*& l : layers) {
+            ((LayerPalettized*)l)->palette = palette;
+            ((LayerPalettized*)l)->markLayerDirty();
+        }
     }
 
     ((PalettizedEditorColorPicker*)colorPicker)->updateForcedColorPaletteButtons();
@@ -627,6 +629,13 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_W, { "Open preview panel...",
                             [this]() {
                                 openPreviewPanel();
+                            }
+                        }
+                    },
+                    { SDL_SCANCODE_A, { "Open frames panel...",
+                            [this]() {
+                                framePicker->enabled = true;
+                                framePicker->playPanelOpenVFX();
                             }
                         }
                     },

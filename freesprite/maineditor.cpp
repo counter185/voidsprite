@@ -1263,6 +1263,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_A, { "Open frames panel...",
+                            [this]() {
+                                framePicker->enabled = true;
+                                framePicker->playPanelOpenVFX();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabView
             }
@@ -1339,6 +1346,9 @@ void MainEditor::setUpWidgets()
 
     framePicker = new EditorFramePicker(this);
     framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67};
+    if (frames.size() == 1) {
+        framePicker->enabled = false;
+    }
     wxsManager.addDrawable(framePicker);
     
     //this must happen after actionbar init
@@ -2302,8 +2312,9 @@ void MainEditor::newFrame()
                                  : Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nlayer != NULL) {
         Frame* nFrame = new Frame();
-        nFrame->layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
+        nFrame->layers.push_back(nlayer);
         frames.push_back(nFrame);
+        framePicker->enabled = true;
         loginfo("new frame added");
         framePicker->createFrameButtons();
         addToUndoStack(new UndoFrameCreated(nFrame, frames.size() - 1));
@@ -2323,6 +2334,7 @@ void MainEditor::duplicateFrame(int index)
     frames.insert(frames.begin() + index + 1, nFrame);
     loginfo("new frame added");
     framePicker->createFrameButtons();
+    framePicker->enabled = true;
     addToUndoStack(new UndoFrameCreated(nFrame, index + 1));
 }
 
