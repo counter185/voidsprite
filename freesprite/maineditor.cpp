@@ -2284,16 +2284,31 @@ void MainEditor::redo()
 
 void MainEditor::newFrame()
 {
-    Frame* nFrame = new Frame();
-    nFrame->layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
-    frames.push_back(nFrame);
-    loginfo("new frame added");
-    framePicker->createFrameButtons();
-    addToUndoStack(new UndoFrameCreated(nFrame, frames.size() - 1));
+    if (splitSessionData.set) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Frames not supported in split session mode"));
+        return;
+    }
+    Layer* nlayer = isPalettized ? LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y)
+                                 : Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
+    if (nlayer != NULL) {
+        Frame* nFrame = new Frame();
+        nFrame->layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
+        frames.push_back(nFrame);
+        loginfo("new frame added");
+        framePicker->createFrameButtons();
+        addToUndoStack(new UndoFrameCreated(nFrame, frames.size() - 1));
+    }
+    else {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+    }
 }
 
 void MainEditor::duplicateFrame(int index)
 {
+    if (splitSessionData.set) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Frames not supported in split session mode"));
+        return;
+    }
     Frame* nFrame = getCurrentFrame()->copy();
     frames.insert(frames.begin() + index + 1, nFrame);
     loginfo("new frame added");

@@ -52,12 +52,12 @@ void EditorFramePicker::createFrameButtons()
                     parent->deleteFrame(i);
                 }},
                 {"Duplicate frame", [this, i]() {
-					parent->duplicateFrame(i);
+                    parent->duplicateFrame(i);
                 }}
             });
 
             g_addPopup(ctx);
-		};
+        };
         if (i == parent->activeFrame) {
             frameBtn->fill = Fill::Gradient(0x80FFFFFF, 0x80FFFFFF, 0x20FFFFFF, 0x20FFFFFF);
         }
