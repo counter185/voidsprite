@@ -2292,17 +2292,38 @@ void MainEditor::newFrame()
     addToUndoStack(new UndoFrameCreated(nFrame, frames.size() - 1));
 }
 
-void MainEditor::duplicateFrame()
+void MainEditor::duplicateFrame(int index)
 {
+    Frame* nFrame = getCurrentFrame()->copy();
+    frames.insert(frames.begin() + index + 1, nFrame);
+    loginfo("new frame added");
+    framePicker->createFrameButtons();
+    addToUndoStack(new UndoFrameCreated(nFrame, index + 1));
 }
 
 void MainEditor::deleteFrame(int index)
 {
+    if (index >= 0 && index < frames.size()) {
+        if (frames.size() != 1) {
+            Frame* target = frames[index];
+            frames.erase(frames.begin() + index);
+            framePicker->createFrameButtons();
+            if (activeFrame >= frames.size()) {
+                switchFrame(frames.size() - 1);
+            }
+            addToUndoStack(new UndoFrameRemoved(target, index));
+        } else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot delete last frame"));
+            return;
+        }
+    }
 }
 
 void MainEditor::switchFrame(int index)
 {
-    getCurrentFrame()->activeLayer = selLayer;
+    if (activeFrame < frames.size()) {
+        getCurrentFrame()->activeLayer = selLayer;
+    }
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
     loginfo(frmt("switching to frame {}", index));
     selLayer = getCurrentFrame()->activeLayer;
@@ -2526,7 +2547,7 @@ void MainEditor::moveLayerUp(int index) {
         switchActiveLayer(selLayer + 1);
     }
 
-    addToUndoStack(new UndoLayerReordered(clayer, index, index + 1));
+    addToUndoStack(new UndoLayerReordered(getCurrentFrame(), clayer, index, index + 1));
 }
 
 void MainEditor::moveLayerDown(int index) {
@@ -2543,7 +2564,7 @@ void MainEditor::moveLayerDown(int index) {
         switchActiveLayer(selLayer-1);
     }
 
-    addToUndoStack(new UndoLayerReordered(clayer, index, index - 1));
+    addToUndoStack(new UndoLayerReordered(getCurrentFrame(), clayer, index, index - 1));
 }
 
 void MainEditor::mergeLayerDown(int index)

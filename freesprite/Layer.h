@@ -418,6 +418,7 @@ public:
 
     }
 
+    //please rename this function to something else some time later
     Layer* copyCurrentVariant();
     Layer* copyCurrentVariantScaled(XY dimensions);
     Layer* copyAllVariantsScaled(XY dimensions);

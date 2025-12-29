@@ -4,6 +4,7 @@
 #include "maineditor.h"
 #include "UIButton.h"
 #include "FontRenderer.h"
+#include "PopupContextMenu.h"
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
@@ -45,6 +46,18 @@ void EditorFramePicker::createFrameButtons()
         frameBtn->onClickCallback = [this, i](UIButton* btn) {
             parent->switchFrame(i);
         };
+        frameBtn->onRightClickCallback = [this, i](UIButton* btn) {
+            PopupContextMenu* ctx = new PopupContextMenu({
+                {"Delete frame", [this, i]() {
+                    parent->deleteFrame(i);
+                }},
+                {"Duplicate frame", [this, i]() {
+					parent->duplicateFrame(i);
+                }}
+            });
+
+            g_addPopup(ctx);
+		};
         if (i == parent->activeFrame) {
             frameBtn->fill = Fill::Gradient(0x80FFFFFF, 0x80FFFFFF, 0x20FFFFFF, 0x20FFFFFF);
         }

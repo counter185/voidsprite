@@ -136,7 +136,7 @@ Layer* Layer::copyCurrentVariant()
 {
     auto variantsCopy = copyAllVariants();
     if (variantsCopy.size() > 0) {
-        Layer* ret = new Layer(w, h, variantsCopy);
+        Layer* ret = isPalettized ? new LayerPalettized(w,h,variantsCopy) : new Layer(w, h, variantsCopy);
         ret->name = name;
         ret->currentLayerVariant = currentLayerVariant;
         ret->colorKey = colorKey;

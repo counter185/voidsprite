@@ -73,7 +73,7 @@ void UndoLayerModified::redo(MainEditor* editor)
 
 void UndoLayerReordered::undo(MainEditor* editor)
 {
-    auto& layers = editor->getLayerStack();
+    auto& layers = f->layers;
     layers.erase(layers.begin() + newIndex);
     layers.insert(layers.begin() + oldIndex, l);
     editor->layerPicker->updateLayers();
@@ -81,7 +81,7 @@ void UndoLayerReordered::undo(MainEditor* editor)
 
 void UndoLayerReordered::redo(MainEditor* editor)
 {
-    auto& layers = editor->getLayerStack();
+    auto& layers = f->layers;
     layers.erase(layers.begin() + oldIndex);
     layers.insert(layers.begin() + newIndex, l);
     editor->layerPicker->updateLayers();

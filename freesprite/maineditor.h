@@ -107,6 +107,16 @@ public:
             delete l;
         }
     }
+
+    Frame* copy() {
+        Frame* f = new Frame();
+        *f = *this;
+        f->layers.clear();
+        for (Layer*& l : layers) {
+            f->layers.push_back(l->copyCurrentVariant());
+        }
+        return f;
+    }
 };
 
 class EditorNetworkCanvasChatPanel : public PanelUserInteractable {
@@ -360,7 +370,7 @@ public:
 
     Frame* getCurrentFrame() { return frames[activeFrame]; }
     void newFrame();
-    void duplicateFrame();
+    void duplicateFrame(int index);
     void deleteFrame(int index);
     void switchFrame(int index);
 
