@@ -138,7 +138,7 @@ void PopupApplyFilter::updatePreview()
             copyPixelsToTexture(target->pixels32(), target->w, target->h, ppx, pitch);
             session->isolatedFragment.forEachPoint([&](XY a) {
                 if (pointInBox(a, { 0,0,target->w,target->h })) {
-                    ARRAY2DPOINT(ppx, a.x*4, a.y, pitch) = ARRAY2DPOINT(previewPx, a.x, a.y, target->w);
+                    *(u32*)(&ARRAY2DPOINT(ppx, a.x * 4, a.y, pitch)) = ARRAY2DPOINT(previewPx, a.x, a.y, target->w);
                 }
             });
         }
