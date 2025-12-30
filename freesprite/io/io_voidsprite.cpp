@@ -524,7 +524,8 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
             {"guidelines", guidelinesData},
             {"edit.time", std::to_string(editor->editTime)},
             {"editor.altbg", editor->usingAltBG() ? "1" : "0"},
-            {"frame.active", std::to_string(editor->activeFrame)}
+            {"frame.active", std::to_string(editor->activeFrame)},
+            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)}
         };
 
         if (editor->isPalettized) {
@@ -845,6 +846,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
             if (extData.contains("editor.altbg")) { ret->setAltBG(extData["editor.altbg"] == "1"); }
             if (extData.contains("frame.active")) { ret->activeFrame = -1; ret->switchFrame(std::stoi(extData["frame.active"])); }
+            if (extData.contains("frame.ms")) { ret->setMSPerFrame(std::stoi(extData["frame.ms"])); }
             if (extData.contains("sym.enabled")) {
                 ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
                 ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';

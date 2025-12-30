@@ -250,6 +250,7 @@ class UIButton;
 class UILabel;
 class UISlider;
 class UITextField;
+class UINumberInputField;
 class UICheckbox;
 class UIDropdown;
 class UIColorPicker;

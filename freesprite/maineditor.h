@@ -397,7 +397,10 @@ public:
     void duplicateFrame(int index);
     void deleteFrame(int index);
     void switchFrame(int index);
+    void moveFrameLeft(int index);
+    void moveFrameRight(int index);
     void toggleFrameAnimation();
+    void setMSPerFrame(int ms);
 
     std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
     Layer* layerAt(int index);

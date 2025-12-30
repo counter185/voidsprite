@@ -10,7 +10,7 @@
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
-    wxWidth = 240;
+    wxWidth = 400;
     wxHeight = 120;
     parent = caller;
 
@@ -22,6 +22,27 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         this->enabled = false;
     });
 
+    UIButton* newFrame = new UIButton("+", "New frame");
+    newFrame->wxWidth = 30;
+    newFrame->wxHeight = 30;
+    newFrame->onClickCallback = [this](UIButton* btn) {
+        parent->newFrame();
+    };
+
+    UIButton* rmFrame = new UIButton("-", "Remove frame");
+    rmFrame->wxWidth = 30;
+    rmFrame->wxHeight = 30;
+    rmFrame->onClickCallback = [this](UIButton* btn) {
+        parent->deleteFrame(parent->activeFrame);
+    };
+
+    UIButton* duplicateFrame = new UIButton("D", "Duplicate frame");
+    duplicateFrame->wxWidth = 30;
+    duplicateFrame->wxHeight = 30;
+    duplicateFrame->onClickCallback = [this](UIButton* btn) {
+        parent->duplicateFrame(parent->activeFrame);
+    };
+
     UIButton* playpauseBtn = new UIButton("P", "Play/pause");
     playpauseBtn->wxWidth = 30;
     playpauseBtn->wxHeight = 30;
@@ -29,11 +50,31 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         parent->toggleFrameAnimation();
     };
 
-    UINumberInputField* msPerFrameInput = new UINumberInputField(&parent->frameAnimMSPerFrame);
+    UIButton* mvLeft = new UIButton("<", "Move frame left");
+    mvLeft->wxWidth = 30;
+    mvLeft->wxHeight = 30;
+    mvLeft->onClickCallback = [this](UIButton* btn) {
+        parent->moveFrameLeft(parent->activeFrame);
+    };
+
+    UIButton* mvRight = new UIButton(">", "Move frame right");
+    mvRight->wxWidth = 30;
+    mvRight->wxHeight = 30;
+    mvRight->onClickCallback = [this](UIButton* btn) {
+        parent->moveFrameRight(parent->activeFrame);
+    };
+
+
+    msPerFrameInput = new UINumberInputField(&parent->frameAnimMSPerFrame);
     msPerFrameInput->wxWidth = 50;
     msPerFrameInput->validateFunction = [](int v) { return v > 0; };
 
     UIStackPanel* topRow = UIStackPanel::Horizontal(4, {
+        newFrame,
+        rmFrame,
+        duplicateFrame,
+        mvLeft,
+        mvRight,
         playpauseBtn,
         Panel::Space(6,2),
         new UILabel("MS per frame"),

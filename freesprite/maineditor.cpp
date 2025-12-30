@@ -2313,11 +2313,12 @@ void MainEditor::newFrame()
     if (nlayer != NULL) {
         Frame* nFrame = new Frame();
         nFrame->layers.push_back(nlayer);
-        frames.push_back(nFrame);
+        frames.insert(frames.begin() + activeFrame + 1, nFrame);
         framePicker->enabled = true;
-        loginfo("new frame added");
+        //loginfo("new frame added");
         framePicker->createFrameButtons();
-        addToUndoStack(new UndoFrameCreated(nFrame, frames.size() - 1));
+        addToUndoStack(new UndoFrameCreated(nFrame, activeFrame + 1));
+        switchFrame(activeFrame + 1);
     }
     else {
         g_addNotification(NOTIF_MALLOC_FAIL);
@@ -2332,7 +2333,7 @@ void MainEditor::duplicateFrame(int index)
     }
     Frame* nFrame = getCurrentFrame()->copy();
     frames.insert(frames.begin() + index + 1, nFrame);
-    loginfo("new frame added");
+    //loginfo("new frame added");
     framePicker->createFrameButtons();
     framePicker->enabled = true;
     addToUndoStack(new UndoFrameCreated(nFrame, index + 1));
@@ -2362,16 +2363,49 @@ void MainEditor::switchFrame(int index)
         getCurrentFrame()->activeLayer = selLayer;
     }
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
-    loginfo(frmt("switching to frame {}", index));
+    //loginfo(frmt("switching to frame {}", index));
     selLayer = getCurrentFrame()->activeLayer;
     layerPicker->updateLayers();
     framePicker->createFrameButtons();
+}
+
+void MainEditor::moveFrameLeft(int index)
+{
+    if (index > 0 && index <= frames.size() - 1) {
+        Frame* target = frames[index];
+        frames.erase(frames.begin() + index);
+        frames.insert(frames.begin() + index - 1, target);
+        framePicker->createFrameButtons();
+        addToUndoStack(new UndoFrameReordered(target, index, index - 1));
+        if (index == activeFrame) {
+            switchFrame(index - 1);
+        }
+    }
+}
+
+void MainEditor::moveFrameRight(int index)
+{
+    if (index >= 0 && index < frames.size() - 1) {
+        Frame* target = frames[index];
+        frames.erase(frames.begin() + index);
+        frames.insert(frames.begin() + index + 1, target);
+        framePicker->createFrameButtons();
+        addToUndoStack(new UndoFrameReordered(target, index, index + 1));
+        if (index == activeFrame) {
+            switchFrame(index + 1);
+        }
+    }
 }
 
 void MainEditor::toggleFrameAnimation()
 {
     frameAnimationPlaying = !frameAnimationPlaying;
     frameAnimationStartTimer.start();
+}
+
+void MainEditor::setMSPerFrame(int ms)
+{
+    framePicker->msPerFrameInput->setText(std::to_string(ms));
 }
 
 Layer* MainEditor::layerAt(int index)

@@ -30,9 +30,12 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
         std::vector<u32> palette;
         bool foundNewPaletteChunk = false;
 
+        int frameLengthSum = 0;
+
         ASEPRITEHeader header;
         fread(&header, sizeof(ASEPRITEHeader), 1, f);
         for (int x = 0; x < header.numFrames; x++) {
+            loginfo(frmt("[ASE] frame {}", x));
             framesData.push_back(ASEFrameData());
             auto& fd = framesData.back();
 
@@ -42,6 +45,8 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
             u32 numChunks = frameHeader.numChunksOld == 0xFFFF
                 ? frameHeader.numChunksNew : frameHeader.numChunksOld;
 
+            frameLengthSum += frameHeader.frameDuration;
+
             //iterate over chunks
             for (u32 nch = 0; nch < numChunks; nch++) {
                 u64 posRn = ftell(f);
@@ -49,6 +54,8 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                 u16 chunkType;
                 fread(&chunkSize, 4, 1, f);
                 fread(&chunkType, 2, 1, f);
+
+                loginfo(frmt("[ASE] chunk {:04X}", chunkType));
 
                 switch (chunkType) {
                 case 0x2004:
@@ -67,6 +74,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                 {
                     ASEPRITECelChunkFragment0 frag0;
                     fread(&frag0, sizeof(ASEPRITECelChunkFragment0), 1, f);
+                    loginfo(frmt("   of type {}", frag0.type));
                     switch (frag0.type) {
                     case 0:
                     {
@@ -98,7 +106,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         u8* pixelData = (u8*)tracked_malloc(dstLength);
                         int uncompressResult = uncompress(pixelData, &dstLength, compressedData, zlibDataSize);
                         if (uncompressResult != Z_OK) {
-                            logprintf("uncompress failed: %i\n", uncompressResult);
+                            logerr(frmt("uncompress failed: {}", uncompressResult));
                         }
                         fd.pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
                         tracked_free(compressedData);
@@ -281,6 +289,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                 }
 
                 retSn->tileDimensions = { header.gridWidth, header.gridHeight };
+                retSn->setMSPerFrame(frameLengthSum / frames.size());
             }
         }
 

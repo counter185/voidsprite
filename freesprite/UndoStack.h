@@ -241,3 +241,15 @@ public:
     void undo(MainEditor* editor) override { UndoFrameCreated::redo(editor); };
     void redo(MainEditor* editor) override { UndoFrameCreated::undo(editor); };
 };
+
+class UndoFrameReordered : public UndoStackElementV2 {
+protected:
+    Frame* f;
+    int oldIdx;
+    int newIdx;
+public:
+    UndoFrameReordered(Frame* ff, int oldIndex, int newIndex) : f(ff), oldIdx(oldIndex), newIdx(newIndex) {}
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;;
+};

@@ -143,6 +143,9 @@ Layer* Layer::copyCurrentVariant()
         ret->name = name;
         ret->currentLayerVariant = currentLayerVariant;
         ret->colorKey = colorKey;
+        ret->colorKeySet = colorKeySet;
+        ret->layerAlpha = layerAlpha;
+        ret->hidden = hidden;
         ret->markLayerDirty();
         return ret;
     }

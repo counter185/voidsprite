@@ -156,3 +156,15 @@ void UndoFrameCreated::redo(MainEditor* editor)
     editor->framePicker->createFrameButtons();
     editor->layerPicker->updateLayers();
 }
+
+void UndoFrameReordered::undo(MainEditor* editor)
+{
+    editor->frames.erase(editor->frames.begin() + newIdx);
+    editor->frames.insert(editor->frames.begin() + oldIdx, f);
+}
+
+void UndoFrameReordered::redo(MainEditor* editor)
+{
+    editor->frames.erase(editor->frames.begin() + oldIdx);
+    editor->frames.insert(editor->frames.begin() + newIdx, f);
+}
