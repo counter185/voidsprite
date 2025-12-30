@@ -56,31 +56,35 @@ public:
             renderData[g_rd].layerDirty = true;
             SDL_SetTextureBlendMode(renderData[g_rd].tex, SDL_BLENDMODE_BLEND);
         }
-        SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, &pitch);
-        //memcpy(pixels, pixelData, w * h * 4);
-        uint32_t* pxd = (uint32_t*)pixels;
-        int32_t* pxd2 = (int32_t*)pixels32();
+        if (SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, &pitch)) {
+            //memcpy(pixels, pixelData, w * h * 4);
+            uint32_t* pxd = (uint32_t*)pixels;
+            int32_t* pxd2 = (int32_t*)pixels32();
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                int32_t srcIndex = ARRAY2DPOINT(pxd2, x, y, w);
-                u32* dstPixel = (u32*)&ARRAY2DPOINT((u8*)pxd, x * 4, y, pitch);
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    int32_t srcIndex = ARRAY2DPOINT(pxd2, x, y, w);
+                    u32* dstPixel = (u32*)&ARRAY2DPOINT((u8*)pxd, x * 4, y, pitch);
 
-                if (srcIndex < 0 || srcIndex >= palette.size()) {
-                    *dstPixel = 0;
-                }
-                else {
-                    u32 color = palette[srcIndex];
-                    //do we need this (can't set color key in indexed mode anyway)?
-                    if (colorKeySet && (color & 0xFFFFFF) == (colorKey & 0xFFFFFF)) {
-                        color &= 0x00FFFFFF;
+                    if (srcIndex < 0 || srcIndex >= palette.size()) {
+                        *dstPixel = 0;
                     }
-                    *dstPixel = color;
+                    else {
+                        u32 color = palette[srcIndex];
+                        //do we need this (can't set color key in indexed mode anyway)?
+                        if (colorKeySet && (color & 0xFFFFFF) == (colorKey & 0xFFFFFF)) {
+                            color &= 0x00FFFFFF;
+                        }
+                        *dstPixel = color;
+                    }
                 }
             }
-        }
 
-        SDL_UnlockTexture(renderData[g_rd].tex);
+            SDL_UnlockTexture(renderData[g_rd].tex);
+        }
+        else {
+            logerr("failed to update layer texture pixels (texture is likely null)");
+        }
         renderData[g_rd].layerDirty = false;
     }
 

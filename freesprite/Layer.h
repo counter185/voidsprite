@@ -180,26 +180,25 @@ public:
             renderData[g_rd].layerDirty = true;
             SDL_SetTextureBlendMode(renderData[g_rd].tex, SDL_BLENDMODE_BLEND);
         }
-        SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, (int*)&pitch);
-        copyPixelsToTexture(pixels32(), w, h, pixels, pitch);
+        if (SDL_LockTexture(renderData[g_rd].tex, NULL, (void**)&pixels, (int*)&pitch)) {
+            copyPixelsToTexture(pixels32(), w, h, pixels, pitch);
 
-        //todo respect the pitch in the below too
-        if (colorKeySet) {
-            u32* px32 = (u32*)pixels32();
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    if ((ARRAY2DPOINT(px32, x,y, w) & 0xffffff) == (colorKey & 0xFFFFFF)) {
-                        ARRAY2DPOINT(pixels, x*4+3, y, pitch) = 0;
+            //todo respect the pitch in the below too
+            if (colorKeySet) {
+                u32* px32 = (u32*)pixels32();
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+                        if ((ARRAY2DPOINT(px32, x, y, w) & 0xffffff) == (colorKey & 0xFFFFFF)) {
+                            ARRAY2DPOINT(pixels, x * 4 + 3, y, pitch) = 0;
+                        }
                     }
                 }
             }
-            /*for (u64 p = 0; p < w * h; p++) {
-                if ((px32[p] & 0xffffff) == (colorKey & 0xFFFFFF)) {
-                    pixels[p * 4+3] = 0;
-                }
-            }*/
+            SDL_UnlockTexture(renderData[g_rd].tex);
         }
-        SDL_UnlockTexture(renderData[g_rd].tex);
+        else {
+            logerr("failed to update layer texture pixels (texture is likely null)");
+        }
         renderData[g_rd].layerDirty = false;
     }
 

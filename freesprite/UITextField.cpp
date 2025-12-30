@@ -132,8 +132,7 @@ bool UITextField::inputChar(char c) {
 void UITextField::renderTextField(XY at)
 {
     SDL_Rect drawrect = { at.x, at.y, wxWidth, wxHeight };
-    SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, focused ? 0xff : 0x80);
-    SDL_RenderFillRect(g_rd, &drawrect);
+    bgFill.fill(drawrect);
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
     SDL_RenderDrawRect(g_rd, &drawrect);
 

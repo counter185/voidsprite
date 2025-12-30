@@ -16,7 +16,7 @@ public:
     bool isColorField = false;
     int insertPosition = 0;
     int wxWidth = 250, wxHeight = 30;
-    SDL_Color bgColor = { 0,0,0, 0xff };
+    Fill bgFill = Fill::Solid(0xFF000000);
     SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
 
     std::vector<std::string> imeCandidates;
@@ -76,3 +76,48 @@ public:
     void clearText();
 };
 
+class UINumberInputField : public UITextField
+{
+protected:
+    int* target = NULL;
+    Fill defaultInputFill = Fill::Solid(0xFF000000);
+    Fill invalidInputFill = Fill::Gradient(0xFF600000, 0xFF300000, 0xFF600000, 0xFF300000);
+public:
+    std::function<bool(int)> validateFunction = NULL;
+
+    UINumberInputField(int* target)
+        : target(target)
+    {
+        isNumericField = true;
+        text = std::to_string(*target);
+        onTextChangedCallback = [this](UITextField* tf, std::string newText) {
+            parseInput();
+        };
+    }
+    void parseInput()
+    {
+        if (target != NULL) {
+            try 
+            {
+                int val = std::stoi(text);
+                if (validateFunction == NULL || validateFunction(val)) {
+                    *target = val;
+                    bgFill = defaultInputFill;
+                }
+                else {
+                    bgFill = invalidInputFill;
+                }
+            }
+            catch (std::exception&) 
+            {
+                bgFill = invalidInputFill;
+            }
+        }
+    }
+
+    void focusOut() override {
+        UITextField::focusOut();
+        text = std::to_string(*target);
+        bgFill = defaultInputFill;
+    }
+};

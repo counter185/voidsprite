@@ -66,18 +66,18 @@ StartScreen::StartScreen() {
     wxsManager.addDrawable(newImageTabs);
 
     //tab 0
-    tab0TextFieldW = new UITextField();
-    tab0TextFieldW->setCallbackListener(2, this);
+    tab0TextFieldW = new UINumberInputField(&newImgSizeTab0.x);
     tab0TextFieldW->position = xySubtract(XY{ 80,120 }, newImageTabs->position);
     tab0TextFieldW->wxWidth = 200;
-    tab0TextFieldW->isNumericField = true;
+    tab0TextFieldW->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[0]->click(); };
+    tab0TextFieldW->validateFunction = [](int v) { return v > 0; };
     newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldW);
 
-    tab0TextFieldH = new UITextField();
-    tab0TextFieldH->setCallbackListener(3, this);
+    tab0TextFieldH = new UINumberInputField(&newImgSizeTab0.y);
     tab0TextFieldH->position = xySubtract(XY{ 80,155 }, newImageTabs->position);
     tab0TextFieldH->wxWidth = 200;
-    tab0TextFieldH->isNumericField = true;
+    tab0TextFieldH->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[0]->click(); };
+    tab0TextFieldH->validateFunction = [](int v) { return v > 0; };
     newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
 
     UILabel* wLabel = new UILabel(TL("vsp.cmn.width"));
@@ -89,32 +89,32 @@ StartScreen::StartScreen() {
     newImageTabs->tabs[0].wxs.addDrawable(hLabel);
 
     //tab 1
-    tab1TextFieldCW = new UITextField();
+    tab1TextFieldCW = new UINumberInputField(&newImgCellSizeTab1.x);
     tab1TextFieldCW->position = xySubtract(XY{ 110,120 }, newImageTabs->position);
     tab1TextFieldCW->wxWidth = 160;
-    tab1TextFieldCW->isNumericField = true;
+    tab1TextFieldCW->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
+    tab1TextFieldCW->validateFunction = [](int v) { return v > 0; };
     newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCW);
 
-    tab1TextFieldCWX = new UITextField();
+    tab1TextFieldCWX = new UINumberInputField(&newImgCellCountTab1.x);
     tab1TextFieldCWX->position = xySubtract(XY{ 300,120 }, newImageTabs->position);
     tab1TextFieldCWX->wxWidth = 40;
-    tab1TextFieldCWX->isNumericField = true;
-    tab1TextFieldCWX->setText("1");
+    tab1TextFieldCWX->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
+    tab1TextFieldCWX->validateFunction = [](int v) { return v > 0; };
     newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCWX);
 
-    tab1TextFieldCH = new UITextField();
+    tab1TextFieldCH = new UINumberInputField(&newImgCellSizeTab1.y);
     tab1TextFieldCH->position = xySubtract(XY{ 110,155 }, newImageTabs->position);
     tab1TextFieldCH->wxWidth = 160;
-    tab1TextFieldCH->isNumericField = true;
-    tab1TextFieldCH->setCallbackListener(3, this);
+    tab1TextFieldCH->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
+    tab1TextFieldCH->validateFunction = [](int v) { return v > 0; };
     newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCH);
 
-    tab1TextFieldCHX = new UITextField();
+    tab1TextFieldCHX = new UINumberInputField(&newImgCellCountTab1.y);
     tab1TextFieldCHX->position = xySubtract(XY{ 300,155 }, newImageTabs->position);
     tab1TextFieldCHX->wxWidth = 40;
-    tab1TextFieldCHX->isNumericField = true;
-    tab1TextFieldCHX->setText("1");
-    tab1TextFieldCHX->setCallbackListener(3, this);
+    tab1TextFieldCHX->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
+    tab1TextFieldCHX->validateFunction = [](int v) { return v > 0; };
     newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
 
     UILabel* w2Label = new UILabel(TL("vsp.launchpad.tab.cellw"));
@@ -161,6 +161,8 @@ StartScreen::StartScreen() {
         buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
         buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
         newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
+
+        rgbTabCreateButtons[x] = buttonNewImageRGB;
 
         UIButton* buttonNewImagePalettized = new UIButton();
         buttonNewImagePalettized->onClickCallback = [this](UIButton*) { NewIndexedSession(); };
@@ -442,52 +444,32 @@ void StartScreen::NewRGBSession(u32 fill)
 {
     switch (newImageTabs->openTab) {
         case 0:
-            if (!tab0TextFieldW->textEmpty() && !tab0TextFieldH->textEmpty()) {
-                try {
-                    int newImgW = std::stoi(tab0TextFieldW->getText());
-                    int newImgH = std::stoi(tab0TextFieldH->getText());
-                    Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
-                    if (newLayer != NULL) {
-                        std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
-                        MainEditor* newMainEditor = new MainEditor(newLayer);
-                        g_addScreen(newMainEditor);
-                    }
-                    else {
-                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                    }
+            {
+                Layer* newLayer = Layer::tryAllocLayer(newImgSizeTab0.x, newImgSizeTab0.y);
+                if (newLayer != NULL) {
+                    std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
+                    MainEditor* newMainEditor = new MainEditor(newLayer);
+                    g_addScreen(newMainEditor);
                 }
-                catch (std::out_of_range&) {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                 }
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
         case 1:
-            if (!tab1TextFieldCH->textEmpty() && !tab1TextFieldCW->textEmpty()
-                && !tab1TextFieldCHX->textEmpty() && !tab1TextFieldCWX->textEmpty()) {
-                try {
-                    XY cellSize = XY{ std::stoi(tab1TextFieldCW->getText()) , std::stoi(tab1TextFieldCH->getText()) };
-                    int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->getText());
-                    int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
-                    Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
-                    if (newLayer != NULL) {
-                        std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
-                        MainEditor* newMainEditor = new MainEditor(newLayer);
-                        newMainEditor->tileDimensions = cellSize;
-                        g_addScreen(newMainEditor);
-                    }
-                    else {
-                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                    }
+            {
+                int newImgW = newImgCellSizeTab1.x * newImgCellCountTab1.x;
+                int newImgH = newImgCellSizeTab1.y * newImgCellCountTab1.y;
+                Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
+                if (newLayer != NULL) {
+                    std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
+                    MainEditor* newMainEditor = new MainEditor(newLayer);
+                    newMainEditor->tileDimensions = newImgCellSizeTab1;
+                    g_addScreen(newMainEditor);
                 }
-                catch (std::out_of_range&) {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                 }
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
     }
@@ -497,52 +479,32 @@ void StartScreen::NewIndexedSession()
 {
     switch (newImageTabs->openTab) {
         case 0:
-            if (!tab0TextFieldW->textEmpty() && !tab0TextFieldH->textEmpty()) {
-                try {
-                    int newImgW = std::stoi(tab0TextFieldW->getText());
-                    int newImgH = std::stoi(tab0TextFieldH->getText());
-                    LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
-                    if (newLayer != NULL) {
-                        newLayer->palette = g_palettes()[PALETTE_DEFAULT];
-                        MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
-                        g_addScreen(newMainEditor);
-                    }
-                    else {
-                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                    }
+            {
+                LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgSizeTab0.x, newImgSizeTab0.y);
+                if (newLayer != NULL) {
+                    newLayer->palette = g_palettes()[PALETTE_DEFAULT];
+                    MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
+                    g_addScreen(newMainEditor);
                 }
-                catch (std::out_of_range&) {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                 }
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
         case 1:
-            if (!tab1TextFieldCH->textEmpty() && !tab1TextFieldCW->textEmpty()
-                && !tab1TextFieldCHX->textEmpty() && !tab1TextFieldCWX->textEmpty()) {
-                try {
-                    XY cellSize = XY{ std::stoi(tab1TextFieldCW->getText()) , std::stoi(tab1TextFieldCH->getText()) };
-                    int newImgW = cellSize.x * std::stoi(tab1TextFieldCWX->getText());
-                    int newImgH = cellSize.y * std::stoi(tab1TextFieldCHX->getText());
-                    LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
-                    if (newLayer != NULL) {
-                        newLayer->palette = g_palettes()[PALETTE_DEFAULT];
-                        MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
-                        newMainEditor->tileDimensions = cellSize;
-                        g_addScreen(newMainEditor);
-                    }
-                    else {
-                        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                    }
+            {
+                int newImgW = newImgCellSizeTab1.x * newImgCellCountTab1.x;
+                int newImgH = newImgCellSizeTab1.y * newImgCellCountTab1.y;
+                LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
+                if (newLayer != NULL) {
+                    newLayer->palette = g_palettes()[PALETTE_DEFAULT];
+                    MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
+                    newMainEditor->tileDimensions = newImgCellSizeTab1;
+                    g_addScreen(newMainEditor);
                 }
-                catch (std::out_of_range&) {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.oob")));
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
                 }
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.no_dims")));
             }
             break;
     }
