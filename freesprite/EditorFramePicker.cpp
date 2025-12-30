@@ -5,6 +5,8 @@
 #include "UIButton.h"
 #include "FontRenderer.h"
 #include "PopupContextMenu.h"
+#include "UILabel.h"
+#include "UITextField.h"
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
@@ -27,7 +29,16 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         parent->toggleFrameAnimation();
     };
 
-    UIStackPanel* topRow = UIStackPanel::Horizontal(4, { playpauseBtn });
+    UINumberInputField* msPerFrameInput = new UINumberInputField(&parent->frameAnimMSPerFrame);
+    msPerFrameInput->wxWidth = 50;
+    msPerFrameInput->validateFunction = [](int v) { return v > 0; };
+
+    UIStackPanel* topRow = UIStackPanel::Horizontal(4, {
+        playpauseBtn,
+        Panel::Space(6,2),
+        new UILabel("MS per frame"),
+        msPerFrameInput
+    });
 
     frameButtonPanel = new ScrollingPanel();
     frameButtonPanel->wxWidth = wxWidth - 10;
