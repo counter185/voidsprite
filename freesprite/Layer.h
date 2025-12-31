@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "mathops.h"
+#include "background_operation.h"
 
 struct LayerVariant {
     std::string name = "Variant";
@@ -67,8 +68,13 @@ public:
         for (auto& variant : layerData) {
             tracked_free(variant.pixelData);
         }
-        for (auto& [rd, t] : renderData) {
-            tracked_destroyTexture(t.tex);
+        if (!renderData.empty()) {
+            auto renderDataCopy = renderData;
+            g_startNewMainThreadOperation([renderDataCopy]() {
+                for (auto& [rd, t] : renderDataCopy) {
+                    tracked_destroyTexture(t.tex);
+                }
+            });
         }
     }
 

@@ -81,6 +81,7 @@ struct NetworkCanvasClientInfo {
     u64 lastReportTime = 0;
     u32 clientColor = 0xC0E1FF;
     bool chatTyping = false;
+    int activeFrame = 0;
 
     //host hints
     bool hostKick = false;
@@ -181,6 +182,7 @@ public:
     std::vector<CommentData> comments;
 
     int activeFrame = 0;
+    std::recursive_mutex framesMutex;
     std::vector<Frame*> frames = { new Frame() };
     Timer64 frameAnimationStartTimer;
     bool frameAnimationPlaying = false;
@@ -393,12 +395,12 @@ public:
     void redo();
 
     Frame* getCurrentFrame() { return frames[activeFrame]; }
-    void newFrame();
-    void duplicateFrame(int index);
-    void deleteFrame(int index);
+    virtual void newFrame();
+    virtual void duplicateFrame(int index);
+    virtual void deleteFrame(int index);
     void switchFrame(int index);
-    void moveFrameLeft(int index);
-    void moveFrameRight(int index);
+    virtual void moveFrameLeft(int index);
+    virtual void moveFrameRight(int index);
     void toggleFrameAnimation();
     void setMSPerFrame(int ms);
 
@@ -443,7 +445,7 @@ public:
 
     std::string networkGetSocketAddress(NET_StreamSocket* sock);
     virtual void promptStartNetworkSession();
-    virtual void networkCanvasStateUpdated(int whichLayer);
+    virtual void networkCanvasStateUpdated(int whichFrame, int whichLayer);
     void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
     void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
@@ -454,7 +456,7 @@ public:
     bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendString(NET_StreamSocket* socket, std::string s);
-    void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
+    void networkCanvasSendLRDT(NET_StreamSocket* socket, int frameIndex, int index, Layer* l);
     std::string networkReadString(NET_StreamSocket* socket);
     void networkCanvasKickUID(u32 uid);
     void networkCanvasSystemMessage(std::string msg);

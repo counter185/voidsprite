@@ -184,6 +184,7 @@ void MainEditor::render() {
         }
     }
     //render all layers
+    framesMutex.lock();
     for (Layer* imgLayer : getLayerStack()) {
         bool isCurrentActiveLayer = imgLayer == getCurrentLayer();
         if (!imgLayer->hidden) {
@@ -201,6 +202,7 @@ void MainEditor::render() {
             imgLayer->render(renderRect, (uint8_t)(alpha * layerFadeIn));
         }
     }
+    framesMutex.unlock();
     for (auto& refPanel : openReferencePanels) {
         if (refPanel->currentMode == REFERENCE_OVER_CANVAS) {
             Layer* p = refPanel->getLayer();
@@ -1661,7 +1663,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 else {
                                     if (currentBrushMouseDowned) {
                                         currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                        networkCanvasStateUpdated(selLayer);
+                                        networkCanvasStateUpdated(activeFrame, selLayer);
                                         currentBrushMouseDowned = false;
                                         leftMouseReleaseTimer.start();
                                     }
@@ -2211,7 +2213,7 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 void MainEditor::commitStateToLayer(Layer* l)
 {
     addToUndoStack(UndoLayerModified::fromCurrentState(l));
-    networkCanvasStateUpdated(indexOfLayer(l));
+    networkCanvasStateUpdated(activeFrame, indexOfLayer(l));
 }
 
 void MainEditor::commitStateToCurrentLayer()
@@ -2248,7 +2250,7 @@ void MainEditor::addToUndoStack(UndoStackElementV2* undo)
     undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
     changesSinceLastSave = HAS_UNSAVED_CHANGES;
-    networkCanvasStateUpdated(indexOfLayer(undo->getAffectedLayer()));
+    networkCanvasStateUpdated(activeFrame, indexOfLayer(undo->getAffectedLayer()));
 }
 
 void MainEditor::discardUndoStack()
@@ -2278,7 +2280,7 @@ void MainEditor::undo()
         undoStack.pop_back();
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
-        networkCanvasStateUpdated(indexOfLayer(l->getAffectedLayer()));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(l->getAffectedLayer()));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to undo", ""));
@@ -2295,7 +2297,7 @@ void MainEditor::redo()
         redoStack.pop_back();
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
-        networkCanvasStateUpdated(indexOfLayer(l->getAffectedLayer()));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(l->getAffectedLayer()));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to redo", ""));
@@ -2304,6 +2306,7 @@ void MainEditor::redo()
 
 void MainEditor::newFrame()
 {
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
     if (splitSessionData.set) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Frames not supported in split session mode"));
         return;
@@ -2327,6 +2330,7 @@ void MainEditor::newFrame()
 
 void MainEditor::duplicateFrame(int index)
 {
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
     if (splitSessionData.set) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Frames not supported in split session mode"));
         return;
@@ -2341,6 +2345,7 @@ void MainEditor::duplicateFrame(int index)
 
 void MainEditor::deleteFrame(int index)
 {
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
     if (index >= 0 && index < frames.size()) {
         if (frames.size() != 1) {
             Frame* target = frames[index];
@@ -2371,6 +2376,7 @@ void MainEditor::switchFrame(int index)
 
 void MainEditor::moveFrameLeft(int index)
 {
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
     if (index > 0 && index <= frames.size() - 1) {
         Frame* target = frames[index];
         frames.erase(frames.begin() + index);
@@ -2385,6 +2391,7 @@ void MainEditor::moveFrameLeft(int index)
 
 void MainEditor::moveFrameRight(int index)
 {
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
     if (index >= 0 && index < frames.size() - 1) {
         Frame* target = frames[index];
         frames.erase(frames.begin() + index);
@@ -2729,7 +2736,7 @@ void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
 {
     int vidxNow = layer->currentLayerVariant;
     if (layer->switchVariant(variantIndex)) {
-        networkCanvasStateUpdated(indexOfLayer(layer));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(layer));
         layerPicker->updateLayers();
         if (layer == getCurrentLayer()) {
             variantSwitchTimer.start();
@@ -2777,7 +2784,7 @@ void MainEditor::layer_promptRename(int index)
         ninput->onTextInputConfirmedCallback = [this, target](PopupTextBox* p, std::string newName) {
             target->name = newName;
             layerPicker->updateLayers();
-            networkCanvasStateUpdated(indexOfLayer(target));
+            networkCanvasStateUpdated(activeFrame, indexOfLayer(target));
         };
         g_addPopup(ninput);
     }
@@ -3208,7 +3215,7 @@ void MainEditor::promptStartNetworkSession()
     g_addPopup(p);
 }
 
-void MainEditor::networkCanvasStateUpdated(int whichLayer)
+void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 {
     canvasStateID++;
 }
@@ -3328,6 +3335,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         anyDataUpdated |= (newClientName != clientInfo->clientName);
         clientInfo->clientName = newClientName;
 
+        clientInfo->activeFrame = inputJson.value("activeFrame", 0);
+
         clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
         try {
             u32 newClientColor = std::stoi(inputJson.value("clientColor", "C0E1FF"), 0, 16);
@@ -3346,17 +3355,27 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             {"tileGridWidth", tileDimensions.x},
             {"tileGridHeight", tileDimensions.y},
             {"chatState", (u32)networkCanvasCurrentChatState->messagesState},
-            {"layers", json::array()},
+            {"frameTime", frameAnimMSPerFrame},
+            {"frames", json::array()},
             {"clients", json::array()}
         };
-        for (Layer*& l : getLayerStack()) {
-            json layerJson = {
-                {"name", l->name},
-                {"hidden", l->hidden},
-                {"opacity", l->layerAlpha}
-            };
-            infoJson["layers"].push_back(layerJson);
+        framesMutex.lock();
+        for (Frame*& f : frames) {
+            json layersJson = json::array();
+            for (Layer*& l : f->layers) {
+                json layerJson = {
+                    {"name", l->name},
+                    {"hidden", l->hidden},
+                    {"opacity", l->layerAlpha}
+                };
+                layersJson.push_back(layerJson);
+            }
+            infoJson["frames"].push_back({
+                {"layers", layersJson}
+            });
         }
+        framesMutex.unlock();
+        
         networkClientsListMutex.lock();
         thisClientInfo->cursorPosition = mousePixelTargetPoint;
         thisClientInfo->lastReportTime = SDL_GetTicks();
@@ -3367,7 +3386,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                 {"cursorX", c->cursorPosition.x},
                 {"cursorY", c->cursorPosition.y},
                 {"clientColor", frmt("{:06X}", 0xFFFFFF&c->clientColor)},
-                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)}
+                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)},
+                {"activeFrame", c->activeFrame}
             };
             infoJson["clients"].push_back(clientJson);
         }
@@ -3385,24 +3405,28 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
     }
     //layer data request
     else if (command == "LRRQ") {
+        u32 frameIndex;
         u32 index;
+        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
         networkReadBytes(clientSocket, (u8*)&index, 4);
 
-        if (index < getLayerStack().size()) {
-            Layer* l = getLayerStack()[index];
-            networkCanvasSendLRDT(clientSocket, index, l);
+        if (frameIndex < frames.size() && index < frames[frameIndex]->layers.size()) {
+            Layer* l = frames[frameIndex]->layers[index];
+            networkCanvasSendLRDT(clientSocket, frameIndex, index, l);
         }
     }
     //layer pixel data update request
     else if (command == "LRDT") {
+        u32 frameIndex;
         u32 index;
         u64 dataSize;
+        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
         networkReadBytes(clientSocket, (u8*)&index, 4);
         networkReadBytes(clientSocket, (u8*)&dataSize, 8);
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(clientSocket, dataBuffer, dataSize);
-            Layer* l = getLayerStack()[index];
+            Layer* l = frames[frameIndex]->layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
                 logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
@@ -3412,7 +3436,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                     memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                     l->markLayerDirty();
                     changesSinceLastSave = HAS_UNSAVED_CHANGES;
-                    networkCanvasStateUpdated(index);
+                    networkCanvasStateUpdated(frameIndex, index);
                 }
             }
             tracked_free(dataBuffer);
@@ -3456,8 +3480,13 @@ bool MainEditor::networkCanvasProcessAUTHCommand(std::string request)
 {
     try {
         json inputJson = json::parse(request);
+        int version = inputJson.value("version", 1);
+        if (version != 2) {
+            logerr(frmt("client version mismatch {}", version));
+            return false;
+        }
         std::string password = inputJson.value("password", "");
-        return networkCanvasPassword == "" || password == networkCanvasPassword;
+        return (networkCanvasPassword == "" || password == networkCanvasPassword);
         
     } catch (std::exception&) {
         return false;
@@ -3554,11 +3583,12 @@ void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
     }
 }
 
-void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l)
+void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int frameIndex, int index, Layer* l)
 {
     auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
     u64 dataSize = compressedData.size();
     networkSendCommand(socket, "LRDT");
+    networkSendBytes(socket, (u8*)&frameIndex, 4);
     networkSendBytes(socket, (u8*)&index, 4);
     networkSendBytes(socket, (u8*)&dataSize, 8);
     networkSendBytes(socket, (u8*)&compressedData[0], dataSize);

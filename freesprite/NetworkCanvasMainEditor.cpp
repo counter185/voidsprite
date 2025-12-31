@@ -7,6 +7,7 @@
 #include "EditorLayerPicker.h"
 #include "Notification.h"
 #include "CollapsableDraggablePanel.h"
+#include "EditorFramePicker.h"
 
 using namespace nlohmann;
 
@@ -67,28 +68,53 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         XY canvasSize = XY{ infoJson["canvasWidth"], infoJson["canvasHeight"] };
         int tileGridWidth = infoJson["tileGridWidth"];
         int tileGridHeight = infoJson["tileGridHeight"];
+        tileDimensions = { ixmax(0, tileGridWidth), ixmax(0, tileGridHeight) };
         int thisUID = infoJson["yourUserIDIs"];
         u32 chatState = infoJson["chatState"];
         thisClientInfo->uid = thisUID;
-        auto layerData = infoJson["layers"];
-        int numLayers = layerData.size();
-        if (!receivedInfo || !xyEqual(canvasSize, lastINFOSize) || lastINFONumLayers != numLayers) {
-            receivedInfo = true;
-            lastINFOSize = canvasSize;
-            lastINFONumLayers = numLayers;
-            canvas.dimensions = canvasSize;
-            reallocLayers(canvasSize, numLayers);
+
+        framesMutex.lock();
+        auto frameData = infoJson["frames"];
+        int numFrames = frameData.size();
+        if (numFrames != frames.size()) {
+            mainThreadOps.add([this]() {
+                this->undoStack.clear();
+                this->redoStack.clear();
+            });
+            for (auto& f : frames) {
+                delete f;
+            }
+            frames.clear();
+            for (int i = 0; i < numFrames; i++) {
+                frames.push_back(new Frame());
+            }
+            mainThreadOps.add([this]() {
+                framePicker->createFrameButtons();
+            });
+        }
+        if (activeFrame >= numFrames) {
+            activeFrame = numFrames - 1;
         }
 
-        tileDimensions = { ixmax(0, tileGridWidth), ixmax(0, tileGridHeight) };
+        for (int fi = 0; fi < numFrames; fi++) {
+            auto layerData = frameData[fi]["layers"];
+            int numLayers = layerData.size();
+            if (!receivedInfo || !xyEqual(canvasSize, lastINFOSize) || frames[fi]->layers.size() != numLayers) {
+                receivedInfo = true;
+                lastINFOSize = canvasSize;
+                canvas.dimensions = canvasSize;
+                reallocLayers(frames[fi], canvasSize, numLayers);
+            }
 
-        int i = 0;
-        for (auto& l : layerData) {
-            Layer* layer = getLayerStack()[i++];
-            layer->name = l["name"];
-            layer->layerAlpha = l["opacity"];
-            layer->hidden = l["hidden"];
+            int i = 0;
+            for (auto& l : layerData) {
+                Layer* layer = frames[fi]->layers[i++];
+                layer->name = l["name"];
+                layer->layerAlpha = l["opacity"];
+                layer->hidden = l["hidden"];
+            }
         }
+        framesMutex.unlock();
 
         auto userData = infoJson["clients"];
         networkClientsListMutex.lock();
@@ -102,6 +128,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             clientInfo->clientName = user["clientName"];
             clientInfo->cursorPosition = XY{ user["cursorX"], user["cursorY"] };
             clientInfo->lastReportTime = user["lastReportTime"];
+            clientInfo->activeFrame = user["activeFrame"];
             try {
                 std::string colorString = user["clientColor"];
                 clientInfo->clientColor = std::stoi(colorString, 0, 16);
@@ -124,20 +151,22 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         }
     }
     else if (command == "LRDT") {
+        u32 frameIndex;
         u32 index;
         u64 dataSize;
+        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
         networkReadBytes(clientSocket, (u8*)&index, 4);
         networkReadBytes(clientSocket, (u8*)&dataSize, 8);
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(clientSocket, dataBuffer, dataSize);
-            Layer* l = getLayerStack()[index];
+            Layer* l = frames[frameIndex]->layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
                 logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
             }
             else {
-                if (index != selLayer || (!leftMouseHold && (!leftMouseReleaseTimer.started || leftMouseReleaseTimer.elapsedTime() > 300))) {
+                if (frameIndex != activeFrame || index != selLayer || (!leftMouseHold && (!leftMouseReleaseTimer.started || leftMouseReleaseTimer.elapsedTime() > 300))) {
                     memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                     l->markLayerDirty();
                 }
@@ -156,9 +185,12 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             loginfo(frmt("{:08X} != {:08X}, updating", oldStateID, canvasStateID));
             receivedDataOnce = true;
             networkCanvasSendInfoRequest();
-            for (int i = 0; i < getLayerStack().size(); i++) {
-                networkSendCommand(clientSocket, "LRRQ");
-                networkSendBytes(clientSocket, (u8*)&i, 4);
+            for (int fi = 0; fi < frames.size(); fi++) {
+                for (int i = 0; i < frames[fi]->layers.size(); i++) {
+                    networkSendCommand(clientSocket, "LRRQ");
+                    networkSendBytes(clientSocket, (u8*)&fi, 4);
+                    networkSendBytes(clientSocket, (u8*)&i, 4);
+                }
             }
         }
     }
@@ -184,7 +216,8 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
         {"clientName", thisClientInfo->clientName},
         {"cursorX", mousePixelTargetPoint.x},
         {"cursorY", mousePixelTargetPoint.y},
-        {"clientColor", frmt("{:06X}", thisClientInfo->clientColor&0xFFFFFF)}
+        {"clientColor", frmt("{:06X}", thisClientInfo->clientColor&0xFFFFFF)},
+        {"activeFrame", activeFrame}
     };
     networkSendString(clientSocket, infoJson.dump());
 
@@ -194,7 +227,7 @@ void NetworkCanvasMainEditor::networkCanvasSendLocalChanges()
 {
     clientSideChangesMutex.lock();
     for (auto& c : clientSideChanges) {
-        networkCanvasSendLRDT(clientSocket, c.first, getLayerStack()[c.first]);
+        networkCanvasSendLRDT(clientSocket, c.first.first, c.first.second, frames[c.first.first]->layers[c.first.second]);
     }
     clientSideChanges.clear();
     clientSideChangesMutex.unlock();
@@ -209,14 +242,15 @@ void NetworkCanvasMainEditor::networkCanvasSendAUTH()
 {
     networkSendCommand(clientSocket, "AUTH");
     json authJson = {
-        {"password", networkCanvasPassword}
+        {"password", networkCanvasPassword},
+        {"version", 2}
     };
     networkSendString(clientSocket, authJson.dump());
 }
 
-void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
+void NetworkCanvasMainEditor::reallocLayers(Frame* f, XY size, int numLayers)
 {
-	auto& layers = getLayerStack();
+    auto& layers = f->layers;
     for (Layer*& layer : layers) {
         delete layer;
     }
@@ -226,12 +260,14 @@ void NetworkCanvasMainEditor::reallocLayers(XY size, int numLayers)
         newLayer->name = "Network layer";
         layers.push_back(newLayer);
     }
-    if (selLayer >= layers.size()) {
-        selLayer = ixmax(0, layers.size() - 1);
+    if (f->activeLayer >= layers.size()) {
+        f->activeLayer = ixmax(0, layers.size() - 1);
     }
-    mainThreadOps.add([this]() {
-        initLayers();
-    });
+    if (getCurrentFrame() == f) {
+        mainThreadOps.add([this]() {
+            initLayers();
+        });
+    }
 }
 
 NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NET_StreamSocket* socket)
@@ -261,13 +297,16 @@ NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSet
     wxsManager.addDrawable(networkCanvasHostPanel);
 }
 
-void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichLayer)
+void NetworkCanvasMainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 {
+    if (whichFrame == -1) {
+        whichFrame = activeFrame;
+    }
     if (whichLayer == -1) {
         whichLayer = selLayer;
     }
     clientSideChangesMutex.lock();
-    clientSideChanges[whichLayer] = true;
+    clientSideChanges[{whichFrame, whichLayer}] = true;
     clientSideChangesMutex.unlock();
 }
 

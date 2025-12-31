@@ -100,6 +100,7 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
 
 void EditorFramePicker::createFrameButtons()
 {
+    std::lock_guard<std::recursive_mutex> lock(parent->framesMutex);
     frameButtonStack->subWidgets.freeAllDrawables();
     int buttonW = g_fnt->StatStringDimensions("000").x + 5;
     for (int i = 0; i < parent->frames.size(); i++) {
