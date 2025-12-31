@@ -85,11 +85,21 @@ struct ASEPRITEChunkHeader {
 };
 #pragma pack(pop)
 
+struct ASELayer {
+    std::string name;
+    bool hidden;
+    int id;
+};
+
+std::vector<int> ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<Layer*> target, int* nextLayerID);
+void ASEWriteCellChunk(Layer* l, FILE* f, int layerID, u32* bytesWritten);
+
 inline void writeASEString(std::string a, FILE* f) {
     u16 b = a.size();
     fwrite(&b, 2, 1, f);
     fwrite(a.c_str(), a.size(), 1, f);
 }
+
 
 MainEditor* readAsepriteASE(PlatformNativePathString path);
 bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor);

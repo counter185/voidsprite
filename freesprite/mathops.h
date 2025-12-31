@@ -153,6 +153,11 @@ inline std::vector<T> joinVectors(std::initializer_list<std::vector<T>> vecs)
     }
     return ret;
 }
+template<typename T>
+inline bool vectorContains(std::vector<T>& vec, T& val)
+{
+    return std::find(vec.begin(), vec.end(), val) != vec.end();
+}
 
 class Bitblock {
 private:

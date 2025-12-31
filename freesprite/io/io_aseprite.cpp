@@ -6,6 +6,66 @@
 #include "../FileIO.h"
 
 
+std::vector<int> ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<Layer*> target, int* nextLayerID) {
+    //return: vector of layer ids for each target
+
+    std::vector<int> ret = {};
+    std::vector<ASELayer> curCopy = current;
+    while (!target.empty()) {
+        if (!curCopy.empty()) {
+            if (target[0]->name == curCopy[0].name 
+                && target[0]->hidden == curCopy[0].hidden) {
+                ret.push_back(curCopy[0].id);
+                target.erase(target.begin());
+            }
+            curCopy.erase(curCopy.begin());
+        }
+        else {
+            current.push_back({ target[0]->name, target[0]->hidden, (*nextLayerID)++ });
+            ret.push_back(current.back().id);
+            target.erase(target.begin());
+        }
+    }
+    return ret;
+}
+
+void ASEWriteCellChunk(Layer* l, FILE* f, int layerID, u32* bytesWritten)
+{
+    ASEPRITEChunkHeader chunkHeader{};
+    chunkHeader.type = 0x2005;
+
+    ASEPRITECelChunkFragment0 celChunk{};
+    celChunk.layerIndex = layerID++;
+    celChunk.x = 0;
+    celChunk.y = 0;
+    celChunk.opacity = l->layerAlpha;
+    celChunk.type = 2;
+    celChunk.zIndex = 0;
+
+    u8* newPixelData;
+    u64 dataSize;
+    u32* ppx = l->pixels32();
+    if (l->isPalettized) {
+        newPixelData = (u8*)tracked_malloc(l->w * l->h * 4);
+        std::transform(ppx, ppx + l->w * l->h, newPixelData, [](u32 a) { return a == -1 ? 0 : (u8)a; });
+        dataSize = l->w * l->h;
+    }
+    else {
+        newPixelData = (u8*)tracked_malloc(l->w * l->h * 4);
+        SDL_ConvertPixels(l->w, l->h, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), l->w * 4, SDL_PIXELFORMAT_ABGR8888, newPixelData, l->w * 4);
+        dataSize = l->w * l->h * 4;
+    }
+    auto compressedData = compressZlib(newPixelData, dataSize);
+    chunkHeader.size = 6 + compressedData.size() + 4 + sizeof(ASEPRITECelChunkFragment0);
+    *bytesWritten += chunkHeader.size;
+    fwrite(&chunkHeader, sizeof(ASEPRITEChunkHeader), 1, f);
+    fwrite(&celChunk, sizeof(ASEPRITECelChunkFragment0), 1, f);
+    u16 buf[2] = { l->w, l->h };
+    fwrite(buf, 2, 2, f);
+    fwrite(compressedData.data(), compressedData.size(), 1, f);
+    tracked_free(newPixelData);
+}
+
 MainEditor* readAsepriteASE(PlatformNativePathString path)
 {
     struct ASERawPixelData {
@@ -220,26 +280,27 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                 std::vector<Frame*> frames;
                 if (header.colorDepth == 8) {
                     for (auto& aseFrame : framesData) {
+                        std::map<int, LayerPalettized*> layerMap;
                         std::vector<LayerPalettized*> layers;
-                        for (auto& kv : aseFrame.pixelDatas) {
+                        for (auto& [id, ld] : layerData) {
                             LayerPalettized* l = new LayerPalettized(header.width, header.height);
-                            l->name = TL("vsp.layer.aseprite");
-                            if (layerData.contains(kv.first)) {
-                                l->name = layerData[kv.first].name;
-                                //l->layerAlpha = layerData[kv.first].rawFrag.opacity;
-                                l->hidden = !(layerData[kv.first].rawFrag.flags & 1);
-                            }
+                            l->name = ld.name;
+                            //l->layerAlpha = ld.rawFrag.opacity;
+                            l->hidden = !(ld.rawFrag.flags & 1);
+                            layerMap[id] = l;
+                            layers.push_back(l);
+                        }
 
-                            LayerPalettized* subLayer = new LayerPalettized(kv.second.size.x, kv.second.size.y);
+                        for (auto& [id, rawPx] : aseFrame.pixelDatas) {
+                            LayerPalettized* subLayer = new LayerPalettized(rawPx.size.x, rawPx.size.y);
                             u32* px = subLayer->pixels32();
                             for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
-                                u8 pixel = kv.second.pixelData[pxp];
+                                u8 pixel = rawPx.pixelData[pxp];
                                 px[pxp] = pixel;
                             }
 
-                            l->blit(subLayer, kv.second.position);
+                            layerMap[id]->blit(subLayer, rawPx.position);
                             delete subLayer;
-                            layers.push_back(l);
                         }
                         Frame* f = new Frame();
                         f->layers = std::vector<Layer*>(layers.begin(), layers.end());
@@ -251,35 +312,36 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                 }
                 else {
                     for (auto& aseFrame : framesData) {
+                        std::map<int, Layer*> layerMap;
                         std::vector<Layer*> layers;
-                        for (auto& kv : aseFrame.pixelDatas) {
+                        for (auto& [id, ld] : layerData) {
                             Layer* l = new Layer(header.width, header.height);
-                            l->name = "Aseprite layer";
-                            if (layerData.contains(kv.first)) {
-                                l->name = layerData[kv.first].name;
-                                l->layerAlpha = layerData[kv.first].rawFrag.opacity;
-                                l->hidden = !(layerData[kv.first].rawFrag.flags & 1);
-                            }
+                            l->name = ld.name;
+                            l->layerAlpha = ld.rawFrag.opacity;
+                            l->hidden = !(ld.rawFrag.flags & 1);
+                            layerMap[id] = l;
+                            layers.push_back(l);
+                        }
 
-                            Layer* subLayer = new Layer(kv.second.size.x, kv.second.size.y);
+                        for (auto& [id, rawPx] : aseFrame.pixelDatas) {
+                            Layer* subLayer = new Layer(rawPx.size.x, rawPx.size.y);
                             u32* px = subLayer->pixels32();
                             if (header.colorDepth == 32) {
-                                ASEPRITERGBAPixel* srcpx = (ASEPRITERGBAPixel*)kv.second.pixelData;
+                                ASEPRITERGBAPixel* srcpx = (ASEPRITERGBAPixel*)rawPx.pixelData;
                                 for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
                                     ASEPRITERGBAPixel pixel = srcpx[pxp];
                                     px[pxp] = PackRGBAtoARGB(pixel.r, pixel.g, pixel.b, pixel.a);
                                 }
                             }
                             else if (header.colorDepth == 16) {
-                                ASEPRITEIA88Pixel* srcpx = (ASEPRITEIA88Pixel*)kv.second.pixelData;
+                                ASEPRITEIA88Pixel* srcpx = (ASEPRITEIA88Pixel*)rawPx.pixelData;
                                 for (u64 pxp = 0; pxp < subLayer->w * subLayer->h; pxp++) {
                                     ASEPRITEIA88Pixel pixel = srcpx[pxp];
                                     px[pxp] = PackRGBAtoARGB(pixel.i, pixel.i, pixel.i, pixel.a);
                                 }
                             }
-                            l->blit(subLayer, kv.second.position);
+                            layerMap[id]->blit(subLayer, rawPx.position);
                             delete subLayer;
-                            layers.push_back(l);
                         }
                         Frame* f = new Frame();
                         f->layers = layers;
@@ -317,16 +379,24 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
             return false;
         }
 
+        std::vector<std::vector<int>> frameLayerIndices;
+        std::vector<ASELayer> aseLayers;
+        int nextLayerID = 0;
+        for (Frame* f : editor->frames) {
+            frameLayerIndices.push_back(ASELayerEvalOrder(aseLayers, f->layers, &nextLayerID));
+        }
+
+
         u64 fileSizePosition = ftell(f);
         ASEPRITEHeader header{};
         header.fileSize = 0;
         header.magic = 0xA5E0;
-        header.numFrames = 1;
+        header.numFrames = editor->frames.size();
         header.width = editor->canvas.dimensions.x;
         header.height = editor->canvas.dimensions.y;
         header.colorDepth = editor->isPalettized ? 8 : 32;
         header.flags = 1;
-        header.speedDeprecated = 100;
+        header.speedDeprecated = editor->frameAnimMSPerFrame;
         header.paletteEntryThatIsTransparent = 0;
         header.numColors = editor->isPalettized ? upcastEditor->palette.size() : 64;
         header.pixelWidth = 1;
@@ -337,14 +407,14 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         header.gridHeight = editor->tileDimensions.y;
         fwrite(&header, sizeof(ASEPRITEHeader), 1, f);
 
-        int estimatedNumChunks = 1 + editor->getLayerStack().size() * 2 + (editor->isPalettized ? 1 : 0);
+        int estimatedNumChunks = 1 + nextLayerID + editor->frames[0]->layers.size() + (editor->isPalettized ? 1 : 0);
         u64 bytesInFramePosition = ftell(f);
         u32 bytesInFrame = sizeof(ASEPRITEFrameHeader);
         ASEPRITEFrameHeader frameHeader{};
         frameHeader.bytesInFrame = 0;
         frameHeader.magic = 0xF1FA;
         frameHeader.numChunksOld = estimatedNumChunks;
-        frameHeader.frameDuration = 100;
+        frameHeader.frameDuration = editor->frameAnimMSPerFrame;
         frameHeader.numChunksNew = estimatedNumChunks;
         fwrite(&frameHeader, sizeof(ASEPRITEFrameHeader), 1, f);
 
@@ -382,65 +452,55 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         }
 
         //layer chunks
-        for (Layer*& l : editor->getLayerStack()) {
+        for (ASELayer& l : aseLayers) {
             numChunks++;
-            chunkHeader.size = 6 + sizeof(ASEPRITELayerChunkFragment0) + 2 + l->name.size();
+            chunkHeader.size = 6 + sizeof(ASEPRITELayerChunkFragment0) + 2 + l.name.size();
             chunkHeader.type = 0x2004;
             bytesInFrame += chunkHeader.size;
             fwrite(&chunkHeader, sizeof(ASEPRITEChunkHeader), 1, f);
             ASEPRITELayerChunkFragment0 layerChunk{};
-            layerChunk.flags = (l->hidden ? 0 : 1) + 0b10;
+            layerChunk.flags = (l.hidden ? 0 : 1) + 0b10;
             layerChunk.layerType = 0;
             layerChunk.layerChildLevel = 0;
             layerChunk.blendMode = 0;
-            layerChunk.opacity = l->layerAlpha;
+            layerChunk.opacity = 255;
             fwrite(&layerChunk, sizeof(ASEPRITELayerChunkFragment0), 1, f);
-            writeASEString(l->name, f);
+            writeASEString(l.name, f);
         }
 
         //cel chunks
-        int i = 0;
-        for (Layer*& l : editor->getLayerStack()) {
-            numChunks++;
-            chunkHeader.type = 0x2005;
+        for (int fi = 0; fi < editor->frames.size(); fi++) {
+            Frame* fr = editor->frames[fi];
+            std::vector<int>& layerIndices = frameLayerIndices[fi];
 
-            ASEPRITECelChunkFragment0 celChunk{};
-            celChunk.layerIndex = i++;
-            celChunk.x = 0;
-            celChunk.y = 0;
-            celChunk.opacity = l->layerAlpha;
-            celChunk.type = 2;
-            celChunk.zIndex = 0;
+            if (fi > 0) {
+                int frameNumChunks = fr->layers.size();
+                //new frame header
+                bytesInFramePosition = ftell(f);
+                bytesInFrame = sizeof(ASEPRITEFrameHeader);
+                ASEPRITEFrameHeader frameHeader{};
+                frameHeader.bytesInFrame = 0;
+                frameHeader.magic = 0xF1FA;
+                frameHeader.numChunksOld = frameNumChunks;
+                frameHeader.frameDuration = editor->frameAnimMSPerFrame;
+                frameHeader.numChunksNew = frameNumChunks;
+                fwrite(&frameHeader, sizeof(ASEPRITEFrameHeader), 1, f);
+                numChunks = 0;
+            }
 
-            u8* newPixelData;
-            u64 dataSize;
-            u32* ppx = l->pixels32();
-            if (editor->isPalettized) {
-                newPixelData = (u8*)tracked_malloc(l->w * l->h * 4);
-                std::transform(ppx, ppx + l->w * l->h, newPixelData, [](u32 a) { return a == -1 ? 0 : (u8)a; });
-                dataSize = l->w * l->h;
+            int i = 0;
+            for (Layer*& l : fr->layers) {
+                numChunks++;
+                ASEWriteCellChunk(l, f, layerIndices[i++], &bytesInFrame);
             }
-            else {
-                newPixelData = (u8*)tracked_malloc(l->w * l->h * 4);
-                SDL_ConvertPixels(l->w, l->h, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), l->w * 4, SDL_PIXELFORMAT_ABGR8888, newPixelData, l->w * 4);
-                dataSize = l->w * l->h * 4;
-            }
-            auto compressedData = compressZlib(newPixelData, dataSize);
-            chunkHeader.size = 6 + compressedData.size() + 4 + sizeof(ASEPRITECelChunkFragment0);
-            bytesInFrame += chunkHeader.size;
-            fwrite(&chunkHeader, sizeof(ASEPRITEChunkHeader), 1, f);
-            fwrite(&celChunk, sizeof(ASEPRITECelChunkFragment0), 1, f);
-            u16 buf[2] = { l->w, l->h };
-            fwrite(buf, 2, 2, f);
-            fwrite(compressedData.data(), compressedData.size(), 1, f);
-            tracked_free(newPixelData);
+            fseek(f, bytesInFramePosition, SEEK_SET);
+            fwrite(&bytesInFrame, 4, 1, f);
+            fseek(f, 0, SEEK_END);
         }
 
         u32 fileSize = ftell(f);
         fseek(f, fileSizePosition, SEEK_SET);
         fwrite(&fileSize, 4, 1, f);
-        fseek(f, bytesInFramePosition, SEEK_SET);
-        fwrite(&bytesInFrame, 4, 1, f);
 
 
         fclose(f);
