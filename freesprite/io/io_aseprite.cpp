@@ -72,6 +72,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
         XY position;
         XY size;
         u8* pixelData;
+        u8 celOpacity = 255;
     };
     struct ASELayerData {
         ASEPRITELayerChunkFragment0 rawFrag;
@@ -144,7 +145,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         int dataSize = w * h * (header.colorDepth / 8);
                         u8* pixelData = (u8*)tracked_malloc(dataSize);
                         fread(pixelData, dataSize, 1, f);
-                        fd.pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
+                        fd.pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData, frag0.opacity };
                     }
                     break;
                     case 1:
@@ -168,7 +169,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         if (uncompressResult != Z_OK) {
                             logerr(frmt("uncompress failed: {}", uncompressResult));
                         }
-                        fd.pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData };
+                        fd.pixelDatas[frag0.layerIndex] = { {frag0.x, frag0.y}, {w,h}, pixelData, frag0.opacity };
                         tracked_free(compressedData);
                     }
                     break;
@@ -317,7 +318,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                         for (auto& [id, ld] : layerData) {
                             Layer* l = new Layer(header.width, header.height);
                             l->name = ld.name;
-                            l->layerAlpha = ld.rawFrag.opacity;
+                            l->layerAlpha = 255;
                             l->hidden = !(ld.rawFrag.flags & 1);
                             layerMap[id] = l;
                             layers.push_back(l);
@@ -341,6 +342,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                                 }
                             }
                             layerMap[id]->blit(subLayer, rawPx.position);
+                            layerMap[id]->layerAlpha = (u8)((layerData[id].rawFrag.opacity / 255.0f) * rawPx.celOpacity);
                             delete subLayer;
                         }
                         Frame* f = new Frame();
