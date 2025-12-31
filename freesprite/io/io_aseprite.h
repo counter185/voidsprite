@@ -91,7 +91,7 @@ struct ASELayer {
     int id;
 };
 
-std::vector<int> ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<Layer*> target, int* nextLayerID);
+void ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<Layer*> target, int* nextLayerID, std::vector<std::vector<int>>& output);
 void ASEWriteCellChunk(Layer* l, FILE* f, int layerID, u32* bytesWritten);
 
 inline void writeASEString(std::string a, FILE* f) {

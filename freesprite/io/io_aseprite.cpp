@@ -6,19 +6,45 @@
 #include "../FileIO.h"
 
 
-std::vector<int> ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<Layer*> target, int* nextLayerID) {
+void ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<Layer*> target, int* nextLayerID, std::vector<std::vector<int>>& output) {
     //return: vector of layer ids for each target
 
     std::vector<int> ret = {};
     std::vector<ASELayer> curCopy = current;
+    bool canInsertAtFront = true;
+
     while (!target.empty()) {
         if (!curCopy.empty()) {
             if (target[0]->name == curCopy[0].name 
                 && target[0]->hidden == curCopy[0].hidden) {
+                //insert existing layer
+                canInsertAtFront = false;
                 ret.push_back(curCopy[0].id);
                 target.erase(target.begin());
+                curCopy.erase(curCopy.begin());
             }
-            curCopy.erase(curCopy.begin());
+            else if (canInsertAtFront) {
+                //insert at front
+                (*nextLayerID)++;
+                for (auto& o : output) {
+                    for (int& id : o) {
+                        id++;
+                    }
+                }
+                for (auto& o : current) {
+                    o.id++;
+                }
+                for (auto& o : curCopy) {
+                    o.id++;
+                }
+
+                ret.insert(ret.begin(), 0);
+                current.insert(current.begin(), { target[0]->name, target[0]->hidden, 0 });
+                target.erase(target.begin());
+            }
+            else {
+                curCopy.erase(curCopy.begin());
+            }
         }
         else {
             current.push_back({ target[0]->name, target[0]->hidden, (*nextLayerID)++ });
@@ -26,7 +52,7 @@ std::vector<int> ASELayerEvalOrder(std::vector<ASELayer>& current, std::vector<L
             target.erase(target.begin());
         }
     }
-    return ret;
+    output.push_back(ret);
 }
 
 void ASEWriteCellChunk(Layer* l, FILE* f, int layerID, u32* bytesWritten)
@@ -385,7 +411,7 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         std::vector<ASELayer> aseLayers;
         int nextLayerID = 0;
         for (Frame* f : editor->frames) {
-            frameLayerIndices.push_back(ASELayerEvalOrder(aseLayers, f->layers, &nextLayerID));
+            ASELayerEvalOrder(aseLayers, f->layers, &nextLayerID, frameLayerIndices);
         }
 
 
