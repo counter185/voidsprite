@@ -711,7 +711,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             if (isPalettized) {
                 std::string paletteString = extData["palette.colors"];
                 auto colors = splitString(paletteString, ';');
-                for (int i = 1; i < colors.size(); i++) {
+                for (int i = 1; i < colors.size() - 1; i++) {
                     palette.push_back(std::stoul(colors[i], NULL, 16));
                 }
             }
@@ -801,6 +801,10 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             : Layer::tryAllocLayer(dimensions.x, dimensions.y);
                         if (newLayer != NULL) {
                             newLayer->name = layerName;
+
+                            if (isPalettized) {
+                                ((LayerPalettized*)newLayer)->palette = palette;
+                            }
 
                             char colorKeySet;
                             fread(&colorKeySet, 1, 1, infile);

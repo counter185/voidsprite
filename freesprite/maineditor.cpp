@@ -2314,6 +2314,9 @@ void MainEditor::newFrame()
     Layer* nlayer = isPalettized ? LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y)
                                  : Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nlayer != NULL) {
+        if (isPalettized) {
+            ((LayerPalettized*)nlayer)->palette = (((MainEditorPalettized*)this)->palette);
+        }
         Frame* nFrame = new Frame();
         nFrame->layers.push_back(nlayer);
         frames.insert(frames.begin() + activeFrame + 1, nFrame);

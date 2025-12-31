@@ -70,13 +70,16 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layerss
 
 MainEditorPalettized::MainEditorPalettized(std::vector<Frame*> framess)
 {
+    isPalettized = true;
     for (auto*& f : frames) {
         delete f;
     }
     frames = framess;
     //todo: check if these are all indexed layers
 
-    palette = ((LayerPalettized*)frames.front()->layers.front())->palette;
+    Layer* firstLayer = frames.front()->layers.front();
+    canvas.dimensions = { firstLayer->w, firstLayer->h };
+    palette = ((LayerPalettized*)firstLayer)->palette;
 
     setUpWidgets();
     recenterCanvas();
@@ -884,11 +887,17 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 
 MainEditor* MainEditorPalettized::toRGBSession()
 {
-    std::vector<Layer*> rgbLayers;
-    for (Layer*& ll : getLayerStack()) {
-        rgbLayers.push_back(((LayerPalettized*)ll)->toRGB());
+    std::vector<Frame*> rgbFrames;
+    for (Frame* ff : frames) {
+        Frame* f = new Frame();
+        rgbFrames.push_back(f);
+        *f = *ff;
+        f->layers.clear();
+        for (Layer*& ll : ff->layers) {
+            f->layers.push_back(((LayerPalettized*)ll)->toRGB());
+        }
     }
-    MainEditor* newEditor = new MainEditor(rgbLayers);
+    MainEditor* newEditor = new MainEditor(rgbFrames);
     newEditor->tileDimensions = tileDimensions;
     return newEditor;
 }
