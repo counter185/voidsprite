@@ -360,7 +360,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_E,
             {
                 "Edit",
-                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N},
+                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
                     {SDL_SCANCODE_Z, { "Undo",
                             [this]() {
@@ -435,6 +435,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_N, { "Integer scale canvas",
                             [this]() {
                                 g_addPopup(new PopupIntegerScale(this, "Integer scale canvas", "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.canvscale"),
+                            [this]() {
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.canvscale"), "New size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },

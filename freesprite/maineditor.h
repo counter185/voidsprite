@@ -405,6 +405,7 @@ public:
     void setMSPerFrame(int ms);
 
     std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
+    std::vector<Layer*> getAllLayers();
     Layer* layerAt(int index);
     virtual Layer* newLayer();
     virtual void deleteLayer(int index);

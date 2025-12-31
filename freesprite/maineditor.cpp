@@ -2898,7 +2898,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     }
 
     UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, size, tileDimensions, tileDimensions);
-    auto& layers = getLayerStack();
+    std::vector<Layer*> layers = getAllLayers();
 
     //todo: detect if copyscaled or malloc fails
     int nElements = layers.size();
@@ -2917,6 +2917,15 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     addToUndoStack(undoData);
 }
 
+std::vector<Layer*> MainEditor::getAllLayers()
+{
+    std::vector<Layer*> ret = {};
+    for (auto& f : frames) {
+        ret = joinVectors({ ret, f->layers });
+    }
+    return ret;
+}
+
 void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
     if (byTile) {
@@ -2931,7 +2940,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
             return;
         }
     }
-    auto& layers = getLayerStack();
+    std::vector<Layer*> layers = getAllLayers();
 
     std::map<Layer*, LayerScaleData> createdVariants;
 
@@ -2974,7 +2983,8 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 
 void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 {
-    auto& layers = getLayerStack();
+    std::vector<Layer*> layers = getAllLayers();
+
     XY newSize = { size.x * tileDimensions.x, size.y * tileDimensions.y };
     UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, tileDimensions);
 
@@ -3004,7 +3014,9 @@ void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
         (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
     };
     if (!xyEqual(oldTileCount, newTileCount)) {
-        for (Layer* l : getLayerStack()) {
+        std::vector<Layer*> targetLayers = getAllLayers();
+
+        for (Layer* l : targetLayers) {
             SDL_Rect sourceRect = { 0,0, tileDimensions.x, tileDimensions.y };
             Layer* temp = l->isPalettized ? LayerPalettized::tryAllocLayer(l->w, l->h)
                           : Layer::tryAllocLayer(l->w, l->h);
@@ -3045,7 +3057,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions not divisible."));
         return;
     }
-    auto& layers = getLayerStack();
+    std::vector<Layer*> layers = getAllLayers();
 
     XY newSize = downscale ? XY{ canvas.dimensions.x / scale.x, canvas.dimensions.y / scale.y }
                            : XY{ canvas.dimensions.x * scale.x, canvas.dimensions.y * scale.y };
