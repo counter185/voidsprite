@@ -32,13 +32,13 @@ public:
     void trySaveImage() override;
     bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter) override;
     void trySaveAsImage() override;
-    Layer* flattenImage() override;
+    Layer* flattenFrame(Frame* f) override;
     Layer* newLayer() override;
     Layer* mergeLayers(Layer* bottom, Layer* top) override;
     void exportTilesIndividually() override;
 
-    int32_t* makeFlatIndicesTable();
-    Layer* flattenImageAndConvertToRGB();
+    int32_t* makeFlatIndicesTable(Frame* f);
+    Layer* flattenImageAndConvertToRGB(Frame* f);
     Layer* flattenImageWithoutConvertingToRGB();
 
     void tryExportRGB();

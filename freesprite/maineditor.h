@@ -429,7 +429,8 @@ public:
     void layer_clearSelectedArea();
     void layer_selectCurrentAlpha();
     void layer_fillActiveColor();
-    virtual Layer* flattenImage();
+    Layer* flattenImage();
+    virtual Layer* flattenFrame(Frame* target);
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void flipAllLayersOnX();
     void flipAllLayersOnY();

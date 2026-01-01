@@ -118,7 +118,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                 delete rgbConvEditor;
             }
             else {
-                Layer* l = flattenImageAndConvertToRGB();
+                Layer* l = flattenImageAndConvertToRGB(getCurrentFrame());
                 result = exporter->exportData(name, l);
                 delete l;
             }
@@ -753,9 +753,9 @@ void MainEditorPalettized::trySaveAsImage()
     trySaveAsPalettizedImage();
 }
 
-Layer* MainEditorPalettized::flattenImage()
+Layer* MainEditorPalettized::flattenFrame(Frame* f)
 {
-    return flattenImageAndConvertToRGB();
+    return flattenImageAndConvertToRGB(f);
 }
 
 Layer* MainEditorPalettized::newLayer()
@@ -813,11 +813,11 @@ void MainEditorPalettized::exportTilesIndividually()
     }
 }
 
-int32_t* MainEditorPalettized::makeFlatIndicesTable()
+int32_t* MainEditorPalettized::makeFlatIndicesTable(Frame* f)
 {
     int32_t* indices = (int32_t*)tracked_malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
     memset(indices, 0, canvas.dimensions.x * canvas.dimensions.y * 4);
-    for (Layer*& l : getLayerStack()) {
+    for (Layer*& l : f->layers) {
         if (!l->hidden) {
             for (int y = 0; y < canvas.dimensions.y; y++) {
                 for (int x = 0; x < canvas.dimensions.x; x++) {
@@ -832,9 +832,9 @@ int32_t* MainEditorPalettized::makeFlatIndicesTable()
     return indices;
 }
 
-Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
+Layer* MainEditorPalettized::flattenImageAndConvertToRGB(Frame* f)
 {
-    int32_t* indices = makeFlatIndicesTable();
+    int32_t* indices = makeFlatIndicesTable(f);
 
     Layer* flatAndRGBConvertedLayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     uint32_t* intpxdata = flatAndRGBConvertedLayer->pixels32();
@@ -849,7 +849,7 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
 
 Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
 {
-    int32_t* indices = makeFlatIndicesTable();
+    int32_t* indices = makeFlatIndicesTable(getCurrentFrame());
     LayerPalettized* flatLayer = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
     memcpy(flatLayer->pixels32(), indices, canvas.dimensions.x * canvas.dimensions.y * 4);
     flatLayer->palette = palette;

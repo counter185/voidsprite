@@ -54,6 +54,7 @@
 #include "PopupChooseAction.h"
 
 #include "discord_rpc.h"
+#include "io/io_avi.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -962,6 +963,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    /*{SDL_SCANCODE_COMMA, {"debug save avi",
+                            [this]() {
+                                writeAVI(convertStringOnWin32("out.avi"), this);
+                            }
+                        }
+                    },*/
 #if VSP_NETWORKING
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
                             [this]() {
@@ -2817,11 +2824,16 @@ void MainEditor::layer_setAllAlpha255()
 
 Layer* MainEditor::flattenImage()
 {
+    return flattenFrame(getCurrentFrame());
+}
+
+Layer* MainEditor::flattenFrame(Frame* target)
+{
     Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (ret != NULL) {
         int x = 0;
         uint32_t* retppx = ret->pixels32();
-        for (Layer*& l : getLayerStack()) {
+        for (Layer*& l : target->layers) {
             if (l->hidden) {
                 continue;
             }

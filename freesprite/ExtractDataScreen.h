@@ -2,7 +2,7 @@
 #include "BaseScreen.h"
 #include "Canvas.h"
 #include "Layer.h"
-#include "DraggablePanel.h"
+#include "PanelUserInteractable.h"
 
 #define pushPixelFunction std::function<void(u32)>
 
@@ -13,7 +13,9 @@ inline std::unordered_map<std::string, std::function<void(FILE*, pushPixelFuncti
     {"RGB24",	[](FILE* f, pushPixelFunction ppx) { u8 c[3]; fread(c, 1, 3, f);    ppx(PackRGBAtoARGB(c[0], c[1], c[2], 0xff)); }},
     {"BGR24",	[](FILE* f, pushPixelFunction ppx) { u8 c[3]; fread(c, 1, 3, f);    ppx(PackRGBAtoARGB(c[2], c[1], c[0], 0xff)); }},
     {"RGBA32",	[](FILE* f, pushPixelFunction ppx) { u8 c[4]; fread(c, 1, 4, f);    ppx(PackRGBAtoARGB(c[0], c[1], c[2], c[3])); }},
+    {"RGBX32",	[](FILE* f, pushPixelFunction ppx) { u8 c[4]; fread(c, 1, 4, f);    ppx(PackRGBAtoARGB(c[0], c[1], c[2], 0xff)); }},
     {"ARGB32",	[](FILE* f, pushPixelFunction ppx) { u8 c[4]; fread(c, 1, 4, f);    ppx(PackRGBAtoARGB(c[1], c[2], c[3], c[0])); }},
+    {"XRGB32",	[](FILE* f, pushPixelFunction ppx) { u8 c[4]; fread(c, 1, 4, f);    ppx(PackRGBAtoARGB(c[1], c[2], c[3], 0xff)); }},
     {"ABGR32",	[](FILE* f, pushPixelFunction ppx) { u8 c[4]; fread(c, 1, 4, f);    ppx(PackRGBAtoARGB(c[3], c[2], c[1], c[0])); }},
     {"RGB565",	[](FILE* f, pushPixelFunction ppx) { u16 c; fread(&c, 2, 1, f);     ppx(RGB565toARGB8888(c)); }},
 };
@@ -23,7 +25,7 @@ enum PixelOrder : int {
     PO_YthenX = 1,
 };
 
-class ExtractDataParametersPanel : public DraggablePanel {
+class ExtractDataParametersPanel : public PanelUserInteractable {
 private:
     ExtractDataScreen* caller;
 public:
@@ -36,7 +38,6 @@ public:
 
     ExtractDataParametersPanel(ExtractDataScreen* parent);
 
-    void render(XY at) override;
 };
 
 class ExtractDataScreen : public BaseScreen
