@@ -105,3 +105,15 @@ void logprintf(char* format, ...)
         va_end(args);
     }
 }
+
+void loghexdump(void* data, int bytesInLine, int lines)
+{
+    u8* d = (u8*)data;
+    for (int i = 0; i < lines; i++) {
+        std::string line = "";
+        for (int j = 0; j < bytesInLine; j++) {
+            line += frmt("{:02X} ", d[i * bytesInLine + j]);
+        }
+        logprintf("%s\n", line.c_str());
+    }
+}

@@ -294,6 +294,7 @@
     <ClCompile Include="io\io_aseprite.cpp" />
     <ClCompile Include="io\io_avi.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />
+    <ClCompile Include="io\io_flipnote.cpp" />
     <ClCompile Include="io\io_gim.cpp" />
     <ClCompile Include="io\io_iw.cpp" />
     <ClCompile Include="io\io_jxl.cpp" />
@@ -552,6 +553,7 @@
     <ClInclude Include="io\io_avi.h" />
     <ClInclude Include="io\io_base.h" />
     <ClInclude Include="io\io_dibv5.h" />
+    <ClInclude Include="io\io_flipnote.h" />
     <ClInclude Include="io\io_gim.h" />
     <ClInclude Include="io\io_iw.h" />
     <ClInclude Include="io\io_jxl.h" />

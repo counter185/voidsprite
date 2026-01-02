@@ -696,6 +696,9 @@
     <ClCompile Include="io\io_avi.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_flipnote.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1386,6 +1389,9 @@
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="io\io_avi.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_flipnote.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>

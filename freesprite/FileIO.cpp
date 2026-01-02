@@ -3351,6 +3351,8 @@ void g_setupIO() {
         magicVerify(4, "\xE0\xA5")));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(4, "\xE0\xA5")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Flipnote Studio animation", ".ppm", &readFlipnotePPM, NULL, FORMAT_PALETTIZED,
+        magicVerify(0, "PARA")));
 #if VSP_USE_LIBLCF
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 #endif
