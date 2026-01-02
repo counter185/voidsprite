@@ -2379,7 +2379,7 @@ void MainEditor::switchFrame(int index)
     }
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
     //loginfo(frmt("switching to frame {}", index));
-    selLayer = getCurrentFrame()->activeLayer;
+    selLayer = ixmin(getCurrentFrame()->layers.size()-1, getCurrentFrame()->activeLayer);
     layerPicker->updateLayers();
     framePicker->createFrameButtons();
 }
