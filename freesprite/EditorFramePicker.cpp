@@ -43,11 +43,12 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         parent->duplicateFrame(parent->activeFrame);
     };
 
-    UIButton* playpauseBtn = new UIButton("P", "Play/pause");
+    playpauseBtn = new UIButton("P", "Play/pause");
     playpauseBtn->wxWidth = 30;
     playpauseBtn->wxHeight = 30;
     playpauseBtn->onClickCallback = [this](UIButton* btn) {
         parent->toggleFrameAnimation();
+        createFrameButtons();
     };
 
     UIButton* mvLeft = new UIButton("<", "Move frame left");
@@ -100,6 +101,8 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
 
 void EditorFramePicker::createFrameButtons()
 {
+    playpauseBtn->fill = parent->frameAnimationPlaying ? fillPlayButtonPlaying : fillPlayButtonPaused;
+
     std::lock_guard<std::recursive_mutex> lock(parent->framesMutex);
     frameButtonStack->subWidgets.freeAllDrawables();
     int buttonW = g_fnt->StatStringDimensions("000").x + 5;

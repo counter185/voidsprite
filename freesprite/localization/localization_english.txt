@@ -132,6 +132,11 @@
     {"vsp.keybinds.maineditor.renamelayervariant", "Rename layer variant"},
     {"vsp.keybinds.maineditor.prevlayervariant", "Previous layer variant"},
     {"vsp.keybinds.maineditor.nextlayervariant", "Next layer variant"},
+    {"vsp.keybinds.maineditor.newframe", "New frame"},
+    {"vsp.keybinds.maineditor.removeframe", "Delete current frame"},
+    {"vsp.keybinds.maineditor.prevframe", "Previous frame"},
+    {"vsp.keybinds.maineditor.nextframe", "Next frame"},
+    {"vsp.keybinds.maineditor.animplaypause", "Play/pause animation"},
 
     {"vsp.keybinds.region.splitsessioneditor", "Split session editor"},
     {"vsp.keybinds.splitsessioneditor.importimage", "Add image to split session"},

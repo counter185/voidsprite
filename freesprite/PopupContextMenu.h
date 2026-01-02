@@ -27,7 +27,7 @@ public:
         renderDrawables();
     }
     void tick() override;
-	void takeInput(SDL_Event evt) override;
+    void takeInput(SDL_Event evt) override;
     void defaultInputAction(SDL_Event evt) override;
     void playPopupCloseVFX() override;
 
@@ -38,7 +38,7 @@ public:
     void finish() {
         if (onExitCallback != NULL) {
             onExitCallback(this);
-		}
+        }
         closePopup();
     }
 };
