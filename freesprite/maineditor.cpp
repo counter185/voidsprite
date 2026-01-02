@@ -2332,6 +2332,7 @@ void MainEditor::newFrame()
         framePicker->createFrameButtons();
         addToUndoStack(new UndoFrameCreated(nFrame, activeFrame + 1));
         switchFrame(activeFrame + 1);
+        framePicker->flashFrame(activeFrame);
     }
     else {
         g_addNotification(NOTIF_MALLOC_FAIL);
@@ -2347,10 +2348,11 @@ void MainEditor::duplicateFrame(int index)
     }
     Frame* nFrame = getCurrentFrame()->copy();
     frames.insert(frames.begin() + index + 1, nFrame);
-    //loginfo("new frame added");
     framePicker->createFrameButtons();
     framePicker->enabled = true;
     addToUndoStack(new UndoFrameCreated(nFrame, index + 1));
+    switchFrame(index + 1);
+    framePicker->flashFrame(activeFrame);
 }
 
 void MainEditor::deleteFrame(int index)

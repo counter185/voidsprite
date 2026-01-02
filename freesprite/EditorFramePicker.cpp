@@ -104,6 +104,7 @@ void EditorFramePicker::createFrameButtons()
     playpauseBtn->fill = parent->frameAnimationPlaying ? fillPlayButtonPlaying : fillPlayButtonPaused;
 
     std::lock_guard<std::recursive_mutex> lock(parent->framesMutex);
+    frameButtons.clear();
     frameButtonStack->subWidgets.freeAllDrawables();
     int buttonW = g_fnt->StatStringDimensions("000").x + 5;
     for (int i = 0; i < parent->frames.size(); i++) {
@@ -129,5 +130,13 @@ void EditorFramePicker::createFrameButtons()
             frameBtn->fill = Fill::Gradient(0x80FFFFFF, 0x80FFFFFF, 0x20FFFFFF, 0x20FFFFFF);
         }
         frameButtonStack->addWidget(frameBtn);
+        frameButtons.push_back(frameBtn);
+    }
+}
+
+void EditorFramePicker::flashFrame(int index)
+{
+    if (index >= 0 && index < frameButtons.size()) {
+        frameButtons[index]->playClickVFXNextFrame();
     }
 }

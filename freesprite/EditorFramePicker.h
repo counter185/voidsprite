@@ -7,6 +7,7 @@ protected:
     MainEditor* parent = NULL;
     ScrollingPanel* frameButtonPanel = NULL;
     UIStackPanel* frameButtonStack = NULL;
+    std::vector<UIButton*> frameButtons;
 
     Fill fillPlayButtonPaused = visualConfigFill("maineditor/framepicker/playpause_button/paused");
     Fill fillPlayButtonPlaying = visualConfigFill("maineditor/framepicker/playpause_button/playing");
@@ -18,5 +19,7 @@ public:
     EditorFramePicker(MainEditor* caller);
 
     void createFrameButtons();
+
+    void flashFrame(int index);
 };
 
