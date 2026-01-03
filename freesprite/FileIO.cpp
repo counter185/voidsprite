@@ -3390,7 +3390,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
     g_fileImporters.push_back(FileImporter::flatImporter("DDS", ".dds", &readDDS, NULL, FORMAT_RGB, magicVerify(0, "DDS")));
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF, exVTF));
-    g_fileImporters.push_back(FileImporter::flatImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED,
+    g_fileImporters.push_back(FileImporter::sessionImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED,
         magicVerify(0, "IDSP")));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));

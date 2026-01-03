@@ -109,7 +109,7 @@ enum VTFFORMAT
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 
-Layer* readValveSPR(PlatformNativePathString path, uint64_t seek = 0);
+MainEditor* readValveSPR(PlatformNativePathString path);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 
 bool writeVTF(PlatformNativePathString path, Layer* data);

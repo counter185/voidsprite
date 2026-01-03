@@ -120,9 +120,15 @@ public:
         }
     }
 
+    void render(XY at) override {
+        if (!focused) {
+            text = std::to_string(*target);
+        }
+        UITextField::render(at);
+    }
+
     void focusOut() override {
         UITextField::focusOut();
-        text = std::to_string(*target);
         bgFill = defaultInputFill;
     }
 };
