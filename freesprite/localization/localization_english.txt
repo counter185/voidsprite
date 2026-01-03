@@ -402,7 +402,7 @@
     {"vsp.config.opt.powersaver.mid", "Medium"},
     {"vsp.config.opt.powersaver.max", "Maximum"},
     {"vsp.config.opt.powersaver.auto", "Automatic"},
-    {"vsp.config.opt.renderer", "Renderer"},
+    {"vsp.config.opt.renderer:v2", "Renderer (restart required)"},
     {"vsp.config.opt.vfx", "Enable visual effects"},
     {"vsp.config.opt.vfx.desc", "When disabled, some visual effect animations will not play."},
     {"vsp.config.opt.showfps", "Show FPS"},

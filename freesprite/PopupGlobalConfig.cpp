@@ -15,6 +15,7 @@
 #include "UISlider.h"
 #include "sdk_pluginloader.h"
 #include "UIStackPanel.h"
+#include "PopupYesNo.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -27,7 +28,6 @@ enum ConfigOptions : int {
     CHECKBOX_VSYNC,
     CHECKBOX_SAVE_LOAD_FLAT_IMAGE_EXT_DATA,
     CHECKBOX_DISCORD_RPC,
-    CHECKBOX_RENDERER,
     TEXTFIELD_AUTOSAVE_INTERVAL,
     CHECKBOX_ROWCOLS_START_AT_1,
     DROPDOWN_LANGUAGE,
@@ -158,13 +158,29 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->subWidgets.addDrawable(dd3);
     posInTab.y += 35;
 
-    lbl4 = new UILabel(TL("vsp.config.opt.renderer"));
+    lbl4 = new UILabel(TL("vsp.config.opt.renderer:v2"));
     lbl4->position = posInTab;
     visualSettingsPanel->subWidgets.addDrawable(lbl4);
-    dd2 = new UIDropdown(g_availableRenderersNow);
+    dd2 = new UIDropdown(joinVectors({ {"<auto>"}, g_availableRenderersNow }));
     dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 180;
-    dd2->setCallbackListener(CHECKBOX_RENDERER, this);
+    dd2->onDropdownItemSelectedCallback = [this](UIDropdown* dd, int index, std::string name) {
+        if (name == "vulkan") {
+            PopupYesNo* popup = new PopupYesNo("Warning",
+                "The Vulkan renderer in SDL is currently broken and has heavy visual issues.\n"
+                "Expect to see a lot of flashing visuals and broken graphics.\n"
+                "\n\nEnable Vulkan anyway?");
+
+            popup->onFinishCallback = [name, this, dd](PopupYesNo* p, bool result) {
+                g_config.preferredRenderer = result ? name : "";
+                dd->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
+            };
+            g_addPopup(popup);
+        }
+        else {
+            g_config.preferredRenderer = name == "<auto>" ? "" : name;
+        }
+    };
     dd2->setTextToSelectedItem = true;
     dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
     visualSettingsPanel->subWidgets.addDrawable(dd2);
@@ -649,9 +665,6 @@ void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::st
 {
     if (evt_id == CHECKBOX_ANIMATED_BACKGROUND) {
         g_config.animatedBackground = index;
-    }
-    else if (evt_id == CHECKBOX_RENDERER) {
-        g_config.preferredRenderer = name;
     }
     else if (evt_id == DROPDOWN_LANGUAGE) {
         g_config.language = langLocNames[index];
