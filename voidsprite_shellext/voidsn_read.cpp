@@ -65,8 +65,8 @@ Layer* mergeLayerStack(std::vector<Layer*> layers) {
     else if (layers.size() == 1) {
         return layers.front();
     }
-	int w = layers.front()->w;
-	int h = layers.front()->h;
+    int w = layers.front()->w;
+    int h = layers.front()->h;
     Layer* ret = new Layer(w, h);
     ret->isPalettized = layers.front()->isPalettized;
     memset(ret->pixels32(), ret->isPalettized ? -1 : 0, w * h * 4);
@@ -152,6 +152,7 @@ Layer* readVOIDSN(IStream* infile)
             case 4:
             case 5:
             case 6:
+            case 7:
             {
                 if (voidsnversion >= 6) {
                     char voidspriteHeader[11];
@@ -196,6 +197,20 @@ Layer* readVOIDSN(IStream* infile)
                         nextSC = paletteString.find_first_of(';');
                         palette.push_back(std::stoul(paletteString.substr(0, nextSC), NULL, 16));
                         paletteString = paletteString.substr(nextSC + 1);
+                    }
+                }
+
+                if (voidsnversion >= 7) {
+
+                    int nframes = voidsnReadU32(infile);
+                    //we only care about the first frame
+
+                    int nFrameExtData = voidsnReadU32(infile);
+                    std::map<std::string, std::string> frameExtData;
+                    for (int x = 0; x < nFrameExtData; x++) {
+                        std::string key = voidsnReadString(infile);
+                        std::string val = voidsnReadString(infile);
+                        frameExtData[key] = val;
                     }
                 }
 

@@ -169,6 +169,7 @@ static std::vector<std::wstring> voidsnExtensions = {
     L".voidsnv4",
     L".voidsnv5",
     L".voidsnv6",
+    L".voidsnv7",
 };
 
 STDAPI_EXPORT DllRegisterServer(void)
