@@ -103,7 +103,7 @@ void UIHueWheel::handleInput(SDL_Event evt, XY gPosOffset)
         case SDL_EVENT_MOUSE_MOTION:
             {
                 XY mousePos = { (int)evt.motion.x, (int)evt.motion.y };
-                if (mouseDrag && onScreenPosInWheelSlider(gPosOffset, mousePos)) {
+                if (mouseDrag) {
                     valueChanged(angleFromOriginAt(gPosOffset, mousePos));
                 }
             }
