@@ -161,6 +161,7 @@ MainEditor::~MainEditor() {
     discardUndoStack();
     discardRedoStack();
     endNetworkSession();
+    tracked_destroyTexture(frameFB.second);
     for (Frame*& frame : frames) {
         delete frame;
     }
@@ -184,9 +185,17 @@ void MainEditor::render() {
             p->render(fit, (u8)(refPanel->opacity * 255));
         }
     }
+    
+    //prepare frame framebuffer
+    if (frameFB.first != g_rd || !xyEqual(frameFBSize, canvas.dimensions)) {
+        SDL_DestroyTexture(frameFB.second);
+        frameFB.second = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, canvas.dimensions.x, canvas.dimensions.y);
+        frameFBSize = canvas.dimensions;
+        frameFB.first = g_rd;
+    }
     //render all layers
     framesMutex.lock();
-    for (Layer* imgLayer : getLayerStack()) {
+    for (Layer* imgLayer : getCurrentFrame()->layers) {
         bool isCurrentActiveLayer = imgLayer == getCurrentLayer();
         if (!imgLayer->hidden) {
             uint8_t alpha = imgLayer->layerAlpha;
@@ -201,6 +210,34 @@ void MainEditor::render() {
                 layerFadeIn = 1.0;
             }
             imgLayer->render(renderRect, (uint8_t)(alpha * layerFadeIn));
+        }
+    }
+    //render backtrace frames
+    for (int backFrame = 0; backFrame < backtraceFrames; backFrame++) {
+        int targetIndex = activeFrame - (backFrame + 1);
+        if (targetIndex >= 0) {
+            Frame* f = frames[targetIndex];
+            renderFrameTo(f, frameFB.second);
+            double alpha = traceOpacity * (1.0 - (double)backFrame / backtraceFrames);
+            SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
+            SDL_RenderCopy(g_rd, frameFB.second, NULL, &canvasRenderRect);
+        }
+        else {
+            break;
+        }
+    }
+    //render fwdtrace frames
+    for (int fwdFrame = 0; fwdFrame < fwdtraceFrames; fwdFrame++) {
+        int targetIndex = activeFrame + (fwdFrame + 1);
+        if (targetIndex < (int)frames.size()) {
+            Frame* f = frames[targetIndex];
+            renderFrameTo(f, frameFB.second);
+            double alpha = traceOpacity * (1.0 - (double)fwdFrame / fwdtraceFrames);
+            SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
+            SDL_RenderCopy(g_rd, frameFB.second, NULL, &canvasRenderRect);
+        }
+        else {
+            break;
         }
     }
     framesMutex.unlock();
@@ -2425,6 +2462,24 @@ void MainEditor::toggleFrameAnimation()
 void MainEditor::setMSPerFrame(int ms)
 {
     framePicker->msPerFrameInput->setText(std::to_string(ms));
+}
+
+void MainEditor::renderFrameTo(Frame* f, SDL_Texture* target, bool clear)
+{
+    g_pushRenderTarget(target);
+
+    if (clear) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+        SDL_RenderClear(g_rd);
+    }
+
+    for (auto& l : f->layers) {
+        if (!l->hidden) {
+            l->render({ 0,0,l->w,l->h }, l->layerAlpha);
+        }
+    }
+
+    g_popRenderTarget();
 }
 
 Layer* MainEditor::layerAt(int index)

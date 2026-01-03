@@ -7,11 +7,12 @@
 #include "PopupContextMenu.h"
 #include "UILabel.h"
 #include "UITextField.h"
+#include "UISlider.h"
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
-    wxWidth = 400;
-    wxHeight = 120;
+    wxWidth = 500;
+    wxHeight = 154;
     parent = caller;
 
     setupDraggable();
@@ -82,13 +83,45 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         msPerFrameInput
     });
 
+    UINumberInputField* backtraceInput = new UINumberInputField(&parent->backtraceFrames);
+    backtraceInput->wxWidth = 30;
+
+    UINumberInputField* fwdtraceInput = new UINumberInputField(&parent->fwdtraceFrames);
+    fwdtraceInput->wxWidth = 30;
+
+    fwdtraceInput->valueUpdatedCallback = backtraceInput->valueUpdatedCallback = [this](int) {
+        createFrameButtons();
+    };
+
+    UISlider* opacitySlider = new UISlider();
+    opacitySlider->wxHeight = 25;
+    opacitySlider->wxWidth = 130;
+    opacitySlider->setValue(0, 1, parent->traceOpacity);
+    opacitySlider->onChangeValueCallback = [this](UISlider* sld, float val) {
+        parent->traceOpacity = val;
+    };
+
+    UIStackPanel* traceRow = UIStackPanel::Horizontal(4, {
+        new UILabel("Trace"),
+        Panel::Space(6,2),
+        new UILabel("Back"),
+        backtraceInput,
+        Panel::Space(4,2),
+        new UILabel("Next"),
+        fwdtraceInput,
+        Panel::Space(6,2),
+        new UILabel("Opacity"),
+        opacitySlider
+    });
+
+
     frameButtonPanel = new ScrollingPanel();
     frameButtonPanel->wxWidth = wxWidth - 10;
     frameButtonPanel->wxHeight = 50;
     frameButtonPanel->scrollHorizontally = true;
     frameButtonPanel->scrollVertically = false;
 
-    UIStackPanel* content = UIStackPanel::Vertical(4, { topRow, frameButtonPanel });
+    UIStackPanel* content = UIStackPanel::Vertical(4, { topRow, traceRow, frameButtonPanel });
     content->position = { 5, 30 };
     wxsTarget().addDrawable(content);
 
@@ -127,7 +160,11 @@ void EditorFramePicker::createFrameButtons()
             g_addPopup(ctx);
         };
         if (i == parent->activeFrame) {
-            frameBtn->fill = Fill::Gradient(0x80FFFFFF, 0x80FFFFFF, 0x20FFFFFF, 0x20FFFFFF);
+            frameBtn->fill = fillActiveFrame;
+        }
+        else if (i >= parent->activeFrame - parent->backtraceFrames 
+                 && i <= parent->activeFrame + parent->fwdtraceFrames) {
+            frameBtn->fill = fillTracedFrame;
         }
         frameButtonStack->addWidget(frameBtn);
         frameButtons.push_back(frameBtn);

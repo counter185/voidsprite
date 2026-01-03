@@ -12,6 +12,9 @@ protected:
     Fill fillPlayButtonPaused = visualConfigFill("maineditor/framepicker/playpause_button/paused");
     Fill fillPlayButtonPlaying = visualConfigFill("maineditor/framepicker/playpause_button/playing");
 
+    Fill fillActiveFrame = visualConfigFill("maineditor/framepicker/active_frame_fill");
+    Fill fillTracedFrame = visualConfigFill("maineditor/framepicker/traced_frame_fill");
+
 public:
     UINumberInputField* msPerFrameInput = NULL;
     UIButton* playpauseBtn = NULL;

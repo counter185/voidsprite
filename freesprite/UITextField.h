@@ -85,6 +85,8 @@ protected:
 public:
     std::function<bool(int)> validateFunction = NULL;
 
+    std::function<void(int)> valueUpdatedCallback = NULL;
+
     UINumberInputField(int* target)
         : target(target)
     {
@@ -103,6 +105,9 @@ public:
                 if (validateFunction == NULL || validateFunction(val)) {
                     *target = val;
                     bgFill = defaultInputFill;
+                    if (valueUpdatedCallback) {
+                        valueUpdatedCallback(val);
+                    }
                 }
                 else {
                     bgFill = invalidInputFill;

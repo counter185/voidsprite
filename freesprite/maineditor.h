@@ -187,6 +187,11 @@ public:
     Timer64 frameAnimationStartTimer;
     bool frameAnimationPlaying = false;
     int frameAnimMSPerFrame = 200;
+    std::pair<SDL_Renderer*, SDL_Texture*> frameFB = { NULL, NULL };
+    XY frameFBSize = { 0,0 };
+    int backtraceFrames = 1;
+    int fwdtraceFrames = 0;
+    double traceOpacity = 0.4;
 
     int selLayer = 0;
 
@@ -403,6 +408,7 @@ public:
     virtual void moveFrameRight(int index);
     void toggleFrameAnimation();
     void setMSPerFrame(int ms);
+    void renderFrameTo(Frame* f, SDL_Texture* target, bool clear = true);
 
     std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
     std::vector<Layer*> getAllLayers();
