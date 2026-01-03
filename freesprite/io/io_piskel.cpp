@@ -76,7 +76,7 @@ bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
         o["piskel"]["height"] = editor->canvas.dimensions.y;
         o["piskel"]["width"] = editor->canvas.dimensions.x;
         o["piskel"]["layers"] = json::array();
-        for (Layer*& l : editor->layers) {
+        for (Layer*& l : editor->getLayerStack()) {
             std::string nestedLayer = "";
             json layerObj = json::object();
             layerObj["name"] = l->name;

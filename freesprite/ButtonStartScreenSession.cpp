@@ -5,12 +5,15 @@
 #include "TooltipsLayer.h"
 #include "FontRenderer.h"
 #include "multiwindow.h"
+#include "PopupContextMenu.h"
 
 void ButtonStartScreenSession::render(XY pos)
 {
     if (correspondingScreen >= 0 && correspondingScreen < targetWindow->screenStack.size()) {
         tooltip = targetWindow->screenStack[correspondingScreen]->getName();
     }
+
+    lastPositionOnScreen = pos;
 
     bool isLinked = targetWindow->screenStack[correspondingScreen]->isSubscreenOf() != NULL;
     bool isActive = correspondingScreen == targetWindow->currentScreen;
@@ -54,6 +57,27 @@ void ButtonStartScreenSession::click()
         }
     }
     UIButton::click();
+}
+
+void ButtonStartScreenSession::rightClick()
+{
+    if (targetWindow->popupStack.empty()) {
+        std::vector<NamedOperation> actions = {
+            {TL("vsp.cmn.close"), [this]() {
+                targetWindow->screenStack[correspondingScreen]->takeInput(SDL_Event{.type = SDL_EVENT_QUIT});
+            }},
+            {"Assign favourite", [this]() {
+                targetWindow->favScreen = targetWindow->screenStack[correspondingScreen];
+            }},
+            /*{"Detach workspace", [this]() {
+                targetWindow->detachScreen(targetWindow->screenStack[correspondingScreen]);
+            }}*/
+        };
+        PopupContextMenu* pcm = new PopupContextMenu(actions);
+        pcm->setContextMenuOrigin({g_windowW, (int)(g_windowH - (50 + 30*actions.size()))});
+        g_addPopup(pcm);
+        parentManager->forceUnfocus();
+    }
 }
 
 void ButtonStartScreenSession::renderTooltip(XY pos)

@@ -9,7 +9,9 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     wxWidth = 260;
     wxHeight = 240;
 
-    subWidgets.addDrawable(new UILabel(TL("vsp.extractdata.title"), { 2,2 }, 18));
+    setupDraggable();
+    setupCollapsible();
+    addTitleText(TL("vsp.extractdata.title"));
 
     XY layoutPos = { 5, 30 };
 
@@ -25,7 +27,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     formatDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int, std::string selectedItem) {
         caller->setCurrentPixelFormat(selectedItem);
     };
-    subWidgets.addDrawable(formatDropdown);
+    wxsTarget().addDrawable(formatDropdown);
     layoutPos.y += 30;
 
 
@@ -41,7 +43,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     pixelOrderDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int index, std::string sel) {
         caller->setCurrentPixelOrder((PixelOrder)index);
     };
-    subWidgets.addDrawable(pixelOrderDropdown);
+    wxsTarget().addDrawable(pixelOrderDropdown);
     layoutPos.y += 30;
 
 
@@ -58,7 +60,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
         catch (std::exception&) {}
         caller->setCurrentFileOffset(newOffset);
     };
-    subWidgets.addDrawable(offsetField);
+    wxsTarget().addDrawable(offsetField);
 
     offsetPlusButton = new UIButton("+");
     offsetPlusButton->position = { layoutPos.x + 130, layoutPos.y };
@@ -66,7 +68,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     offsetPlusButton->onClickCallback = [this, offsetField](UIButton*) {
         offsetField->setText(std::to_string(caller->getCurrentFileOffset() + 1));
     };
-    subWidgets.addDrawable(offsetPlusButton);
+    wxsTarget().addDrawable(offsetPlusButton);
 
     offsetMinusButton = new UIButton("-");
     offsetMinusButton->position = { layoutPos.x + 165, layoutPos.y };
@@ -76,7 +78,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
             offsetField->setText(std::to_string(caller->getCurrentFileOffset() - 1));
         }
     };
-    subWidgets.addDrawable(offsetMinusButton);
+    wxsTarget().addDrawable(offsetMinusButton);
 
     layoutPos.y += 35;
 
@@ -93,7 +95,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
         catch (std::exception&) {}
         caller->setLayerWidth(newWidth);
     };
-    subWidgets.addDrawable(wField);
+    wxsTarget().addDrawable(wField);
 
     wPlusButton = new UIButton("+");
     wPlusButton->position = { layoutPos.x, layoutPos.y + 30 };
@@ -101,7 +103,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     wPlusButton->onClickCallback = [this, wField](UIButton*) {
         wField->setText(std::to_string(caller->getLayerWidth() + 1));
     };
-    subWidgets.addDrawable(wPlusButton);
+    wxsTarget().addDrawable(wPlusButton);
 
     wMinusButton = new UIButton("-");
     wMinusButton->position = xyAdd(wPlusButton->position, { 55, 0 });
@@ -111,7 +113,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
             wField->setText(std::to_string(caller->getLayerWidth() - 1));
         }
     };
-    subWidgets.addDrawable(wMinusButton);
+    wxsTarget().addDrawable(wMinusButton);
 
     UITextField* hField = new UITextField();
     hField->isNumericField = true;
@@ -126,7 +128,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
         catch (std::exception&) {}
         caller->setLayerHeight(newHeight);
     };
-    subWidgets.addDrawable(hField);
+    wxsTarget().addDrawable(hField);
 
     hPlusButton = new UIButton("+");
     hPlusButton->position = { layoutPos.x + 120, layoutPos.y + 30 };
@@ -134,7 +136,7 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
     hPlusButton->onClickCallback = [this, hField](UIButton*) {
         hField->setText(std::to_string(caller->getLayerHeight() + 1));
     };
-    subWidgets.addDrawable(hPlusButton);
+    wxsTarget().addDrawable(hPlusButton);
 
     hMinusButton = new UIButton("-");
     hMinusButton->position = xyAdd(hPlusButton->position, { 55, 0 });
@@ -144,24 +146,9 @@ ExtractDataParametersPanel::ExtractDataParametersPanel(ExtractDataScreen* parent
             hField->setText(std::to_string(caller->getLayerHeight() - 1));
         }
     };
-    subWidgets.addDrawable(hMinusButton);
+    wxsTarget().addDrawable(hMinusButton);
 
     layoutPos.y += 70;
-}
-
-void ExtractDataParametersPanel::render(XY at)
-{
-    SDL_Rect r = { at.x, at.y, wxWidth, wxHeight };
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
-    renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
-    if (thisOrParentFocused()) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-    }
-
-    DraggablePanel::render(at);
 }
 
 

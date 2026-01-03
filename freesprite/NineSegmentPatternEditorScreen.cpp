@@ -43,7 +43,7 @@ void NineSegmentPatternEditorScreen::render()
     drawBackground();
 
     SDL_Rect canvasRenderRect = { canvasDrawOrigin.x, canvasDrawOrigin.y, caller->canvas.dimensions.x * canvasZoom, caller->canvas.dimensions.y * canvasZoom };
-    for (Layer*& l : caller->layers) {
+    for (Layer*& l : caller->getLayerStack()) {
         l->prerender();
         SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, NULL, &canvasRenderRect);
     }

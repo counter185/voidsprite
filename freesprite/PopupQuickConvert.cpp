@@ -105,13 +105,12 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
             Layer* l = NULL;
 
             if (session->isPalettized) {
+                MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
                 if (!forceConvertRGB && (exporter->formatFlags() & FORMAT_PALETTIZED) != 0) {
-                    MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
                     l = upcastSession->flattenImageWithoutConvertingToRGB();
                 }
                 else {
-                    MainEditorPalettized* upcastSession = (MainEditorPalettized*)session;
-                    l = upcastSession->flattenImageAndConvertToRGB();
+                    l = upcastSession->flattenImageAndConvertToRGB(upcastSession->getCurrentFrame());
                 }
             }
             else {

@@ -15,6 +15,7 @@
 #include "ViewSessionScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
 #include "UndoStack.h"
+#include "EditorFramePicker.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -31,7 +32,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
     palette = g_palettes()[PALETTE_DEFAULT];
     LayerPalettized* pltLayer = new LayerPalettized(dimensions.x, dimensions.y);
     pltLayer->palette = palette;
-    layers.push_back(pltLayer);
+    getLayerStack().push_back(pltLayer);
 
     setUpWidgets();
     recenterCanvas();
@@ -43,7 +44,7 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
     isPalettized = true;
     canvas.dimensions = { layer->w, layer->h };
 
-    layers.push_back(layer);
+    getLayerStack().push_back(layer);
     palette = layer->palette;
 
     setUpWidgets();
@@ -51,15 +52,34 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
     initLayers();
 }
 
-MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layers)
+MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layerss)
 {
     //all layers must have the same palette assigned!!!
+    auto& layers = getLayerStack();
     isPalettized = true;
     canvas.dimensions = { layers[0]->w, layers[0]->h };
-    for (auto& l : layers) {
-        this->layers.push_back(l);
+    for (auto& l : layerss) {
+        layers.push_back(l);
     }
-    palette = layers[0]->palette;
+    palette = layerss[0]->palette;
+
+    setUpWidgets();
+    recenterCanvas();
+    initLayers();
+}
+
+MainEditorPalettized::MainEditorPalettized(std::vector<Frame*> framess)
+{
+    isPalettized = true;
+    for (auto*& f : frames) {
+        delete f;
+    }
+    frames = framess;
+    //todo: check if these are all indexed layers
+
+    Layer* firstLayer = frames.front()->layers.front();
+    canvas.dimensions = { firstLayer->w, firstLayer->h };
+    palette = ((LayerPalettized*)firstLayer)->palette;
 
     setUpWidgets();
     recenterCanvas();
@@ -98,7 +118,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                 delete rgbConvEditor;
             }
             else {
-                Layer* l = flattenImageAndConvertToRGB();
+                Layer* l = flattenImageAndConvertToRGB(getCurrentFrame());
                 result = exporter->exportData(name, l);
                 delete l;
             }
@@ -204,6 +224,7 @@ void MainEditorPalettized::setActiveColor(uint32_t col)
 
 uint32_t MainEditorPalettized::pickColorFromAllLayers(XY pos)
 {
+    auto& layers = getLayerStack();
     for (int x = layers.size() - 1; x >= 0; x--) {
         if (layers[x]->hidden) {
             continue;
@@ -238,9 +259,12 @@ void MainEditorPalettized::setPalette(std::vector<uint32_t> newPalette)
 }
 
 void MainEditorPalettized::updatePalette() {
-    for (Layer*& l : layers) {
-        ((LayerPalettized*)l)->palette = palette;
-        ((LayerPalettized*)l)->markLayerDirty();
+    for (auto& frame : frames) {
+        auto& layers = frame->layers;
+        for (Layer*& l : layers) {
+            ((LayerPalettized*)l)->palette = palette;
+            ((LayerPalettized*)l)->markLayerDirty();
+        }
     }
 
     ((PalettizedEditorColorPicker*)colorPicker)->updateForcedColorPaletteButtons();
@@ -336,7 +360,7 @@ void MainEditorPalettized::setUpWidgets()
             SDL_SCANCODE_E,
             {
                 "Edit",
-                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N},
+                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
                 {
                     {SDL_SCANCODE_Z, { "Undo",
                             [this]() {
@@ -411,6 +435,12 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_N, { "Integer scale canvas",
                             [this]() {
                                 g_addPopup(new PopupIntegerScale(this, "Integer scale canvas", "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.canvscale"),
+                            [this]() {
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.canvscale"), "New size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESCALELAYER));
                             }
                         }
                     },
@@ -611,6 +641,13 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    { SDL_SCANCODE_A, { "Open frames panel...",
+                            [this]() {
+                                framePicker->enabled = true;
+                                framePicker->playPanelOpenVFX();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabView
             }
@@ -647,6 +684,10 @@ void MainEditorPalettized::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
+    framePicker = new EditorFramePicker(this);
+    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67 };
+    wxsManager.addDrawable(framePicker);
+
     navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
@@ -663,7 +704,8 @@ void MainEditorPalettized::setUpWidgets()
         std::vector<CompactEditorSection> createSections = {
             {colorPickerPanel, g_iconCompactColorPicker},
             {brushPicker, g_iconCompactToolPicker},
-            {layerPicker, g_iconCompactLayerPicker}
+            {layerPicker, g_iconCompactLayerPicker},
+            {framePicker, g_iconCompactFramePicker}
         };
 
         SetupCompactEditor(createSections);
@@ -711,13 +753,14 @@ void MainEditorPalettized::trySaveAsImage()
     trySaveAsPalettizedImage();
 }
 
-Layer* MainEditorPalettized::flattenImage()
+Layer* MainEditorPalettized::flattenFrame(Frame* f)
 {
-    return flattenImageAndConvertToRGB();
+    return flattenImageAndConvertToRGB(f);
 }
 
 Layer* MainEditorPalettized::newLayer()
 {
+    auto& layers = getLayerStack();
     LayerPalettized* nl = LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nl != NULL) {
         nl->palette = palette;
@@ -726,7 +769,7 @@ Layer* MainEditorPalettized::newLayer()
         layers.insert(layers.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
-        addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
+        addToUndoStack(new UndoLayerCreated(getCurrentFrame(), nl, insertAtIdx));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
@@ -770,11 +813,11 @@ void MainEditorPalettized::exportTilesIndividually()
     }
 }
 
-int32_t* MainEditorPalettized::makeFlatIndicesTable()
+int32_t* MainEditorPalettized::makeFlatIndicesTable(Frame* f)
 {
     int32_t* indices = (int32_t*)tracked_malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
     memset(indices, 0, canvas.dimensions.x * canvas.dimensions.y * 4);
-    for (Layer*& l : layers) {
+    for (Layer*& l : f->layers) {
         if (!l->hidden) {
             for (int y = 0; y < canvas.dimensions.y; y++) {
                 for (int x = 0; x < canvas.dimensions.x; x++) {
@@ -789,9 +832,9 @@ int32_t* MainEditorPalettized::makeFlatIndicesTable()
     return indices;
 }
 
-Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
+Layer* MainEditorPalettized::flattenImageAndConvertToRGB(Frame* f)
 {
-    int32_t* indices = makeFlatIndicesTable();
+    int32_t* indices = makeFlatIndicesTable(f);
 
     Layer* flatAndRGBConvertedLayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
     uint32_t* intpxdata = flatAndRGBConvertedLayer->pixels32();
@@ -806,7 +849,7 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB()
 
 Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
 {
-    int32_t* indices = makeFlatIndicesTable();
+    int32_t* indices = makeFlatIndicesTable(getCurrentFrame());
     LayerPalettized* flatLayer = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
     memcpy(flatLayer->pixels32(), indices, canvas.dimensions.x * canvas.dimensions.y * 4);
     flatLayer->palette = palette;
@@ -850,11 +893,17 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 
 MainEditor* MainEditorPalettized::toRGBSession()
 {
-    std::vector<Layer*> rgbLayers;
-    for (Layer*& ll : layers) {
-        rgbLayers.push_back(((LayerPalettized*)ll)->toRGB());
+    std::vector<Frame*> rgbFrames;
+    for (Frame* ff : frames) {
+        Frame* f = new Frame();
+        rgbFrames.push_back(f);
+        *f = *ff;
+        f->layers.clear();
+        for (Layer*& ll : ff->layers) {
+            f->layers.push_back(((LayerPalettized*)ll)->toRGB());
+        }
     }
-    MainEditor* newEditor = new MainEditor(rgbLayers);
+    MainEditor* newEditor = new MainEditor(rgbFrames);
     newEditor->tileDimensions = tileDimensions;
     return newEditor;
 }

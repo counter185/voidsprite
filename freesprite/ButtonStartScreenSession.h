@@ -20,6 +20,7 @@ public:
     void render(XY pos) override;
 
     void click() override;
+    void rightClick() override;
     void renderTooltip(XY pos) override;
 };
 

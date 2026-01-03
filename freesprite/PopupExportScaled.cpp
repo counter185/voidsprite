@@ -122,9 +122,9 @@ void PopupExportScaled::eventFileSaved(int evt_id, PlatformNativePathString name
                 exporter = exporterList[exporterIndex];
                 if (exporter->exportsWholeSession()) {
                     MainEditor* newSession = NULL;
-                    if (!caller->layers[0]->isPalettized) {
+                    if (!caller->getLayerStack()[0]->isPalettized) {
                         std::vector<Layer*> scaledLayers;
-                        for (Layer* l : caller->layers) {
+                        for (Layer* l : caller->getLayerStack()) {
                             Layer* scaled = l->copyCurrentVariantScaled(resultSize);
                             scaledLayers.push_back(scaled);
                         }
@@ -132,7 +132,7 @@ void PopupExportScaled::eventFileSaved(int evt_id, PlatformNativePathString name
                     }
                     else {
                         std::vector<LayerPalettized*> scaledLayers;
-                        for (Layer* l : caller->layers) {
+                        for (Layer* l : caller->getLayerStack()) {
                             Layer* scaled = l->copyCurrentVariantScaled(resultSize);
                             scaledLayers.push_back((LayerPalettized*)scaled);
                         }

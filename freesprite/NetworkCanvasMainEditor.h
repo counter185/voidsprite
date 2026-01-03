@@ -21,7 +21,7 @@ protected:
     bool receivedDataOnce = false;
 
     std::mutex clientSideChangesMutex;
-    std::map<int,bool> clientSideChanges;
+    std::map<std::pair<int,int>,bool> clientSideChanges;
 
     std::queue<std::string> chatMsgQueue;
     std::mutex chatMsgQueueMutex;
@@ -33,7 +33,7 @@ protected:
     void networkCanvasSendNewLayerRequest();
     void networkCanvasSendAUTH();
 
-    void reallocLayers(XY size, int numLayers);
+    void reallocLayers(Frame* f, XY size, int numLayers);
 
 public:
     NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NET_StreamSocket* socket);
@@ -44,7 +44,7 @@ public:
     std::string getName() override { return TL("vsp.collabeditor") + ": " + targetIP; }
     std::string getRPCString() override { return TL("vsp.collabeditor"); }
 
-    void networkCanvasStateUpdated(int whichLayer) override;
+    void networkCanvasStateUpdated(int whichFrame, int whichLayer) override;
     void networkCanvasChatSendCallback(std::string content) override;
 
     Layer* newLayer() override;
@@ -57,6 +57,12 @@ public:
     void resizeAllLayersFromCommand(XY size, bool byTile = false) override;
     void resizzeAllLayersByTilecountFromCommand(XY size) override;
     void integerScaleAllLayersFromCommand(XY scale, bool downscale = false) override;
+
+    void newFrame() override { postErrorHostOnly(); };
+    void duplicateFrame(int index) override { postErrorHostOnly(); };
+    void deleteFrame(int index) override { postErrorHostOnly(); };
+    void moveFrameLeft(int index) override { postErrorHostOnly(); };
+    void moveFrameRight(int index) override { postErrorHostOnly(); };
 
     void tickAutosave() override {};    //don't do local recovery autosaves in client sessions... (maybe an option in settings?)
     void promptStartNetworkSession() override;

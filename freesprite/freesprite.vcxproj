@@ -286,12 +286,15 @@
       <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <ClCompile Include="DraggablePanel.cpp" />
+    <ClCompile Include="EditorFramePicker.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
     <ClCompile Include="fills.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="io\io_aseprite.cpp" />
+    <ClCompile Include="io\io_avi.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />
+    <ClCompile Include="io\io_flipnote.cpp" />
     <ClCompile Include="io\io_gim.cpp" />
     <ClCompile Include="io\io_iw.cpp" />
     <ClCompile Include="io\io_jxl.cpp" />
@@ -538,6 +541,7 @@
     <ClInclude Include="discord_game_sdk\voice_manager.h" />
     <ClInclude Include="discord_rpc.h" />
     <ClInclude Include="DraggablePanel.h" />
+    <ClInclude Include="EditorFramePicker.h" />
     <ClInclude Include="EditorTouchToggle.h" />
     <ClInclude Include="ExtractDataScreen.h" />
     <ClInclude Include="fills.h" />
@@ -546,8 +550,10 @@
     <ClInclude Include="gzip\decompress.hpp" />
     <ClInclude Include="iostructs.h" />
     <ClInclude Include="io\io_aseprite.h" />
+    <ClInclude Include="io\io_avi.h" />
     <ClInclude Include="io\io_base.h" />
     <ClInclude Include="io\io_dibv5.h" />
+    <ClInclude Include="io\io_flipnote.h" />
     <ClInclude Include="io\io_gim.h" />
     <ClInclude Include="io\io_iw.h" />
     <ClInclude Include="io\io_jxl.h" />

@@ -1,6 +1,7 @@
 #pragma once
 #include <thread>
 #include <mutex>
+#include <queue>
 
 #include "globals.h"
 #include "Timer64.h"
@@ -11,8 +12,8 @@ inline bool threadSet = false;
 inline std::thread g_bgOpThread;
 inline Timer64 g_bgOpStartTimer;
 
-inline std::mutex mainThreadOpMutex;
-inline std::vector<std::function<void()>> g_mainThreadOperations;
+inline std::recursive_mutex mainThreadOpMutex;
+inline std::queue<std::function<void()>> g_mainThreadOperations;
 
 struct AsyncOp {
     bool done = false;
@@ -55,16 +56,21 @@ inline void g_startNewAsyncOperation(std::function<void()> function) {
 }
 
 inline void g_startNewMainThreadOperation(std::function<void()> function) {
-    std::lock_guard<std::mutex> lock(mainThreadOpMutex);
-    g_mainThreadOperations.push_back(function);
+    std::lock_guard<std::recursive_mutex> lock(mainThreadOpMutex);
+    g_mainThreadOperations.push(function);
 }
 
 inline void g_runMainThreadOperations() {
-    std::lock_guard<std::mutex> lock(mainThreadOpMutex);
-    for (auto& op : g_mainThreadOperations) {
-        op();
+    mainThreadOpMutex.lock();
+    while (!g_mainThreadOperations.empty()) {
+        auto& nextOp = g_mainThreadOperations.front();
+        mainThreadOpMutex.unlock();
+        //allow recursively adding main thread ops
+        nextOp();
+        mainThreadOpMutex.lock();
+        g_mainThreadOperations.pop();
     }
-    g_mainThreadOperations.clear();
+    mainThreadOpMutex.unlock();
 }
 inline void g_cleanUpDoneAsyncThreads() {
     for (int x = 0; x < g_asyncOpThreads.size(); x++) {

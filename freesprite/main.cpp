@@ -946,6 +946,12 @@ int main(int argc, char** argv)
         loginfo("Loading assets");
 
         g_mainlogo = new ReldTex( [](SDL_Renderer* rd) { return IMGLoadAssetToTexture("mainlogo.png", rd); } );
+        g_iconFrameNew = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_new.png", rd); });
+        g_iconFrameDelete = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_delete.png", rd); });
+        g_iconFrameDuplicate = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_copy.png", rd); });
+        g_iconFrameMoveLeft = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_moveleft.png", rd); });
+        g_iconFrameMoveRight = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_moveright.png", rd); });
+        g_iconFramePlayPause = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_playpause.png", rd); });
         g_iconLayerAdd = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_add.png", rd); } );
         g_iconLayerDelete = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_delete.png", rd); } );
         g_iconLayerUp = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_layer_up.png", rd); } );
@@ -977,6 +983,7 @@ int main(int argc, char** argv)
         g_iconCompactColorPicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_colorpicker.png", rd); });
         g_iconCompactToolPicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_toolpicker.png", rd); });
         g_iconCompactLayerPicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_layerpicker.png", rd); });
+        g_iconCompactFramePicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_framepicker.png", rd); });
         g_iconFilePickerLink = new ReldTex([](SDL_Renderer* rd) {
             auto r = IMGLoadAssetToTexture("icon_filepicker_link.png", rd); 
             SDL_SetTextureColorMod(r, 0xC3, 0xDB, 0xFF);

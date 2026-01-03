@@ -128,7 +128,7 @@ void TilemapPreviewScreen::render()
                 SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos);
 
                 double alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? XM1PW3P1(layerSelectTimer.percentElapsedTime(1300)) : 1.0;
-                for (Layer* l : caller->layers) {
+                for (Layer* l : caller->getLayerStack()) {
                     l->render(tileDraw, tileClip, l->layerAlpha * alpha);
                 }
             }
@@ -159,7 +159,7 @@ void TilemapPreviewScreen::render()
             caller->canvas.dimensions.y * tileSelectScale
         };
 
-        for (Layer* l : caller->layers) {
+        for (Layer* l : caller->getLayerStack()) {
             l->render(tileSelectRect, l->layerAlpha);
         }
         for (int x = 1; x < 4; x++) {
@@ -827,7 +827,7 @@ Layer* TilemapPreviewScreen::renderLayer(XY** layer)
             if (currentTile.x >= 0 && currentTile.y >= 0) {
                 SDL_Rect clip = caller->getPaddedTilePosAndDimensions(currentTile);
                 int lIndex = 0;
-                for (Layer*& ll : caller->layers) {
+                for (Layer*& ll : caller->getLayerStack()) {
                     l->blit(ll, XY{ x * tileSize.x, y * tileSize.y }, clip, lIndex++ == 0);
                 }
             }

@@ -40,9 +40,26 @@ struct CommentData {
     bool hovered = false;
 };
 
-struct Guideline {
+class Guideline {
+public:
     bool vertical;
     int position;
+
+    std::string Serialize() {
+        return frmt("{}-{}", vertical ? "v" : "h", position);
+    }
+    static Guideline Deserialize(std::string str) {
+        Guideline g;
+        auto splt = splitString(str, '-');
+        if (splt.size() != 2) {
+            throw std::runtime_error("Invalid guideline string");
+        }
+        else {
+            g.vertical = (splt[0] == "v");
+            g.position = std::stoi(splt[1]);
+            return g;
+        }
+    }
 };
 
 #define FRAGMENT_DIRECTION_UP 0b0001
@@ -64,6 +81,7 @@ struct NetworkCanvasClientInfo {
     u64 lastReportTime = 0;
     u32 clientColor = 0xC0E1FF;
     bool chatTyping = false;
+    int activeFrame = 0;
 
     //host hints
     bool hostKick = false;
@@ -96,10 +114,28 @@ public:
     std::string toJson();
 };
 
-/*struct Frame {
+class Frame {
+public:
     std::vector<Layer*> layers;
+    int activeLayer = 0;
     std::vector<CommentData> comments;
-};*/
+
+    ~Frame() {
+        for (Layer* l : layers) {
+            delete l;
+        }
+    }
+
+    Frame* copy() {
+        Frame* f = new Frame();
+        *f = *this;
+        f->layers.clear();
+        for (Layer*& l : layers) {
+            f->layers.push_back(l->copyCurrentVariant());
+        }
+        return f;
+    }
+};
 
 class EditorNetworkCanvasChatPanel : public PanelUserInteractable {
 protected:
@@ -134,6 +170,7 @@ protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
     bool compactEditor = false;
     std::vector<PanelReference*> openReferencePanels;
+    //std::vector<Layer*> layers;
 
     MainEditor() {}
 public:
@@ -142,11 +179,19 @@ public:
     OperationQueue mainThreadOps;
 
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
-    std::vector<CommentData> comments;
 
-    //std::vector<Frame*> frames;
+    int activeFrame = 0;
+    std::recursive_mutex framesMutex;
+    std::vector<Frame*> frames = { new Frame() };
+    Timer64 frameAnimationStartTimer;
+    bool frameAnimationPlaying = false;
+    int frameAnimMSPerFrame = 200;
+    std::pair<SDL_Renderer*, SDL_Texture*> frameFB = { NULL, NULL };
+    XY frameFBSize = { 0,0 };
+    int backtraceFrames = 0;
+    int fwdtraceFrames = 0;
+    double traceOpacity = 0.4;
 
-    std::vector<Layer*> layers;
     int selLayer = 0;
 
     std::vector<UndoStackElementV2*> undoStack, redoStack;
@@ -207,6 +252,7 @@ public:
     EditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;
+    EditorFramePicker* framePicker;
 
     SDL_Color backgroundColor = SDL_Color{ 0,0,0,255 };
 
@@ -264,6 +310,7 @@ public:
     MainEditor(SDL_Surface* srf);
     MainEditor(Layer* srf);
     MainEditor(std::vector<Layer*> layers);
+    MainEditor(std::vector<Frame*> frames);
     ~MainEditor();
 
     void render() override;
@@ -271,7 +318,11 @@ public:
     void takeInput(SDL_Event evt) override;
     void dropEverythingYoureDoingAndSave() override;
 
-    std::string getName() override { return TL("vsp.maineditor") + (lastConfirmedSave ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath)) : std::string("")); }
+    std::string getName() override { 
+        return TL("vsp.maineditor") 
+            + ((lastConfirmedSave || splitSessionData.set) ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
+                : std::string("")); 
+    }
     bool takesTouchEvents() override { return true; }
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
@@ -315,7 +366,7 @@ public:
     virtual void trySaveAsImage();
     std::map<std::string, std::string> makeSingleLayerExtdata();
     void loadSingleLayerExtdata(Layer* l);
-    std::string makeCommentDataString();
+    std::string makeCommentDataString(Frame* f);
     static std::vector<CommentData> parseCommentDataString(std::string data);
     void recenterCanvas();
     bool requestSafeClose();
@@ -347,6 +398,19 @@ public:
     void undo();
     void redo();
 
+    Frame* getCurrentFrame() { return frames[activeFrame]; }
+    virtual void newFrame();
+    virtual void duplicateFrame(int index);
+    virtual void deleteFrame(int index);
+    void switchFrame(int index);
+    virtual void moveFrameLeft(int index);
+    virtual void moveFrameRight(int index);
+    void toggleFrameAnimation();
+    void setMSPerFrame(int ms);
+    void renderFrameTo(Frame* f, SDL_Texture* target, bool clear = true);
+
+    std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
+    std::vector<Layer*> getAllLayers();
     Layer* layerAt(int index);
     virtual Layer* newLayer();
     virtual void deleteLayer(int index);
@@ -355,7 +419,7 @@ public:
     virtual void mergeLayerDown(int index);
     virtual void duplicateLayer(int index);
     void switchActiveLayer(int index);
-    Layer* getCurrentLayer() { return layers[selLayer]; }
+    Layer* getCurrentLayer() { return getLayerStack()[selLayer]; }
     int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
     void layer_promptRename(int index);
@@ -370,7 +434,8 @@ public:
     void layer_clearSelectedArea();
     void layer_selectCurrentAlpha();
     void layer_fillActiveColor();
-    virtual Layer* flattenImage();
+    Layer* flattenImage();
+    virtual Layer* flattenFrame(Frame* target);
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
     void flipAllLayersOnX();
     void flipAllLayersOnY();
@@ -387,7 +452,7 @@ public:
 
     std::string networkGetSocketAddress(NET_StreamSocket* sock);
     virtual void promptStartNetworkSession();
-    virtual void networkCanvasStateUpdated(int whichLayer);
+    virtual void networkCanvasStateUpdated(int whichFrame, int whichLayer);
     void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
     void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
@@ -398,7 +463,7 @@ public:
     bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
     void networkSendString(NET_StreamSocket* socket, std::string s);
-    void networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l);
+    void networkCanvasSendLRDT(NET_StreamSocket* socket, int frameIndex, int index, Layer* l);
     std::string networkReadString(NET_StreamSocket* socket);
     void networkCanvasKickUID(u32 uid);
     void networkCanvasSystemMessage(std::string msg);
@@ -414,6 +479,7 @@ public:
     void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_promptRenameCurrentVariant();
 
+    std::vector<CommentData>& getCommentStack() { return getCurrentFrame()->comments; }
     bool canAddCommentAt(XY a);
     void addComment(CommentData c);
     void addCommentAt(XY a, std::string c);

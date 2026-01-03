@@ -11,3 +11,4 @@ void logwarn(std::string a);
 void logerr(std::string a);
 void logprintf(const char* format, ...);
 void logprintf(char* format, ...);
+void loghexdump(void* data, int bytesInLine, int lines);

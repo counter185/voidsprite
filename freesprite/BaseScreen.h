@@ -53,6 +53,7 @@ public:
     }
 
     void closeThisScreen() {
+        loginfo("closeThisScreen()");
         g_startNewMainThreadOperation([this]() { g_closeScreen(this); });
     }
 };

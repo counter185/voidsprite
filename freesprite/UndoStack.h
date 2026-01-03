@@ -82,10 +82,11 @@ public:
 class UndoLayerCreated : public UndoStackElementV2 {
 protected:
     Layer* l;
+    Frame* f;
     int insertAt;
     bool deleteOnRedo = true;
 public:
-    UndoLayerCreated(Layer* l, int insertAt) : l(l), insertAt(insertAt) {}
+    UndoLayerCreated(Frame* f, Layer* l, int insertAt) : f(f), l(l), insertAt(insertAt) {}
     ~UndoLayerCreated() {
         if (deleteOnRedo == discardFromRedo) {
             delete l;
@@ -102,7 +103,7 @@ public:
 
 class UndoLayerRemoved : public UndoLayerCreated {
 public:
-    UndoLayerRemoved(Layer* l, int insertAt) : UndoLayerCreated(l,insertAt) {
+    UndoLayerRemoved(Frame* f, Layer* l, int insertAt) : UndoLayerCreated(f, l,insertAt) {
         deleteOnRedo = false;
     }
 
@@ -137,10 +138,11 @@ public:
 
 class UndoLayerReordered : public UndoStackElementV2 {
 private:
+    Frame* f;
     Layer* l;
     int oldIndex, newIndex;
 public:
-    UndoLayerReordered(Layer* l, int oldIndex, int newIndex) : l(l), oldIndex(oldIndex), newIndex(newIndex) {}
+    UndoLayerReordered(Frame* f, Layer* l, int oldIndex, int newIndex) : f(f), l(l), oldIndex(oldIndex), newIndex(newIndex) {}
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
@@ -197,9 +199,10 @@ public:
 
 class UndoCommentAdded : public UndoStackElementV2 {
 protected:
+    Frame* f;
     CommentData comment;
 public:
-    UndoCommentAdded(CommentData c) : comment(c) {}
+    UndoCommentAdded(Frame* f, CommentData c) : f(f), comment(c) {}
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
@@ -207,8 +210,47 @@ public:
 
 class UndoCommentRemoved : public UndoCommentAdded {
 public:
-    UndoCommentRemoved(CommentData c) : UndoCommentAdded(c) {}
+    UndoCommentRemoved(Frame* f, CommentData c) : UndoCommentAdded(f, c) {}
 
     void undo(MainEditor* editor) override { UndoCommentAdded::redo(editor); };
     void redo(MainEditor* editor) override { UndoCommentAdded::undo(editor); };
+};
+
+class UndoFrameCreated : public UndoStackElementV2 {
+protected:
+    Frame* f = NULL;
+    int insertAt;
+    bool deleteOnRedo = true;
+public:
+    UndoFrameCreated(Frame* ff, int iinsertAt) : f(ff), insertAt(iinsertAt) {}
+    ~UndoFrameCreated() {
+        if (deleteOnRedo == discardFromRedo) {
+            delete f;
+        }
+    }
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+};
+
+class UndoFrameRemoved : public UndoFrameCreated {
+public:
+    UndoFrameRemoved(Frame* ff, int iinsertAt) : UndoFrameCreated(ff, iinsertAt) {
+        deleteOnRedo = false;
+    }
+
+    void undo(MainEditor* editor) override { UndoFrameCreated::redo(editor); };
+    void redo(MainEditor* editor) override { UndoFrameCreated::undo(editor); };
+};
+
+class UndoFrameReordered : public UndoStackElementV2 {
+protected:
+    Frame* f;
+    int oldIdx;
+    int newIdx;
+public:
+    UndoFrameReordered(Frame* ff, int oldIndex, int newIndex) : f(ff), oldIdx(oldIndex), newIdx(newIndex) {}
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;;
 };

@@ -5,7 +5,7 @@ void DeXT1(Layer* ret, int width, int height, FILE* infile);
 void DeXT23(Layer* ret, int width, int height, FILE* infile);
 void DeXT45(Layer* ret, int width, int height, FILE* infile);
 
-Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
+MainEditor* readValveSPR(PlatformNativePathString path)
 {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
@@ -34,14 +34,13 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
             palette[palette.size() - 1] &= 0xFFFFFF;
         }
 
-        Layer* ret = NULL;
+        std::vector<Frame*> frames;
 
         for (u32 fr = 0; fr < spr.frameNum; fr++) {
             SPR_sprite_frame_header frame;
             fread(&frame, sizeof(SPR_sprite_frame_header), 1, f);
 
             LayerPalettized* l = LayerPalettized::tryAllocIndexedLayer(frame.width, frame.height);
-            ret = l;
             if (l == NULL) {
                 logerr(frmt("[SPR] Failed to allocate layer {}x{}\n", frame.width, frame.height));
             }
@@ -58,8 +57,19 @@ Layer* readValveSPR(PlatformNativePathString path, uint64_t seek)
                 }
             }
 
-            //todo: multiple frames once we get there
-            break;
+            Frame* nframe = new Frame();
+            nframe->layers.push_back(l);
+            frames.push_back(nframe);
+        }
+
+        MainEditorPalettized* ret = NULL;
+        if (!frames.empty()) {
+            ret = new MainEditorPalettized(frames);
+            ret->frameAnimMSPerFrame = 100;
+
+        }
+        else {
+            logerr("[SPR] No frames in file\n");
         }
 
         fclose(f);

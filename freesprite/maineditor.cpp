@@ -28,6 +28,7 @@
 #include "PanelPreview.h"
 #include "UIStackPanel.h"
 #include "UndoStack.h"
+#include "EditorFramePicker.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -53,6 +54,7 @@
 #include "PopupChooseAction.h"
 
 #include "discord_rpc.h"
+#include "io/io_avi.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -97,7 +99,7 @@ MainEditor::MainEditor(XY dimensions) {
 
     canvas.dimensions = { dimensions.x, dimensions.y };
     //canvasCenterPoint = XY{ texW / 2, texH / 2 };
-    layers.push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
+    getLayerStack().push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
     FillTexture();
 
     setUpWidgets();
@@ -110,7 +112,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
     canvas.dimensions = { srf->w, srf->h };
 
     Layer* nlayer = new Layer(canvas.dimensions.x, canvas.dimensions.y);
-    layers.push_back(nlayer);
+    getLayerStack().push_back(nlayer);
     SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixels32(), canvas.dimensions.x*4);
 
     setUpWidgets();
@@ -121,7 +123,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
 MainEditor::MainEditor(Layer* layer)
 {
     canvas.dimensions = { layer->w, layer->h };
-    layers.push_back(layer);
+    getLayerStack().push_back(layer);
     loadSingleLayerExtdata(layer);
 
     setUpWidgets();
@@ -132,7 +134,22 @@ MainEditor::MainEditor(Layer* layer)
 MainEditor::MainEditor(std::vector<Layer*> layers)
 {
     canvas.dimensions = { layers[0]->w, layers[0]->h };
-    this->layers = layers;
+    this->getLayerStack() = layers;
+
+    setUpWidgets();
+    recenterCanvas();
+    initLayers();
+    
+}
+
+MainEditor::MainEditor(std::vector<Frame*> fframes)
+{
+    Layer*& firstLayer = fframes.front()->layers.front();
+    canvas.dimensions = { firstLayer->w, firstLayer->h };
+    for (auto*& f : frames) {
+        delete f;
+    }
+    frames = fframes;
 
     setUpWidgets();
     recenterCanvas();
@@ -144,8 +161,9 @@ MainEditor::~MainEditor() {
     discardUndoStack();
     discardRedoStack();
     endNetworkSession();
-    for (Layer*& imgLayer : layers) {
-        delete imgLayer;
+    tracked_destroyTexture(frameFB.second);
+    for (Frame*& frame : frames) {
+        delete frame;
     }
     for (BaseScreen*& unopenedScreen : hintOpenScreensInInteractiveMode) {
         delete unopenedScreen;
@@ -167,10 +185,18 @@ void MainEditor::render() {
             p->render(fit, (u8)(refPanel->opacity * 255));
         }
     }
+    
+    //prepare frame framebuffer
+    if (frameFB.first != g_rd || !xyEqual(frameFBSize, canvas.dimensions)) {
+        SDL_DestroyTexture(frameFB.second);
+        frameFB.second = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, canvas.dimensions.x, canvas.dimensions.y);
+        frameFBSize = canvas.dimensions;
+        frameFB.first = g_rd;
+    }
     //render all layers
-    for (int x = 0; x < layers.size(); x++) {
-        Layer* imgLayer = layers[x];
-        bool isCurrentActiveLayer = (selLayer == x);
+    framesMutex.lock();
+    for (Layer* imgLayer : getCurrentFrame()->layers) {
+        bool isCurrentActiveLayer = imgLayer == getCurrentLayer();
         if (!imgLayer->hidden) {
             uint8_t alpha = imgLayer->layerAlpha;
             SDL_Rect renderRect = canvasRenderRect;
@@ -186,6 +212,35 @@ void MainEditor::render() {
             imgLayer->render(renderRect, (uint8_t)(alpha * layerFadeIn));
         }
     }
+    //render backtrace frames
+    for (int backFrame = 0; backFrame < backtraceFrames; backFrame++) {
+        int targetIndex = activeFrame - (backFrame + 1);
+        if (targetIndex >= 0) {
+            Frame* f = frames[targetIndex];
+            renderFrameTo(f, frameFB.second);
+            double alpha = traceOpacity * (1.0 - (double)backFrame / backtraceFrames);
+            SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
+            SDL_RenderCopy(g_rd, frameFB.second, NULL, &canvasRenderRect);
+        }
+        else {
+            break;
+        }
+    }
+    //render fwdtrace frames
+    for (int fwdFrame = 0; fwdFrame < fwdtraceFrames; fwdFrame++) {
+        int targetIndex = activeFrame + (fwdFrame + 1);
+        if (targetIndex < (int)frames.size()) {
+            Frame* f = frames[targetIndex];
+            renderFrameTo(f, frameFB.second);
+            double alpha = traceOpacity * (1.0 - (double)fwdFrame / fwdtraceFrames);
+            SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
+            SDL_RenderCopy(g_rd, frameFB.second, NULL, &canvasRenderRect);
+        }
+        else {
+            break;
+        }
+    }
+    framesMutex.unlock();
     for (auto& refPanel : openReferencePanels) {
         if (refPanel->currentMode == REFERENCE_OVER_CANVAS) {
             Layer* p = refPanel->getLayer();
@@ -241,8 +296,7 @@ void MainEditor::render() {
                         continue;
                     }
 
-                    for (int x = 0; x < layers.size(); x++) {
-                        Layer* imgLayer = layers[x];
+                    for (Layer* imgLayer : getLayerStack()) {
                         if (!imgLayer->hidden) {
                             uint8_t alpha = imgLayer->layerAlpha;
                             XY position = { tileRect.x + (xx * canvas.scale * paddedTileRect.w),
@@ -320,6 +374,16 @@ void MainEditor::tick() {
     }
 
     mainThreadOps.process();
+
+    if (frameAnimationPlaying && frameAnimMSPerFrame > 0) {
+        u64 elapsed = frameAnimationStartTimer.elapsedTime();
+        elapsed /= frameAnimMSPerFrame;
+        elapsed %= frames.size();
+        int targetFrame = (int)elapsed;
+        if (targetFrame != activeFrame) {
+            switchFrame(targetFrame);
+        }
+    }
 
     if (g_windowFocused) {
         u64 timestampNow = SDL_GetTicks64() / 1000;
@@ -625,7 +689,7 @@ void MainEditor::drawSplitSessionFragments()
 
             if (pointInBox({ g_mouseX, g_mouseY }, r)) {
                 img.animTimer.startIfNotStarted();
-                localTtp.addTooltip(Tooltip{ {ixmax(0,r.x), ixmax(30, r.y - 30)},
+                localTtp.addTooltip(Tooltip{ {ixmax(0,r.x), ixmax(30 + actionbar->wxHeight, r.y - 30)},
                                           img.originalFileName,
                                           {0xff, 0xff, 0xff, 0xff},
                                           img.animTimer.percentElapsedTime(300)});
@@ -792,7 +856,7 @@ void MainEditor::renderComments()
     localTtp.tooltipFill = commentFill;
 
     XY origin = canvas.currentDrawPoint;
-    for (CommentData& c : comments) {
+    for (CommentData& c : getCommentStack()) {
         XY onScreenPosition = canvas.canvasPointToScreenPoint(c.position); //xyAdd(origin, { c.position.x * scale, c.position.y * scale });
         SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
         SDL_SetTextureAlphaMod(g_iconComment->get(g_rd), 0x80);
@@ -936,6 +1000,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    /*{SDL_SCANCODE_COMMA, {"debug save avi",
+                            [this]() {
+                                writeAVI(convertStringOnWin32("out.avi"), this);
+                            }
+                        }
+                    },*/
 #if VSP_NETWORKING
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
                             [this]() {
@@ -1239,6 +1309,13 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_A, { "Open frames panel...",
+                            [this]() {
+                                framePicker->enabled = true;
+                                framePicker->playPanelOpenVFX();
+                            }
+                        }
+                    },
                 },
                 g_iconNavbarTabView
             }
@@ -1313,6 +1390,12 @@ void MainEditor::setUpWidgets()
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
+    framePicker = new EditorFramePicker(this);
+    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67};
+    if (frames.size() == 1) {
+        framePicker->enabled = false;
+    }
+    wxsManager.addDrawable(framePicker);
     
     //this must happen after actionbar init
     setActiveBrush(g_brushes[0]);
@@ -1327,7 +1410,8 @@ void MainEditor::setUpWidgets()
         std::vector<CompactEditorSection> createSections = {
             {colorPickerPanel, g_iconCompactColorPicker},
             {brushPicker, g_iconCompactToolPicker},
-            {layerPicker, g_iconCompactLayerPicker}
+            {layerPicker, g_iconCompactLayerPicker},
+            {framePicker, g_iconCompactFramePicker}
         };
 
         SetupCompactEditor(createSections);
@@ -1517,7 +1601,7 @@ void MainEditor::RecalcMousePixelTargetPoint(int x, int y) {
 
 bool MainEditor::requestSafeClose() {
     if (changesSinceLastSave == NO_UNSAVED_CHANGES) {
-        closeNextTick = true;
+        closeThisScreen();
         return true;
     }
     else {
@@ -1623,7 +1707,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 else {
                                     if (currentBrushMouseDowned) {
                                         currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                        networkCanvasStateUpdated(selLayer);
+                                        networkCanvasStateUpdated(activeFrame, selLayer);
                                         currentBrushMouseDowned = false;
                                         leftMouseReleaseTimer.start();
                                     }
@@ -2088,7 +2172,7 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
     ret["SymY"] = std::to_string(symmetryPositions.y);
     ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
     ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
-    ret["CommentData"] = makeCommentDataString();
+    ret["CommentData"] = makeCommentDataString(getCurrentFrame());
     ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
     return ret;
 }
@@ -2104,17 +2188,17 @@ void MainEditor::loadSingleLayerExtdata(Layer* l) {
         if (kvmap.contains("SymY")) { symmetryPositions.y = std::stoi(kvmap["SymY"]); }
         if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
         if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
-        if (kvmap.contains("CommentData")) { comments = parseCommentDataString(kvmap["CommentData"]); }
+        if (kvmap.contains("CommentData")) { frames.front()->comments = parseCommentDataString(kvmap["CommentData"]); }
         if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
     }
     catch (std::exception e) {}
 }
 
-std::string MainEditor::makeCommentDataString()
+std::string MainEditor::makeCommentDataString(Frame* f)
 {
     std::string commentsData = "";
-    commentsData += std::to_string(comments.size()) + ';';
-    for (CommentData& c : comments) {
+    commentsData += std::to_string(f->comments.size()) + ';';
+    for (CommentData& c : f->comments) {
         commentsData += std::to_string(c.position.x) + ';';
         commentsData += std::to_string(c.position.y) + ';';
         std::string sanitizedData = c.data;
@@ -2173,12 +2257,12 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
 void MainEditor::commitStateToLayer(Layer* l)
 {
     addToUndoStack(UndoLayerModified::fromCurrentState(l));
-    networkCanvasStateUpdated(indexOfLayer(l));
+    networkCanvasStateUpdated(activeFrame, indexOfLayer(l));
 }
 
 void MainEditor::commitStateToCurrentLayer()
 {
-    if (!layers.empty()) {
+    if (!getLayerStack().empty()) {
         commitStateToLayer(getCurrentLayer());
     }
 }
@@ -2186,11 +2270,12 @@ void MainEditor::commitStateToCurrentLayer()
 uint32_t MainEditor::pickColorFromAllLayers(XY pos)
 {
     uint32_t c = 0;
-    for (int x = layers.size() - 1; x >= 0; x--) {
-        if (layers[x]->hidden) {
+    auto& layerStack = getLayerStack();
+    for (int x = layerStack.size() - 1; x >= 0; x--) {
+        if (layerStack[x]->hidden) {
             continue;
         }
-        uint32_t nextC = layers[x]->getPixelAt(pos, false);
+        uint32_t nextC = layerStack[x]->getPixelAt(pos, false);
         if ((c & 0xff000000) == 0 && (nextC & 0xff000000) == (0xff<<24)) {
             return nextC;
         }
@@ -2209,7 +2294,7 @@ void MainEditor::addToUndoStack(UndoStackElementV2* undo)
     undoStack.push_back(undo);
     checkAndDiscardEndOfUndoStack();
     changesSinceLastSave = HAS_UNSAVED_CHANGES;
-    networkCanvasStateUpdated(indexOfLayer(undo->getAffectedLayer()));
+    networkCanvasStateUpdated(activeFrame, indexOfLayer(undo->getAffectedLayer()));
 }
 
 void MainEditor::discardUndoStack()
@@ -2239,7 +2324,7 @@ void MainEditor::undo()
         undoStack.pop_back();
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         redoStack.push_back(l);
-        networkCanvasStateUpdated(indexOfLayer(l->getAffectedLayer()));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(l->getAffectedLayer()));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to undo", ""));
@@ -2256,28 +2341,163 @@ void MainEditor::redo()
         redoStack.pop_back();
         changesSinceLastSave = HAS_UNSAVED_CHANGES;
         undoStack.push_back(l);
-        networkCanvasStateUpdated(indexOfLayer(l->getAffectedLayer()));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(l->getAffectedLayer()));
     }
     else {
         g_addNotification(ErrorNotification("Nothing to redo", ""));
     }
 }
 
+void MainEditor::newFrame()
+{
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
+    if (splitSessionData.set) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Frames not supported in split session mode"));
+        return;
+    }
+    Layer* nlayer = isPalettized ? LayerPalettized::tryAllocIndexedLayer(canvas.dimensions.x, canvas.dimensions.y)
+                                 : Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
+    if (nlayer != NULL) {
+        if (isPalettized) {
+            ((LayerPalettized*)nlayer)->palette = (((MainEditorPalettized*)this)->palette);
+        }
+        Frame* nFrame = new Frame();
+        nFrame->layers.push_back(nlayer);
+        frames.insert(frames.begin() + activeFrame + 1, nFrame);
+        framePicker->enabled = true;
+        //loginfo("new frame added");
+        framePicker->createFrameButtons();
+        addToUndoStack(new UndoFrameCreated(nFrame, activeFrame + 1));
+        switchFrame(activeFrame + 1);
+        framePicker->flashFrame(activeFrame);
+    }
+    else {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+    }
+}
+
+void MainEditor::duplicateFrame(int index)
+{
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
+    if (splitSessionData.set) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Frames not supported in split session mode"));
+        return;
+    }
+    Frame* nFrame = getCurrentFrame()->copy();
+    frames.insert(frames.begin() + index + 1, nFrame);
+    framePicker->createFrameButtons();
+    framePicker->enabled = true;
+    addToUndoStack(new UndoFrameCreated(nFrame, index + 1));
+    switchFrame(index + 1);
+    framePicker->flashFrame(activeFrame);
+}
+
+void MainEditor::deleteFrame(int index)
+{
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
+    if (index >= 0 && index < frames.size()) {
+        if (frames.size() != 1) {
+            Frame* target = frames[index];
+            frames.erase(frames.begin() + index);
+            framePicker->createFrameButtons();
+            if (activeFrame >= frames.size()) {
+                switchFrame(frames.size() - 1);
+            }
+            addToUndoStack(new UndoFrameRemoved(target, index));
+        } else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot delete last frame"));
+            return;
+        }
+    }
+}
+
+void MainEditor::switchFrame(int index)
+{
+    if (activeFrame >= 0 && activeFrame < frames.size()) {
+        getCurrentFrame()->activeLayer = selLayer;
+    }
+    activeFrame = ixmax(0, ixmin(frames.size()-1, index));
+    //loginfo(frmt("switching to frame {}", index));
+    selLayer = ixmin(getCurrentFrame()->layers.size()-1, getCurrentFrame()->activeLayer);
+    layerPicker->updateLayers();
+    framePicker->createFrameButtons();
+}
+
+void MainEditor::moveFrameLeft(int index)
+{
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
+    if (index > 0 && index <= frames.size() - 1) {
+        Frame* target = frames[index];
+        frames.erase(frames.begin() + index);
+        frames.insert(frames.begin() + index - 1, target);
+        framePicker->createFrameButtons();
+        addToUndoStack(new UndoFrameReordered(target, index, index - 1));
+        if (index == activeFrame) {
+            switchFrame(index - 1);
+        }
+    }
+}
+
+void MainEditor::moveFrameRight(int index)
+{
+    std::lock_guard<std::recursive_mutex> lock(framesMutex);
+    if (index >= 0 && index < frames.size() - 1) {
+        Frame* target = frames[index];
+        frames.erase(frames.begin() + index);
+        frames.insert(frames.begin() + index + 1, target);
+        framePicker->createFrameButtons();
+        addToUndoStack(new UndoFrameReordered(target, index, index + 1));
+        if (index == activeFrame) {
+            switchFrame(index + 1);
+        }
+    }
+}
+
+void MainEditor::toggleFrameAnimation()
+{
+    frameAnimationPlaying = !frameAnimationPlaying;
+    frameAnimationStartTimer.start();
+}
+
+void MainEditor::setMSPerFrame(int ms)
+{
+    framePicker->msPerFrameInput->setText(std::to_string(ms));
+}
+
+void MainEditor::renderFrameTo(Frame* f, SDL_Texture* target, bool clear)
+{
+    g_pushRenderTarget(target);
+
+    if (clear) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+        SDL_RenderClear(g_rd);
+    }
+
+    for (auto& l : f->layers) {
+        if (!l->hidden) {
+            l->render({ 0,0,l->w,l->h }, l->layerAlpha);
+        }
+    }
+
+    g_popRenderTarget();
+}
+
 Layer* MainEditor::layerAt(int index)
 {
-    return layers.size() > index ? layers[index] : NULL;
+    return getLayerStack().size() > index ? getLayerStack()[index] : NULL;
 }
 
 Layer* MainEditor::newLayer()
 {
     Layer* nl = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (nl != NULL) {
-        nl->name = frmt("New Layer {}", layers.size() + 1);
-        int insertAtIdx = std::find(layers.begin(), layers.end(), getCurrentLayer()) - layers.begin() + 1;
-        layers.insert(layers.begin() + insertAtIdx, nl);
+        auto& layerStack = getLayerStack();
+        nl->name = frmt("New Layer {}", layerStack.size() + 1);
+        int insertAtIdx = std::find(layerStack.begin(), layerStack.end(), getCurrentLayer()) - layerStack.begin() + 1;
+        layerStack.insert(layerStack.begin() + insertAtIdx, nl);
         switchActiveLayer(insertAtIdx);
 
-        addToUndoStack(new UndoLayerCreated(nl, insertAtIdx));
+        addToUndoStack(new UndoLayerCreated(getCurrentFrame(), nl, insertAtIdx));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
@@ -2286,23 +2506,24 @@ Layer* MainEditor::newLayer()
 }
 
 void MainEditor::deleteLayer(int index) {
-    if (layers.size() <= 1) {
+    if (getLayerStack().size() <= 1) {
         g_addNotification(ErrorNotification("Can't delete the last layer", ""));
         return;
     }
 
+    auto& layers = getLayerStack();
     Layer* layerAtPos = layers[index];
     layers.erase(layers.begin() + index);
     if (selLayer >= layers.size()) {
         switchActiveLayer(layers.size() - 1);
     }
 
-    addToUndoStack(new UndoLayerRemoved(layerAtPos, index));
+    addToUndoStack(new UndoLayerRemoved(getCurrentFrame(), layerAtPos, index));
 }
 
 void MainEditor::regenerateLastColors()
 {
-    if (layers.empty()) {
+    if (getLayerStack().empty()) {
         return;
     }
     colorPicker->lastColors.clear();
@@ -2464,6 +2685,7 @@ void MainEditor::promptPasteImage(Layer* l)
 }
 
 void MainEditor::moveLayerUp(int index) {
+    auto& layers = getLayerStack();
     if (index >= layers.size()-1) {
         return;
     }
@@ -2476,13 +2698,14 @@ void MainEditor::moveLayerUp(int index) {
         switchActiveLayer(selLayer + 1);
     }
 
-    addToUndoStack(new UndoLayerReordered(clayer, index, index + 1));
+    addToUndoStack(new UndoLayerReordered(getCurrentFrame(), clayer, index, index + 1));
 }
 
 void MainEditor::moveLayerDown(int index) {
     if (index  <= 0) {
         return;
     }
+    auto& layers = getLayerStack();
 
     Layer* clayer = layers[index];
     layers.erase(layers.begin() + index);
@@ -2492,7 +2715,7 @@ void MainEditor::moveLayerDown(int index) {
         switchActiveLayer(selLayer-1);
     }
 
-    addToUndoStack(new UndoLayerReordered(clayer, index, index - 1));
+    addToUndoStack(new UndoLayerReordered(getCurrentFrame(), clayer, index, index - 1));
 }
 
 void MainEditor::mergeLayerDown(int index)
@@ -2500,6 +2723,8 @@ void MainEditor::mergeLayerDown(int index)
     if (index == 0) {
         return;
     }
+    auto& layers = getLayerStack();
+
     Layer* topLayer = layers[index];
     Layer* bottomLayer = layers[index - 1];
     deleteLayer(index);
@@ -2508,11 +2733,11 @@ void MainEditor::mergeLayerDown(int index)
     memcpy(bottomLayer->pixels32(), merged->pixels32(), bottomLayer->w * bottomLayer->h * 4);
     bottomLayer->markLayerDirty();
     delete merged;
-    
 }
 
 void MainEditor::duplicateLayer(int index)
 {
+    auto& layers = getLayerStack();
     Layer* currentLayer = layers[index];
     Layer* newL = newLayer();
     memcpy(newL->pixels32(), currentLayer->pixels32(), currentLayer->w * currentLayer->h * 4);
@@ -2578,7 +2803,7 @@ void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
 {
     int vidxNow = layer->currentLayerVariant;
     if (layer->switchVariant(variantIndex)) {
-        networkCanvasStateUpdated(indexOfLayer(layer));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(layer));
         layerPicker->updateLayers();
         if (layer == getCurrentLayer()) {
             variantSwitchTimer.start();
@@ -2602,6 +2827,7 @@ void MainEditor::layer_promptRenameCurrentVariant()
 
 int MainEditor::indexOfLayer(Layer* l)
 {
+    auto& layers = getLayerStack();
     auto it = std::find(layers.begin(), layers.end(), l);
     if (it != layers.end()) {
         return std::distance(layers.begin(), it);
@@ -2618,13 +2844,14 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
 
 void MainEditor::layer_promptRename(int index)
 {
+    auto& layers = getLayerStack();
     if (!layers.empty() && layers.size() > index) {
         Layer* target = layers[index];
         PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", target->name);
         ninput->onTextInputConfirmedCallback = [this, target](PopupTextBox* p, std::string newName) {
             target->name = newName;
             layerPicker->updateLayers();
-            networkCanvasStateUpdated(indexOfLayer(target));
+            networkCanvasStateUpdated(activeFrame, indexOfLayer(target));
         };
         g_addPopup(ninput);
     }
@@ -2654,11 +2881,16 @@ void MainEditor::layer_setAllAlpha255()
 
 Layer* MainEditor::flattenImage()
 {
+    return flattenFrame(getCurrentFrame());
+}
+
+Layer* MainEditor::flattenFrame(Frame* target)
+{
     Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (ret != NULL) {
         int x = 0;
         uint32_t* retppx = ret->pixels32();
-        for (Layer*& l : layers) {
+        for (Layer*& l : target->layers) {
             if (l->hidden) {
                 continue;
             }
@@ -2709,7 +2941,7 @@ Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 void MainEditor::flipAllLayersOnX()
 {
     std::vector<UndoStackElementV2*> undos;
-    for (auto* l : layers) {
+    for (auto* l : getLayerStack()) {
         undos.push_back(UndoLayerModified::fromCurrentState(l));
         l->flipHorizontally();
     }
@@ -2720,7 +2952,7 @@ void MainEditor::flipAllLayersOnX()
 void MainEditor::flipAllLayersOnY()
 {
     std::vector<UndoStackElementV2*> undos;
-    for (auto* l : layers) {
+    for (auto* l : getLayerStack()) {
         undos.push_back(UndoLayerModified::fromCurrentState(l));
         l->flipVertically();
     }
@@ -2735,6 +2967,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     }
 
     UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, size, tileDimensions, tileDimensions);
+    std::vector<Layer*> layers = getAllLayers();
 
     //todo: detect if copyscaled or malloc fails
     int nElements = layers.size();
@@ -2753,6 +2986,15 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
     addToUndoStack(undoData);
 }
 
+std::vector<Layer*> MainEditor::getAllLayers()
+{
+    std::vector<Layer*> ret = {};
+    for (auto& f : frames) {
+        ret = joinVectors({ ret, f->layers });
+    }
+    return ret;
+}
+
 void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
     if (byTile) {
@@ -2767,6 +3009,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
             return;
         }
     }
+    std::vector<Layer*> layers = getAllLayers();
 
     std::map<Layer*, LayerScaleData> createdVariants;
 
@@ -2809,6 +3052,8 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 
 void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 {
+    std::vector<Layer*> layers = getAllLayers();
+
     XY newSize = { size.x * tileDimensions.x, size.y * tileDimensions.y };
     UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, tileDimensions);
 
@@ -2838,7 +3083,9 @@ void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
         (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
     };
     if (!xyEqual(oldTileCount, newTileCount)) {
-        for (Layer* l : layers) {
+        std::vector<Layer*> targetLayers = getAllLayers();
+
+        for (Layer* l : targetLayers) {
             SDL_Rect sourceRect = { 0,0, tileDimensions.x, tileDimensions.y };
             Layer* temp = l->isPalettized ? LayerPalettized::tryAllocLayer(l->w, l->h)
                           : Layer::tryAllocLayer(l->w, l->h);
@@ -2879,6 +3126,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions not divisible."));
         return;
     }
+    std::vector<Layer*> layers = getAllLayers();
 
     XY newSize = downscale ? XY{ canvas.dimensions.x / scale.x, canvas.dimensions.y / scale.y }
                            : XY{ canvas.dimensions.x * scale.x, canvas.dimensions.y * scale.y };
@@ -2926,6 +3174,8 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
         return NULL;
     }
     else {
+        auto& layers = getLayerStack();
+
         std::map<uint32_t, bool> usedColors;
         for (Layer*& l : layers) {
             std::vector<uint32_t> cols = l->getUniqueColors();
@@ -3049,7 +3299,7 @@ void MainEditor::promptStartNetworkSession()
     g_addPopup(p);
 }
 
-void MainEditor::networkCanvasStateUpdated(int whichLayer)
+void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 {
     canvasStateID++;
 }
@@ -3169,6 +3419,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         anyDataUpdated |= (newClientName != clientInfo->clientName);
         clientInfo->clientName = newClientName;
 
+        clientInfo->activeFrame = inputJson.value("activeFrame", 0);
+
         clientInfo->cursorPosition = XY{ inputJson.value("cursorX", 0), inputJson.value("cursorY", 0)};
         try {
             u32 newClientColor = std::stoi(inputJson.value("clientColor", "C0E1FF"), 0, 16);
@@ -3187,17 +3439,27 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             {"tileGridWidth", tileDimensions.x},
             {"tileGridHeight", tileDimensions.y},
             {"chatState", (u32)networkCanvasCurrentChatState->messagesState},
-            {"layers", json::array()},
+            {"frameTime", frameAnimMSPerFrame},
+            {"frames", json::array()},
             {"clients", json::array()}
         };
-        for (Layer*& l : layers) {
-            json layerJson = {
-                {"name", l->name},
-                {"hidden", l->hidden},
-                {"opacity", l->layerAlpha}
-            };
-            infoJson["layers"].push_back(layerJson);
+        framesMutex.lock();
+        for (Frame*& f : frames) {
+            json layersJson = json::array();
+            for (Layer*& l : f->layers) {
+                json layerJson = {
+                    {"name", l->name},
+                    {"hidden", l->hidden},
+                    {"opacity", l->layerAlpha}
+                };
+                layersJson.push_back(layerJson);
+            }
+            infoJson["frames"].push_back({
+                {"layers", layersJson}
+            });
         }
+        framesMutex.unlock();
+        
         networkClientsListMutex.lock();
         thisClientInfo->cursorPosition = mousePixelTargetPoint;
         thisClientInfo->lastReportTime = SDL_GetTicks();
@@ -3208,7 +3470,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                 {"cursorX", c->cursorPosition.x},
                 {"cursorY", c->cursorPosition.y},
                 {"clientColor", frmt("{:06X}", 0xFFFFFF&c->clientColor)},
-                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)}
+                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)},
+                {"activeFrame", c->activeFrame}
             };
             infoJson["clients"].push_back(clientJson);
         }
@@ -3226,24 +3489,28 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
     }
     //layer data request
     else if (command == "LRRQ") {
+        u32 frameIndex;
         u32 index;
+        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
         networkReadBytes(clientSocket, (u8*)&index, 4);
 
-        if (index < layers.size()) {
-            Layer* l = layers[index];
-            networkCanvasSendLRDT(clientSocket, index, l);
+        if (frameIndex < frames.size() && index < frames[frameIndex]->layers.size()) {
+            Layer* l = frames[frameIndex]->layers[index];
+            networkCanvasSendLRDT(clientSocket, frameIndex, index, l);
         }
     }
     //layer pixel data update request
     else if (command == "LRDT") {
+        u32 frameIndex;
         u32 index;
         u64 dataSize;
+        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
         networkReadBytes(clientSocket, (u8*)&index, 4);
         networkReadBytes(clientSocket, (u8*)&dataSize, 8);
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(clientSocket, dataBuffer, dataSize);
-            Layer* l = layers[index];
+            Layer* l = frames[frameIndex]->layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
                 logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
@@ -3253,7 +3520,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                     memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                     l->markLayerDirty();
                     changesSinceLastSave = HAS_UNSAVED_CHANGES;
-                    networkCanvasStateUpdated(index);
+                    networkCanvasStateUpdated(frameIndex, index);
                 }
             }
             tracked_free(dataBuffer);
@@ -3297,8 +3564,13 @@ bool MainEditor::networkCanvasProcessAUTHCommand(std::string request)
 {
     try {
         json inputJson = json::parse(request);
+        int version = inputJson.value("version", 1);
+        if (version != 2) {
+            logerr(frmt("client version mismatch {}", version));
+            return false;
+        }
         std::string password = inputJson.value("password", "");
-        return networkCanvasPassword == "" || password == networkCanvasPassword;
+        return (networkCanvasPassword == "" || password == networkCanvasPassword);
         
     } catch (std::exception&) {
         return false;
@@ -3395,11 +3667,12 @@ void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
     }
 }
 
-void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int index, Layer* l)
+void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int frameIndex, int index, Layer* l)
 {
     auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
     u64 dataSize = compressedData.size();
     networkSendCommand(socket, "LRDT");
+    networkSendBytes(socket, (u8*)&frameIndex, 4);
     networkSendBytes(socket, (u8*)&index, 4);
     networkSendBytes(socket, (u8*)&dataSize, 8);
     networkSendBytes(socket, (u8*)&compressedData[0], dataSize);
@@ -3538,7 +3811,7 @@ void MainEditor::endNetworkSession()
 
 bool MainEditor::canAddCommentAt(XY a)
 {
-    for (CommentData& c : comments) {
+    for (CommentData& c : getCommentStack()) {
         if (xyEqual(c.position, a)) {
             return false;
         }
@@ -3549,8 +3822,8 @@ bool MainEditor::canAddCommentAt(XY a)
 void MainEditor::addComment(CommentData c)
 {
     if (canAddCommentAt(c.position)) {
-        comments.push_back(c);
-        addToUndoStack(new UndoCommentAdded(c));
+        getCommentStack().push_back(c);
+        addToUndoStack(new UndoCommentAdded(getCurrentFrame(), c));
     }
 }
 
@@ -3564,12 +3837,13 @@ void MainEditor::removeCommentAt(XY a)
 {
     CommentData c = _removeCommentAt(a);
     if (c.data[0] != '\1') {
-        addToUndoStack(new UndoCommentRemoved(c));
+        addToUndoStack(new UndoCommentRemoved(getCurrentFrame(), c));
     }
 }
 
 CommentData MainEditor::_removeCommentAt(XY a)
 {
+    auto& comments = getCommentStack();
     for (int x = 0; x < comments.size(); x++) {
         if (xyEqual(comments[x].position, a)) {
             CommentData c = comments[x];
@@ -3577,9 +3851,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
             return c;
         }
     }
-    logerr("_removeComment NOT FOUND\n");
-    //shitass workaround tell noone thanks
-    //@hirano185 hey girlie check this out!
+    logerr("_removeComment NOT FOUND");
     return { {0,0}, "\1" };
 }
 

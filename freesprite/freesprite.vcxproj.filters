@@ -690,6 +690,15 @@
     <ClCompile Include="PopupChooseAction.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="EditorFramePicker.cpp">
+      <Filter>Source files\ui_widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_avi.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_flipnote.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1375,6 +1384,15 @@
     </ClInclude>
     <ClInclude Include="PopupChooseAction.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorFramePicker.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_avi.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_flipnote.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

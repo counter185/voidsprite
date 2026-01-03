@@ -11,7 +11,7 @@ Layer* CustomTemplate::generate()
 
         tilesize = ssn->tileDimensions;
         tilepadding = ssn->tileGridPaddingBottomRight;
-        comments = ssn->comments;
+        comments = ssn->getCommentStack();
 
         delete ssn;
         return l;

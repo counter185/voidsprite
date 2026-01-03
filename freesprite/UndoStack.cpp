@@ -1,24 +1,31 @@
 #include "UndoStack.h"
 #include "maineditor.h"
+#include "MainEditorPalettized.h"
 #include "EditorLayerPicker.h"
+#include "EditorFramePicker.h"
 
 void UndoLayerCreated::undo(MainEditor* editor)
 {
     //remove layer from list
-    auto pos = std::find(editor->layers.begin(), editor->layers.end(), l);
-    if (pos != editor->layers.end()) {
-        editor->layers.erase(pos);
+    auto& layers = f->layers;
+    auto pos = std::find(layers.begin(), layers.end(), l);
+    if (pos != layers.end()) {
+        layers.erase(pos);
     }
-    if (editor->selLayer >= editor->layers.size()) {
-        editor->switchActiveLayer(editor->layers.size() - 1);
+    if (editor->selLayer >= layers.size()) {
+        editor->switchActiveLayer(layers.size() - 1);
     }
     editor->layerPicker->updateLayers();
 }
 
 void UndoLayerCreated::redo(MainEditor* editor)
 {
-    editor->layers.insert(editor->layers.begin() + insertAt, l);
+    auto& layers = f->layers;
+    layers.insert(layers.begin() + insertAt, l);
     editor->layerPicker->updateLayers();
+    if (editor->isPalettized) {
+        ((MainEditorPalettized*)editor)->updatePalette();
+    }
 }
 
 
@@ -70,15 +77,17 @@ void UndoLayerModified::redo(MainEditor* editor)
 
 void UndoLayerReordered::undo(MainEditor* editor)
 {
-    editor->layers.erase(editor->layers.begin() + newIndex);
-    editor->layers.insert(editor->layers.begin() + oldIndex, l);
+    auto& layers = f->layers;
+    layers.erase(layers.begin() + newIndex);
+    layers.insert(layers.begin() + oldIndex, l);
     editor->layerPicker->updateLayers();
 }
 
 void UndoLayerReordered::redo(MainEditor* editor)
 {
-    editor->layers.erase(editor->layers.begin() + oldIndex);
-    editor->layers.insert(editor->layers.begin() + newIndex, l);
+    auto& layers = f->layers;
+    layers.erase(layers.begin() + oldIndex);
+    layers.insert(layers.begin() + newIndex, l);
     editor->layerPicker->updateLayers();
 }
 
@@ -116,16 +125,46 @@ void UndoLayerOpacityChanged::redo(MainEditor* editor)
 
 void UndoCommentAdded::undo(MainEditor* editor)
 {
-    auto findAtPos = std::find_if(editor->comments.begin(), editor->comments.end(),
+    auto findAtPos = std::find_if(f->comments.begin(), f->comments.end(),
         [this](CommentData& c) {
             return xyEqual(c.position, comment.position);
         });
-    if (findAtPos != editor->comments.end()) {
-        editor->comments.erase(findAtPos);
+    if (findAtPos != f->comments.end()) {
+        f->comments.erase(findAtPos);
     }
 }
 
 void UndoCommentAdded::redo(MainEditor* editor)
 {
-    editor->comments.push_back(comment);
+    f->comments.push_back(comment);
+}
+
+
+void UndoFrameCreated::undo(MainEditor* editor)
+{
+    editor->frames.erase(editor->frames.begin() + insertAt);
+    if (editor->activeFrame >= editor->frames.size()) {
+        editor->activeFrame = editor->frames.size() - 1;
+    }
+    editor->framePicker->createFrameButtons();
+    editor->layerPicker->updateLayers();
+}
+
+void UndoFrameCreated::redo(MainEditor* editor)
+{
+    editor->frames.insert(editor->frames.begin() + insertAt, f);
+    editor->framePicker->createFrameButtons();
+    editor->layerPicker->updateLayers();
+}
+
+void UndoFrameReordered::undo(MainEditor* editor)
+{
+    editor->frames.erase(editor->frames.begin() + newIdx);
+    editor->frames.insert(editor->frames.begin() + oldIdx, f);
+}
+
+void UndoFrameReordered::redo(MainEditor* editor)
+{
+    editor->frames.erase(editor->frames.begin() + oldIdx);
+    editor->frames.insert(editor->frames.begin() + newIdx, f);
 }

@@ -25,18 +25,22 @@ private:
     bool waitingForUpdateCheckInfo = true;
     std::vector<LaunchpadBGStar> stars;
     Timer64 updateCheckTimer;
+
+    XY newImgSizeTab0 = {256,256};
+    XY newImgCellSizeTab1 = { 16,16 };
+    XY newImgCellCountTab1 = { 4,4 };
 public:
     TabbedView* newImageTabs;
 
-    int newImgW = 0, newImgH = 0;
+    UINumberInputField* tab0TextFieldW;
+    UINumberInputField* tab0TextFieldH;
 
-    UITextField* tab0TextFieldW;
-    UITextField* tab0TextFieldH;
+    UINumberInputField* tab1TextFieldCW;
+    UINumberInputField* tab1TextFieldCH;
+    UINumberInputField* tab1TextFieldCWX;
+    UINumberInputField* tab1TextFieldCHX;
 
-    UITextField* tab1TextFieldCW;
-    UITextField* tab1TextFieldCH;
-    UITextField* tab1TextFieldCWX;
-    UITextField* tab1TextFieldCHX;
+    UIButton* rgbTabCreateButtons[2] = { NULL,NULL };
 
     ScreenWideNavBar* navbar;
 

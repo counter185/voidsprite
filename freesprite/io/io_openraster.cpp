@@ -90,7 +90,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         return false;
     }
 
-    std::vector<Layer*> data = editor->layers;
+    std::vector<Layer*>& data = editor->getLayerStack();
     char* zipBuffer = NULL;
     size_t zipBufferSize;
 

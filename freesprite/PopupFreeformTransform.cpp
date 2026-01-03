@@ -22,7 +22,7 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
             targetPasteRect.w = v;
         }
         catch (std::exception&) {}
-	};
+    };
 
     UITextField* txh = new UITextField(std::to_string(target->h));
     txh->isNumericField = true;

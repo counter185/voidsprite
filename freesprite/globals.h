@@ -230,6 +230,7 @@ class ExtractDataScreen;
 class EditorColorPicker;
 class EditorBrushPicker;
 class EditorLayerPicker;
+class EditorFramePicker;
 class EditorSpritesheetPreview;
 class EditorTouchToggle;
 class TilemapEditorLayerPicker;
@@ -249,6 +250,7 @@ class UIButton;
 class UILabel;
 class UISlider;
 class UITextField;
+class UINumberInputField;
 class UICheckbox;
 class UIDropdown;
 class UIColorPicker;
@@ -306,6 +308,12 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconLayerDownMerge = NULL,
    *g_iconLayerDuplicate = NULL,
    *g_iconLayerHide = NULL,
+   *g_iconFrameMoveLeft = NULL,
+   *g_iconFrameMoveRight = NULL,
+   *g_iconFrameNew = NULL,
+   *g_iconFrameDelete = NULL,
+   *g_iconFrameDuplicate = NULL,
+   *g_iconFramePlayPause = NULL,
    *g_iconEraser = NULL,
    *g_iconBlendMode = NULL,
    *g_iconColorHSV = NULL,
@@ -331,6 +339,7 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconCompactColorPicker = NULL,
    *g_iconCompactToolPicker = NULL,
    *g_iconCompactLayerPicker = NULL,
+   *g_iconCompactFramePicker = NULL,
    *g_iconFilePickerLink = NULL,
    *g_iconFilePickerDirectory = NULL,
    *g_iconFilePickerFile = NULL,

@@ -30,6 +30,8 @@ public:
 
     XY lastPositionOnScreen = { 0,0 };
 
+    bool playClickVFXOnNextFrame = false;
+
     std::function<void(UIButton*)> onClickCallback = NULL;
     std::function<void(UIButton*)> onRightClickCallback = NULL;
 
@@ -51,6 +53,8 @@ public:
 
     void renderAnimations(XY pos);
     virtual void renderTooltip(XY pos);
+    void playClickVFX();
+    void playClickVFXNextFrame();
 
     virtual void click();
     virtual void rightClick();

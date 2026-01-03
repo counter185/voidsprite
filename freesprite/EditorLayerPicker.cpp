@@ -99,16 +99,16 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
         caller->switchActiveLayer(evt_id);
     }
     else if (data1 == LAYEREVENT_TOGGLE_HIDE) {
-        caller->layers[evt_id]->hidden = !caller->layers[evt_id]->hidden;
+        caller->getLayerStack()[evt_id]->hidden = !caller->getLayerStack()[evt_id]->hidden;
     }
     else if (data1 == LAYEREVENT_VARIANT_SWITCH) {
         if (caller->selLayer != evt_id) {
             caller->switchActiveLayer(evt_id);
         }
-        caller->layer_switchVariant(caller->layers[evt_id], data2);
+        caller->layer_switchVariant(caller->getLayerStack()[evt_id], data2);
     }
     else if (data1 == LAYEREVENT_VARIANT_DELETE) {
-        caller->layer_removeVariant(caller->layers[evt_id], data2);
+        caller->layer_removeVariant(caller->getLayerStack()[evt_id], data2);
     }
     else if (data1 == LAYEREVENT_DUPLICATE) {
         caller->duplicateLayer(evt_id);
@@ -148,8 +148,8 @@ void EditorLayerPicker::updateLayers()
     layerListPanel->subWidgets.freeAllDrawables();
 
     int yposition = 0;
-    for (int lid = caller->layers.size(); lid --> 0;) {
-        Layer* l = caller->layers[lid];
+    for (int lid = caller->getLayerStack().size(); lid --> 0;) {
+        Layer* l = caller->getLayerStack()[lid];
         UILayerButton* layerButton = new UILayerButton(l->name, l);
         layerButton->hideButton->fill = (l->hidden ? Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF) : SDL_Color{0,0,0,0x80});
         layerButton->position = { 0, yposition };
@@ -159,7 +159,7 @@ void EditorLayerPicker::updateLayers()
         layerListPanel->subWidgets.addDrawable(layerButton);
     }
 
-    if (opacitySlider != NULL && !caller->layers.empty()) {
+    if (opacitySlider != NULL && !caller->getLayerStack().empty()) {
         opacitySlider->sliderPos = caller->getCurrentLayer()->layerAlpha / 255.0f;
     }
 }

@@ -3,6 +3,7 @@
 #include "SplitSessionEditor.h"
 #include "EditorLayerPicker.h"
 #include "EditorColorPicker.h"
+#include "EditorFramePicker.h"
 #include "StartScreen.h"
 #include "brush/BaseBrush.h"
 #include "main.h"
@@ -190,6 +191,26 @@ void g_initKeybinds()
             vNow++;
             vNow %= l->layerData.size();
             ((MainEditor*)d)->layer_switchVariant(l, vNow);
+        }));
+    g_keybindManager.addKeybind("maineditor", "frame_new",
+        KeyCombo(TL("vsp.keybinds.maineditor.newframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->newFrame();
+        }));
+    g_keybindManager.addKeybind("maineditor", "frame_remove",
+        KeyCombo(TL("vsp.keybinds.maineditor.removeframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->deleteFrame(((MainEditor*)d)->activeFrame);
+        }));
+    g_keybindManager.addKeybind("maineditor", "frame_prev",
+        KeyCombo(TL("vsp.keybinds.maineditor.prevframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->switchFrame(((MainEditor*)d)->activeFrame-1);
+        }));
+    g_keybindManager.addKeybind("maineditor", "frame_next",
+        KeyCombo(TL("vsp.keybinds.maineditor.nextframe"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->switchFrame(((MainEditor*)d)->activeFrame+1);
+        }));
+    g_keybindManager.addKeybind("maineditor", "anim_playpause",
+        KeyCombo(TL("vsp.keybinds.maineditor.animplaypause"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->framePicker->playpauseBtn->click();
         }));
 
 

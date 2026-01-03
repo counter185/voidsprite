@@ -3198,7 +3198,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                         newEditor->splitSessionData = ssn;
                         newEditor->tileDimensions = ssn.tileDimensions;
                         newEditor->lastConfirmedSavePath = path;
-                        newEditor->comments = comments;
+                        newEditor->getCommentStack() = comments;
                         return newEditor;
                     }
 
@@ -3224,7 +3224,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
     f << "voidsprite split session file v0\n";
     f << "tiledim.x:" << data->tileDimensions.x << "\n";
     f << "tiledim.y:" << data->tileDimensions.y << "\n";
-    for (CommentData& comment : data->comments) {
+    for (CommentData& comment : data->getCommentStack()) {
         f << "comment:" << comment.data << ";" << comment.position.x << ";" << comment.position.y << "\n";
     }
     SplitSessionData ssn = data->splitSessionData;
@@ -3252,6 +3252,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
 
 void g_setupIO() {
     FileExporter
+        * exVOIDSNv7,
         * exVOIDSNv6,
         * exVOIDSNv5,
         * exVOIDSNv4,
@@ -3278,7 +3279,8 @@ void g_setupIO() {
         * exAVIF
         ;
 
-    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session version 6", ".voidsnv6", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", &writeVOIDSNv3));
@@ -3320,9 +3322,9 @@ void g_setupIO() {
     }
 
 
-    voidsnExporter = exVOIDSNv6;
+    voidsnExporter = exVOIDSNv7;
 
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED,
         [](PlatformNativePathString p) {
             return magicVerify(1, "voidsprite")(p) || magicVerify(9, "/VOIDSN.META/")(p)
                 || magicVerify(0, "\x01")(p) || magicVerify(0, "\x02")(p);
@@ -3349,6 +3351,8 @@ void g_setupIO() {
         magicVerify(4, "\xE0\xA5")));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(4, "\xE0\xA5")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Flipnote Studio animation", ".ppm", &readFlipnotePPM, NULL, FORMAT_PALETTIZED,
+        magicVerify(0, "PARA")));
 #if VSP_USE_LIBLCF
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 #endif
@@ -3386,7 +3390,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
     g_fileImporters.push_back(FileImporter::flatImporter("DDS", ".dds", &readDDS, NULL, FORMAT_RGB, magicVerify(0, "DDS")));
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF, exVTF));
-    g_fileImporters.push_back(FileImporter::flatImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED,
+    g_fileImporters.push_back(FileImporter::sessionImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED,
         magicVerify(0, "IDSP")));
     g_fileImporters.push_back(FileImporter::flatImporter("MSP", ".msp", &readMSP));
     g_fileImporters.push_back(FileImporter::flatImporter("X Bitmap", ".xbm", &readXBM, exXBM, FORMAT_PALETTIZED));
