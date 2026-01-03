@@ -199,9 +199,10 @@ public:
 
 class UndoCommentAdded : public UndoStackElementV2 {
 protected:
+    Frame* f;
     CommentData comment;
 public:
-    UndoCommentAdded(CommentData c) : comment(c) {}
+    UndoCommentAdded(Frame* f, CommentData c) : f(f), comment(c) {}
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
@@ -209,7 +210,7 @@ public:
 
 class UndoCommentRemoved : public UndoCommentAdded {
 public:
-    UndoCommentRemoved(CommentData c) : UndoCommentAdded(c) {}
+    UndoCommentRemoved(Frame* f, CommentData c) : UndoCommentAdded(f, c) {}
 
     void undo(MainEditor* editor) override { UndoCommentAdded::redo(editor); };
     void redo(MainEditor* editor) override { UndoCommentAdded::undo(editor); };

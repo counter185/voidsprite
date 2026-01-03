@@ -125,18 +125,18 @@ void UndoLayerOpacityChanged::redo(MainEditor* editor)
 
 void UndoCommentAdded::undo(MainEditor* editor)
 {
-    auto findAtPos = std::find_if(editor->comments.begin(), editor->comments.end(),
+    auto findAtPos = std::find_if(f->comments.begin(), f->comments.end(),
         [this](CommentData& c) {
             return xyEqual(c.position, comment.position);
         });
-    if (findAtPos != editor->comments.end()) {
-        editor->comments.erase(findAtPos);
+    if (findAtPos != f->comments.end()) {
+        f->comments.erase(findAtPos);
     }
 }
 
 void UndoCommentAdded::redo(MainEditor* editor)
 {
-    editor->comments.push_back(comment);
+    f->comments.push_back(comment);
 }
 
 

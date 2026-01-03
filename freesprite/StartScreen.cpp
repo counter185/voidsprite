@@ -564,7 +564,7 @@ void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string n
         MainEditor* newMainEditor = new MainEditor(templateLayer);
         std::vector<CommentData> templateComments = templ->placeComments();
         for (CommentData& comment : templateComments) {
-            newMainEditor->comments.push_back(comment);
+            newMainEditor->getCommentStack().push_back(comment);
         }
         newMainEditor->tileDimensions = g_templates[index]->tileSize();
         newMainEditor->tileGridPaddingBottomRight = g_templates[index]->tilePadding();

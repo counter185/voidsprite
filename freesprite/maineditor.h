@@ -118,7 +118,7 @@ class Frame {
 public:
     std::vector<Layer*> layers;
     int activeLayer = 0;
-    //std::vector<CommentData> comments;
+    std::vector<CommentData> comments;
 
     ~Frame() {
         for (Layer* l : layers) {
@@ -179,7 +179,6 @@ public:
     OperationQueue mainThreadOps;
 
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
-    std::vector<CommentData> comments;
 
     int activeFrame = 0;
     std::recursive_mutex framesMutex;
@@ -367,7 +366,7 @@ public:
     virtual void trySaveAsImage();
     std::map<std::string, std::string> makeSingleLayerExtdata();
     void loadSingleLayerExtdata(Layer* l);
-    std::string makeCommentDataString();
+    std::string makeCommentDataString(Frame* f);
     static std::vector<CommentData> parseCommentDataString(std::string data);
     void recenterCanvas();
     bool requestSafeClose();
@@ -480,6 +479,7 @@ public:
     void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_promptRenameCurrentVariant();
 
+    std::vector<CommentData>& getCommentStack() { return getCurrentFrame()->comments; }
     bool canAddCommentAt(XY a);
     void addComment(CommentData c);
     void addCommentAt(XY a, std::string c);

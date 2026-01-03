@@ -689,7 +689,7 @@ void MainEditor::drawSplitSessionFragments()
 
             if (pointInBox({ g_mouseX, g_mouseY }, r)) {
                 img.animTimer.startIfNotStarted();
-                localTtp.addTooltip(Tooltip{ {ixmax(0,r.x), ixmax(30, r.y - 30)},
+                localTtp.addTooltip(Tooltip{ {ixmax(0,r.x), ixmax(30 + actionbar->wxHeight, r.y - 30)},
                                           img.originalFileName,
                                           {0xff, 0xff, 0xff, 0xff},
                                           img.animTimer.percentElapsedTime(300)});
@@ -856,7 +856,7 @@ void MainEditor::renderComments()
     localTtp.tooltipFill = commentFill;
 
     XY origin = canvas.currentDrawPoint;
-    for (CommentData& c : comments) {
+    for (CommentData& c : getCommentStack()) {
         XY onScreenPosition = canvas.canvasPointToScreenPoint(c.position); //xyAdd(origin, { c.position.x * scale, c.position.y * scale });
         SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
         SDL_SetTextureAlphaMod(g_iconComment->get(g_rd), 0x80);
@@ -2172,7 +2172,7 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
     ret["SymY"] = std::to_string(symmetryPositions.y);
     ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
     ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
-    ret["CommentData"] = makeCommentDataString();
+    ret["CommentData"] = makeCommentDataString(getCurrentFrame());
     ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
     return ret;
 }
@@ -2188,17 +2188,17 @@ void MainEditor::loadSingleLayerExtdata(Layer* l) {
         if (kvmap.contains("SymY")) { symmetryPositions.y = std::stoi(kvmap["SymY"]); }
         if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
         if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
-        if (kvmap.contains("CommentData")) { comments = parseCommentDataString(kvmap["CommentData"]); }
+        if (kvmap.contains("CommentData")) { frames.front()->comments = parseCommentDataString(kvmap["CommentData"]); }
         if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
     }
     catch (std::exception e) {}
 }
 
-std::string MainEditor::makeCommentDataString()
+std::string MainEditor::makeCommentDataString(Frame* f)
 {
     std::string commentsData = "";
-    commentsData += std::to_string(comments.size()) + ';';
-    for (CommentData& c : comments) {
+    commentsData += std::to_string(f->comments.size()) + ';';
+    for (CommentData& c : f->comments) {
         commentsData += std::to_string(c.position.x) + ';';
         commentsData += std::to_string(c.position.y) + ';';
         std::string sanitizedData = c.data;
@@ -3811,7 +3811,7 @@ void MainEditor::endNetworkSession()
 
 bool MainEditor::canAddCommentAt(XY a)
 {
-    for (CommentData& c : comments) {
+    for (CommentData& c : getCommentStack()) {
         if (xyEqual(c.position, a)) {
             return false;
         }
@@ -3822,8 +3822,8 @@ bool MainEditor::canAddCommentAt(XY a)
 void MainEditor::addComment(CommentData c)
 {
     if (canAddCommentAt(c.position)) {
-        comments.push_back(c);
-        addToUndoStack(new UndoCommentAdded(c));
+        getCommentStack().push_back(c);
+        addToUndoStack(new UndoCommentAdded(getCurrentFrame(), c));
     }
 }
 
@@ -3837,12 +3837,13 @@ void MainEditor::removeCommentAt(XY a)
 {
     CommentData c = _removeCommentAt(a);
     if (c.data[0] != '\1') {
-        addToUndoStack(new UndoCommentRemoved(c));
+        addToUndoStack(new UndoCommentRemoved(getCurrentFrame(), c));
     }
 }
 
 CommentData MainEditor::_removeCommentAt(XY a)
 {
+    auto& comments = getCommentStack();
     for (int x = 0; x < comments.size(); x++) {
         if (xyEqual(comments[x].position, a)) {
             CommentData c = comments[x];
@@ -3850,9 +3851,7 @@ CommentData MainEditor::_removeCommentAt(XY a)
             return c;
         }
     }
-    logerr("_removeComment NOT FOUND\n");
-    //shitass workaround tell noone thanks
-    //@hirano185 hey girlie check this out!
+    logerr("_removeComment NOT FOUND");
     return { {0,0}, "\1" };
 }
 

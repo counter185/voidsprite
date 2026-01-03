@@ -142,7 +142,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData = editor->makeCommentDataString();
+        std::string commentsData = editor->makeCommentDataString(editor->getCurrentFrame());
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->getLayerStack()) {
@@ -213,7 +213,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
         //fwrite(&editor->tileDimensions.x, 4, 1, outfile);
         //fwrite(&editor->tileDimensions.y, 4, 1, outfile);
 
-        std::string commentsData = editor->makeCommentDataString();
+        std::string commentsData = editor->makeCommentDataString(editor->getCurrentFrame());
 
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->getLayerStack()) {
@@ -293,7 +293,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
         voidsnWriteU32(outfile, editor->canvas.dimensions.x);
         voidsnWriteU32(outfile, editor->canvas.dimensions.y);
 
-        std::string commentsData = editor->makeCommentDataString();
+        std::string commentsData = editor->makeCommentDataString(editor->getCurrentFrame());
 
         std::string guidelinesData = frmt("{};", editor->guidelines.size());
         for (Guideline& g : editor->guidelines) {
@@ -388,7 +388,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
         voidsnWriteU32(outfile, editor->canvas.dimensions.x);
         voidsnWriteU32(outfile, editor->canvas.dimensions.y);
 
-        std::string commentsData = editor->makeCommentDataString();
+        std::string commentsData = editor->makeCommentDataString(editor->getCurrentFrame());
 
         std::string guidelinesData = frmt("{};", editor->guidelines.size());
         for (Guideline& g : editor->guidelines) {
@@ -502,8 +502,6 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
         voidsnWriteU32(outfile, editor->canvas.dimensions.x);
         voidsnWriteU32(outfile, editor->canvas.dimensions.y);
 
-        std::string commentsData = editor->makeCommentDataString();
-
         std::string guidelinesData = frmt("{};", editor->guidelines.size());
         for (Guideline& g : editor->guidelines) {
             guidelinesData += frmt("{};", g.Serialize());
@@ -518,14 +516,15 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
             {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
-            {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
             {"guidelines", guidelinesData},
             {"edit.time", std::to_string(editor->editTime)},
             {"editor.altbg", editor->usingAltBG() ? "1" : "0"},
             {"frame.active", std::to_string(editor->activeFrame)},
-            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)}
+            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)},
+            {"frame.backtrace", std::to_string(editor->backtraceFrames)},
+            {"frame.fwdtrace", std::to_string(editor->fwdtraceFrames)},
         };
 
         if (editor->isPalettized) {
@@ -553,9 +552,10 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
         voidsnWriteU32(outfile, editor->frames.size());
 
         for (Frame*& f : editor->frames) {
-
+            std::string commentsData = editor->makeCommentDataString(f);
             std::map<std::string, std::string> frameExtData = {
                 {"layer.selected", std::to_string(f->activeLayer)},
+                {"comments", commentsData},
             };
 
             voidsnWriteU32(outfile, frameExtData.size());
@@ -735,6 +735,9 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
 
                     if (frameExtData.contains("layer.selected")) { frame->activeLayer = std::stoi(frameExtData["layer.selected"]); }
+                    if (frameExtData.contains("comments")) {
+                        frame->comments = MainEditor::parseCommentDataString(frameExtData["comments"]);
+                    }
                 }
 
                 int nlayers = voidsnReadU32(infile);
@@ -851,6 +854,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             if (extData.contains("editor.altbg")) { ret->setAltBG(extData["editor.altbg"] == "1"); }
             if (extData.contains("frame.active")) { ret->activeFrame = -1; ret->switchFrame(std::stoi(extData["frame.active"])); }
             if (extData.contains("frame.ms")) { ret->setMSPerFrame(std::stoi(extData["frame.ms"])); }
+            if (extData.contains("frame.backtrace")) { ret->backtraceFrames = std::stoi(extData["frame.backtrace"]); }
+            if (extData.contains("frame.fwdtrace")) { ret->fwdtraceFrames = std::stoi(extData["frame.fwdtrace"]); }
             if (extData.contains("sym.enabled")) {
                 ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
                 ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
@@ -864,12 +869,12 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             }
             if (extData.contains("comments")) {
                 std::string commentsData = extData["comments"];
-                ret->comments = ret->parseCommentDataString(commentsData);
+                frames.front()->comments = MainEditor::parseCommentDataString(commentsData);
             }
             if (extData.contains("guidelines")) {
                 std::string guidelinesData = extData["guidelines"];
                 auto split = splitString(guidelinesData, ';');
-                for (int i = 1; i < split.size(); i++) {
+                for (int i = 1; i < split.size() - 1; i++) {
                     try {
                         ret->guidelines.push_back(Guideline::Deserialize(split[i]));
                     }
