@@ -705,7 +705,7 @@ void MainEditorPalettized::setUpWidgets()
             {colorPickerPanel, g_iconCompactColorPicker},
             {brushPicker, g_iconCompactToolPicker},
             {layerPicker, g_iconCompactLayerPicker},
-            {framePicker, NULL}
+            {framePicker, g_iconCompactFramePicker}
         };
 
         SetupCompactEditor(createSections);

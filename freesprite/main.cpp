@@ -983,6 +983,7 @@ int main(int argc, char** argv)
         g_iconCompactColorPicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_colorpicker.png", rd); });
         g_iconCompactToolPicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_toolpicker.png", rd); });
         g_iconCompactLayerPicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_layerpicker.png", rd); });
+        g_iconCompactFramePicker = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_compact_framepicker.png", rd); });
         g_iconFilePickerLink = new ReldTex([](SDL_Renderer* rd) {
             auto r = IMGLoadAssetToTexture("icon_filepicker_link.png", rd); 
             SDL_SetTextureColorMod(r, 0xC3, 0xDB, 0xFF);
