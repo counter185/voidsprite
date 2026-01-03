@@ -6,6 +6,7 @@
 UIColorInputField::UIColorInputField(bool alpha)
 {
     allowAlpha = alpha;
+    sizeToContent = true;
     button = new UIButton();
     button->position = XY{ 0,0 };
     button->wxWidth = 125;

@@ -219,6 +219,8 @@ void MainEditor::render() {
             Frame* f = frames[targetIndex];
             renderFrameTo(f, frameFB.second);
             double alpha = traceOpacity * (1.0 - (double)backFrame / backtraceFrames);
+            SDL_Color colorMod = traceColorMod ? uint32ToSDLColor(g_config.backtraceColor) : SDL_Color{ 255,255,255,255 };
+            SDL_SetTextureColorMod(frameFB.second, colorMod.r, colorMod.g, colorMod.b);
             SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
             SDL_RenderCopy(g_rd, frameFB.second, NULL, &canvasRenderRect);
         }
@@ -233,6 +235,8 @@ void MainEditor::render() {
             Frame* f = frames[targetIndex];
             renderFrameTo(f, frameFB.second);
             double alpha = traceOpacity * (1.0 - (double)fwdFrame / fwdtraceFrames);
+            SDL_Color colorMod = traceColorMod ? uint32ToSDLColor(g_config.fwdtraceColor) : SDL_Color{ 255,255,255,255 };
+            SDL_SetTextureColorMod(frameFB.second, colorMod.r, colorMod.g, colorMod.b);
             SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
             SDL_RenderCopy(g_rd, frameFB.second, NULL, &canvasRenderRect);
         }

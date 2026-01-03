@@ -55,6 +55,8 @@ bool g_saveConfig() {
         file << "visualConfig=" << g_config.customVisualConfigPath << std::endl;
         file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
         file << "canvasZoomSensitivity=" << g_config.canvasZoomSensitivity << std::endl;
+        file << "backtraceColor=" << frmt("{:06X}", g_config.backtraceColor) << std::endl;
+        file << "fwdtraceColor=" << frmt("{:06X}", g_config.fwdtraceColor) << std::endl;
         
         auto keybinds = g_keybindManager.serializeKeybinds();
         for (const std::string& keybind : keybinds) {
@@ -109,6 +111,8 @@ void g_loadConfig() {
         if (config.contains("visualConfig")) { g_config.customVisualConfigPath = config["visualConfig"]; }
         if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
         if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
+        if (config.contains("backtraceColor")) { try { g_config.backtraceColor = std::stoul(config["backtraceColor"], nullptr, 16); } catch (std::exception&) {} }
+        if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
 
         g_configWasLoaded = true;
         file.close();

@@ -430,6 +430,7 @@
                                           "Does not apply to any currently open editor workspaces."},
     {"vsp.config.opt.longerrornotifs", "Longer error notifications"},
     {"vsp.config.opt.longerrornotifs.desc", "When enabled, error notifications will appear for 15 seconds instead of 5."},
+    {"vsp.config.opt.tracecolormods", "Trace color modifiers"},
 
     {"vsp.config.opt.openappdata", "Open app data directory..."},
     {"vsp.config.opt.openappdata.desc", "Open the directory where voidsprite stores its data."},

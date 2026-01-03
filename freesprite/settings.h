@@ -35,6 +35,8 @@ public:
     bool autoViewportScale = ONPLATFORM(VSP_PLATFORM_ANDROID, true, false);
     bool longErrorNotifs = false;
     bool hueWheelInsteadOfSlider = false;
+    u32 backtraceColor = 0xFF0000FF;
+    u32 fwdtraceColor = 0xFF00FF00;
 
     std::vector<std::string> lastOpenFiles;
 

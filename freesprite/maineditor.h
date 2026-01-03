@@ -191,6 +191,7 @@ public:
     int backtraceFrames = 0;
     int fwdtraceFrames = 0;
     double traceOpacity = 0.4;
+    bool traceColorMod = false;
 
     int selLayer = 0;
 

@@ -16,6 +16,7 @@
 #include "sdk_pluginloader.h"
 #include "UIStackPanel.h"
 #include "PopupYesNo.h"
+#include "UIColorInputField.h"
 
 enum ConfigOptions : int {
     CHECKBOX_OPEN_SAVED_PATH = 1,
@@ -268,6 +269,33 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showpenpressure"), TL("vsp.config.opt.showpenpressure.desc"), &g_config.showPenPressure, &posInTab));
 
     editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.canvaszoomsens"), "", &g_config.canvasZoomSensitivity, 1, 10, &posInTab));
+
+    UIColorInputField* backtraceColorInput = new UIColorInputField(false);
+    backtraceColorInput->button->wxWidth = 80;
+    backtraceColorInput->setColor(g_config.backtraceColor);
+    backtraceColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
+        g_config.backtraceColor = newColor;
+    };
+
+    UIColorInputField* fwdtraceColorInput = new UIColorInputField(false);
+    fwdtraceColorInput->setColor(g_config.fwdtraceColor);
+    fwdtraceColorInput->button->wxWidth = 80;
+    fwdtraceColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
+        g_config.fwdtraceColor = newColor;
+    };
+
+    UIStackPanel* stack = UIStackPanel::Horizontal(4, {
+        new UILabel(TL("vsp.config.opt.tracecolormods")),
+        Panel::Space(12,2),
+        new UILabel("Back"),
+        backtraceColorInput,
+        Panel::Space(4,2),
+        new UILabel("Next"),
+        fwdtraceColorInput
+    });
+    stack->position = posInTab;
+    editorSettingsPanel->subWidgets.addDrawable(stack);
+    posInTab.y += 35;
 
     /*
         -------------------------

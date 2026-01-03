@@ -8,10 +8,11 @@
 #include "UILabel.h"
 #include "UITextField.h"
 #include "UISlider.h"
+#include "UICheckbox.h"
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
-    wxWidth = 500;
+    wxWidth = 580;
     wxHeight = 154;
     parent = caller;
 
@@ -117,7 +118,8 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         fwdtraceInput,
         Panel::Space(6,2),
         new UILabel("Opacity"),
-        opacitySlider
+        opacitySlider,
+        new UICheckbox("Color mod.", &caller->traceColorMod)
     });
 
 
