@@ -57,7 +57,7 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layerss
     //all layers must have the same palette assigned!!!
     auto& layers = getLayerStack();
     isPalettized = true;
-    canvas.dimensions = { layers[0]->w, layers[0]->h };
+    canvas.dimensions = { layerss[0]->w, layerss[0]->h };
     for (auto& l : layerss) {
         layers.push_back(l);
     }

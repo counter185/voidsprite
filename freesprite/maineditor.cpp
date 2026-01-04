@@ -2082,11 +2082,27 @@ void MainEditor::copyImageToClipboard()
 
 void MainEditor::copyLayerToClipboard(Layer* l)
 {
-    if (platformPutImageInClipboard(l)) {
+    Layer* copyTarget = l;
+    if (isolateEnabled) {
+        SDL_Rect clipRect = isolatedFragment.getMinMaxRect();
+        XY copyOrigin = { clipRect.x, clipRect.y };
+        copyTarget = Layer::tryAllocLayer(clipRect.w, clipRect.h);
+        if (copyTarget == NULL) {
+            g_addNotification(NOTIF_MALLOC_FAIL);
+            return;
+        }
+        isolatedFragment.forEachPoint([&](XY p) {
+            copyTarget->setPixel(xySubtract(p, copyOrigin), l->getVisualPixelAt(p));
+        });
+    }
+    if (platformPutImageInClipboard(copyTarget)) {
         g_addNotification(SuccessNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardcopy")));
+    }
+    if (copyTarget != l) {
+        delete copyTarget;
     }
 }
 
