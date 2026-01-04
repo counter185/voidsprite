@@ -442,71 +442,51 @@ void StartScreen::takeInput(SDL_Event evt)
 
 void StartScreen::NewRGBSession(u32 fill)
 {
-    switch (newImageTabs->openTab) {
-        case 0:
-            {
-                Layer* newLayer = Layer::tryAllocLayer(newImgSizeTab0.x, newImgSizeTab0.y);
-                if (newLayer != NULL) {
-                    std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
-                    MainEditor* newMainEditor = new MainEditor(newLayer);
-                    g_addScreen(newMainEditor);
-                }
-                else {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                }
-            }
-            break;
-        case 1:
-            {
-                int newImgW = newImgCellSizeTab1.x * newImgCellCountTab1.x;
-                int newImgH = newImgCellSizeTab1.y * newImgCellCountTab1.y;
-                Layer* newLayer = Layer::tryAllocLayer(newImgW, newImgH);
-                if (newLayer != NULL) {
-                    std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
-                    MainEditor* newMainEditor = new MainEditor(newLayer);
-                    newMainEditor->tileDimensions = newImgCellSizeTab1;
-                    g_addScreen(newMainEditor);
-                }
-                else {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                }
-            }
-            break;
+    const XY maxImgSize = { 16384, 16384 };
+    XY imgSize = 
+        newImageTabs->openTab == 0 ? newImgSizeTab0 
+        : XY{ newImgCellSizeTab1.x * newImgCellCountTab1.x, newImgCellSizeTab1.y * newImgCellCountTab1.y };
+    if (imgSize.x > maxImgSize.x || imgSize.y > maxImgSize.y) {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+        return;
+    }
+
+    Layer* newLayer = Layer::tryAllocLayer(imgSize.x, imgSize.y);
+    if (newLayer != NULL) {
+        std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
+        MainEditor* newMainEditor = new MainEditor(newLayer);
+        if (newImageTabs->openTab == 1) {
+            newMainEditor->tileDimensions = newImgCellSizeTab1;
+        }
+        g_addScreen(newMainEditor);
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
     }
 }
 
 void StartScreen::NewIndexedSession()
 {
-    switch (newImageTabs->openTab) {
-        case 0:
-            {
-                LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgSizeTab0.x, newImgSizeTab0.y);
-                if (newLayer != NULL) {
-                    newLayer->palette = g_palettes()[PALETTE_DEFAULT];
-                    MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
-                    g_addScreen(newMainEditor);
-                }
-                else {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                }
-            }
-            break;
-        case 1:
-            {
-                int newImgW = newImgCellSizeTab1.x * newImgCellCountTab1.x;
-                int newImgH = newImgCellSizeTab1.y * newImgCellCountTab1.y;
-                LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(newImgW, newImgH);
-                if (newLayer != NULL) {
-                    newLayer->palette = g_palettes()[PALETTE_DEFAULT];
-                    MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
-                    newMainEditor->tileDimensions = newImgCellSizeTab1;
-                    g_addScreen(newMainEditor);
-                }
-                else {
-                    g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
-                }
-            }
-            break;
+    const XY maxImgSize = { 16384, 16384 };
+    XY imgSize =
+        newImageTabs->openTab == 0 ? newImgSizeTab0
+        : XY{ newImgCellSizeTab1.x * newImgCellCountTab1.x, newImgCellSizeTab1.y * newImgCellCountTab1.y };
+    if (imgSize.x > maxImgSize.x || imgSize.y > maxImgSize.y) {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+        return;
+    }
+
+    LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(imgSize.x, imgSize.y);
+    if (newLayer != NULL) {
+        newLayer->palette = g_palettes()[PALETTE_DEFAULT];
+        MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
+        if (newImageTabs->openTab == 1) {
+            newMainEditor->tileDimensions = newImgCellSizeTab1;
+        }
+        g_addScreen(newMainEditor);
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
     }
 }
 

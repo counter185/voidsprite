@@ -438,6 +438,7 @@ public:
     Layer* flattenImage();
     virtual Layer* flattenFrame(Frame* target);
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);
+    Layer* visualClipLayer(Layer* l, ScanlineMap* map);
     void flipAllLayersOnX();
     void flipAllLayersOnY();
 

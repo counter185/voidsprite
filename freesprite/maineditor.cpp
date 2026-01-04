@@ -2084,16 +2084,10 @@ void MainEditor::copyLayerToClipboard(Layer* l)
 {
     Layer* copyTarget = l;
     if (isolateEnabled) {
-        SDL_Rect clipRect = isolatedFragment.getMinMaxRect();
-        XY copyOrigin = { clipRect.x, clipRect.y };
-        copyTarget = Layer::tryAllocLayer(clipRect.w, clipRect.h);
+        copyTarget = visualClipLayer(l, &isolatedFragment);
         if (copyTarget == NULL) {
-            g_addNotification(NOTIF_MALLOC_FAIL);
             return;
         }
-        isolatedFragment.forEachPoint([&](XY p) {
-            copyTarget->setPixel(xySubtract(p, copyOrigin), l->getVisualPixelAt(p));
-        });
     }
     if (platformPutImageInClipboard(copyTarget)) {
         g_addNotification(SuccessNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
@@ -2956,6 +2950,21 @@ Layer* MainEditor::flattenFrame(Frame* target)
 Layer* MainEditor::mergeLayers(Layer* bottom, Layer* top)
 {
     return Layer::mergeLayers(bottom, top);
+}
+
+Layer* MainEditor::visualClipLayer(Layer* l, ScanlineMap* map)
+{
+    SDL_Rect clipRect = map->getMinMaxRect();
+    XY copyOrigin = { clipRect.x, clipRect.y };
+    Layer* copyTarget = Layer::tryAllocLayer(clipRect.w, clipRect.h);
+    if (copyTarget == NULL) {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+        return NULL;
+    }
+    map->forEachPoint([&](XY p) {
+        copyTarget->setPixel(xySubtract(p, copyOrigin), l->getVisualPixelAt(p));
+    });
+    return copyTarget;
 }
 
 void MainEditor::flipAllLayersOnX()
