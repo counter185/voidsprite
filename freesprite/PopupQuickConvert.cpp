@@ -122,6 +122,9 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
             }
 
             if (exporter->exportData(outPath, l)) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                emDownloadFile(outPath);
+#endif
                 g_addNotification(SuccessNotification("Success", "Exported file"));
             }
             else {
