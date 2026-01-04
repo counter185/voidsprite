@@ -49,7 +49,7 @@ void BrushCurve::renderOnCanvas(MainEditor* editor, int scale)
             break;
         case BRUSHCURVE_PLACEP1:
         {
-            std::vector<XY> bezierPoints = { startPos, dragPoint, endPos };
+            std::vector<XY> bezierPoints = { startPos, dragPoint, dragPoint, endPos };
             rasterizeBezierCurve(bezierPoints, [&](XY p) {
                 drawSelectedPoint(editor, p);
             });
