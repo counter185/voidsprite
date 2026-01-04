@@ -546,6 +546,9 @@
     {"vsp.brush.squarepixelarcy", "1x1 Pixel (arc Y)"},
     {"vsp.brush.line:v2", "Line"},
     {"vsp.brush.line.desc", "Hold Mouse Left at the beginning of the line, then release at the end point"},
+    {"vsp.brush.curve", "Curved line"},
+    {"vsp.brush.curve.desc", "Draw a line by holding Mouse Left.\n"
+                             "Then, click Mouse Left at two bending points to create a curve."},
     {"vsp.brush.pathfindline", "1px Pathfind Line"},
     {"vsp.brush.pathfindline.desc", "Hold Mouse Left at the start point, then release at the end point.\n"
                                     "Pathfinding will be used to draw it."},

@@ -10,6 +10,7 @@
 #include "BrushFill.h"
 #include "Brush1pxLinePathfind.h"
 #include "BrushCircle.h"
+#include "BrushCurve.h"
 #include "ToolRectMove.h"
 #include "Brush9SegmentRect.h"
 #include "Brush1x1ArcX.h"
@@ -39,8 +40,10 @@ void BaseBrush::drawWholeSelectedPoint(XY canvasDrawPoint, XY onCanvasPoint, int
 {
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
     drawLocalPoint(canvasDrawPoint, onCanvasPoint, scale);
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-    drawPointOutline(canvasDrawPoint, onCanvasPoint, scale);
+    if (scale > 2) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+        drawPointOutline(canvasDrawPoint, onCanvasPoint, scale);
+    }
 }
 
 void BaseBrush::drawActiveColorPoint(MainEditor* e, XY onCanvasPoint)
@@ -94,6 +97,7 @@ void g_loadBrushes()
     g_brushes.push_back(new Brush1x1ArcY());
     g_brushes.push_back(new Brush1pxLine());
     g_brushes.push_back(new Brush1pxLinePathfind());
+    g_brushes.push_back(new BrushCurve());
     g_brushes.push_back(new BrushBezierLine());
     g_brushes.push_back(new BrushRect());
     g_brushes.push_back(new BrushRectFill());
