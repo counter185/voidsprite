@@ -29,9 +29,9 @@ class BrushCurve :
     std::map<std::string, BrushProperty> getProperties() override
     {
         return {
-            {"brush.pxline.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
-            {"brush.pxline.gradsize", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.gradsize"),0)},
-            {"brush.pxline.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
+            {"brush.curve.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
+            {"brush.curve.gradsize", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.gradsize"),0)},
+            {"brush.curve.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
         };
     }
     XY getSection() override { return XY{ 0,2 }; }

@@ -418,6 +418,10 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
             {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
 
+        for (auto& [key, value] : editor->toolProperties) {
+            extData[frmt("tool.property:{}", key)] = std::to_string(value);
+        }
+
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
             std::string paletteData = "";
@@ -526,6 +530,10 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
             {"frame.backtrace", std::to_string(editor->backtraceFrames)},
             {"frame.fwdtrace", std::to_string(editor->fwdtraceFrames)},
         };
+
+        for (auto& [key, value] : editor->toolProperties) {
+            extData[frmt("tool.property:{}", key)] = std::to_string(value);
+        }
 
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
@@ -883,6 +891,18 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                     }
                 }
             }
+            for (auto& [key, value] : extData) {
+                if (stringStartsWithIgnoreCase(key, "tool.property:")) {
+                    std::string propName = key.substr(14);
+                    try {
+                        ret->toolProperties[propName] = std::stod(value);
+                    }
+                    catch (std::exception& e) {
+                        logerr(frmt("Failed to parse tool property {}:\n {}", propName, e.what()));
+                    }
+                }
+            }
+            ret->initToolParameters();
             if (!ret->isPalettized && extData.contains("layer.opacity")) {
                 std::string layerOpacityData = extData["layer.opacity"];
                 auto& layers = frames.front()->layers;

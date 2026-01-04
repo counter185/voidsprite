@@ -68,9 +68,9 @@ void BrushCurve::renderOnCanvas(MainEditor* editor, int scale)
 
 void BrushCurve::putLine(MainEditor* editor)
 {
-    bool roundC = editor->toolProperties["brush.pxline.round"] == 1;
-    bool gradSize = editor->toolProperties["brush.pxline.gradsize"] == 1;
-    int size = (int)(editor->toolProperties["brush.pxline.size"]);
+    bool roundC = editor->toolProperties["brush.curve.round"] == 1;
+    bool gradSize = editor->toolProperties["brush.curve.gradsize"] == 1;
+    int size = (int)(editor->toolProperties["brush.curve.size"]);
 
     std::vector<XY> bezierPoints = { startPos, p1Pos, p2Pos, endPos };
     std::vector<XY> outPoints;
