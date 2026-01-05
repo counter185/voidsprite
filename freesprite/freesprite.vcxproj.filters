@@ -702,6 +702,9 @@
     <ClCompile Include="brush\BrushCurve.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_gif.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1399,6 +1402,9 @@
     </ClInclude>
     <ClInclude Include="brush\BrushCurve.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_gif.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

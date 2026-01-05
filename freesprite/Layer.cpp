@@ -90,10 +90,11 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
         if (!fast || sourceLayer->colorKeySet) {
             for (int x = 0; x < clipSource.w; x++) {
                 u32 px = sourceLayer->getPixelAt(XY{ x + clipSource.x, y + clipSource.y}, false);
-                if (sourceLayer->colorKeySet && px == sourceLayer->colorKey) {
+                if ((sourceLayer->colorKeySet && px == sourceLayer->colorKey)
+                    || (sourceLayer->isPalettized && px == -1)) {
                     continue;
                 }
-                u32 blendedPixel = alphaBlend(getPixelAt(XY{ x + position.x, y + position.y }), px);
+                u32 blendedPixel = isPalettized ? px : alphaBlend(getPixelAt(XY{ x + position.x, y + position.y }), px);
                 setPixel(XY{ x + position.x, y + position.y }, blendedPixel);
             }
         }

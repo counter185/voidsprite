@@ -53,6 +53,7 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_iw.h"
 #include "io/io_xna.h"
 #include "io/io_flipnote.h"
+#include "io/io_gif.h"
 
 #include "io/io_palettes.h"
 
@@ -78,7 +79,6 @@ Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readGIF(PlatformNativePathString path, u64 seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 

@@ -9,6 +9,41 @@
 #include "../MainEditorPalettized.h"
 #include "../LayerPalettized.h"
 
+class BitReader {
+private:
+    FILE* f = NULL;
+    u8* data = NULL;
+    bool usingFile = false;
+
+    int bitsInBuffer = 0;
+    u8 buffer = 0;
+public:
+    BitReader(FILE* file) : f(file), usingFile(true) {}
+    BitReader(u8* inputData) : data(inputData), usingFile(false) {}
+    u32 readBits(int n) {
+        int result = 0;
+        int bitsRead = 0;
+        while (bitsRead < n) {
+            if (bitsInBuffer == 0) {
+                if (usingFile) {
+                    fread(&buffer, 1, 1, f);
+                }
+                else {
+                    buffer = *(data++);
+                }
+                bitsInBuffer = 8;
+            }
+            //int bytesLeft = n - bitsRead;
+            //int readBits = ixmin(bitsInBuffer, bytesLeft);
+            result |= (buffer & 1) << bitsRead;
+            buffer >>= 1;
+            bitsInBuffer--;
+            bitsRead++;
+        }
+        return result;
+    }
+};
+
 class RIFFChunk {
 public:
     std::string id = "    ";
