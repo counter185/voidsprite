@@ -196,6 +196,10 @@
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},
     {"vsp.launchpad.popup.connectcollab", "Connect to network canvas"},
     {"vsp.launchpad.popup.connectcollab.desc", "Enter the address to connect to"},
+    {"vsp.launchpad.popup.crashsaves", "Recover last open sessions?"},
+    {"vsp.launchpad.popup.crashsaves.desc", "Sessions were saved after the last fatal error. Open them now?\n\n"
+                                            UTF8_DIAMOND "If you choose No, you can still access the recovered files\n"
+                                            "in File > Recovery Autosaves."},
 
     {"vsp.launchpad.filepermcheck.title", "File access permission required"},
     {"vsp.launchpad.filepermcheck.desc", "To access your files and enable split sessions, voidsprite requires file management permissions.\n"

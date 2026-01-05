@@ -318,7 +318,7 @@ public:
     void render() override;
     void tick() override;
     void takeInput(SDL_Event evt) override;
-    void dropEverythingYoureDoingAndSave() override;
+    std::vector<std::string> dropEverythingYoureDoingAndSave() override;
 
     std::string getName() override { 
         return TL("vsp.maineditor") 
@@ -382,7 +382,7 @@ public:
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
     virtual void tickAutosave();
-    void createRecoveryAutosave(std::string insertIntoFilename = "");
+    PlatformNativePathString createRecoveryAutosave(std::string insertIntoFilename = "");
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     bool tryAddReference(PlatformNativePathString path);

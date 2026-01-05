@@ -1841,15 +1841,15 @@ void MainEditor::takeInput(SDL_Event evt) {
     }
 }
 
-void MainEditor::dropEverythingYoureDoingAndSave()
+std::vector<std::string> MainEditor::dropEverythingYoureDoingAndSave()
 {
     try {
-        createRecoveryAutosave(frmt("-crash-{}", g_crashsaveIndex++));
-        logerr("crashsave created");
+        return { convertStringToUTF8OnWin32(createRecoveryAutosave(frmt("-crash-{}", g_crashsaveIndex++))) };
     }
     catch (std::exception& e) {
         logerr(frmt("failed to crashsave:\n {}", e.what()));
     }
+    return {};
 }
 
 void MainEditor::focusOnColorInputTextBox()
@@ -2606,7 +2606,7 @@ void MainEditor::tickAutosave()
     }
 }
 
-void MainEditor::createRecoveryAutosave(std::string insertIntoFilename)
+PlatformNativePathString MainEditor::createRecoveryAutosave(std::string insertIntoFilename)
 {
     time_t now = time(NULL);
     tm ltm;
@@ -2620,9 +2620,12 @@ void MainEditor::createRecoveryAutosave(std::string insertIntoFilename)
 #endif
     std::string autosaveName = "autosave" + frmt("{}_{}-{:02}-{:02}--{:02}-{:02}-{:02}", insertIntoFilename, ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
     try {
-        if (voidsnExporter->exportData(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/autosaves/" + autosaveName), this)) {
+        std::filesystem::path confPath = platformEnsureDirAndGetConfigFilePath();
+        auto autosavePath = confPath.parent_path() / "autosaves" / autosaveName;
+        if (voidsnExporter->exportData(autosavePath, this)) {
             g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
             changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
+            return autosavePath;
         }
         else {
             g_addNotification(ErrorNotification("Recovery autosave", "Autosave failed"));
@@ -2631,6 +2634,7 @@ void MainEditor::createRecoveryAutosave(std::string insertIntoFilename)
     catch (std::exception e) {
         g_addNotification(ErrorNotification("Recovery autosave", "Exception during autosave"));
     }
+    return PlatformNativePathString();
 }
 
 //todo: clean all of that up

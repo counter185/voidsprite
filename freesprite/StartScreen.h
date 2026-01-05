@@ -87,6 +87,7 @@ public:
     void renderBGStars();
     void openImageLoadDialog();
     void promptOpenFromURL();
+    void checkAndPromptCrashSaves();
     static void promptConnectToNetworkCanvas(std::string ip = "", std::string port = "");
     void updateCheckFinished();
     void genBGStars();

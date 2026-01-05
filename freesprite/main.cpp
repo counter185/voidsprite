@@ -4,6 +4,7 @@
 #include <queue>
 #include <regex>
 #include <signal.h>
+#include <fstream>
 
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
@@ -356,11 +357,24 @@ bool main_WindowsMessageHook(void* userdata, MSG* msg) {
 
 void main_saveAllScreens()
 {
-    for (auto& [id, wd] : g_windows) {
-        for (auto& s : wd->screenStack) {
-            s->dropEverythingYoureDoingAndSave();
+    std::vector<std::string> savedPaths;
+
+    try {
+        for (auto& [id, wd] : g_windows) {
+            for (auto& s : wd->screenStack) {
+                savedPaths = joinVectors({ savedPaths, s->dropEverythingYoureDoingAndSave() });
+            }
         }
     }
+    catch (std::exception&) {}
+
+    std::filesystem::path configPath = platformEnsureDirAndGetConfigFilePath();
+    auto crashSavesPath = configPath / "crashsaves.txt";
+    std::ofstream savedPathsFile = std::ofstream(crashSavesPath);
+    for (std::string& p : savedPaths) {
+        savedPathsFile << p << "\n";
+    }
+    savedPathsFile.close();
 }
 
 static void main_handleSIGSEGV(int sig) {
@@ -1245,14 +1259,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception& e) {
 
-        try {
-            for (auto& [id, wd] : g_windows) {
-                for (auto& s : wd->screenStack) {
-                    s->dropEverythingYoureDoingAndSave();
-                }
-            }
-        }
-        catch (std::exception&) {}
+        main_saveAllScreens();
 
         logerr("-------------------------------------------");
         logerr("voidsprite crashed with an uncaught exception");

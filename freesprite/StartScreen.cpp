@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "StartScreen.h"
 #include "FontRenderer.h"
 #include "maineditor.h"
@@ -51,6 +53,7 @@ StartScreen::StartScreen() {
     if (g_config.checkUpdates) {
         g_startNewAsyncOperation([]() { runUpdateCheck(); });
     }
+    checkAndPromptCrashSaves();
 
     UILabel* title = new UILabel("voidsprite");
     title->position = { 10, 40 };
@@ -929,6 +932,45 @@ void StartScreen::promptOpenFromURL()
         }
     };
     g_addPopup(urlPrompt);
+}
+
+void StartScreen::checkAndPromptCrashSaves()
+{
+    std::filesystem::path configPath = platformEnsureDirAndGetConfigFilePath();
+    auto crashSavesPath = configPath / "crashsaves.txt";
+    if (std::filesystem::exists(crashSavesPath)) {
+        PopupYesNo* popup = new PopupYesNo(TL("vsp.launchpad.popup.crashsaves"), TL("vsp.launchpad.popup.crashsaves.desc"));
+        popup->onFinishCallback = [crashSavesPath](PopupYesNo* p, bool yes) {
+            try {
+                if (yes) {
+                    std::ifstream crashSavesFile(crashSavesPath);
+                    std::vector<MainEditor*> sessions;
+                    std::string line;
+                    while (std::getline(crashSavesFile, line)) {
+                        std::string path = line;
+
+                        MainEditor* newSession = loadAnyIntoSession(path);
+                        if (newSession != NULL) {
+                            sessions.push_back(newSession);
+                        }
+                        else {
+                            logerr(frmt("Failed to open: {}", path));
+                        }
+                    }
+                    crashSavesFile.close();
+
+                    for (MainEditor* session : sessions) {
+                        g_addScreen(session);
+                    }
+                }
+                std::filesystem::remove(crashSavesPath);
+            }
+            catch (std::exception& e) {
+                logerr(frmt("Error in crashsave prompt:\n {}", e.what()));
+            }
+        };
+        g_addPopup(popup);
+    }
 }
 
 void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)

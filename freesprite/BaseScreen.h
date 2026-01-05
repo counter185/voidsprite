@@ -32,7 +32,7 @@ public:
     virtual void onReturnToScreen() {}
 
     //called on crash
-    virtual void dropEverythingYoureDoingAndSave() {}
+    virtual std::vector<std::string> dropEverythingYoureDoingAndSave() { return {}; }
 
     virtual std::string getName() { return "Base screen"; }
     virtual std::string getRPCString() { return getName(); }
