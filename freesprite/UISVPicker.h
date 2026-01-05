@@ -7,7 +7,7 @@ public:
 	float sPos = 0.0f;
 	float vPos = 1.0f;
 
-	int wxWidth = 360, wxHeight = 200;
+	int wxWidth = 300, wxHeight = 200;
 	bool mouseHeld = false;
 
 	UIColorPicker* parent;

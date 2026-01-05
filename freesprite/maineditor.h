@@ -236,7 +236,8 @@ public:
     bool replaceAlphaMode = false;
     bool eraserMode = false;
     bool blendAlphaMode = false;
-    uint32_t pickedColor = 0xFFFFFF;
+    u32 pickedColor = 0xFFFFFF;
+    u32 pickedAlpha = 255;
 
     bool qModifier = false;
     XY lockedTilePreview = { -1,-1 };
@@ -376,6 +377,7 @@ public:
     virtual uint32_t pickColorFromAllLayers(XY);
     void regenerateLastColors();
     virtual void setActiveColor(uint32_t);
+    void setActiveAlpha(uint8_t alpha);
     virtual uint32_t getActiveColor();
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);

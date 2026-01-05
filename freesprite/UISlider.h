@@ -9,6 +9,7 @@ public:
     float sliderPos = 0.0f;
 
     int wxWidth = 250, wxHeight = 40;
+    bool verticalSlider = false;
     bool mouseHeld = false;
 
     Fill backgroundFill = Fill::None();

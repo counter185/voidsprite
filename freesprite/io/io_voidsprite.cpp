@@ -252,6 +252,7 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             }
             extData["layer.opacity"] = layerOpacityData;
             extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
+            extData["activecolor.alpha"] = frmt("{:02X}", editor->pickedAlpha);
         }
 
         nvalBuffer = extData.size();
@@ -341,6 +342,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             }
             extData["layer.opacity"] = layerOpacityData;
             extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
+            extData["activecolor.alpha"] = frmt("{:02X}", editor->pickedAlpha);
         }
 
         voidsnWriteU32(outfile, extData.size());
@@ -440,6 +442,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
             }
             extData["layer.opacity"] = layerOpacityData;
             extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
+            extData["activecolor.alpha"] = frmt("{:02X}", editor->pickedAlpha);
         }
 
         voidsnWriteU32(outfile, extData.size());
@@ -548,6 +551,7 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
         }
         else {
             extData["activecolor"] = frmt("{:06X}", editor->pickedColor);
+            extData["activecolor.alpha"] = frmt("{:02X}", editor->pickedAlpha);
         }
 
         voidsnWriteU32(outfile, extData.size());
@@ -917,6 +921,10 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             if (!ret->isPalettized && extData.contains("activecolor")) {
                 uint32_t c = std::stoul(extData["activecolor"], NULL, 16);
                 ret->setActiveColor(c);
+            }
+            if (!ret->isPalettized && extData.contains("activecolor.alpha")) {
+                uint8_t a = (uint8_t)std::stoul(extData["activecolor.alpha"], NULL, 16);
+                ret->setActiveAlpha(a);
             }
             if (ret->isPalettized && extData.contains("palette.index")) {
                 ((MainEditorPalettized*)ret)->pickedPaletteIndex = std::stoi(extData["palette.index"]);

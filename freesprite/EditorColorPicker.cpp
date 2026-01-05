@@ -6,6 +6,7 @@
 #include "ScrollingPanel.h"
 #include "Notification.h"
 #include "TabbedView.h"
+#include "UITextField.h"
 
 EditorColorPicker::EditorColorPicker(MainEditor* c) : UIColorPicker() {
     caller = c;
@@ -26,6 +27,30 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) : UIColorPicker() {
     blendModeButton->tooltip = "Alpha blend";
     blendModeButton->onClickCallback = [this](UIButton* btn) { toggleAlphaBlendMode(); };
     subWidgets.addDrawable(blendModeButton);
+
+    UINumberInputField* alphaInput = new UINumberInputField((int*)&c->pickedAlpha);
+    alphaInput->position = { 255, 350 };
+    alphaInput->wxWidth = 50;
+    alphaInput->textColor = SDL_Color(255, 255, 255, 255);
+    alphaInput->tooltip = "Alpha (transparency)";
+    alphaInput->validateFunction = [](int v) { return v >= 0 && v <= 255; };
+    alphaInput->valueUpdatedCallback = [this](int newVal) {
+        updateAlphaSlider();
+    };
+    subWidgets.addDrawable(alphaInput);
+
+    alphaSlider = new UIColorSlider();
+    alphaSlider->colors = { 0xFFFFFFFF, 0x00FFFFFF };
+    alphaSlider->allowAlpha = true;
+    alphaSlider->verticalSlider = true;
+    alphaSlider->position = g_config.hueWheelInsteadOfSlider ? XY{320, 0} : XY{ 320, 40 };
+    alphaSlider->wxWidth = 30;
+    alphaSlider->wxHeight = g_config.hueWheelInsteadOfSlider ? 240 : 200;
+    updateAlphaSlider();
+    alphaSlider->onChangeValueCallback = [this](UISlider* s, float v) {
+        caller->pickedAlpha = (u8)(v * 255);
+    };
+    colorTabs->tabs[0].wxs.addDrawable(alphaSlider);
 
     onColorChangedCallback = [this](UIColorPicker* from, u32 col) {
         caller->pickedColor = col;
@@ -91,6 +116,11 @@ void EditorColorPicker::toggleAlphaBlendMode()
 {
     caller->blendAlphaMode = !caller->blendAlphaMode;
     updateEraserAndAlphaBlendButtons();
+}
+
+void EditorColorPicker::updateAlphaSlider()
+{
+    alphaSlider->setValue(0, 255, caller->pickedAlpha);
 }
 
 void EditorColorPicker::pushLastColor(uint32_t col)

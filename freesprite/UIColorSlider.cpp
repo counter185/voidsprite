@@ -16,9 +16,20 @@ void UIColorSlider::render(XY pos)
                 subRect.w = wxWidth - (wSplitInt * x);
             }
             subRect.x = pos.x + x * wSplitInt;
-            u32 color1 = colors[x] | 0xFF000000;
-            u32 color2 = colors[x + 1] | 0xFF000000;
-            renderGradient(subRect, color1, color2, color1, color2);
+            
+            u32 color1 = colors[x];
+            u32 color2 = colors[x + 1];
+            if (!allowAlpha) {
+                color1 |= 0xff000000;
+                color2 |= 0xff000000;
+            }
+
+            if (verticalSlider) {
+                renderGradient(subRect, color1, color1, color2, color2);
+            }
+            else {
+                renderGradient(subRect, color1, color2, color1, color2);
+            }
 
             //debug subgradients
 #if _DEBUG

@@ -2038,14 +2038,18 @@ void MainEditor::FillTexture() {
 void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry) {
     if ((currentPattern->canDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
         if (!isolateEnabled || isolatedFragment.pointExists(position)) {
-            uint32_t targetColor = color;
+
+            u8 targetColorAlpha = eraserMode ? 0 : pickedAlpha;
+            u32 colorRGB = color & 0xFFFFFF;
+            u32 targetColor = (targetColorAlpha << 24) + colorRGB;
+
             if (blendAlphaMode) {
                 if (eraserMode) {
                     targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
                 }
                 targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
             }
-            getCurrentLayer()->setPixel(position, targetColor & (eraserMode ? 0xffffff : 0xffffffff));
+            getCurrentLayer()->setPixel(position, targetColor);
             if (pushToLastColors) {
                 colorPicker->pushLastColor(color);
             }
@@ -2553,6 +2557,14 @@ void MainEditor::regenerateLastColors()
 void MainEditor::setActiveColor(uint32_t col)
 {
     colorPicker->setColorRGB(col);
+}
+
+void MainEditor::setActiveAlpha(uint8_t alpha)
+{
+    if (!isPalettized) {
+        pickedAlpha = alpha;
+        colorPicker->updateAlphaSlider();
+    }
 }
 
 uint32_t MainEditor::getActiveColor()
