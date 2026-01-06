@@ -54,7 +54,6 @@
 #include "PopupChooseAction.h"
 
 #include "discord_rpc.h"
-#include "io/io_avi.h"
 
 #if defined(__unix__)
 #include <time.h>
@@ -1004,12 +1003,6 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    /*{SDL_SCANCODE_COMMA, {"debug save avi",
-                            [this]() {
-                                writeAVI(convertStringOnWin32("out.avi"), this);
-                            }
-                        }
-                    },*/
 #if VSP_NETWORKING
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"),
                             [this]() {

@@ -54,6 +54,7 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_xna.h"
 #include "io/io_flipnote.h"
 #include "io/io_gif.h"
+#include "io/io_avi.h"
 
 #include "io/io_palettes.h"
 
