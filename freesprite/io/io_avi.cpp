@@ -37,7 +37,7 @@ bool writeAVI(PlatformNativePathString path, MainEditor* session)
     strhData.wLanguage = 0;
     strhData.dwInitialFrames = 0;
     strhData.dwScale = session->frameAnimMSPerFrame;
-    strhData.dwRate = session->frameAnimMSPerFrame * session->frames.size();
+    strhData.dwRate = 1000;
     strhData.dwStart = 0;
     strhData.dwLength = session->frames.size();
     strhData.dwSuggestedBufferSize = aviHeader.dwSuggestedBufferSize;
