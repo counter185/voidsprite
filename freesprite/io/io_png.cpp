@@ -14,8 +14,11 @@ std::string getlibpngVersion()
     return PNG_LIBPNG_VER_STRING;
 }
 
-size_t readPNGBytes = 0;   //if you promise to tell noone
-size_t PNGFileSize = 0;
+struct PNGReadContext {
+    u8* data;
+    size_t readPNGBytes;
+    size_t PNGFileSize;
+};
 
 void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
     png_voidp io_ptr = png_get_io_ptr(png_ptr);
@@ -24,9 +27,9 @@ void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byt
         return;
     }
 
-    char* inputStream = (char*)io_ptr;
-    memcpy(outBytes, inputStream + readPNGBytes, byteCountToRead);
-    readPNGBytes += byteCountToRead;
+    PNGReadContext* ctx = (PNGReadContext*)io_ptr;
+    memcpy(outBytes, ctx->data + ctx->readPNGBytes, byteCountToRead);
+    ctx->readPNGBytes += byteCountToRead;
 }
 
 Layer* readPNGFromBase64String(std::string b64)
@@ -188,19 +191,22 @@ Layer* _readPNG(png_structp png, png_infop info) {
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
 
     if (dataSize < 8) {
-        logprintf("PNG data too small\n");
+        logerr("PNG data too small");
         return NULL;
     }
     else if (png_sig_cmp(data, 0, 8)) {
-        logprintf("Not a PNG file\n");
+        logerr("Not a PNG file");
         return NULL;
     }
 
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     png_infop info = png_create_info_struct(png);
-    readPNGBytes = 0;
-    PNGFileSize = dataSize;
-    png_set_read_fn(png, (void*)data, _readPNGDataFromMem);
+    PNGReadContext readCtx{
+        .data = data,
+        .readPNGBytes = 0,
+        .PNGFileSize = dataSize
+    };
+    png_set_read_fn(png, (void*)&readCtx, _readPNGDataFromMem);
     //png_set_sig_bytes(png, kPngSignatureLength);
     png_read_info(png, info);
 

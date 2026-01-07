@@ -56,7 +56,7 @@ Layer* readDIBv5FromMem(u8* mem, u64 size)
                 return readPNGFromMem(mem + startOffset, size - startOffset);
                 break;
             default:
-                logprintf("-- unsupported compression type\n");
+                logerr("-- unsupported compression type");
                 break;
 
         }
