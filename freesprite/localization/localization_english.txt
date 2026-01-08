@@ -468,6 +468,10 @@
     {"vsp.config.opt.huewheel", "Use hue wheel instead of slider"},
     {"vsp.config.opt.huewheel.desc", "The Visual color picker will use a wheel for hue instead of a slider.\n"
                                      "Does not apply to any currently open editor workspaces."},
+    {"vsp.config.opt.smoothfonts", "Smooth fonts"},
+    {"vsp.config.opt.smoothfonts.desc", "If disabled, fonts will be rendered with solid pixels instead of smooth.\n"
+                                        "This will make custom pixel fonts render properly.\n"
+                                        "The Text tool is not affected by this setting."},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

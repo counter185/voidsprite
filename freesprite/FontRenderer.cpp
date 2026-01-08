@@ -226,11 +226,12 @@ GlyphData TextRenderer::getGlyphForChar(uint32_t ch, int size)
 void TTFFontObject::RenderGlyph(uint32_t a, int size)
 {
     if (!charInBounds(a)) {
-        logprintf("** requested glyph outside of bounds\n");
+        logerr("** requested glyph outside of bounds");
     }
     if (TTF_FontHasGlyph(font, a)) {
         TTF_SetFontSize(font, size);
-        SDL_Surface* gl = TTF_RenderGlyph_Blended(font, (Uint32)a, SDL_Color{ 255,255,255,255 });
+        SDL_Surface* gl = g_config.smoothFonts ? TTF_RenderGlyph_Blended(font, (Uint32)a, SDL_Color{ 255,255,255,255 })
+            : TTF_RenderGlyph_Solid(font, (Uint32)a, SDL_Color{ 255,255,255,255 });
         if (gl != NULL) {
             SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
 

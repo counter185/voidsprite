@@ -37,6 +37,7 @@ public:
     bool hueWheelInsteadOfSlider = false;
     u32 backtraceColor = 0xFF0000FF;
     u32 fwdtraceColor = 0xFF00FF00;
+    bool smoothFonts = true;
 
     std::vector<std::string> lastOpenFiles;
 

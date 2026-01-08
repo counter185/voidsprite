@@ -32,6 +32,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"autoScreenScale", &g_config.autoViewportScale},
         {"longErrorNotifs", &g_config.longErrorNotifs},
         {"hueWheelInsteadOfSlider", &g_config.hueWheelInsteadOfSlider},
+        {"smoothFonts", &g_config.smoothFonts},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

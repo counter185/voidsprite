@@ -221,6 +221,12 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->subWidgets.addDrawable(dd2);
     posInTab.y += 35;
 
+    UICheckbox* smoothFontCheckbox = optionCheckbox(TL("vsp.config.opt.smoothfonts"), TL("vsp.config.opt.smoothfonts.desc"), &g_config.smoothFonts, &posInTab);
+    visualSettingsPanel->subWidgets.addDrawable(smoothFontCheckbox);
+    smoothFontCheckbox->onStateChangeCallback = [this](UICheckbox* cb, bool newState) {
+        g_reloadFonts();
+    };
+
     /*
         -------------------------
         EDITOR TAB
