@@ -420,6 +420,11 @@ int lastFrameCount = 0;
 int rtFrameCount = 0;
 u64 frameCountTimestamp = 0;
 
+int main_getLastFPS()
+{
+    return lastFrameCount;
+}
+
 void g_mainLoop() {
 
     SDL_Event evt;

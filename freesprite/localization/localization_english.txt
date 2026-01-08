@@ -39,6 +39,7 @@
     {"vsp.nav.help", "Help"},
     {"vsp.nav.window", "Window"},
     {"vsp.nav.view", "View"},
+    {"vsp.nav.preview", "Preview"},
 
     //undo op names 
     {"vsp.undo.layermodified", "Layer modified"},

@@ -3,6 +3,29 @@
 
 #include "Panel.h"
 
+struct NavbarSection {
+    std::string name;
+    std::vector<SDL_Scancode> order;
+    std::map<SDL_Scancode, NamedOperation> actions;
+    HotReloadableTexture* icon = NULL;
+    UIButton* button = NULL;
+};
+
+inline NavbarSection makeNavbarSection(std::string name, HotReloadableTexture* icon, std::vector<std::pair<SDL_Scancode, NamedOperation>> actions) {
+    NavbarSection sec{};
+    sec.name = name;
+    sec.icon = icon;
+    for (auto& [k, op] : actions) {
+        sec.actions[k] = op;
+        sec.order.push_back(k);
+    }
+    return sec;
+}
+
+inline NavbarSection makeNavbarSection(std::string name, std::vector<std::pair<SDL_Scancode, NamedOperation>> actions) {
+    return makeNavbarSection(name, NULL, actions);
+}
+
 class ScreenWideNavBar : public Panel
 {
 private:

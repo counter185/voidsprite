@@ -28,3 +28,15 @@ public:
     void render(XY pos) override;
 };
 
+class UIDynamicLabel : public UILabel {
+public:
+    std::function<std::string()> getTextFunction = []() { return ""; };
+
+    UIDynamicLabel(std::function<std::string()> func, XY pos = { 0,0 }, int size = 18) : UILabel("", pos, size), getTextFunction(func) {}
+
+    void render(XY pos) override {
+        text = getTextFunction();
+        UILabel::render(pos);
+    }
+};
+

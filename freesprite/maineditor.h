@@ -11,6 +11,7 @@
 #include "operation_queue.h"
 #include "Panel.h"
 #include "PanelUserInteractable.h"
+#include "ScreenWideNavBar.h"
 
 struct NET_StreamSocket;
 

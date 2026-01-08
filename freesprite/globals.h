@@ -421,14 +421,6 @@ struct NamedOperation {
     std::function<void()> function;
 };
 
-struct NavbarSection {
-    std::string name;
-    std::vector<SDL_Scancode> order;
-    std::map<SDL_Scancode, NamedOperation> actions;
-    HotReloadableTexture* icon = NULL;
-    UIButton* button = NULL;
-};
-
 struct NineSegmentPattern {
     XY dimensions;
     u32* pixelData;

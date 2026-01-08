@@ -287,27 +287,11 @@ void MainEditorPalettized::setUpWidgets()
         {
             SDL_SCANCODE_F,
             {
-                "File",
-                {SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_F, SDL_SCANCODE_A, SDL_SCANCODE_R, SDL_SCANCODE_C, SDL_SCANCODE_P, SDL_SCANCODE_X},
+                makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile,
                 {
-                    {SDL_SCANCODE_D, { "Save as",
-                            [this]() {
-                                this->trySaveAsImage();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_S, { "Save",
-                            [this]() {
-                                this->trySaveImage();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.forceautosave"),
-                            [this]() {
-                                this->createRecoveryAutosave();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_S, { TL("vsp.nav.save"), [this]() { this->trySaveImage(); } } },
+                    {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"), [this]() { this->trySaveAsImage(); } } },
+                    {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.forceautosave"), [this]() { this->createRecoveryAutosave(); } } },
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
                             [this]() {
                                 PopupExportScaled* popup = new PopupExportScaled(this);
@@ -316,104 +300,54 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_E, { "Export as RGB",
-                            [this]() {
-                                this->tryExportRGB();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_A, { "Export tiles individually",
-                            [this]() {
-                                this->exportTilesIndividually();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_X, { "Close",
-                            [this]() {
-                                this->requestSafeClose();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_R, { "Open in RGB editor",
-                            [this]() {
-                                this->openInNormalRGBEditor();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"),
-                            [this]() {
-                                this->copyImageToClipboard();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_P, { "Preferences",
-                            [this]() {
-                                g_addPopup(new PopupGlobalConfig());
-                            }
-                        }
-                    }
-                },
-                g_iconNavbarTabFile
+                    {SDL_SCANCODE_E, { "Export as RGB", [this]() { this->tryExportRGB(); } } },
+                    {SDL_SCANCODE_A, { "Export tiles individually", [this]() { this->exportTilesIndividually(); } } },
+                    {SDL_SCANCODE_R, { "Open in RGB editor", [this]() { this->openInNormalRGBEditor(); } } },
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"), [this]() { this->copyImageToClipboard(); } } },
+                    {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"), [this]() { g_addPopup(new PopupGlobalConfig()); } } },
+                    {SDL_SCANCODE_X, { TL("vsp.cmn.close"), [this]() { this->requestSafeClose(); } } },
+                })
             }
         },
         {
             SDL_SCANCODE_E,
             {
-                "Edit",
-                {SDL_SCANCODE_Z, SDL_SCANCODE_R, SDL_SCANCODE_X, SDL_SCANCODE_Y, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_S, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M},
-                {
-                    {SDL_SCANCODE_Z, { "Undo",
-                            [this]() {
-                                this->undo();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_R, { "Redo",
-                            [this]() {
-                                this->redo();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_X, { "Toggle symmetry: X",
+                makeNavbarSection(TL("vsp.maineditor.edit"), g_iconNavbarTabEdit, {
+                    {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"), [this]() { this->undo(); } } },
+                    {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"), [this]() { this->redo(); } } },
+                    {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
                             [this]() {
                                 this->symmetryEnabled[0] = !this->symmetryEnabled[0];
                             }
                         }
                     },
-                    {SDL_SCANCODE_Y, { "Toggle symmetry: Y",
+                    {SDL_SCANCODE_Y, { TL("vsp.maineditor.symy"),
                             [this]() {
                                 this->symmetryEnabled[1] = !this->symmetryEnabled[1];
                             }
                         }
                     },
-                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"),
-                            [this]() {
-                                this->flipAllLayersOnX();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"), [this]() { this->flipAllLayersOnX(); } } },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
                             [this]() {
                                 this->flipAllLayersOnY();
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { "Deselect",
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [this]() {
-                                this->isolateEnabled = false;
+                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { "Resize canvas",
-                            [this]() {
-                                g_addPopup(new PopupTileGeneric(this, "Resize canvas", "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
-                            }
+                    {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
+                            [this]() { this->isolateEnabled = false; }
                         }
                     },
-                    {SDL_SCANCODE_V, { "Resize canvas (per tile)",
+                    {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [this]() {
                                 if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
                                     g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile size", "New tile size:", XY{ this->tileDimensions.x, this->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
@@ -421,10 +355,10 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_B, { "Resize canvas (per n.tiles)",
+                    {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
                             [this]() {
                                 if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
+                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
                                     g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(this->canvas.dimensions.x / (float)this->tileDimensions.x), (int)ceil(this->canvas.dimensions.y / (float)this->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
@@ -432,9 +366,9 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_N, { "Integer scale canvas",
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.intscale"),
                             [this]() {
-                                g_addPopup(new PopupIntegerScale(this, "Integer scale canvas", "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
+                                g_addPopup(new PopupIntegerScale(this, TL("vsp.maineditor.intscale"), "Scale:", canvas.dimensions, XY{ 1,1 }, EVENT_MAINEDITOR_INTEGERSCALE));
                             }
                         }
                     },
@@ -450,64 +384,23 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                },
-                g_iconNavbarTabEdit
+                })
             }
         },
         {
             SDL_SCANCODE_L,
             {
-                "Layer",
-                {},
+                makeNavbarSection(TL("vsp.maineditor.layer"), g_iconNavbarTabLayer,
                 {
-                    {SDL_SCANCODE_F, { "Flip current layer: X axis",
-                            [this]() {
-                                this->layer_flipHorizontally();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_G, { "Flip current layer: Y axis",
-                            [this]() {
-                                this->layer_flipVertically();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_R, { "Rename current layer",
-                            [this]() {
-                                this->layer_promptRenameCurrent();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_S, { "Select layer alpha",
-                            [this]() {
-                                this->layer_selectCurrentAlpha();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_O, { "Outline current layer",
-                            [this]() {
-                                this->layer_outline(false);
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),
-                            [this]() {
-                                this->layer_clearSelectedArea();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),
-                            [this]() { this->layer_newVariant(); }
-                        }
-                    },
-                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),
-                            [this]() { this->layer_duplicateActiveVariant(); }
-                        }
-                    },
-                    {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),
-                            [this]() { this->layer_promptRenameCurrentVariant(); }
-                        }
-                    },
+                    {SDL_SCANCODE_F, { "Flip current layer: X axis", [this]() { this->layer_flipHorizontally();}}},
+                    {SDL_SCANCODE_G, { "Flip current layer: Y axis",[this]() {this->layer_flipVertically();}}},
+                    {SDL_SCANCODE_R, { "Rename current layer", [this]() { this->layer_promptRenameCurrent();}}},
+                    {SDL_SCANCODE_S, { "Select layer alpha",[this]() {this->layer_selectCurrentAlpha();}}},
+                    {SDL_SCANCODE_O, { "Outline current layer",[this]() {this->layer_outline(false);}}},
+                    {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),[this]() {this->layer_clearSelectedArea();}}},
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),[this]() { this->layer_newVariant(); }}},
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),[this]() { this->layer_duplicateActiveVariant(); }}},
+                    {SDL_SCANCODE_T, { TL("vsp.maineditor.nav.layer.renvariant"),[this]() { this->layer_promptRenameCurrentVariant(); }}},
                     //todo: fix it (make it so that the -1 index never gets passed)
                     /*{SDL_SCANCODE_C, {TL("vsp.maineditor.nav.layer.copylayertoclipboard"),
                             [](MainEditor* editor) {
@@ -515,8 +408,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     }*/
-                },
-                g_iconNavbarTabLayer
+                })
             }
         },
         {
@@ -526,9 +418,7 @@ void MainEditorPalettized::setUpWidgets()
                 {},
                 {
                     {SDL_SCANCODE_R, { "Recenter canvas",
-                            [this]() {
-                                this->recenterCanvas();
-                            }
+                            [this]() { this->recenterCanvas(); }
                         }
                     },
                     {SDL_SCANCODE_F, { "Add reference...",
@@ -558,90 +448,22 @@ void MainEditorPalettized::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_G, { "Set pixel grid...",
-                            [this]() {
-                                g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:"));
-                            }
+                            [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
-                    {SDL_SCANCODE_S, { "Open spritesheet preview...",
-                            [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
-                                    return;
-                                }
-                                SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(this);
-                                g_addScreen(newScreen);
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_T, { "Open tileset preview...",
-                            [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Set the pixel grid first."));
-                                    return;
-                                }
-                                TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(this);
-                                g_addScreen(newScreen);
-                            }
-                        }
-                    },
-#if VSP_USE_LIBLCF
-                    {SDL_SCANCODE_Y, { "Open RPG Maker 2K/2K3 ChipSet preview...",
-                            [this]() {
-                                if (!xyEqual(this->canvas.dimensions, {480,256})) {
-                                    g_addNotification(ErrorNotification("Error", "Dimensions must be 480x256"));
-                                    return;
-                                }
-                                RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(this);
-                                g_addScreen(newScreen);
-                            }
-                        }
-                    },
-#endif
-                    {SDL_SCANCODE_V, { "Preview in separate workspace...",
-                            [this]() {
-                                g_addScreen(new ViewSessionScreen(this));
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_N, { "Open cube preview...",
-                            [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
-                                    g_addNotification(ErrorNotification("Error", "Tile grid must be set"));
-                                    return;
-                                }
-                                MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(this);
-                                g_addScreen(newScreen);
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_M, { "Open Minecraft skin preview...",
-                            [this]() {
-                                if (!MinecraftSkinPreviewScreen::dimensionsValidForPreview(this->canvas.dimensions)) {
-                                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
-                                    return;
-                                }
-                                g_addScreen(new MinecraftSkinPreviewScreen(this));
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_P, { "Open touch mode panel...",
-                            [this]() {
-                                if (this->touchModePanel == NULL) {
-                                    this->touchModePanel = new EditorTouchToggle(this);
-                                    this->touchModePanel->position = { g_windowW - this->touchModePanel->wxWidth - 10, g_windowH - this->touchModePanel->wxHeight - 40 };
-                                    this->addWidget(this->touchModePanel);
-                                }
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_W, { "Open preview panel...",
+                    {SDL_SCANCODE_P, { "Open preview panel...",
                             [this]() {
                                 openPreviewPanel();
                             }
                         }
                     },
-                    { SDL_SCANCODE_A, { "Open frames panel...",
+                    {SDL_SCANCODE_T, { "Open touch mode panel...",
+                            [this]() {
+                                openTouchModePanel();
+                            }
+                        }
+                    },
+                    {SDL_SCANCODE_A, { "Open frames panel...",
                             [this]() {
                                 framePicker->enabled = true;
                                 framePicker->playPanelOpenVFX();
@@ -651,6 +473,73 @@ void MainEditorPalettized::setUpWidgets()
                 },
                 g_iconNavbarTabView
             }
+        },
+        {
+            SDL_SCANCODE_P,
+            makeNavbarSection(TL("vsp.nav.preview"), {
+                {SDL_SCANCODE_V, { "Preview in separate workspace...",
+                        [this]() {
+                            g_addScreen(new ViewSessionScreen(this));
+                        }
+                    }
+                },
+                {SDL_SCANCODE_N, { "Preview 3D cube...",
+                        [this]() {
+                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile grid must be set"));
+                                return;
+                            }
+                            MinecraftBlockPreviewScreen* newScreen = new MinecraftBlockPreviewScreen(this);
+                            g_addScreen(newScreen);
+                        }
+                    }
+                },
+                {SDL_SCANCODE_S, { "Preview spritesheet...",
+                        [this]() {
+                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
+                                return;
+                            }
+                            SpritesheetPreviewScreen* newScreen = new SpritesheetPreviewScreen(this);
+                            g_addScreen(newScreen);
+                        }
+                    }
+                },
+                {SDL_SCANCODE_T, { "Preview tileset...",
+                        [this]() {
+                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
+                                return;
+                            }
+                            TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(this);
+                            g_addScreen(newScreen);
+                        }
+                    }
+                },
+                {SDL_SCANCODE_M, { "Preview Minecraft skin...",
+                        [this]() {
+                            if (!MinecraftSkinPreviewScreen::dimensionsValidForPreview(this->canvas.dimensions)) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid size. Aspect must be 1:1 or 2:1."));
+                                return;
+                            }
+                            g_addScreen(new MinecraftSkinPreviewScreen(this));
+                        }
+                    }
+                },
+#if VSP_USE_LIBLCF
+                {SDL_SCANCODE_R, { "Preview RPG Maker 2K / 2K3 ChipSet...",
+                        [this]() {
+                            if (!xyEqual(this->canvas.dimensions, {480, 256})) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Dimensions must be 480x256"));
+                                return;
+                            }
+                            RPG2KTilemapPreviewScreen* newScreen = new RPG2KTilemapPreviewScreen(this);
+                            g_addScreen(newScreen);
+                        }
+                    }
+                },
+#endif
+            })
         }
     };
 
@@ -688,7 +577,7 @@ void MainEditorPalettized::setUpWidgets()
     framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67 };
     wxsManager.addDrawable(framePicker);
 
-    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V });
+    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V, SDL_SCANCODE_P });
     wxsManager.addDrawable(navbar);
 
     makeActionBar();

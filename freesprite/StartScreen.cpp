@@ -211,8 +211,7 @@ StartScreen::StartScreen() {
             {
                 SDL_SCANCODE_F,
                 {
-                    TL("vsp.nav.file"),
-                    { SDL_SCANCODE_O, SDL_SCANCODE_V, SDL_SCANCODE_E, SDL_SCANCODE_S, SDL_SCANCODE_R, SDL_SCANCODE_P, SDL_SCANCODE_N },
+                    makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile,
                     {
                         { SDL_SCANCODE_O,{ TL("vsp.nav.open"), [this]() { this->openImageLoadDialog();} } },
                         { SDL_SCANCODE_V,{ TL("vsp.launchpad.nav.openclipboard"), [this]() { this->tryOpenImageFromClipboard();} } },
@@ -230,38 +229,34 @@ StartScreen::StartScreen() {
                         { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}},
                         { SDL_SCANCODE_F,{ TL("vsp.launchpad.nav.findcollabonlan"), []() { g_addPopup(new PopupListLAN()); }}},
 #endif
-                    },
-                    g_iconNavbarTabFile
+                    })
                 }
             },
             {
                 SDL_SCANCODE_W,
                 {
-                    TL("vsp.nav.window"),
-                    {},
+                    makeNavbarSection(TL("vsp.nav.window"),
                     {
                         { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.newwindow"), [this]() { main_newWindow();} } },
-                    }
+                    })
                 }
             },
             {
                 SDL_SCANCODE_V,
                 {
-                    TL("vsp.nav.view"),
-                    {},
+                    makeNavbarSection(TL("vsp.nav.view"),
                     {
                         { SDL_SCANCODE_F, { TL("vsp.launchpad.nav.togglefullscreen"),
                                 []() { main_toggleFullscreen(); }
                             }
                         }
-                    }
+                    })
                 }
             },
             {
                 SDL_SCANCODE_H,
                 {
-                    TL("vsp.nav.help"),
-                    {},
+                    makeNavbarSection(TL("vsp.nav.help"),
                     {
                         { SDL_SCANCODE_U,{ TL("vsp.launchpad.nav.opennightlylinkdl"),
                                 [this]() { platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main"); }
@@ -269,7 +264,7 @@ StartScreen::StartScreen() {
                         },
                         { SDL_SCANCODE_A,{ TL("vsp.launchpad.nav.about"), [this]() { g_addPopup(new PopupAbout());} } },
                         { SDL_SCANCODE_H,{ TL("vsp.launchpad.nav.webmanual"), [this]() { platformOpenWebpageURL("https://counter185.github.io/voidsprite-web-manual"); }}},
-                    }
+                    })
                 }
             }
         }, navbarOrder);

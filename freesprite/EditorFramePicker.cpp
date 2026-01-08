@@ -9,6 +9,7 @@
 #include "UITextField.h"
 #include "UISlider.h"
 #include "UICheckbox.h"
+#include "main.h"
 
 EditorFramePicker::EditorFramePicker(MainEditor* caller)
 {
@@ -87,7 +88,8 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         playpauseBtn,
         Panel::Space(6,2),
         new UILabel("MS per frame"),
-        msPerFrameInput
+        msPerFrameInput,
+        new UIDynamicLabel([]() { return frmt("(@{})",(int)(1.0 / ixmax(1,main_getLastFPS()) * 1000)); },{0,0}, 12)
     });
 
     UINumberInputField* backtraceInput = new UINumberInputField(&parent->backtraceFrames);

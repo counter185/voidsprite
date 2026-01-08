@@ -3,6 +3,8 @@ inline std::map<int, VSPWindow*> g_windows;
 inline Timer64 screenSwitchTimer;
 inline SDL_Texture* screenPreviewFramebuffer = NULL;
 
+int main_getLastFPS();
+
 void main_renderScaleUp();
 void main_renderScaleDown();
 void main_switchToFavScreen();
