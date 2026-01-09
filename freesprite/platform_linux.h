@@ -276,7 +276,7 @@ bool platformHasFileAccessPermissions() {
 void platformRequestFileAccessPermissions() {}
 
 void platformOpenWebpageURL(std::string url) {
-    //todo
+    platformOpenFileLocation(url);  //xdg-open still works here
 }
 
 std::string platformFetchTextFile(std::string url) {
