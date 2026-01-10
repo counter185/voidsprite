@@ -45,7 +45,16 @@
     {"vsp.undo.layermodified", "Layer modified"},
     {"vsp.undo.layercreated", "Layer created"},
     {"vsp.undo.layerremoved", "Layer removed"},
+    {"vsp.undo.layerreordered", "Layer reordered"},
+    {"vsp.undo.layeropacitychanged", "Layer opacity changed"},
     {"vsp.undo.layersresized", "Canvas resized"},
+    {"vsp.undo.layervariantcreated", "Layer variant created"},
+    {"vsp.undo.layervariantremoved", "Layer variant removed"},
+    {"vsp.undo.framecommentadded", "Comment added"},
+    {"vsp.undo.framecommentremoved", "Comment removed"},
+    {"vsp.undo.framecreated", "Frame created"},
+    {"vsp.undo.frameremoved", "Frame removed"},
+    {"vsp.undo.framereordered", "Frame reordered"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},

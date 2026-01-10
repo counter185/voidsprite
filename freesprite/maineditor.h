@@ -196,6 +196,9 @@ public:
 
     int selLayer = 0;
 
+    Timer64 undoTimer;
+    Timer64 undoTimelineHoverTimer;
+    bool lastUndoWasRedo = false;
     std::vector<UndoStackElementV2*> undoStack, redoStack;
 
     XY tileDimensions = XY{ 0,0 };
@@ -221,8 +224,6 @@ public:
     Timer64 layerSwitchTimer;
     Timer64 variantSwitchTimer;
     bool lastVariantSwitchWasRight = false;
-    Timer64 undoTimer;
-    bool lastUndoWasRedo = false;
     bool hideUI = false;
     bool penDown = false;
     bool penAltButtonDown = false;

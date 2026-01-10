@@ -183,6 +183,8 @@ public:
 
     void undo(MainEditor* editor) override { UndoLayerVariantCreated::redo(editor); };
     void redo(MainEditor* editor) override { UndoLayerVariantCreated::undo(editor); };
+
+    std::string name() override { return TL("vsp.undo.layervariantremoved"); }
 };
 
 class UndoLayerOpacityChanged : public UndoStackElementV2 {
@@ -195,6 +197,8 @@ public:
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.layeropacitychanged"); }
 };
 
 class UndoCommentAdded : public UndoStackElementV2 {
@@ -206,6 +210,8 @@ public:
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.framecommentadded"); }
 };
 
 class UndoCommentRemoved : public UndoCommentAdded {
@@ -214,6 +220,8 @@ public:
 
     void undo(MainEditor* editor) override { UndoCommentAdded::redo(editor); };
     void redo(MainEditor* editor) override { UndoCommentAdded::undo(editor); };
+
+    std::string name() override { return TL("vsp.undo.framecommentremoved"); }
 };
 
 class UndoFrameCreated : public UndoStackElementV2 {
@@ -231,6 +239,8 @@ public:
 
     void undo(MainEditor* editor) override;
     void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.framecreated"); }
 };
 
 class UndoFrameRemoved : public UndoFrameCreated {
@@ -239,8 +249,10 @@ public:
         deleteOnRedo = false;
     }
 
-    void undo(MainEditor* editor) override { UndoFrameCreated::redo(editor); };
-    void redo(MainEditor* editor) override { UndoFrameCreated::undo(editor); };
+    void undo(MainEditor* editor) override { UndoFrameCreated::redo(editor); }
+    void redo(MainEditor* editor) override { UndoFrameCreated::undo(editor); }
+
+    std::string name() override { return TL("vsp.undo.frameremoved"); }
 };
 
 class UndoFrameReordered : public UndoStackElementV2 {
@@ -252,5 +264,7 @@ public:
     UndoFrameReordered(Frame* ff, int oldIndex, int newIndex) : f(ff), oldIdx(oldIndex), newIdx(newIndex) {}
 
     void undo(MainEditor* editor) override;
-    void redo(MainEditor* editor) override;;
+    void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.framereordered"); }
 };

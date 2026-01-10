@@ -883,37 +883,51 @@ void MainEditor::renderUndoStack()
 {
     XY center = { g_windowW / 2, g_windowH - 40 };
 
-    double mouseDistance = xyDistance({ g_mouseX, g_mouseY }, center);
+    double mouseDistance = abs(center.y - g_mouseY);
+    uint8_t lineShade = !usingAltBG() ? 0xff : 0x00;
+
+    if (mouseDistance < 30) {
+        undoTimelineHoverTimer.startIfNotStarted();
+    } else {
+        undoTimelineHoverTimer.stop();
+    }
+
+    double hoverTimer = undoTimelineHoverTimer.started ? XM1PW3P1(undoTimelineHoverTimer.percentElapsedTime(300)) : 0;
+    double hoverTimerFast = undoTimelineHoverTimer.started ? XM1PW3P1(undoTimelineHoverTimer.percentElapsedTime(200)) : 0;
+
+    if (hoverTimer > 0) {
+        static std::string undoText = TL("vsp.maineditor.undostack");
+        int xw = g_fnt->StatStringDimensions(undoText, 14).x;
+        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35 + (20 * (1.0-hoverTimer)), SDL_Color{ lineShade,lineShade,lineShade,(u8)(0x50 * hoverTimer) }, 14);
+    }
 
     int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * 5 * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
     center.x += xOffset;
 
-    uint8_t lineShade = !usingAltBG() ? 0xff : 0x00;
+    double tickDistance = 10 + 10.0*hoverTimerFast;
 
-    XY undoOrigin = xySubtract(center, { 10, 0 });
-    XY redoOrigin = xyAdd(center, { 10, 0 });
-
-    for (int x = 0; x < undoStack.size(); x++) {
-        int xPos = undoOrigin.x - x * 10;
-        SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30);
-        SDL_RenderDrawLine(g_rd, xPos, center.y, xPos, center.y - 10);
-    }
-
-    for (int x = 0; x < redoStack.size(); x++) {
-        int xPos = redoOrigin.x + x * 10;
-        SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30);
-        SDL_RenderDrawLine(g_rd, xPos, center.y, xPos, center.y - 10);
+    for (auto& [stack, d] : std::vector<std::pair<std::vector<UndoStackElementV2*>&, int>> 
+        { {undoStack, -1}, {redoStack, 1} }) 
+    {
+        for (int x = 0; x < stack.size(); x++) {
+            int xPos = center.x + (x+1) * tickDistance * d;
+            XY screenPos = {xPos, center.y};
+            double distPercent = 0;
+            if (undoTimelineHoverTimer.started) {
+                double tickMouseDistance = abs(screenPos.x - g_mouseX);
+                if (tickMouseDistance < tickDistance/2) {
+                    g_ttp->addTooltip(Tooltip{screenPos, stack[stack.size()-1-x]->name()});
+                }
+                distPercent = tickMouseDistance < 80 ? (1.0 - tickMouseDistance/80.0) : 0;
+            }
+            SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30 + (u8)(0x70*distPercent));
+            drawLine(screenPos, xySubtract(screenPos, {0,10}));
+        }
     }
 
     //center line
     SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x50);
     SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
-
-    if (mouseDistance < 40) {
-        static std::string undoText = TL("vsp.maineditor.undostack");
-        int xw = g_fnt->StatStringDimensions(undoText, 14).x;
-        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35, SDL_Color{ lineShade,lineShade,lineShade,0x50 }, 14);
-    }
 }
 
 void MainEditor::initLayers()
