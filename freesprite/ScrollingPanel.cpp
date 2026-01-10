@@ -33,6 +33,7 @@ void ScrollingPanel::render(XY at)
     }
     subWidgets.renderAll(xyAdd(at, scrollOffset));
 
+    renderHorizontalScrollbar(at);
     renderVerticalScrollbar(at);
 
     if (clipElementsToSize) {
@@ -52,6 +53,9 @@ void ScrollingPanel::handleInput(SDL_Event evt, XY gPosOffset) {
     if (cevt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && cevt.button.button == SDL_BUTTON_LEFT && mouseInVerticalScrollBar()) {
         draggingVerticalScrollbar = true;
     }
+    else if (cevt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && cevt.button.button == SDL_BUTTON_LEFT && mouseInHorizontalScrollBar())  {
+        draggingHorizontalScrollbar = true;
+    }
     else if (draggingVerticalScrollbar) {
         if (cevt.type == SDL_EVENT_MOUSE_MOTION) {
             double yDelta = cevt.motion.yrel * getVerticalScrollBarPixelScale();
@@ -59,7 +63,16 @@ void ScrollingPanel::handleInput(SDL_Event evt, XY gPosOffset) {
         } else if (cevt.type == SDL_EVENT_MOUSE_BUTTON_UP && cevt.button.button == SDL_BUTTON_LEFT) {
             draggingVerticalScrollbar = false;
         }
-    } else {
+    }
+    else if (draggingHorizontalScrollbar) {
+        if (cevt.type == SDL_EVENT_MOUSE_MOTION) {
+            double xDelta = cevt.motion.xrel * getHorizontalScrollBarPixelScale();
+            scrollOffset.x -= xDelta;
+        } else if (cevt.type == SDL_EVENT_MOUSE_BUTTON_UP && cevt.button.button == SDL_BUTTON_LEFT) {
+            draggingHorizontalScrollbar = false;
+        }
+    } 
+    else {
 
         if (evt.type == SDL_EVENT_FINGER_MOTION) {
             XY motionPos = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
@@ -132,6 +145,29 @@ double ScrollingPanel::getVerticalScrollBarPixelScale() {
     return area.y / (double)wxHeight;
 }
 
+bool ScrollingPanel::mouseInHorizontalScrollBar() {
+    if (scrollHorizontally) {
+        XY localMousePos = xySubtract({g_mouseX, g_mouseY}, lastPosOnScreen);
+        return pointInBox(localMousePos, {0,wxHeight-scrollbarThickness,wxWidth, scrollbarThickness});
+    }
+    return false;
+}
+
+std::pair<XY,XY> ScrollingPanel::getHorizontalScrollBarFromToPos() {
+    XY area = getContentBoxSize();
+    if (scrollHorizontally && area.x > wxWidth) {
+        int lineW = (int)(ixpow(wxWidth, 2) / (double)area.x);
+        XY scrollbarOrigin = { (int)((-scrollOffset.x / (double)area.x) * wxWidth), wxHeight - 2 };
+        return {scrollbarOrigin, xyAdd(scrollbarOrigin, {lineW, 0})};
+    }
+    return {{},{}};
+}
+
+double ScrollingPanel::getHorizontalScrollBarPixelScale() {
+    XY area = getContentBoxSize();
+    return area.x / (double)wxWidth;
+}
+
 void ScrollingPanel::renderVerticalScrollbar(XY at) {
     XY area = getContentBoxSize();
     if (scrollVertically) {
@@ -167,6 +203,46 @@ void ScrollingPanel::renderVerticalScrollbar(XY at) {
 
             XY handleOrigin = xySubtract(scrollbarPositions.first, {thickness, 0});
             SDL_Rect handleRect = {at.x + handleOrigin.x, at.y + handleOrigin.y, thickness, height};
+            Fill::Solid(0xFFFFFFFF).fill(handleRect);
+        }
+    }
+}
+
+void ScrollingPanel::renderHorizontalScrollbar(XY at) {
+    XY area = getContentBoxSize();
+    if (scrollHorizontally) {
+        auto scrollbarPositions = getHorizontalScrollBarFromToPos();
+        if (!xyEqual(scrollbarPositions.first, scrollbarPositions.second)) {
+            bool mouseInScrollbar = mouseInHorizontalScrollBar() || draggingHorizontalScrollbar;
+
+            if (mouseInScrollbar) {
+                horizontalScrollbarHoverTimer.startIfNotStarted();
+            } else {
+                horizontalScrollbarHoverTimer.stop();
+            }
+
+            int width = scrollbarPositions.second.x - scrollbarPositions.first.x;
+            int thickness = 1 + scrollbarThickness * 
+                (mouseInScrollbar ? XM1PW3P1(horizontalScrollbarHoverTimer.percentElapsedTime(200)) : 0);
+
+            if (mouseInScrollbar) {
+                SDL_Rect wholeHScrollbarAreaRect = {
+                    at.x,
+                    at.y + wxHeight - thickness,
+                    wxWidth,
+                    thickness
+                };
+                Fill::Solid(0xa0000000).fill(wholeHScrollbarAreaRect);
+
+                //border line
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x40);
+                XY p1 = {0, wxHeight - scrollbarThickness - 4};
+                XY p2 = xyAdd(p1, {wxWidth, 0});
+                drawLine(xyAdd(at,p1), xyAdd(at,p2), XM1PW3P1(horizontalScrollbarHoverTimer.percentElapsedTime(800)));
+            }
+
+            XY handleOrigin = xySubtract(scrollbarPositions.first, {0, thickness});
+            SDL_Rect handleRect = {at.x + handleOrigin.x, at.y + handleOrigin.y, width, thickness};
             Fill::Solid(0xFFFFFFFF).fill(handleRect);
         }
     }

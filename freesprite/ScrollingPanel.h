@@ -8,8 +8,12 @@ class ScrollingPanel :
 {
 protected:
     XY lastPosOnScreen{};
+
     Timer64 verticalScrollbarHoverTimer;
     bool draggingVerticalScrollbar = false;
+
+    Timer64 horizontalScrollbarHoverTimer;
+    bool draggingHorizontalScrollbar = false;
 public:
     int scrollbarThickness = 14;
 
@@ -108,7 +112,12 @@ public:
     std::pair<XY,XY> getVerticalScrollBarFromToPos();
     double getVerticalScrollBarPixelScale();
 
+    bool mouseInHorizontalScrollBar();
+    std::pair<XY,XY> getHorizontalScrollBarFromToPos();
+    double getHorizontalScrollBarPixelScale();
+
     void renderVerticalScrollbar(XY at);
+    void renderHorizontalScrollbar(XY at);
 
 };
 
