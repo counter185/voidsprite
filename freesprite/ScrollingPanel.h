@@ -6,7 +6,13 @@
 class ScrollingPanel :
     public Panel, public EventCallbackListener
 {
+protected:
+    XY lastPosOnScreen{};
+    Timer64 verticalScrollbarHoverTimer;
+    bool draggingVerticalScrollbar = false;
 public:
+    int scrollbarThickness = 14;
+
     bool scrollVertically = true;
     bool scrollHorizontally = true;
     XY scrollOffset = XY{ 0,0 };
@@ -97,6 +103,12 @@ public:
             scrollOffset.y = 0;
         }
     }
+
+    bool mouseInVerticalScrollBar();
+    std::pair<XY,XY> getVerticalScrollBarFromToPos();
+    double getVerticalScrollBarPixelScale();
+
+    void renderVerticalScrollbar(XY at);
 
 };
 

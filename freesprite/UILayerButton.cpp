@@ -1,9 +1,10 @@
 #include "UILayerButton.h"
 #include "Layer.h"
 #include "PopupContextMenu.h"
+#include "UIStackPanel.h"
 
 UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
-    wxWidth = 240;
+    wxWidth = 220;
     wxHeight = 30;
     sizeToContent = true;
 
@@ -11,14 +12,12 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
 
     mainButton = new LayerActiveButton(layer);
     mainButton->text = mainName;
-    mainButton->position = XY{ 0,0 };
-    mainButton->wxWidth = 200;
+    mainButton->wxWidth = wxWidth - 40;
     mainButton->onClickCallback = [this](UIButton* btn) {
         if (callback != NULL) {
             callback->eventGeneric(callback_id, LAYEREVENT_SWITCH, 0);
         }
     };
-    subWidgets.addDrawable(mainButton);
 
     if (layer != NULL) {
         mainButton->onRightClickCallback = [this](UIButton* btn) {
@@ -53,25 +52,19 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
     //hideButton->text = "H";
     hideButton->tooltip = "Hide";
     hideButton->icon = g_iconLayerHide;
-    hideButton->position = XY{ mainButton->wxWidth + 10,0 };
     hideButton->wxWidth = 30;
     hideButton->onClickCallback = [this](UIButton* btn) {
         if (callback != NULL) {
             callback->eventGeneric(callback_id, LAYEREVENT_TOGGLE_HIDE, 0);
         }
     };
-    subWidgets.addDrawable(hideButton);
+
+    subWidgets.addDrawable(UIStackPanel::Horizontal(10, {mainButton, hideButton}));
 
     if (layer != NULL && layer->layerData.size() > 1) {
-        int variantY = mainButton->wxHeight;
         for (int v = 0; v < layer->layerData.size(); v++) {
-            Panel* p = new Panel();
-            p->sizeToContent = true;
-            p->passThroughMouse = true;
-            p->position = XY{ 0, variantY };
 
             LayerVariantButton* vbtn = new LayerVariantButton(layer, v);
-            vbtn->position = XY{ 30, 0 };
             vbtn->wxWidth = wxWidth - 50;
             vbtn->onClickCallback = [this, v](UIButton* btn) {
                 if (callback != NULL) {
@@ -94,26 +87,26 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
                     }},
                 });
             };
-            variantButtons.push_back(vbtn);
-            p->subWidgets.addDrawable(vbtn);
 
             UIButton* delbtn = new UIButton();
             delbtn->text = "-";
             delbtn->tooltip = "Delete variant";
             delbtn->wxWidth = 20;
             delbtn->wxHeight = vbtn->wxHeight;
-            delbtn->position = XY{ vbtn->wxWidth + 30, 0 };
             delbtn->onClickCallback = [this, v](UIButton* btn) {
                 if (callback != NULL) {
                     callback->eventGeneric(callback_id, LAYEREVENT_VARIANT_DELETE, v);
                 }
             };
-            p->subWidgets.addDrawable(delbtn);
-
-            subWidgets.addDrawable(p);
-
-            variantY += vbtn->wxHeight;
+            variantButtons.push_back(UIStackPanel::Horizontal(0, {
+                Panel::Space(30,0),
+                vbtn, 
+                delbtn}
+            ));
         }
+        UIStackPanel* variantsStack = UIStackPanel::Vertical(0, variantButtons);
+        variantsStack->position = {0, mainButton->wxHeight};
+        subWidgets.addDrawable(variantsStack);
     }
 }
 
