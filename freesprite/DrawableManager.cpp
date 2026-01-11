@@ -44,7 +44,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
         return processMouseWheelEventInMultiple(wxss, evt, parentOffset);
     }
     SDL_Event convEvent = convertTouchToMouseEvent(evt);
-    if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.down) {
+    if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.down && convEvent.button.which != SDL_PEN_MOUSEID) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             if (wxs.tryFocusOnPoint(XY{ (int)convEvent.button.x, (int)convEvent.button.y }, parentOffset)) {
@@ -58,6 +58,15 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             XY touchPos = XY{ (int)(convEvent.tfinger.x * g_windowW), (int)(convEvent.tfinger.y * g_windowH) };
             //loginfo(frmt("attempting to focus on point from touch event {} {}", touchPos.x, touchPos.y));
             if (wxs.tryFocusOnPoint(touchPos, parentOffset)) {
+                break;
+            }
+        }
+    }
+    else if (evt.type == SDL_EVENT_PEN_DOWN) {
+        for (auto& wxsw : wxss) {
+            auto& wxs = wxsw.get();
+            XY penPos = XY{ (int)(convEvent.ptouch.x), (int)(convEvent.ptouch.y) };
+            if (wxs.tryFocusOnPoint(penPos, parentOffset)) {
                 break;
             }
         }
