@@ -134,7 +134,7 @@ std::pair<XY,XY> ScrollingPanel::getVerticalScrollBarFromToPos() {
     XY area = getContentBoxSize();
     if (scrollVertically && area.y > wxHeight) {
         int lineH = (int)(ixpow(wxHeight, 2) / (double)area.y);
-        XY scrollbarOrigin = { wxWidth - 2,  (int)((-scrollOffset.y / (double)area.y) * wxHeight) };
+        XY scrollbarOrigin = { wxWidth - 1,  (int)((-scrollOffset.y / (double)area.y) * wxHeight) };
         return {scrollbarOrigin, xyAdd(scrollbarOrigin, {0,lineH})};
     }
     return {{},{}};
@@ -157,7 +157,7 @@ std::pair<XY,XY> ScrollingPanel::getHorizontalScrollBarFromToPos() {
     XY area = getContentBoxSize();
     if (scrollHorizontally && area.x > wxWidth) {
         int lineW = (int)(ixpow(wxWidth, 2) / (double)area.x);
-        XY scrollbarOrigin = { (int)((-scrollOffset.x / (double)area.x) * wxWidth), wxHeight - 2 };
+        XY scrollbarOrigin = { (int)((-scrollOffset.x / (double)area.x) * wxWidth), wxHeight - 1 };
         return {scrollbarOrigin, xyAdd(scrollbarOrigin, {lineW, 0})};
     }
     return {{},{}};
@@ -195,15 +195,37 @@ void ScrollingPanel::renderVerticalScrollbar(XY at) {
                 Fill::Solid(0xa0000000).fill(wholeVScrollbarAreaRect);
 
                 //border line
-                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x40);
+                static SDL_Color handleBorder = visualConfigColor("ui/scrollpanel/handle_border");
+                SDL_SetRenderDrawColor(g_rd, handleBorder.r, handleBorder.g, handleBorder.b, handleBorder.a);
                 XY p1 = {wxWidth - scrollbarThickness - 4, 0};
                 XY p2 = xyAdd(p1, {0, wxHeight});
                 drawLine(xyAdd(at,p1), xyAdd(at,p2), XM1PW3P1(verticalScrollbarHoverTimer.percentElapsedTime(800)));
             }
 
+            static u32 handleBorder = visualConfigHexU32("ui/scrollpanel/handle_border");
+            static SDL_Color handleBorderC = uint32ToSDLColor(handleBorder);
+            static Fill handleFill = visualConfigFill("ui/scrollpanel/handle_vertical_fill");
+
             XY handleOrigin = xySubtract(scrollbarPositions.first, {thickness, 0});
             SDL_Rect handleRect = {at.x + handleOrigin.x, at.y + handleOrigin.y, thickness, height};
-            Fill::Solid(0xFFFFFFFF).fill(handleRect);
+            if (mouseInScrollbar) {
+                handleFill.fill(handleRect);
+                SDL_SetRenderDrawColor(g_rd, handleBorderC.r, handleBorderC.g, handleBorderC.b, handleBorderC.a);
+                SDL_RenderDrawRect(g_rd, &handleRect);
+                if (thickness > 4) {
+                    XY midpoint = xyAdd(at, statLineEndpoint(scrollbarPositions.first, scrollbarPositions.second, 0.5));
+                    drawLine(xySubtract(midpoint, {2,0}), xySubtract(midpoint, {thickness-2,0}));
+
+                    int ydist = 6;
+                    int subLineThickness = 6;
+                    if (thickness > subLineThickness*2) {
+                        drawLine(xySubtract(midpoint, {subLineThickness,ydist}), xySubtract(midpoint, {thickness-subLineThickness,ydist}));
+                        drawLine(xySubtract(midpoint, {subLineThickness,-ydist}), xySubtract(midpoint, {thickness-subLineThickness,-ydist}));
+                    }
+                }
+            } else {
+                Fill::Solid(handleBorder).fill(handleRect);
+            }
         }
     }
 }
@@ -235,15 +257,26 @@ void ScrollingPanel::renderHorizontalScrollbar(XY at) {
                 Fill::Solid(0xa0000000).fill(wholeHScrollbarAreaRect);
 
                 //border line
-                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x40);
+                static SDL_Color handleBorder = visualConfigColor("ui/scrollpanel/handle_border");
+                SDL_SetRenderDrawColor(g_rd, handleBorder.r, handleBorder.g, handleBorder.b, handleBorder.a);
                 XY p1 = {0, wxHeight - scrollbarThickness - 4};
                 XY p2 = xyAdd(p1, {wxWidth, 0});
                 drawLine(xyAdd(at,p1), xyAdd(at,p2), XM1PW3P1(horizontalScrollbarHoverTimer.percentElapsedTime(800)));
             }
 
+            static u32 handleBorder = visualConfigHexU32("ui/scrollpanel/handle_border");
+            static SDL_Color handleBorderC = uint32ToSDLColor(handleBorder);
+            static Fill handleFill = visualConfigFill("ui/scrollpanel/handle_horizontal_fill");
+
             XY handleOrigin = xySubtract(scrollbarPositions.first, {0, thickness});
             SDL_Rect handleRect = {at.x + handleOrigin.x, at.y + handleOrigin.y, width, thickness};
-            Fill::Solid(0xFFFFFFFF).fill(handleRect);
+            if (mouseInScrollbar) {
+                handleFill.fill(handleRect);
+                SDL_SetRenderDrawColor(g_rd, handleBorderC.r, handleBorderC.g, handleBorderC.b, handleBorderC.a);
+                SDL_RenderDrawRect(g_rd, &handleRect);
+            } else {
+                Fill::Solid(handleBorder).fill(handleRect);
+            }
         }
     }
 }
