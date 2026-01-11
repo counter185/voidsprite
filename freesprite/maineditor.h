@@ -327,6 +327,7 @@ public:
             + ((lastConfirmedSave || splitSessionData.set) ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
                 : std::string("")); 
     }
+    void onReturnToScreen() override;
     bool takesTouchEvents() override { return true; }
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
@@ -348,6 +349,7 @@ public:
     void drawRowColNumbers();
     virtual void drawNetworkCanvasClients();
 
+    void inputBrush(bool down, XY at);
     void inputMouseRight(XY at, bool down);
 
     void focusOnColorInputTextBox();

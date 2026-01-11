@@ -52,6 +52,7 @@
 #include "PopupSetupNetworkCanvas.h"
 #include "PopupFreeformTransform.h"
 #include "PopupChooseAction.h"
+#include "multiwindow.h"
 
 #include "discord_rpc.h"
 
@@ -1611,32 +1612,10 @@ void MainEditor::takeInput(SDL_Event evt) {
                             zoomInitial = 0;
                             zoomOrigin = {(int)evt.button.x, (int)evt.button.y};
                         } else {
-                            zoomKeyHeld = false;
-                            RecalcMousePixelTargetPoint((int)evt.button.x, (int)evt.button.y);
-                            if (evt.button.which != SDL_PEN_MOUSEID) {
+                            if (!penDown && evt.button.which != SDL_PEN_MOUSEID) {
                                 penPressure = 1.0f;
+                                inputBrush(evt.button.down, {(int)evt.button.x, (int)evt.button.y});
                             }
-                            if (currentBrush != NULL) {
-                                if (evt.button.down) {
-                                    if (!currentBrush->isReadOnly()) {
-                                        commitStateToCurrentLayer();
-                                    }
-                                    currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                    currentBrushMouseDowned = true;
-                                }
-                                else {
-                                    if (currentBrushMouseDowned) {
-                                        currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
-                                        networkCanvasStateUpdated(activeFrame, selLayer);
-                                        currentBrushMouseDowned = false;
-                                        leftMouseReleaseTimer.start();
-                                    }
-
-                                }
-                            }
-                            mouseHoldPosition = mousePixelTargetPoint;
-                            mouseHoldPosition2xP = mousePixelTargetPoint2xP;
-                            leftMouseHold = evt.button.down;
                         }
                     }
                     else if (evt.button.button == SDL_BUTTON_MIDDLE) {
@@ -1676,7 +1655,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                     (int)(evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
                                 });
                             }
-                            else if (leftMouseHold) {
+                            else if (currentBrushMouseDowned) {
                                 if (currentBrush != NULL) {
                                     currentBrush->clickDrag(this, 
                                         currentBrush->wantDoublePosPrecision() ? mouseHoldPosition2xP : mouseHoldPosition,
@@ -1741,8 +1720,8 @@ void MainEditor::takeInput(SDL_Event evt) {
                 case SDL_EVENT_PEN_DOWN:
                 case SDL_EVENT_PEN_UP:
                     penDown = evt.ptouch.down;
-                    SDL_SetWindowMouseGrab(g_wd, penDown);
-                    //loginfo(frmt("new pen state: {}", penDown));
+                    loginfo(frmt("pen {} at {}:{}", evt.ptouch.down ? "down" : "up", evt.ptouch.x, evt.ptouch.y));
+                    inputBrush(evt.ptouch.down, { (int)evt.ptouch.x, (int)evt.ptouch.y });
                     break;
                 case SDL_EVENT_PEN_AXIS:
                     if (evt.paxis.axis == 0) {  //should always be the pressure axis
@@ -1755,6 +1734,34 @@ void MainEditor::takeInput(SDL_Event evt) {
         leftMouseHold = false;
         penDown = false;
     }
+}
+
+void MainEditor::inputBrush(bool down, XY at)
+{
+    zoomKeyHeld = false;
+    RecalcMousePixelTargetPoint(at.x, at.y);
+    if (currentBrush != NULL) {
+        loginfo(frmt("brush {} at {}:{}", down ? "down" : "up", at.x, at.y));
+        if (down) {
+            if (!currentBrush->isReadOnly()) {
+                commitStateToCurrentLayer();
+            }
+            currentBrush->clickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+            currentBrushMouseDowned = true;
+        }
+        else {
+            if (currentBrushMouseDowned) {
+                currentBrush->clickRelease(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                networkCanvasStateUpdated(activeFrame, selLayer);
+                currentBrushMouseDowned = false;
+                leftMouseReleaseTimer.start();
+            }
+
+        }
+    }
+    mouseHoldPosition = mousePixelTargetPoint;
+    mouseHoldPosition2xP = mousePixelTargetPoint2xP;
+    leftMouseHold = down;
 }
 
 std::vector<std::string> MainEditor::dropEverythingYoureDoingAndSave()
@@ -1782,6 +1789,21 @@ void MainEditor::layer_clearSelectedArea()
     commitStateToCurrentLayer();
     getCurrentLayer()->clear(isolateEnabled ? &isolatedFragment : NULL);
     g_addNotification(Notification("Area cleared", "", 1000));
+}
+
+void MainEditor::onReturnToScreen()
+{
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+    if (penDown) {
+        SDL_SetWindowMouseGrab(g_wd, false);
+        penDown = false;
+        //SDL_SetWindowMouseRect(g_wd, NULL);
+    }
+#endif
+
+    if (currentBrushMouseDowned) {
+        inputBrush(false, { g_mouseX, g_mouseY });
+    }
 }
 
 void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)
