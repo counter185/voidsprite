@@ -141,7 +141,7 @@ public:
         return false;
     }
     bool duplicateVariant() {
-        duplicateVariant(currentLayerVariant);
+        return duplicateVariant(currentLayerVariant);
     }
     bool switchVariant(int variantIndex) {
         if (layerData.size() > variantIndex && variantIndex >= 0) {

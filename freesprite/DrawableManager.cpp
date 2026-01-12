@@ -65,7 +65,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             }
         }
     }
-    else if (VSP_PLATFORM != VSP_PLATFORM_ANDROID && evt.type == SDL_EVENT_PEN_DOWN) {
+    else if (evt.type == SDL_EVENT_PEN_DOWN) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             XY penPos = XY{ (int)(convEvent.ptouch.x), (int)(convEvent.ptouch.y) };
