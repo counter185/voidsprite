@@ -1977,7 +1977,7 @@ void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, ui
     if ((currentPattern->canDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
         if (!isolateEnabled || isolatedFragment.pointExists(position)) {
 
-            u8 targetColorAlpha = eraserMode ? 0 : pickedAlpha;
+            u8 targetColorAlpha = (u8)((eraserMode ? 0 : pickedAlpha) * (uint32ToSDLColor(color).a/255.0));
             u32 colorRGB = color & 0xFFFFFF;
             u32 targetColor = (targetColorAlpha << 24) + colorRGB;
 
