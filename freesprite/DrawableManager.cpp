@@ -44,7 +44,8 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
         return processMouseWheelEventInMultiple(wxss, evt, parentOffset);
     }
     SDL_Event convEvent = convertTouchToMouseEvent(evt);
-    if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.down && convEvent.button.which != SDL_PEN_MOUSEID) {
+    if (convEvent.type == SDL_MOUSEBUTTONDOWN && convEvent.button.down 
+        && (convEvent.button.which != SDL_PEN_MOUSEID || convEvent.button.button != SDL_BUTTON_LEFT)) {
         for (auto& wxsw : wxss) {
             auto& wxs = wxsw.get();
             if (wxs.tryFocusOnPoint(XY{ (int)convEvent.button.x, (int)convEvent.button.y }, parentOffset)) {
