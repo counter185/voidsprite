@@ -3,6 +3,11 @@
 #include "Layer.h"
 #include "maineditor.h"
 
+class UndoStackCaptureGroup {
+public:
+    std::vector<UndoStackElementV2*> elements;
+};
+
 class UndoStackElementV2 {
 public:
     bool discardFromRedo = false;
@@ -24,7 +29,7 @@ private:
 public:
     std::string opName = "Multiple undo operations";
 
-    UndoStackComposite(std::vector<UndoStackElementV2*> e) : elements(e) {}
+    UndoStackComposite(std::vector<UndoStackElementV2*> e, std::string name = "Multiple undo operations") : elements(e), opName(name) {}
     ~UndoStackComposite() {
         for (auto& e : elements) {
             delete e;

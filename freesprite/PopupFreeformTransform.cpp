@@ -5,35 +5,20 @@
 #include "UITextField.h"
 #include "UIStackPanel.h"
 #include "UILabel.h"
+#include "maineditor.h"
 
 PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target)
 {
     this->caller = caller;
     this->target = target;
-    targetPasteRect = { 0,0, target->w, target->h };
+    targetPasteRect = target != NULL ? SDL_Rect{ 0,0, target->w, target->h } : SDL_Rect{0,0, caller->canvas.dimensions.x, caller->canvas.dimensions.y};
     setSize({ 400, 200 });
 
-    UITextField* txw = new UITextField(std::to_string(target->w));
-    txw->isNumericField = true;
+    UITextField* txw = new UINumberInputField(&targetPasteRect.w);
     txw->wxWidth = 120;
-    txw->onTextChangedCallback = [this](UITextField* t, std::string text) {
-        try {
-            int v = std::stoi(text);
-            targetPasteRect.w = v;
-        }
-        catch (std::exception&) {}
-    };
 
-    UITextField* txh = new UITextField(std::to_string(target->h));
-    txh->isNumericField = true;
+    UITextField* txh = new UINumberInputField(&targetPasteRect.h);
     txh->wxWidth = 120;
-    txh->onTextChangedCallback = [this](UITextField* t, std::string text) {
-        try {
-            int v = std::stoi(text);
-            targetPasteRect.h = v;
-        }
-        catch (std::exception&) {}
-        };
 
     UIStackPanel* sp = UIStackPanel::Horizontal(12, {
         new UILabel("Size"),
@@ -45,9 +30,15 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
     makeTitleAndDesc(TL("vsp.freeformtransform.title"));
 
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton*) {
+        if (onFinishCallback != NULL) {
+            onFinishCallback(false);
+        }
         closePopup();
     };
     actionButton(TL("vsp.cmn.confirm"))->onClickCallback = [this](UIButton*) {
+        if (onFinishCallback != NULL) {
+            onFinishCallback(true);
+        }
         paste();
         closePopup();
     };

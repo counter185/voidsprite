@@ -397,6 +397,7 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_R, { "Rename current layer", [this]() { this->layer_promptRenameCurrent();}}},
                     {SDL_SCANCODE_S, { "Select layer alpha",[this]() {this->layer_selectCurrentAlpha();}}},
                     {SDL_SCANCODE_O, { "Outline current layer",[this]() {this->layer_outline(false);}}},
+                    {SDL_SCANCODE_V, { TL("vsp.maineditor.nav.layer.transformlayer"),[this]() {this->layer_promptTransform(); }}},
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),[this]() {this->layer_clearSelectedArea();}}},
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),[this]() { this->layer_newVariant(); }}},
                     {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.layer.copyvariant"),[this]() { this->layer_duplicateActiveVariant(); }}},

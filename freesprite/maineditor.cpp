@@ -1081,8 +1081,8 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_C, { TL("vsp.maineditor.nav.layer.copylayertoclipboard"),[this]() {this->copyLayerToClipboard(this->getCurrentLayer());}}
-                    },
+                    {SDL_SCANCODE_C, { TL("vsp.maineditor.nav.layer.copylayertoclipboard"),[this]() {this->copyLayerToClipboard(this->getCurrentLayer()); }}},
+                    {SDL_SCANCODE_V, { TL("vsp.maineditor.nav.layer.transformlayer"),[this]() {this->layer_promptTransform(); }}},
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.nav.layer.clearselection"),[this]() { this->layer_clearSelectedArea(); }}},
                     {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.layer.fillselection"),[this]() { this->layer_fillActiveColor(); }}},
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.nav.layer.newvariant"),[this]() { this->layer_newVariant(); }}},
@@ -2244,13 +2244,17 @@ uint32_t MainEditor::pickColorFromAllLayers(XY pos)
 
 void MainEditor::addToUndoStack(UndoStackElementV2* undo)
 {
-    lastUndoWasRedo = true;
-    undoTimer.start();
-    discardRedoStack();
-    undoStack.push_back(undo);
-    checkAndDiscardEndOfUndoStack();
-    changesSinceLastSave = HAS_UNSAVED_CHANGES;
-    networkCanvasStateUpdated(activeFrame, indexOfLayer(undo->getAffectedLayer()));
+    if (!undoCaptureGroups.empty()) {
+        undoCaptureGroups.back()->elements.push_back(undo);
+    } else {
+        lastUndoWasRedo = true;
+        undoTimer.start();
+        discardRedoStack();
+        undoStack.push_back(undo);
+        checkAndDiscardEndOfUndoStack();
+        changesSinceLastSave = HAS_UNSAVED_CHANGES;
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(undo->getAffectedLayer()));
+    }
 }
 
 void MainEditor::discardUndoStack()
@@ -2693,6 +2697,9 @@ void MainEditor::mergeLayerDown(int index)
     }
     auto& layers = getLayerStack();
 
+    UndoStackCaptureGroup undoCaptures;
+    undoCaptureGroups.push_back(&undoCaptures);
+    
     Layer* topLayer = layers[index];
     Layer* bottomLayer = layers[index - 1];
     deleteLayer(index);
@@ -2701,6 +2708,11 @@ void MainEditor::mergeLayerDown(int index)
     memcpy(bottomLayer->pixels32(), merged->pixels32(), bottomLayer->w * bottomLayer->h * 4);
     bottomLayer->markLayerDirty();
     delete merged;
+
+    undoCaptureGroups.pop_back();
+    if (!undoCaptures.elements.empty()) {
+        addToUndoStack(new UndoStackComposite(undoCaptures.elements));
+    }
 }
 
 void MainEditor::duplicateLayer(int index)
@@ -3932,6 +3944,28 @@ void MainEditor::layer_fillActiveColor()
             });
         }
     });
+}
+
+void MainEditor::layer_promptTransform() 
+{
+    Layer* targetLayer = getCurrentLayer();
+    Layer* ll = targetLayer->copyCurrentVariant();
+    if (ll != NULL) {
+        PopupFreeformTransform* popup = new PopupFreeformTransform(this, ll);
+        popup->onFinishCallback = [this, targetLayer, ll](bool result) {
+            if (!result) {
+                memcpy(targetLayer->pixels32(), ll->pixels32(), targetLayer->w * targetLayer->h * 4);
+                targetLayer->markLayerDirty();
+            }
+        };
+        g_addPopup(popup);
+        commitStateToLayer(targetLayer);
+        memset(targetLayer->pixels32(), isPalettized ? 0xff : 0x00, targetLayer->w * targetLayer->h * 4);
+        targetLayer->markLayerDirty();
+
+    } else {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+    }
 }
 
 EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller, bool clientSide)

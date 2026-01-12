@@ -200,6 +200,7 @@ public:
     Timer64 undoTimelineHoverTimer;
     bool lastUndoWasRedo = false;
     std::vector<UndoStackElementV2*> undoStack, redoStack;
+    std::vector<UndoStackCaptureGroup*> undoCaptureGroups;
 
     XY tileDimensions = XY{ 0,0 };
     u8 tileGridAlpha = 0x40;
@@ -441,6 +442,7 @@ public:
     void layer_clearSelectedArea();
     void layer_selectCurrentAlpha();
     void layer_fillActiveColor();
+    void layer_promptTransform();
     Layer* flattenImage();
     virtual Layer* flattenFrame(Frame* target);
     virtual Layer* mergeLayers(Layer* bottom, Layer* top);

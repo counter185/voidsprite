@@ -5,12 +5,16 @@
 class PopupFreeformTransform : public BasePopup {
 protected:
     MainEditor* caller;
-    Layer* target;
     SDL_Rect targetPasteRect;
+    
+    bool pasteWholeSession = false;
+    Layer* target = NULL;
 
     int draggingCorner = -1;
     XY dragStart = { 0,0 };
 public:
+    std::function<void(bool)> onFinishCallback = NULL;
+
     PopupFreeformTransform(MainEditor* caller, Layer* target);
     ~PopupFreeformTransform();
 

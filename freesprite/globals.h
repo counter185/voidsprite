@@ -207,6 +207,7 @@ class VSPWindow;
 class HotReloadableTexture;
 class PopupSetNetworkCanvasData;
 class UndoStackElementV2;
+class UndoStackCaptureGroup;
 
 //textrenderer
 class TextRenderer;
