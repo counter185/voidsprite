@@ -1720,7 +1720,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                 case SDL_EVENT_PEN_DOWN:
                 case SDL_EVENT_PEN_UP:
                     penDown = evt.ptouch.down;
-                    loginfo(frmt("pen {} at {}:{}", evt.ptouch.down ? "down" : "up", evt.ptouch.x, evt.ptouch.y));
+                    //loginfo(frmt("pen {} at {}:{}", evt.ptouch.down ? "down" : "up", evt.ptouch.x, evt.ptouch.y));
                     inputBrush(evt.ptouch.down, { (int)evt.ptouch.x, (int)evt.ptouch.y });
                     break;
                 case SDL_EVENT_PEN_AXIS:
@@ -1741,7 +1741,7 @@ void MainEditor::inputBrush(bool down, XY at)
     zoomKeyHeld = false;
     RecalcMousePixelTargetPoint(at.x, at.y);
     if (currentBrush != NULL) {
-        loginfo(frmt("brush {} at {}:{}", down ? "down" : "up", at.x, at.y));
+        //loginfo(frmt("brush {} at {}:{}", down ? "down" : "up", at.x, at.y));
         if (down) {
             if (!currentBrush->isReadOnly()) {
                 commitStateToCurrentLayer();
