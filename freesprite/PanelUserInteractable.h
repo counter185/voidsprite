@@ -39,16 +39,14 @@ protected:
     void setupCollapsible();
     void setupResizable(XY minDimensions = XY{ 0,0 });
     void setupCloseButton(std::function<void()> callback);
-
-    UILabel* addTitleText(std::string title);
-
+    
     virtual bool defaultInputAction(SDL_Event evt, XY at) { return false; }
     virtual void renderAfterBG(XY at) {}
     void renderResizeHandle(XY at);
     void repositionCloseButton();
 public:
     PanelUserInteractable();
-
+    
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     void render(XY at) override {
         if (enabled) {
@@ -66,10 +64,12 @@ public:
         }
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override;
-
+    
     XY getDimensions() override { return (collapsible && collapsed) ? XY{wxWidth, 30} : Panel::getDimensions(); }
-
+    
     void toggleCollapse();
     void tryMoveOutOfOOB();
+
+    UILabel* addTitleText(std::string title);
 };
 

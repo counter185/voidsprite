@@ -35,17 +35,15 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     editorReplaceBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEREPLACE, this);
     wxsTarget().addDrawable(editorReplaceBtn);
 
-    patternMenuPanel = new Panel();
+    patternMenuPanel = new PanelUserInteractable();
+    patternMenuPanel->addTitleText("PATTERNS");
     patternMenuPanel->enabled = false;
+    patternMenuPanel->sizeToContent = true;
     patternMenuPanel->position = { wxWidth + 30, 0 };
     wxsTarget().addDrawable(patternMenuPanel);
 
-    UILabel* lbl = new UILabel("PATTERNS");
-    lbl->position = { 0, 5 };
-    patternMenuPanel->subWidgets.addDrawable(lbl);
-
     editorInvPatternBtn = new UIButton();
-    editorInvPatternBtn->position = { 160, 5 };
+    editorInvPatternBtn->position = { 160*sc, 5 };
     editorInvPatternBtn->text = "I";
     editorInvPatternBtn->wxWidth = 24 * sc;
     editorInvPatternBtn->wxHeight = 24 * sc;
