@@ -1114,19 +1114,16 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_V,
             {
-                TL("vsp.nav.view"),
-                {},
+                makeNavbarSection(TL("vsp.nav.view"), g_iconNavbarTabView,
                 {
-                    {SDL_SCANCODE_R, { "Recenter canvas",
-                            [this]() { this->recenterCanvas(); }
-                        }
-                    },
+                    {SDL_SCANCODE_R, { "Recenter canvas", [this]() { this->recenterCanvas(); }}},
                     {SDL_SCANCODE_F, { "Add reference...",
                             [this]() {
                                 PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE, true);
                             }
                         }
                     },
+                    {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
                     {SDL_SCANCODE_B, { "Toggle background color",
                             [this]() {
                                 this->backgroundColor.r = ~this->backgroundColor.r;
@@ -1151,18 +1148,8 @@ void MainEditor::setUpWidgets()
                             [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
-                    {SDL_SCANCODE_P, { "Open preview panel...",
-                            [this]() {
-                                openPreviewPanel();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_T, { "Open touch mode panel...",
-                            [this]() {
-                                openTouchModePanel();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
+                    {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
                     {SDL_SCANCODE_A, { "Open frames panel...",
                             [this]() {
                                 framePicker->enabled = true;
@@ -1170,8 +1157,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                },
-                g_iconNavbarTabView
+                })
             }
         },
         {
@@ -2600,6 +2586,20 @@ bool MainEditor::tryAddReference(PlatformNativePathString path)
         referencePanel->playPanelOpenVFX();
         delete ssn;
         return true;
+    }
+    return false;
+}
+bool MainEditor::tryAddReferenceFromClipboard()
+{
+    Layer* flat = platformGetImageFromClipboard();
+    if (flat != NULL) {
+        PanelReference* referencePanel = new PanelReference(flat, this);
+        openReferencePanels.push_back(referencePanel);
+        addWidget(referencePanel);
+        referencePanel->playPanelOpenVFX();
+        return true;
+    } else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.clipboard_no_image")));
     }
     return false;
 }

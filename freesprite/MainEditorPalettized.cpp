@@ -415,19 +415,16 @@ void MainEditorPalettized::setUpWidgets()
         {
             SDL_SCANCODE_V,
             {
-                "View",
-                {},
+                makeNavbarSection(TL("vsp.nav.view"), g_iconNavbarTabView,
                 {
-                    {SDL_SCANCODE_R, { "Recenter canvas",
-                            [this]() { this->recenterCanvas(); }
-                        }
-                    },
+                    {SDL_SCANCODE_R, { "Recenter canvas", [this]() { this->recenterCanvas(); }}},
                     {SDL_SCANCODE_F, { "Add reference...",
                             [this]() {
                                 PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE, true);
                             }
                         }
                     },
+                    {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
                     {SDL_SCANCODE_B, { "Toggle background color",
                             [this]() {
                                 this->backgroundColor.r = ~this->backgroundColor.r;
@@ -452,18 +449,8 @@ void MainEditorPalettized::setUpWidgets()
                             [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
-                    {SDL_SCANCODE_P, { "Open preview panel...",
-                            [this]() {
-                                openPreviewPanel();
-                            }
-                        }
-                    },
-                    {SDL_SCANCODE_T, { "Open touch mode panel...",
-                            [this]() {
-                                openTouchModePanel();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
+                    {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
                     {SDL_SCANCODE_A, { "Open frames panel...",
                             [this]() {
                                 framePicker->enabled = true;
@@ -471,8 +458,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                },
-                g_iconNavbarTabView
+                })
             }
         },
         {

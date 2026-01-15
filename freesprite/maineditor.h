@@ -390,6 +390,7 @@ public:
     PlatformNativePathString createRecoveryAutosave(std::string insertIntoFilename = "");
     bool usingAltBG();
     void setAltBG(bool useAltBG);
+    bool tryAddReferenceFromClipboard();
     bool tryAddReference(PlatformNativePathString path);
     void openPreviewPanel();
     void tryToggleTilePreviewLockAtMousePos();
