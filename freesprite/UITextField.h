@@ -26,6 +26,16 @@ public:
     Timer64 numericFieldOperationTimer;
     char numericFieldCurrentOperation = '\0';
     std::string numericFieldOperationBuffer = "";
+    //feel free to throw exceptions here as they will be try caught
+    std::map<char, std::function<int(int, std::string)>> numericOperations = {
+        {'+', [](int v0, std::string arg) { return v0+std::stoi(arg); }},
+        {'-', [](int v0, std::string arg) { return ixmax(0, v0-std::stoi(arg)); }},
+        {'*', [](int v0, std::string arg) { return v0*std::stoi(arg); }},
+        {'/', [](int v0, std::string arg) { int v1 = std::stoi(arg); return v1 == 0 ? 0 : v0/v1; }},
+        {'%', [](int v0, std::string arg) { int v1 = std::stoi(arg); return v1 == 0 ? 0 : v0%v1; }},
+        {'x', [](int v0, std::string arg) { return std::stoi(arg,0,16); }},
+        {'b', [](int v0, std::string arg) { return std::stoi(arg,0,2); }},
+    };
     
     std::function<void(UITextField*,std::string)> onTextChangedCallback = NULL;
     std::function<void(UITextField*,std::string)> onTextChangedConfirmCallback = NULL;

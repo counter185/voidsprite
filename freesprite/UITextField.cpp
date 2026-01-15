@@ -133,7 +133,7 @@ void UITextField::clearText()
 
 bool UITextField::inputChar(char c) {
     if (isNumericField) {
-        if (c == '/' || c == '-' || c == '+' || c == '*' || c == '%' || c == 'x' || c == 'b') {
+        if (numericOperations.contains(c)) {
             numericFieldOperationTimer.start();
             numericFieldCurrentOperation = c;
         }
@@ -298,15 +298,10 @@ void UITextField::runNumericOperation() {
         try {
             int v1 = std::atoi(text.c_str());
             int v2 = std::atoi(numericFieldOperationBuffer.c_str());
-            switch (numericFieldCurrentOperation) {
-                case '+': setText(std::to_string(v1+v2)); break;
-                case '-': setText(std::to_string(ixmax(0, v1-v2))); break;
-                case '*': setText(std::to_string(v1*v2)); break;
-                case '/': setText(v2 == 0 ? 0 : std::to_string(v1/v2)); break;
-                case '%': setText(v2 == 0 ? 0 : std::to_string(v1%v2)); break;
-                case 'x': setText(std::to_string(std::stoi(numericFieldOperationBuffer,0,16))); break;
-                case 'b': setText(std::to_string(std::stoi(numericFieldOperationBuffer,0,2))); break;
-                default: logerr(frmt("invalid operation: {}", numericFieldCurrentOperation)); break;
+            if (numericOperations.contains(numericFieldCurrentOperation)) {
+                setText(std::to_string(numericOperations[numericFieldCurrentOperation](v1, numericFieldOperationBuffer)));
+            } else {
+                logerr(frmt("invalid operation: {}", numericFieldCurrentOperation)); 
             }
         }
         catch (std::exception& e) {
