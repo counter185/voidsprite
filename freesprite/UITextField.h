@@ -12,17 +12,21 @@ public:
     int fontsize = 18;
     std::string tooltip = "";
     std::string placeholderText = "";
-    bool isNumericField = false;
     bool isColorField = false;
     int insertPosition = 0;
     int wxWidth = 250, wxHeight = 30;
     Fill bgFill = Fill::Solid(0xFF000000);
     SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
-
+    
     std::vector<std::string> imeCandidates;
     int imeCandidateIndex = 0;
     Timer64 imeCandidatesTimer;
 
+    bool isNumericField = false;
+    Timer64 numericFieldOperationTimer;
+    char numericFieldCurrentOperation = '\0';
+    std::string numericFieldOperationBuffer = "";
+    
     std::function<void(UITextField*,std::string)> onTextChangedCallback = NULL;
     std::function<void(UITextField*,std::string)> onTextChangedConfirmCallback = NULL;
 
@@ -40,6 +44,7 @@ public:
         Drawable::focusOut();
         SDL_StopTextInput(g_wd);
         imeCandidates.clear();
+        runNumericOperation();
     }
 
     bool focusable() override { return enabled; }
@@ -74,6 +79,8 @@ public:
     void copyToClipboard();
     void pasteFromClipboard();
     void clearText();
+
+    void runNumericOperation();
 };
 
 class UINumberInputField : public UITextField

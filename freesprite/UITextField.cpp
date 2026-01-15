@@ -28,15 +28,26 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
             case SDL_SCANCODE_TAB:
                 break;
             case SDL_SCANCODE_RETURN:
-                if (onTextChangedConfirmCallback != NULL) {
-                    onTextChangedConfirmCallback(this, text);
-                }
-                else if (callback != NULL) {
-                    callback->eventTextInputConfirm(callback_id, text);
+                if (isNumericField && numericFieldCurrentOperation != '\0') {
+                    runNumericOperation();
+                } else {
+                    if (onTextChangedConfirmCallback != NULL) {
+                        onTextChangedConfirmCallback(this, text);
+                    }
+                    else if (callback != NULL) {
+                        callback->eventTextInputConfirm(callback_id, text);
+                    }
                 }
                 break;
             case SDL_SCANCODE_BACKSPACE:
-                if (!text.empty()) {
+                if (isNumericField && numericFieldCurrentOperation != '\0') {
+                    if (numericFieldOperationBuffer.empty()) {
+                        numericFieldCurrentOperation = '\0';
+                    } else {
+                        numericFieldOperationBuffer.pop_back();
+                    }
+                }
+                else if (!text.empty()) {
                     if (g_ctrlModifier) {
                         auto lastSpacePos = text.find_last_of(' ');
                         if (lastSpacePos == std::string::npos) {
@@ -121,8 +132,20 @@ void UITextField::clearText()
 }
 
 bool UITextField::inputChar(char c) {
-    if ((isNumericField && c >= '0' && c <= '9')
-        || !isNumericField) {
+    if (isNumericField) {
+        if (c == '/' || c == '-' || c == '+' || c == '*' || c == '%' || c == 'x' || c == 'b') {
+            numericFieldOperationTimer.start();
+            numericFieldCurrentOperation = c;
+        }
+        else if ((c >= '0' && c <= '9') || numericFieldCurrentOperation == 'x') {
+            if (numericFieldCurrentOperation != '\0') {
+                numericFieldOperationBuffer += c;
+            } else {
+                text += c;
+                return true;
+            }
+        }
+    } else {
         text += c;
         return true;
     }
@@ -172,7 +195,19 @@ void UITextField::renderTextField(XY at)
     }
 
     if (!isColorField || !isValidOrPartialColor() || text.empty()) {
-        g_fnt->RenderString(text + (focused ? "_" : ""), at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) }, fontsize);
+        XY textEP = g_fnt->RenderString(text + ((focused && numericFieldCurrentOperation == '\0') ? "_" : ""), at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) }, fontsize);
+
+        if (numericFieldCurrentOperation != '\0') {
+            textEP.x += 10;
+            double separatorAnimTimer = XM1PW3P1(numericFieldOperationTimer.percentElapsedTime(400));
+            SDL_SetRenderDrawColor(g_rd, 255,255,255,255);
+            drawLine({textEP.x+2, at.y}, {textEP.x+2, at.y+wxHeight}, separatorAnimTimer);
+
+            textEP.x += 10;
+
+            textEP = g_fnt->RenderString(frmt("{} ", numericFieldCurrentOperation), textEP.x, textEP.y);
+            g_fnt->RenderString(frmt("{}_", numericFieldOperationBuffer), textEP.x, textEP.y, {255,255,255,0xa0});
+        }
     }
     else {
         int textPtr = 0;
@@ -255,5 +290,29 @@ void UITextField::pasteFromClipboard()
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardtextpaste")));
+    }
+}
+
+void UITextField::runNumericOperation() {
+    if (isNumericField && numericFieldCurrentOperation != '\0') {
+        try {
+            int v1 = std::atoi(text.c_str());
+            int v2 = std::atoi(numericFieldOperationBuffer.c_str());
+            switch (numericFieldCurrentOperation) {
+                case '+': setText(std::to_string(v1+v2)); break;
+                case '-': setText(std::to_string(ixmax(0, v1-v2))); break;
+                case '*': setText(std::to_string(v1*v2)); break;
+                case '/': setText(v2 == 0 ? 0 : std::to_string(v1/v2)); break;
+                case '%': setText(v2 == 0 ? 0 : std::to_string(v1%v2)); break;
+                case 'x': setText(std::to_string(std::stoi(numericFieldOperationBuffer,0,16))); break;
+                case 'b': setText(std::to_string(std::stoi(numericFieldOperationBuffer,0,2))); break;
+                default: logerr(frmt("invalid operation: {}", numericFieldCurrentOperation)); break;
+            }
+        }
+        catch (std::exception& e) {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid input"));
+        }
+        numericFieldCurrentOperation = '\0';
+        numericFieldOperationBuffer = "";
     }
 }
