@@ -53,7 +53,7 @@ public:
     u32 colorNowU32 = 0xFF000000;
 
     double currentH = 0, currentS = 0, currentV = 0;
-    uint8_t currentR = 0, currentG = 0, currentB = 0;
+    int currentR = 0, currentG = 0, currentB = 0;
 
     UIHueWheel* hueWheel = NULL;
     UIHueSlider* hueSlider = NULL;
@@ -61,7 +61,7 @@ public:
     UITextField* colorTextField = NULL;
 
     //todo: change these sliders to work based off the color models system
-    UITextField* txtR = NULL, *txtG = NULL, *txtB = NULL;
+    UINumberInputField* txtR = NULL, *txtG = NULL, *txtB = NULL;
     UITextField* txtH = NULL, *txtS = NULL, *txtV = NULL;
 
     UIColorSlider* sliderH = NULL;
@@ -92,7 +92,6 @@ public:
     void reloadColorLists();
     void addColorToPalette(NamedColorPalette p, u32 color);
     void updateColorModelSliders(std::string dontUpdate = "");
-    void updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value);
     void updateHSVTextBoxOnInputEvent(std::string data, double* value);
 
     void colorUpdatedFromVisualHSV();

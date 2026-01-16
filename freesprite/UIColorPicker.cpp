@@ -87,101 +87,66 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
     //   -------------------
     //   | Sliders tab 
 
-    UILabel* labelH = new UILabel("H");
-    UILabel* labelR = new UILabel("R");
-    labelH->position = XY{ 0, 120 + 10 };
-    labelR->position = XY{ 0, 10 };
-    colorTabs->tabs[1].wxs.addDrawable(labelH);
-    colorTabs->tabs[1].wxs.addDrawable(labelR);
-
-    UILabel* labelS = new UILabel("S");
-    UILabel* labelG = new UILabel("G");
-    labelS->position = XY{ 0, 120 + 45 };
-    labelG->position = XY{ 0, 45 };
-    colorTabs->tabs[1].wxs.addDrawable(labelS);
-    colorTabs->tabs[1].wxs.addDrawable(labelG);
-
-    UILabel* labelV = new UILabel("V");
-    UILabel* labelB = new UILabel("B");
-    labelV->position = XY{ 0, 120 + 80 };
-    labelB->position = XY{ 0, 80 };
-    colorTabs->tabs[1].wxs.addDrawable(labelV);
-    colorTabs->tabs[1].wxs.addDrawable(labelB);
-
-    txtR = new UITextField();
-    txtG = new UITextField();
-    txtB = new UITextField();
+    txtR = new UINumberInputField(&currentR);
+    txtG = new UINumberInputField(&currentG);
+    txtB = new UINumberInputField(&currentB);
     txtH = new UITextField();
     txtS = new UITextField();
     txtV = new UITextField();
     txtH->tooltip = txtS->tooltip = txtV->tooltip = "Must be a floating point number";
     txtR->tooltip = txtG->tooltip = txtB->tooltip = "Must be a whole number from 0 to 255.\nFor hex numbers, enter x<number>";
-    txtR->position = XY{ 240, 10 };
-    txtH->position = XY{ 240, 120 + 10 };
     txtR->textColor = { 0xff,0,0,0xff };
-    txtG->position = XY{ 240, 45 };
-    txtS->position = XY{ 240, 120 + 45 };
     txtG->textColor = { 0,0xff,0,0xff };
-    txtB->position = XY{ 240, 80 };
-    txtV->position = XY{ 240, 120 + 80 };
     txtB->textColor = { 0,0,0xff,0xff };
     txtR->wxWidth = txtG->wxWidth = txtB->wxWidth = 60;
     txtH->wxWidth = txtS->wxWidth = txtV->wxWidth = 120;
     txtR->wxHeight = txtG->wxHeight = txtB->wxHeight = txtH->wxHeight = txtS->wxHeight = txtV->wxHeight = 28;
-    txtR->setCallbackListener(EVENT_COLORPICKER_TBOXR, this);
-    txtG->setCallbackListener(EVENT_COLORPICKER_TBOXG, this);
-    txtB->setCallbackListener(EVENT_COLORPICKER_TBOXB, this);
     txtH->setCallbackListener(EVENT_COLORPICKER_TBOXH, this);
     txtS->setCallbackListener(EVENT_COLORPICKER_TBOXS, this);
     txtV->setCallbackListener(EVENT_COLORPICKER_TBOXV, this);
-    colorTabs->tabs[1].wxs.addDrawable(txtR);
-    colorTabs->tabs[1].wxs.addDrawable(txtG);
-    colorTabs->tabs[1].wxs.addDrawable(txtB);
-    colorTabs->tabs[1].wxs.addDrawable(txtH);
-    colorTabs->tabs[1].wxs.addDrawable(txtS);
-    colorTabs->tabs[1].wxs.addDrawable(txtV);
+    txtR->valueUpdatedCallback = txtG->valueUpdatedCallback = txtB->valueUpdatedCallback = [this](int v) { colorUpdatedFromRGBTextBoxes(); };
+    txtR->validateFunction = txtG->validateFunction = txtB->validateFunction = [](int v) { return v >= 0 && v <= 255; };
 
     sliderH = new UIColorSlider();
-    sliderH->position = XY{ 30, 120 + 10 };
-    sliderH->wxWidth = 200;
-    sliderH->wxHeight = 25;
-    sliderH->setCallbackListener(EVENT_COLORPICKER_SLIDERH, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderH);
-
     sliderS = new UIColorSlider();
-    sliderS->position = XY{ 30, 120 + 45 };
-    sliderS->wxWidth = 200;
-    sliderS->wxHeight = 25;
-    sliderS->setCallbackListener(EVENT_COLORPICKER_SLIDERS, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderS);
-
     sliderV = new UIColorSlider();
-    sliderV->position = XY{ 30, 120 + 80 };
-    sliderV->wxWidth = 200;
-    sliderV->wxHeight = 25;
+    sliderH->setCallbackListener(EVENT_COLORPICKER_SLIDERH, this);
+    sliderS->setCallbackListener(EVENT_COLORPICKER_SLIDERS, this);
     sliderV->setCallbackListener(EVENT_COLORPICKER_SLIDERV, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderV);
 
     sliderR = new UIColorSlider();
-    sliderR->position = XY{ 30, 10 };
-    sliderR->wxWidth = 200;
-    sliderR->wxHeight = 25;
-    sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderR);
-
     sliderG = new UIColorSlider();
-    sliderG->position = XY{ 30, 45 };
-    sliderG->wxWidth = 200;
-    sliderG->wxHeight = 25;
-    sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderG);
-
     sliderB = new UIColorSlider();
-    sliderB->position = XY{ 30, 80 };
-    sliderB->wxWidth = 200;
-    sliderB->wxHeight = 25;
+    sliderR->setCallbackListener(EVENT_COLORPICKER_SLIDERR, this);
+    sliderG->setCallbackListener(EVENT_COLORPICKER_SLIDERG, this);
     sliderB->setCallbackListener(EVENT_COLORPICKER_SLIDERB, this);
-    colorTabs->tabs[1].wxs.addDrawable(sliderB);
+
+    sliderH->wxWidth = sliderS->wxWidth = sliderV->wxWidth = sliderR->wxWidth = sliderG->wxWidth = sliderB->wxWidth = 200;
+    sliderH->wxHeight = sliderS->wxHeight = sliderV->wxHeight = sliderR->wxHeight = sliderG->wxHeight = sliderB->wxHeight = 25;
+
+    UIStackPanel* slidersTabStackPanel = UIStackPanel::Vertical(10, {
+        UIStackPanel::Horizontal(10, {
+            new UILabel("R"), Panel::Space(10,1), sliderR, txtR,
+        }), 
+        UIStackPanel::Horizontal(10, {
+            new UILabel("G"), Panel::Space(10,1), sliderG, txtG,
+        }),
+        UIStackPanel::Horizontal(10, {
+            new UILabel("B"), Panel::Space(10,1), sliderB, txtB,
+        }),
+        Panel::Space(1,5),
+        UIStackPanel::Horizontal(10, {
+            new UILabel("H"), Panel::Space(10,1), sliderH, txtH,
+        }),
+        UIStackPanel::Horizontal(10, {
+            new UILabel("S"), Panel::Space(10,1), sliderS, txtS,
+        }),
+        UIStackPanel::Horizontal(10, {
+            new UILabel("V"), Panel::Space(10,1), sliderV, txtV,
+        }),
+    });
+    slidersTabStackPanel->position = {0, 10};
+    colorTabs->tabs[1].wxs.addDrawable(slidersTabStackPanel);
 
     //   -------------------
     //   | Other tab 
@@ -314,15 +279,6 @@ void UIColorPicker::eventTextInput(int evt_id, std::string data)
             }
         }
 
-    }
-    else if (evt_id == EVENT_COLORPICKER_TBOXR) {
-        updateRGBTextBoxOnInputEvent(data, &currentR);
-    }
-    else if (evt_id == EVENT_COLORPICKER_TBOXG) {
-        updateRGBTextBoxOnInputEvent(data, &currentG);
-    }
-    else if (evt_id == EVENT_COLORPICKER_TBOXB) {
-        updateRGBTextBoxOnInputEvent(data, &currentB);
     }
     else if (evt_id == EVENT_COLORPICKER_TBOXH) {
         updateHSVTextBoxOnInputEvent(data, &currentH);
@@ -632,7 +588,7 @@ void UIColorPicker::updateColorModelSliders(std::string dontUpdate)
         ColorModel* mptr = model.second.targetModel;
         std::map<std::string, double> modelColorValue;
         if (model.first != dontUpdate) {
-            modelColorValue = mptr->fromRGB(PackRGBAtoARGB(currentR, currentG, currentB, 255));
+            modelColorValue = mptr->fromRGB(PackRGBAtoARGB((u8)currentR, (u8)currentG, (u8)currentB, 255));
         }
         else {
             for (auto& component : model.second.components) {
@@ -662,26 +618,6 @@ void UIColorPicker::updateColorModelSliders(std::string dontUpdate)
                               component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMid),
                               component.first == "H" ? 0x80000000 : mptr->toRGB(modelColorMax) };
         }
-    }
-}
-
-void UIColorPicker::updateRGBTextBoxOnInputEvent(std::string data, uint8_t* value)
-{
-    try {
-        int val;
-        if (data.size() == 3 && data[0] == 'x') {
-            val = std::stoi(data.substr(1), 0, 16);
-        }
-        else {
-            val = std::stoi(data);
-        }
-        if (val >= 0 && val <= 255) {
-            *value = val;
-            colorUpdatedFromRGBTextBoxes();
-        }
-    }
-    catch (std::exception&) {
-
     }
 }
 
@@ -716,12 +652,12 @@ void UIColorPicker::colorUpdatedFromHSVTextBoxes()
 
 void UIColorPicker::colorUpdatedFromRGBSliders()
 {
-    colorUpdatedRGB({ currentR, currentG, currentB }, SLIDERS_RGB_SLIDER);
+    colorUpdatedRGB({ (u8)currentR, (u8)currentG, (u8)currentB }, SLIDERS_RGB_SLIDER);
 }
 
 void UIColorPicker::colorUpdatedFromRGBTextBoxes()
 {
-    colorUpdatedRGB({ currentR, currentG, currentB }, SLIDERS_RGB_TBOX);
+    colorUpdatedRGB({ (u8)currentR, (u8)currentG, (u8)currentB }, SLIDERS_RGB_TBOX);
 }
 
 void UIColorPicker::setColorHSV(double h, double s, double v)
@@ -808,9 +744,6 @@ void UIColorPicker::updateUIFrom(ColorChangeSource from, std::string dontUpdateT
 
 void UIColorPicker::updateSliderTabRGBTextboxes()
 {
-    txtR->setText(std::to_string(currentR));
-    txtG->setText(std::to_string(currentG));
-    txtB->setText(std::to_string(currentB));
 }
 
 void UIColorPicker::updateSliderTabHSVTextboxes()

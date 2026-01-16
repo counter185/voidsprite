@@ -133,7 +133,11 @@ void UITextField::clearText()
 
 bool UITextField::inputChar(char c) {
     if (isNumericField) {
-        if (numericOperations.contains(c)) {
+        if (text.empty() && c == '-' && numericAllowNegative) {
+            text += c;
+            return true;
+        } 
+        else if (numericOperations.contains(c)) {
             numericFieldOperationTimer.start();
             numericFieldCurrentOperation = c;
         }
@@ -299,7 +303,11 @@ void UITextField::runNumericOperation() {
             int v1 = std::atoi(text.c_str());
             int v2 = std::atoi(numericFieldOperationBuffer.c_str());
             if (numericOperations.contains(numericFieldCurrentOperation)) {
-                setText(std::to_string(numericOperations[numericFieldCurrentOperation](v1, numericFieldOperationBuffer)));
+                int result = numericOperations[numericFieldCurrentOperation](v1, numericFieldOperationBuffer);
+                if (!numericAllowNegative) {
+                    result = ixmax(0,result);
+                }
+                setText(std::to_string(result));
             } else {
                 logerr(frmt("invalid operation: {}", numericFieldCurrentOperation)); 
             }

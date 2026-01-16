@@ -14,16 +14,33 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
     targetPasteRect = target != NULL ? SDL_Rect{ 0,0, target->w, target->h } : SDL_Rect{0,0, caller->canvas.dimensions.x, caller->canvas.dimensions.y};
     setSize({ 400, 200 });
 
+    UITextField* posx = new UINumberInputField(&targetPasteRect.x);
+    posx->wxWidth = 120;
+    posx->numericAllowNegative = true;
+
+    UITextField* posy = new UINumberInputField(&targetPasteRect.y);
+    posy->wxWidth = 120;
+    posy->numericAllowNegative = true;
+
     UITextField* txw = new UINumberInputField(&targetPasteRect.w);
     txw->wxWidth = 120;
 
     UITextField* txh = new UINumberInputField(&targetPasteRect.h);
     txh->wxWidth = 120;
 
-    UIStackPanel* sp = UIStackPanel::Horizontal(12, {
-        new UILabel("Size"),
-        txw, txh
-    });
+    SDL_Rect initialValues = targetPasteRect;
+
+    UIStackPanel* sp = 
+        UIStackPanel::Vertical(6, {
+            UIStackPanel::Horizontal(12, {
+                new UILabel("Position"),
+                posx, posy
+            }),
+            UIStackPanel::Horizontal(12, {
+                new UILabel("Size"),
+                txw, txh
+            })
+        });
     sp->position = { 10, 50 };
     wxsManager.addDrawable(sp);
 
@@ -41,6 +58,9 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
         }
         paste();
         closePopup();
+    };
+    actionButton("Reset")->onClickCallback = [this, initialValues](UIButton*) {
+        targetPasteRect = initialValues;
     };
 }
 
