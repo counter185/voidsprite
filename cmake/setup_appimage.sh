@@ -10,6 +10,7 @@ cp build/src/*.ttf AppDir/usr/bin
 cp build/src/assets/* AppDir/usr/bin/assets
 cp build/src/voidsprite AppDir/usr/bin/voidsprite
 mkdir /tmp/appimage-libs
+cp ./src/libdiscord_game_sdk_linux_x64.so /tmp/appimage-libs/libdiscord_game_sdk_linux_x64.so
 cp ./build/SDL_image/libSDL3_image.so.0 /tmp/appimage-libs/libSDL3_image.so.0
 cp ./build/SDL_net/libSDL3_net.so.0 /tmp/appimage-libs/libSDL3_net.so.0
 cp ./build/SDL_ttf/libSDL3_ttf.so.0 /tmp/appimage-libs/libSDL3_ttf.so.0
