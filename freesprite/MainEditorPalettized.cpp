@@ -445,6 +445,18 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_L, { "Toggle guidelines",
+                            [this]() {
+                                (*(int*)&this->guidelineDisplayMode)++;
+                                (*(int*)&this->guidelineDisplayMode) %= 3;
+                                g_addNotification(Notification(frmt("{}",
+                                    this->guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
+                                    this->guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
+                                    "Guidelines shown in UI color"), "", 1500
+                                ));
+                            }
+                        }
+                    },
                     {SDL_SCANCODE_G, { "Set pixel grid...",
                             [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }

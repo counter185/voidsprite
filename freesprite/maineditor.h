@@ -15,24 +15,13 @@
 
 struct NET_StreamSocket;
 
-enum EditorUnsavedChanges : int {
-    NO_UNSAVED_CHANGES = 0,
-    CHANGES_RECOVERY_AUTOSAVED = 1,
-    HAS_UNSAVED_CHANGES = 2
-};
+enum EditorUnsavedChanges : int { NO_UNSAVED_CHANGES = 0, CHANGES_RECOVERY_AUTOSAVED = 1, HAS_UNSAVED_CHANGES = 2 };
 
-enum MainEditorCommentMode : int {
-    COMMENTMODE_HIDE_ALL = 0,
-    COMMENTMODE_SHOW_HOVERED = 1,
-    COMMENTMODE_SHOW_ALL = 2
-};
+enum MainEditorCommentMode : int { COMMENTMODE_HIDE_ALL = 0, COMMENTMODE_SHOW_HOVERED = 1, COMMENTMODE_SHOW_ALL = 2 };
 
-enum EditorTouchMode : int {
-    TOUCHMODE_PAN = 0,
-    TOUCHMODE_LEFTCLICK = 1,
-    TOUCHMODE_RIGHTCLICK = 2,
-    TOUCHMODE_MAX
-};
+enum GuidelineDisplayMode : int { GUIDELINE_HIDE_ALL = 0, GUIDELINE_SHOW_COLORED = 1, GUIDELINE_SHOW_PRIMARYCOLOR = 2 };
+
+enum EditorTouchMode : int { TOUCHMODE_PAN = 0, TOUCHMODE_LEFTCLICK = 1, TOUCHMODE_RIGHTCLICK = 2, TOUCHMODE_MAX };
 
 struct CommentData {
     XY position;
@@ -46,16 +35,13 @@ public:
     bool vertical;
     int position;
 
-    std::string Serialize() {
-        return frmt("{}-{}", vertical ? "v" : "h", position);
-    }
+    std::string Serialize() { return frmt("{}-{}", vertical ? "v" : "h", position); }
     static Guideline Deserialize(std::string str) {
         Guideline g;
         auto splt = splitString(str, '-');
         if (splt.size() != 2) {
             throw std::runtime_error("Invalid guideline string");
-        }
-        else {
+        } else {
             g.vertical = (splt[0] == "v");
             g.position = std::stoi(splt[1]);
             return g;
@@ -78,13 +64,13 @@ struct NetworkCanvasClientInfo {
     u32 uid = -1;
     std::string clientName = "User";
     std::string clientIP = "??";
-    XY cursorPosition = {0,0};
+    XY cursorPosition = {0, 0};
     u64 lastReportTime = 0;
     u32 clientColor = 0xC0E1FF;
     bool chatTyping = false;
     int activeFrame = 0;
 
-    //host hints
+    // host hints
     bool hostKick = false;
 };
 
@@ -107,9 +93,8 @@ public:
 };
 class NetworkCanvasChatHostState : public NetworkCanvasChatState {
 protected:
-    void nextState() {
-        messagesState++;
-    }
+    void nextState() { messagesState++; }
+
 public:
     void newMessage(NetworkCanvasChatMessage msg);
     std::string toJson();
@@ -143,6 +128,7 @@ protected:
     MainEditor* parent = NULL;
     ScrollingPanel* chatMsgPanel = NULL;
     bool clientSide = false;
+
 public:
     EditorNetworkCanvasChatPanel(MainEditor* caller, bool clientSide = false);
 
@@ -154,6 +140,7 @@ protected:
     MainEditor* parent = NULL;
     ScrollingPanel* clientList = NULL;
     bool clientSide = false;
+
 public:
     EditorNetworkCanvasHostPanel(MainEditor* caller, bool clientSide = false);
 
@@ -165,15 +152,15 @@ struct CompactEditorSection {
     ReldTex* icon = NULL;
 };
 
-class MainEditor : public BaseScreen, public EventCallbackListener
-{
+class MainEditor : public BaseScreen, public EventCallbackListener {
 protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
     bool compactEditor = false;
     std::vector<PanelReference*> openReferencePanels;
-    //std::vector<Layer*> layers;
+    // std::vector<Layer*> layers;
 
     MainEditor() {}
+
 public:
     bool isPalettized = false;
 
@@ -183,12 +170,12 @@ public:
 
     int activeFrame = 0;
     std::recursive_mutex framesMutex;
-    std::vector<Frame*> frames = { new Frame() };
+    std::vector<Frame*> frames = {new Frame()};
     Timer64 frameAnimationStartTimer;
     bool frameAnimationPlaying = false;
     int frameAnimMSPerFrame = 200;
-    std::pair<SDL_Renderer*, SDL_Texture*> frameFB = { NULL, NULL };
-    XY frameFBSize = { 0,0 };
+    std::pair<SDL_Renderer*, SDL_Texture*> frameFB = {NULL, NULL};
+    XY frameFBSize = {0, 0};
     int backtraceFrames = 0;
     int fwdtraceFrames = 0;
     double traceOpacity = 0.4;
@@ -202,18 +189,18 @@ public:
     std::vector<UndoStackElementV2*> undoStack, redoStack;
     std::vector<UndoStackCaptureGroup*> undoCaptureGroups;
 
-    XY tileDimensions = XY{ 0,0 };
+    XY tileDimensions = XY{0, 0};
     u8 tileGridAlpha = 0x40;
-    XY tileGridPaddingBottomRight = XY{ 0,0 };
+    XY tileGridPaddingBottomRight = XY{0, 0};
     SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
     XY getPaddedTileDimensions();
 
     Canvas canvas;
 
-    XY mousePixelTargetPoint = XY{0,0};
-    XY mousePixelTargetPoint2xP = XY{ 0,0 };
-    XY mouseHoldPosition = XY{ 0,0 };
-    XY mouseHoldPosition2xP = XY{ 0,0 };
+    XY mousePixelTargetPoint = XY{0, 0};
+    XY mousePixelTargetPoint2xP = XY{0, 0};
+    XY mouseHoldPosition = XY{0, 0};
+    XY mouseHoldPosition2xP = XY{0, 0};
     bool closeNextTick = false;
     BaseBrush* currentBrush = NULL;
     bool currentBrushMouseDowned = false;
@@ -243,7 +230,7 @@ public:
     u32 pickedAlpha = 255;
 
     bool qModifier = false;
-    XY lockedTilePreview = { -1,-1 };
+    XY lockedTilePreview = {-1, -1};
     Timer64 tileLockTimer;
 
     bool zoomKeyHeld = false;
@@ -259,13 +246,15 @@ public:
     EditorLayerPicker* layerPicker;
     EditorFramePicker* framePicker;
 
-    SDL_Color backgroundColor = SDL_Color{ 0,0,0,255 };
+    SDL_Color backgroundColor = SDL_Color{0, 0, 0, 255};
 
-    XY symmetryPositions = { 0,0 };
-    XY guidelinePosition = { 0,0 };
+    XY symmetryPositions = {0, 0};
+    XY guidelinePosition = {0, 0};
+
+    GuidelineDisplayMode guidelineDisplayMode = GUIDELINE_SHOW_COLORED;
     std::vector<Guideline> guidelines;
 
-    bool symmetryEnabled[2] = { false, false };
+    bool symmetryEnabled[2] = {false, false};
 
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;
@@ -274,7 +263,7 @@ public:
 
     std::vector<uint32_t> lastColors;
 
-    SplitSessionData splitSessionData = { false };
+    SplitSessionData splitSessionData = {false};
 
     std::vector<BaseScreen*> hintOpenScreensInInteractiveMode;
 
@@ -323,10 +312,10 @@ public:
     void takeInput(SDL_Event evt) override;
     std::vector<std::string> dropEverythingYoureDoingAndSave() override;
 
-    std::string getName() override { 
-        return TL("vsp.maineditor") 
-            + ((lastConfirmedSave || splitSessionData.set) ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
-                : std::string("")); 
+    std::string getName() override {
+        return TL("vsp.maineditor") + ((lastConfirmedSave || splitSessionData.set)
+                                           ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
+                                           : std::string(""));
     }
     void onReturnToScreen() override;
     bool takesTouchEvents() override { return true; }
@@ -452,7 +441,7 @@ public:
     void flipAllLayersOnY();
 
     virtual void rescaleAllLayersFromCommand(XY size);
-    //todo: split byTile into two functions
+    // todo: split byTile into two functions
     virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);
     virtual void resizzeAllLayersByTilecountFromCommand(XY size);
     virtual void resizeAllLayersReorderingTilesFromCommand(XY size);
@@ -466,7 +455,8 @@ public:
     virtual void networkCanvasStateUpdated(int whichFrame, int whichLayer);
     void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
     void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
-    void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo);
+    void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket,
+                                               NetworkCanvasClientInfo* clientInfo);
     bool networkCanvasProcessAUTHCommand(std::string request);
     std::string networkReadCommand(NET_StreamSocket* socket);
     bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
@@ -495,7 +485,7 @@ public:
     void addComment(CommentData c);
     void addCommentAt(XY a, std::string c);
     void removeCommentAt(XY a);
+
 private:
     CommentData _removeCommentAt(XY a);
 };
-

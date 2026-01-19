@@ -647,36 +647,40 @@ void MainEditor::renderGuidelines() {
     * [3] "breakpoint" system : shift-lmb to create a "point" on a guideline if a grid is present. the guideline may alter direction after that point
     * [4] option to stop rendering / render specific colour / render all like comments?
     */
-    for (Guideline& guide : guidelines) {
+   if (guidelineDisplayMode != GUIDELINE_HIDE_ALL) {
+        for (Guideline& guide : guidelines) {
 
-        u8  a = (pickedColor >> 24) & 0xff,
-            r = (pickedColor >> 16) & 0xff,
-            g = (pickedColor >> 8) & 0xff,
-            b = pickedColor & 0xff;
+            SDL_Color guidelineColor = usingAltBG() ? SDL_Color{0,0,0,255} : SDL_Color{255,255,255,255};
+            if (guidelineDisplayMode == GUIDELINE_SHOW_COLORED) {
+                u8  a = (pickedColor >> 24) & 0xff,
+                    r = (pickedColor >> 16) & 0xff,
+                    g = (pickedColor >> 8) & 0xff,
+                    b = pickedColor & 0xff;
 
-        hsv h = rgb2hsv({ r / 255.0, g / 255.0, b / 255.0 });
-        h.v = dxmax(0.2, h.v);
-        h.s /= 2;
-        rgb rgbval = hsv2rgb(h);
-        SDL_Color c = rgb2sdlcolor(rgbval);
+                hsv h = rgb2hsv({ r / 255.0, g / 255.0, b / 255.0 });
+                h.v = dxmax(0.2, h.v);
+                h.s /= 2;
+                rgb rgbval = hsv2rgb(h);
+                guidelineColor = rgb2sdlcolor(rgbval);
+            }
 
-        SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, 120);
-        if (!guide.vertical) {
-            //horizontal
-            int gYPos = guide.position / 2;
-            bool gYMiddle = guide.position % 2;
-            int lineDrawYPoint = canvas.currentDrawPoint.y + gYPos * canvas.scale + (gYMiddle ? canvas.scale / 2 : 0);
-            SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
-        }
-        if (guide.vertical) {
-            //vertical
-            int gXPos = guide.position / 2;
-            bool gXMiddle = guide.position % 2;
-            int lineDrawXPoint = canvas.currentDrawPoint.x + gXPos * canvas.scale + (gXMiddle ? canvas.scale / 2 : 0);
-            SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
+            SDL_SetRenderDrawColor(g_rd, guidelineColor.r, guidelineColor.g, guidelineColor.b, 120);
+            if (!guide.vertical) {
+                //horizontal
+                int gYPos = guide.position / 2;
+                bool gYMiddle = guide.position % 2;
+                int lineDrawYPoint = canvas.currentDrawPoint.y + gYPos * canvas.scale + (gYMiddle ? canvas.scale / 2 : 0);
+                SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
+            }
+            if (guide.vertical) {
+                //vertical
+                int gXPos = guide.position / 2;
+                bool gXMiddle = guide.position % 2;
+                int lineDrawXPoint = canvas.currentDrawPoint.x + gXPos * canvas.scale + (gXMiddle ? canvas.scale / 2 : 0);
+                SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
+            }
         }
     }
-
 }
 
 void MainEditor::drawSplitSessionFragments()
@@ -1140,6 +1144,18 @@ void MainEditor::setUpWidgets()
                                     this->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
                                     this->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
                                     "All comments shown"), "", 1500
+                                ));
+                            }
+                        }
+                    },                    
+                    {SDL_SCANCODE_L, { "Toggle guidelines",
+                            [this]() {
+                                (*(int*)&this->guidelineDisplayMode)++;
+                                (*(int*)&this->guidelineDisplayMode) %= 3;
+                                g_addNotification(Notification(frmt("{}",
+                                    this->guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
+                                    this->guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
+                                    "Guidelines shown in UI color"), "", 1500
                                 ));
                             }
                         }
