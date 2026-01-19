@@ -245,7 +245,7 @@ jobs:
 
     - name: build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake/build && CC=clang CXX=clang++ cmake .. -DRELEASE=ON -DVSP_DISCORD_RPC=ON && make
+      run: cd cmake/build && CC=clang CXX=clang++ cmake .. -DRELEASE=ON -DVSP_DISCORD_RPC=ON && make -j4
     
     - uses: actions/setup-python@v6
       with:
@@ -388,7 +388,7 @@ jobs:
     
     - name: setup emscripten build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake/build && emmake make
+      run: cd cmake/build && emmake make -j4
     
     - name: gather artifacts
       working-directory: ${{env.GITHUB_WORKSPACE}}
