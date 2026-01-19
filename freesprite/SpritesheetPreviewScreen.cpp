@@ -264,8 +264,10 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int which)
         SDL_Rect layersClipArea = caller->getPaddedTilePosAndDimensions(currentSprite);
 
         for (Layer*& l : caller->getLayerStack()) {
-            l->prerender();
-            SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, &layersClipArea, &spriteDrawArea);
+            if (!l->hidden) {
+                l->prerender();
+                SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, &layersClipArea, &spriteDrawArea);
+            }
         }
     }
 }

@@ -73,7 +73,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     XY posInTab = { 0,10 };
     
     configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
-    if (platformSupportsFeature(VSP_FEATURE_DISCORD_RPC)){
+    if (VSP_DISCORD_RPC){
         configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
     }
     configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog, &posInTab));
@@ -452,7 +452,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[5].wxs.addDrawable(btn);
     posInTab.y += 35;
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
     std::filesystem::path dllpath = convertStringOnWin32(g_programDirectory);
     dllpath /= "voidsprite_shellext.dll";
 
@@ -773,7 +773,7 @@ void PopupGlobalConfig::updateLanguageCredit()
 
 void PopupGlobalConfig::shellExtensionAction(bool install)
 {
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
     std::filesystem::path dllpath = convertStringOnWin32(g_programDirectory);
     dllpath /= "voidsprite_shellext.dll";
 

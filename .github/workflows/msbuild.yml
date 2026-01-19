@@ -245,7 +245,7 @@ jobs:
 
     - name: build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake/build && CC=clang CXX=clang++ cmake .. && make
+      run: cd cmake/build && CC=clang CXX=clang++ cmake .. -DRELEASE=ON -DVSP_DISCORD_RPC=ON && make
     
     - uses: actions/setup-python@v6
       with:

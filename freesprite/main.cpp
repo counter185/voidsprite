@@ -878,7 +878,7 @@ int main(int argc, char** argv)
         }
         else {
             g_programDirectory = g_programExePath.substr(0, findLastPathSep);
-            g_programDirectory += _WIN32 ? "\\" : "/";
+            g_programDirectory += VSP_PLATFORM == VSP_PLATFORM_WIN32 ? "\\" : "/";
         }
 #endif
         loginfo(frmt("Program directory: {}", g_programDirectory));
@@ -929,7 +929,7 @@ int main(int argc, char** argv)
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
         SDL_SetWindowsMessageHook(main_WindowsMessageHook, NULL);
 #endif
 

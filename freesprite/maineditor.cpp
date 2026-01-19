@@ -2557,7 +2557,7 @@ PlatformNativePathString MainEditor::createRecoveryAutosave(std::string insertIn
     // todo: make a platform-specific localtime function
 #if defined(__unix__) || defined(__APPLE__)
     localtime_r(&now, &ltm);
-#elif _WIN32
+#elif defined(_MSC_VER)
     localtime_s(&ltm, &now);
 #else
     ltm = *std::localtime(&now);
@@ -3273,7 +3273,7 @@ void MainEditor::promptStartNetworkSession()
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Network session already started"));
         return;
     }
-    bool showRPCSettings = platformSupportsFeature(VSP_FEATURE_DISCORD_RPC) && g_config.useDiscordRPC;
+    bool showRPCSettings = VSP_DISCORD_RPC && g_config.useDiscordRPC;
     PopupSetupNetworkCanvas* p = new PopupSetupNetworkCanvas(TL("vsp.maineditor.startcollab"), TL("vsp.collabeditor.popup.host.desc"), false, true, showRPCSettings);
     p->onInputConfirmCallback = [this, showRPCSettings](PopupSetupNetworkCanvas* p, PopupSetNetworkCanvasData d) {
         networkRunning = true;

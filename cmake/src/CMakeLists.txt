@@ -4,6 +4,8 @@ project(my_app)
 
 option(USE_FMT_FORMAT "Use fmt::format instead of std::format" OFF)
 option(VOIDSPRITE_UNITY_BUILD "Use unity build" ON)
+option(VSP_DISCORD_RPC "Enable Discord RPC. Only for x64 Linux (for Windows use the VS sln)" OFF)
+option(RELEASE "Compiler optimizations. Disable for DEBUG options" ON)
 set(VOIDSPRITE_ASSETS_PATH "" CACHE STRING "Path to voidsprite assets. Executable directory if empty")
 
 set(CMAKE_CXX_STANDARD 20)
@@ -16,10 +18,22 @@ if (USE_FMT_FORMAT)
     endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fdiagnostics-show-option -w -Wno-c++11-narrowing -g")
+if (VSP_DISCORD_RPC)
+    add_definitions(-DVSP_DISCORD_RPC=1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,${CMAKE_CURRENT_SOURCE_DIR} -L${CMAKE_CURRENT_SOURCE_DIR} -ldiscord_game_sdk_linux_x64")
+endif()
 
+if (RELEASE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
+else()
+    add_definitions(-D_DEBUG=1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fdiagnostics-show-option -w -Wno-c++11-narrowing")
 
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
+
 if(DEFINED ENV{GIT_HASH})
     add_definitions(-DGIT_HASH="$ENV{GIT_HASH}")
 endif()

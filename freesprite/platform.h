@@ -1,6 +1,6 @@
 #pragma once
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 #define _WIDEPATHS 1
 #define PlatformNativePathString std::wstring
 #define PlatformFileModeRB L"rb"
@@ -16,7 +16,7 @@
 #define VSP_FEATURE_FILE_ASSOC               0b00000001
 #define VSP_FEATURE_CLIPBOARD                0b00000010
 #define VSP_FEATURE_WEB_FETCH                0b00000100
-#define VSP_FEATURE_DISCORD_RPC              0b00001000
+//#define VSP_FEATURE_DISCORD_RPC              0b00001000   //use VSP_DISCORD_RPC define instead
 #define VSP_FEATURE_UNRESTRICTED_FILE_SYSTEM 0b00010000
 #define VSP_FEATURE_MULTIWINDOW              0b00100000
 #define VSP_FEATURE_INSTANCE_IPC             0b01000000

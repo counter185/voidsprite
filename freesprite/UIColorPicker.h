@@ -127,7 +127,7 @@ public:
         colorUpdatedFromVisualHSV();
     }
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
     void openOldWindowsColorPicker();
 #endif
 };

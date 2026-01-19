@@ -16,7 +16,7 @@ using json = nlohmann::json;
 #define GIT_BRANCH  UTF8_DIAMOND "dev"
 #endif
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 #define PLATFORM "win64"
 #elif __APPLE__
 #define PLATFORM "mac"

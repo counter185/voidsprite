@@ -13,7 +13,7 @@
 #include "UIColorInputField.h"
 #include "io/io_voidsprite.h"
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 #include <windows.h>
 #endif
 
@@ -194,7 +194,7 @@ UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
             i++;
         }
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
         UIButton* oldColorPickerButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.win32picker"));
         oldColorPickerButton->position = XY{ 5, yNow };
         oldColorPickerButton->wxWidth = 210;
@@ -832,7 +832,7 @@ void UIColorPicker::updateAllSliderColors()
     };
 }
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
 void UIColorPicker::openOldWindowsColorPicker()
 {
     CHOOSECOLOR cc{};

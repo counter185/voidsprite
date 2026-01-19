@@ -74,7 +74,7 @@
 #define VSP_PLATFORM_VITA 5
 #define VSP_PLATFORM_EMSCRIPTEN 6
 
-#if _WIN32
+#if defined(_WIN32)
     #define VSP_PLATFORM VSP_PLATFORM_WIN32
 #elif __ANDROID__
     #define VSP_PLATFORM VSP_PLATFORM_ANDROID
@@ -144,9 +144,6 @@
 #define u8 uint8_t
 #define s8 int8_t
 
-#ifndef _WIN32
-#define _WIN32 0
-#endif
 
 #ifndef WINDOWS_XP
 #define WINDOWS_XP 0

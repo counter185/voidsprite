@@ -1,4 +1,4 @@
-#if _WIN32 && !_M_ARM64
+#if (!defined(VSP_DISCORD_RPC) && _WIN32 && !_M_ARM64) || VSP_DISCORD_RPC
 
 #include "achievement_manager.cpp.optional"
 #include "activity_manager.cpp.optional"

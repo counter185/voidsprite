@@ -416,7 +416,7 @@ void StartScreen::takeInput(SDL_Event evt)
                         PopupYesNo* p = new PopupYesNo("Test crash handler", "Testing exception handler. Continue?");
                         p->onFinishCallback = [](PopupYesNo*, bool yes) {
                             if (yes) {
-                                throw std::exception("** user-initiated test crash");
+                                throw std::runtime_error("** user-initiated test crash");
                             }
                         };
                         g_addPopup(p);

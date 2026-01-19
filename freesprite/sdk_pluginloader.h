@@ -3,7 +3,7 @@
 #include "globals.h"
 #include "sdk_impl.h"
 
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
     #include <windows.h>
 
     #define ModuleHandle HMODULE
@@ -46,7 +46,7 @@ inline bool loadPluginObject(PlatformNativePathString path) {
     
     if (module == NULL) {
         logerr(frmt("Failed to load plugin"));
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
         u32 errorCode = GetLastError();
         logerr(frmt("Error code: {}", errorCode));
         if (errorCode == 126 && std::filesystem::exists(path)) {

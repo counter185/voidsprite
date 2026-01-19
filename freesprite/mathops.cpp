@@ -260,7 +260,7 @@ std::string fileNameFromPath(std::string fullPath)
 PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNativePathString subdir)
 {
     PlatformNativePathString separator =
-#if _WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
         L"\\"
 #else
         "/"
