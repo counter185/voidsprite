@@ -1,9 +1,9 @@
 #pragma once
 #include "drawable.h"
 #include "globals.h"
-#include "DraggablePanel.h"
+#include "PanelUserInteractable.h"
 
-class EditorSpritesheetPreview : public DraggablePanel
+class EditorSpritesheetPreview : public PanelUserInteractable
 {
 private:
 	SpritesheetPreviewScreen* caller;
@@ -13,8 +13,11 @@ public:
 		caller = parent;
 
 		position = { 430, 60 };
+		setupDraggable();
+		setupCollapsible();
+		addTitleText("PREVIEW");
 	}
 
-	void render(XY at) override;
+	void renderAfterBG(XY at) override;
 };
 
