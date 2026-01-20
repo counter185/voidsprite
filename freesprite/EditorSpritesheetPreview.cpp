@@ -5,7 +5,7 @@
 
 void EditorSpritesheetPreview::renderAfterBG(XY at)
 {
-	XY tileSize = caller->caller->getPaddedTileDimensions();
+	XY tileSize = caller->caller->tileDimensions;
 	wxWidth = ixmax(80, tileSize.x * caller->canvas.scale) + 8;
 	wxHeight = ixmax(30, tileSize.y * caller->canvas.scale) + 20 + 8;
 
@@ -18,5 +18,5 @@ void EditorSpritesheetPreview::renderAfterBG(XY at)
 		wxHeight
 	};
 	//SDL_RenderFillRect(g_rd, &drawRect);
-	caller->drawPreview(xyAdd(origin, XY{ 4, 24 }));
+	caller->drawPreview(xyAdd(origin, XY{ 4, 24 }), caller->canvas.scale);
 }

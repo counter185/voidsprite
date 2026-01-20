@@ -24,6 +24,7 @@ public:
     bool closeNextTick = false;
 
     ScrollingPanel* spriteView;
+    int timelineSpriteScale = 1;
     ScreenWideNavBar* navbar = NULL;
 
     SpritesheetPreviewScreen(MainEditor* parent);
@@ -39,10 +40,11 @@ public:
 
     std::string getName() override { return TL("vsp.spritesheetpreview"); }
 
-    void drawPreview(XY at, int which = -1);
+    void drawPreview(XY at, int scale, int which = -1);
     void drawBackground();
     void genTimelineButtons();
     void addTimelineButton();
     void popTimelineButton();
+    int calcMaxTimelineScale();
 };
 

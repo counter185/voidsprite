@@ -313,9 +313,11 @@ public:
     std::vector<std::string> dropEverythingYoureDoingAndSave() override;
 
     std::string getName() override {
-        return TL("vsp.maineditor") + ((lastConfirmedSave || splitSessionData.set)
-                                           ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
-                                           : std::string(""));
+        return TL("vsp.maineditor") 
+            + ((lastConfirmedSave || splitSessionData.set)
+                ? ": " + fileNameFromPath(convertStringToUTF8OnWin32(lastConfirmedSavePath))
+                : std::string(""))
+            + (changesSinceLastSave != NO_UNSAVED_CHANGES ? "*" : "");
     }
     void onReturnToScreen() override;
     bool takesTouchEvents() override { return true; }

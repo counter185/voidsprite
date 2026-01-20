@@ -26,10 +26,8 @@ PanelSpritesheetPreview::PanelSpritesheetPreview(SpritesheetPreviewScreen* calle
     wxsTarget().addDrawable(textfieldMSPerSprite);
 }
 
-void PanelSpritesheetPreview::render(XY position)
+void PanelSpritesheetPreview::renderAfterBG(XY position)
 {
-    PanelUserInteractable::render(position);
-
     if (!collapsed) {
         XY previewPos = { 5,90 };
         XY callerPaddedTileSize = caller->caller->getPaddedTileDimensions();
@@ -39,6 +37,6 @@ void PanelSpritesheetPreview::render(XY position)
         };
         wxWidth = ixmax(320, previewPos.x + tileSize.x + 10);
         wxHeight = ixmax(200, previewPos.y + tileSize.y + 10);
-        caller->drawPreview(xyAdd(position, previewPos));
+        caller->drawPreview(xyAdd(position, previewPos), caller->canvas.scale);
     }
 }

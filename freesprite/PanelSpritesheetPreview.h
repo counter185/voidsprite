@@ -8,7 +8,7 @@ protected:
     SpritesheetPreviewScreen* caller;
 public:
     PanelSpritesheetPreview(SpritesheetPreviewScreen* caller);
-    void render(XY position) override;
+    void renderAfterBG(XY position) override;
 
 };
 

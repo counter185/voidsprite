@@ -393,8 +393,7 @@
     {"vsp.config.opt.pngextdata.desc", "When enabled, voidsprite will load and save extra data such as canvas comments,\n"
                                        "tile grid and symmetry to PNGs."},
     {"vsp.config.opt.discordrpc", "Discord Rich Presence"},
-    {"vsp.config.opt.discordrpc.desc", "When enabled, your activity will be shared as your Discord status.\n"
-                                       "Supported only on Windows."},
+    {"vsp.config.opt.discordrpc.desc", "When enabled, your activity will be shared as your Discord status."},
     {"vsp.config.opt.usesystemfilepicker", "Use system file dialog"},
     {"vsp.config.opt.usesystemfilepicker.desc", "When enabled, opening and saving files will use the system file picker window.\n"
                                                 "Only supported on desktop platforms."},

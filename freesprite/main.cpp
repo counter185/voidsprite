@@ -1259,7 +1259,9 @@ int main(int argc, char** argv)
         platformDeinit();
 
         g_deinitRPC();
+        SDL_Quit();
         log_close();
+        loginfo("Deinit passed.");
 #endif
     }
     catch (std::exception& e) {
@@ -1275,5 +1277,6 @@ int main(int argc, char** argv)
         std::string errorMsg = frmt("{}\n   {}", TL("vsp.fatalerror.body:v2"), e.what());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
     }
+    loginfo("main() done.");
     return 0;
 }
