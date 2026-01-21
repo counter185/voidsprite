@@ -578,6 +578,7 @@ void StartScreen::populateLastOpenFiles()
                 {TL("vsp.nav.open"), [this, lastPath, button]() { button->click(); }},
                 {TL("vsp.launchpad.ctx.removefromlast"), [this, lastPath]() { g_removeFromLastOpenFiles(lastPath); populateLastOpenFiles(); }},
                 {TL("vsp.launchpad.ctx.clearlast"), [this, lastPath]() { g_clearLastOpenFiles(); populateLastOpenFiles(); }},
+                {TL("vsp.launchpad.ctx.openlocation"), [this, lastPath]() { platformOpenFileLocation(convertStringToUTF8OnWin32(lastPath)); }},
             });
         };
         button->fill = visualConfigFill("launchpad/last_open_files/bg");

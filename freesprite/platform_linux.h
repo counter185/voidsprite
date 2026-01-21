@@ -137,6 +137,11 @@ void platformTryLoadOtherFile(
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
+    auto findSeparator = path.find_last_of("/\\");
+    if (findSeparator != std::string::npos) {
+        path = path.substr(0, findSeparator);
+    }
+    
     pid_t pid;
     char *cpath = (char *)path.c_str();
     char *argv[] = {(char *)"xdg-open", cpath, NULL};

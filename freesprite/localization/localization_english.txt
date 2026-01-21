@@ -175,6 +175,7 @@
 
     {"vsp.launchpad.ctx.removefromlast", "Remove from last open file history"},
     {"vsp.launchpad.ctx.clearlast", "Clear last open file history"},
+    {"vsp.launchpad.ctx.openlocation", "Open file location"},
 
     {"vsp.launchpad.tab.pixeldim", "Pixel dimensions"},
     {"vsp.launchpad.tab.spritesheet", "Sprites/Tiles"},
