@@ -368,13 +368,15 @@ void main_saveAllScreens()
     }
     catch (std::exception&) {}
 
-    std::filesystem::path configPath = platformEnsureDirAndGetConfigFilePath();
-    auto crashSavesPath = configPath / "crashsaves.txt";
-    std::ofstream savedPathsFile = std::ofstream(crashSavesPath);
-    for (std::string& p : savedPaths) {
-        savedPathsFile << p << "\n";
+    if (!savedPaths.empty()) {
+        std::filesystem::path configPath = platformEnsureDirAndGetConfigFilePath();
+        auto crashSavesPath = configPath / "crashsaves.txt";
+        std::ofstream savedPathsFile = std::ofstream(crashSavesPath);
+        for (std::string& p : savedPaths) {
+            savedPathsFile << p << "\n";
+        }
+        savedPathsFile.close();
     }
-    savedPathsFile.close();
 }
 
 static void main_handleSIGSEGV(int sig) {
