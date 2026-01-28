@@ -358,9 +358,9 @@ jobs:
           cp -R ./x64/voidsprite.app/Contents/MacOS/assets/* voidsprite-universal.app/Contents/MacOS/assets/
           cp ./x64/voidsprite.app/Contents/Info.plist voidsprite-universal.app/Contents/Info.plist
           cp voidsprite voidsprite-universal.app/Contents/MacOS/voidsprite
-          find ./arm64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ if [ ! -f ./x64/voidsprite.app/Contents/MacOS/@ ]; then cp ./arm64/voidsprite.app/Contents/MacOS/@ ./voidsprite-universal.app/Contents/MacOS/@ ; fi
-          find ./x64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ if [ ! -f ./arm64/voidsprite.app/Contents/MacOS/@ ]; then cp ./x64/voidsprite.app/Contents/MacOS/@ ./voidsprite-universal.app/Contents/MacOS/@ ; fi
-          find ./x64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ if [ -f ./arm64/voidsprite.app/Contents/MacOS/@ ]; then lipo ./x64/voidsprite.app/Contents/MacOS/@ ./arm64/voidsprite.app/Contents/MacOS/@ -output ./voidsprite-universal.app/Contents/MacOS/@ -create; fi
+          find ./arm64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ sh -c 'if [ ! -f ./x64/voidsprite.app/Contents/MacOS/@ ]; then cp ./arm64/voidsprite.app/Contents/MacOS/@ ./voidsprite-universal.app/Contents/MacOS/@ ; fi'
+          find ./x64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ sh -c 'if [ ! -f ./arm64/voidsprite.app/Contents/MacOS/@ ]; then cp ./x64/voidsprite.app/Contents/MacOS/@ ./voidsprite-universal.app/Contents/MacOS/@ ; fi'
+          find ./x64/voidsprite.app/ -name "*.dylib" -exec basename {} \; | xargs -n1 -I@ sh -c 'if [ -f ./arm64/voidsprite.app/Contents/MacOS/@ ]; then lipo ./x64/voidsprite.app/Contents/MacOS/@ ./arm64/voidsprite.app/Contents/MacOS/@ -output ./voidsprite-universal.app/Contents/MacOS/@ -create; fi'
           chmod +x ./voidsprite-universal.app/Contents/MacOS/voidsprite
           
       - name: create tar
