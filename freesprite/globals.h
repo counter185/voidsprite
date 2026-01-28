@@ -209,7 +209,7 @@ class UndoStackCaptureGroup;
 //textrenderer
 class TextRenderer;
 class BitmapFontObject;
-class GlyphData;
+struct GlyphData;
 
 //templates
 class BaseTemplate;
