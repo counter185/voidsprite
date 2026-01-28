@@ -29,6 +29,7 @@ struct FilterParameter {
 
 void g_loadFilters();
 inline BaseFilter* g_filter_edgeDetect = NULL;
+inline BaseFilter* g_filter_quantize = NULL;
 
 class BaseFilter
 {

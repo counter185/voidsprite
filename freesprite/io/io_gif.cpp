@@ -1,6 +1,7 @@
 #include <map>
 #include "io_base.h"
 #include "io_gif.h"
+#include "../layer_conversions.h"
 
 std::vector<u8> GIFReadDataBlocks(FILE* f)
 {
@@ -365,6 +366,9 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
         for (Frame* fr : editor->frames) {
             Layer* flat = editor->isPalettized ? ((MainEditorPalettized*)editor)->flattenFrameWithoutConvertingToRGB(fr) : editor->flattenFrame(fr);
             if (!editor->isPalettized) {
+                Layer* ff = to8BitIndexed1BitAlpha(flat);
+                delete flat;
+                flat = ff;
                 //Layer* ff = flat->    //todo convert to indexed
             }
             if (flat == NULL) {

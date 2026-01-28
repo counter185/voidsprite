@@ -313,6 +313,7 @@
     <ClCompile Include="io\io_palettes.cpp" />
     <ClCompile Include="io\io_xna.cpp" />
     <ClCompile Include="keybinds.cpp" />
+    <ClCompile Include="layer_conversions.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
     <ClCompile Include="localization\localization.cpp" />
     <ClCompile Include="log.cpp" />
@@ -576,6 +577,7 @@
     <ClInclude Include="json\json.hpp" />
     <ClInclude Include="keybinds.h" />
     <ClInclude Include="LayerPalettized.h" />
+    <ClInclude Include="layer_conversions.h" />
     <ClInclude Include="license.h" />
     <ClInclude Include="localization\localization.h" />
     <ClInclude Include="log.h" />

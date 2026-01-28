@@ -20,7 +20,7 @@ void g_loadFilters()
     g_filters.push_back(new FilterPixelize());
     g_filters.push_back(new FilterOutline());
     g_filters.push_back(new FilterBrightnessContrast());
-    g_filters.push_back(new FilterQuantize());
+    g_filters.push_back(g_filter_quantize = new FilterQuantize());
     g_filters.push_back(new FilterJPEG());
     g_filters.push_back(new FilterAVIF());
     /*g_filters.push_back(new FilterKernelTransformation("Kernel blur", {
