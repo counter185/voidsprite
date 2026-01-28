@@ -3063,7 +3063,8 @@ void g_setupIO() {
         * exVTF,
         * exDIBv5,
         * exJPEG,
-        * exAVIF
+        * exAVIF,
+        * exGIF = NULL
         ;
 
     g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -3079,6 +3080,7 @@ void g_setupIO() {
     g_fileExporters.push_back(exPiskel = FileExporter::sessionExporter("Piskel", ".piskel", &writePISKEL));
     g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::sessionExporter("AVI Video", ".avi", &writeAVI, FORMAT_RGB));
+    //g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", &writeGIF, FORMAT_PALETTIZED));
 
     g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
 
@@ -3144,7 +3146,7 @@ void g_setupIO() {
 #if VSP_USE_LIBLCF
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 #endif
-    g_fileImporters.push_back(FileImporter::sessionImporter("GIF", ".gif", &readGIF, NULL, FORMAT_RGB | FORMAT_PALETTIZED, magicVerify(0, "GIF")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("GIF", ".gif", &readGIF, exGIF, FORMAT_RGB | FORMAT_PALETTIZED, magicVerify(0, "GIF")));
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG, FORMAT_RGB | FORMAT_PALETTIZED,

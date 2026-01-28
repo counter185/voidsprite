@@ -40,6 +40,7 @@ public:
     int32_t* makeFlatIndicesTable(Frame* f);
     Layer* flattenImageAndConvertToRGB(Frame* f);
     Layer* flattenImageWithoutConvertingToRGB();
+    Layer* flattenFrameWithoutConvertingToRGB(Frame* fr);
 
     void tryExportRGB();
     void trySavePalettizedImage();

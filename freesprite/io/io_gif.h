@@ -66,3 +66,5 @@ struct GIFPlainTextExtension {
 std::vector<u8> GIFReadDataBlocks(FILE* f);
 
 MainEditor* readGIF(PlatformNativePathString path);
+
+bool writeGIF(PlatformNativePathString path, MainEditor* editor);

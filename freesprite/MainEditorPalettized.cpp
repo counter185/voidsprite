@@ -737,7 +737,11 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB(Frame* f)
 
 Layer* MainEditorPalettized::flattenImageWithoutConvertingToRGB()
 {
-    int32_t* indices = makeFlatIndicesTable(getCurrentFrame());
+    return flattenFrameWithoutConvertingToRGB(getCurrentFrame());
+}
+
+Layer* MainEditorPalettized::flattenFrameWithoutConvertingToRGB(Frame* fr) {
+    int32_t* indices = makeFlatIndicesTable(fr);
     LayerPalettized* flatLayer = new LayerPalettized(canvas.dimensions.x, canvas.dimensions.y);
     memcpy(flatLayer->pixels32(), indices, canvas.dimensions.x * canvas.dimensions.y * 4);
     flatLayer->palette = palette;

@@ -13,13 +13,15 @@ class BitReader {
 private:
     FILE* f = NULL;
     u8* data = NULL;
+    u64 dataSize = 0;
+    u64 dataPos = 0;
     bool usingFile = false;
 
     int bitsInBuffer = 0;
     u8 buffer = 0;
 public:
     BitReader(FILE* file) : f(file), usingFile(true) {}
-    BitReader(u8* inputData) : data(inputData), usingFile(false) {}
+    BitReader(u8* inputData, u64 size) : data(inputData), dataSize(size), usingFile(false) {}
     u32 readBits(int n) {
         int result = 0;
         int bitsRead = 0;
@@ -29,7 +31,11 @@ public:
                     fread(&buffer, 1, 1, f);
                 }
                 else {
-                    buffer = *(data++);
+                    if (dataPos >= dataSize) {
+                        throw std::runtime_error("[BitReader] attempt to read past end of data");
+                        return result;
+                    }
+                    buffer = *(data + dataPos++);
                 }
                 bitsInBuffer = 8;
             }
@@ -41,6 +47,55 @@ public:
             bitsRead++;
         }
         return result;
+    }
+};
+
+class BitWriter {
+private:
+    FILE* f = NULL;
+    std::vector<u8> data;
+    bool usingFile = false;
+
+    u8 buffer = 0;
+    int bitsInBuffer = 0;
+public:
+    BitWriter(FILE* file) : f(file), usingFile(true) {}
+    BitWriter() : usingFile(false) {}
+
+    void writeBits(u32 bits, int n) {
+        int bitsWritten = 0;
+        while (bitsWritten < n) {
+            buffer |= (bits & 1) << bitsInBuffer;
+            bits >>= 1;
+            bitsInBuffer++;
+            bitsWritten++;
+            if (bitsInBuffer == 8) {
+                if (usingFile) {
+                    fwrite(&buffer, 1, 1, f);
+                }
+                else {
+                    data.push_back(buffer);
+                }
+                buffer = 0;
+                bitsInBuffer = 0;
+            }
+        }
+    }
+    void flush() {
+        if (bitsInBuffer > 0) {
+            if (usingFile) {
+                fwrite(&buffer, 1, 1, f);
+            }
+            else {
+                data.push_back(buffer);
+            }
+            buffer = 0;
+            bitsInBuffer = 0;
+        }
+    }
+
+    std::vector<u8>& getData() {
+        return data;
     }
 };
 

@@ -21,8 +21,9 @@ std::vector<u8> GIFReadDataBlocks(FILE* f)
     return ret;
 }
 std::vector<u8> GIFDecodeLZW(u8 minCodeSize, std::vector<u8>& target) {
-    BitReader br(target.data());
+    BitReader br(target.data(), target.size());
     int codeSize = minCodeSize + 1;
+    //loginfo(frmt("[GIF] decode with min code size {}", (int)minCodeSize));
     std::map<int, std::vector<u8>> dictionary;
     int dictSize = 1 << minCodeSize;
     for (int i = 0; i < dictSize; i++) {
@@ -57,7 +58,12 @@ std::vector<u8> GIFDecodeLZW(u8 minCodeSize, std::vector<u8>& target) {
             }
             else {
                 entry = dictionary[prevCode];
-                entry.push_back(entry.front());
+                if (!entry.empty()) {
+                    entry.push_back(entry.front());
+                } else {
+                    logerr(frmt("[GIF] LZW decode error: invalid code {} at {}", code, output.size()));
+                    break;
+                }
             }
 
             output.insert(output.end(), entry.begin(), entry.end());
@@ -68,6 +74,7 @@ std::vector<u8> GIFDecodeLZW(u8 minCodeSize, std::vector<u8>& target) {
                 dictionary[dictSize++] = newEntry;
 
                 if (dictSize == (1 << codeSize) && codeSize < 12) {
+                    //loginfo(frmt("--increasing code size to {}", (int)(codeSize + 1)));
                     codeSize++;
                 }
             }
@@ -75,6 +82,82 @@ std::vector<u8> GIFDecodeLZW(u8 minCodeSize, std::vector<u8>& target) {
         }
     }
     return output;
+}
+
+BitWriter GIFEncodeLZW(int lzwMinCodeSize, LayerPalettized* frame) {
+    BitWriter bw = BitWriter();
+    u8 currentCodeSize = lzwMinCodeSize + 1;
+    //loginfo(frmt("code size: {}", (int)lzwMinCodeSize));
+    int dictSize = 1 << lzwMinCodeSize;
+    std::vector<std::vector<u8>> codeTable;
+    for (int i = 0; i < dictSize; i++) {
+        codeTable.push_back({ (u8)i });
+    }
+    int clearCode = dictSize++;
+    int endCode = dictSize++;
+    codeTable.push_back({}); //clear code
+    codeTable.push_back({}); //end code
+
+    u32* pixels = frame->pixels32();
+    u64 pixelCount = frame->w * frame->h;
+    u64 ptr = 0;
+    std::vector<u8> indexBuffer = {};
+
+    bw.writeBits(clearCode, currentCodeSize);
+    indexBuffer.push_back((u8)(pixels[ptr++] & 0xFF));
+    while (ptr < pixelCount) {
+        u8 k = (u8)(pixels[ptr++] & 0xFF);
+
+        auto testBuffer = indexBuffer;
+        testBuffer.push_back(k);
+
+        auto pos = std::find_if(codeTable.begin(), codeTable.end(), [&](const std::vector<u8>& v) {
+            return v == testBuffer;
+        });
+        if (pos != codeTable.end()) {
+            //found
+            indexBuffer.push_back(k);
+        } else {
+            //not found
+            auto existingPos = std::find_if(codeTable.begin(), codeTable.end(), [&](const std::vector<u8>& v) {
+                return v == indexBuffer;
+            });
+            int codeIndex = std::distance(codeTable.begin(), existingPos);
+            bw.writeBits(codeIndex, currentCodeSize);
+            indexBuffer = {k};
+            if (dictSize < 4096) {
+                codeTable.push_back(testBuffer);
+                dictSize++;
+                if (currentCodeSize < 12 && dictSize == ((1 << currentCodeSize) + 1)) {
+                    currentCodeSize++;
+                    //loginfo(frmt("---increasing code size to {}", (int)currentCodeSize));
+                }
+            } else {
+                //loginfo("---dictionary full, clear code");
+                bw.writeBits(clearCode, currentCodeSize);
+                codeTable.clear();
+                dictSize = 1 << lzwMinCodeSize;
+                for (int i = 0; i < dictSize; i++) {
+                    codeTable.push_back({ (u8)i });
+                }
+                clearCode = dictSize++;
+                endCode = dictSize++;
+                codeTable.push_back({}); //clear code
+                codeTable.push_back({}); //end code
+                currentCodeSize = lzwMinCodeSize + 1;
+            }
+        }
+    }
+    if (!indexBuffer.empty()) {
+        auto existingPos = std::find_if(codeTable.begin(), codeTable.end(), [&](const std::vector<u8>& v) {
+            return v == indexBuffer;
+        });
+        int codeIndex = std::distance(codeTable.begin(), existingPos);
+        bw.writeBits(codeIndex, currentCodeSize);
+    }
+    bw.writeBits(endCode, currentCodeSize);
+    bw.flush();
+    return bw;
 }
 
 MainEditor* readGIF(PlatformNativePathString path)
@@ -165,6 +248,8 @@ MainEditor* readGIF(PlatformNativePathString path)
                     case LABEL_COMMENT:
                     {
                         std::vector<u8> commentData = GIFReadDataBlocks(f);
+                        std::string commentStr(commentData.begin(), commentData.end());
+                        loginfo(frmt("[GIF] Comment: {}", commentStr));
                     }
                     break;
                     case LABEL_APPLICATION:
@@ -269,4 +354,116 @@ MainEditor* readGIF(PlatformNativePathString path)
         return ret;
     }
     return NULL;
+}
+
+
+bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+
+        std::vector<LayerPalettized*> frames;
+        for (Frame* fr : editor->frames) {
+            Layer* flat = editor->isPalettized ? ((MainEditorPalettized*)editor)->flattenFrameWithoutConvertingToRGB(fr) : editor->flattenFrame(fr);
+            if (!editor->isPalettized) {
+                //Layer* ff = flat->    //todo convert to indexed
+            }
+            if (flat == NULL) {
+                for (LayerPalettized* l : frames) {
+                    delete l;
+                }
+                fclose(f);
+                return false;
+            }
+            frames.push_back((LayerPalettized*)flat);
+        }
+
+        fwrite("GIF89a", 1, 6, f);
+        GIFLogicalScreenDescriptor lsd;
+        lsd.width = editor->canvas.dimensions.x;
+        lsd.height = editor->canvas.dimensions.y;
+        lsd.gctFlags.enabled = 1;
+        lsd.gctFlags.colorRes = 6;
+        lsd.gctFlags.sort = 0;
+        lsd.gctFlags.size = 7;
+        lsd.bgColorIndex = 254;
+        lsd.pixelAspect = 0;
+        fwrite(&lsd, sizeof(GIFLogicalScreenDescriptor), 1, f);
+        auto& palette = frames.front()->palette;
+        for (int i = 0; i < 256; i++) {
+            u32 color = palette.size() > i ? palette[i] : 0;
+            auto cc = uint32ToSDLColor(color);
+            fwrite(&cc.r, 1, 1, f);
+            fwrite(&cc.g, 1, 1, f);
+            fwrite(&cc.b, 1, 1, f);
+        }
+
+        GIFApplicationExtension pae;
+        pae.blockSize = 11;
+        memcpy(pae.identifier, "NETSCAPE", 8);
+        memcpy(pae.authenticationCode, "2.0", 3);
+        fwrite("\x21\xFF", 1, 2, f); //extension introducer
+        fwrite(&pae, sizeof(GIFApplicationExtension), 1, f);
+        u8 subBlockSize = 3;
+        fwrite(&subBlockSize, 1, 1, f);
+        u8 appData[3] = { 1, 0, 0 };
+        fwrite(appData, 1, 3, f);
+        fwrite("\x00", 1, 1, f); //block terminator
+
+        fwrite("\x21\xFE", 1, 2, f); //comment extension
+        std::string comment = "exported by voidsprite";
+        u8 commentBlockSize = (u8)std::min<size_t>(255, comment.size());
+        fwrite(&commentBlockSize, 1, 1, f);
+        fwrite(comment.c_str(), 1, commentBlockSize, f);
+        fwrite("\x00", 1, 1, f); //block terminator
+
+        for (LayerPalettized* frame : frames) {
+
+            GIFGraphicControlExtension gce;
+            fwrite("\x21\xF9", 1, 2, f); //extension introducer
+            gce.blockSize = 4;
+            gce.flags.disposalMode = 2; //clear to bg
+            gce.flags.userInput = 0;
+            gce.flags.transparent = 1;
+            gce.delay = editor->frameAnimMSPerFrame / 10;
+            gce.transparentColorIndex = 255;
+            fwrite(&gce, sizeof(GIFGraphicControlExtension), 1, f);
+            fwrite("\x00", 1, 1, f); //block terminator
+
+            GIFImageDescriptor gid;
+            gid.imageLeftPosition = 0;
+            gid.imageTopPosition = 0;
+            gid.imageWidth = editor->canvas.dimensions.x;
+            gid.imageHeight = editor->canvas.dimensions.y;
+            gid.flags.interlaceFlag = 0;
+            gid.flags.lctEnable = 0;
+            gid.flags.lctSort = 0;
+            gid.flags.lctSize = 0;
+            fwrite("\x2C", 1, 1, f); //image separator
+            fwrite(&gid, sizeof(GIFImageDescriptor), 1, f);
+            u8 lzwMinCodeSize = 8;
+            fwrite(&lzwMinCodeSize, 1, 1, f);
+            BitWriter bw = GIFEncodeLZW(lzwMinCodeSize, frame);
+            std::vector<u8>& encodedData = bw.getData();
+            u8* dataPtr = encodedData.data();
+            u64 dataLeft = encodedData.size();
+            while (dataLeft > 0) {
+                u8 blockSize = (dataLeft > 255) ? 255 : (u8)dataLeft;
+                fwrite(&blockSize, 1, 1, f);
+                fwrite(dataPtr, 1, blockSize, f);
+                dataPtr += blockSize;
+                dataLeft -= blockSize;
+            }
+            fwrite("\x00", 1, 1, f); //block terminator
+
+        }
+        //write trailer
+        fwrite(";", 1, 1, f);
+
+        for (LayerPalettized* l : frames) {
+            delete l;
+        }
+        fclose(f);
+        return true;
+    }
+    return false;
 }
