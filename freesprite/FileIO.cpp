@@ -3157,6 +3157,7 @@ void g_setupIO() {
 #if VOIDSPRITE_JXL_ENABLED
     g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));
 #endif
+    g_fileImporters.push_back(FileImporter::flatImporter("Godot Compressed texture", ".ctex", &readGodotCTEX));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
         magicVerify(0, "BM")));
     g_fileImporters.push_back(FileImporter::flatImporter("RPG2000/2003 XYZ", ".xyz", &readXYZ, exXYZ, FORMAT_PALETTIZED));

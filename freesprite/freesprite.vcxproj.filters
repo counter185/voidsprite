@@ -705,6 +705,12 @@
     <ClCompile Include="io\io_gif.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="layer_conversions.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_godot.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1404,6 +1410,12 @@
       <Filter>Header files\brushes</Filter>
     </ClInclude>
     <ClInclude Include="io\io_gif.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="layer_conversions.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_godot.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
