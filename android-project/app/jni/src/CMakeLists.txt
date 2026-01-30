@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.12)
 
 project(my_app)
 
@@ -70,8 +70,8 @@ Possible ways to fix this:
 - Add add_subdirectory(path/to/SDL) to your CMake script, and make sure a vendored SDL is present there.
 ")
 endif()
-file(GLOB_RECURSE CPP_FILES "voidsprite/*.cpp")
-file(GLOB_RECURSE C_FILES "voidsprite/*.c")
+file(GLOB_RECURSE CPP_FILES CONFIGURE_DEPENDS "voidsprite/*.cpp")
+file(GLOB_RECURSE C_FILES CONFIGURE_DEPENDS "voidsprite/*.c")
 list(FILTER CPP_FILES EXCLUDE REGEX "voidsprite/(x64/|ARM64/)?(Debug/|Release/).*")
 
 add_library(main SHARED
