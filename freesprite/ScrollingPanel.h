@@ -7,14 +7,14 @@ class ScrollingPanel :
     public Panel, public EventCallbackListener
 {
 protected:
-    XY lastPosOnScreen{};
-
     Timer64 verticalScrollbarHoverTimer;
     bool draggingVerticalScrollbar = false;
 
     Timer64 horizontalScrollbarHoverTimer;
     bool draggingHorizontalScrollbar = false;
 public:
+    XY lastPosOnScreen{};
+
     int scrollbarThickness = 14;
 
     bool scrollVertically = true;

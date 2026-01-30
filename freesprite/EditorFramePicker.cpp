@@ -16,6 +16,7 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
     wxWidth = 580;
     wxHeight = 154;
     parent = caller;
+    frameButtonW = g_fnt->StatStringDimensions("000").x + 5;
 
     setupDraggable();
     setupCollapsible();
@@ -142,6 +143,31 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
     createFrameButtons();
 }
 
+void EditorFramePicker::render(XY at) {
+    PanelUserInteractable::render(at);
+    renderPlayhead(at);
+}
+
+void EditorFramePicker::renderPlayhead(XY at)
+{
+    if (parent->frameAnimationPlaying) {
+        XY offs = frameButtonPanel->lastPosOnScreen;
+
+        SDL_Rect panelRect = { offs.x, offs.y, frameButtonPanel->wxWidth, frameButtonPanel->wxHeight };
+
+        XY playheadBegin = xyAdd(offs, { frameButtonPanel->scrollOffset.x, 0 });
+
+        double animTime = parent->frameAnimationStartTimer.elapsedLoopingTime(parent->frames.size() * parent->frameAnimMSPerFrame);
+        animTime /= parent->frameAnimMSPerFrame;
+        int animXPos = playheadBegin.x + animTime * frameButtonW;
+
+        g_pushClip(panelRect);
+        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 0xA0);
+        SDL_RenderDrawLine(g_rd, animXPos, panelRect.y, animXPos, panelRect.y + panelRect.h);
+        g_popClip();
+    }
+}
+
 void EditorFramePicker::createFrameButtons()
 {
     playpauseBtn->fill = parent->frameAnimationPlaying ? fillPlayButtonPlaying : fillPlayButtonPaused;
@@ -149,7 +175,7 @@ void EditorFramePicker::createFrameButtons()
     std::lock_guard<std::recursive_mutex> lock(parent->framesMutex);
     frameButtons.clear();
     frameButtonStack->subWidgets.freeAllDrawables();
-    int buttonW = g_fnt->StatStringDimensions("000").x + 5;
+    int buttonW = frameButtonW;
     for (int i = 0; i < parent->frames.size(); i++) {
         UIButton* frameBtn = new UIButton(std::to_string(i + 1));
         frameBtn->wxWidth = buttonW;

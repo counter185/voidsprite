@@ -4,6 +4,8 @@ class EditorFramePicker :
     public PanelUserInteractable
 {
 protected:
+    int frameButtonW;
+
     MainEditor* parent = NULL;
     ScrollingPanel* frameButtonPanel = NULL;
     UIStackPanel* frameButtonStack = NULL;
@@ -21,8 +23,11 @@ public:
 
     EditorFramePicker(MainEditor* caller);
 
+    void render(XY at) override;
+
     void createFrameButtons();
 
+    void renderPlayhead(XY at);
     void flashFrame(int index);
 };
 
