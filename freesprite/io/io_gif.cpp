@@ -362,43 +362,57 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
 
-        std::vector<LayerPalettized*> frames;
+        struct GIFFrame {
+            LayerPalettized* layer;
+            std::vector<u32> lctPalette;
+            int transparencyIndex;
+        };
+
+        std::vector<GIFFrame> frames;
         for (Frame* fr : editor->frames) {
+            int transparencyIndex = -1;
             Layer* flat = editor->isPalettized ? ((MainEditorPalettized*)editor)->flattenFrameWithoutConvertingToRGB(fr) : editor->flattenFrame(fr);
-            if (!editor->isPalettized) {
-                Layer* ff = to8BitIndexed1BitAlpha(flat);
-                delete flat;
-                flat = ff;
-                //Layer* ff = flat->    //todo convert to indexed
-            }
+
+            auto conv = !editor->isPalettized ? to8BitIndexed1BitAlpha(flat) : to8BitIndexedWith1BitSingleIndexAlpha((LayerPalettized*)flat);
+            transparencyIndex = conv.alphaIndex;
+            loginfo(frmt("[GIF] frame transparency index: {}", transparencyIndex));
+            delete flat;
+            flat = conv.outLayer;
+
             if (flat == NULL) {
-                for (LayerPalettized* l : frames) {
-                    delete l;
+                for (GIFFrame& l : frames) {
+                    delete l.layer;
                 }
                 fclose(f);
                 return false;
             }
-            frames.push_back((LayerPalettized*)flat);
+            frames.push_back({
+                .layer = (LayerPalettized*)flat,
+                .lctPalette = ((LayerPalettized*)flat)->palette,
+                .transparencyIndex = transparencyIndex
+            });
         }
 
         fwrite("GIF89a", 1, 6, f);
         GIFLogicalScreenDescriptor lsd;
         lsd.width = editor->canvas.dimensions.x;
         lsd.height = editor->canvas.dimensions.y;
-        lsd.gctFlags.enabled = 1;
+        lsd.gctFlags.enabled = editor->isPalettized ? 1 : 0;
         lsd.gctFlags.colorRes = 6;
         lsd.gctFlags.sort = 0;
-        lsd.gctFlags.size = 7;
+        lsd.gctFlags.size = editor->isPalettized ? 7 : 0;
         lsd.bgColorIndex = 254;
         lsd.pixelAspect = 0;
         fwrite(&lsd, sizeof(GIFLogicalScreenDescriptor), 1, f);
-        auto& palette = frames.front()->palette;
-        for (int i = 0; i < 256; i++) {
-            u32 color = palette.size() > i ? palette[i] : 0;
-            auto cc = uint32ToSDLColor(color);
-            fwrite(&cc.r, 1, 1, f);
-            fwrite(&cc.g, 1, 1, f);
-            fwrite(&cc.b, 1, 1, f);
+        if (editor->isPalettized) {
+            auto& palette = frames.front().lctPalette;
+            for (int i = 0; i < 256; i++) {
+                u32 color = palette.size() > i ? palette[i] : 0;
+                auto cc = uint32ToSDLColor(color);
+                fwrite(&cc.r, 1, 1, f);
+                fwrite(&cc.g, 1, 1, f);
+                fwrite(&cc.b, 1, 1, f);
+            }
         }
 
         GIFApplicationExtension pae;
@@ -420,16 +434,16 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
         fwrite(comment.c_str(), 1, commentBlockSize, f);
         fwrite("\x00", 1, 1, f); //block terminator
 
-        for (LayerPalettized* frame : frames) {
+        for (GIFFrame& frame : frames) {
 
             GIFGraphicControlExtension gce;
             fwrite("\x21\xF9", 1, 2, f); //extension introducer
             gce.blockSize = 4;
             gce.flags.disposalMode = 2; //clear to bg
             gce.flags.userInput = 0;
-            gce.flags.transparent = 1;
+            gce.flags.transparent = frame.transparencyIndex != -1 ? 1 : 0;
             gce.delay = editor->frameAnimMSPerFrame / 10;
-            gce.transparentColorIndex = 255;
+            gce.transparentColorIndex = (u8)frame.transparencyIndex;
             fwrite(&gce, sizeof(GIFGraphicControlExtension), 1, f);
             fwrite("\x00", 1, 1, f); //block terminator
 
@@ -439,14 +453,26 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
             gid.imageWidth = editor->canvas.dimensions.x;
             gid.imageHeight = editor->canvas.dimensions.y;
             gid.flags.interlaceFlag = 0;
-            gid.flags.lctEnable = 0;
+            gid.flags.lctEnable = !editor->isPalettized ? 1 : 0;
             gid.flags.lctSort = 0;
-            gid.flags.lctSize = 0;
+            gid.flags.lctSize = !editor->isPalettized ? 7 : 0;
             fwrite("\x2C", 1, 1, f); //image separator
             fwrite(&gid, sizeof(GIFImageDescriptor), 1, f);
+
+            if (!editor->isPalettized) {
+                loginfo("[GIF] writing local color table");
+                //write local color table
+                for (int i = 0; i < 256; i++) {
+                    auto cc = uint32ToSDLColor(frame.lctPalette.size() > i ? frame.lctPalette[i] : 0x000000);
+                    fwrite(&cc.r, 1, 1, f);
+                    fwrite(&cc.g, 1, 1, f);
+                    fwrite(&cc.b, 1, 1, f);
+                }
+            }
+            
             u8 lzwMinCodeSize = 8;
             fwrite(&lzwMinCodeSize, 1, 1, f);
-            BitWriter bw = GIFEncodeLZW(lzwMinCodeSize, frame);
+            BitWriter bw = GIFEncodeLZW(lzwMinCodeSize, frame.layer);
             std::vector<u8>& encodedData = bw.getData();
             u8* dataPtr = encodedData.data();
             u64 dataLeft = encodedData.size();
@@ -463,8 +489,8 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
         //write trailer
         fwrite(";", 1, 1, f);
 
-        for (LayerPalettized* l : frames) {
-            delete l;
+        for (auto& l : frames) {
+            delete l.layer;
         }
         fclose(f);
         return true;
