@@ -50,10 +50,10 @@ void ScrollingPanel::handleInput(SDL_Event evt, XY gPosOffset) {
     DrawableManager::processHoverEventInMultiple({ subWidgets }, evt, xyAdd(gPosOffset, scrollOffset));
 
     SDL_Event cevt = convertTouchToMouseEvent(evt);
-    if (cevt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && cevt.button.button == SDL_BUTTON_LEFT && mouseInVerticalScrollBar()) {
+    if (scrollVertically && cevt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && cevt.button.button == SDL_BUTTON_LEFT && mouseInVerticalScrollBar()) {
         draggingVerticalScrollbar = true;
     }
-    else if (cevt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && cevt.button.button == SDL_BUTTON_LEFT && mouseInHorizontalScrollBar())  {
+    else if (scrollHorizontally && cevt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && cevt.button.button == SDL_BUTTON_LEFT && mouseInHorizontalScrollBar())  {
         draggingHorizontalScrollbar = true;
     }
     else if (draggingVerticalScrollbar) {

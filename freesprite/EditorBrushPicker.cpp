@@ -65,6 +65,8 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     XY origin = { 5,40 * sc };
 
     ScrollingPanel* brushPanel = new ScrollingPanel();
+    brushPanel->scrollHorizontally = false;
+    brushPanel->scrollVertically = true;
     brushPanel->position = origin;
     brushPanel->wxWidth = wxWidth - 10;
     brushPanel->wxHeight = wxHeight - origin.y - 5;
