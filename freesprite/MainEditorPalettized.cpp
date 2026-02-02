@@ -24,6 +24,7 @@
 #include "PopupGlobalConfig.h"
 #include "PopupExportScaled.h"
 #include "PopupFilePicker.h"
+#include "PopupChooseFormat.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -774,13 +775,24 @@ void MainEditorPalettized::trySavePalettizedImage()
 void MainEditorPalettized::trySaveAsPalettizedImage()
 {
     lastWasSaveAs = true;
-    std::vector<std::pair<std::string, std::string>> namesAndExtensions;
-    for (auto& e : g_palettizedFileExporters) {
-        if ((e->formatFlags() & FORMAT_PALETTIZED) != 0) {
-            namesAndExtensions.push_back({ e->extension(), e->name()});
+    std::vector<FormatDef> formats;
+    int i = 0;
+    for (auto& f : g_fileExporters) {
+        if ((f->formatFlags() & FORMAT_PALETTIZED) != 0) {
+            formats.push_back({ 
+                .name = f->name(), 
+                .extension = f->extension(),
+                .description = "--test desc from editor",
+                .udata = (void*)f
+            });
         }
     }
-    platformTrySaveOtherFile(this, namesAndExtensions, "save palettized image", EVENT_PALETTIZEDEDITOR_SAVEFILE);
+    PopupChooseFormat* popup = new PopupChooseFormat("Choose format", "", formats);
+    popup->chooseFormatAndDoFileSavePrompt("save indexed image", [this](FormatDef* f, PlatformNativePathString path) {
+        if (trySaveWithExporter(path, (FileExporter*)f->udata)) {
+            g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+        }
+    });
 }
 
 MainEditor* MainEditorPalettized::toRGBSession()

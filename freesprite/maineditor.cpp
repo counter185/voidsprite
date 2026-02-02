@@ -52,6 +52,7 @@
 #include "PopupSetupNetworkCanvas.h"
 #include "PopupFreeformTransform.h"
 #include "PopupChooseAction.h"
+#include "PopupChooseFormat.h"
 #include "multiwindow.h"
 
 #include "discord_rpc.h"
@@ -2111,11 +2112,23 @@ void MainEditor::trySaveAsImage()
     }
     else {
         lastWasSaveAs = true;
-        std::vector<std::pair<std::string, std::string>> formats;
-        for (auto f : g_fileExporters) {
-            formats.push_back({ f->extension(), f->name() });
+        std::vector<FormatDef> formats;
+        int i = 0;
+        for (auto& f : g_fileExporters) {
+            formats.push_back({ 
+                .name = f->name(), 
+                .extension = f->extension(),
+                .description = "--test desc from editor",
+                .udata = (void*)f
+            });
         }
-        platformTrySaveOtherFile(this, formats, TL("vsp.popup.saveimage"), EVENT_MAINEDITOR_SAVEFILE);
+        PopupChooseFormat* popup = new PopupChooseFormat("Choose format", "", formats);
+        popup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), [this](FormatDef* f, PlatformNativePathString path) {
+            if (trySaveWithExporter(path, (FileExporter*)f->udata)) {
+                g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+            }
+        });
+        //platformTrySaveOtherFile(this, formats, TL("vsp.popup.saveimage"), EVENT_MAINEDITOR_SAVEFILE);
     }
 }
 
