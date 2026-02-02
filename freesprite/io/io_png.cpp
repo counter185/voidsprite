@@ -32,6 +32,56 @@ void _readPNGDataFromMem(png_structp png_ptr, png_bytep outBytes, png_size_t byt
     ctx->readPNGBytes += byteCountToRead;
 }
 
+std::vector<PNGChunk> loadPNGChunksFromMem(std::vector<u8>& data)
+{
+    std::vector<PNGChunk> ret;
+    size_t pos = 8; //skip signature
+    while (pos + 8 <= data.size()) {
+        PNGChunk chunk;
+        chunk.length = beU32(*(u32*)(data.data() + pos));
+        memcpy(chunk.type, data.data() + pos + 4, 4);
+        chunk.type[4] = '\0';
+        pos += 8;
+        if (pos + chunk.length + 4 > data.size()) {
+            logerr("[PNG] chunk extends past the end");
+            break;
+        }
+        chunk.data.resize(chunk.length);
+        if (chunk.length > 0) {
+            memcpy(chunk.data.data(), &data[pos], chunk.length);
+        }
+        pos += chunk.length;
+        chunk.crc = beU32(*(u32*)(data.data() + pos));
+        pos += 4;
+        ret.push_back(chunk);
+    }
+    return ret;
+}
+
+void calcCRCAndSize(PNGChunk* chunk)
+{
+    chunk->length = (u32)chunk->data.size();
+
+    u32 crc = crc32(0L, Z_NULL, 0);
+    crc = crc32(crc, (const Bytef*)chunk->type, 4);
+    if (chunk->length > 0) {
+        crc = crc32(crc, (const Bytef*)chunk->data.data(), chunk->length);
+    }
+    chunk->crc = crc;
+}
+
+void writeChunkToFile(FILE* f, PNGChunk* chunk)
+{
+    u32 beLength = beU32(chunk->length);
+    fwrite(&beLength, 4, 1, f);
+    fwrite(chunk->type, 1, 4, f);
+    if (chunk->length > 0) {
+        fwrite(chunk->data.data(), 1, chunk->length, f);
+    }
+    u32 beCRC = beU32(chunk->crc);
+    fwrite(&beCRC, 4, 1, f);
+}
+
 Layer* readPNGFromBase64String(std::string b64)
 {
     auto seekTo = b64.find("iVBO");
@@ -414,6 +464,99 @@ bool writePNG(PlatformNativePathString path, Layer* data)
 
         png_destroy_write_struct(&outpng, &outpnginfo);
         fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writeAPNG(PlatformNativePathString path, MainEditor* data)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+
+        Layer* flat = data->flattenFrame(data->frames.front());
+        std::vector<u8> frame1PNG = writePNGToMem(flat);
+        std::vector<PNGChunk> frame1Chunks = loadPNGChunksFromMem(frame1PNG);
+        delete flat;
+
+        //write header
+        u8 pngHeader[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+        fwrite(pngHeader, 1, 8, f);
+        //copy all chunks that come before IDAT
+        for (auto& chunk : frame1Chunks) {
+            if (std::string(chunk.type) == "IDAT") {
+                break;
+            }
+            writeChunkToFile(f, &chunk);
+        }
+
+        PNGChunk actlChunk;
+        memcpy(actlChunk.type, "acTL", 5);
+        actlChunk.data.resize(8);
+        u32* actlData = (u32*)actlChunk.data.data();
+        actlData[0] = beU32(data->frames.size()); //num frames
+        actlData[1] = beU32(0); //num loops (0 means infinite)
+        calcCRCAndSize(&actlChunk);
+        writeChunkToFile(f, &actlChunk);
+
+        int sequenceNumber = 0;
+
+        PNGChunk frame1fcTLChunk;
+        memcpy(frame1fcTLChunk.type, "fcTL", 5);
+        frame1fcTLChunk.data.resize(sizeof(PNGfcTLChunk));
+        PNGfcTLChunk* fcTLData = (PNGfcTLChunk*)frame1fcTLChunk.data.data();
+        fcTLData->sequenceNumber = beU32(sequenceNumber++);
+        fcTLData->width = beU32(data->canvas.dimensions.x);
+        fcTLData->height = beU32(data->canvas.dimensions.y);
+        fcTLData->xOffset = beU32(0);
+        fcTLData->yOffset = beU32(0);
+        fcTLData->delayNum = beU16(data->frameAnimMSPerFrame);
+        fcTLData->delayDen = beU16(1000);
+        fcTLData->disposeOp = 0; //APNG_DISPOSE_OP_NONE
+        fcTLData->blendOp = 0; //APNG_BLEND_OP_SOURCE
+        calcCRCAndSize(&frame1fcTLChunk);
+        writeChunkToFile(f, &frame1fcTLChunk);
+
+        //copy all idat chunks
+        for (auto& chunk : frame1Chunks) {
+            if (std::string(chunk.type) == "IDAT") {
+                writeChunkToFile(f, &chunk);
+            }
+        }
+
+        //write remaining frames
+        for (int i = 1; i < data->frames.size(); i++) {
+            Layer* flatFrame = data->flattenFrame(data->frames[i]);
+            std::vector<u8> framePNG = writePNGToMem(flatFrame);
+
+            PNGChunk fcTLChunk = frame1fcTLChunk;
+            PNGfcTLChunk* fcTLData = (PNGfcTLChunk*)fcTLChunk.data.data();
+            fcTLData->sequenceNumber = beU32(sequenceNumber++);
+            calcCRCAndSize(&fcTLChunk);
+            writeChunkToFile(f, &fcTLChunk);
+
+            std::vector<PNGChunk> frameChunks = loadPNGChunksFromMem(framePNG);
+            for (auto& chunk : frameChunks) {
+                if (std::string(chunk.type) == "IDAT") {
+                    memcpy(chunk.type, "fdAT", 5);
+                    for (int x = 0; x < 4; x++) { chunk.data.insert(chunk.data.begin(), 0); } //make space for sequence number
+                    u32* seqNumPtr = (u32*)chunk.data.data();
+                    *seqNumPtr = beU32(sequenceNumber++);
+                    calcCRCAndSize(&chunk);
+                    writeChunkToFile(f, &chunk);
+                }
+            }
+            delete flatFrame;
+
+        }
+
+        PNGChunk iendChunk;
+        memcpy(iendChunk.type, "IEND", 5);
+        iendChunk.data.resize(0);
+        calcCRCAndSize(&iendChunk);
+        writeChunkToFile(f, &iendChunk);
+
+        fclose(f);
         return true;
     }
     return false;

@@ -564,7 +564,7 @@
     <ClCompile Include="PopupChooseExtsToAssoc.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
-    <ClCompile Include="PopupChooseFormats.cpp">
+    <ClCompile Include="PopupChooseFormat.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
     <ClCompile Include="visual_config.cpp">
@@ -1220,7 +1220,7 @@
     <ClInclude Include="PopupChooseExtsToAssoc.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
-    <ClInclude Include="PopupChooseFormats.h">
+    <ClInclude Include="PopupChooseFormat.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
     <ClInclude Include="visual_config.h">

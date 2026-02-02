@@ -338,7 +338,7 @@
     <ClCompile Include="PopupApplyFilter.cpp" />
     <ClCompile Include="PopupChooseAction.cpp" />
     <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
-    <ClCompile Include="PopupChooseFormats.cpp" />
+    <ClCompile Include="PopupChooseFormat.cpp" />
     <ClCompile Include="PopupContextMenu.cpp" />
     <ClCompile Include="PopupExportScaled.cpp" />
     <ClCompile Include="PopupFilePicker.cpp" />
@@ -613,7 +613,7 @@
     <ClInclude Include="PopupApplyFilter.h" />
     <ClInclude Include="PopupChooseAction.h" />
     <ClInclude Include="PopupChooseExtsToAssoc.h" />
-    <ClInclude Include="PopupChooseFormats.h" />
+    <ClInclude Include="PopupChooseFormat.h" />
     <ClInclude Include="PopupContextMenu.h" />
     <ClInclude Include="PopupExportScaled.h" />
     <ClInclude Include="PopupFreeformTransform.h" />

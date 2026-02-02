@@ -3081,6 +3081,7 @@ void g_setupIO() {
     g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::sessionExporter("AVI Video", ".avi", &writeAVI, FORMAT_RGB));
     g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::sessionExporter("Animated PNG", ".apng", &writeAPNG, FORMAT_RGB));
 
     g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
 

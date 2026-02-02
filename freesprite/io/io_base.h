@@ -190,4 +190,20 @@ public:
     }
 };
 
+/// <summary>
+/// Flips the byte order if the machine isn't big-endian
+/// </summary>
+inline u32 beU32(u32 v) {
+    //todo: do nothing on big-endian?
+    return ((v & 0x000000FF) << 24) | ((v & 0x0000FF00) << 8) | ((v & 0x00FF0000) >> 8) | ((v & 0xFF000000) >> 24);
+}
+
+/// <summary>
+/// Flips the byte order if the machine isn't big-endian
+/// </summary>
+inline u16 beU16(u16 v) {
+    return ((v & 0x00FF) << 8) | ((v & 0xFF00) >> 8);
+}
+
+
 u8* decompressZlib(u8* data, u64 compressedSize, u64 decompressedSize);
