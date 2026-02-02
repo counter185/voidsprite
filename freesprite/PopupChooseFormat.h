@@ -1,5 +1,6 @@
 #pragma once
 #include "BasePopup.h"
+#include "EventCallbackListener.h"
 
 struct FormatDef {
     std::string name;

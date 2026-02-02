@@ -58,6 +58,6 @@ public:
 
     void chooseDirectory(PlatformNativePathString dir);
     void getFilesInCurrentDir();
-    UIButton* createFileButton(FilePickerFileEntry entry);;
+    UIButton* createFileButton(FilePickerFileEntry entry);
 };
 
