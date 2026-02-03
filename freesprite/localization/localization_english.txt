@@ -32,6 +32,25 @@
     //file type names
     {"vsp.cmn.filetype.splitsession", "Split session file"},
 
+    //file exporter descriptions
+    {"vsp.export.voidsn.latest", "Latest version of the voidsprite session format.\n"
+                                 "Supports all features of the editor."},
+    {"vsp.export.png", "Best format for single-image files.\n"
+                       "Supports transparency and has lossless compression."},
+    {"vsp.export.apng", "Extension of the PNG format with animation support. Low software compatibility."},
+    {"vsp.export.xyz", "Native format of RPG Maker 2000/2003.\n"
+                       "Supports only up to 256 colors, one of which can be chosen as transparent in the engine."},
+    {"vsp.export.vtf", "Native format of Source Engine. Lossless RGBA subformat will be used."},
+    {"vsp.export.aseprite", "Format compatible with Aseprite.\n"
+                            "Frames will have matching layers if their names are the same."},
+    {"vsp.export.gif", "Most compatible animated image format.\n"
+                       "Each frame may only have up to 256 colors and 1-bit transparency."},
+    {"vsp.export.jpeg", "The most compatible single-image format.\n"
+                        "Does not support transparency and has lossy compression."},
+    {"vsp.export.c", "Export the image as an array of numbers that can be used with the C programming language."},
+    {"vsp.export.python", "Export the image as a 2D array of pixels that can be used in a Python script."},
+    {"vsp.export.html", "Export the image as a PNG encoded into Base64 for an inline <img> tag for HTML."},
+
     // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},

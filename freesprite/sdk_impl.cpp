@@ -67,6 +67,7 @@ VSPFileExporter* impl_registerLayerExporter(
     FileExporter* exporter = FileExporter::flatExporter(
         std::string(name),
         std::string(extension),
+        "",
         wExportFunction,
         layerTypes,
         wCanExportFunction

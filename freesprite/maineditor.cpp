@@ -2118,7 +2118,7 @@ void MainEditor::trySaveAsImage()
             formats.push_back({ 
                 .name = f->name(), 
                 .extension = f->extension(),
-                .description = "--test desc from editor",
+                .description = f->description,
                 .udata = (void*)f
             });
         }

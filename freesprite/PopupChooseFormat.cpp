@@ -5,6 +5,7 @@
 #include "UILabel.h"
 #include "UIStackPanel.h"
 #include "FileIO.h"
+#include "FontRenderer.h"
 
 void PopupChooseFormat::buildFormatList() {
     formatsPanel->subWidgets.freeAllDrawables();
@@ -19,12 +20,20 @@ void PopupChooseFormat::buildFormatList() {
         UIButton* btn = new UIButton(f.name);
         btn->position = {0,0};
         btn->wxWidth = formatsPanel->wxWidth - 40;
-        btn->wxHeight = 70;
+        btn->fontSize = 22;
+        btn->wxHeight = f.description.empty() ? 35 : (40 + g_fnt->StatStringDimensions(f.description, 15).y);
         btn->onClickCallback = [this, ptr](UIButton* b) { this->finish(ptr); };
         newButton->subWidgets.addDrawable(btn);
 
-        newButton->subWidgets.addDrawable(new UILabel(f.extension, {8, 20}, 16));
-        newButton->subWidgets.addDrawable(new UILabel(f.description, {8, 40}, 16));
+        UILabel* extLabel = new UILabel(f.extension, { g_fnt->StatStringDimensions(f.name, 22).x + 20, 5 }, 16);
+        extLabel->color = SDL_Color{ 255,255,255, 100 };
+        newButton->subWidgets.addDrawable(extLabel);
+
+        if (!f.description.empty()) {
+            UILabel* descLabel = new UILabel(f.description, { 8, 28 }, 15);
+            descLabel->color = SDL_Color{ 255,255,255, 130 };
+            newButton->subWidgets.addDrawable(descLabel);
+        }
 
         buttons.push_back(newButton);
     }
@@ -36,6 +45,7 @@ void PopupChooseFormat::buildFormatList() {
 
 PopupChooseFormat::PopupChooseFormat(std::string tt, std::string tx, std::vector<FormatDef> f) : formats(f) {
 
+    wxWidth = 750;
     wxHeight = 500;
     makeTitleAndDesc(tt, tx);
 
@@ -56,7 +66,7 @@ PopupChooseFormat* PopupChooseFormat::withDefaultRGBExportFormats(std::string tt
             ff.push_back({
                 .name = f->name(),
                 .extension = f->extension(),
-                .description = "--test desc",
+                .description = f->description,
                 .udata = (void*)f
             });
         }
@@ -71,7 +81,7 @@ PopupChooseFormat* PopupChooseFormat::withDefaultIndexedExportFormats(std::strin
             ff.push_back({
                 .name = f->name(),
                 .extension = f->extension(),
-                .description = "--test desc",
+                .description = f->description,
                 .udata = (void*)f
             });
         }

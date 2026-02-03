@@ -117,6 +117,7 @@ class FileOperation {
 public:
     virtual std::string name() { return _name; }
     virtual std::string extension() { return _extension; }
+    std::string description = "";
 protected:
     std::string _name = "Palette type";
     std::string _extension = "";
@@ -126,20 +127,22 @@ protected:
 class FileExporter : public FileOperation {
 
 public:
-    static FileExporter* sessionExporter(std::string name, std::string extension, std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(MainEditor*)> canExport = NULL) {
+    static FileExporter* sessionExporter(std::string name, std::string extension, std::string description, std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(MainEditor*)> canExport = NULL) {
         FileExporter* ret = new FileExporter();
         ret->_name = name;
         ret->_extension = extension;
+        ret->description = description;
         ret->_formatFlags = formatflags;
         ret->_isSessionExporter = true;
         ret->_sessionExportFunction = exportFunction;
         ret->_sessionCheckExportFunction = canExport;
         return ret;
     }
-    static FileExporter* flatExporter(std::string name, std::string extension, std::function<bool(PlatformNativePathString, Layer*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(Layer*)> canExport = NULL) {
+    static FileExporter* flatExporter(std::string name, std::string extension, std::string description, std::function<bool(PlatformNativePathString, Layer*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(Layer*)> canExport = NULL) {
         FileExporter* ret = new FileExporter();
         ret->_name = name;
         ret->_extension = extension;
+        ret->description = description;
         ret->_formatFlags = formatflags;
         ret->_isSessionExporter = false;
         ret->_flatExportFunction = exportFunction;

@@ -3067,46 +3067,46 @@ void g_setupIO() {
         * exGIF = NULL
         ;
 
-    g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session version 6", ".voidsnv6", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", &writeVOIDSNv3));
-    g_fileExporters.push_back(exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", &writeVOIDSNv2));
-    g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", &writeOpenRaster));
-    g_fileExporters.push_back(exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", &writePixelStudioPSP));
-    g_fileExporters.push_back(exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", &writePixelStudioPSX));
-    g_fileExporters.push_back(exLPE = FileExporter::sessionExporter("Lospec Pixel Editor", ".lpe", &writeLPE));
-    g_fileExporters.push_back(exPiskel = FileExporter::sessionExporter("Piskel", ".piskel", &writePISKEL));
-    g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(FileExporter::sessionExporter("AVI Video", ".avi", &writeAVI, FORMAT_RGB));
-    g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(FileExporter::sessionExporter("Animated PNG", ".apng", &writeAPNG, FORMAT_RGB));
+    g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", TL("vsp.export.voidsn.latest"), &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session version 6", ".voidsnv6", "", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", "", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", "", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", "", &writeVOIDSNv3));
+    g_fileExporters.push_back(exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", "", &writeVOIDSNv2));
+    g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", "", &writeOpenRaster));
+    g_fileExporters.push_back(exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", "", &writePixelStudioPSP));
+    g_fileExporters.push_back(exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", "", &writePixelStudioPSX));
+    g_fileExporters.push_back(exLPE = FileExporter::sessionExporter("Lospec Pixel Editor", ".lpe",  "", &writeLPE));
+    g_fileExporters.push_back(exPiskel = FileExporter::sessionExporter("Piskel", ".piskel", "", &writePISKEL));
+    g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", TL("vsp.export.aseprite"), &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::sessionExporter("AVI Video", ".avi", "", &writeAVI, FORMAT_RGB));
+    g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", TL("vsp.export.gif"), &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::sessionExporter("Animated PNG", ".apng", TL("vsp.export.apng"), &writeAPNG, FORMAT_RGB));
 
-    g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", TL("vsp.export.png"), &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
 
-    g_fileExporters.push_back(exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", &writeBMP));
+    g_fileExporters.push_back(exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", TL("vsp.export.xyz"), &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", "", &writeBMP));
 #if VOIDSPRITE_JXL_ENABLED
     FileExporter* exJXL;
-    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL", ".jxl", &writeJpegXL, FORMAT_RGB));
+    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL", ".jxl", "", &writeJpegXL, FORMAT_RGB));
 #endif
-    g_fileExporters.push_back(exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", &writeJPEG));
-    g_fileExporters.push_back(exAVIF = FileExporter::flatExporter("AVIF", ".avif", &writeAVIF));
-    g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", &writeTGA));
-    g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", &writeCaveStoryPBM));
-    g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exAnymapPGM = FileExporter::flatExporter("Portable Graymap (text) PGM", ".pgm", &writeAnymapTextPGM, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exAnymapPPM = FileExporter::flatExporter("Portable Pixmap (text) PPM", ".ppm", &writeAnymapTextPPM, FORMAT_RGB));
-    g_fileExporters.push_back(exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVTF = FileExporter::flatExporter("VTF", ".vtf", &writeVTF, FORMAT_RGB));
-    g_fileExporters.push_back(exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", &writeSR8, FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exDIBv5 = FileExporter::flatExporter("DIBv5 Clipboard Dump", ".dibv5", &writeDIBV5, FORMAT_RGB));
-    g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", &writePythonNPArray));
-    g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", &writeHTMLBase64));
-    g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", &writeJavaBufferedImage));
+    g_fileExporters.push_back(exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", TL("vsp.export.jpeg"), &writeJPEG));
+    g_fileExporters.push_back(exAVIF = FileExporter::flatExporter("AVIF", ".avif", "", &writeAVIF));
+    g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", "", & writeTGA));
+    g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", "", &writeCaveStoryPBM));
+    g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", "", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exAnymapPGM = FileExporter::flatExporter("Portable Graymap (text) PGM", ".pgm", "", &writeAnymapTextPGM, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exAnymapPPM = FileExporter::flatExporter("Portable Pixmap (text) PPM", ".ppm", "", &writeAnymapTextPPM, FORMAT_RGB));
+    g_fileExporters.push_back(exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", "", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVTF = FileExporter::flatExporter("VTF", ".vtf", TL("vsp.export.vtf"), &writeVTF, FORMAT_RGB));
+    g_fileExporters.push_back(exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", "", &writeSR8, FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exDIBv5 = FileExporter::flatExporter("DIBv5 Clipboard Dump", ".dibv5", "", &writeDIBV5, FORMAT_RGB));
+    g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", "", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::flatExporter("C Header", ".h", TL("vsp.export.c"), &writeCHeader, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(FileExporter::flatExporter("Python NumPy array", ".py", TL("vsp.export.python"), &writePythonNPArray));
+    g_fileExporters.push_back(FileExporter::flatExporter("HTML Base64 image (base64)", ".html", TL("vsp.export.html"), &writeHTMLBase64));
+    g_fileExporters.push_back(FileExporter::flatExporter("Java Buffered Image", ".java", "", &writeJavaBufferedImage));
 
     for (FileExporter* i : g_pluginRegisteredFileExporters) {
         g_fileExporters.push_back(i);
