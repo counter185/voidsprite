@@ -714,6 +714,9 @@
     <ClCompile Include="io\io_godot.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_resprite.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1422,6 +1425,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="io\io_godot.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_resprite.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3148,6 +3148,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("RPG Maker 2000/2003 map (load chipset + preview map)", ".lmu", &readLMU));
 #endif
     g_fileImporters.push_back(FileImporter::sessionImporter("GIF", ".gif", &readGIF, exGIF, FORMAT_RGB | FORMAT_PALETTIZED, magicVerify(0, "GIF")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Resprite project", ".resprite", &readResprite, NULL, FORMAT_RGB, magicVerify(0, "PK")));
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG, FORMAT_RGB | FORMAT_PALETTIZED,

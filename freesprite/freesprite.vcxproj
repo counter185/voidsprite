@@ -307,6 +307,7 @@
     <ClCompile Include="io\io_pixelstudio.cpp" />
     <ClCompile Include="io\io_pixil.cpp" />
     <ClCompile Include="io\io_png.cpp" />
+    <ClCompile Include="io\io_resprite.cpp" />
     <ClCompile Include="io\io_rpgm.cpp" />
     <ClCompile Include="io\io_valve.cpp" />
     <ClCompile Include="io\io_voidsprite.cpp" />
@@ -571,6 +572,7 @@
     <ClInclude Include="io\io_pixelstudio.h" />
     <ClInclude Include="io\io_pixil.h" />
     <ClInclude Include="io\io_png.h" />
+    <ClInclude Include="io\io_resprite.h" />
     <ClInclude Include="io\io_rpgm.h" />
     <ClInclude Include="io\io_valve.h" />
     <ClInclude Include="io\io_voidsprite.h" />
