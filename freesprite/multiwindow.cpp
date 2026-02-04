@@ -428,6 +428,7 @@ void WindowBlurBuffer::windowResized()
 
     SDL_SetTextureScaleMode(fullscreenBuffer, SDL_SCALEMODE_LINEAR);
     SDL_SetTextureScaleMode(blurBuffer, SDL_SCALEMODE_LINEAR);
+    initialized = false;
 }
 
 void WindowBlurBuffer::pushFullscreenBuffer() {
