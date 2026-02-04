@@ -6,6 +6,7 @@
 #include "UIStackPanel.h"
 #include "FileIO.h"
 #include "FontRenderer.h"
+#include "UITextField.h"
 
 void PopupChooseFormat::buildFormatList() {
     formatsPanel->subWidgets.freeAllDrawables();
@@ -13,29 +14,31 @@ void PopupChooseFormat::buildFormatList() {
     std::vector<Drawable*> buttons;
 
     for (auto& f : formats) {
-        FormatDef* ptr = &f;
-        Panel* newButton = new Panel();
-        newButton->sizeToContent = true;
+        if (filterQuery.empty() || stringContainsIgnoreCase(f.name, filterQuery) || stringContainsIgnoreCase(f.extension, filterQuery)) {
+            FormatDef* ptr = &f;
+            Panel* newButton = new Panel();
+            newButton->sizeToContent = true;
 
-        UIButton* btn = new UIButton(f.name);
-        btn->position = {0,0};
-        btn->wxWidth = formatsPanel->wxWidth - 40;
-        btn->fontSize = 22;
-        btn->wxHeight = f.description.empty() ? 35 : (40 + g_fnt->StatStringDimensions(f.description, 15).y);
-        btn->onClickCallback = [this, ptr](UIButton* b) { this->finish(ptr); };
-        newButton->subWidgets.addDrawable(btn);
+            UIButton* btn = new UIButton(f.name);
+            btn->position = { 0,0 };
+            btn->wxWidth = formatsPanel->wxWidth - 40;
+            btn->fontSize = 22;
+            btn->wxHeight = f.description.empty() ? 35 : (40 + g_fnt->StatStringDimensions(f.description, 15).y);
+            btn->onClickCallback = [this, ptr](UIButton* b) { this->finish(ptr); };
+            newButton->subWidgets.addDrawable(btn);
 
-        UILabel* extLabel = new UILabel(f.extension, { g_fnt->StatStringDimensions(f.name, 22).x + 20, 5 }, 16);
-        extLabel->color = SDL_Color{ 255,255,255, 100 };
-        newButton->subWidgets.addDrawable(extLabel);
+            UILabel* extLabel = new UILabel(f.extension, { g_fnt->StatStringDimensions(f.name, 22).x + 20, 5 }, 16);
+            extLabel->color = SDL_Color{ 255,255,255, 100 };
+            newButton->subWidgets.addDrawable(extLabel);
 
-        if (!f.description.empty()) {
-            UILabel* descLabel = new UILabel(f.description, { 8, 28 }, 15);
-            descLabel->color = SDL_Color{ 255,255,255, 130 };
-            newButton->subWidgets.addDrawable(descLabel);
+            if (!f.description.empty()) {
+                UILabel* descLabel = new UILabel(f.description, { 8, 28 }, 15);
+                descLabel->color = SDL_Color{ 255,255,255, 130 };
+                newButton->subWidgets.addDrawable(descLabel);
+            }
+
+            buttons.push_back(newButton);
         }
-
-        buttons.push_back(newButton);
     }
 
     UIStackPanel* buttonStack = UIStackPanel::Vertical(0, buttons);
@@ -51,10 +54,25 @@ PopupChooseFormat::PopupChooseFormat(std::string tt, std::string tx, std::vector
 
     formatsPanel = new ScrollingPanel();
     formatsPanel->wxWidth = wxWidth - 10;
-    formatsPanel->wxHeight = wxHeight - 100;
-    formatsPanel->position = {5, 40};
+    formatsPanel->wxHeight = wxHeight - 120;
     buildFormatList();
-    wxsManager.addDrawable(formatsPanel);
+
+    UITextField* searchField = new UITextField();
+    searchField->wxWidth = 200;
+    searchField->onTextChangedCallback = [this](UITextField*, std::string s) {
+        filterList(s);
+    };
+
+    UIStackPanel* searchAndListStack = 
+        UIStackPanel::Vertical(5, {
+            UIStackPanel::Horizontal(20, {
+                new UILabel(TL("vsp.cmn.search")),
+                searchField
+            }),
+            formatsPanel
+        });
+    searchAndListStack->position = { 5,40 };
+    wxsManager.addDrawable(searchAndListStack);
 
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b){ this->closePopup(); };
 }
@@ -99,6 +117,12 @@ void PopupChooseFormat::eventFileSaved(int evt_id, PlatformNativePathString name
     }
     //g_startNewMainThreadOperation([this](){this->closePopup();});
     closePopup();
+}
+
+void PopupChooseFormat::filterList(std::string search)
+{
+    filterQuery = search;
+    buildFormatList();
 }
 
 void PopupChooseFormat::chooseFormatAndDoFileSavePrompt(std::string promptTitle, std::function<void(FormatDef*,PlatformNativePathString)> callback) {

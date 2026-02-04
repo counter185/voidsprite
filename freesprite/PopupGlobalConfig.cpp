@@ -309,7 +309,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     posInTab = { 0,10 };
-    configTabs->tabs[3].wxs.addDrawable(new UILabel(TL("vsp.config.tab.keybinds.search"), posInTab));
+    configTabs->tabs[3].wxs.addDrawable(new UILabel(TL("vsp.cmn.search"), posInTab));
     keybindSearchField = new UITextField("");
     keybindSearchField->position = xyAdd(posInTab, {120,0});
     keybindSearchField->onTextChangedCallback = [this](UITextField* tf, std::string newText) {

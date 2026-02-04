@@ -13,6 +13,7 @@ class PopupChooseFormat : public BasePopup, EventCallbackListener
 {
 protected:
     std::vector<FormatDef> formats;
+    std::string filterQuery = "";
     ScrollingPanel* formatsPanel = NULL;
 
     std::function<void(FormatDef*,PlatformNativePathString)> onEventFileSavedCallback = NULL;
@@ -30,6 +31,7 @@ public:
     static PopupChooseFormat* withDefaultRGBExportFormats(std::string tt, std::string tx);
     static PopupChooseFormat* withDefaultIndexedExportFormats(std::string tt, std::string tx);
 
+    void filterList(std::string search);
     void chooseFormatAndDoFileSavePrompt(std::string promptTitle, std::function<void(FormatDef*,PlatformNativePathString)> callback);
     void finish(FormatDef* target);
 

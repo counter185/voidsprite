@@ -18,6 +18,7 @@
     {"vsp.cmn.erase", "Erase"},
     {"vsp.cmn.discard", "Discard"},
     {"vsp.cmn.error", "Error"},
+    {"vsp.cmn.search", "Search"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
     {"vsp.cmn.error.decompressfail", "Failed to decompress data."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},
@@ -407,7 +408,6 @@
     {"vsp.config.tab.misc", "Misc."},
 
     {"vsp.config.tab.plugins.noplugins", "No plugins were loaded"},
-    {"vsp.config.tab.keybinds.search", "Search"},
 
     {"vsp.config.opt.pngextdata", "Save/load extra data to PNGs"},
     {"vsp.config.opt.pngextdata.desc", "When enabled, voidsprite will load and save extra data such as canvas comments,\n"
