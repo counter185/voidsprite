@@ -82,8 +82,8 @@ void PanelUserInteractable::repositionCloseButton()
 
 PanelUserInteractable::PanelUserInteractable()
 {
-    fillUnfocused = visualConfigFill("ui/panel/bg_unfocused");
-    fillFocused = visualConfigFill("ui/panel/bg_focused");
+    fillUnfocused = g_config.acrylicPanels ? visualConfigFill("ui/panel/bg_unfocused_blurbehind") : visualConfigFill("ui/panel/bg_unfocused");
+    fillFocused = g_config.acrylicPanels ? visualConfigFill("ui/panel/bg_unfocused_blurbehind") : visualConfigFill("ui/panel/bg_focused");
     borderColor = visualConfigHexU32("ui/panel/border");
 }
 

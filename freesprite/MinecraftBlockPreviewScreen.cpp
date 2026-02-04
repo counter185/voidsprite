@@ -62,6 +62,21 @@ MinecraftBlockPreviewScreen::~MinecraftBlockPreviewScreen()
 
 void MinecraftBlockPreviewScreen::render()
 {
+    renderWithBlurPanelsIfEnabled([this]() { RenderCanvas(); });
+
+    drawBottomBar();
+
+    g_fnt->RenderString(frmt("Select the tile to use for: {}", 
+        choosingSide == 0 ? "top side"
+        : choosingSide == 1 ? "left side"
+        : "right side"),
+        2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+
+    BaseScreen::render();
+}
+
+void MinecraftBlockPreviewScreen::RenderCanvas()
+{
     drawBackground();
 
     canvas.dimensions = caller->canvas.dimensions;
@@ -79,13 +94,13 @@ void MinecraftBlockPreviewScreen::render()
     canvas.drawCanvasOutline(5, SDL_Color{ 255,255,255,0x80 });
 
     XY tiles[] = { tileTop, tileSideLeft, tileSideRight };
-    SDL_Color tileColors[] = { 
-        {0x3c,0x40,0xff,0xff}, 
-        {0x46,0xff,0x3c,0xff}, 
-        {0xff,0x3c,0x3c,0xff} 
+    SDL_Color tileColors[] = {
+        { 0x3c,0x40,0xff,0xff },
+        { 0x46,0xff,0x3c,0xff },
+        { 0xff,0x3c,0x3c,0xff }
     };
     for (int i = 0; i < 3; i++) {
-        if (!xyEqual(tiles[i], {-1,-1})) {
+        if (!xyEqual(tiles[i], { -1,-1 })) {
             SDL_Rect p = canvas.getTileScreenRectAt(tiles[i], caller->tileDimensions);
             SDL_SetRenderDrawColor(g_rd, tileColors[i].r, tileColors[i].g, tileColors[i].b, tileColors[i].a);
             SDL_RenderDrawRect(g_rd, &p);
@@ -93,16 +108,6 @@ void MinecraftBlockPreviewScreen::render()
             SDL_RenderFillRect(g_rd, &p);
         }
     }
-
-    drawBottomBar();
-
-    g_fnt->RenderString(frmt("Select the tile to use for: {}", 
-        choosingSide == 0 ? "top side"
-        : choosingSide == 1 ? "left side"
-        : "right side"),
-        2, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
-
-    BaseScreen::render();
 }
 
 void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)

@@ -38,6 +38,7 @@ public:
     u32 backtraceColor = 0xFF0000FF;
     u32 fwdtraceColor = 0xFF00FF00;
     bool smoothFonts = true;
+    bool acrylicPanels = false;
 
     std::vector<std::string> lastOpenFiles;
 
@@ -51,6 +52,7 @@ struct DebugSettings {
     bool debugTestLocalization = false;
     bool debugShowTilesRPG2K = false;
     bool debugColorWheel = false;
+    bool debugBlurBehind = false;
 };
 
 inline bool g_configWasLoaded = false;

@@ -135,13 +135,15 @@ void RPG2KTilemapPreviewScreen::render()
 {
     canvas.dimensions = { dimensions.x * 16, dimensions.y * 16 };
 
-    TilemapPreviewScreen::drawBackground();
-    RenderWholeMap(canvas.currentDrawPoint, canvas.scale, rdLowerLayer, rdUpperLayer, rdEventLayer);
+    renderWithBlurPanelsIfEnabled([this]() {
+        TilemapPreviewScreen::drawBackground();
+        RenderWholeMap(canvas.currentDrawPoint, canvas.scale, rdLowerLayer, rdUpperLayer, rdEventLayer);
 
-    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, gridOpacity);
-    canvas.drawTileGrid({ 16,16 });
+        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, gridOpacity);
+        canvas.drawTileGrid({ 16,16 });
 
-    canvas.drawCanvasOutline(5, { 255,255,255,0x90 });
+        canvas.drawCanvasOutline(5, { 255,255,255,0x90 });
+    });
 
     wxsManager.renderAll();
 

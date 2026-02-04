@@ -433,17 +433,19 @@ MinecraftSkinPreviewScreen::~MinecraftSkinPreviewScreen()
 
 void MinecraftSkinPreviewScreen::render()
 {
-    renderGradient({ 0,0,g_windowW,g_windowH }, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF202020);
+    renderWithBlurPanelsIfEnabled([this]() {
+        renderGradient({ 0,0,g_windowW,g_windowH }, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF202020);
 
-    if (rotAlpha >= 0) {
-        renderFloorGrid();
-    }
+        if (rotAlpha >= 0) {
+            renderFloorGrid();
+        }
 
-    renderModel(screen00, size);
+        renderModel(screen00, size);
 
-    if (rotAlpha < 0) {
-        renderFloorGrid();
-    }
+        if (rotAlpha < 0) {
+            renderFloorGrid();
+        }
+    });
 
     //g_fnt->RenderString(frmt("alpha rotation: {}", rotAlpha), 5, 5);
     //g_fnt->RenderString(frmt("beta rotation: {}", rotBeta), 5, 25);

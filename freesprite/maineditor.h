@@ -308,6 +308,7 @@ public:
     ~MainEditor();
 
     void render() override;
+    void RenderCanvas();
     void tick() override;
     void takeInput(SDL_Event evt) override;
     std::vector<std::string> dropEverythingYoureDoingAndSave() override;

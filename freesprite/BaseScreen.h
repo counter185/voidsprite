@@ -43,6 +43,8 @@ public:
         SDL_RenderFillRect(g_rd, &r);
     }
 
+    void renderWithBlurPanelsIfEnabled(std::function<void()> renderCode);
+
     void setCallbackListener(int evt_id, EventCallbackListener* callback) {
         this->callback = callback;
         this->callback_id = evt_id;

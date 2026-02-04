@@ -33,6 +33,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"longErrorNotifs", &g_config.longErrorNotifs},
         {"hueWheelInsteadOfSlider", &g_config.hueWheelInsteadOfSlider},
         {"smoothFonts", &g_config.smoothFonts},
+        {"acrylicPanels", &g_config.acrylicPanels},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

@@ -67,8 +67,12 @@ void EditorColorPicker::render(XY position)
     SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, currentV }));
 
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    SDL_Color devalColor = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmax(currentV / 6, 0.1) }));
-    SDL_Color devalColor2 = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmax(currentV / 18, 0.05) }));
+
+    double minValue = g_config.acrylicPanels ? 0.01 : 0.1;
+    double minValue2 = g_config.acrylicPanels ? 0.005 : 0.05;
+
+    SDL_Color devalColor = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmax(currentV / 6, minValue) }));
+    SDL_Color devalColor2 = rgb2sdlcolor(hsv2rgb(hsv{ currentH, currentS, dxmax(currentV / 18, minValue2) }));
     devalColor.a = devalColor2.a = focused ? 0xaf : 0x90;
     //render gradient
     renderGradient(r, sdlcolorToUint32(devalColor2), sdlcolorToUint32(devalColor), sdlcolorToUint32(devalColor), sdlcolorToUint32(devalColor));

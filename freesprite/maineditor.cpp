@@ -173,7 +173,52 @@ MainEditor::~MainEditor() {
 
 
 void MainEditor::render() {
-    SDL_SetRenderDrawColor(g_rd, backgroundColor.r/6*5, backgroundColor.g/6*5, backgroundColor.b/6*5, 255);
+
+    renderWithBlurPanelsIfEnabled([this]() {this->RenderCanvas(); });
+
+    if (currentBrush != NULL) {
+        currentBrush->renderOnCanvas(this, canvas.scale);
+    }    
+
+    if (wxsManager.anyFocused() && navbar->focused) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+        SDL_Rect fullscreen = {0, 0, g_windowW, g_windowH};
+        SDL_RenderFillRect(g_rd, &fullscreen);
+    }
+
+    if (!hideUI) {
+        DrawForeground();
+        wxsManager.renderAll();
+    }
+
+    if (eraserMode) {
+        SDL_Rect eraserRect = { g_mouseX + 6, g_mouseY - 30, 28, 28 };
+        SDL_SetTextureAlphaMod(g_iconEraser->get(), 0xa0);
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
+        SDL_RenderFillRect(g_rd, &eraserRect);
+        SDL_RenderCopy(g_rd, g_iconEraser->get(), NULL, &eraserRect);
+    }
+    if (currentPattern != NULL && currentPattern != g_patterns[0]) {
+        SDL_Rect patternRect = { g_mouseX + 38, g_mouseY - 30, 22, 22 };
+        SDL_SetTextureAlphaMod(currentPattern->cachedIcon->get(), 0xa0);
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
+        SDL_RenderFillRect(g_rd, &patternRect);
+        SDL_RenderCopy(g_rd, currentPattern->cachedIcon->get(), NULL, &patternRect);
+    }
+    if (g_config.showPenPressure && leftMouseHold && penPressure > 0 && penPressure < 1) {
+        SDL_Rect pressureIndicatorBounds = { g_mouseX - 50, g_mouseY - 60, 100, 15 };
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
+        SDL_RenderFillRect(g_rd, &pressureIndicatorBounds);
+        SDL_Rect pressureBar = offsetRect(pressureIndicatorBounds, -2);
+        pressureBar.w *= penPressure;
+        SDL_SetRenderDrawColor(g_rd, 255,255,255, 0xa0);
+        SDL_RenderFillRect(g_rd, &pressureBar);
+    }
+}
+
+void MainEditor::RenderCanvas()
+{
+    SDL_SetRenderDrawColor(g_rd, backgroundColor.r / 6 * 5, backgroundColor.g / 6 * 5, backgroundColor.b / 6 * 5, 255);
     SDL_RenderClear(g_rd);
     DrawBackground();
 
@@ -186,7 +231,7 @@ void MainEditor::render() {
             p->render(fit, (u8)(refPanel->opacity * 255));
         }
     }
-    
+
     //prepare frame framebuffer
     if (frameFB.first != g_rd || !xyEqual(frameFBSize, canvas.dimensions)) {
         SDL_DestroyTexture(frameFB.second);
@@ -274,7 +319,7 @@ void MainEditor::render() {
 
     //draw tile repeat preview
     if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
-        
+
         XY mouseInCanvasPoint = canvas.screenPointToCanvasPoint({ g_mouseX, g_mouseY });
         if (!qModifier || (qModifier && canvas.pointInCanvasBounds(mouseInCanvasPoint))) {
 
@@ -282,9 +327,9 @@ void MainEditor::render() {
 
             XY tilePosition = !qModifier ? lockedTilePreview :
                 XY{
-                    mouseInCanvasPoint.x / tileDim.x,
-                    mouseInCanvasPoint.y / tileDim.y
-                };
+                mouseInCanvasPoint.x / tileDim.x,
+                mouseInCanvasPoint.y / tileDim.y
+            };
 
             SDL_Rect paddedTileRect = getPaddedTilePosAndDimensions(tilePosition);
             SDL_Rect tileRect = {
@@ -305,7 +350,7 @@ void MainEditor::render() {
                         if (!imgLayer->hidden) {
                             uint8_t alpha = imgLayer->layerAlpha;
                             XY position = { tileRect.x + (xx * canvas.scale * paddedTileRect.w),
-                                tileRect.y + (yy * canvas.scale * paddedTileRect.h)};
+                                tileRect.y + (yy * canvas.scale * paddedTileRect.h) };
                             SDL_Rect finalTileRect = { position.x, position.y, tileRect.w, tileRect.h };
                             imgLayer->render(finalTileRect, canvasClipRect, alpha);
                         }
@@ -328,45 +373,6 @@ void MainEditor::render() {
     renderComments();
 
     renderUndoStack();
-
-    if (currentBrush != NULL) {
-        currentBrush->renderOnCanvas(this, canvas.scale);
-    }    
-
-    if (wxsManager.anyFocused() && navbar->focused) {
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-        SDL_Rect fullscreen = {0, 0, g_windowW, g_windowH};
-        SDL_RenderFillRect(g_rd, &fullscreen);
-    }
-
-    if (!hideUI) {
-        DrawForeground();
-        wxsManager.renderAll();
-    }
-
-    if (eraserMode) {
-        SDL_Rect eraserRect = { g_mouseX + 6, g_mouseY - 30, 28, 28 };
-        SDL_SetTextureAlphaMod(g_iconEraser->get(), 0xa0);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
-        SDL_RenderFillRect(g_rd, &eraserRect);
-        SDL_RenderCopy(g_rd, g_iconEraser->get(), NULL, &eraserRect);
-    }
-    if (currentPattern != NULL && currentPattern != g_patterns[0]) {
-        SDL_Rect patternRect = { g_mouseX + 38, g_mouseY - 30, 22, 22 };
-        SDL_SetTextureAlphaMod(currentPattern->cachedIcon->get(), 0xa0);
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
-        SDL_RenderFillRect(g_rd, &patternRect);
-        SDL_RenderCopy(g_rd, currentPattern->cachedIcon->get(), NULL, &patternRect);
-    }
-    if (g_config.showPenPressure && leftMouseHold && penPressure > 0 && penPressure < 1) {
-        SDL_Rect pressureIndicatorBounds = { g_mouseX - 50, g_mouseY - 60, 100, 15 };
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
-        SDL_RenderFillRect(g_rd, &pressureIndicatorBounds);
-        SDL_Rect pressureBar = offsetRect(pressureIndicatorBounds, -2);
-        pressureBar.w *= penPressure;
-        SDL_SetRenderDrawColor(g_rd, 255,255,255, 0xa0);
-        SDL_RenderFillRect(g_rd, &pressureBar);
-    }
 }
 
 void MainEditor::tick() {

@@ -70,44 +70,9 @@ SpritesheetPreviewScreen::~SpritesheetPreviewScreen() {
 
 void SpritesheetPreviewScreen::render()
 {
-    drawBackground();
+    renderWithBlurPanelsIfEnabled([this]() { RenderCanvas(); });
 
-    canvas.dimensions = caller->canvas.dimensions;
-    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
-    for (Layer*& l : caller->getLayerStack()) {
-        if (!l->hidden) {
-            l->render(canvasRenderRect, l->layerAlpha);
-        }
-    }
-
-    // lines between tiles
-    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-    canvas.drawTileGrid(caller->tileDimensions);
-    
-    //canvas border
-    canvas.drawCanvasOutline(5, SDL_Color{ 255,255,255,0x80 });
-
-    XY tileSize = caller->tileDimensions;
-
-    //sprite rects
-    std::map<u64, int> drawnRects;
-    int i = 0;
-    for (XY& sprite : sprites) {
-        SDL_Rect spriteArea = canvas.getTileScreenRectAt(sprite, tileSize);
-
-        if (spritesProgress == i) {
-            SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 0xa0);
-        }
-        else {
-            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
-        }
-        SDL_RenderDrawRect(g_rd, &spriteArea);
-        u64 key = encodeXY(sprite);
-        g_fnt->RenderString(std::to_string(i++), spriteArea.x, spriteArea.y + (25 * drawnRects[key]++), SDL_Color{255,255,255,0xa0});
-    }
-
-    int rightPanelWidth = ixmax(300, canvas.scale * tileSize.x);
-
+    //int rightPanelWidth = ixmax(300, canvas.scale * tileSize.x);
     //drawPreview(XY{ rightPanelRect.x + 10, 100 });
 
     wxsManager.renderAll();
@@ -138,6 +103,45 @@ void SpritesheetPreviewScreen::render()
     static std::string tlTimeline = TL("vsp.spritesheetpreview.timeline");
     g_fnt->RenderString(tlTimeline, 2, spriteView->position.y + 2);
 
+}
+
+void SpritesheetPreviewScreen::RenderCanvas()
+{
+    drawBackground();
+
+    canvas.dimensions = caller->canvas.dimensions;
+    SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
+    for (Layer*& l : caller->getLayerStack()) {
+        if (!l->hidden) {
+            l->render(canvasRenderRect, l->layerAlpha);
+        }
+    }
+
+    // lines between tiles
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+    canvas.drawTileGrid(caller->tileDimensions);
+
+    //canvas border
+    canvas.drawCanvasOutline(5, SDL_Color{ 255,255,255,0x80 });
+
+    XY tileSize = caller->tileDimensions;
+
+    //sprite rects
+    std::map<u64, int> drawnRects;
+    int i = 0;
+    for (XY& sprite : sprites) {
+        SDL_Rect spriteArea = canvas.getTileScreenRectAt(sprite, tileSize);
+
+        if (spritesProgress == i) {
+            SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 0xa0);
+        }
+        else {
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
+        }
+        SDL_RenderDrawRect(g_rd, &spriteArea);
+        u64 key = encodeXY(sprite);
+        g_fnt->RenderString(std::to_string(i++), spriteArea.x, spriteArea.y + (25 * drawnRects[key]++), SDL_Color{ 255,255,255,0xa0 });
+    }
 }
 
 void SpritesheetPreviewScreen::tick()

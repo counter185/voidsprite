@@ -36,6 +36,7 @@ public:
     ~MinecraftBlockPreviewScreen();
 
     void render() override;
+    void RenderCanvas();
     void takeInput(SDL_Event evt) override;
     void tick() override;
     BaseScreen* isSubscreenOf() override;

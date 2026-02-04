@@ -4,6 +4,45 @@
 #include "Timer64.h"
 #include "DrawableManager.h"
 
+class WindowBlurBuffer {
+protected:
+    const int downscaleFactor = 96;
+    SDL_Texture* blurBuffer = NULL;
+    SDL_Texture* fullscreenBuffer = NULL;
+    XY bufferSize = { 0,0 };
+    VSPWindow* parentWindow = NULL;
+    bool initialized = false;
+public:
+    bool enabled = false;
+    WindowBlurBuffer(VSPWindow* w) : parentWindow(w) {
+        enabled = g_config.acrylicPanels;
+        windowResized();
+    }
+    ~WindowBlurBuffer() {
+        if (!enabled) return;
+        if (blurBuffer != NULL) {
+            tracked_destroyTexture(blurBuffer);
+        }
+        if (fullscreenBuffer != NULL) {
+            tracked_destroyTexture(fullscreenBuffer);
+        }
+    }
+
+    void windowResized();
+
+    void pushFullscreenBuffer();
+	//must happen between pushFullscreenBuffer and popAndApplyFullscreenBuffer
+    void renderFullscreenBufferToScreen();
+    void popAndApplyFullscreenBuffer();
+
+    void blurBehindAllPanels(std::vector<Drawable*>& drawables);
+    void renderBlurBehind(SDL_Rect region);
+
+    SDL_Texture* getFullscreenBuffer() {
+        return fullscreenBuffer;
+    }
+};
+
 class VSPWindow {
 public:
     SDL_WindowID windowID = -1;
@@ -31,6 +70,8 @@ public:
     std::vector<ButtonStartScreenSession*> screenButtons;
 
     bool isMainWindow = false;
+
+    WindowBlurBuffer* blurBuffer = NULL;
 
     VSPWindow(std::string title, XY size, u32 flags);
     ~VSPWindow();

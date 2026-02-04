@@ -20,9 +20,13 @@ VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     if (g_config.autoViewportScale) {
         autoViewportScale();
     }
+    blurBuffer = new WindowBlurBuffer(this);
 }
 
 VSPWindow::~VSPWindow() {
+    if (blurBuffer != NULL) {
+        delete blurBuffer;
+    }
     if (rd != NULL) {
         SDL_DestroyRenderer(rd);
     }
@@ -243,6 +247,10 @@ void VSPWindow::updateViewportScaler() {
         viewport = tracked_createTexture(rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
     }
 
+    if (blurBuffer != NULL) {
+        blurBuffer->windowResized();
+    }
+
     if (g_currentWindow == this) {
         thisWindowsTurn();
     }
@@ -392,4 +400,108 @@ void VSPWindow::switchToFavScreen()
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.window.error.nofavscreen")));
     }
 
+}
+
+void WindowBlurBuffer::windowResized()
+{
+    if (!enabled) return;
+    if (blurBuffer != NULL) {
+        tracked_destroyTexture(blurBuffer);
+    }
+    if (fullscreenBuffer != NULL) {
+        tracked_destroyTexture(fullscreenBuffer);
+    }
+
+    fullscreenBuffer = tracked_createTexture(
+        parentWindow->rd,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_TARGET,
+        parentWindow->scaledWindowSize.x,
+        parentWindow->scaledWindowSize.y);
+
+    blurBuffer = tracked_createTexture(
+        parentWindow->rd,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_TARGET,
+        ixmax(1, parentWindow->scaledWindowSize.x / downscaleFactor),
+        ixmax(1, parentWindow->scaledWindowSize.y / downscaleFactor));
+
+    SDL_SetTextureScaleMode(fullscreenBuffer, SDL_SCALEMODE_LINEAR);
+    SDL_SetTextureScaleMode(blurBuffer, SDL_SCALEMODE_LINEAR);
+}
+
+void WindowBlurBuffer::pushFullscreenBuffer() {
+    if (!enabled) return;
+    if (!initialized) {
+        g_pushRenderTarget(blurBuffer);
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
+        SDL_RenderClear(parentWindow->rd);
+        g_popRenderTarget();
+        initialized = true;
+    }
+
+    if (fullscreenBuffer != NULL) {
+        g_pushRenderTarget(fullscreenBuffer);
+    }
+}
+
+void WindowBlurBuffer::renderFullscreenBufferToScreen()
+{
+    if (fullscreenBuffer) {
+        g_popRenderTarget();
+        SDL_SetTextureAlphaMod(fullscreenBuffer, 255);
+		SDL_RenderCopy(parentWindow->rd, fullscreenBuffer, NULL, NULL);
+        g_pushRenderTarget(fullscreenBuffer);
+    }
+}
+
+void WindowBlurBuffer::popAndApplyFullscreenBuffer()
+{
+    if (!enabled) return;
+    if (fullscreenBuffer != NULL) {
+        g_popRenderTarget();
+
+        g_pushRenderTarget(blurBuffer);
+        SDL_SetTextureAlphaMod(fullscreenBuffer, 10);
+        SDL_RenderCopy(parentWindow->rd, fullscreenBuffer, NULL, NULL);
+        SDL_SetTextureAlphaMod(fullscreenBuffer, 255);
+        g_popRenderTarget();
+
+        g_pushRenderTarget(fullscreenBuffer);
+        SDL_RenderCopy(parentWindow->rd, blurBuffer, NULL, NULL);
+        /*SDL_SetRenderDrawColor(parentWindow->rd, 0, 0, 0, 255);
+        SDL_RenderClear(parentWindow->rd);
+        SDL_Rect targetRegion = { 0,0, parentWindow->scaledWindowSize.x, parentWindow->scaledWindowSize.y };
+        SDL_SetTextureAlphaMod(blurBuffer, 255/12);
+        SDL_BlendMode blendRGBaddAlpha = SDL_ComposeCustomBlendMode(
+            SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+            SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE,
+            SDL_BLENDOPERATION_ADD);
+        SDL_SetTextureBlendMode(blurBuffer, blendRGBaddAlpha);
+        for (int i = -6; i <= 6; i++) {
+            SDL_Rect offsetRegion = targetRegion;
+            offsetRegion.x = i*downscaleFactor; 
+            //offsetRegion.y = i;
+            SDL_RenderCopy(parentWindow->rd, blurBuffer, NULL, &offsetRegion);
+        }*/
+        g_popRenderTarget();
+    }
+}
+
+void WindowBlurBuffer::blurBehindAllPanels(std::vector<Drawable*>& drawables)
+{
+    if (!enabled) return;
+    for (auto*& d : drawables) {
+        if (d->isPanel()) {
+            XY renderDimensions = d->getRenderDimensions();
+            g_currentWindow->blurBuffer->renderBlurBehind({ d->position.x, d->position.y, renderDimensions.x, renderDimensions.y });
+        }
+    }
+}
+
+void WindowBlurBuffer::renderBlurBehind(SDL_Rect region)
+{
+    if (!enabled) return;
+    SDL_RenderCopy(parentWindow->rd, fullscreenBuffer, &region, &region);
 }

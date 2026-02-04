@@ -501,6 +501,8 @@
     {"vsp.config.opt.smoothfonts.desc", "If disabled, fonts will be rendered with solid pixels instead of smooth.\n"
                                         "This will make custom pixel fonts render properly.\n"
                                         "The Text tool is not affected by this setting."},
+    {"vsp.config.opt.acrylicpanels", "Acrylic panels (restart required)"},
+    {"vsp.config.opt.acrylicpanels.desc", "The back side of UI panels will be blurred."},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

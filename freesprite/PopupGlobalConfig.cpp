@@ -191,6 +191,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS, &posInTab));
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.autoscale"), TL("vsp.config.opt.autoscale.desc"), &g_config.autoViewportScale, &posInTab));
+    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.acrylicpanels"), TL("vsp.config.opt.acrylicpanels.desc"), &g_config.acrylicPanels, &posInTab));
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();
     std::vector<std::string> visualConfNames = { getDefaultVisualConf()["meta/name"] };
@@ -504,6 +505,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         &g_debugConfig.debugTestLocalization, &posInTab));
     configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
     configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Debug color wheel geometry", "", &g_debugConfig.debugColorWheel, &posInTab));
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show blur buffer", "", &g_debugConfig.debugBlurBehind, &posInTab));
 #endif
     
 
