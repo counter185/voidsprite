@@ -729,6 +729,14 @@ void g_mainLoop() {
             }
         }
 
+        if (g_config.showSystemClock) {
+            std::tm sysTime = getLocalTime();
+            XY sysTimeOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
+            nextStatusBarOrigin = sysTimeOrigin;
+            XY timeEndpoint = g_fnt->RenderString(frmt("{:02}:{:02}", sysTime.tm_hour, sysTime.tm_min), sysTimeOrigin.x, sysTimeOrigin.y - 5, { 255,255,255,0x80 }, 16);
+            g_fnt->RenderString(frmt(":{:02}", sysTime.tm_sec), timeEndpoint.x, timeEndpoint.y, { 255,255,255,0x50 }, 12);
+        }
+
         if (g_config.showFPS) {
             XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
             nextStatusBarOrigin = fpsOrigin;

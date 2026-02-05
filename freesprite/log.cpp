@@ -25,12 +25,7 @@ void log_duplicateLast() {
     bool logExists = std::filesystem::exists(logPath);
     if (!logPath.empty() && logExists) {
         time_t t = time(NULL);
-        tm tmn;
-#ifdef _MSC_VER
-        localtime_s(&tmn, &t);
-#else
-        tmn = *localtime(&t);
-#endif
+        std::tm tmn = getLocalTime();
         std::string date = frmt("{:04d}-{:02d}-{:02d}--{:02d}-{:02d}-{:02d}", tmn.tm_year + 1900, tmn.tm_mon + 1, tmn.tm_mday, tmn.tm_hour, tmn.tm_min, tmn.tm_sec);
         PlatformNativePathString newLogPath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32(frmt("/voidsprite_log-{}.txt", date));
         platformCopyFile(logPath, newLogPath);

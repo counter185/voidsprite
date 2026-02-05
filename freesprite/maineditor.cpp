@@ -2571,16 +2571,7 @@ void MainEditor::tickAutosave()
 
 PlatformNativePathString MainEditor::createRecoveryAutosave(std::string insertIntoFilename)
 {
-    time_t now = time(NULL);
-    tm ltm;
-    // todo: make a platform-specific localtime function
-#if defined(__unix__) || defined(__APPLE__)
-    localtime_r(&now, &ltm);
-#elif defined(_MSC_VER)
-    localtime_s(&ltm, &now);
-#else
-    ltm = *std::localtime(&now);
-#endif
+    tm ltm = getLocalTime();
     std::string autosaveName = "autosave" + frmt("{}_{}-{:02}-{:02}--{:02}-{:02}-{:02}", insertIntoFilename, ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec) + ".voidsn";
     try {
         std::filesystem::path confPath = platformEnsureDirAndGetConfigFilePath();

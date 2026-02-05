@@ -22,6 +22,7 @@ public:
     bool useSystemFileDialog = ONPLATFORM(VSP_PLATFORM_ANDROID, false, true);
     bool showPenPressure = true;
     bool showFPS = false;
+    bool showSystemClock = false;
     bool checkUpdates = true;
     int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 2,
                           ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 1, 3));

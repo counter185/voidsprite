@@ -1287,6 +1287,18 @@ matrix matrixMultiply(matrix a, matrix b)
     return result;
 }
 
+std::tm getLocalTime() {
+    auto timeNow = std::chrono::system_clock::now();
+    std::time_t timeNowT = std::chrono::system_clock::to_time_t(timeNow);
+    std::tm tmNow;
+#ifdef _MSC_VER
+    localtime_s(&tmNow, &timeNowT);
+#else
+    tmNow = *localtime(&timeNowT);
+#endif
+    return tmNow;
+}
+
 hsl rgb2hsl(rgb c) {
 
     hsl result;

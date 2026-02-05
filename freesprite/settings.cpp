@@ -34,6 +34,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"hueWheelInsteadOfSlider", &g_config.hueWheelInsteadOfSlider},
         {"smoothFonts", &g_config.smoothFonts},
         {"acrylicPanels", &g_config.acrylicPanels},
+        {"showSystemClock", &g_config.showSystemClock},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

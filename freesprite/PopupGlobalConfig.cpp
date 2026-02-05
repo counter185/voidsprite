@@ -85,6 +85,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.singleinstance"), TL("vsp.config.opt.singleinstance.desc"), &g_config.singleInstance, &posInTab));
     }
     configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.longerrornotifs"), TL("vsp.config.opt.longerrornotifs.desc"), &g_config.longErrorNotifs, &posInTab));
+    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.showsysclock"), "", &g_config.showSystemClock, &posInTab));
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {

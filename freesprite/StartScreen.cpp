@@ -780,21 +780,15 @@ void StartScreen::renderBackground()
     }
 
     auto timeNow = std::chrono::system_clock::now();
-    std::time_t timeNowT = std::chrono::system_clock::to_time_t(timeNow);
-    std::tm tmNow;
-#ifdef _MSC_VER
-    localtime_s(&tmNow, &timeNowT);
-#else
-    tmNow = *localtime(&timeNowT);
-#endif
+    std::tm tmNow = getLocalTime();
 
     int yearNow = tmNow.tm_year + 1900;
     int monthNow = tmNow.tm_mon;
     int dayNow = tmNow.tm_mday;
 
-    int hourNow = tmNow.tm_hour;//std::chrono::duration_cast<std::chrono::hours>(timeNow.time_since_epoch()).count() % 24;
-    int minuteNow = tmNow.tm_min;//std::chrono::duration_cast<std::chrono::minutes>(timeNow.time_since_epoch()).count() % 60;
-    int secondNow = tmNow.tm_sec;//std::chrono::duration_cast<std::chrono::seconds>(timeNow.time_since_epoch()).count() % 60;
+    int hourNow = tmNow.tm_hour;
+    int minuteNow = tmNow.tm_min;
+    int secondNow = tmNow.tm_sec;
     int msNow = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow.time_since_epoch()).count() % 1000;
 
     int xOrigin = g_windowW - 10;
