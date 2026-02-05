@@ -242,6 +242,12 @@ Layer* readVOIDSN(IStream* infile)
                             else if (dataName == "currentVariant") {
                                 currentVariant = *(u32*)data;
                             }
+                            else if (dataName == "opacity") {
+                                newLayer->layerAlpha = data[0];
+                            }
+                            else if (dataName == "hidden") {
+                                newLayer->hidden = data[0] == '\1';
+                            }
                             else if (stringStartsWithIgnoreCase(dataName, "variant.")) {
                                 
                                 u8* newpx = (u8*)malloc(dimensions.x * dimensions.y * 4);
