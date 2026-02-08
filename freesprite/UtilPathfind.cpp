@@ -8,6 +8,7 @@
 #include "UtilPathfind.h"
 #include "Layer.h"
 #include "Notification.h"
+#include "background_operation.h"
 
 template <typename T>
 void vector_remove(std::vector<T>& vec, int index) {
@@ -16,11 +17,10 @@ void vector_remove(std::vector<T>& vec, int index) {
 
 template <typename T>
 void vector_removeElement(std::vector<T*>& vec, T* element) {
-    for (int x = 0; x != vec.size(); x++) {
-        if (vec[x] == element) {
-            vector_remove(vec, x);
-            return;
-        }
+    auto f = std::find(vec.begin(), vec.end(), element);
+    if (f != vec.end()) {
+        vec.erase(f);
+        return;
     }
 }
 
@@ -64,13 +64,14 @@ bool CanWalkOnMapPoint(Layer* map, int x, int y, uint32_t col1, uint32_t col2) {
     return mapPixel == col1 || mapPixel == col2 || (!map->isPalettized && mapPixel >> 24 == 0 && (col1 >> 24 == 0 || col2 >> 24 == 0));
 }
 
+const u64 timeoutMS = 8000;
 uint64_t startTime;
 
 bool shouldAntiDeadlock() {
-    return SDL_GetTicks64() - startTime > 5000;
+    return SDL_GetTicks64() - startTime > timeoutMS;
 }
 
-std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
+std::vector<Node> genAStar(Layer* mainMap, XY start, XY end, OperationProgressReport* progressReport) {
     Node* startNode = new Node(start.x, start.y);     //START POSITION
     Node* endNode = new Node(end.x, end.y);     //END POSITION
     startTime = SDL_GetTicks64();
@@ -93,6 +94,8 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
     while (openList.size() > 0) {
         step++;
         //PrintMap(mainMap, MAPW, MAPH);
+        u64 ticksUntilTimeout = timeoutMS - (SDL_GetTicks64() - startTime);
+        progressReport->enterSection(frmt("Step {}... (timeout in {:.02}s)", step, ticksUntilTimeout/1000.0));
 
         Node* currentNode = openList[0];
         for (Node*& a : openList) {
@@ -113,8 +116,7 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
                 delete pathN;
                 pathN = npathN;
             }
-            g_addNotification(SuccessShortNotification(frmt("A* finished in {} steps", step), ""));
-            logprintf("genAStar finished in %i steps\n", step);
+            g_addNotificationFromThread(SuccessShortNotification(frmt("A* finished in {} steps", step), ""));
             return nodePath;
         }
         else {
@@ -164,6 +166,7 @@ std::vector<Node> genAStar(Layer* mainMap, XY start, XY end) {
             }
 
         }
+        progressReport->exitSection();
     }
     g_addNotification(ErrorNotification("A* could not find a path", ""));
     //logprintf("no path\n");

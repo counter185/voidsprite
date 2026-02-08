@@ -10,8 +10,9 @@ void Brush1pxLinePathfind::clickPress(MainEditor* editor, XY pos)
 
 void Brush1pxLinePathfind::clickRelease(MainEditor* editor, XY pos)
 {
-	g_startNewOperation([this, editor, pos]() {
-		std::vector<Node> pathfindResult = genAStar(editor->getCurrentLayer(), startPos, pos);
+	g_startNewOperation([this, editor, pos](OperationProgressReport* progressReport) {
+		progressReport->enterSection("Pathfinding...");
+		std::vector<Node> pathfindResult = genAStar(editor->getCurrentLayer(), startPos, pos, progressReport);
 		for (Node& n : pathfindResult) {
 			editor->SetPixel(XY{ n.x, n.y }, editor->getActiveColor());
 		}

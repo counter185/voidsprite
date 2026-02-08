@@ -23,4 +23,4 @@ public:
     }
 };
 
-std::vector<Node> genAStar(Layer* mainMap, XY start, XY end);
+std::vector<Node> genAStar(Layer* mainMap, XY start, XY end, OperationProgressReport* progressReport);
