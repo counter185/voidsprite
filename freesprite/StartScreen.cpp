@@ -1056,14 +1056,16 @@ void StartScreen::tryLoadURL(std::string url)
 
 void StartScreen::tryLoadFile(std::string path)
 {
-    MainEditor* newSession = loadAnyIntoSession(path);
-    if (newSession != NULL) {
-        g_addScreen(newSession);
-        g_tryPushLastFilePath(path);
-    }
-    else {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
-    }
+    g_startNewOperation([path](OperationProgressReport* report) {
+        MainEditor* newSession = loadAnyIntoSession(path, NULL, report);
+        if (newSession != NULL) {
+            g_addScreen(newSession);
+            g_tryPushLastFilePath(path);
+        }
+        else {
+            g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+        }
+    });
 }
 
 void StartScreen::tryOpenImageFromClipboard()

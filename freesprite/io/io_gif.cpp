@@ -161,7 +161,7 @@ BitWriter GIFEncodeLZW(int lzwMinCodeSize, LayerPalettized* frame) {
     return bw;
 }
 
-MainEditor* readGIF(PlatformNativePathString path)
+MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* progress)
 {
     u8 IMAGE_SEPERATOR_MAGIC = 0x2C;
     u8 EXTENSION_INTRODUCER_MAGIC = 0x21;
@@ -175,6 +175,7 @@ MainEditor* readGIF(PlatformNativePathString path)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
 
+        progress->enterSection("Reading GIF");
         u8 magic[3];
         u8 version[3];
         fread(magic, 1, 3, f);
@@ -229,12 +230,14 @@ MainEditor* readGIF(PlatformNativePathString path)
                 LayerPalettized* l = LayerPalettized::tryAllocIndexedLayer(imgDesc.imageWidth, imgDesc.imageHeight);
                 l->name = "GIF Layer";
                 allFrameLayers.push_back(l);
+                progress->enterSection(frmt("Decoding frame {}", allFrameLayers.size()));
                 std::vector<u8> decodedData = GIFDecodeLZW(lzwMinCode, imageData);
                 u32* pxd = l->pixels32();
                 l->palette = imgDesc.flags.lctEnable ? currentLctColorTable : gctColorTable;
                 for (u64 ii = 0; ii < ixmin(decodedData.size(), l->w*l->h); ii++) {
                     pxd[ii] = decodedData[ii];
                 }
+                progress->exitSection();
 
             }
             else if (blockIdentifier == EXTENSION_INTRODUCER_MAGIC) {

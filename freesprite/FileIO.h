@@ -85,8 +85,8 @@ Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGXT(PlatformNativePathString path, u64 seek = 0);
 Layer* readWinSHS(PlatformNativePathString path, u64 seek = 0);
 
-Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL);
-MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL);
+Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter = NULL, OperationProgressReport* progressReport = NULL);
+MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter = NULL, OperationProgressReport* progressReport = NULL);
 
 bool tryInstallPalette(PlatformNativePathString path);
 
@@ -188,7 +188,14 @@ protected:
 class FileImporter : public FileOperation {
 
 public:
-    static FileImporter* sessionImporter(std::string name, std::string extension, std::function<MainEditor*(PlatformNativePathString)> importFunction, FileExporter* reverse = NULL, int formatflags = FORMAT_RGB, std::function<bool(PlatformNativePathString)> canImport = NULL) {
+    static FileImporter* sessionImporter(
+            std::string name, 
+            std::string extension, 
+            std::function<MainEditor*(PlatformNativePathString, OperationProgressReport*)> importFunction, 
+            FileExporter* reverse = NULL, 
+            int formatflags = FORMAT_RGB, 
+            std::function<bool(PlatformNativePathString)> 
+            canImport = NULL) {
         FileImporter* ret = new FileImporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -199,7 +206,27 @@ public:
         ret->_checkImportFunction = canImport;
         return ret;
     }
-    static FileImporter* flatImporter(std::string name, std::string extension, std::function<Layer*(PlatformNativePathString, u64)> importFunction, FileExporter* reverse = NULL, int formatflags = FORMAT_RGB, std::function<bool(PlatformNativePathString)> canImport = NULL) {
+    static FileImporter* sessionImporter(
+            std::string name, 
+            std::string extension, 
+            std::function<MainEditor*(PlatformNativePathString)> importFunction, 
+            FileExporter* reverse = NULL, 
+            int formatflags = FORMAT_RGB, 
+            std::function<bool(PlatformNativePathString)> 
+            canImport = NULL) 
+    {
+        return sessionImporter(name, extension, [importFunction](PlatformNativePathString path, OperationProgressReport* progressReport) {
+            progressReport->enterSection("Loading file...");
+            return importFunction(path);
+        }, reverse, formatflags, canImport);
+    }
+    static FileImporter* flatImporter(
+            std::string name, 
+            std::string extension, 
+            std::function<Layer*(PlatformNativePathString, u64, OperationProgressReport*)> importFunction, 
+            FileExporter* reverse = NULL, 
+            int formatflags = FORMAT_RGB, 
+            std::function<bool(PlatformNativePathString)> canImport = NULL) {
         FileImporter* ret = new FileImporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -210,6 +237,19 @@ public:
         ret->_checkImportFunction = canImport;
         return ret;
     }
+    static FileImporter* flatImporter(
+            std::string name, 
+            std::string extension, 
+            std::function<Layer*(PlatformNativePathString, u64)> importFunction, 
+            FileExporter* reverse = NULL, 
+            int formatflags = FORMAT_RGB, 
+            std::function<bool(PlatformNativePathString)> canImport = NULL) 
+    {
+        return flatImporter(name, extension, [importFunction](PlatformNativePathString path, u64 seek, OperationProgressReport* progressReport) {
+            progressReport->enterSection("Loading file...");
+            return importFunction(path, seek);
+        }, reverse, formatflags, canImport);
+    }
 
     virtual int formatFlags() { return _formatFlags; }
     virtual bool importsWholeSession() { return _isSessionImporter; }
@@ -218,13 +258,13 @@ public:
     virtual bool canImport(PlatformNativePathString path) {
         return _checkImportFunction != NULL ? _checkImportFunction(path) : true;
     }
-    virtual void* importData(PlatformNativePathString path) {
+    virtual void* importData(PlatformNativePathString path, OperationProgressReport* progressReport = NULL) {
         try {
             if (importsWholeSession()) {
-                return _sessionImportFunction(path);
+                return _sessionImportFunction(path, progressReport);
             }
             else {
-                return _flatImportFunction(path, 0);
+                return _flatImportFunction(path, 0, progressReport);
             }
         }
         catch (std::exception e) {
@@ -238,8 +278,8 @@ protected:
 
     std::function<bool(PlatformNativePathString)> _checkImportFunction = NULL;
 
-    std::function<MainEditor*(PlatformNativePathString)> _sessionImportFunction = NULL;
-    std::function<Layer*(PlatformNativePathString, u64)> _flatImportFunction = NULL;
+    std::function<MainEditor*(PlatformNativePathString, OperationProgressReport*)> _sessionImportFunction = NULL;
+    std::function<Layer*(PlatformNativePathString, u64, OperationProgressReport*)> _flatImportFunction = NULL;
 };
 
 class PaletteImporter : public FileOperation {

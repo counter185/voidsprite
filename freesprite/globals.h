@@ -205,6 +205,7 @@ class HotReloadableTexture;
 class PopupSetNetworkCanvasData;
 class UndoStackElementV2;
 class UndoStackCaptureGroup;
+class OperationProgressReport;
 
 //textrenderer
 class TextRenderer;

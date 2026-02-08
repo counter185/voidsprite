@@ -2197,9 +2197,9 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek)
 #endif
 }
 
-Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter)
+Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter, OperationProgressReport* progressReport)
 {
-    MainEditor* ssn = loadAnyIntoSession(utf8path, outputFoundImporter);
+    MainEditor* ssn = loadAnyIntoSession(utf8path, outputFoundImporter, progressReport);
     if (ssn != NULL) {
         Layer* ret = ssn->flattenImage();
         delete ssn;
@@ -2208,13 +2208,14 @@ Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter)
     return NULL;
 }
 
-MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter)
+MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter, OperationProgressReport* progressReport)
 {
+    progressReport = progressReport == NULL ? g_printOnlyProgressReport : progressReport;
     PlatformNativePathString fPath = convertStringOnWin32(utf8path);
 
     for (FileImporter*& importer : g_fileImporters) {
         if (stringEndsWithIgnoreCase(utf8path, importer->extension()) && importer->canImport(fPath)) {
-            void* data = importer->importData(fPath);
+            void* data = importer->importData(fPath, progressReport);
             if (data != NULL) {
                 MainEditor* session = NULL;
                 if (importer->importsWholeSession()) {
@@ -2236,7 +2237,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
                 return session;
             }
             else {
-                logprintf("%s : load failed\n", importer->name().c_str());
+                logwarn(frmt("{} : load failed", importer->name()));
             }
         }
     }

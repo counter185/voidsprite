@@ -204,7 +204,16 @@ void renderbgOpInProgressScreen() {
 
     static std::string bgOpInProgressText = TL("vsp.bgop.inprogress");
 
-    localttp.addTooltip(Tooltip{ {0,g_windowH - 30 }, bgOpInProgressText, {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
+    std::string currentText = bgOpInProgressText;
+
+    int lines = 1;
+    auto progressReports = g_bgOpProgressReport->getCurrentSections();
+    for (const std::string& report : progressReports) {
+        currentText += frmt("\n    {}", report);
+        lines++;
+    }
+
+    localttp.addTooltip(Tooltip{ {0,g_windowH - (12 + 18*lines) }, currentText, {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
     localttp.renderAll();
 }
 
