@@ -17,7 +17,7 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor);
 
-MainEditor* readVOIDSN(PlatformNativePathString path);
+MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* progress);
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette);

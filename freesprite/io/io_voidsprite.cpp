@@ -625,12 +625,13 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
     return false;
 }
 
-MainEditor* readVOIDSN(PlatformNativePathString path)
+MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* progress)
 {
     FILE* infile = platformOpenFile(path, PlatformFileModeRB);
     if (infile != NULL) {
         uint8_t voidsnversion;
         fread(&voidsnversion, 1, 1, infile);
+        progress->enterSection(frmt("voidsprite session v{}", voidsnversion));
         switch (voidsnversion) {
         case 1:
         {
@@ -733,7 +734,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
             int nframes = voidsnversion >= 7 ? voidsnReadU32(infile) : 1;
 
             for (int fidx = 0; fidx < nframes; fidx++) {
-
+                progress->enterSection(frmt("Reading frame {}/{}", fidx + 1, nframes));
                 Frame* frame = new Frame();
                 frames.push_back(frame);
 
@@ -755,6 +756,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                 int nlayers = voidsnReadU32(infile);
 
                 for (int x = 0; x < nlayers; x++) {
+                    progress->enterSection(frmt("Decompressing layer {}/{}", x + 1, nlayers));
 
                     Layer* newLayer = NULL;
                     if (voidsnversion >= 6) {
@@ -846,11 +848,13 @@ MainEditor* readVOIDSN(PlatformNativePathString path)
                             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.mallocfail")));
                         }
                     }
-
+                    
                     if (newLayer != NULL && isPalettized) {
                         ((LayerPalettized*)newLayer)->palette = palette;
                     }
+                    progress->exitSection();
                 }
+                progress->exitSection();
             }
 
             ret = isPalettized ? new MainEditorPalettized(frames) : new MainEditor(frames);

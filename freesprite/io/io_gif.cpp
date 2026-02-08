@@ -308,6 +308,7 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
             int i = 0;
             Layer* prevImage = NULL;
             for (LayerPalettized* l : allFrameLayers) {
+                progress->enterSection(frmt("Processing frame {}/{}", i + 1, allFrameLayers.size()));
                 if (gces.size() > i) {
                     Frame* fr = new Frame();
                     GIFGraphicControlExtension correspondingGCE = gces[i];
@@ -342,6 +343,7 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
                     logerr(frmt("[GIF] no corresponding GCE found for frame {}", i));
                 }
                 i++;
+                progress->exitSection();
             }
             if (prevImage != NULL) {
                 delete prevImage;
