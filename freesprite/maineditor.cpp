@@ -1736,7 +1736,7 @@ void MainEditor::takeInput(SDL_Event evt) {
                                 if (pinchZooming) {
 
                                     double zoomVal = -(lastPinchZoomDistance - distanceNow) / 0.04;
-                                    loginfo(frmt("distanceNow = {}, zoomval = {}", distanceNow, zoomVal));
+                                    //loginfo(frmt("distanceNow = {}, zoomval = {}", distanceNow, zoomVal));
                                     canvas.zoomFromWheelInput((float)zoomVal);
                                 }
                                 pinchZooming = true;
