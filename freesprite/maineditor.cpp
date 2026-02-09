@@ -1597,8 +1597,8 @@ void MainEditor::takeInput(SDL_Event evt) {
     if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 
         switch (evt.type) {
-            case SDL_EVENT_FINGER_DOWN:
             case SDL_EVENT_FINGER_UP:
+            case SDL_EVENT_FINGER_DOWN:
             case SDL_EVENT_FINGER_MOTION:
                 if (touchMode != TOUCHMODE_PAN) {
                     evt = convertTouchToMouseEvent(evt);
@@ -1722,8 +1722,35 @@ void MainEditor::takeInput(SDL_Event evt) {
                     break;
                 case SDL_FINGERMOTION:
                     if (!penDown) {
-                        XY rel = {evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH};
-                        canvas.panCanvas(rel);
+                        if (g_touchPointsOnScreen == 2) {
+                            int num = 0; //should be 2 anyway
+                            SDL_Finger** fingers = SDL_GetTouchFingers(evt.tfinger.touchID, &num);
+
+                            if (num == 2) {
+                                SDL_Finger* oppositeFinger = fingers[0]->id == evt.tfinger.fingerID ? fingers[1] : fingers[0];
+                                XYd oppositeFingerPos = { oppositeFinger->x, oppositeFinger->y };
+                                XYd thisFingerPos = { evt.tfinger.x, evt.tfinger.y };
+                                
+                                double distanceNow = xydDistance(thisFingerPos, oppositeFingerPos);
+
+                                if (pinchZooming) {
+
+                                    double zoomVal = -(lastPinchZoomDistance - distanceNow) / 0.04;
+                                    loginfo(frmt("distanceNow = {}, zoomval = {}", distanceNow, zoomVal));
+                                    canvas.zoomFromWheelInput((float)zoomVal);
+                                }
+                                pinchZooming = true;
+                                lastPinchZoomDistance = distanceNow;
+                            }
+                            else {
+                                logerr("expected 2 fingers on the screen in zoom motion");
+                            }
+                        }
+                        else {
+                            pinchZooming = false;
+                            XY rel = { evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH };
+                            canvas.panCanvas(rel);
+                        }
                     }
                     break;
                 case SDL_EVENT_PEN_DOWN:

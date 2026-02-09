@@ -57,6 +57,7 @@ u32 invertColor(u32 color);
 bool pointInBox(XY point, SDL_Rect rect);
 
 double xyDistance(XY p1, XY p2);
+double xydDistance(XYd p1, XYd p2);
 bool xyEqual(XY p1, XY p2);
 XY xyAdd(XY p1, XY p2);
 XY xySubtract(XY p1, XY p2);

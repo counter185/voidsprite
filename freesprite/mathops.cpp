@@ -20,6 +20,12 @@ double xyDistance(XY p1, XY p2)
     return ret;
 }
 
+double xydDistance(XYd p1, XYd p2)
+{
+    double ret = sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+    return ret;
+}
+
 bool xyEqual(XY p1, XY p2) {
     return p1.x == p2.x && p1.y == p2.y;
 }

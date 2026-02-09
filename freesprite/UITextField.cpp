@@ -312,7 +312,7 @@ void UITextField::runNumericOperation() {
                 logerr(frmt("invalid operation: {}", numericFieldCurrentOperation)); 
             }
         }
-        catch (std::exception& e) {
+        catch (std::exception&) {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid input"));
         }
         numericFieldCurrentOperation = '\0';
