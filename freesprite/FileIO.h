@@ -38,9 +38,7 @@ void emDownloadFile(PlatformNativePathString path);
 
 #include "io/io_png.h"
 #include "io/io_aseprite.h"
-#include "io/io_piskel.h"
-#include "io/io_pixil.h"
-#include "io/io_lpe.h"
+#include "io/io_jsonformats.h"
 #include "io/io_pix2d.h"
 #include "io/io_gim.h"
 #include "io/io_rpgm.h"

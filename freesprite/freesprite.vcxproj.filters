@@ -522,9 +522,6 @@
     <ClCompile Include="FileIO.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
-    <ClCompile Include="io\io_piskel.cpp">
-      <Filter>Source files\io</Filter>
-    </ClCompile>
     <ClCompile Include="io\io_gim.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
@@ -630,9 +627,6 @@
     <ClCompile Include="ViewSessionScreen.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
-    <ClCompile Include="io\io_lpe.cpp">
-      <Filter>Source files\io</Filter>
-    </ClCompile>
     <ClCompile Include="PopupContextMenu.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
@@ -647,9 +641,6 @@
     </ClCompile>
     <ClCompile Include="PopupSetupNetworkCanvas.cpp">
       <Filter>Source files\popup</Filter>
-    </ClCompile>
-    <ClCompile Include="io\io_pixil.cpp">
-      <Filter>Source files\io</Filter>
     </ClCompile>
     <ClCompile Include="io\io_pixelstudio.cpp">
       <Filter>Source files\io</Filter>
@@ -715,6 +706,9 @@
       <Filter>Source files\io</Filter>
     </ClCompile>
     <ClCompile Include="io\io_resprite.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_jsonformats.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1163,9 +1157,6 @@
     <ClInclude Include="FileIO.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
-    <ClInclude Include="io\io_piskel.h">
-      <Filter>Header files\io</Filter>
-    </ClInclude>
     <ClInclude Include="platform.h">
       <Filter>Header files\platform</Filter>
     </ClInclude>
@@ -1328,7 +1319,7 @@
     <ClInclude Include="ViewSessionScreen.h">
       <Filter>Header files\screen</Filter>
     </ClInclude>
-    <ClInclude Include="io\io_lpe.h">
+    <ClInclude Include="io\io_jsonformats.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="PopupContextMenu.h">
@@ -1348,9 +1339,6 @@
     </ClInclude>
     <ClInclude Include="PopupSetupNetworkCanvas.h">
       <Filter>Header files\popup</Filter>
-    </ClInclude>
-    <ClInclude Include="io\io_pixil.h">
-      <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="platform_vita.h">
       <Filter>Header files\platform</Filter>
