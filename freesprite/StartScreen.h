@@ -78,6 +78,7 @@ public:
     void NewIndexedSession();
     void tryLoadURL(std::string url);
     void tryLoadFile(std::string path);
+    void tryLoadFileUsingImporter(FileImporter* importer, PlatformNativePathString name);
     void tryOpenImageFromClipboard();
 
     void populateLastOpenFiles();

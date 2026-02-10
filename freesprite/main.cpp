@@ -90,7 +90,11 @@ void g_closePopup(BasePopup* a, bool dispose) {
 
 void g_addScreen(BaseScreen* a, bool switchTo)
 {
-    g_currentWindow->addScreen(a, switchTo);
+    g_addScreenToWindow(g_currentWindow, a, switchTo);
+}
+void g_addScreenToWindow(VSPWindow* wd, BaseScreen* a, bool switchTo) 
+{
+    wd->addScreen(a, switchTo);
 }
 
 void g_closeScreen(BaseScreen* screen) {

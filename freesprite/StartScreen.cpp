@@ -495,6 +495,35 @@ void StartScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int 
     }
 }
 
+void StartScreen::tryLoadFileUsingImporter(FileImporter* importer, PlatformNativePathString name)
+{
+    VSPWindow* thisWindow = g_currentWindow;
+    g_startNewOperation([name, importer, thisWindow](OperationProgressReport* report) {
+        void* importedData = importer->importData(name, report);
+        if (importedData != NULL) {
+            MainEditor* outSession = NULL;
+            if (!importer->importsWholeSession()) {
+                Layer* nlayer = (Layer*)importedData;
+                outSession = !nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer);
+            }
+            else {
+                outSession = (MainEditor*)importedData;
+            }
+
+            if (importer->getCorrespondingExporter() != NULL) {
+                outSession->lastWasSaveAs = false;
+                outSession->lastConfirmedSave = true;
+                outSession->lastConfirmedSavePath = name;
+                outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
+            }
+            g_addScreenToWindow(thisWindow, outSession);
+        }
+        else {
+            g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+        }
+    });
+}
+
 void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     //wprintf(L"path: %s, index: %i\n", name.c_str(), importerIndex);
     if (evt_id == 0) {
@@ -504,28 +533,7 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
         else {
             importerIndex -= 2;
             FileImporter* importer = g_fileImporters[importerIndex];
-            void* importedData = importer->importData(name);
-            if (importedData != NULL) {
-                MainEditor* outSession = NULL;
-                if (!importer->importsWholeSession()) {
-                    Layer* nlayer = (Layer*)importedData;
-                    outSession = !nlayer->isPalettized ? new MainEditor(nlayer) : new MainEditorPalettized((LayerPalettized*)nlayer);
-                }
-                else {
-                    outSession = (MainEditor*)importedData;
-                }
-
-                if (importer->getCorrespondingExporter() != NULL) {
-                    outSession->lastWasSaveAs = false;
-                    outSession->lastConfirmedSave = true;
-                    outSession->lastConfirmedSavePath = name;
-                    outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
-                }
-                g_addScreen(outSession);
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
-            }
+            tryLoadFileUsingImporter(importer, name);
         }
     }
 }
@@ -965,19 +973,27 @@ void StartScreen::checkAndPromptCrashSaves()
 
 void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
 {
+    VSPWindow* thisWindow = g_currentWindow;
     PopupSetupNetworkCanvas* prompt = new PopupSetupNetworkCanvas(TL("vsp.launchpad.popup.connectcollab"), TL("vsp.launchpad.popup.connectcollab.desc"));
     prompt->textboxIP->setText(ip);
     prompt->textboxPort->setText(port);
-    prompt->onInputConfirmCallback = [](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
+    prompt->onInputConfirmCallback = [thisWindow](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
 #if VSP_NETWORKING
-        g_startNewOperation([input]() {
+        g_startNewOperation([input, thisWindow](OperationProgressReport* report) {
 
+            report->enterSection("Connecting...");
+
+            report->enterSection("Resolving hostname");
             NET_Address* addr = NET_ResolveHostname(input.ip.c_str());
             if (NET_WaitUntilResolved(addr, 15000) == 1) {
+                report->exitSection();
+
+                report->enterSection("Connecting to server");
                 NET_StreamSocket* s = NET_CreateClient(addr, input.port);
                 if (NET_WaitUntilConnected(s, -1) == 1) {
-                    g_startNewMainThreadOperation([input,s]() {
-                        g_addScreen(new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
+                    report->exitSection();
+                    g_startNewMainThreadOperation([input, s, thisWindow]() {
+                        g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
                     });
                 }
                 else {
@@ -1056,10 +1072,11 @@ void StartScreen::tryLoadURL(std::string url)
 
 void StartScreen::tryLoadFile(std::string path)
 {
-    g_startNewOperation([path](OperationProgressReport* report) {
+    VSPWindow* thisWindow = g_currentWindow;
+    g_startNewOperation([thisWindow, path](OperationProgressReport* report) {
         MainEditor* newSession = loadAnyIntoSession(path, NULL, report);
         if (newSession != NULL) {
-            g_addScreen(newSession);
+            g_addScreenToWindow(thisWindow, newSession);
             g_tryPushLastFilePath(path);
         }
         else {
