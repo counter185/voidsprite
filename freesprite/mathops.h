@@ -516,10 +516,13 @@ public:
         return true;
     }
 
-    static SDL_IOStream* OpenNew() {
+    static SDL_IOStream* OpenNew(SDLVectorU8IOStream** outStream = NULL) {
         StreamObjs* streamObjs = new StreamObjs();
         SDL_INIT_INTERFACE(&streamObjs->iface);
         streamObjs->stream = new SDLVectorU8IOStream();
+        if (outStream != NULL) {
+            *outStream = streamObjs->stream;
+        }
         streamObjs->iface.size = SDLVectorU8IOStream::size;
         streamObjs->iface.seek = SDLVectorU8IOStream::seek;
         streamObjs->iface.read = SDLVectorU8IOStream::read;

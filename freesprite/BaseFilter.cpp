@@ -17,6 +17,7 @@ void g_loadFilters()
         return PackRGBAtoARGB(255 - pxnow.r, 255 - pxnow.g, 255 - pxnow.b, pxnow.a);
     }));
     g_filters.push_back(new FilterStrideGlitch());
+    g_filters.push_back(new FilterJPEGGlitch());
     g_filters.push_back(new FilterPixelize());
     g_filters.push_back(new FilterOutline());
     g_filters.push_back(new FilterBrightnessContrast());
@@ -455,15 +456,67 @@ Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
     SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
     if (srf != NULL) {
         SDL_LockSurface(srf);
-        for (int y = 0; y < c->h; y++) {
-            memcpy(&(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), &(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), c->w * 4);
-        }
+        copyPixelsToTexture(c->pixels32(), c->w, c->h, (u8*)srf->pixels, srf->pitch);
         SDL_UnlockSurface(srf);
         SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew();
         IMG_SaveJPG_IO(srf, stream, false, quality);
         SDL_DestroySurface(srf);
         SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET);
         srf = IMG_LoadJPG_IO(stream);
+        SDL_CloseIO(stream);
+
+        if (srf != NULL) {
+            SDL_Surface* srf2 = SDL_ConvertSurface(srf, SDL_PIXELFORMAT_ARGB8888);
+            SDL_DestroySurface(srf);
+            srf = srf2;
+            for (int y = 0; y < ixmin(srf->h, c->h); y++) {
+                memcpy(&(ARRAY2DPOINT(c->pixels32(), 0, y, c->w)), &(ARRAY2DPOINT((u8*)srf->pixels, 0, y, srf->pitch)), ixmin(srf->w, c->w) * 4);
+            }
+        }
+        SDL_FreeSurface(srf);
+    }
+    return c;
+
+}
+Layer* FilterJPEGGlitch::run(Layer* src, std::map<std::string, std::string> options)
+{
+    int quality = std::stoi(options["quality"]);
+    int iterations = std::stoi(options["iterations"]);
+    Layer* c = copy(src);
+    SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
+    if (srf != NULL) {
+        SDL_LockSurface(srf);
+        copyPixelsToTexture(c->pixels32(), c->w, c->h, (u8*)srf->pixels, srf->pitch);
+        SDL_UnlockSurface(srf);
+        SDLVectorU8IOStream* rawStream = NULL;
+        SDL_IOStream* stream = SDLVectorU8IOStream::OpenNew(&rawStream);
+        IMG_SaveJPG_IO(srf, stream, false, quality);
+        SDL_DestroySurface(srf);
+        std::vector<u8>& v = rawStream->data;
+        std::vector<u8> jpegSOS = { 0xFF, 0xDA };
+        std::vector<u8> jpegEOI = { 0xFF, 0xD9 };
+        int sosOffset = 0x10;
+        auto posSOS = std::search(v.begin(), v.end(), std::begin(jpegSOS), std::end(jpegSOS));
+        auto posEOI = std::search(v.begin(), v.end(), std::begin(jpegEOI), std::end(jpegEOI));
+        if (posSOS != v.end() && posEOI != v.end() && posSOS + sosOffset < posEOI) {
+            posSOS += sosOffset;
+            int sizeFromEOItoSOS = (int)(posEOI - posSOS);
+            for (int i = 0; i < iterations; i++) {
+                int glitchPos = randomInt(0, sizeFromEOItoSOS);
+                int insertChars = randomInt(1, 4);
+                for (int j = 0; j < insertChars; j++) {
+                    v.insert(posSOS + glitchPos, (u8)randomInt(0, 127));    //don't accidentally insert a new marker hopefully
+                }
+            }
+        } else {
+            logerr("[FilterJPEGGlitch] no SOS or EOI markers");
+        }
+
+        SDL_SeekIO(stream, 0, SDL_IO_SEEK_SET);
+        srf = IMG_LoadJPG_IO(stream);
+        if (srf == NULL) {
+            logerr("[FilterJPEGGlitch] failed to load glitched JPEG");
+        }
         SDL_CloseIO(stream);
 
         if (srf != NULL) {
