@@ -167,7 +167,7 @@ bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativ
             ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
         if (result) {
 #if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
-            emDownloadFile(lastConfirmedSavePath);
+            emDownloadFile(name);
 #endif
             if (g_config.openSavedPath) {
                 platformOpenFileLocation(name);
