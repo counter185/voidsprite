@@ -39,6 +39,7 @@ void BrushFill::clickPress(MainEditor* editor, XY pos)
         currentLayer->wandSelectWithOperationAt(pos, [editor](XY point) {
             editor->SetPixel(point, editor->getActiveColor());
         });
+        editor->getCurrentLayer()->bgOpFinished = true;
     });
 }
 

@@ -595,6 +595,7 @@
                                     "Pathfinding will be used to draw it."},
     {"vsp.brush.rect:v2", "Rectangle"},
     {"vsp.brush.rectfill", "Filled Rectangle"},
+    {"vsp.brush.rectfill.desc", "Double click to fill the current tile."},
     {"vsp.brush.circle", "1px Circle"},
     {"vsp.brush.circlearc", "1px Circle (arc)"},
     {"vsp.brush.diamond", "1px Diamond"},

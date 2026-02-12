@@ -11,7 +11,7 @@ void ToolRectIsolate::clickPress(MainEditor* editor, XY pos)
 void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) { 
     if (heldDown) {
         heldDown = false;
-        if (xyEqual(startPos, lastMousePos) && clickTimer.started && clickTimer.elapsedTime() < 600) {
+        if (xyEqual(startPos, lastMousePos) && clickTimer.started && clickTimer.elapsedTime() < BRUSH_DOUBLE_CLICK_TIME) {
             if (!g_ctrlModifier) {
                 editor->isolatedFragment.clear();
             }

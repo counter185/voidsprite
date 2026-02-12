@@ -8,6 +8,8 @@
 #define BRUSH_DOUBLE_PROPERTY(name,min,max,defaultvalue) BrushProperty{name,2,min,max,defaultvalue}
 #define BRUSH_BOOL_PROPERTY(name,defaultvalue) BrushProperty{name,3,0,1,defaultvalue}
 
+#define BRUSH_DOUBLE_CLICK_TIME 600
+
 struct BrushProperty {
 	std::string name;
 	int type;
