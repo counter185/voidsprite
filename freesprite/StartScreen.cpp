@@ -1076,8 +1076,10 @@ void StartScreen::tryLoadFile(std::string path)
     g_startNewOperation([thisWindow, path](OperationProgressReport* report) {
         MainEditor* newSession = loadAnyIntoSession(path, NULL, report);
         if (newSession != NULL) {
-            g_addScreenToWindow(thisWindow, newSession);
-            g_tryPushLastFilePath(path);
+            g_startNewMainThreadOperation([thisWindow, newSession, path]() {
+                g_addScreenToWindow(thisWindow, newSession);
+                g_tryPushLastFilePath(path);
+            });
         }
         else {
             g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));

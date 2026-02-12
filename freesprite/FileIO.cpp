@@ -4,12 +4,10 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "gzip/decompress.hpp"
-#include "libtga/tga.h"
 #include "ddspp/ddspp.h"
 #include "easybmp/EasyBMP.h"
 #include "zip/zip.h"
 #include "pugixml/pugixml.hpp"
-#include "astc_dec/astc_decomp.h"
 #include "base64/base64.hpp"
 #include "json/json.hpp"
 
@@ -125,82 +123,6 @@ void detile(Layer* ret, XY tileSize) {
     
     memcpy(ret->pixels32(), t->pixels32(), 4 * t->w * t->h);
     delete t;
-}
-
-int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth, int blockHeight) {
-    uint32_t* pxd = ret->pixels32();
-    /*int skip = 232;
-    int skipHowMany = 24;
-    int skipCounter = 0;*/
-
-    int astcErrors = 0;
-    int blocksW = ceil((float)width / blockWidth);
-    int blocksH = ceil((float)height / blockHeight);
-
-    int x = 0;
-    int y = 0;
-
-    uint8_t astcData[16];
-
-    while (y < blocksH && x < blocksW) {
-
-        //for (int yyyyy = 0; yyyyy < 2; yyyyy++) {
-            for (int xxxxx = 0; xxxxx < 2; xxxxx++) {
-
-                //1x4 vertical strip
-                for (int yyyy = 0; yyyy < 4; yyyy++) {
-
-                    //2x2 deswizzle
-                    for (int xx = 0; xx < 2; xx++) {
-                        for (int yy = 0; yy < 2; yy++) {
-
-                            fread(astcData, 1, 16, infile);
-                            /*while (((uint64_t*)astcData)[0] == 0 && ((uint64_t*)astcData)[1] == 0 && ftell(infile) < fileLength) {
-                                fread(astcData, 1, 16, infile);
-                            }*/
-                            uint8_t* rgbaData = (uint8_t*)tracked_malloc(4 * blockHeight * blockWidth);
-                            bool success = basisu::astc::decompress(rgbaData, astcData, false, blockWidth, blockHeight);
-
-                            if (!success) {
-                                logprintf("ASTC decompression failed\n");
-                                //astcErrors++;
-                                //return;
-                            }
-
-                            int rgbaDataPointer = 0;
-
-                            for (int yyy = 0; yyy < blockHeight; yyy++) {
-                                for (int xxx = 0; xxx < blockWidth; xxx++) {
-                                    //uint32_t colorNow = ((uint32_t*)rgbaData)[yy * blockWidth + xx];
-
-                                    uint8_t r = rgbaData[rgbaDataPointer++];
-                                    uint8_t g = rgbaData[rgbaDataPointer++];
-                                    uint8_t b = rgbaData[rgbaDataPointer++];
-                                    uint8_t a = rgbaData[rgbaDataPointer++];
-
-                                    //if (y+yy > )
-                                    ret->setPixel({ (x + xxxxx * 2 + xx) * blockWidth + xxx, (y + yyyy * 2 + yy) * blockHeight + yyy }, PackRGBAtoARGB(r, g, b, a));
-                                    //ret->setPixel({ x + xx, y + yy }, PackRGBAtoARGB(rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], rgbaData[rgbaDataPointer++], 255));
-                                    //ret->setPixel({ x + xx,y + yy }, colorNow);
-                                }
-                            }
-                            tracked_free(rgbaData);
-                        }
-                    }
-                }
-            }
-        //}
-        
-        y += 8;
-        if (y >= blocksH-8) {
-            y = 0;
-            x += 4;
-        }
-
-    }
-
-    logprintf("[ASTC] at %lx / %lx\n", ftell(infile), fileLength); 
-    return astcErrors;
 }
 
 LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input)
@@ -3185,6 +3107,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("Wii/GC TPL", ".tpl", &readWiiGCTPL));
     g_fileImporters.push_back(FileImporter::flatImporter("NES: dump CHR-ROM", ".nes", &readNES));
     g_fileImporters.push_back(FileImporter::flatImporter("DDS", ".dds", &readDDS, NULL, FORMAT_RGB, magicVerify(0, "DDS")));
+    g_fileImporters.push_back(FileImporter::flatImporter("ASTC", ".astc", &readASTC, NULL, FORMAT_RGB, magicVerify(0, "\x13\xAB\xA1\x5C")));
     g_fileImporters.push_back(FileImporter::flatImporter("VTF", ".vtf", &readVTF, exVTF));
     g_fileImporters.push_back(FileImporter::sessionImporter("Valve SPR", ".spr", &readValveSPR, NULL, FORMAT_PALETTIZED,
         magicVerify(0, "IDSP")));

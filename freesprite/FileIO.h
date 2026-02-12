@@ -16,8 +16,6 @@ void DeXT1(Layer* ret, int width, int height, FILE* infile);
 void DeXT23(Layer* ret, int width, int height, FILE* infile);
 void DeXT45(Layer* ret, int width, int height, FILE* infile);
 
-int DeASTC(Layer* ret, int width, int height, uint64_t fileLength, FILE* infile, int blockWidth = 8, int blockHeight = 8);
-
 LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, u64 dataSize);
@@ -37,6 +35,7 @@ void emDownloadFile(PlatformNativePathString path);
 #endif
 
 #include "io/io_png.h"
+#include "io/io_astc.h"
 #include "io/io_aseprite.h"
 #include "io/io_jsonformats.h"
 #include "io/io_pix2d.h"

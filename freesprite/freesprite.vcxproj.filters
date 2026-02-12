@@ -711,6 +711,9 @@
     <ClCompile Include="io\io_jsonformats.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_astc.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1416,6 +1419,9 @@
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="io\io_resprite.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_astc.h">
       <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>

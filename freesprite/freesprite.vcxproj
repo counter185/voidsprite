@@ -293,6 +293,7 @@
     <ClCompile Include="fills.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="io\io_aseprite.cpp" />
+    <ClCompile Include="io\io_astc.cpp" />
     <ClCompile Include="io\io_avi.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />
     <ClCompile Include="io\io_flipnote.cpp" />
@@ -555,6 +556,7 @@
     <ClInclude Include="gzip\decompress.hpp" />
     <ClInclude Include="iostructs.h" />
     <ClInclude Include="io\io_aseprite.h" />
+    <ClInclude Include="io\io_astc.h" />
     <ClInclude Include="io\io_avi.h" />
     <ClInclude Include="io\io_base.h" />
     <ClInclude Include="io\io_dibv5.h" />
