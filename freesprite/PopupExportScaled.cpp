@@ -8,6 +8,7 @@
 #include "Notification.h"
 #include "settings.h"
 #include "UILabel.h"
+#include "PopupChooseFormat.h"
 
 PopupExportScaled::PopupExportScaled(MainEditor* parent)
 {
@@ -97,11 +98,17 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
     UIButton* confirmButton = actionButton(TL("vsp.cmn.confirm"));
     confirmButton->onClickCallback = [this](...) {
         if (resultSize.x > 0 && resultSize.y > 0) {
-            std::vector<std::pair<std::string, std::string>> formats;
-            for (auto f : exporterList) {
-                formats.push_back({ f->extension(), f->name() });
-            }
-            platformTrySaveOtherFile(this, formats, TL("vsp.popup.saveimage"), EVENT_MAINEDITOR_EXPORTSCALED);
+            PopupChooseFormat* formatPopup = 
+                caller->isPalettized ? PopupChooseFormat::withDefaultIndexedExportFormats("Choose format", "")
+                : PopupChooseFormat::withDefaultRGBExportFormats("Choose format", "");
+                
+            formatPopup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), 
+                [this](FormatDef* fmt, PlatformNativePathString path){
+                    if (exportWithExporter((FileExporter*)fmt->udata, path)) {
+                        closePopup();
+                    }
+                }
+            );
         }
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.exportscaled.invalidsize")));
@@ -109,77 +116,70 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
     };
 }
 
-void PopupExportScaled::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
-{
-    if (evt_id == EVENT_MAINEDITOR_EXPORTSCALED) {
-        exporterIndex--;
+bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativePathString name) {
+    bool result = false;
+    if (resultSize.x > 0 && resultSize.y > 0) {
 
-        if (resultSize.x > 0 && resultSize.y > 0) {
+        if (exporter->exportsWholeSession()) {
+            MainEditor* newSession = NULL;
 
-            FileExporter* exporter = NULL;
-            bool result = false;
-            if (exporterIndex < exporterList.size()) {
-                exporter = exporterList[exporterIndex];
-                if (exporter->exportsWholeSession()) {
-                    MainEditor* newSession = NULL;
-                    if (!caller->getLayerStack()[0]->isPalettized) {
-                        std::vector<Layer*> scaledLayers;
-                        for (Layer* l : caller->getLayerStack()) {
-                            Layer* scaled = l->copyCurrentVariantScaled(resultSize);
-                            scaledLayers.push_back(scaled);
-                        }
-                        newSession = new MainEditor(scaledLayers);
-                    }
-                    else {
-                        std::vector<LayerPalettized*> scaledLayers;
-                        for (Layer* l : caller->getLayerStack()) {
-                            Layer* scaled = l->copyCurrentVariantScaled(resultSize);
-                            scaledLayers.push_back((LayerPalettized*)scaled);
-                        }
-                        newSession = new MainEditorPalettized(scaledLayers);
-                    }
-
-                    if (newSession != NULL) {
-                        result = exporter->exportData(name, newSession);
-                        delete newSession;
-                    }
-
+            std::vector<Frame*> nFrames;
+            for (auto& f : caller->frames) {
+                Frame* scaledFrame = new Frame();
+                scaledFrame->activeLayer = f->activeLayer;
+                for (Layer* l : f->layers) {
+                    Layer* scaled = l->copyCurrentVariantScaled(resultSize);
+                    scaledFrame->layers.push_back(scaled);
                 }
-                else {
-                    Layer* flat = NULL;
-                    if (caller->isPalettized) {
-                        MainEditorPalettized* pssn = (MainEditorPalettized*)caller;
-                        flat = pssn->flattenImageWithoutConvertingToRGB();
-                    }
-                    else {
-                        flat = caller->flattenImage();
-                    }
-
-                    if (flat != NULL) {
-                        Layer* scaled = flat->copyCurrentVariantScaled(resultSize);
-                        delete flat;
-                        result = exporter->exportData(name, scaled);
-                        delete scaled;
-                    }
-                }
-
-                //result = trySaveWithExporter(name, exporter);
+                nFrames.push_back(scaledFrame);
             }
 
-            g_addNotification(result ? SuccessNotification("Success", "File exported successfully.") :
-                ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
-            if (result && g_config.openSavedPath) {
+            newSession = caller->isPalettized ? new MainEditorPalettized(nFrames) : new MainEditor(nFrames);
+
+            if (newSession != NULL) {
+                newSession->activeFrame = caller->activeFrame;
+                newSession->tileDimensions = caller->tileDimensions;
+                newSession->selLayer = caller->selLayer;
+                result = exporter->exportData(name, newSession);
+                delete newSession;
+            }
+
+        }
+        else {
+            Layer* flat = NULL;
+            if (caller->isPalettized) {
+                MainEditorPalettized* pssn = (MainEditorPalettized*)caller;
+                flat = pssn->flattenImageWithoutConvertingToRGB();
+            }
+            else {
+                flat = caller->flattenImage();
+            }
+
+            if (flat != NULL) {
+                Layer* scaled = flat->copyCurrentVariantScaled(resultSize);
+                delete flat;
+                result = exporter->exportData(name, scaled);
+                delete scaled;
+            }
+        }
+
+        g_addNotification(result ? SuccessNotification("Success", "File exported successfully.") :
+            ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
+        if (result) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+            emDownloadFile(lastConfirmedSavePath);
+#endif
+            if (g_config.openSavedPath) {
                 platformOpenFileLocation(name);
             }
-        } else {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.exportscaled.invalidsize")));
         }
+    } else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.exportscaled.invalidsize")));
     }
-
+    return result;
 }
 
-void PopupExportScaled::genExporterList()
-{
+void PopupExportScaled::genExporterList() {
     exporterList = {};
     if (caller->isPalettized) {
         for (auto& e : g_palettizedFileExporters) {

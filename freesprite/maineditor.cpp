@@ -963,7 +963,6 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.nav.exportscaled"),
                             [this]() {
                                 PopupExportScaled* popup = new PopupExportScaled(this);
-                                popup->setCallbackListener(EVENT_MAINEDITOR_EXPORTSCALED, this);
                                 g_addPopup(popup);
                             }
                         }

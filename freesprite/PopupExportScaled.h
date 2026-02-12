@@ -1,13 +1,12 @@
 #pragma once
 #include "BasePopup.h"
-#include "EventCallbackListener.h"
 
 enum ExportMode : int {
     EXPORTMODE_INTEGERSCALE = 0,
     EXPORTMODE_PIXELSCALE = 1
 };
 
-class PopupExportScaled : public BasePopup, public EventCallbackListener
+class PopupExportScaled : public BasePopup
 {
 private:
     MainEditor* caller = NULL;
@@ -22,8 +21,7 @@ private:
 public:
     PopupExportScaled(MainEditor* parent);
 
-    void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
-
+    bool exportWithExporter(FileExporter* exporter, PlatformNativePathString path);
     void genExporterList();
     void recalc();
 };
