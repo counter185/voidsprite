@@ -7,6 +7,7 @@
 #include "UICheckbox.h"
 #include "UIColorInputField.h"
 #include "maineditor.h"
+#include "UITextField.h"
 
 PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx) 
 {
