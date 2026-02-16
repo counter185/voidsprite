@@ -2906,7 +2906,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                         }
                         MainEditor* newEditor = new MainEditor(imageLayer);
                         newEditor->splitSessionData = ssn;
-                        newEditor->tileDimensions = ssn.tileDimensions;
+                        newEditor->ssne.tileDimensions = ssn.tileDimensions;
                         newEditor->lastConfirmedSavePath = path;
                         newEditor->getCommentStack() = comments;
                         return newEditor;
@@ -2932,8 +2932,8 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
     }
     std::ofstream f(path);
     f << "voidsprite split session file v0\n";
-    f << "tiledim.x:" << data->tileDimensions.x << "\n";
-    f << "tiledim.y:" << data->tileDimensions.y << "\n";
+    f << "tiledim.x:" << data->ssne.tileDimensions.x << "\n";
+    f << "tiledim.y:" << data->ssne.tileDimensions.y << "\n";
     for (CommentData& comment : data->getCommentStack()) {
         f << "comment:" << comment.data << ";" << comment.position.x << ";" << comment.position.y << "\n";
     }

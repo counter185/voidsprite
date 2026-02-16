@@ -138,7 +138,7 @@ bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativ
 
             if (newSession != NULL) {
                 newSession->activeFrame = caller->activeFrame;
-                newSession->tileDimensions = caller->tileDimensions;
+                newSession->ssne.tileDimensions = caller->ssne.tileDimensions;
                 newSession->selLayer = caller->selLayer;
                 result = exporter->exportData(name, newSession);
                 delete newSession;

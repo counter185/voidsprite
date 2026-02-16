@@ -13,7 +13,7 @@ void BrushRectFill::clickRelease(MainEditor* editor, XY pos)
     if (heldDown) {
         heldDown = false;
         if (xyEqual(startPos, lastMousePos) && clickTimer.started && clickTimer.elapsedTime() < BRUSH_DOUBLE_CLICK_TIME) {
-            XY tileDimensions = editor->tileDimensions;
+            XY tileDimensions = editor->ssne.tileDimensions;
             tileDimensions.x = tileDimensions.x == 0 ? editor->canvas.dimensions.x : tileDimensions.x;
             tileDimensions.y = tileDimensions.y == 0 ? editor->canvas.dimensions.y : tileDimensions.y;
 

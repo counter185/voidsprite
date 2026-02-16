@@ -145,13 +145,13 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
         exporterId--;
 
         FileExporter* exporter = g_palettizedFileExporters[exporterId];
-        XY tileCounts = { canvas.dimensions.x / tileDimensions.x, canvas.dimensions.y / tileDimensions.y };
+        XY tileCounts = { canvas.dimensions.x / ssne.tileDimensions.x, canvas.dimensions.y / ssne.tileDimensions.y };
         PlatformNativePathString pathOfFile = name.substr(0, name.find_last_of(convertStringOnWin32("/\\")));
 
         Layer* flatImage = flattenImageWithoutConvertingToRGB();
         for (int y = 0; y < tileCounts.y; y++) {
             for (int x = 0; x < tileCounts.x; x++) {
-                SDL_Rect clipRect = { x * tileDimensions.x, y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
+                SDL_Rect clipRect = { x * ssne.tileDimensions.x, y * ssne.tileDimensions.y, ssne.tileDimensions.x, ssne.tileDimensions.y };
                 Layer* clip = flatImage->trim(clipRect);
                 if (clip != NULL) {
                     PlatformNativePathString tileName = name.substr(0, name.find_last_of(convertStringOnWin32("."))) + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
@@ -347,22 +347,22 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile size", "New tile size:", XY{ this->tileDimensions.x, this->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
+                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile size", "New tile size:", XY{ this->ssne.tileDimensions.x, this->ssne.tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
                                 }
                             }
                         }
                     },
                     {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
                             [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(this->canvas.dimensions.x / (float)this->tileDimensions.x), (int)ceil(this->canvas.dimensions.y / (float)this->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
+                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(this->canvas.dimensions.x / (float)this->ssne.tileDimensions.x), (int)ceil(this->canvas.dimensions.y / (float)this->ssne.tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
                                 }
                             }
                         }
@@ -428,19 +428,17 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
                     {SDL_SCANCODE_B, { "Toggle background color",
                             [this]() {
-                                this->backgroundColor.r = ~this->backgroundColor.r;
-                                this->backgroundColor.g = ~this->backgroundColor.g;
-                                this->backgroundColor.b = ~this->backgroundColor.b;
+                                this->ssne.alternateBackground = !this->ssne.alternateBackground;
                             }
                         }
                     },
                     {SDL_SCANCODE_C, { "Toggle comments",
                             [this]() {
-                                (*(int*)&this->commentViewMode)++;
-                                (*(int*)&this->commentViewMode) %= 3;
+                                (*(int*)&this->ssne.commentViewMode)++;
+                                (*(int*)&this->ssne.commentViewMode) %= 3;
                                 g_addNotification(Notification(frmt("{}",
-                                    this->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
-                                    this->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
+                                    this->ssne.commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
+                                    this->ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
                                     "All comments shown"), "", 1500
                                 ));
                             }
@@ -448,11 +446,11 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDL_SCANCODE_L, { "Toggle guidelines",
                             [this]() {
-                                (*(int*)&this->guidelineDisplayMode)++;
-                                (*(int*)&this->guidelineDisplayMode) %= 3;
+                                (*(int*)&this->ssne.guidelineDisplayMode)++;
+                                (*(int*)&this->ssne.guidelineDisplayMode) %= 3;
                                 g_addNotification(Notification(frmt("{}",
-                                    this->guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
-                                    this->guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
+                                    this->ssne.guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
+                                    this->ssne.guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
                                     "Guidelines shown in UI color"), "", 1500
                                 ));
                             }
@@ -485,7 +483,7 @@ void MainEditorPalettized::setUpWidgets()
                 },
                 {SDL_SCANCODE_N, { "Preview 3D cube...",
                         [this]() {
-                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                            if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile grid must be set"));
                                 return;
                             }
@@ -496,7 +494,7 @@ void MainEditorPalettized::setUpWidgets()
                 },
                 {SDL_SCANCODE_S, { "Preview spritesheet...",
                         [this]() {
-                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                            if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 return;
                             }
@@ -507,7 +505,7 @@ void MainEditorPalettized::setUpWidgets()
                 },
                 {SDL_SCANCODE_T, { "Preview tileset...",
                         [this]() {
-                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                            if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 return;
                             }
@@ -690,7 +688,7 @@ Layer* MainEditorPalettized::mergeLayers(Layer* bottom, Layer* top)
 
 void MainEditorPalettized::exportTilesIndividually()
 {
-    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+    if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
         std::vector<std::pair<std::string, std::string>> formats;
         for (auto f : g_palettizedFileExporters) {
             formats.push_back({ f->extension(), f->name() });
@@ -808,7 +806,7 @@ MainEditor* MainEditorPalettized::toRGBSession()
         }
     }
     MainEditor* newEditor = new MainEditor(rgbFrames);
-    newEditor->tileDimensions = tileDimensions;
+    newEditor->ssne = ssne;
     return newEditor;
 }
 

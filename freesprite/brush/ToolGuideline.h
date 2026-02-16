@@ -25,5 +25,7 @@ class ToolGuideline :
     void rightClickPress(MainEditor* editor, XY pos) override;
     void rightClickRelease(MainEditor* editor, XY pos) override;
     void renderOnCanvas(XY canvasDrawPoint, int scale) override;
+
+    void placeAt(MainEditor* editor, bool vertical);
 };
 

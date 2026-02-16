@@ -131,7 +131,7 @@ MainEditor* readResprite(PlatformNativePathString path)
 
         if (!frames.empty()) {
             MainEditor* ret = new MainEditor(frames);
-            ret->tileDimensions = documentJson["showGrid"].get<bool>() ? XY{
+            ret->ssne.tileDimensions = documentJson["showGrid"].get<bool>() ? XY{
                 documentJson["gridWidth"].get<int>(), documentJson["gridHeight"].get<int>()
             } : XY{0,0};
             ret->switchFrame(ixmin(documentJson["currFrameNo"].get<int>(), ret->frames.size() - 1));

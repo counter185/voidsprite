@@ -37,8 +37,8 @@ void ToolSetXSymmetry::renderOnCanvas(XY canvasDrawPoint, int scale)
     SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
     if (mouseHeld) {
         std::string tooltipString = frmt("{}{}", symXPos, symXMiddle ? ".5" : "");
-        if (lastEditor != NULL && lastEditor->tileDimensions.x != 0) {
-            tooltipString += frmt("\n(tile: {}{} / {})", symXPos % lastEditor->tileDimensions.x, symXMiddle ? ".5" : "", lastEditor->tileDimensions.x);
+        if (lastEditor != NULL && lastEditor->ssne.tileDimensions.x != 0) {
+            tooltipString += frmt("\n(tile: {}{} / {})", symXPos % lastEditor->ssne.tileDimensions.x, symXMiddle ? ".5" : "", lastEditor->ssne.tileDimensions.x);
         }
         g_ttp->addTooltip({
             g_mouseX, g_mouseY + 20,

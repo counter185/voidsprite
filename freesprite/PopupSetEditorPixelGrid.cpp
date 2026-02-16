@@ -22,13 +22,13 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
     tboxX = new UITextField();
     tboxX->position = XY{ 20, 80 };
-    tboxX->setText(std::to_string(caller->tileDimensions.x));
+    tboxX->setText(std::to_string(caller->ssne.tileDimensions.x));
     tboxX->wxWidth = 120;
     wxsManager.addDrawable(tboxX);
 
     tboxY = new UITextField();
     tboxY->position = XY{ 160, 80 };
-    tboxY->setText(std::to_string(caller->tileDimensions.y));
+    tboxY->setText(std::to_string(caller->ssne.tileDimensions.y));
     tboxY->wxWidth = 120;
     wxsManager.addDrawable(tboxY);
 
@@ -43,7 +43,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
     tboxPadRX = new UITextField();
     tboxPadRX->position = XY{ 175, 125 };
-    tboxPadRX->setText(std::to_string(caller->tileGridPaddingBottomRight.x));
+    tboxPadRX->setText(std::to_string(caller->ssne.tileGridPaddingBottomRight.x));
     tboxPadRX->wxWidth = 60;
     wxsManager.addDrawable(tboxPadRX);
 
@@ -53,7 +53,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
 
     tboxPadBY = new UITextField();
     tboxPadBY->position = XY{ 320, 125 };
-    tboxPadBY->setText(std::to_string(caller->tileGridPaddingBottomRight.y));
+    tboxPadBY->setText(std::to_string(caller->ssne.tileGridPaddingBottomRight.y));
     tboxPadBY->wxWidth = 60;
     wxsManager.addDrawable(tboxPadBY);
 
@@ -64,7 +64,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     opacitySlider = new UISlider();
     opacitySlider->position = XY{100, 180};
     opacitySlider->wxHeight = 40;
-    opacitySlider->sliderPos = caller->tileGridAlpha / 255.0f;
+    opacitySlider->sliderPos = caller->ssne.tileGridAlpha / 255.0f;
     wxsManager.addDrawable(opacitySlider);
 
     UIDropdown* dropdown = new UIDropdown(names);

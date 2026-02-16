@@ -9,8 +9,8 @@ Layer* CustomTemplate::generate()
     } else {
         Layer* l = ssn->flattenImage();
 
-        tilesize = ssn->tileDimensions;
-        tilepadding = ssn->tileGridPaddingBottomRight;
+        tilesize = ssn->ssne.tileDimensions;
+        tilepadding = ssn->ssne.tileGridPaddingBottomRight;
         comments = ssn->getCommentStack();
 
         delete ssn;

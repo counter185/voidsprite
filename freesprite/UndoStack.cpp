@@ -40,7 +40,7 @@ void UndoLayersResized::undo(MainEditor* editor)
         storedLayerData[layer] = oldData;
     }
     editor->canvas.dimensions = oldDimensions;
-    editor->tileDimensions = oldTileSize;
+    editor->ssne.tileDimensions = oldTileSize;
 }
 
 void UndoLayersResized::redo(MainEditor* editor)
@@ -54,7 +54,7 @@ void UndoLayersResized::redo(MainEditor* editor)
         storedLayerData[layer] = oldData;
     }
     editor->canvas.dimensions = newDimensions;
-    editor->tileDimensions = newTileSize;
+    editor->ssne.tileDimensions = newTileSize;
 }
 
 

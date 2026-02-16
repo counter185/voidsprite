@@ -152,6 +152,20 @@ struct CompactEditorSection {
     ReldTex* icon = NULL;
 };
 
+//this class should be easily copiable with =
+class SessionEditorPrefs {
+public:
+    XY tileDimensions = XY{0, 0};
+    u8 tileGridAlpha = 0x40;
+    XY tileGridPaddingBottomRight = XY{0, 0};
+    bool alternateBackground = false;
+    
+    MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
+
+    std::vector<Guideline> guidelines;
+    GuidelineDisplayMode guidelineDisplayMode = GUIDELINE_SHOW_COLORED;
+};
+
 class MainEditor : public BaseScreen, public EventCallbackListener {
 protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
@@ -166,7 +180,7 @@ public:
 
     OperationQueue mainThreadOps;
 
-    MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
+    SessionEditorPrefs ssne{};
 
     int activeFrame = 0;
     std::recursive_mutex framesMutex;
@@ -189,9 +203,6 @@ public:
     std::vector<UndoStackElementV2*> undoStack, redoStack;
     std::vector<UndoStackCaptureGroup*> undoCaptureGroups;
 
-    XY tileDimensions = XY{0, 0};
-    u8 tileGridAlpha = 0x40;
-    XY tileGridPaddingBottomRight = XY{0, 0};
     SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
     XY getPaddedTileDimensions();
 
@@ -248,13 +259,8 @@ public:
     EditorLayerPicker* layerPicker;
     EditorFramePicker* framePicker;
 
-    SDL_Color backgroundColor = SDL_Color{0, 0, 0, 255};
-
     XY symmetryPositions = {0, 0};
     XY guidelinePosition = {0, 0};
-
-    GuidelineDisplayMode guidelineDisplayMode = GUIDELINE_SHOW_COLORED;
-    std::vector<Guideline> guidelines;
 
     bool symmetryEnabled[2] = {false, false};
 
@@ -330,6 +336,9 @@ public:
     void eventColorSet(int evt_id, uint32_t color) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerId) override;
 
+    bool usingAltBG();
+    void setAltBG(bool useAltBG);
+    SDL_Color getAccentColor();
     void DrawBackground();
     void DrawForeground();
     void renderComments();
@@ -382,8 +391,6 @@ public:
     void setActiveBrush(BaseBrush* b);
     virtual void tickAutosave();
     PlatformNativePathString createRecoveryAutosave(std::string insertIntoFilename = "");
-    bool usingAltBG();
-    void setAltBG(bool useAltBG);
     bool tryAddReferenceFromClipboard();
     bool tryAddReference(PlatformNativePathString path);
     void openPreviewPanel();

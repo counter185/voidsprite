@@ -42,7 +42,7 @@ void PanelTilemapPreview::render(XY position)
 
     //current tile panel
     //SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
-    SDL_Rect panelRect = { 0,40, ixmax(400, 30 + caller->caller->tileDimensions.x * caller->canvas.scale * 2), ixmax(200, 110 + caller->caller->tileDimensions.y * caller->canvas.scale * 2) };
+    SDL_Rect panelRect = { 0,40, ixmax(400, 30 + caller->caller->ssne.tileDimensions.x * caller->canvas.scale * 2), ixmax(200, 110 + caller->caller->ssne.tileDimensions.y * caller->canvas.scale * 2) };
     wxHeight = panelRect.h;
     wxWidth = panelRect.w;
     //SDL_RenderFillRect(g_rd, &panelRect);

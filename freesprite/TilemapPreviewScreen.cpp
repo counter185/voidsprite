@@ -169,16 +169,16 @@ void TilemapPreviewScreen::render()
         }
 
         SDL_Rect pickedTileRect = {
-            tileSelectRect.x + pickedTile.x * caller->tileDimensions.x * tileSelectScale,
-            tileSelectRect.y + pickedTile.y * caller->tileDimensions.y * tileSelectScale,
-            caller->tileDimensions.x * tileSelectScale,
-            caller->tileDimensions.y * tileSelectScale
+            tileSelectRect.x + pickedTile.x * caller->ssne.tileDimensions.x * tileSelectScale,
+            tileSelectRect.y + pickedTile.y * caller->ssne.tileDimensions.y * tileSelectScale,
+            caller->ssne.tileDimensions.x * tileSelectScale,
+            caller->ssne.tileDimensions.y * tileSelectScale
         };
         SDL_Rect hoveredTileRect = {
-            tileSelectRect.x + tileSelectHoveredTile.x * caller->tileDimensions.x * tileSelectScale,
-            tileSelectRect.y + tileSelectHoveredTile.y * caller->tileDimensions.y * tileSelectScale,
-            caller->tileDimensions.x * tileSelectScale,
-            caller->tileDimensions.y * tileSelectScale
+            tileSelectRect.x + tileSelectHoveredTile.x * caller->ssne.tileDimensions.x * tileSelectScale,
+            tileSelectRect.y + tileSelectHoveredTile.y * caller->ssne.tileDimensions.y * tileSelectScale,
+            caller->ssne.tileDimensions.x * tileSelectScale,
+            caller->ssne.tileDimensions.y * tileSelectScale
         };
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xe0);
         SDL_RenderDrawRect(g_rd, &pickedTileRect);
@@ -208,7 +208,7 @@ void TilemapPreviewScreen::tick()
     };
 
     if (mouseLeftingTilemap) {
-        if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
+        if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0) {
             if (hoveredTilePosition.x >= 0 && hoveredTilePosition.y >= 0 && hoveredTilePosition.x < tilemapDimensions.x && hoveredTilePosition.y < tilemapDimensions.y) {
                 activeTilemap[hoveredTilePosition.y][hoveredTilePosition.x] = pickedTile;
             }
@@ -273,8 +273,8 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
 
                 XY pos = xySubtract(XY{ (int)evt.button.x, (int)evt.button.y }, tileSelectOffset);
 
-                pos.x /= caller->tileDimensions.x * tileSelectScale;
-                pos.y /= caller->tileDimensions.y * tileSelectScale;
+                pos.x /= caller->ssne.tileDimensions.x * tileSelectScale;
+                pos.y /= caller->ssne.tileDimensions.y * tileSelectScale;
                 tileSelectHoveredTile = pos;
             }
             else {
@@ -282,7 +282,7 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                     canvas.panCanvas( XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
                 }
 
-                if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0) {
+                if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0) {
                     XY callerTileSize = caller->getPaddedTileDimensions();
                     hoveredTilePosition = canvas.getTilePosAt(XY{ (int)(evt.motion.x), (int)(evt.motion.y) }, callerTileSize);
                 }
@@ -753,7 +753,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             layers.push_back(ll);
         }
         MainEditor* newSession = new MainEditor(layers);
-        newSession->tileDimensions = tileSize;
+        newSession->ssne.tileDimensions = tileSize;
 
         if (exporter->exportsWholeSession()) {
             success = exporter->exportData(path, newSession);
@@ -776,7 +776,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             PlatformNativePathString filename = path + convertStringOnWin32(frmt("-{}{}", x++, exporter->extension()));
             if (exporter->exportsWholeSession()) {
                 MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
-                ssn->tileDimensions = tileSize;
+                ssn->ssne.tileDimensions = tileSize;
                 ss = exporter->exportData(filename, ssn);
                 delete ssn;
             }

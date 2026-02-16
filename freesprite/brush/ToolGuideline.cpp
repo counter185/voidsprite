@@ -16,27 +16,7 @@ void ToolGuideline::clickRelease(MainEditor* editor, XY pos)
         int symXPos = lastMouseMotionPos.x / 2;
         bool symXMiddle = lastMouseMotionPos.x % 2;
 
-        if (editor->eraserMode)
-        {
-            for (int x = 0; x < editor->guidelines.size(); x++) {
-                if (editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.x) {
-                    editor->guidelines.erase(editor->guidelines.begin() + x);
-                    break;
-                }
-            }
-        }
-        else {
-            bool exists = false;
-            for (int x = 0; x < editor->guidelines.size(); x++) {
-                if (editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.x) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) {
-                editor->guidelines.push_back(Guideline{true, lastMouseMotionPos.x});
-            }
-        }
+        placeAt(editor, true);
     }
     mouseLeftHeld = false;
 }
@@ -52,27 +32,7 @@ void ToolGuideline::rightClickRelease(MainEditor* editor, XY pos)
         int symYPos = lastMouseMotionPos.y / 2;
         bool symYMiddle = lastMouseMotionPos.y % 2;
 
-        if (editor->eraserMode)
-        {
-            for (int x = 0; x < editor->guidelines.size(); x++) {
-                if (!editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.y) {
-                    editor->guidelines.erase(editor->guidelines.begin() + x);
-                    break;
-                }
-            }
-        }
-        else {
-            bool exists = false;
-            for (int x = 0; x < editor->guidelines.size(); x++) {
-                if (!editor->guidelines[x].vertical && editor->guidelines[x].position == lastMouseMotionPos.y) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) {
-                editor->guidelines.push_back(Guideline{ false, lastMouseMotionPos.y });
-            }
-        }
+        placeAt(editor, false);
     }
     mouseRightHeld = false;
 }
@@ -97,5 +57,31 @@ void ToolGuideline::renderOnCanvas(XY canvasDrawPoint, int scale)
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x20);
         SDL_RenderDrawLine(g_rd, 0, lineDrawYPoint, g_windowW, lineDrawYPoint);
         g_ttp->addTooltip(Tooltip{ {g_mouseX + 20, g_mouseY + 40 }, frmt("{}{}", symYPos, symYMiddle ? ".5" : "") });
+    }
+}
+
+void ToolGuideline::placeAt(MainEditor* editor, bool vertical) {
+    int guidelinePos = vertical ? lastMouseMotionPos.x : lastMouseMotionPos.y;
+    std::vector<Guideline>& guidelines = editor->ssne.guidelines;
+    if (editor->eraserMode)
+    {
+        for (int x = 0; x < editor->ssne.guidelines.size(); x++) {
+            if (guidelines[x].vertical == vertical && guidelines[x].position == guidelinePos) {
+                guidelines.erase(guidelines.begin() + x);
+                break;
+            }
+        }
+    }
+    else {
+        bool exists = false;
+        for (int x = 0; x < guidelines.size(); x++) {
+            if (guidelines[x].vertical == vertical && guidelines[x].position == guidelinePos) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            guidelines.push_back(Guideline{ vertical, guidelinePos });
+        }
     }
 }

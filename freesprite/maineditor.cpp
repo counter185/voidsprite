@@ -70,7 +70,7 @@ using namespace nlohmann;
 
 SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
 {
-    XY tileDim = xyEqual(tileDimensions, { 0,0 }) ? canvas.dimensions : tileDimensions;
+    XY tileDim = xyEqual(ssne.tileDimensions, { 0,0 }) ? canvas.dimensions : ssne.tileDimensions;
 
     XY origin = {
         tilePos.x * tileDim.x,
@@ -79,20 +79,20 @@ SDL_Rect MainEditor::getPaddedTilePosAndDimensions(XY tilePos)
     return SDL_Rect{
         origin.x,
         origin.y,
-        tileDim.x - ixmax(0,tileGridPaddingBottomRight.x),
-        tileDim.y - ixmax(0,tileGridPaddingBottomRight.y)
+        tileDim.x - ixmax(0,ssne.tileGridPaddingBottomRight.x),
+        tileDim.y - ixmax(0,ssne.tileGridPaddingBottomRight.y)
     };
 }
 
 XY MainEditor::getPaddedTileDimensions()
 {
     XY ret = XY{
-        tileDimensions.x - ixmax(0,tileGridPaddingBottomRight.x),
-        tileDimensions.y - ixmax(0,tileGridPaddingBottomRight.y)
+        ssne.tileDimensions.x - ixmax(0,ssne.tileGridPaddingBottomRight.x),
+        ssne.tileDimensions.y - ixmax(0,ssne.tileGridPaddingBottomRight.y)
     };
     return { 
-        ret.x <= 0 ? tileDimensions.x : ret.x,
-        ret.y <= 0 ? tileDimensions.y : ret.y
+        ret.x <= 0 ? ssne.tileDimensions.x : ret.x,
+        ret.y <= 0 ? ssne.tileDimensions.y : ret.y
     };
 }
 
@@ -218,8 +218,6 @@ void MainEditor::render() {
 
 void MainEditor::RenderCanvas()
 {
-    SDL_SetRenderDrawColor(g_rd, backgroundColor.r / 6 * 5, backgroundColor.g / 6 * 5, backgroundColor.b / 6 * 5, 255);
-    SDL_RenderClear(g_rd);
     DrawBackground();
 
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
@@ -302,8 +300,9 @@ void MainEditor::RenderCanvas()
     //draw a separate 1x1 grid if the scale is >= 1600%
     if (canvas.scale >= 10) {
 
+        SDL_Color gridColor = getAccentColor();
         uint8_t tileGridAlpha = canvas.scale < 16 ? 0x10 * ((canvas.scale - 9) / 7.0) : 0x10;
-        SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha);
+        SDL_SetRenderDrawColor(g_rd, gridColor.r, gridColor.g, gridColor.b, tileGridAlpha);
         canvas.drawTileGrid({ 1,1 });
 
     }
@@ -323,7 +322,7 @@ void MainEditor::RenderCanvas()
         XY mouseInCanvasPoint = canvas.screenPointToCanvasPoint({ g_mouseX, g_mouseY });
         if (!qModifier || (qModifier && canvas.pointInCanvasBounds(mouseInCanvasPoint))) {
 
-            XY tileDim = tileDimensions.x != 0 && tileDimensions.y != 0 ? tileDimensions : canvas.dimensions;
+            XY tileDim = ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0 ? ssne.tileDimensions : canvas.dimensions;
 
             XY tilePosition = !qModifier ? lockedTilePreview :
                 XY{
@@ -462,27 +461,25 @@ void MainEditor::DrawBackground()
 {
     static Fill fillPrimary = visualConfigFill("maineditor/bg");
     static Fill fillAlt = visualConfigFill("maineditor/bg_alt");
-    //uint32_t colorBG1 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    //uint32_t colorBG2 = 0xFF000000 | (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
-    //renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
     (usingAltBG() ? fillAlt : fillPrimary).fill({ 0,0,g_windowW,g_windowH });
+    SDL_Color accentColor = getAccentColor();
 
     uint64_t bgtimer = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
     if (g_config.animatedBackground == 1 || g_config.animatedBackground == 3) {
         int lineX = 400;
         for (int x = 40 + (bgtimer % 5000 / 5000.0 * 60); x < g_windowW + lineX; x += 60) {
-            SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40 / (g_windowFocused ? 1 : 3));
+            SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x40 / (g_windowFocused ? 1 : 3));
             SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
             if (g_windowFocused) {
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40 / 2);
+                SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x40 / 2);
                 SDL_RenderDrawLine(g_rd, x - 1, 0, x - lineX - 1, g_windowH);
-                SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40 / 3);
+                SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x40 / 3);
                 SDL_RenderDrawLine(g_rd, x - 2, 0, x - lineX - 2, g_windowH);
             }
 
-            SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d);
+            SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x0d);
             SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX / 4 * 6, g_windowH);
-            SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d/2);
+            SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x0d/2);
             SDL_RenderDrawLine(g_rd, g_windowW - x - 1, 0, g_windowW - x + lineX / 4 * 6 - 1, g_windowH);
         }
     }
@@ -494,25 +491,23 @@ void MainEditor::DrawBackground()
             XY l2 = { x - lineX, g_windowH };
             XY ll1 = xyAdd(l1, { 4, 0 });
             XY ll2 = xyAdd(l2, { 4, 0 });
-            uint32_t c = PackRGBAtoARGB(0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x40);
+            uint32_t c = PackRGBAtoARGB(accentColor.r, accentColor.g, accentColor.b, 0x40);
             renderGradient(l1, ll1, l2, ll2, c, modAlpha(c, 0), c, modAlpha(c, 0));
 
             l1 = { g_windowW - x, 0 };
             l2 = { g_windowW - x + lineX / 4 * 6, g_windowH };
             ll1 = xyAdd(l1, { 16, 0 });
             ll2 = xyAdd(l2, { 16, 0 });
-            c = PackRGBAtoARGB(0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x06);
+            c = PackRGBAtoARGB(accentColor.r, accentColor.g, accentColor.b, 0x06);
             renderGradient(l1, ll1, l2, ll2, c, modAlpha(c, 0), c, modAlpha(c, 0));
             ll1 = xySubtract(l1, { 16,0 });
             ll2 = xySubtract(l2, { 16,0 });
             renderGradient(l1, ll1, l2, ll2, c, modAlpha(c, 0), c, modAlpha(c, 0));
-            //SDL_SetRenderDrawColor(g_rd, 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0x0d);
-            //SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX / 4 * 6, g_windowH);
         }
     }
 
     //draw border around canvas
-    SDL_Color borderColor = {0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, 0xff};
+    SDL_Color borderColor = {accentColor.r, accentColor.g, accentColor.b, 0xff};
     canvas.drawCanvasOutline(6, borderColor);
 }
 
@@ -620,28 +615,30 @@ void MainEditor::drawTileGrid()
     canvasRenderRect.x = canvasCenterPoint.x;
     canvasRenderRect.y = canvasCenterPoint.y;*/
 
+    SDL_Color accentColor = getAccentColor();
+
     //draw tile lines
-    SDL_Color c = { 0xff - backgroundColor.r, 0xff - backgroundColor.g, 0xff - backgroundColor.b, tileGridAlpha };
+    SDL_Color c = { accentColor.r, accentColor.g, accentColor.b, ssne.tileGridAlpha };
     SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, c.a);
-    canvas.drawTileGrid(tileDimensions);
+    canvas.drawTileGrid(ssne.tileDimensions);
 
     SDL_SetRenderDrawColor(g_rd, c.r, c.g, c.b, c.a / 3 * 2);
     //draw tile grid padding
-    if (tileDimensions.x != 0) {
+    if (ssne.tileDimensions.x != 0) {
         int dx = canvasRenderRect.x;
         while (dx < g_windowW && dx < canvasRenderRect.x + canvasRenderRect.w) {
-            dx += tileDimensions.x * canvas.scale;
-            if (tileGridPaddingBottomRight.x > 0) {
-                SDL_RenderDrawLine(g_rd, dx - tileGridPaddingBottomRight.x * canvas.scale , canvasRenderRect.y, dx - tileGridPaddingBottomRight.x * canvas.scale, canvasRenderRect.y + canvasRenderRect.h);
+            dx += ssne.tileDimensions.x * canvas.scale;
+            if (ssne.tileGridPaddingBottomRight.x > 0) {
+                SDL_RenderDrawLine(g_rd, dx - ssne.tileGridPaddingBottomRight.x * canvas.scale , canvasRenderRect.y, dx - ssne.tileGridPaddingBottomRight.x * canvas.scale, canvasRenderRect.y + canvasRenderRect.h);
             }
         }
     }
-    if (tileDimensions.y != 0) {
+    if (ssne.tileDimensions.y != 0) {
         int dy = canvasRenderRect.y;
         while (dy < g_windowH && dy < canvasRenderRect.y + canvasRenderRect.h) {
-            dy += tileDimensions.y * canvas.scale;
-            if (tileGridPaddingBottomRight.y > 0) {
-                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - tileGridPaddingBottomRight.y * canvas.scale, canvasRenderRect.x + canvasRenderRect.w, dy - tileGridPaddingBottomRight.y * canvas.scale);
+            dy += ssne.tileDimensions.y * canvas.scale;
+            if (ssne.tileGridPaddingBottomRight.y > 0) {
+                SDL_RenderDrawLine(g_rd, canvasRenderRect.x, dy - ssne.tileGridPaddingBottomRight.y * canvas.scale, canvasRenderRect.x + canvasRenderRect.w, dy - ssne.tileGridPaddingBottomRight.y * canvas.scale);
             }
         }
     }
@@ -654,11 +651,11 @@ void MainEditor::renderGuidelines() {
     * [3] "breakpoint" system : shift-lmb to create a "point" on a guideline if a grid is present. the guideline may alter direction after that point
     * [4] option to stop rendering / render specific colour / render all like comments?
     */
-   if (guidelineDisplayMode != GUIDELINE_HIDE_ALL) {
-        for (Guideline& guide : guidelines) {
+   if (ssne.guidelineDisplayMode != GUIDELINE_HIDE_ALL) {
+        for (Guideline& guide : ssne.guidelines) {
 
-            SDL_Color guidelineColor = usingAltBG() ? SDL_Color{0,0,0,255} : SDL_Color{255,255,255,255};
-            if (guidelineDisplayMode == GUIDELINE_SHOW_COLORED) {
+            SDL_Color guidelineColor = getAccentColor();
+            if (ssne.guidelineDisplayMode == GUIDELINE_SHOW_COLORED) {
                 u8  a = (pickedColor >> 24) & 0xff,
                     r = (pickedColor >> 16) & 0xff,
                     g = (pickedColor >> 8) & 0xff,
@@ -741,7 +738,7 @@ void MainEditor::drawRowColNumbers()
 {
     if (canvas.scale >= 20) {
         const u8 opacity = 0x50;
-        SDL_Color textColor = backgroundColor.r == 255 ? SDL_Color{ 0,0,0,opacity } : SDL_Color{ 255,255,255,opacity };
+        SDL_Color textColor = usingAltBG() ? SDL_Color{ 0,0,0,opacity } : SDL_Color{ 255,255,255,opacity };
         SDL_Rect canvasDrawRect = canvas.getCanvasOnScreenRect();
         bool drawHorizontal = canvasDrawRect.y + canvasDrawRect.h < g_windowH;
         int indexOffset = g_config.rowColIndexesStartAt1 ? 1 : 0;
@@ -827,12 +824,12 @@ void MainEditor::DrawForeground()
     g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
 
     XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
-    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+    if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
         std::string s = frmt("(t{}:{} in{}:{})", 
-            (int)floor(mousePixelTargetPoint.x / (float)tileDimensions.x), 
-            (int)floor(mousePixelTargetPoint.y / (float)tileDimensions.y),
-            mousePixelTargetPoint.x%tileDimensions.x,
-            mousePixelTargetPoint.y%tileDimensions.y);
+            (int)floor(mousePixelTargetPoint.x / (float)ssne.tileDimensions.x), 
+            (int)floor(mousePixelTargetPoint.y / (float)ssne.tileDimensions.y),
+            mousePixelTargetPoint.x%ssne.tileDimensions.x,
+            mousePixelTargetPoint.y%ssne.tileDimensions.y);
         endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 });
     }
 
@@ -845,7 +842,7 @@ void MainEditor::DrawForeground()
         g_fnt->RenderString(frmt("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
-    SDL_Color textColor = SDL_Color{ (u8)(255 - backgroundColor.r), (u8)(255 - backgroundColor.g), (u8)(255 - backgroundColor.b), 0x60};
+    SDL_Color textColor = getAccentColor();
 
     g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
 
@@ -862,7 +859,7 @@ void MainEditor::DrawForeground()
 
 void MainEditor::renderComments()
 {
-    if (commentViewMode == COMMENTMODE_HIDE_ALL) {
+    if (ssne.commentViewMode == COMMENTMODE_HIDE_ALL) {
         return;
     }
     static Fill commentFill = visualConfigFill("maineditor/comments/fill");
@@ -876,7 +873,7 @@ void MainEditor::renderComments()
         SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
         SDL_SetTextureAlphaMod(g_iconComment->get(g_rd), 0x80);
         SDL_RenderCopy(g_rd, g_iconComment->get(g_rd), NULL, &iconRect);
-        if (commentViewMode == COMMENTMODE_SHOW_ALL || (commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32)) {
+        if (ssne.commentViewMode == COMMENTMODE_SHOW_ALL || (ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32)) {
             if (!c.hovered) {
                 c.animTimer.start();
                 c.hovered = true;
@@ -896,7 +893,7 @@ void MainEditor::renderUndoStack()
     XY center = { g_windowW / 2, g_windowH - 40 };
 
     double mouseDistance = abs(center.y - g_mouseY);
-    uint8_t lineShade = !usingAltBG() ? 0xff : 0x00;
+    SDL_Color accentColor = getAccentColor();
 
     if (mouseDistance < 30) {
         undoTimelineHoverTimer.startIfNotStarted();
@@ -910,7 +907,7 @@ void MainEditor::renderUndoStack()
     if (hoverTimer > 0) {
         static std::string undoText = TL("vsp.maineditor.undostack");
         int xw = g_fnt->StatStringDimensions(undoText, 14).x;
-        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35 + (20 * (1.0-hoverTimer)), SDL_Color{ lineShade,lineShade,lineShade,(u8)(0x50 * hoverTimer) }, 14);
+        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35 + (20 * (1.0-hoverTimer)), SDL_Color{ accentColor.r,accentColor.g,accentColor.b,(u8)(0x50 * hoverTimer) }, 14);
     }
 
     int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * 5 * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
@@ -932,13 +929,13 @@ void MainEditor::renderUndoStack()
                 }
                 distPercent = tickMouseDistance < 80 ? (1.0 - tickMouseDistance/80.0) : 0;
             }
-            SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x30 + (u8)(0x70*distPercent));
+            SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x30 + (u8)(0x70*distPercent));
             drawLine(screenPos, xySubtract(screenPos, {0,10}));
         }
     }
 
     //center line
-    SDL_SetRenderDrawColor(g_rd, lineShade, lineShade, lineShade, 0x50);
+    SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x50);
     SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
 }
 
@@ -1020,22 +1017,22 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile size", "New tile size:", XY{ this->tileDimensions.x, this->tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
+                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile size", "New tile size:", XY{ this->ssne.tileDimensions.x, this->ssne.tileDimensions.y }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILE));
                                 }
                             }
                         }
                     },
                     {SDL_SCANCODE_B, { TL("vsp.maineditor.rescanv_ntile"),
                             [this]() {
-                                if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                                if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 }
                                 else {
-                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(this->canvas.dimensions.x / (float)this->tileDimensions.x), (int)ceil(this->canvas.dimensions.y / (float)this->tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
+                                    g_addPopup(new PopupTileGeneric(this, "Resize canvas by tile count", "New tile count:", XY{ (int)ceil(this->canvas.dimensions.x / (float)this->ssne.tileDimensions.x), (int)ceil(this->canvas.dimensions.y / (float)this->ssne.tileDimensions.y) }, EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT));
                                 }
                             }
                         }
@@ -1136,19 +1133,17 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
                     {SDL_SCANCODE_B, { "Toggle background color",
                             [this]() {
-                                this->backgroundColor.r = ~this->backgroundColor.r;
-                                this->backgroundColor.g = ~this->backgroundColor.g;
-                                this->backgroundColor.b = ~this->backgroundColor.b;
+                                this->ssne.alternateBackground = !this->ssne.alternateBackground;
                             }
                         }
                     },
                     {SDL_SCANCODE_C, { "Toggle comments",
                             [this]() {
-                                (*(int*)&this->commentViewMode)++;
-                                (*(int*)&this->commentViewMode) %= 3;
+                                (*(int*)&this->ssne.commentViewMode)++;
+                                (*(int*)&this->ssne.commentViewMode) %= 3;
                                 g_addNotification(Notification(frmt("{}",
-                                    this->commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
-                                    this->commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
+                                    this->ssne.commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
+                                    this->ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
                                     "All comments shown"), "", 1500
                                 ));
                             }
@@ -1156,11 +1151,11 @@ void MainEditor::setUpWidgets()
                     },                    
                     {SDL_SCANCODE_L, { "Toggle guidelines",
                             [this]() {
-                                (*(int*)&this->guidelineDisplayMode)++;
-                                (*(int*)&this->guidelineDisplayMode) %= 3;
+                                (*(int*)&this->ssne.guidelineDisplayMode)++;
+                                (*(int*)&this->ssne.guidelineDisplayMode) %= 3;
                                 g_addNotification(Notification(frmt("{}",
-                                    this->guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
-                                    this->guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
+                                    this->ssne.guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
+                                    this->ssne.guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
                                     "Guidelines shown in UI color"), "", 1500
                                 ));
                             }
@@ -1193,7 +1188,7 @@ void MainEditor::setUpWidgets()
                 },
                 {SDL_SCANCODE_3, { "Preview 3D cube...",
                         [this]() {
-                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                            if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile grid must be set"));
                                 return;
                             }
@@ -1204,7 +1199,7 @@ void MainEditor::setUpWidgets()
                 },
                 {SDL_SCANCODE_S, { "Preview spritesheet...",
                         [this]() {
-                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                            if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 return;
                             }
@@ -1215,7 +1210,7 @@ void MainEditor::setUpWidgets()
                 },
                 {SDL_SCANCODE_T, { "Preview tileset...",
                         [this]() {
-                            if (this->tileDimensions.x == 0 || this->tileDimensions.y == 0) {
+                            if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Set the pixel grid first."));
                                 return;
                             }
@@ -1905,13 +1900,13 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
         exporterID--;
 
         FileExporter* exporter = g_fileExporters[exporterID];
-        XY tileCounts = { canvas.dimensions.x / tileDimensions.x, canvas.dimensions.y / tileDimensions.y };
+        XY tileCounts = { canvas.dimensions.x / ssne.tileDimensions.x, canvas.dimensions.y / ssne.tileDimensions.y };
         PlatformNativePathString pathOfFile = name.substr(0, name.find_last_of(convertStringOnWin32("/\\")));
 
         Layer* flatImage = flattenImage();
         for (int y = 0; y < tileCounts.y; y++) {
             for (int x = 0; x < tileCounts.x; x++) {
-                SDL_Rect clipRect = { x * tileDimensions.x, y * tileDimensions.y, tileDimensions.x, tileDimensions.y };
+                SDL_Rect clipRect = { x * ssne.tileDimensions.x, y * ssne.tileDimensions.y, ssne.tileDimensions.x, ssne.tileDimensions.y };
                 Layer* clip = flatImage->trim(clipRect);
                 if (clip != NULL) {
                     PlatformNativePathString tileName = name + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
@@ -2167,10 +2162,10 @@ void MainEditor::trySaveAsImage()
 std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
 {
     std::map<std::string, std::string> ret;
-    ret["TileX"] = std::to_string(tileDimensions.x);
-    ret["TileY"] = std::to_string(tileDimensions.y);
-    ret["TilePadRX"] = std::to_string(tileGridPaddingBottomRight.x);
-    ret["TilePadBY"] = std::to_string(tileGridPaddingBottomRight.y);
+    ret["TileX"] = std::to_string(ssne.tileDimensions.x);
+    ret["TileY"] = std::to_string(ssne.tileDimensions.y);
+    ret["TilePadRX"] = std::to_string(ssne.tileGridPaddingBottomRight.x);
+    ret["TilePadBY"] = std::to_string(ssne.tileGridPaddingBottomRight.y);
     ret["SymX"] = std::to_string(symmetryPositions.x);
     ret["SymY"] = std::to_string(symmetryPositions.y);
     ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
@@ -2183,10 +2178,10 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
 void MainEditor::loadSingleLayerExtdata(Layer* l) {
     try {
         auto kvmap = l->importExportExtdata;
-        if (kvmap.contains("TileX")) { tileDimensions.x = std::stoi(kvmap["TileX"]); }
-        if (kvmap.contains("TileY")) { tileDimensions.y = std::stoi(kvmap["TileY"]); }
-        if (kvmap.contains("TilePadRX")) { tileGridPaddingBottomRight.x = std::stoi(kvmap["TilePadRX"]); }
-        if (kvmap.contains("TilePadBY")) { tileGridPaddingBottomRight.y = std::stoi(kvmap["TilePadBY"]); }
+        if (kvmap.contains("TileX")) { ssne.tileDimensions.x = std::stoi(kvmap["TileX"]); }
+        if (kvmap.contains("TileY")) { ssne.tileDimensions.y = std::stoi(kvmap["TileY"]); }
+        if (kvmap.contains("TilePadRX")) { ssne.tileGridPaddingBottomRight.x = std::stoi(kvmap["TilePadRX"]); }
+        if (kvmap.contains("TilePadBY")) { ssne.tileGridPaddingBottomRight.y = std::stoi(kvmap["TilePadBY"]); }
         if (kvmap.contains("SymX")) { symmetryPositions.x = std::stoi(kvmap["SymX"]); }
         if (kvmap.contains("SymY")) { symmetryPositions.y = std::stoi(kvmap["SymY"]); }
         if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
@@ -2620,11 +2615,16 @@ PlatformNativePathString MainEditor::createRecoveryAutosave(std::string insertIn
 //todo: clean all of that up
 bool MainEditor::usingAltBG()
 {
-    return sdlcolorToUint32(backgroundColor) != 0xFF000000;
+    return ssne.alternateBackground;
 }
 void MainEditor::setAltBG(bool useAltBG)
 {
-    backgroundColor = useAltBG ? SDL_Color{ 255, 255, 255, 255 } : SDL_Color{0, 0, 0, 255};
+    ssne.alternateBackground = useAltBG;
+}
+
+SDL_Color MainEditor::getAccentColor() 
+{
+    return usingAltBG() ? SDL_Color{ 0,0,0,255 } : SDL_Color{ 255,255,255,255 };
 }
 
 bool MainEditor::tryAddReference(PlatformNativePathString path)
@@ -2668,14 +2668,14 @@ void MainEditor::tryToggleTilePreviewLockAtMousePos()
     if (lockedTilePreview.x != -1 && lockedTilePreview.y != -1) {
         lockedTilePreview = {-1, -1};
     } else {
-        if (tileDimensions.x != 0 && tileDimensions.y != 0) {
-            XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, tileDimensions);
+        if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
+            XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, ssne.tileDimensions);
             if (g_config.isolateRectOnLockTile) {
                 isolateEnabled = true;
                 isolatedFragment.clear();
-                isolatedFragment.addRect({tileToLock.x * tileDimensions.x,
-                                          tileToLock.y * tileDimensions.y, tileDimensions.x,
-                                          tileDimensions.y});
+                isolatedFragment.addRect({tileToLock.x * ssne.tileDimensions.x,
+                                          tileToLock.y * ssne.tileDimensions.y, ssne.tileDimensions.x,
+                                          ssne.tileDimensions.y});
                 shouldUpdateRenderedIsolatedFragmentPoints = true;
             }
             if (tileToLock.x >= 0 && tileToLock.y >= 0) {
@@ -3013,7 +3013,7 @@ void MainEditor::rescaleAllLayersFromCommand(XY size) {
         return;
     }
 
-    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, size, tileDimensions, tileDimensions);
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, size, ssne.tileDimensions, ssne.tileDimensions);
     std::vector<Layer*> layers = getAllLayers();
 
     //todo: detect if copyscaled or malloc fails
@@ -3045,7 +3045,7 @@ std::vector<Layer*> MainEditor::getAllLayers()
 void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 {
     if (byTile) {
-        if (xyEqual(tileDimensions, size)) {
+        if (xyEqual(ssne.tileDimensions, size)) {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile size must be different to resize."));
             return;
         }
@@ -3061,7 +3061,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
     std::map<Layer*, LayerScaleData> createdVariants;
 
     for (Layer* target : layers) {
-        LayerScaleData scaleResult = byTile ? target->resizeByTileSizes(tileDimensions, size) : target->resize(size);
+        LayerScaleData scaleResult = byTile ? target->resizeByTileSizes(ssne.tileDimensions, size) : target->resize(size);
         if (scaleResult.success) {
             createdVariants[target] = scaleResult;
         }
@@ -3079,7 +3079,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 
     XY newSize = createdVariants[layers[0]].newSize;
 
-    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, byTile ? size : tileDimensions);
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, byTile ? size : ssne.tileDimensions);
     for (Layer*& l : layers) {
         undoData->storedLayerData[l] = l->layerData;
     }
@@ -3090,7 +3090,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 
     canvas.dimensions = newSize;
     if (byTile) {
-        tileDimensions = size;
+        ssne.tileDimensions = size;
     }
     
     addToUndoStack(undoData);
@@ -3101,12 +3101,12 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 {
     std::vector<Layer*> layers = getAllLayers();
 
-    XY newSize = { size.x * tileDimensions.x, size.y * tileDimensions.y };
-    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, tileDimensions);
+    XY newSize = { size.x * ssne.tileDimensions.x, size.y * ssne.tileDimensions.y };
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, ssne.tileDimensions);
 
     int nLayers = layers.size();
     for (Layer* l : layers) {
-        undoData->storedLayerData[l] = l->resizeByTileCount(tileDimensions, size);
+        undoData->storedLayerData[l] = l->resizeByTileCount(ssne.tileDimensions, size);
         l->markLayerDirty();
     }
     canvas.dimensions = newSize;
@@ -3116,24 +3116,24 @@ void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
 
 void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
 {
-    if (tileDimensions.x == 0 || tileDimensions.y == 0) {
+    if (ssne.tileDimensions.x == 0 || ssne.tileDimensions.y == 0) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile dimensions must be set."));
         return;
     }
     XY oldTileCount = { 
-        (canvas.dimensions.x + (tileDimensions.x - 1)) / tileDimensions.x, 
-        (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
+        (canvas.dimensions.x + (ssne.tileDimensions.x - 1)) / ssne.tileDimensions.x, 
+        (canvas.dimensions.y + (ssne.tileDimensions.y - 1)) / ssne.tileDimensions.y
     };
     resizeAllLayersFromCommand(size, false);
     XY newTileCount = {
-        (canvas.dimensions.x + (tileDimensions.x - 1)) / tileDimensions.x,
-        (canvas.dimensions.y + (tileDimensions.y - 1)) / tileDimensions.y
+        (canvas.dimensions.x + (ssne.tileDimensions.x - 1)) / ssne.tileDimensions.x,
+        (canvas.dimensions.y + (ssne.tileDimensions.y - 1)) / ssne.tileDimensions.y
     };
     if (!xyEqual(oldTileCount, newTileCount)) {
         std::vector<Layer*> targetLayers = getAllLayers();
 
         for (Layer* l : targetLayers) {
-            SDL_Rect sourceRect = { 0,0, tileDimensions.x, tileDimensions.y };
+            SDL_Rect sourceRect = { 0,0, ssne.tileDimensions.x, ssne.tileDimensions.y };
             Layer* temp = l->isPalettized ? LayerPalettized::tryAllocLayer(l->w, l->h)
                           : Layer::tryAllocLayer(l->w, l->h);
             if (temp != NULL) {
@@ -3146,8 +3146,8 @@ void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
                         tileInd % newTileCount.x,
                         tileInd / newTileCount.x
                     };
-                    SDL_Rect sourceRect = canvas.getTileRectAt(srcTilePos, tileDimensions);
-                    SDL_Rect destRect = canvas.getTileRectAt(dstTilePos, tileDimensions);
+                    SDL_Rect sourceRect = canvas.getTileRectAt(srcTilePos, ssne.tileDimensions);
+                    SDL_Rect destRect = canvas.getTileRectAt(dstTilePos, ssne.tileDimensions);
 
                     temp->blit(l, { destRect.x, destRect.y }, sourceRect, true);
                 }
@@ -3177,8 +3177,8 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
 
     XY newSize = downscale ? XY{ canvas.dimensions.x / scale.x, canvas.dimensions.y / scale.y }
                            : XY{ canvas.dimensions.x * scale.x, canvas.dimensions.y * scale.y };
-    XY newTileSize = downscale ? XY{ tileDimensions.x / scale.x, tileDimensions.y / scale.y }
-                               : XY{ tileDimensions.x * scale.x, tileDimensions.y * scale.y };
+    XY newTileSize = downscale ? XY{ ssne.tileDimensions.x / scale.x, ssne.tileDimensions.y / scale.y }
+                               : XY{ ssne.tileDimensions.x * scale.x, ssne.tileDimensions.y * scale.y };
 
     std::map<Layer*, LayerScaleData> createdVariants;
 
@@ -3199,7 +3199,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
         target->markLayerDirty();
     }
 
-    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, tileDimensions, newTileSize);
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, newTileSize);
     for (Layer*& l : layers) {
         undoData->storedLayerData[l] = l->layerData;
     }
@@ -3209,7 +3209,7 @@ void MainEditor::integerScaleAllLayersFromCommand(XY scale, bool downscale)
     }
 
     canvas.dimensions = { layers[0]->w, layers[0]->h };
-    tileDimensions = newTileSize;
+    ssne.tileDimensions = newTileSize;
 
     addToUndoStack(undoData);
 }
@@ -3254,7 +3254,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
             }
             MainEditorPalettized* ret = new MainEditorPalettized(outlayers);
             ret->palette = palette;
-            ret->tileDimensions = tileDimensions;
+            ret->ssne = ssne;
             return ret;
         }
         else {
@@ -3275,7 +3275,7 @@ void MainEditor::tryExportPalettizedImage()
 
 void MainEditor::exportTilesIndividually()
 {
-    if (tileDimensions.x != 0 && tileDimensions.y != 0) {
+    if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
         std::vector<std::pair<std::string, std::string>> formats;
         for (auto f : g_fileExporters) {
             formats.push_back({ f->extension(), f->name() });
@@ -3483,8 +3483,8 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             {"serverName", "---"},
             {"canvasWidth", canvas.dimensions.x},
             {"canvasHeight", canvas.dimensions.y},
-            {"tileGridWidth", tileDimensions.x},
-            {"tileGridHeight", tileDimensions.y},
+            {"tileGridWidth", ssne.tileDimensions.x},
+            {"tileGridHeight", ssne.tileDimensions.y},
             {"chatState", (u32)networkCanvasCurrentChatState->messagesState},
             {"frameTime", frameAnimMSPerFrame},
             {"frames", json::array()},

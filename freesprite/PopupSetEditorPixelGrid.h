@@ -35,9 +35,9 @@ public:
     if (evt_id == 39) {   
         XY newTileSize = predefinedTileSizes[index];
        
-        caller->tileDimensions = newTileSize;
+        caller->ssne.tileDimensions = newTileSize;
         
-        caller->tileGridAlpha = (uint8_t)(opacitySlider->getValue(0, 255));
+        caller->ssne.tileGridAlpha = (uint8_t)(opacitySlider->getValue(0, 255));
        
         closePopup();
     }
@@ -50,18 +50,18 @@ public:
             std::string tboxPadRXtx = tboxPadRX->getText();
             std::string tboxPadBYtx = tboxPadBY->getText();
             if (!tboxXtx.empty() && !tboxYtx.empty() && !tboxPadRXtx.empty() && !tboxPadBYtx.empty()) {
-                caller->tileDimensions = XY{ std::stoi(tboxX->getText()), std::stoi(tboxY->getText()) };
+                caller->ssne.tileDimensions = XY{ std::stoi(tboxX->getText()), std::stoi(tboxY->getText()) };
                 XY newTileGridPaddingBottomRight = XY{ std::stoi(tboxPadRXtx), std::stoi(tboxPadBYtx) };
-                if (newTileGridPaddingBottomRight.x >= caller->tileDimensions.x && newTileGridPaddingBottomRight.x != 0) {
+                if (newTileGridPaddingBottomRight.x >= caller->ssne.tileDimensions.x && newTileGridPaddingBottomRight.x != 0) {
                     newTileGridPaddingBottomRight.x = 0;
                     g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
                 }
-                if (newTileGridPaddingBottomRight.y >= caller->tileDimensions.y && newTileGridPaddingBottomRight.y != 0) {
+                if (newTileGridPaddingBottomRight.y >= caller->ssne.tileDimensions.y && newTileGridPaddingBottomRight.y != 0) {
                     newTileGridPaddingBottomRight.y = 0;
                     g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
                 }
-                caller->tileGridPaddingBottomRight = newTileGridPaddingBottomRight;
-                caller->tileGridAlpha = (uint8_t)(opacitySlider->getValue(0,255));
+                caller->ssne.tileGridPaddingBottomRight = newTileGridPaddingBottomRight;
+                caller->ssne.tileGridAlpha = (uint8_t)(opacitySlider->getValue(0,255));
                 closePopup();
             }
         }

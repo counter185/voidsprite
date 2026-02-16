@@ -82,14 +82,14 @@ void SpritesheetPreviewScreen::render()
 
     if (sprites.size() > 0) {
         for (int x = 0; x < sprites.size(); x++) {
-            int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * timelineSpriteScale);
+            int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->ssne.tileDimensions.x * timelineSpriteScale);
             XY spritePos = xyAdd(spriteListOrigin, XY{ x * elementWidth + x * 5 , 50 });
             drawPreview(spritePos, timelineSpriteScale, x);
             SDL_Rect spriteArea = {
                 spritePos.x,
                 spritePos.y,
-                caller->tileDimensions.x * timelineSpriteScale,
-                caller->tileDimensions.y * timelineSpriteScale
+                caller->ssne.tileDimensions.x * timelineSpriteScale,
+                caller->ssne.tileDimensions.y * timelineSpriteScale
             };
             SDL_SetRenderDrawColor(g_rd, spritesProgress == x ? 0 : 255, 255, spritesProgress == x ? 0 : 255, 0x80);
             SDL_RenderDrawRect(g_rd, &spriteArea);
@@ -119,12 +119,12 @@ void SpritesheetPreviewScreen::RenderCanvas()
 
     // lines between tiles
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-    canvas.drawTileGrid(caller->tileDimensions);
+    canvas.drawTileGrid(caller->ssne.tileDimensions);
 
     //canvas border
     canvas.drawCanvasOutline(5, SDL_Color{ 255,255,255,0x80 });
 
-    XY tileSize = caller->tileDimensions;
+    XY tileSize = caller->ssne.tileDimensions;
 
     //sprite rects
     std::map<u64, int> drawnRects;
@@ -146,20 +146,20 @@ void SpritesheetPreviewScreen::RenderCanvas()
 
 void SpritesheetPreviewScreen::tick()
 {
-    if (closeNextTick || caller->tileDimensions.x == 0 || caller->tileDimensions.y == 0) {
+    if (closeNextTick || caller->ssne.tileDimensions.x == 0 || caller->ssne.tileDimensions.y == 0) {
         g_closeScreen(this);
         return;
     }
 
     panel->position.x = g_windowW - 10 - panel->wxWidth;
 
-    int rightPanelWidth = ixmax(300, canvas.scale * caller->tileDimensions.x);
+    int rightPanelWidth = ixmax(300, canvas.scale * caller->ssne.tileDimensions.x);
     XY origin = { g_windowW - rightPanelWidth, 20 };
 
     timelineSpriteScale = calcMaxTimelineScale();
 
     spriteView->wxWidth = g_windowW;
-    spriteView->wxHeight = 30 + caller->tileDimensions.y * timelineSpriteScale + 60;
+    spriteView->wxHeight = 30 + caller->ssne.tileDimensions.y * timelineSpriteScale + 60;
     spriteView->position = { 0, g_windowH - spriteView->wxHeight };
 
     canvas.lockToScreenBounds(0, 0, spriteView->wxHeight, rightPanelWidth);
@@ -168,7 +168,7 @@ void SpritesheetPreviewScreen::tick()
         int timelineIndex = x / N_BUTTONS_ADDED_TO_TIMELINE;
         int timelineAction = x % N_BUTTONS_ADDED_TO_TIMELINE;
 
-        int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->tileDimensions.x * timelineSpriteScale);
+        int elementWidth = ixmax(MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES, caller->ssne.tileDimensions.x * timelineSpriteScale);
         spriteView->subWidgets.drawablesList[x]->position = XY{ timelineIndex * elementWidth + timelineIndex * 5 + 30 + (24 * timelineAction), 24 };
     }
 }
@@ -191,10 +191,10 @@ void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
                     scrollingCanvas = true;
                 }
                 else if (evt.button.button == SDL_BUTTON_LEFT) {
-                    if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0
+                    if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0
                         && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y}))) 
                     {
-                        XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->tileDimensions);
+                        XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->ssne.tileDimensions);
                         sprites.push_back(tile);
                         addTimelineButton();
                     }
@@ -343,7 +343,7 @@ void SpritesheetPreviewScreen::popTimelineButton()
 }
 
 int SpritesheetPreviewScreen::calcMaxTimelineScale() {
-    XY tileSize = caller->tileDimensions;
+    XY tileSize = caller->ssne.tileDimensions;
     int scale = canvas.scale;
     int maxH = g_windowH/5;
     while (tileSize.y * scale > maxH && scale > 1) {

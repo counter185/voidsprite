@@ -88,26 +88,26 @@ void BrushFill::renderOnCanvas(MainEditor* editor, int scale) {
         && g_deltaTime < 0.018
         && SDL_GetTicks64() > timeNextIter + 16) {
         timeNextIter = SDL_GetTicks64();
-        XY tilePos = editor->tileDimensions.x == 0
+        XY tilePos = editor->ssne.tileDimensions.x == 0
             ? XY{0,0}
             : XY{
-                lastMouseMotionPos.x / editor->tileDimensions.x,
-                lastMouseMotionPos.y / editor->tileDimensions.y,
+                lastMouseMotionPos.x / editor->ssne.tileDimensions.x,
+                lastMouseMotionPos.y / editor->ssne.tileDimensions.y,
             };
 
         std::vector<XY> nextList;
         for (XY& openListElement : previewOpenList) {
             uint32_t pixelRn = editor->getCurrentLayer()->getPixelAt(openListElement);
-            XY tilePosSelected = editor->tileDimensions.x == 0
+            XY tilePosSelected = editor->ssne.tileDimensions.x == 0
                 ? XY{0,0}
                 : XY{
-                    openListElement.x / editor->tileDimensions.x,
-                    openListElement.y / editor->tileDimensions.y,
+                    openListElement.x / editor->ssne.tileDimensions.x,
+                    openListElement.y / editor->ssne.tileDimensions.y,
                 };
             if (editor->isInBounds(openListElement)
                 && colorEqual(pixelRn, previewSearchingColor, editor->isPalettized)
                 && !closedListContains(openListElement)
-                && (editor->tileDimensions.x == 0 || !g_config.fillToolTileBound || xyEqual(tilePosSelected, tilePos))) {
+                && (editor->ssne.tileDimensions.x == 0 || !g_config.fillToolTileBound || xyEqual(tilePosSelected, tilePos))) {
                 XY p[] = {
                     {0,1},
                     {0,-1},

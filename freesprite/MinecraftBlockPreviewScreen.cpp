@@ -88,7 +88,7 @@ void MinecraftBlockPreviewScreen::RenderCanvas()
 
     // lines between tiles
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-    canvas.drawTileGrid(caller->tileDimensions);
+    canvas.drawTileGrid(caller->ssne.tileDimensions);
 
     //canvas border
     canvas.drawCanvasOutline(5, SDL_Color{ 255,255,255,0x80 });
@@ -101,7 +101,7 @@ void MinecraftBlockPreviewScreen::RenderCanvas()
     };
     for (int i = 0; i < 3; i++) {
         if (!xyEqual(tiles[i], { -1,-1 })) {
-            SDL_Rect p = canvas.getTileScreenRectAt(tiles[i], caller->tileDimensions);
+            SDL_Rect p = canvas.getTileScreenRectAt(tiles[i], caller->ssne.tileDimensions);
             SDL_SetRenderDrawColor(g_rd, tileColors[i].r, tileColors[i].g, tileColors[i].b, tileColors[i].a);
             SDL_RenderDrawRect(g_rd, &p);
             SDL_SetRenderDrawColor(g_rd, tileColors[i].r, tileColors[i].g, tileColors[i].b, tileColors[i].a / 2);
@@ -128,10 +128,10 @@ void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
                 scrollingCanvas = true;
             }
             else if (evt.button.button == SDL_BUTTON_LEFT) {
-                if (caller->tileDimensions.x != 0 && caller->tileDimensions.y != 0
+                if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0
                     && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({ (int)evt.button.x, (int)evt.button.y })))
                 {
-                    XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->tileDimensions);
+                    XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->ssne.tileDimensions);
                     //do thing here
                     XY* ws[] = { &tileTop, &tileSideLeft, &tileSideRight };
                     *ws[choosingSide++] = tile;
@@ -158,7 +158,7 @@ void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
 
 void MinecraftBlockPreviewScreen::tick()
 {
-    if (closeNextTick || caller->tileDimensions.x == 0 || caller->tileDimensions.y == 0) {
+    if (closeNextTick || caller->ssne.tileDimensions.x == 0 || caller->ssne.tileDimensions.y == 0) {
         g_closeScreen(this);
         return;
     }
@@ -255,11 +255,11 @@ void MinecraftBlockPreviewScreen::drawIsometricBlockV2(SDL_Rect at)
     drawLine(p3, p1);*/
 
     SDL_Rect topTextureRect =
-        canvas.getTileRectAt(tileTop, caller->tileDimensions);
+        canvas.getTileRectAt(tileTop, caller->ssne.tileDimensions);
     SDL_Rect sideLeftTextureRect =
-        canvas.getTileRectAt(tileSideLeft, caller->tileDimensions);
+        canvas.getTileRectAt(tileSideLeft, caller->ssne.tileDimensions);
     SDL_Rect sideRightTextureRect =
-        canvas.getTileRectAt(tileSideRight, caller->tileDimensions);
+        canvas.getTileRectAt(tileSideRight, caller->ssne.tileDimensions);
 
     SDL_Vertex vertices[8] = {
         {{p1.x, p1.y}},

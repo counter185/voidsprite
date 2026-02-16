@@ -5,7 +5,7 @@
 
 void EditorSpritesheetPreview::renderAfterBG(XY at)
 {
-	XY tileSize = caller->caller->tileDimensions;
+	XY tileSize = caller->caller->ssne.tileDimensions;
 	wxWidth = ixmax(80, tileSize.x * caller->canvas.scale) + 8;
 	wxHeight = ixmax(30, tileSize.y * caller->canvas.scale) + 20 + 8;
 

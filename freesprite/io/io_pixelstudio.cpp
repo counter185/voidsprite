@@ -322,7 +322,7 @@ json serializePixelStudioSession(MainEditor* data) {
     o["Background"] = true;
     o["BackgroundColor"] = { {"r", 0}, {"g", 0}, {"b", 0}, {"a", 0} };
     o["TileMode"] = false;
-    o["TileFade"] = data->tileGridAlpha;
+    o["TileFade"] = data->ssne.tileGridAlpha;
     o["ActiveClipIndex"] = 0;
     o["Clips"] = json::array();
 

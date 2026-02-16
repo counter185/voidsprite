@@ -184,7 +184,7 @@ MainEditor* readLMU(PlatformNativePathString path)
                         l->name = shiftJIStoUTF8(std::string(db.get()->chipsets[chipsetIndex - 1].name));
                         ret = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
 
-                        ret->tileDimensions = { 16,16 };
+                        ret->ssne.tileDimensions = { 16,16 };
 
                         if (ret->isPalettized) {
                             //assume the first color is alpha because this seems to always be the case so far

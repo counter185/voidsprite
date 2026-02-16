@@ -15,7 +15,7 @@ void ToolRectClone::clickRelease(MainEditor* editor, XY pos)
 
         if (xyEqual(prevReleasePoint, pos) && pointInBox(pos, {0,0,editor->canvas.dimensions.x, editor->canvas.dimensions.y})
             && lastClickTimer.started && lastClickTimer.elapsedTime() < 1000) {
-            XY tileDim = editor->tileDimensions;
+            XY tileDim = editor->ssne.tileDimensions;
             tileDim.x = tileDim.x == 0 ? editor->canvas.dimensions.x : tileDim.x;
             tileDim.y = tileDim.y == 0 ? editor->canvas.dimensions.y : tileDim.y;
             XY tileOrigin = {pos.x / tileDim.x * tileDim.x, pos.y / tileDim.y * tileDim.y};

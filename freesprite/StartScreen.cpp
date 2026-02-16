@@ -454,7 +454,7 @@ void StartScreen::NewRGBSession(u32 fill)
         std::fill(newLayer->pixels32(), newLayer->pixels32() + (newLayer->w * newLayer->h), fill);
         MainEditor* newMainEditor = new MainEditor(newLayer);
         if (newImageTabs->openTab == 1) {
-            newMainEditor->tileDimensions = newImgCellSizeTab1;
+            newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;
         }
         g_addScreen(newMainEditor);
     }
@@ -479,7 +479,7 @@ void StartScreen::NewIndexedSession()
         newLayer->palette = g_palettes()[PALETTE_DEFAULT];
         MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
         if (newImageTabs->openTab == 1) {
-            newMainEditor->tileDimensions = newImgCellSizeTab1;
+            newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;
         }
         g_addScreen(newMainEditor);
     }
@@ -552,8 +552,8 @@ void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string n
         for (CommentData& comment : templateComments) {
             newMainEditor->getCommentStack().push_back(comment);
         }
-        newMainEditor->tileDimensions = g_templates[index]->tileSize();
-        newMainEditor->tileGridPaddingBottomRight = g_templates[index]->tilePadding();
+        newMainEditor->ssne.tileDimensions = g_templates[index]->tileSize();
+        newMainEditor->ssne.tileGridPaddingBottomRight = g_templates[index]->tilePadding();
         g_addScreen(newMainEditor);
     }
 }
@@ -669,9 +669,6 @@ void StartScreen::renderBackground()
 {
     static Fill backgroundFill = visualConfigFill("launchpad/bg");
     backgroundFill.fill({ 0,0,g_windowW,g_windowH });
-    //uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
-    //uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
-    //renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
 
     struct StartScreenEffect {
         int type;

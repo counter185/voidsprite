@@ -378,7 +378,7 @@ MainEditor* readAsepriteASE(PlatformNativePathString path)
                     retSn = new MainEditor(frames);
                 }
 
-                retSn->tileDimensions = { header.gridWidth, header.gridHeight };
+                retSn->ssne.tileDimensions = { header.gridWidth, header.gridHeight };
                 retSn->setMSPerFrame(frameLengthSum / frames.size());
             }
         }
@@ -431,8 +431,8 @@ bool writeAsepriteASE(PlatformNativePathString path, MainEditor* editor)
         header.pixelHeight = 1;
         header.gridX = 0;
         header.gridY = 0;
-        header.gridWidth = editor->tileDimensions.x;
-        header.gridHeight = editor->tileDimensions.y;
+        header.gridWidth = editor->ssne.tileDimensions.x;
+        header.gridHeight = editor->ssne.tileDimensions.y;
         fwrite(&header, sizeof(ASEPRITEHeader), 1, f);
 
         int estimatedNumChunks = 1 + nextLayerID + editor->frames[0]->layers.size() + (editor->isPalettized ? 1 : 0);

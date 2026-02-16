@@ -68,7 +68,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         XY canvasSize = XY{ infoJson["canvasWidth"], infoJson["canvasHeight"] };
         int tileGridWidth = infoJson["tileGridWidth"];
         int tileGridHeight = infoJson["tileGridHeight"];
-        tileDimensions = { ixmax(0, tileGridWidth), ixmax(0, tileGridHeight) };
+        ssne.tileDimensions = { ixmax(0, tileGridWidth), ixmax(0, tileGridHeight) };
         int thisUID = infoJson["yourUserIDIs"];
         u32 chatState = infoJson["chatState"];
         thisClientInfo->uid = thisUID;

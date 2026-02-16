@@ -206,7 +206,7 @@ MainEditor* readPISKEL(PlatformNativePathString path)
             if (layers.size() > 0) {
                 MainEditor* editor = new MainEditor(layers);
                 if (lastFrameCount > 1) {
-                    editor->tileDimensions = { width, height };
+                    editor->ssne.tileDimensions = { width, height };
                 }
                 return editor;
             }
@@ -332,7 +332,7 @@ MainEditor* readJPixel(PlatformNativePathString path)
             MainEditor* editor = new MainEditor(frames);
             editor->frameAnimMSPerFrame = (int)(animSpeed * 1000);
             if (unit != 1) {
-                editor->tileDimensions = { unit,unit };
+                editor->ssne.tileDimensions = { unit,unit };
             }
             return editor;
         }
