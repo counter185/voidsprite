@@ -615,7 +615,7 @@ void MainEditor::drawTileGrid()
     canvasRenderRect.x = canvasCenterPoint.x;
     canvasRenderRect.y = canvasCenterPoint.y;*/
 
-    SDL_Color accentColor = getAccentColor();
+    SDL_Color accentColor = ssne.overrideTileGridColor ? uint32ToSDLColor(ssne.tileGridColor) : getAccentColor();
 
     //draw tile lines
     SDL_Color c = { accentColor.r, accentColor.g, accentColor.b, ssne.tileGridAlpha };

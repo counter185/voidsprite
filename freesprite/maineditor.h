@@ -157,6 +157,10 @@ class SessionEditorPrefs {
 public:
     XY tileDimensions = XY{0, 0};
     u8 tileGridAlpha = 0x40;
+
+    bool overrideTileGridColor = false;
+    u32 tileGridColor = 0xFFFFFF;
+
     XY tileGridPaddingBottomRight = XY{0, 0};
     bool alternateBackground = false;
     

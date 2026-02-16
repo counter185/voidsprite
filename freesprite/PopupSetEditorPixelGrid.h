@@ -1,14 +1,8 @@
 #pragma once
 #include "BasePopup.h"
-#include "EventCallbackListener.h"
-#include "UITextField.h"
-#include "UIButton.h"
-#include "maineditor.h"
-#include "Notification.h"
-#include "UISlider.h"
 
 class PopupSetEditorPixelGrid :
-    public BasePopup, public EventCallbackListener
+    public BasePopup
 {
 public:
     std::vector<XY> predefinedTileSizes = {
@@ -21,59 +15,21 @@ public:
         {64,64}
     };
 
-    UITextField* tboxX;
-    UITextField* tboxY;
-    UITextField* tboxPadRX;
-    UITextField* tboxPadBY;
+    UINumberInputField* tboxX;
+    UINumberInputField* tboxY;
+    UINumberInputField* tboxPadRX;
+    UINumberInputField* tboxPadBY;
     UISlider* opacitySlider;
 
     MainEditor* caller;
 
+    XY newTileDimensions{};
+    XY newTilePaddingBottomRight{};
+    bool newOverrideGridColor = false;
+    u32 newTileGridColor = 0xFFFFFF;
+
     PopupSetEditorPixelGrid(MainEditor* parent, std::string tt, std::string tx);
 
-    void eventDropdownItemSelected(int evt_id, int index, std::string name) {
-    if (evt_id == 39) {   
-        XY newTileSize = predefinedTileSizes[index];
-       
-        caller->ssne.tileDimensions = newTileSize;
-        
-        caller->ssne.tileGridAlpha = (uint8_t)(opacitySlider->getValue(0, 255));
-       
-        closePopup();
-    }
-}
-
-    void eventButtonPressed(int evt_id) override {
-        if (evt_id == 0) {
-            std::string tboxXtx = tboxX->getText();
-            std::string tboxYtx = tboxY->getText();
-            std::string tboxPadRXtx = tboxPadRX->getText();
-            std::string tboxPadBYtx = tboxPadBY->getText();
-            if (!tboxXtx.empty() && !tboxYtx.empty() && !tboxPadRXtx.empty() && !tboxPadBYtx.empty()) {
-                caller->ssne.tileDimensions = XY{ std::stoi(tboxX->getText()), std::stoi(tboxY->getText()) };
-                XY newTileGridPaddingBottomRight = XY{ std::stoi(tboxPadRXtx), std::stoi(tboxPadBYtx) };
-                if (newTileGridPaddingBottomRight.x >= caller->ssne.tileDimensions.x && newTileGridPaddingBottomRight.x != 0) {
-                    newTileGridPaddingBottomRight.x = 0;
-                    g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
-                }
-                if (newTileGridPaddingBottomRight.y >= caller->ssne.tileDimensions.y && newTileGridPaddingBottomRight.y != 0) {
-                    newTileGridPaddingBottomRight.y = 0;
-                    g_addNotification(ErrorNotification("Invalid padding size", "Padding overflows tile size"));
-                }
-                caller->ssne.tileGridPaddingBottomRight = newTileGridPaddingBottomRight;
-                caller->ssne.tileGridAlpha = (uint8_t)(opacitySlider->getValue(0,255));
-                closePopup();
-            }
-        }
-        else {
-            closePopup();
-        }
-        
-    }
-    void eventTextInputConfirm(int evt_id, std::string data) override {
-        if (evt_id == 1) {
-            eventButtonPressed(0);
-        }
-    }
+    void finish();
 };
 
