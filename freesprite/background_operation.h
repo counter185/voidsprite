@@ -30,6 +30,12 @@ public:
             reports.pop_back();
         }
     }
+    virtual void updateLastSection(std::string newName) {
+        std::lock_guard<std::recursive_mutex> lock(reportMutex);
+        if (!reports.empty()) {
+            reports.back() = newName;
+        }
+    }
     std::vector<std::string> getCurrentSections() {
         std::lock_guard<std::recursive_mutex> lock(reportMutex);
         return reports;
@@ -38,10 +44,13 @@ public:
 
 class PrintOnlyProgressReport : public OperationProgressReport {
     public:
-    virtual void enterSection(std::string name) override {
+    void enterSection(std::string name) override {
         loginfo(frmt("Entered section: {}", name));
     }
-    virtual void exitSection() override {}
+    void exitSection() override {}
+    void updateLastSection(std::string newName) override {
+        loginfo(frmt("Updated section: {}", newName));
+    }
 
 };
 

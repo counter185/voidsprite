@@ -8,5 +8,5 @@
 
 std::string getlibjxlVersion();
 
-Layer* readJpegXL(PlatformNativePathString path, u64 seek = 0);
-bool writeJpegXL(PlatformNativePathString path, Layer* data);
+MainEditor* readJpegXL(PlatformNativePathString path, OperationProgressReport* progress);
+bool writeJpegXL(PlatformNativePathString path, MainEditor* data);

@@ -2425,6 +2425,15 @@ void MainEditor::switchFrame(int index)
     framePicker->createFrameButtons();
 }
 
+void MainEditor::prerenderAllFrames()
+{
+    for (auto*& f : frames) {
+        for (auto*& l : f->layers) {
+            l->prerender();
+        }
+    }
+}
+
 void MainEditor::moveFrameLeft(int index)
 {
     std::lock_guard<std::recursive_mutex> lock(framesMutex);
@@ -2458,6 +2467,9 @@ void MainEditor::moveFrameRight(int index)
 void MainEditor::toggleFrameAnimation()
 {
     frameAnimationPlaying = !frameAnimationPlaying;
+    if (frameAnimationPlaying) {
+        prerenderAllFrames();
+    }
     frameAnimationStartTimer.start();
 }
 

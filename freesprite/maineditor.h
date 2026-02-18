@@ -417,6 +417,7 @@ public:
     virtual void duplicateFrame(int index);
     virtual void deleteFrame(int index);
     void switchFrame(int index);
+    void prerenderAllFrames();
     virtual void moveFrameLeft(int index);
     virtual void moveFrameRight(int index);
     void toggleFrameAnimation();

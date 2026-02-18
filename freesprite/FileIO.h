@@ -117,13 +117,21 @@ public:
     virtual std::string extension() { return _extension; }
     std::string description = "";
 protected:
-    std::string _name = "Palette type";
+    std::string _name = "";
     std::string _extension = "";
 };
 
 //absolute mess
 class FileExporter : public FileOperation {
+protected:
+    int _formatFlags = FORMAT_RGB;
+    bool _isSessionExporter = false;
 
+    std::function<bool(PlatformNativePathString, MainEditor*)> _sessionExportFunction = NULL;
+    std::function<bool(MainEditor*)> _sessionCheckExportFunction = NULL;
+
+    std::function<bool(PlatformNativePathString, Layer*)> _flatExportFunction = NULL;
+    std::function<bool(Layer*)> _flatCheckExportFunction = NULL;
 public:
     static FileExporter* sessionExporter(std::string name, std::string extension, std::string description, std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(MainEditor*)> canExport = NULL) {
         FileExporter* ret = new FileExporter();
@@ -160,27 +168,14 @@ public:
     }
     virtual bool exportData(PlatformNativePathString path, void* data) {
         try {
-            if (exportsWholeSession()) {
-                return _sessionExportFunction(path, (MainEditor*)data);
-            }
-            else {
-                return _flatExportFunction(path, (Layer*)data);
-            }
+            return exportsWholeSession() ? _sessionExportFunction(path, (MainEditor*)data) 
+                : _flatExportFunction(path, (Layer*)data);
         }
         catch (std::exception& e) {
             logerr(frmt("Data export failed:\n {}", e.what()));
             return false;
         }
     }
-protected:
-    int _formatFlags = FORMAT_RGB;
-    bool _isSessionExporter = false;
-
-    std::function<bool(PlatformNativePathString, MainEditor*)> _sessionExportFunction = NULL;
-    std::function<bool(MainEditor*)> _sessionCheckExportFunction = NULL;
-
-    std::function<bool(PlatformNativePathString, Layer*)> _flatExportFunction = NULL;
-    std::function<bool(Layer*)> _flatCheckExportFunction = NULL;
 };
 class FileImporter : public FileOperation {
 
@@ -191,8 +186,7 @@ public:
             std::function<MainEditor*(PlatformNativePathString, OperationProgressReport*)> importFunction, 
             FileExporter* reverse = NULL, 
             int formatflags = FORMAT_RGB, 
-            std::function<bool(PlatformNativePathString)> 
-            canImport = NULL) {
+            std::function<bool(PlatformNativePathString)> canImport = NULL) {
         FileImporter* ret = new FileImporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -209,8 +203,7 @@ public:
             std::function<MainEditor*(PlatformNativePathString)> importFunction, 
             FileExporter* reverse = NULL, 
             int formatflags = FORMAT_RGB, 
-            std::function<bool(PlatformNativePathString)> 
-            canImport = NULL) 
+            std::function<bool(PlatformNativePathString)> canImport = NULL) 
     {
         return sessionImporter(name, extension, [importFunction](PlatformNativePathString path, OperationProgressReport* progressReport) {
             progressReport->enterSection("Loading file...");

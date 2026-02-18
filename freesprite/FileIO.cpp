@@ -2987,7 +2987,7 @@ void g_setupIO() {
         * exDIBv5,
         * exJPEG,
         * exAVIF,
-        * exGIF = NULL
+        * exGIF
         ;
 
     g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", TL("vsp.export.voidsn.latest"), &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -3012,7 +3012,7 @@ void g_setupIO() {
     g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", "", &writeBMP));
 #if VOIDSPRITE_JXL_ENABLED
     FileExporter* exJXL;
-    g_fileExporters.push_back(exJXL = FileExporter::flatExporter("JPEG XL", ".jxl", "", &writeJpegXL, FORMAT_RGB));
+    g_fileExporters.push_back(exJXL = FileExporter::sessionExporter("JPEG XL", ".jxl", "", &writeJpegXL, FORMAT_RGB));
 #endif
     g_fileExporters.push_back(exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", TL("vsp.export.jpeg"), &writeJPEG));
     g_fileExporters.push_back(exAVIF = FileExporter::flatExporter("AVIF", ".avif", "", &writeAVIF));
@@ -3081,7 +3081,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("AVIF", ".avif", &readSDLImage, exAVIF));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP", ".bmp", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
 #if VOIDSPRITE_JXL_ENABLED
-    g_fileImporters.push_back(FileImporter::flatImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));
 #endif
     g_fileImporters.push_back(FileImporter::flatImporter("Godot Compressed texture", ".ctex", &readGodotCTEX, NULL, FORMAT_RGB, 
         magicVerify(0, "GST")));
