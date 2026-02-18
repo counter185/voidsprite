@@ -143,7 +143,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;avif.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -164,7 +164,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;avif.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -183,7 +183,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf_debug.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;hwy.lib;jxl.lib;avif.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
@@ -228,7 +228,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>external_liblcf.lib;d3d9.lib;dwmapi.lib;SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;SDL3_net.lib;zlibwapi.lib;hwy.lib;jxl.lib;brotlicommon.lib;brotlidec.lib;brotlienc.lib;avif.lib;discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cmd /c "cd .. &amp;&amp; copy_devlibs.bat &amp;&amp; copy_assets.bat"</Command>
@@ -295,6 +295,7 @@
     <ClCompile Include="io\io_aseprite.cpp" />
     <ClCompile Include="io\io_astc.cpp" />
     <ClCompile Include="io\io_avi.cpp" />
+    <ClCompile Include="io\io_avif.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />
     <ClCompile Include="io\io_flipnote.cpp" />
     <ClCompile Include="io\io_gif.cpp" />
@@ -558,6 +559,7 @@
     <ClInclude Include="io\io_aseprite.h" />
     <ClInclude Include="io\io_astc.h" />
     <ClInclude Include="io\io_avi.h" />
+    <ClInclude Include="io\io_avif.h" />
     <ClInclude Include="io\io_base.h" />
     <ClInclude Include="io\io_dibv5.h" />
     <ClInclude Include="io\io_flipnote.h" />

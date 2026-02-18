@@ -18,6 +18,11 @@ endif()
 add_subdirectory(zlib)
 add_subdirectory(fmt)
 
+set(AVIF_LIBYUV "LOCAL")
+set(AVIF_CODEC_LIBGAV1 "LOCAL")
+set(AVIF_CODEC_SVT "LOCAL")
+add_subdirectory(libavif)
+
 # Your game and its CMakeLists.txt are in a subfolder named "src"
 add_subdirectory(src)
 
