@@ -22,8 +22,8 @@ set(AVIF_LIBYUV "LOCAL")
 set(AVIF_CODEC_LIBGAV1 "LOCAL")
 set(AVIF_CODEC_AOM "LOCAL")
 set(AOM_TARGET_CPU "generic")
-set(AVIF_CODEC_DECODE OFF)
-set(AVIF_CODEC_ENCODE ON)
+set(AVIF_CODEC_AOM_DECODE OFF)
+set(AVIF_CODEC_AOM_ENCODE ON)
 add_subdirectory(libavif)
 
 # Your game and its CMakeLists.txt are in a subfolder named "src"
