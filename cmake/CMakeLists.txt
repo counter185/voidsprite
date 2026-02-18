@@ -13,6 +13,8 @@ add_subdirectory(SDL_ttf)
 if (NOT DEFINED EMSCRIPTEN)
     add_subdirectory(SDL_net)
     add_subdirectory(liblcf)
+else()
+    set(CONFIG_MULTITHREAD OFF)
 endif()
 
 add_subdirectory(zlib)
