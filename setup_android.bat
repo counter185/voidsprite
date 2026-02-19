@@ -23,6 +23,7 @@ REM   git clone --recursive https://github.com/libsdl-org/SDL_net.git
 REM   *use the above when SDL fixes android build
 git clone --recursive https://github.com/counter185/SDL_net-android21.git SDL_net
 git clone --recursive https://github.com/madler/zlib.git
+git clone --recursive https://github.com/AOMediaCodec/libavif.git
 mklink /d liblcf "..\..\..\external_liblcf"
 cd src
 mklink /d voidsprite "..\..\..\..\freesprite"

@@ -80,6 +80,9 @@ std::string getAllLibsVersions() {
 #if VOIDSPRITE_JXL_ENABLED
     ret += frmt("libjxl: {}\n", getlibjxlVersion());
 #endif
+#if VSP_USE_LIBAVIF
+	ret += frmt("libavif: {}\n", getLibAVIFVersion());
+#endif
     ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
 
 #ifdef USE_FMT_FORMAT
@@ -2239,30 +2242,6 @@ bool writeJPEG(PlatformNativePathString path, Layer* data)
     return ret;
 }
 
-bool writeAVIF(PlatformNativePathString path, Layer* data)
-{
-    if (data->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Indexed image export not supported"));
-        return false;
-    }
-
-    SDL_Surface* surface = SDL_CreateSurface(data->w, data->h, SDL_PIXELFORMAT_ARGB8888);
-    if (surface == NULL) {
-        logerr(frmt("[AVIF] failed to create surface: {}", SDL_GetError()));
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.mallocfail")));
-        return false;
-    }
-    memcpy(surface->pixels, data->pixels32(), data->w * data->h * 4);
-
-    std::string u8path = convertStringToUTF8OnWin32(path);
-
-    bool ret = IMG_SaveAVIF(surface, u8path.c_str(), 100);
-
-    SDL_FreeSurface(surface);
-
-    return ret;
-}
-
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
 
     if (data->isPalettized) {
@@ -3015,7 +2994,7 @@ void g_setupIO() {
     g_fileExporters.push_back(exJXL = FileExporter::sessionExporter("JPEG XL", ".jxl", "", &writeJpegXL, FORMAT_RGB));
 #endif
     g_fileExporters.push_back(exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", TL("vsp.export.jpeg"), &writeJPEG));
-    g_fileExporters.push_back(exAVIF = FileExporter::flatExporter("AVIF", ".avif", "", &writeAVIF));
+    g_fileExporters.push_back(exAVIF = FileExporter::sessionExporter("AVIF", ".avif", TL("vsp.export.avif"), &writeAVIF));
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", "", & writeTGA));
     g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", "", &writeCaveStoryPBM));
     g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", "", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -3078,7 +3057,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(0, "\x89PNG\x0D\x0A")));
     g_fileImporters.push_back(FileImporter::flatImporter("JPEG", ".jpeg", &readSDLImage, exJPEG, FORMAT_RGB, magicVerify(0, "\xFF\xD8")));
-    g_fileImporters.push_back(FileImporter::flatImporter("AVIF", ".avif", &readSDLImage, exAVIF));
+    g_fileImporters.push_back(FileImporter::sessionImporter("AVIF", ".avif", &readAVIF, exAVIF));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP", ".bmp", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
 #if VOIDSPRITE_JXL_ENABLED
     g_fileImporters.push_back(FileImporter::sessionImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));

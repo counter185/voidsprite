@@ -93,6 +93,7 @@
 #if _M_ARM64
     #define VOIDSPRITE_JXL_ENABLED 0
     #define VSP_DISCORD_RPC 0 
+    #define VSP_USE_LIBAVIF 0 
 #endif
 
 #ifndef VSP_DISCORD_RPC
@@ -105,6 +106,14 @@
 
 #ifndef VSP_USE_LIBLCF
     #define VSP_USE_LIBLCF 1
+#endif
+
+#ifndef VSP_USE_LIBAVIF
+    #if VSP_PLATFORM == VSP_PLATFORM_WIN32  
+        #define VSP_USE_LIBAVIF 1
+    #else
+        #define VSP_USE_LIBAVIF 0
+    #endif
 #endif
 
 #ifndef VSP_NETWORKING

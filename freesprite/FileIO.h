@@ -54,6 +54,7 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_avi.h"
 #include "io/io_godot.h"
 #include "io/io_resprite.h"
+#include "io/io_avif.h"
 
 #include "io/io_palettes.h"
 
@@ -89,7 +90,6 @@ bool tryInstallPalette(PlatformNativePathString path);
 
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeJPEG(PlatformNativePathString path, Layer* data);
-bool writeAVIF(PlatformNativePathString path, Layer* data);
 bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeXBM(PlatformNativePathString path, Layer* data);

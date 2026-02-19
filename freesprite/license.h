@@ -41,8 +41,8 @@ inline std::string getLibraryLicenses() {
 #ifdef USE_FMT_FORMAT
         "fmt\n"
 #endif
-        "giflib\n"
         "json\n"
+        "libavif\n"
         "libjxl\n"
         "liblcf\n"
         "libpng\n"
@@ -55,9 +55,13 @@ inline std::string getLibraryLicenses() {
         "gzip-hpp\n"
         "\n"
         "The following libraries are only used as dependencies of other libraries:\n"
-        "avif [from SDL3_image]\n"
-        "brotli [from libjxl]\n"
+#if VSP_USE_LIBAVIF
+        "libgav1 [from libavif]\n"
+        "SVT-AV1 [from libavif]\n"
+#else
         "dav1d [from SDL3_image]\n"
+#endif
+        "brotli [from libjxl]\n"
         "highway [from libjxl]\n"
         "sjpeg [from SDL3_image]\n"
         "skcms [from libjxl]\n"
