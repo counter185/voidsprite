@@ -469,3 +469,5 @@ cmake/zlib/
 web-build/voidsprite.js
 web-build/voidsprite.wasm
 android-project/app/jni/libavif/
+/cmake/build_em
+cmake/libavif/

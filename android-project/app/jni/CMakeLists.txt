@@ -16,8 +16,10 @@ add_subdirectory(liblcf)
 add_subdirectory(zlib)
 
 set(AVIF_LIBYUV "LOCAL")
-set(AVIF_CODEC_AOM "LOCAL")
-set(AOM_TARGET_CPU "generic")
+set(AVIF_CODEC_AOM OFF)
+set(AVIF_CODEC_LIBGAV1 "LOCAL")
+set(AVIF_CODEC_SVT "LOCAL")
+set(COMPILE_C_ONLY ON)
 add_subdirectory(libavif)
 
 # Your game and its CMakeLists.txt are in a subfolder named "src"

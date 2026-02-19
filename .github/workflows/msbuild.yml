@@ -390,13 +390,13 @@ jobs:
     
     - name: setup emscripten build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake/build && emmake make -j4
+      run: cd cmake/build_em && emmake make -j4
     
     - name: gather artifacts
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cp cmake/build/src/voidsprite.js web-build/voidsprite.js
-        cp cmake/build/src/voidsprite.wasm web-build/voidsprite.wasm
+        cp cmake/build_em/src/voidsprite.js web-build/voidsprite.js
+        cp cmake/build_em/src/voidsprite.wasm web-build/voidsprite.wasm
         cp -R OPEN_SOURCE_LICENSES web-build/OPEN_SOURCE_LICENSES
 #       html is already in the folder
     

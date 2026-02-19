@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
-mkdir build
-cd build
+mkdir build_em
+cd build_em
 emcmake cmake .. -DZLIB_BUILD_SHARED=OFF -DUSE_FMT_FORMAT=ON -DSDLTTF_VENDORED=ON -DVSP_NETWORKING=OFF -DVOIDSPRITE_JXL_ENABLED=OFF -DVSP_USE_LIBLCF=OFF
