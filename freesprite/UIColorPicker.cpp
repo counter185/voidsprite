@@ -14,7 +14,9 @@
 #include "io/io_voidsprite.h"
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
-#include <windows.h>
+    #include <windows.h>
+#elif VSP_PLATFORM == VSP_PLATFORM_LINUX
+    #include <regex>
 #endif
 
 ColorPickerColorButton::ColorPickerColorButton(UIColorPicker* parent, u32 color) : UIButton()
@@ -196,6 +198,15 @@ UIColorPicker::UIColorPicker()
         oldColorPickerButton->onClickCallback = [this](UIButton*) { openOldWindowsColorPicker(); };
         colorModelsPanel->subWidgets.addDrawable(oldColorPickerButton);
         yNow += 35;
+#elif VSP_PLATFORM == VSP_PLATFORM_LINUX
+        if (std::filesystem::exists("/usr/bin/zenity")) {
+            UIButton* oldColorPickerButton = new UIButton("Native color picker...");
+            oldColorPickerButton->position = XY{ 5, yNow };
+            oldColorPickerButton->wxWidth = 210;
+            oldColorPickerButton->onClickCallback = [this](UIButton*) { openZenityColorPicker(); };
+            colorModelsPanel->subWidgets.addDrawable(oldColorPickerButton);
+            yNow += 35;
+        }
 #endif
     }
 
@@ -851,5 +862,33 @@ void UIColorPicker::openOldWindowsColorPicker()
         setColorRGB(PackRGBAtoARGB(colorbgr.b, colorbgr.g, colorbgr.r, 255));
         logprintf("win32 picked color: %x\n", cc.rgbResult);
     }
+}
+#endif
+
+#if VSP_PLATFORM == VSP_PLATFORM_LINUX
+void UIColorPicker::openZenityColorPicker() {
+    std::string command = "zenity --color-selection --show-palette --title \"voidsprite: choose color\"";
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to open color picker"));
+        return;
+    }
+    char buffer[128];
+    std::string result = "";
+    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+        result += buffer;
+    }
+    pclose(pipe);
+
+    try {
+        std::regex regex("rgb\\((\\d+),\\s?(\\d+),\\s?(\\d+)\\)");
+        std::smatch matches;
+        if (std::regex_search(result, matches, regex)) {
+            int r = std::stoi(matches[1]);
+            int g = std::stoi(matches[2]);
+            int b = std::stoi(matches[3]);
+            setColorRGB(PackRGBAtoARGB(r, g, b, 255));
+        }
+    } catch (std::exception&) {}
 }
 #endif

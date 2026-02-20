@@ -125,6 +125,8 @@ public:
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
     void openOldWindowsColorPicker();
+#elif VSP_PLATFORM == VSP_PLATFORM_LINUX
+    void openZenityColorPicker();
 #endif
 };
 
