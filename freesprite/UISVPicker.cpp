@@ -3,6 +3,7 @@
 #include "UISVPicker.h"
 #include "EditorColorPicker.h"
 #include "FontRenderer.h"
+#include "UIColorPicker.h"
 
 void UISVPicker::drawPosIndicator(XY origin)
 {

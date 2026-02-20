@@ -4,6 +4,7 @@
 #include "mathops.h"
 #include "brush/BaseBrush.h"
 #include "keybinds.h"
+#include "json/json.hpp"
 
 struct ConfigBoolOption {
     std::string configKey;
@@ -39,6 +40,30 @@ std::vector<ConfigBoolOption> getBoolOptions() {
     };
 }
 
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+#include <emscripten/emscripten.h>
+
+EM_JS(bool, emSaveConfig, (char* jsonStr), {
+    try {
+        localStorage.setItem("voidsprite-config", UTF8ToString(jsonStr));
+        return true;
+    } catch(e) {}
+    return false;
+});
+
+EM_JS(char*, emLoadConfig, (), {
+    try {
+        var config = localStorage.getItem("voidsprite-config");
+        if (config) {
+            console.log("Config loaded from localStorage");
+            return stringToNewUTF8(config);
+        }
+    } catch(e) {}
+    console.log("Config not found in localStorage");
+    return "";
+});
+#endif
+
 bool g_saveConfig() {
 
     std::vector<ConfigBoolOption> saveBoolOptions = getBoolOptions();
@@ -46,31 +71,44 @@ bool g_saveConfig() {
     PlatformNativePathString path = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("config.txt");
     std::ofstream file(path);
     if (file.is_open()) {
+        std::map<std::string, std::string> config;
+
         for (auto& bopt : saveBoolOptions) {
-            file << bopt.configKey << "=" << (*(bopt.target) ? "1" : "0") << std::endl;
+            config[bopt.configKey] = *(bopt.target) ? "1" : "0";
         }
 
-        file << "animatedBackground=" << std::to_string(g_config.animatedBackground) << std::endl;
-        file << "maxUndoHistory=" << std::to_string(g_config.maxUndoHistory) << std::endl;
-        file << "renderer=" << g_config.preferredRenderer << std::endl;
-        file << "autosaveInterval=" << g_config.autosaveInterval << std::endl;
-        file << "language=" << g_config.language << std::endl;
-        file << "visualConfig=" << g_config.customVisualConfigPath << std::endl;
-        file << "powerSaverLevel=" << g_config.powerSaverLevel << std::endl;
-        file << "canvasZoomSensitivity=" << g_config.canvasZoomSensitivity << std::endl;
-        file << "backtraceColor=" << frmt("{:06X}", g_config.backtraceColor) << std::endl;
-        file << "fwdtraceColor=" << frmt("{:06X}", g_config.fwdtraceColor) << std::endl;
+        config["animatedBackground"] = std::to_string(g_config.animatedBackground);
+        config["maxUndoHistory"] = std::to_string(g_config.maxUndoHistory);
+        config["renderer"] = g_config.preferredRenderer;
+        config["autosaveInterval"] = std::to_string(g_config.autosaveInterval);
+        config["language"] = g_config.language;
+        config["visualConfig"] = g_config.customVisualConfigPath;
+        config["powerSaverLevel"] = std::to_string(g_config.powerSaverLevel);
+        config["canvasZoomSensitivity"] = std::to_string(g_config.canvasZoomSensitivity);
+        config["backtraceColor"] = frmt("{:06X}", g_config.backtraceColor);
+        config["fwdtraceColor"] = frmt("{:06X}", g_config.fwdtraceColor);
         
         auto keybinds = g_keybindManager.serializeKeybinds();
         for (const std::string& keybind : keybinds) {
-            file << "keybind@=" << keybind << std::endl;
+            config["keybind@" + keybind] = "";
         }
 
         for (std::string& p : g_config.lastOpenFiles) {
-            file << "lastfile=" << p << std::endl;
+            config["lastfile@" + p] = "";
         }
 
-        file.close();
+        for (auto& [key, value] : config) {
+            file << key << "=" << value << std::endl;
+        }
+
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+        nlohmann::json j;
+        for (auto& [key, value] : config) {
+            j[key] = value;
+        }
+        std::string jsonStr = j.dump();
+        return emSaveConfig((char*)jsonStr.c_str());
+#endif
         return true;
     }
     else {
@@ -79,10 +117,21 @@ bool g_saveConfig() {
 }
 
 void g_loadConfig() {
+    std::map<std::string, std::string> config;
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+    std::string jsonStr = emLoadConfig();
+    if (jsonStr != "") {
+        nlohmann::json j = nlohmann::json::parse(jsonStr);
+        for (auto& [key, value] : j.items()) {
+            config[key] = value;
+        }
+        g_configWasLoaded = true;
+    }
+#else
     PlatformNativePathString path = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("config.txt");
     std::ifstream file(path);
-    if (file.is_open()) {
-        std::map<std::string, std::string> config;
+    if (file.is_open()) 
+    {
         std::string line;
         while (std::getline(file, line)) {
             if (line.find("=") != std::string::npos) {
@@ -98,28 +147,26 @@ void g_loadConfig() {
                 }
             }
         }
-
-        std::vector<ConfigBoolOption> saveBoolOptions = getBoolOptions();
-        for (auto& bopt : saveBoolOptions) {
-            if (config.contains(bopt.configKey)) {
-                *(bopt.target) = config[bopt.configKey] == "1";
-            }
-        }
-
-        if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception&) {} }
-        if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception&) {} }
-        if (config.contains("renderer")) { g_config.preferredRenderer = config["renderer"]; }
-        if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception&) {} }
-        if (config.contains("language")) { g_config.language = config["language"]; }
-        if (config.contains("visualConfig")) { g_config.customVisualConfigPath = config["visualConfig"]; }
-        if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
-        if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
-        if (config.contains("backtraceColor")) { try { g_config.backtraceColor = std::stoul(config["backtraceColor"], nullptr, 16); } catch (std::exception&) {} }
-        if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
-
         g_configWasLoaded = true;
-        file.close();
     }
+#endif
+    std::vector<ConfigBoolOption> saveBoolOptions = getBoolOptions();
+    for (auto& bopt : saveBoolOptions) {
+        if (config.contains(bopt.configKey)) {
+            *(bopt.target) = config[bopt.configKey] == "1";
+        }
+    }
+
+    if (config.contains("animatedBackground")) { try { g_config.animatedBackground = std::stoi(config["animatedBackground"]); } catch (std::exception&) {} }
+    if (config.contains("maxUndoHistory")) { try { g_config.maxUndoHistory = std::stoi(config["maxUndoHistory"]); } catch (std::exception&) {} }
+    if (config.contains("renderer")) { g_config.preferredRenderer = config["renderer"]; }
+    if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception&) {} }
+    if (config.contains("language")) { g_config.language = config["language"]; }
+    if (config.contains("visualConfig")) { g_config.customVisualConfigPath = config["visualConfig"]; }
+    if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
+    if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
+    if (config.contains("backtraceColor")) { try { g_config.backtraceColor = std::stoul(config["backtraceColor"], nullptr, 16); } catch (std::exception&) {} }
+    if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
 }
 
 void g_tryPushLastFilePath(std::string a) {
