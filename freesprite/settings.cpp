@@ -88,13 +88,14 @@ bool g_saveConfig() {
         config["backtraceColor"] = frmt("{:06X}", g_config.backtraceColor);
         config["fwdtraceColor"] = frmt("{:06X}", g_config.fwdtraceColor);
         
+        int uqIndex = 0;
         auto keybinds = g_keybindManager.serializeKeybinds();
         for (const std::string& keybind : keybinds) {
-            config["keybind@" + keybind] = "";
+            config[frmt("keybind@{}", uqIndex++)] = keybind;
         }
 
         for (std::string& p : g_config.lastOpenFiles) {
-            config["lastfile@" + p] = "";
+            config[frmt("lastfile@{}", uqIndex++)] = p;
         }
 
         for (auto& [key, value] : config) {
@@ -139,10 +140,7 @@ void g_loadConfig() {
                 std::string value = line.substr(line.find("=") + 1);
                 config[key] = value;
 
-                if (key == "keybind@") {
-                    g_config.keybinds.push_back(value);
-                }
-                else if (key == "lastfile") {
+                if (key == "lastfile") {
                     g_config.lastOpenFiles.push_back(value);
                 }
             }
@@ -167,6 +165,15 @@ void g_loadConfig() {
     if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
     if (config.contains("backtraceColor")) { try { g_config.backtraceColor = std::stoul(config["backtraceColor"], nullptr, 16); } catch (std::exception&) {} }
     if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
+
+    for (auto& [key, value] : config) {
+        if (stringStartsWithIgnoreCase(key, "keybind@")) {
+            g_config.keybinds.push_back(value);
+        }
+        else if (stringStartsWithIgnoreCase(key, "lastfile@")) {
+            g_config.lastOpenFiles.push_back(value);
+        }
+    }
 }
 
 void g_tryPushLastFilePath(std::string a) {
