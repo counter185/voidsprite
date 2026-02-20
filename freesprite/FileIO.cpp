@@ -81,7 +81,7 @@ std::string getAllLibsVersions() {
     ret += frmt("libjxl: {}\n", getlibjxlVersion());
 #endif
 #if VSP_USE_LIBAVIF
-	ret += frmt("libavif: {}\n", getLibAVIFVersion());
+    ret += frmt("libavif: {}\n", getLibAVIFVersion());
 #endif
     ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
 
@@ -2954,6 +2954,7 @@ void g_setupIO() {
         * exAsepriteASE,
         * exORA,
         * exPNG,
+        * exAPNG,
         * exBMP,
         * exCaveStoryPBM,
         * exXYZ,
@@ -2983,7 +2984,7 @@ void g_setupIO() {
     g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", TL("vsp.export.aseprite"), &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(FileExporter::sessionExporter("AVI Video", ".avi", "", &writeAVI, FORMAT_RGB));
     g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", TL("vsp.export.gif"), &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(FileExporter::sessionExporter("Animated PNG", ".apng", TL("vsp.export.apng"), &writeAPNG, FORMAT_RGB));
+    g_fileExporters.push_back(exAPNG = FileExporter::sessionExporter("Animated PNG", ".apng", TL("vsp.export.apng"), &writeAPNG, FORMAT_RGB));
 
     g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", TL("vsp.export.png"), &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
 
@@ -3055,6 +3056,8 @@ void g_setupIO() {
 
     g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(0, "\x89PNG\x0D\x0A")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("Animated PNG", ".apng", &readAPNG, exAPNG, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(0, "\x89PNG\x0D\x0A")));
     g_fileImporters.push_back(FileImporter::flatImporter("JPEG", ".jpeg", &readSDLImage, exJPEG, FORMAT_RGB, magicVerify(0, "\xFF\xD8")));
     g_fileImporters.push_back(FileImporter::sessionImporter("AVIF", ".avif", &readAVIF, exAVIF));

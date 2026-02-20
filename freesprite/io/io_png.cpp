@@ -82,6 +82,20 @@ void writeChunkToFile(FILE* f, PNGChunk* chunk)
     fwrite(&beCRC, 4, 1, f);
 }
 
+void writeChunkToMem(std::vector<u8>& mem, PNGChunk* chunk)
+{
+    std::vector<u8> nextMem;
+    u32 length = beU32(chunk->length);
+    nextMem.insert(nextMem.end(), (u8*)&length, ((u8*)&length) + 4);
+    nextMem.insert(nextMem.end(), chunk->type, chunk->type + 4);
+    if (chunk->length > 0) {
+        nextMem.insert(nextMem.end(), chunk->data.data(), chunk->data.data() + chunk->length);
+    }
+    u32 crc = beU32(chunk->crc);
+    nextMem.insert(nextMem.end(), (u8*)&crc, ((u8*)&crc) + 4);
+    mem.insert(mem.end(), nextMem.begin(), nextMem.end());
+}
+
 Layer* readPNGFromBase64String(std::string b64)
 {
     auto seekTo = b64.find("iVBO");
@@ -261,6 +275,36 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
     png_read_info(png, info);
 
     return _readPNG(png, info);
+}
+
+Layer* readPNGFromRawChunks(PNGIHDRChunk ihdr, std::vector<PNGChunk>& otherChunks, PNGChunk idat)
+{
+    std::vector<u8> pngData;
+
+    u8 pngHeader[8] = { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+    pngData.insert(pngData.end(), pngHeader, pngHeader + 8);
+
+    PNGChunk ihdrChunk;
+    ihdrChunk.length = sizeof(PNGIHDRChunk);
+    memcpy(ihdrChunk.type, "IHDR\0", 5);
+    ihdrChunk.data = std::vector<u8>((u8*)&ihdr, (u8*)&ihdr + sizeof(PNGIHDRChunk));
+    calcCRCAndSize(&ihdrChunk);
+    writeChunkToMem(pngData, &ihdrChunk);
+
+    for (PNGChunk chunk : otherChunks) {
+        calcCRCAndSize(&chunk);
+        writeChunkToMem(pngData, &chunk);
+    }
+    calcCRCAndSize(&idat);
+    writeChunkToMem(pngData, &idat);
+
+    PNGChunk iend;
+    iend.length = 0;
+    memcpy(iend.type, "IEND\0", 5);
+    calcCRCAndSize(&iend);
+    writeChunkToMem(pngData, &iend);
+
+    return readPNGFromMem(pngData.data(), pngData.size());
 }
 
 //todo: condense this and writePNG into one function
@@ -467,6 +511,136 @@ bool writePNG(PlatformNativePathString path, Layer* data)
         return true;
     }
     return false;
+}
+
+MainEditor* readAPNG(PlatformNativePathString path, OperationProgressReport* progress)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        DoOnReturn closeFile([f]() { fclose(f); });
+
+        std::vector<u8> fileData;
+        fseek(f, 0, SEEK_END);
+        size_t fileSize = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        fileData.resize(fileSize);
+        fread(fileData.data(), 1, fileSize, f);
+
+        std::vector<PNGChunk> chunks = loadPNGChunksFromMem(fileData);
+
+        PNGIHDRChunk ihdr;
+
+        PNGChunk& firstChunk = chunks.front();
+        if (std::string(firstChunk.type) == "IHDR" && firstChunk.length == 13) {
+            ihdr = *(PNGIHDRChunk*)firstChunk.data.data();
+        }
+        else {
+            logerr("invalid APNG file. first chunk is not IHDR");
+            return NULL;
+        }
+
+        std::vector<PNGChunk> chunksBeforeACTL;
+        for (PNGChunk& chunk : chunks) {
+            std::string typeStr(chunk.type);
+            if (typeStr == "acTL" || typeStr == "fcTL" || typeStr == "IDAT" || typeStr == "fdAT" || typeStr == "IEND") {
+                break;
+            }
+            else if (typeStr != "IHDR") {
+                chunksBeforeACTL.push_back(chunk);
+            }
+        }
+
+        //there might be multiple so we need to gather all of them first
+        std::vector<PNGChunk> idatChunks;
+        for (PNGChunk& chunk : chunks) {
+            std::string typeStr(chunk.type);
+            if (typeStr == "IDAT") {
+                idatChunks.push_back(chunk);
+            }
+        }
+
+        double frameTimeSum = 0;
+        int frameTimeCount = 0;
+
+        std::vector<Frame*> frames;
+
+        PNGfcTLChunk* lastfcTL = NULL;
+        bool writtenIDATs = false;
+        for (PNGChunk& chunk : chunks) {
+            std::string typeStr(chunk.type);
+            if (typeStr == "fcTL") {
+                if (chunk.length >= 26) {
+                    lastfcTL = (PNGfcTLChunk*)chunk.data.data();
+                }
+                else {
+                    logerr("invalid fcTL chunk with length < 26");
+                    return NULL;
+                }
+            }
+            else if (typeStr == "IDAT") {
+                //default image might not be part of the animation
+                if (lastfcTL != NULL && !writtenIDATs) {
+                    frameTimeSum += (double)beU16(lastfcTL->delayNum) / beU16(lastfcTL->delayDen);
+                    frameTimeCount++;
+                    Layer* l = readPNGFromRawChunks(ihdr, chunksBeforeACTL, chunk);
+                    Frame* f = new Frame();
+                    f->layers = { l };
+                    frames.push_back(f);
+                    writtenIDATs = true;
+                }
+            }
+            else if (typeStr == "fdAT") {
+                if (lastfcTL == NULL) {
+                    logerr("fdAT chunk found before any fcTL chunk");
+                }
+                else {
+                    frameTimeSum += (double)beU16(lastfcTL->delayNum) / beU16(lastfcTL->delayDen);
+                    frameTimeCount++;
+
+                    auto ihdrCopy = ihdr;
+                    ihdrCopy.width = lastfcTL->width;
+                    ihdrCopy.height = lastfcTL->height;
+
+                    auto chunkCopy = chunk;
+                    memcpy(chunkCopy.type, "IDAT\0", 5);
+                    chunkCopy.length -= 4;
+                    chunkCopy.data.erase(chunkCopy.data.begin(), chunkCopy.data.begin() + 4);
+
+                    Layer* l = readPNGFromRawChunks(ihdrCopy, chunksBeforeACTL, chunkCopy);
+                    PNGfcTLChunk fcTLData = *(PNGfcTLChunk*)lastfcTL;
+                    if (fcTLData.width != ihdrCopy.width || fcTLData.height != ihdrCopy.height
+                        || fcTLData.xOffset != 0 || fcTLData.yOffset != 0) {
+                        Layer* ll = Layer::tryAllocLayer(beU32(ihdr.width), beU32(ihdr.height));
+                        if (ll != NULL) {
+                            ll->blit(l, XY{ (int)beU32(fcTLData.xOffset), (int)beU32(fcTLData.yOffset) }, SDL_Rect{ 0,0,l->w,l->h }, true);
+                            delete l;
+                            l = ll;
+                        }
+                        else {
+                            g_addNotificationFromThread(NOTIF_MALLOC_FAIL);
+                            delete l;
+                            l = NULL;
+                        }
+                    }
+
+                    if (l != NULL) {
+                        l->name = "APNG Layer";
+                        Frame* f = new Frame();
+                        f->layers = { l };
+                        frames.push_back(f);
+                    }
+                }
+            }
+        }
+
+        if (!frames.empty()) {
+            MainEditor* ret = new MainEditor(frames);
+            ret->frameAnimMSPerFrame = frameTimeCount > 0 ? (int)round(frameTimeSum / frameTimeCount * 1000) : 200;
+            return ret;
+        }
+
+    }
+    return NULL;
 }
 
 bool writeAPNG(PlatformNativePathString path, MainEditor* data)
