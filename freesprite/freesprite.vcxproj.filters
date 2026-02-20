@@ -755,6 +755,9 @@
     <ClInclude Include="EditorColorPicker.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
+    <ClInclude Include="IEditorColorPicker.h">
+      <Filter>Header files\ui_widgets</Filter>
+    </ClInclude>
     <ClInclude Include="ScreenWideNavBar.h">
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>

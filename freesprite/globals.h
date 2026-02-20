@@ -257,6 +257,7 @@ class UILayerButton;
 class UIButton;
 class UILabel;
 class UISlider;
+class UIColorSlider;
 class UITextField;
 class UINumberInputField;
 class UICheckbox;

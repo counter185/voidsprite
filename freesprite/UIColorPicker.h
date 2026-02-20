@@ -1,5 +1,5 @@
 #pragma once
-#include "DraggablePanel.h"
+#include "Panel.h"
 #include "EventCallbackListener.h"
 #include "colormodels.h"
 #include "UIColorSlider.h"
@@ -38,16 +38,13 @@ public:
 };
 
 
-class UIColorPicker : public DraggablePanel, public EventCallbackListener
+class UIColorPicker : public Panel, public EventCallbackListener
 {
 protected:
     bool canEditPalettes = true;
 
-    //literally only here so that PalettizedEditorColorPicker doesn't initialize all the widgets
-    UIColorPicker(int w, int h);
-
-    virtual void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
-    virtual void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
+    void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
+    void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
 public:
     std::function<void(UIColorPicker*, u32)> onColorChangedCallback = NULL;
     u32 colorNowU32 = 0xFF000000;
@@ -88,7 +85,6 @@ public:
     void eventSliderPosChanged(int evt_id, float f) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
-    virtual void updateLastColorButtons() {}
     void reloadColorLists();
     void addColorToPalette(NamedColorPalette p, u32 color);
     void updateColorModelSliders(std::string dontUpdate = "");

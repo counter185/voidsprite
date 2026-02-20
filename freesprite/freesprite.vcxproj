@@ -676,6 +676,7 @@
     <ClInclude Include="easybmp\EasyBMP_DataStructures.h" />
     <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h" />
     <ClInclude Include="EditorBrushPicker.h" />
+    <ClInclude Include="IEditorColorPicker.h" />
     <ClInclude Include="EditorColorPicker.h" />
     <ClInclude Include="EditorLayerPicker.h" />
     <ClInclude Include="EditorSpritesheetPreview.h" />

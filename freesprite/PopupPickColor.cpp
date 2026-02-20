@@ -14,9 +14,7 @@ PopupPickColor::PopupPickColor(std::string tt, std::string tx, bool acceptAlpha)
     //wxsManager.addDrawable(colorInput);
 
     colorPicker = new UIColorPicker();
-    colorPicker->passThroughMouse = true;
-    colorPicker->position = XY{ 30, wxHeight / 2 - colorPicker->wxHeight/2 };
-    colorPicker->wxWidth = 200;
+    colorPicker->position = XY{ 30, wxHeight / 2 - 390/2 };
     wxsManager.addDrawable(colorPicker);
 
     if (acceptAlpha) {

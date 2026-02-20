@@ -12,6 +12,7 @@
 #include "Panel.h"
 #include "PanelUserInteractable.h"
 #include "ScreenWideNavBar.h"
+#include "IEditorColorPicker.h"
 
 struct NET_StreamSocket;
 
@@ -258,7 +259,7 @@ public:
 
     ScreenWideNavBar* navbar;
     ScreenWideActionBar* actionbar;
-    EditorColorPicker* colorPicker;
+    IEditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;
     EditorFramePicker* framePicker;

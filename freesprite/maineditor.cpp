@@ -29,6 +29,7 @@
 #include "UIStackPanel.h"
 #include "UndoStack.h"
 #include "EditorFramePicker.h"
+#include "UISlider.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1297,7 +1298,7 @@ void MainEditor::setUpWidgets()
     makeActionBar();
 
     colorPicker = new EditorColorPicker(this);
-    CollapsableDraggablePanel* colorPickerPanel = new CollapsableDraggablePanel(TL("vsp.maineditor.panel.colorpicker.title"), colorPicker);
+    Panel* colorPickerPanel = colorPicker->getPanel();
     colorPickerPanel->position.y = 67;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
@@ -1675,11 +1676,10 @@ void MainEditor::takeInput(SDL_Event evt) {
                     break;
                 case SDL_MOUSEWHEEL:
                     if (g_ctrlModifier && !g_config.scrollWithTouchpad) {
-                        colorPicker->setColorHSV(colorPicker->currentH, fxmin(fxmax(colorPicker->currentS + 0.1 * evt.wheel.y, 0), 1), colorPicker->currentV);
+                        colorPicker->actionCtrlScroll(evt.wheel.y);
                     }
                     else if (g_shiftModifier && !g_config.scrollWithTouchpad) {
-                        double newH = dxmin(dxmax(colorPicker->currentH + (360.0 / 12) * evt.wheel.y, 0), 359);
-                        colorPicker->setColorHSV(newH, colorPicker->currentS, colorPicker->currentV);
+                        colorPicker->actionShiftScroll(evt.wheel.y);
                     }
                     else {
                         if (g_config.scrollWithTouchpad && !g_ctrlModifier) {
@@ -1807,11 +1807,8 @@ std::vector<std::string> MainEditor::dropEverythingYoureDoingAndSave()
 
 void MainEditor::focusOnColorInputTextBox()
 {
-    if (colorPicker->colorTextField != NULL) {
-        wxsManager.forceFocusOn(colorPicker);
-        colorPicker->subWidgets.forceFocusOn(colorPicker->colorTextField);
-        colorPicker->colorTextField->setText("");
-    }
+    wxsManager.forceFocusOn(colorPicker->getPanel());
+    colorPicker->forceFocusOnColorInputField();
 }
 
 void MainEditor::layer_clearSelectedArea()
@@ -2540,8 +2537,7 @@ void MainEditor::regenerateLastColors()
     if (getLayerStack().empty()) {
         return;
     }
-    colorPicker->lastColors.clear();
-    colorPicker->lastColorsChanged = true;
+    colorPicker->clearLastColors();
     Layer* flatLayer = flattenImage();
     auto colorPalette = flatLayer->get256MostUsedColors();
     delete flatLayer;

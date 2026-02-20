@@ -1,35 +1,54 @@
 #pragma once
-#include "EditorColorPicker.h"
-#include "MainEditorPalettized.h"
+#include "PanelUserInteractable.h"
+#include "EventCallbackListener.h"
+#include "IEditorColorPicker.h"
+
 class PalettizedEditorColorPicker :
-    public EditorColorPicker
+    public PanelUserInteractable, public IEditorColorPicker, public EventCallbackListener
 {
 protected:
-    PalettizedEditorColorPicker() {}
-
-    void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontupdatemodel = "") override {}
-    void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontupdatemodel = "") override {}
+    void _toggleEraser();
+    void updateEraserButton();
+    void updatePanelColors();
 public:
-    MainEditorPalettized* upcastCaller;
+    MainEditorPalettized* caller;
     TabbedView* colorPaletteTabs;
 
     UILabel* pickedColorLabel = NULL;
 
+    UIButton* eraserButton = NULL;
+
     PalettizedEditorColorPicker(MainEditorPalettized* caller);
 
-    void render(XY position) override;
+    void render(XY at) override {
+        updatePanelColors();
+        PanelUserInteractable::render(at);
+    };
+    void renderAfterBG(XY position) override;
 
-    void eventButtonPressed(int evt_id) override;
-    void eventButtonRightClicked(int evt_id) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
     void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
-    void eventColorSet(int evt_id, uint32_t color) override;
-
-    void updateLastColorButtons() override {}
 
     void updateForcedColorPaletteButtons();
     void setPickedPaletteIndex(int32_t index);
+
+    Panel* getPanel() override { return this; }
+
+    void toggleEraser() override;
+    void toggleBlendMode() override {};
+    void forceFocusOnColorInputField() override {};
+
+    void setColorRGB(u32 color) override;
+
+    void updateAlphaSlider() override {};
+
+    void pushLastColor(u32 color) override {};
+    void clearLastColors() override {};
+    void reloadColorLists() override {};
+
+    void actionCtrlScroll(float scrollAmount) override {};
+    void actionShiftScroll(float scrollAmount) override {};
 
 };
 

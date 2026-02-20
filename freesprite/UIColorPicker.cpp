@@ -27,14 +27,9 @@ ColorPickerColorButton::ColorPickerColorButton(UIColorPicker* parent, u32 color)
     };
 }
 
-UIColorPicker::UIColorPicker(int w, int h)
+UIColorPicker::UIColorPicker()
 {
-    wxWidth = w;
-    wxHeight = h;
-}
-
-UIColorPicker::UIColorPicker() : UIColorPicker(400, 390)
-{
+    passThroughMouse = true;
 
     colorModeTabs = new TabbedView({ 
         { TL("vsp.maineditor.panel.colorpicker.tab.colors")},

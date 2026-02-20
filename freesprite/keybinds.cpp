@@ -80,11 +80,11 @@ void g_initKeybinds()
     };
     g_keybindManager.addKeybind("maineditor", "toggle_eraser", 
         KeyCombo(TL("vsp.keybinds.maineditor.eraser"), SDL_SCANCODE_E, false, false, [](void* d) {
-            ((MainEditor*)d)->colorPicker->eraserButton->click();
+            ((MainEditor*)d)->colorPicker->toggleEraser();
         }));
     g_keybindManager.addKeybind("maineditor", "toggle_blendmode", 
         KeyCombo(TL("vsp.keybinds.maineditor.blend"), SDL_SCANCODE_INSERT, false, false, [](void* d) {
-            if (((MainEditor*)d)->colorPicker->blendModeButton != NULL)  ((MainEditor*)d)->colorPicker->blendModeButton->click();
+            ((MainEditor*)d)->colorPicker->toggleBlendMode();
         }));
     g_keybindManager.addKeybind("maineditor", "zoom_in_canvas", 
         KeyCombo(TL("vsp.keybinds.maineditor.zoomin"), KEY_UNASSIGNED, false, false, [](void* d) {

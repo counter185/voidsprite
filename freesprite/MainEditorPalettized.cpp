@@ -554,7 +554,7 @@ void MainEditorPalettized::setUpWidgets()
     }
 
     colorPicker = new PalettizedEditorColorPicker(this);
-    auto colorPickerPanel = new CollapsableDraggablePanel("COLOR PICKER", colorPicker);
+    auto colorPickerPanel = colorPicker->getPanel();
     colorPickerPanel->position.y = 63;
     colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
