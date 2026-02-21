@@ -91,11 +91,12 @@ bool g_saveConfig() {
         int uqIndex = 0;
         auto keybinds = g_keybindManager.serializeKeybinds();
         for (const std::string& keybind : keybinds) {
-            config[frmt("keybind@{}", uqIndex++)] = keybind;
+            config[frmt("keybind@{:05}", uqIndex++)] = keybind;
         }
 
+        //map stores alphabetically and lastfiles should keep their order
         for (std::string& p : g_config.lastOpenFiles) {
-            config[frmt("lastfile@{}", uqIndex++)] = p;
+            config[frmt("lastfile@{:05}", uqIndex++)] = p;
         }
 
         for (auto& [key, value] : config) {
