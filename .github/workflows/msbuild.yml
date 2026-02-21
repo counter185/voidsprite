@@ -436,7 +436,7 @@ jobs:
     with:
       build-arch: armeabi-v7a
   
-  build-android-all:
+  android-merge-cpu-apks:
     needs: [build-android-x64, build-android-arm64, build-android-armv7]
     runs-on: ubuntu-latest
     steps:
