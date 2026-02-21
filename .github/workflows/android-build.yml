@@ -68,7 +68,7 @@ jobs:
         rm -rf keystore
         rm build/outputs/apk/releaseOneArch/output-metadata.json
         rm -rf build/outputs/apk/releaseOneArch/baselineProfiles
-        mv build/outputs/apk/releaseOneArch/app-release.apk build/outputs/apk/releaseOneArch/voidsprite-release.apk
+        mv build/outputs/apk/releaseOneArch/app-releaseOneArch.apk build/outputs/apk/releaseOneArch/voidsprite-release.apk
         cp -R ../../OPEN_SOURCE_LICENSES build/outputs/apk/releaseOneArch/OPEN_SOURCE_LICENSES
 
     - name: Push build artifacts
