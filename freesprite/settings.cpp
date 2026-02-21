@@ -170,9 +170,11 @@ void g_loadConfig() {
         if (stringStartsWithIgnoreCase(key, "keybind@")) {
             g_config.keybinds.push_back(value);
         }
-        else if (stringStartsWithIgnoreCase(key, "lastfile@")) {
+#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+        else if (stringStartsWithIgnoreCase(key, "lastfile@") && !value.empty()) {
             g_config.lastOpenFiles.push_back(value);
         }
+#endif
     }
 }
 

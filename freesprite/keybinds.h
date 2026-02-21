@@ -165,13 +165,22 @@ public:
 
     void deserializeKeybindLine(std::string line) {
         auto splitByColon = splitString(line, ':');
+        if (splitByColon.size() < 2) {
+            return;
+        }
         std::string path = splitByColon[0];
         auto splitBySlash = splitString(path, '/');
+        if (splitBySlash.size() < 2) {
+            return;
+        }
         std::string region = splitBySlash[0];
         std::string keyName = splitBySlash[1];
 
         std::string fullKey = splitByColon[1];
         auto splitByPlus = splitString(fullKey, '+');
+        if (splitByPlus.size() < 3) {
+            return;
+        }
         int key = std::stoi(splitByPlus[0]);
         bool ctrl = splitByPlus[1] == "1";
         bool shift = splitByPlus[2] == "1";
