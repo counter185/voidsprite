@@ -471,3 +471,4 @@ web-build/voidsprite.wasm
 android-project/app/jni/libavif/
 /cmake/build_em
 cmake/libavif/
+android-project/local.properties
