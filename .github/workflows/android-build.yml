@@ -16,6 +16,10 @@ on:
       SIGNING_STORE_PASSWORD:
         required: true
 
+env:
+  GIT_HASH: ${{ github.sha }}
+  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   build-android-onearch:
     runs-on: ubuntu-latest

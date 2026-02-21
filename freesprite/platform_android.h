@@ -272,3 +272,10 @@ std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
         "/system/fonts"
     };
 }
+
+void platformRunAutoUpdate() {
+    jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "runUpdaterActivity", "()V");
+    if (checkMethod != nullptr) {
+        lastJNI->CallStaticVoidMethod(vspActivityClass, checkMethod);
+    }
+}

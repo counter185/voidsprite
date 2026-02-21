@@ -76,3 +76,7 @@ void platformPrintDocument(Layer* layer);
 std::vector<NetworkAdapterInfo> platformGetNetworkAdapters();
 
 std::vector<PlatformNativePathString> platformGetSystemFontPaths();
+
+#if VSP_PLATFORM == VSP_PLATFORM_ANDROID
+void platformRunAutoUpdate();
+#endif

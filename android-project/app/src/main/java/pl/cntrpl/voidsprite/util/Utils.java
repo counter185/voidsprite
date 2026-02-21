@@ -1,5 +1,6 @@
 package pl.cntrpl.voidsprite.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -102,5 +103,21 @@ public class Utils {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static void writeDataToFile(File outFile, byte[] data) throws IOException {
+        FileOutputStream fos = new FileOutputStream(outFile);
+        fos.write(data);
+        fos.close();
+    }
+
+    public static byte[] readAllBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[4096];
+        int nRead;
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+        return buffer.toByteArray();
     }
 }

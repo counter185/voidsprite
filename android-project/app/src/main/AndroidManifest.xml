@@ -60,6 +60,8 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
     <!-- Create a Java class extending SDLActivity and place it in a
          directory under app/src/main/java matching the package, e.g. app/src/main/java/com/gamemaker/game/MyGame.java
 
@@ -115,6 +117,11 @@
         </activity>
 
         <activity
+            android:name=".UpdateVSPActivity"
+            android:exported="true"
+            android:label="Update"/>
+
+        <activity
             android:name="pl.cntrpl.voidsprite.LospecDLActivity"
             android:exported="true"
             android:label="Download palette">
@@ -148,6 +155,15 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
+
+        <receiver
+            android:name=".util.InstallerReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="APP_INSTALL_ACTION" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
