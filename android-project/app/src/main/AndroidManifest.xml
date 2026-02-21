@@ -117,11 +117,6 @@
         </activity>
 
         <activity
-            android:name=".UpdateVSPActivity"
-            android:exported="true"
-            android:label="Update"/>
-
-        <activity
             android:name="pl.cntrpl.voidsprite.LospecDLActivity"
             android:exported="true"
             android:label="Download palette">

@@ -157,8 +157,7 @@ public class VSPActivity extends SDLActivity {
     }
 
     public static void runUpdaterActivity() {
-        Intent myIntent = new Intent(activitySingleton, UpdateVSPActivity.class);
-        activitySingleton.startActivity(myIntent);
+        UpdateVSP.runUpdater(activitySingleton);
     }
     public static String fetchStringHTTP(String url) {
         return Utils.fetchStringHTTP(url);

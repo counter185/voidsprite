@@ -26,18 +26,19 @@ import androidx.core.content.FileProvider;
 import pl.cntrpl.voidsprite.util.InstallerReceiver;
 import pl.cntrpl.voidsprite.util.Utils;
 
-public class UpdateVSPActivity extends Activity {
+public class UpdateVSP  {
 
-    class VSPDownloadAPKTask extends Thread {
-        private final Activity context;
+    public static class VSPDownloadAPKTask extends Thread {
+        private final Context context;
 
-        public VSPDownloadAPKTask(Activity context) {
+        public VSPDownloadAPKTask(Context context) {
             this.context = context;
         }
 
         @Override
         public void run() {
             Looper.prepare();
+            Toast.makeText(context, "Download started", Toast.LENGTH_LONG).show();
             String url = "https://nightly.link/counter185/voidsprite/workflows/msbuild/main/voidsprite-build-android.zip";
             byte[] data = Utils.fetchDataHTTP(url);
             if (data == null) {
@@ -88,17 +89,13 @@ public class UpdateVSPActivity extends Activity {
                 }
             }
 
-            context.finish();
             Looper.loop();
             Looper.myLooper().quitSafely();
         }
     }
 
-    @Override
-    protected void onCreate(android.os.Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_update_vsp);
+    public static void runUpdater(Context c) {
 
-        new VSPDownloadAPKTask(this).start();
+        new VSPDownloadAPKTask(c).start();
     }
 }
