@@ -406,62 +406,82 @@ jobs:
         name: voidsprite-build-emscripten
         path: web-build
 
-  build-android:
+  build-android-x64:
+    uses: ./.github/workflows/android-build.yml
+    with:
+      build-arch: x86_64
+  
+  build-android-arm64:
+    uses: ./.github/workflows/android-build.yml
+    with:
+      build-arch: arm64-v8a
+  
+  build-android-armv7:
+    uses: ./.github/workflows/android-build.yml
+    with:
+      build-arch: armeabi-v7a
+  
+  build-android-all:
+    needs: [build-android-x64, build-android-arm64, build-android-armv7]
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Decode Keystore
-      env:
-        ENCODED_STRING: ${{ secrets.KEYSTORE }}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        mkdir android-project/app/keystore
-        echo $ENCODED_STRING | base64 -di > android-project/app/keystore/vsp_keystore.jks
-
-    - name: setup android dependencies
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: chmod u+x ./setup_android_on_linux.sh && ./setup_android_on_linux.sh
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
         log-accepted-android-sdk-licenses: false
 
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r27c
-        link-to-sdk: true
+    - name: Decode Keystore
+      env:
+        ENCODED_STRING: ${{ secrets.KEYSTORE }}
+      run: |
+        echo $ENCODED_STRING | base64 -di > vsp_keystore.jks
 
-    - name: gradlew build
+    - name: download x64 build
+      uses: actions/download-artifact@v4
+      with:
+        name: voidsprite-build-android-x86_64
+    - name: download arm64 build
+      uses: actions/download-artifact@v4
+      with:
+        name: voidsprite-build-android-arm64-v8a
+    - name: download armv7 build
+      uses: actions/download-artifact@v4
+      with:
+        name: voidsprite-build-android-armeabi-v7a
+    
+    - name: unpack all of these
+      run:
+        unzip voidsprite-build-android-arm64-v8a.zip 'voidsprite-release.apk' -d .
+        mv voidsprite-release.apk voidsprite-arm64-v8a.apk
+        unzip voidsprite-build-android-armeabi-v7a.zip 'voidsprite-release.apk' -d .
+        mv voidsprite-release.apk voidsprite-armeabi-v7a.apk
+        unzip voidsprite-build-android-x86_64.zip 'voidsprite-release.apk' -d .
+        mv voidsprite-release.apk voidsprite-x86_64.apk
+    
+    - name: merge all the apks
       env:
         SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
         SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd android-project && chmod u+x ./gradlew && ./gradlew app:assembleRelease
-
-    - name: clean up
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        cd android-project/app
-        rm -rf keystore
-        rm build/outputs/apk/release/output-metadata.json
-        rm -rf build/outputs/apk/release/baselineProfiles
-        mv build/outputs/apk/release/app-release.apk build/outputs/apk/release/voidsprite-release.apk
-        cp -R ../../OPEN_SOURCE_LICENSES build/outputs/apk/release/OPEN_SOURCE_LICENSES
-
+      run:
+        mkdir outapk
+        unzip voidsprite-x86_64.apk '*' -d outapk
+        unzip voidsprite-arm64-v8a.apk 'lib/*' -d outapk
+        unzip voidsprite-armeabi-v7a.apk 'lib/*' -d outapk
+        cd outapk && zip -r ../voidsprite-release.apk * && cd .. && rm -rf outapk
+        zipalign -P 16 -f -v 4 voidsprite-release.apk voidsprite-release-aligned.apk
+        apksigner sign --ks vsp_keystore.jks --ks-key-alias $SIGNING_KEY_ALIAS --ks-pass env:SIGNING_STORE_PASSWORD --key-pass env:SIGNING_KEY voidsprite-release-aligned.apk
+        mkdir output
+        mv voidsprite-release-aligned.apk ./output/voidsprite-release.apk
+    
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: voidsprite-build-android
+        name: voidsprite-build-android-all
         path: |
-          android-project/app/build/outputs/apk/release
+          output
+      
+
+
+
+        

@@ -56,6 +56,28 @@ android {
                 abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
             }
         }
+        debugOneArch {
+            minifyEnabled false
+            applicationIdSuffix ".debug"
+            versionNameSuffix "◆debug"
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            def buildArch = System.getenv("VSP_BUILD_ARCH")
+            ndk {
+                abiFilters new String[]{buildArch != null ? buildArch : "arm64-v8a"}
+            }
+        }
+        releaseOneArch {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            def buildArch = System.getenv("VSP_BUILD_ARCH")
+            ndk {
+                abiFilters new String[]{buildArch != null ? buildArch : "arm64-v8a"}
+            }
+        }
     }
     applicationVariants.all { variant ->
         tasks["merge${variant.name.capitalize()}Assets"]
