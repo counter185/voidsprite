@@ -488,12 +488,12 @@ jobs:
         $ANDROID_HOME/build-tools/36.1.0/apksigner sign --ks vsp_keystore.jks --ks-key-alias $SIGNING_KEY_ALIAS --ks-pass env:SIGNING_STORE_PASSWORD --key-pass env:SIGNING_KEY_PASSWORD voidsprite-release-aligned.apk
         mkdir output
         mv voidsprite-release-aligned.apk ./output/voidsprite-release.apk
-        cp OPEN_SOURCE_LICENSES ./output/OPEN_SOURCE_LICENSES
+        cp -r OPEN_SOURCE_LICENSES ./output/OPEN_SOURCE_LICENSES
     
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: voidsprite-build-android-all
+        name: voidsprite-build-android
         path: |
           output
       
