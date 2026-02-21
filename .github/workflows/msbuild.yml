@@ -477,7 +477,7 @@ jobs:
         SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
         SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-      run:
+      run: |
         mkdir outapk
         unzip voidsprite-x86_64.apk '*' -d outapk
         unzip voidsprite-arm64-v8a.apk 'lib/*' -d outapk
