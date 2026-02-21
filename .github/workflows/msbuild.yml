@@ -483,7 +483,7 @@ jobs:
         unzip voidsprite-x86_64.apk '*' -d outapk
         unzip voidsprite-arm64-v8a.apk 'lib/*' -d outapk
         unzip voidsprite-armeabi-v7a.apk 'lib/*' -d outapk
-        cd outapk && zip -r ../voidsprite-release.apk * && cd .. && rm -rf outapk
+        cd outapk && zip -n "resources.arsc" -r ../voidsprite-release.apk * && cd .. && rm -rf outapk
         $ANDROID_HOME/build-tools/36.1.0/zipalign -P 16 -f -v 4 voidsprite-release.apk voidsprite-release-aligned.apk
         $ANDROID_HOME/build-tools/36.1.0/apksigner sign --ks vsp_keystore.jks --ks-key-alias $SIGNING_KEY_ALIAS --ks-pass env:SIGNING_STORE_PASSWORD --key-pass env:SIGNING_KEY_PASSWORD voidsprite-release-aligned.apk
         mkdir output
