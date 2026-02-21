@@ -408,16 +408,31 @@ jobs:
 
   build-android-x64:
     uses: ./.github/workflows/android-build.yml
+    secrets:
+      KEYSTORE: ${{ secrets.KEYSTORE }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
     with:
       build-arch: x86_64
   
   build-android-arm64:
     uses: ./.github/workflows/android-build.yml
+    secrets:
+      KEYSTORE: ${{ secrets.KEYSTORE }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
     with:
       build-arch: arm64-v8a
   
   build-android-armv7:
     uses: ./.github/workflows/android-build.yml
+    secrets:
+      KEYSTORE: ${{ secrets.KEYSTORE }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
     with:
       build-arch: armeabi-v7a
   
