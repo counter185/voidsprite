@@ -44,7 +44,6 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        packages: 'tools platform-tools build-tools;36.1.0'
         log-accepted-android-sdk-licenses: false
 
     - uses: nttld/setup-ndk@v1

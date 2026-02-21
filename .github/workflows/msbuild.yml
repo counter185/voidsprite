@@ -443,7 +443,7 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        packages: 'tools platform-tools build-tools;36.1.0'
+        packages: 'platform-tools build-tools;36.1.0'
         log-accepted-android-sdk-licenses: false
 
     - name: Decode Keystore
@@ -485,9 +485,10 @@ jobs:
         unzip voidsprite-armeabi-v7a.apk 'lib/*' -d outapk
         cd outapk && zip -r ../voidsprite-release.apk * && cd .. && rm -rf outapk
         $ANDROID_HOME/build-tools/36.1.0/zipalign -P 16 -f -v 4 voidsprite-release.apk voidsprite-release-aligned.apk
-        $ANDROID_HOME/build-tools/36.1.0/apksigner sign --ks vsp_keystore.jks --ks-key-alias $SIGNING_KEY_ALIAS --ks-pass env:SIGNING_STORE_PASSWORD --key-pass env:SIGNING_KEY voidsprite-release-aligned.apk
+        $ANDROID_HOME/build-tools/36.1.0/apksigner sign --ks vsp_keystore.jks --ks-key-alias $SIGNING_KEY_ALIAS --ks-pass env:SIGNING_STORE_PASSWORD --key-pass env:SIGNING_KEY_PASSWORD voidsprite-release-aligned.apk
         mkdir output
         mv voidsprite-release-aligned.apk ./output/voidsprite-release.apk
+        cp OPEN_SOURCE_LICENSES ./output/OPEN_SOURCE_LICENSES
     
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
