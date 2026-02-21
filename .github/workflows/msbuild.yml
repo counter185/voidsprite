@@ -455,23 +455,22 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: voidsprite-build-android-x86_64
+    - name: rename x64 build
+      run: mv voidsprite-release.apk voidsprite-x86_64.apk
+
     - name: download arm64 build
       uses: actions/download-artifact@v4
       with:
         name: voidsprite-build-android-arm64-v8a
+    - name: rename arm64 build
+      run: mv voidsprite-release.apk voidsprite-arm64-v8a.apk
+
     - name: download armv7 build
       uses: actions/download-artifact@v4
       with:
         name: voidsprite-build-android-armeabi-v7a
-    
-    - name: unpack all of these
-      run:
-        unzip voidsprite-build-android-arm64-v8a.zip 'voidsprite-release.apk' -d .
-        mv voidsprite-release.apk voidsprite-arm64-v8a.apk
-        unzip voidsprite-build-android-armeabi-v7a.zip 'voidsprite-release.apk' -d .
-        mv voidsprite-release.apk voidsprite-armeabi-v7a.apk
-        unzip voidsprite-build-android-x86_64.zip 'voidsprite-release.apk' -d .
-        mv voidsprite-release.apk voidsprite-x86_64.apk
+    - name: rename armv7 build
+      run: mv voidsprite-release.apk voidsprite-armeabi-v7a.apk
     
     - name: merge all the apks
       env:
