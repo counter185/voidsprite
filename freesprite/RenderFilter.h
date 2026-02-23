@@ -12,6 +12,7 @@ class GenNoiseFilter : public RenderFilter
 {
 public:
     std::string name() override { return "Monochrome noise"; }
+    std::string id() override { return "filter.render.bwnoise"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override {
         bool grayscale = std::stod(options["grayscale"]) == 1;
         bool black_to_alpha = std::stod(options["black is alpha"]) == 1;
@@ -46,6 +47,7 @@ class GenRGBNoiseFilter : public RenderFilter
 {
 public:
     std::string name() override { return "RGBA noise"; }
+    std::string id() override { return "filter.render.rgbanoise"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override {
         
         int rmin = std::stoi(options["red.min"]), rmax = std::stoi(options["red.max"]);
@@ -106,6 +108,7 @@ public:
 
 class PrintPaletteFilter : public RenderFilter {
     std::string name() override { return "Render palette"; }
+    std::string id() override { return "filter.render.printpalette"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override { 
         Layer* c = copy(src);
         int columns = std::stoi(options["columns"]);

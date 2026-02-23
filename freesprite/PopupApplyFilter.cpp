@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "PopupApplyFilter.h"
 #include "BaseFilter.h"
 #include "EventCallbackListener.h"
@@ -9,6 +11,7 @@
 #include "UICheckbox.h"
 #include "maineditor.h"
 #include "background_operation.h"
+#include "Notification.h"
 #include "FontRenderer.h"
 
 PopupApplyFilter::~PopupApplyFilter() {
@@ -22,6 +25,48 @@ PopupApplyFilter::~PopupApplyFilter() {
     if (previewTexture != NULL) {
         target->effectPreviewTexture = NULL;
         tracked_destroyTexture(previewTexture);
+    }
+}
+
+void PopupApplyFilter::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) {
+    if (evt_id == EVENT_APPLYFILTER_SAVEPRESET) {
+        FilterPreset newPreset = FilterPreset(targetFilter->id(), buildParameterMap(params));
+        std::string serialized = newPreset.serialize();
+        std::ofstream outFile(convertStringToUTF8OnWin32(name));
+        if (outFile.is_open()) {
+            outFile << serialized;
+            outFile.close();
+            g_addNotification(SuccessShortNotification("Success", "Filter preset saved"));
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to save filter preset"));
+        }
+    }
+}
+
+void PopupApplyFilter::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
+    if (evt_id == EVENT_APPLYFILTER_LOADPRESET) {
+        std::ifstream inFile(convertStringToUTF8OnWin32(name));
+        if (inFile.is_open()) {
+            std::string line;
+            std::string serialized;
+            while (std::getline(inFile, line)) {
+                serialized += line;  //it's json so it shouldn't matter
+            }
+            inFile.close();
+            try {
+                FilterPreset preset = FilterPreset::deserialize(serialized);
+                applyPresetAndClose(preset);
+                
+            } catch (std::exception& e) {
+                logerr(frmt("preset load failed:\n {}", e.what()));
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to parse filter preset"));
+                return;
+            }
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load filter preset"));
+        }
     }
 }
 
@@ -65,30 +110,46 @@ void PopupApplyFilter::renderDefaultBackground()
     //renderGradient({ 0,g_windowH / 2,g_windowW,g_windowH / 2 }, 0xFF000000, 0xFF000000, 0x70000000, 0x70000000);
 }
 
+void PopupApplyFilter::regenParameterUI() {
+    if (paramUI != NULL) {
+        wxsManager.removeDrawable(paramUI);
+    }
+    paramUI = generateParameterUI(&params, [this]() {
+        threadHasNewParameters = true;
+    });
+    paramUI->position = { 0, 50 };
+    wxsManager.addDrawable(paramUI);
+}
+
 void PopupApplyFilter::setupWidgets()
 {
-    UILabel* title = new UILabel(targetFilter->name());
-    title->fontsize = 22;
-    title->position = XY{5, 5};
+    makeTitleAndDesc(targetFilter->name(), "");
+
+#if _DEBUG
+    UILabel* title = new UILabel(targetFilter->id());
+    title->fontsize = 14;
+    title->color = { 255,255,255,0x80 };
+    title->position = XY{10, 30};
     wxsManager.addDrawable(title);
+#endif
 
     params = targetFilter->getParameters();
 
-    Panel* p = generateParameterUI(&params, [this]() {
-        threadHasNewParameters = true;
-    });
-    p->position = { 0, 50 };
-    wxsManager.addDrawable(p);
+    regenParameterUI();
 
-    setSize({ 550, 50 + p->getContentBoxSize().y + 70});
+    setSize({ 550, 50 + paramUI->getContentBoxSize().y + 70});
 
-    actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* b) { applyAndClose(); };
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b) { closePopup(); };
+    actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* b) { applyAndClose(); };
+    actionButton("Load preset")->onClickCallback = [this](UIButton* b) { 
+        platformTryLoadOtherFile(this, {{".voidfpreset", "Filter preset"}}, frmt("voidsprite: {}", TL("vsp.popup.loadfilterpreset")), EVENT_APPLYFILTER_LOADPRESET);
+    };
+    actionButton("Save preset")->onClickCallback = [this](UIButton* b) { 
+        platformTrySaveOtherFile(this, {{".voidfpreset", "Filter preset"}}, frmt("voidsprite: {}", TL("vsp.popup.savefilterpreset")), EVENT_APPLYFILTER_SAVEPRESET);
+    };
 }
 
-void PopupApplyFilter::applyAndClose()
-{
-    std::map<std::string, std::string> parameterMap = makeParameterMap();
+void PopupApplyFilter::apply(std::map<std::string, std::string> parameterMap) {
     auto target = this->target;
     auto session = this->session;
     auto targetFilter = this->targetFilter;
@@ -110,6 +171,16 @@ void PopupApplyFilter::applyAndClose()
         target->markLayerDirty();
         delete copy;
     });
+}
+
+void PopupApplyFilter::applyAndClose()
+{
+    apply(makeParameterMap());
+    closePopup();
+}
+
+void PopupApplyFilter::applyPresetAndClose(FilterPreset preset) {
+    apply(makeParameterMapFromPreset(preset));
     closePopup();
 }
 
@@ -157,6 +228,14 @@ std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
     
     parameterMap["!editor:activecolor"] = std::to_string(session->getActiveColor());
     return parameterMap;
+}
+
+std::map<std::string, std::string> PopupApplyFilter::makeParameterMapFromPreset(FilterPreset preset) {
+    auto paramMap = makeParameterMap();
+    for (auto& [k, v] : preset.options) {
+        paramMap[k] = v;
+    }
+    return paramMap;
 }
 
 void PopupApplyFilter::previewRenderThread()

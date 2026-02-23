@@ -3,9 +3,10 @@
 
 #include "BasePopup.h"
 #include "BaseFilter.h"
+#include "EventCallbackListener.h"
 
 class PopupApplyFilter :
-    public BasePopup
+    public BasePopup, public EventCallbackListener
 {
 protected:
     bool sessionDragging = false;
@@ -18,6 +19,7 @@ protected:
     std::atomic<bool> threadHasNewParameters = true;
     std::atomic<bool> nowRendering = false;
 
+    Panel* paramUI = NULL;
     MainEditor* session;
     Layer* target;
     BaseFilter* targetFilter;
@@ -33,6 +35,9 @@ public:
     }
     ~PopupApplyFilter();
 
+    void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex = -1) override;
+    void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
+
     void render() override;
     void defaultInputAction(SDL_Event evt) override;
     XY getPopupOrigin() override {
@@ -40,11 +45,15 @@ public:
     }
 
     void renderDefaultBackground() override;
+    void regenParameterUI();
     void setupWidgets();
+    void apply(std::map<std::string, std::string> parameterMap);
     void applyAndClose();
+    void applyPresetAndClose(FilterPreset preset);
     void setupPreview();
     void updatePreview();
     std::map<std::string, std::string> makeParameterMap();
+    std::map<std::string, std::string> makeParameterMapFromPreset(FilterPreset preset);
 
     void previewRenderThread();
 

@@ -113,6 +113,8 @@
     {"vsp.popup.addreference", "add reference"},
     {"vsp.popup.addtosplitsession", "add image to split session"},
     {"vsp.popup.openpalette", "load palette"},
+    {"vsp.popup.loadfilterpreset", "load filter preset"},
+    {"vsp.popup.savefilterpreset", "save filter preset"},
 
     // templates
     {"vsp.template.pixelillustration", "pixel illustration"},

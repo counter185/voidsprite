@@ -43,6 +43,7 @@ private:
     std::map<std::string, std::string> optionsNow;
 public:
     std::string n = "External filter";
+    std::string i = "";
     std::function<void(Layer*, VSPFilter*)> f = NULL;
     std::vector<FilterParameter> fParams = {};
 
@@ -52,6 +53,7 @@ public:
     double getRangeValue2(const char* name) { return std::stod(optionsNow[std::string(name)]); }
 
     std::string name() override { return n; }
+    std::string id() override { return i; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override {
         optionsNow = options;
         Layer* c = copy(src);

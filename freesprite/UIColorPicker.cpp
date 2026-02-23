@@ -16,6 +16,7 @@
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
     #include <windows.h>
 #elif VSP_PLATFORM == VSP_PLATFORM_LINUX
+    #include "platform_universal.h"
     #include <regex>
 #endif
 
@@ -868,17 +869,7 @@ void UIColorPicker::openOldWindowsColorPicker()
 #if VSP_PLATFORM == VSP_PLATFORM_LINUX
 void UIColorPicker::openZenityColorPicker() {
     std::string command = "zenity --color-selection --show-palette --title \"voidsprite: choose color\"";
-    FILE* pipe = popen(command.c_str(), "r");
-    if (!pipe) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to open color picker"));
-        return;
-    }
-    char buffer[128];
-    std::string result = "";
-    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
-        result += buffer;
-    }
-    pclose(pipe);
+    std::string result = universal_runCommandAndGetOutput(command);
 
     try {
         std::regex regex("rgb\\((\\d+),\\s?(\\d+),\\s?(\\d+)\\)");

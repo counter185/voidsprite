@@ -6,7 +6,7 @@
 #include "EventCallbackListener.h"
 #include "PopupFilePicker.h"
 
-int findIndexByExtension(
+inline int findIndexByExtension(
         std::vector<std::pair<std::string, std::string>> &filetypes,
         std::string filename) {
     if (filetypes.front().first == "") {
@@ -16,6 +16,9 @@ int findIndexByExtension(
 
     std::transform(filename.begin(), filename.end(), filename.begin(),
                    ::tolower);
+    if (filetypes.size() == 1) {
+        return 1;
+    }
     for (int x = 0; x < filetypes.size(); x++) {
         auto &p = filetypes[x];
         if (filename.size() > p.first.size()) {
@@ -131,27 +134,38 @@ inline Layer* universal_platformGetLayerFromClipboard() {
 
     Layer* ret = NULL;
     if (mimetypes != NULL) {
-        if (formats.contains("image/png")) {
+        if (ret == NULL && formats.contains("image/png")) {
+            formats.erase("image/png"); //so that we don't do it again in the next check
             size_t dataSize = 0;
             u8* pngdata = (u8*)SDL_GetClipboardData("image/png", &dataSize);
             if (pngdata != NULL) {
                 ret = readPNGFromMem(pngdata, dataSize);
                 SDL_free(pngdata);
+            } else {
+                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), "Failed to get clipboard image/png data"));
+                logerr(frmt("error getting clipboard image/png data:\n  {}", SDL_GetError()));
             }
         }
-        else {
+        
+
+        if (ret == NULL){
             for (auto& [type, _] : formats) {
-                if (stringStartsWithIgnoreCase(type, "image/")) {
+                if (type == "application/x-qt-image" || stringStartsWithIgnoreCase(type, "image/")) {
+                    loginfo(frmt("Trying type: {}", type));
                     size_t dataSize = 0;
                     u8* imageData = (u8*)SDL_GetClipboardData(type.c_str(), &dataSize);
-                    SDL_IOStream* io = SDL_IOFromMem(imageData, dataSize);
-                    SDL_Surface* srf = IMG_Load_IO(io, true);
-                    if (srf != NULL) {
-                        ret = Layer::createFromSurface(srf);
-                        SDL_FreeSurface(srf);
-                    }
-                    else {
-                        logerr(frmt("Failed to get clipboard image:\n  {}", SDL_GetError()));
+                    if (imageData != NULL) {
+                        SDL_IOStream* io = SDL_IOFromMem(imageData, dataSize);
+                        SDL_Surface* srf = IMG_Load_IO(io, true);
+                        if (srf != NULL) {
+                            ret = Layer::createFromSurface(srf);
+                            SDL_FreeSurface(srf);
+                        }
+                        else {
+                            logerr(frmt("Failed to get clipboard image:\n  {}", SDL_GetError()));
+                        }
+                    } else {
+                        logerr(frmt("error getting clipboard data:\n  {}", SDL_GetError()));
                     }
                 }
                 if (ret != NULL) {
@@ -215,7 +229,7 @@ inline std::vector<u8> universal_fetchBinFile(std::string url) {
     }
 }
 
-std::vector<NetworkAdapterInfo> universal_platformGetNetworkAdapters() {
+inline std::vector<NetworkAdapterInfo> universal_platformGetNetworkAdapters() {
     return {
         {"Default network adapter", "127.0.0.1", "255.255.255.255"}
     };

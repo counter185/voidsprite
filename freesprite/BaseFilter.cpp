@@ -7,48 +7,90 @@
 #include "RenderFilter.h"
 #include "Layer.h"
 #include "io/io_avif.h"
+#include "json/json.hpp"
+
+std::map<std::string, BaseFilter*> filterIDMap;
+
+void registerFilter(BaseFilter* f, std::vector<BaseFilter*>* target = &g_filters)
+{
+    if (filterIDMap.contains(f->id())) {
+        logwarn(frmt("duplicate filter id: {}", f->id()));
+    }
+    else if (f->id() == "filter.default" || f->id() == "") {
+        logwarn(frmt("invalid filter id: {} ({})", f->id(), f->name()));
+    }
+    target->push_back(f);
+    filterIDMap[f->id()] = f;
+}
+BaseFilter* g_getFilterByID(std::string id)
+{
+    if (filterIDMap.contains(id)) {
+        return filterIDMap[id];
+    }
+    return NULL;
+}
 
 void g_loadFilters()
 {
-    g_filters.push_back(new FilterBlur());
-    g_filters.push_back(new FilterSwapRGBToBGR());
-    g_filters.push_back(new FilterAdjustHSV());
-    g_filters.push_back(new FilterForEachPixel("Invert", [](XY, Layer*, u32 px) {
+    registerFilter(new FilterBlur());
+    registerFilter(new FilterSwapRGBToBGR());
+    registerFilter(new FilterAdjustHSV());
+    registerFilter(new FilterForEachPixel("Invert", "filter.invert", [](XY, Layer*, u32 px) {
         SDL_Color pxnow = uint32ToSDLColor(px);
         return PackRGBAtoARGB(255 - pxnow.r, 255 - pxnow.g, 255 - pxnow.b, pxnow.a);
     }));
-    g_filters.push_back(new FilterStrideGlitch());
-    g_filters.push_back(new FilterJPEGGlitch());
-    g_filters.push_back(new FilterPixelize());
-    g_filters.push_back(new FilterOutline());
-    g_filters.push_back(new FilterBrightnessContrast());
-    g_filters.push_back(g_filter_quantize = new FilterQuantize());
-    g_filters.push_back(new FilterJPEG());
-    g_filters.push_back(new FilterAVIF());
-    /*g_filters.push_back(new FilterKernelTransformation("Kernel blur", {
+    registerFilter(new FilterStrideGlitch());
+    registerFilter(new FilterJPEGGlitch());
+    registerFilter(new FilterPixelize());
+    registerFilter(new FilterOutline());
+    registerFilter(new FilterBrightnessContrast());
+    registerFilter(g_filter_quantize = new FilterQuantize());
+    registerFilter(new FilterJPEG());
+    registerFilter(new FilterAVIF());
+    /*registerFilter(new FilterKernelTransformation("Kernel blur", {
         {1,1,1,1,1},
         {1,0,0,0,1},
         {1,0,0,0,1},
         {1,0,0,0,1},
         {1,1,1,1,1}
     }));*/
-    g_filters.push_back(g_filter_edgeDetect = new FilterKernelTransformation("Kernel edge detect", {
+    registerFilter(g_filter_edgeDetect = new FilterKernelTransformation("Kernel edge detect", "filter.kerneledgedetect", {
         {0,-1,0},
         {-1,5,-1},
         {0,-1,0}
     }));
-    g_filters.push_back(new FilterOffset());
-    g_filters.push_back(new FilterRemoveChannels());
-    g_filters.push_back(new FilterAlphaThreshold());
-    g_filters.push_back(new FilterEdgeDetectOutline());
+    registerFilter(new FilterOffset());
+    registerFilter(new FilterRemoveChannels());
+    registerFilter(new FilterAlphaThreshold());
+    registerFilter(new FilterEdgeDetectOutline());
 
     for (auto pluginFilter : g_pluginFilters) {
-        g_filters.push_back(pluginFilter);
+        registerFilter(pluginFilter);
     }
 
-    g_renderFilters.push_back(new GenNoiseFilter());
-    g_renderFilters.push_back(new GenRGBNoiseFilter());
-    g_renderFilters.push_back(new PrintPaletteFilter());
+    registerFilter(new GenNoiseFilter(), &g_renderFilters);
+    registerFilter(new GenRGBNoiseFilter(), &g_renderFilters);
+    registerFilter(new PrintPaletteFilter(), &g_renderFilters);
+}
+
+std::string FilterPreset::serialize() {
+    nlohmann::json j = nlohmann::json::object();
+    j["filterID"] = filterID;
+    nlohmann::json optionsJSON = nlohmann::json::object();
+    for (auto& [k, v] : this->options) {
+        optionsJSON[k] = v;
+    }
+    j["options"] = optionsJSON;
+    return j.dump();
+}
+
+FilterPreset FilterPreset::deserialize(std::string s) {
+    nlohmann::json j = nlohmann::json::parse(s);
+    std::map<std::string, std::string> options;
+    for (auto& [k, v] : j["options"].items()) {
+        options[k] = v;
+    }
+    return FilterPreset(j["filterID"], options);
 }
 
 Layer* BaseFilter::copy(Layer* src)

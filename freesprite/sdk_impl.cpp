@@ -3,8 +3,12 @@
 
 VSPFilter* impl_registerFilter(const char* name, void (*filterFunction)(VSPLayer* layer, VSPFilter* filter))
 {
+    //todo
+    static int nextFilterID = 1;
+
     FilterExternal* f = new FilterExternal();
     f->n = std::string(name);
+    f->i = frmt("filter.custom.{}", nextFilterID++);
     f->f = filterFunction;
     g_pluginFilters.push_back(f);
     return f;

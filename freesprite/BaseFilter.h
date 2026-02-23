@@ -28,13 +28,27 @@ struct FilterParameter {
 };
 
 void g_loadFilters();
+BaseFilter* g_getFilterByID(std::string id);
 inline BaseFilter* g_filter_edgeDetect = NULL;
 inline BaseFilter* g_filter_quantize = NULL;
+
+class FilterPreset {
+public:
+    std::string filterID;
+    std::map<std::string, std::string> options;
+
+    FilterPreset() {}
+    FilterPreset(std::string filterID, std::map<std::string, std::string> options) : filterID(filterID), options(options) {}
+
+    std::string serialize();
+    static FilterPreset deserialize(std::string s);
+};
 
 class BaseFilter
 {
 public:
     virtual std::string name() { return "Filter"; }
+    virtual std::string id() { return "filter.default";}
 
     virtual void setupParamBounds(Layer* target) {}
 
@@ -58,16 +72,19 @@ protected:
 class FilterForEachPixel : public BaseFilter {
 protected:
     std::string fName = "";
+    std::string i = "";
     std::function<u32(XY, Layer*, u32)> f;
     std::vector<FilterParameter> fParams;
 public:
-    FilterForEachPixel(std::string name, std::function<u32(XY, Layer*, u32)> f, std::vector<FilterParameter> fParams = {}) {
+    FilterForEachPixel(std::string name, std::string id, std::function<u32(XY, Layer*, u32)> f, std::vector<FilterParameter> fParams = {}) {
         this->fName = name;
+        this->i = id;
         this->f = f;
         this->fParams = fParams;
     }
 
     std::string name() override { return fName; }
+    std::string id() override { return i; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override { return fParams; }
 };
@@ -76,6 +93,7 @@ class FilterBlur : public BaseFilter
 {
 public:
     std::string name() override { return "Blur"; }
+    std::string id() override { return "filter.blur"; }
 
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
@@ -89,12 +107,14 @@ public:
 class FilterSwapRGBToBGR : public BaseFilter {
 public:
     std::string name() override { return "Swap channels RGB->BGR"; }
+    std::string id() override { return "filter.rgb2bgr"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
 };
 
 class FilterAdjustHSV : public BaseFilter {
 public:
     std::string name() override { return "Adjust HSV"; }
+    std::string id() override { return "filter.hsvadj"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -109,6 +129,7 @@ public:
 class FilterStrideGlitch : public BaseFilter {
 public:
     std::string name() override { return "Stride glitch"; }
+    std::string id() override { return "filter.strideglitch"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -121,6 +142,7 @@ public:
 class FilterPixelize : public BaseFilter {
 public:
     std::string name() override { return "Pixelize"; }
+    std::string id() override { return "filter.pixelize"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -134,6 +156,7 @@ public:
 class FilterOutline : public BaseFilter {
 public:
     std::string name() override { return "Outline"; }
+    std::string id() override { return "filter.outline"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -147,6 +170,7 @@ public:
 class FilterBrightnessContrast : public BaseFilter {
 public:
     std::string name() override { return "Brightness/contrast"; }
+    std::string id() override { return "filter.brightnesscontrast"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -160,6 +184,7 @@ public:
 class FilterQuantize : public BaseFilter {
 public:
     std::string name() override { return "Quantize colors"; }
+    std::string id() override { return "filter.quantize"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -171,6 +196,7 @@ public:
 class FilterJPEG : public BaseFilter {
 public:
     std::string name() override { return "JPEG compression"; }
+    std::string id() override { return "filter.jpeg"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -181,6 +207,7 @@ public:
 class FilterJPEGGlitch : public BaseFilter {
 public:
     std::string name() override { return "JPEG glitch"; }
+    std::string id() override { return "filter.jpegglitch"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -192,6 +219,7 @@ public:
 class FilterAVIF : public BaseFilter {
 public:
     std::string name() override { return "AVIF compression"; }
+    std::string id() override { return "filter.avi"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -205,10 +233,12 @@ protected:
     std::vector<std::vector<int>> kernel;
     int scale = 16;
     std::string n = "Kernel transformation";
+    std::string i = "";
 public:
-    FilterKernelTransformation(std::string filterName, std::vector<std::vector<int>> k) : n(filterName), kernel(k) {}
+    FilterKernelTransformation(std::string filterName, std::string i, std::vector<std::vector<int>> k) : n(filterName), i(i), kernel(k) {}
 
     std::string name() override { return n; }
+    std::string id() override { return i; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -222,6 +252,7 @@ protected:
     XY lastLayerDims = { 100,100 };
 public:
     std::string name() override { return "Offset"; }
+    std::string id() override { return "filter.offset"; }
     void setupParamBounds(Layer* target) override;
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
@@ -235,6 +266,7 @@ public:
 class FilterRemoveChannels : public BaseFilter {
 public:
     std::string name() override { return "Remove channels"; }
+    std::string id() override { return "filter.removechannels"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -249,6 +281,7 @@ public:
 class FilterAlphaThreshold : public BaseFilter {
 public:
     std::string name() override { return "Alpha threshold"; }
+    std::string id() override { return "filter.alphathreshold"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
@@ -262,7 +295,7 @@ protected:
     std::vector<std::vector<int>> kernel;
     int scale = 16;
 public:
-    FilterEdgeDetectOutline() : FilterKernelTransformation("", 
+    FilterEdgeDetectOutline() : FilterKernelTransformation("", "",
         { 
             {0,-1,0},
             {-1,5,-1},
@@ -270,6 +303,7 @@ public:
         }) {}
 
     std::string name() override { return "Edge detect outline"; }
+    std::string id() override { return "filter.edgedetectoutline"; }
     Layer* run(Layer* src, std::map<std::string, std::string> options) override;
     std::vector<FilterParameter> getParameters() override {
         return {
