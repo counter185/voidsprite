@@ -56,7 +56,12 @@ void PopupApplyFilter::eventFileOpen(int evt_id, PlatformNativePathString name, 
             inFile.close();
             try {
                 FilterPreset preset = FilterPreset::deserialize(serialized);
-                applyPresetAndClose(preset);
+                params = targetFilter->getParameters();
+                params = setDefaultParametersFromPreset(params, preset);
+                regenParameterUI();
+                threadHasNewParameters = true;
+
+                //applyPresetAndClose(preset);
                 
             } catch (std::exception& e) {
                 logerr(frmt("preset load failed:\n {}", e.what()));
@@ -142,10 +147,10 @@ void PopupApplyFilter::setupWidgets()
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b) { closePopup(); };
     actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* b) { applyAndClose(); };
     actionButton("Load preset")->onClickCallback = [this](UIButton* b) { 
-        platformTryLoadOtherFile(this, {{".voidfpreset", "Filter preset"}}, frmt("voidsprite: {}", TL("vsp.popup.loadfilterpreset")), EVENT_APPLYFILTER_LOADPRESET);
+        platformTryLoadOtherFile(this, {{".voidfpreset", "Filter preset"}}, TL("vsp.popup.loadfilterpreset"), EVENT_APPLYFILTER_LOADPRESET);
     };
     actionButton("Save preset")->onClickCallback = [this](UIButton* b) { 
-        platformTrySaveOtherFile(this, {{".voidfpreset", "Filter preset"}}, frmt("voidsprite: {}", TL("vsp.popup.savefilterpreset")), EVENT_APPLYFILTER_SAVEPRESET);
+        platformTrySaveOtherFile(this, {{".voidfpreset", "Filter preset"}}, TL("vsp.popup.savefilterpreset"), EVENT_APPLYFILTER_SAVEPRESET);
     };
 }
 
@@ -255,6 +260,41 @@ void PopupApplyFilter::previewRenderThread()
     }
 }
 
+std::vector<FilterParameter> PopupApplyFilter::setDefaultParametersFromPreset(std::vector<FilterParameter>& src, FilterPreset preset)
+{
+    std::vector<FilterParameter> copy = src;
+    for (FilterParameter& p : copy) {
+        if (preset.options.contains(p.name) 
+            || (p.paramType == PT_INT_RANGE && preset.options.contains(p.name+".min") && preset.options.contains(p.name + ".max"))) {
+            try {
+                switch (p.paramType) {
+                    case PT_BOOL:
+                        p.defaultValue = preset.options[p.name] == "1" ? 1 : 0;
+                        break;
+                    case PT_INT:
+                    case PT_COLOR_L:
+                        p.defaultValue = std::stoi(preset.options[p.name]);
+                        break;
+                    case PT_FLOAT:
+                        p.defaultValue = std::stod(preset.options[p.name]);
+                        break;
+                    case PT_INT_RANGE:
+                        p.defaultValue = std::stoi(preset.options[p.name + ".min"]);
+                        p.defaultValueTwo = std::stoi(preset.options[p.name + ".max"]);
+                        break;
+                    case PT_COLOR_RGB:
+                        p.vU32 = std::stoi(preset.options[p.name], NULL, 16);
+                        break;
+                }
+            }
+            catch (std::exception&) {
+                
+            }
+        }
+    }
+    return copy;
+}
+
 Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* params, std::function<void()> valuesChangedCallback)
 {
     auto updateLabelFn = [](FilterParameter& p, UILabel* l) {
@@ -262,8 +302,6 @@ Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* param
             case PT_BOOL:
                 break;
             case PT_INT:
-                l->setText(std::to_string((int)p.defaultValue));
-                break;
             case PT_COLOR_L:
                 l->setText(std::to_string((int)p.defaultValue));
                 break;

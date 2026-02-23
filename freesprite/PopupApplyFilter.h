@@ -57,6 +57,7 @@ public:
 
     void previewRenderThread();
 
+    static std::vector<FilterParameter> setDefaultParametersFromPreset(std::vector<FilterParameter>& src, FilterPreset preset);
     static Panel* generateParameterUI(std::vector<FilterParameter>* params, std::function<void()> valuesChangedCallback);
     static std::map<std::string, std::string> buildParameterMap(std::vector<FilterParameter>& params);
 };
