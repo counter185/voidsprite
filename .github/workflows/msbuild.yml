@@ -224,7 +224,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
       with:
-        submodules: true
+        submodules: recursive
     - uses: flathub-infra/flatpak-github-actions/flatpak-builder@master
       with:
         bundle: voidsprite-build-linux64-flatpak.flatpak
@@ -236,7 +236,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
       with:
-        submodules: true
+        submodules: recursive
     - name: install pkgs
       run: sudo apt update && sudo apt install cmake clang python3 python3-pip zsync nasm
     
@@ -386,7 +386,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
       with:
-        submodules: true
+        submodules: recursive
 
     - uses: mymindstorm/setup-emsdk@v14
 
