@@ -104,10 +104,10 @@ Possible ways to fix this:
 ")
 endif()
 
-file(COPY voidsprite/assets DESTINATION "${CMAKE_BINARY_DIR}/src")
-file(COPY voidsprite/appfont-MPLUSRounded1c-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
-file(COPY voidsprite/appfontcyr-ZenKakuGothicNew-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
-file(COPY voidsprite/appfontjp-NotoSansJP-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY ../../freesprite/assets DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY ../../freesprite/appfont-MPLUSRounded1c-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY ../../freesprite/appfontcyr-ZenKakuGothicNew-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
+file(COPY ../../freesprite/appfontjp-NotoSansJP-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/src")
 
 if (DEFINED EMSCRIPTEN)
     add_definitions(-DVSP_NETWORKING=0)
@@ -120,8 +120,8 @@ if (DEFINED EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --embed-file ${CMAKE_BINARY_DIR}/src/appfontjp-NotoSansJP-Medium.ttf")
 endif()
 
-file(GLOB_RECURSE CPP_FILES CONFIGURE_DEPENDS "voidsprite/*.cpp")
-file(GLOB_RECURSE C_FILES CONFIGURE_DEPENDS "voidsprite/*.c")
+file(GLOB_RECURSE CPP_FILES CONFIGURE_DEPENDS "../../freesprite/*.cpp")
+file(GLOB_RECURSE C_FILES CONFIGURE_DEPENDS "../../freesprite/*.c")
 
 if(NOT VOIDSPRITE_ASSETS_PATH STREQUAL "")
     add_compile_definitions(VOIDSPRITE_ASSETS_PATH="${VOIDSPRITE_ASSETS_PATH}/")

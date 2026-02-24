@@ -241,11 +241,11 @@ jobs:
 
     - name: setup cmake
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake && chmod +x ./setup_cmake.sh && ./setup_cmake.sh && mkdir build
+      run: mkdir build_appimage
 
     - name: build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake/build && CC=clang CXX=clang++ cmake .. -DRELEASE=ON -DVSP_DISCORD_RPC=ON && make -j4
+      run: cd build_appimage && CC=clang CXX=clang++ cmake .. -DRELEASE=ON -DVSP_DISCORD_RPC=ON && make -j4
     
     - uses: actions/setup-python@v6
       with:
@@ -256,14 +256,14 @@ jobs:
 
     - name: appimage
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake && chmod +x ./setup_appimage.sh && ./setup_appimage.sh
+      run: chmod +x ./setup_appimage.sh && ./setup_appimage.sh
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: voidsprite-build-linux-appimage-x64
         path: |
-          cmake/voidsprite-latest-x86_64.AppImage
+          voidsprite-latest-x86_64.AppImage
         
   build-mac-x64:
     runs-on: macos-15-intel
@@ -386,17 +386,17 @@ jobs:
 
     - name: setup cmake
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake && chmod +x ./setup_cmake.sh && ./setup_cmake.sh && ./setup_emscripten.sh
+      run: ./setup_emscripten.sh
     
     - name: setup emscripten build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd cmake/build_em && emmake make -j4
+      run: cd build_em && emmake make -j4
     
     - name: gather artifacts
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cp cmake/build_em/src/voidsprite.js web-build/voidsprite.js
-        cp cmake/build_em/src/voidsprite.wasm web-build/voidsprite.wasm
+        cp build_em/cmake/voidsprite.js web-build/voidsprite.js
+        cp build_em/cmake/voidsprite.wasm web-build/voidsprite.wasm
         cp -R OPEN_SOURCE_LICENSES web-build/OPEN_SOURCE_LICENSES
 #       html is already in the folder
     

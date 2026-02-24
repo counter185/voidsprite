@@ -1,0 +1,24 @@
+[submodule "external/SDL"]
+	path = external/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "external/SDL_image"]
+	path = external/SDL_image
+	url = https://github.com/libsdl-org/SDL_image.git
+[submodule "external/SDL_ttf"]
+	path = external/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
+[submodule "external/SDL_net"]
+	path = external/SDL_net
+	url = https://github.com/libsdl-org/SDL_net.git
+[submodule "external/zlib"]
+	path = external/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "external/fmt"]
+	path = external/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "external/libavif"]
+	path = external/libavif
+	url = https://github.com/AOMediaCodec/libavif.git
+[submodule "external/liblcf"]
+	path = external/liblcf
+	url = https://github.com/EasyRPG/liblcf.git
