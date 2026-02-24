@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
 project(GAME)
+set(CMAKE_DEBUG_POSTFIX "")
 
 # SDL sources are in a subfolder named "SDL"
 add_subdirectory(SDL)
@@ -12,6 +13,10 @@ add_subdirectory(SDL_ttf)
 
 if (NOT DEFINED EMSCRIPTEN)
     add_subdirectory(SDL_net)
+
+    set(LIBLCF_WITH_INI OFF)
+    set(LIBLCF_WITH_ICU OFF)
+    set(LIBLCF_WITH_XML OFF)
     add_subdirectory(liblcf)
 else()
     set(CONFIG_MULTITHREAD OFF)

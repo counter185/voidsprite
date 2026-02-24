@@ -22,6 +22,6 @@ git clone --recursive https://github.com/AOMediaCodec/libavif.git
 cd zlib
 git checkout v1.3.1.2
 cd ..
-ln -s "../../../external_liblcf" liblcf 
+git clone --recursive https://github.com/EasyRPG/liblcf.git
 cd src
 ln -s "../../../../freesprite" voidsprite
