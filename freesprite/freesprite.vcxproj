@@ -449,9 +449,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ScreenWideNavBar.cpp" />
     <ClCompile Include="Layer.cpp" />
-    <ClCompile Include="libtga\tga.c" />
-    <ClCompile Include="libtga\tgaread.c" />
-    <ClCompile Include="libtga\tgawrite.c" />
     <ClCompile Include="maineditor.cpp" />
     <ClCompile Include="mathops.cpp" />
     <ClCompile Include="Notification.cpp" />
@@ -686,8 +683,6 @@
     <ClInclude Include="ScreenWideNavBar.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Layer.h" />
-    <ClInclude Include="libtga\tga.h" />
-    <ClInclude Include="libtga\tga_private.h" />
     <ClInclude Include="maineditor.h" />
     <ClInclude Include="mathops.h" />
     <ClInclude Include="Notification.h" />

@@ -18,9 +18,6 @@
     <Filter Include="Source files\external">
       <UniqueIdentifier>{a32cb1a6-5407-47ab-92fe-6e5bd7c5879b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\external\libtga">
-      <UniqueIdentifier>{b2b7876e-add1-40fe-a925-456b7b03a6ed}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\ui_widgets">
       <UniqueIdentifier>{e62c2e0a-b6a8-4498-bade-9fb2bd8955a9}</UniqueIdentifier>
     </Filter>
@@ -57,9 +54,6 @@
     </Filter>
     <Filter Include="Header files\external">
       <UniqueIdentifier>{81e8270e-1bb6-412d-806b-77e2e141642d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\libtga">
-      <UniqueIdentifier>{f399e6d2-0f91-458a-8e2b-a4462a230761}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header files\external\easybmp">
       <UniqueIdentifier>{7dd202aa-e86a-4bec-b121-5c24da536967}</UniqueIdentifier>
@@ -152,15 +146,6 @@
     </ClCompile>
     <ClCompile Include="Layer.cpp">
       <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="libtga\tga.c">
-      <Filter>Source files\external\libtga</Filter>
-    </ClCompile>
-    <ClCompile Include="libtga\tgaread.c">
-      <Filter>Source files\external\libtga</Filter>
-    </ClCompile>
-    <ClCompile Include="libtga\tgawrite.c">
-      <Filter>Source files\external\libtga</Filter>
     </ClCompile>
     <ClCompile Include="brush\BaseBrush.cpp">
       <Filter>Source files\brushes</Filter>
@@ -721,12 +706,6 @@
   <ItemGroup>
     <ClInclude Include="globals.h">
       <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="libtga\tga.h">
-      <Filter>Header files\external\libtga</Filter>
-    </ClInclude>
-    <ClInclude Include="libtga\tga_private.h">
-      <Filter>Header files\external\libtga</Filter>
     </ClInclude>
     <ClInclude Include="brush\BaseBrush.h">
       <Filter>Header files\brushes</Filter>

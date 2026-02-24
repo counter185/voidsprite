@@ -22,7 +22,6 @@ zlib_dep = dependency('zlib', fallback: ['zlib', 'zlib_dep'], static: get_option
 # to build them as static libraries, see the subfolders for these libraries
 # under the source folder.
 liblcf_dep = dependency('liblcf', fallback: ['liblcf', 'liblcf_dep'], static: get_option('portable'))
-libtga_dep = dependency('libtga', fallback: ['libtga', 'libtga_dep'], static: get_option('portable'))
 
 sdl3_dep = dependency('sdl3', version: '>=3.0.0', fallback: ['sdl3', 'sdl3_dep'], static: get_option('portable'))
 sdl3_ttf_dep = dependency('SDL3_ttf', version: '>=3.0.0', fallback: ['sdl3_ttf', 'sdl3_ttf_dep'], static: get_option('portable'))
@@ -38,7 +37,6 @@ dependencies = [
   libjxl_dep,
   liblcf_dep,
   pugixml_dep,
-  libtga_dep,
   sdl3_dep,
   sdl3_ttf_dep,
   sdl3_image_dep
