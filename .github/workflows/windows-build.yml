@@ -37,6 +37,7 @@ jobs:
 
     - name: Build shell extension
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      if: ${{ inputs.build-arch == 'x64' }}
       run: msbuild /m /t:voidsprite_shellext /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
 
     - name: Make build directories and copy devlibs
@@ -49,7 +50,8 @@ jobs:
 
     - name: x86 moment
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: if ${{inputs.build-arch}}==x86 md x86 && xcopy /E /I Release x86\Release
+      if: ${{ inputs.build-arch == 'x86' }}
+      run: md x86 && xcopy /E /I Release x86\Release
 
     - name: Cleanup
       working-directory: ${{env.GITHUB_WORKSPACE}}
