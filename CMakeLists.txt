@@ -14,12 +14,6 @@ if (NOT FLATPAK)
     add_subdirectory(external/SDL_image)
     add_subdirectory(external/SDL_ttf)
 
-    set(AVIF_LIBYUV "LOCAL")
-    set(AVIF_CODEC_AOM OFF)
-    set(AVIF_CODEC_LIBGAV1 "LOCAL")
-    set(AVIF_CODEC_SVT "LOCAL")
-    add_subdirectory(external/libavif)
-
     if (NOT DEFINED EMSCRIPTEN)
         add_subdirectory(external/SDL_net)
         set(LIBLCF_WITH_INI OFF)
@@ -31,6 +25,12 @@ if (NOT FLATPAK)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msimd128")
         set(COMPILE_C_ONLY ON)
     endif()
+
+    set(AVIF_LIBYUV "LOCAL")
+    set(AVIF_CODEC_AOM OFF)
+    set(AVIF_CODEC_LIBGAV1 "LOCAL")
+    set(AVIF_CODEC_SVT "LOCAL")
+    add_subdirectory(external/libavif)
 endif()
 
 #these are static and can be used on virtually any platform
