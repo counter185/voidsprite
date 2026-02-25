@@ -1,16 +1,19 @@
 {
-    "name": "SDL3_net",
+    "name": "liblcf",
     "buildsystem": "cmake-ninja",
     "builddir": true,
     "config-opts": [
         "-DCMAKE_VERBOSE_MAKEFILE=ON",
         "-DCMAKE_BUILD_TYPE:STRING=Release",
-        "-DCMAKE_INSTALL_LIBDIR:PATH=lib"
+        "-DCMAKE_INSTALL_LIBDIR:PATH=lib",
+        "-DLIBLCF_WITH_INI=OFF",
+        "-DLIBLCF_WITH_ICU=OFF",
+        "-DLIBLCF_WITH_XML=OFF"
     ],
     "sources": [
         {
             "type": "dir",
-            "path": "../../../external/SDL_net"
+            "path": "../../../external/liblcf"
         }
     ],
     "cleanup": [

@@ -17,6 +17,7 @@ finish-args:
   - --socket=fallback-x11
   - --filesystem=host
   - --device=dri
+  - --share=network
 
 cleanup:
   - /include
@@ -28,42 +29,13 @@ cleanup:
 modules:
   - "SDL3.json"
   - "SDL3_image.json"
-  - "SDL3_ttf.json"
   - "SDL3_net.json"
-
-  - name: pugixml
-    buildsystem: cmake-ninja
-    config-opts:
-      - -DBUILD_SHARED_LIBS=ON
-    cleanup:
-      - /include
-      - /lib/cmake
-      - /lib/pkgconfig
-    sources:
-      - type: archive
-        url: https://github.com/zeux/pugixml/releases/download/v1.14/pugixml-1.14.tar.gz
-        sha256: 2f10e276870c64b1db6809050a75e11a897a8d7456c4be5c6b2e35a11168a015
-        x-checker-data:
-          type: anitya
-          project-id: 3728
-          url-template: https://github.com/zeux/pugixml/releases/download/v$version/pugixml-$version.tar.gz
-
-  - name: libjxl
-    buildsystem: cmake-ninja
-    sources:
-      - type: git
-        url: https://github.com/libjxl/libjxl.git
-        tag: 'v0.11.1'
-        commit: 794a5dcf0d54f9f0b20d288a12e87afb91d20dfc
-        x-checker-data:
-          is-main-source: true
-          type: git
-          tag-pattern: ^v([\d.]+)$
-
+  - "SDL3_ttf.json"
+  - "liblcf.json"
   - name: voidsprite
-    buildsystem: meson
+    buildsystem: cmake-ninja
     sources:
       - type: dir
         path: "../../.."
     config-opts:
-      - -Dflatpak=true
+      - -DFLATPAK=ON

@@ -473,3 +473,4 @@ android-project/app/jni/libavif/
 cmake/libavif/
 android-project/local.properties
 /build_em
+/freesprite/linux/flatpak/repo
