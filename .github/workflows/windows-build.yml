@@ -1,0 +1,63 @@
+name: Windows build
+
+on:
+  workflow_call:
+    inputs:
+      build-arch:
+        required: true
+        type: string
+
+env:
+  SOLUTION_FILE_PATH: .
+  BUILD_CONFIGURATION: Release
+  GIT_HASH: ${{ github.sha }}
+  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  build-windows-onearch:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Extract voidsprite devlibs
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./setup_windows_devlibs.bat
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /t:voidsprite /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build shell extension
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /t:voidsprite_shellext /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Make build directories and copy devlibs
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./copy_devlibs.bat
+      
+    - name: Copy assets
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./copy_assets.bat
+
+    - name: x86 moment
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: if ${{inputs.build-arch}}==x86 md x86 && xcopy /E /I Release x86\Release
+
+    - name: Cleanup
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: del ${{ inputs.build-arch }}\\Release\\*.exp; del ${{ inputs.build-arch }}\\Release\\*.lib; del ${{ inputs.build-arch }}\\Release\\*.pdb
+
+    - name: Push build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: voidsprite-build-win-${{ inputs.build-arch }}
+        path: |
+          ${{ inputs.build-arch }}/Release

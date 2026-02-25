@@ -474,3 +474,4 @@ cmake/libavif/
 android-project/local.properties
 /build_em
 /freesprite/linux/flatpak/repo
+/build_cmake
