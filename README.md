@@ -6,25 +6,51 @@ Free C++ pixel art editor
 
 ## ◆Supported file formats
 
-◆ The list of supported file formats has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/index.html?page=compatibility).
+◆ The list of supported file formats has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/manual/compatibility.html).
+
+## ◆System requirements
+
+◆ The system requirements table has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/manual/requirements.html).
 
 ## ◆Installing
 
-◆ You can grab a pre-built binary from the latest CI artifacts: https://nightly.link/counter185/voidsprite/workflows/msbuild/main
+◆ The downloads section has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/manual/downloads.html).
 
-For Windows, get the `voidsprite-build-win64.zip` file.
+## ◆Links
 
-For Linux, get the `voidsprite-build-linux-flatpak-x86_64.zip` file; this requires [Flatpak](https://flatpak.org) to be installed.
+◆ [Official Discord server](https://discord.gg/c5SndMJKj2)  
+◆ [Itch.io page](https://cntrpl.itch.io/voidsprite)  
+◆ [BlueSky page](https://voidsprite.bsky.social/)  
+◆ [Web manual](https://counter185.github.io/voidsprite-web-manual)
 
 ## ◆Building
 
 ### Windows
 
 1. Run the `setup_windows_devlibs.bat` script
-2. Open `freesprite.sln` with Visual Studio and build/run like any other C++ program  
-*Only x64 builds work right now, 32-bit Windows targets do not compile
+2. Open `freesprite.sln` with Visual Studio and build/run like any other C++ program.  
+
+You may also use MSBuild to build through commandline:
+```sh
+msbuild /m /t:voidsprite /p:Configuration=Release /p:Platform="x64" voidsprite.sln
+```
 
 ### Linux
+
+#### CMake
+
+1. Install CMake and dependencies required for building SDL: https://wiki.libsdl.org/SDL3/README-linux
+2. Run the following commands in the root of the repository:
+```shell
+mkdir build
+cd build
+cmake ..
+make -j4
+```
+The executable will be built to `/build/cmake`.  
+It's recommended to use Clang 18 for building. GCC older than 14 may not work.
+
+#### Meson (deprecated)
 
 1. Install the dependencies and their respective development packages: sdl3, sdl3_ttf, sdl3_image, sdl3_net, libpng, pugixml, zlib, liblcf, libjxl, libhwy
    * Some dependencies (libpng, pugixml, zlib, liblcf) will be automatically downloaded and built during the build step if not installed - don't worry if your distro does not package them.
@@ -40,6 +66,11 @@ By default, the generated output files will be placed in `/tmp/voidsprite`. When
 
 You can also build the program as a Flatpak, see [Flatpak README](https://github.com/counter185/voidsprite/blob/main/freesprite/linux/flatpak/README.md).
 
+### Android
+
+1. Run the `setup_android.bat` script on Windows, or the `setup_android_on_linux.sh` script on other systems.
+2. Open the `android-project` directory with Android Studio and build it like any other project.
+
 ### Optional dependencies
 
 Some dependencies can be disabled with build flags:
@@ -47,16 +78,7 @@ Some dependencies can be disabled with build flags:
 - `-DVSP_NETWORKING=0` will disable all socket-based network features, like network canvas (drops `sdl3_net` requirement). HTTP features like update checks and downloading from Lospec are separate and will still work.
 - `-DUSE_FMT_FORMAT=1` will use `fmt` for string formatting instead of `std::format`. `fmt` needs to be present.
 - `-DVSP_USE_LIBLCF=0` will disable RPG Maker map preview and LMU tileset import (drops `liblcf` requirement). Import/export of XYZ images is not affected.
-
-## ◆System requirements
-
-◆ The system requirements table has been moved to the [web manual](https://counter185.github.io/voidsprite-web-manual/index.html?page=requirements).
-
-## ◆Community
-
-◆ [Official Discord server](https://discord.gg/c5SndMJKj2)  
-◆ [Itch.io page](https://cntrpl.itch.io/voidsprite)  
-◆ [BlueSky page](https://voidsprite.bsky.social/)
+- `-DVSP_USE_LIBAVIF=0` will disable AVIF support (drops `libavif` requirement). AVIF might still be importable and exportable through SDL_image.
 
 ## ◆Contribute
 
