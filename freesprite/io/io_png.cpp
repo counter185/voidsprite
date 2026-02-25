@@ -125,6 +125,18 @@ void addPNGText(png_structp outpng, png_infop outpnginfo, std::string key, std::
 }
 
 Layer* _readPNG(png_structp png, png_infop info) {
+    if (setjmp(png_jmpbuf(png))) {
+        logerr("libpng error reading PNG");
+        png_destroy_read_struct(&png, &info, NULL);
+        return NULL;
+    }
+    png_set_error_fn(png, NULL, 
+        [](png_structp png_ptr, png_const_charp error_msg) {
+            logerr(frmt("libpng error: {}", error_msg));
+        }, 
+        [](png_structp png_ptr, png_const_charp warning_msg) {
+            logerr(frmt("libpng warning: {}", warning_msg));
+        });
     uint32_t width = png_get_image_width(png, info);
     uint32_t height = png_get_image_height(png, info);
     png_byte color_type = png_get_color_type(png, info);
@@ -264,6 +276,11 @@ Layer* readPNGFromMem(uint8_t* data, size_t dataSize) {
     }
 
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (setjmp(png_jmpbuf(png))) {
+        logerr("libpng error initializing PNG read");
+        png_destroy_read_struct(&png, NULL, NULL);
+        return NULL;
+    }
     png_infop info = png_create_info_struct(png);
     PNGReadContext readCtx{
         .data = data,
@@ -322,7 +339,11 @@ std::vector<u8> writePNGToMem(Layer* data)
         };
     png_structp outpng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     png_infop outpnginfo = png_create_info_struct(outpng);
-    setjmp(png_jmpbuf(outpng));
+    if (setjmp(png_jmpbuf(outpng))) {
+        logerr("libpng error writing PNG");
+        png_destroy_write_struct(&outpng, &outpnginfo);
+        return {};
+    }
     png_set_write_fn(outpng, &ret, writeFunc, [](png_structp) {});
     png_set_compression_level(outpng, Z_BEST_COMPRESSION);
     png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
@@ -336,11 +357,8 @@ std::vector<u8> writePNGToMem(Layer* data)
         }
     }
 
-    setjmp(png_jmpbuf(outpng));
-
     if (!data->isPalettized) {
         png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-        setjmp(png_jmpbuf(outpng));
         png_write_info(outpng, outpnginfo);
 
         uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
@@ -357,7 +375,6 @@ std::vector<u8> writePNGToMem(Layer* data)
     else {
         LayerPalettized* pltLayer = (LayerPalettized*)data;
         png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-        setjmp(png_jmpbuf(outpng));
 
         png_colorp plt = new png_color[pltLayer->palette.size()];
         memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
@@ -402,22 +419,26 @@ Layer* readPNG(PlatformNativePathString path, uint64_t seek)
 {
     FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);
     if (pngfile != NULL) {
+        DoOnReturn closeFile([pngfile]() { fclose(pngfile); });
         u8 sig[8];
         fread(sig, 1, 8, pngfile);
         if (png_sig_cmp(sig, 0, 8)) {
-            logprintf("Not a PNG file\n");
+            logerr("Not a PNG file");
             return NULL;
         }
         fseek(pngfile, 0, SEEK_SET);
 
         png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        if (setjmp(png_jmpbuf(png))) {
+            logerr("libpng error initializing PNG read");
+            png_destroy_read_struct(&png, NULL, NULL);
+            return NULL;
+        }
         png_infop info = png_create_info_struct(png);
         png_init_io(png, pngfile);
         png_read_info(png, info);
 
-        Layer* ret = _readPNG(png, info);
-        fclose(pngfile);
-        return ret;
+        return _readPNG(png, info);
     }
     return NULL;
 }
@@ -527,6 +548,11 @@ MainEditor* readAPNG(PlatformNativePathString path, OperationProgressReport* pro
         fread(fileData.data(), 1, fileSize, f);
 
         std::vector<PNGChunk> chunks = loadPNGChunksFromMem(fileData);
+
+        if (chunks.empty()) {
+            logerr("no chunks in APNG");
+            return NULL;
+        }
 
         PNGIHDRChunk ihdr;
 
