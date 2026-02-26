@@ -52,6 +52,9 @@ inline std::string getLibraryLicenses() {
         "SDL3, SDL3_image, SDL3_ttf, SDL3_net\n"
         "AndroidDeviceNames\n"
         "gzip-hpp\n"
+        //not directly copying any code (i just rewrote it from js to c++)
+        //but still
+        "NewPond\n"
         "\n"
         "The following libraries are only used as dependencies of other libraries:\n"
 #if VSP_USE_LIBAVIF

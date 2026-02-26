@@ -31,7 +31,9 @@ public:
         this->targetFilter = targetFilter;
 
         setupWidgets();
-        setupPreview();
+        if (targetFilter->getParameters().size() > 0) {
+            setupPreview();
+        }
     }
     ~PopupApplyFilter();
 

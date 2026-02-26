@@ -136,3 +136,18 @@ class PrintPaletteFilter : public RenderFilter {
         };
     }
 };
+
+// credit to todepond for coming up with this
+// https://youtu.be/WMJ1H3Ai-qs?t=601
+class RGBGeneFilter : public RenderFilter {
+    std::string name() override { return "RedGreenBluegene"; }
+    std::string id() override { return "filter.render.rgbgene"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override { return {
+        INT_PARAM("size.r", 0, 100, 3),
+        INT_PARAM("size.g", 0, 100, 0),
+        INT_PARAM("size.b", 0, 100, 1),
+        INT_PARAM("bias", 0, 20, 0),
+        BOOL_PARAM("mutate upwards", 1)
+    }; }
+};
