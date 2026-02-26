@@ -44,6 +44,23 @@ jobs:
     with:
       build-arch: ARM64
 
+  #required for 1.0 autoupdater. get rid of this some day
+  windows-post-under-older-url:
+    needs: build-windows-x64
+    runs-on: ubuntu-latest
+    steps:
+    - name: download windows x64
+      uses: actions/download-artifact@v8
+      with:
+        skip-decompress: true
+        name: voidsprite-build-windows-x64
+    - name: reupload windows x64 under older name
+      uses: actions/upload-artifact@v7
+      with:
+        archive: false
+        path: voidsprite-build-windows-x64.zip
+        name: voidsprite-build-win64
+
   build-sdk:
     runs-on: windows-latest
 
