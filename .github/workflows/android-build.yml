@@ -76,7 +76,7 @@ jobs:
         cp -R ../../OPEN_SOURCE_LICENSES build/outputs/apk/releaseOneArch/OPEN_SOURCE_LICENSES
 
     - name: Push build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: voidsprite-build-android-${{ inputs.build-arch }}
         retention-days: 1

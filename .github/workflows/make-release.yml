@@ -29,19 +29,19 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         skip-decompress: true
-        name: voidsprite-build-windows-x64
+        name: voidsprite-build-win-x64
 
     - name: download windows x86
       uses: actions/download-artifact@v8
       with:
         skip-decompress: true
-        name: voidsprite-build-windows-x86
+        name: voidsprite-build-win-x86
 
     - name: download windows arm64
       uses: actions/download-artifact@v8
       with:
         skip-decompress: true
-        name: voidsprite-build-windows-ARM64
+        name: voidsprite-build-win-ARM64
 
     - name: download linux appimage
       uses: actions/download-artifact@v8
@@ -98,8 +98,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./voidsprite-build-windows-x64.zip
-        asset_name: voidsprite-build-windows-x64.zip
+        asset_path: ./voidsprite-build-win-x64.zip
+        asset_name: voidsprite-build-win-x64.zip
         asset_content_type: application/zip
     - name: upload windows x86
       uses: actions/upload-release-asset@v1
@@ -107,8 +107,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./voidsprite-build-windows-x86.zip
-        asset_name: voidsprite-build-windows-x86.zip
+        asset_path: ./voidsprite-build-win-x86.zip
+        asset_name: voidsprite-build-win-x86.zip
         asset_content_type: application/zip
     - name: upload windows ARM64
       uses: actions/upload-release-asset@v1
@@ -116,8 +116,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./voidsprite-build-windows-ARM64.zip
-        asset_name: voidsprite-build-windows-ARM64.zip
+        asset_path: ./voidsprite-build-win-ARM64.zip
+        asset_name: voidsprite-build-win-ARM64.zip
         asset_content_type: application/zip
     - name: upload android
       uses: actions/upload-release-asset@v1

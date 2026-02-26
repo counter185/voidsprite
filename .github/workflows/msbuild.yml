@@ -53,13 +53,16 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         skip-decompress: true
-        name: voidsprite-build-windows-x64
+        name: voidsprite-build-win-x64
+        
+    - name: rename
+      run: mv voidsprite-build-win-x64.zip voidsprite-build-win64.zip
+
     - name: reupload windows x64 under older name
       uses: actions/upload-artifact@v7
       with:
         archive: false
-        path: voidsprite-build-windows-x64.zip
-        name: voidsprite-build-win64
+        path: voidsprite-build-win64.zip
 
   build-sdk:
     runs-on: windows-latest
@@ -72,7 +75,7 @@ jobs:
         run: ./make_sdk.ps1
     
       - name: Push build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: voidsprite-sdk
           path: |
@@ -125,7 +128,7 @@ jobs:
       run: chmod +x ./setup_appimage.sh && ./setup_appimage.sh
 
     - name: Push build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with: 
         name: voidsprite-build-linux-appimage-x64
         path: |
@@ -146,7 +149,7 @@ jobs:
     - name: workaround gh actions artifact file permissions
       run: tar -cvf voidsprite.app.tar -C target/mac_release .
     - name: Push build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with: 
         name: voidsprite-build-mac-intel64
         retention-days: 1
@@ -175,7 +178,7 @@ jobs:
       run: tar -cvf voidsprite.app.tar -C target/mac_release .
 
     - name: Push build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with: 
         name: voidsprite-build-mac-arm64
         retention-days: 1
@@ -236,7 +239,7 @@ jobs:
           tar -cvf voidsprite-universal.app.tar -C mac-release .
 
       - name: Push build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: 
           name: voidsprite-build-mac-universal
           path: |
@@ -269,7 +272,7 @@ jobs:
 #       html is already in the folder
     
     - name: Push build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: voidsprite-build-emscripten
         path: web-build
@@ -359,7 +362,7 @@ jobs:
         cp -r OPEN_SOURCE_LICENSES ./output/OPEN_SOURCE_LICENSES
     
     - name: Push build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: voidsprite-build-android
         path: |
