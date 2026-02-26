@@ -23,6 +23,8 @@ jobs:
   create-release:
     needs: build-all
     runs-on: ubuntu-latest
+    permissions: 
+      contents: write
     steps:
 
     - name: download windows x64
