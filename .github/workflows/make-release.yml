@@ -101,7 +101,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-win-x64.zip
-        asset_name: voidsprite-build-win-x64.zip
+        asset_name: voidsprite-${{ inputs.tagName }}-win-x64.zip
         asset_content_type: application/zip
     - name: upload windows x86
       uses: actions/upload-release-asset@v1
@@ -110,7 +110,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-win-x86.zip
-        asset_name: voidsprite-build-win-x86.zip
+        asset_name: voidsprite-${{ inputs.tagName }}-win-x86.zip
         asset_content_type: application/zip
     - name: upload windows ARM64
       uses: actions/upload-release-asset@v1
@@ -119,7 +119,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-win-ARM64.zip
-        asset_name: voidsprite-build-win-ARM64.zip
+        asset_name: voidsprite-${{ inputs.tagName }}-win-ARM64.zip
         asset_content_type: application/zip
     - name: upload android
       uses: actions/upload-release-asset@v1
@@ -128,7 +128,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-release.apk
-        asset_name: voidsprite-build-android.apk
+        asset_name: voidsprite-${{ inputs.tagName }}-android.apk
         asset_content_type: application/vnd.android.package-archive
     - name: upload linux appimage
       uses: actions/upload-release-asset@v1
@@ -137,7 +137,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-latest-x86_64.AppImage
-        asset_name: voidsprite-linux-appimage-x64.AppImage
+        asset_name: voidsprite-${{ inputs.tagName }}-linux-appimage-x64.AppImage
         asset_content_type: application/x-iso9660-appimage    
     - name: upload linux flatpak
       uses: actions/upload-release-asset@v1
@@ -146,7 +146,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-linux64-flatpak.flatpak
-        asset_name: voidsprite-linux-flatpak-x64.flatpak
+        asset_name: voidsprite-${{ inputs.tagName }}-linux-flatpak-x64.flatpak
         asset_content_type: application/vnd.flatpak
     - name: upload mac
       uses: actions/upload-release-asset@v1
@@ -155,7 +155,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-mac-universal.zip
-        asset_name: voidsprite-build-mac-universal.zip
+        asset_name: voidsprite-${{ inputs.tagName }}-mac-universal.zip
         asset_content_type: application/zip
     - name: upload emscripten
       uses: actions/upload-release-asset@v1
@@ -164,7 +164,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-emscripten.zip
-        asset_name: voidsprite-build-emscripten.zip
+        asset_name: voidsprite-${{ inputs.tagName }}-emscripten.zip
         asset_content_type: application/zip
     - name: upload sdk
       uses: actions/upload-release-asset@v1
@@ -173,5 +173,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-sdk.zip
-        asset_name: voidsprite-sdk.zip
+        asset_name: voidsprite-${{ inputs.tagName }}-sdk.zip
         asset_content_type: application/zip
