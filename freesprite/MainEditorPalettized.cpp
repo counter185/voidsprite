@@ -553,6 +553,18 @@ void MainEditorPalettized::setUpWidgets()
         };
     }
 
+    if (platformSupportsFeature(VSP_FEATURE_OS_SHARE)) {
+        mainEditorKeyActions[SDL_SCANCODE_F].order.insert(mainEditorKeyActions[SDL_SCANCODE_F].order.begin() + 9, SDL_SCANCODE_Q);
+        mainEditorKeyActions[SDL_SCANCODE_F].actions[SDL_SCANCODE_Q] = {
+                TL("vsp.cmn.share"),
+                [this]() {
+                    Layer* flat = flattenImage();
+                    platformShareImage(flat);
+                    delete flat;
+                }
+        };
+    }
+
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = colorPicker->getPanel();
     colorPickerPanel->position.y = 63;

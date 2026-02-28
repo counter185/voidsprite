@@ -19,6 +19,7 @@
     {"vsp.cmn.discard", "Discard"},
     {"vsp.cmn.error", "Error"},
     {"vsp.cmn.search", "Search"},
+    {"vsp.cmn.share", "Share"},
     {"vsp.cmn.error.fileloadfail", "Failed to load file."},
     {"vsp.cmn.error.decompressfail", "Failed to decompress data."},
     {"vsp.cmn.error.mallocfail", "Memory allocation failed."},

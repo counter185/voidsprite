@@ -27,7 +27,9 @@
 #include "Notification.h"
 
 u32 platformSupportedFeatures() {
-    return VSP_FEATURE_ALL; //windows is the primary platform and should support everything
+    return VSP_FEATURE_ALL & ~VSP_FEATURE_OS_SHARE;
+    //windows is the primary platform and should support everything
+    //okay maybe not sharing
 }
 
 HWND WINhWnd = NULL;
@@ -930,6 +932,8 @@ void platformPrintDocument(Layer* layer) {
         logerr("failed to get temp file name");
     }
 }
+
+void platformShareImage(Layer* layer) {}
 
 std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
     std::vector<NetworkAdapterInfo> ret = {};

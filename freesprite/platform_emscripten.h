@@ -145,6 +145,8 @@ void platformPrintDocument(Layer* editor) {
 
 }
 
+void platformShareImage(Layer* layer) {}
+
 std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
     return universal_platformGetNetworkAdapters();
 }

@@ -75,10 +75,9 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
 
 
     labelOutputSize = new UILabel();
-    labelOutputSize->position = { 15, wxHeight - labelOutputSize->fontsize - 30 };
+    labelOutputSize->position = { 15, wxHeight - labelOutputSize->fontsize - 50 };
     labelOutputSize->color = { 255,255,255,0xA0 };
     wxsManager.addDrawable(labelOutputSize);
-
     
     tboxISX->onTextChangedCallback = tboxISY->onTextChangedCallback = 
         tboxPXSX->onTextChangedCallback = tboxPXSY->onTextChangedCallback = 
@@ -114,6 +113,19 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.exportscaled.invalidsize")));
         }
     };
+
+    if (platformSupportsFeature(VSP_FEATURE_OS_SHARE)) {
+        UIButton* shareButton = actionButton(TL("vsp.cmn.share"));
+        shareButton->onClickCallback = [this](...) {
+            if (resultSize.x > 0 && resultSize.y > 0) {
+                scaleAndShare();
+                closePopup();
+            }
+            else {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.exportscaled.invalidsize")));
+            }
+        };
+    }
 }
 
 bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativePathString name) {
@@ -220,7 +232,27 @@ void PopupExportScaled::recalc()
     }
 
     labelOutputSize->setText(
-        resultSize.x >= 0 ? frmt("{}: {}x{}", TL("vsp.exportscaled.resultsize"), resultSize.x, resultSize.y)
+        resultSize.x >= 0 ? frmt("{} {}x{}", TL("vsp.exportscaled.resultsize"), resultSize.x, resultSize.y)
         : TL("vsp.exportscaled.invalidsize")
     );
+}
+
+void PopupExportScaled::scaleAndShare() {
+    Layer* flat = NULL;
+    if (caller->isPalettized) {
+        MainEditorPalettized* pssn = (MainEditorPalettized*)caller;
+        flat = pssn->flattenImageWithoutConvertingToRGB();
+    }
+    else {
+        flat = caller->flattenImage();
+    }
+
+    if (flat != NULL) {
+        Layer* scaled = flat->copyCurrentVariantScaled(resultSize);
+        delete flat;
+        platformShareImage(scaled);
+        delete scaled;
+    } else {
+        g_addNotification(NOTIF_MALLOC_FAIL);
+    }
 }

@@ -130,7 +130,7 @@
             </intent-filter>
         </activity>
 
-        <!--<provider
+        <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.filesprovider"
             android:exported="false"
@@ -138,7 +138,8 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/vsp_file_provider_paths"/>
-        </provider>-->
+        </provider>
+
         <provider
             android:name=".VSPAppdataProvider"
             android:authorities="${applicationId}.provider"

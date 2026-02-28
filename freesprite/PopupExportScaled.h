@@ -22,6 +22,7 @@ public:
     PopupExportScaled(MainEditor* parent);
 
     bool exportWithExporter(FileExporter* exporter, PlatformNativePathString path);
+    void scaleAndShare();
     void genExporterList();
     void recalc();
 };

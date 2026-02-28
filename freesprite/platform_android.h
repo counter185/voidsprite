@@ -8,14 +8,16 @@
 
 #include "platform_universal.h"
 #include "PopupFilePicker.h"
+#include "FileIO.h"
 
 JNIEnv* lastJNI = NULL;
 JavaVM* lastJVM = NULL;
 jclass vspActivityClass = NULL;
 
 u32 platformSupportedFeatures() {
-    return 
-        VSP_FEATURE_WEB_FETCH;
+    return
+        VSP_FEATURE_OS_SHARE
+        | VSP_FEATURE_WEB_FETCH;
 }
 
 void platformPreInit() {
@@ -245,9 +247,7 @@ std::vector<u8> platformFetchBinFile(std::string url) {
     jmethodID m = jni->GetStaticMethodID(vspActivityClass, "fetchDataHTTP", "(Ljava/lang/String;)[B");
     if (m != nullptr) {
         jstring jurl = jni->NewStringUTF(url.c_str());
-        auto aa = DoOnReturn([&]() {
-            jni->DeleteLocalRef(jurl);
-        });
+        auto aa = DoOnReturn([&]() { jni->DeleteLocalRef(jurl); });
         jbyteArray result = (jbyteArray)jni->CallStaticObjectMethod(vspActivityClass, m, jurl);
         if (result != NULL) {
             jsize len = jni->GetArrayLength(result);
@@ -260,6 +260,21 @@ std::vector<u8> platformFetchBinFile(std::string url) {
 }
 
 void platformPrintDocument(Layer* editor) {
+
+}
+
+void platformShareImage(Layer* layer) {
+    auto path = newTempFile() + ".png";
+    if (writePNG(path, layer)) {
+        auto ppath = fileNameFromPath(path);
+
+        jmethodID m = lastJNI->GetStaticMethodID(vspActivityClass, "shareImageFromTempPath", "(Ljava/lang/String;)V");
+        if (m != nullptr) {
+            jstring jpath = lastJNI->NewStringUTF(ppath.c_str());
+            auto aa = DoOnReturn([&]() { lastJNI->DeleteLocalRef(jpath); });
+            lastJNI->CallStaticVoidMethod(vspActivityClass, m, jpath);
+        }
+    }
 
 }
 

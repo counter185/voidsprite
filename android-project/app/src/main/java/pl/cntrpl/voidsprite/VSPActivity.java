@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.content.PermissionChecker;
 
 import com.jaredrummler.android.device.DeviceName;
@@ -95,6 +96,22 @@ public class VSPActivity extends SDLActivity {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         activitySingleton.startActivity(intent);
+    }
+
+    public static void shareImageFromTempPath(String fileName) {
+        File f = new File(activitySingleton.getExternalFilesDir(null), fileName);
+
+        //String contentUri = "content://" + activitySingleton.getApplicationContext().getPackageName() + ".provider/document/root/" + fileName;
+        Uri uri = FileProvider.getUriForFile(activitySingleton.getApplicationContext(), activitySingleton.getApplicationContext().getPackageName() + ".filesprovider", f);
+
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        sendIntent.setType("image/png");
+
+        //sendIntent.setData(uri);
+        sendIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        activitySingleton.startActivity(Intent.createChooser(sendIntent, null));
     }
 
     public static void openFileLocation(String path) {
