@@ -399,8 +399,13 @@ void UIColorPicker::reloadColorLists()
 
     std::vector<UIButton*> collapseButtons;
 
-
+    std::vector<IPalette*> palettes = extraPalettes;
     for (auto& p : g_namedColorMap) {
+        palettes.push_back(&p);
+    }
+
+
+    for (auto*& p : palettes) {
         Panel* pp = new Panel();
         pp->sizeToContent = true;
         UIButton* collapseButton = new UIButton("-");
@@ -411,7 +416,7 @@ void UIColorPicker::reloadColorLists()
         collapseButtons.push_back(collapseButton);
 
 
-        UILabel* nameLabel = new UILabel(p.name);
+        UILabel* nameLabel = new UILabel(p->getName());
         nameLabel->position = XY{ 30, 10 };
         pp->subWidgets.addDrawable(nameLabel);
 
@@ -428,7 +433,7 @@ void UIColorPicker::reloadColorLists()
         int lineCount = 1;
         int currentCountInLine = 0;
         int maxCountInLine = 0;
-        for (auto& color : p.colorMap) {
+        for (auto& color : p->getColorList()) {
             if (color.first == HINT_NEXT_LINE) {
                 currentCountInLine = 0;
                 lineCount++;
@@ -443,34 +448,33 @@ void UIColorPicker::reloadColorLists()
 
         int itemHeight = largeColorButtons ? 32 : 20;
 
-        bool paletteModifiable = canEditPalettes && p.correspondingExporter != NULL && !p.path.empty();
+        bool paletteModifiable = canEditPalettes && p->canSave();
 
         //create all the color buttons
         int colorIndex = 0;
-        for (auto& color : p.colorMap) {
-            if (color.first == HINT_NEXT_LINE) {
+        for (auto& [colorName, colorValue] : p->getColorList()) {
+            if (colorName == HINT_NEXT_LINE) {
                 xNow = 0;
                 yNow += itemHeight;
                 colorIndex++;
                 continue;
             }
 
-            ColorPickerColorButton* b = new ColorPickerColorButton(this, color.second);
+            ColorPickerColorButton* b = new ColorPickerColorButton(this, colorValue);
             b->position = XY{ xNow, yNow };
-            b->tooltip = color.first;
+            b->tooltip = colorName;
             b->wxWidth = largeColorButtons ? 48 : 24;
             b->wxHeight = itemHeight;
             if (paletteModifiable) {
-                b->onRightClickCallback = [colorIndex, this, p, color](UIButton*) {
+                b->onRightClickCallback = [colorIndex, this, p, colorValue](UIButton*) {
                     //todo: make this a context menu with remove, move up, move down options
                     PopupYesNo* popup = new PopupYesNo("Remove color",
-                        frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, color.second, p.name));
+                        frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()));
                     popup->onFinishCallback = [this, colorIndex, p](PopupYesNo*, bool result) {
                         if (result) {
-                            if (p.colorMap.size() > colorIndex) {
-                                NamedColorPalette newP = p;
-                                newP.colorMap.erase(newP.colorMap.begin() + colorIndex);
-                                if (g_updateColorMapFile(newP)) {
+                            if (p->getColorList().size() > colorIndex) {
+                                p->getColorList().erase(p->getColorList().begin() + colorIndex);
+                                if (p->save()) {
                                     g_reloadColorMap();
                                     reloadColorLists();
                                 }
@@ -504,7 +508,7 @@ void UIColorPicker::reloadColorLists()
                     popup->setRGB(colorNowU32);
                     popup->onColorConfirmedCallback = [this, p](PopupPickColor*, u32 color) {
                         addColorToPalette(p, color);
-                        };
+                    };
                     g_addPopup(popup);
                 }
                 else {
@@ -579,11 +583,10 @@ void UIColorPicker::reloadColorLists()
     };
 }
 
-void UIColorPicker::addColorToPalette(NamedColorPalette p, u32 color)
+void UIColorPicker::addColorToPalette(IPalette* p, u32 color)
 {
-    NamedColorPalette newP = p;
-    newP.colorMap.push_back(std::pair<std::string, u32>(std::string("newcolor"), color));
-    if (g_updateColorMapFile(newP)) {
+    p->addColor("newcolor", color);
+    if (p->save()) {
         g_reloadColorMap();
         reloadColorLists();
     }

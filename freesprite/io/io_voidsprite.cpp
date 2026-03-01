@@ -156,8 +156,6 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->ssne.tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->ssne.tileDimensions.y)},
             {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
@@ -165,8 +163,11 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
             {"layer.opacity", layerOpacityData},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
+
+        for (auto& [k,v] : editor->ssne.serializeToKeyVals()) {
+            extData[k] = v;
+        }
 
         nvalBuffer = extData.size();
         fwrite(&nvalBuffer, 4, 1, outfile);
@@ -222,8 +223,6 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->ssne.tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->ssne.tileDimensions.y)},
             {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
@@ -231,8 +230,11 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
         };
+
+        for (auto& [k,v] : editor->ssne.serializeToKeyVals()) {
+            extData[k] = v;
+        }
 
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
@@ -296,11 +298,6 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         std::string commentsData = editor->makeCommentDataString(editor->getCurrentFrame());
 
-        std::string guidelinesData = frmt("{};", editor->ssne.guidelines.size());
-        for (Guideline& g : editor->ssne.guidelines) {
-            guidelinesData += frmt("{};", g.Serialize());
-        }
-
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->getLayerStack()) {
             layerVisibilityData += lr->hidden ? '0' : '1';
@@ -308,10 +305,6 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->ssne.tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->ssne.tileDimensions.y)},
-            {"tile.dim.padrx", std::to_string(editor->ssne.tileGridPaddingBottomRight.x)},
-            {"tile.dim.padby", std::to_string(editor->ssne.tileGridPaddingBottomRight.y)},
             {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
@@ -319,10 +312,12 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"guidelines", guidelinesData},
-            {"edit.time", std::to_string(editor->editTime)},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
+            {"edit.time", std::to_string(editor->editTime)}
         };
+
+        for (auto& [k,v] : editor->ssne.serializeToKeyVals()) {
+            extData[k] = v;
+        }
 
         if (editor->isPalettized) {
             MainEditorPalettized* upcastEditor = ((MainEditorPalettized*)editor);
@@ -392,11 +387,6 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
 
         std::string commentsData = editor->makeCommentDataString(editor->getCurrentFrame());
 
-        std::string guidelinesData = frmt("{};", editor->ssne.guidelines.size());
-        for (Guideline& g : editor->ssne.guidelines) {
-            guidelinesData += frmt("{};", g.Serialize());
-        }
-
         std::string layerVisibilityData = "";
         for (Layer*& lr : editor->getLayerStack()) {
             layerVisibilityData += lr->hidden ? '0' : '1';
@@ -404,10 +394,6 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->ssne.tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->ssne.tileDimensions.y)},
-            {"tile.dim.padrx", std::to_string(editor->ssne.tileGridPaddingBottomRight.x)},
-            {"tile.dim.padby", std::to_string(editor->ssne.tileGridPaddingBottomRight.y)},
             {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
@@ -415,10 +401,12 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"guidelines", guidelinesData},
-            {"edit.time", std::to_string(editor->editTime)},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"}
+            {"edit.time", std::to_string(editor->editTime)}
         };
+
+        for (auto& [k,v] : editor->ssne.serializeToKeyVals()) {
+            extData[k] = v;
+        }
 
         for (auto& [key, value] : editor->toolProperties) {
             extData[frmt("tool.property:{}", key)] = std::to_string(value);
@@ -509,30 +497,23 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
         voidsnWriteU32(outfile, editor->canvas.dimensions.x);
         voidsnWriteU32(outfile, editor->canvas.dimensions.y);
 
-        std::string guidelinesData = frmt("{};", editor->ssne.guidelines.size());
-        for (Guideline& g : editor->ssne.guidelines) {
-            guidelinesData += frmt("{};", g.Serialize());
-        }
-
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"tile.dim.x", std::to_string(editor->ssne.tileDimensions.x)},
-            {"tile.dim.y", std::to_string(editor->ssne.tileDimensions.y)},
-            {"tile.dim.padrx", std::to_string(editor->ssne.tileGridPaddingBottomRight.x)},
-            {"tile.dim.padby", std::to_string(editor->ssne.tileGridPaddingBottomRight.y)},
             {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
             {"sym.x", std::to_string(editor->symmetryPositions.x)},
             {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
-            {"guidelines", guidelinesData},
             {"edit.time", std::to_string(editor->editTime)},
-            {"editor.altbg", editor->usingAltBG() ? "1" : "0"},
             {"frame.active", std::to_string(editor->activeFrame)},
             {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)},
             {"frame.backtrace", std::to_string(editor->backtraceFrames)},
             {"frame.fwdtrace", std::to_string(editor->fwdtraceFrames)},
         };
+
+        for (auto& [k,v] : editor->ssne.serializeToKeyVals()) {
+            extData[k] = v;
+        }
 
         for (auto& [key, value] : editor->toolProperties) {
             extData[frmt("tool.property:{}", key)] = std::to_string(value);
@@ -859,15 +840,14 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
 
             ret = isPalettized ? new MainEditorPalettized(frames) : new MainEditor(frames);
 
-            if (extData.contains("tile.dim.x")) { ret->ssne.tileDimensions.x = std::stoi(extData["tile.dim.x"]); }
-            if (extData.contains("tile.dim.y")) { ret->ssne.tileDimensions.y = std::stoi(extData["tile.dim.y"]); }
-            if (extData.contains("tile.dim.padrx")) { ret->ssne.tileGridPaddingBottomRight.x = std::stoi(extData["tile.dim.padrx"]); }
-            if (extData.contains("tile.dim.padby")) { ret->ssne.tileGridPaddingBottomRight.y = std::stoi(extData["tile.dim.padby"]); }
+            ret->ssne = SessionEditorPrefs::deserializeFromKeyVals(extData);
+            //ensure in-session palette gets loaded
+            ret->colorPicker->reloadColorLists();
+
             if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
             if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
             if (extData.contains("layer.selected")) { ret->selLayer = frames[0]->activeLayer = std::stoi(extData["layer.selected"]); }
             if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
-            if (extData.contains("editor.altbg")) { ret->setAltBG(extData["editor.altbg"] == "1"); }
             if (extData.contains("frame.active")) { ret->activeFrame = -1; ret->switchFrame(std::stoi(extData["frame.active"])); }
             if (extData.contains("frame.ms")) { ret->setMSPerFrame(std::stoi(extData["frame.ms"])); }
             if (extData.contains("frame.backtrace")) { ret->backtraceFrames = std::stoi(extData["frame.backtrace"]); }
@@ -886,18 +866,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             if (extData.contains("comments")) {
                 std::string commentsData = extData["comments"];
                 frames.front()->comments = MainEditor::parseCommentDataString(commentsData);
-            }
-            if (extData.contains("guidelines")) {
-                std::string guidelinesData = extData["guidelines"];
-                auto split = splitString(guidelinesData, ';');
-                for (int i = 1; i < split.size() - 1; i++) {
-                    try {
-                        ret->ssne.guidelines.push_back(Guideline::Deserialize(split[i]));
-                    }
-                    catch (std::exception& e) {
-                        logerr(frmt("Failed to parse guideline:\n {}", e.what()));
-                    }
-                }
             }
             for (auto& [key, value] : extData) {
                 if (stringStartsWithIgnoreCase(key, "tool.property:")) {

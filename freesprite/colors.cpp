@@ -8,7 +8,7 @@
 #include "io/io_voidsprite.h"
 
 std::vector<NamedColorPalette> g_baseNamedColorMap = {
-    {
+    NamedColorPalette(
         "Base Colors",
         {
             {"r", 0xFFFF0000},
@@ -20,8 +20,8 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"k", 0xFF000000},
             {"w", 0xFFFFFFFF}
         }
-    },
-    {
+    ),
+    NamedColorPalette(
         "CSS",
         {
             {"aliceblue", 0xFFF0F8FF},
@@ -173,8 +173,8 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"yellow", 0xFFFFFF00},
             {"yellowgreen", 0xFF9ACD32}
         }
-    },
-    {
+    ),
+    NamedColorPalette(
         "NES/Famicom",
         {
             {"nes00", 0xFF757575}, {"nes01", 0xFF271B8F}, {"nes02", 0xFF0000AB}, {"nes03", 0xFF47009F},
@@ -201,8 +201,8 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"nes1e", 0xFF000000}, {"nes1f", 0xFF000000}, {"nes2d", 0xFF000000}, {"nes2e", 0xFF000000},
             {"nes2f", 0xFF000000}, {"nes3d", 0xFF000000}, {"nes3e", 0xFF000000}, {"nes3f", 0xFF000000},
         }
-    },
-    {
+    ),
+    NamedColorPalette(
         "Game Boy/GB Pocket/GB Light",
         {
             {"dmg0", 0xFF294139}, {"dmg1", 0xFF39594A}, {"dmg2", 0xFF5A7942}, {"dmg3", 0xFF7B8210},
@@ -211,8 +211,8 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             HINT_NEXT_LINE_HERE,
             {"gbl0", 0xFF004f3a}, {"gbl1", 0xFF00694a}, {"gbl2", 0xFF009a70}, {"gbl3", 0xFF00b582},
         }
-    },
-    {
+    ),
+    NamedColorPalette(
         "Windows / OS/2 16 Color mode",
         {
             {"9x00", 0xFF000000}, {"9x01", 0xFF800000}, {"9x02", 0xFF008000}, {"9x03", 0xFF808000}, 
@@ -221,8 +221,8 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"9x08", 0xFF808080}, {"9x09", 0xFFFF0000}, {"9x0a", 0xFF00FF00}, {"9x0b", 0xFFFFFF00}, 
             {"9x0c", 0xFF0000FF}, {"9x0d", 0xFFFF00FF}, {"9x0e", 0xFF00FFFF}, {"9x0f", 0xFFFFFFFF}
         }
-    },
-    {
+    ),
+    NamedColorPalette(
         "Color Graphics Adapter [CGA]",
         {
             {"cga0", 0xFF000000}, {"cga1", 0xFF0000AA}, {"cga2", 0xFF00AA00}, {"cga3", 0xFF00AAAA}, 
@@ -231,8 +231,8 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"cga8", 0xFF555555}, {"cga9", 0xFF5555FF}, {"cga10", 0xFF55FF55}, {"cga11", 0xFF55FFFF}, 
             {"cga12", 0xFFFF5555}, {"cga13", 0xFFFF55FF}, {"cga14", 0xFFFFFF55}, {"cga15", 0xFFFFFFFF}
         }
-    },
-    {
+    ),
+    NamedColorPalette(
         "Enhanced Graphics Adapter [EGA]",
         {
             {"ega00", 0xFF000000}, {"ega01", 0xFF0000AA}, {"ega02", 0xFF00AA00}, {"ega03", 0xFF00AAAA},
@@ -259,7 +259,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"ega38", 0xFF555555}, {"ega39", 0xFF5555FF}, {"ega3a", 0xFF55FF55}, {"ega3b", 0xFF55FFFF},
             {"ega3c", 0xFFFF5555}, {"ega3d", 0xFFFF55FF}, {"ega3e", 0xFFFFFF55}, {"ega3f", 0xFFFFFFFF}
         }
-    },
+    ),
 };
 
 void g_generateColorMap() {
@@ -303,18 +303,6 @@ void g_reloadColorMap() {
     }
 
     g_generateColorMap();
-}
-
-bool g_updateColorMapFile(NamedColorPalette target)
-{
-    if (target.correspondingExporter != NULL && !target.path.empty()) {
-        std::vector<u32> colors;
-        for (auto& color : target.colorMap) {
-            colors.push_back(color.second);
-        }
-        return target.correspondingExporter->exportData(target.path, &colors);
-    }
-    return false;
 }
 
 void g_downloadAndInstallPaletteFromLospec(std::string url)
@@ -361,4 +349,15 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.error.invalidlospecpaletteurl")));
     }
+}
+
+bool NamedColorPalette::save() {
+    if (correspondingExporter != NULL && !path.empty()) {
+        std::vector<u32> colors;
+        for (auto& color : colorMap) {
+            colors.push_back(color.second);
+        }
+        return correspondingExporter->exportData(path, &colors);
+    }
+    return false;
 }

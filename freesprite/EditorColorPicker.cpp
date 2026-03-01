@@ -9,7 +9,7 @@
 #include "UITextField.h"
 #include "UIColorPicker.h"
 
-EditorColorPicker::EditorColorPicker(MainEditor* c) {
+EditorColorPicker::EditorColorPicker(MainEditor* c) : callerColorList(c) {
     caller = c;
 
     wxWidth = 400;
@@ -21,6 +21,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) {
 
     wColorPicker = new UIColorPicker();
     wColorPicker->position = {0,0};
+    wColorPicker->addExtraPalette(&this->callerColorList);
     wxsTarget().addDrawable(wColorPicker);
 
     eraserButton = new UIButton();

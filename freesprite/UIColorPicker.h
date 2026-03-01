@@ -42,6 +42,7 @@ class UIColorPicker : public Panel, public EventCallbackListener
 {
 protected:
     bool canEditPalettes = true;
+    std::vector<IPalette*> extraPalettes;
 
     void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
     void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
@@ -86,7 +87,7 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
     void reloadColorLists();
-    void addColorToPalette(NamedColorPalette p, u32 color);
+    void addColorToPalette(IPalette* p, u32 color);
     void updateColorModelSliders(std::string dontUpdate = "");
     void updateHSVTextBoxOnInputEvent(std::string data, double* value);
 
@@ -121,6 +122,11 @@ public:
         currentS = s;
         currentV = v;
         colorUpdatedFromVisualHSV();
+    }
+
+    void addExtraPalette(IPalette* p) { 
+        extraPalettes.push_back(p); 
+        reloadColorLists();
     }
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32

@@ -169,6 +169,14 @@ public:
 
     std::vector<Guideline> guidelines;
     GuidelineDisplayMode guidelineDisplayMode = GUIDELINE_SHOW_COLORED;
+
+    std::vector<std::pair<std::string, u32>> ineditorColorList;
+
+    std::map<std::string, std::string> serializeToKeyVals();
+    std::string serializeToJson();
+
+    static SessionEditorPrefs deserializeFromKeyVals(std::map<std::string, std::string> kvs);
+    static SessionEditorPrefs deserializeFromJson(std::string json);
 };
 
 class MainEditor : public BaseScreen, public EventCallbackListener {

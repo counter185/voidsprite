@@ -3,6 +3,26 @@
 #include "IEditorColorPicker.h"
 #include "PanelUserInteractable.h"
 
+class SessionLocalColorList : public IPalette {
+protected:
+    MainEditor* target = NULL;
+public:
+    SessionLocalColorList(MainEditor* target) : target(target) {}
+
+    std::string getName() override { return "Session-local palette"; }
+    std::vector<std::pair<std::string, u32>>& getColorList() { return target->ssne.ineditorColorList; }
+
+    bool canSave() override { return true; }
+    bool save() override { 
+        int i = 0;
+        for (auto& kv : getColorList()) {
+            kv.first = frmt("{:02}", i++);
+        }
+        target->changesSinceLastSave = HAS_UNSAVED_CHANGES; 
+        return true; 
+    }
+};
+
 class EditorColorPicker : public PanelUserInteractable, public IEditorColorPicker
 {
 protected:
@@ -13,7 +33,7 @@ protected:
     void updatePanelColors();
 public:
     MainEditor* caller = NULL;
-
+    SessionLocalColorList callerColorList;
 
     UIButton* eraserButton = NULL;
     UIButton* blendModeButton = NULL;

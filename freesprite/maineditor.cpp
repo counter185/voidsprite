@@ -4235,3 +4235,96 @@ void EditorNetworkCanvasChatPanel::updateChat()
     parent->networkCanvasCurrentChatState->messagesMutex.unlock();
     chatMsgPanel->scrollToBottom();
 }
+
+std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
+    std::string guidelinesData = frmt("{};", guidelines.size());
+    for (Guideline& g : guidelines) {
+        guidelinesData += frmt("{};", g.Serialize());
+    }
+
+    std::string ineditorColorListData = "";
+    for (auto& [name, color] : ineditorColorList) {
+        ineditorColorListData += frmt("{:08X};", color);
+    }
+
+    std::map<std::string, std::string> kvs;
+    kvs["tile.dim.x"] = std::to_string(tileDimensions.x);
+    kvs["tile.dim.y"] = std::to_string(tileDimensions.y);
+    kvs["tile.dim.padrx"] = std::to_string(tileGridPaddingBottomRight.x);
+    kvs["tile.dim.padby"] = std::to_string(tileGridPaddingBottomRight.y);
+    kvs["editor.altbg"] = alternateBackground ? "1" : "0";
+    kvs["guidelines"] = guidelinesData;
+    kvs["tile.gridalpha"] = std::to_string(tileGridAlpha);
+    kvs["tile.gridcolor.override"] = overrideTileGridColor ? "1" : "0";
+    kvs["tile.gridcolor"] = frmt("{:06X}", tileGridColor);
+    kvs["comments.displaymode"] = std::to_string((int)commentViewMode);
+    kvs["guidelines.displaymode"] = std::to_string((int)guidelineDisplayMode);
+    kvs["palette.colorlist"] = ineditorColorListData;
+    return kvs;
+}
+SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::string, std::string> kvs) {
+    SessionEditorPrefs prefs{};
+    try { prefs.tileDimensions.x = std::stoi(kvs["tile.dim.x"]); } catch (...) {}
+    try { prefs.tileDimensions.y = std::stoi(kvs["tile.dim.y"]); } catch (...) {}
+    try { prefs.tileGridPaddingBottomRight.x = std::stoi(kvs["tile.dim.padrx"]); } catch (...) {}
+    try { prefs.tileGridPaddingBottomRight.y = std::stoi(kvs["tile.dim.padby"]); } catch (...) {}
+    try { prefs.alternateBackground = kvs["editor.altbg"] == "1"; } catch (...) {}
+    try { prefs.tileGridAlpha = std::stoi(kvs["tile.gridalpha"]); } catch (...) {}
+    try { prefs.overrideTileGridColor = kvs["tile.gridcolor.override"] == "1"; } catch (...) {}
+    try { prefs.tileGridColor = std::stoi(kvs["tile.gridcolor"], NULL, 16); } catch (...) {}
+    try { prefs.commentViewMode = (MainEditorCommentMode)std::stoi(kvs["comments.displaymode"]); } catch (...) {}
+    try { prefs.guidelineDisplayMode = (GuidelineDisplayMode)std::stoi(kvs["guidelines.displaymode"]); } catch (...) {}
+
+    try {
+        std::string guidelinesData = kvs["guidelines"];
+        auto split = splitString(guidelinesData, ';');
+        for (int i = 1; i < split.size() - 1; i++) {
+            try {
+                prefs.guidelines.push_back(Guideline::Deserialize(split[i]));
+            }
+            catch (std::exception& e) {
+                logerr(frmt("Failed to parse guideline:\n {}", e.what()));
+            }
+        }
+    } catch (...) {}
+
+    try {
+        std::string ineditorColorListData = kvs["palette.colorlist"];
+        auto split = splitString(ineditorColorListData, ';');
+        for (int i = 0; i < split.size() - 1; i++) {
+            try {
+                prefs.ineditorColorList.push_back({ frmt("{:02}", i), std::stoul(split[i], NULL, 16) });
+            }
+            catch (std::exception& e) {
+                logerr(frmt("Failed to parse color ({}):\n {}", split[i], e.what()));
+            }
+        }
+
+    } catch (...) {}
+
+    return prefs;
+}
+
+std::string SessionEditorPrefs::serializeToJson() {
+    auto kvs = serializeToKeyVals();
+    nlohmann::json j = json::object();
+    for (auto& [key, val] : kvs) {
+        j[key] = val;
+    }
+    return j.dump();
+}
+
+
+SessionEditorPrefs SessionEditorPrefs::deserializeFromJson(std::string json) {
+    try {
+        nlohmann::json j = json::parse(json);
+        std::map<std::string, std::string> kvs;
+        for (auto& [key, val] : j.items()) {
+            kvs[key] = val.get<std::string>();
+        }
+        return deserializeFromKeyVals(kvs);
+    }
+    catch (std::exception&) {
+        return SessionEditorPrefs();
+    }
+}
