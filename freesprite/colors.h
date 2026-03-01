@@ -10,6 +10,8 @@ class IPalette {
 protected:
     std::vector<std::pair<std::string, u32>> placeholderColorList;
 public:
+    virtual ~IPalette() = default;
+
     virtual std::string getName() { return "INVALID PALETTE"; };
     virtual std::vector<std::pair<std::string, u32>>& getColorList() { 
         logerr("accessed placeholder color list. this must not happen"); 

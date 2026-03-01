@@ -2,6 +2,7 @@
 #include "UIButton.h"
 #include "IEditorColorPicker.h"
 #include "PanelUserInteractable.h"
+#include "maineditor.h"
 
 class SessionLocalColorList : public IPalette {
 protected:

@@ -4271,7 +4271,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.alternateBackground = kvs["editor.altbg"] == "1"; } catch (...) {}
     try { prefs.tileGridAlpha = std::stoi(kvs["tile.gridalpha"]); } catch (...) {}
     try { prefs.overrideTileGridColor = kvs["tile.gridcolor.override"] == "1"; } catch (...) {}
-    try { prefs.tileGridColor = std::stoi(kvs["tile.gridcolor"], NULL, 16); } catch (...) {}
+    try { prefs.tileGridColor = std::stoul(kvs["tile.gridcolor"], NULL, 16); } catch (...) {}
     try { prefs.commentViewMode = (MainEditorCommentMode)std::stoi(kvs["comments.displaymode"]); } catch (...) {}
     try { prefs.guidelineDisplayMode = (GuidelineDisplayMode)std::stoi(kvs["guidelines.displaymode"]); } catch (...) {}
 
