@@ -17,6 +17,7 @@ public:
     UILabel* pickedColorLabel = NULL;
 
     UIButton* eraserButton = NULL;
+    std::vector<UIButton*> colorButtons;
 
     PalettizedEditorColorPicker(MainEditorPalettized* caller);
 
@@ -31,6 +32,7 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
     void updateForcedColorPaletteButtons();
+    void highlightActiveColorButton();
     void setPickedPaletteIndex(int32_t index);
 
     Panel* getPanel() override { return this; }

@@ -178,6 +178,7 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
 void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
 {
     colorPaletteTabs->tabs[0].wxs.freeAllDrawables();
+    colorButtons.clear();
 
     int paletteIndex = 0;
     for (int y = 0; y < 16 && paletteIndex < caller->palette.size(); y++) {
@@ -188,7 +189,10 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
             colBtn->wxHeight = 16;
             colBtn->wxWidth = 22;
             colBtn->position = { x * colBtn->wxWidth, 10 + y * colBtn->wxHeight };
-            colBtn->onClickCallback = [this, paletteIndex](UIButton* btn) { setPickedPaletteIndex(paletteIndex); };
+            colBtn->onClickCallback = [this, paletteIndex](UIButton* btn) { 
+                setPickedPaletteIndex(paletteIndex);
+                highlightActiveColorButton();
+            };
             colBtn->onRightClickCallback = [this, col, paletteIndex](UIButton* btn) { 
                 PopupPickColor* ppc = new PopupPickColor("Pick color", frmt("Select color for palette index {}", paletteIndex), true);
                 ppc->setCallbackListener(paletteIndex, this);
@@ -202,6 +206,7 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
                 g_addPopup(ppc);
             };
             colorPaletteTabs->tabs[0].wxs.addDrawable(colBtn);
+            colorButtons.push_back(colBtn);
             paletteIndex++;
         }
     }
@@ -222,7 +227,16 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
         };
         colorPaletteTabs->tabs[0].wxs.addDrawable(newColorButton);
     }
+    highlightActiveColorButton();
+}
 
+void PalettizedEditorColorPicker::highlightActiveColorButton() {
+    static SDL_Color defaultBorder = SDL_Color{ 0xff,0xff,0xff,0x30 };
+
+    static SDL_Color highlightBorder = SDL_Color{ 0,0xff,0,0xd0 };
+    for (int i = 0; i < colorButtons.size(); i++) {
+        colorButtons[i]->colorBorder = i == caller->pickedPaletteIndex ? highlightBorder : defaultBorder;
+    }
 }
 
 void PalettizedEditorColorPicker::setPickedPaletteIndex(int32_t index)
