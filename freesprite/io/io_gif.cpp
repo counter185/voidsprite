@@ -206,6 +206,8 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
 
         std::vector<LayerPalettized*> allFrameLayers;
 
+        std::string ssneData = "";
+
         while (!feof(f)) {
             u8 blockIdentifier;
             fread(&blockIdentifier, 1, 1, f);
@@ -261,6 +263,11 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
                         GIFApplicationExtension gae;
                         fread(&gae, sizeof(GIFApplicationExtension), 1, f);
                         std::vector<u8> applicationData = GIFReadDataBlocks(f);
+                        if (memcmp(gae.identifier, "voidspri", 8) == 0 && applicationData.size() > 3) {
+                            ssneData.resize(applicationData.size() - 3);
+                            memcpy(ssneData.data(), applicationData.data() + 3, applicationData.size() - 3);
+                            loginfo("[GIF] found voidsprite SSNE data in application extension");
+                        }
                         gaes.push_back(gae);
                     }
                     break;
@@ -354,6 +361,9 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
         if (!frames.empty()) {
             ret = frames.front()->layers.front()->isPalettized ? new MainEditorPalettized(frames) : new MainEditor(frames);
             ret->setMSPerFrame(frameDelay);
+            if (!ssneData.empty() && g_config.saveLoadFlatImageExtData) {
+                ret->ssne = SessionEditorPrefs::deserializeFromJson(ssneData);
+            }
         }
 
         fclose(f);
@@ -432,12 +442,35 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
         fwrite(appData, 1, 3, f);
         fwrite("\x00", 1, 1, f); //block terminator
 
-        fwrite("\x21\xFE", 1, 2, f); //comment extension
-        std::string comment = "exported by voidsprite";
-        u8 commentBlockSize = (u8)std::min<size_t>(255, comment.size());
-        fwrite(&commentBlockSize, 1, 1, f);
-        fwrite(comment.c_str(), 1, commentBlockSize, f);
-        fwrite("\x00", 1, 1, f); //block terminator
+        if (g_config.saveLoadFlatImageExtData) {
+            GIFApplicationExtension paeVspExt;
+            paeVspExt.blockSize = 11;
+            memcpy(paeVspExt.identifier, "voidspri", 8);
+            memcpy(paeVspExt.authenticationCode, "te0", 3);
+            fwrite("\x21\xFF", 1, 2, f); //extension introducer
+            fwrite(&paeVspExt, sizeof(GIFApplicationExtension), 1, f);
+            std::string ssneSerialized = "";
+            ssneSerialized.push_back('\x01');   //compat if some app accidentally treats this as NETSCAPE2.0
+            ssneSerialized.push_back('\x00');
+            ssneSerialized.push_back('\x00');
+            ssneSerialized += editor->ssne.serializeToJson();
+            u8 subBlockSize = ssneSerialized.size();
+            int ptr = 0;
+            while (ptr < ssneSerialized.size()) {
+                u8 blockSize = (ssneSerialized.size() - ptr > 255) ? 255 : (u8)(ssneSerialized.size() - ptr);
+                fwrite(&blockSize, 1, 1, f);
+                fwrite(ssneSerialized.data() + ptr, 1, blockSize, f);
+                ptr += blockSize;
+            }
+            fwrite("\x00", 1, 1, f); //block terminator
+
+            fwrite("\x21\xFE", 1, 2, f); //comment extension
+            std::string comment = "exported by voidsprite";
+            u8 commentBlockSize = (u8)std::min<size_t>(255, comment.size());
+            fwrite(&commentBlockSize, 1, 1, f);
+            fwrite(comment.c_str(), 1, commentBlockSize, f);
+            fwrite("\x00", 1, 1, f); //block terminator
+        }
 
         for (GIFFrame& frame : frames) {
 
