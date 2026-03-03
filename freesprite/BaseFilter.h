@@ -313,3 +313,16 @@ public:
         };
     }
 };
+
+class FilterBlendTowardsColor : public BaseFilter {
+public:
+    std::string name() override { return "Blend towards color"; }
+    std::string id() override { return "filter.blendtocolor"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            COLORRGB_PARAM("color", 0xFF000000),
+            FLOAT_PARAM("factor", 0, 100, 50)
+        };
+    }
+};

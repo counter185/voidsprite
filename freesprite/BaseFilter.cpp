@@ -63,6 +63,7 @@ void g_loadFilters()
     registerFilter(new FilterRemoveChannels());
     registerFilter(new FilterAlphaThreshold());
     registerFilter(new FilterEdgeDetectOutline());
+    registerFilter(new FilterBlendTowardsColor());
 
     for (auto pluginFilter : g_pluginFilters) {
         registerFilter(pluginFilter);
@@ -725,4 +726,22 @@ Layer* FilterEdgeDetectOutline::run(Layer* src, std::map<std::string, std::strin
 
     delete cc;
     return c;
+}
+
+Layer* FilterBlendTowardsColor::run(Layer* src, std::map<std::string, std::string> options) {
+
+    u32 target = std::stoul(options["color"], 0, 16);
+    double factor = std::stod(options["factor"]) / 100.0;
+
+    Layer* c = copy(src);
+    for (int y = 0; y < c->h; y++) {
+        for (int x = 0; x < c->w; x++) {
+            u32 srcPx = c->getPixelAt({x,y});
+            u8 srcAlpha = uint32ToSDLColor(srcPx).a;
+            u32 dstPx = modAlpha(target, (u8)(255 * factor));
+            c->setPixel({x,y}, modAlpha(alphaBlend(modAlpha(srcPx, 255), dstPx), srcAlpha));
+        }
+    }
+    return c;
+
 }
