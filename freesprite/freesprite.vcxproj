@@ -356,6 +356,7 @@
     <ClCompile Include="PopupTileGeneric.cpp" />
     <ClCompile Include="RenderFilter.cpp" />
     <ClCompile Include="RPG2KTilemapPreviewScreen.cpp" />
+    <ClCompile Include="ScreenVoxelEditor.cpp" />
     <ClCompile Include="ScreenNonogramPlayer.cpp" />
     <ClCompile Include="ScreenWideActionBar.cpp" />
     <ClCompile Include="sdk_impl.cpp" />
@@ -631,6 +632,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="ScreenVoxelEditor.h" />
     <ClInclude Include="ScreenNonogramPlayer.h" />
     <ClInclude Include="ScreenWideActionBar.h" />
     <ClInclude Include="sdk_impl.h" />

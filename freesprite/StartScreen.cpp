@@ -33,6 +33,7 @@
 #include "updatecheck.h"
 #include "UIStackPanel.h"
 #include "UIColorInputField.h"
+#include "ScreenVoxelEditor.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -414,6 +415,9 @@ void StartScreen::takeInput(SDL_Event evt)
                 case SDL_KEYDOWN:
                     if (evt.key.scancode == SDL_SCANCODE_N && g_ctrlModifier) {
                         ScreenNonogramPlayer::StartDebugGame();
+                    }                    
+                    else if (evt.key.scancode == SDL_SCANCODE_V && g_shiftModifier) {
+                        g_addScreen(new ScreenVoxelEditor());
                     }
     #if _DEBUG
                     else if (evt.key.scancode == SDL_SCANCODE_INSERT && g_ctrlModifier && g_shiftModifier) {
@@ -1036,7 +1040,7 @@ void StartScreen::tryLoadURL(std::string url)
                 bool importedDataIsSession = false;
                 for (auto& importer : g_fileImporters) {
                     if (importer->hasCheckFunction() && importer->canImport(temp)) {
-                        importedData = importer->importData(temp);
+                        importedData = importer->importData(temp, g_printOnlyProgressReport);
                         if (importedData != NULL) {
                             importedDataIsSession = importer->importsWholeSession();
                             break;

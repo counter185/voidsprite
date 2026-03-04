@@ -537,6 +537,9 @@
     <ClCompile Include="ScreenNonogramPlayer.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="ScreenVoxelEditor.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
     <ClCompile Include="io\io_dibv5.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
@@ -1191,6 +1194,9 @@
       <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="ScreenNonogramPlayer.h">
+      <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenVoxelEditor.h">
       <Filter>Header files\screen</Filter>
     </ClInclude>
     <ClInclude Include="io\io_dibv5.h">
