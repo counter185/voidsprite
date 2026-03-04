@@ -99,6 +99,10 @@ bool g_saveConfig() {
             config[frmt("lastfile@{:05}", uqIndex++)] = p;
         }
 
+        for (std::string& f : g_config.favExportFormats) {
+            config[frmt("favexport@{:05}", uqIndex++)] = f;
+        }
+
         for (auto& [key, value] : config) {
             file << key << "=" << value << std::endl;
         }
@@ -170,6 +174,9 @@ void g_loadConfig() {
     for (auto& [key, value] : config) {
         if (stringStartsWithIgnoreCase(key, "keybind@")) {
             g_config.keybinds.push_back(value);
+        }
+        else if (stringStartsWithIgnoreCase(key, "favexport@") && !value.empty()) {
+            g_config.favExportFormats.push_back(value);
         }
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
         else if (stringStartsWithIgnoreCase(key, "lastfile@") && !value.empty()) {

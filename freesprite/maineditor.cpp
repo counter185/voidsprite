@@ -2147,17 +2147,7 @@ void MainEditor::trySaveAsImage()
     }
     else {
         lastWasSaveAs = true;
-        std::vector<FormatDef> formats;
-        int i = 0;
-        for (auto& f : g_fileExporters) {
-            formats.push_back({ 
-                .name = f->name(), 
-                .extension = f->extension(),
-                .description = f->description,
-                .udata = (void*)f
-            });
-        }
-        PopupChooseFormat* popup = new PopupChooseFormat("Choose format", "", formats);
+        PopupChooseFormat* popup = PopupChooseFormat::withDefaultExportFormats("Choose format", "");
         popup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), [this](FormatDef* f, PlatformNativePathString path) {
             if (trySaveWithExporter(path, (FileExporter*)f->udata)) {
                 g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));

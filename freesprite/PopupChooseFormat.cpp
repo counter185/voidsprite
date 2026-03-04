@@ -7,11 +7,13 @@
 #include "FileIO.h"
 #include "FontRenderer.h"
 #include "UITextField.h"
+#include "PopupContextMenu.h"
 
 void PopupChooseFormat::buildFormatList() {
     formatsPanel->subWidgets.freeAllDrawables();
 
-    std::vector<Drawable*> buttons;
+    std::vector<Drawable*> priority1Buttons;
+    std::vector<Drawable*> priority2Buttons;
 
     for (auto& f : formats) {
         if (filterQuery.empty() || stringContainsIgnoreCase(f.name, filterQuery) || stringContainsIgnoreCase(f.extension, filterQuery)) {
@@ -19,7 +21,11 @@ void PopupChooseFormat::buildFormatList() {
             Panel* newButton = new Panel();
             newButton->sizeToContent = true;
 
-            UIButton* btn = new UIButton(f.name);
+            bool isFav = stringStartsWithIgnoreCase(f.name, "\xE2\x98\x85");
+
+            std::string name = f.name;
+
+            UIButton* btn = new UIButton(name);
             btn->position = { 0,0 };
             btn->wxWidth = formatsPanel->wxWidth - 40;
             btn->fontSize = 22;
@@ -37,13 +43,53 @@ void PopupChooseFormat::buildFormatList() {
                 newButton->subWidgets.addDrawable(descLabel);
             }
 
-            buttons.push_back(newButton);
+            if (isFav) {
+                btn->onRightClickCallback = [this, name](...) {
+                    g_addPopup(new PopupContextMenu({
+                        {"Remove from favourites", [this, name]() {
+                            auto indexAt = std::find(g_config.favExportFormats.begin(), g_config.favExportFormats.end(), name);
+                            g_config.favExportFormats.erase(indexAt);
+                            g_saveConfig();
+                            filterList(filterQuery);
+                        }}
+                    }));
+                };
+                btn->fill = Fill::Gradient(0xD02D2C19, 0xD0000000, 0xD02D2C19, 0xD0000000);
+                btn->colorTextFocused = btn->colorTextUnfocused = SDL_Color{ 0xFF, 0xF3, 0x8A, 0xff };
+                priority1Buttons.push_back(newButton);
+            }
+            else {
+                btn->onRightClickCallback = [this, name](...) {
+                    g_addPopup(new PopupContextMenu({
+                        {"Add to favourites", [this, name]() {
+                            g_config.favExportFormats.push_back(name);
+                            g_saveConfig();
+                            filterList(filterQuery);
+                        }}
+                    }));
+                };
+                priority2Buttons.push_back(newButton);
+            }
         }
     }
 
-    UIStackPanel* buttonStack = UIStackPanel::Vertical(0, buttons);
-    buttonStack->takeMouseWheelEvents = false;
-    formatsPanel->subWidgets.addDrawable(buttonStack);
+    if (!priority1Buttons.empty()) {
+        UILabel* favsLabel = new UILabel("Favourites", { 0,0 }, 23);
+        favsLabel->color = SDL_Color{ 0xFF, 0xF3, 0x8A, 0xff };
+        priority1Buttons.insert(priority1Buttons.begin(), UIStackPanel::Horizontal(0, {
+            Panel::Space(5, 0),
+            favsLabel
+        }));
+        priority1Buttons.insert(priority1Buttons.begin()+1, Panel::Space(0, 5));
+    }
+
+    UIStackPanel* finalStack = UIStackPanel::Vertical(30, { 
+        UIStackPanel::Vertical(0, priority1Buttons), 
+        UIStackPanel::Vertical(0, priority2Buttons) 
+    });
+    finalStack->takeMouseWheelEvents = false;
+
+    formatsPanel->subWidgets.addDrawable(finalStack);
 }
 
 PopupChooseFormat::PopupChooseFormat(std::string tt, std::string tx, std::vector<FormatDef> f) : formats(f) {
@@ -77,10 +123,10 @@ PopupChooseFormat::PopupChooseFormat(std::string tt, std::string tx, std::vector
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b){ this->closePopup(); };
 }
 
-PopupChooseFormat* PopupChooseFormat::withDefaultRGBExportFormats(std::string tt, std::string tx) {
+PopupChooseFormat* PopupChooseFormat::withDefaultExportFormats(std::string tt, std::string tx, u32 formatFlags) {
     std::vector<FormatDef> ff;
     for (FileExporter* f : g_fileExporters) {
-        if (f->formatFlags() & FORMAT_RGB) {
+        if (formatFlags == 0 || (f->formatFlags() & formatFlags)) {
             ff.push_back({
                 .name = f->name(),
                 .extension = f->extension(),
@@ -89,23 +135,30 @@ PopupChooseFormat* PopupChooseFormat::withDefaultRGBExportFormats(std::string tt
             });
         }
     }
-
-    return new PopupChooseFormat(tt, tx, ff);
+    std::vector<FormatDef> ff2 = processFavouriteFormats(ff);
+    PopupChooseFormat* ret = new PopupChooseFormat(tt, tx, ff2);
+    ret->hasDefaultFormats = true;
+    ret->defaultFormats = ff;
+    return ret;
+}
+PopupChooseFormat* PopupChooseFormat::withDefaultRGBExportFormats(std::string tt, std::string tx) {
+    return withDefaultExportFormats(tt, tx, FORMAT_RGB);
 }
 PopupChooseFormat* PopupChooseFormat::withDefaultIndexedExportFormats(std::string tt, std::string tx) {
-    std::vector<FormatDef> ff;
-    for (FileExporter* f : g_fileExporters) {
-        if (f->formatFlags() & FORMAT_PALETTIZED) {
-            ff.push_back({
-                .name = f->name(),
-                .extension = f->extension(),
-                .description = f->description,
-                .udata = (void*)f
-            });
+    return withDefaultExportFormats(tt, tx, FORMAT_PALETTIZED);
+}
+
+std::vector<FormatDef> PopupChooseFormat::processFavouriteFormats(std::vector<FormatDef> srcList) {
+    std::vector<FormatDef> ret;
+    for (auto& f : srcList) {
+        if (std::find(g_config.favExportFormats.begin(), g_config.favExportFormats.end(), f.name) != g_config.favExportFormats.end()) {
+            f.name = "\xE2\x98\x85 " + f.name;
+            ret.insert(ret.begin(), f);
+        } else {
+            ret.push_back(f);
         }
     }
-
-    return new PopupChooseFormat(tt, tx, ff);
+    return ret;
 }
 
 void PopupChooseFormat::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) {
@@ -122,6 +175,9 @@ void PopupChooseFormat::eventFileSaved(int evt_id, PlatformNativePathString name
 void PopupChooseFormat::filterList(std::string search)
 {
     filterQuery = search;
+    if (hasDefaultFormats) {
+        formats = processFavouriteFormats(defaultFormats);
+    }
     buildFormatList();
 }
 

@@ -42,6 +42,7 @@ public:
     bool acrylicPanels = false;
 
     std::vector<std::string> lastOpenFiles;
+    std::vector<std::string> favExportFormats;
 
     //this is only during initial load. not updated at runtime.
     std::vector<std::string> keybinds;
