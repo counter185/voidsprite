@@ -28,6 +28,21 @@ public:
             save();
         } 
     }
+    virtual void removeColor(int index) {
+        if (canSave() && getColorList().size() > index) {
+            getColorList().erase(getColorList().begin() + index);
+            save();
+        }
+    }
+    virtual void moveColor(int index, bool right = true) {
+        if (canSave() && ((!right && index > 0) || (right && index < getColorList().size() - 1))) {
+            auto& list = getColorList();
+            auto v = list[index];
+            list.erase(list.begin() + index);
+            list.insert(list.begin() + index + (right ? 1 : -1), v);
+            save();
+        }
+    }
 };
 
 class NamedColorPalette : public IPalette {

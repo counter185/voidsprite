@@ -11,6 +11,7 @@
 #include "PopupTextBox.h"
 #include "UIHueWheel.h"
 #include "UIColorInputField.h"
+#include "PopupContextMenu.h"
 #include "io/io_voidsprite.h"
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
@@ -467,21 +468,37 @@ void UIColorPicker::reloadColorLists()
             b->wxHeight = itemHeight;
             if (paletteModifiable) {
                 b->onRightClickCallback = [colorIndex, this, p, colorValue](UIButton*) {
-                    //todo: make this a context menu with remove, move up, move down options
-                    PopupYesNo* popup = new PopupYesNo("Remove color",
-                        frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()));
-                    popup->onFinishCallback = [this, colorIndex, p](PopupYesNo*, bool result) {
-                        if (result) {
-                            if (p->getColorList().size() > colorIndex) {
-                                p->getColorList().erase(p->getColorList().begin() + colorIndex);
-                                if (p->save()) {
-                                    g_reloadColorMap();
-                                    reloadColorLists();
-                                }
+                    PopupContextMenu* menu = new PopupContextMenu({
+                        { "Remove color", 
+                            [this, colorIndex, colorValue, p]() {
+                                PopupYesNo* popup = new PopupYesNo("Remove color",
+                                    frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()));
+                                popup->onFinishCallback = [this, colorIndex, p](PopupYesNo*, bool result) {
+                                    if (result) {
+                                        p->removeColor(colorIndex);
+                                        g_reloadColorMap();
+                                        reloadColorLists();
+                                    }
+                                };
+                                g_addPopup(popup);
                             }
-                        }
-                    };
-                    g_addPopup(popup);
+                        },
+                        { "Move color left", 
+                            [this, colorIndex, colorValue, p]() {
+                                p->moveColor(colorIndex, false);
+                                g_reloadColorMap();
+                                reloadColorLists();
+                            }
+                        },
+                        { "Move color right", 
+                            [this, colorIndex, colorValue, p]() {
+                                p->moveColor(colorIndex, true);
+                                g_reloadColorMap();
+                                reloadColorLists();
+                            }
+                        },
+                    });
+                    g_addPopup(menu);
                 };
             }
             colorButtonsPanel->subWidgets.addDrawable(b);
