@@ -12,23 +12,24 @@
 class Notification
 {
 public:
-	std::string title;
-	std::string message;
-	Timer64 timer;
-	int duration = 5000;
-	HotReloadableTexture* icon;
-	SDL_Color color;
+    std::string title;
+    std::string message;
+    Timer64 timer;
+    int duration = 5000;
+    HotReloadableTexture* icon;
+    SDL_Color color;
 
-	Notification(std::string title, std::string message, int duration = 5000, HotReloadableTexture* icon = NULL, SDL_Color color = SDL_Color{255,255,255,255}) : title(title), message(message) {
-		this->duration = duration;
-		this->icon = icon;
-		this->color = color;
-		timer.start();
-	}
+    Notification(std::string title, std::string message, int duration = 5000, HotReloadableTexture* icon = NULL, SDL_Color color = SDL_Color{255,255,255,255}) 
+        : title(title), message(message), duration(duration), icon(icon), color(color)
+    {
+        timer.start();
+    }
 
-	SDL_Rect boundsRect = { 0,0,0,0 };
-	SDL_Rect closeBoundsRect = { 0,0,0,0 };
-	bool ignoreMouseTimeExtend = false;
+    bool isExpired() { return timer.elapsedTime() > duration; }
+
+    SDL_Rect boundsRect = { 0,0,0,0 };
+    SDL_Rect closeBoundsRect = { 0,0,0,0 };
+    bool ignoreMouseTimeExtend = false;
 };
 
 

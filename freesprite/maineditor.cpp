@@ -175,7 +175,11 @@ MainEditor::~MainEditor() {
 
 void MainEditor::render() {
 
-    renderWithBlurPanelsIfEnabled([this]() {this->RenderCanvas(); });
+    if (!hideUI) {
+        renderWithBlurPanelsIfEnabled([this]() {this->RenderCanvas(); });
+    } else {
+        RenderCanvas();
+    }
 
     if (currentBrush != NULL) {
         currentBrush->renderOnCanvas(this, canvas.scale);
@@ -1600,7 +1604,7 @@ void MainEditor::takeInput(SDL_Event evt) {
         hideUI = !hideUI;
     }
 
-    if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
+    if (hideUI || !DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 
         switch (evt.type) {
             case SDL_EVENT_FINGER_UP:

@@ -138,7 +138,7 @@ void g_tickNotifications() {
         }
 
         //remove if expired
-        if (notif.timer.elapsedTime() > notif.duration) {
+        if (notif.isExpired()) {
             g_notifications.erase(g_notifications.begin() + x);
             x--;
         }
