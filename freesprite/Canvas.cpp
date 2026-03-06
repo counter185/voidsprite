@@ -95,13 +95,13 @@ void Canvas::zoom(int how_much, XY centerPoint)
     currentDrawPoint = xyAdd(currentDrawPoint, pointDiff);
 }
 
-void Canvas::zoomFromWheelInput(float how_much)
+void Canvas::zoomFromWheelInput(float how_much, XY centerPoint)
 {
     how_much *= g_config.canvasZoomSensitivity;
     wheelInput += how_much;
     if (abs(wheelInput) >= 1.0f) {
         int whole = (int)wheelInput;
-        zoom(whole);
+        zoom(whole, centerPoint);
         wheelInput -= whole;
     }
 }

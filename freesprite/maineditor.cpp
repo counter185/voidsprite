@@ -1742,7 +1742,12 @@ void MainEditor::takeInput(SDL_Event evt) {
 
                                     double zoomVal = -(lastPinchZoomDistance - distanceNow) / 0.04;
                                     //loginfo(frmt("distanceNow = {}, zoomval = {}", distanceNow, zoomVal));
-                                    canvas.zoomFromWheelInput((float)zoomVal);
+                                    
+                                    XY midPoint = statLineEndpoint(
+                                        xydToXy(XYd{thisFingerPos.x * g_windowW, thisFingerPos.y * g_windowH}), 
+                                        xydToXy(XYd{oppositeFingerPos.x * g_windowW, oppositeFingerPos.y * g_windowH}), 
+                                        0.5);
+                                    canvas.zoomFromWheelInput((float)zoomVal, midPoint);
                                 }
                                 pinchZooming = true;
                                 lastPinchZoomDistance = distanceNow;

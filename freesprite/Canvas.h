@@ -25,7 +25,8 @@ public:
     void drawTileGrid(XY tileSize);
     void zoom(int how_much, XY around);
     void zoom(int how_much) { zoom(how_much, { g_mouseX, g_mouseY }); }
-    void zoomFromWheelInput(float how_much);
+    void zoomFromWheelInput(float how_much, XY centerPoint);
+    void zoomFromWheelInput(float how_much) { zoomFromWheelInput(how_much, {g_mouseX, g_mouseY}); }
     void panCanvas(XY by);
     void recenter(XY windowDimensions = {-1,-1});
     void centerOnPoint(XY point, XY windowDimensions = { -1,-1 });

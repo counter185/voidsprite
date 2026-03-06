@@ -61,6 +61,7 @@ public:
     void takeInput(SDL_Event evt) override;
     void tick() override;
     void recalcPointScale();
+    bool takesTouchEvents() override { return true; }
     BaseScreen* isSubscreenOf() override;
 
     std::string getName() override { return "Preview MC skin"; }
