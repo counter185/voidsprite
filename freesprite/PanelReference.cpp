@@ -5,6 +5,7 @@
 #include "UILabel.h"
 #include "Layer.h"
 #include "maineditor.h"
+#include "IEditorColorPicker.h"
 
 PanelReference::PanelReference(Layer* t, MainEditor* caller)
 {
@@ -40,10 +41,22 @@ bool PanelReference::defaultInputAction(SDL_Event evt, XY gPosOffset)
     if (currentMode == REFERENCE_PIXEL_PERFECT) {
         if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
             && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
-            dragging++;
+            if (evtc.button.button == SDL_BUTTON_LEFT) {
+                dragging++;
+            }
+            else if (evtc.button.button == SDL_BUTTON_RIGHT) {
+                if (!parent->isPalettized) {
+                    XY pos = c.screenPointToCanvasPoint(xySubtract({ (int)evtc.button.x, (int)evtc.button.y }, gPosOffset));
+                    u32 colorAtPosition = previewTex->getPixelAt(pos);
+                    parent->colorPicker->setColorRGB(colorAtPosition);
+                    g_newVFX(VFX_COLORPICKER, 500, colorAtPosition, { g_mouseX, g_mouseY,-1,-1 }, {0u});
+                }
+            }
         }
         else if (dragging > 0 && evtc.type == SDL_EVENT_MOUSE_BUTTON_UP) {
-            dragging = 0;
+            if (evtc.button.button == SDL_BUTTON_LEFT) {
+                dragging = 0;
+            }
         }
         else if (dragging && evtc.type == SDL_EVENT_MOUSE_MOTION) {
             c.panCanvas({ (int)evtc.motion.xrel, (int)evtc.motion.yrel });
