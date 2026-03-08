@@ -2139,8 +2139,9 @@ void MainEditor::trySaveAsImage()
         lastWasSaveAs = true;
         PopupChooseFormat* popup = PopupChooseFormat::withDefaultExportFormats("Choose format", "");
         popup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), [this](FormatDef* f, PlatformNativePathString path) {
-            g_startNewOperation([this, path, f](OperationProgressReport* report) {
-                if (trySaveWithExporter(path, (FileExporter*)f->udata, report)) {
+            FormatDef ff = *f;
+            g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {
                     g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
                 }
             });
