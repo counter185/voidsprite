@@ -29,8 +29,6 @@ public:
     void playColorPickerVFX(bool inward) override;
 
     void setUpWidgets() override;
-    void trySaveImage() override;
-    bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter) override;
     void trySaveAsImage() override;
     Layer* flattenFrame(Frame* f) override;
     Layer* newLayer() override;
@@ -43,7 +41,6 @@ public:
     Layer* flattenFrameWithoutConvertingToRGB(Frame* fr);
 
     void tryExportRGB();
-    void trySavePalettizedImage();
     void trySaveAsPalettizedImage();
     MainEditor* toRGBSession();
     void openInNormalRGBEditor();

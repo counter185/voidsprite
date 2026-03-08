@@ -204,18 +204,26 @@ MainEditor* readAVIF(PlatformNativePathString path, OperationProgressReport* pro
 #endif
 }
 
-bool writeAVIF(PlatformNativePathString path, MainEditor* editor)
+bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress)
 {
 #if VSP_USE_LIBAVIF
+    progress = progress = NULL ? g_printOnlyProgressReport : progress;
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
         DoOnReturn closeFile([f]() { fclose(f); });
 
+        progress->enterSection("Writing AVIF...");
+
+        progress->enterSection("Initializing encoder...");
         avifEncoder* encoder = avifEncoderCreate();
         encoder->timescale = 1000;
         encoder->quality = AVIF_QUALITY_LOSSLESS;
         DoOnReturn destroyEncoder([encoder]() { avifEncoderDestroy(encoder); });
+
+        progress->updateLastSection("Writing frames...");
+        int i = 0;
         for (Frame* frame : editor->frames) {
+            progress->updateLastSection(frmt("Writing frame {}/{}", ++i, editor->frames.size()));
             if (frame->layers.empty()) {
                 continue;
             }
@@ -244,7 +252,7 @@ bool writeAVIF(PlatformNativePathString path, MainEditor* editor)
                 }
             }
         }
-
+        progress->updateLastSection("Writing AVIF data to file...");
         avifRWData output{};
         if (avifEncoderFinish(encoder, &output) == AVIF_RESULT_OK) {
             DoOnReturn freeOutputData([&output]() { avifRWDataFree(&output); });

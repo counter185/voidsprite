@@ -67,4 +67,4 @@ std::vector<u8> GIFReadDataBlocks(FILE* f);
 
 MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* progress);
 
-bool writeGIF(PlatformNativePathString path, MainEditor* editor);
+bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress);

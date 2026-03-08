@@ -373,7 +373,8 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
 }
 
 
-bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
+bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress) {
+    progress = progress == NULL ? g_printOnlyProgressReport : progress;
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
 
@@ -383,6 +384,9 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
             int transparencyIndex;
         };
 
+        progress->enterSection("Saving GIF...");
+
+        progress->enterSection("Preparing frames...");
         std::vector<GIFFrame> frames;
         for (Frame* fr : editor->frames) {
             int transparencyIndex = -1;
@@ -408,6 +412,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
             });
         }
 
+        progress->updateLastSection("Writing header...");
         fwrite("GIF89a", 1, 6, f);
         GIFLogicalScreenDescriptor lsd;
         lsd.width = editor->canvas.dimensions.x;
@@ -443,6 +448,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
         fwrite("\x00", 1, 1, f); //block terminator
 
         if (g_config.saveLoadFlatImageExtData) {
+            progress->updateLastSection("Writing extra session data...");
             GIFApplicationExtension paeVspExt;
             paeVspExt.blockSize = 11;
             memcpy(paeVspExt.identifier, "voidspri", 8);
@@ -472,7 +478,10 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
             fwrite("\x00", 1, 1, f); //block terminator
         }
 
+        progress->updateLastSection("Writing frames...");
+        int i = 0;
         for (GIFFrame& frame : frames) {
+            progress->updateLastSection(frmt("Writing frame {}/{}", ++i, frames.size()));
 
             GIFGraphicControlExtension gce;
             fwrite("\x21\xF9", 1, 2, f); //extension introducer
@@ -508,6 +517,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
                 }
             }
             
+            progress->enterSection("Encoding LZW");
             u8 lzwMinCodeSize = 8;
             fwrite(&lzwMinCodeSize, 1, 1, f);
             BitWriter bw = GIFEncodeLZW(lzwMinCodeSize, frame.layer);
@@ -521,6 +531,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor) {
                 dataPtr += blockSize;
                 dataLeft -= blockSize;
             }
+            progress->exitSection();
             fwrite("\x00", 1, 1, f); //block terminator
 
         }

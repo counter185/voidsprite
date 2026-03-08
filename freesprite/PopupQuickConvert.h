@@ -9,16 +9,14 @@ class PopupQuickConvert :
 private:
     bool forceRGB = false;
 public:
-    UIDropdown* pickExportFormat;
-    int exporterIndex = 0;
+    FileExporter* currentExporter = NULL;
 
     PopupQuickConvert(std::string tt, std::string tx);
 
     void takeInput(SDL_Event evt) override;
 
     void onDropFileEvent(SDL_Event evt);
-    void eventDropdownItemSelected(int evt_id, int index, std::string name);
 
-    static void doQuickConvert(MainEditor* session, PlatformNativePathString outPath, FileExporter* exporter = NULL, bool forceConvertRGB = false);
+    static void doQuickConvert(MainEditor* session, PlatformNativePathString outPath, FileExporter* exporter = NULL, bool forceConvertRGB = false, OperationProgressReport* progress = NULL);
 };
 

@@ -127,13 +127,20 @@ protected:
     int _formatFlags = FORMAT_RGB;
     bool _isSessionExporter = false;
 
-    std::function<bool(PlatformNativePathString, MainEditor*)> _sessionExportFunction = NULL;
+    std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*)> _sessionExportFunction = NULL;
     std::function<bool(MainEditor*)> _sessionCheckExportFunction = NULL;
 
-    std::function<bool(PlatformNativePathString, Layer*)> _flatExportFunction = NULL;
+    std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*)> _flatExportFunction = NULL;
     std::function<bool(Layer*)> _flatCheckExportFunction = NULL;
 public:
-    static FileExporter* sessionExporter(std::string name, std::string extension, std::string description, std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(MainEditor*)> canExport = NULL) {
+    static FileExporter* sessionExporter(
+        std::string name,
+        std::string extension, 
+        std::string description, 
+        std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*)> exportFunction, 
+        int formatflags = FORMAT_RGB, 
+        std::function<bool(MainEditor*)> canExport = NULL) 
+    {
         FileExporter* ret = new FileExporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -144,7 +151,29 @@ public:
         ret->_sessionCheckExportFunction = canExport;
         return ret;
     }
-    static FileExporter* flatExporter(std::string name, std::string extension, std::string description, std::function<bool(PlatformNativePathString, Layer*)> exportFunction, int formatflags = FORMAT_RGB, std::function<bool(Layer*)> canExport = NULL) {
+
+    static FileExporter* sessionExporter(
+        std::string name, 
+        std::string extension, 
+        std::string description, 
+        std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, 
+        int formatflags = FORMAT_RGB, 
+        std::function<bool(MainEditor*)> canExport = NULL) 
+    {
+        return sessionExporter(name, extension, description,
+            [exportFunction](PlatformNativePathString a, MainEditor* b, OperationProgressReport* c) {
+                return exportFunction(a,b);
+            }, formatflags, canExport);
+    }
+
+    static FileExporter* flatExporter(
+        std::string name, 
+        std::string extension, 
+        std::string description, 
+        std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*)> exportFunction, 
+        int formatflags = FORMAT_RGB, 
+        std::function<bool(Layer*)> canExport = NULL) 
+    {
         FileExporter* ret = new FileExporter();
         ret->_name = name;
         ret->_extension = extension;
@@ -155,6 +184,20 @@ public:
         ret->_flatCheckExportFunction = canExport;
         return ret;
     }
+    static FileExporter* flatExporter(
+        std::string name, 
+        std::string extension, 
+        std::string description, 
+        std::function<bool(PlatformNativePathString, Layer*)> exportFunction, 
+        int formatflags = FORMAT_RGB, 
+        std::function<bool(Layer*)> canExport = NULL) 
+    {
+        return flatExporter(name, extension, description, 
+            [exportFunction](PlatformNativePathString a, Layer* b, OperationProgressReport* c) {
+                return exportFunction(a,b);
+            }, formatflags, canExport);
+    }    
+    
 
     virtual int formatFlags() { return _formatFlags; }
     virtual bool exportsWholeSession() { return _isSessionExporter; }
@@ -166,10 +209,11 @@ public:
             return _flatCheckExportFunction != NULL ? _flatCheckExportFunction((Layer*)data) : true;
         }
     }
-    virtual bool exportData(PlatformNativePathString path, void* data) {
+    virtual bool exportData(PlatformNativePathString path, void* data, OperationProgressReport* progress = NULL) {
         try {
-            return exportsWholeSession() ? _sessionExportFunction(path, (MainEditor*)data) 
-                : _flatExportFunction(path, (Layer*)data);
+            progress = progress == NULL ? g_printOnlyProgressReport : progress;
+            return exportsWholeSession() ? _sessionExportFunction(path, (MainEditor*)data, progress) 
+                : _flatExportFunction(path, (Layer*)data, progress);
         }
         catch (std::exception& e) {
             logerr(frmt("Data export failed:\n {}", e.what()));

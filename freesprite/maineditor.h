@@ -385,7 +385,7 @@ public:
     void copyImageToClipboard();
     void copyLayerToClipboard(Layer* l);
     virtual void trySaveImage();
-    virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter);
+    virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter, OperationProgressReport* progress = NULL);
     virtual void trySaveAsImage();
     std::map<std::string, std::string> makeSingleLayerExtdata();
     void loadSingleLayerExtdata(Layer* l);

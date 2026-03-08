@@ -611,42 +611,6 @@ void MainEditorPalettized::setUpWidgets()
     }
 }
 
-void MainEditorPalettized::trySaveImage()
-{
-    trySavePalettizedImage();
-}
-
-bool MainEditorPalettized::trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter)
-{
-    bool result = false;
-    if (exporter->exportsWholeSession()) {
-        result = exporter->exportData(name, this);
-    }
-    else {
-        Layer* flat = flattenImageWithoutConvertingToRGB();
-        result = exporter->exportData(name, flat);
-        delete flat;
-    }
-    if (result) {
-        lastConfirmedSave = true;
-        lastConfirmedSavePath = name;
-        lastConfirmedExporter = exporter;
-        changesSinceLastSave = NO_UNSAVED_CHANGES;
-#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
-        emDownloadFile(lastConfirmedSavePath);
-#endif
-        if (lastWasSaveAs && g_config.openSavedPath) {
-            platformOpenFileLocation(lastConfirmedSavePath);
-        }
-        g_addNotification(SuccessNotification("Success", "File saved successfully."));
-    }
-    else {
-        g_addNotification(ErrorNotification("Error", "Failed to save file."));
-    }
-
-    return result;
-}
-
 void MainEditorPalettized::trySaveAsImage()
 {
     trySaveAsPalettizedImage();
@@ -767,19 +731,6 @@ void MainEditorPalettized::tryExportRGB()
         formats.push_back({ f->extension(), f->name() });
     }
     platformTrySaveOtherFile(this, formats, "export image as RGB", EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE);
-}
-
-void MainEditorPalettized::trySavePalettizedImage()
-{
-    lastWasSaveAs = false;
-    if (!lastConfirmedSave) {
-        trySaveAsImage();
-    }
-    else {
-        if (trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter)) {
-            g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
-        }
-    }
 }
 
 void MainEditorPalettized::trySaveAsPalettizedImage()

@@ -1855,24 +1855,7 @@ void MainEditor::onReturnToScreen()
 
 void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)
 {
-    if (evt_id == EVENT_MAINEDITOR_SAVEFILE) {
-        exporterID--;
-        logprintf("eventFileSaved: got file name %ls\n", name.c_str());
-
-        bool result = false;
-
-        FileExporter* exporter = NULL;
-        if (exporterID < g_fileExporters.size()) {
-            exporter = g_fileExporters[exporterID];
-
-            result = trySaveWithExporter(name, exporter);
-        }
-
-        if (result) {
-            g_tryPushLastFilePath(convertStringToUTF8OnWin32(name));
-        }
-    }
-    else if (evt_id == EVENT_MAINEDITOR_EXPORTPALETTIZED) {
+    if (evt_id == EVENT_MAINEDITOR_EXPORTPALETTIZED) {
         exporterID--;
 
         FileExporter* exporter = NULL;
@@ -2091,10 +2074,9 @@ void MainEditor::copyLayerToClipboard(Layer* l)
 
 void MainEditor::trySaveImage()
 {
-    bool result = false;
     if (splitSessionData.set) {
         if (saveSplitSession(lastConfirmedSavePath, this)) {
-            result = true;
+            g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
             timerSinceLastSave.start();
             changesSinceLastSave = NO_UNSAVED_CHANGES;
         }
@@ -2105,24 +2087,25 @@ void MainEditor::trySaveImage()
             trySaveAsImage();
         }
         else {
-            result = trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter);
+            g_startNewOperation([this](OperationProgressReport* report) {
+                if (trySaveWithExporter(lastConfirmedSavePath, lastConfirmedExporter, report)) {
+                    g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
+                }
+            });
         }
-    }
-    if (result) {
-        g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
     }
 }
 
-bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter)
+bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter, OperationProgressReport* progress)
 {
     bool result = false;
     if (exporter->exportsWholeSession()) {
-        result = exporter->exportData(name, this);
+        result = exporter->exportData(name, this, progress);
     }
     else {
-        Layer* flat = flattenImage();
+        Layer* flat = this->isPalettized ? ((MainEditorPalettized*)this)->flattenImageWithoutConvertingToRGB() : flattenImage();
         flat->importExportExtdata = makeSingleLayerExtdata();
-        result = exporter->exportData(name, flat);
+        result = exporter->exportData(name, flat, progress);
         delete flat;
     }
 
@@ -2138,10 +2121,10 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }
-        g_addNotification(SuccessNotification("File saved", "Save successful!"));
+        g_addNotificationFromThread(SuccessNotification("File saved", "Save successful!"));
     }
     else {
-        g_addNotification(ErrorNotification("File not saved", "Save failed!"));
+        g_addNotificationFromThread(ErrorNotification("File not saved", "Save failed!"));
     }
 
     return result;
@@ -2150,19 +2133,18 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
 void MainEditor::trySaveAsImage()
 {
     if (splitSessionData.set) {
-        if (saveSplitSession(lastConfirmedSavePath, this)) {
-            g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
-        }
+        trySaveImage();
     }
     else {
         lastWasSaveAs = true;
         PopupChooseFormat* popup = PopupChooseFormat::withDefaultExportFormats("Choose format", "");
         popup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), [this](FormatDef* f, PlatformNativePathString path) {
-            if (trySaveWithExporter(path, (FileExporter*)f->udata)) {
-                g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
-            }
+            g_startNewOperation([this, path, f](OperationProgressReport* report) {
+                if (trySaveWithExporter(path, (FileExporter*)f->udata, report)) {
+                    g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+                }
+            });
         });
-        //platformTrySaveOtherFile(this, formats, TL("vsp.popup.saveimage"), EVENT_MAINEDITOR_SAVEFILE);
     }
 }
 

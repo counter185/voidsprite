@@ -6,8 +6,10 @@
 #include "MainEditorPalettized.h"
 #include "Notification.h"
 #include "UICheckbox.h"
+#include "PopupChooseFormat.h"
 
 PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
+    currentExporter = g_fileExporters.front();
     wxHeight = 200;
     UIButton* nbutton = actionButton(TL("vsp.cmn.close"));
     nbutton->onClickCallback = [this](UIButton*) {
@@ -23,15 +25,20 @@ PopupQuickConvert::PopupQuickConvert(std::string tt, std::string tx) {
         formats.push_back(fmt->name());
     }
 
-    exporterIndex = 0;
-
-    pickExportFormat = new UIDropdown(formats);
-    pickExportFormat->position = XY{ 20, 100 };
-    pickExportFormat->wxWidth = 400;
-    pickExportFormat->wxHeight = 30;
-    pickExportFormat->text = formats[exporterIndex];
-    pickExportFormat->setCallbackListener(EVENT_QUICKCONVERT_PICKFORMAT, this);
-    wxsManager.addDrawable(pickExportFormat);
+    UIButton* pickExporterButton = new UIButton();
+    pickExporterButton->position = XY{ 20, 100 };
+    pickExporterButton->wxWidth = 400;
+    pickExporterButton->wxHeight = 30;
+    pickExporterButton->onClickCallback = [this](UIButton* b) {
+        PopupChooseFormat* formatPicker = PopupChooseFormat::withDefaultExportFormats("Choose format", "");
+        formatPicker->onFormatChosenCallback = [this, b](FormatDef* f) {
+            b->text = f->name;
+            currentExporter = (FileExporter*)f->udata;
+        };
+        g_addPopup(formatPicker);
+    };
+    pickExporterButton->text = currentExporter->name();
+    wxsManager.addDrawable(pickExporterButton);
 
     makeTitleAndDesc(tt, tx);
 }
@@ -53,20 +60,22 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
         std::string path = std::string(evt.drop.data);
         PlatformNativePathString outPath = convertStringOnWin32(path);
 
-        MainEditor* session = loadAnyIntoSession(path);
-        FileExporter* exporter = g_fileExporters[exporterIndex];
-        doQuickConvert(session, outPath, exporter, forceRGB);
+        g_startNewOperation([this, path, outPath](OperationProgressReport* progress) {
+            MainEditor* session = loadAnyIntoSession(path, NULL, progress);
+            progress->resetProgress();
+            doQuickConvert(session, outPath, currentExporter, forceRGB, progress);
+        });
     }
 }
 
-void PopupQuickConvert::eventDropdownItemSelected(int evt_id, int index, std::string name)
+void PopupQuickConvert::doQuickConvert(
+    MainEditor* session, 
+    PlatformNativePathString outPath, 
+    FileExporter* exporter, 
+    bool forceConvertRGB,
+    OperationProgressReport* progress)
 {
-    exporterIndex = index;
-    pickExportFormat->text = name;
-}
-
-void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathString outPath, FileExporter* exporter, bool forceConvertRGB)
-{
+    progress = progress == NULL ? g_printOnlyProgressReport : progress;
     if (exporter == NULL) {
         for (FileExporter*& e : g_fileExporters) {
             if (stringEndsWithIgnoreCase(outPath, convertStringOnWin32(e->extension()))) {
@@ -77,7 +86,7 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
     }
     if (exporter == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No exporter found for this file"));
-        logprintf("No exporter found for file %s\n", convertStringToUTF8OnWin32(outPath).c_str());
+        logwarn(frmt("No exporter found for file {}", convertStringToUTF8OnWin32(outPath)));
         delete session;
         return;
     }
@@ -94,7 +103,7 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
 
             outPath += convertStringOnWin32(exporter->extension());
 
-            if (exporter->exportData(outPath, session)) {
+            if (exporter->exportData(outPath, session, progress)) {
                 g_addNotification(SuccessNotification("Success", "Exported file"));
             }
             else {
@@ -121,7 +130,7 @@ void PopupQuickConvert::doQuickConvert(MainEditor* session, PlatformNativePathSt
                 outPath += convertStringOnWin32(exporter->extension());
             }
 
-            if (exporter->exportData(outPath, l)) {
+            if (exporter->exportData(outPath, l, progress)) {
 #if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
                 emDownloadFile(outPath);
 #endif
