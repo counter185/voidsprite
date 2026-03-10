@@ -115,6 +115,14 @@ public:
     bool mouseInHorizontalScrollBar();
     std::pair<XY,XY> getHorizontalScrollBarFromToPos();
     double getHorizontalScrollBarPixelScale();
+    bool shouldVerticalScrollbarRender() {
+        auto scrollbarPositions = getVerticalScrollBarFromToPos();
+        return !xyEqual(scrollbarPositions.first, scrollbarPositions.second);
+    }
+    bool shouldHorizontalScrollbarRender() {
+        auto scrollbarPositions = getHorizontalScrollBarFromToPos();
+        return !xyEqual(scrollbarPositions.first, scrollbarPositions.second);
+    }
 
     void renderVerticalScrollbar(XY at);
     void renderHorizontalScrollbar(XY at);

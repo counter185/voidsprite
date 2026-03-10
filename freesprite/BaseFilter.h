@@ -73,10 +73,26 @@ class FilterForEachPixel : public BaseFilter {
 protected:
     std::string fName = "";
     std::string i = "";
-    std::function<u32(XY, Layer*, u32)> f;
+    std::function<u32(XY, Layer*, u32, std::map<std::string, std::string>)> f;
     std::vector<FilterParameter> fParams;
 public:
-    FilterForEachPixel(std::string name, std::string id, std::function<u32(XY, Layer*, u32)> f, std::vector<FilterParameter> fParams = {}) {
+    FilterForEachPixel(
+        std::string name, 
+        std::string id, 
+        std::function<u32(XY, Layer*, u32)> f,
+        std::vector<FilterParameter> fParams = {}) 
+    {
+        this->fName = name;
+        this->i = id;
+        this->f = [f](XY a, Layer* b, u32 c, std::map<std::string, std::string> d) { return f(a, b, c); };
+        this->fParams = fParams;
+    }
+    FilterForEachPixel(
+        std::string name, 
+        std::string id, 
+        std::function<u32(XY, Layer*, u32, std::map<std::string, std::string>)> f,
+        std::vector<FilterParameter> fParams = {}) 
+    {
         this->fName = name;
         this->i = id;
         this->f = f;

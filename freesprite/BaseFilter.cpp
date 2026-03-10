@@ -171,7 +171,7 @@ Layer* FilterForEachPixel::run(Layer* src, std::map<std::string, std::string> op
     for (int y = 0; y < c->h; y++) {
         for (int x = 0; x < c->w; x++) {
             u32 px = src->getPixelAt({x, y}, true);
-            c->setPixel({ x,y }, f({ x,y }, src, px));
+            c->setPixel({ x,y }, f({ x,y }, src, px, options));
         }
     }
     return c;
