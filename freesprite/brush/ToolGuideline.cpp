@@ -62,26 +62,11 @@ void ToolGuideline::renderOnCanvas(XY canvasDrawPoint, int scale)
 
 void ToolGuideline::placeAt(MainEditor* editor, bool vertical) {
     int guidelinePos = vertical ? lastMouseMotionPos.x : lastMouseMotionPos.y;
-    std::vector<Guideline>& guidelines = editor->ssne.guidelines;
     if (editor->eraserMode)
     {
-        for (int x = 0; x < editor->ssne.guidelines.size(); x++) {
-            if (guidelines[x].vertical == vertical && guidelines[x].position == guidelinePos) {
-                guidelines.erase(guidelines.begin() + x);
-                break;
-            }
-        }
+        editor->removeGuideline(guidelinePos, vertical);
     }
     else {
-        bool exists = false;
-        for (int x = 0; x < guidelines.size(); x++) {
-            if (guidelines[x].vertical == vertical && guidelines[x].position == guidelinePos) {
-                exists = true;
-                break;
-            }
-        }
-        if (!exists) {
-            guidelines.push_back(Guideline{ vertical, guidelinePos });
-        }
+        editor->addGuideline(guidelinePos, vertical);
     }
 }

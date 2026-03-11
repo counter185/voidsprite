@@ -506,6 +506,9 @@ public:
     void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_promptRenameCurrentVariant();
 
+    void addGuideline(int doublePrecisionPos, bool vertical);
+    void removeGuideline(int doublePrecisionPos, bool vertical);
+
     std::vector<CommentData>& getCommentStack() { return getCurrentFrame()->comments; }
     bool canAddCommentAt(XY a);
     void addComment(CommentData c);

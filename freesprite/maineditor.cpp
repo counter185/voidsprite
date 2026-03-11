@@ -2858,6 +2858,31 @@ void MainEditor::layer_promptRenameCurrentVariant()
     g_addPopup(ninput);
 }
 
+void MainEditor::addGuideline(int doublePrecisionPos, bool vertical)
+{
+    auto& guidelines = ssne.guidelines;
+    bool exists = false;
+    for (Guideline& g : guidelines) {
+        if (g.vertical == vertical && g.position == doublePrecisionPos) {
+            exists = true;
+            break;
+        }
+    }
+    if (!exists) {
+        guidelines.push_back(Guideline{ vertical, doublePrecisionPos });
+    }
+}
+
+void MainEditor::removeGuideline(int doublePrecisionPos, bool vertical)
+{
+    for (int x = 0; x < ssne.guidelines.size(); x++) {
+        if (ssne.guidelines[x].vertical == vertical && ssne.guidelines[x].position == doublePrecisionPos) {
+            ssne.guidelines.erase(ssne.guidelines.begin() + x);
+            return;
+        }
+    }
+}
+
 int MainEditor::indexOfLayer(Layer* l)
 {
     auto& layers = getLayerStack();

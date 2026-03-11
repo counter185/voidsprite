@@ -619,7 +619,9 @@
                                  "Mouse Right to place/edit horizontal guidelines.\n"
                                  "Use Eraser mode to remove guidelines."},
     {"vsp.brush.measure", "Measure"},
-    {"vsp.brush.measure.desc", "Select an area with Mouse Left to measure its size in pixels"},
+    {"vsp.brush.measure.desc:v2", "Select an area with Mouse Left to measure its size in pixels\n"
+                                  "Mouse Right to place guidelines around the selected area.\n"
+                                  "Mouse Right in Eraser mode will remove guidelines."},
     {"vsp.brush.xsym", "Set X symmetry"},
     {"vsp.brush.xsym.desc", "Mouse Left to enable and set the position of the X symmetry line.\n"
                             "Mouse Right to toggle X symmetry off/on."},
