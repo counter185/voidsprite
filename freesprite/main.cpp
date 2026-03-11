@@ -1192,7 +1192,14 @@ int main(int argc, char** argv)
             }
             else {
                 if (std::filesystem::exists(convertStringOnWin32(arg))) {
-                    launchpad->tryLoadFile(arg);
+                    MainEditor* ssn = loadAnyIntoSession(arg);
+                    if (ssn != NULL) {
+                        loginfo(frmt("Loaded file from commandline arg: {}", arg));
+                        g_addScreen(ssn);
+                    }
+                    else {
+                        logerr(frmt("Failed to load file: {}", arg));
+                    }
                 }
                 else {
                     //todo: this notification never fits the whole file name
