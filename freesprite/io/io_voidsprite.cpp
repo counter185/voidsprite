@@ -458,6 +458,7 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
                 {"colorKeySet", 1, (void*)(lr->colorKeySet ? "\1" : "\0")},
                 {"colorKey", 4, &lr->colorKey},
                 {"currentVariant", 4, &lr->currentLayerVariant},
+                {"colorTag", 4, &lr->colorTag}
             };
             for (LayerVariant& lv : lr->layerData) {
                 u64 maxCompressedDataSize = compressBound(lr->w * lr->h * 4);
@@ -576,7 +577,8 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
                     {"colorKey", 4, &lr->colorKey},
                     {"currentVariant", 4, &lr->currentLayerVariant},
                     {"opacity", 1, &lr->layerAlpha},
-                    {"hidden", 1, (void*)(lr->hidden ? "\1" : "\0")}
+                    {"hidden", 1, (void*)(lr->hidden ? "\1" : "\0")},
+                    {"colorTag", 4, &lr->colorTag}
                 };
                 for (LayerVariant& lv : lr->layerData) {
                     u64 maxCompressedDataSize = compressBound(lr->w * lr->h * 4);
@@ -770,6 +772,9 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
                             }
                             else if (dataName == "hidden") {
                                 newLayer->hidden = data[0] == '\1';
+                            }
+                            else if (dataName == "colorTag") {
+                                newLayer->colorTag = *(u32*)data;
                             }
                             else if (stringStartsWithIgnoreCase(dataName, "variant.")) {
                                 std::string variantName = dataName.substr(8);

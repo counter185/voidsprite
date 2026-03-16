@@ -446,6 +446,7 @@ public:
     Layer* getCurrentLayer() { return getLayerStack()[selLayer]; }
     int indexOfLayer(Layer* l);
     void layer_setOpacity(uint8_t alpha);
+    void layer_promptSetColorTag(int index);
     void layer_promptRename(int index);
     void layer_promptRenameCurrent();
     void layer_flipHorizontally();

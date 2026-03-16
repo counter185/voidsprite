@@ -94,7 +94,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
 
 void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
 {
-	//evt_id : layer index
+    //evt_id : layer index
     if (data1 == LAYEREVENT_SWITCH) {
         caller->switchActiveLayer(evt_id);
     }
@@ -115,16 +115,19 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     }
     else if (data1 == LAYEREVENT_DELETE) {
         caller->deleteLayer(evt_id);
-	}
+    }
     else if (data1 == LAYEREVENT_PROMPTRENAME) {
         caller->layer_promptRename(evt_id);
     }
     else if (data1 == LAYEREVENT_VARIANT_DUPLICATECURRENT) {
         caller->layer_duplicateActiveVariant(caller->layerAt(evt_id));
-	}
+    }
     else if (data1 == LAYEREVENT_VARIANT_DUPLICATE) {
         caller->layer_duplicateVariant(caller->layerAt(evt_id), data2);
-	}
+    }
+    else if (data1 == LAYEREVENT_SETTAG) {
+        caller->layer_promptSetColorTag(evt_id);
+    }
     updateLayers();
 }
 

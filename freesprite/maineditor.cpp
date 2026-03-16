@@ -2900,6 +2900,21 @@ void MainEditor::layer_setOpacity(uint8_t opacity) {
     clayer->lastConfirmedlayerAlpha = clayer->layerAlpha;
 }
 
+void MainEditor::layer_promptSetColorTag(int index)
+{
+    auto& layers = getLayerStack();
+    if (!layers.empty() && layers.size() > index) {
+        Layer* target = layers[index];
+        PopupPickColor* ninput = new PopupPickColor("Set layer tag", "", true);
+        ninput->setRGB(target->colorTag | (target->colorTag == 0 ? 0xFF000000 : 0));
+        ninput->onColorConfirmedCallback = [this, target](PopupPickColor* p, u32 newColor) {
+            target->colorTag = newColor;
+            networkCanvasStateUpdated(activeFrame, indexOfLayer(target));
+        };
+        g_addPopup(ninput);
+    }
+}
+
 void MainEditor::layer_promptRename(int index)
 {
     auto& layers = getLayerStack();

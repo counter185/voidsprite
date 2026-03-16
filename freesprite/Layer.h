@@ -50,6 +50,7 @@ public:
     uint32_t colorKey = 0;
     uint8_t lastConfirmedlayerAlpha = 255;
     uint8_t layerAlpha = 255;
+    u32 colorTag = 0x00000000;
 
     SDL_Texture* effectPreviewTexture = NULL;
 

@@ -70,6 +70,7 @@ struct UIDoubleSliderBounds {
 #define LAYEREVENT_PROMPTRENAME 6
 #define LAYEREVENT_VARIANT_DUPLICATECURRENT 7
 #define LAYEREVENT_VARIANT_DUPLICATE 8
+#define LAYEREVENT_SETTAG 9
 
 //get rid of this whole system somehow
 // (maybe only leave it for async ops like file popups)

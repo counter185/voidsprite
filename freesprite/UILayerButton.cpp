@@ -43,7 +43,12 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
                     if (cb != NULL) {
                         cb->eventGeneric(cbid, LAYEREVENT_VARIANT_DUPLICATECURRENT, 0);
                     }
-                }}
+                }},
+                {"Set color tag", [cb,cbid]() {
+                    if (cb != NULL) {
+                        cb->eventGeneric(cbid, LAYEREVENT_SETTAG, 0);
+                    }
+                }},
             });
         };
     }
@@ -112,6 +117,7 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
 
 void LayerActiveButton::render(XY at)
 {
+
     if (hovered && ll != NULL) {
         SDL_Rect previewRect = { 0,0, 200, 200 };
         if (ll->w >= ll->h) {
@@ -136,6 +142,15 @@ void LayerActiveButton::render(XY at)
         g_popClip();
     }
     UIButton::render(at);
+
+    if (ll != NULL && (ll->colorTag & 0xFF000000) != 0) {
+        colorBorder = uint32ToSDLColor(ll->colorTag);
+        colorBorder.a = 0x60;
+        SDL_Rect buttonRect = { at.x, at.y, wxWidth, wxHeight };
+        buttonRect.w /= 4;
+        buttonRect.x += buttonRect.w * 3;
+        Fill::Gradient(0, ll->colorTag, 0, 0).fill(buttonRect);
+    }
 }
 
 LayerVariantButton::LayerVariantButton(Layer* l, int variantIndex) : UIButton(), ll(l), variantIndex(variantIndex) {
