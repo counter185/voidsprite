@@ -319,16 +319,15 @@ void StartScreen::render()
         drawLine(p1, p2, XM1PW3P1(fadeInTimer2));
     }
 
-    SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, 0xa0};
-    SDL_Color colorBG2 = { 0x20, 0x20, 0x20, 0xa0};
-    SDL_Color colorBG3 = { 0x10, 0x10, 0x10, 0xa0 };
-    renderGradient(bgr, sdlcolorToUint32(colorBG3), sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1));
+    static Fill panelFill = visualConfigFill("ui/panel/bg_focused_blurbehind");
 
-    bgr.x += bgr.w + 10;
+    SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
+    panelFill.fill(bgr);
+
+    /*bgr.x += bgr.w + 10;
     bgr.y += 40;
     bgr.h -= 40;
-    renderGradient(bgr, sdlcolorToUint32(colorBG3), 0, sdlcolorToUint32(colorBG2), 0);
+    renderGradient(bgr, sdlcolorToUint32(colorBG3), 0, sdlcolorToUint32(colorBG2), 0);*/
 
     wxsManager.renderAll();
 
