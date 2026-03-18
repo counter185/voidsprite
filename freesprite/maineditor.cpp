@@ -418,11 +418,6 @@ void MainEditor::tick() {
 
     canvas.lockToScreenBounds();
 
-    //fuck it we ball
-    if (!compactEditor && layerPicker != NULL) {
-        layerPicker->position.x = g_windowW - 260;
-    }
-
     if (isPalettized) {
         MainEditorPalettized* thisUpCast = (MainEditorPalettized*)this;
         uint32_t col = 0;
@@ -1320,12 +1315,12 @@ void MainEditor::setUpWidgets()
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 458;
-    brushPicker->position.x = 10;
+    brushPicker->position = {10, 458};
+    brushPicker->reanchor();
     wxsManager.addDrawable(brushPicker);
 
     layerPicker = new EditorLayerPicker(this);
-    layerPicker->position = XY{ 440, 80 };
+    layerPicker->position = XY{ g_windowW - 260, 80 };
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 

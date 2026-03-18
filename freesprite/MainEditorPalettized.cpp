@@ -573,12 +573,11 @@ void MainEditorPalettized::setUpWidgets()
     //regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position.y = 454;
-    brushPicker->position.x = 10;
+    brushPicker->position = { 10, 454 };
     wxsManager.addDrawable(brushPicker);
 
     layerPicker = new PalettizedEditorLayerPicker(this);
-    layerPicker->position = XY{ 440, 80 };
+    layerPicker->position = XY{ g_windowW - 260, 80 };
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
