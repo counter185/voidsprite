@@ -20,6 +20,7 @@ public:
     u32 fillGradientML = 0xFFFFFFFF, fillGradientMR = 0xFFFFFFFF;
     std::string fillTextureVCKey = "";
     HotReloadableTexture* fillTexture = NULL;
+    bool freeTexture = true;
 
     static Fill None()
     {
@@ -53,22 +54,31 @@ public:
         r.fillGradientDR = dr;
         return r;
     }
+    static Fill ConstTexture(HotReloadableTexture* tex)
+    { 
+        Fill r(FILL_TEXTURE);
+        r.fillTexture = tex;
+        r.freeTexture = false;
+        return r;
+    }
     static Fill Texture(HotReloadableTexture* tex)
     { 
         Fill r(FILL_TEXTURE);
         r.fillTexture = tex;
+        r.freeTexture = true;
         return r;
     }
     static Fill Texture(std::string vcAssetKey)
     { 
         Fill r(FILL_TEXTURE);
+        r.fillTexture = NULL;
         r.fillTextureVCKey = vcAssetKey;
         return r;
     }
 
     Fill(SDL_Color c);
     ~Fill() {
-        if (fillTexture != NULL) {
+        if (fillTexture != NULL && freeTexture) {
             delete fillTexture;
         }
     }

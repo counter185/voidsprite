@@ -894,25 +894,52 @@ void StartScreen::renderBackground()
 
 void StartScreen::renderBGStars()
 {
+    static SDL_Color starColor = visualConfigColor("launchpad/stars_color");
     int i = 0;
     for (LaunchpadBGStar& star : stars) {
+        int sizePlus1 = star.size + 1;
         XY realPosition = bgSpaceTransform(star.pos);
-        XY endPos = bgSpaceTransform(xyAdd(star.pos, { 2,2 }));
+        XY endPos = bgSpaceTransform(xyAdd(star.pos, { 2* sizePlus1,2* sizePlus1 }));
 
-        const int blinkDistance = 12;
+        const int blinkDistance = 12 * sizePlus1;
         XY center = {star.pos.x + 1, star.pos.y + 1};
         XY centerInBgSpace = bgSpaceTransform(center);
-        XY p1 = bgSpaceTransform(xyAdd(center, { blinkDistance, -blinkDistance }));
-        XY p2 = bgSpaceTransform(xyAdd(center, { -blinkDistance, blinkDistance }));
+        XY pUR = bgSpaceTransform(xyAdd(center, { blinkDistance, -blinkDistance }));
+        XY pUL = bgSpaceTransform(xyAdd(center, { -blinkDistance, -blinkDistance }));
+        XY pLL = bgSpaceTransform(xyAdd(center, { -blinkDistance, blinkDistance }));
+        XY pLR = bgSpaceTransform(xyAdd(center, { blinkDistance, blinkDistance }));
 
-        double blinkTimer = star.timer.percentLoopingTime(1500, -star.blinkOffset);
+        double blinkTimer = star.timer.percentLoopingTime(1100 + 400*sizePlus1, -star.blinkOffset);
         u8 alpha = 0x20 + star.opacity * (1.0 - blinkTimer);
-        SDL_SetRenderDrawColor(g_rd, 0xfd, 0xff, 0xab, alpha);
-        drawLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
+        switch (star.size) {
+            case 0:
+                SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha);
+                drawLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
 
-        SDL_SetRenderDrawColor(g_rd, 0xfd, 0xff, 0xab, alpha / 2);
-        drawLine(p1, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
-        drawLine(p2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha / 2);
+                drawLine(pUR, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawLine(pLL, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                break;
+            case 1:
+                SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha);
+                drawLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
+
+                {
+                    XY pURx2 = bgSpaceTransform(xyAdd(center, { blinkDistance*2, -blinkDistance*2 }));
+                    XY pLLx2 = bgSpaceTransform(xyAdd(center, { -blinkDistance*2, blinkDistance*2 }));
+
+                    SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha);
+                    drawLine(pURx2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.6) / 0.6));
+                    drawLine(pLLx2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.6) / 0.6));
+                }
+
+                SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha/3*2);
+                drawLine(pUR, pUL, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawLine(pLL, pUL, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawLine(pLL, pLR, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawLine(pUR, pLR, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                break;
+        }
         i++;
     }
 }
@@ -1132,15 +1159,33 @@ void StartScreen::updateCheckFinished()
 
 void StartScreen::genBGStars() {
     stars.clear();
-    for (int x = 0; x < ixmin(githubStars, 200); x++) {
+    const int groupSize = 35;
+    int smallStars = githubStars;
+    int bigStars = ixmax(0, smallStars - groupSize/2) / groupSize;
+    smallStars -= bigStars * groupSize;
+
+    loginfo(frmt("BG star count: {}, {}", smallStars, bigStars));
+
+    for (int x = 0; x < ixmin(bigStars, 100); x++) {
         LaunchpadBGStar s = {
             XY{ randomInt(0, 960), randomInt(0,960) },
-            randomInt(1,3),
+            1,
             randomInt(0x60,0xa0),
             randomInt(0, 1400),
         };
         stars.push_back(s);
-        stars[stars.size()-1].timer.start();
+        stars.back().timer.start();
+    }
+
+    for (int x = 0; x < ixmin(smallStars, 100); x++) {
+        LaunchpadBGStar s = {
+            XY{ randomInt(0, 960), randomInt(0,960) },
+            0,
+            randomInt(0x60,0xa0),
+            randomInt(0, 1400),
+        };
+        stars.push_back(s);
+        stars.back().timer.start();
     }
 }
 

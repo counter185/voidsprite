@@ -12,7 +12,7 @@ struct LaunchpadBGStar {
     int size;
     u8 opacity;
     int blinkOffset;
-    Timer64 timer;
+    Timer64 timer{};
 };
 
 class StartScreen : public BaseScreen, public EventCallbackListener
