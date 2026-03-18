@@ -110,19 +110,9 @@ void MinecraftBlockPreviewScreen::RenderCanvas()
     }
 }
 
-void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
+void MinecraftBlockPreviewScreen::defaultInputAction(SDL_Event evt)
 {
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-
-    if (evt.type == SDL_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
-    LALT_TO_SUMMON_NAVBAR;
-
-    if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-        switch (evt.type) {
+    switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
                 scrollingCanvas = true;
@@ -152,7 +142,6 @@ void MinecraftBlockPreviewScreen::takeInput(SDL_Event evt)
         case SDL_MOUSEWHEEL:
             canvas.zoomFromWheelInput(evt.wheel.y);
             break;
-        }
     }
 }
 

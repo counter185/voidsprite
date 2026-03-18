@@ -2,42 +2,32 @@
 #include "maineditor.h"
 
 ViewSessionScreen::ViewSessionScreen(MainEditor* parent) : caller(parent) {
-	c.scale = 1;
-	c.dimensions = caller->canvas.dimensions;
-	c.recenter();
+    c.scale = 1;
+    c.dimensions = caller->canvas.dimensions;
+    c.recenter();
 }
 
 BaseScreen* ViewSessionScreen::isSubscreenOf()
 {
-	return caller;
+    return caller;
 }
 
 void ViewSessionScreen::render()
 {
-	c.dimensions = caller->canvas.dimensions;
-	c.lockToScreenBounds(0, 0, 0, 0);
+    c.dimensions = caller->canvas.dimensions;
+    c.lockToScreenBounds(0, 0, 0, 0);
 
-	background.fill({ 0,0,g_windowW, g_windowH });
+    background.fill({ 0,0,g_windowW, g_windowH });
 
-	SDL_Rect canvasRenderRect = c.getCanvasOnScreenRect();
-	for (Layer*& l : caller->getLayerStack()) {
-		l->render(canvasRenderRect, l->layerAlpha);
-	}
+    SDL_Rect canvasRenderRect = c.getCanvasOnScreenRect();
+    for (Layer*& l : caller->getLayerStack()) {
+        l->render(canvasRenderRect, l->layerAlpha);
+    }
 }
 
-void ViewSessionScreen::takeInput(SDL_Event evt)
+void ViewSessionScreen::defaultInputAction(SDL_Event evt)
 {
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-
-    if (evt.type == SDL_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
-    //LALT_TO_SUMMON_NAVBAR;
-
-    if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-        switch (evt.type) {
+    switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
             scrollingCanvas = true;
             break;
@@ -52,6 +42,5 @@ void ViewSessionScreen::takeInput(SDL_Event evt)
         case SDL_MOUSEWHEEL:
             c.zoomFromWheelInput(evt.wheel.y);
             break;
-        }
     }
 }

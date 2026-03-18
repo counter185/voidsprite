@@ -414,9 +414,6 @@
     <ClCompile Include="TemplateRPG2KFaceset.cpp">
       <Filter>Source files\templates</Filter>
     </ClCompile>
-    <ClCompile Include="DraggablePanel.cpp">
-      <Filter>Source files\ui_widgets</Filter>
-    </ClCompile>
     <ClCompile Include="TooltipsLayer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -509,9 +506,6 @@
     </ClCompile>
     <ClCompile Include="io\io_gim.cpp">
       <Filter>Source files\io</Filter>
-    </ClCompile>
-    <ClCompile Include="CollapsableDraggablePanel.cpp">
-      <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
     <ClCompile Include="io\io_rpgm.cpp">
       <Filter>Source files\io</Filter>
@@ -992,9 +986,6 @@
     <ClInclude Include="TemplateRPG2KFaceset.h">
       <Filter>Header files\templates</Filter>
     </ClInclude>
-    <ClInclude Include="DraggablePanel.h">
-      <Filter>Header files\ui_widgets</Filter>
-    </ClInclude>
     <ClInclude Include="TooltipsLayer.h">
       <Filter>Header files</Filter>
     </ClInclude>
@@ -1168,9 +1159,6 @@
     </ClInclude>
     <ClInclude Include="fills.h">
       <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="CollapsableDraggablePanel.h">
-      <Filter>Header files\ui_widgets</Filter>
     </ClInclude>
     <ClInclude Include="sdl23compat.h">
       <Filter>Header files</Filter>

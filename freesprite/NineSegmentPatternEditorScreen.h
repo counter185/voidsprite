@@ -29,7 +29,7 @@ public:
     std::string getName() override { return "9S Pattern Editor"; }
     void render() override;
     void tick() override;
-    void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
     BaseScreen* isSubscreenOf() override;
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) override;

@@ -113,19 +113,9 @@ void NineSegmentPatternEditorScreen::tick()
     };
 }
 
-void NineSegmentPatternEditorScreen::takeInput(SDL_Event evt)
+void NineSegmentPatternEditorScreen::defaultInputAction(SDL_Event evt)
 {
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-
-    if (evt.type == SDL_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
-    LALT_TO_SUMMON_NAVBAR;
-
-    if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-        switch (evt.type) {
+    switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
                 scrollingCanvas = true;
@@ -171,7 +161,6 @@ void NineSegmentPatternEditorScreen::takeInput(SDL_Event evt)
             canvasZoom += evt.wheel.y;
             canvasZoom = ixmax(1, canvasZoom);
             break;
-        }
     }
 }
 

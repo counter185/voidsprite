@@ -279,14 +279,12 @@
     <ClCompile Include="brush\BrushRectFill.cpp" />
     <ClCompile Include="ButtonStartScreenSession.cpp" />
     <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="CollapsableDraggablePanel.cpp" />
     <ClCompile Include="colors.cpp" />
     <ClCompile Include="CustomTemplate.cpp" />
     <ClCompile Include="discord_game_sdk\discord_all.cpp">
       <IncludeInUnityFile>false</IncludeInUnityFile>
       <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
-    <ClCompile Include="DraggablePanel.cpp" />
     <ClCompile Include="EditorFramePicker.cpp" />
     <ClCompile Include="EditorTouchToggle.cpp" />
     <ClCompile Include="ExtractDataScreen.cpp" />
@@ -525,7 +523,6 @@
     <ClInclude Include="brush\BrushRectFill.h" />
     <ClInclude Include="ButtonStartScreenSession.h" />
     <ClInclude Include="Canvas.h" />
-    <ClInclude Include="CollapsableDraggablePanel.h" />
     <ClInclude Include="colormodels.h" />
     <ClInclude Include="CustomTemplate.h" />
     <ClInclude Include="discord_game_sdk\achievement_manager.h" />
@@ -546,7 +543,6 @@
     <ClInclude Include="discord_game_sdk\user_manager.h" />
     <ClInclude Include="discord_game_sdk\voice_manager.h" />
     <ClInclude Include="discord_rpc.h" />
-    <ClInclude Include="DraggablePanel.h" />
     <ClInclude Include="EditorFramePicker.h" />
     <ClInclude Include="EditorTouchToggle.h" />
     <ClInclude Include="ExtractDataScreen.h" />

@@ -23,6 +23,8 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
 
     panel = new PanelSpritesheetPreview(this);
     panel->position = { 5, 40 };
+    panel->position.x = g_windowW - 10 - panel->wxWidth;
+    panel->anchor = { 1,0 };
     wxsManager.addDrawable(panel);
 
     navbar = new ScreenWideNavBar(this,
@@ -151,8 +153,6 @@ void SpritesheetPreviewScreen::tick()
         return;
     }
 
-    panel->position.x = g_windowW - 10 - panel->wxWidth;
-
     int rightPanelWidth = ixmax(300, canvas.scale * caller->ssne.tileDimensions.x);
     XY origin = { g_windowW - rightPanelWidth, 20 };
 
@@ -173,47 +173,36 @@ void SpritesheetPreviewScreen::tick()
     }
 }
 
-void SpritesheetPreviewScreen::takeInput(SDL_Event evt)
+void SpritesheetPreviewScreen::defaultInputAction(SDL_Event evt)
 {
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-
-    if (evt.type == SDL_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
-    LALT_TO_SUMMON_NAVBAR;
-
-    if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
-        switch (evt.type) {
-            case SDL_MOUSEBUTTONDOWN:
-                if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                    scrollingCanvas = true;
+    switch (evt.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            if (evt.button.button == SDL_BUTTON_MIDDLE) {
+                scrollingCanvas = true;
+            }
+            else if (evt.button.button == SDL_BUTTON_LEFT) {
+                if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0
+                    && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y}))) 
+                {
+                    XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->ssne.tileDimensions);
+                    sprites.push_back(tile);
+                    addTimelineButton();
                 }
-                else if (evt.button.button == SDL_BUTTON_LEFT) {
-                    if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0
-                        && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y}))) 
-                    {
-                        XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->ssne.tileDimensions);
-                        sprites.push_back(tile);
-                        addTimelineButton();
-                    }
-                }
-                break;
-            case SDL_MOUSEBUTTONUP:
-                if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                    scrollingCanvas = false;
-                }
-                break;
-            case SDL_MOUSEMOTION:
-                if (scrollingCanvas) {
-                    canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
-                }
-                break;
-            case SDL_MOUSEWHEEL:
-                canvas.zoomFromWheelInput(evt.wheel.y);
-                break;
-        }
+            }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            if (evt.button.button == SDL_BUTTON_MIDDLE) {
+                scrollingCanvas = false;
+            }
+            break;
+        case SDL_MOUSEMOTION:
+            if (scrollingCanvas) {
+                canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
+            }
+            break;
+        case SDL_MOUSEWHEEL:
+            canvas.zoomFromWheelInput(evt.wheel.y);
+            break;
     }
 }
 

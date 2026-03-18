@@ -12,7 +12,6 @@ public:
     DrawableManager* parentManager = NULL;
     bool focused = false;
     XY position = XY{ 50,50 };
-    XY anchor = XY{ 0,0 };
 
     int callback_id = -1;
     EventCallbackListener* callback = NULL;
@@ -42,6 +41,7 @@ public:
         hovered = false;
         hoverTimer.start();
     }
+    virtual void windowResized(XY from, XY to) {}
     virtual void mouseHoverMotion(XY mousePos, XY gPosOffset = {0,0}) {}
     virtual void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) {}
     virtual void focusIn() { 
@@ -60,25 +60,5 @@ public:
     virtual XY getRenderDimensions() { return getDimensions(); };
     virtual bool isPanel() { return false; }
     virtual bool shouldMoveToFrontOnFocus() { return false; }
-
-    XY anchorPos(XY origin, XY originDimensions, XY thisPositionLocal, XY thisDimensions, XY anchor) {
-        XY ret;
-        XY offset = thisPositionLocal;
-        XY endpoint = xyAdd(origin, originDimensions);
-        if (anchor.x == 1) {
-            ret.x = endpoint.x - offset.x - thisDimensions.x;
-        }
-        else {
-            ret.x = origin.x + thisPositionLocal.x;
-        }
-
-        if (anchor.y == 1) {
-            ret.y = endpoint.y - offset.y - thisDimensions.y;
-        }
-        else {
-            ret.y = origin.y + thisDimensions.y;
-        }
-        return ret;
-    }
 };
 

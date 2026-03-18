@@ -8,7 +8,6 @@
 #include "EditorLayerPicker.h"
 #include "EditorColorPicker.h"
 #include "EditorTouchToggle.h"
-#include "CollapsableDraggablePanel.h"
 #include "ScreenWideNavBar.h"
 #include "ScreenWideActionBar.h"
 #include "Notification.h"

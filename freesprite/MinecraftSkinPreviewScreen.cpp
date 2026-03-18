@@ -273,45 +273,34 @@ void MinecraftSkinPreviewScreen::render()
     BaseScreen::render();
 }
 
-void MinecraftSkinPreviewScreen::takeInput(SDL_Event evt)
+void MinecraftSkinPreviewScreen::defaultInputAction(SDL_Event evt)
 {
-    if (evt.type == SDL_EVENT_QUIT) {
-        g_closeScreen(this);
-        return;
+    //evt = convertTouchToMouseEvent(evt);
+
+    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        dragging = evt.button.button;
     }
-
-    LALT_TO_SUMMON_NAVBAR;
-
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-    if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
-
-        //evt = convertTouchToMouseEvent(evt);
-
-        if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-            dragging = evt.button.button;
+    else if (evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+        dragging = -1;
+    }
+    else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
+        if (dragging == SDL_BUTTON_LEFT) {
+            rotateFromMouseInput(evt.motion.xrel, evt.motion.yrel);
         }
-        else if (evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
-            dragging = -1;
+        else if (dragging == SDL_BUTTON_MIDDLE || dragging == SDL_BUTTON_RIGHT) {
+            screen00 = xyAdd(screen00, { (int)evt.motion.xrel, (int)evt.motion.yrel });
         }
-        else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
-            if (dragging == SDL_BUTTON_LEFT) {
-                rotateFromMouseInput(evt.motion.xrel, evt.motion.yrel);
-            }
-            else if (dragging == SDL_BUTTON_MIDDLE || dragging == SDL_BUTTON_RIGHT) {
-                screen00 = xyAdd(screen00, { (int)evt.motion.xrel, (int)evt.motion.yrel });
-            }
+    }
+    else if (evt.type == SDL_EVENT_MOUSE_WHEEL) {
+        size += evt.wheel.y;
+        size = dclamp(5, size, 100);
+    }
+    else if (evt.type == SDL_EVENT_FINGER_MOTION) {
+        if (g_touchPointsOnScreen == 1) {
+            rotateFromMouseInput(evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH);
         }
-        else if (evt.type == SDL_EVENT_MOUSE_WHEEL) {
-            size += evt.wheel.y;
-            size = dclamp(5, size, 100);
-        }
-        else if (evt.type == SDL_EVENT_FINGER_MOTION) {
-            if (g_touchPointsOnScreen == 1) {
-                rotateFromMouseInput(evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH);
-            }
-            else {
-                screen00 = xyAdd(screen00, { (int)(evt.tfinger.dx * g_windowW), (int)(evt.tfinger.dy * g_windowH) });
-            }
+        else {
+            screen00 = xyAdd(screen00, { (int)(evt.tfinger.dx * g_windowW), (int)(evt.tfinger.dy * g_windowH) });
         }
     }
 }

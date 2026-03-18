@@ -6,7 +6,6 @@
 
 #include "EditorLayerPicker.h"
 #include "Notification.h"
-#include "CollapsableDraggablePanel.h"
 #include "EditorFramePicker.h"
 
 using namespace nlohmann;

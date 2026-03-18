@@ -9,9 +9,11 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
     wxWidth = 250;
     wxHeight = 400;
 
-    caller = editor;
+    setupDraggable();
+    setupCollapsible();
+    addTitleText("LAYERS");
 
-    subWidgets.addDrawable(new UILabel("LAYERS", {4,1}));
+    caller = editor;
 
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
@@ -22,7 +24,7 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
         caller->newLayer(); 
         updateLayers();
     };
-    subWidgets.addDrawable(addBtn);
+    wxsTarget().addDrawable(addBtn);
 
     UIButton* removeBtn = new UIButton();
     removeBtn->position = { addBtn->wxWidth + 5 + 5, 30 };
@@ -33,7 +35,7 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
         caller->deleteLayer(caller->activeLayerIndex()); 
         updateLayers();
     };
-    subWidgets.addDrawable(removeBtn);
+    wxsTarget().addDrawable(removeBtn);
 
     UIButton* upBtn = new UIButton();
     upBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + 5 + 5 + 5, 30 };
@@ -44,7 +46,7 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
         caller->moveLayerUp(caller->activeLayerIndex()); 
         updateLayers();
     };
-    subWidgets.addDrawable(upBtn);
+    wxsTarget().addDrawable(upBtn);
 
     UIButton* downBtn = new UIButton();
     downBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + 5 + 5 + 5 + 5, 30 };
@@ -55,7 +57,7 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
         caller->moveLayerDown(caller->activeLayerIndex()); 
         updateLayers();
     };
-    subWidgets.addDrawable(downBtn);
+    wxsTarget().addDrawable(downBtn);
 
     UIButton* mergeDownBtn = new UIButton();
     mergeDownBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + 5 + 5 + 5 + 5 + 5, 30 };
@@ -66,7 +68,7 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
         caller->mergeLayerDown(caller->activeLayerIndex()); 
         updateLayers();
     };
-    subWidgets.addDrawable(mergeDownBtn);
+    wxsTarget().addDrawable(mergeDownBtn);
 
     UIButton* duplicateBtn = new UIButton();
     duplicateBtn->position = { addBtn->wxWidth + removeBtn->wxWidth + upBtn->wxWidth + downBtn->wxWidth + mergeDownBtn->wxWidth + 5 + 5 + 5 + 5 + 5 + 5, 30 };
@@ -76,28 +78,9 @@ TilemapEditorLayerPicker::TilemapEditorLayerPicker(TilemapPreviewScreen* editor)
         caller->duplicateLayer(caller->activeLayerIndex());
         updateLayers();
     };
-    subWidgets.addDrawable(duplicateBtn);
+    wxsTarget().addDrawable(duplicateBtn);
 
     updateLayers();
-}
-
-void TilemapEditorLayerPicker::render(XY position)
-{
-
-    SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
-    //SDL_SetRenderDrawColor(g_rd, 0x30, 0x30, 0x30, focused ? 0x80 : 0x30);
-    //SDL_RenderFillRect(g_rd, &r);
-
-    SDL_Color colorBG1 = { 0x30, 0x30, 0x30, focused ? 0xa0 : 0x90 };
-    SDL_Color colorBG2 = { 0x10, 0x10, 0x10, focused ? 0xa0 : 0x90 };
-    renderGradient(r, sdlcolorToUint32(colorBG2), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1), sdlcolorToUint32(colorBG1));
-    if (focused) {
-        SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 255);
-        drawLine({ position.x, position.y }, { position.x, position.y + wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-        drawLine({ position.x, position.y }, { position.x + wxWidth, position.y }, XM1PW3P1(focusTimer.percentElapsedTime(300)));
-    }
-
-    DraggablePanel::render(position);
 }
 
 void TilemapEditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
@@ -115,7 +98,7 @@ void TilemapEditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
 void TilemapEditorLayerPicker::updateLayers()
 {
     for (Drawable*& b : layerButtons) {
-        subWidgets.removeDrawable(b);
+        wxsTarget().removeDrawable(b);
     }
     layerButtons.clear();
 
@@ -132,7 +115,7 @@ void TilemapEditorLayerPicker::updateLayers()
         layerButton->mainButton->fill = (selectedLayerIndex == lid ? SDL_Color{ 255,255,255,0x60 } : SDL_Color{ 0,0,0,0x80 });
         yposition += 30;
         layerButton->setCallbackListener(lid, this);
-        subWidgets.addDrawable(layerButton);
+        wxsTarget().addDrawable(layerButton);
         layerButtons.push_back(layerButton);
     }
 }

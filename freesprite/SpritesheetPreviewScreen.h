@@ -33,7 +33,7 @@ public:
     void render() override;
     void RenderCanvas();
     void tick() override;
-    void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
     BaseScreen* isSubscreenOf() override;
 
     void eventTextInput(int evt_id, std::string data) override;

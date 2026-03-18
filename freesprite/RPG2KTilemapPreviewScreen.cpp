@@ -15,7 +15,6 @@
 #include "PanelRPG2KTilemapPreview.h"
 #include "PopupGlobalConfig.h"
 #include "PanelReference.h"
-#include "CollapsableDraggablePanel.h"
 #include "TooltipsLayer.h"
 
 RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)

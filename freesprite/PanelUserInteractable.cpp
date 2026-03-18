@@ -80,6 +80,17 @@ void PanelUserInteractable::repositionCloseButton()
     }
 }
 
+void PanelUserInteractable::reanchor()
+{
+    if (draggable) {
+        XY centerPos = xyAdd(position, { wxWidth / 2, wxHeight / 2 });
+        anchor = XY{
+            centerPos.x >= g_windowW / 2 ? 1 : 0,
+            centerPos.y >= g_windowH / 2 ? 1 : 0
+        };
+    }
+}
+
 PanelUserInteractable::PanelUserInteractable()
 {
     fillUnfocused = g_config.acrylicPanels ? visualConfigFill("ui/panel/bg_unfocused_blurbehind") : visualConfigFill("ui/panel/bg_unfocused");
@@ -105,6 +116,24 @@ void PanelUserInteractable::handleInput(SDL_Event evt, XY gPosOffset)
     }
 }
 
+void PanelUserInteractable::windowResized(XY from, XY to)
+{
+    if (draggable) {
+        //move according to anchor
+        XY prevDistance = xySubtract(from, position);
+
+        //anchor on X
+        if (anchor.x == 1) {
+            position.x = to.x - prevDistance.x;
+        }
+
+        //anchor on Y
+        if (anchor.y == 1) {
+            position.y = to.y - prevDistance.y;
+        }
+    }
+}
+
 void PanelUserInteractable::processDrag(SDL_Event evt) {
     switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
@@ -120,6 +149,7 @@ void PanelUserInteractable::processDrag(SDL_Event evt) {
                 position.y += (int)(evt.motion.yrel);
 
                 tryMoveOutOfOOB();
+                reanchor();
             }
             break;
         case SDL_EVENT_FINGER_DOWN:
@@ -133,6 +163,7 @@ void PanelUserInteractable::processDrag(SDL_Event evt) {
                 position.y += (int)(evt.tfinger.dy * g_windowH);
 
                 tryMoveOutOfOOB();
+                reanchor();
             }
             break;
     }

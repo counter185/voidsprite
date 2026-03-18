@@ -45,6 +45,8 @@ protected:
     void renderResizeHandle(XY at);
     void repositionCloseButton();
 public:
+    XY anchor = XY{ 0,0 };
+
     PanelUserInteractable();
     
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
@@ -64,11 +66,13 @@ public:
         }
     }
     void handleInput(SDL_Event evt, XY gPosOffset) override;
+    void windowResized(XY from, XY to) override;
     
     XY getDimensions() override { return (collapsible && collapsed) ? XY{wxWidth, 30} : Panel::getDimensions(); }
     
     void toggleCollapse();
     void tryMoveOutOfOOB();
+    void reanchor();
 
     UILabel* addTitleText(std::string title);
 };

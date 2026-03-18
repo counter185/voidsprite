@@ -26,7 +26,7 @@ public:
 	~ScreenNonogramPlayer();
 
 	void render() override;
-	void takeInput(SDL_Event evt) override;
+	void defaultInputAction(SDL_Event evt) override;
 	std::string getName() override { return "Nonogram Player"; }
 
 	void GenHints();

@@ -54,8 +54,6 @@ protected:
     virtual void playPopupCloseVFX();
     void closePopup();
 
-    virtual void defaultInputAction(SDL_Event evt) {}
-
     XY makeTitleAndDesc(std::string title = "", std::string desc = "");
 
     UIButton* actionButton(std::string text, int width = 120);

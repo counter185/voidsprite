@@ -9,7 +9,6 @@
 #include "RPG2KTilemapPreviewScreen.h"
 #include "MinecraftBlockPreviewScreen.h"
 #include "FileIO.h"
-#include "CollapsableDraggablePanel.h"
 #include "EditorTouchToggle.h"
 #include "SpritesheetPreviewScreen.h"
 #include "ViewSessionScreen.h"

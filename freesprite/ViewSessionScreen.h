@@ -17,6 +17,6 @@ public:
     std::string getName() override { return TL("vsp.fullscreenpreview"); }
     BaseScreen* isSubscreenOf() override;
     void render() override;
-    void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
 };
 

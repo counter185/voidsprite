@@ -58,7 +58,7 @@ public:
     ~MinecraftSkinPreviewScreen();
 
     void render() override;
-    void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
     void tick() override;
     void recalcPointScale();
     bool takesTouchEvents() override { return true; }

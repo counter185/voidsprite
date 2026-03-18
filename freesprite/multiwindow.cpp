@@ -230,6 +230,7 @@ bool VSPWindow::tryCreateRenderer() {
 }
 
 void VSPWindow::updateViewportScaler() {
+    XY previousSize = scaledWindowSize;
     if (viewport != NULL) {
         tracked_destroyTexture(viewport);
     }
@@ -249,6 +250,10 @@ void VSPWindow::updateViewportScaler() {
 
     if (blurBuffer != NULL) {
         blurBuffer->windowResized();
+    }
+
+    for (auto*& screen : screenStack) {
+        screen->screenResized(previousSize, scaledWindowSize);
     }
 
     if (g_currentWindow == this) {

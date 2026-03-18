@@ -103,7 +103,7 @@ void ScreenNonogramPlayer::render()
 	}
 }
 
-void ScreenNonogramPlayer::takeInput(SDL_Event evt)
+void ScreenNonogramPlayer::defaultInputAction(SDL_Event evt)
 {
 	switch (evt.type) {
 		case SDL_EVENT_MOUSE_MOTION:

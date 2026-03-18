@@ -1,14 +1,14 @@
 #pragma once
-#include "DraggablePanel.h"
+#include "PanelUserInteractable.h"
 
 class PanelTilemapPreview :
-    public DraggablePanel
+    public PanelUserInteractable
 {
 public:
     TilemapPreviewScreen* caller;
 
     PanelTilemapPreview(TilemapPreviewScreen* parent);
 
-    void render(XY position) override;
+    void renderAfterBG(XY position) override;
 };
 

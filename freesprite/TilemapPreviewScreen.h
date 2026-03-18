@@ -35,8 +35,9 @@ public:
 	~TilemapPreviewScreen();
 
 	void render() override;
+	void RenderCanvas();
 	void tick() override;
-	void takeInput(SDL_Event evt) override;
+	void defaultInputAction(SDL_Event evt) override;
 	BaseScreen* isSubscreenOf() override;
 
 	std::string getName() override { return TL("vsp.tilemappreview"); }

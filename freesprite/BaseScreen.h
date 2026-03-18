@@ -11,12 +11,14 @@ protected:
     int callback_id = -1;
     EventCallbackListener* callback = NULL;
     DrawableManager wxsManager;
+
 public:
     virtual ~BaseScreen() = default;
 
     virtual void render() {
         wxsManager.renderAll();
     }
+    virtual void defaultInputAction(SDL_Event evt) {}
     virtual void takeInput(SDL_Event evt) 
     {
         if (evt.type == SDL_QUIT) {
@@ -24,12 +26,18 @@ public:
             return;
         }
         DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-        DrawableManager::processInputEventInMultiple({ wxsManager }, evt);
+        if (!DrawableManager::processInputEventInMultiple({ wxsManager }, evt)) {
+            defaultInputAction(evt);
+        }
     }
     virtual void tick() {}
     virtual BaseScreen* isSubscreenOf() { return NULL; }
     virtual bool takesTouchEvents() { return false; }
     virtual void onReturnToScreen() {}
+
+    void screenResized(XY from, XY to) {
+        wxsManager.processWindowResizeEvent(from, to);
+    }
 
     //called on crash
     virtual std::vector<std::string> dropEverythingYoureDoingAndSave() { return {}; }

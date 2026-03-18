@@ -255,6 +255,13 @@ bool DrawableManager::mouseInAny(XY origin, XY mousePos)
     return false;
 }
 
+void DrawableManager::processWindowResizeEvent(XY from, XY to)
+{
+    for (auto*& d : drawablesList) {
+        d->windowResized(from, to);
+    }
+}
+
 bool DrawableManager::processHoverEvent(XY thisPositionOnScreen, XY mousePos)
 {
     Drawable* newHoverTarget = NULL;

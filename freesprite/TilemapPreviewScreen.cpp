@@ -78,6 +78,8 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     resizeTilemap(32, 32);
 
     layerPicker = new TilemapEditorLayerPicker(this);
+    layerPicker->position.x = g_windowW - 260;
+    layerPicker->anchor = { 1,0 };
     wxsManager.addDrawable(layerPicker);
 
     tileSelectScale = caller->canvas.scale;
@@ -101,49 +103,7 @@ TilemapPreviewScreen::~TilemapPreviewScreen()
 
 void TilemapPreviewScreen::render()
 {
-    drawBackground();
-
-    XY callerTileSize = caller->getPaddedTileDimensions();
-
-    canvas.dimensions = { tilemapDimensions.x * callerTileSize.x, tilemapDimensions.y * callerTileSize.y };
-
-    SDL_Rect tilemapDrawRect = canvas.getCanvasOnScreenRect();
-
-    for (int l = 0; l < tilemap.size(); l++) {
-        for (int y = 0; y < tilemapDimensions.y; y++) {
-            for (int x = 0; x < tilemapDimensions.x; x++) {
-
-                XY tilePos = tilemap[l][y][x];
-                if (tilePos.x < 0 || tilePos.y < 0) {
-                    continue;
-                }
-
-                SDL_Rect tileDraw = canvas.getTileScreenRectAt({ x,y }, callerTileSize);/* {
-                    tilemapDrawRect.x + callerTileSize.x * tilemapScale * x,
-                    tilemapDrawRect.y + callerTileSize.y * tilemapScale * y,
-                    callerTileSize.x * tilemapScale,
-                    callerTileSize.y * tilemapScale
-                };*/
-
-                SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos);
-
-                double alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? XM1PW3P1(layerSelectTimer.percentElapsedTime(1300)) : 1.0;
-                for (Layer* l : caller->getLayerStack()) {
-                    l->render(tileDraw, tileClip, l->layerAlpha * alpha);
-                }
-            }
-        }
-    }
-    canvas.drawTileGrid(callerTileSize);
-
-    //tilemap border
-    canvas.drawCanvasOutline(5, { 255,255,255,0xa0 });
-
-    //tilemap current hovered tile
-    SDL_Rect tilemapSelectedTile = canvas.getTileScreenRectAt(hoveredTilePosition, callerTileSize);
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0);
-    SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
-
+    renderWithBlurPanelsIfEnabled([this]() {this->RenderCanvas(); });
 
     //render tile select menu
     if (tileSelectOpen) {
@@ -195,7 +155,53 @@ void TilemapPreviewScreen::render()
         SDL_RenderFillRect(g_rd, &fullscreen);
     }
 
-    wxsManager.renderAll();
+    BaseScreen::render();
+}
+
+void TilemapPreviewScreen::RenderCanvas()
+{
+    drawBackground();
+
+    XY callerTileSize = caller->getPaddedTileDimensions();
+
+    canvas.dimensions = { tilemapDimensions.x * callerTileSize.x, tilemapDimensions.y * callerTileSize.y };
+
+    SDL_Rect tilemapDrawRect = canvas.getCanvasOnScreenRect();
+
+    for (int l = 0; l < tilemap.size(); l++) {
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+            for (int x = 0; x < tilemapDimensions.x; x++) {
+
+                XY tilePos = tilemap[l][y][x];
+                if (tilePos.x < 0 || tilePos.y < 0) {
+                    continue;
+                }
+
+                SDL_Rect tileDraw = canvas.getTileScreenRectAt({ x,y }, callerTileSize);/* {
+                tilemapDrawRect.x + callerTileSize.x * tilemapScale * x,
+                tilemapDrawRect.y + callerTileSize.y * tilemapScale * y,
+                callerTileSize.x * tilemapScale,
+                callerTileSize.y * tilemapScale
+                };*/
+
+                SDL_Rect tileClip = caller->getPaddedTilePosAndDimensions(tilePos);
+
+                double alpha = (layerSelectTimer.started && l == activeLayerIndex()) ? XM1PW3P1(layerSelectTimer.percentElapsedTime(1300)) : 1.0;
+                for (Layer* l : caller->getLayerStack()) {
+                    l->render(tileDraw, tileClip, l->layerAlpha * alpha);
+                }
+            }
+        }
+    }
+    canvas.drawTileGrid(callerTileSize);
+
+    //tilemap border
+    canvas.drawCanvasOutline(5, { 255,255,255,0xa0 });
+
+    //tilemap current hovered tile
+    SDL_Rect tilemapSelectedTile = canvas.getTileScreenRectAt(hoveredTilePosition, callerTileSize);
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xd0);
+    SDL_RenderDrawRect(g_rd, &tilemapSelectedTile);
 }
 
 void TilemapPreviewScreen::tick()
@@ -214,25 +220,11 @@ void TilemapPreviewScreen::tick()
             }
         }
     }
-
-    if (layerPicker != NULL) {
-        layerPicker->position.x = g_windowW - 260;
-    }
 }
 
-void TilemapPreviewScreen::takeInput(SDL_Event evt)
+void TilemapPreviewScreen::defaultInputAction(SDL_Event evt)
 {
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-
-    if (evt.type == SDL_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
-    LALT_TO_SUMMON_NAVBAR;
-
-    if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
-        switch (evt.type) {
+    switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
                 scrollingTilemap = true;
@@ -305,7 +297,6 @@ void TilemapPreviewScreen::takeInput(SDL_Event evt)
                 wxsManager.forceFocusOn(navbar);
             }
             break;
-        }
     }
 }
 
