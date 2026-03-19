@@ -217,6 +217,7 @@ public:
     std::vector<FilterParameter> getParameters() override {
         return {
             INT_PARAM("quality", 1, 100, 50),
+            INT_PARAM("iterations", 1, 20, 1)
         };
     }
 };
