@@ -13,7 +13,7 @@ Layer* RGBGeneFilter::run(Layer* src, std::map<std::string, std::string> options
     int sizeR = std::stoi(options["size.r"]);
     int sizeG = std::stoi(options["size.g"]);
     int sizeB = std::stoi(options["size.b"]);
-    bool mutateUpwards = options["mutate upwards"] == "1";
+    bool mutateUpwards = std::stoi(options["mutate upwards"]);
     int bias = std::stoi(options["bias"]);
 
     struct Plant {
@@ -99,5 +99,34 @@ Layer* RGBGeneFilter::run(Layer* src, std::map<std::string, std::string> options
         }
     }
 
+    return c;
+}
+
+Layer* RenderGridFilter::run(Layer* src, std::map<std::string, std::string> options)
+{
+    u32 color = std::stoul(options["color"], NULL, 16) | 0xFF000000;
+    int alpha = std::stoi(options["alpha"]);
+    color = modAlpha(color, alpha);
+    bool blend = std::stoi(options["blend"]);
+    int gridX = std::stoi(options["size.x"]);
+    int gridY = std::stoi(options["size.y"]);
+
+    Layer* c = copy(src);
+    if (gridX > 0) {
+        for (int xx = 0; xx < c->w; xx += gridX) {
+            for (int yy = 0; yy < c->h; yy++) {
+                c->setPixel({ xx,yy },
+                    blend ? alphaBlend(c->getPixelAt({ xx,yy }), color) : color);
+            }
+        }
+    }
+    if (gridY > 0) {
+        for (int yy = 0; yy < c->h; yy += gridY) {
+            for (int xx = 0; xx < c->w; xx++) {
+                c->setPixel({ xx,yy },
+                    blend ? alphaBlend(c->getPixelAt({ xx,yy }), color) : color);
+            }
+        }
+    }
     return c;
 }

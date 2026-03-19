@@ -73,6 +73,7 @@ void g_loadFilters()
     registerFilter(new GenRGBNoiseFilter(), &g_renderFilters);
     registerFilter(new PrintPaletteFilter(), &g_renderFilters);
     registerFilter(new RGBGeneFilter(), &g_renderFilters);
+    registerFilter(new RenderGridFilter(), &g_renderFilters);
 }
 
 std::string FilterPreset::serialize() {

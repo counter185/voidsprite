@@ -151,3 +151,18 @@ class RGBGeneFilter : public RenderFilter {
         BOOL_PARAM("mutate upwards", 1)
     }; }
 };
+
+class RenderGridFilter : public RenderFilter {
+    std::string name() override { return "Pixel grid"; }
+    std::string id() override { return "filter.render.grid"; }
+    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
+    std::vector<FilterParameter> getParameters() override {
+        return {
+            COLORRGB_PARAM("color", 0x80000000),
+            COLORL_PARAM("alpha"),
+            BOOL_PARAM("blend", 1),
+            INT_PARAM("size.x", 0, 100, 4),
+            INT_PARAM("size.y", 0, 100, 4),
+        };
+    }
+};
