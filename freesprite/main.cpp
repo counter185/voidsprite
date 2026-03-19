@@ -1207,9 +1207,6 @@ int main(int argc, char** argv)
         g_mainWindow->addScreen(launchpad, g_mainWindow->screenStack.empty());
 
         //run command line args
-                    if (ssn != NULL) {
-                        loginfo(frmt("Loaded file from commandline arg: {}", arg));
-                        g_addScreen(ssn);
         bool closeLaunchpad = noLaunchpad;
         for (std::string& arg : fileOpenTargets) {
             if (std::filesystem::exists(convertStringOnWin32(arg))) {
