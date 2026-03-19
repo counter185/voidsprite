@@ -294,3 +294,10 @@ void platformRunAutoUpdate() {
         lastJNI->CallStaticVoidMethod(vspActivityClass, checkMethod);
     }
 }
+
+bool platformSetupIPC() {
+    return true;
+}
+bool platformSendIPCToMainInstance(std::string s) {
+    return false;
+}

@@ -25,6 +25,7 @@
 #include "maineditor.h"
 #include "io/io_png.h"
 #include "Notification.h"
+#include "main.h"
 
 u32 platformSupportedFeatures() {
     return VSP_FEATURE_ALL & ~VSP_FEATURE_OS_SHARE;
@@ -36,6 +37,7 @@ HWND WINhWnd = NULL;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
 std::vector<PlatformNativePathString> tempFilesToDeleteOnDeinit;
+std::jthread* ipcThread = NULL;
 
 int windows_numProcessesRunning(std::wstring name) {
     int ret = 0;
@@ -117,41 +119,6 @@ HWND windows_getProcessMainWindow(DWORD pid) {
 void platformPreInit() {
     auto thisPID = GetCurrentProcessId();
     std::wstring thisExeName = convertStringOnWin32(fileNameFromPath(g_programExePath));
-
-    if (g_config.singleInstance && g_cmdlineArgs.size() == 0) {
-        //find any other already running instances and send wm_user+0 to them
-        HANDLE hProcessSnap;
-        PROCESSENTRY32W pe32;
-        hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
-        if (hProcessSnap != INVALID_HANDLE_VALUE) {
-            pe32.dwSize = sizeof(PROCESSENTRY32W);
-            if (Process32FirstW(hProcessSnap, &pe32)) {
-                do {
-                    if (thisPID != pe32.th32ProcessID && lstrcmpW(pe32.szExeFile, thisExeName.c_str()) == 0) {
-                        //find main window
-                        HWND hWnd = windows_getProcessMainWindow(pe32.th32ProcessID);
-                        if (hWnd != NULL) {
-                            //send message to window
-
-                            //the code below would be ideal but sdl does not support sendmessage and wm_copydata does not support postmessage
-                            //so we can't send strings
-                            /*std::string command = "vspdata:newwindow";
-                            COPYDATASTRUCT cds;
-                            cds.dwData = 0;
-                            cds.cbData = (DWORD)(command.size() + 1);
-                            cds.lpData = (PVOID)command.c_str();
-                            LRESULT res = SendMessageW(hWnd, WM_COPYDATA, 0, (LPARAM)&cds);*/
-
-                            PostMessageW(hWnd, WM_USER + 1, 0, 0);
-                            loginfo(frmt("{}", GetLastError()));
-                            exit(0);
-                        }
-                    }
-                } while (Process32NextW(hProcessSnap, &pe32));
-            }
-            CloseHandle(hProcessSnap);
-        }
-    }
 }
 void platformInit() {
     platformRegisterURI("voidsprite", {});
@@ -187,6 +154,9 @@ void platformDeinit() {
         catch (std::exception& e) {
             logerr(frmt("error deleting temp file\n {}", e.what()));
         }
+    }
+    if (ipcThread != NULL) {
+        TerminateThread(ipcThread->native_handle(), 0);
     }
 }
 
@@ -986,4 +956,74 @@ std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
     return {
         L"C:\\Windows\\Fonts"
     };
+}
+
+const std::string ipcPipePath = "\\\\.\\pipe\\voidspriteIPC";
+void windows_ipcThread() {
+    while (true) {
+        HANDLE pipe = CreateNamedPipeA(
+            ipcPipePath.c_str(),
+            PIPE_ACCESS_INBOUND,
+            PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+            1,
+            1024,
+            1024,
+            0,
+            NULL
+        );
+
+        if (pipe == INVALID_HANDLE_VALUE) {
+            logerr("failed to open IPC pipe");
+            return;
+        }
+
+        //absolute win32
+        if (ConnectNamedPipe(pipe, NULL) || (GetLastError() == ERROR_PIPE_CONNECTED)) {
+            char buffer[1024];
+            DWORD bytesRead;
+
+            if (ReadFile(pipe, buffer, 1024, &bytesRead, NULL)) {
+                std::string ipcCommand;
+                ipcCommand.resize(bytesRead);
+                memcpy(ipcCommand.data(), buffer, bytesRead);
+
+                main_handleIPCMessage(ipcCommand);
+            }
+        }
+
+        DisconnectNamedPipe(pipe);
+        CloseHandle(pipe);
+    }
+}
+bool platformSetupIPC() {
+    HANDLE vspMutex = CreateMutexA(NULL, TRUE, "voidsprite_SingleInstance");
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        return false;
+    }
+    else {
+        ipcThread = new std::jthread(windows_ipcThread);
+        return true;
+    }
+}
+
+bool platformSendIPCToMainInstance(std::string s) {
+    HANDLE pipe = CreateFileA(
+        ipcPipePath.c_str(),
+        GENERIC_WRITE,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL
+    );
+
+    if (pipe == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    DWORD written;
+    WriteFile(pipe, s.c_str(), s.size(), &written, NULL);
+
+    CloseHandle(pipe);
+    return true;
 }

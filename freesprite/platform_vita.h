@@ -150,3 +150,10 @@ std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
     return {
     };
 }
+
+bool platformSetupIPC() {
+    return true;
+}
+bool platformSendIPCToMainInstance(std::string s) {
+    return false;
+}

@@ -307,8 +307,6 @@ inline SDL_PropertiesID g_props;
 inline bool g_lastConfirmInputWasTouch = false;
 inline int g_crashsaveIndex = 0;
 
-extern std::vector<std::string> g_cmdlineArgs;
-
 inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconLayerAdd = NULL,
    *g_iconLayerDelete = NULL,

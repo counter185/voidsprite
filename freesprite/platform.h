@@ -78,6 +78,9 @@ std::vector<NetworkAdapterInfo> platformGetNetworkAdapters();
 
 std::vector<PlatformNativePathString> platformGetSystemFontPaths();
 
+bool platformSetupIPC();
+bool platformSendIPCToMainInstance(std::string s);
+
 #if VSP_PLATFORM == VSP_PLATFORM_ANDROID
 void platformRunAutoUpdate();
 #endif

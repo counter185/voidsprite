@@ -4,6 +4,7 @@ inline Timer64 screenSwitchTimer;
 inline SDL_Texture* screenPreviewFramebuffer = NULL;
 
 int main_getLastFPS();
+void main_handleIPCMessage(std::string msg);
 
 void main_renderScaleUp();
 void main_renderScaleDown();

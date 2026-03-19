@@ -62,7 +62,6 @@ int g_touchPointsOnScreen = 0;
 TextRenderer* g_fnt = NULL;
 TooltipsLayer* g_ttp;
 Gamepad* g_gamepad = NULL;
-std::vector<std::string> g_cmdlineArgs;
 bool fullscreen = false;
 bool g_ctrlModifier = false;
 bool g_shiftModifier = false;
@@ -347,27 +346,6 @@ void main_assignFavScreen()
     g_currentWindow->assignFavScreen();
 }
 
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
-bool main_WindowsMessageHook(void* userdata, MSG* msg) {
-    if (msg->message == WM_USER + 1) {
-        main_newWindow();
-        return false;
-    }
-    else if (msg->message == WM_COPYDATA) {
-        COPYDATASTRUCT* data = (COPYDATASTRUCT*)msg->lParam;
-        if (data->cbData > 8 && strncmp((char*)data->lpData, "vspdata", 7) == 0) {
-            std::string cmdString = "";
-            cmdString.resize(data->cbData);
-            memcpy(&cmdString[0], data->lpData, data->cbData);
-
-            loginfo(frmt("Received window command: {}", cmdString));
-            return false;
-        }
-    }
-    return true;
-}
-#endif
-
 void main_saveAllScreens()
 {
     std::vector<std::string> savedPaths;
@@ -438,6 +416,31 @@ u64 frameCountTimestamp = 0;
 int main_getLastFPS()
 {
     return lastFrameCount;
+}
+
+void main_handleIPCMessage(std::string msg) {
+    loginfo(frmt("IPC message: {}", msg));
+    if (stringStartsWithIgnoreCase(msg, "vspdata:")) {
+        std::string command = msg.substr(8);
+        if (stringStartsWithIgnoreCase(command, "new_window")) {
+            g_startNewMainThreadOperation([]() {
+                main_newWindow();
+            });
+        }
+        else if (stringStartsWithIgnoreCase(command, "open_file:")) {
+            g_startNewMainThreadOperation([command]() {
+                MainEditor* ssn = loadAnyIntoSession(command.substr(10));
+                if (ssn != NULL) {
+                    g_addScreen(ssn);
+                }
+            });
+        }
+        else if (stringStartsWithIgnoreCase(command, "lospec_dl:")) {
+            std::string lospecPaletteID = command.substr(10);
+            loginfo(frmt("Running lospec download: {}", lospecPaletteID));
+            g_downloadAndInstallPaletteFromLospec(lospecPaletteID);
+        }
+    }
 }
 
 void g_mainLoop() {
@@ -855,9 +858,12 @@ int main(int argc, char** argv)
 
         log_init();
         
+        bool noLaunchpad = false;
+        bool preprocessLaunchpad = false;
         std::vector<std::pair<std::string, std::string>> convertTargets;
         std::vector<std::string> lospecDlTargets;
         std::vector<std::string> uriTargets;
+        std::vector<std::string> fileOpenTargets;
 
         while (!argsQueue.empty()) {
 
@@ -879,6 +885,9 @@ int main(int argc, char** argv)
                 //doesn't redirect all the printfs unfortunately
                 //maybe some other time
             }
+            else if (command == "--no-launchpad") {
+                noLaunchpad = true;
+            }
             else if (stringStartsWithIgnoreCase(command, "lospec-palette://")) {
                 lospecDlTargets.push_back(command);
             }
@@ -887,7 +896,8 @@ int main(int argc, char** argv)
                 uriTargets.push_back(path);
             }
             else {
-                g_cmdlineArgs.push_back(command);
+                fileOpenTargets.push_back(command);
+                //g_cmdlineArgs.push_back(command);
             }
         }
 #if __ANDROID__
@@ -916,6 +926,25 @@ int main(int argc, char** argv)
         loginfo("Config loaded");
 
         platformPreInit();
+
+        if (g_config.singleInstance) {
+            if (platformSupportsFeature(VSP_FEATURE_INSTANCE_IPC)) {
+                if (!platformSetupIPC()) {
+                    if (fileOpenTargets.empty() && lospecDlTargets.empty()) {
+                        platformSendIPCToMainInstance("vspdata:new_window");
+                    }
+                    else {
+                        for (auto& path : fileOpenTargets) {
+                            platformSendIPCToMainInstance(frmt("vspdata:open_file:{}", path));
+                        }
+                        for (auto& lospecDL : lospecDlTargets) {
+                            platformSendIPCToMainInstance(frmt("vspdata:lospec_dl:{}", lospecDL));
+                        }
+                    }
+                    exit(0);
+                }
+            }
+        }
 
         SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
         int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
@@ -951,10 +980,6 @@ int main(int argc, char** argv)
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
-
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
-        SDL_SetWindowsMessageHook(main_WindowsMessageHook, NULL);
-#endif
 
         g_props = SDL_CreateProperties();
         
@@ -1182,29 +1207,24 @@ int main(int argc, char** argv)
         g_mainWindow->addScreen(launchpad, g_mainWindow->screenStack.empty());
 
         //run command line args
-        bool closeLaunchpad = false;
-        for (std::string& arg : g_cmdlineArgs) {
-            if (arg.substr(0, 2) == "--") {
-                std::string option = arg.substr(2);
-                if (option == "no-launchpad") {
-                    closeLaunchpad = true;
-                }
-            }
-            else {
-                if (std::filesystem::exists(convertStringOnWin32(arg))) {
-                    MainEditor* ssn = loadAnyIntoSession(arg);
                     if (ssn != NULL) {
                         loginfo(frmt("Loaded file from commandline arg: {}", arg));
                         g_addScreen(ssn);
-                    }
-                    else {
-                        logerr(frmt("Failed to load file: {}", arg));
-                    }
+        bool closeLaunchpad = noLaunchpad;
+        for (std::string& arg : fileOpenTargets) {
+            if (std::filesystem::exists(convertStringOnWin32(arg))) {
+                MainEditor* ssn = loadAnyIntoSession(arg);
+                if (ssn != NULL) {
+                    loginfo(frmt("Loaded file from commandline arg: {}", arg));
+                    g_addScreen(ssn);
                 }
                 else {
-                    //todo: this notification never fits the whole file name
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Could not find file:\n {}", arg)));
+                    logerr(frmt("Failed to load file: {}", arg));
                 }
+            }
+            else {
+                //todo: this notification never fits the whole file name
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Could not find file:\n {}", arg)));
             }
         }
         if (closeLaunchpad) {
