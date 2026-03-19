@@ -6,10 +6,14 @@
 #include <spawn.h>
 #include <unistd.h>
 #include <sys/utsname.h>
+#include <sys/file.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
+#include "main.h"
 
 #include "platform_universal.h"
 
@@ -28,10 +32,13 @@ u32 platformSupportedFeatures() {
         VSP_FEATURE_CLIPBOARD
         | VSP_FEATURE_UNRESTRICTED_FILE_SYSTEM
         | VSP_FEATURE_WEB_FETCH
+        | VSP_FEATURE_INSTANCE_IPC
         | VSP_FEATURE_MULTIWINDOW;
 }
 
 extern char **environ;
+int lockFD = -1;
+std::jthread* linux_ipcThread = NULL;
 
 std::string linux_getCPUName() {
     std::ifstream cpuInfoFile("/proc/cpuinfo");
@@ -63,7 +70,17 @@ void platformPreInit() {
 void platformInit() {}
 void platformPostInit() {}
 
-void platformDeinit() {}
+void platformDeinit() {
+    if (lockFD != -1) {
+        flock(lockFD, LOCK_UN);
+        close(lockFD);
+    }
+    if (linux_ipcThread != NULL) {
+        pthread_kill(linux_ipcThread->native_handle(), SIGTERM);
+        delete linux_ipcThread;
+        linux_ipcThread = NULL;
+    }
+}
 
 //todo
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
@@ -319,9 +336,61 @@ std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
     return ret;
 }
 
+const std::string singleinstanceSocket = "/tmp/voidsprite_singleinstance.sock";
+void linux_threadIPC() {
+    unlink(singleinstanceSocket.c_str());
+    int serverFD = socket(AF_UNIX, SOCK_STREAM, 0);
+    sockaddr_un addr{};
+    addr.sun_family = AF_UNIX;
+    if (sizeof(addr.sun_path) <= singleinstanceSocket.size()) {
+        logerr("socket path too long for sockaddr_un");
+        return;
+    }
+    memcpy(addr.sun_path, singleinstanceSocket.c_str(), singleinstanceSocket.size() + 1);
+
+    bind(serverFD, (sockaddr*)&addr, sizeof(addr));
+    listen(serverFD, 5);
+
+    while (true) {
+        int client = accept(serverFD, NULL, NULL);
+
+        char buffer[1024];
+        int len = read(client, buffer, sizeof(buffer));
+
+        if (len > 0) {
+            std::string command;
+            command.resize(len);
+            memcpy(command.data(), buffer, len);
+            main_handleIPCMessage(command);
+        }
+        close(client);
+    }
+}
+
 bool platformSetupIPC() {
+    lockFD = open("/tmp/voidsprite_singleinstance.lock", O_CREAT | O_RDWR, 0666);
+    if (flock(lockFD, LOCK_EX | LOCK_NB) != 0) {
+        close(lockFD);
+        return false;
+    }
+    linux_ipcThread = new std::jthread(linux_threadIPC);
     return true;
 }
 bool platformSendIPCToMainInstance(std::string s) {
-    return false;
+    int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+
+    sockaddr_un addr{};
+    addr.sun_family = AF_UNIX;
+    if (sizeof(addr.sun_path) <= singleinstanceSocket.size()) {
+        logerr("socket path too long for sockaddr_un");
+        return false;
+    }
+    memcpy(addr.sun_path, singleinstanceSocket.c_str(), singleinstanceSocket.size() + 1);
+
+    connect(sock, (sockaddr*)&addr, sizeof(addr));
+
+    write(sock, s.c_str(), s.size());
+
+    close(sock);
+    return true;
 }
