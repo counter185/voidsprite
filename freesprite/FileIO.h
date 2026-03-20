@@ -211,7 +211,7 @@ public:
     }
     virtual bool exportData(PlatformNativePathString path, void* data, OperationProgressReport* progress = NULL) {
         try {
-            progress = progress == NULL ? g_printOnlyProgressReport : progress;
+            ENSURE_REPORT_VALID(progress);
             return exportsWholeSession() ? _sessionExportFunction(path, (MainEditor*)data, progress) 
                 : _flatExportFunction(path, (Layer*)data, progress);
         }

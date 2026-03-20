@@ -207,7 +207,7 @@ MainEditor* readAVIF(PlatformNativePathString path, OperationProgressReport* pro
 bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress)
 {
 #if VSP_USE_LIBAVIF
-    progress = progress = NULL ? g_printOnlyProgressReport : progress;
+    ENSURE_REPORT_VALID(progress);
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
         DoOnReturn closeFile([f]() { fclose(f); });

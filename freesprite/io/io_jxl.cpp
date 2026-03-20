@@ -14,7 +14,7 @@ std::string getlibjxlVersion()
 
 MainEditor* readJpegXL(PlatformNativePathString path, OperationProgressReport* progress)
 {
-    progress = progress == NULL ? g_printOnlyProgressReport : progress;
+    ENSURE_REPORT_VALID(progress);
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         DoOnReturn closeFile([f]() { fclose(f); });

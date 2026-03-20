@@ -75,7 +75,7 @@ void PopupQuickConvert::doQuickConvert(
     bool forceConvertRGB,
     OperationProgressReport* progress)
 {
-    progress = progress == NULL ? g_printOnlyProgressReport : progress;
+    ENSURE_REPORT_VALID(progress);
     if (exporter == NULL) {
         for (FileExporter*& e : g_fileExporters) {
             if (stringEndsWithIgnoreCase(outPath, convertStringOnWin32(e->extension()))) {

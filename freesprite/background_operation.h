@@ -6,6 +6,8 @@
 #include "globals.h"
 #include "Timer64.h"
 
+#define ENSURE_REPORT_VALID(a) (a=a==NULL?g_printOnlyProgressReport:a)
+
 struct AsyncOp {
     bool done = false;
     std::thread* thread = NULL;

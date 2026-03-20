@@ -374,7 +374,7 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
 
 
 bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress) {
-    progress = progress == NULL ? g_printOnlyProgressReport : progress;
+    ENSURE_REPORT_VALID(progress);
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
 

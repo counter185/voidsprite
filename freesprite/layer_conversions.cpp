@@ -2,6 +2,13 @@
 #include "Layer.h"
 #include "LayerPalettized.h"
 #include "Notification.h"
+#include "BaseFilter.h"
+
+Layer* quantizeToNumColors(Layer* rgb, int numColors)
+{
+    //todo
+    return g_filter_quantize->run(rgb, { { "num.colors", std::to_string(numColors) } });
+}
 
 bool hasTransparency(Layer* rgba, u8 threshold) {
     u32* pixels = rgba->pixels32();

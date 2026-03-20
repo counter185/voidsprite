@@ -2135,7 +2135,7 @@ Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter,
 
 MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundImporter, OperationProgressReport* progressReport)
 {
-    progressReport = progressReport == NULL ? g_printOnlyProgressReport : progressReport;
+    ENSURE_REPORT_VALID(progressReport);
     PlatformNativePathString fPath = convertStringOnWin32(utf8path);
 
     for (FileImporter*& importer : g_fileImporters) {

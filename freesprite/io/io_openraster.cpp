@@ -1,6 +1,7 @@
 #include "io_base.h"
 #include "io_openraster.h"
 #include "io_png.h"
+#include "../layer_conversions.h"
 
 #include "../zip/zip.h"
 #include "../pugixml/pugixml.hpp"
@@ -83,17 +84,20 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
     return NULL;
 }
 
-bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
+bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* report)
 {
+    ENSURE_REPORT_VALID(report);
     if (editor->isPalettized) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
         return false;
     }
 
+    report->enterSection("Exporting OpenRaster...");
     std::vector<Layer*>& data = editor->getLayerStack();
     char* zipBuffer = NULL;
     size_t zipBufferSize;
 
+    report->enterSection("Writing ZIP...");
     zip_t* zip = zip_stream_open(NULL, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
     {
         zip_entry_open(zip, "mimetype");
@@ -102,6 +106,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         }
         zip_entry_close(zip);
 
+        report->updateLastSection("Writing layer stack...");
         zip_entry_open(zip, "stack.xml");
         {
             std::string xmls = "";
@@ -117,6 +122,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         }
         zip_entry_close(zip);
 
+        report->updateLastSection("Writing merged image...");
         zip_entry_open(zip, "mergedimage.png");
         {
             Layer* flat = editor->flattenImage();
@@ -126,20 +132,33 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
         }
         zip_entry_close(zip);
 
+        report->updateLastSection("Writing thumbnail...");
         //todo: quantize it to 256 colors and save it as an 8bit png
         zip_entry_open(zip, "Thumbnails/thumbnail.png");
         {
             Layer* flat = editor->flattenImage();
-            Layer* flatScaled = flat->copyCurrentVariantScaled(XY{ 255,255 });
+            SDL_Rect newDimensions = fitInside({ 0,0, 256, 256 }, { 0,0, flat->w, flat->h });
+            Layer* flatScaled = flat->copyCurrentVariantScaled(XY{ newDimensions.w, newDimensions.h });
             delete flat;
-            std::vector<u8> pngData = writePNGToMem(flatScaled);
-            zip_entry_write(zip, pngData.data(), pngData.size());
+            Layer* q = quantizeToNumColors(flatScaled, 256);
             delete flatScaled;
+            auto quantized = to8BitIndexed1BitAlpha(q);
+            delete q;
+            if (quantized.success) {
+                std::vector<u8> pngData = writePNGToMem(quantized.outLayer);
+                zip_entry_write(zip, pngData.data(), pngData.size());
+            }
+            else {
+                logerr("failed to quantize thumbnail to 256 colors");
+            }
+            delete quantized.outLayer;
         }
         zip_entry_close(zip);
 
         int i = 0;
+        report->updateLastSection("Writing layers...");
         for (auto l = data.rbegin(); l != data.rend(); l++) {
+            report->updateLastSection(frmt("Writing layer {}/{}", i+1, data.size()));
             std::vector<u8> pngData = writePNGToMem(*l);
             std::string fname = frmt("data/layer{}.png", i++);
             zip_entry_open(zip, fname.c_str());
@@ -151,6 +170,7 @@ bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor)
     }
     zip_close(zip);
 
+    report->updateLastSection("Writing ZIP data to file...");
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
 
