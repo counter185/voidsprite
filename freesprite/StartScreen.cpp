@@ -616,7 +616,9 @@ void StartScreen::populateTemplatesPanel()
         }
     }
 
-    templatesPanel->subWidgets.addDrawable(UIStackPanel::Vertical(0, buttons));
+    UIStackPanel* sp = UIStackPanel::Vertical(0, buttons);
+    sp->takeMouseWheelEvents = false;
+    templatesPanel->subWidgets.addDrawable(sp);
 }
 
 void StartScreen::renderStartupAnim()

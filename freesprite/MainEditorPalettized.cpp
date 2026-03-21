@@ -24,6 +24,7 @@
 #include "PopupExportScaled.h"
 #include "PopupFilePicker.h"
 #include "PopupChooseFormat.h"
+#include "PopupSetTemplateInfo.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -384,6 +385,12 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_T, { "Set template info",
+                            [this]() {
+                                g_addPopup(new PopupSetTemplateInfo(this));
+                            }
+                        }
+                    }
                 })
             }
         },

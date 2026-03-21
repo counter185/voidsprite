@@ -53,6 +53,7 @@
 #include "PopupFreeformTransform.h"
 #include "PopupChooseAction.h"
 #include "PopupChooseFormat.h"
+#include "PopupSetTemplateInfo.h"
 #include "multiwindow.h"
 
 #include "discord_rpc.h"
@@ -1060,6 +1061,12 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
+                    {SDL_SCANCODE_T, { "Set template info",
+                            [this]() {
+                                g_addPopup(new PopupSetTemplateInfo(this));
+                            }
+                        }
+                    }
                 })
             }
         },
@@ -4276,6 +4283,10 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["comments.displaymode"] = std::to_string((int)commentViewMode);
     kvs["guidelines.displaymode"] = std::to_string((int)guidelineDisplayMode);
     kvs["palette.colorlist"] = ineditorColorListData;
+    if (!templateName.empty()) {
+        kvs["template.name"] = templateName;
+        kvs["template.desc"] = templateDescription;
+    }
     return kvs;
 }
 SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::string, std::string> kvs) {
@@ -4290,6 +4301,8 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.tileGridColor = std::stoul(kvs["tile.gridcolor"], NULL, 16); } catch (...) {}
     try { prefs.commentViewMode = (MainEditorCommentMode)std::stoi(kvs["comments.displaymode"]); } catch (...) {}
     try { prefs.guidelineDisplayMode = (GuidelineDisplayMode)std::stoi(kvs["guidelines.displaymode"]); } catch (...) {}
+    try { prefs.templateName = kvs["template.name"]; } catch (...) {}
+    try { prefs.templateDescription = kvs["template.desc"]; } catch (...) {}
 
     try {
         std::string guidelinesData = kvs["guidelines"];

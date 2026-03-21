@@ -48,6 +48,50 @@ std::string voidsnReadString(FILE* f)
     return ret;
 }
 
+std::map<std::string, std::string> voidsnReadKeyVals(PlatformNativePathString path)
+{
+    FILE* infile = platformOpenFile(path, PlatformFileModeRB);
+    if (infile != NULL) {
+        DoOnReturn closeInfile([infile]() {fclose(infile); });
+        uint8_t voidsnversion;
+        fread(&voidsnversion, 1, 1, infile);
+        if (voidsnversion >= 3 && voidsnversion <= 7) {
+
+            if (voidsnversion >= 6) {
+                char voidspriteHeader[11];
+                fread(voidspriteHeader, 11, 1, infile);
+                // this should equal "voidsprite"
+                if (memcmp(voidspriteHeader, "voidsprite", 11) != 0) {
+                    logerr("INVALID VOIDSN HEADER\n");
+                    return {};
+                }
+            }
+
+            XY dimensions;
+            dimensions.x = voidsnReadU32(infile);
+            dimensions.y = voidsnReadU32(infile);
+
+            char metaHeader[13];
+            fread(metaHeader, 13, 1, infile);
+            // this should equal /VOIDSN.META/
+            if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
+                logerr("INVALID META HEADER\n");
+                return {};
+            }
+            int nExtData = voidsnReadU32(infile);
+            std::map<std::string, std::string> extData;
+            for (int x = 0; x < nExtData; x++) {
+                std::string key = voidsnReadString(infile);
+                std::string val = voidsnReadString(infile);
+                extData[key] = val;
+            }
+
+            return extData;
+        }
+    }
+    return {};
+}
+
 bool writeVOIDSNv1(PlatformNativePathString path, XY projDimensions, std::vector<Layer*> data)
 {
     if (data[0]->isPalettized) {

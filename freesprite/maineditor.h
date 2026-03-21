@@ -172,6 +172,9 @@ public:
 
     std::vector<std::pair<std::string, u32>> ineditorColorList;
 
+    std::string templateName = "";
+    std::string templateDescription = "";
+
     std::map<std::string, std::string> serializeToKeyVals();
     std::string serializeToJson();
 

@@ -9,6 +9,8 @@ u32 voidsnReadU32(FILE* f);
 u64 voidsnReadU64(FILE* f);
 std::string voidsnReadString(FILE* f);
 
+std::map<std::string, std::string> voidsnReadKeyVals(PlatformNativePathString);
+
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);

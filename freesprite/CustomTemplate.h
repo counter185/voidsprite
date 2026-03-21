@@ -12,9 +12,7 @@ public:
 
     std::string pathToFile;
 
-    CustomTemplate(PlatformNativePathString path) : pathToFile(convertStringToUTF8OnWin32(path)) {
-        name = fileNameFromPath(pathToFile);
-    }
+    CustomTemplate(PlatformNativePathString path);
     
     std::string getName() override { return name; };
     std::string getDescription() override { return description; }
