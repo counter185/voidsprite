@@ -597,6 +597,35 @@ void StartScreen::populateLastOpenFiles()
     }
 }
 
+void StartScreen::populateTemplatesPanel()
+{
+    templatesPanel->subWidgets.freeAllDrawables();
+    std::vector<Drawable*> buttons;
+    for (auto*& templ : g_templates) {
+        Panel* p = new Panel();
+        p->sizeToContent = true;
+        buttons.push_back(p);
+
+        UIButton* button = new UIButton(templ->getName());
+        button->position = { 0,0 };
+        button->wxWidth = templatesPanel->wxWidth - 30;
+        button->onClickCallback = [this, templ](...) {
+            loadFromTemplate(templ);
+        };
+        p->subWidgets.addDrawable(button);
+
+        if (!templ->getDescription().empty()) {
+            button->wxHeight = 50;
+
+            UILabel* descLabel = new UILabel(templ->getDescription(), { 6, 26 }, 14);
+            descLabel->color = SDL_Color{ 255,255,255,0x80 };
+            p->subWidgets.addDrawable(descLabel);
+        }
+    }
+
+    templatesPanel->subWidgets.addDrawable(UIStackPanel::Vertical(0, buttons));
+}
+
 void StartScreen::renderStartupAnim()
 {
     if (startupAnimTimer.started) {
