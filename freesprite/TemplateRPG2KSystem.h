@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseTemplate.h"
 class TemplateRPG2KSystem :
-    public BaseTemplate
+    public LegacyTemplate
 {
 public:
     std::string getName() override { return "RPG2K/2K3 System Template"; };

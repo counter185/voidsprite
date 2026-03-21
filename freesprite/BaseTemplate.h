@@ -7,12 +7,18 @@ class BaseTemplate
 public:
 	virtual std::string getName() { return "Base template"; }
 	virtual std::string getDescription() { return ""; }
-	virtual Layer* generate() { return NULL; }
-	virtual XY tileSize() { return XY{ 0,0 }; }
-	virtual XY tilePadding() { return XY{ 0,0 }; }
-	virtual std::vector<CommentData> placeComments() { return {}; }
+	virtual MainEditor* generateSession() { return NULL; };
 
 	void drawPattern(Layer* layer, uint8_t* pattern, XY patternDimensions, XY position, uint32_t color);
 	void drawCheckerboard(Layer* layer, XY at, XY tileSize, XY tileCount, uint32_t color1, uint32_t color2, bool reverse = false);
 };
 
+class LegacyTemplate : public BaseTemplate {
+public:
+	MainEditor* generateSession() override;
+
+	virtual Layer* generate() { return NULL; }
+	virtual XY tileSize() { return XY{ 0,0 }; }
+	virtual XY tilePadding() { return XY{ 0,0 }; }
+	virtual std::vector<CommentData> placeComments() { return {}; }
+};

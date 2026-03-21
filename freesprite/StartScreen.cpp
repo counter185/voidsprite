@@ -546,18 +546,11 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
 
 void StartScreen::loadFromTemplate(BaseTemplate* templ)
 {
-    Layer* templateLayer = templ->generate();
-    if (templateLayer == NULL) {
+    MainEditor* newMainEditor = templ->generateSession();
+    if (newMainEditor == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.templatefail")));
         return;
     }
-    MainEditor* newMainEditor = new MainEditor(templateLayer);
-    std::vector<CommentData> templateComments = templ->placeComments();
-    for (CommentData& comment : templateComments) {
-        newMainEditor->getCommentStack().push_back(comment);
-    }
-    newMainEditor->ssne.tileDimensions = templ->tileSize();
-    newMainEditor->ssne.tileGridPaddingBottomRight = templ->tilePadding();
     g_addScreen(newMainEditor);
 }
 

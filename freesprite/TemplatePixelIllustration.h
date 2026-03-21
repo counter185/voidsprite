@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseTemplate.h"
-#include "Layer.h"
+#include "maineditor.h"
 
 class TemplatePixelIllustration :
     public BaseTemplate
@@ -13,8 +13,6 @@ public:
 		name = frmt("{}x{} {}", size.x, size.y, TL("vsp.template.pixelillustration"));
 	}
 	std::string getName() override { return name; };
-	Layer* generate() override {
-		return Layer::tryAllocLayer(size.x, size.y);
-	}
+	MainEditor* generateSession() override { return new MainEditor(size); }
 };
 

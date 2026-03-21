@@ -7,10 +7,8 @@ private:
     CustomTemplate() {}
 public:
     std::string name = "";
+    std::string description = "";
     Layer* image = NULL;
-    XY tilesize = {0,0};
-    XY tilepadding = { 0,0 };
-    std::vector<CommentData> comments;
 
     std::string pathToFile;
 
@@ -19,9 +17,7 @@ public:
     }
     
     std::string getName() override { return name; };
-    Layer* generate() override;
-    XY tileSize() override { return tilesize; }
-    XY tilePadding() override { return tilepadding; }
-    std::vector<CommentData> placeComments() override;
+    std::string getDescription() override { return description; }
+    MainEditor* generateSession() override;
 };
 
