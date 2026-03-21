@@ -41,6 +41,7 @@ public:
     UINumberInputField* tab1TextFieldCHX;
 
     UIButton* rgbTabCreateButtons[2] = { NULL,NULL };
+    ScrollingPanel* templatesPanel = NULL;
 
     ScreenWideNavBar* navbar;
 
@@ -72,7 +73,8 @@ public:
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
-    void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
+
+    void loadFromTemplate(BaseTemplate* templ);
     
     void NewRGBSession(u32 fill = 0x00000000);
     void NewIndexedSession();
@@ -81,14 +83,17 @@ public:
     void tryLoadFileUsingImporter(FileImporter* importer, PlatformNativePathString name);
     void tryOpenImageFromClipboard();
 
+    void promptOpenFromURL();
+    void openImageLoadDialog();
+    void checkAndPromptCrashSaves();
+
     void populateLastOpenFiles();
+    void populateTemplatesPanel();
+
     void renderStartupAnim();
     void renderFileDropAnim();
     void renderBackground();
     void renderBGStars();
-    void openImageLoadDialog();
-    void promptOpenFromURL();
-    void checkAndPromptCrashSaves();
     static void promptConnectToNetworkCanvas(std::string ip = "", std::string port = "");
     void updateCheckFinished();
     void genBGStars();

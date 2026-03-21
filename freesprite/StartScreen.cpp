@@ -137,16 +137,15 @@ StartScreen::StartScreen() {
     h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
     newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
 
-    std::vector<std::pair<std::string, std::string>> templates;
-    for (BaseTemplate*& templ : g_templates) {
-        templates.push_back({ templ->getName(), templ->getTooltip() });
-    }
-    UIDropdown* templatesDropdown = new UIDropdown(templates);
-    templatesDropdown->position = XY{ 40, 5 };
-    templatesDropdown->text = TL("vsp.launchpad.tab.picktemplate");
-    templatesDropdown->setCallbackListener(EVENT_STARTSCREEN_TEMPLATEPICKED, this);
-    templatesDropdown->wxWidth = 400;
-    newImageTabs->tabs[2].wxs.addDrawable(templatesDropdown);
+
+    templatesPanel = new ScrollingPanel();
+    templatesPanel->position = XY{ 40, 5 };
+    //templatesPanel->text = TL("vsp.launchpad.tab.picktemplate");
+    templatesPanel->wxWidth = 480;
+    templatesPanel->wxHeight = 300;
+    templatesPanel->takeMouseWheelEvents = false;
+    newImageTabs->tabs[2].wxs.addDrawable(templatesPanel);
+    populateTemplatesPanel();
 
     for (int x = 0; x < 2; x++) {
 
@@ -545,24 +544,21 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
     }
 }
 
-void StartScreen::eventDropdownItemSelected(int evt_id, int index, std::string name)
+void StartScreen::loadFromTemplate(BaseTemplate* templ)
 {
-    if (evt_id == EVENT_STARTSCREEN_TEMPLATEPICKED) {
-        BaseTemplate* templ = g_templates[index];
-        Layer* templateLayer = templ->generate();
-        if (templateLayer == NULL) {
-            g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.templatefail")));
-            return;
-        }
-        MainEditor* newMainEditor = new MainEditor(templateLayer);
-        std::vector<CommentData> templateComments = templ->placeComments();
-        for (CommentData& comment : templateComments) {
-            newMainEditor->getCommentStack().push_back(comment);
-        }
-        newMainEditor->ssne.tileDimensions = g_templates[index]->tileSize();
-        newMainEditor->ssne.tileGridPaddingBottomRight = g_templates[index]->tilePadding();
-        g_addScreen(newMainEditor);
+    Layer* templateLayer = templ->generate();
+    if (templateLayer == NULL) {
+        g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.launchpad.error.templatefail")));
+        return;
     }
+    MainEditor* newMainEditor = new MainEditor(templateLayer);
+    std::vector<CommentData> templateComments = templ->placeComments();
+    for (CommentData& comment : templateComments) {
+        newMainEditor->getCommentStack().push_back(comment);
+    }
+    newMainEditor->ssne.tileDimensions = templ->tileSize();
+    newMainEditor->ssne.tileGridPaddingBottomRight = templ->tilePadding();
+    g_addScreen(newMainEditor);
 }
 
 void StartScreen::populateLastOpenFiles()

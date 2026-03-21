@@ -6,7 +6,7 @@ class BaseTemplate
 {
 public:
 	virtual std::string getName() { return "Base template"; }
-	virtual std::string getTooltip() { return ""; }
+	virtual std::string getDescription() { return ""; }
 	virtual Layer* generate() { return NULL; }
 	virtual XY tileSize() { return XY{ 0,0 }; }
 	virtual XY tilePadding() { return XY{ 0,0 }; }
