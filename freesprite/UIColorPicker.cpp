@@ -541,6 +541,10 @@ void UIColorPicker::reloadColorLists()
             btn->text = colorButtonsPanel->enabled ? "-" : "+";
             stack->recalculateLayout();
         };
+
+        if (p->shouldStartCollapsed()) {
+            collapseButton->click();
+        }
     }
 
     Panel* otherButtons = new Panel();

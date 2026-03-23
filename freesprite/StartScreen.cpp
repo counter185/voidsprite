@@ -482,7 +482,7 @@ void StartScreen::NewIndexedSession()
 
     LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(imgSize.x, imgSize.y);
     if (newLayer != NULL) {
-        newLayer->palette = g_palettes()[PALETTE_DEFAULT];
+        newLayer->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
         MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
         if (newImageTabs->openTab == 1) {
             newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;

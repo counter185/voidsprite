@@ -2,6 +2,7 @@
 
 #define HINT_NEXT_LINE "hint:newline"
 #define HINT_NEXT_LINE_HERE {HINT_NEXT_LINE,0}
+#define PALETTE_DEFAULT "Grayscale"
 
 //filled out at runtime in main.cpp
 inline std::map<std::string, u32> g_colors;
@@ -21,6 +22,7 @@ public:
     //if false, palette will not be modifiable
     virtual bool canSave() { return false; }
     virtual bool save() { return false; }
+    virtual bool shouldStartCollapsed() { return false; }
 
     virtual void addColor(std::string name, u32 color) { 
         if (canSave()) {
@@ -43,6 +45,14 @@ public:
             save();
         }
     }
+
+    virtual std::vector<u32> toRawColorList() {
+        std::vector<u32> ret;
+        for (auto& c : getColorList()) {
+            ret.push_back(c.second);
+        }
+        return ret;
+    }
 };
 
 class NamedColorPalette : public IPalette {
@@ -52,13 +62,23 @@ public:
 
     PlatformNativePathString path;
     PaletteExporter* correspondingExporter = NULL;
+    bool hideByDefault = false;
 
     NamedColorPalette() {}
-    NamedColorPalette(std::string name, std::vector<std::pair<std::string, u32>> colors) : name(name), colorMap(colors) {}
+    NamedColorPalette(std::string name, std::vector<std::pair<std::string, u32>> colors, bool hideByDefault = false) 
+        : name(name), colorMap(colors), hideByDefault(hideByDefault) {}
+    NamedColorPalette(std::string name, std::vector<u32> colors, bool hideByDefault = false) 
+        : name(name), hideByDefault(hideByDefault) 
+    {
+        for (int i = 0; i < colors.size(); i++) {
+            colorMap.push_back({frmt("{}:{:03x}", name, i), colors[i]});
+        }
+    }
 
     std::string getName() override { return name; }
     std::vector<std::pair<std::string, u32>>& getColorList() override { return colorMap; }
 
+    bool shouldStartCollapsed() override { return hideByDefault; }
     bool canSave() override { return correspondingExporter != NULL && !path.empty(); }
     bool save() override;
 };
@@ -67,4 +87,5 @@ inline std::vector<NamedColorPalette> g_namedColorMap = {};
 
 void g_generateColorMap();
 void g_reloadColorMap();
+IPalette* g_paletteByName(std::string name);
 void g_downloadAndInstallPaletteFromLospec(std::string url);

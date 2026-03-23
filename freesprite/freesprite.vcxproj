@@ -323,7 +323,6 @@
     <ClCompile Include="NetworkCanvasMainEditor.cpp" />
     <ClCompile Include="NineSegmentPatternEditorScreen.cpp" />
     <ClCompile Include="NotifSound.cpp" />
-    <ClCompile Include="palettes.cpp" />
     <ClCompile Include="PalettizedEditorColorPicker.cpp" />
     <ClCompile Include="PalettizedEditorLayerPicker.cpp" />
     <ClCompile Include="Panel.cpp" />
@@ -590,7 +589,6 @@
     <ClInclude Include="NineSegmentPatternEditorScreen.h" />
     <ClInclude Include="ninesegmentpatterns.h" />
     <ClInclude Include="operation_queue.h" />
-    <ClInclude Include="palettes.h" />
     <ClInclude Include="PalettizedEditorColorPicker.h" />
     <ClInclude Include="PalettizedEditorLayerPicker.h" />
     <ClInclude Include="Panel.h" />

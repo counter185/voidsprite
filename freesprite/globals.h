@@ -442,7 +442,6 @@ struct NineSegmentPattern {
 #include "memory_tracker.h"
 #include "platform.h"
 #include "colors.h"
-#include "palettes.h"
 #include "settings.h"
 #include "fills.h"
 #include "vfx.h"

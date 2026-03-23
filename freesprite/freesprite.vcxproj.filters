@@ -633,9 +633,6 @@
     <ClCompile Include="PanelPreview.cpp">
       <Filter>Source files\ui_widgets</Filter>
     </ClCompile>
-    <ClCompile Include="palettes.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="PopupListLAN.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
@@ -949,9 +946,6 @@
     </ClInclude>
     <ClInclude Include="brush\ToolRectRotate.h">
       <Filter>Header files\brushes</Filter>
-    </ClInclude>
-    <ClInclude Include="palettes.h">
-      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="MainEditorPalettized.h">
       <Filter>Header files\screen</Filter>

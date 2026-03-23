@@ -38,8 +38,8 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     wxsTarget().addDrawable(pickedColorLabel);
 
     std::vector<std::string> palettes;
-    for (auto& pal : g_palettes()) {
-        palettes.push_back(pal.first);
+    for (auto& pal : g_namedColorMap) {
+        palettes.push_back(pal.getName());
     }
 
     UIButton* buttonSavePalette = new UIButton();
@@ -133,7 +133,13 @@ void PalettizedEditorColorPicker::updatePanelColors() {
 void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
     if (evt_id == EVENT_PALETTECOLORPICKER_PALETTELIST) {
-        caller->setPalette(g_palettes()[name]);
+        IPalette* p = g_paletteByName(name);
+        if (p != NULL) {
+            caller->setPalette(p->toRawColorList());
+        }
+        else {
+            logerr(frmt("palette not found: {}", name));
+        }
     }
 }
 
