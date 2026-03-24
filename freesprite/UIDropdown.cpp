@@ -120,7 +120,7 @@ void UIDropdown::renderDropdownIcon(XY pos)
     }
 }
 
-std::vector<UIButton*> UIDropdown::genButtonsList(UIButton* (*customButtonGenFunction)(std::string name, std::string item))
+std::vector<UIButton*> UIDropdown::genButtonsList()
 {
     std::vector<UIButton*> ret;
 
@@ -139,7 +139,7 @@ std::vector<UIButton*> UIDropdown::genButtonsList(UIButton* (*customButtonGenFun
             ret.push_back(btn);
         }
         else {
-            UIButton* btn = customButtonGenFunction(items[y], items[y]);
+            UIButton* btn = customButtonGenFunction(items[y], y);
             btn->position = { 0, wxHeight + y * btn->wxHeight };
             btn->onClickCallback = [this, y](UIButton* b) {
                 this->eventButtonPressed(y);

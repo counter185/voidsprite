@@ -77,7 +77,7 @@ public:
     void loadFromTemplate(BaseTemplate* templ);
     
     void NewRGBSession(u32 fill = 0x00000000);
-    void NewIndexedSession();
+    void NewIndexedSession(std::string palette);
     void tryLoadURL(std::string url);
     void tryLoadFile(std::string path);
     void tryLoadFileUsingImporter(FileImporter* importer, PlatformNativePathString name);

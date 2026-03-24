@@ -2,6 +2,21 @@
 #include "PanelUserInteractable.h"
 #include "EventCallbackListener.h"
 #include "IEditorColorPicker.h"
+#include "UIButton.h"
+
+class PaletteButton : public UIButton {
+protected:
+    std::vector<u32> colors;
+public:
+    PaletteButton(std::vector<u32> c, int maxNumColors = 32) {
+        colors = c;
+        if (colors.size() > maxNumColors) {
+            colors.resize(maxNumColors);
+        }
+    }
+
+    void render(XY pos) override;
+};
 
 class PalettizedEditorColorPicker :
     public PanelUserInteractable, public IEditorColorPicker, public EventCallbackListener

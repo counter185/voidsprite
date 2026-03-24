@@ -34,6 +34,7 @@
 #include "UIStackPanel.h"
 #include "UIColorInputField.h"
 #include "ScreenVoxelEditor.h"
+#include "PalettizedEditorColorPicker.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -147,6 +148,11 @@ StartScreen::StartScreen() {
     newImageTabs->tabs[2].wxs.addDrawable(templatesPanel);
     populateTemplatesPanel();
 
+    std::vector<std::string> palettes;
+    for (auto& pal : g_namedColorMap) {
+        palettes.push_back(pal.getName());
+    }
+
     for (int x = 0; x < 2; x++) {
 
         newImageTabs->tabs[x].wxs.addDrawable(new UILabel(TL("vsp.launchpad.tab.rgbfill"), {30,100}));
@@ -167,8 +173,24 @@ StartScreen::StartScreen() {
 
         rgbTabCreateButtons[x] = buttonNewImageRGB;
 
+        UIDropdown* palettePicker = new UIDropdown(palettes);
+        palettePicker->customButtonGenFunction = [](std::string name, int index) {
+            IPalette* p = g_paletteByName(name);
+            PaletteButton* ret = new PaletteButton(p != NULL ? p->toRawColorList() : std::vector<u32>{}, 36);
+            ret->text = name;
+            ret->wxWidth = 300;
+            ret->wxHeight = 70;
+            return ret;
+        };
+        palettePicker->text = PALETTE_DEFAULT;
+        palettePicker->position = XY{230, 100};
+        palettePicker->wxWidth = 300;
+        palettePicker->wxHeight = 30;
+        palettePicker->setTextToSelectedItem = true;
+        newImageTabs->tabs[x].wxs.addDrawable(palettePicker);
+
         UIButton* buttonNewImagePalettized = new UIButton();
-        buttonNewImagePalettized->onClickCallback = [this](UIButton*) { NewIndexedSession(); };
+        buttonNewImagePalettized->onClickCallback = [this, palettePicker](UIButton*) { NewIndexedSession(palettePicker->text); };
         buttonNewImagePalettized->position = XY{ 230,140 };
         buttonNewImagePalettized->wxWidth = 200;
         buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
@@ -469,7 +491,7 @@ void StartScreen::NewRGBSession(u32 fill)
     }
 }
 
-void StartScreen::NewIndexedSession()
+void StartScreen::NewIndexedSession(std::string palette)
 {
     const XY maxImgSize = { 16384, 16384 };
     XY imgSize =
@@ -482,7 +504,8 @@ void StartScreen::NewIndexedSession()
 
     LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(imgSize.x, imgSize.y);
     if (newLayer != NULL) {
-        newLayer->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+        IPalette* plt = g_paletteByName(palette);
+        newLayer->palette = plt == NULL ? g_paletteByName(PALETTE_DEFAULT)->toRawColorList() : plt->toRawColorList();
         MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
         if (newImageTabs->openTab == 1) {
             newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;

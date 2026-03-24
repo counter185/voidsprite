@@ -28,6 +28,7 @@ public:
     std::vector<std::string> tooltips;
 
     std::function<void(UIDropdown*, int, std::string)> onDropdownItemSelectedCallback = NULL;
+    std::function<UIButton* (std::string name, int index)> customButtonGenFunction = NULL;
 
     UIDropdown(std::vector<std::string> items);
     UIDropdown(std::vector<std::pair<std::string, std::string>> items);
@@ -45,7 +46,7 @@ public:
 
     void renderDropdownIcon(XY pos);
 
-    std::vector<UIButton*> genButtonsList(UIButton* (*customButtonGenFunction)(std::string name, std::string item) = NULL);
+    std::vector<UIButton*> genButtonsList();
 
     bool takesMouseWheelEvents() override { return true; }
     bool takesTouchEvents() override { return true; }

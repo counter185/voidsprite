@@ -68,10 +68,18 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     colorPaletteTabs->tabs[1].wxs.addDrawable(buttonLoadPalette);
 
     UIDropdown* defaultpalettePicker = new UIDropdown(palettes);
+    defaultpalettePicker->customButtonGenFunction = [](std::string name, int index) {
+        IPalette* p = g_paletteByName(name);
+        PaletteButton* ret = new PaletteButton(p != NULL ? p->toRawColorList() : std::vector<u32>{}, 36);
+        ret->text = name;
+        ret->wxWidth = 300;
+        ret->wxHeight = 70;
+        return ret;
+    };
     defaultpalettePicker->position = XY{ 20, 20 };
     defaultpalettePicker->wxWidth = 300;
     defaultpalettePicker->wxHeight = 30;
-    defaultpalettePicker->text = "Default palettes";
+    defaultpalettePicker->text = "Change palette";
     defaultpalettePicker->setCallbackListener(EVENT_PALETTECOLORPICKER_PALETTELIST, this);
     colorPaletteTabs->tabs[1].wxs.addDrawable(defaultpalettePicker);
 
@@ -256,4 +264,23 @@ void PalettizedEditorColorPicker::toggleEraser() {
 
 void PalettizedEditorColorPicker::setColorRGB(u32 color) {
     setPickedPaletteIndex(color);
+}
+
+void PaletteButton::render(XY pos)
+{
+    UIButton::render(pos);
+
+    if (!colors.empty()) {
+        const int colorW = 24, colorH = 12;
+        XY origin = xyAdd(pos, { 5, wxHeight - 5 });
+        int colorsInOneLine = ixmax(1, (wxWidth - 10) / colorW);
+        int lines = ((colors.size() - 1) / colorsInOneLine) + 1;
+        origin.y -= lines * colorH;
+
+        for (int i = 0; i < colors.size(); i++) {
+            XY pos = xyAdd(origin, { (i % colorsInOneLine) * colorW, (i / colorsInOneLine) * colorH });
+            SDL_Rect r = { pos.x, pos.y, colorW, colorH };
+            Fill::Solid(colors[i]).fill(r);
+        }
+    }
 }
