@@ -3153,8 +3153,8 @@ void g_setupIO() {
     PaletteExporter
         * exVOIDPLT,
         * exHexPLT;
-    g_paletteExporters.push_back(exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", &writePltVOIDPLT));
-    g_paletteExporters.push_back(exHexPLT = PaletteExporter::paletteExporter("Hex palette", ".hex", &writePltHEX));
+    g_paletteExporters.push_back(exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", TL("vsp.export.palette.voidplt"), &writePltVOIDPLT));
+    g_paletteExporters.push_back(exHexPLT = PaletteExporter::paletteExporter("Hex palette", ".hex", TL("vsp.export.palette.hex"), &writePltHEX));
 
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT, NULL, exVOIDPLT));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX, NULL, exHexPLT));

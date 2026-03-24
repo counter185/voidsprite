@@ -43,7 +43,6 @@ public:
     void renderAfterBG(XY position) override;
 
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
-    void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
     void updateForcedColorPaletteButtons();

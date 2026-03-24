@@ -5,6 +5,8 @@
 #include "colors.h"
 #include "background_operation.h"
 #include "Notification.h"
+#include "PopupTextBox.h"
+#include "PopupChooseFormat.h"
 #include "io/io_voidsprite.h"
 
 std::vector<NamedColorPalette> g_baseNamedColorMap = {
@@ -518,6 +520,34 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.error.invalidlospecpaletteurl")));
     }
+}
+
+void g_promptCreateNewPalette(std::vector<u32> newPalette, std::function<void()> onSuccessCallback)
+{
+    PopupTextBox* popup = new PopupTextBox(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.title"),
+        TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.desc"), "");
+    popup->onTextInputConfirmedCallback = [newPalette, onSuccessCallback](PopupTextBox*, std::string name) {
+        if (name.find_first_of("/\\") == std::string::npos) {
+
+            PopupChooseFormat* popup2 = PopupChooseFormat::withDefaultPaletteExportFormats("Choose format", "");
+            popup2->onFormatChosenCallback = [newPalette, name, onSuccessCallback](FormatDef* f) {
+                PlatformNativePathString newPalettePath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + name + f->extension);
+                if (((PaletteExporter*)f->udata)->exportData(newPalettePath, (void*)&newPalette)) {
+                    g_reloadColorMap();
+                    onSuccessCallback();
+                }
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
+                }
+            };
+            g_addPopup(popup2);
+        }
+        else {
+            //invalid characters in name
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid characters in name"));
+        }
+        };
+    g_addPopup(popup);
 }
 
 bool NamedColorPalette::save() {

@@ -7,6 +7,8 @@ struct FormatDef {
     std::string extension;
     std::string description;
     void* udata;
+
+    std::string originalName = "";
 };
 
 class PopupChooseFormat : public BasePopup, EventCallbackListener
@@ -34,6 +36,8 @@ public:
     static PopupChooseFormat* withDefaultExportFormats(std::string tt, std::string tx, u32 formatFlags = 0);
     static PopupChooseFormat* withDefaultRGBExportFormats(std::string tt, std::string tx);
     static PopupChooseFormat* withDefaultIndexedExportFormats(std::string tt, std::string tx);
+
+    static PopupChooseFormat* withDefaultPaletteExportFormats(std::string tt, std::string tx);
 
     static std::vector<FormatDef> processFavouriteFormats(std::vector<FormatDef> srcList);
 

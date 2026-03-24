@@ -318,9 +318,12 @@ protected:
 
 class PaletteImporter : public FileOperation {
 public:
-    static PaletteImporter* paletteImporter(std::string name, std::string extension, 
+    static PaletteImporter* paletteImporter(
+        std::string name, 
+        std::string extension, 
         std::function<std::pair<bool, std::vector<uint32_t>>(PlatformNativePathString)> importFunction,
-        std::function<bool(PlatformNativePathString)> canImport = NULL, PaletteExporter* reverse = NULL) {
+        std::function<bool(PlatformNativePathString)> canImport = NULL, PaletteExporter* reverse = NULL) 
+    {
 
         PaletteImporter* ret = new PaletteImporter();
         ret->_name = name;
@@ -348,10 +351,16 @@ protected:
 class PaletteExporter : public FileOperation {
 
 public:
-    static PaletteExporter* paletteExporter(std::string name, std::string extension, std::function<bool(PlatformNativePathString, std::vector<u32>)> exportFunction) {
+    static PaletteExporter* paletteExporter(
+        std::string name, 
+        std::string extension,
+        std::string description,
+        std::function<bool(PlatformNativePathString, std::vector<u32>)> exportFunction) 
+    {
         PaletteExporter* ret = new PaletteExporter();
         ret->_name = name;
         ret->_extension = extension;
+        ret->description = description;
         ret->_exportFunction = exportFunction;
         return ret;
     }

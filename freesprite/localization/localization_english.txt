@@ -53,6 +53,9 @@
     {"vsp.export.python", "Export the image as a 2D array of pixels that can be used in a Python script."},
     {"vsp.export.html", "Export the image as a PNG encoded into Base64 for an inline <img> tag for HTML."},
 
+    {"vsp.export.palette.voidplt", "Native palette format of voidsprite."},
+    {"vsp.export.palette.hex", "Text file with colors in hex (RRGGBB) format, separated by newlines."},
+
     // common navbar strings
     {"vsp.nav.file", "File"},
     {"vsp.nav.open", "Open"},

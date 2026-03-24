@@ -8,6 +8,7 @@
 #include "TabbedView.h"
 #include "UILabel.h"
 #include "MainEditorPalettized.h"
+#include "PopupChooseFormat.h"
 
 PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c)
 {
@@ -48,7 +49,15 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     buttonSavePalette->wxWidth = 120;
     buttonSavePalette->wxHeight = 30;
     buttonSavePalette->onClickCallback = [this](UIButton*) {
-        platformTrySaveOtherFile(this, { {".voidplt", "voidsprite palette"} }, "save palette", EVENT_PALETTECOLORPICKER_SAVEPALETTE);
+        PopupChooseFormat* popup = PopupChooseFormat::withDefaultPaletteExportFormats("Choose format", "");
+        popup->chooseFormatAndDoFileSavePrompt("save palette", [this](FormatDef* f, PlatformNativePathString path) {
+            if (((PaletteExporter*)f->udata)->exportData(path, &caller->palette)) {
+                g_addNotification(SuccessNotification("Success", "Palette file saved"));
+            }
+            else {
+                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Could not save palette file"));
+            }
+        });
     };
     colorPaletteTabs->tabs[1].wxs.addDrawable(buttonSavePalette);
 
@@ -147,28 +156,6 @@ void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int inde
         }
         else {
             logerr(frmt("palette not found: {}", name));
-        }
-    }
-}
-
-void PalettizedEditorColorPicker::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
-{
-    if (evt_id == EVENT_PALETTECOLORPICKER_SAVEPALETTE) {
-        FILE* f = platformOpenFile(name, PlatformFileModeWB);
-        if (f != NULL) {
-            fwrite("VOIDPLT", 7, 1, f);
-            uint8_t fileversion = 1;
-            fwrite(&fileversion, 1, 1, f);
-            uint32_t count = caller->palette.size();
-            fwrite(&count, 1, 4, f);
-            for (uint32_t col : caller->palette) {
-                fwrite(&col, 1, 4, f);
-            }
-            fclose(f);
-            g_addNotification(SuccessNotification("Success", "Palette file saved"));
-        }
-        else {
-            g_addNotification(ErrorNotification("Error", "Could not save palette file"));
         }
     }
 }

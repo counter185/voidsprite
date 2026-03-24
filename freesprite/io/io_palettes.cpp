@@ -78,9 +78,13 @@ std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
     std::ifstream f(std::filesystem::path(name), std::ios::in);
     if (f.is_open()) {
         std::pair<bool, std::vector<uint32_t>> ret;
+        bool anyNonEmptyLine = false;
         while (!f.eof()) {
             std::string line;
             std::getline(f, line);
+            if (line.size() > 0) {
+                anyNonEmptyLine = true;
+            }
             if (line.size() == 6 || line.size() == 8) {
                 std::string r = line.substr(0, 2);
                 std::string g = line.substr(2, 2);
@@ -94,7 +98,8 @@ std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
             }
         }
         f.close();
-        ret.first = ret.second.size() > 0;
+        //allow empty files so that creating a new .hex palette works
+        ret.first = !anyNonEmptyLine || ret.second.size() > 0;
         return ret;
     }
     return { false,{} };

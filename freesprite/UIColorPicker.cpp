@@ -12,6 +12,7 @@
 #include "UIHueWheel.h"
 #include "UIColorInputField.h"
 #include "PopupContextMenu.h"
+#include "PopupChooseFormat.h"
 #include "io/io_voidsprite.h"
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
@@ -573,25 +574,7 @@ void UIColorPicker::reloadColorLists()
     newPaletteButton->position = XY{ 5, 60 };
     newPaletteButton->wxWidth = 140;
     newPaletteButton->onClickCallback = [this](UIButton*) {
-        PopupTextBox* popup = new PopupTextBox(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.title"),
-            TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette.popup.desc"), "");
-        popup->onTextInputConfirmedCallback = [this](PopupTextBox*, std::string name) {
-            if (name.find_first_of("/\\") == std::string::npos) {
-                PlatformNativePathString newPalettePath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + name + ".voidplt");
-                if (writePltVOIDPLT(newPalettePath, {})) {
-                    g_reloadColorMap();
-                    reloadColorLists();
-                }
-                else {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
-                }
-            }
-            else {
-                //invalid characters in name
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
-            }
-        };
-        g_addPopup(popup);
+        g_promptCreateNewPalette({}, [this]() { reloadColorLists(); });
     };
     otherButtons->subWidgets.addDrawable(newPaletteButton);
 

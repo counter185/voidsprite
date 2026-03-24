@@ -89,3 +89,4 @@ void g_generateColorMap();
 void g_reloadColorMap();
 IPalette* g_paletteByName(std::string name);
 void g_downloadAndInstallPaletteFromLospec(std::string url);
+void g_promptCreateNewPalette(std::vector<u32> newPalette, std::function<void()> onSuccessCallback);

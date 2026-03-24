@@ -24,6 +24,7 @@ void PopupChooseFormat::buildFormatList() {
             bool isFav = stringStartsWithIgnoreCase(f.name, "\xE2\x98\x85");
 
             std::string name = f.name;
+            std::string originalName = f.originalName;
 
             UIButton* btn = new UIButton(name);
             btn->position = { 0,0 };
@@ -44,13 +45,18 @@ void PopupChooseFormat::buildFormatList() {
             }
 
             if (isFav) {
-                btn->onRightClickCallback = [this, name](...) {
+                btn->onRightClickCallback = [this, originalName](...) {
                     g_addPopup(new PopupContextMenu({
-                        {"Remove from favourites", [this, name]() {
-                            auto indexAt = std::find(g_config.favExportFormats.begin(), g_config.favExportFormats.end(), name);
-                            g_config.favExportFormats.erase(indexAt);
-                            g_saveConfig();
-                            filterList(filterQuery);
+                        {"Remove from favourites", [this, originalName]() {
+                            auto indexAt = std::find(g_config.favExportFormats.begin(), g_config.favExportFormats.end(), originalName);
+                            if (indexAt != g_config.favExportFormats.end()) {
+                                g_config.favExportFormats.erase(indexAt);
+                                g_saveConfig();
+                                filterList(filterQuery);
+                            }
+                            else {
+                                logerr("failed to remove fav format");
+                            }
                         }}
                     }));
                 };
@@ -59,10 +65,10 @@ void PopupChooseFormat::buildFormatList() {
                 priority1Buttons.push_back(newButton);
             }
             else {
-                btn->onRightClickCallback = [this, name](...) {
+                btn->onRightClickCallback = [this, originalName](...) {
                     g_addPopup(new PopupContextMenu({
-                        {"Add to favourites", [this, name]() {
-                            g_config.favExportFormats.push_back(name);
+                        {"Add to favourites", [this, originalName]() {
+                            g_config.favExportFormats.push_back(originalName);
                             g_saveConfig();
                             filterList(filterQuery);
                         }}
@@ -148,9 +154,28 @@ PopupChooseFormat* PopupChooseFormat::withDefaultIndexedExportFormats(std::strin
     return withDefaultExportFormats(tt, tx, FORMAT_PALETTIZED);
 }
 
+PopupChooseFormat* PopupChooseFormat::withDefaultPaletteExportFormats(std::string tt, std::string tx)
+{
+    std::vector<FormatDef> ff;
+    for (PaletteExporter* f : g_paletteExporters) {
+        ff.push_back({
+            .name = f->name(),
+            .extension = f->extension(),
+            .description = f->description,
+            .udata = (void*)f
+        });
+    }
+    std::vector<FormatDef> ff2 = processFavouriteFormats(ff);
+    PopupChooseFormat* ret = new PopupChooseFormat(tt, tx, ff2);
+    ret->hasDefaultFormats = true;
+    ret->defaultFormats = ff;
+    return ret;
+}
+
 std::vector<FormatDef> PopupChooseFormat::processFavouriteFormats(std::vector<FormatDef> srcList) {
     std::vector<FormatDef> ret;
     for (auto& f : srcList) {
+        f.originalName = f.name;
         if (std::find(g_config.favExportFormats.begin(), g_config.favExportFormats.end(), f.name) != g_config.favExportFormats.end()) {
             f.name = "\xE2\x98\x85 " + f.name;
             ret.insert(ret.begin(), f);
