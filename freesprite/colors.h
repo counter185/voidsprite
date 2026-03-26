@@ -83,6 +83,19 @@ public:
     bool save() override;
 };
 
+class GenAtRuntimePalette : public NamedColorPalette {
+public:
+    GenAtRuntimePalette(
+        std::string name, 
+        std::function<std::vector<std::pair<std::string, u32>>()> genFunction,
+        bool hideByDefault = false)
+    {
+        this->name = name;
+        this->hideByDefault = hideByDefault;
+        colorMap = genFunction();
+    }
+};
+
 inline std::vector<NamedColorPalette> g_namedColorMap = {};
 
 void g_generateColorMap();
