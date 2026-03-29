@@ -203,13 +203,25 @@ void MainEditor::render() {
         SDL_RenderFillRect(g_rd, &eraserRect);
         SDL_RenderCopy(g_rd, g_iconEraser->get(), NULL, &eraserRect);
     }
-    if (currentPattern != NULL && currentPattern != g_patterns[0]) {
-        SDL_Rect patternRect = { g_mouseX + 38, g_mouseY - 30, 22, 22 };
-        SDL_SetTextureAlphaMod(currentPattern->cachedIcon->get(), 0xa0);
+    //render active pattern icons
+    XY patternIconsOrigin = { g_mouseX + 38, g_mouseY - 30 };
+    int xOffs = 0;
+    for (Pattern*& p : activePatterns) {
+        if (p == g_patterns[0]) {
+            continue;
+        }
+        SDL_Rect patternRect = { patternIconsOrigin.x + xOffs, patternIconsOrigin.y, 22, 22 };
+        SDL_SetTextureAlphaMod(p->cachedIcon->get(), 0xa0);
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
         SDL_RenderFillRect(g_rd, &patternRect);
-        SDL_RenderCopy(g_rd, currentPattern->cachedIcon->get(), NULL, &patternRect);
+        SDL_RenderCopy(g_rd, p->cachedIcon->get(), NULL, &patternRect);
+
+        xOffs += 24;
     }
+    if (invertPattern) {
+        g_fnt->RenderString("~", patternIconsOrigin.x + xOffs, patternIconsOrigin.y);
+    }
+
     if (g_config.showPenPressure && leftMouseHold && penPressure > 0 && penPressure < 1) {
         SDL_Rect pressureIndicatorBounds = { g_mouseX - 50, g_mouseY - 60, 100, 15 };
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
@@ -838,8 +850,10 @@ void MainEditor::DrawForeground()
         g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 30, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
-    if (currentPattern != NULL) {
-        g_fnt->RenderString(frmt("{}", currentPattern->getName()), 620, g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+    if (!activePatterns.empty()) {
+        g_fnt->RenderString(
+            frmt("{} {}", activePatterns.front()->getName(), activePatterns.size() <= 1 ? "" : frmt("(+{})", activePatterns.size()-1)),
+            620, g_windowH - 28, SDL_Color{255,255,255,0xa0});
     }
 
     SDL_Color textColor = getAccentColor();
@@ -1340,7 +1354,7 @@ void MainEditor::setUpWidgets()
     
     //this must happen after actionbar init
     setActiveBrush(g_brushes[0]);
-    currentPattern = g_patterns[0];
+    setActiveSinglePattern(g_patterns[0]);
 
     if (g_lastConfirmInputWasTouch) {
         openTouchModePanel();
@@ -2005,7 +2019,7 @@ void MainEditor::FillTexture() {
 }
 
 void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry) {
-    if ((currentPattern->canDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
+    if ((patternsCanDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (layer_getPixelAt(position) & 0xFF000000) != 0)) {
         if (!isolateEnabled || isolatedFragment.pointExists(position)) {
 
             u8 targetColorAlpha = (u8)((eraserMode ? 0 : pickedAlpha) * (uint32ToSDLColor(color).a/255.0));
@@ -2485,6 +2499,40 @@ void MainEditor::renderFrameTo(Frame* f, SDL_Texture* target, bool clear)
     }
 
     g_popRenderTarget();
+}
+
+void MainEditor::setActiveSinglePattern(Pattern* newPattern)
+{
+    activePatterns.clear();
+    activePatterns.push_back(newPattern);
+}
+
+bool MainEditor::togglePatternInPatternStack(Pattern* newPattern)
+{
+    auto find = std::find(activePatterns.begin(), activePatterns.end(), newPattern);
+    if (find == activePatterns.end()) {
+        activePatterns.push_back(newPattern);
+        return true;
+    }
+    else if (activePatterns.size() > 1) {
+        activePatterns.erase(find);
+    }
+    return false;
+}
+
+bool MainEditor::isPatternActive(Pattern* p)
+{
+    return std::find(activePatterns.begin(), activePatterns.end(), p) != activePatterns.end();
+}
+
+bool MainEditor::patternsCanDrawAt(XY pos)
+{
+    bool r = true;
+    for (Pattern*& p : activePatterns) {
+        r &= p->canDrawAt(pos);
+        if (!r) { break; }
+    }
+    return r;
 }
 
 Layer* MainEditor::layerAt(int index)

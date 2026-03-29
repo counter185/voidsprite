@@ -29,5 +29,5 @@ public:
 
 	void updateActiveBrushButton(int id);
 	void updateActiveBrushButton(BaseBrush* id);
-	void updateActivePatternButton(Pattern* p);
+	void updateActivePatternButton();
 };

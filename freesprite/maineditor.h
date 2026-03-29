@@ -232,7 +232,7 @@ public:
     BaseBrush* currentBrush = NULL;
     bool currentBrushMouseDowned = false;
     bool invertPattern = false;
-    Pattern* currentPattern = NULL;
+    std::vector<Pattern*> activePatterns = {};
     Timer64 leftMouseReleaseTimer;
     bool leftMouseHold = false;
     bool middleMouseHold = false;
@@ -435,6 +435,11 @@ public:
     void toggleFrameAnimation();
     void setMSPerFrame(int ms);
     void renderFrameTo(Frame* f, SDL_Texture* target, bool clear = true);
+
+    void setActiveSinglePattern(Pattern* newPattern);
+    bool togglePatternInPatternStack(Pattern* newPattern);
+    bool isPatternActive(Pattern* p);
+    bool patternsCanDrawAt(XY pos);
 
     std::vector<Layer*>& getLayerStack() { return getCurrentFrame()->layers; }
     std::vector<Layer*> getAllLayers();

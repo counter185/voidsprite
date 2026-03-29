@@ -180,7 +180,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
 
 void MainEditorPalettized::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry)
 {
-    if (currentPattern->canDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && layer_getPixelAt(position) != -1))) {
+    if (patternsCanDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && layer_getPixelAt(position) != -1))) {
         if (!isolateEnabled || (isolateEnabled && isolatedFragment.pointExists(position))) {
             int32_t targetColor = (int32_t)color;
             /*if (blendAlphaMode) {
@@ -598,7 +598,7 @@ void MainEditorPalettized::setUpWidgets()
     makeActionBar();
 
     setActiveBrush(g_brushes[0]);
-    currentPattern = g_patterns[0];
+    setActiveSinglePattern(g_patterns[0]);
 
     if (g_lastConfirmInputWasTouch) {
         openTouchModePanel();

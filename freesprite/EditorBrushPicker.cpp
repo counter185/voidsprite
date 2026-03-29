@@ -148,7 +148,16 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
         //newBtn->text = brush->getName();
         newBtn->wxWidth = 24*sc;
         newBtn->wxHeight = 24*sc;
-        newBtn->setCallbackListener(200 + i++, this);
+        newBtn->onClickCallback = [this, pattern](...) {
+            if (g_shiftModifier) {
+                this->caller->togglePatternInPatternStack(pattern);
+            }
+            else {
+                this->caller->setActiveSinglePattern(pattern);
+            }
+            patternMenu->subWidgets.forceUnfocus();
+            updateActivePatternButton();
+        };
         patternButtons.push_back(newBtn);
         patternMenu->subWidgets.addDrawable(newBtn);
     }
@@ -175,11 +184,6 @@ void EditorBrushPicker::eventButtonPressed(int evt_id)
     else if (evt_id == EVENT_MAINEDITOR_TOGGLEINVERTPATTERN) {
         caller->invertPattern = !caller->invertPattern;
         editorInvPatternBtn->fill = caller->invertPattern ? Fill::Gradient(0xD0000000, 0xD0000000, 0x40FFFFFF, 0x40FFFFFF) : Fill::Solid(0xD0000000);
-    }
-    else if (evt_id >= 200) {
-        caller->currentPattern = g_patterns[evt_id - 200];
-        patternMenu->subWidgets.forceUnfocus();
-        updateActivePatternButton(caller->currentPattern);
     }
     else if (evt_id >= 100) {
         caller->setActiveBrush(g_brushes[evt_id - 100]);
@@ -210,11 +214,11 @@ void EditorBrushPicker::updateActiveBrushButton(BaseBrush* id)
     updateActiveBrushButton(-1);
 }
 
-void EditorBrushPicker::updateActivePatternButton(Pattern* p)
+void EditorBrushPicker::updateActivePatternButton()
 {
     for (int x = 0; x < patternButtons.size(); x++) {
-        patternButtons[x]->fill = p == g_patterns[x] ? Fill::Gradient(0x80000000, 0x80000000, 0x80FFFFFF, 0x80FFFFFF)
+        patternButtons[x]->fill = caller->isPatternActive(g_patterns[x]) ? Fill::Gradient(0x80000000, 0x80000000, 0x80FFFFFF, 0x80FFFFFF)
                                                      : FILL_BUTTON_CHECKED_DEFAULT;
     }
-    patternPanelBtn->icon = p->cachedIcon;
+    patternPanelBtn->icon = caller->activePatterns.front()->cachedIcon;
 }
