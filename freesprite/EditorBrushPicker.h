@@ -16,6 +16,7 @@ public:
 	UIButton* patternPanelBtn;
 	UIButton* editorReplaceBtn;
 	UIButton* editorInvPatternBtn;
+	UIButton* editorAdditivePatternBtn;
 	PanelUserInteractable* patternMenuPanel;
 	ScrollingPanel* patternMenu;
 	std::vector<UIButton*> brushButtons;

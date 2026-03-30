@@ -175,6 +175,8 @@ public:
     std::string templateName = "";
     std::string templateDescription = "";
 
+    bool patternAdditiveMode = false;
+
     std::map<std::string, std::string> serializeToKeyVals();
     std::string serializeToJson();
 

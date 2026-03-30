@@ -2527,10 +2527,20 @@ bool MainEditor::isPatternActive(Pattern* p)
 
 bool MainEditor::patternsCanDrawAt(XY pos)
 {
-    bool r = true;
-    for (Pattern*& p : activePatterns) {
-        r &= p->canDrawAt(pos);
-        if (!r) { break; }
+    bool r;
+    if (ssne.patternAdditiveMode) {
+        r = false;
+        for (Pattern*& p : activePatterns) {
+            r |= p->canDrawAt(pos);
+            if (r) { break; }
+        }
+    }
+    else {
+        r = true;
+        for (Pattern*& p : activePatterns) {
+            r &= p->canDrawAt(pos);
+            if (!r) { break; }
+        }
     }
     return r;
 }
@@ -4328,6 +4338,7 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["tile.gridalpha"] = std::to_string(tileGridAlpha);
     kvs["tile.gridcolor.override"] = overrideTileGridColor ? "1" : "0";
     kvs["tile.gridcolor"] = frmt("{:06X}", tileGridColor);
+    kvs["pattern.additive"] = patternAdditiveMode ? "1" : "0";
     kvs["comments.displaymode"] = std::to_string((int)commentViewMode);
     kvs["guidelines.displaymode"] = std::to_string((int)guidelineDisplayMode);
     kvs["palette.colorlist"] = ineditorColorListData;
@@ -4347,6 +4358,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.tileGridAlpha = std::stoi(kvs["tile.gridalpha"]); } catch (...) {}
     try { prefs.overrideTileGridColor = kvs["tile.gridcolor.override"] == "1"; } catch (...) {}
     try { prefs.tileGridColor = std::stoul(kvs["tile.gridcolor"], NULL, 16); } catch (...) {}
+    try { prefs.patternAdditiveMode = kvs["pattern.additive"] == "1"; } catch (...) {}
     try { prefs.commentViewMode = (MainEditorCommentMode)std::stoi(kvs["comments.displaymode"]); } catch (...) {}
     try { prefs.guidelineDisplayMode = (GuidelineDisplayMode)std::stoi(kvs["guidelines.displaymode"]); } catch (...) {}
     try { prefs.templateName = kvs["template.name"]; } catch (...) {}

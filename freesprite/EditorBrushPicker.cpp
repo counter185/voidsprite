@@ -51,6 +51,18 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     editorInvPatternBtn->setCallbackListener(EVENT_MAINEDITOR_TOGGLEINVERTPATTERN, this);
     patternMenuPanel->subWidgets.addDrawable(editorInvPatternBtn);
 
+    editorAdditivePatternBtn = new UIButton();
+    editorAdditivePatternBtn->position = { 130*sc, 5 };
+    editorAdditivePatternBtn->text = "+";
+    editorAdditivePatternBtn->wxWidth = 24 * sc;
+    editorAdditivePatternBtn->wxHeight = 24 * sc;
+    editorAdditivePatternBtn->tooltip = "Additive pattern stacking\nPatterns stacked with Shift+Mouse Left will work additively instead of subtractively.";
+    editorAdditivePatternBtn->onClickCallback = [this, caller](...) {
+        caller->ssne.patternAdditiveMode = !caller->ssne.patternAdditiveMode;
+        editorAdditivePatternBtn->fill = caller->ssne.patternAdditiveMode ? Fill::Gradient(0xD0000000, 0xD0000000, 0x40FFFFFF, 0x40FFFFFF) : Fill::Solid(0xD0000000);
+    };
+    patternMenuPanel->subWidgets.addDrawable(editorAdditivePatternBtn);
+
     patternMenu = new ScrollingPanel();
     patternMenu->scrollHorizontally = false;
     patternMenu->scrollVertically = true;
