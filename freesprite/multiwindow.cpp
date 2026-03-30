@@ -336,12 +336,12 @@ bool VSPWindow::closeScreen(BaseScreen* screen) {
     }
 }
 
-void VSPWindow::switchScreen(int index) {
+void VSPWindow::switchScreen(int index, int vfxExt) {
     if (index >= 0 && index < screenStack.size()) {
         if (index != currentScreen) {
             currentScreen = index;
             screenStack[currentScreen]->onReturnToScreen();
-            g_newVFX(VFX_SCREENSWITCH, 800);
+            g_newVFX(VFX_SCREENSWITCH, 800, vfxExt);
         }
         overlayWidgets.forceUnfocus();
     }
@@ -351,10 +351,10 @@ void VSPWindow::switchScreenLeft() {
     if (popupStack.empty()) {
         if (currentScreen != 0) {
             if (g_ctrlModifier) {
-                g_switchScreen(0);
+                g_switchScreen(0, 1);
             }
             else {
-                g_switchScreen(currentScreen - 1);
+                g_switchScreen(currentScreen - 1, 1);
             }
         }
     }
@@ -364,10 +364,10 @@ void VSPWindow::switchScreenRight() {
     if (popupStack.empty()) {
         if (currentScreen < screenStack.size() - 1) {
             if (g_ctrlModifier) {
-                g_switchScreen(screenStack.size() - 1);
+                g_switchScreen(screenStack.size() - 1, 2);
             }
             else {
-                g_switchScreen(currentScreen + 1);
+                g_switchScreen(currentScreen + 1, 2);
             }
         }
     }

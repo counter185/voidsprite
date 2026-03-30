@@ -132,6 +132,7 @@ void LayerActiveButton::render(XY at)
         previewRect.x = at.x - previewRect.w;
         previewRect.y = at.y;
         
+        //unclip to escape scrollpanel bounds
         g_pushClip({ 0,0,g_windowW, g_windowH });
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
         SDL_RenderFillRect(g_rd, &previewRect);

@@ -124,7 +124,7 @@ public:
 
     bool closeScreen(BaseScreen* screen);
 
-    void switchScreen(int index);
+    void switchScreen(int index, int vfxExt = 0);
 
     void switchScreenLeft();
     void switchScreenRight();

@@ -358,7 +358,7 @@ void g_addNotificationFromThread(Notification a);
 void g_addScreen(BaseScreen* a, bool switchTo = true);
 void g_addScreenToWindow(VSPWindow* wd, BaseScreen* a, bool switchTo = true);
 void g_closeScreen(BaseScreen* screen);
-void g_switchScreen(int index);
+void g_switchScreen(int index, int vfxExt = 0);
 
 void g_addPopup(BasePopup* a);
 void g_closePopup(BasePopup* a, bool dispose = true);

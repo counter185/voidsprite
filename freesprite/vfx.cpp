@@ -2,6 +2,8 @@
 #include "vfx.h"
 #include "Timer64.h"
 #include "main.h"
+#include "multiwindow.h"
+#include "BaseScreen.h"
 
 class VFX {
 private:
@@ -58,6 +60,22 @@ public:
                 {
                     double animTimer = interpolation(timer.percentElapsedTime(duration));
                     double reverseAnimTimer = 1.0 - animTimer;
+                    if (extData1 != 0) {
+                        int prevScreenIndex = g_currentWindow->currentScreen + (extData1 == 1 ? 1 : -1);
+                        if (g_currentWindow->screenStack.size() > prevScreenIndex) {
+                            double animTimer2 = interpolation(timer.percentElapsedTime(duration/3));
+                            int w = g_windowW * (1.0-animTimer2);
+                            if (w > 0) {
+                                int divLinePos = extData1 == 1 ? g_windowW - w : w;
+                                SDL_Rect clipRect = { extData1 == 1 ? divLinePos : 0, 0, w, g_windowH };
+                                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x60);
+                                drawLine({ divLinePos, 0 }, { divLinePos, g_windowH });
+                                g_pushClip(clipRect);
+                                g_currentWindow->screenStack[prevScreenIndex]->render();
+                                g_popClip();
+                            }
+                        }
+                    }
                     SDL_Rect rect = { 0,0,g_windowW, g_windowH };
                     XY windowOffset = { g_windowW / 16 , g_windowH / 16 };
                     rect = offsetRect(rect, windowOffset.x * -reverseAnimTimer, windowOffset.y * -reverseAnimTimer);
