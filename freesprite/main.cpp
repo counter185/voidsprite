@@ -103,9 +103,9 @@ void g_closeScreen(BaseScreen* screen) {
     }
 }
 
-void g_switchScreen(int index)
+void g_switchScreen(int index, int vfxExt)
 {
-    g_currentWindow->switchScreen(index);
+    g_currentWindow->switchScreen(index, vfxExt);
 }
 
 void g_reloadFonts() {
@@ -119,6 +119,14 @@ void g_reloadFonts() {
 
 std::vector<SDL_Rect> clips;
 void g_pushClip(SDL_Rect r) {
+    if (!clips.empty() 
+        //detect fullscreen clips
+        && !(r.x == 0 && r.y == 0 && r.w == g_windowW && r.h == g_windowH)) 
+    {
+        if (!SDL_GetRectIntersection(&clips.back(), &r, &r)) {
+            r = { 0,0,0,0 };
+        }
+    }
     clips.push_back(r);
     SDL_RenderSetClipRect(g_rd, &r);
 }
