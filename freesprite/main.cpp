@@ -665,6 +665,7 @@ void g_mainLoop() {
             popupStack[popupStack.size() - 1]->render();
         }*/
 
+        g_renderVFX();
 
 #if _DEBUG
         XY origin = { g_windowW - 240, g_windowH - 90 };
@@ -771,7 +772,6 @@ void g_mainLoop() {
         g_renderNotifications();
 
         g_ttp->renderAll();
-        g_renderVFX();
 
         g_cleanUpDoneAsyncThreads();
         if (anyPopupsOpen && !wd->hasPopupsOpen()) {
