@@ -955,6 +955,7 @@ int main(int argc, char** argv)
         }
 
         SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
+        SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_SCALE_TO_DISPLAY, "1");
         int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
         //IMG_Init(-1);   //😈time to get evil
         windowTitle = "void" UTF8_DIAMOND "sprite"
