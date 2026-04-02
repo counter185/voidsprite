@@ -87,7 +87,11 @@ void BasePopup::closePopup() {
     if (callback != NULL) {
         callback->eventPopupClosed(callback_id, this);
     }
-    delete this;
+
+    //delete it next frame to avoid any complications
+    g_startNewMainThreadOperation([this]() {
+        delete this;
+    });
 }
 
 XY BasePopup::makeTitleAndDesc(std::string title, std::string desc) {
