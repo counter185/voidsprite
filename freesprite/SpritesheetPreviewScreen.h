@@ -25,7 +25,6 @@ public:
 
     ScrollingPanel* spriteView;
     int timelineSpriteScale = 1;
-    ScreenWideNavBar* navbar = NULL;
 
     SpritesheetPreviewScreen(MainEditor* parent);
     ~SpritesheetPreviewScreen();

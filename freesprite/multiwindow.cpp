@@ -6,15 +6,27 @@
 #include "BaseScreen.h"
 #include "FontRenderer.h"
 #include "ButtonStartScreenSession.h"
+#include "ScreenWideNavBar.h"
 
 #include "main.h"
 
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+#include <windows.h>
+//do not remove or panelmcblockpreview will not compile
+#undef small
+#endif
+
+
 VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     wd = SDL_CreateWindow(title.c_str(), size.x, size.y, flags);
+    if (wd != NULL) {
+        platformWindowCreated(this);
+    }
     windowID = SDL_GetWindowID(wd);
     tryCreateRenderer();
     setWindowTitle(title);
     setVsync(g_config.vsync);
+    SDL_SetWindowBordered(wd, !g_config.customWindowFrame);
     SDL_GetWindowSize(wd, &size.x, &size.y);
     unscaledWindowSize = scaledWindowSize = size;
     if (g_config.autoViewportScale) {
@@ -24,6 +36,7 @@ VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
 }
 
 VSPWindow::~VSPWindow() {
+    platformWindowDestroyed(this);
     if (blurBuffer != NULL) {
         delete blurBuffer;
     }
@@ -406,6 +419,181 @@ void VSPWindow::switchToFavScreen()
     }
 
 }
+
+void VSPWindow::renderCustomWindowFrame()
+{
+    SDL_SetRenderDrawColor(rd, 255, 255, 255, 0x30);
+    SDL_Rect wdr = {
+        0,0,
+        unscaledWindowSize.x,
+        unscaledWindowSize.y
+    };
+    SDL_RenderDrawRect(rd, &wdr);
+
+    const int actionButtonW = 46;
+    const int actionButtonH = 36;
+
+    double distanceToTopRight = xyDistance({ mouseX, mouseY }, { unscaledWindowSize.x,0 });
+    bool mouseInRange = distanceToTopRight < actionButtonW * 4;
+
+    if (mouseInRange != prevMouseInActionButtonRange) {
+        prevMouseInActionButtonRange = mouseInRange;
+        windowActionButtonsAnimTimer.start();
+    }
+
+    double timer = windowActionButtonsAnimTimer.started ? XM1PW3P1(windowActionButtonsAnimTimer.percentElapsedTime(300)) : 1.0;
+    timer = (mouseInRange ? timer : (1.0-timer));
+
+    //render close,maximize,minimize
+    SDL_Rect buttonNow = { unscaledWindowSize.x - actionButtonW,0,actionButtonW,actionButtonH };
+    buttonNow.h *= timer;
+
+    for (int x = 0; x < 3; x++) {
+
+        if (timer > 0) {
+            //fill
+            Fill::Gradient(0xD0202020, 0xD0202020, 0xD0000000, 0xD0000000).fill(buttonNow);
+            if (pointInBox({ mouseX, mouseY }, buttonNow)) {
+                if (x == 0) {
+                    Fill::Gradient(0xD0300000, 0xD0300000, 0xD0600000, 0xD0600000).fill(buttonNow);
+                }
+                else {
+                    Fill::Gradient(0xD0303030, 0xD0303030, 0xD0606060, 0xD0606060).fill(buttonNow);
+                }
+
+            }
+
+            //outline
+            SDL_SetRenderDrawColor(rd, 255, 255, 255, 0x30 * timer);
+            SDL_RenderDrawRect(rd, &buttonNow);
+        }
+
+        double localTimer = XM1PW3P1(windowActionButtonsAnimTimer.percentElapsedTime(150, 70 * x));
+        localTimer = (mouseInRange ? localTimer : (1.0 - localTimer));
+        localTimer = timer == 0 ? 1.0 : localTimer;
+
+        int innerW = actionButtonH / 3;
+
+        SDL_Rect iconRect = {
+            buttonNow.x + actionButtonW / 2 - innerW / 2,
+            buttonNow.y + actionButtonH / 2 - innerW / 2,
+            innerW, innerW };
+        SDL_SetRenderDrawColor(rd, 255, 255, 255, timer > 0 ? 255 : 80);
+        switch (x) {
+            case 0:
+                //close
+                drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y + iconRect.h }, localTimer);
+                drawLine({ iconRect.x, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+                break;
+            case 1:
+                //maximize
+                drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+                drawLine({ iconRect.x, iconRect.y }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+
+                drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+                drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+                break;
+            case 2:
+                //minimize
+                drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 }, { iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2 }, localTimer);
+                break;
+        }
+
+        buttonNow.x -= actionButtonW;
+    }
+}
+
+bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
+{
+    const int actionButtonW = 46;
+    const int actionButtonH = 36;
+    SDL_Event cevt = convertTouchToMouseEvent(evt);
+    switch (cevt.type) {
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            XY pos = { (int)evt.button.x, (int)evt.button.y };
+            int buttonsOrigin = unscaledWindowSize.x - (actionButtonW * 3);
+            if (pos.y < actionButtonH && pos.x > buttonsOrigin) {
+                int buttonIndex = ixmin(2, (pos.x - buttonsOrigin) / actionButtonW);
+                switch (buttonIndex) {
+                    case 0:
+                        //minimize
+                        SDL_MinimizeWindow(wd);
+                        break;
+                    case 1:
+                        //maximize
+                        if ((SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) == 0) {
+                            SDL_MaximizeWindow(wd);
+                        }
+                        else {
+                            SDL_RestoreWindow(wd);
+                        }
+                        break;
+                    case 2:
+                        //close
+                        {
+                            SDL_Event closeEvent = { .type = SDL_EVENT_WINDOW_CLOSE_REQUESTED };
+                            closeEvent.window.windowID = SDL_GetWindowID(wd);
+                            SDL_PushEvent(&closeEvent);
+                        }
+                        break;
+                }
+                return true;
+            }
+            return false;
+    }
+    return false;
+}
+
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+long VSPWindow::getWin32HitTestAt(XY pos)
+{
+    const int windowBorderSize = 5;
+    const int actionButtonW = 45;
+    const int actionButtonH = 35;
+
+    if (xyDistance(pos, { 0,0 }) <= windowBorderSize) {
+        return HTTOPLEFT;
+    }
+    else if (xyDistance(pos, { 0,unscaledWindowSize.y }) <= windowBorderSize) {
+        return HTBOTTOMLEFT;
+    }
+    else if (xyDistance(pos, { unscaledWindowSize.x,0 }) <= windowBorderSize) {
+        return HTTOPRIGHT;
+    }
+    else if (xyDistance(pos, { unscaledWindowSize.x,unscaledWindowSize.y }) <= windowBorderSize) {
+        return HTBOTTOMRIGHT;
+    }
+
+    else if (pos.y <= windowBorderSize) {
+        return HTTOP;
+    }
+    else if (pos.y >= (unscaledWindowSize.y - windowBorderSize)) {
+        return HTBOTTOM;
+    }
+    else if (pos.x <= windowBorderSize) {
+        return HTLEFT;
+    }
+    else if (pos.x >= (unscaledWindowSize.x - windowBorderSize)) {
+        return HTRIGHT;
+    }
+    else if (pos.y < actionButtonH && pos.x > unscaledWindowSize.x - (actionButtonW * 3)) {
+        return HTCLIENT;
+    }
+
+    ScreenWideNavBar* currentNavbar = screenStack[currentScreen]->getNavbar();
+    if (currentNavbar == NULL || !popupStack.empty()) {
+        if (pos.y < 30) {
+            return HTCAPTION;
+        }
+    }
+    else {
+        if (currentNavbar->pointInWindowDrag(pos)) {
+            return HTCAPTION;
+        }
+    }
+    return HTCLIENT;
+}
+#endif
 
 void WindowBlurBuffer::windowResized()
 {

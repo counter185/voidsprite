@@ -36,6 +36,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"smoothFonts", &g_config.smoothFonts},
         {"acrylicPanels", &g_config.acrylicPanels},
         {"showSystemClock", &g_config.showSystemClock},
+        {"customWindowFrame", &g_config.customWindowFrame},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

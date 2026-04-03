@@ -14,8 +14,6 @@ protected:
 
     PanelMCBlockPreview* panelBig;
     PanelMCBlockPreview* panelSmalm;
-
-    ScreenWideNavBar* navbar = NULL;
 public: 
     MainEditor* caller;
     Canvas canvas;

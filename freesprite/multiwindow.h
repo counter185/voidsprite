@@ -61,6 +61,8 @@ public:
     std::string lastWindowTitle = "";
     std::string windowTitle = "";
     u64 lastLowBatteryPulseTime = 0;
+    bool prevMouseInActionButtonRange = false;
+    Timer64 windowActionButtonsAnimTimer;
 
     BaseScreen* favScreen = NULL;
 
@@ -133,4 +135,11 @@ public:
 
     void assignFavScreen();
     void switchToFavScreen();
+
+    void renderCustomWindowFrame();
+
+    bool handleCustomFrameInput(SDL_Event evt);
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+    long getWin32HitTestAt(XY pos);
+#endif
 };

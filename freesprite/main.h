@@ -16,3 +16,4 @@ void main_newWindow();
 void main_currentWorkspaceToNewWindow();
 void main_attachCurrentWorkspaceToMainWindow();
 void main_promptRenameCurrentWindow();
+void main_updateFramelessWindows();

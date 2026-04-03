@@ -30,7 +30,6 @@ public:
     XY dimensions = XY{ 20,15 };
     uint16_t* lowerLayerData = NULL;
     uint16_t* upperLayerData = NULL;
-    ScreenWideNavBar* navbar = NULL;
     std::vector<LMUEvent> events;
 
     std::map<std::string, ReldTex*> texturesLoaded;

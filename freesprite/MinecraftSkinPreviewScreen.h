@@ -34,8 +34,6 @@ protected:
     int dragging = 0;
     bool slimModel = false;
     bool twoByOneSkin = false;
-
-    ScreenWideNavBar* navbar;
 public:
 
     double overlayOffsetSize = 0.3;

@@ -25,6 +25,7 @@
 #include "maineditor.h"
 #include "io/io_png.h"
 #include "Notification.h"
+#include "multiwindow.h"
 #include "main.h"
 
 u32 platformSupportedFeatures() {
@@ -34,6 +35,7 @@ u32 platformSupportedFeatures() {
 }
 
 HWND WINhWnd = NULL;
+std::map<HWND, VSPWindow*> windowMap;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
 std::vector<PlatformNativePathString> tempFilesToDeleteOnDeinit;
@@ -116,6 +118,32 @@ HWND windows_getProcessMainWindow(DWORD pid) {
     return res.foundHwnd;
 }
 
+LRESULT (CALLBACK *originalWndProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
+
+LRESULT CALLBACK windows_WndProc(
+    HWND hwnd,        // handle to window
+    UINT uMsg,        // message identifier
+    WPARAM wParam,    // first message parameter
+    LPARAM lParam)    // second message parameter
+{
+    if (g_config.customWindowFrame) {
+        switch (uMsg) {
+            case WM_NCHITTEST:
+                XY windowPos = {};
+                SDL_GetWindowPosition(windowMap[hwnd]->wd, &windowPos.x, &windowPos.y);
+                XY position = {
+                    lParam & 0xFFFF,
+                    (lParam >> 16) & 0xFFFF
+                };
+                XY cursorPos = xySubtract(position, windowPos);
+                return windowMap[hwnd]->getWin32HitTestAt(cursorPos);
+        }
+    }
+
+    return originalWndProc(hwnd, uMsg, wParam, lParam);
+}
+
+
 void platformPreInit() {
     auto thisPID = GetCurrentProcessId();
     std::wstring thisExeName = convertStringOnWin32(fileNameFromPath(g_programExePath));
@@ -124,27 +152,32 @@ void platformInit() {
     platformRegisterURI("voidsprite", {});
 }
 void platformPostInit() {
-    static bool d = false;
-    if (!d) {
-        #if WINDOWS_XP == 0
-            BOOL USE_DARK_MODE = true;
-            WINhWnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(g_wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
-            bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-                WINhWnd, 20,
-                &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
-            SDL_HideWindow(g_wd);
-        #endif
-        SDL_ShowWindow(g_wd);
-        //RedrawWindow(WINhWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-        //UpdateWindow(WINhWnd);
-        //RedrawWindow(WINhWnd, NULL, NULL, RDW_INVALIDATE);
-        //SendMessageW(WINhWnd, WM_PAINT, NULL, NULL);
-        d = true;
+    for (auto& [id,wd] : g_windows) {
+        SDL_ShowWindow(wd->wd);
     }
 #if _M_ARM64
     g_addNotification(Notification("arm64 Build", "Experimental build. Things may not work.", 5000, NULL, COLOR_INFO));
 #endif
 }
+
+void platformWindowCreated(VSPWindow* wd) {
+    HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(wd->wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+    windowMap[hwnd] = wd;
+    if (WINhWnd == NULL) {
+        WINhWnd = hwnd;
+        originalWndProc = (WNDPROC)GetWindowLongPtr(WINhWnd, -4);
+    }
+#if WINDOWS_XP == 0
+    BOOL USE_DARK_MODE = true;
+    bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+        WINhWnd, 20,
+        &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
+    SDL_HideWindow(wd->wd);
+#endif
+
+    SetWindowLongPtrW(hwnd, -4, (LONG_PTR)windows_WndProc);
+}
+void platformWindowDestroyed(VSPWindow*) {}
 
 void platformDeinit() {
     for (auto& deleteTemp : tempFilesToDeleteOnDeinit) {

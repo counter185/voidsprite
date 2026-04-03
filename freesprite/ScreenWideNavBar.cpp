@@ -3,7 +3,7 @@
 #include "UIButton.h"
 
 ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, NavbarSection> actions, std::vector<SDL_Scancode> order) {
-    wxHeight = 30;
+    wxHeight = 32;
     parent = caller;
     submenuOrder = order;
     keyBinds = actions;
@@ -12,7 +12,7 @@ ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, Na
     submenuPanel->enabled = false;
     subWidgets.addDrawable(submenuPanel);
 
-    int x = 10;
+    int x = 42;
     int xDist = 120;
 
     //determine the right width
@@ -30,6 +30,7 @@ ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, Na
         sectionButton->fill = Fill::Gradient(0x70424242, 0x70424242, 0x70000000, 0x70000000);
         sectionButton->colorTextFocused = sectionButton->colorTextUnfocused = SDL_Color{ 255,255,255,0xd0 };
         sectionButton->wxWidth = xDist - 10;
+        sectionButton->wxHeight = wxHeight - 1;
         if (keyBinds[editorSection].icon != NULL) {
             sectionButton->icon = keyBinds[editorSection].icon;
         }
@@ -51,6 +52,9 @@ void ScreenWideNavBar::render(XY position) {
 
     SDL_Rect r = SDL_Rect{ 0,0,g_windowW, wxHeight };
     (focused ? bgFocused : bgUnfocused).fill(r);
+
+    SDL_Rect iconRect = { 1,1,32,32 };
+    SDL_RenderCopy(g_rd, g_iconVSP32x32->get(), NULL, &iconRect);
 
     if (focused) {
         if (currentSubmenuOpen == SCANCODE_NONE) {

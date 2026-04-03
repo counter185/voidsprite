@@ -270,7 +270,6 @@ public:
     double lastPinchZoomDistance = 0;
     Timer64 zoomKeyTimer;
 
-    ScreenWideNavBar* navbar;
     ScreenWideActionBar* actionbar;
     IEditorColorPicker* colorPicker;
     EditorBrushPicker* brushPicker;

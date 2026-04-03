@@ -43,8 +43,6 @@ public:
     UIButton* rgbTabCreateButtons[2] = { NULL,NULL };
     ScrollingPanel* templatesPanel = NULL;
 
-    ScreenWideNavBar* navbar;
-
     UIStackPanel* lastOpenFilesPanel;
 
     Timer64 startupAnimTimer;

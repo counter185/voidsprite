@@ -11,6 +11,7 @@ protected:
     int callback_id = -1;
     EventCallbackListener* callback = NULL;
     DrawableManager wxsManager;
+    ScreenWideNavBar* navbar = NULL;
 
 public:
     virtual ~BaseScreen() = default;
@@ -66,5 +67,7 @@ public:
         loginfo("closeThisScreen()");
         g_startNewMainThreadOperation([this]() { g_closeScreen(this); });
     }
+
+    virtual ScreenWideNavBar* getNavbar() { return navbar; };
 };
 

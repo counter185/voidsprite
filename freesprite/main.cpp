@@ -323,6 +323,13 @@ void main_promptRenameCurrentWindow()
     }
 }
 
+void main_updateFramelessWindows()
+{
+    for (auto& [id, wd] : g_windows) {
+        SDL_SetWindowBordered(wd->wd, !g_config.customWindowFrame);
+    }
+}
+
 void main_renderScaleUp()
 {
     g_renderScale++;
@@ -582,6 +589,7 @@ void g_mainLoop() {
 
         g_gamepad->TakeEvent(evt);
         if (!g_bgOpRunning
+            && (!g_config.customWindowFrame || !wdTarget->handleCustomFrameInput(evt))   //pass events to custom frame
             && !g_takeInputNotifications(evt)   //pass events to notifications
             && !DrawableManager::processInputEventInMultiple({ wdTarget->overlayWidgets }, evt) //pass events to overlay
             ) {
@@ -796,6 +804,10 @@ void g_mainLoop() {
         if (wd->viewport != NULL) {
             g_popRenderTarget();
             SDL_RenderCopy(g_rd, wd->viewport, NULL, NULL);
+        }
+
+        if (g_config.customWindowFrame) {
+            wd->renderCustomWindowFrame();
         }
 
         //g_fnt->RenderString(frmt("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
@@ -1022,6 +1034,7 @@ int main(int argc, char** argv)
         loginfo("Loading assets");
 
         g_mainlogo = new ReldTex( [](SDL_Renderer* rd) { return IMGLoadAssetToTexture("mainlogo.png", rd); } );
+        g_iconVSP32x32 = new ReldTex( [](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_voidsprite32x32.png", rd); } );
         g_iconFrameNew = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_new.png", rd); });
         g_iconFrameDelete = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_delete.png", rd); });
         g_iconFrameDuplicate = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_copy.png", rd); });

@@ -50,6 +50,9 @@ void platformDeinit() {
     }
 }
 
+void platformWindowCreated(VSPWindow* wd) {}
+void platformWindowDestroyed(VSPWindow*) {}
+
 std::string appdataPath = "";
 std::string systemInformation = "Android";
 

@@ -63,6 +63,9 @@ void platformPostInit() {
 
 void platformDeinit() {}
 
+void platformWindowCreated(VSPWindow* wd) {}
+void platformWindowDestroyed(VSPWindow*) {}
+
 //todo
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
 bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> additionalArgs) { return false; }

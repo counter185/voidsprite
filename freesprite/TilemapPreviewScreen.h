@@ -29,7 +29,6 @@ public:
 	Timer64 tileSelectTimer;
 
 	TilemapEditorLayerPicker* layerPicker = NULL;
-	ScreenWideNavBar* navbar;
 
 	TilemapPreviewScreen(MainEditor* parent);
 	~TilemapPreviewScreen();

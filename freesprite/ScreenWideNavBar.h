@@ -58,4 +58,8 @@ public:
     void updateCurrentSubmenu();
 
     bool takesMouseWheelEvents() override { return false; }
+
+    bool pointInWindowDrag(XY mousePos) {
+        return pointInBox(mousePos, {0,0, g_windowW, wxHeight}) && !subWidgets.mouseInAny(position, mousePos);
+    }
 };

@@ -15,8 +15,6 @@ protected:
     XY pointUL;
     XY pointUR;
 
-    ScreenWideNavBar* navbar = NULL;
-
     bool closeNextTick = false;
 
     XY dragging = { -1,-1 };

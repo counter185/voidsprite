@@ -510,6 +510,8 @@
     {"vsp.config.opt.acrylicpanels", "Acrylic panels (restart required)"},
     {"vsp.config.opt.acrylicpanels.desc", "The back side of UI panels will be blurred."},
     {"vsp.config.opt.showsysclock", "Show system time"},
+    {"vsp.config.opt.framelesswindow", "Frameless window"},
+    {"vsp.config.opt.framelesswindow.desc", "voidsprite will use its own window decorations instead of system ones."},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

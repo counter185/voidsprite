@@ -40,6 +40,7 @@ public:
     u32 fwdtraceColor = 0xFF00FF00;
     bool smoothFonts = true;
     bool acrylicPanels = false;
+    bool customWindowFrame = false;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

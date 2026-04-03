@@ -30,6 +30,8 @@ inline bool platformSupportsFeature(u32 feature) {
 void platformPreInit();
 void platformInit();
 void platformPostInit();
+void platformWindowCreated(VSPWindow*);
+void platformWindowDestroyed(VSPWindow*);
 
 void platformDeinit();
 
