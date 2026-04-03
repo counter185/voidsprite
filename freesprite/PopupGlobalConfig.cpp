@@ -194,7 +194,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.autoscale"), TL("vsp.config.opt.autoscale.desc"), &g_config.autoViewportScale, &posInTab));
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.acrylicpanels"), TL("vsp.config.opt.acrylicpanels.desc"), &g_config.acrylicPanels, &posInTab));
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+#if VSP_PLATFORM != VSP_PLATFORM_ANDROID && VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
     auto framelessChk = optionCheckbox(TL("vsp.config.opt.framelesswindow"), TL("vsp.config.opt.framelesswindow.desc"), &g_config.customWindowFrame, &posInTab);
     framelessChk->onStateChangeCallback = [](...) {
         main_updateFramelessWindows();

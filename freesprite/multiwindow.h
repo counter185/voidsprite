@@ -91,6 +91,11 @@ public:
 
     static VSPWindow* windowEventTarget(SDL_Event evt);
 
+    static SDL_HitTestResult customFrameCallback(SDL_Window* win, const SDL_Point* area, void* data) {
+        VSPWindow* w = (VSPWindow*)data;
+        return w->getSDLHitTestAt({ area->x, area->y });
+    }
+
     bool hasPopupsOpen() {
         return !popupStack.empty();
     }
@@ -106,6 +111,10 @@ public:
         if (rd != NULL) {
             SDL_SetRenderVSync(rd, vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
         }
+    }
+    void setCustomWindowFrame(bool customFrame) {
+        SDL_SetWindowBordered(wd, !customFrame);
+        SDL_SetWindowHitTest(wd, customFrame ? &VSPWindow::customFrameCallback : NULL, this);
     }
 
     void setWindowTitle(std::string wdTitle) {
@@ -139,7 +148,5 @@ public:
     void renderCustomWindowFrame();
 
     bool handleCustomFrameInput(SDL_Event evt);
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
-    long getWin32HitTestAt(XY pos);
-#endif
+    SDL_HitTestResult getSDLHitTestAt(XY pos);
 };

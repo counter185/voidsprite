@@ -10,12 +10,6 @@
 
 #include "main.h"
 
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
-#include <windows.h>
-//do not remove or panelmcblockpreview will not compile
-#undef small
-#endif
-
 
 VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     wd = SDL_CreateWindow(title.c_str(), size.x, size.y, flags);
@@ -26,7 +20,7 @@ VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     tryCreateRenderer();
     setWindowTitle(title);
     setVsync(g_config.vsync);
-    SDL_SetWindowBordered(wd, !g_config.customWindowFrame);
+    setCustomWindowFrame(g_config.customWindowFrame);
     SDL_GetWindowSize(wd, &size.x, &size.y);
     unscaledWindowSize = scaledWindowSize = size;
     if (g_config.autoViewportScale) {
@@ -544,56 +538,57 @@ bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
     return false;
 }
 
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
-long VSPWindow::getWin32HitTestAt(XY pos)
+SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
 {
+    if (!g_config.customWindowFrame) {
+        return SDL_HITTEST_NORMAL;
+    }
     const int windowBorderSize = 5;
     const int actionButtonW = 45;
     const int actionButtonH = 35;
 
     if (xyDistance(pos, { 0,0 }) <= windowBorderSize) {
-        return HTTOPLEFT;
+        return SDL_HITTEST_RESIZE_TOPLEFT;
     }
     else if (xyDistance(pos, { 0,unscaledWindowSize.y }) <= windowBorderSize) {
-        return HTBOTTOMLEFT;
+        return SDL_HITTEST_RESIZE_BOTTOMLEFT;
     }
     else if (xyDistance(pos, { unscaledWindowSize.x,0 }) <= windowBorderSize) {
-        return HTTOPRIGHT;
+        return SDL_HITTEST_RESIZE_TOPRIGHT;
     }
     else if (xyDistance(pos, { unscaledWindowSize.x,unscaledWindowSize.y }) <= windowBorderSize) {
-        return HTBOTTOMRIGHT;
+        return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
     }
 
     else if (pos.y <= windowBorderSize) {
-        return HTTOP;
+        return SDL_HITTEST_RESIZE_TOP;
     }
     else if (pos.y >= (unscaledWindowSize.y - windowBorderSize)) {
-        return HTBOTTOM;
+        return SDL_HITTEST_RESIZE_BOTTOM;
     }
     else if (pos.x <= windowBorderSize) {
-        return HTLEFT;
+        return SDL_HITTEST_RESIZE_LEFT;
     }
     else if (pos.x >= (unscaledWindowSize.x - windowBorderSize)) {
-        return HTRIGHT;
+        return SDL_HITTEST_RESIZE_RIGHT;
     }
     else if (pos.y < actionButtonH && pos.x > unscaledWindowSize.x - (actionButtonW * 3)) {
-        return HTCLIENT;
+        return SDL_HITTEST_NORMAL;
     }
 
     ScreenWideNavBar* currentNavbar = screenStack[currentScreen]->getNavbar();
     if (currentNavbar == NULL || !popupStack.empty()) {
         if (pos.y < 30) {
-            return HTCAPTION;
+            return SDL_HITTEST_DRAGGABLE;
         }
     }
     else {
         if (currentNavbar->pointInWindowDrag(pos)) {
-            return HTCAPTION;
+            return SDL_HITTEST_DRAGGABLE;
         }
     }
-    return HTCLIENT;
+    return SDL_HITTEST_NORMAL;
 }
-#endif
 
 void WindowBlurBuffer::windowResized()
 {

@@ -120,30 +120,6 @@ HWND windows_getProcessMainWindow(DWORD pid) {
 
 LRESULT (CALLBACK *originalWndProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
 
-LRESULT CALLBACK windows_WndProc(
-    HWND hwnd,        // handle to window
-    UINT uMsg,        // message identifier
-    WPARAM wParam,    // first message parameter
-    LPARAM lParam)    // second message parameter
-{
-    if (g_config.customWindowFrame) {
-        switch (uMsg) {
-            case WM_NCHITTEST:
-                XY windowPos = {};
-                SDL_GetWindowPosition(windowMap[hwnd]->wd, &windowPos.x, &windowPos.y);
-                XY position = {
-                    lParam & 0xFFFF,
-                    (lParam >> 16) & 0xFFFF
-                };
-                XY cursorPos = xySubtract(position, windowPos);
-                return windowMap[hwnd]->getWin32HitTestAt(cursorPos);
-        }
-    }
-
-    return originalWndProc(hwnd, uMsg, wParam, lParam);
-}
-
-
 void platformPreInit() {
     auto thisPID = GetCurrentProcessId();
     std::wstring thisExeName = convertStringOnWin32(fileNameFromPath(g_programExePath));
@@ -165,17 +141,21 @@ void platformWindowCreated(VSPWindow* wd) {
     windowMap[hwnd] = wd;
     if (WINhWnd == NULL) {
         WINhWnd = hwnd;
-        originalWndProc = (WNDPROC)GetWindowLongPtr(WINhWnd, -4);
-    }
-#if WINDOWS_XP == 0
-    BOOL USE_DARK_MODE = true;
-    bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-        WINhWnd, 20,
-        &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
-    SDL_HideWindow(wd->wd);
-#endif
+        //originalWndProc = (WNDPROC)GetWindowLongPtr(WINhWnd, -4);
 
-    SetWindowLongPtrW(hwnd, -4, (LONG_PTR)windows_WndProc);
+#if WINDOWS_XP == 0
+        //run this only on the first window
+        BOOL USE_DARK_MODE = true;
+        bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+            WINhWnd, 20,
+            &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
+        //not needed on win11 but this makes win10 repaint the whole window
+        //SDL_HideWindow(wd->wd);
+        //SDL_ShowWindow(wd->wd);
+#endif
+    }
+
+    //SetWindowLongPtrW(hwnd, -4, (LONG_PTR)windows_WndProc);
 }
 void platformWindowDestroyed(VSPWindow*) {}
 
@@ -663,14 +643,14 @@ std::string platformGetSystemInfo() {
         : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64 ? "ARM64"
         : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL ? "x86"
         : sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ? "Intel Itanium"   //lmao
-		: "???";
+        : "???";
     std::string cpuArchNative = 
         sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? "x64"
         : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM ? "ARM"
         : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64 ? "ARM64"
         : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL ? "x86"
         : sysinfoNative.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ? "Intel Itanium"
-		: "???";
+        : "???";
 
     std::wstring pcName;
     u32 pcNameSize = 256;
@@ -958,7 +938,7 @@ std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
         PIP_ADAPTER_INFO next = infActual;
         while (next) {
             NetworkAdapterInfo newInf{};
-			u32 ipv4 = parseIpAddress(next->IpAddressList.IpAddress.String);
+            u32 ipv4 = parseIpAddress(next->IpAddressList.IpAddress.String);
             if (ipv4 != 0) {
                 /*loginfo(frmt(
                     "Name: {} /\n     {}\n  IP: {}\n  mask: {}\n",
@@ -970,7 +950,7 @@ std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
                 newInf.name = next->Description;
                 newInf.thisMachineAddress = next->IpAddressList.IpAddress.String;
 
-				u32 mask = parseIpAddress(next->IpAddressList.IpMask.String);
+                u32 mask = parseIpAddress(next->IpAddressList.IpMask.String);
                 newInf.broadcastAddress = ipToString((ipv4 & mask) | ~mask);
                 ret.push_back(newInf);
 

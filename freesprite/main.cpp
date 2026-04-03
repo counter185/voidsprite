@@ -326,7 +326,7 @@ void main_promptRenameCurrentWindow()
 void main_updateFramelessWindows()
 {
     for (auto& [id, wd] : g_windows) {
-        SDL_SetWindowBordered(wd->wd, !g_config.customWindowFrame);
+        wd->setCustomWindowFrame(g_config.customWindowFrame);
     }
 }
 
