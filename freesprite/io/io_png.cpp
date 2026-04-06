@@ -14,6 +14,62 @@ std::string getlibpngVersion()
     return PNG_LIBPNG_VER_STRING;
 }
 
+std::pair<bool, std::vector<uint32_t>> readPltPNG(PlatformNativePathString name)
+{
+    Layer* png = readPNG(name);
+    if (png != NULL) {
+        DoOnReturn deletePNG([png]() {delete png; });
+        if (png->isPalettized) {
+            return { true, ((LayerPalettized*)png)->palette };
+        }
+        else {
+            std::vector<u32> colorList;
+            u32* ppx = png->pixels32();
+            for (u64 x = 0; x < png->w * png->h; x++) {
+                u32 nextPx = ppx[x];
+                if ((nextPx >> 24) != 0 && std::find(colorList.begin(), colorList.end(), nextPx) == colorList.end()) {
+                    colorList.push_back(nextPx);
+                }
+
+                if (colorList.size() >= 256) {
+                    break;
+                }
+            }
+           
+            return { true, colorList };
+        }
+    }
+    else {
+        return { false,{} };
+    }
+}
+
+bool writePltPNG(PlatformNativePathString path, std::vector<u32> palette)
+{
+    int layerW =
+        palette.size() <= 1 ? 1
+        : palette.size() <= 4 ? 2
+        : palette.size() <= 16 ? 4
+        : palette.size() <= 36 ? 6
+        : palette.size() <= 64 ? 8
+        : palette.size() <= 256 ? 16
+        : 24;
+    int layerH = (palette.size() / layerW) + ((palette.size() % layerW != 0) ? 1 : 0);
+    Layer* ll = Layer::tryAllocLayer(layerW, layerH);
+    if (ll != NULL) {
+        DoOnReturn freeLayer([ll]() {delete ll; });
+        u32* ppx = ll->pixels32();
+        for (u32& c : palette) {
+            *(ppx++) = c;
+        }
+        return writePNG(path, ll);
+    }
+    else {
+        g_addNotificationFromThread(NOTIF_MALLOC_FAIL);
+        return false;
+    }
+}
+
 struct PNGReadContext {
     u8* data;
     size_t readPNGBytes;

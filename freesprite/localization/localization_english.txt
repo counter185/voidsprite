@@ -55,6 +55,7 @@
 
     {"vsp.export.palette.voidplt", "Native palette format of voidsprite."},
     {"vsp.export.palette.hex", "Text file with colors in hex (RRGGBB) format, separated by newlines."},
+    {"vsp.export.palette.png", "PNG image containing colors."},
 
     // common navbar strings
     {"vsp.nav.file", "File"},

@@ -393,7 +393,7 @@ void StartScreen::takeInput(SDL_Event evt)
                 g_addScreen(new ASCIIEditor(ssn));
             }
         }
-        else if (tryInstallPalette(convertStringOnWin32(filePath))) {
+        else if (!stringEndsWithIgnoreCase(filePath, ".png") && tryInstallPalette(convertStringOnWin32(filePath))) {
             g_reloadColorMap();
             g_addNotification(SuccessNotification(TL("vsp.launchpad.paletteinstall"), fileNameFromPath(filePath)));
         }

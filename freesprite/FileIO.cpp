@@ -3152,9 +3152,11 @@ void g_setupIO() {
 
     PaletteExporter
         * exVOIDPLT,
-        * exHexPLT;
+        * exHexPLT,
+        * exPNGPLT;
     g_paletteExporters.push_back(exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", TL("vsp.export.palette.voidplt"), &writePltVOIDPLT));
     g_paletteExporters.push_back(exHexPLT = PaletteExporter::paletteExporter("Hex palette", ".hex", TL("vsp.export.palette.hex"), &writePltHEX));
+    g_paletteExporters.push_back(exPNGPLT = PaletteExporter::paletteExporter("PNG palette", ".png", TL("vsp.export.palette.png"), &writePltPNG));
 
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("voidsprite palette", ".voidplt", &readPltVOIDPLT, NULL, exVOIDPLT));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("Hex palette", ".hex", &readPltHEX, NULL, exHexPLT));
@@ -3164,6 +3166,7 @@ void g_setupIO() {
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("GIMP GPL palette", ".gpl", &readPltGIMPGPL,
         magicVerify(0, "GIMP Palette")));
     g_paletteImporters.push_back(PaletteImporter::paletteImporter("Pixel Studio palette", ".palette", &readPltPixelStudioPALETTE));
+    g_paletteImporters.push_back(PaletteImporter::paletteImporter("PNG palette", ".png", &readPltPNG, NULL, exPNGPLT));
 
 
 
