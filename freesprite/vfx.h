@@ -8,6 +8,7 @@ enum VFXType {
     VFX_POPUPCLOSE,
     VFX_PANELOPEN,
     VFX_LOWBATTERYPULSE,
+    VFX_WINDOWBUTTONPULSE,   //ext1: button index, ext2: button rect
 };
 
 void g_newVFX(VFXType type, u32 durationMS, u32 extData1 = 0, SDL_Rect extData2 = { 0,0,0,0 }, std::vector<u32> moreExtData = std::vector<u32>{0});

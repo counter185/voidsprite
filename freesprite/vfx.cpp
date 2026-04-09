@@ -56,6 +56,17 @@ public:
                     }
                 }
                 break;
+            case VFX_WINDOWBUTTONPULSE:
+                {
+                    XY lowerOrigin = { extData2.x, extData2.y + extData2.h };
+                    XY lowerOrigin2 = xyAdd(lowerOrigin, { extData2.w, 0 });
+                    double percent = interpolation(timer.percentElapsedTime(duration));
+                    lowerOrigin = xyAdd(lowerOrigin, { 0, (int)(extData2.h * percent) });
+                    lowerOrigin2 = xyAdd(lowerOrigin2, { 0, (int)(extData2.h * percent) });
+                    SDL_SetRenderDrawColor(g_rd, 255, extData1 == 2 ? 0 : 255, extData1 == 2 ? 0 : 255, 0xd0 * (1.0-percent));
+                    drawLine(lowerOrigin, lowerOrigin2, 1.0);
+                }
+                break;
             case VFX_SCREENSWITCH:
                 {
                     double animTimer = interpolation(timer.percentElapsedTime(duration));

@@ -251,6 +251,7 @@ void main_newWindow() {
         if (oldWindow != NULL) {
            oldWindow->thisWindowsTurn();
         }
+        SDL_RaiseWindow(newWindow->wd);
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.windowcreationfailed")));
@@ -436,8 +437,11 @@ int main_getLastFPS()
 void main_handleIPCMessage(std::string msg) {
     loginfo(frmt("IPC message: {}", msg));
     if (stringStartsWithIgnoreCase(msg, "vspdata:")) {
+        bool focusWindow = true;
+
         std::string command = msg.substr(8);
         if (stringStartsWithIgnoreCase(command, "new_window")) {
+            focusWindow = false;
             g_startNewMainThreadOperation([]() {
                 main_newWindow();
             });
@@ -454,6 +458,21 @@ void main_handleIPCMessage(std::string msg) {
             std::string lospecPaletteID = command.substr(10);
             loginfo(frmt("Running lospec download: {}", lospecPaletteID));
             g_downloadAndInstallPaletteFromLospec(lospecPaletteID);
+        }
+        else {
+            focusWindow = false;
+        }
+
+        if (focusWindow) {
+            g_startNewMainThreadOperation([]() {
+                if (!g_windows.empty()) {
+                    SDL_Window* targetWd = g_windows.begin()->second->wd;
+                    if (SDL_GetWindowFlags(targetWd) & SDL_WINDOW_MINIMIZED) {
+                        SDL_RestoreWindow(targetWd);
+                    }
+                    SDL_RaiseWindow(targetWd);
+                }
+            });
         }
     }
 }

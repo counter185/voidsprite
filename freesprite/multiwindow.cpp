@@ -531,6 +531,9 @@ bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
                         }
                         break;
                 }
+                if (buttonIndex == 2) {
+                    g_newVFX(VFX_WINDOWBUTTONPULSE, 1000, buttonIndex, { buttonsOrigin + actionButtonW * buttonIndex, 0, actionButtonW, actionButtonH });
+                }
                 return true;
             }
             return false;
