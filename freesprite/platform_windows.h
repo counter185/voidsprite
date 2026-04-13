@@ -204,6 +204,10 @@ bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> addit
                 RegSetValueExW(hKey, NULL, 0, REG_SZ, (const BYTE*)pathWstr.c_str(), (pathWstr.size() + 1) * sizeof(wchar_t));
                 RegCloseKey(hKey);
             }
+            if (RegCreateKeyExW(voidspriteRootKey, L"shell\\open", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+                RegSetValueExW(hKey, L"FriendlyAppName", 0, REG_SZ, (const BYTE*)L"voidsprite", sizeof(L"voidsprite"));
+                RegCloseKey(hKey);
+            }
             RegCloseKey(voidspriteRootKey);
         }
         else {

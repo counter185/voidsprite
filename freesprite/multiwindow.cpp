@@ -427,7 +427,7 @@ void VSPWindow::renderCustomWindowFrame()
     const int actionButtonW = 46;
     const int actionButtonH = 36;
 
-    double distanceToTopRight = xyDistance({ mouseX, mouseY }, { unscaledWindowSize.x,0 });
+    double distanceToTopRight = xyDistance(unscaledMousePos, { unscaledWindowSize.x,0 });
     bool mouseInRange = distanceToTopRight < actionButtonW * 4;
 
     if (mouseInRange != prevMouseInActionButtonRange) {
@@ -447,7 +447,7 @@ void VSPWindow::renderCustomWindowFrame()
         if (timer > 0) {
             //fill
             Fill::Gradient(0xD0202020, 0xD0202020, 0xD0000000, 0xD0000000).fill(buttonNow);
-            if (pointInBox({ mouseX, mouseY }, buttonNow)) {
+            if (pointInBox(unscaledMousePos, buttonNow)) {
                 if (x == 0) {
                     Fill::Gradient(0xD0300000, 0xD0300000, 0xD0600000, 0xD0600000).fill(buttonNow);
                 }
@@ -581,12 +581,12 @@ SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
 
     ScreenWideNavBar* currentNavbar = screenStack[currentScreen]->getNavbar();
     if (currentNavbar == NULL || !popupStack.empty()) {
-        if (pos.y < 30) {
+        if (pos.y < 30 * g_renderScale) {
             return SDL_HITTEST_DRAGGABLE;
         }
     }
     else {
-        if (currentNavbar->pointInWindowDrag(pos)) {
+        if (currentNavbar->pointInWindowDrag({ pos.x/g_renderScale, pos.y/g_renderScale })) {
             return SDL_HITTEST_DRAGGABLE;
         }
     }

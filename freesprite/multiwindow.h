@@ -66,6 +66,7 @@ public:
 
     BaseScreen* favScreen = NULL;
 
+    XY unscaledMousePos = { 0,0 };
     int mouseX = 0, mouseY = 0;
 
     DrawableManager overlayWidgets;

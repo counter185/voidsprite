@@ -496,6 +496,7 @@ void g_mainLoop() {
         wdTarget->thisWindowsTurn();
 
         evt = handleNumLockInEvent(evt);
+        SDL_Event unscaledEvent = evt;
         evt = scaleScreenPositionsInEvent(evt);
         DrawableManager::processHoverEventInMultiple({ g_currentWindow->overlayWidgets }, evt);
 
@@ -543,6 +544,7 @@ void g_mainLoop() {
             if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
                 wdTarget->mouseX = (int)(evt.motion.x);
                 wdTarget->mouseY = (int)(evt.motion.y);
+                wdTarget->unscaledMousePos = { (int)unscaledEvent.motion.x, (int)unscaledEvent.motion.y };
             }
             break;
         case SDL_EVENT_FINGER_DOWN:
@@ -553,12 +555,14 @@ void g_mainLoop() {
             if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
                 wdTarget->mouseX = evt.tfinger.x * g_windowW;
                 wdTarget->mouseY = evt.tfinger.y * g_windowH;
+                wdTarget->unscaledMousePos = { (int)(unscaledEvent.tfinger.x * g_windowW), (int)(unscaledEvent.tfinger.y * g_windowH) };
             }
             break;
         case SDL_EVENT_PEN_MOTION:
             lastPenEvent.start();
             wdTarget->mouseX = (int)(evt.pmotion.x);
             wdTarget->mouseY = (int)(evt.pmotion.y);
+            wdTarget->unscaledMousePos = { (int)unscaledEvent.pmotion.x, (int)unscaledEvent.pmotion.y };
             break;
         case SDL_EVENT_PEN_DOWN:
         case SDL_EVENT_PEN_UP:
@@ -608,7 +612,7 @@ void g_mainLoop() {
 
         g_gamepad->TakeEvent(evt);
         if (!g_bgOpRunning
-            && (!g_config.customWindowFrame || !wdTarget->handleCustomFrameInput(evt))   //pass events to custom frame
+            && (!g_config.customWindowFrame || !wdTarget->handleCustomFrameInput(unscaledEvent))   //pass events to custom frame
             && !g_takeInputNotifications(evt)   //pass events to notifications
             && !DrawableManager::processInputEventInMultiple({ wdTarget->overlayWidgets }, evt) //pass events to overlay
             ) {
