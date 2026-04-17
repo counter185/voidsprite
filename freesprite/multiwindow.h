@@ -149,5 +149,6 @@ public:
     void renderCustomWindowFrame();
 
     bool handleCustomFrameInput(SDL_Event evt);
+    bool IsMaximized();
     SDL_HitTestResult getSDLHitTestAt(XY pos);
 };

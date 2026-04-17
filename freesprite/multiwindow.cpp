@@ -515,7 +515,7 @@ bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
                         break;
                     case 1:
                         //maximize
-                        if ((SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) == 0) {
+                        if (!IsMaximized()) {
                             SDL_MaximizeWindow(wd);
                         }
                         else {
@@ -541,6 +541,11 @@ bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
     return false;
 }
 
+bool VSPWindow::IsMaximized()
+{
+    return (SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) != 0;
+}
+
 SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
 {
     if (!g_config.customWindowFrame) {
@@ -550,32 +555,34 @@ SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
     const int actionButtonW = 45;
     const int actionButtonH = 35;
 
-    if (xyDistance(pos, { 0,0 }) <= windowBorderSize) {
-        return SDL_HITTEST_RESIZE_TOPLEFT;
-    }
-    else if (xyDistance(pos, { 0,unscaledWindowSize.y }) <= windowBorderSize) {
-        return SDL_HITTEST_RESIZE_BOTTOMLEFT;
-    }
-    else if (xyDistance(pos, { unscaledWindowSize.x,0 }) <= windowBorderSize) {
-        return SDL_HITTEST_RESIZE_TOPRIGHT;
-    }
-    else if (xyDistance(pos, { unscaledWindowSize.x,unscaledWindowSize.y }) <= windowBorderSize) {
-        return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
-    }
+    if (!IsMaximized()) {
+        if (xyDistance(pos, { 0,0 }) <= windowBorderSize) {
+            return SDL_HITTEST_RESIZE_TOPLEFT;
+        }
+        else if (xyDistance(pos, { 0,unscaledWindowSize.y }) <= windowBorderSize) {
+            return SDL_HITTEST_RESIZE_BOTTOMLEFT;
+        }
+        else if (xyDistance(pos, { unscaledWindowSize.x,0 }) <= windowBorderSize) {
+            return SDL_HITTEST_RESIZE_TOPRIGHT;
+        }
+        else if (xyDistance(pos, { unscaledWindowSize.x,unscaledWindowSize.y }) <= windowBorderSize) {
+            return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
+        }
 
-    else if (pos.y <= windowBorderSize) {
-        return SDL_HITTEST_RESIZE_TOP;
+        else if (pos.y <= windowBorderSize) {
+            return SDL_HITTEST_RESIZE_TOP;
+        }
+        else if (pos.y >= (unscaledWindowSize.y - windowBorderSize)) {
+            return SDL_HITTEST_RESIZE_BOTTOM;
+        }
+        else if (pos.x <= windowBorderSize) {
+            return SDL_HITTEST_RESIZE_LEFT;
+        }
+        else if (pos.x >= (unscaledWindowSize.x - windowBorderSize)) {
+            return SDL_HITTEST_RESIZE_RIGHT;
+        }
     }
-    else if (pos.y >= (unscaledWindowSize.y - windowBorderSize)) {
-        return SDL_HITTEST_RESIZE_BOTTOM;
-    }
-    else if (pos.x <= windowBorderSize) {
-        return SDL_HITTEST_RESIZE_LEFT;
-    }
-    else if (pos.x >= (unscaledWindowSize.x - windowBorderSize)) {
-        return SDL_HITTEST_RESIZE_RIGHT;
-    }
-    else if (pos.y < actionButtonH && pos.x > unscaledWindowSize.x - (actionButtonW * 3)) {
+    if (pos.y < actionButtonH && pos.x > unscaledWindowSize.x - (actionButtonW * 3)) {
         return SDL_HITTEST_NORMAL;
     }
 
