@@ -23,3 +23,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette);
+
+MainEditor* loadSplitSession(PlatformNativePathString path);
+bool saveSplitSession(PlatformNativePathString path, MainEditor* data);

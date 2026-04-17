@@ -108,9 +108,6 @@ bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1,
 
 //SplitSessionData loadSplitSessionData(PlatformNativePathString path);
 
-MainEditor* loadSplitSession(PlatformNativePathString path);
-bool saveSplitSession(PlatformNativePathString path, MainEditor* data);
-
 class FileOperation {
 public:
     virtual std::string name() { return _name; }

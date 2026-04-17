@@ -2,6 +2,7 @@
 #include "brush/BaseBrush.h"
 #include "maineditor.h"
 #include "UILabel.h"
+#include "PopupContextMenu.h"
 
 EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
     this->caller = caller;
@@ -169,6 +170,12 @@ EditorBrushPicker::EditorBrushPicker(MainEditor* caller) {
             }
             patternMenu->subWidgets.forceUnfocus();
             updateActivePatternButton();
+        };
+        newBtn->onRightClickCallback = [this, pattern](...) {
+            PopupContextMenu* ctx = new PopupContextMenu({
+                {"Add/remove from pattern stack",[this, pattern]() {this->caller->togglePatternInPatternStack(pattern); }}
+            });
+            g_addPopup(ctx);
         };
         patternButtons.push_back(newBtn);
         patternMenu->subWidgets.addDrawable(newBtn);
