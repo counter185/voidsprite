@@ -177,6 +177,10 @@ public:
 
     bool patternAdditiveMode = false;
 
+    XY symmetryPositions = { 0, 0 };
+    bool symmetryEnabled[2] = { false, false };
+
+
     std::map<std::string, std::string> serializeToKeyVals();
     std::string serializeToJson();
 
@@ -258,7 +262,7 @@ public:
     u32 pickedColor = 0xFFFFFF;
     u32 pickedAlpha = 255;
 
-    bool qModifier = false;
+    bool keybindLoopTileHeld = false;
     XY lockedTilePreview = {-1, -1};
     Timer64 tileLockTimer;
 
@@ -275,11 +279,6 @@ public:
     EditorBrushPicker* brushPicker;
     EditorLayerPicker* layerPicker;
     EditorFramePicker* framePicker;
-
-    XY symmetryPositions = {0, 0};
-    XY guidelinePosition = {0, 0};
-
-    bool symmetryEnabled[2] = {false, false};
 
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;

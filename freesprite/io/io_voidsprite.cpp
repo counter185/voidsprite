@@ -202,9 +202,6 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
@@ -269,9 +266,6 @@ bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
@@ -351,9 +345,6 @@ bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
@@ -440,9 +431,6 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"comments", commentsData},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"layer.visibility", layerVisibilityData},
@@ -546,9 +534,6 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
 
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
-            {"sym.enabled", frmt("{}{}", (editor->symmetryEnabled[0] ? '1' : '0'), (editor->symmetryEnabled[1] ? '1' : '0'))},
-            {"sym.x", std::to_string(editor->symmetryPositions.x)},
-            {"sym.y", std::to_string(editor->symmetryPositions.y)},
             {"layer.selected", std::to_string(editor->selLayer)},
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
             {"edit.time", std::to_string(editor->editTime)},
@@ -895,18 +880,12 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             //ensure in-session palette gets loaded
             ret->colorPicker->reloadColorLists();
 
-            if (extData.contains("sym.x")) { ret->symmetryPositions.x = std::stoi(extData["sym.x"]); }
-            if (extData.contains("sym.y")) { ret->symmetryPositions.y = std::stoi(extData["sym.y"]); }
             if (extData.contains("layer.selected")) { ret->selLayer = frames[0]->activeLayer = std::stoi(extData["layer.selected"]); }
             if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
             if (extData.contains("frame.active")) { ret->activeFrame = -1; ret->switchFrame(std::stoi(extData["frame.active"])); }
             if (extData.contains("frame.ms")) { ret->setMSPerFrame(std::stoi(extData["frame.ms"])); }
             if (extData.contains("frame.backtrace")) { ret->backtraceFrames = std::stoi(extData["frame.backtrace"]); }
             if (extData.contains("frame.fwdtrace")) { ret->fwdtraceFrames = std::stoi(extData["frame.fwdtrace"]); }
-            if (extData.contains("sym.enabled")) {
-                ret->symmetryEnabled[0] = extData["sym.enabled"][0] == '1';
-                ret->symmetryEnabled[1] = extData["sym.enabled"][1] == '1';
-            }
             if (extData.contains("layer.visibility")) {
                 std::string layerVisibilityData = extData["layer.visibility"];
                 for (int x = 0; x < frames.front()->layers.size() && x < layerVisibilityData.size(); x++) {

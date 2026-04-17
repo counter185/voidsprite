@@ -4,8 +4,8 @@
 
 void ToolSetXSymmetry::clickPress(MainEditor* editor, XY pos)
 {
-    editor->symmetryEnabled[0] = true;
-    editor->symmetryPositions.x = pos.x;
+    editor->ssne.symmetryEnabled[0] = true;
+    editor->ssne.symmetryPositions.x = pos.x;
     mouseHeld = true;
     lastEditor = editor;
     clickTimer.start();
@@ -13,8 +13,8 @@ void ToolSetXSymmetry::clickPress(MainEditor* editor, XY pos)
 
 void ToolSetXSymmetry::clickDrag(MainEditor* editor, XY from, XY to)
 {
-    editor->symmetryEnabled[0] = true;
-    editor->symmetryPositions.x = to.x;
+    editor->ssne.symmetryEnabled[0] = true;
+    editor->ssne.symmetryPositions.x = to.x;
 }
 
 void ToolSetXSymmetry::clickRelease(MainEditor* editor, XY pos)
@@ -24,7 +24,7 @@ void ToolSetXSymmetry::clickRelease(MainEditor* editor, XY pos)
 
 void ToolSetXSymmetry::rightClickPress(MainEditor* editor, XY pos)
 {
-    editor->symmetryEnabled[0] = !editor->symmetryEnabled[0];
+    editor->ssne.symmetryEnabled[0] = !editor->ssne.symmetryEnabled[0];
 }
 
 void ToolSetXSymmetry::renderOnCanvas(XY canvasDrawPoint, int scale)

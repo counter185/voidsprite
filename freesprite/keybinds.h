@@ -6,7 +6,8 @@
 
 class KeyCombo {
 private:
-    std::function<void(void*)> action = NULL;
+    std::function<void(void*)> actionPress = NULL;
+    std::function<void(void*)> actionRelease = NULL;
 public:
     std::string displayName = "Keybind";
     SDL_Scancode key = KEY_UNASSIGNED;
@@ -16,12 +17,23 @@ public:
 
     SDL_GamepadButton gamepadButton = SDL_GAMEPAD_BUTTON_INVALID;
 
+    bool highPriority = false;
+
     KeyCombo() {}
-    KeyCombo(std::string n, std::function<void(void*)> a) : displayName(n), action(a) {}
+    KeyCombo(std::string n, std::function<void(void*)> a) : displayName(n), actionPress(a) {}
     KeyCombo(std::string n, SDL_Scancode k, bool c, bool s, std::function<void(void*)> a) 
-        : displayName(n), key(k), ctrl(c), shift(s), action(a) {}
-    KeyCombo(std::string n, SDL_Scancode k, bool c, bool s, SDL_GamepadButton g, std::function<void(void*)> a) 
-        : displayName(n), key(k), ctrl(c), shift(s), action(a), gamepadButton(g) {}
+        : displayName(n), key(k), ctrl(c), shift(s), actionPress(a) {}
+    KeyCombo(std::string n, SDL_Scancode k, bool c, bool s, SDL_GamepadButton g, 
+        std::function<void(void*)> onPress, std::function<void(void*)> onRelease = NULL)
+        : displayName(n), key(k), ctrl(c), shift(s), gamepadButton(g), actionPress(onPress), actionRelease(onRelease) {}
+
+    static KeyCombo HighPriorityKeyCombo(std::string n, SDL_Scancode k, bool c, bool s, SDL_GamepadButton g,
+        std::function<void(void*)> onPress, std::function<void(void*)> onRelease = NULL) 
+    {
+        KeyCombo ret = KeyCombo(n, k, c, s, g, onPress, onRelease);
+        ret.highPriority = true;
+        return ret;
+    }
 
     bool isHit(SDL_Event evt) {
         return (evt.type == SDL_EVENT_KEY_DOWN
@@ -33,15 +45,32 @@ public:
                 && gamepadButton != SDL_GAMEPAD_BUTTON_INVALID
                 && evt.gbutton.button == gamepadButton);
     }
-    void execute(void* caller) {
-        if (action) {
-            action(caller);
+
+    bool isReleased(SDL_Event evt) {
+        return (evt.type == SDL_EVENT_KEY_UP
+                && key != KEY_UNASSIGNED
+                && evt.key.scancode == key)
+            || (evt.type == SDL_EVENT_GAMEPAD_BUTTON_UP
+                && gamepadButton != SDL_GAMEPAD_BUTTON_INVALID
+                && evt.gbutton.button == gamepadButton);
+    }
+    void executePress(void* caller) {
+        if (actionPress) {
+            actionPress(caller);
+        }
+    }
+    void executeRelease(void* caller) {
+        if (actionRelease != NULL) {
+            actionRelease(caller);
         }
     }
     bool executeIfHit(SDL_Event evt, void* caller) {
         if (isHit(evt)) {
-            execute(caller);
+            executePress(caller);
             return true;
+        }
+        else if (isReleased(evt)) {
+            executeRelease(caller);
         }
         return false;
     }
@@ -143,9 +172,9 @@ public:
         regions[region].orderInSettings.push_back(key);
     }
 
-    bool processKeybinds(SDL_Event evt, std::string inRegion, void* caller) {
+    bool processKeybinds(SDL_Event evt, std::string inRegion, void* caller, bool highPriority = false) {
         for (auto [id, kc] : regions[inRegion].keybinds) {
-            if (kc.executeIfHit(evt, caller)) {
+            if (kc.highPriority == highPriority && kc.executeIfHit(evt, caller)) {
                 return true;
             }
         }

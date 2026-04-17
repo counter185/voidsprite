@@ -75,9 +75,10 @@ void g_initKeybinds()
 
     //main editor keybinds
     g_keybindManager.newRegion("maineditor", TL("vsp.keybinds.region.maineditor"));
-    g_keybindManager.regions["maineditor"].reservedKeys = {
-        SDL_SCANCODE_Q,
-    };
+    g_keybindManager.addKeybind("maineditor", "toggle_ui",
+        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.toggleui"), SDL_SCANCODE_F1, false, false, SDL_GAMEPAD_BUTTON_INVALID,
+            [](void* d) { TOGGLE(((MainEditor*)d)->hideUI);}
+        ));
     g_keybindManager.addKeybind("maineditor", "toggle_eraser", 
         KeyCombo(TL("vsp.keybinds.maineditor.eraser"), SDL_SCANCODE_E, false, false, [](void* d) {
             ((MainEditor*)d)->colorPicker->toggleEraser();
@@ -93,6 +94,10 @@ void g_initKeybinds()
     g_keybindManager.addKeybind("maineditor", "zoom_out_canvas", 
         KeyCombo(TL("vsp.keybinds.maineditor.zoomout"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->zoom(-1);
+        }));
+    g_keybindManager.addKeybind("maineditor", "toggle_drag", 
+        KeyCombo(TL("vsp.keybinds.maineditor.toggledrag"), SDL_SCANCODE_RCTRL, false, false, [](void* d) {
+            TOGGLE(((MainEditor*)d)->middleMouseHold);
         }));
     g_keybindManager.addKeybind("maineditor", "focus_color_input", 
         KeyCombo(TL("vsp.keybinds.maineditor.focusoncolortextbox"), SDL_SCANCODE_INSERT, true, false, [](void* d) {
@@ -134,8 +139,14 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.redoalt"), SDL_SCANCODE_Y, true, false, [](void* d) {
             ((MainEditor*)d)->redo();
         }));
+    g_keybindManager.addKeybind("maineditor", "tile_loop_preview",
+        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.tilelooppreview"), SDL_SCANCODE_Q, false, false,
+            SDL_GAMEPAD_BUTTON_INVALID,
+            [](void* d) { ((MainEditor*)d)->keybindLoopTileHeld = true; },
+            [](void* d) { ((MainEditor*)d)->keybindLoopTileHeld = false; }
+        ));
     g_keybindManager.addKeybind("maineditor", "lock_tile_preview", 
-        KeyCombo(TL("vsp.keybinds.maineditor.locktilepreview"), SDL_SCANCODE_Q, true, false, [](void* d) {
+        KeyCombo(TL("vsp.keybinds.maineditor.locktilepreview:v2"), SDL_SCANCODE_Q, true, false, [](void* d) {
             ((MainEditor*)d)->tryToggleTilePreviewLockAtMousePos();
         }));
     g_keybindManager.addKeybind("maineditor", "layer_rename", 

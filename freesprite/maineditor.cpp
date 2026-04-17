@@ -334,14 +334,14 @@ void MainEditor::RenderCanvas()
     drawZoomLines();
 
     //draw tile repeat preview
-    if (qModifier || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
+    if (keybindLoopTileHeld || (lockedTilePreview.x >= 0 && lockedTilePreview.y >= 0)) {
 
         XY mouseInCanvasPoint = canvas.screenPointToCanvasPoint({ g_mouseX, g_mouseY });
-        if (!qModifier || (qModifier && canvas.pointInCanvasBounds(mouseInCanvasPoint))) {
+        if (!keybindLoopTileHeld || (keybindLoopTileHeld && canvas.pointInCanvasBounds(mouseInCanvasPoint))) {
 
             XY tileDim = ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0 ? ssne.tileDimensions : canvas.dimensions;
 
-            XY tilePosition = !qModifier ? lockedTilePreview :
+            XY tilePosition = !keybindLoopTileHeld ? lockedTilePreview :
                 XY{
                 mouseInCanvasPoint.x / tileDim.x,
                 mouseInCanvasPoint.y / tileDim.y
@@ -524,17 +524,17 @@ void MainEditor::DrawBackground()
 }
 
 void MainEditor::drawSymmetryLines() {
-    if (symmetryEnabled[0]) {
-        int symXPos = symmetryPositions.x / 2;
-        bool symXMiddle = symmetryPositions.x % 2;
+    if (ssne.symmetryEnabled[0]) {
+        int symXPos = ssne.symmetryPositions.x / 2;
+        bool symXMiddle = ssne.symmetryPositions.x % 2;
         int lineDrawXPoint = canvas.currentDrawPoint.x + symXPos * canvas.scale + (symXMiddle ? canvas.scale /2 : 0);
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
         SDL_RenderDrawLine(g_rd, lineDrawXPoint, 0, lineDrawXPoint, g_windowH);
     }
-    if (symmetryEnabled[1]) {
-        int symYPos = symmetryPositions.y / 2;
-        bool symYMiddle = symmetryPositions.y % 2;
+    if (ssne.symmetryEnabled[1]) {
+        int symYPos = ssne.symmetryPositions.y / 2;
+        bool symYMiddle = ssne.symmetryPositions.y % 2;
         int lineDrawYPoint = canvas.currentDrawPoint.y + symYPos * canvas.scale + (symYMiddle ? canvas.scale /2 : 0);
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
@@ -1007,13 +1007,13 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"), [this]() { this->redo(); } } },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
                             [this]() {
-                                this->symmetryEnabled[0] = !this->symmetryEnabled[0];
+                                this->ssne.symmetryEnabled[0] = !this->ssne.symmetryEnabled[0];
                             }
                         }
                     },
                     {SDL_SCANCODE_Y, { TL("vsp.maineditor.symy"),
                             [this]() {
-                                this->symmetryEnabled[1] = !this->symmetryEnabled[1];
+                                this->ssne.symmetryEnabled[1] = !this->ssne.symmetryEnabled[1];
                             }
                         }
                     },
@@ -1611,13 +1611,7 @@ void MainEditor::takeInput(SDL_Event evt) {
         }
     }
 
-    if ((evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) && evt.key.scancode == SDL_SCANCODE_Q) {
-        qModifier = evt.key.down;
-    }
-
-    if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_F1) {
-        hideUI = !hideUI;
-    }
+    g_keybindManager.processKeybinds(evt, "maineditor", this, true);
 
     if (hideUI || !DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
 
@@ -1635,7 +1629,7 @@ void MainEditor::takeInput(SDL_Event evt) {
 
         }
 
-        if (!g_keybindManager.processKeybinds(evt, "maineditor", this)) {
+        if (!g_keybindManager.processKeybinds(evt, "maineditor", this, false)) {
             switch (evt.type) {
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:
@@ -1737,9 +1731,6 @@ void MainEditor::takeInput(SDL_Event evt) {
                                     g_addNotification(
                                         Notification("hiii!!!!", "hello!!", 7500, g_iconNotifTheCreature, COLOR_INFO));
                                 }
-                                break;
-                            case SDL_SCANCODE_RCTRL:
-                                middleMouseHold = !middleMouseHold;
                                 break;
                         }
                     }
@@ -2038,15 +2029,15 @@ void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, ui
             }
         }
     }
-    if (symmetryEnabled[0] && !(symmetry & 0b10)) {
-        int symmetryXPoint = symmetryPositions.x / 2;
-        bool symXPointIsCentered = symmetryPositions.x % 2;
+    if (ssne.symmetryEnabled[0] && !(symmetry & 0b10)) {
+        int symmetryXPoint = ssne.symmetryPositions.x / 2;
+        bool symXPointIsCentered = ssne.symmetryPositions.x % 2;
         int symmetryFlippedX = symmetryXPoint + (symmetryXPoint - position.x) - (symXPointIsCentered ? 0 : 1);
         SetPixel(XY{symmetryFlippedX, position.y}, color, pushToLastColors, symmetry | 0b10);
     }
-    if (symmetryEnabled[1] && !(symmetry & 0b1)) {
-        int symmetryYPoint = symmetryPositions.y / 2;
-        bool symYPointIsCentered = symmetryPositions.y % 2;
+    if (ssne.symmetryEnabled[1] && !(symmetry & 0b1)) {
+        int symmetryYPoint = ssne.symmetryPositions.y / 2;
+        bool symYPointIsCentered = ssne.symmetryPositions.y % 2;
         int symmetryFlippedY = symmetryYPoint + (symmetryYPoint - position.y) - (symYPointIsCentered ? 0 : 1);
         SetPixel(XY{position.x, symmetryFlippedY}, color, pushToLastColors, symmetry | 0b1);
     }
@@ -2164,6 +2155,7 @@ void MainEditor::trySaveAsImage()
     }
 }
 
+//deprecated use ssne keyvals instead
 std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
 {
     std::map<std::string, std::string> ret;
@@ -2171,15 +2163,15 @@ std::map<std::string, std::string> MainEditor::makeSingleLayerExtdata()
     ret["TileY"] = std::to_string(ssne.tileDimensions.y);
     ret["TilePadRX"] = std::to_string(ssne.tileGridPaddingBottomRight.x);
     ret["TilePadBY"] = std::to_string(ssne.tileGridPaddingBottomRight.y);
-    ret["SymX"] = std::to_string(symmetryPositions.x);
-    ret["SymY"] = std::to_string(symmetryPositions.y);
-    ret["SymEnabledX"] = symmetryEnabled[0] ? "1" : "0";
-    ret["SymEnabledY"] = symmetryEnabled[1] ? "1" : "0";
+    ret["SymX"] = std::to_string(ssne.symmetryPositions.x);
+    ret["SymY"] = std::to_string(ssne.symmetryPositions.y);
+    ret["SymEnabledX"] = ssne.symmetryEnabled[0] ? "1" : "0";
+    ret["SymEnabledY"] = ssne.symmetryEnabled[1] ? "1" : "0";
     ret["CommentData"] = makeCommentDataString(getCurrentFrame());
     ret["UsingAltBG"] = usingAltBG() ? "1" : "0";
     return ret;
 }
-
+//just get rid of this whole system while you're at it some time in the future
 void MainEditor::loadSingleLayerExtdata(Layer* l) {
     try {
         auto kvmap = l->importExportExtdata;
@@ -2187,10 +2179,10 @@ void MainEditor::loadSingleLayerExtdata(Layer* l) {
         if (kvmap.contains("TileY")) { ssne.tileDimensions.y = std::stoi(kvmap["TileY"]); }
         if (kvmap.contains("TilePadRX")) { ssne.tileGridPaddingBottomRight.x = std::stoi(kvmap["TilePadRX"]); }
         if (kvmap.contains("TilePadBY")) { ssne.tileGridPaddingBottomRight.y = std::stoi(kvmap["TilePadBY"]); }
-        if (kvmap.contains("SymX")) { symmetryPositions.x = std::stoi(kvmap["SymX"]); }
-        if (kvmap.contains("SymY")) { symmetryPositions.y = std::stoi(kvmap["SymY"]); }
-        if (kvmap.contains("SymEnabledX")) { symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
-        if (kvmap.contains("SymEnabledY")) { symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
+        if (kvmap.contains("SymX")) { ssne.symmetryPositions.x = std::stoi(kvmap["SymX"]); }
+        if (kvmap.contains("SymY")) { ssne.symmetryPositions.y = std::stoi(kvmap["SymY"]); }
+        if (kvmap.contains("SymEnabledX")) { ssne.symmetryEnabled[0] = kvmap["SymEnabledX"] == "1"; }
+        if (kvmap.contains("SymEnabledY")) { ssne.symmetryEnabled[1] = kvmap["SymEnabledY"] == "1"; }
         if (kvmap.contains("CommentData")) { frames.front()->comments = parseCommentDataString(kvmap["CommentData"]); }
         if (kvmap.contains("UsingAltBG")) { setAltBG(kvmap["UsingAltBG"] == "1"); }
     }
@@ -4333,6 +4325,9 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["tile.dim.y"] = std::to_string(tileDimensions.y);
     kvs["tile.dim.padrx"] = std::to_string(tileGridPaddingBottomRight.x);
     kvs["tile.dim.padby"] = std::to_string(tileGridPaddingBottomRight.y);
+    kvs["sym.x"] = std::to_string(symmetryPositions.x);
+    kvs["sym.y"] = std::to_string(symmetryPositions.y);
+    kvs["sym.enabled"] = frmt("{}{}", symmetryEnabled[0] ? 1 : 0, symmetryEnabled[1] ? 1 : 0);
     kvs["editor.altbg"] = alternateBackground ? "1" : "0";
     kvs["guidelines"] = guidelinesData;
     kvs["tile.gridalpha"] = std::to_string(tileGridAlpha);
@@ -4354,6 +4349,10 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.tileDimensions.y = std::stoi(kvs["tile.dim.y"]); } catch (...) {}
     try { prefs.tileGridPaddingBottomRight.x = std::stoi(kvs["tile.dim.padrx"]); } catch (...) {}
     try { prefs.tileGridPaddingBottomRight.y = std::stoi(kvs["tile.dim.padby"]); } catch (...) {}
+    try { prefs.symmetryPositions.x = std::stoi(kvs["sym.x"]); } catch (...) {}
+    try { prefs.symmetryPositions.y = std::stoi(kvs["sym.y"]); } catch (...) {}
+    try { prefs.symmetryEnabled[0] = kvs["sym.enabled"].at(0) == '1'; } catch (...) {}
+    try { prefs.symmetryEnabled[1] = kvs["sym.enabled"].at(1) == '1'; } catch (...) {}
     try { prefs.alternateBackground = kvs["editor.altbg"] == "1"; } catch (...) {}
     try { prefs.tileGridAlpha = std::stoi(kvs["tile.gridalpha"]); } catch (...) {}
     try { prefs.overrideTileGridColor = kvs["tile.gridcolor.override"] == "1"; } catch (...) {}

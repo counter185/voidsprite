@@ -196,15 +196,15 @@ void MainEditorPalettized::SetPixel(XY position, uint32_t color, bool pushToLast
         }
         //colorPicker->pushLastColor(color);
     }
-    if (symmetryEnabled[0] && !(symmetry & 0b10)) {
-        int symmetryXPoint = symmetryPositions.x / 2;
-        bool symXPointIsCentered = symmetryPositions.x % 2;
+    if (ssne.symmetryEnabled[0] && !(symmetry & 0b10)) {
+        int symmetryXPoint = ssne.symmetryPositions.x / 2;
+        bool symXPointIsCentered = ssne.symmetryPositions.x % 2;
         int symmetryFlippedX = symmetryXPoint + (symmetryXPoint - position.x) - (symXPointIsCentered ? 0 : 1);
         SetPixel(XY{ symmetryFlippedX, position.y }, color, false, symmetry | 0b10);
     }
-    if (symmetryEnabled[1] && !(symmetry & 0b1)) {
-        int symmetryYPoint = symmetryPositions.y / 2;
-        bool symYPointIsCentered = symmetryPositions.y % 2;
+    if (ssne.symmetryEnabled[1] && !(symmetry & 0b1)) {
+        int symmetryYPoint = ssne.symmetryPositions.y / 2;
+        bool symYPointIsCentered = ssne.symmetryPositions.y % 2;
         int symmetryFlippedY = symmetryYPoint + (symmetryYPoint - position.y) - (symYPointIsCentered ? 0 : 1);
         SetPixel(XY{ position.x, symmetryFlippedY }, color, false, symmetry | 0b1);
     }
@@ -318,13 +318,13 @@ void MainEditorPalettized::setUpWidgets()
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"), [this]() { this->redo(); } } },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),
                             [this]() {
-                                this->symmetryEnabled[0] = !this->symmetryEnabled[0];
+                                this->ssne.symmetryEnabled[0] = !this->ssne.symmetryEnabled[0];
                             }
                         }
                     },
                     {SDL_SCANCODE_Y, { TL("vsp.maineditor.symy"),
                             [this]() {
-                                this->symmetryEnabled[1] = !this->symmetryEnabled[1];
+                                this->ssne.symmetryEnabled[1] = !this->ssne.symmetryEnabled[1];
                             }
                         }
                     },
