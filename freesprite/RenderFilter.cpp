@@ -5,16 +5,16 @@
 
 
 
-Layer* RGBGeneFilter::run(Layer* src, std::map<std::string, std::string> options) {
+Layer* RGBGeneFilter::run(Layer* src, ParameterStore* options) {
     Layer* c = copy(src);
 
     auto rng = std::default_random_engine {};
 
-    int sizeR = std::stoi(options["size.r"]);
-    int sizeG = std::stoi(options["size.g"]);
-    int sizeB = std::stoi(options["size.b"]);
-    bool mutateUpwards = std::stoi(options["mutate upwards"]);
-    int bias = std::stoi(options["bias"]);
+    int sizeR = options->getInt("size.r");// std::stoi(options["size.r"]);
+    int sizeG = options->getInt("size.g");// std::stoi(options["size.g"]);
+    int sizeB = options->getInt("size.b");// std::stoi(options["size.b"]);
+    bool mutateUpwards = options->getBool("mutate upwards");// std::stoi(options["mutate upwards"]);
+    int bias = options->getInt("bias");// std::stoi(options["bias"]);
 
     struct Plant {
         XY position;
@@ -102,14 +102,14 @@ Layer* RGBGeneFilter::run(Layer* src, std::map<std::string, std::string> options
     return c;
 }
 
-Layer* RenderGridFilter::run(Layer* src, std::map<std::string, std::string> options)
+Layer* RenderGridFilter::run(Layer* src, ParameterStore* options)
 {
-    u32 color = std::stoul(options["color"], NULL, 16) | 0xFF000000;
-    int alpha = std::stoi(options["alpha"]);
+    u32 color = options->getColorRGB("color") | 0xFF000000;// std::stoul(options["color"], NULL, 16) | 0xFF000000;
+    int alpha = options->getInt("alpha"); //std::stoi(options["alpha"]);
     color = modAlpha(color, alpha);
-    bool blend = std::stoi(options["blend"]);
-    int gridX = std::stoi(options["size.x"]);
-    int gridY = std::stoi(options["size.y"]);
+    bool blend = options->getBool("blend"); //std::stoi(options["blend"]);
+    int gridX = options->getInt("size.x");// std::stoi(options["size.x"]);
+    int gridY = options->getInt("size.y");// std::stoi(options["size.y"]);
 
     Layer* c = copy(src);
     if (gridX > 0) {

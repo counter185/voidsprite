@@ -13,11 +13,12 @@ class GenNoiseFilter : public RenderFilter
 public:
     std::string name() override { return "Monochrome noise"; }
     std::string id() override { return "filter.render.bwnoise"; }
-    Layer* run(Layer* src, std::map<std::string, std::string> options) override {
-        bool grayscale = std::stod(options["grayscale"]) == 1;
-        bool black_to_alpha = std::stod(options["black is alpha"]) == 1;
-        u8 range_min = std::stoul(options["range.min"]);
-        u8 range_max = std::stoul(options["range.max"]);
+    Layer* run(Layer* src, ParameterStore* options) override {
+        bool grayscale = options->getBool("grayscale");// std::stod(options["grayscale"]) == 1;
+        bool black_to_alpha = options->getBool("black is alpha");
+        auto range = options->getIntRange("range");
+        u8 range_min = range.first;
+        u8 range_max = range.second;
 
         Layer* c = copy(src);
         u32* px = c->pixels32();
@@ -35,7 +36,7 @@ public:
 
         return c;
     }
-    std::vector<FilterParameter> getParameters() override { return {
+    ParamList getParameters() override { return {
         BOOL_PARAM("grayscale", 1),
         BOOL_PARAM("black is alpha", 1),
         INT_RANGE_PARAM("range", 0, 255, 0, 255, 0xffffffff),
@@ -48,12 +49,25 @@ class GenRGBNoiseFilter : public RenderFilter
 public:
     std::string name() override { return "RGBA noise"; }
     std::string id() override { return "filter.render.rgbanoise"; }
-    Layer* run(Layer* src, std::map<std::string, std::string> options) override {
+    Layer* run(Layer* src, ParameterStore* options) override {
         
-        int rmin = std::stoi(options["red.min"]), rmax = std::stoi(options["red.max"]);
+        /*int rmin = std::stoi(options["red.min"]), rmax = std::stoi(options["red.max"]);
         int gmin = std::stoi(options["green.min"]), gmax = std::stoi(options["green.max"]);
         int bmin = std::stoi(options["blue.min"]), bmax = std::stoi(options["blue.max"]);
-        int amin = std::stoi(options["alpha.min"]), amax = std::stoi(options["alpha.max"]);
+        int amin = std::stoi(options["alpha.min"]), amax = std::stoi(options["alpha.max"]);*/
+        auto rrange = options->getIntRange("red");
+        auto grange = options->getIntRange("green");
+        auto brange = options->getIntRange("blue");
+        auto arange = options->getIntRange("alpha");
+        int rmin = rrange.first;
+        int rmax = rrange.second;
+        int gmin = grange.first;
+        int gmax = grange.second;
+        int bmin = brange.first;
+        int bmax = brange.second;
+        int amin = arange.first;
+        int amax = arange.second;
+
         if (rmax > rmin) {
             int t = rmax;
             rmax = rmin;
@@ -88,16 +102,7 @@ public:
         }
         return c;
     }
-    std::vector<FilterParameter> getParameters() override { return {
-        // INT_PARAM("red.min", 0, 255, 0),
-        // INT_PARAM("red.max", 0, 255, 255),
-        // INT_PARAM("green.min", 0, 255, 0),
-        // INT_PARAM("green.max", 0, 255, 255),
-        // INT_PARAM("blue.min", 0, 255, 0),
-        // INT_PARAM("blue.max", 0, 255, 255),
-        // INT_PARAM("alpha.min", 0, 255, 255),
-        // INT_PARAM("alpha.max", 0, 255, 255),
-
+    ParamList getParameters() override { return {
         INT_RANGE_PARAM("red", 0, 255, 0, 255, 0xffff0000),
         INT_RANGE_PARAM("green", 0, 255, 0, 255, 0xff00ff00),
         INT_RANGE_PARAM("blue", 0, 255, 0, 255, 0xff0000ff),
@@ -109,10 +114,10 @@ public:
 class PrintPaletteFilter : public RenderFilter {
     std::string name() override { return "Render palette"; }
     std::string id() override { return "filter.render.printpalette"; }
-    Layer* run(Layer* src, std::map<std::string, std::string> options) override { 
+    Layer* run(Layer* src, ParameterStore* options) override {
         Layer* c = copy(src);
-        int columns = std::stoi(options["columns"]);
-        XY sqDim = {std::stoi(options["square.w"]), std::stoi(options["square.h"])};
+        int columns = options->getInt("columns");// std::stoi(options["columns"]);
+        XY sqDim = {options->getInt("square.w"), options->getInt("square.h")};
         auto cols = src->getUniqueColors(true);
         int ynow = 0;
         int xnow = 0;
@@ -128,7 +133,7 @@ class PrintPaletteFilter : public RenderFilter {
         return c;
     }
 
-    std::vector<FilterParameter> getParameters() override {
+    ParamList getParameters() override {
         return {
             INT_PARAM("columns", 1, 100, 16), 
             INT_PARAM("square.w", 1, 16, 1),
@@ -142,8 +147,8 @@ class PrintPaletteFilter : public RenderFilter {
 class RGBGeneFilter : public RenderFilter {
     std::string name() override { return "RedGreenBluegene"; }
     std::string id() override { return "filter.render.rgbgene"; }
-    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
-    std::vector<FilterParameter> getParameters() override { return {
+    Layer* run(Layer* src, ParameterStore* options) override;
+    ParamList getParameters() override { return {
         INT_PARAM("size.r", 0, 100, 3),
         INT_PARAM("size.g", 0, 100, 0),
         INT_PARAM("size.b", 0, 100, 1),
@@ -155,8 +160,8 @@ class RGBGeneFilter : public RenderFilter {
 class RenderGridFilter : public RenderFilter {
     std::string name() override { return "Pixel grid"; }
     std::string id() override { return "filter.render.grid"; }
-    Layer* run(Layer* src, std::map<std::string, std::string> options) override;
-    std::vector<FilterParameter> getParameters() override {
+    Layer* run(Layer* src, ParameterStore* options) override;
+    ParamList getParameters() override {
         return {
             COLORRGB_PARAM("color", 0x80000000),
             COLORL_PARAM("alpha"),

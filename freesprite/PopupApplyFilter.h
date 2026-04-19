@@ -4,6 +4,7 @@
 #include "BasePopup.h"
 #include "BaseFilter.h"
 #include "EventCallbackListener.h"
+#include "ParameterStore.h"
 
 class PopupApplyFilter :
     public BasePopup, public EventCallbackListener
@@ -23,7 +24,7 @@ protected:
     MainEditor* session;
     Layer* target;
     BaseFilter* targetFilter;
-    std::vector<FilterParameter> params;
+    ParameterStore params;
 public:
     PopupApplyFilter(MainEditor* session, Layer* target, BaseFilter* targetFilter) {
         this->session = session;
@@ -49,18 +50,16 @@ public:
     void renderDefaultBackground() override;
     void regenParameterUI();
     void setupWidgets();
-    void apply(std::map<std::string, std::string> parameterMap);
+    void apply(ParameterStore* parameterMap);
     void applyAndClose();
     void applyPresetAndClose(FilterPreset preset);
     void setupPreview();
     void updatePreview();
-    std::map<std::string, std::string> makeParameterMap();
-    std::map<std::string, std::string> makeParameterMapFromPreset(FilterPreset preset);
+    ParameterStore makeParamsFromPreset(FilterPreset preset);
 
     void previewRenderThread();
 
-    static std::vector<FilterParameter> setDefaultParametersFromPreset(std::vector<FilterParameter>& src, FilterPreset preset);
-    static Panel* generateParameterUI(std::vector<FilterParameter>* params, std::function<void()> valuesChangedCallback);
-    static std::map<std::string, std::string> buildParameterMap(std::vector<FilterParameter>& params);
+    static ParamList setDefaultParametersFromPreset(ParamList& src, FilterPreset preset);
+    static std::map<std::string, std::string> buildParameterMap(ParamList& params);
 };
 

@@ -104,11 +104,11 @@ Layer* BaseFilter::copy(Layer* src)
     return src->copyCurrentVariant();
 }
 
-Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterBlur::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
-    int radiusX = options.contains("radius.x") ? std::stod(options["radius.x"]) : 4;
-    int radiusY = options.contains("radius.y") ? std::stod(options["radius.y"]) : 4;
+    int radiusX = options->getFloat("radius.x");//options.contains("radius.x") ? std::stod(options["radius.x"]) : 4;
+    int radiusY = options->getFloat("radius.y");//options.contains("radius.y") ? std::stod(options["radius.y"]) : 4;
     for (int y = 0; y < c->h; y++) {
         for (int x = 0; x < c->w; x++) {
 
@@ -166,7 +166,7 @@ Layer* FilterBlur::run(Layer* src, std::map<std::string, std::string> options)
     return c;
 }
 
-Layer* FilterForEachPixel::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterForEachPixel::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
     for (int y = 0; y < c->h; y++) {
@@ -178,19 +178,19 @@ Layer* FilterForEachPixel::run(Layer* src, std::map<std::string, std::string> op
     return c;
 }
 
-Layer* FilterSwapRGBToBGR::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterSwapRGBToBGR::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
     SDL_ConvertPixels(c->w, c->h, SDL_PIXELFORMAT_ARGB8888, src->pixels32(), c->w * 4, SDL_PIXELFORMAT_ABGR8888, c->pixels32(), c->w * 4);
     return c;
 }
 
-Layer* FilterAdjustHSV::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterAdjustHSV::run(Layer* src, ParameterStore* options)
 {
-    bool colorize = std::stoi(options["colorize"]);
-    double h = std::stod(options["hue"]);
-    double s = std::stod(options["saturation"]) / 100.0;
-    double v = std::stod(options["value"]) / 100.0;
+    bool colorize = options->getBool("colorize"); //std::stoi(options["colorize"]);
+    double h = options->getFloat("hue"); // std::stod(options["hue"]);
+    double s = options->getFloat("saturation") / 100.0; // std::stod(options["saturation"]) / 100.0;
+    double v = options->getFloat("value") / 100.0; // std::stod(options["value"]) / 100.0;
     hsv hsvv = { h,s,v };
     Layer* c = copy(src);
     for (int y = 0; y < c->h; y++) {
@@ -205,11 +205,11 @@ Layer* FilterAdjustHSV::run(Layer* src, std::map<std::string, std::string> optio
     return c;
 }
 
-Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterStrideGlitch::run(Layer* src, ParameterStore* options)
 {
-    int splits = ixmax(1, ixmin(std::stod(options["splits"]), src->h));
-    int lengthMin = std::stoi(options["length.min"]);
-    int lengthMax = std::stoi(options["length.max"]);
+    int splits = ixmax(1, ixmin(options->getInt("splits"), src->h));
+    int lengthMin = options->getInt("length.min");// std::stoi(options["length.min"]);
+    int lengthMax = options->getInt("length.max");// std::stoi(options["length.max"]);
     Layer* c = copy(src);
     int h = c->h;
     std::stack<int> splitPoints;
@@ -253,12 +253,12 @@ Layer* FilterStrideGlitch::run(Layer* src, std::map<std::string, std::string> op
     return c;
 }
 
-Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterPixelize::run(Layer* src, ParameterStore* options)
 {
-    bool sampleOnePoint = std::stoi(options["one sample"]);
+    bool sampleOnePoint = options->getBool("one sample");// std::stoi(options["one sample"]);
 
     Layer* c = copy(src);
-    XY pixelSize = { std::stod(options["size.x"]), std::stod(options["size.y"]) };
+    XY pixelSize = { options->getInt("size.x"), options->getInt("size.y") };
     int tilesW = (int)ceil(c->w / (double)pixelSize.x);
     int tilesH = (int)ceil(c->h / (double)pixelSize.y);
 
@@ -303,12 +303,12 @@ Layer* FilterPixelize::run(Layer* src, std::map<std::string, std::string> option
     return c;
 }
 
-Layer* FilterOutline::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterOutline::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
-    int iterations = std::stoi(options["thickness"]);
-    bool corners = std::stoi(options["corners"]);
-    u32 activeColor = std::stoul(options["color"], 0, 16);
+    int iterations = options->getInt("thickness");// std::stoi(options["thickness"]);
+    bool corners = options->getBool("corners");// std::stoi(options["corners"]);
+    u32 activeColor = options->getColorRGB("color"); //std::stoul(options["color"], 0, 16);
 
     for (int i = 0; i < iterations; i++) {
         uint8_t* placePixelData = (uint8_t*)tracked_malloc(c->w * c->h);
@@ -354,12 +354,12 @@ Layer* FilterOutline::run(Layer* src, std::map<std::string, std::string> options
     return c;
 }
 
-Layer* FilterBrightnessContrast::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterBrightnessContrast::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
-    bool contrastFirst = std::stoi(options["contrast.first"]);
-    double brightness = std::stod(options["brightness"]);
-    double contrast = std::stod(options["contrast"]);
+    bool contrastFirst = options->getBool("contrast.first");// std::stoi(options["contrast.first"]);
+    double brightness = options->getFloat("brightness");// std::stod(options["brightness"]);
+    double contrast = options->getFloat("contrast");// std::stod(options["contrast"]);
 
     u32* ppx = c->pixels32();
     for (u64 x = 0; x < c->w * c->h; x++) {
@@ -451,9 +451,9 @@ u32 evalBucketMean(std::vector<u32> colors) {
     return PackRGBAtoARGB(r / colors.size(), g / colors.size(), b / colors.size(), a / colors.size());
 }
 
-Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterQuantize::run(Layer* src, ParameterStore* options)
 {
-    int numColors = std::stoi(options["num.colors"]);
+    int numColors = options->getInt("num.colors"); //std::stoi(options["num.colors"]);
     auto colors = src->getUniqueColors(true);
     if (colors.size() <= numColors) {
         return copy(src);
@@ -495,10 +495,10 @@ Layer* FilterQuantize::run(Layer* src, std::map<std::string, std::string> option
     return c;
 }
 
-Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterJPEG::run(Layer* src, ParameterStore* options)
 {
-    int quality = std::stoi(options["quality"]);
-    int iterations = std::stoi(options["iterations"]);
+    int quality = options->getInt("quality");// std::stoi(options["quality"]);
+    int iterations = options->getInt("iterations");// std::stoi(options["iterations"]);
     Layer* c = copy(src);
     for (int i = 0; i < iterations; i++) {
         SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
@@ -527,10 +527,10 @@ Layer* FilterJPEG::run(Layer* src, std::map<std::string, std::string> options)
     return c;
 
 }
-Layer* FilterJPEGGlitch::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterJPEGGlitch::run(Layer* src, ParameterStore* options)
 {
-    int quality = std::stoi(options["quality"]);
-    int iterations = std::stoi(options["iterations"]);
+    int quality =    options->getInt("quality");// std::stoi(options["quality"]);
+    int iterations = options->getInt("iterations");// std::stoi(options["iterations"]);
     Layer* c = copy(src);
     SDL_Surface* srf = SDL_CreateSurface(c->w, c->h, SDL_PIXELFORMAT_ARGB8888);
     if (srf != NULL) {
@@ -548,13 +548,15 @@ Layer* FilterJPEGGlitch::run(Layer* src, std::map<std::string, std::string> opti
         auto posSOS = std::search(v.begin(), v.end(), std::begin(jpegSOS), std::end(jpegSOS));
         auto posEOI = std::search(v.begin(), v.end(), std::begin(jpegEOI), std::end(jpegEOI));
         if (posSOS != v.end() && posEOI != v.end() && posSOS + sosOffset < posEOI) {
-            posSOS += sosOffset;
-            int sizeFromEOItoSOS = (int)(posEOI - posSOS);
+            int idxSOS = posSOS - v.begin();
+            int idxEOI = posEOI - v.begin();
+            idxSOS += sosOffset;
+            int sizeFromEOItoSOS = (int)(idxEOI - idxSOS);
             for (int i = 0; i < iterations; i++) {
                 int glitchPos = randomInt(0, sizeFromEOItoSOS);
                 int insertChars = randomInt(1, 4);
                 for (int j = 0; j < insertChars; j++) {
-                    v.insert(posSOS + glitchPos, (u8)randomInt(0, 127));    //don't accidentally insert a new marker hopefully
+                    v.insert(v.begin() + idxSOS + glitchPos, (u8)randomInt(0, 127));    //don't accidentally insert a new marker hopefully
                 }
             }
         } else {
@@ -582,9 +584,9 @@ Layer* FilterJPEGGlitch::run(Layer* src, std::map<std::string, std::string> opti
 
 }
 
-Layer* FilterAVIF::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterAVIF::run(Layer* src, ParameterStore* options)
 {
-    int quality = std::stoi(options["quality"]);
+    int quality = options->getInt("quality");//std::stoi(options["quality"]);
     Layer* c = copy(src);
 
     auto memAvif = writeAVIFToMem(c, quality);
@@ -600,12 +602,12 @@ Layer* FilterAVIF::run(Layer* src, std::map<std::string, std::string> options)
     return c;
 }
 
-Layer* FilterKernelTransformation::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterKernelTransformation::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
     int kerH = kernel.size();
     int kerW = kernel[0].size();
-    int scale = (int)std::stod(options["scale"]); //this->scale;
+    int scale = options->getInt("scale");// (int)std::stod(options["scale"]); //this->scale;
     int w = c->w;
     int h = c->h;
     int k = kerH;
@@ -643,13 +645,13 @@ void FilterOffset::setupParamBounds(Layer* target)
     lastLayerDims = { target->w, target->h };
 }
 
-Layer* FilterOffset::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterOffset::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
 
-    int offsetX = std::stoi(options["offset.x"]); 
-    int offsetY = std::stoi(options["offset.y"]);
-    bool wrap = std::stoi(options["wrap"]);
+    int offsetX =options->getInt("offset.x");
+    int offsetY =options->getInt("offset.y");
+    bool wrap = options->getBool("wrap");
 
     for (int x = 0; x < c->w; x++) {
         for (int y = 0; y < c->h; y++) {
@@ -672,14 +674,14 @@ Layer* FilterOffset::run(Layer* src, std::map<std::string, std::string> options)
     return c;
 }
 
-Layer* FilterRemoveChannels::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterRemoveChannels::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
 
-    bool r = std::stoi(options["remove.r"]);
-    bool g = std::stoi(options["remove.g"]);
-    bool b = std::stoi(options["remove.b"]);
-    bool a = std::stoi(options["remove.a"]);
+    bool r = options->getBool("remove.r");
+    bool g = options->getBool("remove.g");
+    bool b = options->getBool("remove.b");
+    bool a = options->getBool("remove.a");
 
     for (int x = 0; x < c->w; x++) {
         for (int y = 0; y < c->h; y++) {
@@ -693,10 +695,10 @@ Layer* FilterRemoveChannels::run(Layer* src, std::map<std::string, std::string> 
     return c;
 }
 
-Layer* FilterAlphaThreshold::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterAlphaThreshold::run(Layer* src, ParameterStore* options)
 {
     Layer* c = copy(src);
-    int threshold = std::stoi(options["threshold"]);
+    int threshold = options->getInt("threshold");// std::stoi(options["threshold"]);
 
     for (int x = 0; x < c->w; x++) {
         for (int y = 0; y < c->h; y++) {
@@ -708,10 +710,10 @@ Layer* FilterAlphaThreshold::run(Layer* src, std::map<std::string, std::string> 
     return c;
 }
 
-Layer* FilterEdgeDetectOutline::run(Layer* src, std::map<std::string, std::string> options)
+Layer* FilterEdgeDetectOutline::run(Layer* src, ParameterStore* options)
 {
-    u32 outlineColor = std::stoul(options["color"], 0, 16);
-    double threshold = std::stod(options["threshold"]) / 100.0;
+    u32 outlineColor = options->getColorRGB("color");
+    double threshold = options->getFloat("threshold") / 100.0;
 
     Layer* cc = FilterKernelTransformation::run(src, options);
     Layer* c = copy(src);
@@ -732,10 +734,10 @@ Layer* FilterEdgeDetectOutline::run(Layer* src, std::map<std::string, std::strin
     return c;
 }
 
-Layer* FilterBlendTowardsColor::run(Layer* src, std::map<std::string, std::string> options) {
+Layer* FilterBlendTowardsColor::run(Layer* src, ParameterStore* options) {
 
-    u32 target = std::stoul(options["color"], 0, 16);
-    double factor = std::stod(options["factor"]) / 100.0;
+    u32 target = options->getColorRGB("color");
+    double factor = options->getFloat("factor") / 100.0;
 
     Layer* c = copy(src);
     for (int y = 0; y < c->h; y++) {

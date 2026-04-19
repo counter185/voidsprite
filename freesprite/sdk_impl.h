@@ -45,7 +45,7 @@ public:
     std::string n = "External filter";
     std::string i = "";
     std::function<void(Layer*, VSPFilter*)> f = NULL;
-    std::vector<FilterParameter> fParams = {};
+    ParamList fParams = {};
 
     double getDoubleValue(const char* name) { return std::stod(optionsNow[std::string(name)]); }
     int getIntValue(const char* name) { return std::stoi(optionsNow[std::string(name)]); }
@@ -54,13 +54,13 @@ public:
 
     std::string name() override { return n; }
     std::string id() override { return i; }
-    Layer* run(Layer* src, std::map<std::string, std::string> options) override {
-        optionsNow = options;
+    Layer* run(Layer* src, ParameterStore* options) override {
+        optionsNow = options->buildParameterMap();
         Layer* c = copy(src);
         f(c, this);
         return c;
     }
-    std::vector<FilterParameter> getParameters() override { return fParams; }
+    ParamList getParameters() override { return fParams; }
 };
 
 VSPFilter* impl_registerFilter(

@@ -7,7 +7,9 @@
 Layer* quantizeToNumColors(Layer* rgb, int numColors)
 {
     //todo
-    return g_filter_quantize->run(rgb, { { "num.colors", std::to_string(numColors) } });
+    ParameterStore p = ParameterStore(g_filter_quantize->getParameters());
+    p.setParametersFromParameterMap({ {"num.colors", std::to_string(numColors)} });
+    return g_filter_quantize->run(rgb, &p);
 }
 
 bool hasTransparency(Layer* rgba, u8 threshold) {

@@ -30,7 +30,7 @@ PopupApplyFilter::~PopupApplyFilter() {
 
 void PopupApplyFilter::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) {
     if (evt_id == EVENT_APPLYFILTER_SAVEPRESET) {
-        FilterPreset newPreset = FilterPreset(targetFilter->id(), buildParameterMap(params));
+        FilterPreset newPreset = FilterPreset(targetFilter->id(), params.buildParameterMap());
         std::string serialized = newPreset.serialize();
         std::ofstream outFile(convertStringToUTF8OnWin32(name));
         if (outFile.is_open()) {
@@ -56,8 +56,9 @@ void PopupApplyFilter::eventFileOpen(int evt_id, PlatformNativePathString name, 
             inFile.close();
             try {
                 FilterPreset preset = FilterPreset::deserialize(serialized);
-                params = targetFilter->getParameters();
-                params = setDefaultParametersFromPreset(params, preset);
+                ParamList list = targetFilter->getParameters();
+                list = setDefaultParametersFromPreset(list, preset);
+                params = ParameterStore(list);
                 regenParameterUI();
                 threadHasNewParameters = true;
 
@@ -119,9 +120,12 @@ void PopupApplyFilter::regenParameterUI() {
     if (paramUI != NULL) {
         wxsManager.removeDrawable(paramUI);
     }
-    paramUI = generateParameterUI(&params, [this]() {
+    paramUI = params.generateVerticalUI([this]() {
         threadHasNewParameters = true;
     });
+    /*generateParameterUI(&params, [this]() {
+        threadHasNewParameters = true;
+    });*/
     paramUI->position = { 0, 50 };
     wxsManager.addDrawable(paramUI);
 }
@@ -154,7 +158,7 @@ void PopupApplyFilter::setupWidgets()
     };
 }
 
-void PopupApplyFilter::apply(std::map<std::string, std::string> parameterMap) {
+void PopupApplyFilter::apply(ParameterStore* parameterMap) {
     auto target = this->target;
     auto session = this->session;
     auto targetFilter = this->targetFilter;
@@ -180,12 +184,13 @@ void PopupApplyFilter::apply(std::map<std::string, std::string> parameterMap) {
 
 void PopupApplyFilter::applyAndClose()
 {
-    apply(makeParameterMap());
+    apply(&params);
     closePopup();
 }
 
 void PopupApplyFilter::applyPresetAndClose(FilterPreset preset) {
-    apply(makeParameterMapFromPreset(preset));
+    ParameterStore newParams = makeParamsFromPreset(preset);
+    apply(&newParams);
     closePopup();
 }
 
@@ -227,19 +232,9 @@ void PopupApplyFilter::updatePreview()
 #endif
 }
 
-std::map<std::string, std::string> PopupApplyFilter::makeParameterMap()
-{
-    std::map<std::string, std::string> parameterMap = buildParameterMap(params);
-    
-    parameterMap["!editor:activecolor"] = std::to_string(session->getActiveColor());
-    return parameterMap;
-}
-
-std::map<std::string, std::string> PopupApplyFilter::makeParameterMapFromPreset(FilterPreset preset) {
-    auto paramMap = makeParameterMap();
-    for (auto& [k, v] : preset.options) {
-        paramMap[k] = v;
-    }
+ParameterStore PopupApplyFilter::makeParamsFromPreset(FilterPreset preset) {
+    auto paramMap = params.copy();
+    params.setParametersFromParameterMap(preset.options);
     return paramMap;
 }
 
@@ -248,9 +243,9 @@ void PopupApplyFilter::previewRenderThread()
     while (previewRenderThreadShouldRun) {
         if (threadHasNewParameters) {
             nowRendering = true;
-            std::map<std::string, std::string> parameterMap = makeParameterMap();
+            ParameterStore previewParams = params.copy();
             threadHasNewParameters = false;
-            Layer* l = targetFilter->run(target, parameterMap);
+            Layer* l = targetFilter->run(target, &previewParams);
             memcpy(previewPixelData, l->pixels32(), 4 * target->w * target->h);
             pixelDataDirty = true;
             delete l;
@@ -260,27 +255,27 @@ void PopupApplyFilter::previewRenderThread()
     }
 }
 
-std::vector<FilterParameter> PopupApplyFilter::setDefaultParametersFromPreset(std::vector<FilterParameter>& src, FilterPreset preset)
+ParamList PopupApplyFilter::setDefaultParametersFromPreset(ParamList& src, FilterPreset preset)
 {
-    std::vector<FilterParameter> copy = src;
-    for (FilterParameter& p : copy) {
+    ParamList copy = src;
+    for (Parameter& p : copy) {
         if (preset.options.contains(p.name) 
             || (p.paramType == PT_INT_RANGE && preset.options.contains(p.name+".min") && preset.options.contains(p.name + ".max"))) {
             try {
                 switch (p.paramType) {
                     case PT_BOOL:
-                        p.defaultValue = preset.options[p.name] == "1" ? 1 : 0;
+                        p.vNum = preset.options[p.name] == "1" ? 1 : 0;
                         break;
                     case PT_INT:
                     case PT_COLOR_L:
-                        p.defaultValue = std::stoi(preset.options[p.name]);
+                        p.vNum = std::stoi(preset.options[p.name]);
                         break;
                     case PT_FLOAT:
-                        p.defaultValue = std::stod(preset.options[p.name]);
+                        p.vNum = std::stod(preset.options[p.name]);
                         break;
                     case PT_INT_RANGE:
-                        p.defaultValue = std::stoi(preset.options[p.name + ".min"]);
-                        p.defaultValueTwo = std::stoi(preset.options[p.name + ".max"]);
+                        p.vNum = std::stoi(preset.options[p.name + ".min"]);
+                        p.vNum2 = std::stoi(preset.options[p.name + ".max"]);
                         break;
                     case PT_COLOR_RGB:
                         p.vU32 = std::stoi(preset.options[p.name], NULL, 16);
@@ -295,133 +290,7 @@ std::vector<FilterParameter> PopupApplyFilter::setDefaultParametersFromPreset(st
     return copy;
 }
 
-Panel* PopupApplyFilter::generateParameterUI(std::vector<FilterParameter>* params, std::function<void()> valuesChangedCallback)
-{
-    auto updateLabelFn = [](FilterParameter& p, UILabel* l) {
-        switch (p.paramType) {
-            case PT_BOOL:
-                break;
-            case PT_INT:
-            case PT_COLOR_L:
-                l->setText(std::to_string((int)p.defaultValue));
-                break;
-            case PT_FLOAT:
-                l->setText(frmt("{:.1f}", p.defaultValue));
-                break;
-            case PT_INT_RANGE:
-                l->setText(std::to_string((int)p.defaultValue) + ":" + std::to_string((int)p.defaultValueTwo));
-                break;
-        }
-    };
-
-    Panel* panel = new Panel();
-    panel->sizeToContent = true;
-    panel->passThroughMouse = true;
-
-    int y = 0;
-    int i = 0;
-    for (auto& p : *params) {
-        UILabel* label = new UILabel(p.name);
-        label->position = XY{ 10, y + 2 };
-        panel->subWidgets.addDrawable(label);
-
-        switch (p.paramType) {
-        case PT_BOOL:
-        {
-            UICheckbox* checkbox = new UICheckbox("", p.defaultValue == 1);
-            checkbox->position = XY{ 250, y };
-            checkbox->onStateChangeCallback = [params, i, valuesChangedCallback](UICheckbox* c, bool v) {
-                params->at(i).defaultValue = v ? 1 : 0;
-                valuesChangedCallback();
-            };
-            panel->subWidgets.addDrawable(checkbox);
-        }
-        break;
-        case PT_COLOR_L:
-        case PT_INT:
-        case PT_FLOAT:
-        {
-            float v = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
-            UISlider* slider = new UISlider();
-            slider->position = XY{ 285, y };
-            slider->sliderPos = v;
-            slider->wxHeight = 25;
-            if (p.paramType == PT_COLOR_L) {
-                slider->backgroundFill = Fill::Gradient(0xA0000000, 0xA0FFFFFF, 0xA0000000, 0xA0FFFFFF);
-            }
-            panel->subWidgets.addDrawable(slider);
-
-            UILabel* valueLabel = new UILabel();
-            valueLabel->position = xySubtract(slider->position, { 84, 0 });
-            panel->subWidgets.addDrawable(valueLabel);
-
-            slider->onChangeValueCallback = [params, i, valueLabel, valuesChangedCallback, updateLabelFn](UISlider* s, float v) {
-                FilterParameter& p = params->at(i);
-                switch (p.paramType) {
-                    case PT_INT:
-                        p.defaultValue = (int)(p.minValue + (p.maxValue - p.minValue) * v);
-                        break;
-                    case PT_COLOR_L:
-                        p.defaultValue = (int)(255 * v);
-                        break;
-                    case PT_FLOAT:
-                        p.defaultValue = p.minValue + (p.maxValue - p.minValue) * v;
-                        break;
-                    default: break;
-                }
-                updateLabelFn(p, valueLabel);
-                valuesChangedCallback();
-            };
-            updateLabelFn(p, valueLabel);
-        }
-        break;
-        case PT_COLOR_RGB:
-        {
-            UIColorInputField* colorInput = new UIColorInputField();
-            colorInput->position = XY{ 250, y };
-            colorInput->wxHeight = 25;
-            colorInput->setColor(p.vU32);
-            panel->subWidgets.addDrawable(colorInput);
-            colorInput->onColorChangedCallback = [params, i, valuesChangedCallback](UIColorInputField* p, u32 c) {
-                params->at(i).vU32 = c;
-                valuesChangedCallback();
-            };
-        }
-        break;
-        case PT_INT_RANGE:
-        {
-            float vl = (p.defaultValue - p.minValue) / (p.maxValue - p.minValue);
-            float vm = (p.defaultValueTwo - p.minValue) / (p.maxValue - p.minValue);
-            UIDoubleSlider* slider = new UIDoubleSlider();
-            slider->position = XY{ 285, y };
-            slider->sliderPos.min = vl;
-            slider->sliderPos.max = vm;
-            slider->bodyColor = p.vU32;
-            slider->wxHeight = 25;
-            panel->subWidgets.addDrawable(slider);
-
-            UILabel* valueLabel = new UILabel();
-            valueLabel->position = xySubtract(slider->position, { 84, 0 });
-            panel->subWidgets.addDrawable(valueLabel);
-
-            slider->onChangeValueCallback = [params, i, valueLabel, valuesChangedCallback, updateLabelFn](UIDoubleSlider* s, UIDoubleSliderBounds v) {
-                FilterParameter& p = params->at(i);
-                p.defaultValue = (int)(p.minValue + (p.maxValue - p.minValue) * v.min);
-                p.defaultValueTwo = (int)(p.minValue + (p.maxValue - p.minValue) * v.max);
-                updateLabelFn(p, valueLabel);
-                valuesChangedCallback();
-            };
-            updateLabelFn(p, valueLabel);
-        }
-        break;
-        }
-        y += 40;
-        i++;
-    }
-    return panel;
-}
-
-std::map<std::string, std::string> PopupApplyFilter::buildParameterMap(std::vector<FilterParameter>& params)
+std::map<std::string, std::string> PopupApplyFilter::buildParameterMap(ParamList& params)
 {
     std::map<std::string, std::string> ret = {};
     for (auto& p : params) {
@@ -430,11 +299,11 @@ std::map<std::string, std::string> PopupApplyFilter::buildParameterMap(std::vect
             ret[p.name] = frmt("{:08X}", p.vU32);
             break;
         case PT_INT_RANGE:
-            ret[p.name + ".min"] = std::to_string(p.defaultValue);
-            ret[p.name + ".max"] = std::to_string(p.defaultValueTwo);
+            ret[p.name + ".min"] = std::to_string(p.vNum);
+            ret[p.name + ".max"] = std::to_string(p.vNum2);
             break;
         default:
-            ret[p.name] = std::to_string(p.defaultValue);
+            ret[p.name] = std::to_string(p.vNum);
             break;
         }
     }
