@@ -333,6 +333,7 @@
     <ClCompile Include="PanelSpritesheetPreview.cpp" />
     <ClCompile Include="PanelTilemapPreview.cpp" />
     <ClCompile Include="PanelUserInteractable.cpp" />
+    <ClCompile Include="ParameterStore.cpp" />
     <ClCompile Include="PopupApplyFilter.cpp" />
     <ClCompile Include="PopupChooseAction.cpp" />
     <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
@@ -600,6 +601,7 @@
     <ClInclude Include="PanelSpritesheetPreview.h" />
     <ClInclude Include="PanelTilemapPreview.h" />
     <ClInclude Include="PanelUserInteractable.h" />
+    <ClInclude Include="ParameterStore.h" />
     <ClInclude Include="platform_android.h" />
     <ClInclude Include="platform_emscripten.h" />
     <ClInclude Include="platform_linux.h" />

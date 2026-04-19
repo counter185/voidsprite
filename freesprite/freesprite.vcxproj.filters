@@ -702,6 +702,9 @@
     <ClCompile Include="PopupSetTemplateInfo.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="ParameterStore.cpp">
+      <Filter>Source files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1411,6 +1414,9 @@
     </ClInclude>
     <ClInclude Include="PopupSetTemplateInfo.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ParameterStore.h">
+      <Filter>Header files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
