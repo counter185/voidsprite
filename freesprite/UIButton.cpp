@@ -82,6 +82,7 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
             if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })) {
                 touchHoldDownPos = touchPosition;
                 touchHoldingDown = true;
+                touchHoldDownTimer.start();
             }
         }
             break;
@@ -92,7 +93,12 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
                 XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
                 if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })
                     && xyDistance(touchHoldDownPos, touchPosition) < touchTapMaxDistance) {
-                    click();
+                    if (touchHoldDownTimer.elapsedTime() >= 1200) {
+                        rightClick();
+                    }
+                    else {
+                        click();
+                    }
                 }
             }
         }
@@ -127,6 +133,27 @@ void UIButton::renderAnimations(XY pos)
         renderGradient(drawrect, 0x10FFFFFF, 0x10FFFFFF, 0x40D3F4FF, 0x40D3F4FF);
         SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x70);
         SDL_RenderDrawRect(g_rd, &drawrect);
+    }
+
+    if (touchHoldingDown && touchHoldDownTimer.elapsedTime() >= 200) {
+        double percentTime = touchHoldDownTimer.percentElapsedTime(1200);
+        double l1 = XM1PW3P1(dxmin(1.0, percentTime / 0.25));
+        double l2 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.25) / 0.25)));
+        double l3 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.5) / 0.25)));
+        double l4 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.75) / 0.25)));
+
+        const int holdFxDistance = 60;
+
+        XY p1 = xyAdd(touchHoldDownPos, { 0, -holdFxDistance });
+        XY p2 = xyAdd(touchHoldDownPos, { -holdFxDistance, 0 });
+        XY p3 = xyAdd(touchHoldDownPos, { 0, holdFxDistance });
+        XY p4 = xyAdd(touchHoldDownPos, { holdFxDistance, 0 });
+        
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+        drawLine(p1, p2, l1);
+        drawLine(p2, p3, l2);
+        drawLine(p3, p4, l3);
+        drawLine(p4, p1, l4);
     }
 
     if (playClickVFXOnNextFrame) {
