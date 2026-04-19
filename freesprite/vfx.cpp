@@ -18,6 +18,7 @@ private:
     std::function<double(double)> interpolation = &XM1PW3P1;
 public:
     VFX(VFXType t, u32 dur, u32 ext1, SDL_Rect ext2, std::vector<u32> ext3) : type(t), duration(dur), extData1(ext1), extData2(ext2), extData3(ext3) {
+        interpolation = XM1PW3P1;
         timer = Timer64();
         timer.start();
     }
@@ -148,7 +149,8 @@ std::map<VSPWindow*, std::vector<VFX>> currentVfxs;
 void g_newVFX(VFXType type, u32 durationMS, u32 extData1, SDL_Rect extData2, std::vector<u32> moreExtData)
 {
     if (g_config.vfxEnabled) {
-        currentVfxs[g_currentWindow].push_back(VFX(type, durationMS, extData1, extData2, moreExtData));
+        VFX newVfx = VFX(type, durationMS, extData1, extData2, moreExtData);
+        currentVfxs[g_currentWindow].push_back(newVfx);
         if (type == VFX_SCREENSWITCH) {
             screenSwitchTimer.start();
         }

@@ -600,6 +600,19 @@ SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
     return SDL_HITTEST_NORMAL;
 }
 
+void VSPWindow::pushOverlayRenderOperation(std::function<void()> op)
+{
+    overlayRenderOperations.push_back(op);
+}
+
+void VSPWindow::doOverlayRenderOperations()
+{
+    for (auto& op : overlayRenderOperations) {
+        op();
+    }
+    overlayRenderOperations.clear();
+}
+
 void WindowBlurBuffer::windowResized()
 {
     if (!enabled) return;

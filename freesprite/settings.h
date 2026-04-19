@@ -56,6 +56,7 @@ struct DebugSettings {
     bool debugShowTilesRPG2K = false;
     bool debugColorWheel = false;
     bool debugBlurBehind = false;
+    bool debugAlwaysMobileUITextField = false;
 };
 
 inline bool g_configWasLoaded = false;

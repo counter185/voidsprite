@@ -544,7 +544,7 @@ void UIColorPicker::reloadColorLists()
         };
 
         if (p->shouldStartCollapsed()) {
-            collapseButton->click();
+            collapseButton->onClickCallback(collapseButton);
         }
     }
 

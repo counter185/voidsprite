@@ -998,8 +998,9 @@ bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
     return false;
 }
 
-MainEditor* loadSplitSession(PlatformNativePathString path)
+MainEditor* loadSplitSession(PlatformNativePathString path, OperationProgressReport* progress)
 {
+    ENSURE_REPORT_VALID(progress);
     std::string utf8path = convertStringToUTF8OnWin32(path);
     std::string fullDirectory = (utf8path.find('/') != std::string::npos || utf8path.find('\\') != std::string::npos) ? utf8path.substr(0, utf8path.find_last_of("\\/")) : "";
     if (fullDirectory.length() > 0) {
@@ -1008,6 +1009,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
 
     std::ifstream f(path);
     if (f.good() && f.is_open()) {
+        progress->enterSection("Loading split session...");
         SplitSessionData ssn;
         ssn.set = true;
 
@@ -1032,6 +1034,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
             switch (version) {
             case 0:
             {
+                progress->enterSection("Parsing...");
                 while (!f.eof()) {
                     std::getline(f, line);
                     if (stringStartsWithIgnoreCase(line, "#:")) {
@@ -1041,6 +1044,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                             std::string filename = fullDirectory + originalFileName;
                             int x = std::stoi(line.substr(line.find('|') + 1, line.find('|', line.find('|') + 1) - line.find('|') - 1));
                             int y = std::stoi(line.substr(line.find('|', line.find('|') + 1) + 1));
+                            progress->enterSection(frmt("Loading fragment: {}", originalFileName));
                             SplitSessionImage ssi;
                             ssi.fileName = filename;
                             ssi.originalFileName = originalFileName;
@@ -1066,6 +1070,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                             else {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to load split session fragment"));
                             }
+                            progress->exitSection();
 
                         }
                         catch (std::exception&) {
@@ -1109,9 +1114,12 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
                 }
                 if (layers.size() > 0) {
                     ssn.overallDimensions = minImageDimensions;
+                    progress->updateLastSection("Putting fragments on canvas...");
                     Layer* imageLayer = new Layer(minImageDimensions.x, minImageDimensions.y);
                     imageLayer->name = "Split session layer";
                     for (int i = 0; i < layers.size(); i++) {
+                        //crashes for some reason
+                        progress->updateLastSection(frmt("Putting fragments on canvas... ({}/{})", i+1, (int)layers.size()));
                         SplitSessionImage ssi = ssn.images[i];
                         Layer* layer = layers[i];
                         imageLayer->blit(layer, ssi.positionInOverallImage, { 0,0,layer->w, layer->h }, true);
@@ -1137,13 +1145,16 @@ MainEditor* loadSplitSession(PlatformNativePathString path)
     return NULL;
 }
 
-bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
+bool saveSplitSession(PlatformNativePathString path, MainEditor* data, OperationProgressReport* progress)
 {
+    ENSURE_REPORT_VALID(progress);
     if (!data->splitSessionData.set) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No split session data."));
         return false;
     }
+    progress->enterSection("Saving split session...");
     std::ofstream f(path);
+    progress->enterSection("Writing split session file...");
     f << "voidsprite split session file v0\n";
     for (CommentData& comment : data->frames[0]->comments) {
         f << "comment:" << comment.data << ";" << comment.position.x << ";" << comment.position.y << "\n";
@@ -1153,9 +1164,12 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data)
         f << frmt("+{}:{}\n", k, v);
     }
 
+    progress->updateLastSection("Writing fragments...");
     SplitSessionData ssn = data->splitSessionData;
     Layer* flat = data->flattenImage();
+    int i = 0;
     for (SplitSessionImage& separateImage : ssn.images) {
+        progress->updateLastSection(frmt("Writing fragment {}/{}  ({})", ++i, ssn.images.size(), separateImage.originalFileName));
         f << "#:"
             << separateImage.originalFileName
             << "|" << separateImage.positionInOverallImage.x << "|"

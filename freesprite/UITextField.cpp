@@ -4,6 +4,7 @@
 #include "TooltipsLayer.h"
 #include "Notification.h"
 #include "PopupContextMenu.h"
+#include "multiwindow.h"
 
 void UITextField::render(XY pos)
 {
@@ -11,8 +12,12 @@ void UITextField::render(XY pos)
         return;
     }
     renderTextField(pos);
-#if __ANDROID__
-    if (!SDL_IsDeXMode() && focused) {
+#if VSP_PLATFORM == VSP_PLATFORM_ANDROID
+    if ((!SDL_IsDeXMode()|| g_debugConfig.debugAlwaysMobileUITextField) && focused) {
+        renderOnScreenTextField();
+    }
+#elif _DEBUG
+    if (focused && g_debugConfig.debugAlwaysMobileUITextField) {
         renderOnScreenTextField();
     }
 #endif
@@ -247,12 +252,14 @@ void UITextField::renderOnScreenTextField()
     onScreenPos.y -= wxHeight / 2;
 
     double focusTime = focusTimer.percentElapsedTime(600);
-    g_pushClip({ 0,0,g_windowW, g_windowH });
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xd0 * focusTime);
-    SDL_RenderFillRect(g_rd, (SDL_Rect*)NULL);
+    //g_pushClip({ 0,0,g_windowW, g_windowH });
+    g_currentWindow->pushOverlayRenderOperation([this, focusTime, onScreenPos]() {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xd0 * focusTime);
+        SDL_RenderFillRect(g_rd, (SDL_Rect*)NULL);
 
-    renderTextField(onScreenPos);
-    g_popClip();
+        renderTextField(onScreenPos);
+    });
+    //g_popClip();
 }
 
 bool UITextField::isValidOrPartialColor()

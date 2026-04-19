@@ -2,6 +2,7 @@
 #include "FontRenderer.h"
 #include "mathops.h"
 #include "TooltipsLayer.h"
+#include "multiwindow.h"
 #include "EventCallbackListener.h"
 
 void UIButton::render(XY pos)
@@ -137,23 +138,26 @@ void UIButton::renderAnimations(XY pos)
 
     if (touchHoldingDown && touchHoldDownTimer.elapsedTime() >= 200) {
         double percentTime = touchHoldDownTimer.percentElapsedTime(1200);
-        double l1 = XM1PW3P1(dxmin(1.0, percentTime / 0.25));
-        double l2 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.25) / 0.25)));
-        double l3 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.5) / 0.25)));
-        double l4 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.75) / 0.25)));
+        XY holdPos = touchHoldDownPos;
+        g_currentWindow->pushOverlayRenderOperation([percentTime, holdPos]() {
+            double l1 = XM1PW3P1(dxmin(1.0, percentTime / 0.25));
+            double l2 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.25) / 0.25)));
+            double l3 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.5) / 0.25)));
+            double l4 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.75) / 0.25)));
 
-        const int holdFxDistance = 60;
+            const int holdFxDistance = 60;
 
-        XY p1 = xyAdd(touchHoldDownPos, { 0, -holdFxDistance });
-        XY p2 = xyAdd(touchHoldDownPos, { -holdFxDistance, 0 });
-        XY p3 = xyAdd(touchHoldDownPos, { 0, holdFxDistance });
-        XY p4 = xyAdd(touchHoldDownPos, { holdFxDistance, 0 });
-        
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-        drawLine(p1, p2, l1);
-        drawLine(p2, p3, l2);
-        drawLine(p3, p4, l3);
-        drawLine(p4, p1, l4);
+            XY p1 = xyAdd(holdPos, { 0, -holdFxDistance });
+            XY p2 = xyAdd(holdPos, { -holdFxDistance, 0 });
+            XY p3 = xyAdd(holdPos, { 0, holdFxDistance });
+            XY p4 = xyAdd(holdPos, { holdFxDistance, 0 });
+
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+            drawLine(p1, p2, l1);
+            drawLine(p2, p3, l2);
+            drawLine(p3, p4, l3);
+            drawLine(p4, p1, l4);
+        });
     }
 
     if (playClickVFXOnNextFrame) {

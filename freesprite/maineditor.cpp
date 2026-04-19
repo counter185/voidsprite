@@ -2081,11 +2081,15 @@ void MainEditor::copyLayerToClipboard(Layer* l)
 void MainEditor::trySaveImage()
 {
     if (splitSessionData.set) {
-        if (saveSplitSession(lastConfirmedSavePath, this)) {
-            g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
-            timerSinceLastSave.start();
-            changesSinceLastSave = NO_UNSAVED_CHANGES;
-        }
+        g_startNewOperation([this](OperationProgressReport* report) {
+            if (saveSplitSession(lastConfirmedSavePath, this, report)) {
+                g_tryPushLastFilePath(convertStringToUTF8OnWin32(lastConfirmedSavePath));
+                mainThreadOps.add([this]() {
+                    timerSinceLastSave.start();
+                    changesSinceLastSave = NO_UNSAVED_CHANGES;
+                });
+            }
+        });
     }
     else {
         lastWasSaveAs = false;

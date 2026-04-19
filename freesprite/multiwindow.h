@@ -44,6 +44,8 @@ public:
 };
 
 class VSPWindow {
+protected:
+    std::vector<std::function<void()>> overlayRenderOperations;
 public:
     SDL_WindowID windowID = -1;
     SDL_Window* wd = NULL;
@@ -131,13 +133,10 @@ public:
     void autoViewportScale();
 
     void addScreen(BaseScreen* a, bool switchTo);
-
     void detachScreen(BaseScreen* screen);
-
     bool closeScreen(BaseScreen* screen);
 
     void switchScreen(int index, int vfxExt = 0);
-
     void switchScreenLeft();
     void switchScreenRight();
 
@@ -147,8 +146,11 @@ public:
     void switchToFavScreen();
 
     void renderCustomWindowFrame();
-
     bool handleCustomFrameInput(SDL_Event evt);
-    bool IsMaximized();
     SDL_HitTestResult getSDLHitTestAt(XY pos);
+
+    void pushOverlayRenderOperation(std::function<void()> op);
+    void doOverlayRenderOperations();
+
+    bool IsMaximized();
 };

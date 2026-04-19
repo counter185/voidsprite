@@ -515,6 +515,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
     configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Debug color wheel geometry", "", &g_debugConfig.debugColorWheel, &posInTab));
     configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show blur buffer", "", &g_debugConfig.debugBlurBehind, &posInTab));
+    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Always show mobile text field", "", &g_debugConfig.debugAlwaysMobileUITextField, &posInTab));
 #endif
     
 
