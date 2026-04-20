@@ -2,6 +2,8 @@
 
 #include "../globals.h"
 
+void io_registerVSP();
+
 void voidsnWriteU32(FILE* f, u32 num);
 void voidsnWriteU64(FILE* f, u64 num);
 void voidsnWriteString(FILE* f, std::string str);
@@ -10,6 +12,9 @@ u64 voidsnReadU64(FILE* f);
 std::string voidsnReadString(FILE* f);
 
 std::map<std::string, std::string> voidsnReadKeyVals(PlatformNativePathString);
+
+std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
+bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
 
 bool writeVOIDSNv1(PlatformNativePathString, XY projDimensions, std::vector<Layer*> data);
 bool writeVOIDSNv2(PlatformNativePathString path, MainEditor* editor);
@@ -23,6 +28,8 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
 
 std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name);
 bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette);
+
+Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 
 MainEditor* loadSplitSession(PlatformNativePathString path, OperationProgressReport* progress);
 bool saveSplitSession(PlatformNativePathString path, MainEditor* data, OperationProgressReport* progress);

@@ -1,11 +1,14 @@
+#include <SDL3_image/SDL_image.h>
 
 #include "io_base.h"
 #include "io_aseprite.h"
 #include "io_avi.h"
 
 
-bool writeAVI(PlatformNativePathString path, MainEditor* session)
+bool writeAVI(PlatformNativePathString path, MainEditor* session, OperationProgressReport* report, ParameterStore* params)
 {
+    bool mjpeg = params == NULL || params->hasParam("avi.mjpg") ? true : params->getBool("avi.mjpg");
+
     __AVIMAINHEADER aviHeader{};
     aviHeader.dwMicroSecPerFrame = session->frameAnimMSPerFrame * 1000;
     aviHeader.dwWidth = session->canvas.dimensions.x;
@@ -23,7 +26,7 @@ bool writeAVI(PlatformNativePathString path, MainEditor* session)
     strfData.biHeight = session->canvas.dimensions.y;
     strfData.biPlanes = 1;
     strfData.biBitCount = 32;
-    strfData.biCompression = 0;
+    strfData.biCompression = mjpeg ? 'GPJM' : 0;
     strfData.biSizeImage = aviHeader.dwWidth * aviHeader.dwHeight * 4;
     strfData.biXPelsPerMeter = strfData.biYPelsPerMeter = 0;
     strfData.biClrUsed = 0;
@@ -31,7 +34,7 @@ bool writeAVI(PlatformNativePathString path, MainEditor* session)
 
     __AVIStreamHeader strhData{};
     strhData.fccType = 'sdiv';
-    strhData.fccHandler = 'ABGR';
+    strhData.fccHandler = mjpeg ? 'GPJM' : 'ABGR';
     strhData.dwFlags = 0;
     strhData.wPriority = 0;
     strhData.wLanguage = 0;
@@ -51,18 +54,38 @@ bool writeAVI(PlatformNativePathString path, MainEditor* session)
 
     std::vector<RIFFChunk*> frameChunks;
     for (auto*& frame : session->frames) {
-        frameChunks.push_back(new RIFFLargeDataChunk("00db", [session, frame]() {
+        frameChunks.push_back(new RIFFLargeDataChunk(mjpeg ? "00dc" : "00db", [mjpeg, session, frame]() {
             Layer* frameFlat = session->flattenFrame(frame);
             std::vector<u8> ret;
 
-            u32* srcpx = frameFlat->pixels32();
-            for (int y = frameFlat->h - 1; y >= 0; y--) {
-                for (int x = 0; x < frameFlat->w; x++) {
-                    SDL_Color srcColor = uint32ToSDLColor(frameFlat->getPixelAt({ x, y }));
-                    ret.push_back(srcColor.b);
-                    ret.push_back(srcColor.g);
-                    ret.push_back(srcColor.r);
-                    ret.push_back(srcColor.a);
+            if (mjpeg) {
+                SDLVectorU8IOStream* jpegStream = NULL;
+                SDL_IOStream* jpegStream2 = SDLVectorU8IOStream::OpenNew(&jpegStream);
+                DoOnReturn closeStream([jpegStream2]() { SDL_CloseIO(jpegStream2); });
+                SDL_Surface* srf = SDL_CreateSurface(frameFlat->w, frameFlat->h, SDL_PIXELFORMAT_ARGB8888);
+                if (srf != NULL) {
+                    SDL_LockSurface(srf);
+                    copyPixelsToTexture(frameFlat->pixels32(), frameFlat->w, frameFlat->h, (u8*)srf->pixels, srf->pitch);
+                    SDL_UnlockSurface(srf);
+                    IMG_SaveJPG_IO(srf, jpegStream2, false, 100);
+                    ret.insert(ret.end(), jpegStream->data.begin(), jpegStream->data.end());
+                    SDL_DestroySurface(srf);
+                }
+                else {
+                    logerr("failed to alloc surface for mjpg frame");
+                }
+            }
+            else {
+
+                u32* srcpx = frameFlat->pixels32();
+                for (int y = frameFlat->h - 1; y >= 0; y--) {
+                    for (int x = 0; x < frameFlat->w; x++) {
+                        SDL_Color srcColor = uint32ToSDLColor(frameFlat->getPixelAt({ x, y }));
+                        ret.push_back(srcColor.b);
+                        ret.push_back(srcColor.g);
+                        ret.push_back(srcColor.r);
+                        ret.push_back(srcColor.a);
+                    }
                 }
             }
             delete frameFlat;

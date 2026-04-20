@@ -37,6 +37,10 @@
     //file exporter descriptions
     {"vsp.export.voidsn.latest", "Latest version of the voidsprite session format.\n"
                                  "Supports all features of the editor."},
+    {"vsp.export.voidsn.v6", "Compatible with alpha23.07.2025"},
+    {"vsp.export.voidsn.v5", "Compatible with alpha08.10.2024"},
+    {"vsp.export.voidsn.v3", "Compatible with alpha13.06.2024"},
+    {"vsp.export.voidsn.v2", "Compatible with alpha16.05.2024"},
     {"vsp.export.png", "Best format for single-image files.\n"
                        "Supports transparency and has lossless compression."},
     {"vsp.export.apng", "Extension of the PNG format with animation support. Low software compatibility."},
@@ -56,6 +60,9 @@
     {"vsp.export.palette.voidplt", "Native palette format of voidsprite."},
     {"vsp.export.palette.hex", "Text file with colors in hex (RRGGBB) format, separated by newlines."},
     {"vsp.export.palette.png", "PNG image containing colors."},
+
+    {"vsp.export.option.jpeg.quality", "JPEG quality"},
+    {"vsp.export.option.avi.mjpg", "Use Motion JPEG codec"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},

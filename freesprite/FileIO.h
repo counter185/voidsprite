@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "Layer.h"
 #include "iostructs.h"
+#include "ParameterStore.h"
 
 #define FORMAT_RGB			0b01
 #define FORMAT_PALETTIZED	0b10
@@ -76,7 +77,6 @@ Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAnymapPPM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNDSBanner(PlatformNativePathString path, uint64_t seek = 0);
 Layer* read3DSCXIIcon(PlatformNativePathString path, uint64_t seek = 0);
@@ -89,7 +89,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
 bool tryInstallPalette(PlatformNativePathString path);
 
 bool writeBMP(PlatformNativePathString path, Layer* data);
-bool writeJPEG(PlatformNativePathString path, Layer* data);
+bool writeJPEG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params);
 bool writeTGA(PlatformNativePathString path, Layer* data);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeXBM(PlatformNativePathString path, Layer* data);
@@ -103,8 +103,7 @@ bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
 
-std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path);
-bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2);
+
 
 //SplitSessionData loadSplitSessionData(PlatformNativePathString path);
 
@@ -124,17 +123,19 @@ protected:
     int _formatFlags = FORMAT_RGB;
     bool _isSessionExporter = false;
 
-    std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*)> _sessionExportFunction = NULL;
+    std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*, ParameterStore*)> _sessionExportFunction = NULL;
     std::function<bool(MainEditor*)> _sessionCheckExportFunction = NULL;
 
-    std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*)> _flatExportFunction = NULL;
+    std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*, ParameterStore*)> _flatExportFunction = NULL;
     std::function<bool(Layer*)> _flatCheckExportFunction = NULL;
+
+    ParamList parameters;
 public:
     static FileExporter* sessionExporter(
         std::string name,
         std::string extension, 
         std::string description, 
-        std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*)> exportFunction, 
+        std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*, ParameterStore*)> exportFunction, 
         int formatflags = FORMAT_RGB, 
         std::function<bool(MainEditor*)> canExport = NULL) 
     {
@@ -153,12 +154,27 @@ public:
         std::string name, 
         std::string extension, 
         std::string description, 
+        std::function<bool(PlatformNativePathString, MainEditor*, OperationProgressReport*)> exportFunction, 
+        int formatflags = FORMAT_RGB, 
+        std::function<bool(MainEditor*)> canExport = NULL) 
+    {
+        return sessionExporter(name, extension, description,
+            [exportFunction](PlatformNativePathString a, MainEditor* b, OperationProgressReport* c, ParameterStore* d) {
+                return exportFunction(a,b,c);
+            }, formatflags, canExport);
+    }
+
+
+    static FileExporter* sessionExporter(
+        std::string name, 
+        std::string extension, 
+        std::string description, 
         std::function<bool(PlatformNativePathString, MainEditor*)> exportFunction, 
         int formatflags = FORMAT_RGB, 
         std::function<bool(MainEditor*)> canExport = NULL) 
     {
         return sessionExporter(name, extension, description,
-            [exportFunction](PlatformNativePathString a, MainEditor* b, OperationProgressReport* c) {
+            [exportFunction](PlatformNativePathString a, MainEditor* b, OperationProgressReport* c, ParameterStore* d) {
                 return exportFunction(a,b);
             }, formatflags, canExport);
     }
@@ -167,7 +183,7 @@ public:
         std::string name, 
         std::string extension, 
         std::string description, 
-        std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*)> exportFunction, 
+        std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*, ParameterStore*)> exportFunction, 
         int formatflags = FORMAT_RGB, 
         std::function<bool(Layer*)> canExport = NULL) 
     {
@@ -182,6 +198,19 @@ public:
         return ret;
     }
     static FileExporter* flatExporter(
+        std::string name,
+        std::string extension,
+        std::string description,
+        std::function<bool(PlatformNativePathString, Layer*, OperationProgressReport*)> exportFunction,
+        int formatflags = FORMAT_RGB,
+        std::function<bool(Layer*)> canExport = NULL)
+    {
+        return flatExporter(name, extension, description,
+            [exportFunction](PlatformNativePathString a, Layer* b, OperationProgressReport* c, ParameterStore*) {
+                return exportFunction(a, b, c);
+            }, formatflags, canExport);
+    }
+    static FileExporter* flatExporter(
         std::string name, 
         std::string extension, 
         std::string description, 
@@ -190,11 +219,13 @@ public:
         std::function<bool(Layer*)> canExport = NULL) 
     {
         return flatExporter(name, extension, description, 
-            [exportFunction](PlatformNativePathString a, Layer* b, OperationProgressReport* c) {
+            [exportFunction](PlatformNativePathString a, Layer* b, OperationProgressReport* c, ParameterStore*) {
                 return exportFunction(a,b);
             }, formatflags, canExport);
     }    
     
+    FileExporter* buildParameters(ParamList p) { parameters = p; return this; }
+    ParamList getParameters() { return parameters; }
 
     virtual int formatFlags() { return _formatFlags; }
     virtual bool exportsWholeSession() { return _isSessionExporter; }
@@ -206,11 +237,11 @@ public:
             return _flatCheckExportFunction != NULL ? _flatCheckExportFunction((Layer*)data) : true;
         }
     }
-    virtual bool exportData(PlatformNativePathString path, void* data, OperationProgressReport* progress = NULL) {
+    virtual bool exportData(PlatformNativePathString path, void* data, OperationProgressReport* progress, ParameterStore* params) {
         try {
             ENSURE_REPORT_VALID(progress);
-            return exportsWholeSession() ? _sessionExportFunction(path, (MainEditor*)data, progress) 
-                : _flatExportFunction(path, (Layer*)data, progress);
+            return exportsWholeSession() ? _sessionExportFunction(path, (MainEditor*)data, progress, params) 
+                : _flatExportFunction(path, (Layer*)data, progress, params);
         }
         catch (std::exception& e) {
             logerr(frmt("Data export failed:\n {}", e.what()));

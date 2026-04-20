@@ -115,12 +115,12 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
 
             if (exporter->exportsWholeSession()) {
                 MainEditor* rgbConvEditor = toRGBSession();
-                result = exporter->exportData(name, rgbConvEditor);
+                result = exporter->exportData(name, rgbConvEditor, g_printOnlyProgressReport, &exportParameters);
                 delete rgbConvEditor;
             }
             else {
                 Layer* l = flattenImageAndConvertToRGB(getCurrentFrame());
-                result = exporter->exportData(name, l);
+                result = exporter->exportData(name, l, g_printOnlyProgressReport, &exportParameters);
                 delete l;
             }
 
@@ -156,7 +156,7 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
                 if (clip != NULL) {
                     PlatformNativePathString tileName = name.substr(0, name.find_last_of(convertStringOnWin32("."))) + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
                     if (!exporter->exportsWholeSession()) {
-                        exporter->exportData(tileName, clip);
+                        exporter->exportData(tileName, clip, g_printOnlyProgressReport, &exportParameters);
 #if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
                         emDownloadFile(tileName);
 #endif

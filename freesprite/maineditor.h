@@ -13,6 +13,7 @@
 #include "PanelUserInteractable.h"
 #include "ScreenWideNavBar.h"
 #include "IEditorColorPicker.h"
+#include "ParameterStore.h"
 
 struct NET_StreamSocket;
 
@@ -255,6 +256,7 @@ public:
     FileExporter* lastConfirmedExporter = NULL;
     bool lastConfirmedSave = false;
     bool lastWasSaveAs = false;
+    ParameterStore exportParameters;
 
     bool replaceAlphaMode = false;
     bool eraserMode = false;

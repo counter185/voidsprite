@@ -8,6 +8,44 @@
 #include <zlib.h>
 
 
+void io_registerVSP()
+{
+    FileExporter
+        * exVOIDSNv7,
+        * exVOIDSNv6,
+        * exVOIDSNv5,
+        * exVOIDSNv4,
+        * exVOIDSNv3,
+        * exVOIDSNv2;
+
+    g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", TL("vsp.export.voidsn.latest"), &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session version 6", ".voidsnv6", TL("vsp.export.voidsn.v6"), &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", TL("vsp.export.voidsn.v5"), &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", "", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", TL("vsp.export.voidsn.v3"), &writeVOIDSNv3));
+    g_fileExporters.push_back(exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", TL("vsp.export.voidsn.v2"), &writeVOIDSNv2));
+
+    voidsnExporter = exVOIDSNv7;
+
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED,
+        [](PlatformNativePathString p) {
+            return magicVerify(1, "voidsprite")(p) || magicVerify(9, "/VOIDSN.META/")(p)
+                || magicVerify(0, "\x01")(p) || magicVerify(0, "\x02")(p);
+        }));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v6", ".voidsnv6", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(1, "voidsprite")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(9, "/VOIDSN.META/")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v4", ".voidsnv4", &readVOIDSN, exVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(9, "/VOIDSN.META/")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED,
+        magicVerify(9, "/VOIDSN.META/")));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
+    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Split Session", ".voidspsn", &loadSplitSession, NULL));
+    g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
+}
+
 void voidsnWriteU32(FILE* f, u32 num)
 {
     u32 nvalBuffer = num;
@@ -998,6 +1036,72 @@ bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
     return false;
 }
 
+std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+
+        char header[7];
+        fread(header, 7, 1, f);
+        if (strncmp(header, "VOID9SP", 7) == 0) {
+
+            NineSegmentPattern ret;
+            int* reads[] = {
+                &ret.point1.x, &ret.point1.y, &ret.point2.x, &ret.point2.y, &ret.dimensions.x, &ret.dimensions.y
+            };
+            for (int*& r : reads) {
+                u32 buffer;
+                fread(&buffer, 4, 1, f);
+                *r = buffer;
+            }
+            if (ret.dimensions.x > 0 && ret.dimensions.y > 0) {
+                ret.pixelData = (u32*)tracked_malloc(4 * ret.dimensions.x * ret.dimensions.y, "9SP");
+            }
+
+            if (ret.pixelData != NULL) {
+                fread(ret.pixelData, 4, ret.dimensions.x * ret.dimensions.y, f);
+                fclose(f);
+                return { true, ret };
+            }
+        }
+
+        fclose(f);
+    }
+    return { false,{} };
+}
+
+bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fwrite("VOID9SP", 7, 1, outfile);
+        u32 writes[] = {
+            point1.x, point1.y, point2.x, point2.y, data->w, data->h
+        };
+        for (u32& w : writes) {
+            fwrite(&w, 4, 1, outfile);
+        }
+        fwrite(data->pixels32(), data->w * data->h, 4, outfile);
+
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
+{
+    auto nsp = read9SegmentPattern(path);
+    if (nsp.first) {
+        Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
+        memcpy(nlayer->pixels32(), nsp.second.pixelData, nlayer->w * nlayer->h * 4);
+        tracked_free(nsp.second.pixelData);
+        nlayer->name = "Pattern Layer";
+        return nlayer;
+    }
+    return NULL;
+}
+
 MainEditor* loadSplitSession(PlatformNativePathString path, OperationProgressReport* progress)
 {
     ENSURE_REPORT_VALID(progress);
@@ -1178,7 +1282,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data, Operation
         if (separateImage.exporter != NULL) {
             Layer* trimmed = flat->trim({ separateImage.positionInOverallImage.x, separateImage.positionInOverallImage.y,
                 separateImage.dimensions.x, separateImage.dimensions.y });
-            separateImage.exporter->exportData(subImageFile, trimmed);
+            separateImage.exporter->exportData(subImageFile, trimmed, NULL, NULL);
             delete trimmed;
         }
         else {

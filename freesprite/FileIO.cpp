@@ -1727,19 +1727,6 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
     return NULL;
 }
 
-Layer* readVOID9SP(PlatformNativePathString path, uint64_t seek)
-{
-    auto nsp = read9SegmentPattern(path);
-    if (nsp.first) {
-        Layer* nlayer = new Layer(nsp.second.dimensions.x, nsp.second.dimensions.y);
-        memcpy(nlayer->pixels32(), nsp.second.pixelData, nlayer->w * nlayer->h * 4);
-        tracked_free(nsp.second.pixelData);
-        nlayer->name = "Pattern Layer";
-        return nlayer;
-    }
-    return NULL;
-}
-
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek)
 {
     struct PS2IcnHeader {
@@ -2219,8 +2206,10 @@ bool writeBMP(PlatformNativePathString path, Layer* data) {
     return outbmp.WriteToFileP(nfile);
 }
 
-bool writeJPEG(PlatformNativePathString path, Layer* data)
+bool writeJPEG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params)
 {
+    int quality = params == NULL || !params->hasParam("jpeg.quality") ? 100 : params->getInt("jpeg.quality");
+
     if (data->isPalettized) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Indexed image export not supported"));
         return false;
@@ -2236,7 +2225,7 @@ bool writeJPEG(PlatformNativePathString path, Layer* data)
 
     std::string u8path = convertStringToUTF8OnWin32(path);
 
-    bool ret = IMG_SaveJPG(surface, u8path.c_str(), 100);
+    bool ret = IMG_SaveJPG(surface, u8path.c_str(), quality);
 
     SDL_FreeSurface(surface);
 
@@ -2719,67 +2708,9 @@ bool writeCUR(PlatformNativePathString path, Layer* data)
     return false;
 }
 
-std::pair<bool, NineSegmentPattern> read9SegmentPattern(PlatformNativePathString path)
-{
-    FILE* f = platformOpenFile(path, PlatformFileModeRB);
-    if (f != NULL) {
-
-        char header[7];
-        fread(header, 7, 1, f);
-        if (strncmp(header, "VOID9SP", 7) == 0) {
-
-            NineSegmentPattern ret;
-            int* reads[] = {
-                &ret.point1.x, &ret.point1.y, &ret.point2.x, &ret.point2.y, &ret.dimensions.x, &ret.dimensions.y
-            };
-            for (int*& r : reads) {
-                u32 buffer;
-                fread(&buffer, 4, 1, f);
-                *r = buffer;
-            }
-            if (ret.dimensions.x > 0 && ret.dimensions.y > 0) {
-                ret.pixelData = (u32*)tracked_malloc(4 * ret.dimensions.x * ret.dimensions.y, "9SP");
-            }
-
-            if (ret.pixelData != NULL) {
-                fread(ret.pixelData, 4, ret.dimensions.x * ret.dimensions.y, f);
-                fclose(f);
-                return { true, ret };
-            }
-        }
-
-        fclose(f);
-    }
-    return { false,{} };
-}
-
-bool write9SegmentPattern(PlatformNativePathString path, Layer* data, XY point1, XY point2)
-{
-    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outfile != NULL) {
-        fwrite("VOID9SP", 7, 1, outfile);
-        u32 writes[] = {
-            point1.x, point1.y, point2.x, point2.y, data->w, data->h
-        };
-        for (u32& w : writes) {
-            fwrite(&w, 4, 1, outfile);
-        }
-        fwrite(data->pixels32(), data->w * data->h, 4, outfile);
-
-        fclose(outfile);
-        return true;
-    }
-    return false;
-}
 
 void g_setupIO() {
     FileExporter
-        * exVOIDSNv7,
-        * exVOIDSNv6,
-        * exVOIDSNv5,
-        * exVOIDSNv4,
-        * exVOIDSNv3,
-        * exVOIDSNv2,
         * exPixelStudioPSP,
         * exPixelStudioPSX,
         * exPiskel,
@@ -2803,19 +2734,19 @@ void g_setupIO() {
         * exGIF
         ;
 
-    g_fileExporters.push_back(exVOIDSNv7 = FileExporter::sessionExporter("voidsprite Session", ".voidsn", TL("vsp.export.voidsn.latest"), &writeVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv6 = FileExporter::sessionExporter("voidsprite Session version 6", ".voidsnv6", "", &writeVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv5 = FileExporter::sessionExporter("voidsprite Session version 5", ".voidsnv5", "", &writeVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv4 = FileExporter::sessionExporter("voidsprite Session version 4", ".voidsnv4", "", &writeVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVOIDSNv3 = FileExporter::sessionExporter("voidsprite Session version 3", ".voidsnv3", "", &writeVOIDSNv3));
-    g_fileExporters.push_back(exVOIDSNv2 = FileExporter::sessionExporter("voidsprite Session version 2", ".voidsnv2", "", &writeVOIDSNv2));
+    io_registerVSP();
     g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", "", &writeOpenRaster));
     g_fileExporters.push_back(exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", "", &writePixelStudioPSP));
     g_fileExporters.push_back(exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", "", &writePixelStudioPSX));
     g_fileExporters.push_back(exLPE = FileExporter::sessionExporter("Lospec Pixel Editor", ".lpe",  "", &writeLPE));
     g_fileExporters.push_back(exPiskel = FileExporter::sessionExporter("Piskel", ".piskel", "", &writePISKEL));
     g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", TL("vsp.export.aseprite"), &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(FileExporter::sessionExporter("AVI Video", ".avi", "", &writeAVI, FORMAT_RGB));
+    g_fileExporters.push_back(
+        FileExporter::sessionExporter("AVI Video", ".avi", "", &writeAVI, FORMAT_RGB)
+        ->buildParameters({
+            BOOL_PARAM("avi.mjpg", 1)
+        })
+    );
     g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", TL("vsp.export.gif"), &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exAPNG = FileExporter::sessionExporter("Animated PNG", ".apng", TL("vsp.export.apng"), &writeAPNG, FORMAT_RGB));
 
@@ -2827,7 +2758,12 @@ void g_setupIO() {
     FileExporter* exJXL;
     g_fileExporters.push_back(exJXL = FileExporter::sessionExporter("JPEG XL", ".jxl", "", &writeJpegXL, FORMAT_RGB));
 #endif
-    g_fileExporters.push_back(exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", TL("vsp.export.jpeg"), &writeJPEG));
+    g_fileExporters.push_back(
+        exJPEG = FileExporter::flatExporter("JPEG", ".jpeg", TL("vsp.export.jpeg"), &writeJPEG)
+            ->buildParameters({
+                INT_PARAM("jpeg.quality", 0, 100, 100)
+            })
+    );
     g_fileExporters.push_back(exAVIF = FileExporter::sessionExporter("AVIF", ".avif", TL("vsp.export.avif"), &writeAVIF));
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", "", & writeTGA));
     g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", "", &writeCaveStoryPBM));
@@ -2848,25 +2784,6 @@ void g_setupIO() {
         g_fileExporters.push_back(i);
     }
 
-
-    voidsnExporter = exVOIDSNv7;
-
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session", ".voidsn", &readVOIDSN, exVOIDSNv7, FORMAT_RGB | FORMAT_PALETTIZED,
-        [](PlatformNativePathString p) {
-            return magicVerify(1, "voidsprite")(p) || magicVerify(9, "/VOIDSN.META/")(p)
-                || magicVerify(0, "\x01")(p) || magicVerify(0, "\x02")(p);
-        }));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v6", ".voidsnv6", &readVOIDSN, exVOIDSNv6, FORMAT_RGB | FORMAT_PALETTIZED,
-        magicVerify(1, "voidsprite")));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v5", ".voidsnv5", &readVOIDSN, exVOIDSNv5, FORMAT_RGB | FORMAT_PALETTIZED,
-        magicVerify(9, "/VOIDSN.META/")));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v4", ".voidsnv4", &readVOIDSN, exVOIDSNv4, FORMAT_RGB | FORMAT_PALETTIZED,
-        magicVerify(9, "/VOIDSN.META/")));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v3", ".voidsnv3", &readVOIDSN, exVOIDSNv3, FORMAT_RGB | FORMAT_PALETTIZED,
-        magicVerify(9, "/VOIDSN.META/")));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v2", ".voidsnv2", &readVOIDSN, exVOIDSNv2));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Session v1", ".voidsnv1", &readVOIDSN, exVOIDSNv3));
-    g_fileImporters.push_back(FileImporter::sessionImporter("voidsprite Split Session", ".voidspsn", &loadSplitSession, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
@@ -2887,7 +2804,6 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("GIF", ".gif", &readGIF, exGIF, FORMAT_RGB | FORMAT_PALETTIZED, magicVerify(0, "GIF")));
     g_fileImporters.push_back(FileImporter::sessionImporter("Resprite project", ".resprite", &readResprite, NULL, FORMAT_RGB, magicVerify(0, "PK")));
 
-    g_fileImporters.push_back(FileImporter::flatImporter("voidsprite 9-segment pattern", ".void9sp", &readVOID9SP, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("PNG", ".png", &readPNG, exPNG, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(0, "\x89PNG\x0D\x0A")));
     g_fileImporters.push_back(FileImporter::sessionImporter("Animated PNG", ".apng", &readAPNG, exAPNG, FORMAT_RGB | FORMAT_PALETTIZED,

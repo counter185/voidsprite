@@ -226,11 +226,11 @@ void RPG2KTilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathStr
         if (exporter->exportsWholeSession()) {
             MainEditor* session = new MainEditor(l);
             session->ssne.tileDimensions = { 16,16 };
-            result = exporter->exportData(path, session);
+            result = exporter->exportData(path, session, g_printOnlyProgressReport, NULL);
             delete session;
         }
         else {
-            result = exporter->exportData(path, l);
+            result = exporter->exportData(path, l, g_printOnlyProgressReport, NULL);
             delete l;
         }
 

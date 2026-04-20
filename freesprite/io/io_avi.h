@@ -49,4 +49,4 @@ struct __AVIStreamHeader {
 };
 #pragma pack(pop)
 
-bool writeAVI(PlatformNativePathString path, MainEditor* session);
+bool writeAVI(PlatformNativePathString path, MainEditor* session, OperationProgressReport* report, ParameterStore* params);

@@ -84,7 +84,7 @@ MainEditor* readOpenRaster(PlatformNativePathString path)
     return NULL;
 }
 
-bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* report)
+bool writeOpenRaster(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* report, ParameterStore*)
 {
     ENSURE_REPORT_VALID(report);
     if (editor->isPalettized) {

@@ -103,7 +103,7 @@ void PopupQuickConvert::doQuickConvert(
 
             outPath += convertStringOnWin32(exporter->extension());
 
-            if (exporter->exportData(outPath, session, progress)) {
+            if (exporter->exportData(outPath, session, progress, NULL)) {
                 g_addNotification(SuccessNotification("Success", "Exported file"));
             }
             else {
@@ -130,7 +130,7 @@ void PopupQuickConvert::doQuickConvert(
                 outPath += convertStringOnWin32(exporter->extension());
             }
 
-            if (exporter->exportData(outPath, l, progress)) {
+            if (exporter->exportData(outPath, l, progress, NULL)) {
 #if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
                 emDownloadFile(outPath);
 #endif

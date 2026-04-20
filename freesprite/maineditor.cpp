@@ -54,6 +54,7 @@
 #include "PopupChooseAction.h"
 #include "PopupChooseFormat.h"
 #include "PopupSetTemplateInfo.h"
+#include "PopupSetParameters.h"
 #include "multiwindow.h"
 
 #include "discord_rpc.h"
@@ -1872,11 +1873,11 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
             MainEditorPalettized* rgbConvEditor = toPalettizedSession();
             if (rgbConvEditor != NULL) {
                 if (exporter->exportsWholeSession()) {
-                    result = exporter->exportData(name, rgbConvEditor);
+                    result = exporter->exportData(name, rgbConvEditor, NULL, &exportParameters);
                 }
                 else {
                     Layer* l = rgbConvEditor->flattenImageWithoutConvertingToRGB();
-                    result = exporter->exportData(name, l);
+                    result = exporter->exportData(name, l, NULL, &exportParameters);
                     delete l;
                 }
                 delete rgbConvEditor;
@@ -1917,7 +1918,7 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
                 if (clip != NULL) {
                     PlatformNativePathString tileName = name + convertStringOnWin32(frmt("_{}_{}{}", x, y, exporter->extension()));
                     if (!exporter->exportsWholeSession()) {
-                        exporter->exportData(tileName, clip);
+                        exporter->exportData(tileName, clip, g_printOnlyProgressReport, &exportParameters);
 #if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
                         emDownloadFile(tileName);
 #endif
@@ -2110,12 +2111,12 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
 {
     bool result = false;
     if (exporter->exportsWholeSession()) {
-        result = exporter->exportData(name, this, progress);
+        result = exporter->exportData(name, this, progress, &exportParameters);
     }
     else {
         Layer* flat = this->isPalettized ? ((MainEditorPalettized*)this)->flattenImageWithoutConvertingToRGB() : flattenImage();
         flat->importExportExtdata = makeSingleLayerExtdata();
-        result = exporter->exportData(name, flat, progress);
+        result = exporter->exportData(name, flat, progress, &exportParameters);
         delete flat;
     }
 
@@ -2150,11 +2151,26 @@ void MainEditor::trySaveAsImage()
         PopupChooseFormat* popup = PopupChooseFormat::withDefaultExportFormats("Choose format", "");
         popup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), [this](FormatDef* f, PlatformNativePathString path) {
             FormatDef ff = *f;
-            g_startNewOperation([this, path, ff](OperationProgressReport* report) {
-                if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {
-                    g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
-                }
-            });
+            FileExporter* exporter = (FileExporter*)ff.udata;
+            ParamList params = exporter->getParameters();
+            if (params.empty()) {
+                g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                    if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {
+                        g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+                    }
+                    });
+            }
+            else {
+                PopupSetParameters* setParamsPopup = new PopupSetParameters("Set export parameters", &exportParameters, &params, "vsp.export.option");
+                setParamsPopup->onFinishCallback = [this, path, ff]() {
+                    g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                        if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {
+                            g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+                        }
+                        });
+                    };
+                g_addPopup(setParamsPopup);
+            }
         });
     }
 }
@@ -2653,7 +2669,7 @@ PlatformNativePathString MainEditor::createRecoveryAutosave(std::string insertIn
     try {
         std::filesystem::path confPath = platformEnsureDirAndGetConfigFilePath();
         auto autosavePath = confPath.parent_path() / "autosaves" / autosaveName;
-        if (voidsnExporter->exportData(autosavePath, this)) {
+        if (voidsnExporter->exportData(autosavePath, this, g_printOnlyProgressReport, &exportParameters)) {
             g_addNotification(SuccessNotification("Recovery autosave", "Autosave successful"));
             changesSinceLastSave = CHANGES_RECOVERY_AUTOSAVED;
             return autosavePath;

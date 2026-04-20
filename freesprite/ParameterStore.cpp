@@ -8,6 +8,16 @@
 #include "UITextField.h"
 
 
+bool ParameterStore::hasParam(std::string key)
+{
+    for (auto& p : parameters) {
+        if (p.name == key) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Parameter& ParameterStore::getParam(std::string key)
 {
 	for (auto& p : parameters) {
@@ -18,8 +28,20 @@ Parameter& ParameterStore::getParam(std::string key)
 	return PARAM_INVALID;
 }
 
-Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallback)
+int ParameterStore::addOrGetParamIndex(Parameter p)
 {
+    for (int i = 0; i < parameters.size(); i++) {
+        if (parameters[i].name == p.name) {
+            return i;
+        }
+    }
+    parameters.push_back(p);
+    return parameters.size() - 1;
+}
+
+Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallback, ParamList* paramList, std::string locKeyPrefix)
+{
+    paramList = paramList == NULL ? &parameters : paramList;
 	auto updateLabelFn = [](Parameter& p, UILabel* l) {
         switch (p.paramType) {
             case PT_BOOL:
@@ -43,9 +65,9 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
     panel->passThroughMouse = true;
 
     int y = 0;
-    int i = 0;
-    for (auto& p : parameters) {
-        UILabel* label = new UILabel(p.name);
+    for (auto& p : *paramList) {
+        int i = addOrGetParamIndex(p);
+        UILabel* label = new UILabel(locKeyPrefix != "" ? TL(frmt("{}.{}",locKeyPrefix, p.name)) : p.name);
         label->position = XY{ 10, y + 2 };
         panel->subWidgets.addDrawable(label);
 
@@ -151,7 +173,6 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
             break;
         }
         y += 40;
-        i++;
     }
     return panel;
 }

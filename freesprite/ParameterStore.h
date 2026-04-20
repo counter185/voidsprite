@@ -52,7 +52,10 @@ public:
         return ParameterStore(parameters);
     }
 
+    bool hasParam(std::string key);
+
     Parameter& getParam(std::string key);
+    int addOrGetParamIndex(Parameter p);
 
     bool getBool(std::string key) { return getParam(key).vNum == 1; }
     float getFloat(std::string key) { return getParam(key).vNum; }
@@ -62,7 +65,7 @@ public:
     std::pair<int, int> getIntRange(std::string key) { return { (int)getParam(key).vNum, (int)getParam(key).vNum2 }; };
     std::string getString(std::string key) { return getParam(key).vStr; }
 
-    Panel* generateVerticalUI(std::function<void()> onChangedCallback);
+    Panel* generateVerticalUI(std::function<void()> onChangedCallback, ParamList* paramList = NULL, std::string locKeyPrefix = "");
     Panel* generateHorizontalUI(std::function<void()> onChangedCallback);
 
     std::map<std::string, std::string> buildParameterMap();

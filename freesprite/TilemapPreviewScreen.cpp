@@ -747,12 +747,12 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
         newSession->ssne.tileDimensions = tileSize;
 
         if (exporter->exportsWholeSession()) {
-            success = exporter->exportData(path, newSession);
+            success = exporter->exportData(path, newSession, NULL, NULL);
             delete newSession;
         }
         else {
             Layer* l = newSession->flattenImage();
-            success = exporter->exportData(path, l);
+            success = exporter->exportData(path, l, NULL, NULL);
             delete l;
         }
         delete newSession;
@@ -768,11 +768,11 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             if (exporter->exportsWholeSession()) {
                 MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
                 ssn->ssne.tileDimensions = tileSize;
-                ss = exporter->exportData(filename, ssn);
+                ss = exporter->exportData(filename, ssn, NULL, NULL);
                 delete ssn;
             }
             else {
-                ss = exporter->exportData(filename, ll);
+                ss = exporter->exportData(filename, ll, NULL, NULL);
                 delete ll;
             }
             exports += ss ? 1 : 0;
@@ -783,11 +783,11 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
         Layer* ll = renderLayer(activeTilemap);
         if (exporter->exportsWholeSession()) {
             MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
-            success = exporter->exportData(path, ssn);
+            success = exporter->exportData(path, ssn, NULL, NULL);
             delete ssn;
         }
         else {
-            success = exporter->exportData(path, ll);
+            success = exporter->exportData(path, ll, NULL, NULL);
             delete ll;
         }
     }

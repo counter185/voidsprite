@@ -152,7 +152,7 @@ bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativ
                 newSession->activeFrame = caller->activeFrame;
                 newSession->ssne.tileDimensions = caller->ssne.tileDimensions;
                 newSession->selLayer = caller->selLayer;
-                result = exporter->exportData(name, newSession);
+                result = exporter->exportData(name, newSession, g_printOnlyProgressReport, &caller->exportParameters);
                 delete newSession;
             }
 
@@ -170,7 +170,7 @@ bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativ
             if (flat != NULL) {
                 Layer* scaled = flat->copyCurrentVariantScaled(resultSize);
                 delete flat;
-                result = exporter->exportData(name, scaled);
+                result = exporter->exportData(name, scaled, g_printOnlyProgressReport, &caller->exportParameters);
                 delete scaled;
             }
         }
