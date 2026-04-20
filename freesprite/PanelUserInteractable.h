@@ -1,5 +1,10 @@
 #pragma once
 #include "Panel.h"
+
+#define RESIZE_VERTICALLY 0b10
+#define RESIZE_HORIZONTALLY 0b1
+#define RESIZE_ALL 0b11
+
 class PanelUserInteractable :
     public Panel
 {
@@ -15,6 +20,7 @@ private:
 
     const int resizeDistance = 15;
     bool resizing = false;
+    u8 resizeFlags = RESIZE_ALL;
     XY minResizableSize = XY{ 0,0 };
 
     UIButton* collapseButton = NULL;
@@ -37,11 +43,12 @@ protected:
 
     void setupDraggable();
     void setupCollapsible();
-    void setupResizable(XY minDimensions = XY{ 0,0 });
+    void setupResizable(XY minDimensions = XY{ 0,0 }, u8 resizeFlags = RESIZE_ALL);
     void setupCloseButton(std::function<void()> callback);
     
     virtual bool defaultInputAction(SDL_Event evt, XY at) { return false; }
     virtual void renderAfterBG(XY at) {}
+    virtual void panelResized(XY from, XY to) {}
     void renderResizeHandle(XY at);
     void repositionCloseButton();
 public:
@@ -73,6 +80,7 @@ public:
     void toggleCollapse();
     void tryMoveOutOfOOB();
     void reanchor();
+    void reanchorInnerDrawable(Drawable* d, XY oldSize, XY newSize, XY anchor);
 
     UILabel* addTitleText(std::string title);
 };

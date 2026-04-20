@@ -25,6 +25,7 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
     setupCloseButton([this]() {
         this->enabled = false;
     });
+    setupResizable({580, 154}, RESIZE_HORIZONTALLY);
 
     UIButton* newFrame = new UIButton("", "New frame");
     newFrame->icon = g_iconFrameNew;
@@ -146,6 +147,11 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
 void EditorFramePicker::render(XY at) {
     PanelUserInteractable::render(at);
     renderPlayhead(at);
+}
+
+void EditorFramePicker::panelResized(XY from, XY to)
+{
+    frameButtonPanel->wxWidth = wxWidth - 10;
 }
 
 void EditorFramePicker::renderPlayhead(XY at)

@@ -15,6 +15,7 @@ enum ParameterType {
     PT_COLOR_L = 3,
     PT_BOOL = 4,
     PT_INT_RANGE = 5,
+    PT_STRING = 6,
 };
 
 struct Parameter {
@@ -26,6 +27,15 @@ struct Parameter {
     double vNum = 0.5;
     u32 vU32 = 0;
     double vNum2 = 0.5;
+    std::string vStr = "";
+
+    static Parameter StringParam(std::string name, std::string defaultValue) {
+        return Parameter{
+            .paramType = PT_STRING,
+            .name = name,
+            .vStr = defaultValue
+        };
+    }
 };
 #define ParamList std::vector<Parameter>
 inline Parameter PARAM_INVALID = Parameter((ParameterType)-1, "INVALID PARAMETER");
@@ -50,6 +60,7 @@ public:
     u32 getColorRGB(std::string key) { return getParam(key).vU32; }
     u8 getColorL(std::string key) { return (int)getParam(key).vNum; }
     std::pair<int, int> getIntRange(std::string key) { return { (int)getParam(key).vNum, (int)getParam(key).vNum2 }; };
+    std::string getString(std::string key) { return getParam(key).vStr; }
 
     Panel* generateVerticalUI(std::function<void()> onChangedCallback);
     Panel* generateHorizontalUI(std::function<void()> onChangedCallback);

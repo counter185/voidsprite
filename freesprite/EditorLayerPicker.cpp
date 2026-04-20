@@ -19,6 +19,7 @@ EditorLayerPicker::EditorLayerPicker(MainEditor* editor) {
     setupDraggable();
     setupCollapsible();
     addTitleText(TL("vsp.maineditor.panel.layerpicker.title"));
+    setupResizable({250, 150}, RESIZE_VERTICALLY);
 
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
@@ -144,6 +145,11 @@ void EditorLayerPicker::eventSliderPosFinishedChanging(int evt_id, float value)
         caller->layer_setOpacity((uint8_t)(value * 255));
         //logprintf("eventSliderPosFinishedChanging, %x\n", (uint8_t)(value * 255));
     }
+}
+
+void EditorLayerPicker::panelResized(XY from, XY to)
+{
+    layerListPanel->wxHeight = wxHeight - layerListPanel->position.y - 5;
 }
 
 void EditorLayerPicker::updateLayers()

@@ -9,7 +9,7 @@
 #define BRUSH_BOOL_PROPERTY(name,defaultvalue) BrushProperty{name,3,0,1,defaultvalue}
 
 #define BRUSH_DOUBLE_CLICK_TIME 600
-
+//todo: use parameterstore for all of this
 struct BrushProperty {
 	std::string name;
 	int type;

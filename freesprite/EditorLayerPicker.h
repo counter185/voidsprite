@@ -18,6 +18,7 @@ public:
 	void eventSliderPosChanged(int evt_id, float value) override;
 	void eventSliderPosFinishedChanging(int evt_id, float value) override;
 
+	void panelResized(XY from, XY to) override;
 	void updateLayers();
 };
 

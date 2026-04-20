@@ -696,6 +696,8 @@ void g_mainLoop() {
             popupStack[popupStack.size() - 1]->render();
         }*/
 
+        wd->doOverlayRenderOperations();
+
         g_renderVFX();
 
 #if _DEBUG

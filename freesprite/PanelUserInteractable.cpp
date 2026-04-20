@@ -33,10 +33,11 @@ void PanelUserInteractable::setupCollapsible()
     subWidgets.addDrawable(collapseButton);
 }
 
-void PanelUserInteractable::setupResizable(XY minDimensions)
+void PanelUserInteractable::setupResizable(XY minDimensions, u8 resizeFlags)
 {
     resizable = true;
     minResizableSize = minDimensions;
+    this->resizeFlags = resizeFlags;
 }
 
 void PanelUserInteractable::setupCloseButton(std::function<void()> callback)
@@ -88,6 +89,20 @@ void PanelUserInteractable::reanchor()
             centerPos.x >= g_windowW / 2 ? 1 : 0,
             centerPos.y >= g_windowH / 2 ? 1 : 0
         };
+    }
+}
+
+void PanelUserInteractable::reanchorInnerDrawable(Drawable* d, XY oldSize, XY newSize, XY anchor)
+{
+    if (d != NULL) {
+        if (anchor.x == 1) {
+            int distance = newSize.x - oldSize.x;
+            d->position.x += distance;
+        }
+        if (anchor.y == 1) {
+            int distance = newSize.y - oldSize.y;
+            d->position.y += distance;
+        }
     }
 }
 
@@ -186,9 +201,16 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
             return false;
         case SDL_MOUSEMOTION:
             if (resizing && (!collapsible || !collapsed)) {
-                wxWidth = ixmin(g_windowW, ixmax(minResizableSize.x, wxWidth + (int)(evt.motion.xrel)));
-                wxHeight = ixmin(g_windowH, ixmax(minResizableSize.x, wxHeight + (int)(evt.motion.yrel)));
-                repositionCloseButton();
+                XY oldSize = { wxWidth, wxHeight };
+                XY newSize = {
+                    resizeFlags & RESIZE_HORIZONTALLY ? ixmin(g_windowW, ixmax(minResizableSize.x, wxWidth + (int)(evt.motion.xrel))) : wxWidth,
+                    resizeFlags & RESIZE_VERTICALLY ? ixmin(g_windowH, ixmax(minResizableSize.y, wxHeight + (int)(evt.motion.yrel))) : wxHeight
+                };
+                wxWidth = newSize.x;
+                wxHeight = newSize.y;
+                panelResized(oldSize, newSize);
+                //repositionCloseButton();
+                reanchorInnerDrawable(closeButton, oldSize, newSize, { 1,0 });
 
                 tryMoveOutOfOOB();
                 return true;

@@ -25,6 +25,8 @@ public:
 
     void render(XY at) override;
 
+    void panelResized(XY from, XY to) override;
+
     void createFrameButtons();
 
     void renderPlayhead(XY at);

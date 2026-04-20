@@ -14,6 +14,7 @@ PalettizedEditorLayerPicker::PalettizedEditorLayerPicker(MainEditorPalettized* e
     setupDraggable();
     setupCollapsible();
     addTitleText(TL("vsp.maineditor.panel.layerpicker.title"));
+    setupResizable({ 250, 150 }, RESIZE_VERTICALLY);
 
     UIButton* addBtn = new UIButton();
     addBtn->position = { 5, 30 };
