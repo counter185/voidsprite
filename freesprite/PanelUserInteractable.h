@@ -45,6 +45,8 @@ protected:
     void setupCollapsible();
     void setupResizable(XY minDimensions = XY{ 0,0 }, u8 resizeFlags = RESIZE_ALL);
     void setupCloseButton(std::function<void()> callback);
+
+    void disableResizable();
     
     virtual bool defaultInputAction(SDL_Event evt, XY at) { return false; }
     virtual void renderAfterBG(XY at) {}

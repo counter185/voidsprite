@@ -52,6 +52,11 @@ void PanelUserInteractable::setupCloseButton(std::function<void()> callback)
     wxsTarget().addDrawable(closeButton);
 }
 
+void PanelUserInteractable::disableResizable()
+{
+    resizable = false;
+}
+
 UILabel* PanelUserInteractable::addTitleText(std::string title)
 {
     XY labelPosition = { collapsible ? 30 : 5, 3 };

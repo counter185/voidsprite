@@ -89,8 +89,8 @@ void PanelReference::renderAfterBG(XY at)
         g_popClip();
     }
     else if (currentMode == REFERENCE_FIT) {    //fit
-        //previewTex->render(fitInside(canvasDraw, {0,0,previewTex->w, previewTex->h}));
-        previewTex->render(canvasDraw);
+        previewTex->render(fitInside(canvasDraw, {0,0,previewTex->w, previewTex->h}));
+        //previewTex->render(canvasDraw);
     }
 
 }
@@ -110,14 +110,17 @@ void PanelReference::initWidgets()
     if (currentMode == REFERENCE_PIXEL_PERFECT) { //pixel-perfect
         wxWidth = 400;
         wxHeight = 300;
+        setupResizable({ 380, 200 });
     }
     else if (currentMode == REFERENCE_FIT) {  //fit
         wxWidth = 400;
         wxHeight = (int)(400.0 / previewTex->w * previewTex->h);
+        setupResizable({ 380, 200 });
     }
     else if (currentMode == REFERENCE_UNDER_CANVAS || currentMode == REFERENCE_OVER_CANVAS) {
         wxWidth = 400;
         wxHeight = 80;
+        disableResizable();
 
         UISlider* opacitySlider = new UISlider();
         opacitySlider->setValue(0, 1, opacity);
