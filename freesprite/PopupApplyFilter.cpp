@@ -162,7 +162,9 @@ void PopupApplyFilter::apply(ParameterStore* parameterMap) {
     auto target = this->target;
     auto session = this->session;
     auto targetFilter = this->targetFilter;
-    g_startNewOperation([parameterMap, targetFilter, session, target]() {
+    auto seed = this->filterRandomSeed;
+    g_startNewOperation([seed, parameterMap, targetFilter, session, target]() {
+        srand(seed);
         Layer* copy = targetFilter->run(target, parameterMap);
         session->commitStateToCurrentLayer();
         if (session->isolateEnabled) {
@@ -240,8 +242,12 @@ ParameterStore PopupApplyFilter::makeParamsFromPreset(FilterPreset preset) {
 
 void PopupApplyFilter::previewRenderThread()
 {
+    srand(filterRandomSeed);
     while (previewRenderThreadShouldRun) {
         if (threadHasNewParameters) {
+            filterRandomSeed = randomInt(0, 0xFFFF);
+            //loginfo(frmt("random seed: {:08x}", filterRandomSeed));
+            srand(filterRandomSeed);
             nowRendering = true;
             ParameterStore previewParams = params.copy();
             threadHasNewParameters = false;

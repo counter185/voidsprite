@@ -20,6 +20,8 @@ protected:
     std::atomic<bool> threadHasNewParameters = true;
     std::atomic<bool> nowRendering = false;
 
+    u32 filterRandomSeed = 0;
+
     Panel* paramUI = NULL;
     MainEditor* session;
     Layer* target;
@@ -30,6 +32,7 @@ public:
         this->session = session;
         this->target = target;
         this->targetFilter = targetFilter;
+        filterRandomSeed = randomInt(0, 0xFFFF);
 
         setupWidgets();
         if (targetFilter->getParameters().size() > 0) {

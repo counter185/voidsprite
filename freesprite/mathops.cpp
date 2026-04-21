@@ -1075,9 +1075,10 @@ int randomInt(int minIncl, int maxExcl)
     }
     if (range > RAND_MAX) {
         int s = 0;
-        for (int s = 0; s < 1 + (range / RAND_MAX); s++) {
-            range -= RAND_MAX;
+        int iterations = (int)ceil(range / (float)RAND_MAX);
+        for (int i = 0; i < iterations; i++) {
             s += rand() % ixmin(range, RAND_MAX);
+            range -= RAND_MAX;
         }
         return s + minIncl;
     }

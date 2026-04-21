@@ -208,8 +208,9 @@ Layer* FilterAdjustHSV::run(Layer* src, ParameterStore* options)
 Layer* FilterStrideGlitch::run(Layer* src, ParameterStore* options)
 {
     int splits = ixmax(1, ixmin(options->getInt("splits"), src->h));
-    int lengthMin = options->getInt("length.min");// std::stoi(options["length.min"]);
-    int lengthMax = options->getInt("length.max");// std::stoi(options["length.max"]);
+    auto lengthRange = options->getIntRange("length");
+    int lengthMin = lengthRange.first;
+    int lengthMax = lengthRange.second;
     Layer* c = copy(src);
     int h = c->h;
     std::stack<int> splitPoints;
