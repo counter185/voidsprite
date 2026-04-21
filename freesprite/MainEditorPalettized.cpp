@@ -25,6 +25,7 @@
 #include "PopupFilePicker.h"
 #include "PopupChooseFormat.h"
 #include "PopupSetTemplateInfo.h"
+#include "PopupSetParameters.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -742,9 +743,28 @@ void MainEditorPalettized::trySaveAsPalettizedImage()
 {
     lastWasSaveAs = true;
     PopupChooseFormat* popup = PopupChooseFormat::withDefaultIndexedExportFormats("Choose format", "");
+    popup->setHighlightUdata(lastConfirmedExporter);
     popup->chooseFormatAndDoFileSavePrompt("save indexed image", [this](FormatDef* f, PlatformNativePathString path) {
-        if (trySaveWithExporter(path, (FileExporter*)f->udata)) {
-            g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+        FormatDef ff = *f;
+        FileExporter* exporter = (FileExporter*)ff.udata;
+        ParamList params = exporter->getParameters();
+        if (params.empty()) {
+            g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {
+                    g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+                }
+                });
+        }
+        else {
+            PopupSetParameters* setParamsPopup = new PopupSetParameters(frmt("Export options: {}", ff.name), &exportParameters, &params, "vsp.export.option");
+            setParamsPopup->onFinishCallback = [this, path, ff]() {
+                g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                    if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {
+                        g_tryPushLastFilePath(convertStringToUTF8OnWin32(path));
+                    }
+                    });
+                };
+            g_addPopup(setParamsPopup);
         }
     });
 }

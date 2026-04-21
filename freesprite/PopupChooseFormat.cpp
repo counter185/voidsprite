@@ -74,7 +74,15 @@ void PopupChooseFormat::buildFormatList() {
                         }}
                     }));
                 };
-                priority2Buttons.push_back(newButton);
+                if (highlightUdata != NULL && f.udata == highlightUdata) {
+                    btn->fill = Fill::Gradient(0xD0192D2C, 0xD0000000, 0xD0192D2C, 0xD0000000);
+                    btn->colorTextFocused = btn->colorTextUnfocused = SDL_Color{ 0x8A, 0xFF, 0xFA, 0xff };
+                    priority2Buttons.insert(priority2Buttons.begin(), newButton);
+                }
+                else {
+                    priority2Buttons.push_back(newButton);
+                }
+                
             }
         }
     }
@@ -195,6 +203,12 @@ void PopupChooseFormat::eventFileSaved(int evt_id, PlatformNativePathString name
     }
     //g_startNewMainThreadOperation([this](){this->closePopup();});
     closePopup();
+}
+
+void PopupChooseFormat::setHighlightUdata(void* udata)
+{
+    highlightUdata = udata;
+    filterList(filterQuery);
 }
 
 void PopupChooseFormat::filterList(std::string search)

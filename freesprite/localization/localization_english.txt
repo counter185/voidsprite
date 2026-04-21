@@ -56,6 +56,9 @@
     {"vsp.export.c", "Export the image as an array of numbers that can be used with the C programming language."},
     {"vsp.export.python", "Export the image as a 2D array of pixels that can be used in a Python script."},
     {"vsp.export.html", "Export the image as a PNG encoded into Base64 for an inline <img> tag for HTML."},
+    {"vsp.export.pgm", "Simple, easily adaptable format for grayscale images.\n"
+                       "In RGB mode, pixels will be converted to grayscale.\n"
+                       "In indexed mode, raw palette indexes will be written."},
 
     {"vsp.export.palette.voidplt", "Native palette format of voidsprite."},
     {"vsp.export.palette.hex", "Text file with colors in hex (RRGGBB) format, separated by newlines."},
@@ -63,6 +66,7 @@
 
     {"vsp.export.option.jpeg.quality", "JPEG quality"},
     {"vsp.export.option.avi.mjpg", "Use Motion JPEG codec"},
+    {"vsp.export.option.pgm.binary", "Binary PGM"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},

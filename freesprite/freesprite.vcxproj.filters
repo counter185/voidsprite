@@ -708,6 +708,9 @@
     <ClCompile Include="PopupSetParameters.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_anymap.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1423,6 +1426,9 @@
     </ClInclude>
     <ClInclude Include="PopupSetParameters.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_anymap.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

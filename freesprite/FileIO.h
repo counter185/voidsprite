@@ -56,6 +56,7 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_godot.h"
 #include "io/io_resprite.h"
 #include "io/io_avif.h"
+#include "io/io_anymap.h"
 
 #include "io/io_palettes.h"
 
@@ -72,9 +73,6 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSPK(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComBDY(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXComSCR(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readAnymapPPM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readXBM(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSR8(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readPS2ICN(PlatformNativePathString path, uint64_t seek = 0);
@@ -97,9 +95,6 @@ bool writeCHeader(PlatformNativePathString path, Layer* data);
 bool writePythonNPArray(PlatformNativePathString path, Layer* data);
 bool writeHTMLBase64(PlatformNativePathString path, Layer* data);
 bool writeJavaBufferedImage(PlatformNativePathString path, Layer* data);
-bool writeAnymapTextPBM(PlatformNativePathString path, Layer* data);
-bool writeAnymapTextPGM(PlatformNativePathString path, Layer* data);
-bool writeAnymapTextPPM(PlatformNativePathString path, Layer* data);
 bool writeSR8(PlatformNativePathString path, Layer* data);
 bool writeCUR(PlatformNativePathString path, Layer* data);
 

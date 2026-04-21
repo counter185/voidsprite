@@ -290,6 +290,7 @@
     <ClCompile Include="ExtractDataScreen.cpp" />
     <ClCompile Include="fills.cpp" />
     <ClCompile Include="Gamepad.cpp" />
+    <ClCompile Include="io\io_anymap.cpp" />
     <ClCompile Include="io\io_aseprite.cpp" />
     <ClCompile Include="io\io_astc.cpp" />
     <ClCompile Include="io\io_avi.cpp" />
@@ -553,6 +554,7 @@
     <ClInclude Include="gzip\config.hpp" />
     <ClInclude Include="gzip\decompress.hpp" />
     <ClInclude Include="iostructs.h" />
+    <ClInclude Include="io\io_anymap.h" />
     <ClInclude Include="io\io_aseprite.h" />
     <ClInclude Include="io\io_astc.h" />
     <ClInclude Include="io\io_avi.h" />

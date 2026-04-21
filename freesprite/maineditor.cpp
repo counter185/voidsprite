@@ -2149,6 +2149,7 @@ void MainEditor::trySaveAsImage()
     else {
         lastWasSaveAs = true;
         PopupChooseFormat* popup = PopupChooseFormat::withDefaultExportFormats("Choose format", "");
+        popup->setHighlightUdata(lastConfirmedExporter);
         popup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), [this](FormatDef* f, PlatformNativePathString path) {
             FormatDef ff = *f;
             FileExporter* exporter = (FileExporter*)ff.udata;
@@ -2161,7 +2162,7 @@ void MainEditor::trySaveAsImage()
                     });
             }
             else {
-                PopupSetParameters* setParamsPopup = new PopupSetParameters("Set export parameters", &exportParameters, &params, "vsp.export.option");
+                PopupSetParameters* setParamsPopup = new PopupSetParameters(frmt("Export options: {}", ff.name), &exportParameters, &params, "vsp.export.option");
                 setParamsPopup->onFinishCallback = [this, path, ff]() {
                     g_startNewOperation([this, path, ff](OperationProgressReport* report) {
                         if (trySaveWithExporter(path, (FileExporter*)ff.udata, report)) {

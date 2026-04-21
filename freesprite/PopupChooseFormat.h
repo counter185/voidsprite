@@ -17,6 +17,7 @@ protected:
     std::vector<FormatDef> formats;
     std::string filterQuery = "";
     ScrollingPanel* formatsPanel = NULL;
+    void* highlightUdata = NULL;
 
     std::function<void(FormatDef*,PlatformNativePathString)> onEventFileSavedCallback = NULL;
 
@@ -41,6 +42,7 @@ public:
 
     static std::vector<FormatDef> processFavouriteFormats(std::vector<FormatDef> srcList);
 
+    void setHighlightUdata(void* udata);
     void filterList(std::string search);
     void chooseFormatAndDoFileSavePrompt(std::string promptTitle, std::function<void(FormatDef*,PlatformNativePathString)> callback);
     void finish(FormatDef* target);
