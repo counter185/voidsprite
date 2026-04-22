@@ -349,6 +349,7 @@ public:
     void onReturnToScreen() override;
     bool takesTouchEvents() override { return true; }
 
+
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
     void eventPopupClosed(int evt_id, BasePopup* p) override;
     void eventColorSet(int evt_id, uint32_t color) override;
@@ -394,6 +395,7 @@ public:
     virtual void trySaveImage();
     virtual bool trySaveWithExporter(PlatformNativePathString name, FileExporter* exporter, OperationProgressReport* progress = NULL);
     virtual void trySaveAsImage();
+    void exportIndexed(FileExporter* exporter, PlatformNativePathString name, OperationProgressReport* report);
     std::map<std::string, std::string> makeSingleLayerExtdata();
     void loadSingleLayerExtdata(Layer* l);
     std::string makeCommentDataString(Frame* f);

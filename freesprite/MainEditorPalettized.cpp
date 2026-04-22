@@ -106,42 +106,6 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
             }
         }
     }
-    else if (evt_id == EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE) {
-        exporterId--;
-
-        FileExporter* exporter = NULL;
-        if (exporterId < g_fileExporters.size()) {
-            bool result = false;
-            exporter = g_fileExporters[exporterId];
-
-            if (exporter->exportsWholeSession()) {
-                MainEditor* rgbConvEditor = toRGBSession();
-                result = exporter->exportData(name, rgbConvEditor, g_printOnlyProgressReport, &exportParameters);
-                delete rgbConvEditor;
-            }
-            else {
-                Layer* l = flattenImageAndConvertToRGB(getCurrentFrame());
-                result = exporter->exportData(name, l, g_printOnlyProgressReport, &exportParameters);
-                delete l;
-            }
-
-            if (result) {
-#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
-                emDownloadFile(lastConfirmedSavePath);
-#endif
-                if (lastWasSaveAs && g_config.openSavedPath) {
-                    platformOpenFileLocation(lastConfirmedSavePath);
-                }
-                g_addNotification(SuccessNotification("Success", "File exported successfully."));
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
-            }
-        }
-        else {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid exporter"));
-        }
-    }
     else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
         exporterId--;
 
@@ -176,6 +140,36 @@ void MainEditorPalettized::eventFileSaved(int evt_id, PlatformNativePathString n
         }
         delete flatImage;
         g_addNotification(SuccessNotification("Success", "Tiles exported"));
+    }
+}
+
+void MainEditorPalettized::exportRGB(FileExporter* exporter, PlatformNativePathString name, OperationProgressReport* report)
+{
+    ENSURE_REPORT_VALID(report);
+    bool result = false;
+
+    if (exporter->exportsWholeSession()) {
+        MainEditor* rgbConvEditor = toRGBSession();
+        result = exporter->exportData(name, rgbConvEditor, report, &exportParameters);
+        delete rgbConvEditor;
+    }
+    else {
+        Layer* l = flattenImageAndConvertToRGB(getCurrentFrame());
+        result = exporter->exportData(name, l, report, &exportParameters);
+        delete l;
+    }
+
+    if (result) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+        emDownloadFile(lastConfirmedSavePath);
+#endif
+        if (lastWasSaveAs && g_config.openSavedPath) {
+            platformOpenFileLocation(lastConfirmedSavePath);
+        }
+        g_addNotification(SuccessNotification("Success", "File exported successfully."));
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to exported file."));
     }
 }
 
@@ -732,11 +726,27 @@ Layer* MainEditorPalettized::flattenFrameWithoutConvertingToRGB(Frame* fr) {
 
 void MainEditorPalettized::tryExportRGB()
 {
-    std::vector<std::pair<std::string, std::string>> formats;
-    for (auto f : g_fileExporters) {
-        formats.push_back({ f->extension(), f->name() });
-    }
-    platformTrySaveOtherFile(this, formats, "export image as RGB", EVENT_PALETTIZEDEDITOR_EXPORTRGBFILE);
+    PopupChooseFormat* popup = PopupChooseFormat::withDefaultRGBExportFormats("Choose format", "");
+    popup->setHighlightUdata(lastConfirmedExporter);
+    popup->chooseFormatAndDoFileSavePrompt("export image as RGB", [this](FormatDef* f, PlatformNativePathString path) {
+        FormatDef ff = *f;
+        FileExporter* exporter = (FileExporter*)ff.udata;
+        ParamList params = exporter->getParameters();
+        if (params.empty()) {
+            g_startNewOperation([this, path, exporter](OperationProgressReport* report) {
+                exportRGB(exporter, path, report);
+            });
+        }
+        else {
+            PopupSetParameters* setParamsPopup = new PopupSetParameters(frmt("Export options: {}", ff.name), &exportParameters, &params, "vsp.export.option");
+            setParamsPopup->onFinishCallback = [this, path, exporter]() {
+                g_startNewOperation([this, path, exporter](OperationProgressReport* report) {
+                    exportRGB(exporter, path, report);
+                });
+            };
+            g_addPopup(setParamsPopup);
+        }
+    });
 }
 
 void MainEditorPalettized::trySaveAsPalettizedImage()

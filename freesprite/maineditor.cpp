@@ -1879,50 +1879,44 @@ void MainEditor::onReturnToScreen()
     }
 }
 
-void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)
+void MainEditor::exportIndexed(FileExporter* exporter, PlatformNativePathString name, OperationProgressReport* report)
 {
-    if (evt_id == EVENT_MAINEDITOR_EXPORTPALETTIZED) {
-        exporterID--;
+    ENSURE_REPORT_VALID(report);
+    bool result = false;
 
-        FileExporter* exporter = NULL;
-        if (exporterID < g_palettizedFileExporters.size()) {
-            bool result = false;
-            exporter = g_palettizedFileExporters[exporterID];
-
-            MainEditorPalettized* rgbConvEditor = toPalettizedSession();
-            if (rgbConvEditor != NULL) {
-                if (exporter->exportsWholeSession()) {
-                    result = exporter->exportData(name, rgbConvEditor, NULL, &exportParameters);
-                }
-                else {
-                    Layer* l = rgbConvEditor->flattenImageWithoutConvertingToRGB();
-                    result = exporter->exportData(name, l, NULL, &exportParameters);
-                    delete l;
-                }
-                delete rgbConvEditor;
-
-                if (result) {
-#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
-                    emDownloadFile(lastConfirmedSavePath);
-#endif
-                    if (lastWasSaveAs && g_config.openSavedPath) {
-                        platformOpenFileLocation(lastConfirmedSavePath);
-                    }
-                    g_addNotification(SuccessNotification("Success", "File exported successfully."));
-                }
-                else {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
-                }
-            }
-            else {
-                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
-            }
+    MainEditorPalettized* rgbConvEditor = toPalettizedSession();
+    if (rgbConvEditor != NULL) {
+        if (exporter->exportsWholeSession()) {
+            result = exporter->exportData(name, rgbConvEditor, report, &exportParameters);
         }
         else {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid exporter"));
+            Layer* l = rgbConvEditor->flattenImageWithoutConvertingToRGB();
+            result = exporter->exportData(name, l, report, &exportParameters);
+            delete l;
+        }
+        delete rgbConvEditor;
+
+        if (result) {
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+            emDownloadFile(lastConfirmedSavePath);
+#endif
+            if (lastWasSaveAs && g_config.openSavedPath) {
+                platformOpenFileLocation(lastConfirmedSavePath);
+            }
+            g_addNotification(SuccessNotification("Success", "File exported successfully."));
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
         }
     }
-    else if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
+    }
+}
+
+void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterID)
+{
+    if (evt_id == EVENT_MAINEDITOR_EXPORTTILES) {
         exporterID--;
 
         FileExporter* exporter = g_fileExporters[exporterID];
@@ -3398,11 +3392,28 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
 
 void MainEditor::tryExportPalettizedImage()
 {
-    std::vector<std::pair<std::string, std::string>> formats;
-    for (auto f : g_palettizedFileExporters) {
-        formats.push_back({ f->extension(), f->name() });
-    }
-    platformTrySaveOtherFile(this, formats, "export image as palettized", EVENT_MAINEDITOR_EXPORTPALETTIZED);
+    PopupChooseFormat* popup = PopupChooseFormat::withDefaultIndexedExportFormats("Choose format", "");
+    popup->setHighlightUdata(lastConfirmedExporter);
+    popup->chooseFormatAndDoFileSavePrompt("export image as indexed", [this](FormatDef* f, PlatformNativePathString path) {
+        FormatDef ff = *f;
+        FileExporter* exporter = (FileExporter*)ff.udata;
+        //clean this up please don't repeat code like this....
+        ParamList params = exporter->getParameters();
+        if (params.empty()) {
+            g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                exportIndexed((FileExporter*)ff.udata, path, report);
+            });
+        }
+        else {
+            PopupSetParameters* setParamsPopup = new PopupSetParameters(frmt("Export options: {}", ff.name), &exportParameters, &params, "vsp.export.option");
+            setParamsPopup->onFinishCallback = [this, path, ff]() {
+                g_startNewOperation([this, path, ff](OperationProgressReport* report) {
+                    exportIndexed((FileExporter*)ff.udata, path, report);
+                });
+            };
+            g_addPopup(setParamsPopup);
+        }
+    });
 }
 
 void MainEditor::exportTilesIndividually()

@@ -705,11 +705,11 @@
     <ClCompile Include="ParameterStore.cpp">
       <Filter>Source files\util</Filter>
     </ClCompile>
-    <ClCompile Include="PopupSetParameters.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="io\io_anymap.cpp">
       <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupSetParameters.cpp">
+      <Filter>Source files\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1424,11 +1424,11 @@
     <ClInclude Include="ParameterStore.h">
       <Filter>Header files\util</Filter>
     </ClInclude>
-    <ClInclude Include="PopupSetParameters.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="io\io_anymap.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSetParameters.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

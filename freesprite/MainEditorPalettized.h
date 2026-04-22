@@ -18,6 +18,7 @@ public:
 
     void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterId) override;
 
+
     void SetPixel(XY position, uint32_t color, bool pushToLastColors = true, uint8_t symmetry = 0) override;
     uint32_t getActiveColor() override;
     void setActiveColor(uint32_t col) override;
@@ -30,6 +31,7 @@ public:
 
     void setUpWidgets() override;
     void trySaveAsImage() override;
+    void exportRGB(FileExporter* exporter, PlatformNativePathString name, OperationProgressReport* report);
     Layer* flattenFrame(Frame* f) override;
     Layer* newLayer() override;
     Layer* mergeLayers(Layer* bottom, Layer* top) override;
