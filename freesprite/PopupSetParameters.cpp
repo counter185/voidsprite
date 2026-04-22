@@ -1,6 +1,7 @@
 #include "PopupSetParameters.h"
 #include "Panel.h"
 #include "UIButton.h"
+#include "FontRenderer.h"
 
 PopupSetParameters::PopupSetParameters(std::string title, ParameterStore* paramstore, ParamList* params, std::string locKeyPrefix)
 {
@@ -14,7 +15,7 @@ PopupSetParameters::PopupSetParameters(std::string title, ParameterStore* params
 	wxsManager.addDrawable(p);
 
 	wxHeight = 50 + p->getDimensions().y + 80;
-	wxWidth = 30 + p->getDimensions().x;
+	wxWidth = 30 + ixmax(p->getDimensions().x, g_fnt->StatStringDimensions(title, 22).x);
 
 	actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](...) {
 		finish(false);

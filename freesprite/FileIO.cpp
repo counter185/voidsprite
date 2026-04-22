@@ -2474,7 +2474,12 @@ void g_setupIO() {
                 BOOL_PARAM("pgm.binary", false)
             })
     );
-    g_fileExporters.push_back(exAnymapPPM = FileExporter::flatExporter("Portable Pixmap (text) PPM", ".ppm", "", &writeAnymapTextPPM, FORMAT_RGB));
+    g_fileExporters.push_back(
+        exAnymapPPM = FileExporter::flatExporter("Portable Pixmap PPM", ".ppm", "", &writeAnymapPPM, FORMAT_RGB)
+        ->buildParameters({
+            BOOL_PARAM("ppm.binary", false)
+        })
+    );
     g_fileExporters.push_back(exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", "", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exVTF = FileExporter::flatExporter("VTF", ".vtf", TL("vsp.export.vtf"), &writeVTF, FORMAT_RGB));
     g_fileExporters.push_back(exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", "", &writeSR8, FORMAT_PALETTIZED));
@@ -2553,32 +2558,14 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("Windows Shell Scrap SHS", ".shs", &readWinSHS, NULL, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::flatImporter("DIBv5 Clipboard Dump", ".dibv5", &readDIBV5, exDIBv5, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable bitmap PBM", ".pbm", &readAnymapPBM, exAnymapPBM, FORMAT_PALETTIZED,
-        [](PlatformNativePathString path) {
-            FILE* f = platformOpenFile(path, PlatformFileModeRB);
-            //check if file starts with P1 or P4
-            char c[2];
-            fread(c, 2, 1, f);
-            fclose(f);
-            return c[0] == 'P' && (c[1] == '1' || c[1] == '4');
-        }));
+        [](PlatformNativePathString path) { return magicVerify(0, "P1")(path) || magicVerify(0, "P4")(path); }
+    ));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable graymap PGM", ".pgm", &readAnymapPGM, exAnymapPGM, FORMAT_PALETTIZED,
-        [](PlatformNativePathString path) {
-            FILE* f = platformOpenFile(path, PlatformFileModeRB);
-            //check if file starts with P2 or P5
-            char c[2];
-            fread(c, 2, 1, f);
-            fclose(f);
-            return c[0] == 'P' && (c[1] == '2' || c[1] == '5');
-        }));
+        [](PlatformNativePathString path) { return magicVerify(0, "P2")(path) || magicVerify(0, "P5")(path); }
+    ));
     g_fileImporters.push_back(FileImporter::flatImporter("Portable pixmap PPM", ".ppm", &readAnymapPPM, exAnymapPPM, FORMAT_RGB,
-        [](PlatformNativePathString path) {
-            FILE* f = platformOpenFile(path, PlatformFileModeRB);
-            //check if file starts with P3 or P6
-            char c[2];
-            fread(c, 2, 1, f);
-            fclose(f);
-            return c[0] == 'P' && (c[1] == '3' || c[1] == '6');
-        }));
+        [](PlatformNativePathString path) { return magicVerify(0, "P3")(path) || magicVerify(0, "P6")(path); }
+    ));
     g_fileImporters.push_back(FileImporter::flatImporter("Mario Paint save file SRM", ".srm", &readMarioPaintSRM, NULL, FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Nintendo DS rom (dump banner)", ".nds", &readNDSBanner, NULL));
     g_fileImporters.push_back(FileImporter::flatImporter("X-Com SPK file", ".spk", &readXComSPK, NULL, FORMAT_PALETTIZED));

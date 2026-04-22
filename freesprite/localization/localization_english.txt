@@ -67,6 +67,7 @@
     {"vsp.export.option.jpeg.quality", "JPEG quality"},
     {"vsp.export.option.avi.mjpg", "Use Motion JPEG codec"},
     {"vsp.export.option.pgm.binary", "Binary PGM"},
+    {"vsp.export.option.ppm.binary", "Binary PPM"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
