@@ -79,6 +79,16 @@ void g_initKeybinds()
         KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.toggleui"), SDL_SCANCODE_F1, false, false, SDL_GAMEPAD_BUTTON_INVALID,
             [](void* d) { TOGGLE(((MainEditor*)d)->hideUI);}
         ));
+    g_keybindManager.addKeybind("maineditor", "brush_primary", 
+        KeyCombo(TL("vsp.keybinds.maineditor.brushleft"), KEY_UNASSIGNED, false, false, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+            [](void* d) { if (!((MainEditor*)d)->leftMouseHold) ((MainEditor*)d)->inputBrushHere(true); },
+            [](void* d) { ((MainEditor*)d)->inputBrushHere(false); }
+        ));
+    g_keybindManager.addKeybind("maineditor", "brush_secondary", 
+        KeyCombo(TL("vsp.keybinds.maineditor.brushsecondary"), KEY_UNASSIGNED, false, false, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
+            [](void* d) { ((MainEditor*)d)->inputMouseRightHere(true); },
+            [](void* d) { ((MainEditor*)d)->inputMouseRightHere(false); }
+        ));
     g_keybindManager.addKeybind("maineditor", "toggle_eraser", 
         KeyCombo(TL("vsp.keybinds.maineditor.eraser"), SDL_SCANCODE_E, false, false, [](void* d) {
             ((MainEditor*)d)->colorPicker->toggleEraser();

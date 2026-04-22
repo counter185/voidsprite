@@ -372,7 +372,9 @@ public:
     virtual void drawNetworkCanvasClients();
 
     void inputBrush(bool down, XY at);
+    void inputBrushHere(bool down);
     void inputMouseRight(XY at, bool down);
+    void inputMouseRightHere(bool down);
 
     void focusOnColorInputTextBox();
     void initLayers();

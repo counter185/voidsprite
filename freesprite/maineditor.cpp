@@ -427,6 +427,15 @@ void MainEditor::tick() {
             (int)(-g_gamepad->gamepadLSY * 10)
         });
         RecalcMousePixelTargetPoint(g_windowW / 2, g_windowH / 2);
+        if (currentBrushMouseDowned) {
+            if (currentBrush != NULL) {
+                currentBrush->clickDrag(this,
+                    currentBrush->wantDoublePosPrecision() ? mouseHoldPosition2xP : mouseHoldPosition,
+                    currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+            }
+            mouseHoldPosition = mousePixelTargetPoint;
+            mouseHoldPosition2xP = mousePixelTargetPoint2xP;
+        }
         currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
     }
 
@@ -812,6 +821,11 @@ void MainEditor::drawNetworkCanvasClients()
 void MainEditor::inputMouseRight(XY at, bool down)
 {
     RecalcMousePixelTargetPoint(at.x, at.y);
+    inputMouseRightHere(down);
+}
+
+void MainEditor::inputMouseRightHere(bool down)
+{
     if (currentBrush != NULL && currentBrush->overrideRightClick()) {
         if (down) {
             currentBrush->rightClickPress(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
@@ -1797,6 +1811,11 @@ void MainEditor::inputBrush(bool down, XY at)
 {
     zoomKeyHeld = false;
     RecalcMousePixelTargetPoint(at.x, at.y);
+    inputBrushHere(down);
+}
+
+void MainEditor::inputBrushHere(bool down)
+{
     if (currentBrush != NULL) {
         //loginfo(frmt("brush {} at {}:{}", down ? "down" : "up", at.x, at.y));
         if (down) {
@@ -1816,9 +1835,9 @@ void MainEditor::inputBrush(bool down, XY at)
 
         }
     }
+    leftMouseHold = down;
     mouseHoldPosition = mousePixelTargetPoint;
     mouseHoldPosition2xP = mousePixelTargetPoint2xP;
-    leftMouseHold = down;
 }
 
 std::vector<std::string> MainEditor::dropEverythingYoureDoingAndSave()
