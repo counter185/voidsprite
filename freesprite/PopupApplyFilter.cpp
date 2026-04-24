@@ -163,9 +163,10 @@ void PopupApplyFilter::apply(ParameterStore* parameterMap) {
     auto session = this->session;
     auto targetFilter = this->targetFilter;
     auto seed = this->filterRandomSeed;
-    g_startNewOperation([seed, parameterMap, targetFilter, session, target]() {
+    auto paramMap = parameterMap->copy();
+    g_startNewOperation([seed, paramMap, targetFilter, session, target]() {
         srand(seed);
-        Layer* copy = targetFilter->run(target, parameterMap);
+        Layer* copy = targetFilter->run(target, (ParameterStore*)&paramMap);
         session->commitStateToCurrentLayer();
         if (session->isolateEnabled) {
             u32* srcpx = copy->pixels32();
