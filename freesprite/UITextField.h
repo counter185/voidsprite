@@ -32,8 +32,10 @@ public:
         {'+', [](int v0, std::string arg) { return v0+std::stoi(arg); }},
         {'-', [](int v0, std::string arg) { return v0-std::stoi(arg); }},
         {'*', [](int v0, std::string arg) { return v0*std::stoi(arg); }},
+        {'&', [](int v0, std::string arg) { return v0&std::stoi(arg); }},
         {'/', [](int v0, std::string arg) { int v1 = std::stoi(arg); return v1 == 0 ? 0 : v0/v1; }},
         {'%', [](int v0, std::string arg) { int v1 = std::stoi(arg); return v1 == 0 ? 0 : v0%v1; }},
+        {'#', [](int v0, std::string arg) { return std::stoi(arg); }},
         {'x', [](int v0, std::string arg) { return std::stoi(arg,0,16); }},
         {'b', [](int v0, std::string arg) { return std::stoi(arg,0,2); }},
     };
@@ -143,6 +145,13 @@ public:
             text = std::to_string(*target);
         }
         UITextField::render(at);
+    }
+
+    void focusIn() override {
+        UITextField::focusIn();
+        if (*target == 0) {
+            text = "";
+        }
     }
 
     void focusOut() override {
