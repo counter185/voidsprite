@@ -61,7 +61,7 @@ else
 endif
 
 install_subdir('assets', install_dir: assets_dir)
-install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontjp-NotoSansJP-Medium.ttf', 'appfontcyr-ZenKakuGothicNew-Medium.ttf', install_dir: assets_dir)
+install_data('appfont-MPLUSRounded1c-Medium.ttf', 'appfontcyr-ZenKakuGothicNew-Medium.ttf', install_dir: assets_dir)
 if host_machine.system() == 'linux'
   subdir('linux')
 endif

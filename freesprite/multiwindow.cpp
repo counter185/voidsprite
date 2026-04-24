@@ -108,9 +108,11 @@ void VSPWindow::initFonts() {
     };
 
     fnt = new TextRenderer();
+    bool fontDefaultIsFallback = false;
     TTF_Font* fontDefault = TTF_OpenFont(pathInProgramDirectory(FONT_PATH).c_str(), 18);
     fontDefault = fontDefault == NULL ? TTF_OpenFont(FONT_PATH, 18) : fontDefault;
     if (fontDefault == NULL) {
+        fontDefaultIsFallback = true;
         std::string fallback = findFallbackSystemFont(fallbackFonts);
         if (fallback != "") {
             logwarn(frmt("Loading fallback system font: {}", fallback));
@@ -125,9 +127,9 @@ void VSPWindow::initFonts() {
         logerr("Failed to load the default font");
     }
 
-    TTF_Font* fontJP = TTF_OpenFont(pathInProgramDirectory(FONT_PATH_JP).c_str(), 18);
-    fontJP = fontJP == NULL ? TTF_OpenFont(FONT_PATH_JP, 18) : fontJP;
-    if (fontJP == NULL) {
+    TTF_Font* fontJP = NULL;
+    //load fontJP only if mplus failed
+    if (fontDefaultIsFallback) {
         std::string fallback = findFallbackSystemFont(fallbackFontsJP);
         if (fallback != "") {
             logwarn(frmt("Loading fallback system font: {}", fallback));
