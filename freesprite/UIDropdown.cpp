@@ -47,11 +47,11 @@ void UIDropdown::render(XY pos)
     int textX = pos.x + 2;
     if (icon != NULL) {
         SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, wxHeight - 2, wxHeight - 2 };
-        SDL_RenderCopy(g_rd, icon, NULL, &iconRect);
+        SDL_RenderCopy(g_rd, icon->get(), NULL, &iconRect);
         textX += iconRect.w;
     }
 
-    g_fnt->RenderString(text, textX, pos.y + 2, textColor);
+    g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);
     renderDropdownIcon(pos);
 }
 

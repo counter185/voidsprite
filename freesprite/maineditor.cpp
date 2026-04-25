@@ -29,6 +29,7 @@
 #include "UndoStack.h"
 #include "EditorFramePicker.h"
 #include "UISlider.h"
+#include "UIDropdown.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -1429,56 +1430,59 @@ void MainEditor::makeActionBar()
 
     int actionBarButtonSize = compactEditor ? 60 : 30;
 
-    int nextNavbarX = 5;
     UIButton* undoButton = new UIButton("", TL("vsp.maineditor.undo"));
     undoButton->icon = g_iconActionBarUndo;
     undoButton->onClickCallback = [this](UIButton* btn) { undo(); };
-    undoButton->position = { nextNavbarX,0 };
     undoButton->wxWidth = actionBarButtonSize;
     undoButton->wxHeight = actionBarButtonSize;
-    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* redoButton = new UIButton("", TL("vsp.maineditor.redo"));
     redoButton->icon = g_iconActionBarRedo;
     redoButton->onClickCallback = [this](UIButton* btn) { redo(); };
-    redoButton->position = { nextNavbarX,0 };
     redoButton->wxWidth = actionBarButtonSize;
     redoButton->wxHeight = actionBarButtonSize;
-    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* saveButton = new UIButton("", TL("vsp.nav.save"));
     saveButton->icon = g_iconActionBarSave;
     saveButton->onClickCallback = [this](UIButton* btn) { if (g_shiftModifier) trySaveAsImage(); else trySaveImage(); };
-    saveButton->position = { nextNavbarX,0 };
     saveButton->wxWidth = actionBarButtonSize;
     saveButton->wxHeight = actionBarButtonSize;
-    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* zoomoutButton = new UIButton("", TL("vsp.cmn.zoomout"));
     zoomoutButton->icon = g_iconActionBarZoomOut;
     zoomoutButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(-1, { g_windowW / 2, g_windowH / 2 }); };
-    zoomoutButton->position = { nextNavbarX,0 };
     zoomoutButton->wxWidth = actionBarButtonSize;
-    zoomoutButton->wxHeight = actionBarButtonSize;
-    nextNavbarX += actionBarButtonSize + 5;
 
     UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
     zoominButton->icon = g_iconActionBarZoomIn;
     zoominButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(1, {g_windowW/2, g_windowH/2}); };
-    zoominButton->position = { nextNavbarX,0 };
     zoominButton->wxWidth = actionBarButtonSize;
     zoominButton->wxHeight = actionBarButtonSize;
-    nextNavbarX += actionBarButtonSize + 5;
+
+    if (!isPalettized) {
+        std::vector<std::string> blendModes;
+        for (auto& op : blendOperations) {
+            blendModes.push_back(TL(op.nameTLKey));
+        }
+        blendModeDropdown = new UIDropdown(blendModes);
+        blendModeDropdown->position = { 195, 350 };
+        blendModeDropdown->icon = g_iconBlendMode;
+        blendModeDropdown->wxWidth = 150;
+        blendModeDropdown->text = blendModes[ssne.blendAlphaMode];
+        blendModeDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int index, std::string) {
+            setBlendMode((BlendMode)index);
+        };
+    }
 
     UIStackPanel* actionsStack = UIStackPanel::Horizontal(5, {
-        undoButton, redoButton, saveButton, zoomoutButton, zoominButton
+        undoButton, redoButton, saveButton, zoomoutButton, zoominButton, blendModeDropdown
     });
     actionsStack->position = { 5, 5 };
     actionbar->addDrawable(actionsStack);
 
     toolPropertiesPanel = new Panel();
     toolPropertiesPanel->sizeToContent = true;
-    toolPropertiesPanel->position = { nextNavbarX + 50, 0 };
+    toolPropertiesPanel->position = { actionsStack->getDimensions().x  + 50, 0};
     actionbar->addDrawable(toolPropertiesPanel);
 
     wxsManager.addDrawable(actionbar);
@@ -2031,11 +2035,11 @@ void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, ui
             u32 colorRGB = color & 0xFFFFFF;
             u32 targetColor = (targetColorAlpha << 24) + colorRGB;
 
-            if (blendAlphaMode) {
-                if (eraserMode) {
-                    targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
-                }
-                targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
+            if (eraserMode) {
+                targetColor = modAlpha(targetColor, 0);
+            }
+            else {
+                targetColor = blendOperations[(int)ssne.blendAlphaMode].blendFunction(getCurrentLayer()->getPixelAt(position), targetColor);
             }
             getCurrentLayer()->setPixel(position, targetColor);
             if (pushToLastColors) {
@@ -2660,6 +2664,15 @@ void MainEditor::setActiveBrush(BaseBrush* b)
     }
     brushPicker->updateActiveBrushButton(b);
     initToolParameters();
+}
+
+void MainEditor::setBlendMode(BlendMode b)
+{
+    b = (BlendMode)ixmax(0, ixmin(blendOperations.size() - 1, (int)b));
+    ssne.blendAlphaMode = b;
+    if (blendModeDropdown != NULL) {
+        blendModeDropdown->text = TL(blendOperations[(int)b].nameTLKey);
+    }
 }
 
 void MainEditor::tickAutosave()
@@ -4388,6 +4401,7 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["comments.displaymode"] = std::to_string((int)commentViewMode);
     kvs["guidelines.displaymode"] = std::to_string((int)guidelineDisplayMode);
     kvs["palette.colorlist"] = ineditorColorListData;
+    kvs["blendmode.index"] = std::to_string((int)blendAlphaMode);
     if (!templateName.empty()) {
         kvs["template.name"] = templateName;
         kvs["template.desc"] = templateDescription;
@@ -4413,6 +4427,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.guidelineDisplayMode = (GuidelineDisplayMode)std::stoi(kvs["guidelines.displaymode"]); } catch (...) {}
     try { prefs.templateName = kvs["template.name"]; } catch (...) {}
     try { prefs.templateDescription = kvs["template.desc"]; } catch (...) {}
+    try { prefs.blendAlphaMode = (BlendMode)ixmax(0, ixmin(blendOperations.size()-1, std::stoi(kvs["blendmode.index"]))); } catch (...) {}
 
     try {
         std::string guidelinesData = kvs["guidelines"];

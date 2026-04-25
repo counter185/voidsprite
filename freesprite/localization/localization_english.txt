@@ -376,6 +376,11 @@
     {"vsp.maineditor.popup.safeclose.desc", "There are unsaved changes."},
     {"vsp.maineditor.popup.safeclose.desc2", "Time since last save:"},
 
+    {"vsp.maineditor.blendmode.replace", "Replace"},
+    {"vsp.maineditor.blendmode.overlay", "Overlay"},
+    {"vsp.maineditor.blendmode.add", "Add"},
+    {"vsp.maineditor.blendmode.multiply", "Multiply"},
+
     //screen: network editor
     {"vsp.collabeditor", "Network Editor"},
     {"vsp.collabeditor.error.disconnected", "Disconnected from server"},

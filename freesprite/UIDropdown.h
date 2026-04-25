@@ -10,8 +10,9 @@ private:
     XY lastPosOnScreen{};
 public:
     std::string text;
+    int fontSize = 18;
     int wxWidth = 250, wxHeight = 30;
-    SDL_Texture* icon = NULL;
+    ReldTex* icon = NULL;
 
     SDL_Color colorBGFocused = SDL_Color{ 0,0,0,0xff };
     SDL_Color colorBGUnfocused = SDL_Color{ 0,0,0,0xd0 };

@@ -39,12 +39,17 @@ rgb sdlColorToRGB(SDL_Color c);
 rgb u32ToRGB(u32 color);
 
 SDL_FColor toFColor(SDL_Color c);
+SDL_FColor toFColor(u32 c);
+SDL_Color toSDLColor(SDL_FColor fc);
 SDL_Color rgb2sdlcolor(rgb a);
 bool tryRgbStringToColor(std::string str, unsigned int* ret);
-unsigned int alphaBlend(unsigned int colora, unsigned int colorb);
 uint32_t sdlcolorToUint32(SDL_Color c);
 SDL_Color uint32ToSDLColor(u32 c);
 uint32_t modAlpha(uint32_t color, uint8_t alpha);
+
+u32 alphaBlend(u32 colora, u32 colorb);
+u32 alphaAdd(u32 bottom, u32 top);
+u32 alphaMultiply(u32 bottom, u32 top);
 
 SDL_Surface* trimSurface(SDL_Surface* target, SDL_Rect dims);
 void copyPixelsToTexture(u32* pixels, int w, int h, u8* dst, int dstPitch);

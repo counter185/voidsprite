@@ -8,6 +8,7 @@
 #include "TabbedView.h"
 #include "UITextField.h"
 #include "UIColorPicker.h"
+#include "UIDropdown.h"
 
 EditorColorPicker::EditorColorPicker(MainEditor* c) : callerColorList(c) {
     caller = c;
@@ -33,17 +34,9 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) : callerColorList(c) {
     eraserButton->onClickCallback = [this](UIButton* btn) { _toggleEraser(); };
     wxsTarget().addDrawable(eraserButton);
 
-    blendModeButton = new UIButton();
-    blendModeButton->position = { 215, 350 };
-    blendModeButton->icon = g_iconBlendMode;
-    blendModeButton->wxWidth = 30;
-    blendModeButton->tooltip = "Alpha blend";
-    blendModeButton->onClickCallback = [this](UIButton* btn) { _toggleBlendMode(); };
-    wxsTarget().addDrawable(blendModeButton);
-
     UINumberInputField* alphaInput = new UINumberInputField((int*)&c->pickedAlpha);
-    alphaInput->position = { 255, 350 };
-    alphaInput->wxWidth = 50;
+    alphaInput->position = { 230, 350 };
+    alphaInput->wxWidth = g_fnt->StatStringDimensions("888_").x + 4;
     alphaInput->textColor = SDL_Color{255, 255, 255, 255};
     alphaInput->tooltip = "Alpha (transparency)";
     alphaInput->validateFunction = [](int v) { return v >= 0 && v <= 255; };
@@ -92,18 +85,10 @@ void EditorColorPicker::renderAfterBG(XY position)
 void EditorColorPicker::updateEraserAndAlphaBlendButtons() {
     eraserButton->fill = caller->eraserMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
                                             : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
-    if (blendModeButton != NULL) {
-        blendModeButton->fill = caller->blendAlphaMode ? Fill::Gradient(0x30FFFFFF, 0x80000000, 0x80FFFFFF, 0x30FFFFFF)
-                                                       : Fill::Gradient(0x80000000, 0x80000000, 0x80707070, 0x80000000);
-    }
 }
 
 void EditorColorPicker::_toggleEraser() {
     caller->eraserMode = !caller->eraserMode;
-    updateEraserAndAlphaBlendButtons();
-}
-void EditorColorPicker::_toggleBlendMode() {
-    caller->blendAlphaMode = !caller->blendAlphaMode;
     updateEraserAndAlphaBlendButtons();
 }
 
@@ -129,11 +114,6 @@ void EditorColorPicker::updatePanelColors() {
 void EditorColorPicker::toggleEraser() 
 {
     eraserButton->click();
-}
-
-void EditorColorPicker::toggleBlendMode()
-{
-    blendModeButton->click();
 }
 
 void EditorColorPicker::forceFocusOnColorInputField() {

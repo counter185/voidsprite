@@ -5,7 +5,9 @@ UIStackPanel* UIStackPanel::FromContent(std::vector<Drawable*> content)
 {
     UIStackPanel* panel = new UIStackPanel();
     for (Drawable* d : content) {
-        panel->addWidget(d);
+        if (d != NULL) {
+            panel->addWidget(d);
+        }
     }
     panel->position = {0,0};
     panel->manuallyRecalculateLayout = true;

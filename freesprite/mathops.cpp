@@ -778,25 +778,81 @@ rgb hsv2rgb(hsv in)
 SDL_FColor toFColor(SDL_Color c) {
     return SDL_FColor{c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, c.a / 255.0f};
 }
+SDL_FColor toFColor(u32 c) {
+    return toFColor(uint32ToSDLColor(c));
+}
+SDL_Color toSDLColor(SDL_FColor fc) {
+    return {
+        (u8)(ixmin(255, ixmax(0, fc.r * 255))),
+        (u8)(ixmin(255, ixmax(0, fc.g * 255))),
+        (u8)(ixmin(255, ixmax(0, fc.g * 255))),
+        (u8)(ixmin(255, ixmax(0, fc.a * 255)))
+    };
+}
 
 SDL_Color rgb2sdlcolor(rgb a) {
     return SDL_Color{ (u8)(a.r * 255), (u8)(a.g * 255), (u8)(a.b * 255), 255 };
 }
 
-unsigned int alphaBlend(unsigned int colora, unsigned int colorb) {
-    unsigned int a2 = (colorb & 0xFF000000) >> 24;
-    unsigned int alpha = a2;
+u32 alphaBlend(u32 colora, u32 colorb) {
+    u32 a2 = (colorb & 0xFF000000) >> 24;
+    u32 alpha = a2;
     if (alpha == 0) return colora;
     if (alpha == 255) return colorb;
-    unsigned int a1 = (colora & 0xFF000000) >> 24;
-    unsigned int nalpha = 0x100 - alpha;
-    unsigned int rb1 = (nalpha * (colora & 0xFF00FF)) >> 8;
-    unsigned int rb2 = (alpha * (colorb & 0xFF00FF)) >> 8;
-    unsigned int g1 = (nalpha * (colora & 0x00FF00)) >> 8;
-    unsigned int g2 = (alpha * (colorb & 0x00FF00)) >> 8;
-    unsigned int anew = a1 + a2;
+    u32 a1 = (colora & 0xFF000000) >> 24;
+    u32 nalpha = 0x100 - alpha;
+    u32 rb1 = (nalpha * (colora & 0xFF00FF)) >> 8;
+    u32 rb2 = (alpha * (colorb & 0xFF00FF)) >> 8;
+    u32 g1 = (nalpha * (colora & 0x00FF00)) >> 8;
+    u32 g2 = (alpha * (colorb & 0x00FF00)) >> 8;
+    u32 anew = a1 + a2;
     if (anew > 255) { anew = 255; }
     return ((rb1 + rb2) & 0xFF00FF) + ((g1 + g2) & 0x00FF00) + (anew << 24);
+}
+
+u32 alphaAdd(u32 bottom, u32 top)
+{
+    SDL_Color cBottom = uint32ToSDLColor(bottom);
+    SDL_Color cTop = uint32ToSDLColor(top);
+    SDL_FColor fcBottom = toFColor(bottom);
+    SDL_FColor fcTop = toFColor(top);
+
+    cTop.r *= fcTop.a;
+    cTop.g *= fcTop.a;
+    cTop.b *= fcTop.a;
+
+    return PackRGBAtoARGB(
+        (u8)ixmin(255, cTop.r + cBottom.r),
+        (u8)ixmin(255, cTop.g + cBottom.g),
+        (u8)ixmin(255, cTop.b + cBottom.b),
+        cBottom.a
+    );
+}
+
+u32 alphaMultiply(u32 bottom, u32 top)
+{
+    SDL_FColor fcBottom = toFColor(bottom);
+    SDL_FColor fcTop = toFColor(top);
+
+    SDL_FColor fcLeft = {
+        fcBottom.r * fcTop.r,
+        fcBottom.g * fcTop.g,
+        fcBottom.b * fcTop.b,
+    };
+    SDL_FColor fcRight = {
+        fcBottom.r * (1 - fcTop.a),
+        fcBottom.g * (1 - fcTop.a),
+        fcBottom.b * (1 - fcTop.a),
+    };
+
+    SDL_FColor fcRes = {
+        fcLeft.r + fcRight.r,
+        fcLeft.g + fcRight.g,
+        fcLeft.b + fcRight.b,
+        fcBottom.a
+    };
+
+    return sdlcolorToUint32(toSDLColor(fcRes));
 }
 
 uint32_t sdlcolorToUint32(SDL_Color c)

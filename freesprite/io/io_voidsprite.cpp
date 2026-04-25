@@ -917,6 +917,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             ret->ssne = SessionEditorPrefs::deserializeFromKeyVals(extData);
             //ensure in-session palette gets loaded
             ret->colorPicker->reloadColorLists();
+            ret->setBlendMode(ret->ssne.blendAlphaMode);
 
             if (extData.contains("layer.selected")) { ret->selLayer = frames[0]->activeLayer = std::stoi(extData["layer.selected"]); }
             if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }

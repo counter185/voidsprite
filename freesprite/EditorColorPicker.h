@@ -30,14 +30,12 @@ protected:
     UIColorPicker* wColorPicker = NULL;
 
     void _toggleEraser();
-    void _toggleBlendMode();
     void updatePanelColors();
 public:
     MainEditor* caller = NULL;
     SessionLocalColorList callerColorList;
 
     UIButton* eraserButton = NULL;
-    UIButton* blendModeButton = NULL;
     UIColorSlider* alphaSlider = NULL;
 
     std::vector<u32> lastColors;
@@ -59,7 +57,6 @@ public:
     Panel* getPanel() override { return this; };
 
     void toggleEraser() override;
-    void toggleBlendMode() override;
     void forceFocusOnColorInputField() override;
 
     void setColorRGB(u32 color) override;

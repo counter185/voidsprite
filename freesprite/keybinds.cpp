@@ -95,7 +95,9 @@ void g_initKeybinds()
         }));
     g_keybindManager.addKeybind("maineditor", "toggle_blendmode", 
         KeyCombo(TL("vsp.keybinds.maineditor.blend"), SDL_SCANCODE_INSERT, false, false, [](void* d) {
-            ((MainEditor*)d)->colorPicker->toggleBlendMode();
+            ((MainEditor*)d)->setBlendMode(
+                ((MainEditor*)d)->ssne.blendAlphaMode != BLENDMODE_OVERLAY ? BLENDMODE_OVERLAY : BLENDMODE_REPLACE
+            );
         }));
     g_keybindManager.addKeybind("maineditor", "zoom_in_canvas", 
         KeyCombo(TL("vsp.keybinds.maineditor.zoomin"), KEY_UNASSIGNED, false, false, [](void* d) {

@@ -6,7 +6,6 @@ public:
     virtual Panel* getPanel() = 0;
 
     virtual void toggleEraser() = 0;
-    virtual void toggleBlendMode() = 0;
     virtual void forceFocusOnColorInputField() = 0;
 
     virtual void setColorRGB(u32 color) = 0;

@@ -52,7 +52,6 @@ public:
     Panel* getPanel() override { return this; }
 
     void toggleEraser() override;
-    void toggleBlendMode() override {};
     void forceFocusOnColorInputField() override {};
 
     void setColorRGB(u32 color) override;

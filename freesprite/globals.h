@@ -438,6 +438,13 @@ struct NineSegmentPattern {
     HotReloadableTexture* cachedTexture = NULL;
 };
 
+enum BlendMode : int {
+    BLENDMODE_REPLACE = 0,
+    BLENDMODE_OVERLAY = 1,
+    BLENDMODE_ADD = 2,
+    BLENDMODE_MULTIPLY = 3
+};
+
 #include "log.h"
 #include "localization/localization.h"
 #include "memory_tracker.h"

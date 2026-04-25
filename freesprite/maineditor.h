@@ -17,13 +17,44 @@
 
 struct NET_StreamSocket;
 
-enum EditorUnsavedChanges : int { NO_UNSAVED_CHANGES = 0, CHANGES_RECOVERY_AUTOSAVED = 1, HAS_UNSAVED_CHANGES = 2 };
+enum EditorUnsavedChanges : int { 
+    NO_UNSAVED_CHANGES = 0, 
+    CHANGES_RECOVERY_AUTOSAVED = 1, 
+    HAS_UNSAVED_CHANGES = 2 
+};
 
-enum MainEditorCommentMode : int { COMMENTMODE_HIDE_ALL = 0, COMMENTMODE_SHOW_HOVERED = 1, COMMENTMODE_SHOW_ALL = 2 };
+enum MainEditorCommentMode : int { 
+    COMMENTMODE_HIDE_ALL = 0, 
+    COMMENTMODE_SHOW_HOVERED = 1, 
+    COMMENTMODE_SHOW_ALL = 2 
+};
 
-enum GuidelineDisplayMode : int { GUIDELINE_HIDE_ALL = 0, GUIDELINE_SHOW_COLORED = 1, GUIDELINE_SHOW_PRIMARYCOLOR = 2 };
+enum GuidelineDisplayMode : int { 
+    GUIDELINE_HIDE_ALL = 0, 
+    GUIDELINE_SHOW_COLORED = 1, 
+    GUIDELINE_SHOW_PRIMARYCOLOR = 2 
+};
 
-enum EditorTouchMode : int { TOUCHMODE_PAN = 0, TOUCHMODE_LEFTCLICK = 1, TOUCHMODE_RIGHTCLICK = 2, TOUCHMODE_MAX };
+enum EditorTouchMode : int { 
+    TOUCHMODE_PAN = 0, 
+    TOUCHMODE_LEFTCLICK = 1, 
+    TOUCHMODE_RIGHTCLICK = 2, 
+    TOUCHMODE_MAX 
+};
+
+struct BlendModeOperation {
+    BlendMode type;
+    std::string nameTLKey;
+    std::function<u32(u32, u32)> blendFunction = NULL;
+};
+
+//these must be in the order of the enum (optimization)
+static std::vector<BlendModeOperation> blendOperations = {
+    {BLENDMODE_REPLACE, "vsp.maineditor.blendmode.replace", [](u32 bottom, u32 top) { return top; }},
+    {BLENDMODE_OVERLAY, "vsp.maineditor.blendmode.overlay", [](u32 bottom, u32 top) { return alphaBlend(bottom, top); }},
+    {BLENDMODE_ADD, "vsp.maineditor.blendmode.add", [](u32 bottom, u32 top) { return alphaAdd(bottom, top); }},
+    {BLENDMODE_MULTIPLY, "vsp.maineditor.blendmode.multiply", [](u32 bottom, u32 top) { return alphaMultiply(bottom, top); }}
+};
 
 struct CommentData {
     XY position;
@@ -181,6 +212,8 @@ public:
     XY symmetryPositions = { 0, 0 };
     bool symmetryEnabled[2] = { false, false };
 
+    BlendMode blendAlphaMode = BLENDMODE_REPLACE;
+
 
     std::map<std::string, std::string> serializeToKeyVals();
     std::string serializeToJson();
@@ -260,7 +293,6 @@ public:
 
     bool replaceAlphaMode = false;
     bool eraserMode = false;
-    bool blendAlphaMode = false;
     u32 pickedColor = 0xFFFFFF;
     u32 pickedAlpha = 255;
 
@@ -293,6 +325,7 @@ public:
 
     std::vector<BaseScreen*> hintOpenScreensInInteractiveMode;
 
+    UIDropdown* blendModeDropdown = NULL;
     std::map<std::string, double> toolProperties;
     Panel* toolPropertiesPanel = NULL;
 
@@ -411,6 +444,7 @@ public:
     virtual uint32_t getActiveColor();
     virtual void playColorPickerVFX(bool inward);
     void setActiveBrush(BaseBrush* b);
+    void setBlendMode(BlendMode b);
     virtual void tickAutosave();
     PlatformNativePathString createRecoveryAutosave(std::string insertIntoFilename = "");
     bool tryAddReferenceFromClipboard();
