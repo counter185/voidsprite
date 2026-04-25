@@ -462,6 +462,20 @@ LayerScaleData Layer::integerDownscale(XY scale)
     }
 }
 
+ScanlineMap Layer::selectAllOfColor(u32 c)
+{
+    ScanlineMap r;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            u32 pixelRn = getPixelAt({ x,y });
+            if (pixelRn == c || (!isPalettized && pixelRn >> 24 == 0 && c >> 24 == 0)) {
+                r.addPoint({ x,y });
+            }
+        }
+    }
+    return r;
+}
+
 ScanlineMap Layer::wandSelectAt(XY pos) {
     ScanlineMap r;
     wandSelectWithOperationAt(pos, [&](XY a) {

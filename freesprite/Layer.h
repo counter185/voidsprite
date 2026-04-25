@@ -491,6 +491,7 @@ public:
     LayerScaleData integerScale(XY scale);
     LayerScaleData integerDownscale(XY scale);
 
+    ScanlineMap selectAllOfColor(u32 c);
     ScanlineMap wandSelectAt(XY pos);
     void wandSelectWithOperationAt(XY pos, std::function<void(XY)> foreachPoint);
 

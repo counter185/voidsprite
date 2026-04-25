@@ -15,9 +15,13 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
             if (!g_ctrlModifier) {
                 editor->isolatedFragment.clear();
             }
+            bool selectAllOfColor = g_shiftModifier;
+
             Layer* targetLayer = editor->getCurrentLayer();
-            g_startNewOperation([targetLayer, editor, pos]() {
-                ScanlineMap selectionMap = targetLayer->wandSelectAt(pos);
+            g_startNewOperation([targetLayer, editor, pos, selectAllOfColor]() {
+                ScanlineMap selectionMap = 
+                    selectAllOfColor ? targetLayer->selectAllOfColor(targetLayer->getPixelAt(pos))
+                    : targetLayer->wandSelectAt(pos);
                 g_startNewMainThreadOperation([editor, selectionMap]() {
                     editor->isolatedFragment.addOtherMap(selectionMap);
                     editor->isolateEnabled = true;
