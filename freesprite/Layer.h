@@ -484,6 +484,7 @@ public:
     /// <param name="to">Target dimensions</param>
     /// <returns>Old pixel data</returns>
     LayerScaleData scaleGeneric(XY newSize, std::function<void(u32* pxNow,u32* pxNew)>);
+    LayerScaleData crop(SDL_Rect to);
     LayerScaleData resize(XY to);
     LayerScaleData resizeByTileSizes(XY tileSizesNow, XY targetTileSize);
     //todo:update this one too

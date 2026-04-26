@@ -64,19 +64,21 @@ void BaseBrush::drawSelectedPoint(MainEditor* e, XY onCanvasPoint)
     }
 }
 
-void BaseBrush::drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale)
+SDL_Rect BaseBrush::calcPixelRect(XY from, XY to, XY canvasDrawPoint, int scale)
 {
     XY pointFrom = XY{ ixmin(from.x, to.x), ixmin(from.y, to.y) };
     XY pointTo = XY{ ixmax(from.x, to.x), ixmax(from.y, to.y) };
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x20);
     SDL_Rect r = { canvasDrawPoint.x + (pointFrom.x * scale), canvasDrawPoint.y + (pointFrom.y * scale), ((pointTo.x - pointFrom.x + 1) * scale), ((pointTo.y - pointFrom.y + 1) * scale) };
+    return r;
+}
+
+void BaseBrush::drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale)
+{
+    SDL_Rect r = calcPixelRect(from, to, canvasDrawPoint, scale);
     SDL_RenderFillRect(g_rd, &r);
     SDL_SetRenderDrawColor(g_rd, 0x00, 0x00, 0x00, 0x80);
-    SDL_Rect r2 = r;
-    r2.x++;
-    r2.y++;
-    r2.w -= 2;
-    r2.h -= 2;
+    SDL_Rect r2 = offsetRect(r, -1);
     SDL_RenderDrawRect(g_rd, &r2);
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
     SDL_RenderDrawRect(g_rd, &r);

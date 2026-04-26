@@ -346,6 +346,25 @@ LayerScaleData Layer::scaleGeneric(XY newSize, std::function<void(u32*,u32*)> op
     return { true, newSize, scaledVariants };
 }
 
+LayerScaleData Layer::crop(SDL_Rect to)
+{
+    return scaleGeneric({ to.w, to.h }, [this, to](u32* pxdNow, u32* pxdNew) {
+        XY dstOrigin = { -to.x, -to.y };  //place the srcimage here
+        for (int y = 0; y < h; y++) {
+            int yOrigin = dstOrigin.y + y;
+            if (yOrigin < 0) { continue; }
+            if (yOrigin >= to.h) { break; }
+
+            for (int x = 0; x < w; x++) {
+                int xOrigin = dstOrigin.x + x;
+                if (xOrigin < 0) { continue; }
+                if (xOrigin >= to.w) { break; }
+                ARRAY2DPOINT(pxdNew, xOrigin, yOrigin, to.w) = ARRAY2DPOINT(pxdNow, x, y, w);
+            }
+        }
+    });
+}
+
 LayerScaleData Layer::resize(XY to)
 {
     return scaleGeneric(to, [this, to](u32* pxdNow, u32* pxdNew) {

@@ -515,6 +515,7 @@ public:
     void flipAllLayersOnX();
     void flipAllLayersOnY();
 
+    virtual void cropAllLayersFromCommand(SDL_Rect targetRect);
     virtual void rescaleAllLayersFromCommand(XY size);
     // todo: split byTile into two functions
     virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);

@@ -3146,6 +3146,49 @@ void MainEditor::flipAllLayersOnY()
     addToUndoStack(new UndoStackComposite(undos));
 }
 
+void MainEditor::cropAllLayersFromCommand(SDL_Rect targetRect)
+{
+    if (xyEqual(canvas.dimensions, { targetRect.w, targetRect.h }) && targetRect.x == 0 && targetRect.y == 0) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size and origin must be different to resize."));
+        return;
+    }
+    std::vector<Layer*> layers = getAllLayers();
+
+    std::map<Layer*, LayerScaleData> createdVariants;
+
+    for (Layer* target : layers) {
+        LayerScaleData scaleResult = target->crop(targetRect);
+        if (scaleResult.success) {
+            createdVariants[target] = scaleResult;
+        }
+        else {
+            for (auto& [layer, variants] : createdVariants) {
+                for (auto& variant : variants.scaledVariants) {
+                    tracked_free(variant.pixelData);
+                }
+            }
+            return;
+        }
+
+        target->markLayerDirty();
+    }
+
+    XY newSize = createdVariants[layers[0]].newSize;
+
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, ssne.tileDimensions);
+    for (Layer*& l : layers) {
+        undoData->storedLayerData[l] = l->layerData;
+    }
+
+    for (auto& [layer, variants] : createdVariants) {
+        layer->setLayerData(variants.scaledVariants, variants.newSize);
+    }
+
+    canvas.dimensions = newSize;
+
+    addToUndoStack(undoData);
+}
+
 void MainEditor::rescaleAllLayersFromCommand(XY size) {
     if (xyEqual(canvas.dimensions, size)) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size must be different to rescale."));
