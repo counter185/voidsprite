@@ -1,3 +1,7 @@
+** the vendored code of libbzip2 included with voidsprite was modified to
+   support compiling on modern MSVC.
+
+   location: freesprite/libbzip2
 
 --------------------------------------------------------------------------
 
