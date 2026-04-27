@@ -1,12 +1,13 @@
-#if VSP_USE_LIBAVIF
-    #include <avif/avif_cxx.h>
-#endif
 
 #include <SDL3_image/SDL_image.h>
 
 #include "io_base.h"
 #include "io_avif.h"
 #include "../FileIO.h"
+
+#if VSP_USE_LIBAVIF
+    #include <avif/avif_cxx.h>
+#endif
 
 std::string getLibAVIFVersion()
 {
@@ -204,8 +205,9 @@ MainEditor* readAVIF(PlatformNativePathString path, OperationProgressReport* pro
 #endif
 }
 
-bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress)
+bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress, ParameterStore* params)
 {
+    int quality = params == NULL || !params->hasParam("avif.quality") ? 100 : params->getInt("avif.quality");
 #if VSP_USE_LIBAVIF
     ENSURE_REPORT_VALID(progress);
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
@@ -217,7 +219,7 @@ bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgr
         progress->enterSection("Initializing encoder...");
         avifEncoder* encoder = avifEncoderCreate();
         encoder->timescale = 1000;
-        encoder->quality = AVIF_QUALITY_LOSSLESS;
+        encoder->quality = quality;
         DoOnReturn destroyEncoder([encoder]() { avifEncoderDestroy(encoder); });
 
         progress->updateLastSection("Writing frames...");
@@ -266,11 +268,11 @@ bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgr
     }
     return false;
 #else
-    return writeAVIFWithSDLImage(path, editor);
+    return writeAVIFWithSDLImage(path, editor, quality);
 #endif
 }
 
-bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data)
+bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data, int quality)
 {
     if (data->isPalettized) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Indexed image export not supported"));
@@ -294,7 +296,7 @@ bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data)
 
     std::string u8path = convertStringToUTF8OnWin32(path);
 
-    bool ret = IMG_SaveAVIF(surface, u8path.c_str(), 100);
+    bool ret = IMG_SaveAVIF(surface, u8path.c_str(), quality);
 
     SDL_FreeSurface(surface);
 

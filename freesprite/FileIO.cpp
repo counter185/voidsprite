@@ -2450,7 +2450,12 @@ void g_setupIO() {
     g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", TL("vsp.export.gif"), &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exAPNG = FileExporter::sessionExporter("Animated PNG", ".apng", TL("vsp.export.apng"), &writeAPNG, FORMAT_RGB));
 
-    g_fileExporters.push_back(exPNG = FileExporter::flatExporter("PNG", ".png", TL("vsp.export.png"), &writePNG, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(
+        exPNG = FileExporter::flatExporter("PNG", ".png", TL("vsp.export.png"), &writePNG, FORMAT_RGB | FORMAT_PALETTIZED)
+        ->buildParameters({
+            INT_PARAM("png.compressionlvl", 0,9,9)
+        })
+    );
 
     g_fileExporters.push_back(exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", TL("vsp.export.xyz"), &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", "", &writeBMP));
@@ -2464,7 +2469,12 @@ void g_setupIO() {
                 INT_PARAM("jpeg.quality", 0, 100, 100)
             })
     );
-    g_fileExporters.push_back(exAVIF = FileExporter::sessionExporter("AVIF", ".avif", TL("vsp.export.avif"), &writeAVIF));
+    g_fileExporters.push_back(
+        exAVIF = FileExporter::sessionExporter("AVIF", ".avif", TL("vsp.export.avif"), &writeAVIF)
+            ->buildParameters({
+                INT_PARAM("avif.quality", 0, 100, 100)
+            })
+    );
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", "", & writeTGA));
     g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", "", &writeCaveStoryPBM));
     g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", "", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));

@@ -44,7 +44,7 @@ Layer* readPNGFromRawChunks(PNGIHDRChunk ihdr, std::vector<PNGChunk>& otherChunk
 std::vector<u8> writePNGToMem(Layer* l);
 
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
-bool writePNG(PlatformNativePathString path, Layer* data);
+bool writePNG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress = NULL, ParameterStore* params = NULL);
 
 MainEditor* readAPNG(PlatformNativePathString path, OperationProgressReport* progress);
 bool writeAPNG(PlatformNativePathString path, MainEditor* data);
