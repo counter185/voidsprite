@@ -50,6 +50,7 @@ inline std::string getLibraryLicenses() {
         "libpng\n"
         "pugixml\n"
         "skyline\n"
+        "libbzip2\n"
         "s3tc-dxt-decompression\n"
         "SDL3, SDL3_image, SDL3_ttf, SDL3_net\n"
         "AndroidDeviceNames\n"
@@ -57,6 +58,8 @@ inline std::string getLibraryLicenses() {
         //not directly copying any code (i just rewrote it from js to c++)
         //but still
         "NewPond\n"
+        //also not directly copying any code (rewrite from c# to c++)
+        "yytexUnpacker\n"
         "\n"
         "The following libraries are only used as dependencies of other libraries:\n"
 #if VSP_USE_LIBAVIF

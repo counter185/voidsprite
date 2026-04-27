@@ -2536,6 +2536,9 @@ void g_setupIO() {
 #endif
     g_fileImporters.push_back(FileImporter::flatImporter("Godot Compressed texture", ".ctex", &readGodotCTEX, NULL, FORMAT_RGB, 
         magicVerify(0, "GST")));
+    g_fileImporters.push_back(FileImporter::flatImporter("YoYo texture", ".yytex", &readYoYoTex, NULL, FORMAT_RGB, 
+        [](PlatformNativePathString path) { return magicVerify(0, "fioq")(path) || magicVerify(0, "2zoq")(path); }
+    ));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
         magicVerify(0, "BM")));
     g_fileImporters.push_back(FileImporter::flatImporter("RPG2000/2003 XYZ", ".xyz", &readXYZ, exXYZ, FORMAT_PALETTIZED));

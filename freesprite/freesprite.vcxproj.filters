@@ -136,6 +136,12 @@
     <Filter Include="Header files\external\gzip">
       <UniqueIdentifier>{f00f289a-056a-4e54-b187-b504a5fa11b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\libbzip2">
+      <UniqueIdentifier>{5756d835-5084-455a-8468-e88d758c1049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\external\libbzip2">
+      <UniqueIdentifier>{682a6cc4-b299-4780-8b3a-13c74aedeafa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -710,6 +716,30 @@
     </ClCompile>
     <ClCompile Include="PopupSetParameters.cpp">
       <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_gamemaker.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\bzlib.c">
+      <Filter>Source files\external\libbzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\randtable.c">
+      <Filter>Source files\external\libbzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\decompress.c">
+      <Filter>Source files\external\libbzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\crctable.c">
+      <Filter>Source files\external\libbzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\compress.c">
+      <Filter>Source files\external\libbzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\blocksort.c">
+      <Filter>Source files\external\libbzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="libbzip2\huffman.c">
+      <Filter>Source files\external\libbzip2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1429,6 +1459,15 @@
     </ClInclude>
     <ClInclude Include="PopupSetParameters.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_gamemaker.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="libbzip2\bzlib.h">
+      <Filter>Header files\external\libbzip2</Filter>
+    </ClInclude>
+    <ClInclude Include="libbzip2\bzlib_private.h">
+      <Filter>Header files\external\libbzip2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

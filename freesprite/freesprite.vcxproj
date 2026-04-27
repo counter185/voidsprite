@@ -297,6 +297,7 @@
     <ClCompile Include="io\io_avif.cpp" />
     <ClCompile Include="io\io_dibv5.cpp" />
     <ClCompile Include="io\io_flipnote.cpp" />
+    <ClCompile Include="io\io_gamemaker.cpp" />
     <ClCompile Include="io\io_gif.cpp" />
     <ClCompile Include="io\io_gim.cpp" />
     <ClCompile Include="io\io_iw.cpp" />
@@ -316,6 +317,13 @@
     <ClCompile Include="keybinds.cpp" />
     <ClCompile Include="layer_conversions.cpp" />
     <ClCompile Include="LayerPalettized.cpp" />
+    <ClCompile Include="libbzip2\blocksort.c" />
+    <ClCompile Include="libbzip2\bzlib.c" />
+    <ClCompile Include="libbzip2\compress.c" />
+    <ClCompile Include="libbzip2\crctable.c" />
+    <ClCompile Include="libbzip2\decompress.c" />
+    <ClCompile Include="libbzip2\huffman.c" />
+    <ClCompile Include="libbzip2\randtable.c" />
     <ClCompile Include="localization\localization.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="MainEditorPalettized.cpp" />
@@ -562,6 +570,7 @@
     <ClInclude Include="io\io_base.h" />
     <ClInclude Include="io\io_dibv5.h" />
     <ClInclude Include="io\io_flipnote.h" />
+    <ClInclude Include="io\io_gamemaker.h" />
     <ClInclude Include="io\io_gif.h" />
     <ClInclude Include="io\io_gim.h" />
     <ClInclude Include="io\io_iw.h" />
@@ -582,6 +591,8 @@
     <ClInclude Include="keybinds.h" />
     <ClInclude Include="LayerPalettized.h" />
     <ClInclude Include="layer_conversions.h" />
+    <ClInclude Include="libbzip2\bzlib.h" />
+    <ClInclude Include="libbzip2\bzlib_private.h" />
     <ClInclude Include="license.h" />
     <ClInclude Include="localization\localization.h" />
     <ClInclude Include="log.h" />

@@ -57,6 +57,7 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_resprite.h"
 #include "io/io_avif.h"
 #include "io/io_anymap.h"
+#include "io/io_gamemaker.h"
 
 #include "io/io_palettes.h"
 
