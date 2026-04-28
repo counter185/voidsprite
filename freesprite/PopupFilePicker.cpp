@@ -36,6 +36,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
         if (std::filesystem::exists(p)) {
             if (std::filesystem::is_directory(p)) {
                 this->currentDir = p;
+                filesInCurrentDirValid = false;
                 this->populateFileList();
             } else {
                 f->setText(convertStringToUTF8OnWin32(currentDir));
@@ -65,6 +66,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
                 }
                 else {
                     if (std::filesystem::create_directory(newFolderPath)) {
+                        filesInCurrentDirValid = false;
                         this->populateFileList();
                     }
                     else {
@@ -274,7 +276,7 @@ void PopupFilePicker::getFilesInCurrentDir()
                 file.is_directory(),
                 stringEndsWithIgnoreCase(utf8name, targetExtension),
                 file.is_symlink()
-                });
+            });
         }
 
         std::sort(filesInCurrentDir.begin(), filesInCurrentDir.end(), [](FilePickerFileEntry& left, FilePickerFileEntry& right) {
@@ -311,6 +313,7 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
                         if (yes) {
                             try {
                                 std::filesystem::remove_all(p);
+                                filesInCurrentDirValid = false;
                                 populateFileList();
                             } catch (std::exception& e) {
                                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.deletefile"), e.what())));
@@ -330,6 +333,7 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
                     popup->onTextInputConfirmedCallback = [this, p](PopupTextBox* popup, std::string newName) {
                         try {
                             std::filesystem::rename(p, appendPath(currentDir, convertStringOnWin32(newName)));
+                            filesInCurrentDirValid = false;
                             populateFileList();
                         } catch (std::exception& e) {
                             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.renamefile"), e.what())));
