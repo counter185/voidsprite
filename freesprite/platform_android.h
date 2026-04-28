@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <filesystem>
+#include <ios>
 
 #include <jni.h>
 #include "EventCallbackListener.h"
@@ -127,7 +128,7 @@ bool platformCreateDirectory(PlatformNativePathString path) {
     if (checkMethod != nullptr) {
         bool res = lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(path.c_str()));
         if (!res) {
-            throw std::filesystem::filesystem_error("createDirectory failed");
+            throw std::ios_base::failure("createDirectory failed");
         } else {
             return true;
         }
@@ -139,7 +140,7 @@ bool platformRenameFile(PlatformNativePathString path, PlatformNativePathString 
     if (checkMethod != nullptr) {
         bool res = lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(path.c_str()), lastJNI->NewStringUTF(newPath.c_str()));
         if (!res) {
-            throw std::filesystem::filesystem_error("renameFile failed");
+            throw std::ios_base::failure("renameFile failed");
         } else {
             return true;
         }

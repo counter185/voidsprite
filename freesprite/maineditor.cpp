@@ -1452,6 +1452,7 @@ void MainEditor::makeActionBar()
     zoomoutButton->icon = g_iconActionBarZoomOut;
     zoomoutButton->onClickCallback = [this](UIButton* btn) { canvas.zoom(-1, { g_windowW / 2, g_windowH / 2 }); };
     zoomoutButton->wxWidth = actionBarButtonSize;
+    zoomoutButton->wxHeight = actionBarButtonSize;
 
     UIButton* zoominButton = new UIButton("", TL("vsp.cmn.zoomin"));
     zoominButton->icon = g_iconActionBarZoomIn;
