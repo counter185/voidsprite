@@ -1,6 +1,8 @@
 #pragma once
 
 #include <fstream>
+#include <sys/stat.h>
+#include <filesystem>
 
 #include <jni.h>
 #include "EventCallbackListener.h"
@@ -21,13 +23,13 @@ u32 platformSupportedFeatures() {
 }
 
 void platformPreInit() {
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/templates");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath());
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/templates");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 
     //manually setting orientation not only doesn't maximize it but also adds garbage data on the sides
     /*if (!SDL_IsDeXMode() && !SDL_IsTablet()) {
@@ -117,6 +119,33 @@ std::vector<RootDirInfo> android_getStoragePathsFromProcMounts() {
 bool platformAssocFileTypes(std::vector<std::string> extensions, std::vector<std::string> additionalArgs) { return false; }
 bool platformRegisterURI(std::string uriProtocol, std::vector<std::string> additionalArgs) { return false; }
 std::string platformGetFileAssocForExtension(std::string extension) { return "";}
+
+//we're doing this with jni because std::filesystem creates phantom folders on android when special characters are used
+//that cannot be accessed from any other file manager
+bool platformCreateDirectory(PlatformNativePathString path) {
+    jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "createDirectory", "(Ljava/lang/String;)Z");
+    if (checkMethod != nullptr) {
+        bool res = lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(path.c_str()));
+        if (!res) {
+            throw std::filesystem::filesystem_error("createDirectory failed");
+        } else {
+            return true;
+        }
+    }
+    throw std::runtime_error("jni function not found");
+}
+bool platformRenameFile(PlatformNativePathString path, PlatformNativePathString newPath) {
+    jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "renameFile", "(Ljava/lang/String;Ljava/lang/String;)Z");
+    if (checkMethod != nullptr) {
+        bool res = lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(path.c_str()), lastJNI->NewStringUTF(newPath.c_str()));
+        if (!res) {
+            throw std::filesystem::filesystem_error("renameFile failed");
+        } else {
+            return true;
+        }
+    }
+    throw std::runtime_error("jni function not found");
+}
 
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}

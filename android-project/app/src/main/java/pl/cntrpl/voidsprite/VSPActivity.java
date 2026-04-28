@@ -183,6 +183,9 @@ public class VSPActivity extends SDLActivity {
         return Utils.fetchDataHTTP(url);
     }
 
+    public static boolean createDirectory(String path) { return new File(path).mkdir(); };
+    public static boolean renameFile(String oldPath, String newPath) { return new File(oldPath).renameTo(new File(newPath)); };
+
     public static native void passAppdataPathString(String appdataPath);
     public static native void passSystemInformationString(String systemInformation);
 }

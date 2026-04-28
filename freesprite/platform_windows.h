@@ -393,6 +393,15 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     }
 }
 
+bool platformCreateDirectory(PlatformNativePathString path) {
+    std::filesystem::create_directory(path);
+    return true;
+}
+bool platformRenameFile(PlatformNativePathString path, PlatformNativePathString newPath) {
+    std::filesystem::rename(path, newPath);
+    return true;
+}
+
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {
     return CopyFileW(from.c_str(), to.c_str(), FALSE);
 }

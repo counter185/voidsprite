@@ -68,6 +68,9 @@ PlatformNativePathString platformEnsureDirAndGetConfigFilePath();
 std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathString path, std::string filterExtension = "");
 std::vector<RootDirInfo> platformListRootDirectories();
 
+bool platformCreateDirectory(PlatformNativePathString path);
+bool platformRenameFile(PlatformNativePathString path, PlatformNativePathString newPath);
+
 bool platformPutImageInClipboard(Layer* l);
 Layer* platformGetImageFromClipboard();
 

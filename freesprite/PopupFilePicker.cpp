@@ -65,7 +65,7 @@ PopupFilePicker::PopupFilePicker(FilePickerMode m, std::string title, std::vecto
                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.folderexists")));
                 }
                 else {
-                    if (std::filesystem::create_directory(newFolderPath)) {
+                    if (platformCreateDirectory(newFolderPath)) {
                         filesInCurrentDirValid = false;
                         this->populateFileList();
                     }
@@ -332,7 +332,7 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
                     popup->allowEmptyText = false;
                     popup->onTextInputConfirmedCallback = [this, p](PopupTextBox* popup, std::string newName) {
                         try {
-                            std::filesystem::rename(p, appendPath(currentDir, convertStringOnWin32(newName)));
+                            platformRenameFile(p, appendPath(currentDir, convertStringOnWin32(newName)));
                             filesInCurrentDirValid = false;
                             populateFileList();
                         } catch (std::exception& e) {

@@ -16,13 +16,13 @@ extern char **environ;
 
 
 void platformPreInit() {
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath());
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/templates");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
-    std::filesystem::create_directory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath());
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/templates");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/9segmentpatterns");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/palettes");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
+    platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 }
 void platformInit() {}
 void platformPostInit() {}
@@ -67,6 +67,15 @@ void platformOpenFileLocation(PlatformNativePathString path) {
 
 PlatformNativePathString platformEnsureDirAndGetConfigFilePath() {
     return "ux0:/data/voidsprite/";
+}
+
+bool platformCreateDirectory(PlatformNativePathString path) {
+    std::filesystem::create_directory(path);
+    return true;
+}
+bool platformRenameFile(PlatformNativePathString path, PlatformNativePathString newPath) {
+    std::filesystem::rename(path, newPath);
+    return true;
 }
 
 bool platformCopyFile(PlatformNativePathString from, PlatformNativePathString to) {
