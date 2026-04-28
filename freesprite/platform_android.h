@@ -127,11 +127,7 @@ bool platformCreateDirectory(PlatformNativePathString path) {
     jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "createDirectory", "(Ljava/lang/String;)Z");
     if (checkMethod != nullptr) {
         bool res = lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(path.c_str()));
-        if (!res) {
-            throw std::ios_base::failure("createDirectory failed");
-        } else {
-            return true;
-        }
+        return res;
     }
     throw std::runtime_error("jni function not found");
 }
@@ -139,11 +135,7 @@ bool platformRenameFile(PlatformNativePathString path, PlatformNativePathString 
     jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "renameFile", "(Ljava/lang/String;Ljava/lang/String;)Z");
     if (checkMethod != nullptr) {
         bool res = lastJNI->CallStaticBooleanMethod(vspActivityClass, checkMethod, lastJNI->NewStringUTF(path.c_str()), lastJNI->NewStringUTF(newPath.c_str()));
-        if (!res) {
-            throw std::ios_base::failure("renameFile failed");
-        } else {
-            return true;
-        }
+        return res;
     }
     throw std::runtime_error("jni function not found");
 }
