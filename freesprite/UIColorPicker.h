@@ -76,6 +76,7 @@ public:
     UIColorInputField* mix1Input = NULL;
     UIColorInputField* mix2Input = NULL;
     UIColorSlider* mixSlider = NULL;
+    bool lockMix2 = false;
 
     std::vector<std::pair<std::string, ColorModelData>> colorModels;
 

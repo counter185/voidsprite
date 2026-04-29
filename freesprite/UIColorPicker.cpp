@@ -13,6 +13,7 @@
 #include "UIColorInputField.h"
 #include "PopupContextMenu.h"
 #include "PopupChooseFormat.h"
+#include "UICheckbox.h"
 #include "io/io_voidsprite.h"
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
@@ -229,28 +230,38 @@ UIColorPicker::UIColorPicker()
     //-----------------
     //| Mix tab
 
-    colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("A", {20, 25}));
     mix1Input = new UIColorInputField();
-    mix1Input->position = XY{ 20, 50 };
     mix1Input->button->wxWidth = 100;
     mix1Input->onColorChangedCallback = [this](UIColorInputField* uic, u32 c) {
         colorUpdatedFromMixInput();
     };
-    colorModeTabs->tabs[3].wxs.addDrawable(mix1Input);
 
-    colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("B", { 200, 25 }));
+    UIStackPanel* mxAsp = UIStackPanel::Vertical(4, {
+        new UILabel("A"),
+        mix1Input
+    });
+    mxAsp->position = { 20,25 };
+    colorModeTabs->tabs[3].wxs.addDrawable(mxAsp);
+
+
     mix2Input = new UIColorInputField();
-    mix2Input->position = XY{ 200, 50 };
     mix2Input->button->wxWidth = 100;
     mix2Input->onColorChangedCallback = [this](UIColorInputField* uic, u32 c) {
         colorUpdatedFromMixInput();
     };
-    colorModeTabs->tabs[3].wxs.addDrawable(mix2Input);
+
+    UIStackPanel* mxBsp = UIStackPanel::Vertical(4, {
+        new UILabel("B"),
+        mix2Input,
+        new UICheckbox("Lock", &this->lockMix2)
+    });
+    mxBsp->position = { 200, 25 };
+    colorModeTabs->tabs[3].wxs.addDrawable(mxBsp);
 
     colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("+", { 150, 50 }));
 
     mixSlider = new UIColorSlider();
-    mixSlider->position = XY{ 40, 120 };
+    mixSlider->position = XY{ 40, 140 };
     mixSlider->wxWidth = 240;
     mixSlider->onChangeValueCallback = [this](UISlider* s, float f) {
         colorUpdatedFromMixInput();
@@ -748,7 +759,9 @@ void UIColorPicker::updateUIFrom(ColorChangeSource from, std::string dontUpdateT
     if (from != MIX_SLIDER) {
         mixSlider->setValue(0,1,0);
         mix1Input->setColor(colorNowU32, false);
-        mix2Input->setColor(colorNowU32, false);
+        if (!lockMix2) {
+            mix2Input->setColor(colorNowU32, false);
+        }
     }
 
     updateAllSliderColors();
