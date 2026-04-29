@@ -5,6 +5,7 @@
 #include "UITextField.h"
 #include "UIStackPanel.h"
 #include "UILabel.h"
+#include "UISlider.h"
 #include "maineditor.h"
 
 PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target)
@@ -12,7 +13,7 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
     this->caller = caller;
     this->target = target;
     targetPasteRect = target != NULL ? SDL_Rect{ 0,0, target->w, target->h } : SDL_Rect{0,0, caller->canvas.dimensions.x, caller->canvas.dimensions.y};
-    setSize({ 400, 200 });
+    setSize({ 400, 230 });
 
     UITextField* posx = new UINumberInputField(&targetPasteRect.x);
     posx->wxWidth = 120;
@@ -28,6 +29,14 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
     UITextField* txh = new UINumberInputField(&targetPasteRect.h);
     txh->wxWidth = 120;
 
+    UISlider* previewOpacitySlider = new UISlider();
+    previewOpacitySlider->wxWidth = 230;
+    previewOpacitySlider->wxHeight = 25;
+    previewOpacitySlider->setValue(0, 255, (double)previewOpacity);
+    previewOpacitySlider->onChangeValueCallback = [this](UISlider* s, float v) {
+        previewOpacity = (u8)s->getValue(0, 255);
+    };
+
     SDL_Rect initialValues = targetPasteRect;
 
     UIStackPanel* sp = 
@@ -39,6 +48,10 @@ PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target
             UIStackPanel::Horizontal(12, {
                 new UILabel("Size"),
                 txw, txh
+            }),
+            UIStackPanel::Horizontal(12, {
+                new UILabel("Preview opacity"),
+                previewOpacitySlider
             })
         });
     sp->position = { 10, 50 };
@@ -74,7 +87,7 @@ PopupFreeformTransform::~PopupFreeformTransform()
 void PopupFreeformTransform::render()
 {
     SDL_Rect renderTargetRect = getRenderTargetRect();
-    target->render(renderTargetRect);
+    target->render(renderTargetRect, previewOpacity);
     SDL_Rect rtr1 = offsetRect(renderTargetRect, 1);
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x80);
     SDL_RenderDrawRect(g_rd, &rtr1);

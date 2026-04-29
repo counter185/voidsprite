@@ -12,6 +12,7 @@ protected:
 
     int draggingCorner = -1;
     XY dragStart = { 0,0 };
+    u8 previewOpacity = 255;
 public:
     std::function<void(bool)> onFinishCallback = NULL;
 
