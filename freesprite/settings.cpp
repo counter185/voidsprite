@@ -178,7 +178,7 @@ void g_loadConfig() {
     if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
     if (config.contains("checkerboardPrimary")) { try { g_config.checkerboardPrimary = std::stoul(config["checkerboardPrimary"], nullptr, 16); } catch (std::exception&) {} }
     if (config.contains("checkerboardSecondary")) { try { g_config.checkerboardSecondary = std::stoul(config["checkerboardSecondary"], nullptr, 16); } catch (std::exception&) {} }
-    if (config.contains("powerSaverLevel")) { try { g_config.checkerboardSize = std::stoi(config["checkerboardSize"]); } catch (std::exception&) {} }
+    if (config.contains("checkerboardSize")) { try { g_config.checkerboardSize = std::stoi(config["checkerboardSize"]); } catch (std::exception&) {} }
 
     for (auto& [key, value] : config) {
         if (stringStartsWithIgnoreCase(key, "keybind@")) {
