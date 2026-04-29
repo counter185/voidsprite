@@ -476,22 +476,28 @@ void MainEditor::tick() {
         }
     }
 
-    if (abs(g_gamepad->gamepadLSX) > 0.05f || abs(g_gamepad->gamepadLSY) > 0.05f) {
-        canvas.panCanvas({
-            (int)(-g_gamepad->gamepadLSX * 10),
-            (int)(-g_gamepad->gamepadLSY * 10)
-        });
-        RecalcMousePixelTargetPoint(g_windowW / 2, g_windowH / 2);
-        if (currentBrushMouseDowned) {
-            if (currentBrush != NULL) {
-                currentBrush->clickDrag(this,
-                    currentBrush->wantDoublePosPrecision() ? mouseHoldPosition2xP : mouseHoldPosition,
-                    currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+    if (!g_bgOpRunning && !g_currentWindow->hasPopupsOpen()) {
+
+        if (abs(g_gamepad->gamepadLSX) > 0.05f || abs(g_gamepad->gamepadLSY) > 0.05f) {
+            canvas.panCanvas({
+                (int)(-g_gamepad->gamepadLSX * 10),
+                (int)(-g_gamepad->gamepadLSY * 10)
+                });
+            RecalcMousePixelTargetPoint(g_windowW / 2, g_windowH / 2);
+            if (currentBrushMouseDowned) {
+                if (currentBrush != NULL) {
+                    currentBrush->clickDrag(this,
+                        currentBrush->wantDoublePosPrecision() ? mouseHoldPosition2xP : mouseHoldPosition,
+                        currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+                }
+                mouseHoldPosition = mousePixelTargetPoint;
+                mouseHoldPosition2xP = mousePixelTargetPoint2xP;
             }
-            mouseHoldPosition = mousePixelTargetPoint;
-            mouseHoldPosition2xP = mousePixelTargetPoint2xP;
+            currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
         }
-        currentBrush->mouseMotion(this, currentBrush->wantDoublePosPrecision() ? mousePixelTargetPoint2xP : mousePixelTargetPoint);
+    }
+    else {
+        currentBrushMouseDowned = false;
     }
 
     canvas.lockToScreenBounds();
