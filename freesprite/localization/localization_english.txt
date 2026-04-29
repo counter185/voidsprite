@@ -537,6 +537,10 @@
     {"vsp.config.opt.showsysclock", "Show system time"},
     {"vsp.config.opt.framelesswindow", "Frameless window"},
     {"vsp.config.opt.framelesswindow.desc", "voidsprite will use its own window decorations instead of system ones."},
+    {"vsp.config.opt.enablecheckerboard", "Enable checkerboard"},
+    {"vsp.config.opt.checkerboardsize", "Checkerboard size"},
+    {"vsp.config.opt.checkerboardscalewithcanvas", "Scale checkerboard with canvas"},
+    {"vsp.config.opt.checkerboardcolors", "Checkerboard colors"},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

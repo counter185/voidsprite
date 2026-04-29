@@ -313,6 +313,38 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->subWidgets.addDrawable(stack);
     posInTab.y += 35;
 
+
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.enablecheckerboard"), "", &g_config.enableCheckerboard, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.checkerboardsize"), "", &g_config.checkerboardSize, 4, 512, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.checkerboardscalewithcanvas"), "", &g_config.checkerboardScaleWithCanvas, &posInTab));
+    UIColorInputField* checkerboardPrimaryColorInput = new UIColorInputField(true);
+    checkerboardPrimaryColorInput->button->wxWidth = 80;
+    checkerboardPrimaryColorInput->setColor(g_config.checkerboardPrimary);
+    checkerboardPrimaryColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
+        g_config.checkerboardPrimary = newColor;
+    };
+
+    UIColorInputField* checkerboardSecondaryColorInput = new UIColorInputField(true);
+    checkerboardSecondaryColorInput->setColor(g_config.checkerboardSecondary);
+    checkerboardSecondaryColorInput->button->wxWidth = 80;
+    checkerboardSecondaryColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
+        g_config.checkerboardSecondary = newColor;
+    };
+
+    stack = UIStackPanel::Horizontal(4, {
+        new UILabel(TL("vsp.config.opt.checkerboardcolors")),
+        Panel::Space(12,2),
+        new UILabel("Primary"),
+        checkerboardPrimaryColorInput,
+        Panel::Space(4,2),
+        new UILabel("Secondary"),
+        checkerboardSecondaryColorInput
+    });
+    stack->position = posInTab;
+    editorSettingsPanel->subWidgets.addDrawable(stack);
+    posInTab.y += 35;
+
+
     /*
         -------------------------
         KEYBINDS TAB

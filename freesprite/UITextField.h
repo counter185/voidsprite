@@ -17,6 +17,7 @@ public:
     int wxWidth = 250, wxHeight = 30;
     Fill bgFill = Fill::Solid(0xFF000000);
     SDL_Color textColor = { 0xff,0xff,0xff, 0xff };
+    bool multiline = false;
     
     std::vector<std::string> imeCandidates;
     int imeCandidateIndex = 0;

@@ -37,6 +37,8 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"acrylicPanels", &g_config.acrylicPanels},
         {"showSystemClock", &g_config.showSystemClock},
         {"customWindowFrame", &g_config.customWindowFrame},
+        {"checkerboard", &g_config.enableCheckerboard},
+        {"checkerboardScaleWithCanvas", &g_config.checkerboardScaleWithCanvas},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }
@@ -88,6 +90,9 @@ bool g_saveConfig() {
         config["canvasZoomSensitivity"] = std::to_string(g_config.canvasZoomSensitivity);
         config["backtraceColor"] = frmt("{:06X}", g_config.backtraceColor);
         config["fwdtraceColor"] = frmt("{:06X}", g_config.fwdtraceColor);
+        config["checkerboardPrimary"] = frmt("{:06X}", g_config.checkerboardPrimary);
+        config["checkerboardSecondary"] = frmt("{:06X}", g_config.checkerboardSecondary);
+        config["checkerboardSize"] = std::to_string(g_config.checkerboardSize);
         
         int uqIndex = 0;
         auto keybinds = g_keybindManager.serializeKeybinds();
@@ -171,6 +176,9 @@ void g_loadConfig() {
     if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
     if (config.contains("backtraceColor")) { try { g_config.backtraceColor = std::stoul(config["backtraceColor"], nullptr, 16); } catch (std::exception&) {} }
     if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
+    if (config.contains("checkerboardPrimary")) { try { g_config.checkerboardPrimary = std::stoul(config["checkerboardPrimary"], nullptr, 16); } catch (std::exception&) {} }
+    if (config.contains("checkerboardSecondary")) { try { g_config.checkerboardSecondary = std::stoul(config["checkerboardSecondary"], nullptr, 16); } catch (std::exception&) {} }
+    if (config.contains("powerSaverLevel")) { try { g_config.checkerboardSize = std::stoi(config["checkerboardSize"]); } catch (std::exception&) {} }
 
     for (auto& [key, value] : config) {
         if (stringStartsWithIgnoreCase(key, "keybind@")) {

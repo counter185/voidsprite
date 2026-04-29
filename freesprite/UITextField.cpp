@@ -35,6 +35,8 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
             case SDL_SCANCODE_RETURN:
                 if (isNumericField && numericFieldCurrentOperation != '\0') {
                     runNumericOperation();
+                } else if (multiline) {
+                    inputChar('\n');
                 } else {
                     if (onTextChangedConfirmCallback != NULL) {
                         onTextChangedConfirmCallback(this, text);

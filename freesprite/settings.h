@@ -41,6 +41,11 @@ public:
     bool smoothFonts = true;
     bool acrylicPanels = false;
     bool customWindowFrame = false;
+    bool enableCheckerboard = false;
+    bool checkerboardScaleWithCanvas = true;
+    int checkerboardSize = 16;
+    u32 checkerboardPrimary = 0xFF1A1A1A;
+    u32 checkerboardSecondary = 0xFF2A2A2A;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

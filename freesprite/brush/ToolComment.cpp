@@ -11,6 +11,7 @@ void ToolComment::clickPress(MainEditor* editor, XY pos)
 			clickPos = pos;
 			clickEditor = editor;
 			PopupTextBox* textInput = new PopupTextBox("Add comment", frmt("Set comment text at {}:{}:", pos.x, pos.y), "", 440);
+			textInput->setMultiline();
 			textInput->setCallbackListener(EVENT_MAINEDITOR_ADD_COMMENT, this);
 			g_addPopup(textInput);
 		}

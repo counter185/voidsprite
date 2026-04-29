@@ -332,9 +332,12 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
                     popup->allowEmptyText = false;
                     popup->onTextInputConfirmedCallback = [this, p](PopupTextBox* popup, std::string newName) {
                         try {
-                            platformRenameFile(p, appendPath(currentDir, convertStringOnWin32(newName)));
-                            filesInCurrentDirValid = false;
-                            populateFileList();
+                            if (platformRenameFile(p, appendPath(currentDir, convertStringOnWin32(newName)))) {
+                                filesInCurrentDirValid = false;
+                                populateFileList();
+                            } else {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.filepicker.error.renamefile")));
+                            }
                         } catch (std::exception& e) {
                             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("{}\n  {}", TL("vsp.filepicker.error.renamefile"), e.what())));
                         }

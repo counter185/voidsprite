@@ -367,7 +367,6 @@ public:
     ~MainEditor();
 
     void render() override;
-    void RenderCanvas();
     void tick() override;
     void takeInput(SDL_Event evt) override;
     std::vector<std::string> dropEverythingYoureDoingAndSave() override;
@@ -391,6 +390,8 @@ public:
     bool usingAltBG();
     void setAltBG(bool useAltBG);
     SDL_Color getAccentColor();
+    void RenderCanvas();
+    void renderCheckerboard();
     void DrawBackground();
     void DrawForeground();
     void renderComments();

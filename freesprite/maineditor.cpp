@@ -240,6 +240,9 @@ void MainEditor::RenderCanvas()
     DrawBackground();
 
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
+
+    renderCheckerboard();
+
     //render references under the canvas
     for (auto& refPanel : openReferencePanels) {
         if (refPanel->currentMode == REFERENCE_UNDER_CANVAS) {
@@ -391,6 +394,57 @@ void MainEditor::RenderCanvas()
     renderComments();
 
     renderUndoStack();
+}
+
+void MainEditor::renderCheckerboard()
+{
+    if (g_config.enableCheckerboard) {
+        SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
+        int squareSize = ixmax(1, g_config.checkerboardSize * (g_config.checkerboardScaleWithCanvas ? canvas.scale : 1));
+
+        SDL_Color colPrimary = uint32ToSDLColor(g_config.checkerboardPrimary);
+        SDL_Color colSecondary = uint32ToSDLColor(g_config.checkerboardSecondary);
+
+        if (colPrimary.a != 0) {
+            SDL_SetRenderDrawColor(g_rd, colPrimary.r, colPrimary.g, colPrimary.b, colPrimary.a);
+            SDL_RenderFillRect(g_rd, &canvasRenderRect);
+        }
+
+        if (colSecondary.a != 0) {
+            bool state = false;
+            bool lineInitialState = false;
+            SDL_SetRenderDrawColor(g_rd, colSecondary.r, colSecondary.g, colSecondary.b, colSecondary.a);
+            for (int y = 0; y < canvasRenderRect.h; y += squareSize) {
+                state = lineInitialState;
+                lineInitialState = !lineInitialState;
+                if (canvasRenderRect.y + y + squareSize < 0) {
+                    continue;
+                }
+                for (int x = 0; x < canvasRenderRect.w; x += squareSize) {
+                    if (state) {
+                        SDL_Rect r = {
+                            canvasRenderRect.x + x,
+                            canvasRenderRect.y + y,
+                            ixmin(squareSize, canvasRenderRect.w - x),
+                            ixmin(squareSize, canvasRenderRect.h - y)
+                        };
+                        if (r.x + r.w < 0) {
+                            state = !state;
+                            continue;
+                        }
+                        if (r.y > g_windowH) {
+                            return;
+                        }
+                        if (r.x > g_windowW) {
+                            break;
+                        }
+                        SDL_RenderFillRect(g_rd, &r);
+                    }
+                    state = !state;
+                }
+            }
+        }
+    }
 }
 
 void MainEditor::tick() {
