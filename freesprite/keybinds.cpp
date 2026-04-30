@@ -6,6 +6,7 @@
 #include "EditorFramePicker.h"
 #include "StartScreen.h"
 #include "brush/BaseBrush.h"
+#include "BaseFilter.h"
 #include "main.h"
 #include "multiwindow.h"
 
@@ -262,6 +263,17 @@ void g_initKeybinds()
         );
         kc.icon = brush->cachedIcon;
         g_keybindManager.addKeybind("maineditor", frmt("brush_{}", i++), kc);
+    }
+
+    for (auto& filter : g_filters) {
+        KeyCombo kc = KeyCombo(frmt("{}: {}", "Filter", filter->name()),
+            KEY_UNASSIGNED, false, false, [filter](void* d) {
+                if (!((MainEditor*)d)->isPalettized) {
+                    ((MainEditor*)d)->openFilterUI(filter);
+                }
+            }
+        );
+        g_keybindManager.addKeybind("maineditor", frmt("filter_{}", filter->id()), kc);
     }
 
 

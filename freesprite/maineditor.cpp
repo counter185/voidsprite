@@ -1374,13 +1374,7 @@ void MainEditor::setUpWidgets()
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDL_SCANCODE_Q].actions[keyorder[i++]] = {
             filter->name(), [this, filter]() {
-                Layer* currentLayer = this->getCurrentLayer();
-                filter->setupParamBounds(currentLayer);
-                PopupApplyFilter* newPopup = new PopupApplyFilter(this, currentLayer, filter);
-                g_addPopup(newPopup);
-                if (filter->getParameters().size() == 0) {
-                    newPopup->applyAndClose();
-                }
+                openFilterUI(filter);
             }
         };
     }
@@ -1446,6 +1440,17 @@ void MainEditor::setUpWidgets()
         };
 
         SetupCompactEditor(createSections);
+    }
+}
+
+void MainEditor::openFilterUI(BaseFilter* filter)
+{
+    Layer* currentLayer = this->getCurrentLayer();
+    filter->setupParamBounds(currentLayer);
+    PopupApplyFilter* newPopup = new PopupApplyFilter(this, currentLayer, filter);
+    g_addPopup(newPopup);
+    if (filter->getParameters().size() == 0) {
+        newPopup->applyAndClose();
     }
 }
 
