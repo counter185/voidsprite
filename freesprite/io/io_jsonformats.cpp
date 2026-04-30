@@ -73,10 +73,7 @@ bool writeLPE(PlatformNativePathString path, MainEditor* editor)
             layerObj["id"] = frmt("layer{}", i);
             layerObj["name"] = l->name;
 
-            std::vector<u8> pngBytes = writePNGToMem(l);
-            std::string fileBuffer;
-            fileBuffer.resize(pngBytes.size());
-            memcpy(fileBuffer.data(), pngBytes.data(), pngBytes.size());
+            std::string fileBuffer = writePNGToBase64(l);
             layerObj["src"] = "data:image/png;base64," + base64::to_base64(fileBuffer);
 
             o["layers"].push_back(layerObj);
@@ -244,11 +241,8 @@ bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
             layerObj["chunks"] = json::array();
             json chunkObj = json::object();
 
-            std::vector<u8> pngData = writePNGToMem(l);
-            std::string fileBuffer;
-            fileBuffer.resize(pngData.size());
-            memcpy(fileBuffer.data(), pngData.data(), pngData.size());
-            chunkObj["base64PNG"] = "data:image/png;base64," + base64::to_base64(fileBuffer);
+            std::string layerB64 = writePNGToBase64(l);
+            chunkObj["base64PNG"] = "data:image/png;base64," + layerB64;
             chunkObj["layout"] = json::array();
             chunkObj["layout"].push_back(json::array());
             chunkObj["layout"][0].push_back(0);

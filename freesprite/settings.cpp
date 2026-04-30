@@ -39,6 +39,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"customWindowFrame", &g_config.customWindowFrame},
         {"checkerboard", &g_config.enableCheckerboard},
         {"checkerboardScaleWithCanvas", &g_config.checkerboardScaleWithCanvas},
+        {"saveLoadReferences", &g_config.saveLoadReferences},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

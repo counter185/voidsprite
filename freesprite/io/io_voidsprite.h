@@ -22,7 +22,7 @@ bool writeVOIDSNv3(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv4(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv5(PlatformNativePathString path, MainEditor* editor);
 bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor);
-bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor);
+bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress, ParameterStore* params);
 
 MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* progress);
 

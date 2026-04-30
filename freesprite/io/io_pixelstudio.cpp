@@ -355,12 +355,7 @@ json serializePixelStudioSession(MainEditor* data) {
         historyJson["Actions"] = json::array();
         historyJson["Index"] = 0;
 
-        std::string pixelDataPNGAsBase64 = "";
-        std::vector<u8> pngData = writePNGToMem(l);
-        std::string fileBuffer;
-        fileBuffer.resize(pngData.size());
-        memcpy(&fileBuffer[0], pngData.data(), pngData.size());
-        pixelDataPNGAsBase64 = base64::to_base64(fileBuffer);
+        std::string pixelDataPNGAsBase64 = writePNGToBase64(l);
         historyJson["_source"] = pixelDataPNGAsBase64;
 
         layer["_historyJson"] = historyJson.dump();

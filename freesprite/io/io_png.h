@@ -42,6 +42,7 @@ Layer* readPNGFromBase64String(std::string b64);
 Layer* readPNGFromMem(uint8_t* data, size_t dataSize);
 Layer* readPNGFromRawChunks(PNGIHDRChunk ihdr, std::vector<PNGChunk>& otherChunks, PNGChunk idat);
 std::vector<u8> writePNGToMem(Layer* l);
+std::string writePNGToBase64(Layer* l);
 
 Layer* readPNG(PlatformNativePathString path, uint64_t seek = 0);
 bool writePNG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress = NULL, ParameterStore* params = NULL);

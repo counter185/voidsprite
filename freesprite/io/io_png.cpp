@@ -471,6 +471,15 @@ std::vector<u8> writePNGToMem(Layer* data)
     return ret;
 }
 
+std::string writePNGToBase64(Layer* l)
+{
+    std::vector<u8> pngData = writePNGToMem(l);
+    std::string fileBuffer;
+    fileBuffer.resize(pngData.size());
+    memcpy(fileBuffer.data(), pngData.data(), pngData.size());
+    return base64::to_base64(fileBuffer);
+}
+
 Layer* readPNG(PlatformNativePathString path, uint64_t seek)
 {
     FILE* pngfile = platformOpenFile(path, PlatformFileModeRB);

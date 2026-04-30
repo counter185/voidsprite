@@ -2,8 +2,11 @@
 #include "io_base.h"
 #include "io_voidsprite.h"
 
+#include "io_png.h"
+
 #include "../EditorLayerPicker.h"
 #include "../FileIO.h"
+#include "../PanelReference.h"
 
 #include <zlib.h>
 
@@ -559,10 +562,12 @@ bool writeVOIDSNv6(PlatformNativePathString path, MainEditor* editor)
     return false;
 }
 
-bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
+bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress, ParameterStore* params)
 {
+    ENSURE_REPORT_VALID(progress);
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
+        progress->enterSection("Writing voidsprite session...");
         uint8_t voidsnVersion = 0x07;
         fwrite(&voidsnVersion, 1, 1, outfile);
         fwrite("voidsprite", sizeof("voidsprite"), 1, outfile);
@@ -570,6 +575,7 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
         voidsnWriteU32(outfile, editor->canvas.dimensions.x);
         voidsnWriteU32(outfile, editor->canvas.dimensions.y);
 
+        progress->enterSection("Writing extra data...");
         fwrite("/VOIDSN.META/", 1, 13, outfile);
         std::map<std::string, std::string> extData = {
             {"layer.selected", std::to_string(editor->selLayer)},
@@ -580,6 +586,18 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
             {"frame.backtrace", std::to_string(editor->backtraceFrames)},
             {"frame.fwdtrace", std::to_string(editor->fwdtraceFrames)},
         };
+
+        if (g_config.saveLoadReferences) {
+            int refI = 0;
+            progress->updateLastSection("Writing references...");
+            for (auto*& reference : editor->openReferencePanels) {
+                progress->updateLastSection(frmt("Writing reference {}/{}", refI + 1, editor->openReferencePanels.size()));
+                Layer* target = reference->getLayer();
+                if (target != NULL) {
+                    extData[frmt("reference.data.{}", refI++)] = writePNGToBase64(target);
+                }
+            }
+        }
 
         for (auto& [k,v] : editor->ssne.serializeToKeyVals()) {
             extData[k] = v;
@@ -614,7 +632,10 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
 
         voidsnWriteU32(outfile, editor->frames.size());
 
+        progress->updateLastSection("Writing frames...");
+        int frameI = 0;
         for (Frame*& f : editor->frames) {
+            progress->updateLastSection(frmt("Writing frame {}/{}", ++frameI, editor->frames.size()));
             std::string commentsData = editor->makeCommentDataString(f);
             std::map<std::string, std::string> frameExtData = {
                 {"layer.selected", std::to_string(f->activeLayer)},
@@ -636,7 +657,10 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
                 bool hintDelete = false;
             };
 
+            progress->enterSection("Writing layers...");
+            int layerIndex = 0;
             for (Layer*& lr : f->layers) {
+                progress->updateLastSection(frmt("Writing layer {}/{}", ++layerIndex, f->layers.size()));
                 if (lr->w * lr->h != editor->canvas.dimensions.x * editor->canvas.dimensions.y) {
                     logerr("[VOIDSNv3] INVALID LAYER DIMENSIONS (THIS IS BAD)");
                 }
@@ -669,6 +693,7 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor)
                     }
                 }
             }
+            progress->exitSection();
         }
 
         fclose(outfile);
@@ -760,7 +785,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             fread(metaHeader, 13, 1, infile);
             // this should equal /VOIDSN.META/
             if (memcmp(metaHeader, "/VOIDSN.META/", 13) != 0) {
-                logprintf("INVALID META HEADER\n");
+                logerr("INVALID META HEADER");
             }
             int nExtData = voidsnReadU32(infile);
             std::map<std::string, std::string> extData;
@@ -936,8 +961,15 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
                 std::string commentsData = extData["comments"];
                 frames.front()->comments = MainEditor::parseCommentDataString(commentsData);
             }
+
             for (auto& [key, value] : extData) {
-                if (stringStartsWithIgnoreCase(key, "tool.property:")) {
+                if (g_config.saveLoadReferences && stringStartsWithIgnoreCase(key, "reference.data.")) {
+                    Layer* newRef = readPNGFromBase64String(value);
+                    if (newRef != NULL) {
+                        ret->addReference(newRef);
+                    }
+                }
+                else if (stringStartsWithIgnoreCase(key, "tool.property:")) {
                     std::string propName = key.substr(14);
                     try {
                         ret->toolProperties[propName] = std::stod(value);

@@ -226,7 +226,6 @@ class MainEditor : public BaseScreen, public EventCallbackListener {
 protected:
     std::vector<IsolatedFragmentPoint> renderedIsolatedFragmentPoints;
     bool compactEditor = false;
-    std::vector<PanelReference*> openReferencePanels;
     // std::vector<Layer*> layers;
 
     MainEditor() {}
@@ -340,6 +339,8 @@ public:
     Timer64 autosaveTimer;
     Timer64 timerSinceLastSave;
 
+    std::vector<PanelReference*> openReferencePanels;
+
     u32 canvasStateID;
     std::atomic<bool> networkRunning = false;
     std::thread* networkCanvasThread = NULL;
@@ -450,6 +451,7 @@ public:
     PlatformNativePathString createRecoveryAutosave(std::string insertIntoFilename = "");
     bool tryAddReferenceFromClipboard();
     bool tryAddReference(PlatformNativePathString path);
+    bool addReference(Layer* l);
     void openPreviewPanel();
     void tryToggleTilePreviewLockAtMousePos();
     void promptPasteImageFromClipboard();

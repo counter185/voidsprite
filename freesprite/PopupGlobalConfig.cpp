@@ -71,22 +71,30 @@ PopupGlobalConfig::PopupGlobalConfig()
         GENERAL TAB
         -------------------------
     */
+    ScrollingPanel* generalSettingsPanel = new ScrollingPanel();
+    generalSettingsPanel->position = { 0,0 };
+    generalSettingsPanel->wxWidth = wxWidth - 20;
+    generalSettingsPanel->wxHeight = wxHeight - 140;
+    generalSettingsPanel->scrollVertically = true;
+    generalSettingsPanel->scrollHorizontally = false;
+    configTabs->tabs[0].wxs.addDrawable(generalSettingsPanel);
     XY posInTab = { 0,10 };
     
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.saverefs"), TL("vsp.config.opt.saverefs.desc"), &g_config.saveLoadReferences, &posInTab));
     if (VSP_DISCORD_RPC){
-        configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
+        generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
     }
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog, &posInTab));
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath, &posInTab));
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog, &posInTab));
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath, &posInTab));
     if (platformSupportsFeature(VSP_FEATURE_WEB_FETCH)) {
-        configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates, &posInTab));
+        generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates, &posInTab));
     }
     if (platformSupportsFeature(VSP_FEATURE_INSTANCE_IPC)) {
-        configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.singleinstance"), TL("vsp.config.opt.singleinstance.desc"), &g_config.singleInstance, &posInTab));
+        generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.singleinstance"), TL("vsp.config.opt.singleinstance.desc"), &g_config.singleInstance, &posInTab));
     }
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.longerrornotifs"), TL("vsp.config.opt.longerrornotifs.desc"), &g_config.longErrorNotifs, &posInTab));
-    configTabs->tabs[0].wxs.addDrawable(optionCheckbox(TL("vsp.config.opt.showsysclock"), "", &g_config.showSystemClock, &posInTab));
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.longerrornotifs"), TL("vsp.config.opt.longerrornotifs.desc"), &g_config.longErrorNotifs, &posInTab));
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showsysclock"), "", &g_config.showSystemClock, &posInTab));
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
@@ -95,21 +103,21 @@ PopupGlobalConfig::PopupGlobalConfig()
     }
     UILabel* lbl4 = new UILabel(TL("vsp.config.opt.lang"));
     lbl4->position = posInTab;
-    configTabs->tabs[0].wxs.addDrawable(lbl4);
+    generalSettingsPanel->subWidgets.addDrawable(lbl4);
     UIDropdown* dd2 = new UIDropdown(langNames);
     dd2->position = xyAdd(posInTab, { 300, 0 });
     dd2->wxWidth = 180;
     dd2->setCallbackListener(DROPDOWN_LANGUAGE, this);
     dd2->setTextToSelectedItem = true;
     dd2->text = getLocalizations().contains(g_config.language) ? getLocalizations()[g_config.language].langName : "???";
-    configTabs->tabs[0].wxs.addDrawable(dd2);
+    generalSettingsPanel->subWidgets.addDrawable(dd2);
     posInTab.y += 35;
 
     languageCredit = new UILabel("");
     languageCredit->fontsize = 16;
     languageCredit->position = xyAdd(posInTab, {30, 0});
     languageCredit->color = { 255,255,255,0xa0 };
-    configTabs->tabs[0].wxs.addDrawable(languageCredit);
+    generalSettingsPanel->subWidgets.addDrawable(languageCredit);
     posInTab.y += 70;
     updateLanguageCredit();
 

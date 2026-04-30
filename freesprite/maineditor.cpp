@@ -2792,11 +2792,18 @@ bool MainEditor::tryAddReference(PlatformNativePathString path)
     MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(path));
     if (ssn != NULL) {
         Layer* flat = ssn->flattenImage();
-        PanelReference* referencePanel = new PanelReference(flat, this);
+        delete ssn;
+        return addReference(flat);
+    }
+    return false;
+}
+bool MainEditor::addReference(Layer* l)
+{
+    if (l != NULL) {
+        PanelReference* referencePanel = new PanelReference(l, this);
         openReferencePanels.push_back(referencePanel);
         addWidget(referencePanel);
         referencePanel->playPanelOpenVFX();
-        delete ssn;
         return true;
     }
     return false;
@@ -2805,11 +2812,7 @@ bool MainEditor::tryAddReferenceFromClipboard()
 {
     Layer* flat = platformGetImageFromClipboard();
     if (flat != NULL) {
-        PanelReference* referencePanel = new PanelReference(flat, this);
-        openReferencePanels.push_back(referencePanel);
-        addWidget(referencePanel);
-        referencePanel->playPanelOpenVFX();
-        return true;
+        return addReference(flat);
     } else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.clipboard_no_image")));
     }
