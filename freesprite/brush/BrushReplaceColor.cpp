@@ -2,7 +2,8 @@
 
 void BrushReplaceColor::clickPress(MainEditor* editor, XY pos)
 {
-	editor->layer_replaceColor(editor->layer_getPixelAt(pos), editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : editor->getActiveColor());
+	u32 color = editor->isPalettized ? editor->getActiveColor() : modAlpha(editor->getActiveColor(), editor->pickedAlpha);
+	editor->layer_replaceColor(editor->layer_getPixelAt(pos), editor->eraserMode ? (editor->isPalettized ? -1 : 0x00000000) : color);
 }
 
 void BrushReplaceColor::renderOnCanvas(MainEditor* editor, int scale)
