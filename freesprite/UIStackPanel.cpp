@@ -1,9 +1,10 @@
 #include "UIStackPanel.h"
 
 
-UIStackPanel* UIStackPanel::FromContent(std::vector<Drawable*> content)
+UIStackPanel* UIStackPanel::FromContent(std::vector<Drawable*> content, bool vertical)
 {
     UIStackPanel* panel = new UIStackPanel();
+    panel->orientationVertical = vertical;
     for (Drawable* d : content) {
         if (d != NULL) {
             panel->addWidget(d);
@@ -21,19 +22,19 @@ UIStackPanel::UIStackPanel()
     sizeToContent = true;
 }
 
-UIStackPanel* UIStackPanel::Vertical(int spacing, std::vector<Drawable*> content)
+UIStackPanel* UIStackPanel::Vertical(int spacing, std::vector<Drawable*> content, XY position)
 {
-    auto panel = FromContent(content);
-    panel->orientationVertical = true;
+    auto panel = FromContent(content, true);
+    panel->position = position;
     panel->spacing = spacing;
     panel->recalculateLayout();
     return panel;
 }
 
-UIStackPanel* UIStackPanel::Horizontal(int spacing, std::vector<Drawable*> content)
+UIStackPanel* UIStackPanel::Horizontal(int spacing, std::vector<Drawable*> content, XY position)
 {
-    auto panel = FromContent(content);
-    panel->orientationVertical = false;
+    auto panel = FromContent(content, false);
+    panel->position;
     panel->spacing = spacing;
     panel->recalculateLayout();
     return panel;
@@ -68,4 +69,15 @@ void UIStackPanel::recalculateLayout()
         }
     }
     contentBoxSize = getContentBoxSize();
+}
+
+HAlignPoint::~HAlignPoint() { if (--parent->refCount == 0) { delete parent; } }
+
+XY HAlignPoint::getDimensions() {
+    if (!xPointSet) {
+        originalXPoint = position.x;
+        xPointSet = true;
+    }
+    parent->updateAlignPoints();
+    return { w, 1 };
 }

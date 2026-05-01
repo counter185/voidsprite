@@ -61,145 +61,11 @@ StartScreen::StartScreen() {
     title->position = { 10, 40 };
     wxsManager.addDrawable(title);
 
-    title = new UILabel(TL("vsp.launchpad.newimage"));
-    title->fontsize = 22;
-    title->position = { 10, 75 };
-    wxsManager.addDrawable(title);
+    newImagePanel = new PanelNewImage();
+    newImagePanel->position = { 10, 75 };
+    wxsManager.addDrawable(newImagePanel);
 
-    newImageTabs = new TabbedView({ { TL("vsp.launchpad.tab.pixeldim"), g_iconMenuPxDim },{ TL("vsp.launchpad.tab.spritesheet"), g_iconMenuSpritesheet },{ TL("vsp.launchpad.tab.templates"), g_iconMenuTemplates } }, 180);
-    newImageTabs->position = XY{ 10, 110 };
-    wxsManager.addDrawable(newImageTabs);
-
-    //tab 0
-    tab0TextFieldW = new UINumberInputField(&newImgSizeTab0.x);
-    tab0TextFieldW->position = xySubtract(XY{ 80,120 }, newImageTabs->position);
-    tab0TextFieldW->wxWidth = 200;
-    tab0TextFieldW->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[0]->click(); };
-    tab0TextFieldW->validateFunction = [](int v) { return v > 0; };
-    newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldW);
-
-    tab0TextFieldH = new UINumberInputField(&newImgSizeTab0.y);
-    tab0TextFieldH->position = xySubtract(XY{ 80,155 }, newImageTabs->position);
-    tab0TextFieldH->wxWidth = 200;
-    tab0TextFieldH->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[0]->click(); };
-    tab0TextFieldH->validateFunction = [](int v) { return v > 0; };
-    newImageTabs->tabs[0].wxs.addDrawable(tab0TextFieldH);
-
-    UILabel* wLabel = new UILabel(TL("vsp.cmn.width"));
-    wLabel->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
-    newImageTabs->tabs[0].wxs.addDrawable(wLabel);
-
-    UILabel* hLabel = new UILabel(TL("vsp.cmn.height"));
-    hLabel->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
-    newImageTabs->tabs[0].wxs.addDrawable(hLabel);
-
-    //tab 1
-    tab1TextFieldCW = new UINumberInputField(&newImgCellSizeTab1.x);
-    tab1TextFieldCW->position = xySubtract(XY{ 110,120 }, newImageTabs->position);
-    tab1TextFieldCW->wxWidth = 160;
-    tab1TextFieldCW->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
-    tab1TextFieldCW->validateFunction = [](int v) { return v > 0; };
-    newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCW);
-
-    tab1TextFieldCWX = new UINumberInputField(&newImgCellCountTab1.x);
-    tab1TextFieldCWX->position = xySubtract(XY{ 300,120 }, newImageTabs->position);
-    tab1TextFieldCWX->wxWidth = 40;
-    tab1TextFieldCWX->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
-    tab1TextFieldCWX->validateFunction = [](int v) { return v > 0; };
-    newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCWX);
-
-    tab1TextFieldCH = new UINumberInputField(&newImgCellSizeTab1.y);
-    tab1TextFieldCH->position = xySubtract(XY{ 110,155 }, newImageTabs->position);
-    tab1TextFieldCH->wxWidth = 160;
-    tab1TextFieldCH->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
-    tab1TextFieldCH->validateFunction = [](int v) { return v > 0; };
-    newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCH);
-
-    tab1TextFieldCHX = new UINumberInputField(&newImgCellCountTab1.y);
-    tab1TextFieldCHX->position = xySubtract(XY{ 300,155 }, newImageTabs->position);
-    tab1TextFieldCHX->wxWidth = 40;
-    tab1TextFieldCHX->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
-    tab1TextFieldCHX->validateFunction = [](int v) { return v > 0; };
-    newImageTabs->tabs[1].wxs.addDrawable(tab1TextFieldCHX);
-
-    UILabel* w2Label = new UILabel(TL("vsp.launchpad.tab.cellw"));
-    w2Label->position = xySubtract(XY{ 10,120 }, newImageTabs->position);
-    newImageTabs->tabs[1].wxs.addDrawable(w2Label);
-
-    UILabel* h2Label = new UILabel(TL("vsp.launchpad.tab.cellh"));
-    h2Label->position = xySubtract(XY{ 10,155 }, newImageTabs->position);
-    newImageTabs->tabs[1].wxs.addDrawable(h2Label);
-
-    UILabel* w2Label2 = new UILabel("x");
-    w2Label2->position = xySubtract(XY{ 280,120 }, newImageTabs->position);
-    newImageTabs->tabs[1].wxs.addDrawable(w2Label2);
-
-    UILabel* h2Label2 = new UILabel("x");
-    h2Label2->position = xySubtract(XY{ 280,155 }, newImageTabs->position);
-    newImageTabs->tabs[1].wxs.addDrawable(h2Label2);
-
-
-    templatesPanel = new ScrollingPanel();
-    templatesPanel->position = XY{ 40, 5 };
-    //templatesPanel->text = TL("vsp.launchpad.tab.picktemplate");
-    templatesPanel->wxWidth = 480;
-    templatesPanel->wxHeight = 300;
-    templatesPanel->takeMouseWheelEvents = false;
-    newImageTabs->tabs[2].wxs.addDrawable(templatesPanel);
-    populateTemplatesPanel();
-
-    std::vector<std::string> palettes;
-    for (auto& pal : g_namedColorMap) {
-        palettes.push_back(pal.getName());
-    }
-
-    for (int x = 0; x < 2; x++) {
-
-        newImageTabs->tabs[x].wxs.addDrawable(new UILabel(TL("vsp.launchpad.tab.rgbfill"), {30,100}));
-
-        UIColorInputField* rgbFillField = new UIColorInputField(true);
-        rgbFillField->setColor(0);
-        rgbFillField->position = { 110,100 };
-        rgbFillField->button->wxWidth = 80;
-        newImageTabs->tabs[x].wxs.addDrawable(rgbFillField);
-
-        UIButton* buttonNewImageRGB = new UIButton();
-        buttonNewImageRGB->onClickCallback = [this, rgbFillField](UIButton*) { NewRGBSession(rgbFillField->getColor()); };
-        buttonNewImageRGB->position = XY{ 30,140 };
-        buttonNewImageRGB->wxWidth = 160;
-        buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
-        buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
-        newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
-
-        rgbTabCreateButtons[x] = buttonNewImageRGB;
-
-        UIDropdown* palettePicker = new UIDropdown(palettes);
-        palettePicker->customButtonGenFunction = [](std::string name, int index) {
-            IPalette* p = g_paletteByName(name);
-            PaletteButton* ret = new PaletteButton(p != NULL ? p->toRawColorList() : std::vector<u32>{}, 36);
-            ret->text = name;
-            ret->wxWidth = 300;
-            ret->wxHeight = 70;
-            return ret;
-        };
-        palettePicker->text = PALETTE_DEFAULT;
-        palettePicker->position = XY{230, 100};
-        palettePicker->wxWidth = 300;
-        palettePicker->wxHeight = 30;
-        palettePicker->setTextToSelectedItem = true;
-        newImageTabs->tabs[x].wxs.addDrawable(palettePicker);
-
-        UIButton* buttonNewImagePalettized = new UIButton();
-        buttonNewImagePalettized->onClickCallback = [this, palettePicker](UIButton*) { NewIndexedSession(palettePicker->text); };
-        buttonNewImagePalettized->position = XY{ 230,140 };
-        buttonNewImagePalettized->wxWidth = 200;
-        buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
-        buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
-        newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
-    }
-
-
-    int startScreenPanelEndpoint = newImageTabs->getDimensions().x + newImageTabs->position.x;
+    int startScreenPanelEndpoint = newImagePanel->getDimensions().x + newImagePanel->position.x;
     startScreenPanelEndpoint = ixmax(560, startScreenPanelEndpoint);
 
     ScrollingPanel* lastOpenFilesPanelContainer = new ScrollingPanel();
@@ -325,24 +191,12 @@ void StartScreen::render()
     g_fnt->RenderString(frmt("alpha@{}\n{}", __DATE__, line2), 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 
     if (g_config.checkUpdates && updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
-        static std::string tlUpdateAvailable = TL("vsp.launchpad.update.title");
-        static std::string tlLatestVer = TL("vsp.launchpad.update.latestver");
-        std::string desc = frmt("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
-        XY position = { logoRect.x, logoRect.y };
-        double fadeInTimer = updateCheckTimer.percentElapsedTime(800, -400);
-        double fadeInTimer2 = updateCheckTimer.percentElapsedTime(800);
-        g_fnt->RenderString(tlUpdateAvailable, position.x + 14 - 30 * (1.0 - XM1PW3P1(fadeInTimer)), position.y, SDL_Color{ 0xFC,0xFF,0x84,(u8)(0x80 * fadeInTimer) }, 20);
-        g_fnt->RenderString(desc, position.x + 14 - 30 * (1.0 - XM1PW3P1(fadeInTimer2)), position.y + 24, SDL_Color{ 0xFC,0xFF,0x84,(u8)(0x80 * fadeInTimer2) }, 16);
-        XY textB = g_fnt->StatStringDimensions(desc, 16);
-        XY p1 = { position.x + 5, position.y + 5 };
-        XY p2 = xyAdd(p1, { 0, 24 + textB.y });
-        SDL_SetRenderDrawColor(g_rd, 0xFC, 0xFF, 0x84, (u8)(0xd0 * fadeInTimer));
-        drawLine(p1, p2, XM1PW3P1(fadeInTimer2));
+        renderUpdateCheck(logoRect);
     }
 
     static Fill panelFill = visualConfigFill("ui/panel/bg_focused_blurbehind");
 
-    SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImageTabs->getDimensions().x + newImageTabs->position.x + 5), 300 };
+    SDL_Rect bgr = SDL_Rect{ 0, 35, ixmax(560,newImagePanel->getDimensions().x + newImagePanel->position.x + 5), 300 };
     panelFill.fill(bgr);
 
     /*bgr.x += bgr.w + 10;
@@ -355,6 +209,23 @@ void StartScreen::render()
     renderFileDropAnim();
 
     renderStartupAnim();
+}
+
+void StartScreen::renderUpdateCheck(SDL_Rect logoRect)
+{
+    static std::string tlUpdateAvailable = TL("vsp.launchpad.update.title");
+    static std::string tlLatestVer = TL("vsp.launchpad.update.latestver");
+    std::string desc = frmt("{} {}/{}/{} - {}", tlLatestVer, latestVersionYear, latestVersionMonth, latestVersionDay, latestHash.substr(0, 7));
+    XY position = { logoRect.x, logoRect.y };
+    double fadeInTimer = updateCheckTimer.percentElapsedTime(800, -400);
+    double fadeInTimer2 = updateCheckTimer.percentElapsedTime(800);
+    g_fnt->RenderString(tlUpdateAvailable, position.x + 14 - 30 * (1.0 - XM1PW3P1(fadeInTimer)), position.y, SDL_Color{ 0xFC,0xFF,0x84,(u8)(0x80 * fadeInTimer) }, 20);
+    g_fnt->RenderString(desc, position.x + 14 - 30 * (1.0 - XM1PW3P1(fadeInTimer2)), position.y + 24, SDL_Color{ 0xFC,0xFF,0x84,(u8)(0x80 * fadeInTimer2) }, 16);
+    XY textB = g_fnt->StatStringDimensions(desc, 16);
+    XY p1 = { position.x + 5, position.y + 5 };
+    XY p2 = xyAdd(p1, { 0, 24 + textB.y });
+    SDL_SetRenderDrawColor(g_rd, 0xFC, 0xFF, 0x84, (u8)(0xd0 * fadeInTimer));
+    drawLine(p1, p2, XM1PW3P1(fadeInTimer2));
 }
 
 void StartScreen::takeInput(SDL_Event evt)
@@ -466,7 +337,7 @@ void StartScreen::takeInput(SDL_Event evt)
     }
 }
 
-void StartScreen::NewRGBSession(u32 fill)
+void PanelNewImage::newRGBSession(u32 fill)
 {
     const XY maxImgSize = { 16384, 16384 };
     XY imgSize = 
@@ -485,13 +356,14 @@ void StartScreen::NewRGBSession(u32 fill)
             newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;
         }
         g_addScreen(newMainEditor);
+        runImageCreatedCallback();
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
     }
 }
 
-void StartScreen::NewIndexedSession(std::string palette)
+void PanelNewImage::newIndexedSession(std::string palette)
 {
     const XY maxImgSize = { 16384, 16384 };
     XY imgSize =
@@ -511,6 +383,7 @@ void StartScreen::NewIndexedSession(std::string palette)
             newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;
         }
         g_addScreen(newMainEditor);
+        runImageCreatedCallback();
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.launchpad.error.starteditor"), TL("vsp.cmn.error.mallocfail")));
@@ -567,7 +440,7 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
     }
 }
 
-void StartScreen::loadFromTemplate(BaseTemplate* templ)
+void PanelNewImage::loadFromTemplate(BaseTemplate* templ)
 {
     MainEditor* newMainEditor = templ->generateSession();
     if (newMainEditor == NULL) {
@@ -575,6 +448,7 @@ void StartScreen::loadFromTemplate(BaseTemplate* templ)
         return;
     }
     g_addScreen(newMainEditor);
+    runImageCreatedCallback();
 }
 
 void StartScreen::populateLastOpenFiles()
@@ -613,7 +487,7 @@ void StartScreen::populateLastOpenFiles()
     }
 }
 
-void StartScreen::populateTemplatesPanel()
+void PanelNewImage::populateTemplatesPanel()
 {
     templatesPanel->subWidgets.freeAllDrawables();
     std::vector<Drawable*> buttons;
@@ -642,6 +516,13 @@ void StartScreen::populateTemplatesPanel()
     UIStackPanel* sp = UIStackPanel::Vertical(0, buttons);
     sp->takeMouseWheelEvents = false;
     templatesPanel->subWidgets.addDrawable(sp);
+}
+
+void PanelNewImage::runImageCreatedCallback()
+{
+    if (imageCreatedCallback != NULL) {
+        imageCreatedCallback();
+    }
 }
 
 void StartScreen::renderStartupAnim()
@@ -1237,4 +1118,162 @@ XY StartScreen::bgSpaceTransform(XY p)
         (int)((p.x / 960.0f) * g_windowW),
         (int)((p.y / 960.0f) * g_windowH)
     };
+}
+
+PanelNewImage::PanelNewImage()
+{
+    XY initialOrigin = { 10,75 };
+    sizeToContent = true;
+    subWidgets.addDrawable(new UILabel(TL("vsp.launchpad.newimage"), { 0,0 }, 22));
+
+    newImageTabs = new TabbedView({ 
+        { TL("vsp.launchpad.tab.pixeldim"), g_iconMenuPxDim },
+        { TL("vsp.launchpad.tab.spritesheet"), g_iconMenuSpritesheet },
+        { TL("vsp.launchpad.tab.templates"), g_iconMenuTemplates } 
+    }, 180);
+    newImageTabs->position = XY{ 0, 35 };
+    subWidgets.addDrawable(newImageTabs);
+
+
+    //tab 0
+    tab0TextFieldW = new UINumberInputField(&newImgSizeTab0.x);
+    tab0TextFieldH = new UINumberInputField(&newImgSizeTab0.y);
+
+    tab0TextFieldW->wxWidth = tab0TextFieldH->wxWidth = 200;
+
+    tab0TextFieldW->onTextChangedConfirmCallback = tab0TextFieldH->onTextChangedConfirmCallback = 
+        [this](UITextField*, std::string s) { rgbTabCreateButtons[0]->click(); };
+
+    tab0TextFieldW->validateFunction = tab0TextFieldH->validateFunction = 
+        [](int v) { return v > 0; };
+
+    HAlign* align = new HAlign();
+
+    UIStackPanel* wOptions = 
+        UIStackPanel::Horizontal(2, {
+            new UILabel(TL("vsp.cmn.width")),
+            Panel::Space(4,1),
+            align->alignPoint(),
+            tab0TextFieldW
+        });
+    UIStackPanel* hOptions = 
+        UIStackPanel::Horizontal(2, {
+            new UILabel(TL("vsp.cmn.height")),
+            Panel::Space(4,1),
+            align->alignPoint(),
+            tab0TextFieldH
+        });
+    wOptions->recalculateLayout();
+    hOptions->recalculateLayout();
+    newImageTabs->tabs[0].wxs.addDrawable(UIStackPanel::Vertical(5, {
+        wOptions,
+        hOptions
+    }, {0, 10}));
+
+
+    //tab 1
+    tab1TextFieldCW = new UINumberInputField(&newImgCellSizeTab1.x);
+    tab1TextFieldCWX = new UINumberInputField(&newImgCellCountTab1.x);
+    tab1TextFieldCH = new UINumberInputField(&newImgCellSizeTab1.y);
+    tab1TextFieldCHX = new UINumberInputField(&newImgCellCountTab1.y);
+
+    tab1TextFieldCW->wxWidth = tab1TextFieldCH->wxWidth = 160;
+    tab1TextFieldCWX->wxWidth = tab1TextFieldCHX->wxWidth = 40;
+
+    tab1TextFieldCW->onTextChangedConfirmCallback = 
+        tab1TextFieldCWX->onTextChangedConfirmCallback = 
+        tab1TextFieldCH->onTextChangedConfirmCallback = 
+        tab1TextFieldCHX->onTextChangedConfirmCallback = [this](UITextField*, std::string s) { rgbTabCreateButtons[1]->click(); };
+
+    tab1TextFieldCW->validateFunction = 
+        tab1TextFieldCWX->validateFunction = 
+        tab1TextFieldCH->validateFunction = 
+        tab1TextFieldCHX->validateFunction = [](int v) { return v > 0; };
+
+    align = new HAlign();
+    auto* cellWOptions =
+        UIStackPanel::Horizontal(2, {
+            new UILabel(TL("vsp.launchpad.tab.cellw")),
+            Panel::Space(4,1),
+            align->alignPoint(),
+            tab1TextFieldCW,
+            new UILabel("x"),
+            tab1TextFieldCWX
+        });
+    auto* cellHOptions = 
+        UIStackPanel::Horizontal(2, {
+            new UILabel(TL("vsp.launchpad.tab.cellh")),
+            Panel::Space(4,1),
+            align->alignPoint(),
+            tab1TextFieldCH,
+            new UILabel("x"),
+            tab1TextFieldCHX
+        });
+    cellWOptions->recalculateLayout();
+    cellHOptions->recalculateLayout();
+
+    newImageTabs->tabs[1].wxs.addDrawable(UIStackPanel::Vertical(5, {
+        cellWOptions,
+        cellHOptions
+    }, {0,10}));
+
+
+    templatesPanel = new ScrollingPanel();
+    templatesPanel->position = XY{ 40, 5 };
+    //templatesPanel->text = TL("vsp.launchpad.tab.picktemplate");
+    templatesPanel->wxWidth = 480;
+    templatesPanel->wxHeight = 300;
+    templatesPanel->takeMouseWheelEvents = false;
+    newImageTabs->tabs[2].wxs.addDrawable(templatesPanel);
+    populateTemplatesPanel();
+
+    std::vector<std::string> palettes;
+    for (auto& pal : g_namedColorMap) {
+        palettes.push_back(pal.getName());
+    }
+
+    for (int x = 0; x < 2; x++) {
+
+        newImageTabs->tabs[x].wxs.addDrawable(new UILabel(TL("vsp.launchpad.tab.rgbfill"), { 30,100 }));
+
+        UIColorInputField* rgbFillField = new UIColorInputField(true);
+        rgbFillField->setColor(0);
+        rgbFillField->position = { 110,100 };
+        rgbFillField->button->wxWidth = 80;
+        newImageTabs->tabs[x].wxs.addDrawable(rgbFillField);
+
+        UIButton* buttonNewImageRGB = new UIButton();
+        buttonNewImageRGB->onClickCallback = [this, rgbFillField](UIButton*) { newRGBSession(rgbFillField->getColor()); };
+        buttonNewImageRGB->position = XY{ 30,140 };
+        buttonNewImageRGB->wxWidth = 160;
+        buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
+        buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
+        newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
+
+        rgbTabCreateButtons[x] = buttonNewImageRGB;
+
+        UIDropdown* palettePicker = new UIDropdown(palettes);
+        palettePicker->customButtonGenFunction = [](std::string name, int index) {
+            IPalette* p = g_paletteByName(name);
+            PaletteButton* ret = new PaletteButton(p != NULL ? p->toRawColorList() : std::vector<u32>{}, 36);
+            ret->text = name;
+            ret->wxWidth = 300;
+            ret->wxHeight = 70;
+            return ret;
+        };
+        palettePicker->text = PALETTE_DEFAULT;
+        palettePicker->position = XY{ 230, 100 };
+        palettePicker->wxWidth = 300;
+        palettePicker->wxHeight = 30;
+        palettePicker->setTextToSelectedItem = true;
+        newImageTabs->tabs[x].wxs.addDrawable(palettePicker);
+
+        UIButton* buttonNewImagePalettized = new UIButton();
+        buttonNewImagePalettized->onClickCallback = [this, palettePicker](UIButton*) { newIndexedSession(palettePicker->text); };
+        buttonNewImagePalettized->position = XY{ 230,140 };
+        buttonNewImagePalettized->wxWidth = 200;
+        buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
+        buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
+        newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
+    }
 }

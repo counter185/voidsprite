@@ -741,6 +741,9 @@
     <ClCompile Include="libbzip2\huffman.c">
       <Filter>Source files\external\libbzip2</Filter>
     </ClCompile>
+    <ClCompile Include="PopupNewImage.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1468,6 +1471,9 @@
     </ClInclude>
     <ClInclude Include="libbzip2\bzlib_private.h">
       <Filter>Header files\external\libbzip2</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupNewImage.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

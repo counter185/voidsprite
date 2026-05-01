@@ -56,6 +56,7 @@
 #include "PopupChooseFormat.h"
 #include "PopupSetTemplateInfo.h"
 #include "PopupSetParameters.h"
+#include "PopupNewImage.h"
 #include "multiwindow.h"
 
 #include "discord_rpc.h"
@@ -1044,6 +1045,7 @@ void MainEditor::setUpWidgets()
             {
                 makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile,
                 {
+                    {SDL_SCANCODE_N, { TL("vsp.maineditor.nav.newsession"), [this]() { g_addPopup(new PopupNewImage()); }}},
                     {SDL_SCANCODE_S, { TL("vsp.nav.save"), [this]() { this->trySaveImage(); } } },
                     {SDL_SCANCODE_D, { TL("vsp.maineditor.saveas"), [this]() { this->trySaveAsImage(); } } },
                     {SDL_SCANCODE_W, { TL("vsp.maineditor.nav.forceautosave"), [this]() { this->createRecoveryAutosave(); } } },
@@ -1068,7 +1070,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"), [this]() { this->copyImageToClipboard(); } } },
                     {SDL_SCANCODE_V, { TL("vsp.cmn.paste"), [this]() { this->promptPasteImageFromClipboard(); } } },
 #if VSP_NETWORKING
-                    {SDL_SCANCODE_N, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
+                    {SDL_SCANCODE_M, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
 #endif
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"), [this]() { g_addPopup(new PopupGlobalConfig()); } } },
                     {SDL_SCANCODE_X, { TL("vsp.cmn.close"), [this]() { this->requestSafeClose(); } } },

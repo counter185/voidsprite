@@ -355,6 +355,7 @@
     <ClCompile Include="PopupIntegerScale.cpp" />
     <ClCompile Include="PopupListLAN.cpp" />
     <ClCompile Include="PopupListRecoveryAutosaves.cpp" />
+    <ClCompile Include="PopupNewImage.cpp" />
     <ClCompile Include="PopupPickColor.cpp" />
     <ClCompile Include="PopupQuickConvert.cpp" />
     <ClCompile Include="PopupSet9SPattern.cpp" />
@@ -634,6 +635,7 @@
     <ClInclude Include="PopupIntegerScale.h" />
     <ClInclude Include="PopupListLAN.h" />
     <ClInclude Include="PopupListRecoveryAutosaves.h" />
+    <ClInclude Include="PopupNewImage.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupSet9SPattern.h" />

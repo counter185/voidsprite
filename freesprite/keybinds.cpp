@@ -9,6 +9,7 @@
 #include "BaseFilter.h"
 #include "main.h"
 #include "multiwindow.h"
+#include "PopupNewImage.h"
 
 void g_initKeybinds()
 {
@@ -79,6 +80,10 @@ void g_initKeybinds()
     g_keybindManager.addKeybind("maineditor", "toggle_ui",
         KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.toggleui"), SDL_SCANCODE_F1, false, false, SDL_GAMEPAD_BUTTON_INVALID,
             [](void* d) { TOGGLE(((MainEditor*)d)->hideUI);}
+        ));
+    g_keybindManager.addKeybind("maineditor", "new_session", 
+        KeyCombo(TL("vsp.maineditor.nav.newsession"), SDL_SCANCODE_N, true, false, SDL_GAMEPAD_BUTTON_INVALID,
+            [](void* d) { g_addPopup(new PopupNewImage()); }
         ));
     g_keybindManager.addKeybind("maineditor", "brush_primary", 
         KeyCombo(TL("vsp.keybinds.maineditor.brushleft"), KEY_UNASSIGNED, false, false, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,

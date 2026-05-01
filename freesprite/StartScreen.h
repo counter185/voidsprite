@@ -2,8 +2,6 @@
 #include "globals.h"
 #include "EventCallbackListener.h"
 #include "BaseScreen.h"
-#include "UITextField.h"
-#include "ScreenWideNavBar.h"
 #include "Timer64.h"
 #include "Panel.h"
 
@@ -15,21 +13,8 @@ struct LaunchpadBGStar {
     Timer64 timer{};
 };
 
-class StartScreen : public BaseScreen, public EventCallbackListener
-{
-private:
-    Timer64 fileDropTimer;
-    bool droppingFile = false;
-    XY fileDropXY = { -1,-1 };
-
-    bool waitingForUpdateCheckInfo = true;
-    std::vector<LaunchpadBGStar> stars;
-    Timer64 updateCheckTimer;
-
-    XY newImgSizeTab0 = {256,256};
-    XY newImgCellSizeTab1 = { 16,16 };
-    XY newImgCellCountTab1 = { 4,4 };
-public:
+class PanelNewImage : public Panel {
+protected:
     TabbedView* newImageTabs;
 
     UINumberInputField* tab0TextFieldW;
@@ -42,6 +27,37 @@ public:
 
     UIButton* rgbTabCreateButtons[2] = { NULL,NULL };
     ScrollingPanel* templatesPanel = NULL;
+
+    XY newImgSizeTab0 = { 256,256 };
+    XY newImgCellSizeTab1 = { 16,16 };
+    XY newImgCellCountTab1 = { 4,4 };
+public:
+    std::function<void()> imageCreatedCallback = NULL;
+
+    PanelNewImage();
+
+    void populateTemplatesPanel();
+    void runImageCreatedCallback();
+
+    void loadFromTemplate(BaseTemplate* templ);
+    void newRGBSession(u32 fill = 0x00000000);
+    void newIndexedSession(std::string palette);
+
+};
+
+class StartScreen : public BaseScreen, public EventCallbackListener
+{
+private:
+    Timer64 fileDropTimer;
+    bool droppingFile = false;
+    XY fileDropXY = { -1,-1 };
+
+    PanelNewImage* newImagePanel = NULL;
+
+    bool waitingForUpdateCheckInfo = true;
+    std::vector<LaunchpadBGStar> stars;
+    Timer64 updateCheckTimer;
+public:
 
     UIStackPanel* lastOpenFilesPanel;
 
@@ -63,19 +79,9 @@ public:
     std::string getName() override { return TL("vsp.launchpad"); }
     bool takesTouchEvents() { return true; }
 
-    void eventTextInputConfirm(int evt_id, std::string data) override {
-        if (evt_id == 3) {
-            eventButtonPressed(4);
-        }
-    }
-
     void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
-
-    void loadFromTemplate(BaseTemplate* templ);
     
-    void NewRGBSession(u32 fill = 0x00000000);
-    void NewIndexedSession(std::string palette);
     void tryLoadURL(std::string url);
     void tryLoadFile(std::string path);
     void tryLoadFileUsingImporter(FileImporter* importer, PlatformNativePathString name);
@@ -86,12 +92,12 @@ public:
     void checkAndPromptCrashSaves();
 
     void populateLastOpenFiles();
-    void populateTemplatesPanel();
 
     void renderStartupAnim();
     void renderFileDropAnim();
     void renderBackground();
     void renderBGStars();
+    void renderUpdateCheck(SDL_Rect logoRect);
     static void promptConnectToNetworkCanvas(std::string ip = "", std::string port = "");
     void updateCheckFinished();
     void genBGStars();

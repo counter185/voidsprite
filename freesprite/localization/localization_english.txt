@@ -339,6 +339,7 @@
     {"vsp.maineditor.nav.print", "Print"},
     {"vsp.maineditor.nav.print.scale", "Print image"},
     {"vsp.maineditor.nav.print.scale.desc", "Enter the scale of the printed image"},
+    {"vsp.maineditor.nav.newsession", "New session"},
 
     {"vsp.maineditor.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},
