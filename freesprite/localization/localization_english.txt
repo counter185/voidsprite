@@ -142,6 +142,8 @@
     {"vsp.keybinds.region.global", "General"},
     {"vsp.keybinds.global.screenleft", "Previous workspace"},
     {"vsp.keybinds.global.screenright", "Next workspace"},
+    {"vsp.keybinds.global.screenfirst", "Switch to first workspace"},
+    {"vsp.keybinds.global.screenlast", "Switch to last workspace"},
     {"vsp.keybinds.global.setfavworkspace", "Assign favourite workspace"},
     {"vsp.keybinds.global.switchfavworkspace", "Switch to favourite workspace"},
     {"vsp.keybinds.global.fullscreen", "Toggle fullscreen"},

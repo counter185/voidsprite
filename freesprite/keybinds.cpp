@@ -27,6 +27,14 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.global.screenright"), SDL_SCANCODE_RIGHTBRACKET, false, false, [](void* d) {
             g_currentWindow->switchScreenRight();
         }));
+    g_keybindManager.addKeybind("global", "switch_first_screen",
+        KeyCombo(TL("vsp.keybinds.global.screenfirst"), SDL_SCANCODE_LEFTBRACKET, true, false, [](void* d) {
+            g_currentWindow->switchScreen(0, 1);
+        }));
+    g_keybindManager.addKeybind("global", "switch_last_screen",
+        KeyCombo(TL("vsp.keybinds.global.screenlast"), SDL_SCANCODE_RIGHTBRACKET, true, false, [](void* d) {
+            g_currentWindow->switchScreen(g_currentWindow->screenStack.size()-1, 2);
+        }));
     if (platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
         g_keybindManager.addKeybind("global", "new_window",
             KeyCombo(TL("vsp.keybinds.global.newwindow"), SDL_SCANCODE_RIGHT, true, false, [](void* d) {
