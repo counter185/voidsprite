@@ -651,6 +651,8 @@ void MainEditor::drawIsolatedFragment()
 {
     if (isolateEnabled) {
 
+        SDL_Color lineColor = getAccentColor();
+
         int xincrement = canvas.scale == 1 ? 3 : canvas.scale < 6 ? 2 : 1;
         int vincrement = canvas.scale <= 2 ? 4 : canvas.scale <= 5 ? 2 : 1;
 
@@ -674,7 +676,7 @@ void MainEditor::drawIsolatedFragment()
             else if (onScreenPointRect.y + onScreenPointRect.h < 0) {
                 continue;
             }
-            SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x80);
+            SDL_SetRenderDrawColor(g_rd, lineColor.r, lineColor.g, lineColor.b, 0x80);
             if (scaledDirections & FRAGMENT_DIRECTION_UP) {
                 drawLine(onScreenPoint, xyAdd(onScreenPoint, { onScreenPointRect.w / (scale ? 1 : 2), 0 }));
             }
