@@ -171,6 +171,10 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.renamelayer"), SDL_SCANCODE_F2, false, false, [](void* d) {
             ((MainEditor*)d)->layer_promptRenameCurrent();
         }));
+    g_keybindManager.addKeybind("maineditor", "deselect", 
+        KeyCombo(TL("vsp.keybinds.maineditor.deselect"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->isolateEnabled = false;
+        }));
     g_keybindManager.addKeybind("maineditor", "clear_area", 
         KeyCombo(TL("vsp.keybinds.maineditor.cleararea"), SDL_SCANCODE_DELETE, false, false, [](void* d) {
             ((MainEditor*)d)->layer_clearSelectedArea();

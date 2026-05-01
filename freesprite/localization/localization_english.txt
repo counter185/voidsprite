@@ -193,6 +193,7 @@
     {"vsp.keybinds.maineditor.prevframe", "Previous frame"},
     {"vsp.keybinds.maineditor.nextframe", "Next frame"},
     {"vsp.keybinds.maineditor.animplaypause", "Play/pause animation"},
+    {"vsp.keybinds.maineditor.deselect", "Deselect"},
 
     {"vsp.keybinds.region.splitsessioneditor", "Split session editor"},
     {"vsp.keybinds.splitsessioneditor.importimage", "Add image to split session"},
