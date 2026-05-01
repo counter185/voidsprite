@@ -183,6 +183,22 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.fillarea"), SDL_SCANCODE_UNKNOWN, false, false, [](void* d) {
             ((MainEditor*)d)->layer_fillActiveColor();
         }));
+    g_keybindManager.addKeybind("maineditor", "flip_layer_x", 
+        KeyCombo(TL("vsp.keybinds.maineditor.fliplayerx"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_flipHorizontally();
+        }));
+    g_keybindManager.addKeybind("maineditor", "flip_layer_y", 
+        KeyCombo(TL("vsp.keybinds.maineditor.fliplayery"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->layer_flipVertically();
+        }));
+    g_keybindManager.addKeybind("maineditor", "flip_image_x", 
+        KeyCombo(TL("vsp.keybinds.maineditor.flipimagex"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->flipAllLayersOnX();
+        }));
+    g_keybindManager.addKeybind("maineditor", "flip_image_y", 
+        KeyCombo(TL("vsp.keybinds.maineditor.flipimagey"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->flipAllLayersOnY();
+        }));
     g_keybindManager.addKeybind("maineditor", "new_layer", 
         KeyCombo(TL("vsp.keybinds.maineditor.newlayer"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->newLayer(); ((MainEditor*)d)->layerPicker->updateLayers();
