@@ -52,7 +52,7 @@ void ToolMeasure::renderOnCanvas(MainEditor* editor, int scale)
             frmt("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1),
             {0xff,0xff,0xff,0xff},
             clickTimer.percentElapsedTime(200)
-            });
+        });
     }
     else if (!xyEqual(lastOrigin, lastEnd)) {
         XY pointFrom = XY{ ixmin(lastOrigin.x, lastEnd.x), ixmin(lastOrigin.y, lastEnd.y) };

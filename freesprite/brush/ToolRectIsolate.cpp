@@ -6,6 +6,7 @@ void ToolRectIsolate::clickPress(MainEditor* editor, XY pos)
     heldDown = true;
     startPos = pos;
     lastMousePos = pos;
+    clickTimer.start();
 }
 
 void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) { 
@@ -49,6 +50,15 @@ void ToolRectIsolate::renderOnCanvas(XY canvasDrawPoint, int scale)
 {
     if (heldDown) {
         drawPixelRect(startPos, lastMousePos, canvasDrawPoint, scale);
+        XY pointFrom = XY{ ixmin(startPos.x, lastMousePos.x), ixmin(startPos.y, lastMousePos.y) };
+        XY pointTo = XY{ ixmax(startPos.x, lastMousePos.x), ixmax(startPos.y, lastMousePos.y) };
+
+        g_ttp->addTooltip(Tooltip{
+            canvasDrawPoint.x + lastMousePos.x * scale + 25, canvasDrawPoint.y + lastMousePos.y * scale,
+            frmt("{}px x {}px", pointTo.x - pointFrom.x + 1, pointTo.y - pointFrom.y + 1),
+            {0xff,0xff,0xff,0xff},
+            clickTimer.percentElapsedTime(200)
+        });
     }
 }
 
