@@ -122,12 +122,13 @@ XY BasePopup::makeTitleAndDesc(std::string title, std::string desc) {
 
 UIButton* BasePopup::actionButton(std::string text, int width) {
     if (!actionButtonXInit) {
-        nextActionButtonX = wxWidth - (width + 10);
+        nextActionButtonX = wxWidth - 10;
+        //nextActionButtonX = wxWidth - (width + 10);
         actionButtonXInit = true;
     }
     UIButton* nbutton = new UIButton();
     nbutton->text = text;
-    nbutton->position = XY{ nextActionButtonX, wxHeight - 40 };
+    nbutton->position = XY{ nextActionButtonX - width, wxHeight - 40 };
     nextActionButtonX -= width + 10;
     nbutton->wxWidth = width;
     wxsManager.addDrawable(nbutton);

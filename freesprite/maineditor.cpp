@@ -1070,7 +1070,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"), [this]() { this->copyImageToClipboard(); } } },
-                    {SDL_SCANCODE_V, { TL("vsp.cmn.paste"), [this]() { this->promptPasteImageFromClipboard(); } } },
+                    {SDL_SCANCODE_V, { TL("vsp.cmn.paste"), [this]() { this->promptImageActionFromClipboard(); } } },
 #if VSP_NETWORKING
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
 #endif
@@ -1691,12 +1691,13 @@ void MainEditor::takeInput(SDL_Event evt) {
 
     if (evt.type == SDL_DROPFILE) {
         std::string path = evt.drop.data;
-        if (!tryAddReference(convertStringOnWin32(path))) {
-            if (tryInstallPalette(convertStringOnWin32(path))) {
-                g_addNotification(SuccessNotification(TL("vsp.launchpad.paletteinstall"), fileNameFromPath(path)));
-                g_reloadColorMap();
-                colorPicker->reloadColorLists();
-            }
+        if (!stringEndsWithIgnoreCase(path, ".png") && tryInstallPalette(convertStringOnWin32(path))) {
+            g_addNotification(SuccessNotification(TL("vsp.launchpad.paletteinstall"), fileNameFromPath(path)));
+            g_reloadColorMap();
+            colorPicker->reloadColorLists();
+        }
+        else {
+            promptForImageAction(convertStringOnWin32(path));
         }
     }
 
@@ -2864,11 +2865,11 @@ void MainEditor::tryToggleTilePreviewLockAtMousePos()
     }
 }
 
-void MainEditor::promptPasteImageFromClipboard()
+void MainEditor::promptImageActionFromClipboard()
 {
     Layer* p = platformGetImageFromClipboard();
     if (p != NULL) {
-        promptPasteImage(p);
+        promptForImageAction(p);
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.clipboard_no_image")));
@@ -2878,6 +2879,61 @@ void MainEditor::promptPasteImageFromClipboard()
 void MainEditor::promptPasteImage(Layer* l)
 {
     g_addPopup(new PopupFreeformTransform(this, l));
+}
+
+void MainEditor::promptForImageAction(Layer* l)
+{
+    if (l != NULL) {
+        PopupChooseAction* popup = new PopupChooseAction("Import image", "Choose what to do with the imported image", {
+            {SDL_SCANCODE_C, {"Cancel", [this, l]() { delete l; }}},
+            {SDL_SCANCODE_P, {"Paste into layer", [this, l]() { 
+                if (isPalettized) {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste into indexed session"));
+                    return;
+                }
+                promptPasteImage(l); 
+            }}},
+            {SDL_SCANCODE_R, {"Add reference", [this, l]() { addReference(l); }}},
+            {SDL_SCANCODE_N, {"New session", [this, l]() { g_addScreen(new MainEditor(l)); }}},
+        });
+        g_addPopup(popup);
+    }
+}
+
+void MainEditor::promptForImageAction(PlatformNativePathString path)
+{
+    PopupChooseAction* popup = new PopupChooseAction("Import file", frmt("Choose what to do with the file:\n {}", fileNameFromPath(convertStringToUTF8OnWin32(path))), 
+        {
+            {SDL_SCANCODE_C, {"Cancel", [this, path]() {}}},
+            {SDL_SCANCODE_P, {"Paste into layer", [this, path]() { 
+                if (isPalettized) {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste into indexed session"));
+                    return;
+                }
+                Layer* flat = loadAnyIntoFlat(convertStringToUTF8OnWin32(path));
+                if (flat != NULL) {
+                    promptPasteImage(flat);
+                }
+                else {
+                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+                }
+            }}},
+            {SDL_SCANCODE_R, {"Add reference", [this, path]() { tryAddReference(path); }}},
+            {SDL_SCANCODE_N, {"New session", [this, path]() {
+                g_startNewOperation([path](OperationProgressReport* report) {
+                    auto* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(path), NULL, report);
+                    if (ssn != NULL) {
+                        g_startNewMainThreadOperation([ssn]() {
+                            g_addScreen(ssn);
+                        });
+                    }
+                    else {
+                        g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+                    }
+                });
+            }}},
+        });
+    g_addPopup(popup);
 }
 
 void MainEditor::moveLayerUp(int index) {

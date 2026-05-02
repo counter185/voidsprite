@@ -455,8 +455,10 @@ public:
     bool addReference(Layer* l);
     void openPreviewPanel();
     void tryToggleTilePreviewLockAtMousePos();
-    void promptPasteImageFromClipboard();
+    void promptImageActionFromClipboard();
     void promptPasteImage(Layer* l);
+    void promptForImageAction(Layer* l);
+    void promptForImageAction(PlatformNativePathString path);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

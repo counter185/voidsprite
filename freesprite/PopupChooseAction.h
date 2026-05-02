@@ -19,7 +19,8 @@ public:
         wxWidth = ixmax(wxWidth, ixmax(g_fnt->StatStringDimensions(tx).x + 20, g_fnt->StatStringDimensions(tt, 22).x + 20));
 
         for (auto& [key, op] : ops) { 
-            UIButton* b = actionButton(op.name);
+            int buttonW = ixmax(120, g_fnt->StatStringDimensions(op.name).x + 10);
+            UIButton* b = actionButton(op.name, buttonW);
             b->onClickCallback = [this, op](UIButton*) { 
                 op.function();
                 closePopup(); 
