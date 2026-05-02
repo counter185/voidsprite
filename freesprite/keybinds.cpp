@@ -14,11 +14,20 @@
 void g_initKeybinds()
 {
     g_keybindManager.globalReservedKeys = {
-        SDL_SCANCODE_LALT,
     };
 
     //global keybinds
     g_keybindManager.newRegion("global", TL("vsp.keybinds.region.global"));
+    g_keybindManager.addKeybind("global", "summon_navbar",
+        KeyCombo(TL("vsp.keybinds.global.summonnavbar"), SDL_SCANCODE_LALT, false, false, [](void* d) {
+            if (g_currentWindow->currentScreen < g_currentWindow->screenStack.size()) {
+                BaseScreen* screen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
+                ScreenWideNavBar* navbar = screen->getNavbar();
+                if (navbar != NULL) {
+                    screen->toggleNavbarFocus();
+                }
+            }
+        }));
     g_keybindManager.addKeybind("global", "switch_screen_left",
         KeyCombo(TL("vsp.keybinds.global.screenleft"), SDL_SCANCODE_LEFTBRACKET, false, false, [](void* d) {
             g_currentWindow->switchScreenLeft();
@@ -125,6 +134,11 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.toggledrag"), SDL_SCANCODE_RCTRL, false, false, [](void* d) {
             TOGGLE(((MainEditor*)d)->middleMouseHold);
         }));
+    g_keybindManager.addKeybind("maineditor", "hold_drag", 
+        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.holddrag"), SDL_SCANCODE_SPACE, false, false, SDL_GAMEPAD_BUTTON_INVALID,
+            [](void* d) { ((MainEditor*)d)->middleMouseHold = true;},
+            [](void* d) { ((MainEditor*)d)->middleMouseHold = false; }
+        ));
     g_keybindManager.addKeybind("maineditor", "focus_color_input", 
         KeyCombo(TL("vsp.keybinds.maineditor.focusoncolortextbox"), SDL_SCANCODE_INSERT, true, false, [](void* d) {
             ((MainEditor*)d)->focusOnColorInputTextBox();

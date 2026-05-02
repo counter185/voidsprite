@@ -140,6 +140,7 @@
 
     //keybinds
     {"vsp.keybinds.region.global", "General"},
+    {"vsp.keybinds.global.summonnavbar", "Focus on navigation bar"},
     {"vsp.keybinds.global.screenleft", "Previous workspace"},
     {"vsp.keybinds.global.screenright", "Next workspace"},
     {"vsp.keybinds.global.screenfirst", "Switch to first workspace"},
@@ -165,7 +166,8 @@
     {"vsp.keybinds.maineditor.blend", "Toggle blend mode"},
     {"vsp.keybinds.maineditor.zoomin", "Zoom in"},
     {"vsp.keybinds.maineditor.zoomout", "Zoom out"},
-    {"vsp.keybinds.maineditor.toggledrag", "Toggle canvas pan"},
+    {"vsp.keybinds.maineditor.toggledrag", "Pan canvas"},
+    {"vsp.keybinds.maineditor.holddrag", "Toggle canvas pan"},
     {"vsp.keybinds.maineditor.focusoncolortextbox", "Focus on color input text field"},
     {"vsp.keybinds.maineditor.copylayer", "Copy layer to clipboard"},
     {"vsp.keybinds.maineditor.copyimage", "Copy whole image to clipboard"},

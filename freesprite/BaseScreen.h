@@ -1,9 +1,10 @@
 #pragma once
 #include "globals.h"
 #include "DrawableManager.h"
+#include "ScreenWideNavBar.h"
 #include "background_operation.h"
 
-#define LALT_TO_SUMMON_NAVBAR if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_LALT) { if (!navbar->focused) wxsManager.forceFocusOn(navbar); else wxsManager.forceUnfocus(); return; }
+#define LALT_TO_SUMMON_NAVBAR (void)0 //if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_LALT) {  return; }
 
 class BaseScreen
 {
@@ -69,5 +70,16 @@ public:
     }
 
     virtual ScreenWideNavBar* getNavbar() { return navbar; };
+    void toggleNavbarFocus() {
+        auto* n = getNavbar();
+        if (n != NULL) {
+            if (!n->focused) {
+                wxsManager.forceFocusOn(n);
+            }
+            else {
+                wxsManager.forceUnfocus();
+            }
+        }
+    }
 };
 

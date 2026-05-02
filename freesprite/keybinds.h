@@ -39,6 +39,7 @@ public:
         return (evt.type == SDL_EVENT_KEY_DOWN
                 && key != KEY_UNASSIGNED
                 && evt.key.scancode == key
+                && !evt.key.repeat
                 && ctrl == g_ctrlModifier
                 && shift == g_shiftModifier)
             || (evt.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN
