@@ -344,6 +344,7 @@
     <ClCompile Include="PanelUserInteractable.cpp" />
     <ClCompile Include="ParameterStore.cpp" />
     <ClCompile Include="PopupApplyFilter.cpp" />
+    <ClCompile Include="PopupCanvasResize.cpp" />
     <ClCompile Include="PopupChooseAction.cpp" />
     <ClCompile Include="PopupChooseExtsToAssoc.cpp" />
     <ClCompile Include="PopupChooseFormat.cpp" />
@@ -487,6 +488,7 @@
     <ClCompile Include="brush\ToolSetYSymmetry.cpp" />
     <ClCompile Include="brush\ToolText.cpp" />
     <ClCompile Include="TooltipsLayer.cpp" />
+    <ClCompile Include="UIAnchorSelect.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UICheckbox.cpp" />
     <ClCompile Include="UIColorInputField.cpp" />
@@ -624,6 +626,7 @@
     <ClInclude Include="platform_universal.h" />
     <ClInclude Include="platform_vita.h" />
     <ClInclude Include="PopupApplyFilter.h" />
+    <ClInclude Include="PopupCanvasResize.h" />
     <ClInclude Include="PopupChooseAction.h" />
     <ClInclude Include="PopupChooseExtsToAssoc.h" />
     <ClInclude Include="PopupChooseFormat.h" />
@@ -731,6 +734,7 @@
     <ClInclude Include="brush\ToolSetYSymmetry.h" />
     <ClInclude Include="brush\ToolText.h" />
     <ClInclude Include="TooltipsLayer.h" />
+    <ClInclude Include="UIAnchorSelect.h" />
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UICheckbox.h" />
     <ClInclude Include="UIColorInputField.h" />

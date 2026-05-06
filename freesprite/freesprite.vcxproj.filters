@@ -744,6 +744,12 @@
     <ClCompile Include="PopupNewImage.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UIAnchorSelect.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupCanvasResize.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1473,6 +1479,12 @@
       <Filter>Header files\external\libbzip2</Filter>
     </ClInclude>
     <ClInclude Include="PopupNewImage.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIAnchorSelect.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupCanvasResize.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,7 @@
 #include "PanelUserInteractable.h"
 #include "ScreenWideNavBar.h"
 #include "IEditorColorPicker.h"
+#include "UIAnchorSelect.h"
 #include "ParameterStore.h"
 
 struct NET_StreamSocket;
@@ -521,11 +522,11 @@ public:
     void flipAllLayersOnX();
     void flipAllLayersOnY();
 
+    SDL_Rect buildCropRectFromAnchor(XY newSize, Anchor anchor);
     virtual void cropAllLayersFromCommand(SDL_Rect targetRect);
     virtual void rescaleAllLayersFromCommand(XY size);
-    // todo: split byTile into two functions
-    virtual void resizeAllLayersFromCommand(XY size, bool byTile = false);
-    virtual void resizzeAllLayersByTilecountFromCommand(XY size);
+    virtual void resizeAllLayersByTileSizeFromCommand(XY size);
+    virtual void resizeAllLayersByTilecountFromCommand(XY size);
     virtual void resizeAllLayersReorderingTilesFromCommand(XY size);
     virtual void integerScaleAllLayersFromCommand(XY scale, bool downscale = false);
     MainEditorPalettized* toPalettizedSession();

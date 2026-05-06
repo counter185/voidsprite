@@ -57,6 +57,7 @@
 #include "PopupSetTemplateInfo.h"
 #include "PopupSetParameters.h"
 #include "PopupNewImage.h"
+#include "PopupCanvasResize.h"
 #include "multiwindow.h"
 
 #include "discord_rpc.h"
@@ -1101,7 +1102,7 @@ void MainEditor::setUpWidgets()
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"), [this]() { this->flipAllLayersOnY(); } } },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [this]() {
-                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
+                                g_addPopup(new PopupCanvasResize(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },
@@ -2031,13 +2032,14 @@ void MainEditor::eventFileSaved(int evt_id, PlatformNativePathString name, int e
 void MainEditor::eventPopupClosed(int evt_id, BasePopup* p)
 {
     if (evt_id == EVENT_MAINEDITOR_RESIZELAYER) {
-        resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result, false);
+        cropAllLayersFromCommand(buildCropRectFromAnchor(((PopupCanvasResize*)p)->result, ((PopupCanvasResize*)p)->anchorSelect->selectedAnchor));
+        //resizeAllLayersByTileSizeFromCommand(((PopupTileGeneric*)p)->result, false);
     }
     else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILE) {
-        resizeAllLayersFromCommand(((PopupTileGeneric*)p)->result, true);
+        resizeAllLayersByTileSizeFromCommand(((PopupTileGeneric*)p)->result);
     }
     else if (evt_id == EVENT_MAINEDITOR_RESIZELAYER_BY_TILECOUNT) {
-        resizzeAllLayersByTilecountFromCommand(((PopupTileGeneric*)p)->result);
+        resizeAllLayersByTilecountFromCommand(((PopupTileGeneric*)p)->result);
     }
     else if (evt_id == EVENT_MAINEDITOR_INTEGERSCALE) {
         integerScaleAllLayersFromCommand(((PopupIntegerScale*)p)->result, ((PopupIntegerScale*)p)->downscaleCheckbox->isChecked());
@@ -3275,6 +3277,36 @@ void MainEditor::flipAllLayersOnY()
     addToUndoStack(new UndoStackComposite(undos));
 }
 
+SDL_Rect MainEditor::buildCropRectFromAnchor(XY newSize, Anchor anchor)
+{
+    SDL_Rect ret = { 0,0,newSize.x, newSize.y };
+    int facX =
+        anchor == ANCHOR_TOPCENTER || anchor == ANCHOR_MIDCENTER || anchor == ANCHOR_BOTTOMCENTER ? 1
+        : anchor == ANCHOR_TOPRIGHT || anchor == ANCHOR_MIDRIGHT || anchor == ANCHOR_BOTTOMRIGHT ? 2
+        : 0;
+    int facY =
+        anchor == ANCHOR_MIDLEFT || anchor == ANCHOR_MIDCENTER || anchor == ANCHOR_MIDRIGHT ? 1
+        : anchor == ANCHOR_BOTTOMLEFT || anchor == ANCHOR_BOTTOMCENTER || anchor == ANCHOR_BOTTOMRIGHT ? 2
+        : 0;
+
+    if (facX == 2) {
+        ret.x = canvas.dimensions.x - ret.w;
+    }
+    else if (facX == 1) {
+        ret.x = canvas.dimensions.x / 2 - ret.w / 2;
+    }
+
+
+    if (facY == 2) {
+        ret.y = canvas.dimensions.y - ret.h;
+    }
+    else if (facY == 1) {
+        ret.y = canvas.dimensions.y / 2 - ret.h / 2;
+    }
+
+    return ret;
+}
+
 void MainEditor::cropAllLayersFromCommand(SDL_Rect targetRect)
 {
     if (xyEqual(canvas.dimensions, { targetRect.w, targetRect.h }) && targetRect.x == 0 && targetRect.y == 0) {
@@ -3353,26 +3385,18 @@ std::vector<Layer*> MainEditor::getAllLayers()
     return ret;
 }
 
-void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
+void MainEditor::resizeAllLayersByTileSizeFromCommand(XY size)
 {
-    if (byTile) {
-        if (xyEqual(ssne.tileDimensions, size)) {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile size must be different to resize."));
-            return;
-        }
-    }
-    else {
-        if (xyEqual(canvas.dimensions, size)) {
-            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Size must be different to resize."));
-            return;
-        }
+    if (xyEqual(ssne.tileDimensions, size)) {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Tile size must be different to resize."));
+        return;
     }
     std::vector<Layer*> layers = getAllLayers();
 
     std::map<Layer*, LayerScaleData> createdVariants;
 
     for (Layer* target : layers) {
-        LayerScaleData scaleResult = byTile ? target->resizeByTileSizes(ssne.tileDimensions, size) : target->resize(size);
+        LayerScaleData scaleResult = target->resizeByTileSizes(ssne.tileDimensions, size);
         if (scaleResult.success) {
             createdVariants[target] = scaleResult;
         }
@@ -3390,7 +3414,7 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
 
     XY newSize = createdVariants[layers[0]].newSize;
 
-    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, byTile ? size : ssne.tileDimensions);
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, size);
     for (Layer*& l : layers) {
         undoData->storedLayerData[l] = l->layerData;
     }
@@ -3400,15 +3424,13 @@ void MainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
     }
 
     canvas.dimensions = newSize;
-    if (byTile) {
-        ssne.tileDimensions = size;
-    }
+    ssne.tileDimensions = size;
     
     addToUndoStack(undoData);
 
 }
 
-void MainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
+void MainEditor::resizeAllLayersByTilecountFromCommand(XY size)
 {
     std::vector<Layer*> layers = getAllLayers();
 
@@ -3435,7 +3457,8 @@ void MainEditor::resizeAllLayersReorderingTilesFromCommand(XY size)
         (canvas.dimensions.x + (ssne.tileDimensions.x - 1)) / ssne.tileDimensions.x, 
         (canvas.dimensions.y + (ssne.tileDimensions.y - 1)) / ssne.tileDimensions.y
     };
-    resizeAllLayersFromCommand(size, false);
+    cropAllLayersFromCommand({ 0,0,size.x, size.y });
+    //resizeAllLayersByTileSizeFromCommand(size, false);
     XY newTileCount = {
         (canvas.dimensions.x + (ssne.tileDimensions.x - 1)) / ssne.tileDimensions.x,
         (canvas.dimensions.y + (ssne.tileDimensions.y - 1)) / ssne.tileDimensions.y

@@ -337,7 +337,7 @@ LayerScaleData Layer::scaleGeneric(XY newSize, std::function<void(u32*,u32*)> op
         }
 
         uint32_t* pixelDataNow = (uint32_t*)variant.pixelData;
-        memset(newPixelData, 0, 4ull * newSize.x * newSize.y);
+        memset(newPixelData, isPalettized ? 0xff : 0, 4ull * newSize.x * newSize.y);
         operation(pixelDataNow, newPixelData);
         LayerVariant variantCopy = variant;
         variantCopy.pixelData = (uint8_t*)newPixelData;

@@ -12,6 +12,7 @@ public:
 
     void resultUpdated(XY result) override;
 
-    bool inputValid() override;
+    bool xValid(int v) override;
+    bool yValid(int v) override;
 };
 

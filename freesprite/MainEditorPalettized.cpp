@@ -26,6 +26,7 @@
 #include "PopupChooseFormat.h"
 #include "PopupSetTemplateInfo.h"
 #include "PopupSetParameters.h"
+#include "PopupCanvasResize.h"
 
 MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
@@ -332,7 +333,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [this]() {
-                                g_addPopup(new PopupTileGeneric(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
+                                g_addPopup(new PopupCanvasResize(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
                             }
                         }
                     },

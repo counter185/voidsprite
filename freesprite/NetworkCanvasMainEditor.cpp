@@ -347,17 +347,22 @@ void NetworkCanvasMainEditor::duplicateLayer(int index)
     postErrorHostOnly();
 }
 
+void NetworkCanvasMainEditor::cropAllLayersFromCommand(SDL_Rect rect)
+{
+    postErrorHostOnly();
+}
+
 void NetworkCanvasMainEditor::rescaleAllLayersFromCommand(XY size)
 {
     postErrorHostOnly();
 }
 
-void NetworkCanvasMainEditor::resizeAllLayersFromCommand(XY size, bool byTile)
+void NetworkCanvasMainEditor::resizeAllLayersByTileSizeFromCommand(XY size)
 {
     postErrorHostOnly();
 }
 
-void NetworkCanvasMainEditor::resizzeAllLayersByTilecountFromCommand(XY size)
+void NetworkCanvasMainEditor::resizeAllLayersByTilecountFromCommand(XY size)
 {
     postErrorHostOnly();
 }

@@ -5,12 +5,10 @@
 #include "UIButton.h"
 
 class PopupTileGeneric :
-    public BasePopup, public EventCallbackListener
+    public BasePopup
 {
 public:
 
-    UITextField* tboxX;
-    UITextField* tboxY;
 
     XY result{};
     int popupEvtID;
@@ -19,10 +17,9 @@ public:
 
     PopupTileGeneric(EventCallbackListener* callback, std::string tt, std::string tx, XY defaultValues, int event_id);
 
-    void eventButtonPressed(int evt_id) override;
-
     virtual void resultUpdated(XY) {}
 
-    virtual bool inputValid() { return true; }
+    virtual bool xValid(int v) { return true; }
+    virtual bool yValid(int v) { return true; }
 };
 
