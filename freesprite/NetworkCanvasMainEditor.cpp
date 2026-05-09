@@ -352,6 +352,11 @@ void NetworkCanvasMainEditor::cropAllLayersFromCommand(SDL_Rect rect)
     postErrorHostOnly();
 }
 
+void NetworkCanvasMainEditor::rotateAllLayersFromCommand(bool right)
+{
+    postErrorHostOnly();
+}
+
 void NetworkCanvasMainEditor::rescaleAllLayersFromCommand(XY size)
 {
     postErrorHostOnly();

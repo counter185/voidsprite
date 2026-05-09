@@ -221,6 +221,14 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.flipimagey"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->flipAllLayersOnY();
         }));
+    g_keybindManager.addKeybind("maineditor", "rotate_image_left", 
+        KeyCombo(TL("vsp.keybinds.maineditor.rotimageleft"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->rotateAllLayersFromCommand(false);
+        }));
+    g_keybindManager.addKeybind("maineditor", "rotate_image_right", 
+        KeyCombo(TL("vsp.keybinds.maineditor.rotimageright"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->rotateAllLayersFromCommand(true);
+        }));
     g_keybindManager.addKeybind("maineditor", "new_layer", 
         KeyCombo(TL("vsp.keybinds.maineditor.newlayer"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->newLayer(); ((MainEditor*)d)->layerPicker->updateLayers();

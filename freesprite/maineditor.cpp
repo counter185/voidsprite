@@ -1100,6 +1100,8 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"), [this]() { this->flipAllLayersOnX(); } } },
                     {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"), [this]() { this->flipAllLayersOnY(); } } },
+                    {SDL_SCANCODE_Q, { TL("vsp.maineditor.rotleft"), [this]() { this->rotateAllLayersFromCommand(false); } } },
+                    {SDL_SCANCODE_W, { TL("vsp.maineditor.rotright"), [this]() { this->rotateAllLayersFromCommand(true); } } },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [this]() {
                                 g_addPopup(new PopupCanvasResize(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));
@@ -3346,6 +3348,47 @@ void MainEditor::cropAllLayersFromCommand(SDL_Rect targetRect)
     }
 
     canvas.dimensions = newSize;
+
+    addToUndoStack(undoData);
+}
+
+void MainEditor::rotateAllLayersFromCommand(bool right)
+{
+    std::vector<Layer*> layers = getAllLayers();
+
+    std::map<Layer*, LayerScaleData> createdVariants;
+
+    for (Layer* target : layers) {
+        LayerScaleData scaleResult = target->rotate(right);
+        if (scaleResult.success) {
+            createdVariants[target] = scaleResult;
+        }
+        else {
+            for (auto& [layer, variants] : createdVariants) {
+                for (auto& variant : variants.scaledVariants) {
+                    tracked_free(variant.pixelData);
+                }
+            }
+            return;
+        }
+
+        target->markLayerDirty();
+    }
+
+    XY newSize = createdVariants[layers[0]].newSize;
+    XY newTileDim = { ssne.tileDimensions.y, ssne.tileDimensions.x };
+
+    UndoLayersResized* undoData = new UndoLayersResized(canvas.dimensions, newSize, ssne.tileDimensions, newTileDim);
+    for (Layer*& l : layers) {
+        undoData->storedLayerData[l] = l->layerData;
+    }
+
+    for (auto& [layer, variants] : createdVariants) {
+        layer->setLayerData(variants.scaledVariants, variants.newSize);
+    }
+
+    canvas.dimensions = newSize;
+    ssne.tileDimensions = newTileDim;
 
     addToUndoStack(undoData);
 }

@@ -524,6 +524,7 @@ public:
 
     SDL_Rect buildCropRectFromAnchor(XY newSize, Anchor anchor);
     virtual void cropAllLayersFromCommand(SDL_Rect targetRect);
+    virtual void rotateAllLayersFromCommand(bool right);
     virtual void rescaleAllLayersFromCommand(XY size);
     virtual void resizeAllLayersByTileSizeFromCommand(XY size);
     virtual void resizeAllLayersByTilecountFromCommand(XY size);

@@ -202,6 +202,8 @@
     {"vsp.keybinds.maineditor.fliplayery", "Flip layer vertically"},
     {"vsp.keybinds.maineditor.flipimagex", "Flip all layers horizontally"},
     {"vsp.keybinds.maineditor.flipimagey", "Flip all layers vertically"},
+    {"vsp.keybinds.maineditor.rotimageleft", "Rotate image 90d left"},
+    {"vsp.keybinds.maineditor.rotimageright", "Rotate image 90d right"},
 
     {"vsp.keybinds.region.splitsessioneditor", "Split session editor"},
     {"vsp.keybinds.splitsessioneditor.importimage", "Add image to split session"},
@@ -357,6 +359,8 @@
     {"vsp.maineditor.symy","Toggle symmetry: Y"},
     {"vsp.maineditor.flipallx", "Flip whole image: X axis"},
     {"vsp.maineditor.flipally", "Flip whole image: Y axis"},
+    {"vsp.maineditor.rotleft", "Rotate image 90d left"},
+    {"vsp.maineditor.rotright", "Rotate image 90d right"},
     {"vsp.maineditor.rescanv","Resize canvas"}, // translation note: this scales the canvas, image remains the same
     {"vsp.maineditor.dsel","Deselect"},
     {"vsp.maineditor.rescanv_bytile","Resize canvas (per tile)"},

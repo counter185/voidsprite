@@ -491,6 +491,7 @@ public:
     std::vector<LayerVariant> resizeByTileCount(XY tileSizesNow, XY newTileCount);
     LayerScaleData integerScale(XY scale);
     LayerScaleData integerDownscale(XY scale);
+    LayerScaleData rotate(bool right);
 
     ScanlineMap selectAllOfColor(u32 c);
     ScanlineMap wandSelectAt(XY pos);

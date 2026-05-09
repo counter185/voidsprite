@@ -481,6 +481,18 @@ LayerScaleData Layer::integerDownscale(XY scale)
     }
 }
 
+LayerScaleData Layer::rotate(bool right)
+{
+    XY newSize = { h,w };
+    return scaleGeneric(newSize, [&](u32* pxNow, u32* pxNew) {
+        for (int y = 0; y < newSize.y; y++) {
+            for (int x = 0; x < newSize.x; x++) {
+                ARRAY2DPOINT(pxNew, right ? (h-x-1) : x, !right ? (w-y-1) : y, h) = ARRAY2DPOINT(pxNow, y, x, w);
+            }
+        }
+    });
+}
+
 ScanlineMap Layer::selectAllOfColor(u32 c)
 {
     ScanlineMap r;

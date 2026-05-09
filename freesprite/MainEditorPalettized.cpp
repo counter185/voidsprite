@@ -325,12 +325,9 @@ void MainEditorPalettized::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_F, { TL("vsp.maineditor.flipallx"), [this]() { this->flipAllLayersOnX(); } } },
-                    {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"),
-                            [this]() {
-                                this->flipAllLayersOnY();
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_G, { TL("vsp.maineditor.flipally"), [this]() { this->flipAllLayersOnY(); } } },
+                    {SDL_SCANCODE_Q, { TL("vsp.maineditor.rotleft"), [this]() { this->rotateAllLayersFromCommand(false); } } },
+                    {SDL_SCANCODE_W, { TL("vsp.maineditor.rotright"), [this]() { this->rotateAllLayersFromCommand(true); } } },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.rescanv"),
                             [this]() {
                                 g_addPopup(new PopupCanvasResize(this, TL("vsp.maineditor.rescanv"), "New canvas size:", this->canvas.dimensions, EVENT_MAINEDITOR_RESIZELAYER));

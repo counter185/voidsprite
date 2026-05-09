@@ -54,6 +54,7 @@ public:
     void mergeLayerDown(int index) override;
     void duplicateLayer(int index) override;
     void cropAllLayersFromCommand(SDL_Rect rect) override;
+    void rotateAllLayersFromCommand(bool right) override;
     void rescaleAllLayersFromCommand(XY size) override;
     void resizeAllLayersByTileSizeFromCommand(XY size) override;
     void resizeAllLayersByTilecountFromCommand(XY size) override;
