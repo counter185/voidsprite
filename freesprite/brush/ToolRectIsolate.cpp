@@ -24,7 +24,9 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
                     selectAllOfColor ? targetLayer->selectAllOfColor(targetLayer->getPixelAt(pos))
                     : targetLayer->wandSelectAt(pos);
                 g_startNewMainThreadOperation([editor, selectionMap]() {
+                    ScanlineMap old = editor->isolatedFragment;
                     editor->isolatedFragment.addOtherMap(selectionMap);
+                    editor->commitIsolatedFragmentState(old);
                     editor->isolateEnabled = true;
                     editor->shouldUpdateRenderedIsolatedFragmentPoints = true;
                 });
@@ -34,11 +36,13 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
             XY p2 = lastMousePos;
             XY minpoint = XY{ixmin(p1.x, p2.x), ixmin(p1.y, p2.y)};
             XY maxpoint = XY{ixmax(p1.x, p2.x), ixmax(p1.y, p2.y)};
+            ScanlineMap old = editor->isolatedFragment;
             if (!g_ctrlModifier) {
                 editor->isolatedFragment.clear();
             }
             editor->isolatedFragment.addRect(
                 {minpoint.x, minpoint.y, maxpoint.x - minpoint.x + 1, maxpoint.y - minpoint.y + 1});
+            editor->commitIsolatedFragmentState(old);
             editor->isolateEnabled = true;
             editor->shouldUpdateRenderedIsolatedFragmentPoints = true;
         }
@@ -64,5 +68,5 @@ void ToolRectIsolate::renderOnCanvas(XY canvasDrawPoint, int scale)
 
 void ToolRectIsolate::rightClickPress(MainEditor* editor, XY pos)
 {
-    editor->isolateEnabled = false;
+    editor->deselectAndCommitToUndoStack();
 }

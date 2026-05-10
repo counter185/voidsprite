@@ -168,3 +168,17 @@ void UndoFrameReordered::redo(MainEditor* editor)
     editor->frames.erase(editor->frames.begin() + oldIdx);
     editor->frames.insert(editor->frames.begin() + newIdx, f);
 }
+
+void UndoSelectionChanged::undo(MainEditor* editor)
+{
+    editor->isolatedFragment.replaceWith(oldSel);
+    editor->isolateEnabled = !oldSel.empty();
+    editor->shouldUpdateRenderedIsolatedFragmentPoints = true;
+}
+
+void UndoSelectionChanged::redo(MainEditor* editor)
+{
+    editor->isolatedFragment.replaceWith(newSel);
+    editor->isolateEnabled = !newSel.empty();
+    editor->shouldUpdateRenderedIsolatedFragmentPoints = true;
+}

@@ -334,10 +334,7 @@ void MainEditorPalettized::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
-                            [this]() { this->isolateEnabled = false; }
-                        }
-                    },
+                    {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"), [this]() { deselectAndCommitToUndoStack(); } } },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [this]() {
                                 if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {

@@ -273,3 +273,15 @@ public:
 
     std::string name() override { return TL("vsp.undo.framereordered"); }
 };
+
+class UndoSelectionChanged : public UndoStackElementV2 {
+protected:
+    ScanlineMap oldSel, newSel;
+public:
+    UndoSelectionChanged(ScanlineMap oldM, ScanlineMap newM) : oldSel(oldM), newSel(newM) {}
+
+    void undo(MainEditor* editor) override;
+    void redo(MainEditor* editor) override;
+
+    std::string name() override { return TL("vsp.undo.selectionchanged"); }
+};

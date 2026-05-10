@@ -195,7 +195,7 @@ void g_initKeybinds()
         }));
     g_keybindManager.addKeybind("maineditor", "deselect", 
         KeyCombo(TL("vsp.keybinds.maineditor.deselect"), KEY_UNASSIGNED, false, false, [](void* d) {
-            ((MainEditor*)d)->isolateEnabled = false;
+            ((MainEditor*)d)->deselectAndCommitToUndoStack();
         }));
     g_keybindManager.addKeybind("maineditor", "clear_area", 
         KeyCombo(TL("vsp.keybinds.maineditor.cleararea"), SDL_SCANCODE_DELETE, false, false, [](void* d) {

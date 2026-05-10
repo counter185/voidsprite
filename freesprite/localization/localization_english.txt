@@ -94,6 +94,7 @@
     {"vsp.undo.framecreated", "Frame created"},
     {"vsp.undo.frameremoved", "Frame removed"},
     {"vsp.undo.framereordered", "Frame reordered"},
+    {"vsp.undo.selectionchanged", "Selection changed"},
 
     //rich presence (discord, title bar) strings
     {"vsp.rpc.1activeworkspace", "1 active workspace"},

@@ -1108,10 +1108,7 @@ void MainEditor::setUpWidgets()
                             }
                         }
                     },
-                    {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"),
-                            [this]() { this->isolateEnabled = false; }
-                        }
-                    },
+                    {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"), [this]() { deselectAndCommitToUndoStack(); } } },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [this]() {
                                 if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
@@ -1447,6 +1444,16 @@ void MainEditor::setUpWidgets()
         };
 
         SetupCompactEditor(createSections);
+    }
+}
+
+void MainEditor::deselectAndCommitToUndoStack()
+{
+    if (isolateEnabled) {
+        ScanlineMap old = isolatedFragment;
+        isolatedFragment.clear();
+        commitIsolatedFragmentState(old);
+        isolateEnabled = false;
     }
 }
 
@@ -2375,6 +2382,11 @@ void MainEditor::commitStateToCurrentLayer()
     }
 }
 
+void MainEditor::commitIsolatedFragmentState(ScanlineMap old)
+{
+    addToUndoStack(new UndoSelectionChanged(isolateEnabled ? old : ScanlineMap(), isolatedFragment));
+}
+
 uint32_t MainEditor::pickColorFromAllLayers(XY pos)
 {
     uint32_t c = 0;
@@ -2848,11 +2860,13 @@ void MainEditor::tryToggleTilePreviewLockAtMousePos()
         if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
             XY tileToLock = canvas.getTilePosAt({g_mouseX, g_mouseY}, ssne.tileDimensions);
             if (g_config.isolateRectOnLockTile) {
-                isolateEnabled = true;
+                ScanlineMap old = isolatedFragment;
                 isolatedFragment.clear();
                 isolatedFragment.addRect({tileToLock.x * ssne.tileDimensions.x,
                                           tileToLock.y * ssne.tileDimensions.y, ssne.tileDimensions.x,
                                           ssne.tileDimensions.y});
+                commitIsolatedFragmentState(old);
+                isolateEnabled = true;
                 shouldUpdateRenderedIsolatedFragmentPoints = true;
             }
             if (tileToLock.x >= 0 && tileToLock.y >= 0) {
@@ -4357,6 +4371,7 @@ void MainEditor::layer_outline(bool wholeImage)
 void MainEditor::layer_selectCurrentAlpha()
 {
     Layer* l = getCurrentLayer();
+    ScanlineMap old = isolatedFragment;
     isolatedFragment.clear();
     int p = 0;
     for (int y = 0; y < l->h; y++) {
@@ -4369,6 +4384,7 @@ void MainEditor::layer_selectCurrentAlpha()
         }
     }
     shouldUpdateRenderedIsolatedFragmentPoints = true;
+    commitIsolatedFragmentState(old);
     isolateEnabled = p > 0;
 }
 
