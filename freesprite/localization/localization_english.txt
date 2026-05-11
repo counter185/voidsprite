@@ -70,6 +70,7 @@
     {"vsp.export.option.ppm.binary", "Binary PPM"},
     {"vsp.export.option.png.compressionlvl", "Compression level"},
     {"vsp.export.option.avif.quality", "Quality (100: lossless)"},
+    {"vsp.export.option.yytex.compressed", "Compressed YYTEX"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},

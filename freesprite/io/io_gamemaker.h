@@ -24,5 +24,7 @@ const u8 QOI_MASK_3 = 0xe0;
 const u8 QOI_MASK_4 = 0xf0;
 
 Layer* readYoYoTex(PlatformNativePathString path, u64 seek = 0);
+bool writeYoYoTex(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params);
 
+std::vector<u8> writeQoifToMem(Layer* l);
 Layer* readQoifFromMem(std::vector<u8>& bytes);

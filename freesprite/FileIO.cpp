@@ -2431,7 +2431,8 @@ void g_setupIO() {
         * exDIBv5,
         * exJPEG,
         * exAVIF,
-        * exGIF
+        * exGIF,
+        * exYYTEX
         ;
 
     io_registerVSP();
@@ -2486,9 +2487,15 @@ void g_setupIO() {
     );
     g_fileExporters.push_back(
         exAnymapPPM = FileExporter::flatExporter("Portable Pixmap PPM", ".ppm", "", &writeAnymapPPM, FORMAT_RGB)
-        ->buildParameters({
-            BOOL_PARAM("ppm.binary", false)
-        })
+            ->buildParameters({
+                BOOL_PARAM("ppm.binary", false)
+            })
+    );
+    g_fileExporters.push_back(
+        exYYTEX = FileExporter::flatExporter("YoYo texture", ".yytex", "", &writeYoYoTex, FORMAT_RGB)
+            ->buildParameters({
+                BOOL_PARAM("yytex.compressed", true)
+            })
     );
     g_fileExporters.push_back(exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", "", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exVTF = FileExporter::flatExporter("VTF", ".vtf", TL("vsp.export.vtf"), &writeVTF, FORMAT_RGB));
@@ -2536,7 +2543,7 @@ void g_setupIO() {
 #endif
     g_fileImporters.push_back(FileImporter::flatImporter("Godot Compressed texture", ".ctex", &readGodotCTEX, NULL, FORMAT_RGB, 
         magicVerify(0, "GST")));
-    g_fileImporters.push_back(FileImporter::flatImporter("YoYo texture", ".yytex", &readYoYoTex, NULL, FORMAT_RGB, 
+    g_fileImporters.push_back(FileImporter::flatImporter("YoYo texture", ".yytex", &readYoYoTex, exYYTEX, FORMAT_RGB, 
         [](PlatformNativePathString path) { return magicVerify(0, "fioq")(path) || magicVerify(0, "2zoq")(path); }
     ));
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
@@ -2641,17 +2648,21 @@ bool writeHTMLBase64(PlatformNativePathString path, Layer* data)
 
     if (outfile != NULL) {
 
-        std::string base64Buffer;
-        {
-            std::vector<u8> pngData = writePNGToMem(data);
-            std::string fileBuffer;
-            fileBuffer.resize(pngData.size());
-            memcpy(fileBuffer.data(), pngData.data(), pngData.size());
-            base64Buffer = base64::to_base64(fileBuffer);
-        }
+        std::string base64Buffer = writePNGToBase64(data);
 
-        std::string htmlPre = "<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>voidsprite image</title>\n\t\t<!-- File exported with voidsprite -->\n\t</head>\n\t<body>\n\t\t<img src=\"data:image/png;base64, ";
-        std::string htmlPost = "\"></img>\n\t</body>\n</html>";
+        std::string htmlPre = 
+            "<!DOCTYPE HTML>\n"
+            "<html>\n"
+            "\t<head>\n"
+            "\t\t<title>voidsprite image</title>\n"
+            "\t\t<!-- File exported with voidsprite -->\n"
+            "\t</head>\n"
+            "\t<body>\n"
+            "\t\t<img src=\"data:image/png;base64, ";
+        std::string htmlPost = 
+            "\"></img>\n"
+            "\t</body>\n"
+            "</html>";
         fwrite(htmlPre.c_str(), htmlPre.size(), 1, outfile);
         fwrite(base64Buffer.c_str(), base64Buffer.length(), 1, outfile);
         fwrite(htmlPost.c_str(), htmlPost.size(), 1, outfile);
