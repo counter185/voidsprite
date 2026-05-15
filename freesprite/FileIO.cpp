@@ -2448,7 +2448,12 @@ void g_setupIO() {
             BOOL_PARAM("avi.mjpg", 1)
         })
     );
-    g_fileExporters.push_back(exGIF = FileExporter::sessionExporter("GIF", ".gif", TL("vsp.export.gif"), &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED));
+    g_fileExporters.push_back(
+        exGIF = FileExporter::sessionExporter("GIF", ".gif", TL("vsp.export.gif"), &writeGIF, FORMAT_RGB | FORMAT_PALETTIZED)
+        ->buildParameters({
+            BOOL_PARAM("gif.loopanim", 1)
+        })
+    );
     g_fileExporters.push_back(exAPNG = FileExporter::sessionExporter("Animated PNG", ".apng", TL("vsp.export.apng"), &writeAPNG, FORMAT_RGB));
 
     g_fileExporters.push_back(

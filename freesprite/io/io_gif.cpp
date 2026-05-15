@@ -373,8 +373,9 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
 }
 
 
-bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress) {
+bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress, ParameterStore* params) {
     ENSURE_REPORT_VALID(progress);
+    bool loop = params == NULL || !params->hasParam("gif.loopanim") ? true : params->getBool("gif.loopanim");
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
 
@@ -443,7 +444,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgre
         fwrite(&pae, sizeof(GIFApplicationExtension), 1, f);
         u8 subBlockSize = 3;
         fwrite(&subBlockSize, 1, 1, f);
-        u8 appData[3] = { 1, 0, 0 };
+        u8 appData[3] = { 1, loop ? 0 : 1, 0 };
         fwrite(appData, 1, 3, f);
         fwrite("\x00", 1, 1, f); //block terminator
 
