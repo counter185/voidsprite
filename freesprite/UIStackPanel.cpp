@@ -34,7 +34,7 @@ UIStackPanel* UIStackPanel::Vertical(int spacing, std::vector<Drawable*> content
 UIStackPanel* UIStackPanel::Horizontal(int spacing, std::vector<Drawable*> content, XY position)
 {
     auto panel = FromContent(content, false);
-    panel->position;
+    panel->position = position;
     panel->spacing = spacing;
     panel->recalculateLayout();
     return panel;
