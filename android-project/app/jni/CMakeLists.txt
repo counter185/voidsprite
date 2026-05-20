@@ -7,8 +7,10 @@ set(CMAKE_DEBUG_POSTFIX "")
 # SDL sources are in a subfolder named "SDL"
 add_subdirectory(SDL)
 
-# Compilation of companion libraries
+# we have our own avif
+set(SDLIMAGE_AVIF OFF)
 add_subdirectory(SDL_image)
+
 #add_subdirectory(SDL_mixer)
 add_subdirectory(SDL_ttf)
 add_subdirectory(SDL_net)
