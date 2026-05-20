@@ -9,6 +9,7 @@ add_subdirectory(SDL)
 
 # we have our own avif
 set(SDLIMAGE_AVIF OFF)
+set(SDLIMAGE_ZLIB_SHARED OFF)
 add_subdirectory(SDL_image)
 
 #add_subdirectory(SDL_mixer)
@@ -20,7 +21,9 @@ set(LIBLCF_WITH_ICU OFF)
 set(LIBLCF_WITH_XML OFF)
 add_subdirectory(liblcf)
 
-add_subdirectory(zlib)
+if(NOT TARGET zlibstatic)
+    add_subdirectory(zlib)
+endif()
 
 set(AVIF_LIBYUV "LOCAL")
 set(AVIF_CODEC_AOM OFF)
