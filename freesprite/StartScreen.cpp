@@ -1165,7 +1165,7 @@ PanelNewImage::PanelNewImage()
         });
     wOptions->recalculateLayout();
     hOptions->recalculateLayout();
-    newImageTabs->tabs[0].wxs.addDrawable(UIStackPanel::Vertical(5, {
+    newImageTabs->tabs[0].add(UIStackPanel::Vertical(5, {
         wOptions,
         hOptions
     }, {0, 10}));
@@ -1212,7 +1212,7 @@ PanelNewImage::PanelNewImage()
     cellWOptions->recalculateLayout();
     cellHOptions->recalculateLayout();
 
-    newImageTabs->tabs[1].wxs.addDrawable(UIStackPanel::Vertical(5, {
+    newImageTabs->tabs[1].add(UIStackPanel::Vertical(5, {
         cellWOptions,
         cellHOptions
     }, {0,10}));
@@ -1224,7 +1224,7 @@ PanelNewImage::PanelNewImage()
     templatesPanel->wxWidth = 480;
     templatesPanel->wxHeight = 300;
     templatesPanel->takeMouseWheelEvents = false;
-    newImageTabs->tabs[2].wxs.addDrawable(templatesPanel);
+    newImageTabs->tabs[2].add(templatesPanel);
     populateTemplatesPanel();
 
     std::vector<std::string> palettes;
@@ -1234,13 +1234,13 @@ PanelNewImage::PanelNewImage()
 
     for (int x = 0; x < 2; x++) {
 
-        newImageTabs->tabs[x].wxs.addDrawable(new UILabel(TL("vsp.launchpad.tab.rgbfill"), { 30,100 }));
+        newImageTabs->tabs[x].add(new UILabel(TL("vsp.launchpad.tab.rgbfill"), { 30,100 }));
 
         UIColorInputField* rgbFillField = new UIColorInputField(true);
         rgbFillField->setColor(0);
         rgbFillField->position = { 110,100 };
         rgbFillField->button->wxWidth = 80;
-        newImageTabs->tabs[x].wxs.addDrawable(rgbFillField);
+        newImageTabs->tabs[x].add(rgbFillField);
 
         UIButton* buttonNewImageRGB = new UIButton();
         buttonNewImageRGB->onClickCallback = [this, rgbFillField](UIButton*) { newRGBSession(rgbFillField->getColor()); };
@@ -1248,7 +1248,7 @@ PanelNewImage::PanelNewImage()
         buttonNewImageRGB->wxWidth = 160;
         buttonNewImageRGB->text = TL("vsp.launchpad.tab.creatergb");
         buttonNewImageRGB->tooltip = TL("vsp.launchpad.tab.creatergb.tooltip");
-        newImageTabs->tabs[x].wxs.addDrawable(buttonNewImageRGB);
+        newImageTabs->tabs[x].add(buttonNewImageRGB);
 
         rgbTabCreateButtons[x] = buttonNewImageRGB;
 
@@ -1266,7 +1266,7 @@ PanelNewImage::PanelNewImage()
         palettePicker->wxWidth = 300;
         palettePicker->wxHeight = 30;
         palettePicker->setTextToSelectedItem = true;
-        newImageTabs->tabs[x].wxs.addDrawable(palettePicker);
+        newImageTabs->tabs[x].add(palettePicker);
 
         UIButton* buttonNewImagePalettized = new UIButton();
         buttonNewImagePalettized->onClickCallback = [this, palettePicker](UIButton*) { newIndexedSession(palettePicker->text); };
@@ -1274,6 +1274,6 @@ PanelNewImage::PanelNewImage()
         buttonNewImagePalettized->wxWidth = 200;
         buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
         buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
-        newImageTabs->tabs[x].wxs.addDrawable(buttonNewImagePalettized);
+        newImageTabs->tabs[x].add(buttonNewImagePalettized);
     }
 }

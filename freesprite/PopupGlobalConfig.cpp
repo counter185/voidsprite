@@ -77,7 +77,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     generalSettingsPanel->wxHeight = wxHeight - 140;
     generalSettingsPanel->scrollVertically = true;
     generalSettingsPanel->scrollHorizontally = false;
-    configTabs->tabs[0].wxs.addDrawable(generalSettingsPanel);
+    configTabs->tabs[0].add(generalSettingsPanel);
     XY posInTab = { 0,10 };
     
     generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
@@ -132,7 +132,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->wxHeight = wxHeight - 140;
     visualSettingsPanel->scrollVertically = true;
     visualSettingsPanel->scrollHorizontally = false;
-    configTabs->tabs[1].wxs.addDrawable(visualSettingsPanel);
+    configTabs->tabs[1].add(visualSettingsPanel);
 
     posInTab = { 0,10 };
 
@@ -257,7 +257,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->wxHeight = wxHeight - 140;
     editorSettingsPanel->scrollVertically = true;
     editorSettingsPanel->scrollHorizontally = false;
-    configTabs->tabs[2].wxs.addDrawable(editorSettingsPanel);
+    configTabs->tabs[2].add(editorSettingsPanel);
 
     posInTab = { 0,10 };
 
@@ -359,14 +359,14 @@ PopupGlobalConfig::PopupGlobalConfig()
         -------------------------
     */
     posInTab = { 0,10 };
-    configTabs->tabs[3].wxs.addDrawable(new UILabel(TL("vsp.cmn.search"), posInTab));
+    configTabs->tabs[3].add(new UILabel(TL("vsp.cmn.search"), posInTab));
     keybindSearchField = new UITextField("");
     keybindSearchField->position = xyAdd(posInTab, {120,0});
     keybindSearchField->onTextChangedCallback = [this](UITextField* tf, std::string newText) {
         createKeybindButtons(newText);
         keybindsPanel->scrollOffset.y = 0;
     };
-    configTabs->tabs[3].wxs.addDrawable(keybindSearchField);
+    configTabs->tabs[3].add(keybindSearchField);
     posInTab.y += 40;
 
     keybindsPanel = new ScrollingPanel();
@@ -375,7 +375,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     keybindsPanel->wxHeight = wxHeight - 130 - posInTab.y;
     keybindsPanel->scrollVertically = true;
     keybindsPanel->scrollHorizontally = false;
-    configTabs->tabs[3].wxs.addDrawable(keybindsPanel);
+    configTabs->tabs[3].add(keybindsPanel);
 
     keybindsStack = UIStackPanel::Vertical(0, {});
     keybindsStack->position = { 0,0 };
@@ -397,7 +397,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     pluginsPanel->wxHeight = wxHeight - 140;
     pluginsPanel->scrollVertically = true;
     pluginsPanel->scrollHorizontally = false;
-    configTabs->tabs[4].wxs.addDrawable(pluginsPanel);
+    configTabs->tabs[4].add(pluginsPanel);
 
     XY posInPanel = { 5,5 };
     if (g_loadedPlugins.empty()) {
@@ -447,7 +447,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->onClickCallback = [this](UIButton*) {
         platformOpenFileLocation(platformEnsureDirAndGetConfigFilePath());
     };
-    configTabs->tabs[5].wxs.addDrawable(btn);
+    configTabs->tabs[5].add(btn);
     posInTab.y += 35;
 
     if (platformSupportsFeature(VSP_FEATURE_FILE_ASSOC)) {
@@ -459,7 +459,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         btn->onClickCallback = [this](UIButton*) {
             g_addPopup(new PopupChooseExtsToAssoc());
         };
-        configTabs->tabs[5].wxs.addDrawable(btn);
+        configTabs->tabs[5].add(btn);
         posInTab.y += 35;
 
         btn = new UIButton();
@@ -476,7 +476,7 @@ PopupGlobalConfig::PopupGlobalConfig()
                 logerr("failed to register lospec-palette:// uri");
             }
         };
-        configTabs->tabs[5].wxs.addDrawable(btn);
+        configTabs->tabs[5].add(btn);
         posInTab.y += 35;
     }
 
@@ -488,7 +488,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadFonts();
         g_addNotification(SuccessShortNotification(TL("vsp.config.opt.fontsreloaded"), ""));
     };
-    configTabs->tabs[5].wxs.addDrawable(btn);
+    configTabs->tabs[5].add(btn);
     posInTab.y += 35;
 
     btn = new UIButton();
@@ -499,7 +499,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadColorMap();
         g_addNotification(SuccessShortNotification(TL("vsp.config.opt.colorlistreloaded"), ""));
         };
-    configTabs->tabs[5].wxs.addDrawable(btn);
+    configTabs->tabs[5].add(btn);
     posInTab.y += 35;
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
@@ -513,7 +513,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         btn->position = posInTab;
         btn->wxWidth = 270;
         btn->onClickCallback = [this, dllpath](UIButton*) {  shellExtensionAction(true); };
-        configTabs->tabs[5].wxs.addDrawable(btn);
+        configTabs->tabs[5].add(btn);
         posInTab.y += 35;
 
         btn = new UIButton();
@@ -521,7 +521,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         btn->position = posInTab;
         btn->wxWidth = 270;
         btn->onClickCallback = [this, dllpath](UIButton*) {  shellExtensionAction(false); };
-        configTabs->tabs[5].wxs.addDrawable(btn);
+        configTabs->tabs[5].add(btn);
         posInTab.y += 35;
     }
 #endif
@@ -535,7 +535,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     btn->onClickCallback = [this](UIButton*) {
         platformRequestFileAccessPermissions();
     };
-    configTabs->tabs[5].wxs.addDrawable(btn);
+    configTabs->tabs[5].add(btn);
     posInTab.y += 35;
 #endif
 
@@ -546,16 +546,18 @@ PopupGlobalConfig::PopupGlobalConfig()
     */
 #if _DEBUG
     posInTab = { 0,10 };
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab));
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Debug color slider gradient bounds", "", &g_debugConfig.debugColorSliderGradients, &posInTab));
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Test localization", 
-        UTF8_DIAMOND " will appear next to strings that are present in the current localization\n"
-        UTF8_EMPTY_DIAMOND " will appear next to strings that are being pulled as fallback from English",
-        &g_debugConfig.debugTestLocalization, &posInTab));
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab));
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Debug color wheel geometry", "", &g_debugConfig.debugColorWheel, &posInTab));
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Show blur buffer", "", &g_debugConfig.debugBlurBehind, &posInTab));
-    configTabs->tabs[6].wxs.addDrawable(optionCheckbox("Always show mobile text field", "", &g_debugConfig.debugAlwaysMobileUITextField, &posInTab));
+    configTabs->tabs[6].add(UIStackPanel::Vertical(5, {
+        optionCheckbox("Show scroll panel bounds", "", &g_debugConfig.debugShowScrollPanelBounds, &posInTab),
+        optionCheckbox("Debug color slider gradient bounds", "", &g_debugConfig.debugColorSliderGradients, &posInTab),
+        optionCheckbox("Test localization",
+            UTF8_DIAMOND " will appear next to strings that are present in the current localization\n"
+            UTF8_EMPTY_DIAMOND " will appear next to strings that are being pulled as fallback from English",
+            &g_debugConfig.debugTestLocalization, &posInTab),
+        optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab),
+        optionCheckbox("Debug color wheel geometry", "", &g_debugConfig.debugColorWheel, &posInTab),
+        optionCheckbox("Show blur buffer", "", &g_debugConfig.debugBlurBehind, &posInTab),
+        optionCheckbox("Always show mobile text field", "", &g_debugConfig.debugAlwaysMobileUITextField, &posInTab)
+    }, {0, 10}));
 #endif
     
 

@@ -56,7 +56,7 @@ EditorColorPicker::EditorColorPicker(MainEditor* c) : callerColorList(c) {
     alphaSlider->onChangeValueCallback = [this](UISlider* s, float v) {
         caller->pickedAlpha = (u8)(v * 255);
     };
-    wColorPicker->colorTabs->tabs[0].wxs.addDrawable(alphaSlider);
+    wColorPicker->colorTabs->tabs[0].add(alphaSlider);
 
     wColorPicker->onColorChangedCallback = [this](UIColorPicker* from, u32 col) {
         caller->pickedColor = col;
@@ -175,7 +175,7 @@ void EditorColorPicker::updateLastColorButtons()
     if (!lastColorsChanged) {
         return;
     }
-    wColorPicker->colorModeTabs->tabs[1].wxs.freeAllDrawables();
+    wColorPicker->colorModeTabs->tabs[1].tabPanel->subWidgets.freeAllDrawables();
     int x = 0;
     int xx = 0;
     int y = 0;
@@ -186,7 +186,7 @@ void EditorColorPicker::updateLastColorButtons()
         colBtn->position = { posX, posY };
         colBtn->wxHeight = 24;
         colBtn->wxWidth = 30;
-        wColorPicker->colorModeTabs->tabs[1].wxs.addDrawable(colBtn);
+        wColorPicker->colorModeTabs->tabs[1].add(colBtn);
 
         posX += 30;
 

@@ -66,7 +66,7 @@ public:
             aboutView->position = {0,0};
             aboutView->wxWidth = wxWidth - 20;
             aboutView->wxHeight = wxHeight - 120;
-            aboutTabs->tabs[i++].wxs.addDrawable(aboutView);
+            aboutTabs->tabs[i++].add(aboutView);
 
             UILabel* primaryText = new UILabel(tabContents);
             primaryText->position = {5,5};

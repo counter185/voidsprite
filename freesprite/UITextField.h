@@ -69,7 +69,6 @@ public:
     void render(XY pos) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     bool focusableWithTab() override { return true; }
-    bool shouldMoveToFrontOnFocus() override { return true; }
     XY getDimensions() override { return { wxWidth, wxHeight }; }
 
     void renderTextField(XY at);

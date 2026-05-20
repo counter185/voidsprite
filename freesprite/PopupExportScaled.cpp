@@ -28,7 +28,7 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
     UILabel* tabTitle = new UILabel(TL("vsp.exportscaled.integerscale.title"));
     tabTitle->position = { 10, 10 };
     tabTitle->fontsize = 20;
-    tabbedView->tabs[0].wxs.addDrawable(tabTitle);
+    tabbedView->tabs[0].add(tabTitle);
 
     tboxISX = new UITextField();
     tboxISX->position = { 10, 60 };
@@ -44,16 +44,16 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
     tboxISX->isNumericField = tboxISY->isNumericField = true;
     tboxISX->wxWidth = tboxISY->wxWidth = 110;
 
-    tabbedView->tabs[0].wxs.addDrawable(tboxISX);
-    tabbedView->tabs[0].wxs.addDrawable(l);
-    tabbedView->tabs[0].wxs.addDrawable(tboxISY);
+    tabbedView->tabs[0].add(tboxISX);
+    tabbedView->tabs[0].add(l);
+    tabbedView->tabs[0].add(tboxISY);
 
 
     //pixel size tab
     tabTitle = new UILabel(TL("vsp.exportscaled.pixelsize.title"));
     tabTitle->position = { 10, 10 };
     tabTitle->fontsize = 20;
-    tabbedView->tabs[1].wxs.addDrawable(tabTitle);
+    tabbedView->tabs[1].add(tabTitle);
 
     tboxPXSX = new UITextField();
     tboxPXSX->position = { 10, 60 };
@@ -69,9 +69,9 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
     tboxPXSX->isNumericField = tboxPXSY->isNumericField = true;
     tboxPXSX->wxWidth = tboxPXSY->wxWidth = 110;
 
-    tabbedView->tabs[1].wxs.addDrawable(tboxPXSX);
-    tabbedView->tabs[1].wxs.addDrawable(l);
-    tabbedView->tabs[1].wxs.addDrawable(tboxPXSY);
+    tabbedView->tabs[1].add(tboxPXSX);
+    tabbedView->tabs[1].add(l);
+    tabbedView->tabs[1].add(tboxPXSY);
 
 
     labelOutputSize = new UILabel();

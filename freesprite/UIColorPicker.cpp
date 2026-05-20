@@ -55,7 +55,7 @@ UIColorPicker::UIColorPicker()
         { TL("vsp.maineditor.panel.colorpicker.tab.other")}
         }, 100);
     colorTabs->position = XY{ 0,5 };
-    colorModeTabs->tabs[0].wxs.addDrawable(colorTabs);
+    colorModeTabs->tabs[0].add(colorTabs);
 
     //   -------------------
     //   | Visual tab
@@ -67,7 +67,7 @@ UIColorPicker::UIColorPicker()
         hueWheel->wxWidth = 230;
         hueWheel->wxHeight = 230;
         hueWheel->position = { 10,10 };
-        colorTabs->tabs[0].wxs.addDrawable(hueWheel);
+        colorTabs->tabs[0].add(hueWheel);
 
         SDL_Rect innerRect = hueWheel->innerRect();
 
@@ -79,11 +79,11 @@ UIColorPicker::UIColorPicker()
 
         hueSlider = new UIHueSlider(this);
         hueSlider->position = XY{ 0,10 };
-        colorTabs->tabs[0].wxs.addDrawable(hueSlider);
+        colorTabs->tabs[0].add(hueSlider);
 
         satValSlider->position = XY{ 0,40 };
     }
-    colorTabs->tabs[0].wxs.addDrawable(satValSlider);
+    colorTabs->tabs[0].add(satValSlider);
 
     //   -------------------
     //   | Sliders tab 
@@ -147,7 +147,7 @@ UIColorPicker::UIColorPicker()
         }),
     });
     slidersTabStackPanel->position = {0, 10};
-    colorTabs->tabs[1].wxs.addDrawable(slidersTabStackPanel);
+    colorTabs->tabs[1].add(slidersTabStackPanel);
 
     //   -------------------
     //   | Other tab 
@@ -158,7 +158,7 @@ UIColorPicker::UIColorPicker()
     colorModelsPanel->bgColor = Fill::Solid(0x40000000);
     colorModelsPanel->wxWidth = 370;
     colorModelsPanel->wxHeight = 250;
-    colorTabs->tabs[2].wxs.addDrawable(colorModelsPanel);
+    colorTabs->tabs[2].add(colorModelsPanel);
     {
         int yNow = 5;
         int i = 0;
@@ -224,7 +224,7 @@ UIColorPicker::UIColorPicker()
     palettePanel->wxWidth = 370;
     palettePanel->wxHeight = 270;
     reloadColorLists();
-    colorModeTabs->tabs[2].wxs.addDrawable(palettePanel);
+    colorModeTabs->tabs[2].add(palettePanel);
 
 
     //-----------------
@@ -241,7 +241,7 @@ UIColorPicker::UIColorPicker()
         mix1Input
     });
     mxAsp->position = { 20,25 };
-    colorModeTabs->tabs[3].wxs.addDrawable(mxAsp);
+    colorModeTabs->tabs[3].add(mxAsp);
 
 
     mix2Input = new UIColorInputField();
@@ -256,9 +256,9 @@ UIColorPicker::UIColorPicker()
         new UICheckbox("Lock", &this->lockMix2)
     });
     mxBsp->position = { 200, 25 };
-    colorModeTabs->tabs[3].wxs.addDrawable(mxBsp);
+    colorModeTabs->tabs[3].add(mxBsp);
 
-    colorModeTabs->tabs[3].wxs.addDrawable(new UILabel("+", { 150, 50 }));
+    colorModeTabs->tabs[3].add(new UILabel("+", { 150, 50 }));
 
     mixSlider = new UIColorSlider();
     mixSlider->position = XY{ 40, 140 };
@@ -266,7 +266,7 @@ UIColorPicker::UIColorPicker()
     mixSlider->onChangeValueCallback = [this](UISlider* s, float f) {
         colorUpdatedFromMixInput();
     };
-    colorModeTabs->tabs[3].wxs.addDrawable(mixSlider);
+    colorModeTabs->tabs[3].add(mixSlider);
 
     //widgets outside of tabs
 

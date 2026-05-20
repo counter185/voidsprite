@@ -59,7 +59,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
             }
         });
     };
-    colorPaletteTabs->tabs[1].wxs.addDrawable(buttonSavePalette);
+    colorPaletteTabs->tabs[1].add(buttonSavePalette);
 
     UIButton* buttonLoadPalette = new UIButton();
     buttonLoadPalette->position = { 150, 60 };
@@ -74,7 +74,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
         platformTryLoadOtherFile(this, filetypes, "load palette", EVENT_PALETTECOLORPICKER_LOADPALETTE);
     };
     //buttonLoadPalette->setCallbackListener(EVENT_PALETTECOLORPICKER_LOADPALETTE, this);
-    colorPaletteTabs->tabs[1].wxs.addDrawable(buttonLoadPalette);
+    colorPaletteTabs->tabs[1].add(buttonLoadPalette);
 
     UIDropdown* defaultpalettePicker = new UIDropdown(palettes);
     defaultpalettePicker->customButtonGenFunction = [](std::string name, int index) {
@@ -90,7 +90,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     defaultpalettePicker->wxHeight = 30;
     defaultpalettePicker->text = "Change palette";
     defaultpalettePicker->setCallbackListener(EVENT_PALETTECOLORPICKER_PALETTELIST, this);
-    colorPaletteTabs->tabs[1].wxs.addDrawable(defaultpalettePicker);
+    colorPaletteTabs->tabs[1].add(defaultpalettePicker);
 
     updateForcedColorPaletteButtons();
 }
@@ -178,7 +178,7 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
 
 void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
 {
-    colorPaletteTabs->tabs[0].wxs.freeAllDrawables();
+    colorPaletteTabs->tabs[0].tabPanel->subWidgets.freeAllDrawables();
     colorButtons.clear();
 
     int paletteIndex = 0;
@@ -206,7 +206,7 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
                 ppc->setAlpha(col >> 24);
                 g_addPopup(ppc);
             };
-            colorPaletteTabs->tabs[0].wxs.addDrawable(colBtn);
+            colorPaletteTabs->tabs[0].add(colBtn);
             colorButtons.push_back(colBtn);
             paletteIndex++;
         }
@@ -226,7 +226,7 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
             caller->setPalette(paletteCopy);
             updateForcedColorPaletteButtons();
         };
-        colorPaletteTabs->tabs[0].wxs.addDrawable(newColorButton);
+        colorPaletteTabs->tabs[0].add(newColorButton);
     }
     highlightActiveColorButton();
 }
