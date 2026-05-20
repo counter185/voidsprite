@@ -8,11 +8,11 @@ cd android-project/app/jni
 
 git clone --recursive https://github.com/libsdl-org/SDL.git
 cd SDL
-git checkout c61497b
+git checkout release-3.4.8
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
 cd SDL_image
-git checkout release-3.2.4
+git checkout release-3.4.4
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
 #git clone --recursive https://github.com/libsdl-org/SDL_net.git
