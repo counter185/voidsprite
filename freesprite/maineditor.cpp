@@ -2768,6 +2768,9 @@ void MainEditor::setActiveBrush(BaseBrush* b)
         }
     }
     brushPicker->updateActiveBrushButton(b);
+    if (g_config.resetEraserOnToolSwitch) {
+        colorPicker->setEraserMode(false);
+    }
     initToolParameters();
 }
 

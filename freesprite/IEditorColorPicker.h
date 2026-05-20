@@ -5,6 +5,7 @@ class IEditorColorPicker {
 public:
     virtual Panel* getPanel() = 0;
 
+    virtual void setEraserMode(bool state) = 0;
     virtual void toggleEraser() = 0;
     virtual void forceFocusOnColorInputField() = 0;
 

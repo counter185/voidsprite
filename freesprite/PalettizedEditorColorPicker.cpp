@@ -245,6 +245,12 @@ void PalettizedEditorColorPicker::setPickedPaletteIndex(int32_t index)
     caller->pickedPaletteIndex = index;
 }
 
+void PalettizedEditorColorPicker::setEraserMode(bool state)
+{
+    caller->eraserMode = state;
+    updateEraserButton();
+}
+
 void PalettizedEditorColorPicker::toggleEraser() {
     eraserButton->click();
 }

@@ -560,6 +560,7 @@
     {"vsp.config.opt.checkerboardsize", "Checkerboard size"},
     {"vsp.config.opt.checkerboardscalewithcanvas", "Scale checkerboard with canvas"},
     {"vsp.config.opt.checkerboardcolors", "Checkerboard colors"},
+    {"vsp.config.opt.reseteraser", "Disable eraser mode when switching tools"},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

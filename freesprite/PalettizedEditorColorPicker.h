@@ -51,6 +51,7 @@ public:
 
     Panel* getPanel() override { return this; }
 
+    void setEraserMode(bool state) override;
     void toggleEraser() override;
     void forceFocusOnColorInputField() override {};
 

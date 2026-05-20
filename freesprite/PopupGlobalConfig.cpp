@@ -352,6 +352,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->subWidgets.addDrawable(stack);
     posInTab.y += 35;
 
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.reseteraser"), "", &g_config.resetEraserOnToolSwitch, &posInTab));
 
     /*
         -------------------------

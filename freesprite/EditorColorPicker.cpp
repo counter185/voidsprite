@@ -111,7 +111,13 @@ void EditorColorPicker::updatePanelColors() {
     focusBorderColor = valCol;
 }
 
-void EditorColorPicker::toggleEraser() 
+void EditorColorPicker::setEraserMode(bool state)
+{
+    caller->eraserMode = state;
+    updateEraserAndAlphaBlendButtons();
+}
+
+void EditorColorPicker::toggleEraser()
 {
     eraserButton->click();
 }
