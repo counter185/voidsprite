@@ -2143,6 +2143,24 @@ void MainEditor::SetPixel(XY position, uint32_t color, bool pushToLastColors, ui
     }
 }
 
+void MainEditor::erasePixel(XY position, u8 symmetry)
+{
+    getCurrentLayer()->setPixel(position, isPalettized ? -1 : 0x00000000);
+
+    if (ssne.symmetryEnabled[0] && !(symmetry & 0b10)) {
+        int symmetryXPoint = ssne.symmetryPositions.x / 2;
+        bool symXPointIsCentered = ssne.symmetryPositions.x % 2;
+        int symmetryFlippedX = symmetryXPoint + (symmetryXPoint - position.x) - (symXPointIsCentered ? 0 : 1);
+        erasePixel(XY{ symmetryFlippedX, position.y }, symmetry | 0b10);
+    }
+    if (ssne.symmetryEnabled[1] && !(symmetry & 0b1)) {
+        int symmetryYPoint = ssne.symmetryPositions.y / 2;
+        bool symYPointIsCentered = ssne.symmetryPositions.y % 2;
+        int symmetryFlippedY = symmetryYPoint + (symmetryYPoint - position.y) - (symYPointIsCentered ? 0 : 1);
+        erasePixel(XY{ position.x, symmetryFlippedY }, symmetry | 0b1);
+    }
+}
+
 void MainEditor::DrawLine(XY from, XY to, uint32_t color) {
     rasterizeLine(from, to, [&](XY a)->void {
         SetPixel(a, color);

@@ -426,6 +426,7 @@ public:
     void RecalcMousePixelTargetPoint(int x, int y);
     void FillTexture();
     virtual void SetPixel(XY position, uint32_t color, bool pushToLastColors = true, uint8_t symmetry = 0);
+    void erasePixel(XY position, u8 symmetry = 0);
     void DrawLine(XY from, XY to, uint32_t color);
     void copyImageToClipboard();
     void copyLayerToClipboard(Layer* l);
