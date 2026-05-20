@@ -63,6 +63,7 @@ struct DebugSettings {
     bool debugColorWheel = false;
     bool debugBlurBehind = false;
     bool debugAlwaysMobileUITextField = false;
+    bool debugDrawableFocus = false;
 };
 
 inline bool g_configWasLoaded = false;

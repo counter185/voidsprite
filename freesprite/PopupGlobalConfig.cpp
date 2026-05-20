@@ -556,7 +556,8 @@ PopupGlobalConfig::PopupGlobalConfig()
         optionCheckbox("Show raw RPG2K tile data", "", &g_debugConfig.debugShowTilesRPG2K, &posInTab),
         optionCheckbox("Debug color wheel geometry", "", &g_debugConfig.debugColorWheel, &posInTab),
         optionCheckbox("Show blur buffer", "", &g_debugConfig.debugBlurBehind, &posInTab),
-        optionCheckbox("Always show mobile text field", "", &g_debugConfig.debugAlwaysMobileUITextField, &posInTab)
+        optionCheckbox("Always show mobile text field", "", &g_debugConfig.debugAlwaysMobileUITextField, &posInTab),
+        optionCheckbox("Debug focused drawables", "", &g_debugConfig.debugDrawableFocus, &posInTab),
     }, {0, 10}));
 #endif
     

@@ -32,6 +32,7 @@ void UIButton::render(XY pos)
                        : hovered ? XM1PW3P1(hoverTimer.percentElapsedTime(400)) : (1 - XM1PW3P1(hoverTimer.percentElapsedTime(200)));
     //SDL_RenderDrawLine(g_rd, p1.x, p1.y, p1.x + drawrect.w / 2, p1.y);
     //SDL_RenderDrawLine(g_rd, p1.x, p1.y, p1.x, p1.y + drawrect.h / 2);
+
     drawLine(p2, { p2.x - drawrect.w + offset, p2.y }, 0.25 + 0.65 * hoverTime);
     drawLine({ p2.x, p2.y - 1 }, { p2.x, p2.y - drawrect.h + offset}, 0.33 + 0.56 * hoverTime);
 
@@ -46,18 +47,26 @@ void UIButton::render(XY pos)
         textX += iconRect.w;
     }
 
-    g_fnt->RenderString(text + (focused ? "_" : ""), textX, pos.y + 2, textColor, fontSize);
+    g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);
+
+    if (focused) {
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x60);
+        double focusProgress = XM1PW3P1(focusTimer.percentElapsedTime(300));
+        XY centerPoint = { drawrect.x + drawrect.w / 2, drawrect.y + drawrect.h / 2 };
+        drawLine(p1, xyAdd(p1, { drawrect.w/2, 0 }), focusProgress);
+        drawLine(p1, xyAdd(p1, { 0, drawrect.h/2 }), focusProgress);
+        //drawLine(xySubtract(centerPoint, { 10, 0 }), xyAdd(centerPoint, { 10, 0 }), focusProgress);
+        //drawLine(xySubtract(centerPoint, { 0, 10 }), xyAdd(centerPoint, { 0, 10 }), focusProgress);
+
+        //drawLine(p1, p2, focusProgress);
+    }
 
     renderTooltip(pos);
 }
 
-void UIButton::focusIn()
-{
-    
-}
-
 void UIButton::focusOut()
 {
+    Drawable::focusOut();
     touchHoldingDown = false;
 }
 
@@ -110,6 +119,16 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
                 if (xyDistance(touchPosition, touchHoldDownPos) > 20) {
                     touchHoldingDown = false;
                 }
+            }
+            break;
+        case SDL_EVENT_KEY_DOWN:
+            if (evt.key.scancode == SDL_SCANCODE_RETURN
+                || evt.key.scancode == SDL_SCANCODE_RETURN2
+                || evt.key.scancode == SDL_SCANCODE_SPACE) {
+                click();
+            }
+            else if (evt.key.scancode == SDL_SCANCODE_MENU) {
+                rightClick();
             }
             break;
     }

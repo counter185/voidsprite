@@ -46,11 +46,11 @@ public:
         return pointInBox(mousePos, SDL_Rect{ thisPositionOnScreen.x, thisPositionOnScreen.y, wxWidth, wxHeight });
     }
     void render(XY pos) override;
-    void focusIn() override;
     void focusOut() override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
     bool takesTouchEvents() override { return true; }
+    bool focusableWithTab() override { return true; }
 
     void renderAnimations(XY pos);
     virtual void renderTooltip(XY pos);

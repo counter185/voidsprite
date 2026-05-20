@@ -79,7 +79,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
             auto& wxs = wxsw.get();
             if (wxs.anyFocused()) {
                 wxs.tryFocusOnNextTabbable();
-                break;
+                return true;
             }
         }
     }
@@ -142,6 +142,15 @@ void DrawableManager::renderAll(XY offset) {
         //XY position = xyAdd(a->position, a->anchorPos(offset, XY{ g_windowW, g_windowH }, a->position, a->getDimensions(), a->anchor));
         a->render(xyAdd(a->position, offset));
     }
+#if _DEBUG
+    if (g_debugConfig.debugDrawableFocus && focused != NULL) {
+        XY size = focused->getDimensions();
+        XY pos = xyAdd(offset, focused->position);
+        SDL_Rect outline = { pos.x,pos.y, size.x, size.y };
+        SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 0x80);
+        SDL_RenderDrawRect(g_rd, &outline);
+    }
+#endif
 }
 
 void DrawableManager::moveToFront(Drawable* d) {
@@ -181,37 +190,47 @@ bool DrawableManager::tryFocusOnPoint(XY screenPoint, XY parentOffset) {
     return false;
 }
 
-bool DrawableManager::tryFocusOnNextTabbable()
+TabFocusResponse DrawableManager::tryFocusOnNextTabbable(bool wrapAround)
 {
-    if (focused != NULL && focused->isPanel()) {
-        return ((Panel*)focused)->subWidgets.tryFocusOnNextTabbable();
+    if (focused != NULL && focused->isPanel() && ((Panel*)focused)->enabled) {
+        TabFocusResponse subResponse = ((Panel*)focused)->subWidgets.tryFocusOnNextTabbable(false);
+        if (subResponse == FOCUSED_ON_INNER) {
+            return FOCUSED_ON_INNER;
+        }
     }
-    int currentIndex = focused == NULL ? 0 : std::find(drawablesList.begin(), drawablesList.end(), focused) - drawablesList.begin();
-    for (int xx = 0; xx < drawablesList.size(); xx++) {
-        int x = (currentIndex + xx) % drawablesList.size();
-        Drawable* a = drawablesList[x];
+    int currentIndex = focused == NULL ? 0 : (std::find(drawablesList.begin(), drawablesList.end(), focused) - drawablesList.begin());
+    for (int xx = currentIndex; xx < drawablesList.size(); xx++) {
+        Drawable* a = drawablesList[xx];
         if (a == focused) {
             continue;
         }
         if (a->focusable() && a->focusableWithTab()) {
-            if (focused != a) {
-                if (focused != NULL) {
-                    focused->focusOut();
+            if (a->isPanel() && ((Panel*)a)->enabled) {
+                if (((Panel*)a)->subWidgets.tryFocusOnNextTabbable(false) == LAST_PASSED) {
+                    continue;
                 }
-                if (a->shouldMoveToFrontOnFocus()) {
-                    moveToFront(a);
-                }
-                a->focusIn();
             }
-            focused = a;
-            return true;
+            forceFocusOn(a);
+            return FOCUSED_ON_INNER;
         }
     }
-    if (focused != NULL) {
-        focused->focusOut();
+    //loop back to beginning if we can and should
+    if (wrapAround && currentIndex > 0) {
+        for (int i = 0; i < drawablesList.size(); i++) {
+            Drawable* d = drawablesList[i];
+            if (d->focusable() && d->focusableWithTab()) {
+                if (d->isPanel() && ((Panel*)d)->enabled) {
+                    if (((Panel*)d)->subWidgets.tryFocusOnNextTabbable(false) == LAST_PASSED) {
+                        continue;
+                    }
+                }
+                forceFocusOn(d);
+                return FOCUSED_ON_INNER;
+            }
+        }
     }
-    focused = NULL;
-    return false;
+    forceUnfocus();
+    return LAST_PASSED;
 }
 
 void DrawableManager::forceFocusOn(Drawable* d)

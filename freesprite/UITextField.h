@@ -92,6 +92,7 @@ public:
     void copyToClipboard();
     void pasteFromClipboard();
     void clearText();
+    virtual void openActionsMenu();
 
     void runNumericOperation();
 };

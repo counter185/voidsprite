@@ -2,6 +2,11 @@
 #include "globals.h"
 #include "drawable.h"
 
+enum TabFocusResponse {
+	FOCUSED_ON_INNER = 0,
+	LAST_PASSED = 1
+};
+
 class DrawableManager
 {
 private:
@@ -27,7 +32,7 @@ public:
 	void passInputToFocused(SDL_Event evt, XY parentOffset = XY{0,0});
 	bool anyFocused() { return focused != NULL; }
 	bool tryFocusOnPoint(XY screenPoint, XY parentOffset = XY{0,0});
-	bool tryFocusOnNextTabbable();
+	TabFocusResponse tryFocusOnNextTabbable(bool wrapAround = true);
 	void forceFocusOn(Drawable* d);
 	void forceUnfocus();
 	void forceUnhover();

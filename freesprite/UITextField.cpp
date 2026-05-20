@@ -32,6 +32,9 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
         switch (evt.key.scancode) {
             case SDL_SCANCODE_TAB:
                 break;
+            case SDL_SCANCODE_MENU:
+                openActionsMenu();
+                break;
             case SDL_SCANCODE_RETURN:
                 if (isNumericField && numericFieldCurrentOperation != '\0') {
                     runNumericOperation();
@@ -118,13 +121,18 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
     }
     else if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         if (evt.button.button == SDL_BUTTON_RIGHT) {
-            g_openContextMenu({
-                {TL("vsp.cmn.copy"), [this]() { copyToClipboard(); }},
-                {TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); }},
-                {TL("vsp.cmn.erase"), [this]() { clearText(); }},
-            });
+            openActionsMenu();
         }
     }
+}
+
+void UITextField::openActionsMenu()
+{
+    g_openContextMenu({
+        { TL("vsp.cmn.copy"), [this]() { copyToClipboard(); } },
+        { TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); } },
+        { TL("vsp.cmn.erase"), [this]() { clearText(); } },
+    });
 }
 
 void UITextField::clearText()

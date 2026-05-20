@@ -37,6 +37,7 @@ public:
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     void render(XY position) override;
     void handleInput(SDL_Event evt, XY gPosOffset) override;
+    bool focusableWithTab() override { return true; }
     void focusOut() override {
         Drawable::focusOut();
         subWidgets.forceUnfocus();
