@@ -147,7 +147,7 @@ jobs:
     - name: run build
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=clang CXX=clang++ ./mac_build.sh
     - name: workaround gh actions artifact file permissions
-      run: tar -cvf voidsprite.app.tar -C target/mac_release .
+      run: tar -cvf voidsprite.app.tar -C mac_release .
     - name: Push build artifacts
       uses: actions/upload-artifact@v7
       with: 
@@ -175,7 +175,7 @@ jobs:
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=clang CXX=clang++ ./mac_build.sh
 
     - name: workaround gh actions artifact file permissions
-      run: tar -cvf voidsprite.app.tar -C target/mac_release .
+      run: tar -cvf voidsprite.app.tar -C mac_release .
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v7
