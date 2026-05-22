@@ -170,3 +170,8 @@ if (FLATPAK)
         install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/libdiscord_game_sdk_linux_x64.so" DESTINATION lib)
     endif()
 endif() 
+
+if (APPLE)
+    file(GET_RUNTIME_DEPENDENCIES RESOLVED_DEPENDENCIES_VAR rtlibs EXECUTABLES "${CMAKE_BINARY_DIR}/cmake/voidsprite")
+    file(COPY ${rtlibs} DESTINATION "${CMAKE_BINARY_DIR}/cmake")
+endif()
