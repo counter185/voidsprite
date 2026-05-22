@@ -86,7 +86,7 @@ voidsprite is open for community contributions. Here are some ways you can help:
 
 - Open PRs to contribute to the code
 - Open Issues (or report them on Discord) to help get bugs and other problems fixed
-- Share your custom [Patterns](community-patterns) and [Templates](community-templates)
+- Share your custom [Patterns](community-content/community-patterns) and [Templates](community-content/community-templates)
 - Translate voidsprite into your language. [More details](freesprite/localization)
 
 ## ◆Donate
@@ -98,3 +98,6 @@ voidsprite is open for community contributions. Here are some ways you can help:
 ◆ voidsprite is licensed under GPLv2.  
 ◆ Licenses for other libraries and fonts used in voidsprite can be found in the `OPEN_SOURCE_LICENSES` directory  
 ◆ All content created with voidsprite (including content created using default templates, filters, patterns, etc.) remains the property of the user who created it.
+
+
+![88x31](community-content/vsp_88x31.gif)
