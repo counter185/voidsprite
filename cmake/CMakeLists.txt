@@ -171,7 +171,14 @@ if (FLATPAK)
     endif()
 endif() 
 
+# use this for appimage too maybe?
 if (APPLE)
-    file(GET_RUNTIME_DEPENDENCIES RESOLVED_DEPENDENCIES_VAR rtlibs EXECUTABLES "${CMAKE_BINARY_DIR}/cmake/voidsprite")
-    file(COPY ${rtlibs} DESTINATION "${CMAKE_BINARY_DIR}/cmake")
+    add_custom_command(TARGET voidsprite
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        -DBINARY_DIR=${CMAKE_BINARY_DIR}/cmake
+        -P ${CMAKE_SOURCE_DIR}/cmake/copy_dependencies.cmake
+        COMMENT "Copying dependencies to exe dir..."
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
 endif()
