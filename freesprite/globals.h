@@ -117,15 +117,7 @@
 #endif
 
 #ifndef VSP_NETWORKING
-    #if VSP_PLATFORM == VSP_PLATFORM_WIN32
-        #define VSP_NETWORKING 1
-    #elif VSP_PLATFORM == VSP_PLATFORM_ANDROID
-        #define VSP_NETWORKING 1
-    #elif VSP_PLATFORM == VSP_PLATFORM_MAC
-        #define VSP_NETWORKING 0
-    #else
-        #define VSP_NETWORKING 1
-    #endif
+    #define VSP_NETWORKING ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 0, 1)
 #endif
 
 #if VSP_NETWORKING
