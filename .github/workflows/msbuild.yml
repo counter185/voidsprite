@@ -44,26 +44,6 @@ jobs:
     with:
       build-arch: ARM64
 
-  #required for 1.0 autoupdater. get rid of this some day
-  windows-post-under-older-url:
-    needs: build-windows-x64
-    runs-on: ubuntu-latest
-    steps:
-    - name: download windows x64
-      uses: actions/download-artifact@v8
-      with:
-        skip-decompress: true
-        name: voidsprite-build-win-x64
-        
-    - name: rename
-      run: mv voidsprite-build-win-x64.zip voidsprite-build-win64.zip
-
-    - name: reupload windows x64 under older name
-      uses: actions/upload-artifact@v7
-      with:
-        archive: false
-        path: voidsprite-build-win64.zip
-
   build-sdk:
     runs-on: windows-latest
 
@@ -137,17 +117,17 @@ jobs:
   build-mac-x64:
     runs-on: macos-15-intel
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: recursive
     - name: install clang
-      run: brew install llvm
+      run: brew install llvm nasm
     - name: install pkgconfig and cmake
       run: brew install pkgconfig
-    - name: install devlibs
-      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
     - name: run build
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=clang CXX=clang++ ./mac_build.sh
     - name: workaround gh actions artifact file permissions
-      run: tar -cvf voidsprite.app.tar -C target/mac_release .
+      run: tar -cvf voidsprite.app.tar -C mac_release .
     - name: Push build artifacts
       uses: actions/upload-artifact@v7
       with: 
@@ -160,7 +140,9 @@ jobs:
     runs-on: macos-15
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: recursive
 
     - name: install clang
       run: brew install llvm
@@ -168,14 +150,11 @@ jobs:
     - name: install pkgconfig and cmake
       run: brew install pkgconfig
 
-    - name: install devlibs
-      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
-
     - name: run build
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=clang CXX=clang++ ./mac_build.sh
 
     - name: workaround gh actions artifact file permissions
-      run: tar -cvf voidsprite.app.tar -C target/mac_release .
+      run: tar -cvf voidsprite.app.tar -C mac_release .
 
     - name: Push build artifacts
       uses: actions/upload-artifact@v7

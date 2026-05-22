@@ -5,7 +5,8 @@ mkdir voidsprite.app/Contents
 mkdir voidsprite.app/Contents/MacOS
 mkdir voidsprite.app/Contents/Resources
 cp mac-build-resources/Info.plist voidsprite.app/Contents/Info.plist
-cp target/release/bin/voidsprite voidsprite.app/Contents/MacOS/voidsprite
+cp build/cmake/voidsprite voidsprite.app/Contents/MacOS/voidsprite
+cp build/cmake/*.dylib voidsprite.app/Contents/MacOS/
 chmod +x voidsprite.app/Contents/MacOS/voidsprite
 
 mkdir mac-build-resources/generated
@@ -25,7 +26,7 @@ copyLib () {
     install_name_tool -change $1 @executable_path/$libname voidsprite.app/Contents/MacOS/voidsprite
 }
 
-for lib in $(evalLibs "target/release/bin/voidsprite")
+for lib in $(evalLibs "build/cmake/voidsprite")
 do
     dirname=$(dirname $lib)
     for sublib in $(evalLibs $lib)
@@ -43,5 +44,5 @@ mkdir voidsprite.app/Contents/MacOS/assets
 cp -R freesprite/assets voidsprite.app/Contents/MacOS
 cp freesprite/*.ttf voidsprite.app/Contents/MacOS/
 cp -R OPEN_SOURCE_LICENSES voidsprite.app
-mkdir target/mac_release
-mv voidsprite.app target/mac_release/voidsprite.app
+mkdir mac_release
+mv voidsprite.app mac_release/voidsprite.app

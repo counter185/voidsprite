@@ -170,3 +170,15 @@ if (FLATPAK)
         install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/libdiscord_game_sdk_linux_x64.so" DESTINATION lib)
     endif()
 endif() 
+
+# use this for appimage too maybe?
+if (APPLE)
+    add_custom_command(TARGET voidsprite
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        -DBINARY_DIR=${CMAKE_BINARY_DIR}/cmake
+        -P ${CMAKE_SOURCE_DIR}/cmake/copy_dependencies.cmake
+        COMMENT "Copying dependencies to exe dir..."
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
