@@ -429,7 +429,7 @@ bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressRepor
                 FILE* ff = platformOpenFile(outPath, PlatformFileModeWB);
                 if (ff != NULL) {
                     std::string vmt = std::format(
-                        "\"VertexLitGeneric\"\n"
+                        "\"LightmappedGeneric\"\n"
                         "{{\n"
                         "    \"$basetexture\" \"{}\"\n"
                         "    \"$translucent\" \"1\"\n"
