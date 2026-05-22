@@ -44,26 +44,6 @@ jobs:
     with:
       build-arch: ARM64
 
-  #required for 1.0 autoupdater. get rid of this some day
-  windows-post-under-older-url:
-    needs: build-windows-x64
-    runs-on: ubuntu-latest
-    steps:
-    - name: download windows x64
-      uses: actions/download-artifact@v8
-      with:
-        skip-decompress: true
-        name: voidsprite-build-win-x64
-        
-    - name: rename
-      run: mv voidsprite-build-win-x64.zip voidsprite-build-win64.zip
-
-    - name: reupload windows x64 under older name
-      uses: actions/upload-artifact@v7
-      with:
-        archive: false
-        path: voidsprite-build-win64.zip
-
   build-sdk:
     runs-on: windows-latest
 
@@ -137,7 +117,7 @@ jobs:
   build-mac-x64:
     runs-on: macos-15-intel
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: install clang
       run: brew install llvm
     - name: install pkgconfig and cmake
@@ -160,7 +140,7 @@ jobs:
     runs-on: macos-15
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: install clang
       run: brew install llvm
