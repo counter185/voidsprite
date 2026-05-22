@@ -121,11 +121,9 @@ jobs:
       with:
         submodules: recursive
     - name: install clang
-      run: brew install llvm
+      run: brew install llvm nasm
     - name: install pkgconfig and cmake
       run: brew install pkgconfig
-    - name: install devlibs
-      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
     - name: run build
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=clang CXX=clang++ ./mac_build.sh
     - name: workaround gh actions artifact file permissions
@@ -151,9 +149,6 @@ jobs:
 
     - name: install pkgconfig and cmake
       run: brew install pkgconfig
-
-    - name: install devlibs
-      run: brew install meson sdl3 sdl3_image sdl3_ttf jpeg-xl
 
     - name: run build
       run: chmod +x ./mac_build.sh && chmod +x ./mac_make_app.sh && CC=clang CXX=clang++ ./mac_build.sh

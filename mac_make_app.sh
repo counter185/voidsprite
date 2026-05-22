@@ -6,6 +6,7 @@ mkdir voidsprite.app/Contents/MacOS
 mkdir voidsprite.app/Contents/Resources
 cp mac-build-resources/Info.plist voidsprite.app/Contents/Info.plist
 cp build/cmake/voidsprite voidsprite.app/Contents/MacOS/voidsprite
+cp build/cmake/voidsprite/*.dylib voidsprite.app/Contents/MacOS/
 chmod +x voidsprite.app/Contents/MacOS/voidsprite
 
 mkdir mac-build-resources/generated
