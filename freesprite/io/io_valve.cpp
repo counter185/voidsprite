@@ -371,10 +371,15 @@ Layer* readVTF(PlatformNativePathString path, uint64_t seek)
     return ret;
 }
 
-bool writeVTF(PlatformNativePathString path, Layer* data)
+bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressReport* report, ParameterStore* params)
 {
+    ENSURE_REPORT_VALID(report);
+    bool writeVMT = params == NULL || !params->hasParam("vtf.genmaterial") ? false : params->getBool("vtf.genmaterial");
+
     FILE* f = platformOpenFile(path, PlatformFileModeWB);
     if (f != NULL) {
+        report->enterSection("Writing VTF...");
+        report->enterSection("Preparing low resolution image...");
         XY lowResDimensions = data->w > 32 || data->h > 32 ? XY{ 32, 32 } : XY{ data->w, data->h };
         Layer* lowResImage = data->copyCurrentVariantScaled(lowResDimensions);
 
@@ -401,11 +406,41 @@ bool writeVTF(PlatformNativePathString path, Layer* data)
         header.lowResImageWidth = lowResDimensions.x;
         header.lowResImageHeight = lowResDimensions.y;
 
+        report->updateLastSection("Writing header...");
         fwrite(&header, 64, 1, f);
+        report->updateLastSection("Writing low resolution image...");
         fwrite(lowResImage->pixels32(), lowResDimensions.x * lowResDimensions.y, 4, f);
+        report->updateLastSection("Writing pixels...");
         fwrite(data->pixels32(), data->w * data->h, 4, f);
         delete lowResImage;
         fclose(f);
+
+        if (writeVMT) {
+            std::string textureFileName = fileNameFromPath(convertStringToUTF8OnWin32(path));
+            std::string textureName = textureFileName;
+            if (stringEndsWithIgnoreCase(textureName, ".vtf")) {
+                textureName = textureName.substr(0, textureName.size() - 4);
+            }
+
+            report->updateLastSection("Writing material...");
+            PlatformNativePathString outPath = path.substr(0, path.size() - textureFileName.size()) + convertStringOnWin32(textureName + ".vmt");
+            //do not overwrite it if it exists that would be annoying
+            if (!std::filesystem::exists(outPath)) {
+                FILE* ff = platformOpenFile(outPath, PlatformFileModeWB);
+                if (ff != NULL) {
+                    std::string vmt = std::format(
+                        "\"VertexLitGeneric\"\n"
+                        "{{\n"
+                        "    \"$basetexture\" \"{}\"\n"
+                        "    \"$translucent\" \"1\"\n"
+                        "}}\n"
+                        , textureName);
+                    fwrite(vmt.c_str(), 1, vmt.size(), ff);
+                    fclose(ff);
+                }
+            }
+        }
+
         return true;
     }
     return false;

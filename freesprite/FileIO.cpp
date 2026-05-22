@@ -2503,7 +2503,12 @@ void g_setupIO() {
             })
     );
     g_fileExporters.push_back(exXBM = FileExporter::flatExporter("X Bitmap", ".xbm", "", &writeXBM, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exVTF = FileExporter::flatExporter("VTF", ".vtf", TL("vsp.export.vtf"), &writeVTF, FORMAT_RGB));
+    g_fileExporters.push_back(
+        exVTF = FileExporter::flatExporter("VTF", ".vtf", TL("vsp.export.vtf"), &writeVTF, FORMAT_RGB)
+            ->buildParameters({
+                BOOL_PARAM("vtf.genmaterial", false)
+            })
+    );
     g_fileExporters.push_back(exSR8 = FileExporter::flatExporter("Slim Render (8-bit)", ".sr8", "", &writeSR8, FORMAT_PALETTIZED));
     g_fileExporters.push_back(exDIBv5 = FileExporter::flatExporter("DIBv5 Clipboard Dump", ".dibv5", "", &writeDIBV5, FORMAT_RGB));
     g_fileExporters.push_back(FileExporter::flatExporter("Windows Cursor", ".cur", "", &writeCUR, FORMAT_RGB | FORMAT_PALETTIZED));

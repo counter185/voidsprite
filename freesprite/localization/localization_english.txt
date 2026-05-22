@@ -72,6 +72,7 @@
     {"vsp.export.option.avif.quality", "Quality (100: lossless)"},
     {"vsp.export.option.yytex.compressed", "Compressed YYTEX"},
     {"vsp.export.option.gif.loopanim", "Loop animation"},
+    {"vsp.export.option.vtf.genmaterial", "Generate material VMT"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},

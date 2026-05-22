@@ -112,4 +112,4 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
 MainEditor* readValveSPR(PlatformNativePathString path);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 
-bool writeVTF(PlatformNativePathString path, Layer* data);
+bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressReport* report, ParameterStore* params);
