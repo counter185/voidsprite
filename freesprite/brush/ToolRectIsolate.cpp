@@ -13,7 +13,7 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
     if (heldDown) {
         heldDown = false;
         if (xyEqual(startPos, lastMousePos) && clickTimer.started && clickTimer.elapsedTime() < BRUSH_DOUBLE_CLICK_TIME) {
-            if (!g_ctrlModifier) {
+            if (!g_ctrlModifier && !editor->eraserMode) {
                 editor->isolatedFragment.clear();
             }
             bool selectAllOfColor = g_shiftModifier;
@@ -25,9 +25,14 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
                     : targetLayer->wandSelectAt(pos);
                 g_startNewMainThreadOperation([editor, selectionMap]() {
                     ScanlineMap old = editor->isolatedFragment;
-                    editor->isolatedFragment.addOtherMap(selectionMap);
+                    if (editor->eraserMode) {
+                        editor->isolatedFragment.removeOtherMap(selectionMap);
+                    }
+                    else {
+                        editor->isolatedFragment.addOtherMap(selectionMap);
+                    }
                     editor->commitIsolatedFragmentState(old);
-                    editor->isolateEnabled = true;
+                    editor->isolateEnabled = !editor->isolatedFragment.empty();
                     editor->shouldUpdateRenderedIsolatedFragmentPoints = true;
                 });
             });
@@ -37,13 +42,19 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
             XY minpoint = XY{ixmin(p1.x, p2.x), ixmin(p1.y, p2.y)};
             XY maxpoint = XY{ixmax(p1.x, p2.x), ixmax(p1.y, p2.y)};
             ScanlineMap old = editor->isolatedFragment;
-            if (!g_ctrlModifier) {
+            if (!g_ctrlModifier && !editor->eraserMode) {
                 editor->isolatedFragment.clear();
             }
-            editor->isolatedFragment.addRect(
-                {minpoint.x, minpoint.y, maxpoint.x - minpoint.x + 1, maxpoint.y - minpoint.y + 1});
+            if (editor->eraserMode) {
+                editor->isolatedFragment.removeRect(
+                    { minpoint.x, minpoint.y, maxpoint.x - minpoint.x + 1, maxpoint.y - minpoint.y + 1 });
+            }
+            else {
+                editor->isolatedFragment.addRect(
+                    { minpoint.x, minpoint.y, maxpoint.x - minpoint.x + 1, maxpoint.y - minpoint.y + 1 });
+            }
             editor->commitIsolatedFragmentState(old);
-            editor->isolateEnabled = true;
+            editor->isolateEnabled = !editor->isolatedFragment.empty();
             editor->shouldUpdateRenderedIsolatedFragmentPoints = true;
         }
         clickTimer.start();

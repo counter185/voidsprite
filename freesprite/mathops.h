@@ -247,6 +247,47 @@ public:
     void addOtherMap(ScanlineMap other) {
         other.forEachScanline([this](ScanlineMapElement e) { addScanline(e); });
     }
+    void removePoint(XY point) {
+        std::vector<ScanlineMapElement>& smm = scanlineMap[point.y];
+        for (int x = 0; x < smm.size(); x++) {
+            ScanlineMapElement& sme = smm[x];
+            if (sme.origin.x == point.x) {
+                if (--sme.size.x == 0) {
+                    smm.erase(smm.begin() + x);
+                }
+                else {
+                    sme.origin.x++;
+                }
+                return;
+            }
+            else if (sme.origin.x + sme.size.x == point.x) {
+                if (--sme.size.x == 0) {
+                    smm.erase(smm.begin() + x);
+                }
+                return;
+            }
+            else if (sme.origin.x < point.x && point.x < sme.origin.x + sme.size.x) {
+                int fullScanlineSize = sme.size.x;
+                sme.size.x = point.x - sme.origin.x;
+                smm.push_back({ xyAdd(point, {1,0}), {fullScanlineSize - sme.size.x - 1, 1} });
+                std::sort(smm.begin(), smm.end(), [](ScanlineMapElement a, ScanlineMapElement b) { return a.origin.x < b.origin.x; });
+                return;
+            }
+        }
+    }
+    void removeScanline(ScanlineMapElement e) {
+        for (int x = 0; x < e.size.x; x++) {
+            removePoint({ e.origin.x + x, e.origin.y });
+        }
+    }
+    void removeRect(SDL_Rect r) {
+        for (int y = 0; y < r.h; y++) {
+            removeScanline({ {r.x,r.y + y}, {r.w,1} });
+        }
+    }
+    void removeOtherMap(ScanlineMap other) {
+        other.forEachScanline([this](ScanlineMapElement e) { removeScanline(e); });
+    }
     void replaceWith(ScanlineMap& other) {
         scanlineMap = other.scanlineMap;
     }
