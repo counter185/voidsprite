@@ -87,6 +87,7 @@ public:
     void concatToText(std::string t) {
         setText(text + t);
     }
+    void removeLastUTF8Char();
     bool inputChar(char c);
     bool isValidOrPartialColor();
     void copyToClipboard();

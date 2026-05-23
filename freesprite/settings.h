@@ -65,6 +65,7 @@ struct DebugSettings {
     bool debugBlurBehind = false;
     bool debugAlwaysMobileUITextField = false;
     bool debugDrawableFocus = false;
+    bool debugShowTextFieldUTF8 = false;
 };
 
 inline bool g_configWasLoaded = false;

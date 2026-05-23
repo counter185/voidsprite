@@ -559,6 +559,7 @@ PopupGlobalConfig::PopupGlobalConfig()
         optionCheckbox("Show blur buffer", "", &g_debugConfig.debugBlurBehind, &posInTab),
         optionCheckbox("Always show mobile text field", "", &g_debugConfig.debugAlwaysMobileUITextField, &posInTab),
         optionCheckbox("Debug focused drawables", "", &g_debugConfig.debugDrawableFocus, &posInTab),
+        optionCheckbox("Debug text field bytes", "", &g_debugConfig.debugShowTextFieldUTF8, &posInTab),
     }, {0, 10}));
 #endif
     

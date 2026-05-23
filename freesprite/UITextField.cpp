@@ -66,7 +66,7 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
                         text = text.substr(0, lastSpacePos);
                     }
                     else {
-                        text = text.substr(0, text.size() - 1);
+                        removeLastUTF8Char();
                     }
 
                     if (onTextChangedCallback != NULL) {
@@ -146,6 +146,38 @@ void UITextField::clearText()
     }
 }
 
+void UITextField::removeLastUTF8Char()
+{
+    if (!text.empty()) {
+        char lastChar = text.back();
+        text.pop_back();
+        
+        if (((lastChar >> 6) & 0b11) == 0b10) {
+            int charsDeleted = 0;
+            while (!text.empty() && ++charsDeleted < 6) {
+                lastChar = text.back();
+                if (((lastChar >> 6) & 0b11) == 0b10) {
+                    text.pop_back();
+                }
+                else if (
+                    ((lastChar >> 5) & 0b111) == 0b110
+                    || ((lastChar >> 4) & 0b1111) == 0b1110
+                    || ((lastChar >> 3) & 0b11111) == 0b11110
+                    || ((lastChar >> 2) & 0b111111) == 0b111110
+                    || ((lastChar >> 1) & 0b1111111) == 0b1111110) 
+                {
+                    text.pop_back();
+                    break;
+                }
+                else {
+                    logwarn("weird utf8 sequence");
+                    break;
+                }
+            }
+        }
+    }
+}
+
 bool UITextField::inputChar(char c) {
     if (isNumericField) {
         if (text.empty() && c == '-' && numericAllowNegative) {
@@ -212,6 +244,14 @@ void UITextField::renderTextField(XY at)
     if (text.empty() && !placeholderText.empty()) {
         g_fnt->RenderString(placeholderText, at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(u8)(textColor.a / 4) }, fontsize);
     }
+#if _DEBUG
+    if (g_debugConfig.debugShowTextFieldUTF8) {
+        XY ep = xyAdd(at, { 0, 25 });
+        for (char& c : text) {
+            ep = g_fnt->RenderString(frmt("{:02X} ", c), ep.x, ep.y, { 255,255,255,80 }, 12);
+        }
+    }
+#endif
 
     if (!isColorField || !isValidOrPartialColor() || text.empty()) {
         XY textEP = g_fnt->RenderString(text + ((focused && numericFieldCurrentOperation == '\0') ? "_" : ""), at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) }, fontsize);
