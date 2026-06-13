@@ -20,6 +20,7 @@ PopupSetEditorPixelGrid::PopupSetEditorPixelGrid(MainEditor* parent, std::string
     newTileGridColor = caller->ssne.tileGridColor;
 
     std::vector<std::string> names;
+    predefinedTileSizes.push_back(parent->canvas.dimensions);
     for (XY& tileSize : predefinedTileSizes) {  
         names.push_back(xyEqual(tileSize, { 0,0 }) ? std::string("No grid") : frmt("{}x{}", tileSize.x, tileSize.y));
     }
