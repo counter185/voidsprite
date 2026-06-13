@@ -56,7 +56,7 @@ public:
     UIHueWheel* hueWheel = NULL;
     UIHueSlider* hueSlider = NULL;
     UISVPicker* satValSlider = NULL;
-    UITextField* colorTextField = NULL;
+    UIColorTextField* colorTextField = NULL;
 
     //todo: change these sliders to work based off the color models system
     UINumberInputField* txtR = NULL, *txtG = NULL, *txtB = NULL;

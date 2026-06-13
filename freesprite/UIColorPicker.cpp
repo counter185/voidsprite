@@ -270,8 +270,8 @@ UIColorPicker::UIColorPicker()
 
     //widgets outside of tabs
 
-    colorTextField = new UITextField();
-    colorTextField->isColorField = true;
+    colorTextField = new UIColorTextField();
+    colorTextField->linkedToColorPicker = this;
     colorTextField->position = XY{ 60, 350 };
     colorTextField->wxWidth = 140;
     colorTextField->tooltip = TL("vsp.maineditor.panel.colorpicker.colorinput.tooltip");

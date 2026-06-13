@@ -4,6 +4,7 @@
 #include "TooltipsLayer.h"
 #include "Notification.h"
 #include "PopupContextMenu.h"
+#include "UIColorPicker.h"
 #include "multiwindow.h"
 
 void UITextField::render(XY pos)
@@ -203,6 +204,25 @@ bool UITextField::inputChar(char c) {
     return false;
 }
 
+void UITextField::renderTextFieldText(XY at)
+{
+    XY textEP = g_fnt->RenderString(text + ((focused && numericFieldCurrentOperation == '\0') ? "_" : ""),
+        at.x + 2, at.y + 2,
+        SDL_Color{ textColor.r,textColor.g,textColor.b,(u8)(focused ? 0xff : 0xa0) }, fontsize);
+
+    if (numericFieldCurrentOperation != '\0') {
+        textEP.x += 10;
+        double separatorAnimTimer = XM1PW3P1(numericFieldOperationTimer.percentElapsedTime(400));
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+        drawLine({ textEP.x + 2, at.y }, { textEP.x + 2, at.y + wxHeight }, separatorAnimTimer);
+
+        textEP.x += 10;
+
+        textEP = g_fnt->RenderString(frmt("{} ", numericFieldCurrentOperation), textEP.x, textEP.y);
+        g_fnt->RenderString(frmt("{}_", numericFieldOperationBuffer), textEP.x, textEP.y, { 255,255,255,0xa0 });
+    }
+}
+
 void UITextField::renderTextField(XY at)
 {
     SDL_Rect drawrect = { at.x, at.y, wxWidth, wxHeight };
@@ -253,46 +273,7 @@ void UITextField::renderTextField(XY at)
     }
 #endif
 
-    if (!isColorField || !isValidOrPartialColor() || text.empty()) {
-        XY textEP = g_fnt->RenderString(text + ((focused && numericFieldCurrentOperation == '\0') ? "_" : ""), at.x + 2, at.y + 2, SDL_Color{ textColor.r,textColor.g,textColor.b,(unsigned char)(focused ? 0xff : 0xa0) }, fontsize);
-
-        if (numericFieldCurrentOperation != '\0') {
-            textEP.x += 10;
-            double separatorAnimTimer = XM1PW3P1(numericFieldOperationTimer.percentElapsedTime(400));
-            SDL_SetRenderDrawColor(g_rd, 255,255,255,255);
-            drawLine({textEP.x+2, at.y}, {textEP.x+2, at.y+wxHeight}, separatorAnimTimer);
-
-            textEP.x += 10;
-
-            textEP = g_fnt->RenderString(frmt("{} ", numericFieldCurrentOperation), textEP.x, textEP.y);
-            g_fnt->RenderString(frmt("{}_", numericFieldOperationBuffer), textEP.x, textEP.y, {255,255,255,0xa0});
-        }
-    }
-    else {
-        int textPtr = 0;
-        XY origin = xyAdd(at, { 2,2 });
-        if (text[0] == '#') {
-            origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{ 0x80,0x80,0x80,255 });
-            textPtr++;
-        }
-        origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 255,0x32,0x32,255 }, fontsize);
-        textPtr += 2;
-        if (textPtr < text.size()) {
-            origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 0x50,255,0x50,255 }, fontsize);
-            textPtr += 2;
-        }
-        if (textPtr < text.size()) {
-            origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 0x18,0x9A,255,255 }, fontsize);
-            textPtr += 2;
-        }
-        if (textPtr < text.size()) {
-            origin = g_fnt->RenderString(text.substr(textPtr), origin.x, origin.y, {255,255,255,255}, fontsize);
-        }
-        if (focused) {
-            g_fnt->RenderString("_", origin.x, origin.y, {255,255,255,255}, fontsize);
-
-        }
-    }
+    renderTextFieldText(at);
 }
 
 void UITextField::renderOnScreenTextField()
@@ -312,25 +293,9 @@ void UITextField::renderOnScreenTextField()
     //g_popClip();
 }
 
-bool UITextField::isValidOrPartialColor()
-{
-    for (int x = 0; x < text.size(); x++) {
-        char c = tolower(text[x]);
-        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c == '#' && x == 0))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 void UITextField::copyToClipboard()
 {
-    if (SDL_SetClipboardText(text.c_str())) {
-        g_addNotification(SuccessShortNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
-    }
-    else {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error.clipboardcopy"), ""));
-    }
+    g_copyStringToClipboard(text);
 }
 
 void UITextField::pasteFromClipboard()
@@ -351,6 +316,90 @@ void UITextField::pasteFromClipboard()
     }
     else {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.clipboardtextpaste")));
+    }
+}
+
+bool UIColorTextField::isValidOrPartialColor()
+{
+    for (int x = 0; x < text.size(); x++) {
+        char c = tolower(text[x]);
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c == '#' && x == 0))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void UIColorTextField::copyUnityTMP()
+{
+    if (linkedToColorPicker != NULL) {
+        u32 col = linkedToColorPicker->colorNowU32 & 0xFFFFFF;
+        g_copyStringToClipboard(frmt("<#{:06X}>", col));
+    }
+}
+
+void UIColorTextField::copyCSSRGB()
+{
+    if (linkedToColorPicker != NULL) {
+        SDL_Color col = uint32ToSDLColor(linkedToColorPicker->colorNowU32);
+        g_copyStringToClipboard(frmt("rgb({} {} {})", col.r, col.g, col.b));
+    }
+}
+
+void UIColorTextField::copyCSSHSL()
+{
+    if (linkedToColorPicker != NULL) {
+        auto hsl = g_colorModels["HSL"]->fromRGB(linkedToColorPicker->colorNowU32);
+        g_copyStringToClipboard(frmt("hsl({:.1f} {:.1f}% {:.1f}%)", hsl["H"], hsl["S"]*100, hsl["L"]*100));
+    }
+}
+
+void UIColorTextField::renderTextFieldText(XY at)
+{
+    if (!isValidOrPartialColor() || text.empty()) {
+        UITextField::renderTextFieldText(at);
+    }
+    else {
+        int textPtr = 0;
+        XY origin = xyAdd(at, { 2,2 });
+        if (text[0] == '#') {
+            origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{ 0x80,0x80,0x80,255 });
+            textPtr++;
+        }
+        origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 255,0x32,0x32,255 }, fontsize);
+        textPtr += 2;
+        if (textPtr < text.size()) {
+            origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 0x50,255,0x50,255 }, fontsize);
+            textPtr += 2;
+        }
+        if (textPtr < text.size()) {
+            origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 0x18,0x9A,255,255 }, fontsize);
+            textPtr += 2;
+        }
+        if (textPtr < text.size()) {
+            origin = g_fnt->RenderString(text.substr(textPtr), origin.x, origin.y, { 255,255,255,255 }, fontsize);
+        }
+        if (focused) {
+            g_fnt->RenderString("_", origin.x, origin.y, { 255,255,255,255 }, fontsize);
+
+        }
+    }
+}
+
+void UIColorTextField::openActionsMenu()
+{
+    if (linkedToColorPicker == NULL) {
+        UITextField::openActionsMenu();
+    }
+    else {
+        g_openContextMenu({
+            { TL("vsp.cmn.copy"), [this]() { copyToClipboard(); } },
+            { "Copy as TextMeshPro tag", [this]() { copyUnityTMP(); }},
+            { "Copy as CSS rgb()", [this]() { copyCSSRGB(); }},
+            { "Copy as CSS hsl()", [this]() { copyCSSHSL(); }},
+            { TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); } },
+            { TL("vsp.cmn.erase"), [this]() { clearText(); } },
+        });
     }
 }
 

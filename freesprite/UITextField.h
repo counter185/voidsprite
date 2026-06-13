@@ -12,7 +12,6 @@ public:
     int fontsize = 18;
     std::string tooltip = "";
     std::string placeholderText = "";
-    bool isColorField = false;
     int insertPosition = 0;
     int wxWidth = 250, wxHeight = 30;
     Fill bgFill = Fill::Solid(0xFF000000);
@@ -71,6 +70,7 @@ public:
     bool focusableWithTab() override { return true; }
     XY getDimensions() override { return { wxWidth, wxHeight }; }
 
+    virtual void renderTextFieldText(XY at);
     void renderTextField(XY at);
     void renderOnScreenTextField();
 
@@ -89,13 +89,26 @@ public:
     }
     void removeLastUTF8Char();
     bool inputChar(char c);
-    bool isValidOrPartialColor();
     void copyToClipboard();
     void pasteFromClipboard();
     void clearText();
     virtual void openActionsMenu();
 
     void runNumericOperation();
+};
+
+class UIColorTextField : public UITextField {
+public:
+    UIColorPicker* linkedToColorPicker = NULL;
+
+    void renderTextFieldText(XY at) override;
+    void openActionsMenu() override;
+
+    bool isValidOrPartialColor();
+
+    void copyUnityTMP();
+    void copyCSSRGB();
+    void copyCSSHSL();
 };
 
 class UINumberInputField : public UITextField

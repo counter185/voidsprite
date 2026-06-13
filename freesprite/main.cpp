@@ -120,6 +120,15 @@ void g_reloadFonts() {
     currentWd->thisWindowsTurn();
 }
 
+void g_copyStringToClipboard(std::string text) {
+    if (SDL_SetClipboardText(text.c_str())) {
+        g_addNotification(SuccessShortNotification(TL("vsp.cmn.copiedtoclipboard"), ""));
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error.clipboardcopy"), ""));
+    }
+}
+
 std::vector<SDL_Rect> clips;
 void g_pushClip(SDL_Rect r) {
     if (!clips.empty() 

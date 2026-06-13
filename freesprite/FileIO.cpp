@@ -2436,7 +2436,7 @@ void g_setupIO() {
         ;
 
     io_registerVSP();
-    g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", "", &writeOpenRaster));
+    g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", TL("vsp.export.ora"), &writeOpenRaster));
     g_fileExporters.push_back(exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", "", &writePixelStudioPSP));
     g_fileExporters.push_back(exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", "", &writePixelStudioPSX));
     g_fileExporters.push_back(exLPE = FileExporter::sessionExporter("Lospec Pixel Editor", ".lpe",  "", &writeLPE));

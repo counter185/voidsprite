@@ -251,6 +251,7 @@ class UILabel;
 class UISlider;
 class UIColorSlider;
 class UITextField;
+class UIColorTextField;
 class UINumberInputField;
 class UICheckbox;
 class UIDropdown;
@@ -364,6 +365,7 @@ void g_pushRenderTarget(SDL_Texture* tex);
 void g_popRenderTarget();
 
 void g_reloadFonts();
+void g_copyStringToClipboard(std::string text);
 
 SDL_Texture* IMGLoadToTexture(std::string path);
 SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd = NULL);
