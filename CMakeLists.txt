@@ -24,6 +24,7 @@ if (NOT FLATPAK)
         set(CONFIG_MULTITHREAD OFF)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msimd128")
         set(COMPILE_C_ONLY ON)
+        set(BUILD_SHARED_LIBS OFF)
     endif()
 
     set(AVIF_LIBYUV "LOCAL")
