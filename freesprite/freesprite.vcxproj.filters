@@ -142,6 +142,9 @@
     <Filter Include="Source files\external\libbzip2">
       <UniqueIdentifier>{682a6cc4-b299-4780-8b3a-13c74aedeafa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\pep">
+      <UniqueIdentifier>{cf271b90-e083-40d7-b1b0-e4b0ee330a53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -749,6 +752,9 @@
     </ClCompile>
     <ClCompile Include="PopupCanvasResize.cpp">
       <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_pep.cpp">
+      <Filter>Source files\io</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1486,6 +1492,12 @@
     </ClInclude>
     <ClInclude Include="PopupCanvasResize.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_pep.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="pep\pep.h">
+      <Filter>Header files\external\pep</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

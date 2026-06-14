@@ -304,6 +304,7 @@
     <ClCompile Include="io\io_jsonformats.cpp" />
     <ClCompile Include="io\io_jxl.cpp" />
     <ClCompile Include="io\io_openraster.cpp" />
+    <ClCompile Include="io\io_pep.cpp" />
     <ClCompile Include="io\io_pix2d.cpp" />
     <ClCompile Include="io\io_pixelstudio.cpp" />
     <ClCompile Include="io\io_png.cpp" />
@@ -580,6 +581,7 @@
     <ClInclude Include="io\io_jxl.h" />
     <ClInclude Include="io\io_jsonformats.h" />
     <ClInclude Include="io\io_openraster.h" />
+    <ClInclude Include="io\io_pep.h" />
     <ClInclude Include="io\io_pix2d.h" />
     <ClInclude Include="io\io_pixelstudio.h" />
     <ClInclude Include="io\io_png.h" />
@@ -619,6 +621,7 @@
     <ClInclude Include="PanelTilemapPreview.h" />
     <ClInclude Include="PanelUserInteractable.h" />
     <ClInclude Include="ParameterStore.h" />
+    <ClInclude Include="pep\pep.h" />
     <ClInclude Include="platform_android.h" />
     <ClInclude Include="platform_emscripten.h" />
     <ClInclude Include="platform_linux.h" />

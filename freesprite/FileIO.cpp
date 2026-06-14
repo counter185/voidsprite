@@ -2432,7 +2432,8 @@ void g_setupIO() {
         * exJPEG,
         * exAVIF,
         * exGIF,
-        * exYYTEX
+        * exYYTEX,
+        * exPEP
         ;
 
     io_registerVSP();
@@ -2481,6 +2482,7 @@ void g_setupIO() {
                 INT_PARAM("avif.quality", 0, 100, 100)
             })
     );
+    g_fileExporters.push_back(exPEP = FileExporter::flatExporter("Prediction-Encoded Pixels PEP", ".pep", "", &writePEP, FORMAT_RGB));
     g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", "", & writeTGA));
     g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", "", &writeCaveStoryPBM));
     g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", "", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -2551,6 +2553,7 @@ void g_setupIO() {
 #if VOIDSPRITE_JXL_ENABLED
     g_fileImporters.push_back(FileImporter::sessionImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));
 #endif
+    g_fileImporters.push_back(FileImporter::flatImporter("Prediction-Encoded Pixels PEP", ".pep", &readPEP, exPEP));
     g_fileImporters.push_back(FileImporter::flatImporter("Godot Compressed texture", ".ctex", &readGodotCTEX, NULL, FORMAT_RGB, 
         magicVerify(0, "GST")));
     g_fileImporters.push_back(FileImporter::flatImporter("YoYo texture", ".yytex", &readYoYoTex, exYYTEX, FORMAT_RGB, 

@@ -48,6 +48,7 @@ inline std::string getLibraryLicenses() {
         "libjxl\n"
         "liblcf\n"
         "libpng\n"
+        "PEP\n"
         "pugixml\n"
         "skyline\n"
         "libbzip2\n"

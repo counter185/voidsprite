@@ -205,5 +205,20 @@ inline u16 beU16(u16 v) {
     return ((v & 0x00FF) << 8) | ((v & 0xFF00) >> 8);
 }
 
+inline std::vector<u8> readWholeFile(FILE* f) {
+    fseek(f, 0, SEEK_END);
+    u64 size = ftell(f);
+    try {
+        std::vector<u8> ret;
+        ret.resize(size);
+        fseek(f, 0, SEEK_SET);
+        fread(ret.data(), 1, size, f);
+        return ret;
+    }
+    catch (std::bad_alloc&) {
+        logerr("readWholeFile bad_alloc");
+        return {};
+    }
+}
 
 u8* decompressZlib(u8* data, u64 compressedSize, u64 decompressedSize);
