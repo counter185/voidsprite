@@ -4,14 +4,17 @@
 void ToolRectIsolate::clickPress(MainEditor* editor, XY pos)
 {
     heldDown = true;
+    pos = clampPointInsideCanvasIfParam(editor, pos);
     startPos = pos;
     lastMousePos = pos;
     clickTimer.start();
 }
 
 void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) { 
+    pos = clampPointInsideCanvasIfParam(editor, pos);
     if (heldDown) {
         heldDown = false;
+        //double click to wand select
         if (xyEqual(startPos, lastMousePos) && clickTimer.started && clickTimer.elapsedTime() < BRUSH_DOUBLE_CLICK_TIME) {
             if (!g_ctrlModifier && !editor->eraserMode) {
                 editor->isolatedFragment.clear();
@@ -38,7 +41,7 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
             });
         } else {
             XY p1 = startPos;
-            XY p2 = lastMousePos;
+            XY p2 = pos;
             XY minpoint = XY{ixmin(p1.x, p2.x), ixmin(p1.y, p2.y)};
             XY maxpoint = XY{ixmax(p1.x, p2.x), ixmax(p1.y, p2.y)};
             ScanlineMap old = editor->isolatedFragment;
@@ -61,12 +64,15 @@ void ToolRectIsolate::clickRelease(MainEditor* editor, XY pos) {
     }
 }
 
-void ToolRectIsolate::renderOnCanvas(XY canvasDrawPoint, int scale)
+void ToolRectIsolate::renderOnCanvas(MainEditor* editor, int scale)
 {
+    XY canvasDrawPoint = editor->canvas.currentDrawPoint;
     if (heldDown) {
-        drawPixelRect(startPos, lastMousePos, canvasDrawPoint, scale);
         XY pointFrom = XY{ ixmin(startPos.x, lastMousePos.x), ixmin(startPos.y, lastMousePos.y) };
         XY pointTo = XY{ ixmax(startPos.x, lastMousePos.x), ixmax(startPos.y, lastMousePos.y) };
+        pointFrom = clampPointInsideCanvasIfParam(editor, pointFrom);
+        pointTo = clampPointInsideCanvasIfParam(editor, pointTo);
+        drawPixelRect(pointFrom, pointTo, canvasDrawPoint, scale);
 
         g_ttp->addTooltip(Tooltip{
             canvasDrawPoint.x + lastMousePos.x * scale + 25, canvasDrawPoint.y + lastMousePos.y * scale,
@@ -80,4 +86,14 @@ void ToolRectIsolate::renderOnCanvas(XY canvasDrawPoint, int scale)
 void ToolRectIsolate::rightClickPress(MainEditor* editor, XY pos)
 {
     editor->deselectAndCommitToUndoStack();
+}
+
+XY ToolRectIsolate::clampPointInsideCanvasIfParam(MainEditor* editor, XY point)
+{
+    return editor->toolProperties["brush.isolate.locktobounds"] == 1 ?
+        XY{
+            ixmin(ixmax(point.x, 0), editor->canvas.dimensions.x - 1),
+            ixmin(ixmax(point.y, 0), editor->canvas.dimensions.y - 1)
+    }
+    : point;
 }

@@ -209,6 +209,16 @@ struct ScanlineMapElement {
     XY size;    //y must be 1, x is the width
 };
 class ScanlineMap {
+protected:
+    void addRawScanline(ScanlineMapElement e) {
+        int p = e.origin.y;
+        scanlineMap[p].push_back(e);
+    }
+    void addRawRect(SDL_Rect r) {
+        for (int y = 0; y < r.h; y++) {
+            addRawScanline({ {r.x,r.y + y}, {r.w,1} });
+        }
+    }
 public:
     bool iPromiseNotToPutDuplicatePoints = false;   //skips checking if a point already exists in the map when adding
     std::map<int, std::vector<ScanlineMapElement>> scanlineMap;
@@ -240,12 +250,18 @@ public:
         }
     }
     void addRect(SDL_Rect r) {
-        for (int y = 0; y < r.h; y++) {
-            addScanline({ {r.x,r.y + y}, {r.w,1} });
+        if (empty()) {
+            addRawRect(r);
+        }
+        else {
+            for (int y = 0; y < r.h; y++) {
+                addScanline({ {r.x,r.y + y}, {r.w,1} });
+            }
         }
     }
     void addOtherMap(ScanlineMap other) {
-        other.forEachScanline([this](ScanlineMapElement e) { addScanline(e); });
+        bool isEmpty = empty();
+        other.forEachScanline([this, isEmpty](ScanlineMapElement e) { isEmpty ? addRawScanline(e) : addScanline(e); });
     }
     void removePoint(XY point) {
         std::vector<ScanlineMapElement>& smm = scanlineMap[point.y];

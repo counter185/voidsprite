@@ -7,7 +7,8 @@
 void ToolMeasure::clickPress(MainEditor* editor, XY pos)
 {
     heldDown = true;
-    lastMousePos = pos;
+    pos = clampPointInsideCanvasIfParam(editor, pos);
+    lastMousePos = lastMouseMotionPos = pos;
     startPos = lastOrigin = pos;
     lastEnd = startPos;
     clickTimer.start();
@@ -15,12 +16,14 @@ void ToolMeasure::clickPress(MainEditor* editor, XY pos)
 
 void ToolMeasure::clickDrag(MainEditor* editor, XY from, XY to) {
     lastEnd = g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos;
+    lastEnd = clampPointInsideCanvasIfParam(editor, lastEnd);
     lastMousePos = to;
 }
 
 void ToolMeasure::clickRelease(MainEditor* editor, XY pos)
 {
     lastEnd = g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos;
+    lastEnd = clampPointInsideCanvasIfParam(editor, lastEnd);
     heldDown = false;
 }
 
@@ -43,6 +46,7 @@ void ToolMeasure::renderOnCanvas(MainEditor* editor, int scale)
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
     if (heldDown) {
         XY measureEndPoint = g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos;
+        measureEndPoint = clampPointInsideCanvasIfParam(editor, measureEndPoint);
         drawPixelRect(startPos, measureEndPoint, canvasDrawPoint, scale);
         XY pointFrom = XY{ ixmin(startPos.x, measureEndPoint.x), ixmin(startPos.y, measureEndPoint.y) };
         XY pointTo = XY{ ixmax(startPos.x, measureEndPoint.x), ixmax(startPos.y, measureEndPoint.y) };
@@ -75,13 +79,28 @@ void ToolMeasure::renderOnCanvas(MainEditor* editor, int scale)
 
 }
 
-SDL_Rect ToolMeasure::getSelectedRegion()
+SDL_Rect ToolMeasure::getLastSelectedRegion(MainEditor* editor)
 {
-    XY pointFrom = XY{ ixmin(lastOrigin.x, lastEnd.x), ixmin(lastOrigin.y, lastEnd.y) };
-    XY pointTo = XY{ ixmax(lastOrigin.x, lastEnd.x), ixmax(lastOrigin.y, lastEnd.y) };
+    return calcSelectedRegion(editor, lastOrigin, lastEnd);
+}
+
+SDL_Rect ToolMeasure::calcSelectedRegion(MainEditor* editor, XY from, XY to)
+{
+    XY pointFrom = clampPointInsideCanvasIfParam(editor, XY{ ixmin(from.x, to.x), ixmin(from.y, to.y) });
+    XY pointTo =   clampPointInsideCanvasIfParam(editor, XY{ ixmax(from.x, to.x), ixmax(from.y, to.y) });
     int rectW = pointTo.x - pointFrom.x + 1;
     int rectH = pointTo.y - pointFrom.y + 1;
     return { pointFrom.x, pointFrom.y, rectW, rectH };
+}
+
+XY ToolMeasure::clampPointInsideCanvasIfParam(MainEditor* editor, XY point)
+{
+    return editor->toolProperties["brush.measure.locktobounds"] == 1 ? 
+        XY{
+            ixmin(ixmax(point.x, 0), editor->canvas.dimensions.x-1),
+            ixmin(ixmax(point.y, 0), editor->canvas.dimensions.y-1)
+        }
+        : point;
 }
 
 void ToolMeasure::editorPlaceGuidelinesAroundSelRegion(MainEditor* editor)
@@ -105,7 +124,7 @@ void ToolMeasure::editorPlaceGuidelinesAroundSelRegion(MainEditor* editor)
 
 void ToolMeasure::editorCropToSelRegion(MainEditor* editor)
 {
-    SDL_Rect region = getSelectedRegion();
+    SDL_Rect region = getLastSelectedRegion(editor);
     editor->cropAllLayersFromCommand(region);
     lastOrigin.x -= region.x;
     lastOrigin.y -= region.y;

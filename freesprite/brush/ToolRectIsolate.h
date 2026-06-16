@@ -22,12 +22,20 @@ public:
         "Hold CTRL to add to the current area.\n"
         "In Eraser mode, the area will be subtracted from current selection.\n"
         "Deselect this area with Mouse Right."; }
+    std::map<std::string, BrushProperty> getProperties() override
+    {
+        return {
+            {"brush.isolate.locktobounds", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.lockbounds"),1)},
+        };
+    }
     XY getSection() override { return XY{ 1,0 }; }
 
     void clickPress(MainEditor* editor, XY pos) override;
     void clickDrag(MainEditor* editor, XY from, XY to) override { lastMousePos = to; }
     void clickRelease(MainEditor* editor, XY pos) override;
-    void renderOnCanvas(XY canvasDrawPoint, int scale) override;
+    void renderOnCanvas(MainEditor* editor, int scale) override;
     void rightClickPress(MainEditor* editor, XY pos) override;
+
+    XY clampPointInsideCanvasIfParam(MainEditor* editor, XY point);
 };
 

@@ -15,6 +15,12 @@ class ToolMeasure :
     bool isReadOnly() override { return true; }
     std::string getName() override { return TL("vsp.brush.measure"); }
     std::string getTooltip() override { return TL("vsp.brush.measure.desc:v2"); }
+    std::map<std::string, BrushProperty> getProperties() override
+    {
+        return {
+            {"brush.measure.locktobounds", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.lockbounds"),0)},
+        };
+    }
     bool overrideRightClick() { return true; }
     XY getSection() override { return XY{ 1,1 }; }
 
@@ -24,7 +30,9 @@ class ToolMeasure :
     void rightClickPress(MainEditor* editor, XY pos) override;
     void renderOnCanvas(MainEditor* editor, int scale) override;
 
-    SDL_Rect getSelectedRegion();
+    SDL_Rect getLastSelectedRegion(MainEditor* editor);
+    SDL_Rect calcSelectedRegion(MainEditor* editor, XY start, XY end);
+    XY clampPointInsideCanvasIfParam(MainEditor* editor, XY point);
 
     void editorPlaceGuidelinesAroundSelRegion(MainEditor* editor);
     void editorCropToSelRegion(MainEditor* editor);
