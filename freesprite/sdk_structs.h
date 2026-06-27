@@ -188,13 +188,13 @@ struct voidspriteSDK {
         ) = 0;
 
     /// <summary>
-    /// Flattens the all layers in the editor's current frame to a newly allocated layer.
+    /// Flattens all layers in the editor's current frame to a newly allocated layer.
     /// Must be freed with layerFree after use.
     /// </summary>
     VSPLayer* (*editorFlattenImage)(VSPEditorContext* editor) = 0;
 
     /// <summary>
-    /// Flattens the all layers in the selected frame to a newly allocated layer.
+    /// Flattens all layers in the selected frame to a newly allocated layer.
     /// Must be freed with layerFree after use.
     /// </summary>
     VSPLayer* (*editorFlattenFrame)(VSPEditorContext* editor, int index) = 0;
