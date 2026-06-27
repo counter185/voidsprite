@@ -3,6 +3,13 @@
 #include "UIButton.h"
 
 ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, NavbarSection> actions, std::vector<SDL_Scancode> order) {
+    for (int i = 0; i < order.size(); i++) {
+        if (!actions.contains(order[i])) {
+            order.erase(order.begin() + i);
+            i--;
+        }
+    }
+
     wxHeight = 32;
     parent = caller;
     submenuOrder = order;

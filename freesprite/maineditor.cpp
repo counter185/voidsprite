@@ -1395,8 +1395,21 @@ void MainEditor::setUpWidgets()
             }
         };
     }
+    //load actions
+    if (externalEditorActions.size() > 0) {
+        std::vector<std::pair<SDL_Scancode, NamedOperation>> actions;
+        int i = 0;
+        for (auto& action : externalEditorActions) {
+            actions.push_back({ keyorder[i], { action.name, [this, action]() {action.function(this); } } });
+            //todo
+            if (++i >= 26) {
+                break;
+            }
+        }
+        mainEditorKeyActions[SDL_SCANCODE_A] = makeNavbarSection("Actions", actions);
+    }
 
-    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V, SDL_SCANCODE_P }); 
+    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_Q, SDL_SCANCODE_R, SDL_SCANCODE_V, SDL_SCANCODE_P, SDL_SCANCODE_A });
     wxsManager.addDrawable(navbar);
 
     makeActionBar();
@@ -2249,7 +2262,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }
-        g_addNotificationFromThread(SuccessNotification("File saved", "Save successful!"));
+        g_addNotificationFromThread(SuccessNotification(TL("vsp.cmn.filesaved"), "Save successful!"));
     }
     else {
         g_addNotificationFromThread(ErrorNotification("File not saved", "Save failed!"));
@@ -2387,10 +2400,27 @@ void MainEditor::checkAndDiscardEndOfUndoStack()
     }
 }
 
+bool MainEditor::layerExistsInSession(Layer* l)
+{
+    for (auto*& f : frames) {
+        for (auto*& layer : f->layers) {
+            if (layer == l) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void MainEditor::commitStateToLayer(Layer* l)
 {
-    addToUndoStack(UndoLayerModified::fromCurrentState(l));
-    networkCanvasStateUpdated(activeFrame, indexOfLayer(l));
+    if (layerExistsInSession(l)) {
+        addToUndoStack(UndoLayerModified::fromCurrentState(l));
+        networkCanvasStateUpdated(activeFrame, indexOfLayer(l));
+    }
+    else {
+        logerr("(commitStateToLayer) layer does not exist in session");
+    }
 }
 
 void MainEditor::commitStateToCurrentLayer()

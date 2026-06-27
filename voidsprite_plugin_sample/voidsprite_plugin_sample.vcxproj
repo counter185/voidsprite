@@ -202,7 +202,6 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="sdk_structs.h" />
     <ClInclude Include="voidsprite_sdk.h" />
   </ItemGroup>
   <ItemGroup>

@@ -561,6 +561,24 @@ void MainEditorPalettized::setUpWidgets()
         };
     }
 
+    SDL_Scancode keyorder[] = { SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R, SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_U, SDL_SCANCODE_I, SDL_SCANCODE_O, SDL_SCANCODE_P,
+                               SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F, SDL_SCANCODE_G, SDL_SCANCODE_H, SDL_SCANCODE_J, SDL_SCANCODE_K, SDL_SCANCODE_L,
+                               SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M };
+
+    //load actions
+    if (externalEditorActions.size() > 0) {
+        std::vector<std::pair<SDL_Scancode, NamedOperation>> actions;
+        int i = 0;
+        for (auto& action : externalEditorActions) {
+            actions.push_back({ keyorder[i], { action.name, [this, action]() {action.function(this); } } });
+            //todo
+            if (++i >= 26) {
+                break;
+            }
+        }
+        mainEditorKeyActions[SDL_SCANCODE_A] = makeNavbarSection("Actions", actions);
+    }
+
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = colorPicker->getPanel();
     colorPickerPanel->position.y = 63;
@@ -582,7 +600,7 @@ void MainEditorPalettized::setUpWidgets()
     framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67 };
     wxsManager.addDrawable(framePicker);
 
-    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V, SDL_SCANCODE_P });
+    navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V, SDL_SCANCODE_P, SDL_SCANCODE_A });
     wxsManager.addDrawable(navbar);
 
     makeActionBar();

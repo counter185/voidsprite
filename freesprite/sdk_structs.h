@@ -165,5 +165,49 @@ struct voidspriteSDK {
     /// It's safe to call this function from a thread.
     /// </summary>
     void (*vspPostErrorNotification)(const char* title, const char* message) = 0;
+
+    /// <summary>
+    /// Pushes the current layer state onto the undo stack.
+    /// Do this before modifying a layer's pixels outside of brush and filter code.
+    /// </summary>
+    void (*editorUndoPushLayerState)(VSPEditorContext* editor, VSPLayer* layer) = 0;
+
+    /// <summary>
+    /// Registers a new editor action accessible in the navigation bar.
+    /// </summary>
+    void (*registerEditorAction)(
+        const char* name,
+        void (*action)(VSPEditorContext* editor)
+        ) = 0;
+
+    /// <summary>
+    /// Flattens the all layers in the editor's current frame to a newly allocated layer.
+    /// Must be freed with layerFree after use.
+    /// </summary>
+    VSPLayer* (*editorFlattenImage)(VSPEditorContext* editor) = 0;
+
+    /// <summary>
+    /// Flattens the all layers in the selected frame to a newly allocated layer.
+    /// Must be freed with layerFree after use.
+    /// </summary>
+    VSPLayer* (*editorFlattenFrame)(VSPEditorContext* editor, int index) = 0;
+
+    /// <summary>
+    /// Gets the number of frames in an editor session.
+    /// </summary>
+    int (*editorGetNumFrames)(VSPEditorContext* editor) = 0;
+
+    /// <summary>
+    /// Gets the index of the current active frame.
+    /// </summary>
+    int (*editorGetActiveFrameIndex)(VSPEditorContext* editor) = 0;
+
+    /// <summary>
+    /// Gets a localized string from the current active localization.
+    /// If the key doesn't exist, "--NO KEY" will be returned.
+    /// Ex. "vsp.cmn.error" -> "Error"
+    /// Do not modify or free this pointer.
+    /// </summary>
+    const char* (*vspGetLocalizedString)(const char* key) = 0;
 };
 #pragma pack(pop)

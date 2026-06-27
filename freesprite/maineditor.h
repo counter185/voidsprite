@@ -57,6 +57,12 @@ static std::vector<BlendModeOperation> blendOperations = {
     {BLENDMODE_MULTIPLY, "vsp.maineditor.blendmode.multiply", [](u32 bottom, u32 top) { return alphaMultiply(bottom, top); }}
 };
 
+struct NamedEditorOperation {
+    std::string name;
+    std::function<void(MainEditor*)> function;
+};
+inline std::vector<NamedEditorOperation> externalEditorActions;
+
 struct CommentData {
     XY position;
     std::string data;
@@ -232,6 +238,7 @@ protected:
     MainEditor() {}
 
 public:
+
     bool isPalettized = false;
 
     OperationQueue mainThreadOps;
@@ -464,6 +471,7 @@ public:
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();
+    bool layerExistsInSession(Layer* l);
     void commitStateToLayer(Layer* l);
     void commitStateToCurrentLayer();
     void commitIsolatedFragmentState(ScanlineMap old);

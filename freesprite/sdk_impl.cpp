@@ -94,6 +94,13 @@ VSPBrush* impl_registerBrush(const char* name, const char* tooltip, bool wantDou
     return b;
 }
 
+void impl_registerEditorAction(
+    const char* name,
+    void (*action)(VSPEditorContext* editor)) 
+{
+    externalEditorActions.push_back({ name, action });
+}
+
 VSPLayer* impl_layerAllocNew(int type, int width, int height) {
     if (type == VSP_LAYER_RGBA) {
         return Layer::tryAllocLayer(width, height);

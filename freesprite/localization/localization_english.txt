@@ -30,6 +30,7 @@
     {"vsp.cmn.error.unsupportedformat", "Unsupported format"},
     {"vsp.cmn.error.invalidinput", "Invalid input"},
     {"vsp.cmn.copiedtoclipboard", "Copied to clipboard"},
+    {"vsp.cmn.filesaved", "File saved"},
 
     //file type names
     {"vsp.cmn.filetype.splitsession", "Split session file"},

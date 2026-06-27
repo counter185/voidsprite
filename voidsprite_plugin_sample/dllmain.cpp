@@ -7,7 +7,12 @@ voidspriteSDK* vsp;
 VSPLayer* importBIN(char* path)
 {
     printf("Importing file: %s\n", path);
-    FILE* f = vsp->util_fopenUTF8(path, "rb");
+    FILE* f = NULL;
+#ifdef _MSC_VER
+    fopen_s(&f, path, "rb");
+#else
+    f = fopen(path, "rb");
+#endif
     if (f != NULL) {
         // Create a new layer
         VSPLayer* layer = vsp->layerAllocNew(VSP_LAYER_RGBA, 256, 256);
@@ -57,6 +62,38 @@ void invertFilter(VSPLayer* layer, VSPFilter* filter) {
     vsp->util_free(info);
 }
 
+// Sample editor action
+void dumpLayerPixelsToBIN(VSPEditorContext* editor) {
+
+    FILE* file = NULL;
+#ifdef _MSC_VER
+    fopen_s(&file, "data.bin", "wb");
+#else
+    file = fopen("data.bin", "wb");
+#endif
+    if (file != NULL) {
+        //let's also put a white pixel at 1,1 on the current layer
+        VSPLayer* activeLayer = vsp->editorGetActiveLayer(editor);
+        vsp->editorUndoPushLayerState(editor, activeLayer);
+        vsp->layerSetPixel(activeLayer, 1, 1, 0xFFFFFFFF);
+
+
+        VSPLayer* l = vsp->editorFlattenImage(editor);
+        uint32_t* pixelData = vsp->layerGetRawPixelData(l);
+        VSPLayerInfo* layerInfo = vsp->layerGetInfo(l);
+        fwrite(pixelData, 4, layerInfo->width * layerInfo->height, file);
+        vsp->util_free(layerInfo);
+        vsp->layerFree(l);
+
+        //to see all the localization keys, open localization/localization_english.txt
+        vsp->vspPostSuccessNotification(vsp->vspGetLocalizedString("vsp.cmn.filesaved"), "");
+        fclose(file);
+    }
+    else {
+        vsp->vspPostErrorNotification(vsp->vspGetLocalizedString("vsp.cmn.error"), "Failed to open file");
+    }
+}
+
 void pluginInit(voidspriteSDK* sdk)
 {
     vsp = sdk;
@@ -83,6 +120,10 @@ void pluginInit(voidspriteSDK* sdk)
         NULL,
         NULL
     );
+
+    vsp->registerEditorAction("Dump pixels to BIN", dumpLayerPixelsToBIN);
+
+    vsp->vspPostNotification("Hello from plugin sample!", "pluginInit passed", 0xFFFFFFFF, 10000);
 }
 
 const char* getPluginName()

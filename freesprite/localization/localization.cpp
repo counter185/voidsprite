@@ -40,6 +40,22 @@ std::string g_getLocString(std::string key) {
     }
 }
 
+const char* g_getConstLocString(const char* key)
+{
+    std::string lang = g_config.language;
+
+    if (g_localizations.contains(lang) && g_localizations[lang].kvs.contains(key)) {
+        return g_localizations[lang].kvs[key].c_str();
+    }
+    else if (g_localizations["en-us"].kvs.contains(key)) {
+        return g_localizations["en-us"].kvs[key].c_str();
+    }
+    else {
+        logerr(frmt("Translation key not found in language {}:\n {}", lang, key));
+        return "--NO KEY";
+    }
+}
+
 double g_getLocCompletionPercentage(std::string locale)
 {
     if (g_localizations.contains(locale)) {

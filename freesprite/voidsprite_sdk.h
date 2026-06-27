@@ -13,8 +13,6 @@
 
 #define VS_SDK_VERSION 1
 
-#define VSPLayer void
-
 #include "sdk_structs.h"
 
 extern "C" {

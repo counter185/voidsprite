@@ -90,6 +90,10 @@ VSPBrush* impl_registerBrush(
     void (*dragFunction)(VSPBrush* brush, VSPEditorContext* editor, int fromX, int fromY, int toX, int toY),
     void (*releaseFunction)(VSPBrush* brush, VSPEditorContext* editor, int x, int y));
 
+void impl_registerEditorAction(
+    const char* name,
+    void (*action)(VSPEditorContext* editor));
+
 VSPLayer*	impl_layerAllocNew(int type, int width, int height);
 void		impl_layerFree(VSPLayer* layer);
 VSPLayerInfo*	impl_layerGetInfo(VSPLayer*);
@@ -110,6 +114,11 @@ inline int impl_editorGetNumLayers(VSPEditorContext* editor) { return editor != 
 inline VSPLayer* impl_editorGetLayer(VSPEditorContext* editor, int index) { return (editor != NULL && index >= 0 && index < (int)editor->getLayerStack().size()) ? editor->getLayerStack()[index] : NULL; }
 inline VSPLayer* impl_editorGetActiveLayer(VSPEditorContext* editor) { return editor != NULL ? editor->getCurrentLayer() : NULL; }
 inline void impl_editorSetPixel(VSPEditorContext* editor, int x, int y, uint32_t color) { if (editor != NULL) { editor->SetPixel({x,y}, color); } }
+inline void impl_editorUndoPushLayerState(VSPEditorContext* editor, VSPLayer* layer) { editor->commitStateToLayer(layer); }
+inline VSPLayer* impl_editorFlattenImage(VSPEditorContext* editor) { return editor->flattenImage(); }
+inline VSPLayer* impl_editorFlattenFrame(VSPEditorContext* editor, int index) { return index < editor->frames.size() ? editor->flattenFrame(editor->frames[index]) : NULL; }
+inline int impl_editorGetNumFrames(VSPEditorContext* editor) { return editor->frames.size(); }
+inline int impl_editorGetActiveFrameIndex(VSPEditorContext* editor) { return editor->activeFrame; }
 
 inline void impl_vspPostNotification(const char* title, const char* message, u32 color, int durationMS) {
     g_addNotificationFromThread(Notification(title, message, durationMS, NULL, uint32ToSDLColor(color)));
@@ -133,6 +142,7 @@ inline void panicAndClose() {
 
 inline void g_createVSPSDK() {
     voidspriteSDK* v1SDK = (voidspriteSDK*)tracked_malloc(sizeof(voidspriteSDK) + sizeof(void*)*100, "Plugins"); //new voidspriteSDK();
+    //guess who forgot FILE* is not cross-compatible...
     v1SDK->util_fopenUTF8 = [](char* path_utf8, const char* mode) { return platformOpenFile(convertStringOnWin32(path_utf8), convertStringOnWin32(mode)); };
     v1SDK->util_free = [](void* a) { free(a); };
 
@@ -140,6 +150,7 @@ inline void g_createVSPSDK() {
     v1SDK->registerLayerImporter = impl_registerLayerImporter;
     v1SDK->registerLayerExporter = impl_registerLayerExporter;
     v1SDK->registerBrush = impl_registerBrush;
+    v1SDK->registerEditorAction = impl_registerEditorAction;
 
     v1SDK->layerAllocNew = impl_layerAllocNew;
     v1SDK->layerFree = impl_layerFree;
@@ -161,10 +172,16 @@ inline void g_createVSPSDK() {
     v1SDK->editorGetLayer = impl_editorGetLayer;
     v1SDK->editorGetActiveLayer = impl_editorGetActiveLayer;
     v1SDK->editorSetPixel = impl_editorSetPixel;
+    v1SDK->editorUndoPushLayerState = impl_editorUndoPushLayerState;
+    v1SDK->editorFlattenImage = impl_editorFlattenImage;
+    v1SDK->editorFlattenFrame = impl_editorFlattenFrame;
+    v1SDK->editorGetNumFrames = impl_editorGetNumFrames;
+    v1SDK->editorGetActiveFrameIndex = impl_editorGetActiveFrameIndex;
 
     v1SDK->vspPostNotification = impl_vspPostNotification;
     v1SDK->vspPostSuccessNotification = impl_vspPostSuccessNotification;
     v1SDK->vspPostErrorNotification = impl_vspPostErrorNotification;
+    v1SDK->vspGetLocalizedString = g_getConstLocString;
 
     //hit panicAndClose if any later function doesn't exist in the current version
     void** nextPlaceholderJump = (void**)(v1SDK + 1);
