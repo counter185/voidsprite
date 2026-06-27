@@ -22,6 +22,13 @@ struct VSPEditorContext { char _placeholder; };
 #ifndef VSPBrush
 struct VSPBrush { char _placeholder; };
 #endif
+#ifndef VSPNativePath
+    #if _WIN32
+        #define VSPNativePath wchar_t*
+    #else
+        #define VSPNativePath char*
+    #endif
+#endif
 
 #pragma pack(push, 1)
 struct VSPLayerInfo {
@@ -209,5 +216,12 @@ struct voidspriteSDK {
     /// Do not modify or free this pointer.
     /// </summary>
     const char* (*vspGetLocalizedString)(const char* key) = 0;
+
+    /// <summary>
+    /// Returns the editor's last saved file path.
+    /// If the editor hasn't been saved to a file, returns NULL.
+    /// Do not free or modify this pointer.
+    /// </summary>
+    VSPNativePath (*editorGetLastSavedFilePath)(VSPEditorContext* editor) = 0;
 };
 #pragma pack(pop)

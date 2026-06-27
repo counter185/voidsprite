@@ -119,6 +119,7 @@ inline VSPLayer* impl_editorFlattenImage(VSPEditorContext* editor) { return edit
 inline VSPLayer* impl_editorFlattenFrame(VSPEditorContext* editor, int index) { return index < editor->frames.size() ? editor->flattenFrame(editor->frames[index]) : NULL; }
 inline int impl_editorGetNumFrames(VSPEditorContext* editor) { return editor->frames.size(); }
 inline int impl_editorGetActiveFrameIndex(VSPEditorContext* editor) { return editor->activeFrame; }
+inline VSPNativePath impl_editorGetLastSavedFilePath(VSPEditorContext* editor) { return editor->lastConfirmedSave ? (VSPNativePath)editor->lastConfirmedSavePath.c_str() : NULL; }
 
 inline void impl_vspPostNotification(const char* title, const char* message, u32 color, int durationMS) {
     g_addNotificationFromThread(Notification(title, message, durationMS, NULL, uint32ToSDLColor(color)));
@@ -177,6 +178,7 @@ inline void g_createVSPSDK() {
     v1SDK->editorFlattenFrame = impl_editorFlattenFrame;
     v1SDK->editorGetNumFrames = impl_editorGetNumFrames;
     v1SDK->editorGetActiveFrameIndex = impl_editorGetActiveFrameIndex;
+    v1SDK->editorGetLastSavedFilePath = impl_editorGetLastSavedFilePath;
 
     v1SDK->vspPostNotification = impl_vspPostNotification;
     v1SDK->vspPostSuccessNotification = impl_vspPostSuccessNotification;
