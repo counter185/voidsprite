@@ -578,7 +578,7 @@ SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
         return SDL_HITTEST_NORMAL;
     }
 
-    ScreenWideNavBar* currentNavbar = screenStack[currentScreen]->getNavbar();
+    ScreenWideNavBar* currentNavbar = currentScreen < screenStack.size() ? screenStack[currentScreen]->getNavbar() : NULL;
     if (currentNavbar == NULL || !popupStack.empty()) {
         if (pos.y < 30 * g_renderScale) {
             return SDL_HITTEST_DRAGGABLE;

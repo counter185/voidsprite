@@ -40,10 +40,12 @@ Layer* readPEP(PlatformNativePathString path, u64 seek) {
 }
 
 bool writePEP(PlatformNativePathString path, Layer* l) {
-	if (l->numUniqueColors() > 256) {
-		g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), "Too many colors (max. 256 for PEP)."));
+	int uqColors = l->numUniqueColors();
+	if (uqColors > 256) {
+		g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), frmt("Too many colors for PEP ({} > max 256)", uqColors)));
 		return false;
 	}
+
 	FILE* f = platformOpenFile(path, PlatformFileModeWB);
 	if (f != NULL) {
 		DoOnReturn closeFile([f]() {fclose(f); });
