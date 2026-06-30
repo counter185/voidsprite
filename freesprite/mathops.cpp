@@ -825,7 +825,7 @@ u32 alphaAdd(u32 bottom, u32 top)
         (u8)ixmin(255, cTop.r + cBottom.r),
         (u8)ixmin(255, cTop.g + cBottom.g),
         (u8)ixmin(255, cTop.b + cBottom.b),
-        cBottom.a
+        (u8)ixmin(255, cTop.a + cBottom.a)
     );
 }
 
