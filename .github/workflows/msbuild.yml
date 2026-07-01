@@ -233,6 +233,8 @@ jobs:
         submodules: recursive
 
     - uses: mymindstorm/setup-emsdk@v14
+      with:
+        version: 5.0.7
 
     - name: setup cmake
       working-directory: ${{env.GITHUB_WORKSPACE}}
