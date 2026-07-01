@@ -756,6 +756,9 @@
     <ClCompile Include="io\io_pep.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="ScreenPreprocessImage.cpp">
+      <Filter>Source files\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1498,6 +1501,9 @@
     </ClInclude>
     <ClInclude Include="pep\pep.h">
       <Filter>Header files\external\pep</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenPreprocessImage.h">
+      <Filter>Header files\screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

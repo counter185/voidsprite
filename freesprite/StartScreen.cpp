@@ -35,6 +35,7 @@
 #include "UIColorInputField.h"
 #include "ScreenVoxelEditor.h"
 #include "PalettizedEditorColorPicker.h"
+#include "ScreenPreprocessImage.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -110,6 +111,7 @@ StartScreen::StartScreen() {
                                 }
                             }
                         },
+                        { SDL_SCANCODE_T,{ TL("vsp.launchpad.nav.preprocess"), [this]() { this->openImagePreprocessDialog(); }}},
                         { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
                         { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
                         { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
@@ -436,6 +438,15 @@ void StartScreen::eventFileOpen(int evt_id, PlatformNativePathString name, int i
             importerIndex -= 2;
             FileImporter* importer = g_fileImporters[importerIndex];
             tryLoadFileUsingImporter(importer, name);
+        }
+    }
+    else if (evt_id == 1) {
+        Layer* l = loadAnyIntoFlat(convertStringToUTF8OnWin32(name));
+        if (l != NULL) {
+            g_addScreen(new ScreenPreprocessImage(l));
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
         }
     }
 }
@@ -870,6 +881,11 @@ void StartScreen::renderBGStars()
 void StartScreen::openImageLoadDialog()
 {
     PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0, true);
+}
+
+void StartScreen::openImagePreprocessDialog()
+{
+    PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.preprocessimage"), 1, true);
 }
 
 void StartScreen::promptOpenFromURL()

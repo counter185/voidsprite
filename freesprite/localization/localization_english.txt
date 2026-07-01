@@ -143,6 +143,7 @@
     {"vsp.popup.openpalette", "load palette"},
     {"vsp.popup.loadfilterpreset", "load filter preset"},
     {"vsp.popup.savefilterpreset", "save filter preset"},
+    {"vsp.popup.preprocessimage", "preprocess image"},
 
     // templates
     {"vsp.template.pixelillustration", "pixel illustration"},
@@ -268,6 +269,7 @@
     {"vsp.launchpad.nav.connecttocollab", "Connect to network canvas [BETA]"},
     {"vsp.launchpad.nav.findcollabonlan", "Find network sessions on LAN"},
     {"vsp.launchpad.nav.togglefullscreen", "Toggle fullscreen"},
+    {"vsp.launchpad.nav.preprocess", "Preprocess image..."},
 
     {"vsp.launchpad.popup.openfromurl", "Open from URL"},
     {"vsp.launchpad.popup.openfromurl.desc", "Enter a URL to download an image from it"},
@@ -448,6 +450,18 @@
     //screen: fullscreen preview
     {"vsp.fullscreenpreview", "Fullscreen preview"},
 
+    //screen: preprocess image
+    {"vsp.preprocess", "Preprocess image"},
+    {"vsp.preprocess.nav.openineditor", "Open in Editor..."},
+    {"vsp.preprocess.nav.savepreset", "Save current preset"},
+    {"vsp.preprocess.nav.loadpreset", "Load preset"},
+    {"vsp.preprocess.matchmode.manual", "Manual"},
+    {"vsp.preprocess.matchmode.defined", "Match palette"},
+    {"vsp.preprocess.addfilter", "Add filter..."},
+    {"vsp.preprocess.addcolor", "Add color..."},
+    {"vsp.preprocess.downscalefirst", "Pre-downscale"},
+    {"spec.preprocess.export", "Export pattern"},
+    
 
     //popup: settings
     {"vsp.config.title", "Preferences"},

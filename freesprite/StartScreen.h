@@ -89,6 +89,7 @@ public:
 
     void promptOpenFromURL();
     void openImageLoadDialog();
+    void openImagePreprocessDialog();
     void checkAndPromptCrashSaves();
 
     void populateLastOpenFiles();

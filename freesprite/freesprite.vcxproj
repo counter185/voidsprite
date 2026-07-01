@@ -258,6 +258,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ScreenPreprocessImage.cpp" />
     <ClCompile Include="ASCIIEditor.cpp" />
     <ClCompile Include="astc_dec\astc_decomp.cpp" />
     <ClCompile Include="brush\BaseBrush.cpp" />
@@ -654,6 +655,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="ScreenPreprocessImage.h" />
     <ClInclude Include="ScreenVoxelEditor.h" />
     <ClInclude Include="ScreenIsomView.h" />
     <ClInclude Include="ScreenNonogramPlayer.h" />
