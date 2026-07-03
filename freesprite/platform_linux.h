@@ -68,29 +68,28 @@ std::string linux_getGPUname() {
         return gpuName;
     }
 
-    const u8* (*p_glGetString)(GLuint) = (const u8*(*)(GLuint))SDL_GL_GetProcAddress("glGetString");
-    if (p_glGetString != NULL) {
-
-        SDL_Window* sdl_window = SDL_CreateWindow("vsp_gl_window", 100, 100,
-                SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
-        if(sdl_window != NULL) {
-            SDL_GLContext gl_context = SDL_GL_CreateContext(sdl_window);
-            if(gl_context != NULL) {
+    SDL_Window* sdl_window = SDL_CreateWindow("vsp_gl_window", 100, 100,
+            SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+    if(sdl_window != NULL) {
+        SDL_GLContext gl_context = SDL_GL_CreateContext(sdl_window);
+        if(gl_context != NULL) {
+            const u8* (*p_glGetString)(GLuint) = (const u8*(*)(GLuint))SDL_GL_GetProcAddress("glGetString");
+            if (p_glGetString != NULL) {
                 const unsigned char* gpu_info = p_glGetString(GL_RENDERER);
-                if(SDL_GL_DestroyContext(gl_context) != true) {
-                    logwarn("Failed to destroy OpenGL context.");
-                }
-                SDL_DestroyWindow(sdl_window);
                 gpuName = std::string(reinterpret_cast<const char*>(gpu_info));
             } else {
-                gpuName = "(failed to get GPU (Could not create OpenGL context))";
+                logerr("couldn't get glGetString address");
+                gpuName = "(failed to get GPU (no glGetString address))";
+            }
+            if(SDL_GL_DestroyContext(gl_context) != true) {
+                logwarn("Failed to destroy OpenGL context.");
             }
         } else {
-            gpuName = "(failed to get GPU (Window did not open))";
+            gpuName = "(failed to get GPU (Could not create OpenGL context))";
         }
+        SDL_DestroyWindow(sdl_window);
     } else {
-        logerr("couldn't get glGetString address");
-        gpuName = "(failed to get GPU (no glGetString address))";
+        gpuName = "(failed to get GPU (Window did not open))";
     }
 
     return gpuName;
