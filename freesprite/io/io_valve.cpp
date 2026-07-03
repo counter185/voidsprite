@@ -428,7 +428,7 @@ bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressRepor
             if (!std::filesystem::exists(outPath)) {
                 FILE* ff = platformOpenFile(outPath, PlatformFileModeWB);
                 if (ff != NULL) {
-                    std::string vmt = std::format(
+                    std::string vmt = frmt(
                         "\"LightmappedGeneric\"\n"
                         "{{\n"
                         "    \"$basetexture\" \"{}\"\n"

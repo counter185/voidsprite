@@ -10,6 +10,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <SDL3/SDL_video.h>
+#include <GL/gl.h>
+
 #include "EventCallbackListener.h"
 #include "Notification.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
@@ -56,6 +59,27 @@ std::string linux_getCPUName() {
         return "(failed to read /proc/cpuinfo)\n";
     }
     
+}
+
+std::string linux_getGPUname() {
+    SDL_Window* sdl_window = SDL_CreateWindow("vsp_gl_window", 100, 100, 
+            SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+    if(sdl_window != NULL) {
+        SDL_GLContext gl_context = SDL_GL_CreateContext(sdl_window);
+        if(gl_context != NULL) {
+            const unsigned char* gpu_info = glGetString(GL_RENDERER);
+            if(SDL_GL_DestroyContext(gl_context) != true) {
+                logwarn("Failed to destroy OpenGL context.");
+            }
+            SDL_DestroyWindow(sdl_window);
+            return std::string(reinterpret_cast<const char*>(gpu_info));        
+        } else {
+            return "Failed to get GPU (Could not create OpenGL context)";
+        }
+    } else {
+        return "Failed to get GPU (Window did not open)";
+    }
+
 }
 
 void platformPreInit() {
@@ -285,6 +309,7 @@ std::string platformGetSystemInfo() {
 
     ret += frmt("CPU: {}\n", linux_getCPUName());
     ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
+    ret += frmt("GPU: {}\n", linux_getGPUname());
 
     //todo: get gpu, maybe the hardware model if possible, distro info
 

@@ -147,7 +147,9 @@ SDL_Rect fitInside(SDL_Rect outer, SDL_Rect inner);
 u32 parseIpAddress(std::string ipv4);
 std::string ipToString(u32 ipv4);
 
-#define matrix std::vector<std::vector<double>>
+//#define matrix std::vector<std::vector<double>>
+typedef std::vector<std::vector<double>> matrix; // <- this may cause issues
+                                                 // the macro causes trouble with GL/gl.h
 matrix matrixMultiply(matrix a, matrix b);
 
 std::tm getLocalTime();
