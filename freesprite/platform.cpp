@@ -22,6 +22,6 @@ std::ofstream platformOpenOFStream(PlatformNativePathString path) {
     return ret;
 }
 std::ifstream platformOpenIFStream(PlatformNativePathString path, int mode) {
-    std::ifstream ret = std::ifstream(std::filesystem::path(path), mode);
+    std::ifstream ret = std::ifstream(std::filesystem::path(path), (std::ios_base::openmode)mode);
     return ret;
 }
