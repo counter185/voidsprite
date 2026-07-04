@@ -55,6 +55,7 @@ int g_windowW = 1280;
 int g_windowH = 720;
 XY unscaledWindowSize = {g_windowW, g_windowH};
 
+OperationProgressReport initSteps;
 SDL_Window* g_wd;
 SDL_Renderer* g_rd;
 int g_mouseX = 0, g_mouseY = 0;
@@ -905,6 +906,7 @@ void g_mainLoop() {
 int main(int argc, char** argv)
 {
     try {
+        initSteps.enterSection("Initial startup");
         main_registerCExceptionHandlers();
         std::chrono::time_point<std::chrono::system_clock> startupTime = std::chrono::system_clock::now();
 
@@ -922,6 +924,7 @@ int main(int argc, char** argv)
         std::vector<std::string> uriTargets;
         std::vector<std::string> fileOpenTargets;
 
+        initSteps.updateLastSection("Loading commandline arguments");
         while (!argsQueue.empty()) {
 
             std::string command = argsQueue.front(); argsQueue.pop();
@@ -957,6 +960,7 @@ int main(int argc, char** argv)
                 //g_cmdlineArgs.push_back(command);
             }
         }
+        initSteps.updateLastSection("Finding program directory");
 #if __ANDROID__
         g_programDirectory = "";
         g_programExePath = "";
@@ -979,11 +983,14 @@ int main(int argc, char** argv)
         loginfo("Library versions:\n" + getAllLibsVersions());
         loginfo("System information:\n" + platformGetSystemInfo());
 
+        initSteps.updateLastSection("Loading configuration");
         g_loadConfig();
         loginfo("Config loaded");
 
+        initSteps.updateLastSection("Pre-init");
         platformPreInit();
 
+        initSteps.enterSection("Setting up IPC socket");
         if (g_config.singleInstance) {
             if (platformSupportsFeature(VSP_FEATURE_INSTANCE_IPC)) {
                 if (!platformSetupIPC()) {
@@ -1003,6 +1010,7 @@ int main(int argc, char** argv)
             }
         }
 
+        initSteps.updateLastSection("Initializing SDL");
         SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
         SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_SCALE_TO_DISPLAY, "1");
         int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
@@ -1015,6 +1023,7 @@ int main(int argc, char** argv)
         u32 windowFlags = ONPLATFORM(VSP_PLATFORM_ANDROID, SDL_WINDOW_MAXIMIZED, 0) 
             | ONPLATFORM(VSP_PLATFORM_WIN32, SDL_WINDOW_HIDDEN, 0)
             | SDL_WINDOW_RESIZABLE;
+        initSteps.updateLastSection("Creating main window");
         g_mainWindow = VSPWindow::tryCreateWindow(windowTitle, { g_windowW, g_windowH }, windowFlags);
         g_mainWindow->isMainWindow = true;
         g_mainWindow->thisWindowsTurn();
@@ -1024,6 +1033,7 @@ int main(int argc, char** argv)
         loginfo("Passed SDL_Init");
 
 #if VSP_NETWORKING
+        initSteps.updateLastSection("Initializing SDL_net");
         bool netInit = NET_Init();
         if (!netInit) {
             logerr("NET_Init failed: " + std::string(SDL_GetError()));
@@ -1032,6 +1042,8 @@ int main(int argc, char** argv)
             loginfo("Passed NET_Init");
         }
 #endif
+        initSteps.exitSection();
+        initSteps.updateLastSection("Init");
 
         platformInit();
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
@@ -1043,6 +1055,7 @@ int main(int argc, char** argv)
         
         g_mainWindow->updateViewportScaler();
 
+        initSteps.enterSection("Loading visual configuration");
         if (g_config.customVisualConfigPath != "") {
             if (!g_loadVisualConfig(convertStringOnWin32(g_config.customVisualConfigPath))) {
                 logerr("Failed to load custom visual config");
@@ -1052,6 +1065,7 @@ int main(int argc, char** argv)
             serializeVisualConfig(getDefaultVisualConf(), convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath()) + "/visualconfigs/sample_config.json");
         }
 
+        initSteps.updateLastSection("Loading custom cursor");
         if (g_config.overrideCursor) {
             std::string cursorPath = pathInProgramDirectory(VOIDSPRITE_ASSETS_SUBDIR "app_cursor.png");
             SDL_Surface* cursorSrf = IMG_Load(cursorPath.c_str());
@@ -1062,14 +1076,19 @@ int main(int argc, char** argv)
             }
         }
 
+        initSteps.updateLastSection("Initializing SDK");
         g_createVSPSDK();
+        initSteps.updateLastSection("Loading plugins");
         g_loadPlugins();
+        initSteps.updateLastSection("Setting up color models");
         g_setupColorModels();
+        initSteps.updateLastSection("Setting up file operations");
         g_setupIO();
+        initSteps.updateLastSection("Loading palettes");
         g_reloadColorMap();
 
+        initSteps.updateLastSection("Loading assets");
         loginfo("Loading assets");
-
         g_mainlogo = new ReldTex( [](SDL_Renderer* rd) { return IMGLoadAssetToTexture("mainlogo.png", rd); } );
         g_iconVSP32x32 = new ReldTex( [](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_voidsprite32x32.png", rd); } );
         g_iconFrameNew = new ReldTex([](SDL_Renderer* rd) { return IMGLoadAssetToTexture("icon_frame_new.png", rd); });
@@ -1135,11 +1154,12 @@ int main(int argc, char** argv)
             return ret;
         });
 
+        initSteps.updateLastSection("Initializing gamepad");
         g_gamepad = new Gamepad();
         g_gamepad->TryCaptureGamepad();
 
         loginfo("Loading tools");
-
+        initSteps.updateLastSection("Loading brushes");
         //load brushes
         g_loadBrushes();
         int i = 0;
@@ -1148,7 +1168,7 @@ int main(int argc, char** argv)
         }
 
         loginfo("Loading patterns");
-
+        initSteps.updateLastSection("Loading patterns");
         //load patterns
         g_patterns.push_back(new PatternFull());
         g_patterns.push_back(new PatternGrid());
@@ -1177,6 +1197,7 @@ int main(int argc, char** argv)
         g_patterns.push_back(new PatternRandom(4));
         g_patterns.push_back(new PatternRandom(8));
         g_patterns.push_back(new PatternRandom(16));
+        initSteps.updateLastSection("Loading custom patterns");
         int customPatterns = 0;
         auto customPatternPaths = joinVectors({
             platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm"),
@@ -1189,12 +1210,13 @@ int main(int argc, char** argv)
                 customPatterns++;
             }
         }
+        initSteps.updateLastSection("Loading pattern icons");
         for (Pattern*& pattern : g_patterns) {
             pattern->tryLoadIcon();
         }
 
         loginfo("Loading templates");
-
+        initSteps.updateLastSection("Loading templates");
         // load templates
         g_templates = {
             new TemplatePixelIllustration({256, 144}),
@@ -1209,6 +1231,7 @@ int main(int argc, char** argv)
             new TemplateMC64x32Skin(),
         };
         int customTemplates = 0;
+        initSteps.updateLastSection("Loading custom templates");
         auto customTemplatePaths = joinVectors({
             platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".png"),
             platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("templates/"), ".voidsn")
@@ -1222,7 +1245,7 @@ int main(int argc, char** argv)
         }
 
         loginfo("Loading 9S patterns");
-
+        initSteps.updateLastSection("Loading 9S patterns");
         // load 9segment patterns
         g_9spatterns = {
             new NineSegmentPattern(nspattern1),
@@ -1243,13 +1266,16 @@ int main(int argc, char** argv)
         }
 
         //load filters
+        initSteps.updateLastSection("Loading filters");
         g_loadFilters();
-
+        initSteps.updateLastSection("Setting up keybinds");
         g_initKeybinds();
 
-        loginfo("Loading fonts");
         //load fonts
+        loginfo("Loading fonts");
+        initSteps.updateLastSection("Initializing SDL_ttf");
         TTF_Init();
+        initSteps.updateLastSection("Loading fonts");
         g_reloadFonts();
 
         /*SDL_Surface* rasterCP437FontImg = IMG_Load(pathInProgramDirectory("assets/codepage437-8x8-voidfont.png").c_str());
@@ -1262,10 +1288,12 @@ int main(int argc, char** argv)
         g_ttp = new TooltipsLayer();
 
         loginfo("Starting launchpad");
+        initSteps.updateLastSection("Starting Launchpad");
         StartScreen* launchpad = new StartScreen();
         g_mainWindow->addScreen(launchpad, g_mainWindow->screenStack.empty());
 
         //run command line args
+        initSteps.updateLastSection("Executing commandline args");
         bool closeLaunchpad = noLaunchpad;
         for (std::string& arg : fileOpenTargets) {
             if (std::filesystem::exists(convertStringOnWin32(arg))) {
@@ -1287,24 +1315,30 @@ int main(int argc, char** argv)
             g_closeScreen(launchpad);
         }
 
+        initSteps.updateLastSection("Setting up RPC");
         if (g_config.useDiscordRPC) {
             g_initRPC();
         }
 
+        initSteps.exitSection();
+        initSteps.updateLastSection("Post-init");
         platformPostInit();
         loginfo("Init passed");
 
         //run conversions
+        initSteps.enterSection("Running conversions");
         for (auto& c : convertTargets) {
             MainEditor* sn = loadAnyIntoSession(c.first);
             PopupQuickConvert::doQuickConvert(sn, convertStringOnWin32(c.second));
         }
         //run lospec downloads
+        initSteps.updateLastSection("Running lospec downloads");
         for (auto& url : lospecDlTargets) {
             loginfo(frmt("Running lospec download: {}", url));
             g_downloadAndInstallPaletteFromLospec(url);
         }
         //run uris
+        initSteps.updateLastSection("Running URI targets");
         for (auto& uriPath : uriTargets) {
             std::vector<std::string> spltPath = splitString(uriPath, '/');
             if (!spltPath.empty()) {
@@ -1329,6 +1363,9 @@ int main(int argc, char** argv)
                 }
             }
         }
+
+        initSteps.exitSection();
+        initSteps.exitSection();
 
         if (customPatterns > 0) {
             g_addNotification(Notification(frmt("Loaded {} custom patterns", customPatterns), "", 4000, NULL, COLOR_INFO));
@@ -1377,10 +1414,23 @@ int main(int argc, char** argv)
         logerr("-------------------------------------------");
         logerr("voidsprite crashed with an uncaught exception");
         logerr(frmt("Details: \n {}", e.what()));
+        if (initSteps.getCurrentSections().size() > 0) {
+            logerr("initSteps stack:");
+            for (auto& section : initSteps.getCurrentSections()) {
+                logerr(frmt("- {}", section));
+            }
+        }
         log_close();
         log_duplicateLast();
         std::string errorTitle = frmt("voidsprite: {}", TL("vsp.fatalerror.title"));
-        std::string errorMsg = frmt("{}\n   {}", TL("vsp.fatalerror.body:v2"), e.what());
+        std::string detailsMsg = e.what();
+        if (initSteps.getCurrentSections().size() > 0) {
+            detailsMsg += "\ninitSteps stack:\n";
+            for (auto& section : initSteps.getCurrentSections()) {
+                detailsMsg += frmt("- {}\n", section);
+            }
+        }
+        std::string errorMsg = frmt("{}\n   {}", TL("vsp.fatalerror.body:v2"), detailsMsg);
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorTitle.c_str(), errorMsg.c_str(), g_wd);
     }
     loginfo("main() done.");
