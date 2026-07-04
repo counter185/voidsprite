@@ -371,7 +371,7 @@ json serializePixelStudioSession(MainEditor* data) {
 
 MainEditor* readPixelStudioPSP(PlatformNativePathString path)
 {
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.is_open()) {
         try {
             json j = json::parse(f);
@@ -420,7 +420,7 @@ MainEditor* readPixelStudioPSX(PlatformNativePathString path)
 
 bool writePixelStudioPSP(PlatformNativePathString path, MainEditor* data)
 {
-    std::ofstream outfile(path);
+    std::ofstream outfile = platformOpenOFStream(path);
 
     if (outfile.is_open()) {
         json o = serializePixelStudioSession(data);
@@ -458,7 +458,7 @@ bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data)
 
 std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativePathString name)
 {
-    std::ifstream f(name);
+    std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
         json j = json::parse(f);
         f.close();

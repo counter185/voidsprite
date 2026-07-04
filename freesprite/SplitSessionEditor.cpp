@@ -24,7 +24,7 @@ SplitSessionData loadSplitSessionData(PlatformNativePathString path)
         fullDirectory += "/";
     }
 
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.good() && f.is_open()) {
         SplitSessionData ssn;
         ssn.set = true;
@@ -564,7 +564,7 @@ bool SplitSessionEditor::trySave(bool openSession)
     if (outputSPSNFilePath.size() > 0) {
         recalcRelativePaths();
 
-        std::ofstream file(outputSPSNFilePath);
+        std::ofstream file = platformOpenOFStream(convertStringOnWin32(outputSPSNFilePath));
         if (file.good() && file.is_open()) {
             file << "voidsprite split session file v0\n";
             for (tempSplitSessionImage &tssi : loadedImgs) {

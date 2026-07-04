@@ -114,7 +114,7 @@ void evalVisualConfigJsonTree(nlohmann::json& object, std::unordered_map<std::st
 }
 
 std::unordered_map<std::string, std::string> loadVisualConfig(PlatformNativePathString path) {
-    std::ifstream infile(path);
+    std::ifstream infile = platformOpenIFStream(path);
     if (infile.is_open()) {
         nlohmann::json j;
         try {
@@ -201,7 +201,7 @@ void serializeVisualConfig(std::unordered_map<std::string, std::string>& conf, s
         }
         (*current) = value;
     }
-    std::ofstream fileout(path);
+    std::ofstream fileout = platformOpenOFStream(convertStringOnWin32(path));
     if (fileout.is_open()) {
         fileout << j.dump(4);
     }

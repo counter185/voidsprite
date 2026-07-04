@@ -4,7 +4,7 @@
 
 Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek)
 {
-    std::ifstream f(path, std::ios::binary);
+    std::ifstream f = platformOpenIFStream(path, std::ios::binary);
     if (f.is_open()) {
         LayerPalettized* ret = NULL;
         std::vector<uint32_t> palette = { 0xFF000000, 0xFFFFFFFF };
@@ -68,7 +68,7 @@ Layer* readAnymapPBM(PlatformNativePathString path, uint64_t seek)
 
 Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek)
 {
-    std::ifstream f(path, std::ios::binary);
+    std::ifstream f = platformOpenIFStream(path, std::ios::binary);
     if (f.is_open()) {
         LayerPalettized* ret = NULL;
 
@@ -136,7 +136,7 @@ Layer* readAnymapPPM(PlatformNativePathString path, uint64_t seek, OperationProg
 {
     ENSURE_REPORT_VALID(report);
     //TODO: CHANGE THIS TO USE FILE* AND FSCANF (text-based ppm loads very slowly and fscanf will be 2x faster)
-    std::ifstream f(path, std::ios::binary);
+    std::ifstream f = platformOpenIFStream(path, std::ios::binary);
     if (f.is_open()) {
         Layer* ret = NULL;
 

@@ -1144,7 +1144,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path, OperationProgressRep
         fullDirectory += "/";
     }
 
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.good() && f.is_open()) {
         progress->enterSection("Loading split session...");
         SplitSessionData ssn;
@@ -1290,7 +1290,7 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data, Operation
         return false;
     }
     progress->enterSection("Saving split session...");
-    std::ofstream f(path);
+    std::ofstream f = platformOpenOFStream(path);
     progress->enterSection("Writing split session file...");
     f << "voidsprite split session file v0\n";
     for (CommentData& comment : data->frames[0]->comments) {

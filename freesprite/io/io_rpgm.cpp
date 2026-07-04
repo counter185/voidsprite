@@ -157,7 +157,7 @@ MainEditor* readLMU(PlatformNativePathString path)
 {
     MainEditor* ret = NULL;
 
-    std::ifstream lmuFile(path, std::ios::binary);
+    std::ifstream lmuFile = platformOpenIFStream(path, std::ios::binary);
     if (lmuFile.is_open()) {
         std::unique_ptr<lcf::rpg::Map> a = lcf::LMU_Reader::Load(lmuFile);
         int chipsetIndex = a.get()->chipset_id;
@@ -165,7 +165,7 @@ MainEditor* readLMU(PlatformNativePathString path)
         PlatformNativePathString ldbPath = pathDir + convertStringOnWin32("/RPG_RT.ldb");
 
         if (std::filesystem::exists(ldbPath)) {
-            std::ifstream ldbFile(ldbPath, std::ios::binary);
+            std::ifstream ldbFile = platformOpenIFStream(ldbPath, std::ios::binary);
             if (ldbFile.is_open()) {
                 std::unique_ptr<lcf::rpg::Database> db = lcf::LDB_Reader::Load(ldbFile);
                 if (db.get()->chipsets.size() > chipsetIndex) {

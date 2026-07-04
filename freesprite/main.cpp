@@ -415,7 +415,7 @@ static void main_handleSIGTERM(int sig) {
 
 void main_registerCExceptionHandlers()
 {
-#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32 && defined(_MSC_VER)
     _set_se_translator([](unsigned int u, _EXCEPTION_POINTERS* pExp) {
         throw std::runtime_error(frmt("Fatal error: SEH exception code {:X}", u));
     });

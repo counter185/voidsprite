@@ -93,7 +93,7 @@ std::string getAllLibsVersions() {
 
 std::map<std::string, std::string> parseINI(PlatformNativePathString path)
 {
-    std::ifstream infile(path);
+    std::ifstream infile = platformOpenIFStream(path);
     std::map<std::string, std::string> ret;
     std::string line;
     while (std::getline(infile, line)) {
@@ -1427,7 +1427,7 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
 }
 
 Layer* readXBM(PlatformNativePathString path, uint64_t seek) {
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.is_open()) {
         int w = -1, h = -1;
         LayerPalettized* ret = NULL;

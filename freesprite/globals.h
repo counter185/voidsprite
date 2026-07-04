@@ -56,6 +56,7 @@
 #include <functional>
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <atomic>
 //do not include these here:
 //iostream: use logprintf or loginfo instead

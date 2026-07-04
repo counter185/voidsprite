@@ -839,7 +839,7 @@ void PopupGlobalConfig::shellExtensionAction(bool install)
         paramString = L"/u " + paramString;
     }
 
-    SHELLEXECUTEINFO shExInfo = { 0 };
+    SHELLEXECUTEINFOW shExInfo = { 0 };
     shExInfo.cbSize = sizeof(shExInfo);
     shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
     shExInfo.hwnd = 0;
@@ -850,7 +850,7 @@ void PopupGlobalConfig::shellExtensionAction(bool install)
     shExInfo.nShow = SW_SHOW;
     shExInfo.hInstApp = 0;
 
-    if (ShellExecuteEx(&shExInfo))
+    if (ShellExecuteExW(&shExInfo))
     {
         WaitForSingleObject(shExInfo.hProcess, INFINITE);
         DWORD exitCode = 0;

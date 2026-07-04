@@ -75,6 +75,8 @@ bool platformPutImageInClipboard(Layer* l);
 Layer* platformGetImageFromClipboard();
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
+std::ofstream platformOpenOFStream(PlatformNativePathString path);
+std::ifstream platformOpenIFStream(PlatformNativePathString path, int mode = 1);
 
 void platformPrintDocument(Layer* layer);
 void platformShareImage(Layer* layer);

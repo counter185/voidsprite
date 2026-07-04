@@ -74,7 +74,7 @@ bool g_saveConfig() {
     std::vector<ConfigBoolOption> saveBoolOptions = getBoolOptions();
 
     PlatformNativePathString path = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("config.txt");
-    std::ofstream file(path);
+    std::ofstream file = platformOpenOFStream(path);
     if (file.is_open()) {
         std::map<std::string, std::string> config;
 
@@ -143,7 +143,7 @@ void g_loadConfig() {
     }
 #else
     PlatformNativePathString path = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("config.txt");
-    std::ifstream file(path);
+    std::ifstream file = platformOpenIFStream(path);
     if (file.is_open()) 
     {
         std::string line;

@@ -16,3 +16,12 @@
 #else
     #include "platform_linux.h"
 #endif
+
+std::ofstream platformOpenOFStream(PlatformNativePathString path) {
+    std::ofstream ret = std::ofstream(std::filesystem::path(path));
+    return ret;
+}
+std::ifstream platformOpenIFStream(PlatformNativePathString path, int mode) {
+    std::ifstream ret = std::ifstream(std::filesystem::path(path), mode);
+    return ret;
+}

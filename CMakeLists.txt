@@ -10,6 +10,12 @@ option(VSP_NETWORKING "enable SDL_net functionality" ON)
 if (EMSCRIPTEN)
     set(VSP_NETWORKING OFF)
 endif()
+if (WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -Wno-unused-command-line-argument")
+    set(SDLIMAGE_AVIF OFF)
+    set(SDLIMAGE_VENDORED OFF)
+    set(SDLTTF_VENDORED ON)
+endif()
 
 #on flatpak we must install these separately as system libraries
 #(add to the flatpak yml file)

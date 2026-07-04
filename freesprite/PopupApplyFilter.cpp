@@ -32,7 +32,7 @@ void PopupApplyFilter::eventFileSaved(int evt_id, PlatformNativePathString name,
     if (evt_id == EVENT_APPLYFILTER_SAVEPRESET) {
         FilterPreset newPreset = FilterPreset(targetFilter->id(), params.buildParameterMap());
         std::string serialized = newPreset.serialize();
-        std::ofstream outFile(convertStringToUTF8OnWin32(name));
+        std::ofstream outFile = platformOpenOFStream(name);
         if (outFile.is_open()) {
             outFile << serialized;
             outFile.close();
@@ -46,7 +46,7 @@ void PopupApplyFilter::eventFileSaved(int evt_id, PlatformNativePathString name,
 
 void PopupApplyFilter::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) {
     if (evt_id == EVENT_APPLYFILTER_LOADPRESET) {
-        std::ifstream inFile(convertStringToUTF8OnWin32(name));
+        std::ifstream inFile = platformOpenIFStream(name);
         if (inFile.is_open()) {
             std::string line;
             std::string serialized;

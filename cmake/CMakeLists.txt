@@ -21,6 +21,8 @@ endif()
 if (VSP_DISCORD_RPC)
     add_definitions(-DVSP_DISCORD_RPC=1)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,${CMAKE_CURRENT_SOURCE_DIR} -L${CMAKE_CURRENT_SOURCE_DIR} -ldiscord_game_sdk_linux_x64")
+else()
+    add_definitions(-DVSP_DISCORD_RPC=0)
 endif()
 
 if (RELEASE)
@@ -148,6 +150,9 @@ target_link_libraries(voidsprite PRIVATE SDL3_ttf::SDL3_ttf)
 target_link_libraries(voidsprite PRIVATE SDL3_image::SDL3_image)
 target_link_libraries(voidsprite PRIVATE avif)
 target_link_libraries(voidsprite PRIVATE ZLIB::ZLIBSTATIC)
+if (DEFINED WIN32)
+    target_link_libraries(voidsprite PRIVATE d3d9 dwmapi winhttp iphlpapi)
+endif()
 if (VSP_NETWORKING)
     add_definitions(-DVSP_NETWORKING=1)
     target_link_libraries(voidsprite PRIVATE SDL3_net::SDL3_net)
@@ -184,5 +189,11 @@ if (APPLE)
         -P ${CMAKE_SOURCE_DIR}/cmake/copy_dependencies.cmake
         COMMENT "Copying dependencies to exe dir..."
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
+if (WIN32)
+    add_custom_command(TARGET voidsprite POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:voidsprite> $<TARGET_FILE_DIR:voidsprite>
+        COMMAND_EXPAND_LISTS
     )
 endif()

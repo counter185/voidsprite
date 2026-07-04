@@ -9,7 +9,7 @@ using namespace nlohmann;
 
 MainEditor* readLPE(PlatformNativePathString path)
 {
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.is_open()) {
         json j = json::parse(f);
         f.close();
@@ -43,7 +43,7 @@ MainEditor* readLPE(PlatformNativePathString path)
 
 bool writeLPE(PlatformNativePathString path, MainEditor* editor)
 {
-    std::ofstream outfile(path);
+    std::ofstream outfile = platformOpenOFStream(path);
 
     if (outfile.is_open()) {
         json o = json::object();
@@ -90,7 +90,7 @@ bool writeLPE(PlatformNativePathString path, MainEditor* editor)
 
 MainEditor* readPIXIL(PlatformNativePathString path)
 {
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.is_open()) {
         try {
             json j = json::parse(f);
@@ -149,7 +149,7 @@ MainEditor* readPIXIL(PlatformNativePathString path)
 
 bool writePIXIL(PlatformNativePathString path, MainEditor* editor)
 {
-    std::ofstream outfile(path);
+    std::ofstream outfile = platformOpenOFStream(path);
 
     if (outfile.is_open()) {
         json o = json::object();
@@ -165,7 +165,7 @@ bool writePIXIL(PlatformNativePathString path, MainEditor* editor)
 
 MainEditor* readPISKEL(PlatformNativePathString path)
 {
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.is_open()) {
         json j = json::parse(f);
         f.close();
@@ -220,7 +220,7 @@ MainEditor* readPISKEL(PlatformNativePathString path)
 
 bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
 {
-    std::ofstream outfile(path);
+    std::ofstream outfile = platformOpenOFStream(path);
 
     if (outfile.is_open()) {
         json o = json::object();
@@ -265,7 +265,7 @@ bool writePISKEL(PlatformNativePathString path, MainEditor* editor)
 
 MainEditor* readJPixel(PlatformNativePathString path)
 {
-    std::ifstream f(path);
+    std::ifstream f = platformOpenIFStream(path);
     if (f.is_open()) {
         json j = json::parse(f);
         f.close();

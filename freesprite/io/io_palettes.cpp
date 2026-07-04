@@ -3,7 +3,7 @@
 
 std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name)
 {
-    std::ifstream f(std::filesystem::path(name), std::ios::in);
+    std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
         std::vector<uint32_t> newPalette;
         std::string line;
@@ -28,7 +28,7 @@ std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString n
 
 std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name)
 {
-    std::ifstream f(std::filesystem::path(name), std::ios::in);
+    std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
         std::string magic = "";
         std::string name = "";
@@ -75,7 +75,7 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
 
 std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
 {
-    std::ifstream f(std::filesystem::path(name), std::ios::in);
+    std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
         std::pair<bool, std::vector<uint32_t>> ret;
         bool anyNonEmptyLine = false;
@@ -107,7 +107,7 @@ std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
 
 std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString name)
 {
-    std::ifstream f(std::filesystem::path(name), std::ios::in);
+    std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
         std::pair<bool, std::vector<uint32_t>> ret;
         while (!f.eof()) {

@@ -1145,7 +1145,7 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
     events.clear();
 
     PlatformNativePathString directoryOfFile = path.substr(0, path.find_last_of({ '/', '\\' }) + 1);
-    std::ifstream file(path, std::ios::binary);
+    std::ifstream file = platformOpenIFStream(path, std::ios::binary);
     if (file.is_open()) {
 
         std::unique_ptr<lcf::rpg::Map> map(lcf::LMU_Reader::Load(file));

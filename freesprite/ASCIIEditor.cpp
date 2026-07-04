@@ -259,7 +259,7 @@ void ASCIIEditor::resize(XY newSize)
 ASCIISession* ASCIISession::fromTXT(PlatformNativePathString path)
 {
     
-    std::ifstream infile(path);
+    std::ifstream infile = platformOpenIFStream(path);
     if (infile.good()) {
         ASCIISession* ret = new ASCIISession({ 0,0 });
         std::string line;
