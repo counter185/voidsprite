@@ -168,19 +168,6 @@ void g_popRenderTarget() {
     SDL_SetRenderTarget(g_rd, rts.size() == 0 ? NULL : rts[rts.size() - 1]);
 }
 
-
-SDL_Texture* IMGLoadToTexture(std::string path) {
-    SDL_Surface* srf = IMG_Load(pathInProgramDirectory(path).c_str());
-    srf = srf == NULL ? IMG_Load(path.c_str()) : srf;
-    if (srf == NULL) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't load: " + path));
-        return NULL;
-    }
-    SDL_Texture* ret = tracked_createTextureFromSurface(g_rd, srf);
-    SDL_FreeSurface(srf);
-    return ret;
-}
-
 SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd) {
     rd = rd == NULL ? g_rd : rd;
     std::vector<PlatformNativePathString> pathList;
@@ -193,8 +180,11 @@ SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd) {
     SDL_Surface* srf = NULL;
     for (auto& path : pathList) {
         std::string pathUTF8 = convertStringToUTF8OnWin32(path);
-        srf = IMG_Load(pathUTF8.c_str());
-        if (srf != NULL) {
+        Layer* l = loadAnyIntoFlat(pathUTF8);
+        //srf = IMG_Load(pathUTF8.c_str());
+        if (l != NULL) {
+            srf = l->toSDLSurface();
+            delete l;
             break;
         }
     }
@@ -1065,17 +1055,6 @@ int main(int argc, char** argv)
             serializeVisualConfig(getDefaultVisualConf(), convertStringToUTF8OnWin32(platformEnsureDirAndGetConfigFilePath()) + "/visualconfigs/sample_config.json");
         }
 
-        initSteps.updateLastSection("Loading custom cursor");
-        if (g_config.overrideCursor) {
-            std::string cursorPath = pathInProgramDirectory(VOIDSPRITE_ASSETS_SUBDIR "app_cursor.png");
-            SDL_Surface* cursorSrf = IMG_Load(cursorPath.c_str());
-            if (cursorSrf != NULL) {
-                SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
-                SDL_SetCursor(cur);
-                SDL_FreeSurface(cursorSrf);
-            }
-        }
-
         initSteps.updateLastSection("Initializing SDK");
         g_createVSPSDK();
         initSteps.updateLastSection("Loading plugins");
@@ -1086,6 +1065,23 @@ int main(int argc, char** argv)
         g_setupIO();
         initSteps.updateLastSection("Loading palettes");
         g_reloadColorMap();
+
+        //load fonts
+        loginfo("Loading fonts");
+        initSteps.updateLastSection("Initializing SDL_ttf");
+        TTF_Init();
+        initSteps.updateLastSection("Loading fonts");
+        g_reloadFonts();
+
+        initSteps.updateLastSection("Loading custom cursor");
+        if (g_config.overrideCursor) {
+            SDL_Surface* cursorSrf = IMGLoadAssetToSurface("app_cursor.png");
+            if (cursorSrf != NULL) {
+                SDL_Cursor* cur = SDL_CreateColorCursor(cursorSrf, 0, 0);
+                SDL_SetCursor(cur);
+                SDL_FreeSurface(cursorSrf);
+            }
+        }
 
         initSteps.updateLastSection("Loading assets");
         loginfo("Loading assets");
@@ -1270,13 +1266,6 @@ int main(int argc, char** argv)
         g_loadFilters();
         initSteps.updateLastSection("Setting up keybinds");
         g_initKeybinds();
-
-        //load fonts
-        loginfo("Loading fonts");
-        initSteps.updateLastSection("Initializing SDL_ttf");
-        TTF_Init();
-        initSteps.updateLastSection("Loading fonts");
-        g_reloadFonts();
 
         /*SDL_Surface* rasterCP437FontImg = IMG_Load(pathInProgramDirectory("assets/codepage437-8x8-voidfont.png").c_str());
         if (rasterCP437FontImg != NULL) {

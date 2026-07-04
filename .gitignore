@@ -476,3 +476,4 @@ android-project/local.properties
 /freesprite/linux/flatpak/repo
 /build_cmake
 /freesprite/.vscode
+*.kate-swp

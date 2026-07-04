@@ -367,7 +367,6 @@ void g_popRenderTarget();
 void g_reloadFonts();
 void g_copyStringToClipboard(std::string text);
 
-SDL_Texture* IMGLoadToTexture(std::string path);
 SDL_Surface* IMGLoadAssetToSurface(std::string path, SDL_Renderer* rd = NULL);
 SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd = NULL);
 

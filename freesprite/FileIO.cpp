@@ -1911,6 +1911,22 @@ Layer* readWinSHS(PlatformNativePathString path, u64 seek)
 
 Layer* loadAnyIntoFlat(std::string utf8path, FileImporter** outputFoundImporter, OperationProgressReport* progressReport)
 {
+    ENSURE_REPORT_VALID(progressReport);
+    PlatformNativePathString fPath = convertStringOnWin32(utf8path);
+
+    //see if we can just simply use a flat importer for this
+    for (FileImporter*& importer : g_fileImporters) {
+        if (stringEndsWithIgnoreCase(utf8path, importer->extension()) && importer->canImport(fPath)) {
+            if (!importer->importsWholeSession()) {
+                Layer* l = (Layer*)importer->importData(fPath, progressReport);
+                if (l != NULL) {
+                    return l;
+                }
+            } else {
+                break;
+            }
+        }
+    }
     MainEditor* ssn = loadAnyIntoSession(utf8path, outputFoundImporter, progressReport);
     if (ssn != NULL) {
         Layer* ret = ssn->flattenImage();

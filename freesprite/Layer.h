@@ -80,6 +80,8 @@ public:
     }
 
     static Layer* createFromSurface(SDL_Surface* from);
+    
+    SDL_Surface* toSDLSurface();
 
     /// <summary>
     /// Tries to allocate a new layer. If either memory allocation or texture creation fails, frees it and returns NULL.

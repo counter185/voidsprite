@@ -48,6 +48,18 @@ Layer* Layer::createFromSurface(SDL_Surface* from) {
     return NULL;
 }
 
+SDL_Surface* Layer::toSDLSurface() {
+    if (!isPalettized) {
+        SDL_Surface* srf = SDL_CreateSurface(w, h, SDL_PIXELFORMAT_ARGB8888);
+        memcpy(srf->pixels, pixels32(), w*h*4);
+        return srf;
+    } else {
+        Layer* rgb = ((LayerPalettized*)this)->toRGB();
+        DoOnReturn deleteRGB([rgb](){delete rgb;});
+        return rgb->toSDLSurface();
+    }
+}
+
 void Layer::setLayerData(std::vector<LayerVariant> data, XY dimensions)
 {
     layerData = data;

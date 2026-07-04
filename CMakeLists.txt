@@ -5,6 +5,11 @@ project(voidsprite)
 set(CMAKE_DEBUG_POSTFIX "")
 
 option(FLATPAK "set to ON if building a flatpak" OFF)
+option(VSP_NETWORKING "enable SDL_net functionality" ON)
+
+if (EMSCRIPTEN)
+    set(VSP_NETWORKING OFF)
+endif()
 
 #on flatpak we must install these separately as system libraries
 #(add to the flatpak yml file)
@@ -15,7 +20,6 @@ if (NOT FLATPAK)
     add_subdirectory(external/SDL_ttf)
 
     if (NOT DEFINED EMSCRIPTEN)
-        add_subdirectory(external/SDL_net)
         set(LIBLCF_WITH_INI OFF)
         set(LIBLCF_WITH_ICU OFF)
         set(LIBLCF_WITH_XML OFF)
@@ -32,6 +36,10 @@ if (NOT FLATPAK)
     set(AVIF_CODEC_LIBGAV1 "LOCAL")
     set(AVIF_CODEC_SVT "LOCAL")
     add_subdirectory(external/libavif)
+endif()
+
+if (VSP_NETWORKING)
+    add_subdirectory(external/SDL_net)
 endif()
 
 #these are static and can be used on virtually any platform
