@@ -46,6 +46,81 @@ Layer* galDecode24bit(int w, int h, std::vector<u8>& pixelData)
     return l;
 }
 
+std::string galMakeXML(MainEditor* session)
+{
+    std::string ret = "";
+    ret += frmt("<Frames Version=\"200\" Width=\"{}\" Height=\"{}\" Bpp=\"24\" Count=\"{}\" SyncPal=\"1\" Randomized=\"0\" CompType=\"0\" CompLevel=\"0\" BGColor=\"16777215\" BlockWidth=\"0\" BlockHeight=\"0\" NotFillBG=\"1\">\n", 
+        session->canvas.dimensions.x, session->canvas.dimensions.y, session->frames.size());
+
+    for (Frame*& f : session->frames) {
+        ret += frmt("  <Frame Name=\"%framenumber%\" TransColor=\"-1\" Delay=\"{}\" Disposal=\"2\">\n",
+            session->frameAnimMSPerFrame);
+        ret += frmt("    <Layers Count=\"{}\" Width=\"{}\" Height=\"{}\" Bpp=\"24\">\n",
+            f->layers.size(), session->canvas.dimensions.x, session->canvas.dimensions.y);
+
+        for (Layer*& l : f->layers) {
+            ret += frmt("      <Layer Left=\"0\" Top=\"0\" Visible=\"{}\" TransColor=\"-1\" Alpha=\"{}\" AlphaOn=\"1\" Name=\"{}\" Lock=\"0\" />\n",
+                l->hidden ? "0" : "1", l->layerAlpha, l->name);
+        }
+
+        ret += frmt("    </Layers>\n");
+        ret += frmt("  </Frame>\n");
+    }
+
+    ret += frmt("</Frames>");
+    return ret;
+}
+
+std::vector<u8> galEncodeLayerRGB(Layer* layer)
+{
+    std::vector<u8> ret;
+    int padBytes = (4 - ((layer->w * 3) % 4)) % 4;
+    ret.resize(layer->w * layer->h * 3 + (padBytes * layer->h));
+    u8* retData = ret.data();
+    u32* ppx = layer->pixels32();
+    for (int y = 0; y < layer->h; y++) {
+        for (int x = 0; x < layer->w; x++) {
+            auto c = uint32ToSDLColor(ARRAY2DPOINT(ppx, x, y, layer->w));
+            *(retData++) = c.b;
+            *(retData++) = c.g;
+            *(retData++) = c.r;
+        }
+        
+        for (int p = 0; p < padBytes; p++) {
+            *(retData++) = 0;
+        }
+    }
+    return ret;
+}
+
+std::vector<u8> galEncodeLayerAlphaMap(Layer* layer)
+{
+    std::vector<u8> ret;
+    int padBytes = (4 - (layer->w % 4)) % 4;
+    ret.resize(layer->w * layer->h + (padBytes * layer->h));
+    u8* retData = ret.data();
+    u32* ppx = layer->pixels32();
+    for (int y = 0; y < layer->h; y++) {
+        for (int x = 0; x < layer->w; x++) {
+            auto c = uint32ToSDLColor(ARRAY2DPOINT(ppx, x, y, layer->w));
+            *(retData++) = c.a;
+        }
+
+        for (int p = 0; p < padBytes; p++) {
+            *(retData++) = 0;
+        }
+    }
+    return ret;
+}
+
+std::vector<u8> galEncodeBufferPair(std::vector<u8>& data)
+{
+    std::vector<u8> ret = compressZlib(data.data(), data.size());
+    u32 size = ret.size();
+    ret.insert(ret.begin(), { (u8)size, (u8)(size >> 8), (u8)(size >> 16), (u8)(size >> 24) });
+    return ret;
+}
+
 void galApplyAlphaMap(Layer* rgb, Layer* alphaMap) {
     if (xyEqual({ rgb->w, rgb->h }, { alphaMap->w, alphaMap->h })) {
         u32* rgbPx = rgb->pixels32();
@@ -127,15 +202,6 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
             auto layersRoot = frameNode.child("Layers");
             for (auto& layerNode : layersRoot.children()) {
                 auto layerBuffer = galNextBufferPair(f);
-                //i can't be bothered to figure out how this padding works
-                /*for (int skip = 0; skip < 4; skip++) {
-                    int g = fgetc(f);
-                    if (g != 0) {
-                        ungetc(g, f);
-                        break;
-                    }
-                    loginfo(frmt("[GALE] skipping padding at {}...", ftell(f)));
-                }*/
 
                 Layer* decoded = galDecode24bit(w, h, layerBuffer);
 
@@ -163,4 +229,32 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
         return new MainEditor(frames);
     }
     return NULL;
+}
+
+bool writeGAL(PlatformNativePathString path, MainEditor* session, OperationProgressReport* progress)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+        DoOnReturn closeFile([f](){fclose(f); });
+        fwrite("GaleX200", 8, 1, f);
+        std::string xml = galMakeXML(session);
+        std::vector<u8> xmlV = std::vector<u8>(xml.begin(), xml.end());
+        std::vector<u8> xmlEncode = galEncodeBufferPair(xmlV);
+        fwrite(xmlEncode.data(), 1, xmlEncode.size(), f);
+
+        for (Frame*& frame : session->frames) {
+            for (Layer*& layer : frame->layers) {
+                std::vector<u8> layerRGB = galEncodeLayerRGB(layer);
+                std::vector<u8> layerEncode = galEncodeBufferPair(layerRGB);
+                fwrite(layerEncode.data(), 1, layerEncode.size(), f);
+
+                std::vector<u8> layerAlpha = galEncodeLayerAlphaMap(layer);
+                std::vector<u8> layerAEncode = galEncodeBufferPair(layerAlpha);
+                fwrite(layerAEncode.data(), 1, layerAEncode.size(), f);
+            }
+        }
+
+        return true;
+    }
+    return false;
 }
