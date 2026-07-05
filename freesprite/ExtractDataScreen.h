@@ -72,6 +72,11 @@ public:
         dimensionsUpdated();
         c.recenter();
     }
+    ~ExtractDataScreen() {
+        if (fileHandle != NULL) {
+            fclose(fileHandle);
+        }
+    }
 
     void render() override;
     void takeInput(SDL_Event evt) override;

@@ -59,6 +59,7 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_anymap.h"
 #include "io/io_gamemaker.h"
 #include "io/io_pep.h"
+#include "io/io_graphicsgale.h"
 
 #include "io/io_palettes.h"
 

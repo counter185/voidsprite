@@ -759,6 +759,12 @@
     <ClCompile Include="ScreenPreprocessImage.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_graphicsgale.h">
+      <Filter>Header files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_graphicsgale.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">

@@ -220,5 +220,3 @@ inline std::vector<u8> readWholeFile(FILE* f) {
         return {};
     }
 }
-
-u8* decompressZlib(u8* data, u64 compressedSize, u64 decompressedSize);
