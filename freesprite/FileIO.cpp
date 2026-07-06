@@ -2457,7 +2457,7 @@ void g_setupIO() {
     g_fileExporters.push_back(exORA = FileExporter::sessionExporter("OpenRaster", ".ora", TL("vsp.export.ora"), &writeOpenRaster));
     g_fileExporters.push_back(exPixelStudioPSP = FileExporter::sessionExporter("Pixel Studio PSP", ".psp", "", &writePixelStudioPSP));
     g_fileExporters.push_back(exPixelStudioPSX = FileExporter::sessionExporter("Pixel Studio (compressed) PSX", ".psx", "", &writePixelStudioPSX));
-    g_fileExporters.push_back(exGAL = FileExporter::sessionExporter("GraphicsGale", ".gal", "", &writeGAL));
+    g_fileExporters.push_back(exGAL = FileExporter::sessionExporter("GraphicsGale", ".gal", "", &writeGAL, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exLPE = FileExporter::sessionExporter("Lospec Pixel Editor", ".lpe",  "", &writeLPE));
     g_fileExporters.push_back(exPiskel = FileExporter::sessionExporter("Piskel", ".piskel", "", &writePISKEL));
     g_fileExporters.push_back(exAsepriteASE = FileExporter::sessionExporter("Aseprite Sprite", ".aseprite", TL("vsp.export.aseprite"), &writeAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED));
@@ -2544,7 +2544,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("OpenRaster", ".ora", &readOpenRaster, exORA));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio", ".psp", &readPixelStudioPSP, exPixelStudioPSP));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixel Studio (compressed)", ".psx", &readPixelStudioPSX, exPixelStudioPSX));
-    g_fileImporters.push_back(FileImporter::sessionImporter("GraphicsGale", ".gal", &readGAL, exGAL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("GraphicsGale", ".gal", &readGAL, exGAL, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::sessionImporter("Lospec Pixel Editor", ".lpe", &readLPE, exLPE));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pix2D", ".pix2d", &readPix2D, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, exPiskel));

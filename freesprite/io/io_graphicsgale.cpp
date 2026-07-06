@@ -49,18 +49,25 @@ Layer* galDecode24bit(int w, int h, std::vector<u8>& pixelData)
 std::string galMakeXML(MainEditor* session)
 {
     std::string ret = "";
-    ret += frmt("<Frames Version=\"200\" Width=\"{}\" Height=\"{}\" Bpp=\"24\" Count=\"{}\" SyncPal=\"1\" Randomized=\"0\" CompType=\"0\" CompLevel=\"0\" BGColor=\"16777215\" BlockWidth=\"0\" BlockHeight=\"0\" NotFillBG=\"1\">\n", 
-        session->canvas.dimensions.x, session->canvas.dimensions.y, session->frames.size());
+    int bpp = session->isPalettized ? 8 : 24;
+    ret += frmt("<Frames Version=\"200\" Width=\"{}\" Height=\"{}\" Bpp=\"{}\" Count=\"{}\" SyncPal=\"1\" Randomized=\"0\" CompType=\"0\" CompLevel=\"0\" BGColor=\"16777215\" BlockWidth=\"0\" BlockHeight=\"0\" NotFillBG=\"1\">\n", 
+        session->canvas.dimensions.x, session->canvas.dimensions.y, bpp, session->frames.size());
 
     for (Frame*& f : session->frames) {
         ret += frmt("  <Frame Name=\"%framenumber%\" TransColor=\"-1\" Delay=\"{}\" Disposal=\"2\">\n",
             session->frameAnimMSPerFrame);
-        ret += frmt("    <Layers Count=\"{}\" Width=\"{}\" Height=\"{}\" Bpp=\"24\">\n",
-            f->layers.size(), session->canvas.dimensions.x, session->canvas.dimensions.y);
+
+        ret += frmt("    <Layers Count=\"{}\" Width=\"{}\" Height=\"{}\" Bpp=\"{}\">\n",
+            f->layers.size(), session->canvas.dimensions.x, session->canvas.dimensions.y, bpp);
+
+        if (bpp == 8) {
+            ret += frmt("    <RGB>{}</RGB>\n",
+                galEncodePalette(((MainEditorPalettized*)session)->palette));
+        }
 
         for (Layer*& l : f->layers) {
-            ret += frmt("      <Layer Left=\"0\" Top=\"0\" Visible=\"{}\" TransColor=\"-1\" Alpha=\"{}\" AlphaOn=\"1\" Name=\"{}\" Lock=\"0\" />\n",
-                l->hidden ? "0" : "1", l->layerAlpha, l->name);
+            ret += frmt("      <Layer Left=\"0\" Top=\"0\" Visible=\"{}\" TransColor=\"{}\" Alpha=\"{}\" AlphaOn=\"{}\" Name=\"{}\" Lock=\"0\" />\n",
+                l->hidden ? "0" : "1", bpp == 8 ? "255" : "-1", l->layerAlpha, bpp == 8 ? 0 : 1, l->name);
         }
 
         ret += frmt("    </Layers>\n");
@@ -93,6 +100,25 @@ std::vector<u8> galEncodeLayerRGB(Layer* layer)
     return ret;
 }
 
+std::vector<u8> galEncodeLayerIndexed(LayerPalettized* layer) {
+    std::vector<u8> ret;
+    int padBytes = (4 - (layer->w % 4)) % 4;
+    ret.resize(layer->w * layer->h + (padBytes * layer->h));
+    u8* retData = ret.data();
+    u32* ppx = layer->pixels32();
+    for (int y = 0; y < layer->h; y++) {
+        for (int x = 0; x < layer->w; x++) {
+            u32 c = ARRAY2DPOINT(ppx, x, y, layer->w);
+            *(retData++) = (u8)c;
+        }
+
+        for (int p = 0; p < padBytes; p++) {
+            *(retData++) = 0;
+        }
+    }
+    return ret;
+}
+
 std::vector<u8> galEncodeLayerAlphaMap(Layer* layer)
 {
     std::vector<u8> ret;
@@ -118,6 +144,35 @@ std::vector<u8> galEncodeBufferPair(std::vector<u8>& data)
     std::vector<u8> ret = compressZlib(data.data(), data.size());
     u32 size = ret.size();
     ret.insert(ret.begin(), { (u8)size, (u8)(size >> 8), (u8)(size >> 16), (u8)(size >> 24) });
+    return ret;
+}
+
+std::string galEncodePalette(std::vector<u32>& palette)
+{
+    std::string ret = "";
+    for (int i = 0; i < 256; i++) {
+        auto c = i < palette.size() ? palette[i] : 0;
+        auto cc = uint32ToSDLColor(c);
+        u32 colorBGR = PackRGBAtoARGB(cc.b, cc.g, cc.r, 0);
+        ret += frmt("{:06X}", colorBGR);
+    }
+    return ret;
+}
+
+std::vector<u32> galParsePalette(std::string s)
+{
+    std::vector<u32> ret;
+    while (s.size() >= 6) {
+        try {
+            u32 bgr = std::stoi(s.substr(0, 6), 0, 16);
+            auto c = uint32ToSDLColor(bgr);
+            ret.push_back(PackRGBAtoARGB(c.b, c.g, c.r, 255));
+            s = s.substr(6);
+        }
+        catch (std::exception&) {
+            logerr("[GALE] Invalid color");
+        }
+    }
     return ret;
 }
 
@@ -184,7 +239,7 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
         int h = root.attribute("Height").as_int();
         int bpp = root.attribute("Bpp").as_int();
         loginfo(frmt("[GALE] {}x{} bpp:{}", w, h, bpp));
-        if (bpp != 24) {
+        if (bpp != 24 && bpp != 8) {
             g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), frmt("Unsupported BPP: {}", bpp)));
             logerr("[GALE] unsupported bpp");
             return NULL;
@@ -194,30 +249,62 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
 
         int sumDelay = 0;
 
+        std::vector<u32> palette;
+        bool paletteIsTheSame = true;
+
         for (auto& frameNode : root.children()) {
             Frame* fr = new Frame();
             frames.push_back(fr);
             sumDelay += frameNode.attribute("Delay").as_int();
 
             auto layersRoot = frameNode.child("Layers");
-            for (auto& layerNode : layersRoot.children()) {
+
+            if (bpp == 8) {
+                auto paletteNode = layersRoot.child("RGB");
+                std::vector<u32> newPalette = galParsePalette(paletteNode.text().as_string());
+                if (palette.empty()) {
+                    palette = newPalette;
+                } 
+                else if (palette.size() != newPalette.size() || memcmp(palette.data(), newPalette.data(), palette.size() * 4) != 0) {
+                    palette = newPalette;
+                    paletteIsTheSame = false;
+                    loginfo("[GALE] palettes are not the same across frames. loading in RGB mode");
+                }
+            }
+
+            for (auto& layerNode : layersRoot.children("Layer")) {
                 auto layerBuffer = galNextBufferPair(f);
 
-                Layer* decoded = galDecode24bit(w, h, layerBuffer);
+                Layer* decoded = NULL;
+                if (bpp == 24) {
+                    decoded = galDecode24bit(w, h, layerBuffer);
 
-                //int alphaOn = layerNode.attribute("AlphaOn").as_int();
+                    //int alphaOn = layerNode.attribute("AlphaOn").as_int();
 
-                auto alphaBuffer = galNextBufferPair(f);
-                if (alphaBuffer.size() > 0) {
-                    Layer* a = galDecode8Bit(w, h, alphaBuffer);
-                    galApplyAlphaMap(decoded, a);
-                    delete a;
+                    auto alphaBuffer = galNextBufferPair(f);
+                    if (alphaBuffer.size() > 0) {
+                        Layer* a = galDecode8Bit(w, h, alphaBuffer);
+                        galApplyAlphaMap(decoded, a);
+                        delete a;
+                    }
+                    else {
+                        std::string transColor = layerNode.attribute("TransColor").as_string();
+                        if (transColor != "-1") {
+                            u32 transparentColor = layerNode.attribute("TransColor").as_uint() | 0xFF000000;
+                            decoded->replaceColor(transparentColor, 0);
+                        }
+                    }
                 }
-                else {
+                else if (bpp == 8) {
+                    decoded = galDecode8Bit(w, h, layerBuffer);
+                    ((LayerPalettized*)decoded)->palette = palette;
+                    //what's this even for
+                    galNextBufferPair(f);
+
                     std::string transColor = layerNode.attribute("TransColor").as_string();
                     if (transColor != "-1") {
-                        u32 transparentColor = layerNode.attribute("TransColor").as_uint() | 0xFF000000;
-                        decoded->replaceColor(transparentColor, 0);
+                        u32 transparentColor = layerNode.attribute("TransColor").as_uint();
+                        decoded->replaceColor(transparentColor, -1);
                     }
                 }
                 decoded->layerAlpha = (u8)layerNode.attribute("Alpha").as_int();
@@ -226,7 +313,9 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
                 fr->layers.push_back(decoded);
             }
         }
-        return new MainEditor(frames);
+        MainEditor* ret = frames.front()->layers.front()->isPalettized ? new MainEditorPalettized(frames) : new MainEditor(frames);
+        ret->frameAnimMSPerFrame = sumDelay / frames.size();
+        return ret;
     }
     return NULL;
 }
@@ -244,13 +333,23 @@ bool writeGAL(PlatformNativePathString path, MainEditor* session, OperationProgr
 
         for (Frame*& frame : session->frames) {
             for (Layer*& layer : frame->layers) {
-                std::vector<u8> layerRGB = galEncodeLayerRGB(layer);
-                std::vector<u8> layerEncode = galEncodeBufferPair(layerRGB);
-                fwrite(layerEncode.data(), 1, layerEncode.size(), f);
+                if (session->isPalettized) {
+                    std::vector<u8> layerRGB = galEncodeLayerIndexed((LayerPalettized*)layer);
+                    std::vector<u8> layerEncode = galEncodeBufferPair(layerRGB);
+                    fwrite(layerEncode.data(), 1, layerEncode.size(), f);
 
-                std::vector<u8> layerAlpha = galEncodeLayerAlphaMap(layer);
-                std::vector<u8> layerAEncode = galEncodeBufferPair(layerAlpha);
-                fwrite(layerAEncode.data(), 1, layerAEncode.size(), f);
+                    //empty buffer
+                    fwrite("\0\0\0\0", 4, 1, f);
+                }
+                else {
+                    std::vector<u8> layerRGB = galEncodeLayerRGB(layer);
+                    std::vector<u8> layerEncode = galEncodeBufferPair(layerRGB);
+                    fwrite(layerEncode.data(), 1, layerEncode.size(), f);
+
+                    std::vector<u8> layerAlpha = galEncodeLayerAlphaMap(layer);
+                    std::vector<u8> layerAEncode = galEncodeBufferPair(layerAlpha);
+                    fwrite(layerAEncode.data(), 1, layerAEncode.size(), f);
+                }
             }
         }
 

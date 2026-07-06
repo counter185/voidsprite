@@ -258,8 +258,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="io\io_graphicsgale.cpp"/>
-    <ClCompile Include="io\io_graphicsgale.h" />
+    <ClCompile Include="io\io_graphicsgale.cpp" />
+    <ClInclude Include="io\io_graphicsgale.h" />
     <ClCompile Include="ScreenPreprocessImage.cpp" />
     <ClCompile Include="ASCIIEditor.cpp" />
     <ClCompile Include="astc_dec\astc_decomp.cpp" />

@@ -224,7 +224,6 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
             auto paletteCopy = caller->palette;
             paletteCopy.push_back(0xFF000000);
             caller->setPalette(paletteCopy);
-            updateForcedColorPaletteButtons();
         };
         colorPaletteTabs->tabs[0].add(newColorButton);
     }
