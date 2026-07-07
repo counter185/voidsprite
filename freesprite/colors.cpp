@@ -440,23 +440,28 @@ void g_reloadColorMap() {
         auto fileList = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("palettes"), palImport->extension());
         for (auto& file : fileList) {
             std::string fileName = fileNameFromPath(convertStringToUTF8OnWin32(file));
-            if (palImport->canImport(file)) {
-                auto result = palImport->importPalette(file);
-                if (result.first) {
-                    auto colorList = result.second;
-                    NamedColorPalette ncp;
-                    ncp.name = fileName;
-                    ncp.correspondingExporter = palImport->getCorrespondingExporter();
-                    ncp.path = file;
-                    int i = 0;
-                    for (auto& color : colorList) {
-                        ncp.colorMap.push_back({ frmt("{}:{:02x}", fileName, i++), color });
+            try {
+                if (palImport->canImport(file)) {
+                    auto result = palImport->importPalette(file);
+                    if (result.first) {
+                        auto colorList = result.second;
+                        NamedColorPalette ncp;
+                        ncp.name = fileName;
+                        ncp.correspondingExporter = palImport->getCorrespondingExporter();
+                        ncp.path = file;
+                        int i = 0;
+                        for (auto& color : colorList) {
+                            ncp.colorMap.push_back({ frmt("{}:{:02x}", fileName, i++), color });
+                        }
+                        g_namedColorMap.push_back(ncp);
                     }
-                    g_namedColorMap.push_back(ncp);
+                    else {
+                        logerr(frmt("Failed to load palette: {}", fileName));
+                    }
                 }
-                else {
-                    logerr(frmt("Failed to load palette: {}", fileName));
-                }
+            }
+            catch (std::exception& e) {
+                logerr(frmt("Failed to load palette: {}\n  {}", fileName, e.what()));
             }
         }
     }

@@ -458,10 +458,11 @@ bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data)
 
 std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativePathString name)
 {
-    std::ifstream f = platformOpenIFStream(name);
-    if (f.is_open()) {
+    FILE* f = platformOpenFile(name, PlatformFileModeR);
+    if (f != NULL) {
+        DoOnReturn closeFile([f]() {fclose(f); });
+        //auto fileData = readWholeFile(f);
         json j = json::parse(f);
-        f.close();
 
         std::vector<uint32_t> ret;
 
