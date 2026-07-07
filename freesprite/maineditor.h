@@ -315,11 +315,11 @@ public:
     double lastPinchZoomDistance = 0;
     Timer64 zoomKeyTimer;
 
-    ScreenWideActionBar* actionbar;
-    IEditorColorPicker* colorPicker;
-    EditorBrushPicker* brushPicker;
-    EditorLayerPicker* layerPicker;
-    EditorFramePicker* framePicker;
+    ScreenWideActionBar* actionbar = NULL;
+    IEditorColorPicker* colorPicker = NULL;
+    EditorBrushPicker* brushPicker = NULL;
+    EditorLayerPicker* layerPicker = NULL;
+    EditorFramePicker* framePicker = NULL;
 
     bool isolateEnabled = false;
     ScanlineMap isolatedFragment;
