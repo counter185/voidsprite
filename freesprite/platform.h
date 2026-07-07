@@ -78,7 +78,7 @@ Layer* platformGetImageFromClipboard();
 
 FILE* platformOpenFile(PlatformNativePathString path, PlatformNativePathString mode);
 std::ofstream platformOpenOFStream(PlatformNativePathString path);
-std::ifstream platformOpenIFStream(PlatformNativePathString path, int mode = 1);
+std::ifstream platformOpenIFStream(PlatformNativePathString path, int mode = std::ios_base::in);
 
 void platformPrintDocument(Layer* layer);
 void platformShareImage(Layer* layer);
