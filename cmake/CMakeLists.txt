@@ -125,6 +125,8 @@ endif()
 file(GLOB_RECURSE CPP_FILES CONFIGURE_DEPENDS "../freesprite/*.cpp")
 file(GLOB_RECURSE C_FILES CONFIGURE_DEPENDS "../freesprite/*.c")
 
+list(FILTER CPP_FILES EXCLUDE REGEX ".*(x64[/\\])?(Debug|Release)[/\\].*")
+
 if(NOT VOIDSPRITE_ASSETS_PATH STREQUAL "")
     add_compile_definitions(VOIDSPRITE_ASSETS_PATH="${VOIDSPRITE_ASSETS_PATH}/")
 endif()

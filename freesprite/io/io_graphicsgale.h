@@ -5,6 +5,8 @@ std::vector<u8> galNextBufferPair(FILE* f);
 std::vector<u32> galParsePalette(std::string s);
 Layer* galDecode24bit(int w, int h, std::vector<u8>& pixelData);
 Layer* galDecode8Bit(int w, int h, std::vector<u8>& pixelData);
+Layer* galDecode4Bit(int w, int h, std::vector<u8>& pixelData);
+Layer* galDecode1Bit(int w, int h, std::vector<u8>& pixelData);
 
 std::string galMakeXML(MainEditor* session);
 std::vector<u8> galEncodeLayerRGB(Layer* layer);

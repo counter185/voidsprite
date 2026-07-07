@@ -213,6 +213,46 @@ Layer* galDecode8Bit(int w, int h, std::vector<u8>& pixelData) {
     return l;
 }
 
+Layer* galDecode4Bit(int w, int h, std::vector<u8>& pixelData)
+{
+    LayerPalettized* l = LayerPalettized::tryAllocIndexedLayer(w, h);
+    u32* px32 = l->pixels32();
+    u64 pxPos = 0;
+    if (l != NULL) {
+        int lineStride = (w / 2) + (w % 2 != 0 ? 1 : 0);
+        int padBytes = (4 - ((lineStride) % 4)) % 4;
+        for (int y = 0; y < h; y++) {
+            BitReader bits(pixelData.data() + (lineStride + padBytes) * y, lineStride);
+            bits.readHighestBit = true;
+            for (int x = 0; x < w; x++) {
+                u8 index = bits.readBits(4);
+                px32[pxPos++] = (u32)index;
+            }
+        }
+    }
+    return l;
+}
+
+Layer* galDecode1Bit(int w, int h, std::vector<u8>& pixelData)
+{
+    LayerPalettized* l = LayerPalettized::tryAllocIndexedLayer(w, h);
+    u32* px32 = l->pixels32();
+    u64 pxPos = 0;
+    if (l != NULL) {
+        int lineStride = (w / 8) + (w % 8 != 0 ? 1 : 0);
+        int padBytes = (4 - ((lineStride) % 4)) % 4;
+        for (int y = 0; y < h; y++) {
+            BitReader bits(pixelData.data() + (lineStride + padBytes) * y, lineStride);
+            bits.readHighestBit = true;
+            for (int x = 0; x < w; x++) {
+                u8 index = bits.readBits(1);
+                px32[pxPos++] = (u32)index;
+            }
+        }
+    }
+    return l;
+}
+
 MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* progress) {
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
@@ -239,7 +279,7 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
         int h = root.attribute("Height").as_int();
         int bpp = root.attribute("Bpp").as_int();
         loginfo(frmt("[GALE] {}x{} bpp:{}", w, h, bpp));
-        if (bpp != 24 && bpp != 8) {
+        if (bpp != 24 && bpp != 8 && bpp != 4 && bpp != 1) {
             g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), frmt("Unsupported BPP: {}", bpp)));
             logerr("[GALE] unsupported bpp");
             return NULL;
@@ -259,7 +299,7 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
 
             auto layersRoot = frameNode.child("Layers");
 
-            if (bpp == 8) {
+            if (bpp < 24) {
                 auto paletteNode = layersRoot.child("RGB");
                 std::vector<u32> newPalette = galParsePalette(paletteNode.text().as_string());
                 if (palette.empty()) {
@@ -295,8 +335,18 @@ MainEditor* readGAL(PlatformNativePathString path, OperationProgressReport* prog
                         }
                     }
                 }
-                else if (bpp == 8) {
-                    decoded = galDecode8Bit(w, h, layerBuffer);
+                else {
+                    switch (bpp) {
+                        case 8:
+                            decoded = galDecode8Bit(w, h, layerBuffer);
+                            break;
+                        case 4:
+                            decoded = galDecode4Bit(w, h, layerBuffer);
+                            break;
+                        case 1:
+                            decoded = galDecode1Bit(w, h, layerBuffer);
+                            break;
+                    }
                     ((LayerPalettized*)decoded)->palette = palette;
                     //what's this even for
                     galNextBufferPair(f);

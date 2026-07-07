@@ -20,6 +20,8 @@ private:
     int bitsInBuffer = 0;
     u8 buffer = 0;
 public:
+    bool readHighestBit = false;
+
     BitReader(FILE* file) : f(file), usingFile(true) {}
     BitReader(u8* inputData, u64 size) : data(inputData), dataSize(size), usingFile(false) {}
     u32 readBits(int n) {
@@ -41,8 +43,15 @@ public:
             }
             //int bytesLeft = n - bitsRead;
             //int readBits = ixmin(bitsInBuffer, bytesLeft);
-            result |= (buffer & 1) << bitsRead;
-            buffer >>= 1;
+            if (readHighestBit) {
+                result <<= 1;
+                result |= ((buffer & 0b10000000) >> 7);
+                buffer <<= 1;
+            }
+            else {
+                result |= (buffer & 1) << bitsRead;
+                buffer >>= 1;
+            }
             bitsInBuffer--;
             bitsRead++;
         }
