@@ -4,6 +4,7 @@
 #include "BaseScreen.h"
 #include "Timer64.h"
 #include "Panel.h"
+#include "UIButton.h"
 
 struct LaunchpadBGStar {
     XY pos;
@@ -11,6 +12,20 @@ struct LaunchpadBGStar {
     u8 opacity;
     int blinkOffset;
     Timer64 timer{};
+};
+
+class ButtonLaunchpadLastFile : public UIButton {
+private:
+    bool fileExists = false;
+    std::string fullPath;
+    std::string path;
+    std::string fileName;
+    std::string size = "";
+public:
+    ButtonLaunchpadLastFile(std::string file);
+
+    void renderText(XY pos) override;
+    void renderTooltip(XY pos) override;
 };
 
 class PanelNewImage : public Panel {

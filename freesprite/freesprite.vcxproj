@@ -382,6 +382,7 @@
     <ClCompile Include="TemplateRPG2KChipset.cpp" />
     <ClCompile Include="TemplateRPG2KFaceset.cpp" />
     <ClCompile Include="TemplateRPG2KSystem.cpp" />
+    <ClCompile Include="thumbnail_loader.cpp" />
     <ClCompile Include="TilemapEditorLayerPicker.cpp" />
     <ClCompile Include="brush\ToolGuideline.cpp" />
     <ClCompile Include="brush\ToolRectFlip.cpp" />
@@ -675,6 +676,7 @@
     <ClInclude Include="TemplateRPG2KChipset.h" />
     <ClInclude Include="TemplateRPG2KFaceset.h" />
     <ClInclude Include="TemplateRPG2KSystem.h" />
+    <ClInclude Include="thumbnail_loader.h" />
     <ClInclude Include="TilemapEditorLayerPicker.h" />
     <ClInclude Include="brush\ToolGuideline.h" />
     <ClInclude Include="brush\ToolRectFlip.h" />

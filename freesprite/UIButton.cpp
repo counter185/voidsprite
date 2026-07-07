@@ -17,7 +17,7 @@ void UIButton::render(XY pos)
     }
 
     //SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
-    SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+    
     //SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
     //SDL_RenderFillRect(g_rd, &drawrect);
     fill.fill(drawrect);
@@ -38,16 +38,7 @@ void UIButton::render(XY pos)
 
     renderAnimations(pos);
 
-    int textX = pos.x + 5;
-    if (icon != NULL) {
-        SDL_Texture* icn = icon->get(g_rd);
-        SDL_SetTextureAlphaMod(icn, 0xff);
-        SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
-        SDL_RenderCopy(g_rd, icn, NULL, &iconRect);
-        textX += iconRect.w;
-    }
-
-    g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);
+    renderText(pos);
 
     if (focused) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x60);
@@ -183,6 +174,22 @@ void UIButton::renderAnimations(XY pos)
         playClickVFX();
         playClickVFXOnNextFrame = false;
     }
+}
+
+void UIButton::renderText(XY pos)
+{
+    SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+
+    int textX = pos.x + 5;
+    if (icon != NULL) {
+        SDL_Texture* icn = icon->get(g_rd);
+        SDL_SetTextureAlphaMod(icn, 0xff);
+        SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
+        SDL_RenderCopy(g_rd, icn, NULL, &iconRect);
+        textX += iconRect.w;
+    }
+
+    g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);
 }
 
 void UIButton::renderTooltip(XY pos)

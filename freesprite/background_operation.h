@@ -97,7 +97,7 @@ inline void g_startNewOperation(std::function<void()> function) {
 
 inline void g_startNewAsyncOperation(std::function<void()> function) {
     g_bgOpProgressReport->resetProgress();
-#if __EMSCRIPTEN__
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
     function();
 #else
     AsyncOp* op = new AsyncOp();

@@ -32,6 +32,7 @@
 #include "keybinds.h"
 #include "sdk_pluginloader.h"
 #include "multiwindow.h"
+#include "thumbnail_loader.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -716,6 +717,9 @@ void g_mainLoop() {
         g_fnt->RenderString(frmt("Drawables created: {}", g_createdDrawables), origin.x, origin.y,
             { 255, 255, 255, 100 }, 14);
         origin.y -= 16;
+        g_fnt->RenderString(frmt("Thumbnail cache: {}", bytesToFriendlyString(thumbnails_cacheSize)), origin.x, origin.y,
+            { 255, 255, 255, 100 }, 14);
+        origin.y -= 16;
         //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
         //origin.y -= 16;
 #endif
@@ -1065,6 +1069,8 @@ int main(int argc, char** argv)
         g_setupIO();
         initSteps.updateLastSection("Loading palettes");
         g_reloadColorMap();
+        initSteps.updateLastSection("Initializing thumbnail loader");
+        thumbnails_start();
 
         //load fonts
         loginfo("Loading fonts");
@@ -1385,6 +1391,7 @@ int main(int argc, char** argv)
             g_mainLoop();
         }
 
+        thumbnails_stop();
         g_waitAndRemoveAllBgOpAndAsyncThreads();
 
         loginfo("Deinit...");

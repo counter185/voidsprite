@@ -762,6 +762,9 @@
     <ClCompile Include="io\io_graphicsgale.cpp">
       <Filter>Source files\io</Filter>
     </ClCompile>
+    <ClCompile Include="thumbnail_loader.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1510,6 +1513,9 @@
     </ClInclude>
     <ClInclude Include="io\io_graphicsgale.h">
       <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="thumbnail_loader.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

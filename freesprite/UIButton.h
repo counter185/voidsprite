@@ -53,6 +53,7 @@ public:
     bool focusableWithTab() override { return true; }
 
     void renderAnimations(XY pos);
+    virtual void renderText(XY pos);
     virtual void renderTooltip(XY pos);
     void playClickVFX();
     void playClickVFXNextFrame();

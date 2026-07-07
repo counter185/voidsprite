@@ -36,6 +36,9 @@
 #include "ScreenVoxelEditor.h"
 #include "PalettizedEditorColorPicker.h"
 #include "ScreenPreprocessImage.h"
+#include "TooltipsLayer.h"
+#include "thumbnail_loader.h"
+#include "multiwindow.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -467,21 +470,8 @@ void StartScreen::populateLastOpenFiles()
     lastOpenFilesPanel->subWidgets.freeAllDrawables();
 
     for (std::string& lastPath : g_config.lastOpenFiles) {
-        UIButton* button = new UIButton();
-        button->tooltip = lastPath;
-        std::string s = lastPath;
-        bool ellipsis = false;
-        const int maxW = 600;
-        while (s.size() > 3 && g_fnt->StatStringDimensions(s).x > maxW) {
-            s = s.substr(1);
-            ellipsis = true;
-        }
-        if (ellipsis) {
-            s = "..." + s;
-        }
-        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(s));
-        button->text = s;
-        button->wxWidth = textDim.x;
+        ButtonLaunchpadLastFile* button = new ButtonLaunchpadLastFile(lastPath);
+        
         button->onClickCallback = [this, lastPath](UIButton*) {
             this->tryLoadFile(lastPath);
         };
@@ -1291,5 +1281,71 @@ PanelNewImage::PanelNewImage()
         buttonNewImagePalettized->text = TL("vsp.launchpad.tab.createindexed");
         buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
         newImageTabs->tabs[x].add(buttonNewImagePalettized);
+    }
+}
+
+ButtonLaunchpadLastFile::ButtonLaunchpadLastFile(std::string file)
+{
+    fullPath = file;
+    fileName = fileNameFromPath(fullPath);
+    path = fullPath.substr(0, fullPath.size() - fileName.size());
+    try {
+        fileExists = std::filesystem::exists(convertStringOnWin32(fullPath));
+        size = fileExists ? bytesToFriendlyString(std::filesystem::file_size(convertStringOnWin32(fullPath))) : "";
+    }
+    catch (std::exception&) {}
+
+    tooltip = fullPath;
+    /*std::string s = fullPath;
+    bool ellipsis = false;
+    const int maxW = 600;
+    while (s.size() > 3 && g_fnt->StatStringDimensions(s).x > maxW) {
+        s = s.substr(1);
+        ellipsis = true;
+    }
+    if (ellipsis) {
+        s = "..." + s;
+    }*/
+    XY textDim = xyAdd({ 10, 0 }, g_fnt->StatStringDimensions(fileName));
+    text = fileName;
+    wxWidth = textDim.x;
+}
+
+void ButtonLaunchpadLastFile::renderText(XY pos)
+{
+    SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+
+    int textX = pos.x + 5;
+
+    XY textEP = g_fnt->RenderString(text, textX, pos.y + 2, fileExists ? textColor : SDL_Color{255, 128, 128, 120}, fontSize);
+    g_fnt->RenderString(path, textEP.x + 10, pos.y - 3, {255,255,255,120}, 14);
+    g_fnt->RenderString(size, textEP.x + 10, pos.y + 11, {255,255,255,180}, 14);
+}
+
+void ButtonLaunchpadLastFile::renderTooltip(XY pos)
+{
+    if (hovered) {
+        if (instantTooltip || hoverTimer.percentElapsedTime(1000) == 1.0f) {
+            PlatformNativePathString nativePath = convertStringOnWin32(fullPath);
+            XY dimensions = fileExists ? thumbnails_getSize(nativePath) : XY{0,0};
+            if ((dimensions.x > 0 && dimensions.y > 0)) {
+                int thisH = wxHeight;
+                double hoverTime = XM1PW3P1(hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000));
+                g_currentWindow->pushOverlayRenderOperation([thisH, dimensions, pos, nativePath, hoverTime]() {
+                    SDL_Rect screenRect = { pos.x, pos.y + thisH, dimensions.x, (int)(dimensions.y * hoverTime) };
+
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
+                    SDL_RenderFillRect(g_rd, &screenRect);
+
+                    thumbnails_render(nativePath, NULL, &screenRect);
+
+                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
+                    SDL_RenderDrawRect(g_rd, &screenRect);
+                });
+            }
+            else if (!tooltip.empty()) {
+                g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });
+            }
+        }
     }
 }
