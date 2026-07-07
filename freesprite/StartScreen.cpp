@@ -1286,11 +1286,11 @@ PanelNewImage::PanelNewImage()
 
 ButtonLaunchpadLastFile::ButtonLaunchpadLastFile(std::string file)
 {
+    setTargetFilePath(convertStringOnWin32(file));
     fullPath = file;
     fileName = fileNameFromPath(fullPath);
     path = fullPath.substr(0, fullPath.size() - fileName.size());
     try {
-        fileExists = std::filesystem::exists(convertStringOnWin32(fullPath));
         size = fileExists ? bytesToFriendlyString(std::filesystem::file_size(convertStringOnWin32(fullPath))) : "";
     }
     catch (std::exception&) {}
@@ -1320,32 +1320,4 @@ void ButtonLaunchpadLastFile::renderText(XY pos)
     XY textEP = g_fnt->RenderString(text, textX, pos.y + 2, fileExists ? textColor : SDL_Color{255, 128, 128, 120}, fontSize);
     g_fnt->RenderString(path, textEP.x + 10, pos.y - 3, {255,255,255,120}, 14);
     g_fnt->RenderString(size, textEP.x + 10, pos.y + 11, {255,255,255,180}, 14);
-}
-
-void ButtonLaunchpadLastFile::renderTooltip(XY pos)
-{
-    if (hovered) {
-        if (instantTooltip || hoverTimer.percentElapsedTime(1000) == 1.0f) {
-            PlatformNativePathString nativePath = convertStringOnWin32(fullPath);
-            XY dimensions = fileExists ? thumbnails_getSize(nativePath) : XY{0,0};
-            if ((dimensions.x > 0 && dimensions.y > 0)) {
-                int thisH = wxHeight;
-                double hoverTime = XM1PW3P1(hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000));
-                g_currentWindow->pushOverlayRenderOperation([thisH, dimensions, pos, nativePath, hoverTime]() {
-                    SDL_Rect screenRect = { pos.x, pos.y + thisH, dimensions.x, (int)(dimensions.y * hoverTime) };
-
-                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
-                    SDL_RenderFillRect(g_rd, &screenRect);
-
-                    thumbnails_render(nativePath, NULL, &screenRect);
-
-                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
-                    SDL_RenderDrawRect(g_rd, &screenRect);
-                });
-            }
-            else if (!tooltip.empty()) {
-                g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });
-            }
-        }
-    }
 }

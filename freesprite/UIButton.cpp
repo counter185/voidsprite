@@ -3,6 +3,7 @@
 #include "mathops.h"
 #include "TooltipsLayer.h"
 #include "multiwindow.h"
+#include "thumbnail_loader.h"
 #include "EventCallbackListener.h"
 
 void UIButton::render(XY pos)
@@ -231,5 +232,42 @@ void UIButton::rightClick()
     }
     else if (callback != NULL) {
         callback->eventButtonRightClicked(callback_id);
+    }
+}
+
+void UIImageFileButton::setTargetFilePath(PlatformNativePathString path) 
+{ 
+    imageFilePath = path; 
+    try {
+        fileExists = std::filesystem::exists(imageFilePath);
+    }
+    catch (std::exception&) {}
+}
+
+void UIImageFileButton::renderTooltip(XY pos)
+{
+    if (hovered) {
+        if (instantTooltip || hoverTimer.percentElapsedTime(1000) == 1.0f) {
+            PlatformNativePathString nativePath = imageFilePath;
+            XY dimensions = fileExists ? thumbnails_getSize(nativePath) : XY{ 0,0 };
+            if ((dimensions.x > 0 && dimensions.y > 0)) {
+                int thisH = wxHeight;
+                double hoverTime = XM1PW3P1(hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000));
+                g_currentWindow->pushOverlayRenderOperation([thisH, dimensions, pos, nativePath, hoverTime]() {
+                    SDL_Rect screenRect = { pos.x, pos.y + thisH, dimensions.x, (int)(dimensions.y * hoverTime) };
+
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
+                    SDL_RenderFillRect(g_rd, &screenRect);
+
+                    thumbnails_render(nativePath, NULL, &screenRect);
+
+                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
+                    SDL_RenderDrawRect(g_rd, &screenRect);
+                    });
+            }
+            else if (!tooltip.empty()) {
+                g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });
+            }
+        }
     }
 }

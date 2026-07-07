@@ -96,6 +96,7 @@ void thumbnails_clearHalfOfCache()
 void thumbnails_request(PlatformNativePathString path)
 {
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+	const u64 maxFileSize = 50 * 1024 * 1024;//max 50mb files
 	{
 		std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
 		auto find = std::find_if(thumbnails.begin(), thumbnails.end(), [path](ThumbnailData& t) { return t.filePath == path; });
@@ -111,7 +112,17 @@ void thumbnails_request(PlatformNativePathString path)
 			return;
 		}
 		else {
-			requestedPaths.push_back(path);
+			try {
+				if (std::filesystem::file_size(path) < maxFileSize) {
+					requestedPaths.push_back(path);
+				}
+				else {
+					std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
+					//autofail if file is too big
+					thumbnails.push_back({path, NULL});
+				}
+			}
+			catch (std::exception&) {}
 		}
 	}
 #endif
@@ -127,7 +138,7 @@ XY thumbnails_getSize(PlatformNativePathString path)
 		return {0,0};
 	}
 	else {
-		return { (*find).thumbnail->w, (*find).thumbnail->h };
+		return (*find).thumbnail != NULL ? XY{ (*find).thumbnail->w, (*find).thumbnail->h } : XY{0,0};
 	}
 #else
 	return { 0,0 };

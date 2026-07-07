@@ -62,3 +62,14 @@ public:
     virtual void rightClick();
 };
 
+class UIImageFileButton : public UIButton {
+protected:
+    bool fileExists = false;
+    PlatformNativePathString imageFilePath;
+public:
+    UIImageFileButton(std::string text = "", std::string tooltip = "")
+        : UIButton(text, tooltip) {}
+
+    void setTargetFilePath(PlatformNativePathString path);
+    void renderTooltip(XY pos) override;
+};

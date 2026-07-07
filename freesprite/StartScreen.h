@@ -14,9 +14,8 @@ struct LaunchpadBGStar {
     Timer64 timer{};
 };
 
-class ButtonLaunchpadLastFile : public UIButton {
+class ButtonLaunchpadLastFile : public UIImageFileButton {
 private:
-    bool fileExists = false;
     std::string fullPath;
     std::string path;
     std::string fileName;
@@ -25,7 +24,6 @@ public:
     ButtonLaunchpadLastFile(std::string file);
 
     void renderText(XY pos) override;
-    void renderTooltip(XY pos) override;
 };
 
 class PanelNewImage : public Panel {
