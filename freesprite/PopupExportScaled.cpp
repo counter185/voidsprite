@@ -9,6 +9,7 @@
 #include "settings.h"
 #include "UILabel.h"
 #include "PopupChooseFormat.h"
+#include "thumbnail_loader.h"
 
 PopupExportScaled::PopupExportScaled(MainEditor* parent)
 {
@@ -195,6 +196,7 @@ bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativ
 #if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
             emDownloadFile(name);
 #endif
+            thumbnails_removeFromCache(name);
             if (g_config.openSavedPath) {
                 platformOpenFileLocation(name);
             }

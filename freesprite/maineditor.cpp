@@ -59,6 +59,7 @@
 #include "PopupNewImage.h"
 #include "PopupCanvasResize.h"
 #include "multiwindow.h"
+#include "thumbnail_loader.h"
 
 #include "discord_rpc.h"
 
@@ -2266,6 +2267,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }
+        thumbnails_removeFromCache(name);
         g_addNotificationFromThread(SuccessNotification(TL("vsp.cmn.filesaved"), "Save successful!"));
     }
     else {

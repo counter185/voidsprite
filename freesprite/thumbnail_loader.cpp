@@ -110,6 +110,22 @@ void thumbnails_clearHalfOfCache()
 	}
 }
 
+void thumbnails_removeFromCache(PlatformNativePathString path)
+{
+#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+	std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
+	auto find = std::find_if(thumbnails.begin(), thumbnails.end(), [path](ThumbnailData& t) { return t.filePath == path; });
+	if (find == thumbnails.end()) {
+		return;
+	}
+	if ((*find).thumbnail != NULL) {
+		thumbnails_cacheSize -= (*find).thumbnail->w * (*find).thumbnail->h * 4;
+		delete (*find).thumbnail;
+	}
+	thumbnails.erase(find);
+#endif
+}
+
 void thumbnails_request(PlatformNativePathString path)
 {
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN

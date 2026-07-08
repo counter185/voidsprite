@@ -197,7 +197,7 @@ Layer* galDecode8Bit(int w, int h, std::vector<u8>& pixelData) {
     if (l != NULL) {
         u8* ptr = pixelData.data();
         u64 pos = 0;
-        int padBytes = (4 - ((w * 3) % 4)) % 4;
+        int padBytes = (4 - ((w) % 4)) % 4;
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 if (pos >= pixelData.size()) {
