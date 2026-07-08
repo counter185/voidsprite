@@ -17,6 +17,7 @@
 #include "UIStackPanel.h"
 #include "PopupYesNo.h"
 #include "UIColorInputField.h"
+#include "thumbnail_loader.h"
 #include "main.h"
 
 enum ConfigOptions : int {
@@ -561,6 +562,13 @@ PopupGlobalConfig::PopupGlobalConfig()
         optionCheckbox("Debug focused drawables", "", &g_debugConfig.debugDrawableFocus, &posInTab),
         optionCheckbox("Debug text field bytes", "", &g_debugConfig.debugShowTextFieldUTF8, &posInTab),
     }, {0, 10}));
+
+    UIButton* debugWipeThumbnails = new UIButton("Clear thumbnail cache");
+    debugWipeThumbnails->onClickCallback = [](UIButton*) { thumbnails_clearCache(); };
+    configTabs->tabs[6].add(UIStackPanel::Vertical(5, {
+        debugWipeThumbnails
+    }, { 400, 10 }));
+
 #endif
     
 

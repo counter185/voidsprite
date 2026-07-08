@@ -48,23 +48,37 @@ void thumbnails_threadLoop()
 		}
 		requestedPathsMutex.unlock();
 		if (!next.empty() && std::filesystem::exists(next)) {
-			Layer* l = loadAnyIntoFlat(convertStringToUTF8OnWin32(next));
-			if (l != NULL) {
-				if (l->w > thumbnailMaxSize.x || l->h > thumbnailMaxSize.y) {
-					SDL_Rect scaleSize = fitInside({ 0,0,thumbnailMaxSize.x, thumbnailMaxSize.y }, { 0,0,l->w, l->h });
-					Layer* newL = l->copyAllVariantsScaled({ scaleSize.w, scaleSize.h });
-					delete l;
-					l = newL;
+			try {
+				Layer* l = loadAnyIntoFlat(convertStringToUTF8OnWin32(next));
+				if (l != NULL) {
+					if (l->w > thumbnailMaxSize.x || l->h > thumbnailMaxSize.y) {
+						SDL_Rect scaleSize = fitInside({ 0,0,thumbnailMaxSize.x, thumbnailMaxSize.y }, { 0,0,l->w, l->h });
+						Layer* newL = l->copyAllVariantsScaled({ scaleSize.w, scaleSize.h });
+						delete l;
+						l = newL;
+					}
+					else if (thumbnailMaxSize.x / l->w >= 4 && thumbnailMaxSize.y / l->h >= 4) {
+						Layer* newL = l->copyAllVariantsScaled({ l->w * 4, l->h * 4 });
+						delete l;
+						l = newL;
+					}
+					else if (thumbnailMaxSize.x / l->w >= 2 && thumbnailMaxSize.y / l->h >= 2) {
+						Layer* newL = l->copyAllVariantsScaled({ l->w * 2, l->h * 2 });
+						delete l;
+						l = newL;
+					}
+				}
+
+				{
+					std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
+					thumbnails_cacheSize += l != NULL ? (l->w * l->h * 4) : 0;
+					thumbnails.push_back({ next, l });
+					if (thumbnails_cacheSize >= thumbnails_maxCache && thumbnails.size() > 1) {
+						g_startNewMainThreadOperation([]() {thumbnails_clearHalfOfCache(); });
+					}
 				}
 			}
-
-			thumbnailsMutex.lock();
-			thumbnails_cacheSize += l != NULL ? (l->w * l->h * 4) : 0;
-			thumbnails.push_back({ next, l });
-			if (thumbnails_cacheSize >= thumbnails_maxCache && thumbnails.size() > 1) {
-				g_startNewMainThreadOperation([]() {thumbnails_clearHalfOfCache(); });
-			}
-			thumbnailsMutex.unlock();
+			catch (std::exception&) {}
 		}
 		SDL_Delay(500);
 	}
@@ -74,7 +88,10 @@ void thumbnails_clearCache()
 {
 	std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
 	for (auto& t : thumbnails) {
-		delete t.thumbnail;
+		if (t.thumbnail != NULL) {
+			thumbnails_cacheSize -= t.thumbnail->w * t.thumbnail->h * 4;
+			delete t.thumbnail;
+		}
 	}
 	thumbnails.clear();
 }

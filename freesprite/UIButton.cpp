@@ -256,7 +256,7 @@ void UIImageFileButton::renderTooltip(XY pos)
                 g_currentWindow->pushOverlayRenderOperation([thisH, dimensions, pos, nativePath, hoverTime]() {
                     SDL_Rect screenRect = { pos.x, pos.y + thisH, dimensions.x, (int)(dimensions.y * hoverTime) };
 
-                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xa0);
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xf0);
                     SDL_RenderFillRect(g_rd, &screenRect);
 
                     thumbnails_render(nativePath, NULL, &screenRect);

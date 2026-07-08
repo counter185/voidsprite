@@ -716,7 +716,8 @@ Layer* MainEditorPalettized::flattenImageAndConvertToRGB(Frame* f)
     uint32_t* intpxdata = flatAndRGBConvertedLayer->pixels32();
     for (int y = 0; y < canvas.dimensions.y; y++) {
         for (int x = 0; x < canvas.dimensions.x; x++) {
-            intpxdata[x + y * canvas.dimensions.x] = palette[indices[x + y * canvas.dimensions.x]];
+            u32 index = ARRAY2DPOINT(indices, x, y, canvas.dimensions.x);
+            ARRAY2DPOINT(intpxdata, x, y, canvas.dimensions.x) = palette.size() > index ? palette[index] : 0;
         }
     }
     tracked_free(indices);

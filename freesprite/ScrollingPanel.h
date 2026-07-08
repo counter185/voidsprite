@@ -58,6 +58,7 @@ public:
                 if (scrollHorizontally) {
                     scrollOffset.x += direction.x * 20;
                 }
+                subWidgets.processHoverEvent(xyAdd(gPosOffset, position), mousePos);
             }
         }
     }

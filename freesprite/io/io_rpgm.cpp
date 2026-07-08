@@ -191,12 +191,14 @@ MainEditor* readLMU(PlatformNativePathString path)
                             ((MainEditorPalettized*)ret)->setPaletteIndex(0, ((MainEditorPalettized*)ret)->palette[0] & 0xFFFFFF);
                         }
 
-                        RPG2KTilemapPreviewScreen* mapPreview = new RPG2KTilemapPreviewScreen(ret);
-                        if (mapPreview->LoadLMU(path)) {
-                            ret->hintOpenScreensInInteractiveMode.push_back(mapPreview);
-                        }
-                        else {
-                            delete mapPreview;
+                        if (g_interactiveContext) {
+                            RPG2KTilemapPreviewScreen* mapPreview = new RPG2KTilemapPreviewScreen(ret);
+                            if (mapPreview->LoadLMU(path)) {
+                                ret->hintOpenScreensInInteractiveMode.push_back(mapPreview);
+                            }
+                            else {
+                                delete mapPreview;
+                            }
                         }
                     }
                     else {
