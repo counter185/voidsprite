@@ -296,7 +296,7 @@ MainEditor* deserializePixelStudioSession(json j)
         }
     }
     MainEditor* ret = new MainEditor(retFrames);
-    if (showWarning) {
+    if (showWarning && g_interactiveContext) {
         PopupMessageBox* warningPopup = new PopupMessageBox("Warning",
             "This is a file in a Pixel Studio Pro format.\n"
             "This format requires the whole undo history to be reenacted,\nso importing may not work directly.\n"

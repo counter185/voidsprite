@@ -103,9 +103,12 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
                 
             formatPopup->chooseFormatAndDoFileSavePrompt(TL("vsp.popup.saveimage"), 
                 [this](FormatDef* fmt, PlatformNativePathString path){
-                    if (exportWithExporter((FileExporter*)fmt->udata, path)) {
-                        closePopup();
-                    }
+                    FileExporter* exporter = (FileExporter*)fmt->udata;
+                    g_startNewOperation([this, exporter, path](OperationProgressReport* report) {
+                        if (exportWithExporter(exporter, path, report)) {
+                            g_startNewMainThreadOperation([this]() { closePopup(); });
+                        }
+                    });
                 }
             );
         }
@@ -128,37 +131,47 @@ PopupExportScaled::PopupExportScaled(MainEditor* parent)
     }
 }
 
-bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativePathString name) {
+bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativePathString name, OperationProgressReport* report) {
     bool result = false;
     if (resultSize.x > 0 && resultSize.y > 0) {
+
+        report->enterSection(frmt("Scaling to {}x{}...", resultSize.x, resultSize.y));
 
         if (exporter->exportsWholeSession()) {
             MainEditor* newSession = NULL;
 
+            report->enterSection("Scaling frames...");
+            int i = 0;
             std::vector<Frame*> nFrames;
             for (auto& f : caller->frames) {
+                report->updateLastSection(frmt("Scaling frame {}/{}...", ++i, caller->frames.size()));
                 Frame* scaledFrame = new Frame();
                 scaledFrame->activeLayer = f->activeLayer;
+                report->enterSection("Scaling layers...");
                 for (Layer* l : f->layers) {
                     Layer* scaled = l->copyCurrentVariantScaled(resultSize);
                     scaledFrame->layers.push_back(scaled);
                 }
+                report->exitSection();
                 nFrames.push_back(scaledFrame);
             }
+            report->exitSection();
 
             newSession = caller->isPalettized ? new MainEditorPalettized(nFrames) : new MainEditor(nFrames);
 
+            report->enterSection("Exporting session...");
             if (newSession != NULL) {
                 newSession->activeFrame = caller->activeFrame;
                 newSession->ssne.tileDimensions = caller->ssne.tileDimensions;
                 newSession->selLayer = caller->selLayer;
-                result = exporter->exportData(name, newSession, g_printOnlyProgressReport, &caller->exportParameters);
+                result = exporter->exportData(name, newSession, report, &caller->exportParameters);
                 delete newSession;
             }
 
         }
         else {
             Layer* flat = NULL;
+            report->enterSection("Merging layers...");
             if (caller->isPalettized) {
                 MainEditorPalettized* pssn = (MainEditorPalettized*)caller;
                 flat = pssn->flattenImageWithoutConvertingToRGB();
@@ -170,7 +183,8 @@ bool PopupExportScaled::exportWithExporter(FileExporter* exporter, PlatformNativ
             if (flat != NULL) {
                 Layer* scaled = flat->copyCurrentVariantScaled(resultSize);
                 delete flat;
-                result = exporter->exportData(name, scaled, g_printOnlyProgressReport, &caller->exportParameters);
+                report->updateLastSection("Exporting layer...");
+                result = exporter->exportData(name, scaled, report, &caller->exportParameters);
                 delete scaled;
             }
         }
