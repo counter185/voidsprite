@@ -168,6 +168,7 @@
 
 #define ARRAY2DPOINT(arr,x,y,w) (arr)[(y)*w+(x)]
 #define TOGGLE(a) a=!a
+#define ONLY_IN_INTERACTIVE_CONTEXT if(!g_interactiveContext){return;}
 
 #define FONT_PATH "appfont-MPLUSRounded1c-Medium.ttf"
 #define FONT_PATH_CYR "appfontcyr-ZenKakuGothicNew-Medium.ttf"
@@ -179,6 +180,7 @@
 #define UTF8_EMPTY_DIAMOND "\xE2\x97\x87"
 
 #define LAN_BROADCAST_PORT 60600
+
 
 #ifndef INT_MAX
 #define INT_MAX 2147483647
@@ -300,6 +302,7 @@ inline bool g_fullFramerateThisFrame = false;
 inline SDL_PropertiesID g_props;
 inline bool g_lastConfirmInputWasTouch = false;
 inline int g_crashsaveIndex = 0;
+inline thread_local bool g_interactiveContext = true;
 
 inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconVSP32x32 = NULL,

@@ -61,6 +61,7 @@ void PopupQuickConvert::onDropFileEvent(SDL_Event evt)
         PlatformNativePathString outPath = convertStringOnWin32(path);
 
         g_startNewOperation([this, path, outPath](OperationProgressReport* progress) {
+            g_interactiveContext = ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, true, false);
             MainEditor* session = loadAnyIntoSession(path, NULL, progress);
             progress->resetProgress();
             doQuickConvert(session, outPath, currentExporter, forceRGB, progress);

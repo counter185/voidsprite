@@ -941,7 +941,9 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
 
             ret->ssne = SessionEditorPrefs::deserializeFromKeyVals(extData);
             //ensure in-session palette gets loaded
-            ret->colorPicker->reloadColorLists();
+            if (ret->colorPicker != NULL) {
+                ret->colorPicker->reloadColorLists();
+            }
             ret->setBlendMode(ret->ssne.blendAlphaMode);
 
             if (extData.contains("layer.selected")) { ret->selLayer = frames[0]->activeLayer = std::stoi(extData["layer.selected"]); }
@@ -955,7 +957,9 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
                 for (int x = 0; x < frames.front()->layers.size() && x < layerVisibilityData.size(); x++) {
                     frames.front()->layers[x]->hidden = layerVisibilityData[x] == '0';
                 }
-                ret->layerPicker->updateLayers();
+                if (ret->layerPicker != NULL) {
+                    ret->layerPicker->updateLayers();
+                }
             }
             if (extData.contains("comments")) {
                 std::string commentsData = extData["comments"];
@@ -989,7 +993,9 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
                     layers[x]->lastConfirmedlayerAlpha = ret->getLayerStack()[x]->layerAlpha;
                     layerOpacityData = layerOpacityData.substr(nextSC + 1);
                 }
-                ret->layerPicker->updateLayers();
+                if (ret->layerPicker != NULL) {
+                    ret->layerPicker->updateLayers();
+                }
             }
             if (!ret->isPalettized && extData.contains("activecolor")) {
                 uint32_t c = std::stoul(extData["activecolor"], NULL, 16);

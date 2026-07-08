@@ -59,6 +59,7 @@
 #include "PopupNewImage.h"
 #include "PopupCanvasResize.h"
 #include "multiwindow.h"
+#include "thumbnail_loader.h"
 
 #include "discord_rpc.h"
 
@@ -108,6 +109,7 @@ MainEditor::MainEditor(XY dimensions) {
     getLayerStack().push_back(new Layer(canvas.dimensions.x, canvas.dimensions.y));
     FillTexture();
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -121,6 +123,7 @@ MainEditor::MainEditor(SDL_Surface* srf) {
     getLayerStack().push_back(nlayer);
     SDL_ConvertPixels(srf->w, srf->h, srf->format, srf->pixels, srf->pitch, SDL_PIXELFORMAT_ARGB8888, nlayer->pixels32(), canvas.dimensions.x*4);
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -132,6 +135,7 @@ MainEditor::MainEditor(Layer* layer)
     getLayerStack().push_back(layer);
     loadSingleLayerExtdata(layer);
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -142,10 +146,10 @@ MainEditor::MainEditor(std::vector<Layer*> layers)
     canvas.dimensions = { layers[0]->w, layers[0]->h };
     this->getLayerStack() = layers;
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
-    
 }
 
 MainEditor::MainEditor(std::vector<Frame*> fframes)
@@ -157,10 +161,10 @@ MainEditor::MainEditor(std::vector<Frame*> fframes)
     }
     frames = fframes;
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
-    
 }
 
 MainEditor::~MainEditor() {
@@ -1583,6 +1587,7 @@ void MainEditor::makeActionBar()
 
 void MainEditor::initToolParameters()
 {
+    ONLY_IN_INTERACTIVE_CONTEXT;
     toolPropertiesPanel->subWidgets.freeAllDrawables();
     int x = 0;
     if (currentBrush != NULL) {
@@ -2262,6 +2267,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         if (lastWasSaveAs && g_config.openSavedPath) {
             platformOpenFileLocation(lastConfirmedSavePath);
         }
+        thumbnails_removeFromCache(name);
         g_addNotificationFromThread(SuccessNotification(TL("vsp.cmn.filesaved"), "Save successful!"));
     }
     else {
@@ -2591,8 +2597,10 @@ void MainEditor::switchFrame(int index)
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
     //loginfo(frmt("switching to frame {}", index));
     selLayer = ixmin(getCurrentFrame()->layers.size()-1, getCurrentFrame()->activeLayer);
-    layerPicker->updateLayers();
-    framePicker->createFrameButtons();
+    if (g_interactiveContext) {
+        layerPicker->updateLayers();
+        framePicker->createFrameButtons();
+    }
 }
 
 void MainEditor::prerenderAllFrames()
@@ -2645,7 +2653,9 @@ void MainEditor::toggleFrameAnimation()
 
 void MainEditor::setMSPerFrame(int ms)
 {
-    framePicker->msPerFrameInput->setText(std::to_string(ms));
+    if (framePicker != NULL) {
+        framePicker->msPerFrameInput->setText(std::to_string(ms));
+    }
 }
 
 void MainEditor::renderFrameTo(Frame* f, SDL_Texture* target, bool clear)
@@ -2765,11 +2775,13 @@ void MainEditor::regenerateLastColors()
 
 void MainEditor::setActiveColor(uint32_t col)
 {
+    ONLY_IN_INTERACTIVE_CONTEXT;
     colorPicker->setColorRGB(col);
 }
 
 void MainEditor::setActiveAlpha(uint8_t alpha)
 {
+    ONLY_IN_INTERACTIVE_CONTEXT;
     if (!isPalettized) {
         pickedAlpha = alpha;
         colorPicker->updateAlphaSlider();
@@ -2788,6 +2800,7 @@ void MainEditor::playColorPickerVFX(bool inward)
 
 void MainEditor::setActiveBrush(BaseBrush* b)
 {
+    ONLY_IN_INTERACTIVE_CONTEXT;
     if (currentBrush != NULL) {
         currentBrush->resetState();
     }
@@ -2808,6 +2821,7 @@ void MainEditor::setBlendMode(BlendMode b)
 {
     b = (BlendMode)ixmax(0, ixmin(blendOperations.size() - 1, (int)b));
     ssne.blendAlphaMode = b;
+    ONLY_IN_INTERACTIVE_CONTEXT;
     if (blendModeDropdown != NULL) {
         blendModeDropdown->text = TL(blendOperations[(int)b].nameTLKey);
     }
@@ -2876,7 +2890,7 @@ bool MainEditor::tryAddReference(PlatformNativePathString path)
 }
 bool MainEditor::addReference(Layer* l)
 {
-    if (l != NULL) {
+    if (l != NULL && g_interactiveContext) {
         PanelReference* referencePanel = new PanelReference(l, this);
         openReferencePanels.push_back(referencePanel);
         addWidget(referencePanel);

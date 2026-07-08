@@ -298,7 +298,14 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
 {
     bool matchesExtension = fileEntry.matchesExtension;
 
-    UIButton* btn = new UIButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
+    UIButton* btn;
+    if (!fileEntry.isDirectory && fileEntry.matchesExtension) {
+        btn = new UIImageFileButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
+        ((UIImageFileButton*)btn)->setTargetFilePath(appendPath(currentDir, fileEntry.realFileName));
+    }
+    else {
+        btn = new UIButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
+    }
     btn->wxWidth = g_fnt->StatStringDimensions(btn->text).x + 15 + 30;
     btn->wxHeight = 30;
 

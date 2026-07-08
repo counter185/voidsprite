@@ -21,7 +21,7 @@ private:
 public:
     PopupExportScaled(MainEditor* parent);
 
-    bool exportWithExporter(FileExporter* exporter, PlatformNativePathString path);
+    bool exportWithExporter(FileExporter* exporter, PlatformNativePathString path, OperationProgressReport* report);
     void scaleAndShare();
     void genExporterList();
     void recalc();

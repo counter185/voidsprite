@@ -3,6 +3,7 @@
 #include "mathops.h"
 #include "TooltipsLayer.h"
 #include "multiwindow.h"
+#include "thumbnail_loader.h"
 #include "EventCallbackListener.h"
 
 void UIButton::render(XY pos)
@@ -17,7 +18,7 @@ void UIButton::render(XY pos)
     }
 
     //SDL_Color bgColor = focused ? colorBGFocused : colorBGUnfocused;
-    SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+    
     //SDL_SetRenderDrawColor(g_rd, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
     //SDL_RenderFillRect(g_rd, &drawrect);
     fill.fill(drawrect);
@@ -38,16 +39,7 @@ void UIButton::render(XY pos)
 
     renderAnimations(pos);
 
-    int textX = pos.x + 5;
-    if (icon != NULL) {
-        SDL_Texture* icn = icon->get(g_rd);
-        SDL_SetTextureAlphaMod(icn, 0xff);
-        SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
-        SDL_RenderCopy(g_rd, icn, NULL, &iconRect);
-        textX += iconRect.w;
-    }
-
-    g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);
+    renderText(pos);
 
     if (focused) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x60);
@@ -185,6 +177,22 @@ void UIButton::renderAnimations(XY pos)
     }
 }
 
+void UIButton::renderText(XY pos)
+{
+    SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+
+    int textX = pos.x + 5;
+    if (icon != NULL) {
+        SDL_Texture* icn = icon->get(g_rd);
+        SDL_SetTextureAlphaMod(icn, 0xff);
+        SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, fullWidthIcon ? (wxWidth - 2) : (wxHeight - 2), wxHeight - 2 };
+        SDL_RenderCopy(g_rd, icn, NULL, &iconRect);
+        textX += iconRect.w;
+    }
+
+    g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);
+}
+
 void UIButton::renderTooltip(XY pos)
 {
     if (hovered) {
@@ -224,5 +232,42 @@ void UIButton::rightClick()
     }
     else if (callback != NULL) {
         callback->eventButtonRightClicked(callback_id);
+    }
+}
+
+void UIImageFileButton::setTargetFilePath(PlatformNativePathString path) 
+{ 
+    imageFilePath = path; 
+    try {
+        fileExists = std::filesystem::exists(imageFilePath);
+    }
+    catch (std::exception&) {}
+}
+
+void UIImageFileButton::renderTooltip(XY pos)
+{
+    if (hovered) {
+        if (instantTooltip || hoverTimer.percentElapsedTime(1000) == 1.0f) {
+            PlatformNativePathString nativePath = imageFilePath;
+            XY dimensions = fileExists ? thumbnails_getSize(nativePath) : XY{ 0,0 };
+            if ((dimensions.x > 0 && dimensions.y > 0)) {
+                int thisH = wxHeight;
+                double hoverTime = XM1PW3P1(hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000));
+                g_currentWindow->pushOverlayRenderOperation([thisH, dimensions, pos, nativePath, hoverTime]() {
+                    SDL_Rect screenRect = { pos.x, pos.y + thisH, dimensions.x, (int)(dimensions.y * hoverTime) };
+
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xf0);
+                    SDL_RenderFillRect(g_rd, &screenRect);
+
+                    thumbnails_render(nativePath, NULL, &screenRect);
+
+                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
+                    SDL_RenderDrawRect(g_rd, &screenRect);
+                    });
+            }
+            else if (!tooltip.empty()) {
+                g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });
+            }
+        }
     }
 }

@@ -36,6 +36,9 @@
 #include "ScreenVoxelEditor.h"
 #include "PalettizedEditorColorPicker.h"
 #include "ScreenPreprocessImage.h"
+#include "TooltipsLayer.h"
+#include "thumbnail_loader.h"
+#include "multiwindow.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -467,21 +470,8 @@ void StartScreen::populateLastOpenFiles()
     lastOpenFilesPanel->subWidgets.freeAllDrawables();
 
     for (std::string& lastPath : g_config.lastOpenFiles) {
-        UIButton* button = new UIButton();
-        button->tooltip = lastPath;
-        std::string s = lastPath;
-        bool ellipsis = false;
-        const int maxW = 600;
-        while (s.size() > 3 && g_fnt->StatStringDimensions(s).x > maxW) {
-            s = s.substr(1);
-            ellipsis = true;
-        }
-        if (ellipsis) {
-            s = "..." + s;
-        }
-        XY textDim = xyAdd({10, 0}, g_fnt->StatStringDimensions(s));
-        button->text = s;
-        button->wxWidth = textDim.x;
+        ButtonLaunchpadLastFile* button = new ButtonLaunchpadLastFile(lastPath);
+        
         button->onClickCallback = [this, lastPath](UIButton*) {
             this->tryLoadFile(lastPath);
         };
@@ -1292,4 +1282,42 @@ PanelNewImage::PanelNewImage()
         buttonNewImagePalettized->tooltip = TL("vsp.launchpad.tab.createindexed.tooltip");
         newImageTabs->tabs[x].add(buttonNewImagePalettized);
     }
+}
+
+ButtonLaunchpadLastFile::ButtonLaunchpadLastFile(std::string file)
+{
+    setTargetFilePath(convertStringOnWin32(file));
+    fullPath = file;
+    fileName = fileNameFromPath(fullPath);
+    path = fullPath.substr(0, fullPath.size() - fileName.size());
+    try {
+        size = fileExists ? bytesToFriendlyString(std::filesystem::file_size(convertStringOnWin32(fullPath))) : "";
+    }
+    catch (std::exception&) {}
+
+    tooltip = fullPath;
+    /*std::string s = fullPath;
+    bool ellipsis = false;
+    const int maxW = 600;
+    while (s.size() > 3 && g_fnt->StatStringDimensions(s).x > maxW) {
+        s = s.substr(1);
+        ellipsis = true;
+    }
+    if (ellipsis) {
+        s = "..." + s;
+    }*/
+    XY textDim = xyAdd({ 10, 0 }, g_fnt->StatStringDimensions(fileName));
+    text = fileName;
+    wxWidth = textDim.x;
+}
+
+void ButtonLaunchpadLastFile::renderText(XY pos)
+{
+    SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
+
+    int textX = pos.x + 5;
+
+    XY textEP = g_fnt->RenderString(text, textX, pos.y + 2, fileExists ? textColor : SDL_Color{255, 128, 128, 120}, fontSize);
+    g_fnt->RenderString(path, textEP.x + 10, pos.y - 3, {255,255,255,120}, 14);
+    g_fnt->RenderString(size, textEP.x + 10, pos.y + 11, {255,255,255,180}, 14);
 }
