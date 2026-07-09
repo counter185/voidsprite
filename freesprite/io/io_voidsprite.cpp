@@ -967,7 +967,7 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             }
 
             for (auto& [key, value] : extData) {
-                if (g_config.saveLoadReferences && stringStartsWithIgnoreCase(key, "reference.data.")) {
+                if (g_config.saveLoadReferences && g_interactiveContext && stringStartsWithIgnoreCase(key, "reference.data.")) {
                     Layer* newRef = readPNGFromBase64String(value);
                     if (newRef != NULL) {
                         ret->addReference(newRef);
