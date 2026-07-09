@@ -267,19 +267,35 @@ Layer* _readPNG(png_structp png, png_infop info) {
         ret = new Layer(width, height);
         ret->name = "PNG Image";
         u8* pixelData = ret->pixels8();
+        u32* pixelData32 = ret->pixels32();
 
-        int imagePointer = 0;
         for (uint32_t y = 0; y < height; y++) {
             if (numchannels == 4) {
-                memcpy(pixelData + (y * numchannels * width), rows[y], width * numchannels);
+                if (bit_depth == 16) {
+                    int currentRowPointer = 0;
+                    for (u32 x = 0; x < width; x++) {
+                        u16 b = (rows[y][currentRowPointer+1] << 8) + rows[y][currentRowPointer];
+                        currentRowPointer += 2;
+                        u16 g = (rows[y][currentRowPointer+1] << 8) + rows[y][currentRowPointer];
+                        currentRowPointer += 2;
+                        u16 r = (rows[y][currentRowPointer+1] << 8) + rows[y][currentRowPointer];
+                        currentRowPointer += 2;
+                        u16 a = (rows[y][currentRowPointer+1] << 8) + rows[y][currentRowPointer];
+                        currentRowPointer += 2;
+                        ARRAY2DPOINT(pixelData32, x, y, width) = PackRGBAtoARGB(r / 256, g / 256, b / 256, a / 256);
+                    }
+                }
+                else {
+                    memcpy(pixelData + (y * numchannels * width), rows[y], width * numchannels);
+                }
             }
             else if (numchannels == 3) {
                 int currentRowPointer = 0;
                 for (uint32_t x = 0; x < width; x++) {
-                    pixelData[imagePointer++] = 0xff;
-                    pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    pixelData[imagePointer++] = rows[y][currentRowPointer++];
-                    pixelData[imagePointer++] = rows[y][currentRowPointer++];
+                    u8 r = rows[y][currentRowPointer++];
+                    u8 g = rows[y][currentRowPointer++];
+                    u8 b = rows[y][currentRowPointer++];
+                    ARRAY2DPOINT(pixelData32, x, y, width) = PackRGBAtoARGB(r,g,b,255);
                 }
             }
             else {
