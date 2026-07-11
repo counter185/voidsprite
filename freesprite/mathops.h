@@ -151,6 +151,8 @@ std::string ipToString(u32 ipv4);
 typedef std::vector<std::vector<double>> matrix; // <- this may cause issues
                                                  // the macro causes trouble with GL/gl.h
 matrix matrixMultiply(matrix a, matrix b);
+matrix matrixTranspose(matrix a);
+void matrixPrint(matrix a);
 
 std::tm getLocalTime();
 

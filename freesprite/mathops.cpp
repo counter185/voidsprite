@@ -1350,6 +1350,30 @@ matrix matrixMultiply(matrix a, matrix b)
     return result;
 }
 
+matrix matrixTranspose(matrix a) {
+    matrix result;
+    int newH = a[0].size();
+    result.resize(newH);
+    for (int y = 0; y < newH; y++) {
+        int newW = a.size();
+        result[y].resize(newW);
+        for (int x = 0; x < newW; x++) {
+            result[y][x] = a[x][y];
+        }
+    }
+    return result;
+}
+
+void matrixPrint(matrix a)
+{
+    for (auto& y : a) {
+        for (auto& x : y) {
+            printf("%lf ", x);
+        }
+        printf("\n");
+    }
+}
+
 std::tm getLocalTime() {
     auto timeNow = std::chrono::system_clock::now();
     std::time_t timeNowT = std::chrono::system_clock::to_time_t(timeNow);
