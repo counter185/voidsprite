@@ -2,23 +2,34 @@
 #include "BaseScreen.h"
 #include "mathops.h"
 
+struct Vertex {
+    XYZd pos;
+    XYd uv;
+};
+
+struct Quad {
+    Vertex topLeft, topRight, bottomLeft, bottomRight;
+};
+
 class ScreenCubemapPreview :
     public BaseScreen
 {
 private:
     MainEditor* parent = NULL;
+    matrix viewMatrix;
 public:
     double posX = 0, posY = 0, posZ = 0;
     double rotX = 0, rotY = 0, rotZ = 0;
 
-    double fov = 80;
+    double fov = 100;
     double nearPlane = 0.5;
     double farPlane = 200;
 
     bool mouseDrag = false;
 
     XYZd intersectViewSpace(XYZd a, XYZd b);
-    std::vector<XYZd> clipViewSpaceTriangle(std::vector<XYZd> points);
+    Vertex intersectTexturedViewSpace(Vertex a, Vertex b);
+    std::vector<Vertex> clipViewSpaceTriangle(std::vector<Vertex> points);
     matrix makeViewMatrix();
     XYZWd calcViewSpace(XYZd worldSpace);
     matrix calcClipSpace(double fovRad, double aspectRatio, XYZWd viewSpace);
@@ -35,5 +46,12 @@ public:
 
     void renderTriangle(std::vector<XYZd> worldSpacePoints);
     void renderQuad(std::vector<XYZd> worldSpacePoints);
+    void renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
+    void renderTexturedQuad(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
+    void renderTesellatedTexturedQuad(Vertex topLeft, Vertex topRight, Vertex bottomLeft, Vertex bottomRight, SDL_Texture* tex);
+    void renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex);
+
+    std::vector<Quad> tesellateQuad(Quad q);
+    std::vector<Quad> tesellateQuad(Quad q, int iterations);
 };
 

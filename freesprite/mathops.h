@@ -106,6 +106,9 @@ void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEac
 XY statLineEndpoint(XY p1, XY p2, double percent);
 void drawLine(XY p1, XY p2, double percent = 1.0);
 XY evalBezierPoint(std::vector<XY> vtx, double percent);
+double interpolatePos(double start, double end, double t);
+XYd interpolatePosXYd(XYd start, XYd end, double t);
+XYZd interpolatePosXYZd(XYZd start, XYZd end, double t);
 double XM1PW3P1(double x);
 
 int ixmin(int a, int b);

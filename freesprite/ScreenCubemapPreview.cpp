@@ -1,5 +1,7 @@
 #include "ScreenCubemapPreview.h"
 #include "FontRenderer.h"
+#include "TooltipsLayer.h"
+#include "maineditor.h"
 
 double degToRad(double deg) {
     return deg * M_PI / 180.0;
@@ -11,15 +13,24 @@ XYZd ScreenCubemapPreview::intersectViewSpace(XYZd a, XYZd b)
     return { a.x + t * (b.x - a.x), a.y + t * (b.y - a.y), -nearPlane };
 }
 
-std::vector<XYZd> ScreenCubemapPreview::clipViewSpaceTriangle(std::vector<XYZd> points)
+Vertex ScreenCubemapPreview::intersectTexturedViewSpace(Vertex a, Vertex b)
 {
-    std::vector<XYZd> ret;
-    for (int i = 0; i < points.size(); i++) {
-        XYZd now = points[i];
-        XYZd next = points[(i + 1) % 3];
+    double t = (-nearPlane - a.pos.z) / (b.pos.z - a.pos.z);
+    XYZd newPos = { a.pos.x + t * (b.pos.x - a.pos.x), a.pos.y + t * (b.pos.y - a.pos.y), -nearPlane };
 
-        bool nowInside = now.z <= -nearPlane;
-        bool nextInside = next.z <= -nearPlane;
+    XYd newUV = { a.uv.x + t * (b.uv.x - a.uv.x), a.uv.y + t * (b.uv.y - a.uv.y) };
+    return Vertex{ newPos, newUV };
+}
+
+std::vector<Vertex> ScreenCubemapPreview::clipViewSpaceTriangle(std::vector<Vertex> points)
+{
+    std::vector<Vertex> ret;
+    for (int i = 0; i < points.size(); i++) {
+        Vertex now = points[i];
+        Vertex next = points[(i + 1) % 3];
+
+        bool nowInside = now.pos.z <= -nearPlane;
+        bool nextInside = next.pos.z <= -nearPlane;
 
         if (nowInside && nextInside)
         {
@@ -27,11 +38,13 @@ std::vector<XYZd> ScreenCubemapPreview::clipViewSpaceTriangle(std::vector<XYZd> 
         }
         else if (nowInside && !nextInside)
         {
-            ret.push_back(intersectViewSpace(now, next));
+            Vertex newVtx = intersectTexturedViewSpace(now, next);
+            //newVtx.uv = now.uv;
+            ret.push_back(newVtx);
         }
         else if (!nowInside && nextInside)
         {
-            ret.push_back(intersectViewSpace(now, next));
+            ret.push_back(intersectTexturedViewSpace(now, next));
             ret.push_back(next);
         }
     }
@@ -79,7 +92,7 @@ matrix ScreenCubemapPreview::makeViewMatrix()
 
 XYZWd ScreenCubemapPreview::calcViewSpace(XYZd worldPos)
 {
-    matrix viewMatrix = makeViewMatrix();
+    //matrix viewMatrix = viewMatrix;//makeViewMatrix();
     matrix viewSpace = matrixMultiply(viewMatrix, { {worldPos.x}, {worldPos.y}, {worldPos.z}, {1} });
     return XYZWd{ viewSpace[0][0], viewSpace[1][0], viewSpace[2][0], viewSpace[3][0] };
 }
@@ -122,10 +135,11 @@ XYZd ScreenCubemapPreview::worldPointToScreenPoint(XYZd worldPos)
 
 void ScreenCubemapPreview::render()
 {
+    viewMatrix = makeViewMatrix();
     Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 
     const double fac = 3.0;
-    const double facZ = 4.0;
+    const double facZ = 3.0;
     /*SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
     renderTriangle({
         {-fac, -fac, facZ},
@@ -133,7 +147,7 @@ void ScreenCubemapPreview::render()
         {0, fac, facZ}
     });*/
 
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+    /*SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
     renderQuad({
         {-fac, -fac, facZ},
         {fac, -fac, facZ},
@@ -147,7 +161,86 @@ void ScreenCubemapPreview::render()
         {fac, -fac, -facZ},
         {fac, fac, -facZ},
         {-fac, fac, -facZ},
-    });
+    });*/
+    /*renderTexturedTriangle({
+        {{-fac, -fac, -facZ}, {0,0}},
+        {{fac, -fac, -facZ}, {1,0}},
+        {{fac, fac, -facZ}, {1,1}}
+    }, g_iconNotifTheCreature->get());*/
+    /*renderTexturedQuad({
+        {{-fac, -fac, -facZ}, {0,1}},
+        {{fac, -fac, -facZ}, {1,1}},
+        {{-fac, fac, -facZ}, {0,0}},
+        {{fac, fac, -facZ}, {1,0}},
+        }, parent->getLayerStack()[0]->renderData[g_rd].tex);*/
+
+    const int teselatteCuts = 4;
+
+    static std::vector<Quad> frontQs = tesellateQuad(
+        Quad{
+            Vertex{ {-fac, fac, -facZ}, {0,0} },
+            Vertex{ {fac, fac, -facZ}, {1,0} },
+            Vertex{ {-fac, -fac, -facZ}, {0,1} },
+            Vertex{ {fac, -fac, -facZ}, {1,1} }
+        }, teselatteCuts);
+
+    static std::vector<Quad> backQs = tesellateQuad(
+        Quad{
+            Vertex{ {fac, fac, facZ}, {0,0} },
+            Vertex{ {-fac, fac, facZ}, {1,0} },
+            Vertex{ {fac, -fac, facZ}, {0,1} },
+            Vertex{ {-fac, -fac, facZ}, {1,1} }
+        }, teselatteCuts);
+
+    static std::vector<Quad> rightQs = tesellateQuad(
+        Quad{
+            Vertex{ {fac, fac, -facZ}, {0,0} },
+            Vertex{ {fac, fac, facZ}, {1,0} },
+            Vertex{ {fac, -fac, -facZ}, {0,1} },
+            Vertex{ {fac, -fac, facZ}, {1,1} }
+        }, teselatteCuts);
+
+    static std::vector<Quad> leftQs = tesellateQuad(
+        Quad{
+            Vertex{ {-fac, fac, facZ}, {0,0} },
+            Vertex{ {-fac, fac, -facZ}, {1,0} },
+            Vertex{ {-fac, -fac, facZ}, {0,1} },
+            Vertex{ {-fac, -fac, -facZ}, {1,1} }
+        }, teselatteCuts);
+
+    static std::vector<Quad> topQs = tesellateQuad(
+        Quad{
+            Vertex{ {-fac, fac, facZ} , {0,0} },
+            Vertex{ {fac, fac, facZ}, {1,0} },
+            Vertex{ {-fac, fac, -facZ}, {0,1} },
+            Vertex{ {fac, fac, -facZ} , {1,1} }
+        }, teselatteCuts);
+
+    static std::vector<Quad> bottomQs = tesellateQuad(
+        Quad{
+            Vertex{ { fac, -fac, facZ } , {0,0} },
+            Vertex{ {-fac, -fac, facZ}, {1,0} },
+            Vertex{ { fac, -fac, -facZ }, {0,1} },
+            Vertex{ {-fac, -fac, -facZ}, {1,1} }
+        }, teselatteCuts);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
+    renderMultipleTexturedQuads(frontQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 255, 255);
+    renderMultipleTexturedQuads(backQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+
+    SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
+    renderMultipleTexturedQuads(rightQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 0, 255);
+    renderMultipleTexturedQuads(leftQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
+    renderMultipleTexturedQuads(topQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+
+    SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
+    renderMultipleTexturedQuads(bottomQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
 
     g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov),5, 30);
 }
@@ -210,11 +303,11 @@ void ScreenCubemapPreview::renderTriangle(std::vector<XYZd> worldSpacePoints)
     double fovRad = degToRad(fov);
     double aspectRatio = (double)g_windowW / g_windowH;
 
-    std::vector<XYZd> viewMt;
+    std::vector<Vertex> viewMt;
     bool anyOnScreen = false;
     for (auto& point : worldSpacePoints) {
         XYZWd viewSpace = calcViewSpace(point);
-        viewMt.push_back(XYZd{ viewSpace.x, viewSpace.y, viewSpace.z });
+        viewMt.push_back({ XYZd{ viewSpace.x, viewSpace.y, viewSpace.z } });
         anyOnScreen |= viewSpace.z <= -nearPlane;
     }
 
@@ -227,11 +320,12 @@ void ScreenCubemapPreview::renderTriangle(std::vector<XYZd> worldSpacePoints)
     std::vector<XY> screenPoints;
 
     for (auto& v : viewMt) {
-        XYZd screenSpace = calcScreenSpace(calcClipSpace(fovRad, aspectRatio, {v.x, v.y, v.z, 1}));
+        XYZd screenSpace = calcScreenSpace(calcClipSpace(fovRad, aspectRatio, {v.pos.x, v.pos.y, v.pos.z, 1}));
         screenPoints.push_back(XY{ (int)screenSpace.x, (int)screenSpace.y });
     }
 
     for (int i = 0; i < screenPoints.size(); i++) {
+        g_ttp->addTooltip(Tooltip{ screenPoints[i], frmt("{}",i) });
         drawLine(screenPoints[i], screenPoints[(i + 1) % screenPoints.size()]);
     }
 }
@@ -252,4 +346,153 @@ void ScreenCubemapPreview::renderQuad(std::vector<XYZd> worldSpacePoints)
         worldSpacePoints[0],
         worldSpacePoints[2],
     });
+}
+
+void ScreenCubemapPreview::renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex)
+{
+    double fovRad = degToRad(fov);
+    double aspectRatio = (double)g_windowW / g_windowH;
+
+    std::vector<Vertex> viewMt;
+    bool anyOnScreen = false;
+    for (auto& point : worldSpacePoints) {
+        XYZWd viewSpace = calcViewSpace(point.pos);
+        viewMt.push_back({ XYZd{ viewSpace.x, viewSpace.y, viewSpace.z }, point.uv });
+        anyOnScreen |= viewSpace.z <= -nearPlane;
+    }
+
+    if (!anyOnScreen) {
+        return;
+    }
+
+    viewMt = clipViewSpaceTriangle(viewMt);
+
+    std::vector<SDL_Vertex> screenPoints;
+
+    for (auto& v : viewMt) {
+        XYZd screenSpace = calcScreenSpace(calcClipSpace(fovRad, aspectRatio, { v.pos.x, v.pos.y, v.pos.z, 1 }));
+        SDL_Vertex vv{};
+        vv.position = { (float)screenSpace.x, (float)screenSpace.y };
+        vv.color = { 1,1,1,1 };
+        vv.tex_coord = { (float)v.uv.x, (float)v.uv.y };
+        screenPoints.push_back(vv);
+    }
+
+    if (viewMt.size() == 3) {
+        int ind[] = { 0,1,2 };
+        SDL_RenderGeometry(g_rd, tex, screenPoints.data(), 3, ind, 3);
+    }
+    else if (viewMt.size() == 4) {
+        int ind[] = { 0,1,2, 1,2,3 };
+        SDL_RenderGeometry(g_rd, tex, screenPoints.data(), 4, ind, 6);
+    }
+    else {
+        logerr(frmt("invalid vertex count: {}", viewMt.size()));
+    }
+
+    /*for (int i = 0; i < screenPoints.size(); i++) {
+        XY a = { (int)screenPoints[i].position.x, (int)screenPoints[i].position.y };
+        XY b = { (int)screenPoints[(i + 1) % screenPoints.size()].position.x, (int)screenPoints[(i + 1) % screenPoints.size()].position.y };
+        //g_ttp->addTooltip(Tooltip{a, frmt("{:.02f} {:.02f}", screenPoints[i].tex_coord.x, screenPoints[i].tex_coord.y)});
+        drawLine(a,b);
+    }*/
+
+    //SDL_RenderGeometry(g_rd, tex, )
+}
+
+void ScreenCubemapPreview::renderTexturedQuad(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex)
+{
+    renderTexturedTriangle({
+        worldSpacePoints[0],
+        worldSpacePoints[1],
+        worldSpacePoints[2]
+    }, tex);
+    renderTexturedTriangle({
+        worldSpacePoints[1],
+        worldSpacePoints[2],
+        worldSpacePoints[3]
+    }, tex);
+}
+
+std::vector<Quad> ScreenCubemapPreview::tesellateQuad(Quad q) {
+    Vertex center = {
+        interpolatePosXYZd(q.topLeft.pos, q.bottomRight.pos, 0.5),
+        interpolatePosXYd(q.topLeft.uv, q.bottomRight.uv, 0.5)
+    };
+    Vertex top = {
+        interpolatePosXYZd(q.topLeft.pos, q.topRight.pos, 0.5),
+        interpolatePosXYd(q.topLeft.uv, q.topRight.uv, 0.5)
+    };
+    Vertex left = {
+        interpolatePosXYZd(q.topLeft.pos, q.bottomLeft.pos, 0.5),
+        interpolatePosXYd(q.topLeft.uv, q.bottomLeft.uv, 0.5)
+    };
+    Vertex right = {
+        interpolatePosXYZd(q.topRight.pos, q.bottomRight.pos, 0.5),
+        interpolatePosXYd(q.topRight.uv, q.bottomRight.uv, 0.5)
+    };
+    Vertex bottom = {
+        interpolatePosXYZd(q.bottomLeft.pos, q.bottomRight.pos, 0.5),
+        interpolatePosXYd(q.bottomLeft.uv, q.bottomRight.uv, 0.5)
+    };
+
+    return {
+        Quad{ q.topLeft, top, left, center },
+        Quad{ top, q.topRight, center, right },
+        Quad{ left, center, q.bottomLeft, bottom },
+        Quad{ center, right, bottom, q.bottomRight }
+    };
+}
+
+std::vector<Quad> ScreenCubemapPreview::tesellateQuad(Quad q, int cuts)
+{
+    std::queue<Quad> cutQueue;
+    cutQueue.push(q);
+    for (int i = 0; i < cuts; i++) {
+        std::queue<Quad> nextQueue;
+        while (!cutQueue.empty()) {
+            for (auto& q : tesellateQuad(cutQueue.front())) {
+                nextQueue.push(q);
+            }
+            cutQueue.pop();
+        }
+        cutQueue = nextQueue;
+    }
+
+    std::vector<Quad> ret;
+    while (!cutQueue.empty()) {
+        ret.push_back(cutQueue.front());
+        cutQueue.pop();
+    }
+    return ret;
+}
+
+void ScreenCubemapPreview::renderTesellatedTexturedQuad(Vertex topLeft, Vertex topRight, Vertex bottomLeft, Vertex bottomRight, SDL_Texture* tex)
+{
+    const int cuts = 3;
+    std::queue<Quad> cutQueue;
+    cutQueue.push(Quad{ topLeft, topRight, bottomLeft, bottomRight });
+    for (int i = 0; i < cuts; i++) {
+        std::queue<Quad> nextQueue;
+        while (!cutQueue.empty()) {
+            for (auto& q : tesellateQuad(cutQueue.front())) {
+                nextQueue.push(q);
+            }
+            cutQueue.pop();
+        }
+        cutQueue = nextQueue;
+    }
+
+    while (!cutQueue.empty()) {
+        Quad& nextQ = cutQueue.front();
+        renderTexturedQuad({ nextQ.topLeft, nextQ.topRight, nextQ.bottomLeft, nextQ.bottomRight }, tex);
+        cutQueue.pop();
+    }
+}
+
+void ScreenCubemapPreview::renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex)
+{
+    for (auto& qq : q) {
+        renderTexturedQuad({ qq.topLeft, qq.topRight, qq.bottomLeft, qq.bottomRight }, tex);
+    }
 }
