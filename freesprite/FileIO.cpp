@@ -2124,37 +2124,68 @@ bool writeXBM(PlatformNativePathString path, Layer* data)
     return false;
 }
 
-bool writeTGA(PlatformNativePathString path, Layer* data) {
-    if (data->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
-        return false;
-    }
+bool writeTGA(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params) {
 
-    FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
-    if (nfile != NULL) {
-        //copilot hallucinated all of this code i don't know if it even works
-        uint8_t header[18];
-        memset(header, 0, 18);
-        header[2] = 2;  // uncompressed RGB
-        header[12] = data->w & 0xff;    // width
-        header[13] = (data->w >> 8) & 0xff;
-        header[14] = data->h & 0xff;    // height
-        header[15] = (data->h >> 8) & 0xff;
-        header[16] = 24;    // 24 bit bitmap
-        header[17] = 0x20;  // top-down, non-interlaced
-        fwrite(header, 18, 1, nfile);
-        for (int y = 0; y < data->h; y++) {
-            for (int x = 0; x < data->w; x++) {
-                uint32_t pxx = data->getPixelAt(XY{ x,y });
-                uint8_t px[3];
-                px[0] = pxx & 0xff;
-                px[1] = (pxx >> 8) & 0xff;
-                px[2] = (pxx >> 16) & 0xff;
-                fwrite(px, 3, 1, nfile);
+    FILE* f = platformOpenFile(path, PlatformFileModeWB);
+    if (f != NULL) {
+        DoOnReturn closeFile([f]() {fclose(f); });
+
+        //referenced http://tfc.duke.free.fr/coding/tga_specs.pdf
+        fwrite("\0", 1, 1, f);  //id length
+        fwrite(data->isPalettized ? "\1" : "\0", 1, 1, f);  //color map type
+        fwrite(data->isPalettized ? "\1" : "\2", 1, 1, f);  //image type (uncompressed true color)
+        if (data->isPalettized) {
+            fwrite("\0\0", 2, 1, f);  //first entry index
+            u16 length = ((LayerPalettized*)data)->palette.size();
+            fwrite(&length, 2, 1, f);   //palette size
+            fputc(32, f);   //color map entry size
+        }
+        else {
+            fwrite("\0\0\0\0\0", 5, 1, f);  //color map specification
+        }
+
+        //image specification
+        fwrite("\0\0", 2, 1, f);    //x origin
+        fwrite("\0\0", 2, 1, f);    //y origin
+        u16 w = data->w;
+        u16 h = data->h;
+        fwrite(&w, 2, 1, f);    //width
+        fwrite(&h, 2, 1, f);    //height
+        fputc(data->isPalettized ? 8 : 32, f); //pixel depth
+        u8 flags = 0b00100000;
+        fwrite(&flags, 1, 1, f);    //image descriptor flags
+
+        if (data->isPalettized) {
+            auto& palette = ((LayerPalettized*)data)->palette;
+            fwrite(palette.data(), 4, palette.size(), f);
+            /*for (u32& c : palette) {
+            }*/
+
+            u32* ppx = data->pixels32();
+            for (int y = 0; y < data->h; y++) {
+                for (int x = 0; x < data->w; x++) {
+                    u8 index = (u8)ARRAY2DPOINT(ppx, x, y, w);
+                    fwrite(&index, 1, 1, f);
+                }
             }
         }
-        
-        fclose(nfile);
+        else {
+
+            u32* ppx = data->pixels32();
+
+            fwrite(ppx, 4, w * h, f);
+            /*for (int y = 0; y < data->h; y++) {
+                for (int x = 0; x < data->w; x++) {
+                    u32 px = ARRAY2DPOINT(ppx, x, y, w);
+                    uint32_t pxx = data->getPixelAt(XY{ x,y });
+                    auto rgb = uint32ToSDLColor(pxx);
+                    fwrite(&rgb.b, 1, 1, f);
+                    fwrite(&rgb.g, 1, 1, f);
+                    fwrite(&rgb.r, 1, 1, f);
+                    fwrite(&rgb.a, 1, 1, f);
+                }
+            }*/
+        }
         return true;
     }
     return false;
@@ -2450,7 +2481,8 @@ void g_setupIO() {
         * exGIF,
         * exYYTEX,
         * exPEP,
-        * exGAL
+        * exGAL,
+        * exTGA
         ;
 
     io_registerVSP();
@@ -2501,7 +2533,7 @@ void g_setupIO() {
             })
     );
     g_fileExporters.push_back(exPEP = FileExporter::flatExporter("Prediction-Encoded Pixels PEP", ".pep", "", &writePEP, FORMAT_RGB));
-    g_fileExporters.push_back(FileExporter::flatExporter("TGA", ".tga", "", & writeTGA));
+    g_fileExporters.push_back(exTGA = FileExporter::flatExporter("TGA", ".tga", "", &writeTGA, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(exCaveStoryPBM = FileExporter::flatExporter("CaveStory PBM", ".pbm", "", &writeCaveStoryPBM));
     g_fileExporters.push_back(exAnymapPBM = FileExporter::flatExporter("Portable Bitmap (text) PBM", ".pbm", "", &writeAnymapTextPBM, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileExporters.push_back(
@@ -2567,6 +2599,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("Animated PNG", ".apng", &readAPNG, exAPNG, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(0, "\x89PNG\x0D\x0A")));
     g_fileImporters.push_back(FileImporter::flatImporter("JPEG", ".jpeg", &readSDLImage, exJPEG, FORMAT_RGB, magicVerify(0, "\xFF\xD8")));
+    g_fileImporters.push_back(FileImporter::flatImporter("TGA", ".tga", &readSDLImage, exTGA, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::sessionImporter("AVIF", ".avif", &readAVIF, exAVIF));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP", ".bmp", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
 #if VOIDSPRITE_JXL_ENABLED

@@ -91,7 +91,7 @@ bool tryInstallPalette(PlatformNativePathString path);
 
 bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeJPEG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params);
-bool writeTGA(PlatformNativePathString path, Layer* data);
+bool writeTGA(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params);
 bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeXBM(PlatformNativePathString path, Layer* data);
 bool writeCHeader(PlatformNativePathString path, Layer* data);
