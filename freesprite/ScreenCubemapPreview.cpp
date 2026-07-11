@@ -135,6 +135,14 @@ XYZd ScreenCubemapPreview::worldPointToScreenPoint(XYZd worldPos)
 
 void ScreenCubemapPreview::render()
 {
+    if (rotY < 0) {
+        rotY += (360 * (int)(rotY / -360 + 1));
+    }
+    if (rotY >= 360) {
+        rotY -= (360 * (int)(rotY / 360));
+    }
+    rotX = dclamp(-90, rotX, 90);
+
     viewMatrix = makeViewMatrix();
     Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 
@@ -174,73 +182,86 @@ void ScreenCubemapPreview::render()
         {{fac, fac, -facZ}, {1,0}},
         }, parent->getLayerStack()[0]->renderData[g_rd].tex);*/
 
-    const int teselatteCuts = 4;
+    const int teselatteCuts = 3;
 
-    static std::vector<Quad> frontQs = tesellateQuad(
-        Quad{
-            Vertex{ {-fac, fac, -facZ}, {0,0} },
-            Vertex{ {fac, fac, -facZ}, {1,0} },
-            Vertex{ {-fac, -fac, -facZ}, {0,1} },
-            Vertex{ {fac, -fac, -facZ}, {1,1} }
-        }, teselatteCuts);
+    static Quad srcFront = Quad{
+        Vertex{ {-fac, fac, -facZ}, {0,0} },
+        Vertex{ {fac, fac, -facZ}, {1,0} },
+        Vertex{ {-fac, -fac, -facZ}, {0,1} },
+        Vertex{ {fac, -fac, -facZ}, {1,1} }
+    };
 
-    static std::vector<Quad> backQs = tesellateQuad(
-        Quad{
-            Vertex{ {fac, fac, facZ}, {0,0} },
-            Vertex{ {-fac, fac, facZ}, {1,0} },
-            Vertex{ {fac, -fac, facZ}, {0,1} },
-            Vertex{ {-fac, -fac, facZ}, {1,1} }
-        }, teselatteCuts);
+    static Quad srcBack = Quad{
+        Vertex{ {fac, fac, facZ}, {0,0} },
+        Vertex{ {-fac, fac, facZ}, {1,0} },
+        Vertex{ {fac, -fac, facZ}, {0,1} },
+        Vertex{ {-fac, -fac, facZ}, {1,1} }
+    };
 
-    static std::vector<Quad> rightQs = tesellateQuad(
-        Quad{
-            Vertex{ {fac, fac, -facZ}, {0,0} },
-            Vertex{ {fac, fac, facZ}, {1,0} },
-            Vertex{ {fac, -fac, -facZ}, {0,1} },
-            Vertex{ {fac, -fac, facZ}, {1,1} }
-        }, teselatteCuts);
+    static Quad srcRight = Quad{
+        Vertex{ {fac, fac, -facZ}, {0,0} },
+        Vertex{ {fac, fac, facZ}, {1,0} },
+        Vertex{ {fac, -fac, -facZ}, {0,1} },
+        Vertex{ {fac, -fac, facZ}, {1,1} }
+    };
 
-    static std::vector<Quad> leftQs = tesellateQuad(
-        Quad{
-            Vertex{ {-fac, fac, facZ}, {0,0} },
-            Vertex{ {-fac, fac, -facZ}, {1,0} },
-            Vertex{ {-fac, -fac, facZ}, {0,1} },
-            Vertex{ {-fac, -fac, -facZ}, {1,1} }
-        }, teselatteCuts);
+    static Quad srcLeft = Quad{
+        Vertex{ {-fac, fac, facZ}, {0,0} },
+        Vertex{ {-fac, fac, -facZ}, {1,0} },
+        Vertex{ {-fac, -fac, facZ}, {0,1} },
+        Vertex{ {-fac, -fac, -facZ}, {1,1} }
+    };
 
-    static std::vector<Quad> topQs = tesellateQuad(
-        Quad{
-            Vertex{ {-fac, fac, facZ} , {0,0} },
-            Vertex{ {fac, fac, facZ}, {1,0} },
-            Vertex{ {-fac, fac, -facZ}, {0,1} },
-            Vertex{ {fac, fac, -facZ} , {1,1} }
-        }, teselatteCuts);
+    static Quad srcTop = Quad{
+        Vertex{ {-fac, fac, facZ} , {0,0} },
+        Vertex{ {fac, fac, facZ}, {1,0} },
+        Vertex{ {-fac, fac, -facZ}, {0,1} },
+        Vertex{ {fac, fac, -facZ} , {1,1} }
+    };
 
-    static std::vector<Quad> bottomQs = tesellateQuad(
-        Quad{
-            Vertex{ { fac, -fac, facZ } , {0,0} },
-            Vertex{ {-fac, -fac, facZ}, {1,0} },
-            Vertex{ { fac, -fac, -facZ }, {0,1} },
-            Vertex{ {-fac, -fac, -facZ}, {1,1} }
-        }, teselatteCuts);
+    static Quad srcBottom = Quad{
+        Vertex{ { fac, -fac, facZ } , {0,0} },
+        Vertex{ {-fac, -fac, facZ}, {1,0} },
+        Vertex{ { fac, -fac, -facZ }, {0,1} },
+        Vertex{ {-fac, -fac, -facZ}, {1,1} }
+    };
 
-    SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
-    renderMultipleTexturedQuads(frontQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    static std::vector<Quad> frontQs = tesellateQuad(srcFront, teselatteCuts);
+    static std::vector<Quad> backQs = tesellateQuad(srcBack, teselatteCuts);
+    static std::vector<Quad> rightQs = tesellateQuad(srcRight, teselatteCuts);
+    static std::vector<Quad> leftQs = tesellateQuad(srcLeft, teselatteCuts);
+    static std::vector<Quad> topQs = tesellateQuad(srcTop, teselatteCuts);
+    static std::vector<Quad> bottomQs = tesellateQuad(srcBottom, teselatteCuts);
 
-    SDL_SetRenderDrawColor(g_rd, 0, 0, 255, 255);
-    renderMultipleTexturedQuads(backQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    if (quadInView(srcFront)) {
+        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
+        renderMultipleTexturedQuads(frontQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    }
 
-    SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
-    renderMultipleTexturedQuads(rightQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    if (quadInView(srcBack)) {
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 255, 255);
+        renderMultipleTexturedQuads(backQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    }
 
-    SDL_SetRenderDrawColor(g_rd, 255, 255, 0, 255);
-    renderMultipleTexturedQuads(leftQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    if (quadInView(srcRight)) {
+        SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
+        renderMultipleTexturedQuads(rightQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    }
 
-    SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
-    renderMultipleTexturedQuads(topQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    if (quadInView(srcLeft)) {
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 0, 255);
+        renderMultipleTexturedQuads(leftQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    }
 
-    SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
-    renderMultipleTexturedQuads(bottomQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    if (quadInView(srcTop)) {
+        SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
+        renderMultipleTexturedQuads(topQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    }
+
+    if (quadInView(srcBottom)) {
+        SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
+        renderMultipleTexturedQuads(bottomQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+    }
 
     g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov),5, 30);
 }
@@ -390,12 +411,12 @@ void ScreenCubemapPreview::renderTexturedTriangle(std::vector<Vertex> worldSpace
         logerr(frmt("invalid vertex count: {}", viewMt.size()));
     }
 
-    /*for (int i = 0; i < screenPoints.size(); i++) {
+    for (int i = 0; i < screenPoints.size(); i++) {
         XY a = { (int)screenPoints[i].position.x, (int)screenPoints[i].position.y };
         XY b = { (int)screenPoints[(i + 1) % screenPoints.size()].position.x, (int)screenPoints[(i + 1) % screenPoints.size()].position.y };
         //g_ttp->addTooltip(Tooltip{a, frmt("{:.02f} {:.02f}", screenPoints[i].tex_coord.x, screenPoints[i].tex_coord.y)});
         drawLine(a,b);
-    }*/
+    }
 
     //SDL_RenderGeometry(g_rd, tex, )
 }
@@ -467,27 +488,20 @@ std::vector<Quad> ScreenCubemapPreview::tesellateQuad(Quad q, int cuts)
     return ret;
 }
 
-void ScreenCubemapPreview::renderTesellatedTexturedQuad(Vertex topLeft, Vertex topRight, Vertex bottomLeft, Vertex bottomRight, SDL_Texture* tex)
+bool ScreenCubemapPreview::quadInView(Quad q)
 {
-    const int cuts = 3;
-    std::queue<Quad> cutQueue;
-    cutQueue.push(Quad{ topLeft, topRight, bottomLeft, bottomRight });
-    for (int i = 0; i < cuts; i++) {
-        std::queue<Quad> nextQueue;
-        while (!cutQueue.empty()) {
-            for (auto& q : tesellateQuad(cutQueue.front())) {
-                nextQueue.push(q);
-            }
-            cutQueue.pop();
+    //double fovRad = degToRad(fov);
+    //double aspectRatio = (double)g_windowW / g_windowH;
+
+    bool anyOnScreen = false;
+    for (auto& point : {q.bottomLeft, q.bottomRight, q.topLeft, q.topRight}) {
+        XYZWd viewSpace = calcViewSpace(point.pos);
+        if (viewSpace.z <= -nearPlane) {
+            return true;
         }
-        cutQueue = nextQueue;
     }
 
-    while (!cutQueue.empty()) {
-        Quad& nextQ = cutQueue.front();
-        renderTexturedQuad({ nextQ.topLeft, nextQ.topRight, nextQ.bottomLeft, nextQ.bottomRight }, tex);
-        cutQueue.pop();
-    }
+    return false;
 }
 
 void ScreenCubemapPreview::renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex)

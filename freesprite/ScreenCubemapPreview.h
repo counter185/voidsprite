@@ -48,10 +48,11 @@ public:
     void renderQuad(std::vector<XYZd> worldSpacePoints);
     void renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
     void renderTexturedQuad(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
-    void renderTesellatedTexturedQuad(Vertex topLeft, Vertex topRight, Vertex bottomLeft, Vertex bottomRight, SDL_Texture* tex);
     void renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex);
 
     std::vector<Quad> tesellateQuad(Quad q);
     std::vector<Quad> tesellateQuad(Quad q, int iterations);
+
+    bool quadInView(Quad q);
 };
 
