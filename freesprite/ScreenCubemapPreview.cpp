@@ -25,6 +25,7 @@ Vertex ScreenCubemapPreview::intersectTexturedViewSpace(Vertex a, Vertex b)
 std::vector<Vertex> ScreenCubemapPreview::clipViewSpaceTriangle(std::vector<Vertex> points)
 {
     std::vector<Vertex> ret;
+    bool noneOutside = true;
     for (int i = 0; i < points.size(); i++) {
         Vertex now = points[i];
         Vertex next = points[(i + 1) % 3];
@@ -38,17 +39,17 @@ std::vector<Vertex> ScreenCubemapPreview::clipViewSpaceTriangle(std::vector<Vert
         }
         else if (nowInside && !nextInside)
         {
-            Vertex newVtx = intersectTexturedViewSpace(now, next);
-            //newVtx.uv = now.uv;
-            ret.push_back(newVtx);
+            noneOutside = false;
+            ret.push_back(intersectTexturedViewSpace(now, next));
         }
         else if (!nowInside && nextInside)
         {
+            noneOutside = false;
             ret.push_back(intersectTexturedViewSpace(now, next));
             ret.push_back(next);
         }
     }
-    return ret;
+    return noneOutside && !ret.empty() ? points : ret;
 }
 
 matrix ScreenCubemapPreview::makeViewMatrix()
@@ -90,6 +91,19 @@ matrix ScreenCubemapPreview::makeViewMatrix()
     return V;
 }
 
+matrix ScreenCubemapPreview::makeProjectionMatrix()
+{
+    double fovRad = degToRad(fov);
+    double aspectRatio = (double)g_windowW / g_windowH;
+
+    return {
+        {1.0 / (aspectRatio * tan(fovRad / 2)), 0, 0, 0},
+        {0, 1.0 / (tan(fovRad / 2)), 0, 0},
+        {0, 0, nearPlane, farPlane},
+        {0, 0, -1, 0}
+    };
+}
+
 XYZWd ScreenCubemapPreview::calcViewSpace(XYZd worldPos)
 {
     //matrix viewMatrix = viewMatrix;//makeViewMatrix();
@@ -97,7 +111,7 @@ XYZWd ScreenCubemapPreview::calcViewSpace(XYZd worldPos)
     return XYZWd{ viewSpace[0][0], viewSpace[1][0], viewSpace[2][0], viewSpace[3][0] };
 }
 
-matrix ScreenCubemapPreview::calcClipSpace(double fovRad, double aspectRatio, XYZWd viewSpace)
+matrix ScreenCubemapPreview::calcClipSpace(XYZWd viewSpace)
 {
     double xP = viewSpace.x / viewSpace.z;
     double yP = viewSpace.y / viewSpace.z;
@@ -105,12 +119,6 @@ matrix ScreenCubemapPreview::calcClipSpace(double fovRad, double aspectRatio, XY
     //viewSpace.x = xP;
     //viewSpace.y = yP;
 
-    matrix projection = {
-        {1.0 / (aspectRatio * tan(fovRad / 2)), 0, 0, 0},
-        {0, 1.0 / (tan(fovRad / 2)), 0, 0},
-        {0, 0, nearPlane, farPlane},
-        {0, 0, -1, 0}
-    };
     return matrixMultiply(projection, { {viewSpace.x}, {viewSpace.y}, {viewSpace.z}, {viewSpace.w} });
 }
 
@@ -125,11 +133,8 @@ XYZd ScreenCubemapPreview::calcScreenSpace(matrix clipSpace)
 
 XYZd ScreenCubemapPreview::worldPointToScreenPoint(XYZd worldPos)
 {
-    double fovRad = degToRad(fov);
-    double aspectRatio = (double)g_windowW / g_windowH;
-
     XYZWd pView = calcViewSpace(worldPos);
-    matrix pClip = calcClipSpace(fovRad, aspectRatio, pView);
+    matrix pClip = calcClipSpace(pView);
     return calcScreenSpace(pClip);
 }
 
@@ -144,6 +149,7 @@ void ScreenCubemapPreview::render()
     rotX = dclamp(-90, rotX, 90);
 
     viewMatrix = makeViewMatrix();
+    projection = makeProjectionMatrix();
     Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 
     const double fac = 3.0;
@@ -233,34 +239,41 @@ void ScreenCubemapPreview::render()
     static std::vector<Quad> topQs = tesellateQuad(srcTop, teselatteCuts);
     static std::vector<Quad> bottomQs = tesellateQuad(srcBottom, teselatteCuts);
 
+    static std::vector<std::vector<Vertex>> frontQqs = tesellateQuadV2(srcFront);
+    static std::vector<std::vector<Vertex>> backQqs = tesellateQuadV2(srcBack);
+    static std::vector<std::vector<Vertex>> rightQqs = tesellateQuadV2(srcRight);
+    static std::vector<std::vector<Vertex>> leftQqs = tesellateQuadV2(srcLeft);
+    static std::vector<std::vector<Vertex>> topQqs = tesellateQuadV2(srcTop);
+    static std::vector<std::vector<Vertex>> bottomQqs = tesellateQuadV2(srcBottom);
+
     if (quadInView(srcFront)) {
         SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
-        renderMultipleTexturedQuads(frontQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+        renderTesellatedTexturedQuad(frontQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
     }
 
     if (quadInView(srcBack)) {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 255, 255);
-        renderMultipleTexturedQuads(backQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+        renderTesellatedTexturedQuad(backQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
     }
 
     if (quadInView(srcRight)) {
         SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
-        renderMultipleTexturedQuads(rightQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+        renderTesellatedTexturedQuad(rightQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
     }
 
     if (quadInView(srcLeft)) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 0, 255);
-        renderMultipleTexturedQuads(leftQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+        renderTesellatedTexturedQuad(leftQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
     }
 
     if (quadInView(srcTop)) {
         SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
-        renderMultipleTexturedQuads(topQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+        renderTesellatedTexturedQuad(topQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
     }
 
     if (quadInView(srcBottom)) {
         SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
-        renderMultipleTexturedQuads(bottomQs, parent->getLayerStack()[0]->renderData[g_rd].tex);
+        renderTesellatedTexturedQuad(bottomQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
     }
 
     g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov),5, 30);
@@ -321,9 +334,6 @@ void ScreenCubemapPreview::takeInput(SDL_Event evt)
 
 void ScreenCubemapPreview::renderTriangle(std::vector<XYZd> worldSpacePoints)
 {
-    double fovRad = degToRad(fov);
-    double aspectRatio = (double)g_windowW / g_windowH;
-
     std::vector<Vertex> viewMt;
     bool anyOnScreen = false;
     for (auto& point : worldSpacePoints) {
@@ -341,7 +351,7 @@ void ScreenCubemapPreview::renderTriangle(std::vector<XYZd> worldSpacePoints)
     std::vector<XY> screenPoints;
 
     for (auto& v : viewMt) {
-        XYZd screenSpace = calcScreenSpace(calcClipSpace(fovRad, aspectRatio, {v.pos.x, v.pos.y, v.pos.z, 1}));
+        XYZd screenSpace = calcScreenSpace(calcClipSpace({v.pos.x, v.pos.y, v.pos.z, 1}));
         screenPoints.push_back(XY{ (int)screenSpace.x, (int)screenSpace.y });
     }
 
@@ -371,27 +381,46 @@ void ScreenCubemapPreview::renderQuad(std::vector<XYZd> worldSpacePoints)
 
 void ScreenCubemapPreview::renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex)
 {
-    double fovRad = degToRad(fov);
-    double aspectRatio = (double)g_windowW / g_windowH;
-
     std::vector<Vertex> viewMt;
-    bool anyOnScreen = false;
     for (auto& point : worldSpacePoints) {
         XYZWd viewSpace = calcViewSpace(point.pos);
         viewMt.push_back({ XYZd{ viewSpace.x, viewSpace.y, viewSpace.z }, point.uv });
-        anyOnScreen |= viewSpace.z <= -nearPlane;
     }
 
+    renderViewSpaceTriangle(viewMt, tex);
+
+    //SDL_RenderGeometry(g_rd, tex, )
+}
+
+void ScreenCubemapPreview::renderViewSpaceTriangle(std::vector<Vertex> viewMt, SDL_Texture* tex, XYZd* screenPointCache)
+{
+    bool anyOnScreen = false;
+    for (auto& viewSpacePoint : viewMt) {
+        anyOnScreen |= viewSpacePoint.pos.z <= -nearPlane;
+    }
     if (!anyOnScreen) {
         return;
     }
 
-    viewMt = clipViewSpaceTriangle(viewMt);
+    auto newViewMt = clipViewSpaceTriangle(viewMt);
+    viewMt = newViewMt;
 
     std::vector<SDL_Vertex> screenPoints;
 
+    int i = 0;
     for (auto& v : viewMt) {
-        XYZd screenSpace = calcScreenSpace(calcClipSpace(fovRad, aspectRatio, { v.pos.x, v.pos.y, v.pos.z, 1 }));
+        XYZd screenSpace;
+        if (viewMt.size() == 3 && screenPointCache != NULL && !isnan(screenPointCache[i].x)) {
+            screenSpace = screenPointCache[i];
+        }
+        else
+        {
+            screenSpace = calcScreenSpace(calcClipSpace({ v.pos.x, v.pos.y, v.pos.z, 1 }));
+            if (viewMt.size() == 3 && screenPointCache != NULL) {
+                screenPointCache[i] = screenSpace;
+            }
+        }
+        i++;
         SDL_Vertex vv{};
         vv.position = { (float)screenSpace.x, (float)screenSpace.y };
         vv.color = { 1,1,1,1 };
@@ -411,14 +440,12 @@ void ScreenCubemapPreview::renderTexturedTriangle(std::vector<Vertex> worldSpace
         logerr(frmt("invalid vertex count: {}", viewMt.size()));
     }
 
-    for (int i = 0; i < screenPoints.size(); i++) {
+    /*for (int i = 0; i < screenPoints.size(); i++) {
         XY a = { (int)screenPoints[i].position.x, (int)screenPoints[i].position.y };
         XY b = { (int)screenPoints[(i + 1) % screenPoints.size()].position.x, (int)screenPoints[(i + 1) % screenPoints.size()].position.y };
         //g_ttp->addTooltip(Tooltip{a, frmt("{:.02f} {:.02f}", screenPoints[i].tex_coord.x, screenPoints[i].tex_coord.y)});
-        drawLine(a,b);
-    }
-
-    //SDL_RenderGeometry(g_rd, tex, )
+        drawLine(a, b);
+    }*/
 }
 
 void ScreenCubemapPreview::renderTexturedQuad(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex)
@@ -488,6 +515,42 @@ std::vector<Quad> ScreenCubemapPreview::tesellateQuad(Quad q, int cuts)
     return ret;
 }
 
+std::vector<std::vector<Vertex>> ScreenCubemapPreview::tesellateQuadV2(Quad q)
+{
+    std::vector<std::vector<Vertex>> ret;
+    const int splitsX = 14;
+    const int splitsY = 20;
+
+    Vertex topLeft = q.topLeft;
+    Vertex topRight = q.topRight;
+    Vertex bottomLeft = q.bottomLeft;
+    Vertex bottomRight = q.bottomRight;
+
+    for (int y = 0; y < (splitsY + 1); y++) {
+        double tVertical = (double)y / splitsY;
+        Vertex leftOrigin = {
+            interpolatePosXYZd(topLeft.pos, bottomLeft.pos, tVertical),
+            interpolatePosXYd(topLeft.uv, bottomLeft.uv, tVertical)
+        };
+        Vertex rightOrigin = {
+            interpolatePosXYZd(topRight.pos, bottomRight.pos, tVertical),
+            interpolatePosXYd(topRight.uv, bottomRight.uv, tVertical)
+        };
+
+        std::vector<Vertex> thisLine;
+        for (int x = 0; x < (splitsX + 1); x++) {
+            double tHorizontal = (double)x / splitsX;
+            thisLine.push_back({
+                interpolatePosXYZd(leftOrigin.pos, rightOrigin.pos, tHorizontal),
+                interpolatePosXYd(leftOrigin.uv, rightOrigin.uv, tHorizontal)
+            });
+        }
+        ret.push_back(thisLine);
+    }
+
+    return ret;
+}
+
 bool ScreenCubemapPreview::quadInView(Quad q)
 {
     //double fovRad = degToRad(fov);
@@ -508,5 +571,57 @@ void ScreenCubemapPreview::renderMultipleTexturedQuads(std::vector<Quad> q, SDL_
 {
     for (auto& qq : q) {
         renderTexturedQuad({ qq.topLeft, qq.topRight, qq.bottomLeft, qq.bottomRight }, tex);
+    }
+}
+
+void ScreenCubemapPreview::renderTesellatedTexturedQuad(std::vector<std::vector<Vertex>>& q, SDL_Texture* tex)
+{
+
+    std::vector<std::vector<Vertex>> viewSpaceQs;
+    std::vector<std::vector<XYZd>> screenPointCache;
+
+    for (auto& qq : q) {
+        std::vector<Vertex> n;
+        std::vector<XYZd> s;
+        for (auto& qqq : qq) {
+            XYZWd viewSpace = calcViewSpace(qqq.pos);
+            n.push_back({ XYZd{ viewSpace.x, viewSpace.y, viewSpace.z }, qqq.uv });
+            s.push_back({ NAN,0,0 });
+        }
+        viewSpaceQs.push_back(n);
+        screenPointCache.push_back(s);
+    }
+
+
+    int pointsX = q[0].size();
+    int pointsY = q.size();
+
+    for (int y = 0; y < pointsY - 1; y++) {
+        for (int x = 0; x < pointsX - 1; x++) {
+            XYZd screenPointBuffer[3];
+            screenPointBuffer[0] = screenPointCache[y][x];
+            screenPointBuffer[1] = screenPointCache[y][x+1];
+            screenPointBuffer[2] = screenPointCache[y+1][x];
+            renderViewSpaceTriangle({
+                viewSpaceQs[y][x],
+                viewSpaceQs[y][x+1],
+                viewSpaceQs[y+1][x],
+            }, tex, screenPointBuffer);
+            screenPointCache[y][x] = screenPointBuffer[0];
+            screenPointCache[y][x+1] = screenPointBuffer[1];
+            screenPointCache[y+1][x] = screenPointBuffer[2];
+
+            screenPointBuffer[0] = screenPointCache[y+1][x];
+            screenPointBuffer[1] = screenPointCache[y][x+1];
+            screenPointBuffer[2] = screenPointCache[y+1][x+1];
+            renderViewSpaceTriangle({
+                viewSpaceQs[y+1][x],
+                viewSpaceQs[y][x+1],
+                viewSpaceQs[y+1][x+1],
+            }, tex, screenPointBuffer);
+            screenPointCache[y+1][x] = screenPointBuffer[0];
+            screenPointCache[y][x+1] = screenPointBuffer[1];
+            screenPointCache[y+1][x+1] = screenPointBuffer[2];
+        }
     }
 }

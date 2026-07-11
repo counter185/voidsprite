@@ -17,6 +17,7 @@ class ScreenCubemapPreview :
 private:
     MainEditor* parent = NULL;
     matrix viewMatrix;
+    matrix projection;
 public:
     double posX = 0, posY = 0, posZ = 0;
     double rotX = 0, rotY = 0, rotZ = 0;
@@ -31,8 +32,9 @@ public:
     Vertex intersectTexturedViewSpace(Vertex a, Vertex b);
     std::vector<Vertex> clipViewSpaceTriangle(std::vector<Vertex> points);
     matrix makeViewMatrix();
+    matrix makeProjectionMatrix();
     XYZWd calcViewSpace(XYZd worldSpace);
-    matrix calcClipSpace(double fovRad, double aspectRatio, XYZWd viewSpace);
+    matrix calcClipSpace(XYZWd viewSpace);
     XYZd calcScreenSpace(matrix clipSpace);
     XYZd worldPointToScreenPoint(XYZd worldPos);
 
@@ -47,11 +49,14 @@ public:
     void renderTriangle(std::vector<XYZd> worldSpacePoints);
     void renderQuad(std::vector<XYZd> worldSpacePoints);
     void renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
+    void renderViewSpaceTriangle(std::vector<Vertex> viewMt, SDL_Texture* tex, XYZd* screenPointCache = NULL);
     void renderTexturedQuad(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
     void renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex);
+    void renderTesellatedTexturedQuad(std::vector<std::vector<Vertex>>& q, SDL_Texture* tex);
 
     std::vector<Quad> tesellateQuad(Quad q);
     std::vector<Quad> tesellateQuad(Quad q, int iterations);
+    std::vector<std::vector<Vertex>> tesellateQuadV2(Quad q);
 
     bool quadInView(Quad q);
 };
