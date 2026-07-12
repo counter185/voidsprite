@@ -27,6 +27,7 @@ public:
 
     int count = 1;
     int maxCount = 40;
+
     int framesWait = 0;
 
     TesellatedQuad(ScreenCubemapPreview* caller, Quad base);
@@ -104,7 +105,7 @@ public:
     void resetAllQuads();
 
     bool quadInView(Quad q);
-    std::pair<std::vector<SDL_Vertex>, std::vector<int>> evalTriangleScreenPoints(std::vector<Vertex> viewMt);
+    std::pair<std::vector<SDL_Vertex>, std::vector<int>> evalTriangleScreenPoints(std::vector<Vertex> viewMt, XYZd* screenPointCache = NULL);
 
     void promptOverrideTexture(int id);
 };

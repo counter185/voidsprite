@@ -535,6 +535,8 @@ std::vector<std::vector<Vertex>> ScreenCubemapPreview::tesellateQuadV2(Quad q, i
     Vertex bottomLeft = q.bottomLeft;
     Vertex bottomRight = q.bottomRight;
 
+    ret.resize(splitsY + 1);
+
     for (int y = 0; y < (splitsY + 1); y++) {
         double tVertical = (double)y / splitsY;
         Vertex leftOrigin = {
@@ -547,14 +549,15 @@ std::vector<std::vector<Vertex>> ScreenCubemapPreview::tesellateQuadV2(Quad q, i
         };
 
         std::vector<Vertex> thisLine;
+        thisLine.resize(splitsX + 1);
         for (int x = 0; x < (splitsX + 1); x++) {
             double tHorizontal = (double)x / splitsX;
-            thisLine.push_back({
+            thisLine.data()[x] = {
                 interpolatePosXYZd(leftOrigin.pos, rightOrigin.pos, tHorizontal),
                 interpolatePosXYd(leftOrigin.uv, rightOrigin.uv, tHorizontal)
-            });
+            };
         }
-        ret.push_back(thisLine);
+        ret.data()[y] = thisLine;
     }
 
     return ret;
@@ -586,7 +589,7 @@ bool ScreenCubemapPreview::quadInView(Quad q)
     return false;
 }
 
-std::pair<std::vector<SDL_Vertex>, std::vector<int>> ScreenCubemapPreview::evalTriangleScreenPoints(std::vector<Vertex> viewMt)
+std::pair<std::vector<SDL_Vertex>, std::vector<int>> ScreenCubemapPreview::evalTriangleScreenPoints(std::vector<Vertex> viewMt, XYZd* screenPointCache)
 {
     bool anyOnScreen = false;
     for (auto& viewSpacePoint : viewMt) {
@@ -601,8 +604,20 @@ std::pair<std::vector<SDL_Vertex>, std::vector<int>> ScreenCubemapPreview::evalT
 
     std::vector<SDL_Vertex> screenPoints;
 
+    int i = 0;
     for (auto& v : viewMt) {
-        XYZd screenSpace = calcScreenSpace(calcClipSpace({ v.pos.x, v.pos.y, v.pos.z, 1 }));
+        XYZd screenSpace;
+        if (viewMt.size() == 3 && screenPointCache != NULL && !isnan(screenPointCache[i].x)) {
+            screenSpace = screenPointCache[i];
+        }
+        else
+        {
+            screenSpace = calcScreenSpace(calcClipSpace({ v.pos.x, v.pos.y, v.pos.z, 1 }));
+            if (viewMt.size() == 3 && screenPointCache != NULL) {
+                screenPointCache[i] = screenSpace;
+            }
+        }
+        i++;
         SDL_Vertex vv{};
         vv.position = { (float)screenSpace.x, (float)screenSpace.y };
         vv.color = { 1,1,1,1 };
@@ -710,7 +725,7 @@ void TesellatedQuad::render(Layer* overrideTex) {
             count =
                 count < 15 ? count + 1
                 : count < 25 ? count + 3
-                : ixmin(maxCount, count + 10);
+                : maxCount;
             updateScreenSpaceVtx();
             framesWait = 
                 count < 15 ? 0
@@ -744,6 +759,7 @@ void TesellatedQuad::updateScreenSpaceVtx()
         auto tesellated = parent->tesellateQuadV2(baseQuad, count, count);
 
         std::vector<std::vector<Vertex>> viewSpaceQs;
+        std::vector<std::vector<XYZd>> screenPointCache;
 
         for (auto& qq : tesellated) {
             std::vector<Vertex> n;
@@ -754,6 +770,7 @@ void TesellatedQuad::updateScreenSpaceVtx()
                 s.push_back({ NAN,0,0 });
             }
             viewSpaceQs.push_back(n);
+            screenPointCache.push_back(s);
         }
 
         int pointsX = tesellated[0].size();
@@ -761,17 +778,32 @@ void TesellatedQuad::updateScreenSpaceVtx()
 
         for (int y = 0; y < pointsY - 1; y++) {
             for (int x = 0; x < pointsX - 1; x++) {
+                XYZd screenPointBuffer[3];
+                
+                screenPointBuffer[0] = screenPointCache[y][x];
+                screenPointBuffer[1] = screenPointCache[y][x + 1];
+                screenPointBuffer[2] = screenPointCache[y + 1][x];
                 screenSpaceDrawCalls.push_back(parent->evalTriangleScreenPoints({
                     viewSpaceQs[y][x],
                     viewSpaceQs[y][x + 1],
                     viewSpaceQs[y + 1][x],
-                    }));
+                }, screenPointBuffer));
+                screenPointCache[y][x] = screenPointBuffer[0];
+                screenPointCache[y][x + 1] = screenPointBuffer[1];
+                screenPointCache[y + 1][x] = screenPointBuffer[2];
 
+
+                screenPointBuffer[0] = screenPointCache[y + 1][x];
+                screenPointBuffer[1] = screenPointCache[y][x + 1];
+                screenPointBuffer[2] = screenPointCache[y + 1][x + 1];
                 screenSpaceDrawCalls.push_back(parent->evalTriangleScreenPoints({
                     viewSpaceQs[y + 1][x],
                     viewSpaceQs[y][x + 1],
                     viewSpaceQs[y + 1][x + 1],
-                    }));
+                }, screenPointBuffer));
+                screenPointCache[y + 1][x] = screenPointBuffer[0];
+                screenPointCache[y][x + 1] = screenPointBuffer[1];
+                screenPointCache[y + 1][x + 1] = screenPointBuffer[2];
             }
         }
     }
