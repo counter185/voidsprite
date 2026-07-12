@@ -2,6 +2,8 @@
 #include "BaseScreen.h"
 #include "mathops.h"
 
+class ScreenCubemapPreview;
+
 struct Vertex {
     XYZd pos;
     XYd uv;
@@ -11,14 +13,38 @@ struct Quad {
     Vertex topLeft, topRight, bottomLeft, bottomRight;
 };
 
+class TesellatedQuad {
+private:
+    ScreenCubemapPreview* parent;
+public:
+    Quad baseQuad;
+
+    std::vector<std::pair<std::vector<SDL_Vertex>, std::vector<int>>> screenSpaceDrawCalls;
+    //std::vector<Vertex> screenSpaceVtx;
+    //std::vector<int> indexBuffer;
+
+    int count = 1;
+    int maxCount = 30;
+    int framesWait = 0;
+
+    TesellatedQuad(ScreenCubemapPreview* caller, Quad base);
+
+    void render();
+    void reset();
+
+    void updateScreenSpaceVtx();
+};
+
 class ScreenCubemapPreview :
     public BaseScreen
 {
 private:
+    TesellatedQuad* qFront, *qBack, *qLeft, *qRight, *qTop, *qBottom;
+public:
     MainEditor* parent = NULL;
     matrix viewMatrix;
     matrix projection;
-public:
+
     double posX = 0, posY = 0, posZ = 0;
     double rotX = 0, rotY = 0, rotZ = 0;
 
@@ -27,6 +53,14 @@ public:
     double farPlane = 200;
 
     bool mouseDrag = false;
+
+    ScreenCubemapPreview(MainEditor* caller);
+    ~ScreenCubemapPreview();
+
+    void render() override;
+    void takeInput(SDL_Event evt) override;
+    std::string getName() { return "Cubemap preview"; }
+    BaseScreen* isSubscreenOf() override { return (BaseScreen*)parent; }
 
     XYZd intersectViewSpace(XYZd a, XYZd b);
     Vertex intersectTexturedViewSpace(Vertex a, Vertex b);
@@ -38,14 +72,6 @@ public:
     XYZd calcScreenSpace(matrix clipSpace);
     XYZd worldPointToScreenPoint(XYZd worldPos);
 
-    ScreenCubemapPreview(MainEditor* caller)
-        : parent(caller) {}
-
-    void render() override;
-    void takeInput(SDL_Event evt) override;
-    std::string getName() { return "Cubemap preview"; }
-    BaseScreen* isSubscreenOf() override { return (BaseScreen*)parent; }
-
     void renderTriangle(std::vector<XYZd> worldSpacePoints);
     void renderQuad(std::vector<XYZd> worldSpacePoints);
     void renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);
@@ -56,8 +82,11 @@ public:
 
     std::vector<Quad> tesellateQuad(Quad q);
     std::vector<Quad> tesellateQuad(Quad q, int iterations);
-    std::vector<std::vector<Vertex>> tesellateQuadV2(Quad q);
+    std::vector<std::vector<Vertex>> tesellateQuadV2(Quad q, int splitsW = 10, int splitsH = 10);
+
+    void resetAllQuads();
 
     bool quadInView(Quad q);
+    std::pair<std::vector<SDL_Vertex>, std::vector<int>> evalTriangleScreenPoints(std::vector<Vertex> viewMt);
 };
 

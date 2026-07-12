@@ -138,6 +138,60 @@ XYZd ScreenCubemapPreview::worldPointToScreenPoint(XYZd worldPos)
     return calcScreenSpace(pClip);
 }
 
+ScreenCubemapPreview::ScreenCubemapPreview(MainEditor* caller)
+    : parent(caller)
+{
+    const double fac = 3.0;
+    const double facZ = 3.0;
+
+    qFront = new TesellatedQuad(this, Quad{
+        Vertex{ {-fac, fac, -facZ}, {0,0} },
+        Vertex{ {fac, fac, -facZ}, {1,0} },
+        Vertex{ {-fac, -fac, -facZ}, {0,1} },
+        Vertex{ {fac, -fac, -facZ}, {1,1} }
+    });
+    qBack = new TesellatedQuad(this, Quad{
+        Vertex{ {fac, fac, facZ}, {0,0} },
+        Vertex{ {-fac, fac, facZ}, {1,0} },
+        Vertex{ {fac, -fac, facZ}, {0,1} },
+        Vertex{ {-fac, -fac, facZ}, {1,1} }
+    });
+    qRight = new TesellatedQuad(this, Quad{
+        Vertex{ {fac, fac, -facZ}, {0,0} },
+        Vertex{ {fac, fac, facZ}, {1,0} },
+        Vertex{ {fac, -fac, -facZ}, {0,1} },
+        Vertex{ {fac, -fac, facZ}, {1,1} }
+    });
+    qLeft = new TesellatedQuad(this, Quad{
+        Vertex{ {-fac, fac, facZ}, {0,0} },
+        Vertex{ {-fac, fac, -facZ}, {1,0} },
+        Vertex{ {-fac, -fac, facZ}, {0,1} },
+        Vertex{ {-fac, -fac, -facZ}, {1,1} }
+    });
+    qTop = new TesellatedQuad(this, Quad{
+        Vertex{ {-fac, fac, facZ} , {0,0} },
+        Vertex{ {fac, fac, facZ}, {1,0} },
+        Vertex{ {-fac, fac, -facZ}, {0,1} },
+        Vertex{ {fac, fac, -facZ} , {1,1} }
+    });
+    qBottom = new TesellatedQuad(this, Quad{
+        Vertex{ { fac, -fac, facZ } , {0,0} },
+        Vertex{ {-fac, -fac, facZ}, {1,0} },
+        Vertex{ { fac, -fac, -facZ }, {0,1} },
+        Vertex{ {-fac, -fac, -facZ}, {1,1} }
+    });
+}
+
+ScreenCubemapPreview::~ScreenCubemapPreview()
+{
+    delete qFront;
+    delete qBack;
+    delete qLeft;
+    delete qRight;
+    delete qTop;
+    delete qBottom;
+}
+
 void ScreenCubemapPreview::render()
 {
     if (rotY < 0) {
@@ -152,8 +206,6 @@ void ScreenCubemapPreview::render()
     projection = makeProjectionMatrix();
     Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 
-    const double fac = 3.0;
-    const double facZ = 3.0;
     /*SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
     renderTriangle({
         {-fac, -fac, facZ},
@@ -188,93 +240,27 @@ void ScreenCubemapPreview::render()
         {{fac, fac, -facZ}, {1,0}},
         }, parent->getLayerStack()[0]->renderData[g_rd].tex);*/
 
-    const int teselatteCuts = 3;
 
-    static Quad srcFront = Quad{
-        Vertex{ {-fac, fac, -facZ}, {0,0} },
-        Vertex{ {fac, fac, -facZ}, {1,0} },
-        Vertex{ {-fac, -fac, -facZ}, {0,1} },
-        Vertex{ {fac, -fac, -facZ}, {1,1} }
-    };
+    
+    SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
+    qFront->render();
+    //renderTesellatedTexturedQuad(frontQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
 
-    static Quad srcBack = Quad{
-        Vertex{ {fac, fac, facZ}, {0,0} },
-        Vertex{ {-fac, fac, facZ}, {1,0} },
-        Vertex{ {fac, -fac, facZ}, {0,1} },
-        Vertex{ {-fac, -fac, facZ}, {1,1} }
-    };
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 255, 255);
+    qBack->render();
+    //renderTesellatedTexturedQuad(backQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
 
-    static Quad srcRight = Quad{
-        Vertex{ {fac, fac, -facZ}, {0,0} },
-        Vertex{ {fac, fac, facZ}, {1,0} },
-        Vertex{ {fac, -fac, -facZ}, {0,1} },
-        Vertex{ {fac, -fac, facZ}, {1,1} }
-    };
+    SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
+    qRight->render();
 
-    static Quad srcLeft = Quad{
-        Vertex{ {-fac, fac, facZ}, {0,0} },
-        Vertex{ {-fac, fac, -facZ}, {1,0} },
-        Vertex{ {-fac, -fac, facZ}, {0,1} },
-        Vertex{ {-fac, -fac, -facZ}, {1,1} }
-    };
+    SDL_SetRenderDrawColor(g_rd, 255, 255, 0, 255);
+    qLeft->render();
 
-    static Quad srcTop = Quad{
-        Vertex{ {-fac, fac, facZ} , {0,0} },
-        Vertex{ {fac, fac, facZ}, {1,0} },
-        Vertex{ {-fac, fac, -facZ}, {0,1} },
-        Vertex{ {fac, fac, -facZ} , {1,1} }
-    };
+    SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
+    qTop->render();
 
-    static Quad srcBottom = Quad{
-        Vertex{ { fac, -fac, facZ } , {0,0} },
-        Vertex{ {-fac, -fac, facZ}, {1,0} },
-        Vertex{ { fac, -fac, -facZ }, {0,1} },
-        Vertex{ {-fac, -fac, -facZ}, {1,1} }
-    };
-
-    static std::vector<Quad> frontQs = tesellateQuad(srcFront, teselatteCuts);
-    static std::vector<Quad> backQs = tesellateQuad(srcBack, teselatteCuts);
-    static std::vector<Quad> rightQs = tesellateQuad(srcRight, teselatteCuts);
-    static std::vector<Quad> leftQs = tesellateQuad(srcLeft, teselatteCuts);
-    static std::vector<Quad> topQs = tesellateQuad(srcTop, teselatteCuts);
-    static std::vector<Quad> bottomQs = tesellateQuad(srcBottom, teselatteCuts);
-
-    static std::vector<std::vector<Vertex>> frontQqs = tesellateQuadV2(srcFront);
-    static std::vector<std::vector<Vertex>> backQqs = tesellateQuadV2(srcBack);
-    static std::vector<std::vector<Vertex>> rightQqs = tesellateQuadV2(srcRight);
-    static std::vector<std::vector<Vertex>> leftQqs = tesellateQuadV2(srcLeft);
-    static std::vector<std::vector<Vertex>> topQqs = tesellateQuadV2(srcTop);
-    static std::vector<std::vector<Vertex>> bottomQqs = tesellateQuadV2(srcBottom);
-
-    if (quadInView(srcFront)) {
-        SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
-        renderTesellatedTexturedQuad(frontQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
-    }
-
-    if (quadInView(srcBack)) {
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 255, 255);
-        renderTesellatedTexturedQuad(backQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
-    }
-
-    if (quadInView(srcRight)) {
-        SDL_SetRenderDrawColor(g_rd, 255, 0, 0, 255);
-        renderTesellatedTexturedQuad(rightQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
-    }
-
-    if (quadInView(srcLeft)) {
-        SDL_SetRenderDrawColor(g_rd, 255, 255, 0, 255);
-        renderTesellatedTexturedQuad(leftQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
-    }
-
-    if (quadInView(srcTop)) {
-        SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
-        renderTesellatedTexturedQuad(topQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
-    }
-
-    if (quadInView(srcBottom)) {
-        SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
-        renderTesellatedTexturedQuad(bottomQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
-    }
+    SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
+    qBottom->render();
 
     g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov),5, 30);
 }
@@ -287,36 +273,46 @@ void ScreenCubemapPreview::takeInput(SDL_Event evt)
     }
 
     if (evt.type == SDL_KEYDOWN) {
-        switch (evt.key.scancode) {
+        switch (evt.key.scancode)  {
             case SDL_SCANCODE_W:
                 fov += 1;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_S:
                 fov -= 1;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_D:
                 rotZ += 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_A:
                 rotZ -= 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_LEFT:
                 posX -= 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_RIGHT:
                 posX += 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_UP:
                 posY += 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_DOWN:
                 posY -= 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_PAGEUP:
                 posZ += 0.2;
+                resetAllQuads();
                 break;
             case SDL_SCANCODE_PAGEDOWN:
                 posZ -= 0.2;
+                resetAllQuads();
                 break;
         }
     }
@@ -328,6 +324,7 @@ void ScreenCubemapPreview::takeInput(SDL_Event evt)
         if (mouseDrag) {
             rotY += -evt.motion.xrel;
             rotX += -evt.motion.yrel;
+            resetAllQuads();
         }
     }
 }
@@ -515,11 +512,9 @@ std::vector<Quad> ScreenCubemapPreview::tesellateQuad(Quad q, int cuts)
     return ret;
 }
 
-std::vector<std::vector<Vertex>> ScreenCubemapPreview::tesellateQuadV2(Quad q)
+std::vector<std::vector<Vertex>> ScreenCubemapPreview::tesellateQuadV2(Quad q, int splitsX, int splitsY)
 {
     std::vector<std::vector<Vertex>> ret;
-    const int splitsX = 14;
-    const int splitsY = 20;
 
     Vertex topLeft = q.topLeft;
     Vertex topRight = q.topRight;
@@ -551,6 +546,16 @@ std::vector<std::vector<Vertex>> ScreenCubemapPreview::tesellateQuadV2(Quad q)
     return ret;
 }
 
+void ScreenCubemapPreview::resetAllQuads()
+{
+    qFront->reset();
+    qBack->reset();
+    qLeft->reset();
+    qRight->reset();
+    qTop->reset();
+    qBottom->reset();
+}
+
 bool ScreenCubemapPreview::quadInView(Quad q)
 {
     //double fovRad = degToRad(fov);
@@ -565,6 +570,39 @@ bool ScreenCubemapPreview::quadInView(Quad q)
     }
 
     return false;
+}
+
+std::pair<std::vector<SDL_Vertex>, std::vector<int>> ScreenCubemapPreview::evalTriangleScreenPoints(std::vector<Vertex> viewMt)
+{
+    bool anyOnScreen = false;
+    for (auto& viewSpacePoint : viewMt) {
+        anyOnScreen |= viewSpacePoint.pos.z <= -nearPlane;
+    }
+    if (!anyOnScreen) {
+        return {};
+    }
+
+    auto newViewMt = clipViewSpaceTriangle(viewMt);
+    viewMt = newViewMt;
+
+    std::vector<SDL_Vertex> screenPoints;
+
+    for (auto& v : viewMt) {
+        XYZd screenSpace = calcScreenSpace(calcClipSpace({ v.pos.x, v.pos.y, v.pos.z, 1 }));
+        SDL_Vertex vv{};
+        vv.position = { (float)screenSpace.x, (float)screenSpace.y };
+        vv.color = { 1,1,1,1 };
+        vv.tex_coord = { (float)v.uv.x, (float)v.uv.y };
+        screenPoints.push_back(vv);
+    }
+
+    if (viewMt.size() == 3) {
+        return { screenPoints, {0,1,2} };
+    }
+    else if (viewMt.size() == 4) {
+        return { screenPoints, { 0,1,2, 1,2,3 } };
+    }
+    return {};
 }
 
 void ScreenCubemapPreview::renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex)
@@ -622,6 +660,86 @@ void ScreenCubemapPreview::renderTesellatedTexturedQuad(std::vector<std::vector<
             screenPointCache[y+1][x] = screenPointBuffer[0];
             screenPointCache[y][x+1] = screenPointBuffer[1];
             screenPointCache[y+1][x+1] = screenPointBuffer[2];
+        }
+    }
+}
+
+TesellatedQuad::TesellatedQuad(ScreenCubemapPreview* caller, Quad base)
+{
+    parent = caller;
+    baseQuad = base;
+}
+
+void TesellatedQuad::reset() {
+    screenSpaceDrawCalls.clear();
+    count = 4;
+    framesWait = 0;
+}
+
+void TesellatedQuad::render() {
+    for (auto& l : parent->parent->getLayerStack()) {
+        l->prerender();
+    }
+
+    if (count < maxCount) {
+        if (framesWait == 0) {
+            count++;
+            updateScreenSpaceVtx();
+            framesWait = 
+                count < 15 ? 0
+                : count < 25 ? 1
+                : 4;
+        }
+        else {
+            framesWait--;
+        }
+    }
+
+    for (auto& [v, i] : screenSpaceDrawCalls) {
+        for (auto& l : parent->parent->getLayerStack()) {
+            SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex,
+                v.data(), v.size(), i.data(), i.size());
+        }
+    }
+}
+
+void TesellatedQuad::updateScreenSpaceVtx()
+{
+    screenSpaceDrawCalls.clear();
+
+    if (parent->quadInView(baseQuad)) {
+        auto tesellated = parent->tesellateQuadV2(baseQuad, count, count);
+
+        std::vector<std::vector<Vertex>> viewSpaceQs;
+
+        for (auto& qq : tesellated) {
+            std::vector<Vertex> n;
+            std::vector<XYZd> s;
+            for (auto& qqq : qq) {
+                XYZWd viewSpace = parent->calcViewSpace(qqq.pos);
+                n.push_back({ XYZd{ viewSpace.x, viewSpace.y, viewSpace.z }, qqq.uv });
+                s.push_back({ NAN,0,0 });
+            }
+            viewSpaceQs.push_back(n);
+        }
+
+        int pointsX = tesellated[0].size();
+        int pointsY = tesellated.size();
+
+        for (int y = 0; y < pointsY - 1; y++) {
+            for (int x = 0; x < pointsX - 1; x++) {
+                screenSpaceDrawCalls.push_back(parent->evalTriangleScreenPoints({
+                    viewSpaceQs[y][x],
+                    viewSpaceQs[y][x + 1],
+                    viewSpaceQs[y + 1][x],
+                    }));
+
+                screenSpaceDrawCalls.push_back(parent->evalTriangleScreenPoints({
+                    viewSpaceQs[y + 1][x],
+                    viewSpaceQs[y][x + 1],
+                    viewSpaceQs[y + 1][x + 1],
+                    }));
+            }
         }
     }
 }
