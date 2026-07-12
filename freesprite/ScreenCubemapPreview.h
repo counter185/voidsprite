@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseScreen.h"
 #include "mathops.h"
+#include "PanelUserInteractable.h"
 
 class ScreenCubemapPreview;
 
@@ -35,6 +36,13 @@ public:
     void updateScreenSpaceVtx();
 };
 
+class PanelCubemapPreview : public PanelUserInteractable {
+private:
+    ScreenCubemapPreview* parent;
+public:
+    PanelCubemapPreview(ScreenCubemapPreview* caller);
+};
+
 class ScreenCubemapPreview :
     public BaseScreen
 {
@@ -58,7 +66,7 @@ public:
     ~ScreenCubemapPreview();
 
     void render() override;
-    void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
     std::string getName() { return "Cubemap preview"; }
     BaseScreen* isSubscreenOf() override { return (BaseScreen*)parent; }
 
@@ -72,6 +80,7 @@ public:
     XYZd calcScreenSpace(matrix clipSpace);
     XYZd worldPointToScreenPoint(XYZd worldPos);
 
+    void renderScene();
     void renderTriangle(std::vector<XYZd> worldSpacePoints);
     void renderQuad(std::vector<XYZd> worldSpacePoints);
     void renderTexturedTriangle(std::vector<Vertex> worldSpacePoints, SDL_Texture* tex);

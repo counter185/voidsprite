@@ -2,6 +2,9 @@
 #include "FontRenderer.h"
 #include "TooltipsLayer.h"
 #include "maineditor.h"
+#include "UISlider.h"
+#include "UILabel.h"
+#include "UIStackPanel.h"
 
 double degToRad(double deg) {
     return deg * M_PI / 180.0;
@@ -141,6 +144,10 @@ XYZd ScreenCubemapPreview::worldPointToScreenPoint(XYZd worldPos)
 ScreenCubemapPreview::ScreenCubemapPreview(MainEditor* caller)
     : parent(caller)
 {
+    PanelCubemapPreview* panel = new PanelCubemapPreview(this);
+    panel->position = { 10, 30 };
+    wxsManager.addDrawable(panel);
+
     const double fac = 3.0;
     const double facZ = 3.0;
 
@@ -204,44 +211,14 @@ void ScreenCubemapPreview::render()
 
     viewMatrix = makeViewMatrix();
     projection = makeProjectionMatrix();
+    renderWithBlurPanelsIfEnabled([this]() {this->renderScene(); });
+    BaseScreen::render();
+}
+
+void ScreenCubemapPreview::renderScene()
+{
     Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 
-    /*SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-    renderTriangle({
-        {-fac, -fac, facZ},
-        {fac, -fac, facZ},
-        {0, fac, facZ}
-    });*/
-
-    /*SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-    renderQuad({
-        {-fac, -fac, facZ},
-        {fac, -fac, facZ},
-        {fac, fac, facZ},
-        {-fac, fac, facZ},
-    });
-
-    SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
-    renderQuad({
-        {-fac, -fac, -facZ},
-        {fac, -fac, -facZ},
-        {fac, fac, -facZ},
-        {-fac, fac, -facZ},
-    });*/
-    /*renderTexturedTriangle({
-        {{-fac, -fac, -facZ}, {0,0}},
-        {{fac, -fac, -facZ}, {1,0}},
-        {{fac, fac, -facZ}, {1,1}}
-    }, g_iconNotifTheCreature->get());*/
-    /*renderTexturedQuad({
-        {{-fac, -fac, -facZ}, {0,1}},
-        {{fac, -fac, -facZ}, {1,1}},
-        {{-fac, fac, -facZ}, {0,0}},
-        {{fac, fac, -facZ}, {1,0}},
-        }, parent->getLayerStack()[0]->renderData[g_rd].tex);*/
-
-
-    
     SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
     qFront->render();
     //renderTesellatedTexturedQuad(frontQqs, parent->getLayerStack()[0]->renderData[g_rd].tex);
@@ -262,16 +239,11 @@ void ScreenCubemapPreview::render()
     SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
     qBottom->render();
 
-    g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov),5, 30);
+    g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov), 5, 30);
 }
 
-void ScreenCubemapPreview::takeInput(SDL_Event evt)
+void ScreenCubemapPreview::defaultInputAction(SDL_Event evt)
 {
-    if (evt.type == SDL_EVENT_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
     if (evt.type == SDL_KEYDOWN) {
         switch (evt.key.scancode)  {
             case SDL_SCANCODE_W:
@@ -683,12 +655,15 @@ void TesellatedQuad::render() {
 
     if (count < maxCount) {
         if (framesWait == 0) {
-            count++;
+            count =
+                count < 15 ? count + 1
+                : count < 25 ? count + 3
+                : ixmin(maxCount, count + 10);
             updateScreenSpaceVtx();
             framesWait = 
                 count < 15 ? 0
                 : count < 25 ? 1
-                : 4;
+                : 30;
         }
         else {
             framesWait--;
@@ -742,4 +717,40 @@ void TesellatedQuad::updateScreenSpaceVtx()
             }
         }
     }
+}
+
+PanelCubemapPreview::PanelCubemapPreview(ScreenCubemapPreview* caller)
+{
+    parent = caller;
+
+    wxWidth = 300;
+    wxHeight = 100;
+
+    setupDraggable();
+    //setupResizable({300,100});
+    setupCollapsible();
+    addTitleText("CUBEMAP PREVIEW");
+
+
+    UILabel* fovV = new UILabel("000");
+
+    UISlider* fovSlider = new UISlider();
+    fovSlider->setValue(20, 140, parent->fov);
+    fovSlider->wxWidth = 180;
+    fovSlider->wxHeight = 30;
+    fovSlider->onChangeValueCallback = [this, fovV](UISlider* s, float v) {
+        parent->fov = s->getValue(20, 140);
+        fovV->setText(std::to_string((int)parent->fov));
+        parent->resetAllQuads();
+    };
+
+    wxsTarget().addDrawable(UIStackPanel::Horizontal(4, {
+        new UILabel("FOV"),
+        Panel::Space(20, 1),
+        fovV,
+        Panel::Space(5,1),
+        fovSlider
+    }, {5, 40}));
+
+    fovV->setText(std::to_string((int)parent->fov));
 }
