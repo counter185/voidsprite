@@ -144,6 +144,7 @@
     {"vsp.popup.loadfilterpreset", "load filter preset"},
     {"vsp.popup.savefilterpreset", "save filter preset"},
     {"vsp.popup.preprocessimage", "preprocess image"},
+    {"vsp.popup.overridecubetex", "override texture"},
 
     // templates
     {"vsp.template.pixelillustration", "pixel illustration"},

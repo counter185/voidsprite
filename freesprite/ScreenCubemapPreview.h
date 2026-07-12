@@ -2,6 +2,7 @@
 #include "BaseScreen.h"
 #include "mathops.h"
 #include "PanelUserInteractable.h"
+#include "EventCallbackListener.h"
 
 class ScreenCubemapPreview;
 
@@ -30,7 +31,7 @@ public:
 
     TesellatedQuad(ScreenCubemapPreview* caller, Quad base);
 
-    void render();
+    void render(Layer* overrideTex = NULL);
     void reset();
 
     void updateScreenSpaceVtx();
@@ -44,7 +45,7 @@ public:
 };
 
 class ScreenCubemapPreview :
-    public BaseScreen
+    public BaseScreen, EventCallbackListener
 {
 private:
 public:
@@ -62,6 +63,9 @@ public:
 
     bool mouseDrag = false;
 
+    Layer* overrideTop = NULL;
+    Layer* overrideBottom = NULL;
+
     ScreenCubemapPreview(MainEditor* caller);
     ~ScreenCubemapPreview();
 
@@ -71,6 +75,8 @@ public:
     std::string getName() { return "Cubemap preview"; }
     BaseScreen* isSubscreenOf() override { return (BaseScreen*)parent; }
     void screenResized(XY from, XY to) override { resetAllQuads(); }
+
+    void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) override;
 
     XYZd intersectViewSpace(XYZd a, XYZd b);
     Vertex intersectTexturedViewSpace(Vertex a, Vertex b);
@@ -99,5 +105,7 @@ public:
 
     bool quadInView(Quad q);
     std::pair<std::vector<SDL_Vertex>, std::vector<int>> evalTriangleScreenPoints(std::vector<Vertex> viewMt);
+
+    void promptOverrideTexture(int id);
 };
 

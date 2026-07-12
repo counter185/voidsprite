@@ -5,9 +5,41 @@
 #include "UISlider.h"
 #include "UILabel.h"
 #include "UIStackPanel.h"
+#include "PopupFilePicker.h"
+#include "FileIO.h"
+#include "Notification.h"
+#include "UIButton.h"
+
+#define EVENT_CUBEMAP_OVERRIDE_TOP 1
+#define EVENT_CUBEMAP_OVERRIDE_BOTTOM 2
 
 double degToRad(double deg) {
     return deg * M_PI / 180.0;
+}
+
+void ScreenCubemapPreview::eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex)
+{
+    Layer** target =
+        evt_id == EVENT_CUBEMAP_OVERRIDE_TOP ? &overrideTop
+        : evt_id == EVENT_CUBEMAP_OVERRIDE_BOTTOM ? &overrideBottom
+        : NULL;
+
+    if (target != NULL) {
+        g_startNewOperation([target, name](OperationProgressReport* report) {
+            Layer* l = loadAnyIntoFlat(convertStringToUTF8OnWin32(name), NULL, report);
+            if (l != NULL) {
+                g_startNewMainThreadOperation([l, target]() {
+                    if (*target != NULL) {
+                        delete (*target);
+                    }
+                    *target = l;
+                });
+            }
+            else {
+                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.fileloadfail")));
+            }
+        });
+    }
 }
 
 XYZd ScreenCubemapPreview::intersectViewSpace(XYZd a, XYZd b)
@@ -197,6 +229,13 @@ ScreenCubemapPreview::~ScreenCubemapPreview()
     delete qRight;
     delete qTop;
     delete qBottom;
+
+    if (overrideTop != NULL) {
+        delete overrideTop;
+    }
+    if (overrideBottom != NULL) {
+        delete overrideBottom;
+    }
 }
 
 void ScreenCubemapPreview::render()
@@ -234,10 +273,10 @@ void ScreenCubemapPreview::renderScene()
     qLeft->render();
 
     SDL_SetRenderDrawColor(g_rd, 0, 255, 255, 255);
-    qTop->render();
+    qTop->render(overrideTop);
 
     SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
-    qBottom->render();
+    qBottom->render(overrideBottom);
 
     g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov), 5, 30);
 }
@@ -580,6 +619,11 @@ std::pair<std::vector<SDL_Vertex>, std::vector<int>> ScreenCubemapPreview::evalT
     return {};
 }
 
+void ScreenCubemapPreview::promptOverrideTexture(int id)
+{
+    PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.overridecubetex"), id, true);
+}
+
 void ScreenCubemapPreview::renderMultipleTexturedQuads(std::vector<Quad> q, SDL_Texture* tex)
 {
     for (auto& qq : q) {
@@ -651,9 +695,14 @@ void TesellatedQuad::reset() {
     framesWait = 0;
 }
 
-void TesellatedQuad::render() {
-    for (auto& l : parent->parent->getLayerStack()) {
-        l->prerender();
+void TesellatedQuad::render(Layer* overrideTex) {
+    if (overrideTex != NULL) {
+        overrideTex->prerender();
+    }
+    else {
+        for (auto& l : parent->parent->getLayerStack()) {
+            l->prerender();
+        }
     }
 
     if (count < maxCount) {
@@ -674,9 +723,15 @@ void TesellatedQuad::render() {
     }
 
     for (auto& [v, i] : screenSpaceDrawCalls) {
-        for (auto& l : parent->parent->getLayerStack()) {
-            SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex,
+        if (overrideTex != NULL) {
+            SDL_RenderGeometry(g_rd, overrideTex->renderData[g_rd].tex,
                 v.data(), v.size(), i.data(), i.size());
+        }
+        else {
+            for (auto& l : parent->parent->getLayerStack()) {
+                SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex,
+                    v.data(), v.size(), i.data(), i.size());
+            }
         }
     }
 }
@@ -727,7 +782,7 @@ PanelCubemapPreview::PanelCubemapPreview(ScreenCubemapPreview* caller)
     parent = caller;
 
     wxWidth = 300;
-    wxHeight = 150;
+    wxHeight = 200;
 
     setupDraggable();
     //setupResizable({300,100});
@@ -747,6 +802,12 @@ PanelCubemapPreview::PanelCubemapPreview(ScreenCubemapPreview* caller)
         parent->resetAllQuads();
     };
 
+    UIButton* btnOverrideTop = new UIButton("Override top texture");
+    btnOverrideTop->onClickCallback = [this](...) { parent->promptOverrideTexture(EVENT_CUBEMAP_OVERRIDE_TOP); };
+
+    UIButton* btnOverrideBottom = new UIButton("Override bottom texture");
+    btnOverrideBottom->onClickCallback = [this](...) { parent->promptOverrideTexture(EVENT_CUBEMAP_OVERRIDE_BOTTOM); };
+
     wxsTarget().addDrawable(
         UIStackPanel::Vertical(5, {
             UIStackPanel::Horizontal(4, {
@@ -756,6 +817,8 @@ PanelCubemapPreview::PanelCubemapPreview(ScreenCubemapPreview* caller)
                 Panel::Space(5,1),
                 fovSlider
             }),
+            btnOverrideTop,
+            btnOverrideBottom,
             new UIDynamicLabel([this]() {
                 int count = parent->qTop->count;
                 int maxCount = parent->qTop->maxCount;
