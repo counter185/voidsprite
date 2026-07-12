@@ -765,6 +765,9 @@
     <ClCompile Include="thumbnail_loader.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="ScreenCubemapPreview.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1515,6 +1518,9 @@
       <Filter>Header files\io</Filter>
     </ClInclude>
     <ClInclude Include="thumbnail_loader.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenCubemapPreview.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

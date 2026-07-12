@@ -599,6 +599,28 @@ XY evalBezierPoint(std::vector<XY> vtx, double percent)
     }
 }
 
+double interpolatePos(double start, double end, double t)
+{
+    return start + (end - start) * t;
+}
+
+XYd interpolatePosXYd(XYd start, XYd end, double t)
+{
+    return {
+        interpolatePos(start.x, end.x, t),
+        interpolatePos(start.y, end.y, t)
+    };
+}
+
+XYZd interpolatePosXYZd(XYZd start, XYZd end, double t)
+{
+    return {
+        interpolatePos(start.x, end.x, t),
+        interpolatePos(start.y, end.y, t),
+        interpolatePos(start.z, end.z, t)
+    };
+}
+
 /// <summary>
 /// (x-1)^3 + 1
 /// </summary>
@@ -1330,24 +1352,51 @@ matrix matrixMultiply(matrix a, matrix b)
     int resultW = b[0].size();
     int resultH = a.size();
 
-    if (a[0].size() != b.size()) {
+    int a0s = a[0].size();
+
+    if (a0s != b.size()) {
         //invalid matrix sizes
         return matrix();
     }
 
+
     matrix result;
     result.resize(resultH);
     for (int y = 0; y < resultH; y++) {
-        result[y].resize(resultW);
+        result.data()[y].resize(resultW);
         for (int x = 0; x < resultW; x++) {
             double c = 0;
-            for (int k = 0; k < a[0].size(); k++) {
-                c += a[y][k] * b[k][x];
+            for (int k = 0; k < a0s; k++) {
+                c += a.data()[y].data()[k] * b.data()[k].data()[x];
             }
-            result[y][x] = c;
+            result.data()[y].data()[x] = c;
         }
     }
     return result;
+}
+
+matrix matrixTranspose(matrix a) {
+    matrix result;
+    int newH = a[0].size();
+    result.resize(newH);
+    for (int y = 0; y < newH; y++) {
+        int newW = a.size();
+        result[y].resize(newW);
+        for (int x = 0; x < newW; x++) {
+            result[y][x] = a[x][y];
+        }
+    }
+    return result;
+}
+
+void matrixPrint(matrix a)
+{
+    for (auto& y : a) {
+        for (auto& x : y) {
+            printf("%lf ", x);
+        }
+        printf("\n");
+    }
 }
 
 std::tm getLocalTime() {

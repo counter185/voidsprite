@@ -260,6 +260,7 @@
   <ItemGroup>
     <ClCompile Include="io\io_graphicsgale.cpp" />
     <ClInclude Include="io\io_graphicsgale.h" />
+    <ClCompile Include="ScreenCubemapPreview.cpp" />
     <ClCompile Include="ScreenPreprocessImage.cpp" />
     <ClCompile Include="ASCIIEditor.cpp" />
     <ClCompile Include="astc_dec\astc_decomp.cpp" />
@@ -658,6 +659,7 @@
     <ClInclude Include="portable-file-dialogs\portable-file-dialogs.h" />
     <ClInclude Include="RenderFilter.h" />
     <ClInclude Include="RPG2KTilemapPreviewScreen.h" />
+    <ClInclude Include="ScreenCubemapPreview.h" />
     <ClInclude Include="ScreenPreprocessImage.h" />
     <ClInclude Include="ScreenVoxelEditor.h" />
     <ClInclude Include="ScreenIsomView.h" />

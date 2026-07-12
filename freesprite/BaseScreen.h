@@ -37,7 +37,7 @@ public:
     virtual bool takesTouchEvents() { return false; }
     virtual void onReturnToScreen() {}
 
-    void screenResized(XY from, XY to) {
+    virtual void screenResized(XY from, XY to) {
         wxsManager.processWindowResizeEvent(from, to);
     }
 

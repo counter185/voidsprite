@@ -419,6 +419,9 @@ struct XYd {
 struct XYZd {
     double x, y, z;
 };
+struct XYZWd {
+    double x, y, z, w;
+};
 
 inline XY xydToXy(XYd v) { return XY{ (int)v.x, (int)v.y }; }
 

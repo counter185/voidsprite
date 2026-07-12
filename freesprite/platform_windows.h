@@ -3,9 +3,13 @@
 #pragma comment(lib, "winhttp.lib")
 #pragma comment(lib, "iphlpapi.lib")
 
-//no dwmapi on xp
-#if WINDOWS_XP == 0
-#include <dwmapi.h>
+//disable for reactos/winxp
+#ifndef VSP_WIN32_DWMAPI
+    #define VSP_WIN32_DWMAPI 1
+#endif
+
+#if VSP_WIN32_DWMAPI
+    #include <dwmapi.h>
 #endif
 
 #define popen _popen
@@ -143,7 +147,7 @@ void platformWindowCreated(VSPWindow* wd) {
         WINhWnd = hwnd;
         //originalWndProc = (WNDPROC)GetWindowLongPtr(WINhWnd, -4);
 
-#if WINDOWS_XP == 0
+#if VSP_WIN32_DWMAPI
         //run this only on the first window
         BOOL USE_DARK_MODE = true;
         bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(

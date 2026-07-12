@@ -38,6 +38,7 @@
 #include "NineSegmentPatternEditorScreen.h"
 #include "MinecraftBlockPreviewScreen.h"
 #include "ViewSessionScreen.h"
+#include "ScreenCubemapPreview.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupTextBox.h"
@@ -1319,6 +1320,13 @@ void MainEditor::setUpWidgets()
                                 return;
                             }
                             TilemapPreviewScreen* newScreen = new TilemapPreviewScreen(this);
+                            g_addScreen(newScreen);
+                        }
+                    }
+                },
+                {SDL_SCANCODE_C, { "Preview cubemap...",
+                        [this]() {
+                            ScreenCubemapPreview* newScreen = new ScreenCubemapPreview(this);
                             g_addScreen(newScreen);
                         }
                     }
