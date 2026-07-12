@@ -25,7 +25,7 @@ public:
     //std::vector<int> indexBuffer;
 
     int count = 1;
-    int maxCount = 30;
+    int maxCount = 40;
     int framesWait = 0;
 
     TesellatedQuad(ScreenCubemapPreview* caller, Quad base);
@@ -47,8 +47,8 @@ class ScreenCubemapPreview :
     public BaseScreen
 {
 private:
-    TesellatedQuad* qFront, *qBack, *qLeft, *qRight, *qTop, *qBottom;
 public:
+    TesellatedQuad* qFront, *qBack, *qLeft, *qRight, *qTop, *qBottom;
     MainEditor* parent = NULL;
     matrix viewMatrix;
     matrix projection;

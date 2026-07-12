@@ -724,7 +724,7 @@ PanelCubemapPreview::PanelCubemapPreview(ScreenCubemapPreview* caller)
     parent = caller;
 
     wxWidth = 300;
-    wxHeight = 100;
+    wxHeight = 150;
 
     setupDraggable();
     //setupResizable({300,100});
@@ -744,13 +744,22 @@ PanelCubemapPreview::PanelCubemapPreview(ScreenCubemapPreview* caller)
         parent->resetAllQuads();
     };
 
-    wxsTarget().addDrawable(UIStackPanel::Horizontal(4, {
-        new UILabel("FOV"),
-        Panel::Space(20, 1),
-        fovV,
-        Panel::Space(5,1),
-        fovSlider
-    }, {5, 40}));
+    wxsTarget().addDrawable(
+        UIStackPanel::Vertical(5, {
+            UIStackPanel::Horizontal(4, {
+                new UILabel("FOV"),
+                Panel::Space(20, 1),
+                fovV,
+                Panel::Space(5,1),
+                fovSlider
+            }),
+            new UIDynamicLabel([this]() {
+                int count = parent->qTop->count;
+                int maxCount = parent->qTop->maxCount;
+                return count != maxCount ? frmt("Unwarping textures... {}/{}", count, maxCount) : std::string();
+            })
+        }, {5, 40})
+    );
 
     fovV->setText(std::to_string((int)parent->fov));
 }
