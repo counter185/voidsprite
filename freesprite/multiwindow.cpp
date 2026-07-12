@@ -210,6 +210,7 @@ bool VSPWindow::tryCreateRenderer() {
             loginfo(frmt("Renderer {}: {}", x, renderDriverName));
         }
     }
+    g_availableRenderersNow.push_back(SDL_SOFTWARE_RENDERER);
     if (std::find(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), g_config.preferredRenderer) == g_availableRenderersNow.end()) {
         g_config.preferredRenderer = GlobalConfig().preferredRenderer;  //reset to default
     }
@@ -231,6 +232,9 @@ bool VSPWindow::tryCreateRenderer() {
             useRenderer = g_availableRenderersNow[0];
             g_config.preferredRenderer = useRenderer;
             loginfo(frmt("Trying renderer: {}", useRenderer));
+            if (useRenderer == SDL_SOFTWARE_RENDERER) {
+                g_addNotification(ErrorNotification("Falling back to software renderer","Expect slow performance."));
+            }
             rd = SDL_CreateRenderer(wd, useRenderer.c_str());
         }
     }

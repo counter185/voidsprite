@@ -67,8 +67,10 @@ public:
 
     void render() override;
     void defaultInputAction(SDL_Event evt) override;
+    bool takesTouchEvents() override { return true; }
     std::string getName() { return "Cubemap preview"; }
     BaseScreen* isSubscreenOf() override { return (BaseScreen*)parent; }
+    void screenResized(XY from, XY to) override { resetAllQuads(); }
 
     XYZd intersectViewSpace(XYZd a, XYZd b);
     Vertex intersectTexturedViewSpace(Vertex a, Vertex b);

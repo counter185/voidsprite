@@ -244,6 +244,8 @@ void ScreenCubemapPreview::renderScene()
 
 void ScreenCubemapPreview::defaultInputAction(SDL_Event evt)
 {
+    evt = convertTouchToMouseEvent(evt);
+
     if (evt.type == SDL_KEYDOWN) {
         switch (evt.key.scancode)  {
             case SDL_SCANCODE_W:
@@ -294,8 +296,9 @@ void ScreenCubemapPreview::defaultInputAction(SDL_Event evt)
     }
     else if (evt.type == SDL_MOUSEMOTION) {
         if (mouseDrag) {
-            rotY += -evt.motion.xrel;
-            rotX += -evt.motion.yrel;
+            const double rotSensitivity = 0.2;
+            rotY += -evt.motion.xrel * rotSensitivity;
+            rotX += -evt.motion.yrel * rotSensitivity;
             resetAllQuads();
         }
     }
