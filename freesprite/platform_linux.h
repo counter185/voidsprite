@@ -16,6 +16,7 @@
 #include "EventCallbackListener.h"
 #include "Notification.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
+#include "json/json.hpp"
 #include "main.h"
 
 #include "platform_universal.h"
@@ -320,6 +321,12 @@ std::string platformGetSystemInfo() {
         ret += frmt("os-release info: {}\n", distroInfoString);
     }
 
+    std::string hostname;
+    hostname.resize(256);
+    if (gethostname(hostname.data(), 256) == 0) {
+        ret += frmt("Network name: {}\n", hostname.c_str());
+    }
+
     ret += frmt("CPU: {}\n", linux_getCPUName());
     ret += frmt("GPU: {}\n", linux_getGPUname());
     ret += frmt("System memory: {} MiB\n", SDL_GetSystemRAM());
@@ -339,6 +346,35 @@ std::vector<RootDirInfo> platformListRootDirectories() {
     }
 
     ret.push_back({"Root", "/"});
+
+    int ec = -1;
+    std::string lsblkOutput = universal_runCommandAndGetOutput("lsblk --json", &ec);
+    try {
+        nlohmann::json j = nlohmann::json::parse(lsblkOutput);
+        for (auto& blockdevice : j["blockdevices"]) {
+            std::string name = blockdevice["name"];
+            //loginfo(frmt("name: {}", name));
+            for (auto& vol : blockdevice["children"]) 
+            {
+                try {
+                    std::string devname = vol["name"];
+                    //loginfo(frmt("- devname: {}", name));
+                    auto mountpoints = vol["mountpoints"];
+                    if (!mountpoints.empty()) {
+                        std::string path = mountpoints[0];
+                        if (stringStartsWithIgnoreCase(path, "/") && !stringStartsWithIgnoreCase(path, "/boot")) {
+                            ret.push_back({devname, path});
+                        }
+                    }
+                } catch (std::exception&) {}
+            }
+            
+        }
+        
+    } catch (std::exception& e) {
+        logerr(frmt("error reading json from lsblk:\n {}", e.what()));
+    }
+
     return ret;
 }
 
