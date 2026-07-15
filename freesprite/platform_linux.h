@@ -195,9 +195,11 @@ void platformTryLoadOtherFile(
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
-    auto findSeparator = path.find_last_of("/\\");
-    if (findSeparator != std::string::npos) {
-        path = path.substr(0, findSeparator);
+    if (stringStartsWithIgnoreCase(path, "/")) {
+        auto findSeparator = path.find_last_of("/\\");
+        if (findSeparator != std::string::npos) {
+            path = path.substr(0, findSeparator);
+        }
     }
     
     pid_t pid;
