@@ -84,4 +84,7 @@ void ToolRectMove::rightClickPress(MainEditor* editor, XY pos)
             }
         }
     }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No area selected."));
+    }
 }
