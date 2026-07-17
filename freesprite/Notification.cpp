@@ -153,6 +153,7 @@ bool g_takeInputNotifications(SDL_Event evt)
             Notification& notif = g_notifications[x];
             if (pointInBox({ (int)evt.button.x, (int)evt.button.y }, notif.boundsRect)) {
                 if (!notif.ignoreMouseTimeExtend && pointInBox({ (int)evt.button.x, (int)evt.button.y }, notif.closeBoundsRect)) {
+                    g_newVFX(VFX_BUTTONPULSE, 1000, sdlcolorToUint32(notif.color), notif.closeBoundsRect);
                     notif.timer.setElapsedTime(notif.duration - 500);
                     notif.ignoreMouseTimeExtend = true;
                 }
