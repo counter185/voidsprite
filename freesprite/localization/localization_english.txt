@@ -704,5 +704,7 @@
     {"vsp.brush.ysym", "Set Y symmetry"},
     {"vsp.brush.ysym.desc", "Mouse Left to enable and set the position of the Y symmetry line.\n"
                             "Mouse Right to toggle Y symmetry off/on."},
+    {"vsp.brush.scatter", "Scatter"},
+    {"vsp.brush.scatter.desc", "Pixels in the highlighted area will be randomly shuffled."},
 
 }}},

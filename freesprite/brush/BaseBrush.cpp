@@ -30,6 +30,7 @@
 #include "ToolComment.h"
 #include "ToolColorPicker.h"
 #include "ToolRectClone.h"
+#include "BrushScatter.h"
 
 void BaseBrush::renderOnCanvas(MainEditor* editor, int scale)
 {
@@ -99,6 +100,7 @@ void g_loadBrushes()
     g_brushes.push_back(new Brush1x1ArcY());
     g_brushes.push_back(new Brush1pxLine());
     g_brushes.push_back(new Brush1pxLinePathfind());
+    g_brushes.push_back(new BrushScatter());
     g_brushes.push_back(new BrushCurve());
     g_brushes.push_back(new BrushBezierLine());
     g_brushes.push_back(new BrushRect());

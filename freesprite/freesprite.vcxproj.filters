@@ -768,6 +768,9 @@
     <ClCompile Include="ScreenCubemapPreview.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="brush\BrushScatter.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1522,6 +1525,9 @@
     </ClInclude>
     <ClInclude Include="ScreenCubemapPreview.h">
       <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="brush\BrushScatter.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
