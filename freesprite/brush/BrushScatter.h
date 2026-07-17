@@ -12,7 +12,8 @@ class BrushScatter :
         return {
             {"brush.scatter.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
             {"brush.scatter.pressuresens", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.pressuresize"),0)},
-            {"brush.scatter.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),2,20,4)}
+            {"brush.scatter.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),2,20,4)},
+            {"brush.scatter.move1px", BRUSH_BOOL_PROPERTY("Move by 1 pixel",0)},
         };
     }
     void clickPress(MainEditor* editor, XY pos) override;

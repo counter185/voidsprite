@@ -30,21 +30,51 @@ void BrushScatter::renderOnCanvas(MainEditor * editor, int scale)
 
 void BrushScatter::doScatter(MainEditor* editor, XY pos, int size, bool round)
 {
-    Layer* l = editor->getCurrentLayer();
-    std::vector<std::pair<XY, u32>> posColors;
-    rasterizePoint(pos, size, [&](XY p) {
-        XY ogP = p;
-        if (!posColors.empty()) {
-            auto& randomIndex = posColors[randomInt(0, posColors.size())];
-            XY pp = randomIndex.first;
-            randomIndex.first = p;
-            p = pp;
-            
-        }
-        posColors.push_back({ p, l->getPixelAt(ogP) });
-    }, round);
+    bool move1px = editor->toolProperties["brush.scatter.move1px"] == 1;
 
-    for (auto& [pos, color] : posColors) {
-        editor->SetPixel(pos, color, false);
+    Layer* l = editor->getCurrentLayer();
+
+    if (!move1px) {
+        std::vector<std::pair<XY, u32>> posColors;
+        rasterizePoint(pos, size, [&](XY p) {
+            XY ogP = p;
+            if (!posColors.empty()) {
+                auto& randomIndex = posColors[randomInt(0, posColors.size())];
+                XY pp = randomIndex.first;
+                randomIndex.first = p;
+                p = pp;
+
+            }
+            posColors.push_back({ p, l->getPixelAt(ogP) });
+        }, round);
+
+        for (auto& [pos, color] : posColors) {
+            editor->SetPixel(pos, color, false);
+        }
+    }
+    else {
+        std::map<u64, int> validPositions;
+        std::vector<std::pair<XY, u32>> posColors;
+
+        rasterizePoint(pos, size, [&](XY p) {
+            posColors.push_back({ p, l->getPixelAt(p) });
+            validPositions[encodeXY(p)] = posColors.size()-1;
+        }, round);
+
+        for (auto& [enc, idx] : validPositions) {
+            auto& posColorRef = posColors[idx];
+            XY p = posColorRef.first;
+            XY nextPos = xyAdd(p, XY{ randomInt(-1, 2), randomInt(-1, 2) });
+            if (!xyEqual(nextPos, p) && validPositions.contains(encodeXY(nextPos))) {
+                auto& other = posColors[validPositions[encodeXY(nextPos)]];
+                posColorRef.first = other.first;
+                other.first = p;
+            }
+        }
+
+        for (auto& [pos, color] : posColors) {
+            editor->SetPixel(pos, color, false);
+        }
+
     }
 }
