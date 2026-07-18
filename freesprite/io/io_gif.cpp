@@ -187,7 +187,7 @@ MainEditor* readGIF(PlatformNativePathString path, OperationProgressReport* prog
         std::vector<u32> currentLctColorTable;
 
         //magic should == "GIF"
-        GIFLogicalScreenDescriptor lsd;
+        GIFLogicalScreenDescriptor lsd{};
         fread(&lsd, sizeof(GIFLogicalScreenDescriptor), 1, f);
         if (lsd.gctFlags.enabled) {
             gctColorTableSet = true;
@@ -415,7 +415,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgre
 
         progress->updateLastSection("Writing header...");
         fwrite("GIF89a", 1, 6, f);
-        GIFLogicalScreenDescriptor lsd;
+        GIFLogicalScreenDescriptor lsd{};
         lsd.width = editor->canvas.dimensions.x;
         lsd.height = editor->canvas.dimensions.y;
         lsd.gctFlags.enabled = editor->isPalettized ? 1 : 0;
@@ -436,7 +436,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgre
             }
         }
 
-        GIFApplicationExtension pae;
+        GIFApplicationExtension pae{};
         pae.blockSize = 11;
         memcpy(pae.identifier, "NETSCAPE", 8);
         memcpy(pae.authenticationCode, "2.0", 3);
@@ -450,7 +450,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgre
 
         if (g_config.saveLoadFlatImageExtData) {
             progress->updateLastSection("Writing extra session data...");
-            GIFApplicationExtension paeVspExt;
+            GIFApplicationExtension paeVspExt{};
             paeVspExt.blockSize = 11;
             memcpy(paeVspExt.identifier, "voidspri", 8);
             memcpy(paeVspExt.authenticationCode, "te0", 3);
@@ -484,7 +484,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgre
         for (GIFFrame& frame : frames) {
             progress->updateLastSection(frmt("Writing frame {}/{}", ++i, frames.size()));
 
-            GIFGraphicControlExtension gce;
+            GIFGraphicControlExtension gce{};
             fwrite("\x21\xF9", 1, 2, f); //extension introducer
             gce.blockSize = 4;
             gce.flags.disposalMode = 2; //clear to bg
@@ -495,7 +495,7 @@ bool writeGIF(PlatformNativePathString path, MainEditor* editor, OperationProgre
             fwrite(&gce, sizeof(GIFGraphicControlExtension), 1, f);
             fwrite("\x00", 1, 1, f); //block terminator
 
-            GIFImageDescriptor gid;
+            GIFImageDescriptor gid{};
             gid.imageLeftPosition = 0;
             gid.imageTopPosition = 0;
             gid.imageWidth = editor->canvas.dimensions.x;
