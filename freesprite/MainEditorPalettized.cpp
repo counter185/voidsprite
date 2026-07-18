@@ -695,9 +695,10 @@ int32_t* MainEditorPalettized::makeFlatIndicesTable(Frame* f)
     memset(indices, 0, canvas.dimensions.x * canvas.dimensions.y * 4);
     for (Layer*& l : f->layers) {
         if (!l->hidden) {
+            s32* px = (s32*)l->pixels32();
             for (int y = 0; y < canvas.dimensions.y; y++) {
                 for (int x = 0; x < canvas.dimensions.x; x++) {
-                    uint32_t color = l->getPixelAt(XY{ x,y });
+                    s32 color = ARRAY2DPOINT(px, x, y, l->w);
                     if (color != -1) {
                         indices[x + y * canvas.dimensions.x] = color;
                     }

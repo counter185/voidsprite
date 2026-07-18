@@ -3687,18 +3687,19 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
     else {
         auto& layers = getLayerStack();
 
-        std::map<uint32_t, bool> usedColors;
+        std::map<u32, bool> usedColors;
         for (Layer*& l : layers) {
-            std::vector<uint32_t> cols = l->getUniqueColors();
-            for (uint32_t c : cols) {
+            std::vector<u32> cols = l->getUniqueColors();
+            for (u32 c : cols) {
                 usedColors[c] = true;
             }
         }
 
         if (usedColors.size() <= 256) {
 
-            std::vector<uint32_t> palette;
+            std::vector<u32> palette;
             for (auto& c : usedColors) {
+                //loginfo(frmt("- {:08X}", c.first));
                 palette.push_back(c.first);
             }
 
@@ -3709,10 +3710,19 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
                 newLayer->hidden = l->hidden;
                 newLayer->palette = palette;
 
-                uint32_t* ppx = l->pixels32();
-                uint32_t* outpx = newLayer->pixels32();
-                for (uint64_t p = 0; p < l->w * l->h; p++) {
-                    outpx[p] = std::find(palette.begin(), palette.end(), ppx[p]) - palette.begin();
+                u32* ppx = l->pixels32();
+                s32* outpx = (s32*)newLayer->pixels32();
+                for (u64 p = 0; p < l->w * l->h; p++) {
+                    u32 px = ppx[p];
+                    if ((px & 0xFF000000) == 0) {
+                        outpx[p] = -1;
+                    } else {
+                        auto findIdx = std::find(palette.begin(), palette.end(), px);
+                        if (findIdx == palette.end()) {
+                            logerr(frmt("COLOR {:08X} NOT FOUND IN PALETTE (?????)", ppx[p]));
+                        }
+                        outpx[p] = findIdx - palette.begin();
+                    }
                 }
                 outlayers.push_back(newLayer);
             }

@@ -477,3 +477,4 @@ android-project/local.properties
 /build_cmake
 /freesprite/.vscode
 *.kate-swp
+/build_appimage

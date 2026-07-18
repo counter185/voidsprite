@@ -396,7 +396,85 @@ Layer* readPNGFromRawChunks(PNGIHDRChunk ihdr, std::vector<PNGChunk>& otherChunk
     return readPNGFromMem(pngData.data(), pngData.size());
 }
 
-//todo: condense this and writePNG into one function
+bool _writePNG(Layer* data, png_structp png, png_infop info, int compressionLevel = 9, OperationProgressReport* report = NULL) {
+    ENSURE_REPORT_VALID(report);
+    //do not put destroy_write_struct in a DoOnReturn
+    if (setjmp(png_jmpbuf(png))) {
+        logerr("libpng error writing PNG");
+        png_destroy_write_struct(&png, &info);
+        return false;
+    }
+    png_set_compression_level(png, compressionLevel);
+    png_set_compression_mem_level(png, MAX_MEM_LEVEL);
+    png_set_compression_buffer_size(png, 1024 * 1024);
+
+    if (g_config.saveLoadFlatImageExtData) {
+        addPNGText(png, info, "Software", "voidsprite - libpng " PNG_LIBPNG_VER_STRING);
+        auto extmap = data->importExportExtdata;
+        for (auto& kv : extmap) {
+            addPNGText(png, info, "vsp/" + kv.first, kv.second);
+        }
+    }
+
+    if (!data->isPalettized) {
+        png_set_IHDR(png, info, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
+        png_write_info(png, info);
+
+        u8* convertedToABGR = (u8*)tracked_malloc(data->w * data->h * 4);
+        SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixels32(), data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
+
+        png_bytepp rows = new png_bytep[data->h];
+        for (int y = 0; y < data->h; y++) {
+            rows[y] = &ARRAY2DPOINT(convertedToABGR, 0, y, data->w*4);
+        }
+        png_write_image(png, rows);
+        png_write_end(png, info);
+        delete[] rows;
+        tracked_free(convertedToABGR);
+    }
+    else {
+        LayerPalettized* pltLayer = (LayerPalettized*)data;
+        png_set_IHDR(png, info, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
+
+        png_colorp plt = new png_color[pltLayer->palette.size()];
+        memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
+        png_bytep trns = new png_byte[pltLayer->palette.size()];
+
+        for (int x = 0; x < pltLayer->palette.size(); x++) {
+            SDL_Color c = uint32ToSDLColor(pltLayer->palette[x]);
+            plt[x].red = c.r;
+            plt[x].green = c.g;
+            plt[x].blue = c.b;
+            trns[x] = c.a;
+        }
+
+        png_set_PLTE(png, info, plt, pltLayer->palette.size());
+        png_set_tRNS(png, info, trns, pltLayer->palette.size(), NULL);
+        png_write_info(png, info);
+
+        u8* indexArray = (u8*)tracked_malloc(data->w * data->h);
+
+        s32* px32 = (s32*)pltLayer->pixels32();
+        png_bytepp rows = new png_bytep[data->h];
+        for (int y = 0; y < data->h; y++) {
+            for (int x = 0; x < data->w; x++) {
+                ARRAY2DPOINT(indexArray, x, y, data->w) = ARRAY2DPOINT(px32, x, y, data->w);
+            }
+            rows[y] = &ARRAY2DPOINT(indexArray, 0, y, data->w);
+        }
+        png_write_image(png, rows);
+        png_write_end(png, info);
+
+        tracked_free(indexArray);
+        delete[] plt;
+        delete[] trns;
+        delete[] rows;
+    }
+    // do not free any memory before doing png_write_end
+    png_destroy_write_struct(&png, &info);
+    return true;
+}
+
 std::vector<u8> writePNGToMem(Layer* data)
 {
     if (data->isPalettized && ((LayerPalettized*)data)->palette.size() > 256) {
@@ -408,82 +486,14 @@ std::vector<u8> writePNGToMem(Layer* data)
     png_rw_ptr writeFunc = [](png_structp png_ptr, png_bytep data, png_size_t length) {
         std::vector<u8>* ret = (std::vector<u8>*)png_get_io_ptr(png_ptr);
         ret->insert(ret->end(), data, data + length);
-        };
+    };
     png_structp outpng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     png_infop outpnginfo = png_create_info_struct(outpng);
-    if (setjmp(png_jmpbuf(outpng))) {
+    png_set_write_fn(outpng, &ret, writeFunc, [](png_structp) {});
+    if (!_writePNG(data, outpng, outpnginfo)) {
         logerr("libpng error writing PNG");
-        png_destroy_write_struct(&outpng, &outpnginfo);
         return {};
     }
-    png_set_write_fn(outpng, &ret, writeFunc, [](png_structp) {});
-    png_set_compression_level(outpng, Z_BEST_COMPRESSION);
-    png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
-    png_set_compression_buffer_size(outpng, 1024 * 1024);
-
-    if (g_config.saveLoadFlatImageExtData) {
-        addPNGText(outpng, outpnginfo, "Software", "voidsprite - libpng " PNG_LIBPNG_VER_STRING);
-        auto extmap = data->importExportExtdata;
-        for (auto& kv : extmap) {
-            addPNGText(outpng, outpnginfo, "vsp/" + kv.first, kv.second);
-        }
-    }
-
-    if (!data->isPalettized) {
-        png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-        png_write_info(outpng, outpnginfo);
-
-        uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
-        SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixels32(), data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
-
-        png_bytepp rows = new png_bytep[data->h];
-        for (int y = 0; y < data->h; y++) {
-            rows[y] = convertedToABGR + (y * data->w * 4);
-        }
-        png_write_image(outpng, rows);
-        delete[] rows;
-        tracked_free(convertedToABGR);
-    }
-    else {
-        LayerPalettized* pltLayer = (LayerPalettized*)data;
-        png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-
-        png_colorp plt = new png_color[pltLayer->palette.size()];
-        memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
-        png_bytep trns = new png_byte[pltLayer->palette.size()];
-
-        for (int x = 0; x < pltLayer->palette.size(); x++) {
-            plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
-            plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
-            plt[x].blue = pltLayer->palette[x] & 0xff;
-            trns[x] = (pltLayer->palette[x] >> 24) & 0xff;
-        }
-
-        png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
-        png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
-        png_write_info(outpng, outpnginfo);
-
-        int32_t* pixelData32 = (int32_t*)pltLayer->pixels32();
-        png_bytepp rows = new png_bytep[data->h];
-        for (int y = 0; y < data->h; y++) {
-            png_bytep row = new png_byte[data->w];
-            for (int x = 0; x < data->w; x++) {
-                row[x] = pixelData32[x + y * data->w];
-            }
-            rows[y] = row;
-        }
-        png_write_image(outpng, rows);
-        delete[] plt;
-        delete[] trns;
-        for (int y = 0; y < data->h; y++) {
-            delete[] rows[y];
-        }
-        delete[] rows;
-
-    }
-    png_write_end(outpng, outpnginfo);
-
-    png_destroy_write_struct(&outpng, &outpnginfo);
     return ret;
 }
 
@@ -536,89 +546,13 @@ bool writePNG(PlatformNativePathString path, Layer* data, OperationProgressRepor
     // exports png
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
+        DoOnReturn closeFile([outfile](){fclose(outfile);});
         progress->enterSection("Writing PNG...");
         progress->enterSection("Initializing libpng...");
         png_structp outpng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
         png_infop outpnginfo = png_create_info_struct(outpng);
-        setjmp(png_jmpbuf(outpng));
         png_init_io(outpng, outfile);
-        png_set_compression_level(outpng, compressionLevel);
-        png_set_compression_mem_level(outpng, MAX_MEM_LEVEL);
-        png_set_compression_buffer_size(outpng, 1024 * 1024);
-
-        if (g_config.saveLoadFlatImageExtData) {
-            progress->updateLastSection("Writing extended data...");
-            addPNGText(outpng, outpnginfo, "Software", "voidsprite - libpng " PNG_LIBPNG_VER_STRING);
-            auto extmap = data->importExportExtdata;
-            for (auto& kv : extmap) {
-                addPNGText(outpng, outpnginfo, "vsp/" + kv.first, kv.second);
-            }
-        }
-
-        setjmp(png_jmpbuf(outpng));
-
-        progress->updateLastSection("Writing pixel data...");
-        if (!data->isPalettized) {
-            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-            setjmp(png_jmpbuf(outpng));
-            png_write_info(outpng, outpnginfo);
-
-            uint8_t* convertedToABGR = (uint8_t*)tracked_malloc(data->w * data->h * 4);
-            SDL_ConvertPixels(data->w, data->h, SDL_PIXELFORMAT_ARGB8888, data->pixels32(), data->w * 4, SDL_PIXELFORMAT_ABGR8888, convertedToABGR, data->w * 4);
-
-            png_bytepp rows = new png_bytep[data->h];
-            for (int y = 0; y < data->h; y++) {
-                rows[y] = convertedToABGR + (y * data->w * 4);
-            }
-            progress->updateLastSection("Writing to file...");
-            png_write_image(outpng, rows);
-            delete[] rows;
-            tracked_free(convertedToABGR);
-        }
-        else {
-            LayerPalettized* pltLayer = (LayerPalettized*)data;
-            png_set_IHDR(outpng, outpnginfo, data->w, data->h, 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_DEFAULT);
-            setjmp(png_jmpbuf(outpng));
-
-            png_colorp plt = new png_color[pltLayer->palette.size()];
-            memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
-            png_bytep trns = new png_byte[pltLayer->palette.size()];
-
-            for (int x = 0; x < pltLayer->palette.size(); x++) {
-                plt[x].red = (pltLayer->palette[x] >> 16) & 0xff;
-                plt[x].green = (pltLayer->palette[x] >> 8) & 0xff;
-                plt[x].blue = pltLayer->palette[x] & 0xff;
-                trns[x] = (pltLayer->palette[x] >> 24) & 0xff;
-            }
-
-            png_set_PLTE(outpng, outpnginfo, plt, pltLayer->palette.size());
-            png_set_tRNS(outpng, outpnginfo, trns, pltLayer->palette.size(), NULL);
-            png_write_info(outpng, outpnginfo);
-
-            int32_t* pixelData32 = (int32_t*)pltLayer->pixels32();
-            png_bytepp rows = new png_bytep[data->h];
-            for (int y = 0; y < data->h; y++) {
-                png_bytep row = new png_byte[data->w];
-                for (int x = 0; x < data->w; x++) {
-                    row[x] = pixelData32[x + y * data->w];
-                }
-                rows[y] = row;
-            }
-            progress->updateLastSection("Writing to file...");
-            png_write_image(outpng, rows);
-            delete[] plt;
-            delete[] trns;
-            for (int y = 0; y < data->h; y++) {
-                delete[] rows[y];
-            }
-            delete[] rows;
-
-        }
-        png_write_end(outpng, outpnginfo);
-
-        png_destroy_write_struct(&outpng, &outpnginfo);
-        fclose(outfile);
-        return true;
+        return _writePNG(data, outpng, outpnginfo, compressionLevel, progress);
     }
     return false;
 }
