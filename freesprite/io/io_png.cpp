@@ -448,7 +448,7 @@ bool _writePNG(Layer* data, png_structp png, png_infop info, int compressionLeve
             plt[x].blue = c.b;
             trns[x] = c.a;
             if (c.a == 0) {
-                transparentIndex = i;
+                transparentIndex = x;
             }
         }
 
