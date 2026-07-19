@@ -330,6 +330,34 @@ bool UIColorTextField::isValidOrPartialColor()
     return true;
 }
 
+void UIColorTextField::copyParenthCommaSeparatedRGB() {
+    if (linkedToColorPicker != NULL) {
+        SDL_Color col = uint32ToSDLColor(linkedToColorPicker->colorNowU32);
+        g_copyStringToClipboard(frmt("({:.03f}, {:.03f}, {:.03f})", col.r/255.0f, col.g/255.0f, col.b/255.0f));
+    }
+}
+
+void UIColorTextField::copyParenthCommaSeparatedRGBA() {
+    if (linkedToColorPicker != NULL) {
+        SDL_Color col = uint32ToSDLColor(linkedToColorPicker->colorNowU32);
+        g_copyStringToClipboard(frmt("({:.03f}, {:.03f}, {:.03f}, 1.0)", col.r/255.0f, col.g/255.0f, col.b/255.0f));
+    }
+}
+
+void UIColorTextField::copyParenthCommaSeparatedRGB24() {
+    if (linkedToColorPicker != NULL) {
+        SDL_Color col = uint32ToSDLColor(linkedToColorPicker->colorNowU32);
+        g_copyStringToClipboard(frmt("({}, {}, {})", col.r, col.g, col.b));
+    }
+}
+
+void UIColorTextField::copyUnityEngineColor() {
+    if (linkedToColorPicker != NULL) {
+        SDL_Color col = uint32ToSDLColor(linkedToColorPicker->colorNowU32);
+        g_copyStringToClipboard(frmt("new Color({:.03f}f,{:.03f}f,{:.03f}f,1.0f)", col.r/255.0f, col.g/255.0f, col.b/255.0f));
+    }
+}
+
 void UIColorTextField::copyUnityTMP()
 {
     if (linkedToColorPicker != NULL) {
@@ -394,9 +422,13 @@ void UIColorTextField::openActionsMenu()
     else {
         g_openContextMenu({
             { TL("vsp.cmn.copy"), [this]() { copyToClipboard(); } },
+            { "Copy as (r,g,b) [0-1 range]", [this]() { copyParenthCommaSeparatedRGB(); }},
+            { "Copy as (r,g,b) [0-255 range]", [this]() { copyParenthCommaSeparatedRGB24(); }},
+            { "Copy as (r,g,b,1) [0-1 range]", [this]() { copyParenthCommaSeparatedRGBA(); }},
             { "Copy as TextMeshPro tag", [this]() { copyUnityTMP(); }},
             { "Copy as CSS rgb()", [this]() { copyCSSRGB(); }},
             { "Copy as CSS hsl()", [this]() { copyCSSHSL(); }},
+            { "Copy as C# UnityEngine.Color", [this]() { copyUnityEngineColor(); }},
             { TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); } },
             { TL("vsp.cmn.erase"), [this]() { clearText(); } },
         });

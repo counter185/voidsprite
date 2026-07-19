@@ -106,6 +106,10 @@ public:
 
     bool isValidOrPartialColor();
 
+    void copyParenthCommaSeparatedRGB();
+    void copyParenthCommaSeparatedRGBA();
+    void copyParenthCommaSeparatedRGB24();
+    void copyUnityEngineColor();
     void copyUnityTMP();
     void copyCSSRGB();
     void copyCSSHSL();
