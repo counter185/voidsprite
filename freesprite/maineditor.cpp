@@ -1088,7 +1088,7 @@ void MainEditor::setUpWidgets()
         {
             SDL_SCANCODE_E,
             {
-                makeNavbarSection(TL("vsp.maineditor.edit"), g_iconNavbarTabEdit, {
+                makeNavbarSection(TL("vsp.nav.edit"), g_iconNavbarTabEdit, {
                     {SDL_SCANCODE_Z, { TL("vsp.maineditor.undo"), [this]() { this->undo(); } } },
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.redo"), [this]() { this->redo(); } } },
                     {SDL_SCANCODE_X, { TL("vsp.maineditor.symx"),

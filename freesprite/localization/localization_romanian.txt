@@ -72,7 +72,7 @@
     {"vsp.maineditor.preference","Preferințe"},
     {"vsp.maineditor.copyflattoclipboard", "Copiază în clipboard"},
 
-    {"vsp.maineditor.edit","Editează"},
+    {"vsp.nav.edit","Editează"},
     {"vsp.maineditor.undo","Undo"}, // no clue how to translate these two so i wont bother LOL
     {"vsp.maineditor.redo","Redo"},
     {"vsp.maineditor.symx","Pornește simetria pe axa X"},

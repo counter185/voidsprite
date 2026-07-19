@@ -62,7 +62,8 @@ public:
 	void duplicateLayer(int index);
 
 	void promptRenderMap(int type);
-	void doRenderMap(PlatformNativePathString path, int type, int exporterIndex);
+	void doRenderMap(PlatformNativePathString path, int type, FileExporter* exporter);
 	Layer* renderLayer(XY** layer);
+	MainEditor* renderToNewSession();
 };
 

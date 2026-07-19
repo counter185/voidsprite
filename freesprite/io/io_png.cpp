@@ -440,12 +440,16 @@ bool _writePNG(Layer* data, png_structp png, png_infop info, int compressionLeve
         memset(plt, 0, pltLayer->palette.size() * sizeof(png_color));
         png_bytep trns = new png_byte[pltLayer->palette.size()];
 
+        int transparentIndex = -1;
         for (int x = 0; x < pltLayer->palette.size(); x++) {
             SDL_Color c = uint32ToSDLColor(pltLayer->palette[x]);
             plt[x].red = c.r;
             plt[x].green = c.g;
             plt[x].blue = c.b;
             trns[x] = c.a;
+            if (c.a == 0) {
+                transparentIndex = i;
+            }
         }
 
         png_set_PLTE(png, info, plt, pltLayer->palette.size());

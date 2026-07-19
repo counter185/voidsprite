@@ -146,6 +146,9 @@ public:
     int activeLayer = 0;
     std::vector<CommentData> comments;
 
+    Frame() {}
+    Frame(std::vector<Layer*> l) : layers(l) {}
+
     ~Frame() {
         for (Layer* l : layers) {
             delete l;

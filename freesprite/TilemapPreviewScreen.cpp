@@ -7,6 +7,9 @@
 #include "PanelTilemapPreview.h"
 #include "FileIO.h"
 #include "PopupTileGeneric.h"
+#include "LayerPalettized.h"
+#include "MainEditorPalettized.h"
+#include "PopupChooseFormat.h"
 
 TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
     caller = parent;
@@ -15,9 +18,8 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
         {
             {
                 SDL_SCANCODE_F,
-                {
-                    "File",
-                    {SDL_SCANCODE_O, SDL_SCANCODE_S, SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C},
+                makeNavbarSection(
+                    TL("vsp.nav.file"), g_iconNavbarTabFile,
                     {
                         {SDL_SCANCODE_O, { "Load layout from file",
                                 [this]() {
@@ -32,32 +34,29 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                             }
                         },
                         {SDL_SCANCODE_Z, { "Render all layers to image",
-                                [this]() {
-                                    this->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE);
-                                }
+                                [this]() { this->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGE); }
                             }
                         },
                         {SDL_SCANCODE_X, { "Render all layers to separate images",
-                                [this]() {
-                                    this->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES);
-                                }
+                                [this]() { this->promptRenderMap(EVENT_TILEMAP_RENDERALLLTOIMAGES); }
                             }
                         },
                         {SDL_SCANCODE_C, { "Render current layer to image",
-                                [this]() {
-                                    this->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE);
-                                }
+                                [this]() { this->promptRenderMap(EVENT_TILEMAP_RENDERCURRENTLTOIMAGE); }
                             }
                         },
-                    },
-                    g_iconNavbarTabFile
-                }
+
+                        {SDL_SCANCODE_V, { "Render to new workspace",
+                                [this]() { g_addScreen(renderToNewSession()); }
+                            }
+                        },
+                    }
+                )
             }, 
             {
                 SDL_SCANCODE_E,
-                {
-                    "Edit",
-                    {},
+                makeNavbarSection(
+                    TL("vsp.nav.edit"), g_iconNavbarTabEdit,
                     {
                         {SDL_SCANCODE_R, { "Resize tilemap",
                                 [this]() {
@@ -65,9 +64,8 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                                 }
                             }
                         }
-                    },
-                    g_iconNavbarTabEdit
-                }
+                    }
+                )
             }
         }, { SDL_SCANCODE_F, SDL_SCANCODE_E });
     wxsManager.addDrawable(navbar);
@@ -313,12 +311,7 @@ BaseScreen* TilemapPreviewScreen::isSubscreenOf()
 
 void TilemapPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
 {
-    if (evt_id == EVENT_TILEMAP_RENDERALLLTOIMAGE
-        || evt_id == EVENT_TILEMAP_RENDERALLLTOIMAGES
-        || evt_id == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
-        doRenderMap(name, evt_id, exporterIndex);
-    }
-    else if (evt_id == EVENT_TILEMAP_SAVELAYOUT) {
+    if (evt_id == EVENT_TILEMAP_SAVELAYOUT) {
         if (exporterIndex == 2) {
             //pxm
             FILE* file = platformOpenFile(name, PlatformFileModeWB);
@@ -725,26 +718,27 @@ void TilemapPreviewScreen::promptRenderMap(int type)
         for (auto f : g_fileExporters) {
             formats.push_back({ f->extension(), f->name() });
         }
-        platformTrySaveOtherFile(this, formats, "render image", type);
+        PopupChooseFormat* f = caller->isPalettized ? PopupChooseFormat::withDefaultIndexedExportFormats("Choose format", "")
+                                : PopupChooseFormat::withDefaultRGBExportFormats("Choose format", "");
+        f->chooseFormatAndDoFileSavePrompt("render image", [this, type](FormatDef* f, PlatformNativePathString path) {
+            g_startNewOperation([this, path, type, f](){
+#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+                g_interactiveContext = false;
+#endif
+                doRenderMap(path, type, (FileExporter*)f->udata);
+            });
+        });
+        //platformTrySaveOtherFile(this, formats, "render image", type);
     }
 }
 
-void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, int exporterIndex)
+void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, FileExporter* exporter)
 {
-    FileExporter* exporter = g_fileExporters[exporterIndex - 1];
     XY tileSize = caller->getPaddedTileDimensions();
     bool success = false;
     if (type == EVENT_TILEMAP_RENDERALLLTOIMAGE) {
 
-        std::vector<Layer*> layers;
-        int x = 0;
-        for (XY**& tileLayer : tilemap) {
-            Layer* ll = renderLayer(tileLayer);
-            ll->name += frmt(" {}", x++);
-            layers.push_back(ll);
-        }
-        MainEditor* newSession = new MainEditor(layers);
-        newSession->ssne.tileDimensions = tileSize;
+        MainEditor* newSession = renderToNewSession();
 
         if (exporter->exportsWholeSession()) {
             success = exporter->exportData(path, newSession, NULL, NULL);
@@ -766,7 +760,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
             bool ss = false;
             PlatformNativePathString filename = path + convertStringOnWin32(frmt("-{}{}", x++, exporter->extension()));
             if (exporter->exportsWholeSession()) {
-                MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
+                MainEditor* ssn = ll->isPalettized ? new MainEditorPalettized((LayerPalettized*)ll) : new MainEditor(ll);
                 ssn->ssne.tileDimensions = tileSize;
                 ss = exporter->exportData(filename, ssn, NULL, NULL);
                 delete ssn;
@@ -782,7 +776,7 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
     else if (type == EVENT_TILEMAP_RENDERCURRENTLTOIMAGE) {
         Layer* ll = renderLayer(activeTilemap);
         if (exporter->exportsWholeSession()) {
-            MainEditor* ssn = new MainEditor(std::vector<Layer*>{ ll });
+            MainEditor* ssn = ll->isPalettized ? new MainEditorPalettized((LayerPalettized*)ll) : new MainEditor(ll);
             success = exporter->exportData(path, ssn, NULL, NULL);
             delete ssn;
         }
@@ -810,19 +804,40 @@ void TilemapPreviewScreen::doRenderMap(PlatformNativePathString path, int type, 
 Layer* TilemapPreviewScreen::renderLayer(XY** layer)
 {
     XY tileSize = caller->getPaddedTileDimensions();
-    Layer* l = new Layer(tileSize.x * tilemapDimensions.x, tileSize.y * tilemapDimensions.y);
-    l->name = "Tilemap layer";
-    for (int y = 0; y < tilemapDimensions.y; y++) {
-        for (int x = 0; x < tilemapDimensions.x; x++) {
-            XY currentTile = layer[y][x];
-            if (currentTile.x >= 0 && currentTile.y >= 0) {
-                SDL_Rect clip = caller->getPaddedTilePosAndDimensions(currentTile);
-                int lIndex = 0;
-                for (Layer*& ll : caller->getLayerStack()) {
-                    l->blit(ll, XY{ x * tileSize.x, y * tileSize.y }, clip, lIndex++ == 0);
+    Layer* l = caller->isPalettized ? LayerPalettized::tryAllocIndexedLayer(tileSize.x * tilemapDimensions.x, tileSize.y * tilemapDimensions.y)
+                : Layer::tryAllocLayer(tileSize.x * tilemapDimensions.x, tileSize.y * tilemapDimensions.y);
+    if (l != NULL) {
+        l->name = "Tilemap layer";
+        if (l->isPalettized) {
+            ((LayerPalettized*)l)->palette = ((MainEditorPalettized*)caller)->palette;
+        }
+        for (int y = 0; y < tilemapDimensions.y; y++) {
+            for (int x = 0; x < tilemapDimensions.x; x++) {
+                XY currentTile = layer[y][x];
+                if (currentTile.x >= 0 && currentTile.y >= 0) {
+                    SDL_Rect clip = caller->getPaddedTilePosAndDimensions(currentTile);
+                    int lIndex = 0;
+                    for (Layer*& ll : caller->getLayerStack()) {
+                        l->blit(ll, XY{ x * tileSize.x, y * tileSize.y }, clip, lIndex++ == 0);
+                    }
                 }
             }
         }
+    } else {
+        g_addNotificationFromThread(NOTIF_MALLOC_FAIL);
     }
     return l;
+}
+
+MainEditor* TilemapPreviewScreen::renderToNewSession() {
+    std::vector<Layer*> layers;
+    int x = 0;
+    for (XY**& tileLayer : tilemap) {
+        Layer* ll = renderLayer(tileLayer);
+        ll->name += frmt(" {}", ++x);
+        layers.push_back(ll);
+    }
+    MainEditor* newSession = layers.front()->isPalettized ? new MainEditorPalettized({new Frame(layers)}) : new MainEditor(layers);
+    newSession->ssne = caller->ssne;
+    return newSession;
 }

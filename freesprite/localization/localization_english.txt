@@ -87,6 +87,7 @@
     {"vsp.nav.window", "Window"},
     {"vsp.nav.view", "View"},
     {"vsp.nav.preview", "Preview"},
+    {"vsp.nav.edit","Edit"},
 
     //undo op names 
     {"vsp.undo.layermodified", "Layer modified"},
@@ -364,7 +365,6 @@
     {"vsp.maineditor.nav.print.scale.desc", "Enter the scale of the printed image"},
     {"vsp.maineditor.nav.newsession", "New session"},
 
-    {"vsp.maineditor.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},
     {"vsp.maineditor.redo","Redo"},
     {"vsp.maineditor.symx","Toggle symmetry: X"},

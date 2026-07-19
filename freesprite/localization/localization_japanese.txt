@@ -99,7 +99,7 @@
     {"vsp.maineditor.preference","Preferences"},
     {"vsp.maineditor.copyflattoclipboard", "クリップボードにコピー"},
 
-    {"vsp.maineditor.edit","Edit"},
+    {"vsp.nav.edit","Edit"},
     {"vsp.maineditor.undo","Undo"},
     {"vsp.maineditor.redo","Redo"},
     {"vsp.maineditor.symx","Toggle symmetry: X"},
