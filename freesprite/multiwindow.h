@@ -43,10 +43,17 @@ public:
     }
 };
 
-class VSPWindow {
+class RenderQueue {
 protected:
-    std::vector<std::function<void()>> overlayRenderOperations;
+    std::vector<std::function<void()>> queue;
 public:
+    void enqueue(std::function<void()> fn);
+    void renderAll();
+};
+
+class VSPWindow {
+public:
+    RenderQueue overlayRenderQueue;
     SDL_WindowID windowID = -1;
     SDL_Window* wd = NULL;
     SDL_Renderer* rd = NULL;
@@ -148,9 +155,6 @@ public:
     void renderCustomWindowFrame();
     bool handleCustomFrameInput(SDL_Event evt);
     SDL_HitTestResult getSDLHitTestAt(XY pos);
-
-    void pushOverlayRenderOperation(std::function<void()> op);
-    void doOverlayRenderOperations();
 
     bool IsMaximized();
 };

@@ -77,7 +77,7 @@ void SpritesheetPreviewScreen::render()
     //int rightPanelWidth = ixmax(300, canvas.scale * tileSize.x);
     //drawPreview(XY{ rightPanelRect.x + 10, 100 });
 
-    wxsManager.renderAll();
+    BaseScreen::render();
 
     //sprite timeline
     XY spriteListOrigin = xyAdd(spriteView->position, spriteView->scrollOffset);

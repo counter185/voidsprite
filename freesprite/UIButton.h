@@ -67,6 +67,8 @@ protected:
     bool fileExists = false;
     PlatformNativePathString imageFilePath;
 public:
+    RenderQueue* thumbnailTarget = NULL;
+    
     UIImageFileButton(std::string text = "", std::string tooltip = "")
         : UIButton(text, tooltip) {}
 

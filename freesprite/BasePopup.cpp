@@ -13,6 +13,7 @@ void BasePopup::render() {
     }
     renderPopupWindow();
     renderDrawables();
+    postWidgetsRenderQueue.renderAll();
     if (animTime < 1) {
         g_popClip();
     }

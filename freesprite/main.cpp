@@ -700,7 +700,7 @@ void g_mainLoop() {
             popupStack[popupStack.size() - 1]->render();
         }*/
 
-        wd->doOverlayRenderOperations();
+        wd->overlayRenderQueue.renderAll();
 
         g_renderVFX();
 

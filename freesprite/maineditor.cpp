@@ -203,7 +203,7 @@ void MainEditor::render() {
 
     if (!hideUI) {
         DrawForeground();
-        wxsManager.renderAll();
+        BaseScreen::render();
     }
 
     if (eraserMode) {

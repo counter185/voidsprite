@@ -150,7 +150,7 @@ void UIButton::renderAnimations(XY pos)
     if (touchHoldingDown && touchHoldDownTimer.elapsedTime() >= 200) {
         double percentTime = touchHoldDownTimer.percentElapsedTime(1200);
         XY holdPos = touchHoldDownPos;
-        g_currentWindow->pushOverlayRenderOperation([percentTime, holdPos]() {
+        g_currentWindow->overlayRenderQueue.enqueue([percentTime, holdPos]() {
             double l1 = XM1PW3P1(dxmin(1.0, percentTime / 0.25));
             double l2 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.25) / 0.25)));
             double l3 = XM1PW3P1(dxmax(0.0, dxmin(1.0, (percentTime - 0.5) / 0.25)));
@@ -253,7 +253,8 @@ void UIImageFileButton::renderTooltip(XY pos)
             if ((dimensions.x > 0 && dimensions.y > 0)) {
                 int thisH = wxHeight;
                 double hoverTime = XM1PW3P1(hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000));
-                g_currentWindow->pushOverlayRenderOperation([thisH, dimensions, pos, nativePath, hoverTime]() {
+                RenderQueue* q = thumbnailTarget == NULL ? &g_currentWindow->overlayRenderQueue : thumbnailTarget;
+                q->enqueue([thisH, dimensions, pos, nativePath, hoverTime]() {
                     SDL_Rect screenRect = { pos.x, pos.y + thisH, dimensions.x, (int)(dimensions.y * hoverTime) };
 
                     SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xf0);
@@ -263,7 +264,7 @@ void UIImageFileButton::renderTooltip(XY pos)
 
                     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
                     SDL_RenderDrawRect(g_rd, &screenRect);
-                    });
+                });
             }
             else if (!tooltip.empty()) {
                 g_ttp->addTooltip(Tooltip{ xyAdd(pos, {0, wxHeight}), tooltip, {255,255,255,255}, hoverTimer.percentElapsedTime(300, instantTooltip ? 0 : 1000) });

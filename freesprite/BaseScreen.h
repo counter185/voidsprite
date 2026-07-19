@@ -3,6 +3,7 @@
 #include "DrawableManager.h"
 #include "ScreenWideNavBar.h"
 #include "background_operation.h"
+#include "multiwindow.h"
 
 #define LALT_TO_SUMMON_NAVBAR (void)0 //if (evt.type == SDL_KEYDOWN && evt.key.scancode == SDL_SCANCODE_LALT) {  return; }
 
@@ -13,12 +14,13 @@ protected:
     EventCallbackListener* callback = NULL;
     DrawableManager wxsManager;
     ScreenWideNavBar* navbar = NULL;
-
+    RenderQueue postWidgetsRenderQueue{};
 public:
     virtual ~BaseScreen() = default;
 
     virtual void render() {
         wxsManager.renderAll();
+        postWidgetsRenderQueue.renderAll();
     }
     virtual void defaultInputAction(SDL_Event evt) {}
     virtual void takeInput(SDL_Event evt) 
@@ -81,5 +83,6 @@ public:
             }
         }
     }
+    RenderQueue* getPostWidgetsRenderQueue() { return &postWidgetsRenderQueue; }
 };
 

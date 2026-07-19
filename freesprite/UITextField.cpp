@@ -284,7 +284,7 @@ void UITextField::renderOnScreenTextField()
 
     double focusTime = focusTimer.percentElapsedTime(600);
     //g_pushClip({ 0,0,g_windowW, g_windowH });
-    g_currentWindow->pushOverlayRenderOperation([this, focusTime, onScreenPos]() {
+    g_currentWindow->overlayRenderQueue.enqueue([this, focusTime, onScreenPos]() {
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xd0 * focusTime);
         SDL_RenderFillRect(g_rd, (SDL_Rect*)NULL);
 

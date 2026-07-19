@@ -144,7 +144,7 @@ void RPG2KTilemapPreviewScreen::render()
         canvas.drawCanvasOutline(5, { 255,255,255,0x90 });
     });
 
-    wxsManager.renderAll();
+    BaseScreen::render();
 
     //bottom bar
     SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };

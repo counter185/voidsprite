@@ -596,19 +596,6 @@ SDL_HitTestResult VSPWindow::getSDLHitTestAt(XY pos)
     return SDL_HITTEST_NORMAL;
 }
 
-void VSPWindow::pushOverlayRenderOperation(std::function<void()> op)
-{
-    overlayRenderOperations.push_back(op);
-}
-
-void VSPWindow::doOverlayRenderOperations()
-{
-    for (auto& op : overlayRenderOperations) {
-        op();
-    }
-    overlayRenderOperations.clear();
-}
-
 void WindowBlurBuffer::windowResized()
 {
     if (!enabled) return;
@@ -712,4 +699,20 @@ void WindowBlurBuffer::renderBlurBehind(SDL_Rect region)
 {
     if (!enabled) return;
     SDL_RenderCopy(parentWindow->rd, fullscreenBuffer, &region, &region);
+}
+
+void RenderQueue::enqueue(std::function<void()> fn) 
+{
+    if (queue.size() >= 100) {
+        queue.clear();
+    }
+    queue.push_back(fn);
+}
+
+void RenderQueue::renderAll() 
+{
+    for (auto& op : queue) {
+        op();
+    }
+    queue.clear();
 }

@@ -301,6 +301,7 @@ UIButton* PopupFilePicker::createFileButton(FilePickerFileEntry fileEntry)
     UIButton* btn;
     if (!fileEntry.isDirectory && fileEntry.matchesExtension) {
         btn = new UIImageFileButton(fileEntry.displayFileName + (fileEntry.isDirectory ? "/" : ""));
+        ((UIImageFileButton*)btn)->thumbnailTarget = getPostWidgetsRenderQueue();
         ((UIImageFileButton*)btn)->setTargetFilePath(appendPath(currentDir, fileEntry.realFileName));
     }
     else {

@@ -209,7 +209,7 @@ void StartScreen::render()
     bgr.h -= 40;
     renderGradient(bgr, sdlcolorToUint32(colorBG3), 0, sdlcolorToUint32(colorBG2), 0);*/
 
-    wxsManager.renderAll();
+    BaseScreen::render();
 
     renderFileDropAnim();
 
@@ -471,6 +471,7 @@ void StartScreen::populateLastOpenFiles()
 
     for (std::string& lastPath : g_config.lastOpenFiles) {
         ButtonLaunchpadLastFile* button = new ButtonLaunchpadLastFile(lastPath);
+        button->thumbnailTarget = getPostWidgetsRenderQueue();
         
         button->onClickCallback = [this, lastPath](UIButton*) {
             this->tryLoadFile(lastPath);

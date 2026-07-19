@@ -210,6 +210,7 @@ class PopupSetNetworkCanvasData;
 class UndoStackElementV2;
 class UndoStackCaptureGroup;
 class OperationProgressReport;
+class RenderQueue;
 
 //textrenderer
 class TextRenderer;
