@@ -15,6 +15,7 @@
 #include "MinecraftSkinPreviewScreen.h"
 #include "UndoStack.h"
 #include "EditorFramePicker.h"
+#include "layer_conversions.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"

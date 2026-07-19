@@ -3,6 +3,7 @@
 #include "LayerPalettized.h"
 #include "Notification.h"
 #include "BaseFilter.h"
+#include "maineditor.h"
 
 Layer* quantizeToNumColors(Layer* rgb, int numColors)
 {
@@ -136,4 +137,65 @@ LayerOpResult to8BitIndexedWith1BitSingleIndexAlpha(LayerPalettized* idx)
     else {
         return { false };
     }
+}
+
+LayerPalettized* prepareForIndexedFlatExport(LayerPalettized* l) {
+    LayerPalettized* ret = (LayerPalettized*)l->copyCurrentVariant();
+    ret->palette = l->palette;
+    int transparentIndex = -1;
+    for (int i = 0; i < ret->palette.size(); i++) {
+        if (uint32ToSDLColor(ret->palette[i]).a == 0) {
+            transparentIndex = i;
+            break;
+        }
+    }
+    memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4);
+
+    s32* ppx = (s32*)ret->pixels32();
+    for (u64 i = 0; i < (u64)l->w * l->h; i++) {
+        if (ppx[i] == -1) {
+            if (transparentIndex == -1) {
+                if (ret->palette.size() < 256) {
+                    loginfo(frmt("found transparency but no transparent index. adding #000000 into palette[{}]", ret->palette.size()));
+                    transparentIndex = ret->palette.size();
+                    ret->palette.push_back(0);
+                } else {
+                    logwarn("layer has transparency pixels but no space for transparency. using 0");
+                    transparentIndex = 0;
+                }
+            }
+            ppx[i] = transparentIndex;
+        }
+    }
+    return ret;
+
+}
+
+LayerPalettized* flattenIndexedFrameKeepingTransparencyIndex(Frame* f, std::vector<u32>& palette) {
+    LayerPalettized* l = LayerPalettized::tryAllocIndexedLayer(f->layers.front()->w, f->layers.front()->h);
+    l->palette = palette;
+    //int32_t* indices = (int32_t*)tracked_malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
+    memset(l->pixels32(), 0xFF, l->w * l->h * 4);
+    s32* dstppx = (s32*)l->pixels32();
+    for (Layer*& l : f->layers) {
+        if (!l->hidden) {
+            s32* px = (s32*)l->pixels32();
+            for (int y = 0; y < l->h; y++) {
+                for (int x = 0; x < l->w; x++) {
+                    s32 color = ARRAY2DPOINT(px, x, y, l->w);
+                    if (color != -1 && uint32ToSDLColor(palette[color]).a != 0) {
+                        ARRAY2DPOINT(dstppx, x, y, l->w) = color;
+                    }
+                }
+            }
+        }
+    }
+    return l;
+}
+
+LayerPalettized* flattenIndexedFrameWithoutTransparencyIndex(Frame* f, std::vector<u32>& palette) {
+    LayerPalettized* l = flattenIndexedFrameKeepingTransparencyIndex(f, palette);
+    LayerPalettized* ll = prepareForIndexedFlatExport(l);
+    delete l;
+    return ll;
 }

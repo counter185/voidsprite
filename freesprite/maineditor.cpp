@@ -30,6 +30,7 @@
 #include "EditorFramePicker.h"
 #include "UISlider.h"
 #include "UIDropdown.h"
+#include "layer_conversions.h"
 
 #include "TilemapPreviewScreen.h"
 #include "MinecraftSkinPreviewScreen.h"
@@ -2001,7 +2002,7 @@ void MainEditor::exportIndexed(FileExporter* exporter, PlatformNativePathString 
             result = exporter->exportData(name, rgbConvEditor, report, &exportParameters);
         }
         else {
-            Layer* l = rgbConvEditor->flattenImageWithoutConvertingToRGB();
+            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(getCurrentFrame(), ((MainEditorPalettized*)this)->palette);// rgbConvEditor->flattenImageWithoutConvertingToRGB();
             result = exporter->exportData(name, l, report, &exportParameters);
             delete l;
         }
@@ -2257,7 +2258,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
         result = exporter->exportData(name, this, progress, &exportParameters);
     }
     else {
-        Layer* flat = this->isPalettized ? ((MainEditorPalettized*)this)->flattenImageWithoutConvertingToRGB() : flattenImage();
+        Layer* flat = this->isPalettized ? flattenIndexedFrameWithoutTransparencyIndex(getCurrentFrame(), ((MainEditorPalettized*)this)->palette) : flattenImage();
         flat->importExportExtdata = makeSingleLayerExtdata();
         result = exporter->exportData(name, flat, progress, &exportParameters);
         delete flat;

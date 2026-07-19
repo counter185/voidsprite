@@ -15,3 +15,7 @@ LayerOpResult to8BitIndexedNoAlpha(Layer* rgb);
 LayerOpResult to8BitIndexed1BitAlpha(Layer* rgba);
 
 LayerOpResult to8BitIndexedWith1BitSingleIndexAlpha(LayerPalettized* idx);
+
+LayerPalettized* prepareForIndexedFlatExport(LayerPalettized* l);
+LayerPalettized* flattenIndexedFrameKeepingTransparencyIndex(Frame* f, std::vector<u32>& palette);
+LayerPalettized* flattenIndexedFrameWithoutTransparencyIndex(Frame* f, std::vector<u32>& palette);
