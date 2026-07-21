@@ -177,12 +177,12 @@ LayerPalettized* flattenIndexedFrameKeepingTransparencyIndex(Frame* f, std::vect
     //int32_t* indices = (int32_t*)tracked_malloc(canvas.dimensions.x * canvas.dimensions.y * 4);
     memset(l->pixels32(), 0xFF, l->w * l->h * 4);
     s32* dstppx = (s32*)l->pixels32();
-    for (Layer*& l : f->layers) {
-        if (!l->hidden) {
-            s32* px = (s32*)l->pixels32();
+    for (Layer*& ll : f->layers) {
+        if (!ll->hidden) {
+            s32* px = (s32*)ll->pixels32();
             for (int y = 0; y < l->h; y++) {
                 for (int x = 0; x < l->w; x++) {
-                    s32 color = ARRAY2DPOINT(px, x, y, l->w);
+                    s32 color = ARRAY2DPOINT(px, x, y, ll->w);
                     if (color != -1 && uint32ToSDLColor(palette[color]).a != 0) {
                         ARRAY2DPOINT(dstppx, x, y, l->w) = color;
                     }

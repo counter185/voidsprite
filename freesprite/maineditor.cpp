@@ -2002,7 +2002,7 @@ void MainEditor::exportIndexed(FileExporter* exporter, PlatformNativePathString 
             result = exporter->exportData(name, rgbConvEditor, report, &exportParameters);
         }
         else {
-            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(getCurrentFrame(), ((MainEditorPalettized*)this)->palette);// rgbConvEditor->flattenImageWithoutConvertingToRGB();
+            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(rgbConvEditor->getCurrentFrame(), rgbConvEditor->palette);// rgbConvEditor->flattenImageWithoutConvertingToRGB();
             result = exporter->exportData(name, l, report, &exportParameters);
             delete l;
         }
