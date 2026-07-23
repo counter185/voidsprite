@@ -38,8 +38,6 @@ u32 platformSupportedFeatures() {
     //okay maybe not sharing
 }
 
-HWND WINhWnd = NULL;
-std::map<HWND, VSPWindow*> windowMap;
 wchar_t fileNameBuffer[MAX_PATH] = { 0 };
 int lastFilterIndex = 1;
 std::vector<PlatformNativePathString> tempFilesToDeleteOnDeinit;
@@ -100,26 +98,11 @@ std::string windows_getActiveGPUName() {
     return ret;
 }
 
-HWND windows_getProcessMainWindow(DWORD pid) {
-    struct result {
-        DWORD targetPid = 0;
-        DWORD foundPid = 0;
-        HWND foundHwnd = NULL;
-    };
-    result res{};
-    res.targetPid = pid;
-
-    EnumWindows([](HWND hwnd, LPARAM lparam) {
-        result* r = (result*)lparam;
-        DWORD pidNow;
-        if (GetWindowThreadProcessId(hwnd, &pidNow) && pidNow == r->targetPid) {
-            r->foundHwnd = hwnd;
-            return FALSE;
-        }
-        return TRUE;
-    }, (LPARAM)&res);
-
-    return res.foundHwnd;
+HWND windows_getWindowHWND(VSPWindow* w) {
+    if (w != NULL) {
+        return (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(w->wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+    }
+    return NULL;
 }
 
 LRESULT (CALLBACK *originalWndProc)(HWND, UINT, WPARAM, LPARAM) = NULL;
@@ -141,17 +124,14 @@ void platformPostInit() {
 }
 
 void platformWindowCreated(VSPWindow* wd) {
-    HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(wd->wd), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
-    windowMap[hwnd] = wd;
-    if (WINhWnd == NULL) {
-        WINhWnd = hwnd;
-        //originalWndProc = (WNDPROC)GetWindowLongPtr(WINhWnd, -4);
-
+    static bool firstWindow = true;
+    if (firstWindow) {
+        firstWindow = false;
 #if VSP_WIN32_DWMAPI
         //run this only on the first window
         BOOL USE_DARK_MODE = true;
         bool SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-            WINhWnd, 20,
+            windows_getWindowHWND(wd), 20,
             &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
         //not needed on win11 but this makes win10 repaint the whole window
         //SDL_HideWindow(wd->wd);
@@ -304,7 +284,7 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
-    ofna.hwndOwner = WINhWnd;
+    ofna.hwndOwner = windows_getWindowHWND(g_currentWindow);
     std::wstring filterString = L"";
     for (auto& ft : filetypes) {
         filterString += utf8StringToWstring(ft.second) + L" ("+ utf8StringToWstring(ft.first) +L")";
@@ -342,7 +322,13 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
         listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
-        logprintf("windows error: %i\n", GetLastError());
+        u32 winError = GetLastError();
+        u32 commDlgError = CommDlgExtendedError();
+        logerr(frmt("windows error opening dialog: {:08X} {:08X}", winError, commDlgError));
+        // "unspecified error"
+        if (winError == E_FAIL || commDlgError == 0xFFFF) {
+            universal_platformTrySaveOtherFile(listener, filetypes, windowTitle, evt_id);
+        }
     }
 }
 
@@ -355,7 +341,7 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
     OPENFILENAMEW ofna;
     ZeroMemory(&ofna, sizeof(ofna));
     ofna.lStructSize = sizeof(ofna);
-    ofna.hwndOwner = WINhWnd;
+    ofna.hwndOwner = windows_getWindowHWND(g_currentWindow);
     std::wstring filterString = L"";
     for (auto& ft : filetypes) {
         if (!ft.first.empty()) {
@@ -393,7 +379,13 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
         listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
-        logprintf("windows error: %i\n", GetLastError());
+        u32 winError = GetLastError();
+        u32 commDlgError = CommDlgExtendedError();
+        logerr(frmt("windows error opening dialog: {:08X} {:08X}", winError, commDlgError));
+        // "unspecified error"
+        if (winError == E_FAIL || commDlgError == 0xFFFF) {
+            universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+        }
     }
 }
 
@@ -486,7 +478,7 @@ std::vector<PlatformNativePathString> platformListFilesInDir(PlatformNativePathS
 bool platformPutImageInClipboard(Layer* l) {
     //return universal_platformPushLayerToClipboard(l);
 
-    if (OpenClipboard(WINhWnd)) {
+    if (OpenClipboard(windows_getWindowHWND(g_currentWindow))) {
         EmptyClipboard();
 
         int writtenFormats = 0;
@@ -534,10 +526,10 @@ bool platformPutImageInClipboard(Layer* l) {
 }
 
 Layer* platformGetImageFromClipboard() {
-
+    HWND currentHwnd = windows_getWindowHWND(g_currentWindow);
     bool res;
     HANDLE dataHandle;
-    res = OpenClipboard(WINhWnd);
+    res = OpenClipboard(currentHwnd);
     UINT fileNameFormat = RegisterClipboardFormatW(L"FileNameW");
     dataHandle = GetClipboardData(fileNameFormat);
     Layer* foundImage = NULL;
@@ -565,7 +557,7 @@ Layer* platformGetImageFromClipboard() {
 
     Layer* foundPNG = NULL;
     for (std::wstring pngFormatName : {L"PNG", L"image/png"}) { //browsers use PNG, krita saves to image/png
-        res = OpenClipboard(WINhWnd);
+        res = OpenClipboard(currentHwnd);
         UINT pngFormat = RegisterClipboardFormatW(pngFormatName.c_str());
         dataHandle = GetClipboardData(pngFormat);
         if (dataHandle != NULL) {
@@ -592,7 +584,7 @@ Layer* platformGetImageFromClipboard() {
     }
 
     //dibv5
-    res = OpenClipboard(WINhWnd);
+    res = OpenClipboard(currentHwnd);
     Layer* foundDIBV5 = NULL;
     dataHandle = GetClipboardData(CF_DIBV5);
     if (dataHandle != NULL) {
@@ -609,7 +601,7 @@ Layer* platformGetImageFromClipboard() {
     CloseClipboard();
 
     //if there's no PNG in the clipboard, read as a bitmap
-    res = OpenClipboard(WINhWnd);
+    res = OpenClipboard(currentHwnd);
     dataHandle = GetClipboardData(CF_BITMAP);
     if (dataHandle == NULL) {
         CloseClipboard();
@@ -618,7 +610,7 @@ Layer* platformGetImageFromClipboard() {
     HBITMAP bmp = (HBITMAP)dataHandle;
     BITMAP bitmap;
     GetObjectW(bmp, sizeof(BITMAP), &bitmap);
-    HDC hdc = GetDC(WINhWnd);
+    HDC hdc = GetDC(currentHwnd);
     HDC memDC = CreateCompatibleDC(hdc);
     HBITMAP oldBmp = (HBITMAP)SelectObject(memDC, bmp);
     Layer* layer = new Layer(bitmap.bmWidth, bitmap.bmHeight);
@@ -630,7 +622,7 @@ Layer* platformGetImageFromClipboard() {
     }
     SelectObject(memDC, oldBmp);
     DeleteDC(memDC);
-    ReleaseDC(WINhWnd, hdc);
+    ReleaseDC(currentHwnd, hdc);
     CloseClipboard();
     return layer;
 }
@@ -920,7 +912,7 @@ void platformPrintDocument(Layer* layer) {
         tempFile += L".png";
         if (writePNG(tempFile, layer)) {
             tempFilesToDeleteOnDeinit.push_back(tempFile);
-            ShellExecuteW(WINhWnd, L"print", tempFile.c_str(), L"", L"", FALSE);
+            ShellExecuteW(windows_getWindowHWND(g_currentWindow), L"print", tempFile.c_str(), L"", L"", FALSE);
             //todo: delete these temp files
             loginfo(frmt("Sent print command for: {}", convertStringToUTF8OnWin32(tempFile)));
         }
