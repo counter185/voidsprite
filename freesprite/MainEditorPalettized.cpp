@@ -177,15 +177,9 @@ void MainEditorPalettized::exportRGB(FileExporter* exporter, PlatformNativePathS
 
 void MainEditorPalettized::SetPixel(XY position, uint32_t color, bool pushToLastColors, uint8_t symmetry)
 {
-    if (patternsCanDrawAt(position) && (!replaceAlphaMode || (replaceAlphaMode && layer_getPixelAt(position) != -1))) {
+    if ((patternsCanDrawAt(position) ^ invertPattern) && (!replaceAlphaMode || (replaceAlphaMode && layer_getPixelAt(position) != -1))) {
         if (!isolateEnabled || (isolateEnabled && isolatedFragment.pointExists(position))) {
             int32_t targetColor = (int32_t)color;
-            /*if (blendAlphaMode) {
-                if (eraserMode) {
-                    targetColor = ((0xff - (targetColor >> 24)) << 24) + (targetColor & 0xffffff);
-                }
-                targetColor = alphaBlend(getCurrentLayer()->getPixelAt(position), targetColor);
-            }*/
             if (targetColor < -1 || targetColor >= palette.size()) {
                 targetColor = -1;
             }
