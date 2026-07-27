@@ -111,6 +111,10 @@ bool g_saveConfig() {
             config[frmt("favexport@{:05}", uqIndex++)] = f;
         }
 
+        for (std::string& f : g_config.favLayerNames) {
+            config[frmt("favlayername@{:05}", uqIndex++)] = f;
+        }
+
         for (auto& [key, value] : config) {
             file << key << "=" << value << std::endl;
         }
@@ -188,6 +192,9 @@ void g_loadConfig() {
         }
         else if (stringStartsWithIgnoreCase(key, "favexport@") && !value.empty()) {
             g_config.favExportFormats.push_back(value);
+        }
+        else if (stringStartsWithIgnoreCase(key, "favlayername@") && !value.empty()) {
+            g_config.favLayerNames.push_back(value);
         }
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
         else if (stringStartsWithIgnoreCase(key, "lastfile@") && !value.empty()) {

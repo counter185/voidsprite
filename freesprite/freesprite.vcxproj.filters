@@ -744,13 +744,7 @@
     <ClCompile Include="libbzip2\huffman.c">
       <Filter>Source files\external\libbzip2</Filter>
     </ClCompile>
-    <ClCompile Include="PopupNewImage.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="UIAnchorSelect.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="PopupCanvasResize.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="io\io_pep.cpp">
@@ -765,11 +759,20 @@
     <ClCompile Include="thumbnail_loader.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="ScreenCubemapPreview.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="brush\BrushScatter.cpp">
       <Filter>Source files\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupRenameLayer.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupCanvasResize.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupNewImage.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenCubemapPreview.cpp">
+      <Filter>Source files\screen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1499,13 +1502,7 @@
     <ClInclude Include="libbzip2\bzlib_private.h">
       <Filter>Header files\external\libbzip2</Filter>
     </ClInclude>
-    <ClInclude Include="PopupNewImage.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="UIAnchorSelect.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="PopupCanvasResize.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="io\io_pep.h">
@@ -1523,11 +1520,20 @@
     <ClInclude Include="thumbnail_loader.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenCubemapPreview.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="brush\BrushScatter.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupRenameLayer.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupCanvasResize.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenCubemapPreview.h">
+      <Filter>Header files\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupNewImage.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -260,6 +260,7 @@
   <ItemGroup>
     <ClCompile Include="io\io_graphicsgale.cpp" />
     <ClInclude Include="io\io_graphicsgale.h" />
+    <ClCompile Include="PopupRenameLayer.cpp" />
     <ClCompile Include="ScreenCubemapPreview.cpp" />
     <ClCompile Include="ScreenPreprocessImage.cpp" />
     <ClCompile Include="ASCIIEditor.cpp" />
@@ -651,6 +652,7 @@
     <ClInclude Include="PopupNewImage.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
+    <ClInclude Include="PopupRenameLayer.h" />
     <ClInclude Include="PopupSet9SPattern.h" />
     <ClInclude Include="PopupSetParameters.h" />
     <ClInclude Include="PopupSetTemplateInfo.h" />

@@ -51,6 +51,7 @@ public:
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;
+    std::vector<std::string> favLayerNames;
 
     //this is only during initial load. not updated at runtime.
     std::vector<std::string> keybinds;

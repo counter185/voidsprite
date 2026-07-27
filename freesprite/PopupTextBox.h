@@ -3,8 +3,23 @@
 #include "EventCallbackListener.h"
 #include "UITextField.h"
 
-class PopupTextBox : public BasePopup, public EventCallbackListener
+class PopupTextBox : public BasePopup
 {
+protected:
+    void accept() {
+        if (allowEmptyText || !tbox->textEmpty()) {
+            if (onTextInputConfirmedCallback != NULL) {
+                onTextInputConfirmedCallback(this, tbox->getText());
+            }
+            else if (callback != NULL) {
+                callback->eventTextInputConfirm(callback_id, tbox->getText());
+            }
+            closePopup();
+        }
+    }
+    void close() {
+        closePopup();
+    }
 public:
 
     UITextField* tbox;
@@ -12,28 +27,6 @@ public:
     bool allowEmptyText = false;
 
     PopupTextBox(std::string tt, std::string tx, std::string defaultValue = "", int textFieldWidth = 320);
-
-    void eventButtonPressed(int evt_id) override {
-        if (evt_id == 0) {
-            if (allowEmptyText || !tbox->textEmpty()) {
-                if (onTextInputConfirmedCallback != NULL) {
-                    onTextInputConfirmedCallback(this, tbox->getText());
-                }
-                else if (callback != NULL) {
-                    callback->eventTextInputConfirm(callback_id, tbox->getText());
-                }
-                closePopup();
-            }
-        }
-        else {
-            closePopup();
-        }
-
-    }
-
-    void eventTextInputConfirm(int evt_id, std::string text) override {
-        eventButtonPressed(0);
-    }
 
     void setMultiline(int textBoxHeight = 90) {
         tbox->multiline = true;

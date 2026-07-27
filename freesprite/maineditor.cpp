@@ -60,6 +60,7 @@
 #include "PopupSetParameters.h"
 #include "PopupNewImage.h"
 #include "PopupCanvasResize.h"
+#include "PopupRenameLayer.h"
 #include "multiwindow.h"
 #include "thumbnail_loader.h"
 
@@ -3239,7 +3240,7 @@ void MainEditor::layer_promptRename(int index)
     auto& layers = getLayerStack();
     if (!layers.empty() && layers.size() > index) {
         Layer* target = layers[index];
-        PopupTextBox* ninput = new PopupTextBox("Rename layer", "Enter the new layer name:", target->name);
+        PopupRenameLayer* ninput = new PopupRenameLayer(target->name);
         ninput->onTextInputConfirmedCallback = [this, target](PopupTextBox* p, std::string newName) {
             target->name = newName;
             layerPicker->updateLayers();
