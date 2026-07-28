@@ -79,6 +79,8 @@ public:
 
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex) override;
 
+    void renderToWorkspace();
+
     XYZd intersectViewSpace(XYZd a, XYZd b);
     Vertex intersectTexturedViewSpace(Vertex a, Vertex b);
     std::vector<Vertex> clipViewSpaceTriangle(std::vector<Vertex> points);
@@ -89,6 +91,7 @@ public:
     XYZd calcScreenSpace(matrix clipSpace);
     XYZd worldPointToScreenPoint(XYZd worldPos);
 
+    void renderBackground();
     void renderScene();
     void renderTriangle(std::vector<XYZd> worldSpacePoints);
     void renderQuad(std::vector<XYZd> worldSpacePoints);

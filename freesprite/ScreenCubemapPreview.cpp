@@ -9,6 +9,7 @@
 #include "FileIO.h"
 #include "Notification.h"
 #include "UIButton.h"
+#include "ScreenWideNavBar.h"
 
 #define EVENT_CUBEMAP_OVERRIDE_TOP 1
 #define EVENT_CUBEMAP_OVERRIDE_BOTTOM 2
@@ -40,6 +41,27 @@ void ScreenCubemapPreview::eventFileOpen(int evt_id, PlatformNativePathString na
             }
         });
     }
+}
+
+void ScreenCubemapPreview::renderToWorkspace()
+{
+    XY wh = { g_windowW, g_windowH };
+    SDL_Texture* renderTarget = tracked_createTexture(g_rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wh.x, wh.y);
+    g_pushRenderTarget(renderTarget);
+
+    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0);
+    SDL_RenderClear(g_rd);
+    renderScene();
+    Layer* l = new Layer(wh.x, wh.y);
+    SDL_Surface* nsrf = SDL_RenderReadPixels(g_rd, NULL);
+    SDL_ConvertPixels(wh.x, wh.y, nsrf->format, nsrf->pixels, nsrf->pitch, SDL_PIXELFORMAT_ARGB8888, l->pixels32(), wh.x * 4);
+    SDL_FreeSurface(nsrf);
+
+    g_popRenderTarget();
+    tracked_destroyTexture(renderTarget);
+
+    MainEditor* newSession = new MainEditor(l);
+    g_addScreen(newSession);
 }
 
 XYZd ScreenCubemapPreview::intersectViewSpace(XYZd a, XYZd b)
@@ -219,6 +241,16 @@ ScreenCubemapPreview::ScreenCubemapPreview(MainEditor* caller)
         Vertex{ { fac, -fac, -facZ }, {0,1} },
         Vertex{ {-fac, -fac, -facZ}, {1,1} }
     });
+    navbar = new ScreenWideNavBar(this, {
+        {SDL_SCANCODE_F, makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile, {
+            {SDL_SCANCODE_R, {"Render to new workspace", [this]() { renderToWorkspace(); }}},
+            {SDL_SCANCODE_X, {"Close", [this]() {closeThisScreen(); }}}
+        })},
+        {SDL_SCANCODE_V, makeNavbarSection(TL("vsp.nav.view"), g_iconNavbarTabView, {
+            {SDL_SCANCODE_R, {"Reset view", [this]() { posX = posY = posZ = rotX = rotY = rotZ = 0; resetAllQuads(); }}}
+        })},
+    }, { SDL_SCANCODE_F, SDL_SCANCODE_V });
+    wxsManager.addDrawable(navbar);
 }
 
 ScreenCubemapPreview::~ScreenCubemapPreview()
@@ -250,13 +282,17 @@ void ScreenCubemapPreview::render()
 
     viewMatrix = makeViewMatrix();
     projection = makeProjectionMatrix();
-    renderWithBlurPanelsIfEnabled([this]() {this->renderScene(); });
+    renderWithBlurPanelsIfEnabled([this]() { this->renderBackground(); this->renderScene(); });
     BaseScreen::render();
+}
+
+void ScreenCubemapPreview::renderBackground()
+{
+    Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 }
 
 void ScreenCubemapPreview::renderScene()
 {
-    Fill::Gradient(0xFF000000, 0xFF000000, 0xFF000000, 0xFF303030).fill({ 0, 0, g_windowW, g_windowH });
 
     SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 255);
     qFront->render();
@@ -278,7 +314,7 @@ void ScreenCubemapPreview::renderScene()
     SDL_SetRenderDrawColor(g_rd, 255, 0, 255, 255);
     qBottom->render(overrideBottom);
 
-    g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov), 5, 30);
+    //g_fnt->RenderString(frmt("pos: {:02f} {:02f} {:02f}\nrot: {:02f} {:02f} {:02f}\nfov: {}", posX, posY, posZ, rotX, rotY, rotZ, fov), 5, 30);
 }
 
 void ScreenCubemapPreview::defaultInputAction(SDL_Event evt)
@@ -286,7 +322,7 @@ void ScreenCubemapPreview::defaultInputAction(SDL_Event evt)
     evt = convertTouchToMouseEvent(evt);
 
     if (evt.type == SDL_KEYDOWN) {
-        switch (evt.key.scancode)  {
+        /*switch (evt.key.scancode) {
             case SDL_SCANCODE_W:
                 fov += 1;
                 resetAllQuads();
@@ -327,7 +363,7 @@ void ScreenCubemapPreview::defaultInputAction(SDL_Event evt)
                 posZ -= 0.2;
                 resetAllQuads();
                 break;
-        }
+        }*/
     }
     else if (evt.type == SDL_MOUSEBUTTONDOWN || evt.type == SDL_MOUSEBUTTONUP) {
         mouseDrag = evt.button.down;
