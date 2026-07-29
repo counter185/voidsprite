@@ -11,6 +11,7 @@ class PopupApplyFilter :
 {
 protected:
     bool sessionDragging = false;
+    bool applyToAllFrames = false;
 
     u8* previewPixelData = NULL;
     std::atomic<bool> pixelDataDirty = true;

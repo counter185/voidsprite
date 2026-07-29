@@ -13,6 +13,8 @@
 #include "background_operation.h"
 #include "Notification.h"
 #include "FontRenderer.h"
+#include "UIStackPanel.h"
+#include "UndoStack.h"
 
 PopupApplyFilter::~PopupApplyFilter() {
     if (previewRenderThreadObj.joinable()) {
@@ -126,7 +128,7 @@ void PopupApplyFilter::regenParameterUI() {
     /*generateParameterUI(&params, [this]() {
         threadHasNewParameters = true;
     });*/
-    paramUI->position = { 0, 50 };
+    paramUI->position = { 0, 130 };
     wxsManager.addDrawable(paramUI);
 }
 
@@ -144,18 +146,37 @@ void PopupApplyFilter::setupWidgets()
 
     params = targetFilter->getParameters();
 
+    UIButton* loadPreset, *savePreset;
+    loadPreset = new UIButton("Load preset");
+    loadPreset->onClickCallback = [this](UIButton* b) {
+        platformTryLoadOtherFile(this, { {".voidfpreset", "Filter preset"} }, TL("vsp.popup.loadfilterpreset"), EVENT_APPLYFILTER_LOADPRESET);
+    };
+
+    savePreset = new UIButton("Save preset");
+    savePreset->onClickCallback = [this](UIButton* b) {
+        platformTrySaveOtherFile(this, { {".voidfpreset", "Filter preset"} }, TL("vsp.popup.savefilterpreset"), EVENT_APPLYFILTER_SAVEPRESET);
+    };
+
+    loadPreset->wxWidth = savePreset->wxWidth = 120;
+
+    UICheckbox* checkboxApplyToAll = new UICheckbox("Apply to all frames", &applyToAllFrames);
+    checkboxApplyToAll->checkbox->tooltip = "Apply this filter to the first layer with the same name in all other frames";
+
+    wxsManager.addDrawable(
+        UIStackPanel::Vertical(5, 
+            {
+                UIStackPanel::Horizontal(10, {
+                    loadPreset, savePreset
+                }),
+                checkboxApplyToAll
+            }, {10, 50}));
+
     regenParameterUI();
 
-    setSize({ 550, 50 + paramUI->getContentBoxSize().y + 70});
+    setSize({ 550, 130 + paramUI->getContentBoxSize().y + 70});
 
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b) { closePopup(); };
     actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* b) { applyAndClose(); };
-    actionButton("Load preset")->onClickCallback = [this](UIButton* b) { 
-        platformTryLoadOtherFile(this, {{".voidfpreset", "Filter preset"}}, TL("vsp.popup.loadfilterpreset"), EVENT_APPLYFILTER_LOADPRESET);
-    };
-    actionButton("Save preset")->onClickCallback = [this](UIButton* b) { 
-        platformTrySaveOtherFile(this, {{".voidfpreset", "Filter preset"}}, TL("vsp.popup.savefilterpreset"), EVENT_APPLYFILTER_SAVEPRESET);
-    };
 }
 
 void PopupApplyFilter::apply(ParameterStore* parameterMap) {
@@ -163,25 +184,54 @@ void PopupApplyFilter::apply(ParameterStore* parameterMap) {
     auto session = this->session;
     auto targetFilter = this->targetFilter;
     auto seed = this->filterRandomSeed;
+    auto applyToAll = this->applyToAllFrames;
     auto paramMap = parameterMap->copy();
-    g_startNewOperation([seed, paramMap, targetFilter, session, target]() {
+    g_startNewOperation([seed, paramMap, targetFilter, session, target, applyToAll](OperationProgressReport* progress) {
         srand(seed);
-        Layer* copy = targetFilter->run(target, (ParameterStore*)&paramMap);
-        session->commitStateToCurrentLayer();
-        if (session->isolateEnabled) {
-            u32* srcpx = copy->pixels32();
-            u32* dstpx = target->pixels32();
-            session->isolatedFragment.forEachPoint([&](XY a) {
-                if (pointInBox(a, { 0,0,target->w,target->h })) {
-                    ARRAY2DPOINT(dstpx, a.x, a.y, target->w) = ARRAY2DPOINT(srcpx, a.x, a.y, target->w);
+
+        UndoStackCaptureGroup layerUndoCaptures{};
+        session->undoCaptureGroups.push_back(&layerUndoCaptures);
+
+        //target should get processed first so that seed matches preview
+        progress->enterSection("Finding layers...");
+        std::vector<Layer*> layersToRunOn = { target };
+        if (applyToAll) {
+            for (Frame* f : session->frames) {
+                if (f != session->getCurrentFrame()) {
+                    for (Layer* l : f->layers) {
+                        if (l->name == target->name) {
+                            layersToRunOn.push_back(l);
+                            break;
+                        }
+                    }
                 }
-            });
+            }
         }
-        else {
-            memcpy(target->pixels32(), copy->pixels32(), 4 * target->w * target->h);
+
+        progress->updateLastSection("Processing layers...");
+        int i = 0;
+        for (Layer* l : layersToRunOn) {
+            progress->updateLastSection(frmt("Processing layer {}/{}", ++i, layersToRunOn.size()));
+            Layer* copy = targetFilter->run(l, (ParameterStore*)&paramMap);
+            session->commitStateToLayer(l);
+            if (session->isolateEnabled) {
+                u32* srcpx = copy->pixels32();
+                u32* dstpx = l->pixels32();
+                session->isolatedFragment.forEachPoint([&](XY a) {
+                    if (pointInBox(a, { 0,0,l->w,l->h })) {
+                        ARRAY2DPOINT(dstpx, a.x, a.y, l->w) = ARRAY2DPOINT(srcpx, a.x, a.y, target->w);
+                    }
+                    });
+            }
+            else {
+                memcpy(l->pixels32(), copy->pixels32(), 4 * l->w * l->h);
+            }
+            l->markLayerDirty();
+            delete copy;
         }
-        target->markLayerDirty();
-        delete copy;
+
+        session->undoCaptureGroups.pop_back();
+        session->addToUndoStack(new UndoStackComposite(layerUndoCaptures.elements, frmt("Filter applied ({})", targetFilter->name())));
     });
 }
 
