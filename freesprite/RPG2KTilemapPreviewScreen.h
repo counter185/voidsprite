@@ -34,6 +34,7 @@ public:
 
     std::map<std::string, ReldTex*> texturesLoaded;
     ReldTex* callerCanvas = NULL;
+    PlatformNativePathString loadedPath{};
 
     Canvas canvas;
 
@@ -57,6 +58,7 @@ public:
 
     uint16_t lowerLayerTileAt(XY position);
     bool isDeepWaterTileAt(XY position);
+    LMUEvent* eventAtScreenSpacePos(XY position);
 
     void RecenterCanvas();
     void PrerenderCanvas();
@@ -66,7 +68,9 @@ public:
     void RenderEvents(XY originPoint, int canvasScale);
     void RenderWholeMap(XY at, int scale, bool rdLowerLayer = true, bool rdUpperLayer = true, bool rdEvents = true);
     Layer* RenderWholeMapToTexture();
+
     bool LoadLMU(PlatformNativePathString path);
+    void openEventCharsetInSeparateEditor(LMUEvent* evt);
 };
 
 #endif

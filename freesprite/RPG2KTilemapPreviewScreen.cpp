@@ -16,6 +16,7 @@
 #include "PopupGlobalConfig.h"
 #include "PanelReference.h"
 #include "TooltipsLayer.h"
+#include "PopupContextMenu.h"
 
 RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
 {
@@ -28,78 +29,51 @@ RPG2KTilemapPreviewScreen::RPG2KTilemapPreviewScreen(MainEditor* parent)
     navbar = new ScreenWideNavBar(this,
         {
             {
-                SDL_SCANCODE_F,
-                {
-                    "File",
-                    {},
-                    {
-                        {SDL_SCANCODE_O, { "Load layout from file",
-                                [this]() {
-                                    platformTryLoadOtherFile(this, {{".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
-                                }
-                            }
-                        },
-                        {SDL_SCANCODE_E, { "Render to image",
-                                [this]() {
-                                    std::vector<std::pair<std::string, std::string>> formats;
-                                    for (auto f : g_fileExporters) {
-                                        formats.push_back({ f->extension(), f->name()});
-                                    }
-                                    platformTrySaveOtherFile(this, formats, "render LMU map to image", EVENT_LMUPREVIEW_RENDERMAP);
-                                }
-                            }
-                        },
-                        {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"),
+                SDL_SCANCODE_F, makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile, {
+                    {SDL_SCANCODE_O, { "Load layout from file",
                             [this]() {
-                                g_addPopup(new PopupGlobalConfig());
+                                platformTryLoadOtherFile(this, {{".lmu", "RPGM2000/2003 Map"}}, "Load tile layout", EVENT_OTHERFILE_OPENFILE);
                             }
                         }
                     },
-                        /*{SDL_SCANCODE_S, {"Save layout to file",
-                                [](TilemapPreviewScreen* screen) {
-                                    platformTrySaveOtherFile(screen, { {".voidtile", "voidtile layout"} }, "Save tile layout", EVENT_OTHERFILE_SAVEFILE);
+                    {SDL_SCANCODE_E, { "Render to image",
+                            [this]() {
+                                std::vector<std::pair<std::string, std::string>> formats;
+                                for (auto f : g_fileExporters) {
+                                    formats.push_back({ f->extension(), f->name()});
                                 }
+                                platformTrySaveOtherFile(this, formats, "render LMU map to image", EVENT_LMUPREVIEW_RENDERMAP);
                             }
-                        },*/
+                        }
                     },
-                    g_iconNavbarTabFile
-                }
+                    {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"), [this]() { g_addPopup(new PopupGlobalConfig()); }}}
+                })
+                    
             },
             {
-                SDL_SCANCODE_V,
-                {
-                    "View",
-                    {},
-                    {
-                        {SDL_SCANCODE_E, { "Toggle Event display",
-                                [this]() {
-                                    this->eventViewMode = (LMUEventViewMode)(((int)this->eventViewMode + 1) % 4);
-                                    switch (this->eventViewMode) {
-                                        case LMUEVENTS_HIDE_ALL:
-                                            g_addNotification(Notification("All Events hidden","", 1500, NULL, COLOR_INFO));
-                                            break;
-                                        case LMUEVENTS_SHOW_INGAME:
-                                            g_addNotification(Notification("Events shown as ingame", "", 1500, NULL, COLOR_INFO));
-                                            break;
-                                        case LMUEVENTS_SHOW_RECTS:
-                                            g_addNotification(Notification("Events shown as in editor", "", 1500, NULL, COLOR_INFO));
-                                            break;
-                                        case LMUEVENTS_SHOW_INGAME_AND_RECTS:
-                                            g_addNotification(Notification("Events shown as ingame and in editor", "", 1500, NULL, COLOR_INFO));
-                                            break;
-                                    }
-                                }
-                            }
-                        },
-                        {SDL_SCANCODE_R, { "Recenter canvas",
-                                [this]() {
-                                    this->RecenterCanvas();
+                SDL_SCANCODE_V, makeNavbarSection(TL("vsp.nav.view"), g_iconNavbarTabView, {
+                    {SDL_SCANCODE_E, { "Toggle Event display",
+                            [this]() {
+                                this->eventViewMode = (LMUEventViewMode)(((int)this->eventViewMode + 1) % 4);
+                                switch (this->eventViewMode) {
+                                    case LMUEVENTS_HIDE_ALL:
+                                        g_addNotification(Notification("All Events hidden","", 1500, NULL, COLOR_INFO));
+                                        break;
+                                    case LMUEVENTS_SHOW_INGAME:
+                                        g_addNotification(Notification("Events shown as ingame", "", 1500, NULL, COLOR_INFO));
+                                        break;
+                                    case LMUEVENTS_SHOW_RECTS:
+                                        g_addNotification(Notification("Events shown as in editor", "", 1500, NULL, COLOR_INFO));
+                                        break;
+                                    case LMUEVENTS_SHOW_INGAME_AND_RECTS:
+                                        g_addNotification(Notification("Events shown as ingame and in editor", "", 1500, NULL, COLOR_INFO));
+                                        break;
                                 }
                             }
                         }
                     },
-                    g_iconNavbarTabView 
-                }
+                    {SDL_SCANCODE_R, { "Recenter canvas", [this]() { this->RecenterCanvas(); }}}
+                })
             }
         }, { SDL_SCANCODE_F, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
@@ -193,6 +167,15 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
                 scrollingTilemap = evt.button.down;
             }
+            else if (evt.button.button == SDL_BUTTON_RIGHT && evt.button.down) {
+                LMUEvent* mapEvt = eventAtScreenSpacePos({ (int)evt.button.x, (int)evt.button.y });
+                if (mapEvt != NULL) {
+                    PopupContextMenu* ctx = new PopupContextMenu({
+                        {"Open CharSet...", [this, mapEvt]() { openEventCharsetInSeparateEditor(mapEvt); }}
+                    });
+                    g_addPopup(ctx);
+                }
+            }
             break;
         case SDL_MOUSEMOTION:
             if (scrollingTilemap) {
@@ -271,6 +254,21 @@ bool RPG2KTilemapPreviewScreen::isDeepWaterTileAt(XY position)
     else {
         return false;
     }
+}
+
+LMUEvent* RPG2KTilemapPreviewScreen::eventAtScreenSpacePos(XY position)
+{
+    XY originPoint = canvas.currentDrawPoint;
+    int canvasScale = canvas.scale;
+    for (LMUEvent& evt : events) {
+        int tileW = 16 * canvasScale;
+        SDL_Rect evtRect = { originPoint.x + evt.pos.x * tileW, originPoint.y + evt.pos.y * tileW, tileW, tileW };
+
+        if (pointInBox(position, evtRect)) {
+            return &evt;
+        }
+    }
+    return NULL;
 }
 
 void RPG2KTilemapPreviewScreen::RecenterCanvas()
@@ -1144,6 +1142,7 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
     texturesLoaded.clear();
     events.clear();
 
+    loadedPath = path;
     PlatformNativePathString directoryOfFile = path.substr(0, path.find_last_of({ '/', '\\' }) + 1);
     std::ifstream file = platformOpenIFStream(path, std::ios::binary);
     if (file.is_open()) {
@@ -1168,7 +1167,7 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
 
         int charsetLoadFails = 0;
         for (lcf::rpg::Event& evt : map->events) {
-            LMUEvent newEvt;
+            LMUEvent newEvt{};
             newEvt.pos = { evt.x, evt.y };
             //todo: convert name from shift-jis to utf8
             newEvt.name = std::string(evt.name);
@@ -1188,37 +1187,24 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
                         texturesLoaded[newEvt.texFileName] = new ReldTex([directoryOfFile, texFileName](SDL_Renderer* rd) {
 
                             SDL_Texture* tex = NULL;
-
-                            PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + texFileName + ".xyz");
-                            if (std::filesystem::exists(charsetPath)) {
-                                //xyz has no alpha channel so let's just assume that the first color in the palette is transparency
-                                LayerPalettized* nl = (LayerPalettized*)readXYZ(charsetPath);
-                                if (nl != NULL) {
-                                    nl->palette[0] &= 0xffffff;
-                                    nl->updateTexture();
-                                    tex = nl->renderToTexture();
-                                    delete nl;
-                                }
-                            }
-
-                            if (tex == NULL) {
-                                charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + texFileName + ".png");
+                            std::vector<std::string> possibleExtensions = { ".xyz", ".png", ".bmp" };
+                            for (auto& ext : possibleExtensions) {
+                                PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + texFileName + ext);
                                 if (std::filesystem::exists(charsetPath)) {
-                                    Layer* nl = readPNG(charsetPath);
+                                    Layer* nl = loadAnyIntoFlat(convertStringToUTF8OnWin32(charsetPath));
                                     if (nl != NULL) {
                                         if (nl->isPalettized) {
                                             ((LayerPalettized*)nl)->palette[0] &= 0xffffff;
-                                            ((LayerPalettized*)nl)->updateTexture();
+                                            nl->updateTexture();
                                         }
                                         tex = nl->renderToTexture();
                                         delete nl;
+                                        break;
                                     }
                                 }
                             }
-
                             return tex;
                         });
-                        
                     }
 
                     newEvt.tex = texturesLoaded[newEvt.texFileName];
@@ -1257,6 +1243,34 @@ bool RPG2KTilemapPreviewScreen::LoadLMU(PlatformNativePathString path)
     else {
         g_addNotification(Notification("Error loading file", "Could not open file for reading."));
         return false;
+    }
+}
+
+void RPG2KTilemapPreviewScreen::openEventCharsetInSeparateEditor(LMUEvent* evt)
+{
+    if (evt != NULL) {
+        if (!evt->texFileName.empty()) {
+            PlatformNativePathString directoryOfFile = loadedPath.substr(0, loadedPath.find_last_of({ '/', '\\' }) + 1);
+
+            std::vector<std::string> possibleExtensions = { ".xyz", ".png", ".bmp" };
+            for (auto& ext : possibleExtensions) {
+                PlatformNativePathString charsetPath = directoryOfFile + convertStringOnWin32("/CharSet/" + evt->texFileName + ext);
+                if (std::filesystem::exists(charsetPath)) {
+                    MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(charsetPath));
+                    if (ssn != NULL) {
+                        g_addScreen(ssn);
+                        return;
+                    }
+                }
+            }
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "CharSet not found."));
+        }
+        else {
+            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "CharSet is empty."));
+        }
+    }
+    else {
+        logerr("evt is null");
     }
 }
 
