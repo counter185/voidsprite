@@ -1258,6 +1258,7 @@ void RPG2KTilemapPreviewScreen::openEventCharsetInSeparateEditor(LMUEvent* evt)
                 if (std::filesystem::exists(charsetPath)) {
                     MainEditor* ssn = loadAnyIntoSession(convertStringToUTF8OnWin32(charsetPath));
                     if (ssn != NULL) {
+                        ssn->ssne.tileDimensions = { 24,32 };
                         g_addScreen(ssn);
                         return;
                     }
