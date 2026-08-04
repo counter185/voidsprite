@@ -60,10 +60,13 @@ public class Utils {
 
             if (connection.getResponseCode() == 200) {
                 java.io.InputStream inputStream = connection.getInputStream();
-                int dataSize = connection.getContentLength();
-                byte[] data = new byte[dataSize];
-                j9_readNBytes(inputStream, data, 0, dataSize);
-                return data;
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                byte[] buffer = new byte[4096];
+                int n;
+                while ((n = inputStream.read(buffer, 0, 4096)) > 0) {
+                    output.write(buffer, 0, n);
+                }
+                return output.toByteArray();
             } else {
                 return null;
             }
