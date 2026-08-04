@@ -721,11 +721,12 @@ void TilemapPreviewScreen::promptRenderMap(int type)
         PopupChooseFormat* f = caller->isPalettized ? PopupChooseFormat::withDefaultIndexedExportFormats("Choose format", "")
                                 : PopupChooseFormat::withDefaultRGBExportFormats("Choose format", "");
         f->chooseFormatAndDoFileSavePrompt("render image", [this, type](FormatDef* f, PlatformNativePathString path) {
-            g_startNewOperation([this, path, type, f](){
+            FileExporter* exporter = (FileExporter*)f->udata;
+            g_startNewOperation([this, path, type, exporter](){
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
                 g_interactiveContext = false;
 #endif
-                doRenderMap(path, type, (FileExporter*)f->udata);
+                doRenderMap(path, type, exporter);
             });
         });
         //platformTrySaveOtherFile(this, formats, "render image", type);

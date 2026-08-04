@@ -319,6 +319,14 @@ void platformTrySaveOtherFile(EventCallbackListener* listener, std::vector<std::
         if (fileNameLower.size() < extensionW.size() || fileNameLower.substr(fileNameLower.size() - extensionW.size()) != extensionW) {
             fileName += extensionW;
         }
+
+        auto findDot = fileName.find_last_of(L'.');
+        if (findDot != std::string::npos) {
+            std::wstring fileNameNoExt = fileName.substr(0, findDot);
+            memset(fileNameBuffer, 0, sizeof(fileNameBuffer));
+            memcpy(fileNameBuffer, fileNameNoExt.data(), sizeof(wchar_t) * ixmin(MAX_PATH-1, fileNameNoExt.size()));
+        }
+
         listener->eventFileSaved(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
@@ -376,6 +384,14 @@ void platformTryLoadOtherFile(EventCallbackListener* listener, std::vector<std::
 
     if (GetOpenFileNameW(&ofna)) {
         std::wstring fileName = fileNameBuffer;
+
+        auto findDot = fileName.find_last_of(L'.');
+        if (findDot != std::string::npos) {
+            std::wstring fileNameNoExt = fileName.substr(0, findDot);
+            memset(fileNameBuffer, 0, sizeof(fileNameBuffer));
+            memcpy(fileNameBuffer, fileNameNoExt.data(), sizeof(wchar_t) * ixmin(MAX_PATH - 1, fileNameNoExt.size()));
+        }
+
         listener->eventFileOpen(evt_id, fileName, ofna.nFilterIndex);
     }
     else {
