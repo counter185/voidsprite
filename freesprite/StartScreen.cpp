@@ -905,7 +905,7 @@ void StartScreen::renderFeaturedImages()
         origin.y += 26;
         if (g_motd != "") {
             g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, 16);
-            origin.y += 20;
+            origin.y += 24;
         }
         if (!g_featured.empty()) {
             auto& feat = g_featured[featuredCurrentImage];
@@ -932,7 +932,7 @@ void StartScreen::renderFeaturedImages()
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
             SDL_RenderDrawRect(g_rd, &imgRect);
 
-            if (pointInBox({ g_mouseX, g_mouseY }, imgRect)) {
+            if (pointInBox({ g_mouseX, g_mouseY }, imgRect) && !g_currentWindow->hasPopupsOpen()) {
                 featuredImageHoverTimer.startIfNotStarted();
                 double hoverTimer = XM1PW3P1(featuredImageHoverTimer.percentElapsedTime(600));
                 postWidgetsRenderQueue.enqueue([ll, imgRect, hoverTimer]() {
