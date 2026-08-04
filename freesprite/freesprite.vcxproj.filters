@@ -1535,6 +1535,9 @@
     <ClInclude Include="PopupNewImage.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
+    <ClInclude Include="online_community.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

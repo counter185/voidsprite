@@ -1282,14 +1282,15 @@ int main(int argc, char** argv)
 
         g_ttp = new TooltipsLayer();
 
-        loginfo("Starting launchpad");
-        initSteps.updateLastSection("Starting Launchpad");
-        StartScreen* launchpad = new StartScreen();
-        g_mainWindow->addScreen(launchpad, g_mainWindow->screenStack.empty());
+        if (!noLaunchpad) {
+            loginfo("Starting launchpad");
+            initSteps.updateLastSection("Starting Launchpad");
+            StartScreen* launchpad = new StartScreen();
+            g_mainWindow->addScreen(launchpad, g_mainWindow->screenStack.empty());
+        }
 
         //run command line args
         initSteps.updateLastSection("Executing commandline args");
-        bool closeLaunchpad = noLaunchpad;
         for (std::string& arg : fileOpenTargets) {
             if (std::filesystem::exists(convertStringOnWin32(arg))) {
                 MainEditor* ssn = loadAnyIntoSession(arg);
@@ -1305,9 +1306,6 @@ int main(int argc, char** argv)
                 //todo: this notification never fits the whole file name
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Could not find file:\n {}", arg)));
             }
-        }
-        if (closeLaunchpad) {
-            g_closeScreen(launchpad);
         }
 
         initSteps.updateLastSection("Setting up RPC");
@@ -1354,7 +1352,7 @@ int main(int argc, char** argv)
                 // voidsprite://openurl/<url>
                 else if (spltPath[0] == "openurl" && spltPath.size() >= 2) {
                     std::string p = "openurl/";
-                    launchpad->tryLoadURL(uriPath.substr(p.size()));
+                    StartScreen::tryLoadURL(uriPath.substr(p.size()));
                 }
             }
         }

@@ -97,6 +97,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.longerrornotifs"), TL("vsp.config.opt.longerrornotifs.desc"), &g_config.longErrorNotifs, &posInTab));
     generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showsysclock"), "", &g_config.showSystemClock, &posInTab));
 
+    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showfeaturedugc"), TL("vsp.config.opt.showfeaturedugc.desc"), &g_config.showFeaturedUGC, &posInTab));
+
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
         langLocNames.push_back(loc.first);

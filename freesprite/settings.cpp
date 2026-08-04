@@ -41,6 +41,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"checkerboardScaleWithCanvas", &g_config.checkerboardScaleWithCanvas},
         {"saveLoadReferences", &g_config.saveLoadReferences},
         {"resetEraserOnToolSwitch", &g_config.resetEraserOnToolSwitch},
+        {"showFeaturedUGC", &g_config.showFeaturedUGC},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

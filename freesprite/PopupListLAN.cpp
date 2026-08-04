@@ -71,7 +71,7 @@ void PopupListLAN::populateList()
 void PopupListLAN::lanScannerThread()
 {
 #if VSP_NETWORKING
-    NET_DatagramSocket* broadcastSocket = NET_CreateDatagramSocket(NULL, LAN_BROADCAST_PORT);
+    NET_DatagramSocket* broadcastSocket = NET_CreateDatagramSocket(NULL, LAN_BROADCAST_PORT, 0);
 
     if (broadcastSocket == NULL) {
         logerr("Failed to create LAN broadcast socket");

@@ -21,7 +21,10 @@ cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
 REM   git clone --recursive https://github.com/libsdl-org/SDL_net.git
 REM   *use the above when SDL fixes android build
-git clone --recursive https://github.com/counter185/SDL_net-android21.git SDL_net
+git clone --recursive https://github.com/libsdl-org/SDL_net.git
+cd SDL_net
+git checkout release-3.2.0
+cd ..
 git clone --recursive https://github.com/madler/zlib.git
 git clone --recursive https://github.com/AOMediaCodec/libavif.git
 git clone --recursive https://github.com/EasyRPG/liblcf.git

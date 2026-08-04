@@ -70,6 +70,9 @@ private:
     bool waitingForUpdateCheckInfo = true;
     std::vector<LaunchpadBGStar> stars;
     Timer64 updateCheckTimer;
+
+    Timer64 featuredImagesTimer, featuredImageHoverTimer;
+    int featuredCurrentImage = 0;
 public:
 
     UIStackPanel* lastOpenFilesPanel;
@@ -95,7 +98,7 @@ public:
     void eventFileSaved(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
     
-    void tryLoadURL(std::string url);
+    static void tryLoadURL(std::string url);
     void tryLoadFile(std::string path);
     void tryLoadFileUsingImporter(FileImporter* importer, PlatformNativePathString name);
     void tryOpenImageFromClipboard();
@@ -111,6 +114,7 @@ public:
     void renderFileDropAnim();
     void renderBackground();
     void renderBGStars();
+    void renderFeaturedImages();
     void renderUpdateCheck(SDL_Rect logoRect);
     static void promptConnectToNetworkCanvas(std::string ip = "", std::string port = "");
     void updateCheckFinished();

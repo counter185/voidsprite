@@ -39,6 +39,7 @@
 #include "TooltipsLayer.h"
 #include "thumbnail_loader.h"
 #include "multiwindow.h"
+#include "online_community.h"
 #include "main.h"
 
 void StartScreen::tick() {
@@ -59,6 +60,10 @@ StartScreen::StartScreen() {
     if (g_config.checkUpdates) {
         g_startNewAsyncOperation([]() { runUpdateCheck(); });
     }
+    if (g_config.showFeaturedUGC && !g_featuredImagesLoaded) {
+        g_loadCommunityContent();
+    }
+
     checkAndPromptCrashSaves();
 
     UILabel* title = new UILabel("voidsprite");
@@ -198,6 +203,8 @@ void StartScreen::render()
     if (g_config.checkUpdates && updateCheckComplete && !updateCheckFailed && latestHash != GIT_HASH) {
         renderUpdateCheck(logoRect);
     }
+
+    renderFeaturedImages();
 
     static Fill panelFill = visualConfigFill("ui/panel/bg_focused_blurbehind");
 
@@ -869,6 +876,128 @@ void StartScreen::renderBGStars()
     }
 }
 
+void StartScreen::renderFeaturedImages()
+{
+    if (g_config.showFeaturedUGC && g_featuredImagesLoaded && !g_featured.empty()) {
+        featuredImagesTimer.startIfNotStarted();
+
+        const int featuredImageAppearTime = 10000;
+        double percentElapsed = featuredImagesTimer.percentElapsedTime(featuredImageAppearTime);
+        if (percentElapsed >= 1.0) {
+            featuredCurrentImage++;
+            featuredCurrentImage %= g_featured.size();
+            featuredImagesTimer.start();
+            featuredImageHoverTimer.stop();
+        }
+        featuredCurrentImage %= g_featured.size();
+
+        bool compactLayout = true;
+        XY origin = { newImagePanel->getDimensions().x + newImagePanel->position.x + 20, 330 };
+        XY targetSize = { 400, 256 };
+
+        if (g_windowW >= 630 + newImagePanel->getDimensions().x + 400) {
+            compactLayout = false;
+            origin = { newImagePanel->getDimensions().x + 630 + newImagePanel->position.x + 30, newImagePanel->position.y };
+            targetSize = { 512, 512 };
+        }
+
+        g_fnt->RenderString("Featured", origin.x, origin.y, { 255,255,255,255, }, 22);
+        origin.y += 26;
+        if (g_motd != "") {
+            g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, 16);
+            origin.y += 20;
+        }
+        if (!g_featured.empty()) {
+            auto& feat = g_featured[featuredCurrentImage];
+
+            Layer* ll = feat.image;
+            XY imgSize = { ll->w, ll->h };
+
+            SDL_Rect clipRect = { 0,0,imgSize.x, imgSize.y };
+            
+            if (imgSize.x > targetSize.x || imgSize.y > targetSize.y) {
+                //auto fit = fitInside({ 0,0,targetSize.x, targetSize.y }, { 0,0,imgSize.x, imgSize.y });
+                imgSize = {ixmin(targetSize.x, imgSize.x), ixmin(targetSize.y, imgSize.y)}; //{ fit.w, fit.h };
+                clipRect = { ll->w/2-imgSize.x/2, ll->h/2-imgSize.y/2, imgSize.x, imgSize.y };
+            }
+            else if (imgSize.x <= targetSize.x / 4 && imgSize.y <= targetSize.y / 4) {
+                imgSize = { imgSize.x * 4, imgSize.y * 4 };
+            }
+            else if (imgSize.x <= targetSize.x / 2 && imgSize.y <= targetSize.y / 2) {
+                imgSize = { imgSize.x * 2, imgSize.y * 2 };
+            }
+
+            SDL_Rect imgRect = { origin.x, origin.y, imgSize.x, imgSize.y };
+            ll->render(imgRect, clipRect);
+            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
+            SDL_RenderDrawRect(g_rd, &imgRect);
+
+            if (pointInBox({ g_mouseX, g_mouseY }, imgRect)) {
+                featuredImageHoverTimer.startIfNotStarted();
+                double hoverTimer = XM1PW3P1(featuredImageHoverTimer.percentElapsedTime(600));
+                postWidgetsRenderQueue.enqueue([ll, imgRect, hoverTimer]() {
+                    SDL_SetRenderDrawColor(g_rd, 0, 0, 0, (u8)(180 * hoverTimer));
+                    SDL_RenderFillRect(g_rd, (SDL_Rect*)NULL);
+
+                    SDL_Rect clipRect = { 0,0,ll->w, (int)(ll->h * hoverTimer) };
+
+                    SDL_Rect fullRect = imgRect;
+                    fullRect.w = ll->w;
+                    fullRect.h = ll->h;
+
+                    if (ll->w < g_windowW / 3 && ll->h < g_windowH / 3) {
+                        fullRect.w *= 2;
+                        fullRect.h *= 2;
+                    }
+
+                    fullRect.h *= hoverTimer;
+                    if (fullRect.x + fullRect.w > g_windowW) {
+                        fullRect.x = ixmax(0, g_windowW - fullRect.w);
+                    }
+                    if (fullRect.y + fullRect.h > g_windowH) {
+                        fullRect.y = ixmax(0, g_windowH - fullRect.h);
+                    }
+                    ll->render(fullRect, clipRect, 255);
+
+                    SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
+                    SDL_RenderDrawRect(g_rd, &fullRect);
+                });
+            }
+            else {
+                featuredImageHoverTimer.stop();
+            }
+
+            SDL_Rect timeBarRect = imgRect;
+            timeBarRect.h = 3;
+            timeBarRect.y += imgRect.h;
+            timeBarRect.w *= percentElapsed;
+            if (g_featured.size() > 0) {
+                SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 120);
+                SDL_RenderFillRect(g_rd, &timeBarRect);
+            }
+
+            g_fnt->RenderString(frmt("{}/{}", featuredCurrentImage + 1, g_featured.size()), timeBarRect.x + imgRect.w + 2, timeBarRect.y - 22, { 255,255,255,120 }, 18);
+
+            if (compactLayout) {
+                origin.x += imgRect.w + 10;
+            }
+            else {
+                origin.y += imgRect.h + 4;
+            }
+            XY ep = origin;
+            ep = g_fnt->RenderString(feat.title + " ", origin.x, origin.y, {255,255,255,220,}, 18);
+            origin.y += 20;
+            if (feat.artistName != "") {
+                g_fnt->RenderString(frmt("by {}", feat.artistName), ep.x, ep.y, {255,255,255,180,}, 14);
+            }
+            if (feat.artistLinks != "") {
+                g_fnt->RenderString(feat.artistLinks, origin.x, origin.y, {255,255,255,127,}, 12);
+                origin.y += 16;
+            }
+        }
+    }
+}
+
 void StartScreen::openImageLoadDialog()
 {
     PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.openimage"), 0, true);
@@ -951,7 +1080,7 @@ void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
                 report->exitSection();
 
                 report->enterSection("Connecting to server");
-                NET_StreamSocket* s = NET_CreateClient(addr, input.port);
+                NET_StreamSocket* s = NET_CreateClient(addr, input.port, 0);
                 if (NET_WaitUntilConnected(s, -1) == 1) {
                     report->exitSection();
                     g_startNewMainThreadOperation([input, s, thisWindow]() {

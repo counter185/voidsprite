@@ -293,7 +293,7 @@ void VSPWindow::autoViewportScale() {
 void VSPWindow::addScreen(BaseScreen* a, bool switchTo) {
     screenStack.push_back(a);
     if (switchTo) {
-        g_switchScreen(screenStack.size() - 1);
+        switchScreen(screenStack.size() - 1);
     }
     ButtonStartScreenSession* screenButton = new ButtonStartScreenSession(this, screenStack.size() - 1);
     screenButtons.push_back(screenButton);

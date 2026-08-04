@@ -48,6 +48,7 @@ public:
     u32 checkerboardSecondary = 0xFF2A2A2A;
     bool saveLoadReferences = false;
     bool resetEraserOnToolSwitch = false;
+    bool showFeaturedUGC = true;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

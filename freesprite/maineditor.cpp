@@ -3847,7 +3847,7 @@ void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
 #if VSP_NETWORKING
-    NET_Server* server = NET_CreateServer(NULL, startData.port);
+    NET_Server* server = NET_CreateServer(NULL, startData.port, 0);
 
     thisClientInfo->uid = nextClientUID++;
     thisClientInfo->clientName = startData.username;
@@ -4298,7 +4298,7 @@ void MainEditor::networkCanvasBroadcastToLAN()
         if (addr != NULL) {
             DoOnReturn unrefAddr([addr]() {NET_UnrefAddress(addr); });
             DoOnReturn unrefAddr2([addr2]() {NET_UnrefAddress(addr2); });
-            NET_DatagramSocket* sock = NET_CreateDatagramSocket(addr2, LAN_BROADCAST_PORT);
+            NET_DatagramSocket* sock = NET_CreateDatagramSocket(addr2, LAN_BROADCAST_PORT, 0);
             if (sock != NULL) {
                 DoOnReturn freeSock([sock]() { NET_DestroyDatagramSocket(sock); });
                 std::string str = frmt("vspcollab:{}", networkCanvasPort);
