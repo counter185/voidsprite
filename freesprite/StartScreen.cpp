@@ -932,6 +932,7 @@ void StartScreen::renderFeaturedImages()
             SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
             SDL_RenderDrawRect(g_rd, &imgRect);
 
+            //render hovered image
             if (pointInBox({ g_mouseX, g_mouseY }, imgRect) && !g_currentWindow->hasPopupsOpen()) {
                 featuredImageHoverTimer.startIfNotStarted();
                 double hoverTimer = XM1PW3P1(featuredImageHoverTimer.percentElapsedTime(600));
@@ -945,7 +946,7 @@ void StartScreen::renderFeaturedImages()
                     fullRect.w = ll->w;
                     fullRect.h = ll->h;
 
-                    if (ll->w < g_windowW / 3 && ll->h < g_windowH / 3) {
+                    if (ll->w < g_windowW / 2.5f && ll->h < g_windowH / 2.5f) {
                         fullRect.w *= 2;
                         fullRect.h *= 2;
                     }
