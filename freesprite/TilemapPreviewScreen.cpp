@@ -66,8 +66,23 @@ TilemapPreviewScreen::TilemapPreviewScreen(MainEditor* parent) {
                         }
                     }
                 )
-            }
-        }, { SDL_SCANCODE_F, SDL_SCANCODE_E });
+            }, 
+            {
+                SDL_SCANCODE_V,
+                makeNavbarSection(
+                    TL("vsp.nav.view"), g_iconNavbarTabView,
+                    {
+                        {SDL_SCANCODE_G, { "Toggle grid",
+                                [this]() { 
+                                    showGrid = !showGrid; 
+                                    g_addNotification(Notification(frmt("Grid is now {}", showGrid ? "visible" : "hidden"), "", 1500));
+                                }
+                            }
+                        }
+                    }
+                )
+            },
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_V });
     wxsManager.addDrawable(navbar);
 
     PanelTilemapPreview* panel = new PanelTilemapPreview(this);
@@ -191,7 +206,9 @@ void TilemapPreviewScreen::RenderCanvas()
             }
         }
     }
-    canvas.drawTileGrid(callerTileSize);
+    if (showGrid) {
+        canvas.drawTileGrid(callerTileSize);
+    }
 
     //tilemap border
     canvas.drawCanvasOutline(5, { 255,255,255,0xa0 });

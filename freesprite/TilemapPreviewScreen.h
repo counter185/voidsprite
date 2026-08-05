@@ -16,6 +16,7 @@ public:
 
 	Canvas canvas;
 	XY tilemapDimensions = {-1,-1};
+	bool showGrid = true;
 	bool scrollingTilemap = false;
 	bool mouseLeftingTilemap = false;
 
