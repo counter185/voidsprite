@@ -11,6 +11,47 @@ struct VOIDSNExtData {
 
 //  _______________
 // |
+// | VOIDSNv7
+// |
+
+struct VOIDSNv7LayerData {
+    VOIDSNString name;
+    u64 dataSize;
+    u8 data[dataSize];
+};
+struct VOIDSNv7Layer {
+    u32 numData;
+    VOIDSNv7LayerData layerData[numData];
+};
+
+struct VOIDSNv7FrameData {
+    VOIDSNString name;
+    u32 dataSize;
+    u8 data[dataSize];
+};
+
+struct VOIDSNv7Frame {
+    u32 numData;
+    VOIDSNv7FrameData frameData[numData];
+    u32 numLayers;
+    VOIDSNv7Layer layers[numLayers];
+};
+
+struct VOIDSNv7 {
+    char magic[11];
+    u32 imageWidth;
+    u32 imageHeight;
+    char extDataHeader[13];
+    u32 extDataSize;
+    VOIDSNExtData extData[extDataSize];
+    u32 numFrames;
+    
+    VOIDSNv7Frame frames[numFrames];
+};
+
+
+//  _______________
+// |
 // | VOIDSNv6
 // |
 
@@ -140,6 +181,9 @@ struct VOIDSNfile {
     }
     else if (version == 6) {
         VOIDSNv6 v6File;
+    }
+    else if (version == 7) {
+        VOIDSNv7 v7File;
     }
 };
 

@@ -17,6 +17,8 @@ The first byte will always be the version number.
 > All strings use UTF-8, but only data input by the user (layer names, comments) will contain UTF-8 characters.  
 > Additionally, strings are not NULL-terminated.
 
+---
+
 ### voidsprite Session v1 (.voidsnv1)
 
 `versionNumber` will be equal to `0x01`
@@ -33,6 +35,7 @@ For each layer:
 | :--------: | :---------: | :--- |
 | 4 * `imageWidth` * `imageHeight` | uint32_t[`imageWidth` * `imageHeight`] | `pixelData` |
 
+---
 
 ### voidsprite Session v2 (.voidsnv2)
 
@@ -54,6 +57,7 @@ For each layer:
 | `lengthOfLayerName` | char[`lengthOfLayerName`] | `layerName` |
 | 4 * `imageWidth` * `imageHeight` | uint32_t[`imageWidth` * `imageHeight`] | `pixelData` |
 
+---
 
 ### voidsprite Session v3 (.voidsnv3)
 
@@ -112,6 +116,8 @@ For each layer:
 `guidelines`: Guidelines data in the following format:  
 `(Num. guidelines);` then for every guideline: `(Orientation)-(Position);`, where orientation is either `v` or `h` indicating vertical or horizontal, and `Position` is its position on the canvas. Like symmetry lines, the position needs to be divided by 2 when reading.  
 
+---
+
 ### voidsprite Session v4 (.voidsnv4)
 
 `versionNumber` will be equal to `0x04`  
@@ -119,7 +125,9 @@ VOIDSNv4 is identical to v3, but adds support for palettized images.
 The image is palettized if the extended data key `palette.enabled` == `"1"`  
 The palette colors can then be found in the ext. data key `palette.colors`, which is a formatted string:  
 `"<num colors>;<HEX COLOR 1>;<HEX COLOR 2>;<HEX COLOR 3>;..."`  
-`pixelData` becomes an array of int32 indices. An index can be `-1`, meaning it's fully transparent.
+`pixelData` becomes an array of int32 indices. An index can be `-1 (0xFFFFFFFF)`, meaning it's fully transparent.
+
+---
 
 ### voidsprite Session v5 (.voidsnv5)
 
@@ -136,6 +144,8 @@ For each layer:
 | 4 | uint32_t | `colorKey` |
 | 8 | uint64_t | `sizeOfCompressedData` |
 | `sizeOfCompressedData` | uint8_t[`sizeOfCompressedData`] | `compressedPixelData` |
+
+---
 
 ### voidsprite Session v6 (.voidsnv6)
 
@@ -176,5 +186,59 @@ For each layer:
 `name`: Name of the layer. (data is a UTF-8 string)  
 `colorKeySet`: Does the layer have a color key enabled? (data is one byte, 0 or 1)  
 `colorKey`: Color key of the layer, if it has one. (data is a 4-byte color value)  
-`currentVariant`: Index of the currently active layer variant. (data is a 4-byte integer)
+`currentVariant`: Index of the currently active layer variant. (data is a 4-byte integer)  
 `variant.<name>`: Pixel data of a layer variant. (data is a zlib-compressed ARGB pixel data array)
+
+---
+
+### voidsprite Session v7 (.voidsnv7)
+
+`versionNumber` will be equal to `0x07`  
+VOIDSNv7 is the first version to support multiple frames.
+
+#### Required types:
+
+##### `VOIDSNLayerData`:
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| &lt;variable&gt; | `VOIDSNString` | `dataName` |
+| 8 | uint64_t | `dataSize` |
+| `dataSize` | uint8_t[`dataSize`] | `data` |
+
+##### `VOIDSNLayer`:
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| 4 | uint32_t | `layerDataCount` |
+| &lt;variable&gt; | `VOIDSNLayerData`[`numData`] | `layerData` |
+
+##### `VOIDSNFrameData`:
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| &lt;variable&gt; | `VOIDSNString` | `dataName` |
+| 4 | uint32_t | dataSize |
+| `dataSize` | uint8_t[`dataSize`] | `data` |
+
+#### File
+
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| 11 | char[11] | `magic` |
+| 4 | uint32_t | `imageWidth` |
+| 4 | uint32_t | `imageHeight` |
+| 13 | char[13] | `extendedDataHeader` |
+| 4 | uint32_t | `extendedDataCount` |
+| &lt;variable&gt; | `VOIDSNExtData`[`extendedDataCount`] | `extendedData` |
+| 4 | uint32_t | `numberOfFrames` |
+
+For each frame:
+
+| Num. bytes | C data type | Name |
+| :--------: | :---------: | :--- |
+| 4 | uint32_t | `dataValuesCount` |
+| &lt;variable&gt; | `VOIDSNFrameData`[`dataValuesCount`] | `extendedFrameData` |
+| 4 | uint32_t | `numLayers` |
+| &lt;variable&gt; | `VOIDSNLayer`[`numLayers`] | `layers` |
+
+#### Frame data values:
+`comments`: Comment data (encoded the same way as described in VOIDSNv3)  
+`layer.selected`: Index of the current active layer in this frame
