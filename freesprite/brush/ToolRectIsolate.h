@@ -21,7 +21,7 @@ public:
         "Shift+Double click to select all areas of the same color.\n"
         "Hold CTRL to add to the current area.\n"
         "In Eraser mode, the area will be subtracted from current selection.\n"
-        "Deselect this area with Mouse Right."; }
+        "Mouse Right for more actions."; }
     std::map<std::string, BrushProperty> getProperties() override
     {
         return {
