@@ -1,5 +1,6 @@
 #include "ToolRectIsolate.h"
 #include "../background_operation.h"
+#include "../PopupContextMenu.h"
 
 void ToolRectIsolate::clickPress(MainEditor* editor, XY pos)
 {
@@ -85,7 +86,14 @@ void ToolRectIsolate::renderOnCanvas(MainEditor* editor, int scale)
 
 void ToolRectIsolate::rightClickPress(MainEditor* editor, XY pos)
 {
-    editor->deselectAndCommitToUndoStack();
+    g_addPopup(new PopupContextMenu({
+        {"Deselect", [editor]() {editor->deselectAndCommitToUndoStack(); }},
+        {"Select layer alpha", [editor]() {editor->layer_selectCurrentAlpha(); }},
+        {"Fill area", [editor]() {editor->layer_fillActiveColor(); }},
+        {"Clear area", [editor]() {editor->layer_clearSelectedArea(); }},
+        {"Copy (layer)", [editor]() {editor->copyLayerToClipboard(editor->getCurrentLayer()); }},
+        {"Copy (whole image)", [editor]() {editor->copyImageToClipboard(); }},
+    }));
 }
 
 XY ToolRectIsolate::clampPointInsideCanvasIfParam(MainEditor* editor, XY point)
