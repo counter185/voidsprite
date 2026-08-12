@@ -2979,10 +2979,19 @@ void MainEditor::promptForImageAction(Layer* l)
     if (l != NULL) {
         PopupChooseAction* popup = new PopupChooseAction("Import image", "Choose what to do with the imported image", {
             {SDL_SCANCODE_C, {"Cancel", [this, l]() { delete l; }}},
-            {SDL_SCANCODE_P, {"Paste into layer", [this, l]() { 
+            {SDL_SCANCODE_P, {"Paste into layer", [this, l]() {
                 if (isPalettized) {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste into indexed session"));
-                    return;
+                    if (!l->isPalettized) {
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste RGB into indexed session"));
+                        return;
+                    }
+                    else {
+                        auto& palette = ((MainEditorPalettized*)this)->palette;
+                        auto& srcPalette = ((LayerPalettized*)l)->palette;
+                        if (palette.size() != srcPalette.size() || memcmp(palette.data(), srcPalette.data(), sizeof(u32) * palette.size()) != 0) {
+                            g_addNotification(Notification("Palette mismatch", "Colors may be wrong."));
+                        }
+                    }
                 }
                 promptPasteImage(l); 
             }}},
@@ -2999,11 +3008,21 @@ void MainEditor::promptForImageAction(PlatformNativePathString path)
         {
             {SDL_SCANCODE_C, {"Cancel", [this, path]() {}}},
             {SDL_SCANCODE_P, {"Paste into layer", [this, path]() { 
-                if (isPalettized) {
-                    g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste into indexed session"));
-                    return;
-                }
                 Layer* flat = loadAnyIntoFlat(convertStringToUTF8OnWin32(path));
+                if (isPalettized) {
+                    if (!flat->isPalettized) {
+                        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste RGB into indexed session"));
+                        delete flat;
+                        return;
+                    }
+                    else {
+                        auto& palette = ((MainEditorPalettized*)this)->palette;
+                        auto& srcPalette = ((LayerPalettized*)flat)->palette;
+                        if (palette.size() != srcPalette.size() || memcmp(palette.data(), srcPalette.data(), sizeof(u32) * palette.size()) != 0) {
+                            g_addNotification(Notification("Palette mismatch", "Colors may be wrong."));
+                        }
+                    }
+                }
                 if (flat != NULL) {
                     promptPasteImage(flat);
                 }

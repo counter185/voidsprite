@@ -81,7 +81,10 @@ void Layer::blit(Layer* sourceLayer, XY position)
 
     for (int y = position.y; y < endPosition.y; y++) {
         for (int x = position.x; x < endPosition.x; x++) {
-            setPixel(XY{x, y}, sourceLayer->getPixelAt(XY{x - position.x, y - position.y}));
+            setPixel(XY{x, y}, 
+                !isPalettized && sourceLayer->isPalettized ? sourceLayer->getVisualPixelAt(XY{ x - position.x, y - position.y })
+                : sourceLayer->getPixelAt(XY{x - position.x, y - position.y})
+            );
         }
     }
 
