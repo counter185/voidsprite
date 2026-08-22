@@ -105,3 +105,39 @@ void ToolRectClone::rightClickPress(MainEditor* editor, XY pos)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No area selected."));
     }
 }
+
+void ToolRectClone::renderOnCanvas(MainEditor* editor, int scale) {
+    XY canvasDrawPoint = editor->canvas.currentDrawPoint;
+    if (mouseDown) {
+        drawPixelRect(mouseDownPoint, lastMouseMotionPos, canvasDrawPoint, scale);
+    }
+    else if (clonedArea != NULL) {
+        SDL_Color accent = editor->getAccentColor();
+        SDL_SetRenderDrawColor(g_rd, accent.r, accent.g, accent.b, 0x40);
+        SDL_Rect cAreaRect = SDL_Rect{
+            canvasDrawPoint.x + clonedAreaPointAndDimensions.x * scale,
+            canvasDrawPoint.y + clonedAreaPointAndDimensions.y * scale,
+            clonedAreaPointAndDimensions.w * scale,
+            clonedAreaPointAndDimensions.h * scale
+        };
+        SDL_RenderDrawRect(g_rd, &cAreaRect);
+
+        SDL_Rect previewRect = SDL_Rect{
+            canvasDrawPoint.x + lastMouseMotionPos.x * scale,
+            canvasDrawPoint.y + lastMouseMotionPos.y * scale,
+            clonedAreaPointAndDimensions.w * scale,
+            clonedAreaPointAndDimensions.h * scale
+        };
+        SDL_RenderCopy(g_rd, cacheClonePreview, NULL, &previewRect);
+        SDL_RenderDrawRect(g_rd, &previewRect);
+
+        SDL_SetRenderDrawColor(g_rd, accent.r, accent.g, accent.b, 0x20);
+        SDL_RenderDrawLine(g_rd, 0, cAreaRect.y, g_windowW, cAreaRect.y);
+        SDL_RenderDrawLine(g_rd, 0, cAreaRect.y + cAreaRect.h, g_windowW, cAreaRect.y + cAreaRect.h);
+        SDL_RenderDrawLine(g_rd, cAreaRect.x, 0, cAreaRect.x, g_windowH);
+        SDL_RenderDrawLine(g_rd, cAreaRect.x + cAreaRect.w, 0, cAreaRect.x + cAreaRect.w, g_windowH);
+    }
+
+    SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
+    drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
+}
