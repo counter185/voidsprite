@@ -95,11 +95,11 @@ void g_initKeybinds()
     //main editor keybinds
     g_keybindManager.newRegion("maineditor", TL("vsp.keybinds.region.maineditor"));
     g_keybindManager.addKeybind("maineditor", "toggle_ui",
-        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.toggleui"), SDL_SCANCODE_F1, false, false, SDL_GAMEPAD_BUTTON_INVALID,
+        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.toggleui"), SDL_SCANCODE_F1, false, false, GAMEPAD_UNASSIGNED,
             [](void* d) { TOGGLE(((MainEditor*)d)->hideUI);}
         ));
     g_keybindManager.addKeybind("maineditor", "new_session", 
-        KeyCombo(TL("vsp.maineditor.nav.newsession"), SDL_SCANCODE_N, true, false, SDL_GAMEPAD_BUTTON_INVALID,
+        KeyCombo(TL("vsp.maineditor.nav.newsession"), SDL_SCANCODE_N, true, false, GAMEPAD_UNASSIGNED,
             [](void* d) { g_addPopup(new PopupNewImage()); }
         ));
     g_keybindManager.addKeybind("maineditor", "brush_primary", 
@@ -135,7 +135,7 @@ void g_initKeybinds()
             TOGGLE(((MainEditor*)d)->middleMouseHold);
         }));
     g_keybindManager.addKeybind("maineditor", "hold_drag", 
-        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.holddrag"), SDL_SCANCODE_SPACE, false, false, SDL_GAMEPAD_BUTTON_INVALID,
+        KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.holddrag"), SDL_SCANCODE_SPACE, false, false, GAMEPAD_UNASSIGNED,
             [](void* d) { ((MainEditor*)d)->middleMouseHold = true;},
             [](void* d) { ((MainEditor*)d)->middleMouseHold = false; }
         ));
@@ -181,7 +181,7 @@ void g_initKeybinds()
         }));
     g_keybindManager.addKeybind("maineditor", "tile_loop_preview",
         KeyCombo::HighPriorityKeyCombo(TL("vsp.keybinds.maineditor.tilelooppreview"), SDL_SCANCODE_Q, false, false,
-            SDL_GAMEPAD_BUTTON_INVALID,
+            GAMEPAD_UNASSIGNED,
             [](void* d) { ((MainEditor*)d)->keybindLoopTileHeld = true; },
             [](void* d) { ((MainEditor*)d)->keybindLoopTileHeld = false; }
         ));
@@ -291,6 +291,11 @@ void g_initKeybinds()
         KeyCombo(TL("vsp.keybinds.maineditor.animplaypause"), KEY_UNASSIGNED, false, false, [](void* d) {
             ((MainEditor*)d)->framePicker->playpauseBtn->click();
         }));
+    g_keybindManager.addKeybind("maineditor", "layer_move_hold",
+        KeyCombo(TL("vsp.keybinds.maineditor.layerdraghold"), KEY_UNASSIGNED, false, false, GAMEPAD_UNASSIGNED,
+            [](void* d) { ((MainEditor*)d)->inputMoveHoldPressed(); },
+            [](void* d) { ((MainEditor*)d)->inputMoveHoldReleased(); }
+        ));
 
 
     //split session editor keybinds

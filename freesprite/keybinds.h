@@ -3,6 +3,7 @@
 #include "mathops.h"
 
 #define KEY_UNASSIGNED SDL_SCANCODE_UNKNOWN
+#define GAMEPAD_UNASSIGNED SDL_GAMEPAD_BUTTON_INVALID
 
 class KeyCombo {
 private:

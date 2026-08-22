@@ -97,6 +97,17 @@ void Layer::blit(Layer* sourceLayer, XY position, SDL_Rect clipSource, bool fast
         return;
     }
 
+    if (position.x < 0) {
+        clipSource.x -= position.x;
+        clipSource.w += position.x;
+        position.x = 0;
+    }
+    if (position.y < 0) {
+        clipSource.y -= position.y;
+        clipSource.h += position.y;
+        position.y = 0;
+    }
+
     for (int y = 0; y < clipSource.h; y++) {
         if (y + position.y >= h) {
             break;

@@ -320,6 +320,22 @@ void MainEditor::RenderCanvas()
         }
     }
     framesMutex.unlock();
+
+    //render movehold
+    if (layerMoveHold) {
+        XY offset = inputMoveHoldOffset();
+        Layer* l = getCurrentLayer();
+        if (l != NULL) {
+            SDL_Rect r = canvas.canvasRectToScreenRect({ offset.x, offset.y, l->w, l->h });
+            SDL_Color accent = getAccentColor();
+            SDL_SetRenderDrawColor(g_rd, accent.r, accent.g, accent.b, 0x90);
+            l->render(r, l->layerAlpha / 4);
+            SDL_RenderDrawRect(g_rd, &r);
+            g_ttp->addTooltip(Tooltip{ {r.x, r.y}, frmt("Offset: {}:{}", offset.x, offset.y), {255,255,255,255}, layerMoveHoldTimer.percentElapsedTime(400)});
+        }
+    }
+
+    //render over/under canvas references
     for (auto& refPanel : openReferencePanels) {
         if (refPanel->currentMode == REFERENCE_OVER_CANVAS) {
             Layer* p = refPanel->getLayer();
@@ -914,6 +930,44 @@ void MainEditor::inputMouseRightHere(bool down)
             playColorPickerVFX(pickFromWholeImage);
         }
     }
+}
+
+void MainEditor::inputMoveHoldPressed()
+{
+    layerMoveHold = true;
+    layerMoveHoldOrigin = mousePixelTargetPoint;
+    layerMoveHoldTimer.start();
+}
+
+void MainEditor::inputMoveHoldReleased()
+{
+    if (layerMoveHold) {
+        layerMoveHold = false;
+        XY offset = inputMoveHoldOffset();
+        if (!xyEqual(offset, { 0,0 })) {
+            Layer* l = getCurrentLayer();
+            if (l != NULL) {
+                commitStateToLayer(l);
+                SDL_Rect r = { 0,0,l->w, l->h };
+                Layer* ll = isPalettized ? LayerPalettized::tryAllocIndexedLayer(l->w, l->h) : Layer::tryAllocLayer(l->w, l->h);
+                if (ll != NULL) {
+                    memcpy(ll->pixels32(), l->pixels32(), l->w * l->h * 4);
+                    memset(l->pixels32(), isPalettized ? -1 : 0, l->w * l->h * 4);
+                    l->blit(ll, offset, r, true);
+                    delete ll;
+                    l->markLayerDirty();
+                }
+                else {
+                    g_addNotification(NOTIF_MALLOC_FAIL);
+                }
+            }
+        }
+    }
+}
+
+XY MainEditor::inputMoveHoldOffset()
+{
+    return xySubtract(mousePixelTargetPoint, layerMoveHoldOrigin);
 }
 
 void MainEditor::DrawForeground()

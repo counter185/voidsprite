@@ -272,7 +272,7 @@ public:
     SDL_Rect getPaddedTilePosAndDimensions(XY tilePos);
     XY getPaddedTileDimensions();
 
-    Canvas canvas;
+    Canvas canvas{};
 
     XY mousePixelTargetPoint = XY{0, 0};
     XY mousePixelTargetPoint2xP = XY{0, 0};
@@ -293,6 +293,10 @@ public:
     bool penDown = false;
     bool penAltButtonDown = false;
     double penPressure = 1.0f;
+
+    bool layerMoveHold = false;
+    XY layerMoveHoldOrigin = { 0,0 };
+    Timer64 layerMoveHoldTimer;
 
     EditorUnsavedChanges changesSinceLastSave = NO_UNSAVED_CHANGES;
     PlatformNativePathString lastConfirmedSavePath;
@@ -422,6 +426,10 @@ public:
     void inputBrushHere(bool down);
     void inputMouseRight(XY at, bool down);
     void inputMouseRightHere(bool down);
+
+    void inputMoveHoldPressed();
+    void inputMoveHoldReleased();
+    XY inputMoveHoldOffset();
 
     void focusOnColorInputTextBox();
     void initLayers();
