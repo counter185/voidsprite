@@ -53,7 +53,7 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r27c
+        ndk-version: r29
         link-to-sdk: true
 
     - name: gradlew build
