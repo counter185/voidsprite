@@ -1950,9 +1950,12 @@ void MainEditor::takeInput(SDL_Event evt) {
                         }
                         else {
                             pinchZooming = false;
-                            XY rel = { evt.tfinger.dx * g_windowW, evt.tfinger.dy * g_windowH };
-                            canvas.panCanvas(rel);
                         }
+                        XY rel = { 
+                            (evt.tfinger.dx * g_windowW) / (pinchZooming ? 2 : 1), 
+                            (evt.tfinger.dy* g_windowH) / (pinchZooming ? 2 : 1)
+                        };
+                        canvas.panCanvas(rel);
                     }
                     break;
                 case SDL_EVENT_PEN_DOWN:
