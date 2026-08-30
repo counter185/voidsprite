@@ -14,8 +14,9 @@ PanelMCBlockPreview::PanelMCBlockPreview(MinecraftBlockPreviewScreen* caller, bo
     setupDraggable();
     if (small) {
         setupCollapsible();
+        setupResizable({180, 200});
     }
-    addTitleText("Cube");
+    addTitleText("CUBE");
     
 
     if (!small) {
@@ -54,16 +55,18 @@ PanelMCBlockPreview::PanelMCBlockPreview(MinecraftBlockPreviewScreen* caller, bo
 void PanelMCBlockPreview::renderAfterBG(XY position)
 {
     int pad = small ? 5 : 10;
-    int size = wxWidth - pad*2;
+    int sizeW = wxWidth - pad*2;
+    int sizeH = small ? (wxHeight - pad * 2 - 25) : sizeW;
 
     SDL_Rect blockRenderBounds = {
-        position.x + pad, position.y + wxHeight - size - pad,
-        size, size
+        position.x + pad, position.y + wxHeight - sizeH - pad,
+        sizeW, sizeH
     };
+    SDL_Rect oneToOneAspectBounds = fitInside(blockRenderBounds, {0,0, ixmin(sizeW,sizeH),ixmin(sizeW,sizeH) });
 
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x40);
     SDL_RenderDrawRect(g_rd, &blockRenderBounds);
 
-    caller->drawIsometricBlockV2(blockRenderBounds);
+    caller->drawIsometricBlockV2(oneToOneAspectBounds);
 }
 
