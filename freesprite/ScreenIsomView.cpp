@@ -42,11 +42,13 @@ void ScreenIsomView::renderQuadFromEditorContent(MainEditor* editor, XY origin00
 
     int indices[] = {0,1,2,2,1,3};
     for (Layer* l : editor->getLayerStack()) {
-        for (SDL_Vertex& v : verts) {
-            v.color.a = l->layerAlpha / 255.0f;
+        if (!l->hidden) {
+            for (SDL_Vertex& v : verts) {
+                v.color.a = l->layerAlpha / 255.0f;
+            }
+            l->prerender();
+            SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, verts, 4, indices, 6);
         }
-        l->prerender();
-        SDL_RenderGeometry(g_rd, l->renderData[g_rd].tex, verts, 4, indices, 6);
     }
 
     if (drawWireframe) {
