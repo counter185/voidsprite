@@ -1172,51 +1172,11 @@ int main(int argc, char** argv)
 
         loginfo("Loading patterns");
         initSteps.updateLastSection("Loading patterns");
-        //load patterns
-        g_patterns.push_back(new PatternFull());
-        g_patterns.push_back(new PatternGrid());
-        g_patterns.push_back(new PatternGridReverse());
-        g_patterns.push_back(new PatternDiag2px());
-        g_patterns.push_back(new PatternDiag3px());
-        g_patterns.push_back(new PatternDiag4px());
-        g_patterns.push_back(new PatternDiag2pxReverse());
-        g_patterns.push_back(new PatternDiag3pxReverse());
-        g_patterns.push_back(new PatternDiag4pxReverse());
-        g_patterns.push_back(new PatternHorizontal1px());
-        g_patterns.push_back(new PatternHorizontal2px());
-        g_patterns.push_back(new PatternHorizontal3px());
-        g_patterns.push_back(new PatternHorizontal4px());
-        g_patterns.push_back(new PatternVertical1px());
-        g_patterns.push_back(new PatternVertical2px());
-        g_patterns.push_back(new PatternVertical3px());
-        g_patterns.push_back(new PatternVertical4px());
-        g_patterns.push_back(new PatternSquares1px());
-        g_patterns.push_back(new PatternSquares2px());
-        g_patterns.push_back(new PatternSquares3px());
-        g_patterns.push_back(new PatternSquares4px());
-        g_patterns.push_back(new PatternHT1());
-        g_patterns.push_back(new PatternHT2());
-        g_patterns.push_back(new PatternRandom(2));
-        g_patterns.push_back(new PatternRandom(4));
-        g_patterns.push_back(new PatternRandom(8));
-        g_patterns.push_back(new PatternRandom(16));
+        g_loadPatterns();
         initSteps.updateLastSection("Loading custom patterns");
-        int customPatterns = 0;
-        auto customPatternPaths = joinVectors({
-            platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".pbm"),
-            platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("patterns/"), ".xbm")
-            });
-        for (auto& cpattern : customPatternPaths) {
-            CustomPattern* p = CustomPattern::load(cpattern);
-            if (p != NULL) {
-                g_patterns.push_back(p);
-                customPatterns++;
-            }
-        }
-        initSteps.updateLastSection("Loading pattern icons");
-        for (Pattern*& pattern : g_patterns) {
-            pattern->tryLoadIcon();
-        }
+        int customPatterns = g_loadCustomPatterns();
+        initSteps.updateLastSection("Generating pattern icons");
+        g_loadPatternIcons();
 
         loginfo("Loading templates");
         initSteps.updateLastSection("Loading templates");

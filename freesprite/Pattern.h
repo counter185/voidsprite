@@ -1,12 +1,19 @@
 #pragma once
 #include "globals.h"
 
+void g_loadPatterns();
+int g_loadCustomPatterns();
+void g_loadPatternIcons();
+SDL_Texture* g_generatePatternIcon(SDL_Renderer* rd, Pattern* p, int pxScale, XY patternOffset = { 0,0 }, XY texSize = { 22,22 });
+
 class Pattern
 {
+protected:
+    ReldTex* makeIconGenerator(XY offset = {0,0});
 public:
     HotReloadableTexture* cachedIcon = NULL;
 
-    virtual std::string getIconPath() { return "pattern_default.png"; }
+    virtual std::string getIconPath() { return ""; }
     virtual std::string getName() { return "Pattern"; }
     virtual bool canDrawAt(XY position) { return true; }
     virtual void tryLoadIcon();
@@ -15,7 +22,6 @@ public:
 class PatternFull : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_full.png"; }
     std::string getName() override { return ""; }
     bool canDrawAt(XY position) override { return true; }
 };
@@ -23,21 +29,18 @@ public:
 class PatternGrid : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_grid.png"; }
     std::string getName() override { return "1x1 grid"; }
     bool canDrawAt(XY position) override { return (position.x + position.y) % 2 == 0; }
 };
 class PatternGridReverse : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_grid_reverse.png"; }
     std::string getName() override { return "1x1 grid (reversed)"; }
     bool canDrawAt(XY position) override { return (position.x + position.y) % 2 == 1; }
 };
 class PatternDiag2px : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_diag_2px.png"; }
     std::string getName() override { return "Diagonal - 2px dist."; }
     bool canDrawAt(XY position) override {
         if (position.x >= 0 && position.y >= 0) {
@@ -49,7 +52,6 @@ public:
 class PatternDiag3px : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_diag_3px.png"; }
     std::string getName() override { return "Diagonal - 3px dist."; }
     bool canDrawAt(XY position) override {
         if (position.x >= 0 && position.y >= 0) {
@@ -61,7 +63,6 @@ public:
 class PatternDiag4px : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_diag_4px.png"; }
     std::string getName() override { return "Diagonal - 4px dist."; }
     bool canDrawAt(XY position) override {
         if (position.x >= 0 && position.y >= 0) {
@@ -74,7 +75,6 @@ public:
 class PatternDiag2pxReverse : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_diag_2px_reverse.png"; }
     std::string getName() override { return "Diagonal (reversed) - 2px dist."; }
     bool canDrawAt(XY position) override {
         if (position.x >= 0 && position.y >= 0) {
@@ -86,7 +86,6 @@ public:
 class PatternDiag3pxReverse : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_diag_3px_reverse.png"; }
     std::string getName() override { return "Diagonal (reversed) - 3px dist."; }
     bool canDrawAt(XY position) override {
         if (position.x >= 0 && position.y >= 0) {
@@ -98,7 +97,6 @@ public:
 class PatternDiag4pxReverse : public Pattern
 {
 public:
-    std::string getIconPath() override { return "pattern_diag_4px_reverse.png"; }
     std::string getName() override { return "Diagonal (reversed) - 4px dist."; }
     bool canDrawAt(XY position) override {
         if (position.x >= 0 && position.y >= 0) {
@@ -108,100 +106,47 @@ public:
     }
 };
 
-class PatternHorizontal1px : public Pattern
+class PatternHorizontal : public Pattern
 {
+    int d;
 public:
-    std::string getIconPath() override { return "pattern_hor_1px.png"; }
-    std::string getName() override { return "Horizontal - 1px dist."; }
-    bool canDrawAt(XY position) override { return position.y >= 0 ? (position.y % 2) == 0 : false; }
-};
-class PatternHorizontal2px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_hor_2px.png"; }
-    std::string getName() override { return "Horizontal - 2px dist."; }
-    bool canDrawAt(XY position) override { return position.y >= 0 ? (position.y % 3) == 0 : false; }
-};
-class PatternHorizontal3px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_hor_3px.png"; }
-    std::string getName() override { return "Horizontal - 3px dist."; }
-    bool canDrawAt(XY position) override { return position.y >= 0 ? (position.y % 4) == 0 : false; }
-};
-class PatternHorizontal4px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_hor_4px.png"; }
-    std::string getName() override { return "Horizontal - 4px dist."; }
-    bool canDrawAt(XY position) override { return position.y >= 0 ? (position.y % 5) == 0 : false; }
+    PatternHorizontal(int distance) : d(distance) {}
+    std::string getName() override { return frmt("Horizontal - {}px dist.", d); }
+    bool canDrawAt(XY position) override { return position.y >= 0 ? (position.y % (d+1)) == 0 : false; }
 };
 
-class PatternVertical1px : public Pattern
+class PatternVertical : public Pattern 
 {
+    int d;
 public:
-    std::string getIconPath() override { return "pattern_vert_1px.png"; }
-    std::string getName() override { return "Vertical - 1px dist."; }
-    bool canDrawAt(XY position) override { return position.x >= 0 ? (position.x % 2) == 0 : false; }
-};
-class PatternVertical2px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_vert_2px.png"; }
-    std::string getName() override { return "Vertical - 2px dist."; }
-    bool canDrawAt(XY position) override { return position.x >= 0 ? (position.x % 3) == 0 : false; }
-};
-class PatternVertical3px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_vert_3px.png"; }
-    std::string getName() override { return "Vertical - 3px dist."; }
-    bool canDrawAt(XY position) override { return position.x >= 0 ? (position.x % 4) == 0 : false; }
-};
-class PatternVertical4px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_vert_4px.png"; }
-    std::string getName() override { return "Vertical - 4px dist."; }
-    bool canDrawAt(XY position) override { return position.x >= 0 ? (position.x % 5) == 0 : false; }
+    PatternVertical(int distance) : d(distance) {}
+    std::string getName() override { return frmt("Vertical - {}px dist.", d); }
+    bool canDrawAt(XY position) override { return position.x >= 0 ? (position.x % (d+1)) == 0 : false; }
 };
 
-class PatternSquares1px : public Pattern
+class PatternSquares : public Pattern 
 {
-    std::string getIconPath() override { return "pattern_sq_1x.png"; }
-    std::string getName() override { return "Squares - 1px"; }
-    bool canDrawAt(XY position) override { return (position.x % 2) != 0 && (position.y % 2) != 0; }
-};
-
-class PatternSquares2px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_sq_2x.png"; }
-    std::string getName() override { return "Squares - 2px"; }
-    bool canDrawAt(XY position) override { return (position.x % 3) != 0 && (position.y % 3) != 0; }
-};
-
-class PatternSquares3px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_sq_3x.png"; }
-    std::string getName() override { return "Squares - 3px"; }
-    bool canDrawAt(XY position) override { return (position.x % 4) != 0 && (position.y % 4) != 0; }
-};
-
-class PatternSquares4px : public Pattern
-{
-    std::string getIconPath() override { return "pattern_sq_4x.png"; }
-    std::string getName() override { return "Squares - 4px"; }
-    bool canDrawAt(XY position) override { return (position.x % 5) != 0 && (position.y % 5) != 0; }
+    int d;
+public:
+    PatternSquares(int distance) : d(distance) {}
+    std::string getName() override { return frmt("Squares - {}px", d); }
+    bool canDrawAt(XY position) override { return (position.x % (d+1)) != 0 && (position.y % (d+1)) != 0; }
+    void tryLoadIcon() override { cachedIcon = makeIconGenerator({ 1,1 }); }
 };
 
 class PatternHT1 : public Pattern
 {
-    std::string getIconPath() override { return "pattern_ht1.png"; }
     std::string getName() override { return "Diagonal half-dithering"; }
     bool canDrawAt(XY position) override { 
         int lpx = position.x % 8;
         int lpy = position.y % 8;
         return (lpx + lpy) % 2 == 0 && (lpy) < (-lpx + 7);
     }
+    void tryLoadIcon() override { cachedIcon = makeIconGenerator({ -1,-1 }); }
 };
 
 class PatternHT2 : public Pattern
 {
-    std::string getIconPath() override { return "pattern_ht2.png"; }
     std::string getName() override { return "Central dither"; }
     bool canDrawAt(XY position) override { 
         int lpx = position.x % 4;
@@ -234,6 +179,5 @@ public:
     CustomPattern(LayerPalettized* from);
     std::string getName() override { return name; }
     bool canDrawAt(XY position) override;
-    void tryLoadIcon() override;
 
 };
