@@ -152,7 +152,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;GIT_RELEASE="$(GitRelease)";GIT_HASH="$(GitHash)";GIT_BRANCH="$(GitBranch)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -215,7 +215,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GIT_HASH="$(GitHash)";GIT_BRANCH="$(GitBranch)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GIT_RELEASE="$(GitRelease)";GIT_HASH="$(GitHash)";GIT_BRANCH="$(GitBranch)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ShowIncludes>false</ShowIncludes>
@@ -240,7 +240,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;__LITTLE_ENDIAN__;GIT_HASH="$(GitHash)";GIT_BRANCH="$(GitBranch)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;__LITTLE_ENDIAN__;GIT_RELEASE="$(GitRelease)";GIT_HASH="$(GitHash)";GIT_BRANCH="$(GitBranch)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ShowIncludes>false</ShowIncludes>

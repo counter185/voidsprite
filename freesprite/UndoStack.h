@@ -32,13 +32,14 @@ public:
     UndoStackComposite(std::vector<UndoStackElementV2*> e, std::string name = "Multiple undo operations") : elements(e), opName(name) {}
     ~UndoStackComposite() {
         for (auto& e : elements) {
+            e->discardFromRedo = this->discardFromRedo;
             delete e;
         }
     }
 
     void undo(MainEditor* editor) override {
-        for (auto& e : elements) {
-            e->undo(editor);
+        for (auto e = elements.rbegin(); e != elements.rend(); e++) {
+            (*e)->undo(editor);
         }
     }
     void redo(MainEditor* editor) override {

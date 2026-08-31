@@ -6,12 +6,16 @@ on:
       build-arch:
         required: true
         type: string
+      release-tag:
+        required: false
+        type: string
 
 env:
   SOLUTION_FILE_PATH: .
   BUILD_CONFIGURATION: Release
   GIT_HASH: ${{ github.sha }}
   GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+  GIT_RELEASE: ${{ inputs.release-tag }}
 
 jobs:
   build-windows-onearch:
@@ -33,12 +37,12 @@ jobs:
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /t:voidsprite /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /t:voidsprite /p:GitRelease=${{env.GIT_RELEASE}} /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
 
     - name: Build shell extension
       working-directory: ${{env.GITHUB_WORKSPACE}}
       if: ${{ inputs.build-arch == 'x64' }}
-      run: msbuild /m /t:voidsprite_shellext /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /t:voidsprite_shellext /p:GitRelease=${{env.GIT_RELEASE}} /p:GitHash=${{env.GIT_HASH}} /p:GitBranch=${{env.GIT_BRANCH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform="${{ inputs.build-arch }}" ${{env.SOLUTION_FILE_PATH}}
 
     - name: Make build directories and copy devlibs
       working-directory: ${{env.GITHUB_WORKSPACE}}

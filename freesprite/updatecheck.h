@@ -12,6 +12,10 @@ using json = nlohmann::json;
 #define GIT_HASH ""
 #endif
 
+#ifndef GIT_RELEASE
+#define GIT_RELEASE ""
+#endif
+
 #ifndef GIT_BRANCH
 #define GIT_BRANCH  UTF8_DIAMOND "dev"
 #endif

@@ -11,6 +11,10 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_call:
+    inputs:
+      release-tag:
+        required: false
+        type: string
     secrets:
       KEYSTORE:
         required: true
@@ -24,6 +28,7 @@ on:
 env:
   GIT_HASH: ${{ github.sha }}
   GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+  GIT_RELEASE: ${{ inputs.release-tag }}
 
 permissions:
   contents: read
@@ -33,16 +38,19 @@ jobs:
     uses: ./.github/workflows/windows-build.yml
     with:
       build-arch: x86
+      release-tag: ${{ inputs.release-tag }}
           
   build-windows-x64:
     uses: ./.github/workflows/windows-build.yml
     with:
       build-arch: x64
+      release-tag: ${{ inputs.release-tag }}
   
   build-windows-arm64:
     uses: ./.github/workflows/windows-build.yml
     with:
       build-arch: ARM64
+      release-tag: ${{ inputs.release-tag }}
 
   build-sdk:
     runs-on: windows-latest
