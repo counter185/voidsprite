@@ -39,14 +39,17 @@ void PanelRPG2KTilemapPreview::eventGeneric(int evt_id, int data1, int data2)
         switch (evt_id) {
             case 0:
                 caller->rdLowerLayer = !caller->rdLowerLayer;
+                btnLL->hideButton->icon = caller->rdLowerLayer ? g_iconLayerHide : g_iconLayerHideOn;
                 btnLL->hideButton->fill = caller->rdLowerLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
                 break;
             case 1:
                 caller->rdUpperLayer = !caller->rdUpperLayer;
+                btnUL->hideButton->icon = caller->rdUpperLayer ? g_iconLayerHide : g_iconLayerHideOn;
                 btnUL->hideButton->fill = caller->rdUpperLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
                 break;
             case 2:
                 caller->rdEventLayer = !caller->rdEventLayer;
+                btnEL->hideButton->icon = caller->rdEventLayer ? g_iconLayerHide : g_iconLayerHideOn;
                 btnEL->hideButton->fill = caller->rdEventLayer ? SDL_Color{ 0,0,0,0xd0 } : SDL_Color{ 0xff,0xff,0xff, 0xa0 };
                 break;
         }

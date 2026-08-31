@@ -314,6 +314,7 @@ inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconLayerDownMerge = NULL,
    *g_iconLayerDuplicate = NULL,
    *g_iconLayerHide = NULL,
+   *g_iconLayerHideOn = NULL,
    *g_iconFrameMoveLeft = NULL,
    *g_iconFrameMoveRight = NULL,
    *g_iconFrameNew = NULL,
@@ -399,6 +400,7 @@ public:
     }
 };
 #define ReldTex HotReloadableTexture
+#define ReldTexFromAsset(a) (new ReldTex([](SDL_Renderer* rd) {return IMGLoadAssetToTexture(a,rd);}))
 
 struct XY {
     int x, y;

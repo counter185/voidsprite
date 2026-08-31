@@ -157,10 +157,11 @@ void EditorLayerPicker::updateLayers()
     layerListPanel->subWidgets.freeAllDrawables();
 
     int yposition = 0;
-    for (int lid = caller->getLayerStack().size(); lid --> 0;) {
+    for (int lid = caller->getLayerStack().size(); lid --> 0;) { 
         Layer* l = caller->getLayerStack()[lid];
         UILayerButton* layerButton = new UILayerButton(l->name, l);
         layerButton->hideButton->fill = (l->hidden ? Fill::Gradient(0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF) : SDL_Color{0,0,0,0x80});
+        layerButton->hideButton->icon = l->hidden ? g_iconLayerHideOn : g_iconLayerHide;
         layerButton->position = { 0, yposition };
         layerButton->mainButton->fill = (caller->selLayer == lid ? Fill::Gradient(0x70FFFFFF, 0x00FFFFFF, 0x70FFFFFF, 0x00FFFFFF) : SDL_Color{ 0,0,0,0x80 });
         yposition += layerButton->getDimensions().y;

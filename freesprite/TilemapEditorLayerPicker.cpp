@@ -110,6 +110,7 @@ void TilemapEditorLayerPicker::updateLayers()
         //UILayerButton* layerButton = new UILayerButton(l->name);
         UILayerButton* layerButton = new UILayerButton(frmt("Layer {}", lid+1), NULL);
         //todo:
+        layerButton->hideButton->icon = g_iconLayerHide;
         layerButton->hideButton->fill = SDL_Color{ 0,0,0,0x80 };
         layerButton->position = { 5, yposition };
         layerButton->mainButton->fill = (selectedLayerIndex == lid ? SDL_Color{ 255,255,255,0x60 } : SDL_Color{ 0,0,0,0x80 });
