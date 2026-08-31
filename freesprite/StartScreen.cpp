@@ -194,9 +194,11 @@ void StartScreen::render()
     SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
     SDL_RenderCopy(g_rd, g_mainlogo->get(g_rd), NULL, &logoRect);
 
-    static std::string versionInfo =
+    //do not make these two variables static (crashes linux)
+    std::string branchInfo = std::string(GIT_HASH) != "" ? frmt("{}-{}", GIT_BRANCH, std::string(GIT_HASH).substr(0, 7)) : frmt("{}", GIT_BRANCH);
+    std::string versionInfo =
         std::string(GIT_RELEASE) != "" ? GIT_RELEASE
-        : frmt("beta@{}\n{}", __DATE__, std::string(GIT_HASH) != "" ? frmt("{}-{}", GIT_BRANCH, std::string(GIT_HASH).substr(0, 7)) : GIT_BRANCH);
+        : frmt("beta@{}\n{}", __DATE__, branchInfo);
 
     g_fnt->RenderString(versionInfo, 6, g_windowH - 20 - 20, SDL_Color{255,255,255,0x50}, 14);
 

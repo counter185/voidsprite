@@ -204,6 +204,29 @@ inline std::string universal_runCommandAndGetOutput(std::string command, int* ex
     return output;
 }
 
+
+inline std::vector<u8> universal_runCommandAndGetBinaryOutput(std::string command, int* exitCode = NULL) {
+    std::vector<u8> output;
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        logerr("Failed to run command: " + command);
+        if (exitCode != NULL) {
+            *exitCode = -1;
+        }
+        return {};
+    }
+    int c = 0;
+    while ((c = fgetc(pipe)) != EOF) {
+        output.push_back((u8)c);
+    }
+    int ec = pclose(pipe);
+    if (exitCode != NULL) {
+        *exitCode = ec;
+    }
+    loginfo(frmt("{}\n  {} bytes", command, output.size()));
+    return output;
+}
+
 inline std::string universal_fetchTextFile(std::string url) {
     //uses curl
     std::string command = "curl -s -f \"" + url + "\"";
@@ -221,9 +244,9 @@ inline std::vector<u8> universal_fetchBinFile(std::string url) {
     //uses curl
     std::string command = "curl -s -f \"" + url + "\"";
     int ec;
-    std::string output = universal_runCommandAndGetOutput(command, &ec);
+    std::vector<u8> output = universal_runCommandAndGetBinaryOutput(command, &ec);
     if (ec == 0) {
-        return std::vector<u8>(output.begin(), output.end());
+        return output;
     }
     else {
         throw std::runtime_error("curl failed");
