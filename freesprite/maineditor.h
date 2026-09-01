@@ -200,11 +200,11 @@ class SessionEditorPrefs {
 public:
     XY tileDimensions = XY{0, 0};
     u8 tileGridAlpha = 0x40;
-
+    XY tileGridPaddingBottomRight = XY{0, 0};
     bool overrideTileGridColor = false;
     u32 tileGridColor = 0xFFFFFF;
+    bool showTileGrid = true;
 
-    XY tileGridPaddingBottomRight = XY{0, 0};
     bool alternateBackground = false;
     
     MainEditorCommentMode commentViewMode = COMMENTMODE_SHOW_HOVERED;
@@ -479,6 +479,7 @@ public:
     void promptPasteImage(Layer* l);
     void promptForImageAction(Layer* l);
     void promptForImageAction(PlatformNativePathString path);
+    void togglePixelGrid();
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

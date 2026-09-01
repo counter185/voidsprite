@@ -451,6 +451,7 @@ void MainEditorPalettized::setUpWidgets()
                             [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
+                    {SDL_SCANCODE_H, { "Toggle pixel grid", [this]() { togglePixelGrid(); }}},
                     {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
                     {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
                     {SDL_SCANCODE_A, { "Open frames panel...",

@@ -112,6 +112,10 @@ void g_initKeybinds()
             [](void* d) { ((MainEditor*)d)->inputMouseRightHere(true); },
             [](void* d) { ((MainEditor*)d)->inputMouseRightHere(false); }
         ));
+    g_keybindManager.addKeybind("maineditor", "toggle_grid", 
+        KeyCombo(TL("vsp.keybinds.maineditor.togglegrid"), KEY_UNASSIGNED, false, false, [](void* d) {
+            ((MainEditor*)d)->togglePixelGrid();
+        }));
     g_keybindManager.addKeybind("maineditor", "toggle_eraser", 
         KeyCombo(TL("vsp.keybinds.maineditor.eraser"), SDL_SCANCODE_E, false, false, [](void* d) {
             ((MainEditor*)d)->colorPicker->toggleEraser();

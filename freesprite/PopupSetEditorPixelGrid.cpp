@@ -118,5 +118,6 @@ void PopupSetEditorPixelGrid::finish() {
     caller->ssne.tileGridAlpha = (uint8_t)(opacitySlider->getValue(0, 255));
     caller->ssne.overrideTileGridColor = newOverrideGridColor;
     caller->ssne.tileGridColor = newTileGridColor;
+    caller->ssne.showTileGrid = true;
     closePopup();
 }

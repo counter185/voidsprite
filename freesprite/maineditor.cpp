@@ -719,6 +719,10 @@ void MainEditor::drawIsolatedFragment()
 
 void MainEditor::drawTileGrid()
 {
+    if (!ssne.showTileGrid) {
+        return;
+    }
+
     SDL_Rect canvasRenderRect = canvas.getCanvasOnScreenRect();
     /*canvasRenderRect.w = texW * scale;
     canvasRenderRect.h = texH * scale;
@@ -1292,12 +1296,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
-                    {SDL_SCANCODE_B, { "Toggle background color",
-                            [this]() {
-                                this->ssne.alternateBackground = !this->ssne.alternateBackground;
-                            }
-                        }
-                    },
+                    {SDL_SCANCODE_B, { "Toggle background color", [this]() { TOGGLE(this->ssne.alternateBackground); }}},
                     {SDL_SCANCODE_C, { "Toggle comments",
                             [this]() {
                                 (*(int*)&this->ssne.commentViewMode)++;
@@ -1326,6 +1325,7 @@ void MainEditor::setUpWidgets()
                             [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
                         }
                     },
+                    {SDL_SCANCODE_H, { "Toggle pixel grid", [this]() { togglePixelGrid(); }}},
                     {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
                     {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
                     {SDL_SCANCODE_A, { "Open frames panel...",
@@ -3105,6 +3105,17 @@ void MainEditor::promptForImageAction(PlatformNativePathString path)
     g_addPopup(popup);
 }
 
+void MainEditor::togglePixelGrid()
+{
+    TOGGLE(ssne.showTileGrid);
+    if (xyEqual(ssne.tileDimensions, {0,0})) {
+        g_addNotification(ErrorNotification("Pixel grid is not set.", ""));
+    }
+    else {
+        g_addNotification(Notification(ssne.showTileGrid ? "Pixel grid shown" : "Pixel grid hidden", ""));
+    }
+}
+
 void MainEditor::moveLayerUp(int index) {
     auto& layers = getLayerStack();
     if (index >= layers.size()-1) {
@@ -4804,6 +4815,7 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["tile.dim.y"] = std::to_string(tileDimensions.y);
     kvs["tile.dim.padrx"] = std::to_string(tileGridPaddingBottomRight.x);
     kvs["tile.dim.padby"] = std::to_string(tileGridPaddingBottomRight.y);
+    kvs["tile.show"] = showTileGrid ? "1" : "0";
     kvs["sym.x"] = std::to_string(symmetryPositions.x);
     kvs["sym.y"] = std::to_string(symmetryPositions.y);
     kvs["sym.enabled"] = frmt("{}{}", symmetryEnabled[0] ? 1 : 0, symmetryEnabled[1] ? 1 : 0);
@@ -4829,6 +4841,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.tileDimensions.y = std::stoi(kvs["tile.dim.y"]); } catch (...) {}
     try { prefs.tileGridPaddingBottomRight.x = std::stoi(kvs["tile.dim.padrx"]); } catch (...) {}
     try { prefs.tileGridPaddingBottomRight.y = std::stoi(kvs["tile.dim.padby"]); } catch (...) {}
+    try { prefs.showTileGrid = kvs["tile.dim.padby"] == "1"; } catch (...) {}
     try { prefs.symmetryPositions.x = std::stoi(kvs["sym.x"]); } catch (...) {}
     try { prefs.symmetryPositions.y = std::stoi(kvs["sym.y"]); } catch (...) {}
     try { prefs.symmetryEnabled[0] = kvs["sym.enabled"].at(0) == '1'; } catch (...) {}
