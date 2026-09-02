@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.DocumentsContract;
@@ -43,6 +44,14 @@ public class VSPActivity extends SDLActivity {
     protected String[] getArguments() {
 
         return mainArgs.toArray(new String[0]);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!isTablet() && !isDeXMode()) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
     }
 
     @Override

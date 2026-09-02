@@ -33,15 +33,14 @@ void platformPreInit() {
     platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 
     //manually setting orientation not only doesn't maximize it but also adds garbage data on the sides
-    /*if (!SDL_IsDeXMode() && !SDL_IsTablet()) {
+    if (!SDL_IsDeXMode() && !SDL_IsTablet()) {
         //only these on phones
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
-    }*/
+    }
 }
 void platformInit() {}
 void platformPostInit() {
     if (!SDL_IsDeXMode() && !SDL_IsTablet()) {
-        
         SDL_SetWindowFullscreen(g_wd, true);
     }
 }
