@@ -537,6 +537,22 @@ bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
     return false;
 }
 
+std::pair<XY,XY> VSPWindow::getSafeAreaCorners() {
+#if VSP_PLATFORM == VSP_PLATFORM_ANDROID
+    SDL_Rect r{};
+    if (SDL_GetWindowSafeArea(wd, &r)) {
+        return {{r.x / renderScale,r.y / renderScale}, {(r.w+r.x) / renderScale, (r.h+r.y) / renderScale}};
+    } else
+#endif
+    {
+        return {{0,0},{unscaledWindowSize.x / renderScale, unscaledWindowSize.y / renderScale}};
+    }
+}
+
+int VSPWindow::getSafeAreaLeft() {
+    return getSafeAreaCorners().first.x;
+}
+
 bool VSPWindow::IsMaximized()
 {
     return (SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) != 0;

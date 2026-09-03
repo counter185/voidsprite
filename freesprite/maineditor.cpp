@@ -978,9 +978,11 @@ void MainEditor::DrawForeground()
 {
     drawBottomBar();
 
-    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+    int leftX = g_currentWindow->getSafeAreaLeft();
 
-    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200, g_windowH - 28, SDL_Color{255,255,255,0xd0});
+    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+
+    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xd0});
     if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
         std::string s = frmt("(t{}:{} in{}:{})", 
             (int)floor(mousePixelTargetPoint.x / (float)ssne.tileDimensions.x), 
@@ -992,18 +994,18 @@ void MainEditor::DrawForeground()
 
     if (currentBrush != NULL) {
         static std::string eraserModeText = TL("vsp.maineditor.erasermode");
-        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 30, 370), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 30, 370 + leftX), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
     }
 
     if (!activePatterns.empty()) {
         g_fnt->RenderString(
             frmt("{} {}", activePatterns.front()->getName(), activePatterns.size() <= 1 ? "" : frmt("(+{})", activePatterns.size()-1)),
-            620, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+            620 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
     }
 
     SDL_Color textColor = getAccentColor();
 
-    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
+    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2 + leftX, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
 
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
@@ -1482,16 +1484,18 @@ void MainEditor::setUpWidgets()
 
     makeActionBar();
 
+    int leftX = g_currentWindow->getSafeAreaLeft();
+
     colorPicker = new EditorColorPicker(this);
     Panel* colorPickerPanel = colorPicker->getPanel();
     colorPickerPanel->position.y = 67;
-    colorPickerPanel->position.x = 10;
+    colorPickerPanel->position.x = 10 + leftX;
     wxsManager.addDrawable(colorPickerPanel);
     colorPicker->setColorRGB(pickedColor);
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position = {10, 458};
+    brushPicker->position = {10 + leftX, 458};
     brushPicker->reanchor();
     wxsManager.addDrawable(brushPicker);
 
@@ -1501,7 +1505,7 @@ void MainEditor::setUpWidgets()
     wxsManager.addDrawable(layerPicker);
 
     framePicker = new EditorFramePicker(this);
-    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67};
+    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x + leftX, 67};
     if (frames.size() == 1) {
         framePicker->enabled = false;
     }
@@ -1558,7 +1562,7 @@ void MainEditor::SetupCompactEditor(std::vector<CompactEditorSection> createSect
 
         UIButton* btn = new UIButton();
         btn->icon = section.icon;
-        btn->position = { 0, y };
+        btn->position = { g_currentWindow->getSafeAreaLeft(), y };
         btn->wxWidth = 80;
         btn->wxHeight = h;
         section.targetPanel->position = xyAdd(btn->position, { 100, 0 });
@@ -1635,15 +1639,17 @@ void MainEditor::makeActionBar()
         };
     }
 
+    int leftX = g_currentWindow->getSafeAreaLeft();
+
     UIStackPanel* actionsStack = UIStackPanel::Horizontal(5, {
         undoButton, redoButton, saveButton, zoomoutButton, zoominButton, blendModeDropdown
     });
-    actionsStack->position = { 5, 5 };
+    actionsStack->position = { ixmax(5, leftX), 5 };
     actionbar->addDrawable(actionsStack);
 
     toolPropertiesPanel = new Panel();
     toolPropertiesPanel->sizeToContent = true;
-    toolPropertiesPanel->position = { actionsStack->getDimensions().x  + 50, 0};
+    toolPropertiesPanel->position = { actionsStack->getDimensions().x  + 50 + leftX, 0};
     actionbar->addDrawable(toolPropertiesPanel);
 
     wxsManager.addDrawable(actionbar);

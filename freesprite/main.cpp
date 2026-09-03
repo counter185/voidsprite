@@ -700,6 +700,14 @@ void g_mainLoop() {
             popupStack[popupStack.size() - 1]->render();
         }*/
 
+        //debug: render safearea
+        /*auto safeArea = wd->getSafeAreaCorners();
+        SDL_Rect safeAreaRect = {safeArea.first.x, safeArea.first.y,
+                                 safeArea.second.x - safeArea.first.x,
+                                 safeArea.second.y - safeArea.first.y};
+        SDL_SetRenderDrawColor(wd->rd, 255,0,0,255);
+        SDL_RenderDrawRect(wd->rd, &safeAreaRect);*/
+
         wd->overlayRenderQueue.renderAll();
 
         g_renderVFX();

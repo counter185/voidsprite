@@ -19,7 +19,7 @@ ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, Na
     submenuPanel->enabled = false;
     subWidgets.addDrawable(submenuPanel);
 
-    int x = 42;
+    int x = ixmax(42, g_currentWindow->getSafeAreaLeft());
     int xDist = 120;
 
     //determine the right width

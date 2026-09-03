@@ -136,7 +136,6 @@ public:
     bool tryCreateRenderer();
 
     void updateViewportScaler();
-
     void autoViewportScale();
 
     void addScreen(BaseScreen* a, bool switchTo);
@@ -155,6 +154,9 @@ public:
     void renderCustomWindowFrame();
     bool handleCustomFrameInput(SDL_Event evt);
     SDL_HitTestResult getSDLHitTestAt(XY pos);
+
+    std::pair<XY,XY> getSafeAreaCorners();
+    int getSafeAreaLeft();
 
     bool IsMaximized();
 };
