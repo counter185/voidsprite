@@ -2614,6 +2614,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("CaveStory PBM", ".pbm", &readBMP, exCaveStoryPBM, FORMAT_RGB,
         magicVerify(0, "BM")));
     g_fileImporters.push_back(FileImporter::flatImporter("RPG2000/2003 XYZ", ".xyz", &readXYZ, exXYZ, FORMAT_PALETTIZED));
+    g_fileImporters.push_back(FileImporter::flatImporter("RPG Maker MV image", ".rpgmvp", &readMZMVEncPNG, NULL, FORMAT_RGB | FORMAT_PALETTIZED));
     g_fileImporters.push_back(FileImporter::flatImporter("Atrophy Engine AETEX v1/v2", ".aetex", &readAETEX));
     g_fileImporters.push_back(FileImporter::flatImporter("PS Graphic Image Map GIM", ".gim", &readGIM));
     g_fileImporters.push_back(FileImporter::flatImporter("PS2 Icon ICN", ".icn", &readPS2ICN));
