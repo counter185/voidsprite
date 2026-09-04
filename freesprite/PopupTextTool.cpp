@@ -1,4 +1,4 @@
-#include <SDL3_TTF/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include "PopupTextTool.h"
 #include "globals.h"
 #include "FontRenderer.h"
