@@ -2568,6 +2568,9 @@ void MainEditor::discardRedoStack()
 void MainEditor::undo()
 {
     if (!undoStack.empty()) {
+        if (leftMouseHold && !currentBrush->isReadOnly()) {
+            inputBrushHere(false);
+        }
         undoTimer.start();
         lastUndoWasRedo = false;
         auto*& l = undoStack.back();
