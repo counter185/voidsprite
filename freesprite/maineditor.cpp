@@ -3263,17 +3263,23 @@ void MainEditor::layer_switchVariant(Layer* layer, int variantIndex)
     }
 }
 
+void MainEditor::layer_promptRenameVariant(Layer* layer, int variantIndex)
+{
+    std::string nameNow = layer->layerData[variantIndex].name;
+    PopupTextBox* ninput = new PopupTextBox("Rename layer variant", "Enter the new layer variant name:", nameNow);
+    ninput->onTextInputConfirmedCallback = [this, layer, variantIndex](PopupTextBox* p, std::string newName) {
+        layer->layerData[variantIndex].name = newName;
+        layerPicker->updateLayers();
+    };
+    g_addPopup(ninput);
+}
+
 void MainEditor::layer_promptRenameCurrentVariant()
 {
     Layer* clayer = getCurrentLayer();
     int layerVariantIndex = clayer->currentLayerVariant;
-    std::string nameNow = clayer->layerData[layerVariantIndex].name;
-    PopupTextBox* ninput = new PopupTextBox("Rename layer variant", "Enter the new layer variant name:", nameNow);
-    ninput->onTextInputConfirmedCallback = [this,clayer,layerVariantIndex](PopupTextBox* p, std::string newName) {
-        clayer->layerData[layerVariantIndex].name = newName;
-        layerPicker->updateLayers();
-    };
-    g_addPopup(ninput);
+    layer_promptRenameVariant(clayer, layerVariantIndex);
+    
 }
 
 void MainEditor::addGuideline(int doublePrecisionPos, bool vertical)
