@@ -152,6 +152,23 @@ bool writeXYZ(PlatformNativePathString path, Layer* data)
     return false;
 }
 
+Layer* readMZMVEncPNG(PlatformNativePathString path, uint64_t seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        auto bytes = readWholeFile(f);
+        fclose(f);
+
+        if (bytes.size() > 32) {
+            bytes.erase(bytes.begin(), bytes.begin() + 16);
+            u8 pngBytes[] = "\x89PNG\xD\xA\x1A\xA\0\0\0\xDIHDR";
+            memcpy(bytes.data(), pngBytes, 16);
+            return readPNGFromMem(bytes.data(), bytes.size());
+        }
+    }
+    return NULL;
+}
+
 #if VSP_USE_LIBLCF
 MainEditor* readLMU(PlatformNativePathString path)
 {
