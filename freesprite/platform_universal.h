@@ -8,7 +8,7 @@
 #include "Notification.h"
 
 inline int findIndexByExtension(
-        std::vector<std::pair<std::string, std::string>> &filetypes,
+        const std::vector<std::pair<std::string, std::string>> &filetypes,
         std::string filename) {
     if (filetypes.front().first == "") {
         //this means first entry is autodetect
