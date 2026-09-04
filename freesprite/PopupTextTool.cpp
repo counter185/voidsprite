@@ -7,6 +7,7 @@
 #include "UILabel.h"
 #include "EventCallbackListener.h"
 #include "UIDropdown.h"
+#include <algorithm>
 
 PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 {
@@ -83,5 +84,6 @@ std::vector<std::string> PopupTextTool::listAllSystemFonts()
             ret.push_back(convertStringToUTF8OnWin32(file));
         }
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }
