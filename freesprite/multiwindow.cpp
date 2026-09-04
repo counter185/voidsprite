@@ -553,6 +553,10 @@ int VSPWindow::getSafeAreaLeft() {
     return getSafeAreaCorners().first.x;
 }
 
+int VSPWindow::getSafeAreaRight() {
+    return (unscaledWindowSize.x / renderScale) - getSafeAreaCorners().second.x;
+}
+
 bool VSPWindow::IsMaximized()
 {
     return (SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) != 0;

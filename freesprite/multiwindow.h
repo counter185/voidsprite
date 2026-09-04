@@ -157,6 +157,7 @@ public:
 
     std::pair<XY,XY> getSafeAreaCorners();
     int getSafeAreaLeft();
+    int getSafeAreaRight();
 
     bool IsMaximized();
 };

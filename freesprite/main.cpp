@@ -732,7 +732,8 @@ void g_mainLoop() {
         //origin.y -= 16;
 #endif
 
-        XY nextStatusBarOrigin = { g_windowW, g_windowH - 26 };
+        int rightX = wd->getSafeAreaRight();
+        XY nextStatusBarOrigin = { g_windowW - rightX, g_windowH - 26 };
 
         //draw the screen icons
         //XY screenIcons = { g_windowW, g_windowH - 10 };
@@ -750,7 +751,7 @@ void g_mainLoop() {
         if (!wd->screenStack.empty()) {
             std::string screenName = wd->screenStack[wd->currentScreen]->getName();
             int statW = g_fnt->StatStringDimensions(screenName, 16).x;
-            XY screenNameOrigin = xySubtract({ g_windowW, g_windowH }, { 10 + statW, 55 });
+            XY screenNameOrigin = xySubtract({ g_windowW - rightX, g_windowH }, { 10 + statW, 55 });
             g_fnt->RenderString(wd->screenStack[wd->currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
         }
 

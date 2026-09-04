@@ -1581,7 +1581,9 @@ void MainEditor::openTouchModePanel()
 {
     if (this->touchModePanel == NULL) {
         this->touchModePanel = new EditorTouchToggle(this);
-        this->touchModePanel->position = { g_windowW - this->touchModePanel->wxWidth - 10, g_windowH - this->touchModePanel->wxHeight - 40 };
+        this->touchModePanel->position = { 
+            g_windowW - this->touchModePanel->wxWidth - ixmax(10, g_currentWindow->getSafeAreaRight()), 
+            g_windowH - this->touchModePanel->wxHeight - 40};
         this->addWidget(this->touchModePanel);
     }
 }
