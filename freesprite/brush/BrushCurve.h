@@ -31,7 +31,7 @@ class BrushCurve :
         return {
             {"brush.curve.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
             {"brush.curve.gradsize", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.gradsize"),0)},
-            {"brush.curve.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
+            {"brush.curve.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,32,1)}
         };
     }
     XY getSection() override { return XY{ 0,2 }; }

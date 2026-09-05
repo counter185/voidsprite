@@ -10,7 +10,7 @@ class Brush1x1 : public BaseBrush
         return {
             {"brush.squarepixel.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
             {"brush.squarepixel.pressuresens", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.pressuresize"),0)},
-            {"brush.squarepixel.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
+            {"brush.squarepixel.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,32,1)}
         }; 
     }
     void clickPress(MainEditor* editor, XY pos) override;

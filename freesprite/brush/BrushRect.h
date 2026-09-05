@@ -16,7 +16,7 @@ class BrushRect :
     {
         return {
             {"brush.pxrect.round", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.round"),0)},
-            {"brush.pxrect.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,16,1)}
+            {"brush.pxrect.size", BRUSH_INT_PROPERTY(TL("vsp.brush.param.size"),1,32,1)}
         };
     }
     XY getSection() override { return XY{ 0,2 }; }
