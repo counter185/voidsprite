@@ -1,3 +1,4 @@
+#include <SDL3_ttf/SDL_ttf.h>
 #include "PopupTextTool.h"
 #include "globals.h"
 #include "FontRenderer.h"
@@ -7,6 +8,7 @@
 #include "UILabel.h"
 #include "EventCallbackListener.h"
 #include "UIDropdown.h"
+#include "PopupChooseFormat.h"
 
 PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
 {
@@ -35,7 +37,14 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
     foundFonts = listAllSystemFonts();
     std::vector<std::string> fontNames;
     std::transform(foundFonts.begin(), foundFonts.end(), std::back_inserter(fontNames), fileNameFromPath);
-    fontsDropdown = new UIDropdown(fontNames);
+
+    fontButton = new UIButton("Choose font...");
+    fontButton->position = XY{ 90, 160 };
+    fontButton->wxWidth = 200;
+    fontButton->onClickCallback = [this](...) { g_addPopup(makeFontPicker()); };
+    wxsManager.addDrawable(fontButton);
+
+    /*fontsDropdown = new UIDropdown(fontNames);
     fontsDropdown->position = XY{ 90, 160 };
     fontsDropdown->setTextToSelectedItem = true;
     fontsDropdown->onDropdownItemSelectedCallback = [this](UIDropdown* dd, int index, std::string name) {
@@ -45,7 +54,7 @@ PopupTextTool::PopupTextTool(ToolText* parent, std::string tt, std::string tx)
             fontPath = "";
         }
     };
-    wxsManager.addDrawable(fontsDropdown);
+    wxsManager.addDrawable(fontsDropdown);*/
 
     UIButton* nbutton = actionButton(TL("vsp.cmn.apply"));
     nbutton->onClickCallback = [this](UIButton*) {
@@ -69,9 +78,45 @@ void PopupTextTool::defaultInputAction(SDL_Event evt)
         if (stringEndsWithIgnoreCase(filePath, ".ttf")) {
             fontPath = filePath;
             loginfo(frmt("[ToolText] changed font to {}", filePath));
-            fontsDropdown->text = fileNameFromPath(filePath);
+            fontButton->text = fileNameFromPath(filePath);
         }
     }
+}
+
+PopupChooseFormat* PopupTextTool::makeFontPicker()
+{
+    static bool fontsLoaded = false;
+    static std::vector<FormatDef> fontListData;
+    if (!fontsLoaded) {
+        auto fontPaths = listAllSystemFonts();
+        fontListData.clear();
+        for (auto& fontPath : fontPaths) {
+            FormatDef newF{};
+            newF.name = fileNameFromPath(fontPath);
+            newF.description = fontPath;
+            TTF_Font* ttff = TTF_OpenFont(fontPath.c_str(), 1);
+            if (ttff != NULL) {
+                const char* name = TTF_GetFontFamilyName(ttff);
+                const char* style = TTF_GetFontStyleName(ttff);
+                if (name != NULL) {
+                    newF.name = name;
+                    newF.extension = style != NULL ? style : "";
+                }
+
+                TTF_CloseFont(ttff);
+            }
+            fontListData.push_back(newF);
+            
+        }
+        fontsLoaded = true;
+    }
+
+    PopupChooseFormat* c = new PopupChooseFormat("Choose font", "", fontListData);
+    c->onFormatChosenCallback = [this](FormatDef* f) {
+        fontPath = f->description;
+        fontButton->text = f->name;
+    };
+    return c;
 }
 
 std::vector<std::string> PopupTextTool::listAllSystemFonts()
@@ -83,5 +128,6 @@ std::vector<std::string> PopupTextTool::listAllSystemFonts()
             ret.push_back(convertStringToUTF8OnWin32(file));
         }
     }
+    std::sort(ret.begin(), ret.end());
     return ret;
 }

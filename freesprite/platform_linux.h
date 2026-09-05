@@ -1,20 +1,26 @@
 #pragma once
 
+#include <cstdio>
 #include <fstream>
 
+#include <mutex>
 #include <pwd.h>
 #include <spawn.h>
+#include <string>
 #include <unistd.h>
+#include <dirent.h>
 #include <sys/utsname.h>
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <linux/limits.h>
 
 #include <SDL3/SDL_video.h>
 #include <GL/gl.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
+#include "background_operation.h"
 #include "portable-file-dialogs/portable-file-dialogs.h"
 #include "json/json.hpp"
 #include "main.h"
@@ -39,6 +45,11 @@ u32 platformSupportedFeatures() {
         | VSP_FEATURE_INSTANCE_IPC
         | VSP_FEATURE_MULTIWINDOW;
 }
+
+static std::string _L_lastSaveDir = "";
+static std::string _L_lastOpenDir = "";
+std::string singleinstanceSocket = "/tmp/voidsprite_singleinstance.sock";
+std::string singleinstanceLock = "/tmp/voidsprite_singleinstance.lock";
 
 extern char **environ;
 int lockFD = -1;
@@ -97,6 +108,42 @@ std::string linux_getGPUname() {
 }
 
 void platformPreInit() {
+    {
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, PATH_MAX) == NULL) {
+            std::string err = "Failed to obtain current directory: getcwd(): ";
+            err += strerror(errno);
+            g_addNotification(ErrorNotification(
+                "Linux error", err));
+        } else {
+            _L_lastOpenDir = std::string(cwd);
+            _L_lastSaveDir = std::string(cwd);
+        }
+    }
+    {
+        char *xdg_runtime_dir = getenv("XDG_RUNTIME_DIR");
+        if (xdg_runtime_dir == NULL) {
+            g_addNotification(ErrorNotification(
+                "Linux error", "XDG_RUNTIME_DIR is not set!"));
+            
+            // I COULD make it find /run/user/<uid>, but tbh by this point your system is so
+            // fucked I might as well not bother.
+        } else {
+            DIR *tmpdir = opendir(xdg_runtime_dir);
+            if (tmpdir == NULL) {
+                std::string err = "XDG_RUNTIME_DIR is set to an invalid directory: opendir(): ";
+                err += strerror(errno);
+                g_addNotification(ErrorNotification(
+                    "Linux error", err));
+            } else closedir(tmpdir);
+
+            singleinstanceSocket = std::string(xdg_runtime_dir);
+            if (!singleinstanceSocket.ends_with("/")) singleinstanceSocket += "/";
+            singleinstanceLock = std::string(singleinstanceSocket);
+            singleinstanceSocket += "voidsprite_singleinstance.sock";
+            singleinstanceLock += "voidsprite_singleinstance.lock";
+        }
+    }
     platformCreateDirectory(platformEnsureDirAndGetConfigFilePath());
     platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/patterns");
     platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/templates");
@@ -105,7 +152,8 @@ void platformPreInit() {
     platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/autosaves");
     platformCreateDirectory(platformEnsureDirAndGetConfigFilePath() + "/visualconfigs");
 }
-void platformInit() {}
+void platformInit() {
+}
 void platformPostInit() {}
 
 void platformDeinit() {
@@ -131,67 +179,92 @@ std::string platformGetFileAssocForExtension(std::string extension) { return "";
 void platformTrySaveImageFile(EventCallbackListener *caller) {}
 void platformTryLoadImageFile(EventCallbackListener *caller) {}
 
-
-
 void platformTrySaveOtherFile(
-    EventCallbackListener *caller,
+    EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
-
-    if (!g_config.useSystemFileDialog) {
-        universal_platformTrySaveOtherFile(caller, filetypes, windowTitle, evt_id);
-        return;
-    }
-
-    std::vector<std::string> fileTypeStrings;
-    for (auto &p : filetypes) {
-        fileTypeStrings.push_back(p.second);
-        fileTypeStrings.push_back("*" + p.first);
-    }
-    auto result = pfd::save_file("voidsprite: " + windowTitle,
-                                 pfd::path::home(), fileTypeStrings, pfd::opt::none);
-    std::string filename = result.result();
-    if (filename.length() > 0) {
-        // uh oh we need to manually find the filter index
-        int index = findIndexByExtension(filetypes, filename);
-        if (index != -1) {
-            caller->eventFileSaved(evt_id, filename, index);
-        } else {
-            g_addNotification(ErrorNotification(
-                "Linux error", "Please add the extension to the file name"));
+    g_startNewOperation([
+        listener = std::move(listener),
+        filetypes = std::move(filetypes),
+        windowTitle = std::move(windowTitle),
+        evt_id = evt_id
+    ](){
+        if (!g_config.useSystemFileDialog) {
+            universal_platformTrySaveOtherFile(listener, filetypes, windowTitle, evt_id);
+            return;
         }
-    }
+
+        std::vector<std::string> fileTypeStrings;
+        for (auto &p : filetypes) {
+            fileTypeStrings.push_back(p.second);
+            fileTypeStrings.push_back("*" + p.first);
+        }
+        auto result = pfd::save_file("voidsprite: " + windowTitle,
+                                     _L_lastSaveDir, fileTypeStrings, pfd::opt::none);
+        std::string filename = result.result();
+        if (filename.length() > 0) {
+            // uh oh we need to manually find the filter index
+            int index = findIndexByExtension(filetypes, filename);
+            if (index != -1) {
+                size_t last_seg_sep_i = filename.find_last_of('/');
+                if (last_seg_sep_i == filename.npos) {
+                    g_addNotification(WarningNotification(
+                        "Weird path", "Export file obtained appears to not have a parent"));
+                } else {
+                    _L_lastSaveDir = filename.substr(0, index);
+                }
+                listener->eventFileSaved(evt_id, filename, index);
+            } else {
+                g_addNotification(ErrorNotification(
+                    "Linux error", "Please add the extension to the file name"));
+            }
+        }
+    });
 }
 
 void platformTryLoadOtherFile(
     EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
-
-    if (!g_config.useSystemFileDialog) {
-        universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
-        return;
-    }
-
-    std::vector<std::string> fileTypeStrings;
-    for (auto &p : filetypes) {
-        fileTypeStrings.push_back(p.second);
-        fileTypeStrings.push_back("*" + p.first);
-    }
-    auto result =
-        pfd::open_file("voidsprite: " + windowTitle, pfd::path::home(),
-                       fileTypeStrings, pfd::opt::multiselect);
-    std::vector<std::string> filenames = result.result();
-    if (filenames.size() > 0) {
-        // uh oh we need to manually find the filter index again
-        int index = findIndexByExtension(filetypes, filenames[0]);
-        if (index != -1) {
-            listener->eventFileOpen(evt_id, filenames[0], index);
-        } else {
-            g_addNotification(ErrorNotification(
-                "Linux error", "File type could not be found"));
+    g_startNewOperation([
+        listener = std::move(listener),
+        filetypes = std::move(filetypes),
+        windowTitle = std::move(windowTitle),
+        evt_id = evt_id
+    ](){
+        if (!g_config.useSystemFileDialog) {
+            universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+            return;
         }
-    }
+
+        std::vector<std::string> fileTypeStrings;
+        for (auto &p : filetypes) {
+            fileTypeStrings.push_back(p.second);
+            fileTypeStrings.push_back("*" + p.first);
+        }
+        auto result =
+            pfd::open_file("voidsprite: " + windowTitle, _L_lastOpenDir,
+                fileTypeStrings, pfd::opt::multiselect);
+        std::vector<std::string> filenames = result.result();
+        if (filenames.size() > 0) {
+            // uh oh we need to manually find the filter index again
+            int index = findIndexByExtension(filetypes, filenames[0]);
+            if (index != -1) {
+                std::string filename = filenames[0];
+                size_t last_seg_sep_i = filename.find_last_of('/');
+                if (last_seg_sep_i == filename.npos) {
+                    g_addNotification(WarningNotification(
+                        "Weird path", "Import file obtained appears to not have a parent"));
+                } else {
+                    _L_lastOpenDir = filename.substr(0, index);
+                }
+                listener->eventFileOpen(evt_id, filenames[0], index);
+            } else {
+                g_addNotification(ErrorNotification(
+                    "Linux error", "File type could not be found"));
+            }
+        }
+    });
 }
 
 void platformOpenFileLocation(PlatformNativePathString path) {
@@ -407,24 +480,60 @@ std::vector<NetworkAdapterInfo> platformGetNetworkAdapters() {
     return universal_platformGetNetworkAdapters();
 }
 
-std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
-    //todo: iterate over every subfolder in /usr/share/fonts/truetype and add that to the list
-    std::vector<PlatformNativePathString> ret = {
-        "/usr/share/fonts",
-        "/usr/share/fonts/truetype"
-    };
+static void _L_iterate_dir(std::vector<PlatformNativePathString>& store, PlatformNativePathString path) {
+    DIR *dir = opendir(path.c_str());
+    if (dir == NULL) return;
 
-    if (std::filesystem::exists("/usr/share/fonts/truetype")) {
-        for (auto& ff : std::filesystem::directory_iterator("/usr/share/fonts/truetype")) {
-            if (ff.is_directory()) {
-                ret.push_back(ff.path().string());
-            }
+    store.push_back(path);
+
+    struct dirent *ent;
+    while ((ent = readdir(dir)) != NULL) {
+        if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")) continue;
+        if (ent->d_type == DT_DIR || ent->d_type == DT_UNKNOWN) {
+            std::string s(path);
+            if (!path.ends_with("/")) s += "/";
+            s += ent->d_name;
+            _L_iterate_dir(store, s);
         }
     }
+
+    closedir(dir);
+}
+
+std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
+    std::vector<PlatformNativePathString> ret = {};
+
+    const char *__xdg_data_home = getenv("XDG_DATA_HOME");
+    std::string xdg_data_home;
+    if (__xdg_data_home == NULL) {
+        xdg_data_home = pfd::path::home();
+        if (xdg_data_home.ends_with("/")) xdg_data_home += ".local/share/fonts/";
+        else xdg_data_home += "/.local/share/fonts/";
+    } else {
+        xdg_data_home = std::string(__xdg_data_home);
+        if (!xdg_data_home.ends_with("/")) xdg_data_home += "/fonts/";
+        else xdg_data_home += "fonts/";
+    }
+    _L_iterate_dir(ret, xdg_data_home);
+
+    const char *xdg_data_dirs = getenv("XDG_DATA_DIRS");
+    if (xdg_data_dirs == NULL) xdg_data_dirs = "/usr/local/share/:/usr/share/";
+
+    bool found_end = false;
+    while (!found_end) {
+        const char *end = strchr(xdg_data_dirs, ':');
+        found_end = end == NULL;
+        if (end == NULL) end = xdg_data_dirs + strlen(xdg_data_dirs);
+
+        // By this point the loop will terminate, so it's OK for the address
+        // to not be valid.
+        _L_iterate_dir(ret, std::string(xdg_data_dirs, end - xdg_data_dirs));
+        xdg_data_dirs = end + 1;
+    }
+
     return ret;
 }
 
-const std::string singleinstanceSocket = "/tmp/voidsprite_singleinstance.sock";
 void linux_threadIPC() {
     unlink(singleinstanceSocket.c_str());
     int serverFD = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -456,7 +565,14 @@ void linux_threadIPC() {
 }
 
 bool platformSetupIPC() {
-    lockFD = open("/tmp/voidsprite_singleinstance.lock", O_CREAT | O_RDWR, 0666);
+    lockFD = open(singleinstanceLock.c_str(), O_CREAT | O_RDWR, 0666);
+    if (lockFD == -1) {
+        std::string err = "Failed to open lock file: open(): ";
+        err += strerror(errno);
+        g_addNotification(ErrorNotification(
+            "Linux error", err));
+        return true;
+    }
     if (flock(lockFD, LOCK_EX | LOCK_NB) != 0) {
         close(lockFD);
         return false;

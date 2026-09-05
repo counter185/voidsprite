@@ -1,6 +1,7 @@
 #include "ScreenWideNavBar.h"
 #include "FontRenderer.h"
 #include "UIButton.h"
+#include "multiwindow.h"
 
 ScreenWideNavBar::ScreenWideNavBar(BaseScreen* caller, std::map<SDL_Scancode, NavbarSection> actions, std::vector<SDL_Scancode> order) {
     for (int i = 0; i < order.size(); i++) {

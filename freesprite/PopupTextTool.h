@@ -14,11 +14,13 @@ public:
     UITextField* textboxSize;
     int textSize;
     ToolText* caller;
-    UIDropdown* fontsDropdown;
+    UIButton* fontButton;
+    //UIDropdown* fontsDropdown;
 
     PopupTextTool(ToolText* parent, std::string tt, std::string tx);
     void defaultInputAction(SDL_Event evt) override;
 
+    PopupChooseFormat* makeFontPicker();
     std::vector<std::string> listAllSystemFonts();
 };
 

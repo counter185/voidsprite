@@ -90,6 +90,11 @@ UILayerButton::UILayerButton(std::string mainName, Layer* linkedLayer) {
                             cb->eventGeneric(cbid, LAYEREVENT_VARIANT_DUPLICATE, v);
                         }
                     }},
+                    {"Rename variant", [cb,cbid, v]() {
+                        if (cb != NULL) {
+                            cb->eventGeneric(cbid, LAYEREVENT_VARIANT_RENAME, v);
+                        }
+                    }},
                 });
             };
 

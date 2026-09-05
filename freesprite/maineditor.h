@@ -585,6 +585,7 @@ public:
     void layer_duplicateVariant(Layer* layer, int variantIndex);
     void layer_removeVariant(Layer* layer, int variantIndex);
     void layer_switchVariant(Layer* layer, int variantIndex);
+    void layer_promptRenameVariant(Layer* layer, int variantIndex);
     void layer_promptRenameCurrentVariant();
 
     void addGuideline(int doublePrecisionPos, bool vertical);

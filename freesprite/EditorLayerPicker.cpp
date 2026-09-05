@@ -129,6 +129,9 @@ void EditorLayerPicker::eventGeneric(int evt_id, int data1, int data2)
     else if (data1 == LAYEREVENT_SETTAG) {
         caller->layer_promptSetColorTag(evt_id);
     }
+    else if (data1 == LAYEREVENT_VARIANT_RENAME) {
+        caller->layer_promptRenameVariant(caller->getLayerStack()[evt_id], data2);
+    }
     updateLayers();
 }
 

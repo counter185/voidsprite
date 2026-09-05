@@ -229,6 +229,7 @@ class SpritesheetPreviewScreen;
 class TilemapPreviewScreen;
 class MinecraftBlockPreviewScreen;
 class ExtractDataScreen;
+class PopupChooseFormat;
 
 //specialized ui elements
 class EditorColorPicker;
