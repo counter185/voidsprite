@@ -42,6 +42,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"saveLoadReferences", &g_config.saveLoadReferences},
         {"resetEraserOnToolSwitch", &g_config.resetEraserOnToolSwitch},
         {"showFeaturedUGC", &g_config.showFeaturedUGC},
+        {"editorShowGitRepo", &g_config.editorShowGitRepo},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

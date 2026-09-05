@@ -274,6 +274,7 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.compacteditor"), TL("vsp.config.opt.compacteditor.desc"), &g_config.compactEditor, &posInTab));
     editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.huewheel"), TL("vsp.config.opt.huewheel.desc"), &g_config.hueWheelInsteadOfSlider, &posInTab));
+    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showgitrepo"), TL("vsp.config.opt.showgitrepo.desc"), &g_config.editorShowGitRepo, &posInTab));
 
     UILabel* lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
     lbl2->position = posInTab;

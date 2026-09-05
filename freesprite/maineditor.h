@@ -15,6 +15,7 @@
 #include "IEditorColorPicker.h"
 #include "UIAnchorSelect.h"
 #include "ParameterStore.h"
+#include "git.h"
 
 struct NET_StreamSocket;
 
@@ -303,6 +304,7 @@ public:
     FileExporter* lastConfirmedExporter = NULL;
     bool lastConfirmedSave = false;
     bool lastWasSaveAs = false;
+    GitData savedFileGitData{false};
     ParameterStore exportParameters;
 
     bool replaceAlphaMode = false;
@@ -480,6 +482,7 @@ public:
     void promptForImageAction(Layer* l);
     void promptForImageAction(PlatformNativePathString path);
     void togglePixelGrid();
+    void setLastConfirmedSavePath(PlatformNativePathString path);
 
     void discardEndOfUndoStack();
     void checkAndDiscardEndOfUndoStack();

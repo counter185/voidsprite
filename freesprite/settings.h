@@ -49,6 +49,7 @@ public:
     bool saveLoadReferences = false;
     bool resetEraserOnToolSwitch = false;
     bool showFeaturedUGC = true;
+    bool editorShowGitRepo = true;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

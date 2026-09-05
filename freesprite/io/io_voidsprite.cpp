@@ -1271,7 +1271,7 @@ MainEditor* loadSplitSession(PlatformNativePathString path, OperationProgressRep
                     MainEditor* newEditor = new MainEditor(imageLayer);
                     newEditor->splitSessionData = ssn;
                     newEditor->ssne = SessionEditorPrefs::deserializeFromKeyVals(ssneKeyvals);
-                    newEditor->lastConfirmedSavePath = path;
+                    newEditor->setLastConfirmedSavePath(path);
                     newEditor->getCommentStack() = comments;
                     return newEditor;
                 }

@@ -429,7 +429,7 @@ void StartScreen::tryLoadFileUsingImporter(FileImporter* importer, PlatformNativ
             if (importer->getCorrespondingExporter() != NULL) {
                 outSession->lastWasSaveAs = false;
                 outSession->lastConfirmedSave = true;
-                outSession->lastConfirmedSavePath = name;
+                outSession->setLastConfirmedSavePath(name);
                 outSession->lastConfirmedExporter = importer->getCorrespondingExporter();
             }
             g_addScreenToWindow(thisWindow, outSession);

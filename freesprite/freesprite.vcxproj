@@ -259,6 +259,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="io\io_graphicsgale.cpp" />
+    <ClInclude Include="git.h" />
     <ClInclude Include="io\io_graphicsgale.h" />
     <ClCompile Include="PopupRenameLayer.cpp" />
     <ClCompile Include="ScreenCubemapPreview.cpp" />

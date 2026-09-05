@@ -1538,6 +1538,9 @@
     <ClInclude Include="online_community.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="git.h">
+      <Filter>Header files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="freesprite.rc">

@@ -1956,7 +1956,7 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
                 if (importer->getCorrespondingExporter() != NULL) {
                     session->lastWasSaveAs = false;
                     session->lastConfirmedSave = true;
-                    session->lastConfirmedSavePath = fPath;
+                    session->setLastConfirmedSavePath(fPath);
                     session->lastConfirmedExporter = importer->getCorrespondingExporter();
                 }
                 if (outputFoundImporter != NULL) {

@@ -570,6 +570,9 @@
     {"vsp.config.opt.huewheel", "Use hue wheel instead of slider"},
     {"vsp.config.opt.huewheel.desc", "The Visual color picker will use a wheel for hue instead of a slider.\n"
                                      "Does not apply to any currently open editor workspaces."},
+    {"vsp.config.opt.showgitrepo", "Show Git repository details"},
+    {"vsp.config.opt.showgitrepo.desc", "Opening a file that's inside a Git repository will show its name and current branch.\n"
+                                        "May marginally slow down load times."},
     {"vsp.config.opt.smoothfonts", "Smooth fonts"},
     {"vsp.config.opt.smoothfonts.desc", "If disabled, fonts will be rendered with solid pixels instead of smooth.\n"
                                         "This will make custom pixel fonts render properly.\n"

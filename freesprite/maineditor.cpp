@@ -979,6 +979,7 @@ void MainEditor::DrawForeground()
     drawBottomBar();
 
     int leftX = g_currentWindow->getSafeAreaLeft();
+    int rightX = g_currentWindow->getSafeAreaRight();
 
     g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
 
@@ -1007,14 +1008,22 @@ void MainEditor::DrawForeground()
 
     g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2 + leftX, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
 
+    XY rightOrigin = { g_windowW - ixmax(rightX, 2), g_windowH - 50 };
+    if (savedFileGitData.found && g_config.editorShowGitRepo) {
+        rightOrigin.y -= 18;
+        std::string s = frmt("git:  {}:{}", savedFileGitData.friendlyRepoName, savedFileGitData.branch);
+        int fw = g_fnt->StatStringDimensions(s, 13).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
+    }
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
+        rightOrigin.y -= 20;
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
         int fw = g_fnt->StatStringDimensions(unsavedSymbol).x;
-        g_fnt->RenderString(unsavedSymbol, g_windowW - fw - 2, g_windowH - 70, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 });
+        g_fnt->RenderString(unsavedSymbol, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 });
 
         std::string timeString = frmt("({})", secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
         int fw2 = g_fnt->StatStringDimensions(timeString, 12).x;
-        g_fnt->RenderString(timeString, g_windowW - fw - fw2 - 3, g_windowH - 70, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
+        g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
     }
 }
 
@@ -2332,7 +2341,7 @@ bool MainEditor::trySaveWithExporter(PlatformNativePathString name, FileExporter
 
     if (result) {
         lastConfirmedSave = true;
-        lastConfirmedSavePath = name;
+        setLastConfirmedSavePath(name);
         lastConfirmedExporter = exporter;
         timerSinceLastSave.start();
         changesSinceLastSave = NO_UNSAVED_CHANGES;
@@ -3125,6 +3134,15 @@ void MainEditor::togglePixelGrid()
     else {
         g_addNotification(Notification(ssne.showTileGrid ? "Pixel grid shown" : "Pixel grid hidden", ""));
     }
+}
+
+void MainEditor::setLastConfirmedSavePath(PlatformNativePathString path)
+{
+    if (g_interactiveContext && g_config.editorShowGitRepo && path != lastConfirmedSavePath) {
+        savedFileGitData = tryFindGitDataFromFile(path);
+    }
+
+    lastConfirmedSavePath = path;
 }
 
 void MainEditor::moveLayerUp(int index) {
