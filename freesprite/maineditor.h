@@ -358,6 +358,8 @@ public:
 
     std::vector<PanelReference*> openReferencePanels;
 
+    int timelapseSkipNFrames = 0;
+    int timelapseCurrentFrameskip = 0;
     VideoEncoder* timelapseRecorder = NULL;
 
     u32 canvasStateID;
@@ -594,6 +596,7 @@ public:
     void layer_promptRenameCurrentVariant();
 
     void timelapsePromptStart();
+    void timelapseStart(VideoEncoder* enc, PlatformNativePathString path);
     void timelapseStop();
     void timelapsePush();
 

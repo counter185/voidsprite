@@ -61,6 +61,7 @@
 #include "PopupNewImage.h"
 #include "PopupCanvasResize.h"
 #include "PopupRenameLayer.h"
+#include "PopupRecordTimelapse.h"
 #include "multiwindow.h"
 #include "thumbnail_loader.h"
 
@@ -171,6 +172,7 @@ MainEditor::MainEditor(std::vector<Frame*> fframes)
 }
 
 MainEditor::~MainEditor() {
+    timelapseStop();
     discardUndoStack();
     discardRedoStack();
     endNetworkSession();
@@ -1024,6 +1026,12 @@ void MainEditor::DrawForeground()
         std::string timeString = frmt("({})", secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
         int fw2 = g_fnt->StatStringDimensions(timeString, 12).x;
         g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
+    }
+    if (timelapseRecorder != NULL) {
+        rightOrigin.y -= 18;
+        std::string s = frmt("Recoding timelapse (frame {})", timelapseRecorder->getFramesWritten());
+        int fw = g_fnt->StatStringDimensions(s, 13).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
     }
 }
 
@@ -3304,31 +3312,46 @@ void MainEditor::layer_promptRenameCurrentVariant()
 
 void MainEditor::timelapsePromptStart()
 {
+    g_addPopup(new PopupRecordTimelapse(this));
+}
+
+void MainEditor::timelapseStart(VideoEncoder* enc, PlatformNativePathString path)
+{
     if (timelapseRecorder == NULL) {
-        timelapseRecorder = new AVIFVideoEncoder();
-        timelapseRecorder->startRecording(L"timelapse.avif");
+        timelapseRecorder = enc;
+        timelapseCurrentFrameskip = 0;
     }
     else {
-        //already started
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Already recording timelapse."));
     }
 }
 
 void MainEditor::timelapseStop()
 {
     if (timelapseRecorder != NULL) {
-        timelapseRecorder->stopRecording();
-        delete timelapseRecorder;
-        timelapseRecorder = NULL;
+        g_startNewOperation([this]() {
+            VideoEncoder* enc = timelapseRecorder;
+            enc->stopRecording();
+            g_addNotificationFromThread(Notification("Timelapse saved", frmt("Recorded {} frames", enc->getFramesWritten())));
+            timelapseRecorder = NULL;
+            delete enc;
+        });
     }
 }
 
 void MainEditor::timelapsePush()
 {
     if (timelapseRecorder != NULL) {
-        Layer* l = flattenImage();
-        if (l != NULL) {
-            timelapseRecorder->submitFrame(l);
-            delete l;
+        if (timelapseCurrentFrameskip-- <= 0) {
+            Layer* l = flattenImage();
+            if (l != NULL) {
+                timelapseRecorder->submitFrame(l);
+                delete l;
+            }
+            else {
+                g_addNotification(NOTIF_MALLOC_FAIL);
+            }
+            timelapseCurrentFrameskip = timelapseSkipNFrames;
         }
     }
 }

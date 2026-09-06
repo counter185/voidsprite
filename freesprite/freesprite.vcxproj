@@ -261,6 +261,7 @@
     <ClCompile Include="io\io_graphicsgale.cpp" />
     <ClInclude Include="git.h" />
     <ClInclude Include="io\io_graphicsgale.h" />
+    <ClCompile Include="PopupRecordTimelapse.cpp" />
     <ClCompile Include="PopupRenameLayer.cpp" />
     <ClCompile Include="ScreenCubemapPreview.cpp" />
     <ClCompile Include="ScreenPreprocessImage.cpp" />
@@ -654,6 +655,7 @@
     <ClInclude Include="PopupNewImage.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
+    <ClInclude Include="PopupRecordTimelapse.h" />
     <ClInclude Include="PopupRenameLayer.h" />
     <ClInclude Include="PopupSet9SPattern.h" />
     <ClInclude Include="PopupSetParameters.h" />

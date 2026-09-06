@@ -18,12 +18,13 @@ bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data, int 
 #if VSP_USE_LIBAVIF
 class AVIFVideoEncoder : public VideoEncoder {
 
-	void startRecording(PlatformNativePathString path) override;
+	void startRecording(PlatformNativePathString path, int msPerFrame, int quality) override;
 	void stopRecording() override;
 
 	void submitFrame(Layer* l) override;
 protected:
 	PlatformNativePathString file;
 	avifEncoder* encoder = NULL;
+	int msPerFrame = 100;
 };
 #endif

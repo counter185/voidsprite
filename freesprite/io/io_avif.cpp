@@ -305,13 +305,14 @@ bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data, int 
 
 
 #if VSP_USE_LIBAVIF
-void AVIFVideoEncoder::startRecording(PlatformNativePathString path)
+void AVIFVideoEncoder::startRecording(PlatformNativePathString path, int msPerFrame, int quality)
 {
     file = path;
+    this->msPerFrame = msPerFrame;
     encoder = avifEncoderCreate();
     if (encoder != NULL) {
         encoder->timescale = 1000;
-        encoder->quality = 100;
+        encoder->quality = quality;
     }
 }
 
@@ -345,7 +346,10 @@ void AVIFVideoEncoder::submitFrame(Layer* l)
     rgbImage.pixels = (u8*)l->pixels32();
     rgbImage.rowBytes = 4 * l->w;
     if (avifImageRGBToYUV(image, &rgbImage) == AVIF_RESULT_OK) {
-        if (avifEncoderAddImage(encoder, image, 200, AVIF_ADD_IMAGE_FLAG_NONE) != AVIF_RESULT_OK) {
+        if (avifEncoderAddImage(encoder, image, msPerFrame, AVIF_ADD_IMAGE_FLAG_NONE) == AVIF_RESULT_OK) {
+            framesWritten++;
+        }
+        else {
             logerr("[AVIFVideoEncoder] failed to write avif frame");
         }
     }

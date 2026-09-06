@@ -194,6 +194,7 @@ struct TTF_Font;
 class EventCallbackListener;
 class Layer;
 class LayerPalettized;
+class Frame;
 class Pattern;
 class Notification;
 class Gamepad;
