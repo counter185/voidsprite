@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../globals.h"
+#include "../videoencoder.h"
+
+struct avifEncoder;
 
 std::string getLibAVIFVersion();
 
@@ -11,3 +14,16 @@ MainEditor* readAVIF(PlatformNativePathString path, OperationProgressReport* pro
 bool writeAVIF(PlatformNativePathString path, MainEditor* editor, OperationProgressReport* progress, ParameterStore* params);
 
 bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data, int quality = 100);
+
+#if VSP_USE_LIBAVIF
+class AVIFVideoEncoder : public VideoEncoder {
+
+	void startRecording(PlatformNativePathString path) override;
+	void stopRecording() override;
+
+	void submitFrame(Layer* l) override;
+protected:
+	PlatformNativePathString file;
+	avifEncoder* encoder = NULL;
+};
+#endif

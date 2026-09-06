@@ -771,6 +771,7 @@
     <ClInclude Include="updatecheck.h" />
     <ClInclude Include="UtilPathfind.h" />
     <ClInclude Include="vfx.h" />
+    <ClInclude Include="videoencoder.h" />
     <ClInclude Include="ViewSessionScreen.h" />
     <ClInclude Include="visual_config.h" />
     <ClInclude Include="voidsprite_sdk.h" />

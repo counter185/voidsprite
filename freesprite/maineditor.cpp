@@ -1151,6 +1151,7 @@ void MainEditor::setUpWidgets()
 #if VSP_NETWORKING
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
 #endif
+                    {SDL_SCANCODE_T, { "Start/stop recording timelapse", [this]() { if (timelapseRecorder == NULL) timelapsePromptStart(); else timelapseStop(); }}},
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"), [this]() { g_addPopup(new PopupGlobalConfig()); } } },
                     {SDL_SCANCODE_X, { TL("vsp.cmn.close"), [this]() { this->requestSafeClose(); } } },
                 })
@@ -2507,6 +2508,7 @@ void MainEditor::commitStateToLayer(Layer* l)
     if (layerExistsInSession(l)) {
         addToUndoStack(UndoLayerModified::fromCurrentState(l));
         networkCanvasStateUpdated(activeFrame, indexOfLayer(l));
+        timelapsePush();
     }
     else {
         logerr("(commitStateToLayer) layer does not exist in session");
@@ -3298,6 +3300,37 @@ void MainEditor::layer_promptRenameCurrentVariant()
     int layerVariantIndex = clayer->currentLayerVariant;
     layer_promptRenameVariant(clayer, layerVariantIndex);
     
+}
+
+void MainEditor::timelapsePromptStart()
+{
+    if (timelapseRecorder == NULL) {
+        timelapseRecorder = new AVIFVideoEncoder();
+        timelapseRecorder->startRecording(L"timelapse.avif");
+    }
+    else {
+        //already started
+    }
+}
+
+void MainEditor::timelapseStop()
+{
+    if (timelapseRecorder != NULL) {
+        timelapseRecorder->stopRecording();
+        delete timelapseRecorder;
+        timelapseRecorder = NULL;
+    }
+}
+
+void MainEditor::timelapsePush()
+{
+    if (timelapseRecorder != NULL) {
+        Layer* l = flattenImage();
+        if (l != NULL) {
+            timelapseRecorder->submitFrame(l);
+            delete l;
+        }
+    }
 }
 
 void MainEditor::addGuideline(int doublePrecisionPos, bool vertical)

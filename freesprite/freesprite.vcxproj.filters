@@ -1539,6 +1539,7 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="git.h">
+    <ClInclude Include="videoencoder.h">
       <Filter>Header files\util</Filter>
     </ClInclude>
   </ItemGroup>

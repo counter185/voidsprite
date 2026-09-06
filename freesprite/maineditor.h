@@ -358,6 +358,8 @@ public:
 
     std::vector<PanelReference*> openReferencePanels;
 
+    VideoEncoder* timelapseRecorder = NULL;
+
     u32 canvasStateID;
     std::atomic<bool> networkRunning = false;
     std::thread* networkCanvasThread = NULL;
@@ -590,6 +592,10 @@ public:
     void layer_switchVariant(Layer* layer, int variantIndex);
     void layer_promptRenameVariant(Layer* layer, int variantIndex);
     void layer_promptRenameCurrentVariant();
+
+    void timelapsePromptStart();
+    void timelapseStop();
+    void timelapsePush();
 
     void addGuideline(int doublePrecisionPos, bool vertical);
     void removeGuideline(int doublePrecisionPos, bool vertical);
