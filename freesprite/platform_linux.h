@@ -183,16 +183,13 @@ void platformTrySaveOtherFile(
     EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
-    g_startNewOperation([
-        listener = std::move(listener),
-        filetypes = std::move(filetypes),
-        windowTitle = std::move(windowTitle),
-        evt_id = evt_id
-    ](){
-        if (!g_config.useSystemFileDialog) {
-            universal_platformTrySaveOtherFile(listener, filetypes, windowTitle, evt_id);
-            return;
-        }
+
+    if (!g_config.useSystemFileDialog) {
+        universal_platformTrySaveOtherFile(listener, filetypes, windowTitle, evt_id);
+        return;
+    }
+
+    g_startNewOperation([listener, filetypes, windowTitle, evt_id](){
 
         std::vector<std::string> fileTypeStrings;
         for (auto &p : filetypes) {
@@ -208,14 +205,16 @@ void platformTrySaveOtherFile(
             if (index != -1) {
                 size_t last_seg_sep_i = filename.find_last_of('/');
                 if (last_seg_sep_i == filename.npos) {
-                    g_addNotification(WarningNotification(
+                    g_addNotificationFromThread(WarningNotification(
                         "Weird path", "Export file obtained appears to not have a parent"));
                 } else {
                     _L_lastSaveDir = filename.substr(0, index);
                 }
-                listener->eventFileSaved(evt_id, filename, index);
+                g_startNewMainThreadOperation([=]() {
+                    listener->eventFileSaved(evt_id, filename, index);
+                });
             } else {
-                g_addNotification(ErrorNotification(
+                g_addNotificationFromThread(ErrorNotification(
                     "Linux error", "Please add the extension to the file name"));
             }
         }
@@ -226,16 +225,13 @@ void platformTryLoadOtherFile(
     EventCallbackListener *listener,
     std::vector<std::pair<std::string, std::string>> filetypes,
     std::string windowTitle, int evt_id) {
-    g_startNewOperation([
-        listener = std::move(listener),
-        filetypes = std::move(filetypes),
-        windowTitle = std::move(windowTitle),
-        evt_id = evt_id
-    ](){
-        if (!g_config.useSystemFileDialog) {
-            universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
-            return;
-        }
+
+    if (!g_config.useSystemFileDialog) {
+        universal_platformTryLoadOtherFile(listener, filetypes, windowTitle, evt_id);
+        return;
+    }
+
+    g_startNewOperation([listener, filetypes, windowTitle, evt_id](){
 
         std::vector<std::string> fileTypeStrings;
         for (auto &p : filetypes) {
@@ -253,14 +249,16 @@ void platformTryLoadOtherFile(
                 std::string filename = filenames[0];
                 size_t last_seg_sep_i = filename.find_last_of('/');
                 if (last_seg_sep_i == filename.npos) {
-                    g_addNotification(WarningNotification(
+                    g_addNotificationFromThread(WarningNotification(
                         "Weird path", "Import file obtained appears to not have a parent"));
                 } else {
                     _L_lastOpenDir = filename.substr(0, index);
                 }
-                listener->eventFileOpen(evt_id, filenames[0], index);
+                g_startNewMainThreadOperation([=]() {
+                    listener->eventFileOpen(evt_id, filenames[0], index);
+                });
             } else {
-                g_addNotification(ErrorNotification(
+                g_addNotificationFromThread(ErrorNotification(
                     "Linux error", "File type could not be found"));
             }
         }
