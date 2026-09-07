@@ -5,17 +5,25 @@
 #include "maineditor.h"
 #include "UITextField.h"
 #include "io/io_avif.h"
+#include "Notification.h"
 
 PopupRecordTimelapse::PopupRecordTimelapse(MainEditor* caller) : parent(caller)
 {
-	wxHeight = 300;
+	wxHeight = 350;
 	makeTitleAndDesc("Record timelapse", "Start recording timelapse of this editor session?");
+
+	actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](...) { closePopup(); };
 
 	std::vector<TimelapseRecorder> recorders = {
 #if VSP_USE_LIBAVIF
 		{"AVIF animation", ".avif", "AVIF animation", []() { return new AVIFVideoEncoder(); }}
 #endif
 	};
+
+	if (recorders.empty()) {
+		g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No compatible video encoders"));
+		return;
+	}
 
 	recorder = recorders.front();
 	std::vector<std::string> recNames;
@@ -35,9 +43,10 @@ PopupRecordTimelapse::PopupRecordTimelapse(MainEditor* caller) : parent(caller)
 		UIStackPanel::Horizontal(10, { new UILabel("Skip every n frames"), align->alignPoint(), new UINumberInputField(&skipNFrames)}),
 		UIStackPanel::Horizontal(10, { new UILabel("MS per frame"), align->alignPoint(), new UINumberInputField(&msPerFrame)}),
 		UIStackPanel::Horizontal(10, { new UILabel("Quality"), align->alignPoint(), qualityInputField}),
+		UIStackPanel::Horizontal(10, { new UILabel("Repeat last frame"), align->alignPoint(), new UINumberInputField(&parent->timelapseRepeatLastFrame)}),
+		UIStackPanel::Horizontal(10, { new UILabel("Upscale ratio"), align->alignPoint(), new UINumberInputField(&parent->timelapseUpscale)}),
 	}, {10, 90}));
 
-	actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](...) { closePopup(); };
 	actionButton(TL("vsp.cmn.confirm"))->onClickCallback = [this](...) { 
 		platformTrySaveOtherFile(this, { {".avif", "AVIF animation"} }, "voidsprite: save timelapse", 0);
 	};

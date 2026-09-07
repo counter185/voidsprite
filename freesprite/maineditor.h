@@ -360,6 +360,8 @@ public:
 
     int timelapseSkipNFrames = 0;
     int timelapseCurrentFrameskip = 0;
+    int timelapseRepeatLastFrame = 0;
+    int timelapseUpscale = 1;
     VideoEncoder* timelapseRecorder = NULL;
 
     u32 canvasStateID;
@@ -598,7 +600,7 @@ public:
     void timelapsePromptStart();
     void timelapseStart(VideoEncoder* enc, PlatformNativePathString path);
     void timelapseStop();
-    void timelapsePush();
+    void timelapsePush(int repeat = 1);
 
     void addGuideline(int doublePrecisionPos, bool vertical);
     void removeGuideline(int doublePrecisionPos, bool vertical);

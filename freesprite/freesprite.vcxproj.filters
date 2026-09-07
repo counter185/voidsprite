@@ -775,7 +775,7 @@
       <Filter>Source files\screen</Filter>
     </ClCompile>
     <ClCompile Include="PopupRecordTimelapse.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1548,7 +1548,7 @@
       <Filter>Header files\util</Filter>
     </ClInclude>
     <ClInclude Include="PopupRecordTimelapse.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

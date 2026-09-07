@@ -3330,6 +3330,8 @@ void MainEditor::timelapseStop()
 {
     if (timelapseRecorder != NULL) {
         g_startNewOperation([this]() {
+            timelapseCurrentFrameskip = 0;
+            timelapsePush(1 + timelapseRepeatLastFrame);
             VideoEncoder* enc = timelapseRecorder;
             enc->stopRecording();
             g_addNotificationFromThread(Notification("Timelapse saved", frmt("Recorded {} frames", enc->getFramesWritten())));
@@ -3339,13 +3341,27 @@ void MainEditor::timelapseStop()
     }
 }
 
-void MainEditor::timelapsePush()
+void MainEditor::timelapsePush(int repeat)
 {
     if (timelapseRecorder != NULL) {
         if (timelapseCurrentFrameskip-- <= 0) {
             Layer* l = flattenImage();
             if (l != NULL) {
-                timelapseRecorder->submitFrame(l);
+
+                if (timelapseUpscale > 1) {
+                    Layer* ll = l->copyCurrentVariantScaled({ l->w * timelapseUpscale, l->h * timelapseUpscale });
+                    if (ll != NULL) {
+                        delete l;
+                        l = ll;
+                    }
+                    else {
+                        logerr("[timelapsePush] scale failed");
+                    }
+                }
+
+                while (repeat--> 0) {
+                    timelapseRecorder->submitFrame(l);
+                }
                 delete l;
             }
             else {
