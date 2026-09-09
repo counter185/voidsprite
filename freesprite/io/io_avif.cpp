@@ -302,3 +302,59 @@ bool writeAVIFWithSDLImage(PlatformNativePathString path, MainEditor* data, int 
 
     return ret;
 }
+
+
+#if VSP_USE_LIBAVIF
+void AVIFVideoEncoder::startRecording(PlatformNativePathString path, int msPerFrame, int quality)
+{
+    file = path;
+    this->msPerFrame = msPerFrame;
+    encoder = avifEncoderCreate();
+    if (encoder != NULL) {
+        encoder->timescale = 1000;
+        encoder->quality = quality;
+    }
+}
+
+void AVIFVideoEncoder::stopRecording()
+{
+    if (encoder != NULL) {
+        avifRWData output{};
+        if (avifEncoderFinish(encoder, &output) == AVIF_RESULT_OK) {
+            DoOnReturn freeOutputData([&output]() { avifRWDataFree(&output); });
+            FILE* f = platformOpenFile(file, PlatformFileModeWB);
+            if (f != NULL) {
+                fwrite(output.data, 1, output.size, f);
+                fclose(f);
+            }
+            else {
+                logerr("[AVIFVideoEncoder] failed to open file");
+            }
+        }
+        avifEncoderDestroy(encoder);
+    }
+}
+
+void AVIFVideoEncoder::submitFrame(Layer* l)
+{
+    avifImage* image = avifImageCreate(l->w, l->h, 8, AVIF_PIXEL_FORMAT_YUV420);
+    DoOnReturn destroyImage([image]() { avifImageDestroy(image); });
+
+    avifRGBImage rgbImage;
+    avifRGBImageSetDefaults(&rgbImage, image);
+    rgbImage.format = AVIF_RGB_FORMAT_BGRA;
+    rgbImage.pixels = (u8*)l->pixels32();
+    rgbImage.rowBytes = 4 * l->w;
+    if (avifImageRGBToYUV(image, &rgbImage) == AVIF_RESULT_OK) {
+        if (avifEncoderAddImage(encoder, image, msPerFrame, AVIF_ADD_IMAGE_FLAG_NONE) == AVIF_RESULT_OK) {
+            framesWritten++;
+        }
+        else {
+            logerr("[AVIFVideoEncoder] failed to write avif frame");
+        }
+    }
+    else {
+        logerr("[AVIFVideoEncoder] failed to write avif frame");
+    }
+}
+#endif

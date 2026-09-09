@@ -88,7 +88,12 @@ void UITextField::handleInput(SDL_Event evt, XY gPosOffset)
                 break;
             case SDL_SCANCODE_V:
                 if (g_ctrlModifier) {
-                    pasteFromClipboard();
+                    if (replaceOnCtrlV) {
+                        replaceFromClipboard();
+                    }
+                    else {
+                        pasteFromClipboard();
+                    }
                 }
                 break;
         }
@@ -132,6 +137,7 @@ void UITextField::openActionsMenu()
     g_openContextMenu({
         { TL("vsp.cmn.copy"), [this]() { copyToClipboard(); } },
         { TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); } },
+        { "Paste (replace)", [this]() { replaceFromClipboard(); }},
         { TL("vsp.cmn.erase"), [this]() { clearText(); } },
     });
 }
@@ -319,6 +325,12 @@ void UITextField::pasteFromClipboard()
     }
 }
 
+void UITextField::replaceFromClipboard()
+{
+    clearText();
+    pasteFromClipboard();
+}
+
 bool UIColorTextField::isValidOrPartialColor()
 {
     for (int x = 0; x < text.size(); x++) {
@@ -430,6 +442,7 @@ void UIColorTextField::openActionsMenu()
             { "Copy as CSS hsl()", [this]() { copyCSSHSL(); }},
             { "Copy as C# UnityEngine.Color", [this]() { copyUnityEngineColor(); }},
             { TL("vsp.cmn.paste"), [this]() { pasteFromClipboard(); } },
+            { "Paste (replace)", [this]() { replaceFromClipboard(); }},
             { TL("vsp.cmn.erase"), [this]() { clearText(); } },
         });
     }

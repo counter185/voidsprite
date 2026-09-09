@@ -116,28 +116,30 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         framesMutex.unlock();
 
         auto userData = infoJson["clients"];
-        networkClientsListMutex.lock();
-        for (auto*& user : networkClients) {
-            delete user;
-        }
-        networkClients.clear();
-        for (auto& user : userData) {
-            NetworkCanvasClientInfo* clientInfo = new NetworkCanvasClientInfo();
-            clientInfo->uid = user["uid"];
-            clientInfo->clientName = user["clientName"];
-            clientInfo->cursorPosition = XY{ user["cursorX"], user["cursorY"] };
-            clientInfo->lastReportTime = user["lastReportTime"];
-            clientInfo->activeFrame = user["activeFrame"];
-            try {
-                std::string colorString = user["clientColor"];
-                clientInfo->clientColor = std::stoi(colorString, 0, 16);
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+            for (auto*& user : networkClients) {
+                delete user;
             }
-            catch (std::exception&) {
-                clientInfo->clientColor = 0xC0E1FF;
+            networkClients.clear();
+            for (auto& user : userData) {
+                NetworkCanvasClientInfo* clientInfo = new NetworkCanvasClientInfo();
+                clientInfo->uid = user["uid"];
+                clientInfo->clientName = user["clientName"];
+                clientInfo->cursorPosition = XY{ user["cursorX"], user["cursorY"] };
+                clientInfo->lastReportTime = user["lastReportTime"];
+                clientInfo->activeFrame = user["activeFrame"];
+                try {
+                    std::string colorString = user["clientColor"];
+                    clientInfo->clientColor = std::stoi(colorString, 0, 16);
+                }
+                catch (std::exception&) {
+                    clientInfo->clientColor = 0xC0E1FF;
+                }
+                networkClients.push_back(clientInfo);
             }
-            networkClients.push_back(clientInfo);
         }
-        networkClientsListMutex.unlock();
 
         //todo: do this only when the layers update and not every frame
         mainThreadOps.add([this]() {
@@ -168,6 +170,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
                 if (frameIndex != activeFrame || index != selLayer || (!leftMouseHold && (!leftMouseReleaseTimer.started || leftMouseReleaseTimer.elapsedTime() > 300))) {
                     memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
                     l->markLayerDirty();
+                    mainThreadOps.add([this]() { timelapsePush(); });
                 }
             }
             tracked_free(dataBuffer);

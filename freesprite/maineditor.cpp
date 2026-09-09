@@ -61,6 +61,7 @@
 #include "PopupNewImage.h"
 #include "PopupCanvasResize.h"
 #include "PopupRenameLayer.h"
+#include "PopupRecordTimelapse.h"
 #include "multiwindow.h"
 #include "thumbnail_loader.h"
 
@@ -171,6 +172,7 @@ MainEditor::MainEditor(std::vector<Frame*> fframes)
 }
 
 MainEditor::~MainEditor() {
+    timelapseStop();
     discardUndoStack();
     discardRedoStack();
     endNetworkSession();
@@ -547,9 +549,10 @@ void MainEditor::tick() {
         lobbyInfo.id = networkCanvasLobbyID;
         lobbyInfo.isPrivate = networkCanvasRPCPrivate;
         lobbyInfo.joinSecret = networkCanvasRPCAddress;
-        networkClientsListMutex.lock();
-        lobbyInfo.currentSize = networkClients.size();
-        networkClientsListMutex.unlock();
+        {
+            std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+            lobbyInfo.currentSize = networkClients.size();
+        }
         lobbyInfo.maxSize = 16;
         g_pushRPCLobbyInfo(lobbyInfo);
     }
@@ -885,7 +888,7 @@ void MainEditor::drawRowColNumbers()
 
 void MainEditor::drawNetworkCanvasClients()
 {
-    networkClientsListMutex.lock();
+    std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     for (auto& client : networkClients) {
         if (thisClientInfo != NULL && client->uid == thisClientInfo->uid) {
             //skip myself
@@ -907,7 +910,6 @@ void MainEditor::drawNetworkCanvasClients()
         clientRect = offsetRect(clientRect, 15);
         SDL_RenderDrawRect(g_rd, &clientRect);
     }
-    networkClientsListMutex.unlock();
 }
 
 void MainEditor::inputMouseRight(XY at, bool down)
@@ -1024,6 +1026,12 @@ void MainEditor::DrawForeground()
         std::string timeString = frmt("({})", secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
         int fw2 = g_fnt->StatStringDimensions(timeString, 12).x;
         g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
+    }
+    if (timelapseRecorder != NULL) {
+        rightOrigin.y -= 18;
+        std::string s = frmt("Recoding timelapse (frame {})", timelapseRecorder->getFramesWritten());
+        int fw = g_fnt->StatStringDimensions(s, 13).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
     }
 }
 
@@ -1151,6 +1159,7 @@ void MainEditor::setUpWidgets()
 #if VSP_NETWORKING
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
 #endif
+                    {SDL_SCANCODE_T, { "Start/stop recording timelapse", [this]() { if (timelapseRecorder == NULL) timelapsePromptStart(); else timelapseStop(); }}},
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"), [this]() { g_addPopup(new PopupGlobalConfig()); } } },
                     {SDL_SCANCODE_X, { TL("vsp.cmn.close"), [this]() { this->requestSafeClose(); } } },
                 })
@@ -2507,6 +2516,7 @@ void MainEditor::commitStateToLayer(Layer* l)
     if (layerExistsInSession(l)) {
         addToUndoStack(UndoLayerModified::fromCurrentState(l));
         networkCanvasStateUpdated(activeFrame, indexOfLayer(l));
+        timelapsePush();
     }
     else {
         logerr("(commitStateToLayer) layer does not exist in session");
@@ -3300,6 +3310,68 @@ void MainEditor::layer_promptRenameCurrentVariant()
     
 }
 
+void MainEditor::timelapsePromptStart()
+{
+    g_addPopup(new PopupRecordTimelapse(this));
+}
+
+void MainEditor::timelapseStart(VideoEncoder* enc, PlatformNativePathString path)
+{
+    if (timelapseRecorder == NULL) {
+        timelapseRecorder = enc;
+        timelapseCurrentFrameskip = 0;
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Already recording timelapse."));
+    }
+}
+
+void MainEditor::timelapseStop()
+{
+    if (timelapseRecorder != NULL) {
+        g_startNewOperation([this]() {
+            timelapseCurrentFrameskip = 0;
+            timelapsePush(1 + timelapseRepeatLastFrame);
+            VideoEncoder* enc = timelapseRecorder;
+            enc->stopRecording();
+            g_addNotificationFromThread(Notification("Timelapse saved", frmt("Recorded {} frames", enc->getFramesWritten())));
+            timelapseRecorder = NULL;
+            delete enc;
+        });
+    }
+}
+
+void MainEditor::timelapsePush(int repeat)
+{
+    if (timelapseRecorder != NULL) {
+        if (timelapseCurrentFrameskip-- <= 0) {
+            Layer* l = flattenImage();
+            if (l != NULL) {
+
+                if (timelapseUpscale > 1) {
+                    Layer* ll = l->copyCurrentVariantScaled({ l->w * timelapseUpscale, l->h * timelapseUpscale });
+                    if (ll != NULL) {
+                        delete l;
+                        l = ll;
+                    }
+                    else {
+                        logerr("[timelapsePush] scale failed");
+                    }
+                }
+
+                while (repeat--> 0) {
+                    timelapseRecorder->submitFrame(l);
+                }
+                delete l;
+            }
+            else {
+                g_addNotification(NOTIF_MALLOC_FAIL);
+            }
+            timelapseCurrentFrameskip = timelapseSkipNFrames;
+        }
+    }
+}
+
 void MainEditor::addGuideline(int doublePrecisionPos, bool vertical)
 {
     auto& guidelines = ssne.guidelines;
@@ -3981,10 +4053,12 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
         return;
     }
 
-    networkClientsListMutex.lock();
-    networkClients.clear();
-    networkClients.push_back(thisClientInfo);
-    networkClientsListMutex.unlock();
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        networkClients.clear();
+        networkClients.push_back(thisClientInfo);
+    }
+
 
     mainThreadOps.add([this]() {
         networkCanvasHostPanel->updateClientList();
@@ -4006,9 +4080,8 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
         }
     }
     NET_DestroyServer(server);
-    networkClientsListMutex.lock();
+    std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     networkClients.clear();
-    networkClientsListMutex.unlock();
 #else
     logerr("Attempted to run network thread in non-network build");
 #endif
@@ -4031,9 +4104,11 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     clientInfo.clientIP = networkGetSocketAddress(clientSocket);
     bool receivedName = false;
 
-    networkClientsListMutex.lock();
-    networkClients.push_back(&clientInfo);
-    networkClientsListMutex.unlock();
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        networkClients.push_back(&clientInfo);
+    }
+
 
     while (networkRunning && !clientInfo.hostKick) {
         try {
@@ -4054,9 +4129,10 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         networkSendString(clientSocket, "Kicked by host");
     }
 
-    networkClientsListMutex.lock();
-    networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
-    networkClientsListMutex.unlock();
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
+    }
 
     NET_DestroyStreamSocket(clientSocket);
     mainThreadOps.add([this]() {
@@ -4122,22 +4198,24 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         }
         framesMutex.unlock();
         
-        networkClientsListMutex.lock();
-        thisClientInfo->cursorPosition = mousePixelTargetPoint;
-        thisClientInfo->lastReportTime = SDL_GetTicks();
-        for (NetworkCanvasClientInfo* c : networkClients) {
-            json clientJson = {
-                {"uid", c->uid},
-                {"clientName", c->clientName},
-                {"cursorX", c->cursorPosition.x},
-                {"cursorY", c->cursorPosition.y},
-                {"clientColor", frmt("{:06X}", 0xFFFFFF&c->clientColor)},
-                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)},
-                {"activeFrame", c->activeFrame}
-            };
-            infoJson["clients"].push_back(clientJson);
+        {
+            std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+            thisClientInfo->cursorPosition = mousePixelTargetPoint;
+            thisClientInfo->lastReportTime = SDL_GetTicks();
+            for (NetworkCanvasClientInfo* c : networkClients) {
+                json clientJson = {
+                    {"uid", c->uid},
+                    {"clientName", c->clientName},
+                    {"cursorX", c->cursorPosition.x},
+                    {"cursorY", c->cursorPosition.y},
+                    {"clientColor", frmt("{:06X}", 0xFFFFFF & c->clientColor)},
+                    {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)},
+                    {"activeFrame", c->activeFrame}
+                };
+                infoJson["clients"].push_back(clientJson);
+            }
         }
-        networkClientsListMutex.unlock();
+
 
         if (anyDataUpdated) {
             mainThreadOps.add([this]() {
@@ -4183,6 +4261,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                     l->markLayerDirty();
                     changesSinceLastSave = HAS_UNSAVED_CHANGES;
                     networkCanvasStateUpdated(frameIndex, index);
+                    mainThreadOps.add([this]() { timelapsePush(); });
                 }
             }
             tracked_free(dataBuffer);
@@ -4361,15 +4440,17 @@ void MainEditor::networkCanvasKickUID(u32 uid)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.kickhost")));
         return;
     }
-    networkClientsListMutex.lock();
-    for (auto& client : networkClients) {
-        if (client->uid == uid) {
-            networkCanvasSystemMessage(frmt("{} kicked", client->clientName));
-            client->hostKick = true;
-            break;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        for (auto& client : networkClients) {
+            if (client->uid == uid) {
+                networkCanvasSystemMessage(frmt("{} kicked", client->clientName));
+                client->hostKick = true;
+                break;
+            }
         }
     }
-    networkClientsListMutex.unlock();
 }
 
 void MainEditor::networkCanvasSystemMessage(std::string msg)
@@ -4660,7 +4741,7 @@ void EditorNetworkCanvasHostPanel::updateClientList()
 {
     clientList->subWidgets.freeAllDrawables();
     int clientY = 0;
-    parent->networkClientsListMutex.lock();
+    std::lock_guard<std::recursive_mutex> lock(parent->networkClientsListMutex);
     for (auto*& client : parent->networkClients) {
         UIButton* clientButton = new UIButton();
         clientButton->text = std::string((clientSide ? (client->uid == parent->thisClientInfo->uid) : (client == parent->thisClientInfo)) ? UTF8_DIAMOND : "") + client->clientName;
@@ -4686,7 +4767,6 @@ void EditorNetworkCanvasHostPanel::updateClientList()
 
         clientY += 30;
     }
-    parent->networkClientsListMutex.unlock();
 }
 
 void NetworkCanvasChatHostState::newMessage(NetworkCanvasChatMessage msg) {

@@ -774,6 +774,9 @@
     <ClCompile Include="ScreenCubemapPreview.cpp">
       <Filter>Source files\screen</Filter>
     </ClCompile>
+    <ClCompile Include="PopupRecordTimelapse.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1540,6 +1543,12 @@
     </ClInclude>
     <ClInclude Include="git.h">
       <Filter>Header files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="videoencoder.h">
+      <Filter>Header files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupRecordTimelapse.h">
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
