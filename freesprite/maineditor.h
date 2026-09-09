@@ -367,8 +367,8 @@ public:
     u32 canvasStateID;
     std::atomic<bool> networkRunning = false;
     std::thread* networkCanvasThread = NULL;
-    std::mutex networkClientsListMutex;
-    std::vector<NetworkCanvasClientInfo*> networkClients;
+    std::recursive_mutex networkClientsListMutex{};
+    std::vector<NetworkCanvasClientInfo*> networkClients{};
     std::vector<std::thread*> networkCanvasResponderThreads;
     NetworkCanvasClientInfo* thisClientInfo = NULL;
     std::atomic<int> nextClientUID = 0;

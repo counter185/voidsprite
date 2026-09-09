@@ -549,9 +549,10 @@ void MainEditor::tick() {
         lobbyInfo.id = networkCanvasLobbyID;
         lobbyInfo.isPrivate = networkCanvasRPCPrivate;
         lobbyInfo.joinSecret = networkCanvasRPCAddress;
-        networkClientsListMutex.lock();
-        lobbyInfo.currentSize = networkClients.size();
-        networkClientsListMutex.unlock();
+        {
+            std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+            lobbyInfo.currentSize = networkClients.size();
+        }
         lobbyInfo.maxSize = 16;
         g_pushRPCLobbyInfo(lobbyInfo);
     }
@@ -887,7 +888,7 @@ void MainEditor::drawRowColNumbers()
 
 void MainEditor::drawNetworkCanvasClients()
 {
-    networkClientsListMutex.lock();
+    std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     for (auto& client : networkClients) {
         if (thisClientInfo != NULL && client->uid == thisClientInfo->uid) {
             //skip myself
@@ -909,7 +910,6 @@ void MainEditor::drawNetworkCanvasClients()
         clientRect = offsetRect(clientRect, 15);
         SDL_RenderDrawRect(g_rd, &clientRect);
     }
-    networkClientsListMutex.unlock();
 }
 
 void MainEditor::inputMouseRight(XY at, bool down)
@@ -4053,10 +4053,12 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
         return;
     }
 
-    networkClientsListMutex.lock();
-    networkClients.clear();
-    networkClients.push_back(thisClientInfo);
-    networkClientsListMutex.unlock();
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        networkClients.clear();
+        networkClients.push_back(thisClientInfo);
+    }
+
 
     mainThreadOps.add([this]() {
         networkCanvasHostPanel->updateClientList();
@@ -4078,9 +4080,8 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
         }
     }
     NET_DestroyServer(server);
-    networkClientsListMutex.lock();
+    std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     networkClients.clear();
-    networkClientsListMutex.unlock();
 #else
     logerr("Attempted to run network thread in non-network build");
 #endif
@@ -4103,9 +4104,11 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     clientInfo.clientIP = networkGetSocketAddress(clientSocket);
     bool receivedName = false;
 
-    networkClientsListMutex.lock();
-    networkClients.push_back(&clientInfo);
-    networkClientsListMutex.unlock();
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        networkClients.push_back(&clientInfo);
+    }
+
 
     while (networkRunning && !clientInfo.hostKick) {
         try {
@@ -4126,9 +4129,10 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         networkSendString(clientSocket, "Kicked by host");
     }
 
-    networkClientsListMutex.lock();
-    networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
-    networkClientsListMutex.unlock();
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
+    }
 
     NET_DestroyStreamSocket(clientSocket);
     mainThreadOps.add([this]() {
@@ -4194,22 +4198,24 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         }
         framesMutex.unlock();
         
-        networkClientsListMutex.lock();
-        thisClientInfo->cursorPosition = mousePixelTargetPoint;
-        thisClientInfo->lastReportTime = SDL_GetTicks();
-        for (NetworkCanvasClientInfo* c : networkClients) {
-            json clientJson = {
-                {"uid", c->uid},
-                {"clientName", c->clientName},
-                {"cursorX", c->cursorPosition.x},
-                {"cursorY", c->cursorPosition.y},
-                {"clientColor", frmt("{:06X}", 0xFFFFFF&c->clientColor)},
-                {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)},
-                {"activeFrame", c->activeFrame}
-            };
-            infoJson["clients"].push_back(clientJson);
+        {
+            std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+            thisClientInfo->cursorPosition = mousePixelTargetPoint;
+            thisClientInfo->lastReportTime = SDL_GetTicks();
+            for (NetworkCanvasClientInfo* c : networkClients) {
+                json clientJson = {
+                    {"uid", c->uid},
+                    {"clientName", c->clientName},
+                    {"cursorX", c->cursorPosition.x},
+                    {"cursorY", c->cursorPosition.y},
+                    {"clientColor", frmt("{:06X}", 0xFFFFFF & c->clientColor)},
+                    {"lastReportTime", (SDL_GetTicks() - c->lastReportTime)},
+                    {"activeFrame", c->activeFrame}
+                };
+                infoJson["clients"].push_back(clientJson);
+            }
         }
-        networkClientsListMutex.unlock();
+
 
         if (anyDataUpdated) {
             mainThreadOps.add([this]() {
@@ -4255,6 +4261,7 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
                     l->markLayerDirty();
                     changesSinceLastSave = HAS_UNSAVED_CHANGES;
                     networkCanvasStateUpdated(frameIndex, index);
+                    mainThreadOps.add([this]() { timelapsePush(); });
                 }
             }
             tracked_free(dataBuffer);
@@ -4433,15 +4440,17 @@ void MainEditor::networkCanvasKickUID(u32 uid)
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.collabeditor.error.kickhost")));
         return;
     }
-    networkClientsListMutex.lock();
-    for (auto& client : networkClients) {
-        if (client->uid == uid) {
-            networkCanvasSystemMessage(frmt("{} kicked", client->clientName));
-            client->hostKick = true;
-            break;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
+        for (auto& client : networkClients) {
+            if (client->uid == uid) {
+                networkCanvasSystemMessage(frmt("{} kicked", client->clientName));
+                client->hostKick = true;
+                break;
+            }
         }
     }
-    networkClientsListMutex.unlock();
 }
 
 void MainEditor::networkCanvasSystemMessage(std::string msg)
@@ -4732,7 +4741,7 @@ void EditorNetworkCanvasHostPanel::updateClientList()
 {
     clientList->subWidgets.freeAllDrawables();
     int clientY = 0;
-    parent->networkClientsListMutex.lock();
+    std::lock_guard<std::recursive_mutex> lock(parent->networkClientsListMutex);
     for (auto*& client : parent->networkClients) {
         UIButton* clientButton = new UIButton();
         clientButton->text = std::string((clientSide ? (client->uid == parent->thisClientInfo->uid) : (client == parent->thisClientInfo)) ? UTF8_DIAMOND : "") + client->clientName;
@@ -4758,7 +4767,6 @@ void EditorNetworkCanvasHostPanel::updateClientList()
 
         clientY += 30;
     }
-    parent->networkClientsListMutex.unlock();
 }
 
 void NetworkCanvasChatHostState::newMessage(NetworkCanvasChatMessage msg) {
