@@ -7,6 +7,7 @@ class UITextField : public Drawable
 {
 protected:
     std::string text = "";
+    bool replaceOnCtrlV = false;
 public:
     bool enabled = true;
     int fontsize = 18;
@@ -91,6 +92,7 @@ public:
     bool inputChar(char c);
     void copyToClipboard();
     void pasteFromClipboard();
+    void replaceFromClipboard();
     void clearText();
     virtual void openActionsMenu();
 
@@ -100,6 +102,10 @@ public:
 class UIColorTextField : public UITextField {
 public:
     UIColorPicker* linkedToColorPicker = NULL;
+
+    UIColorTextField() : UITextField() {
+        replaceOnCtrlV = true;
+    }
 
     void renderTextFieldText(XY at) override;
     void openActionsMenu() override;
