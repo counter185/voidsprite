@@ -4956,7 +4956,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.tileDimensions.y = std::stoi(kvs["tile.dim.y"]); } catch (...) {}
     try { prefs.tileGridPaddingBottomRight.x = std::stoi(kvs["tile.dim.padrx"]); } catch (...) {}
     try { prefs.tileGridPaddingBottomRight.y = std::stoi(kvs["tile.dim.padby"]); } catch (...) {}
-    try { prefs.showTileGrid = kvs["tile.dim.padby"] == "1"; } catch (...) {}
+    try { prefs.showTileGrid = kvs["tile.show"] == "1"; } catch (...) {}
     try { prefs.symmetryPositions.x = std::stoi(kvs["sym.x"]); } catch (...) {}
     try { prefs.symmetryPositions.y = std::stoi(kvs["sym.y"]); } catch (...) {}
     try { prefs.symmetryEnabled[0] = kvs["sym.enabled"].at(0) == '1'; } catch (...) {}
