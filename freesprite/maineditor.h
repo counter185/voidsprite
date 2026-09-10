@@ -320,8 +320,6 @@ public:
     XY zoomOrigin{};
     int zoomInitial = 0;
     const int zoomPixelStep = 50;
-    bool pinchZooming = false;
-    double lastPinchZoomDistance = 0;
     Timer64 zoomKeyTimer;
 
     ScreenWideActionBar* actionbar = NULL;

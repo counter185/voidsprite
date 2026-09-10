@@ -175,43 +175,32 @@ void SpritesheetPreviewScreen::tick()
 
 void SpritesheetPreviewScreen::defaultInputAction(SDL_Event evt)
 {
-    switch (evt.type) {
-        case SDL_MOUSEBUTTONDOWN:
-            if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingCanvas = true;
-            }
-            else if (evt.button.button == SDL_BUTTON_LEFT) {
-                if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0
-                    && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint({(int)evt.button.x, (int)evt.button.y}))) 
-                {
-                    XY tile = canvas.getTilePosAt(XY{ (int)evt.button.x, (int)evt.button.y }, caller->ssne.tileDimensions);
-                    sprites.push_back(tile);
-                    addTimelineButton();
+    if (!canvas.takeInput(evt)) {
+        switch (evt.type) {
+            case SDL_FINGERDOWN:
+                lastTapPosition = { (int)(g_windowW * evt.tfinger.x), (int)(g_windowH * evt.tfinger.y) };
+                break;
+            case SDL_FINGERUP:
+            {
+                XY touchPos = { g_windowW * evt.tfinger.x, g_windowH * evt.tfinger.y };
+                if (xyDistance(touchPos, lastTapPosition) <= 10 && lastTapTimer.started && lastTapTimer.elapsedTime() < 1000) {
+                    selectTileAt(touchPos);
                 }
+                lastTapPosition = touchPos;
+                lastTapTimer.start();
+                break;
             }
-            break;
-        case SDL_MOUSEBUTTONUP:
-            if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingCanvas = false;
-            }
-            break;
-        case SDL_MOUSEMOTION:
-            if (scrollingCanvas) {
-                canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
-            }
-            break;
-        case SDL_MOUSEWHEEL:
-            canvas.zoomFromWheelInput(evt.wheel.y);
-            break;
+            case SDL_MOUSEBUTTONDOWN:
+                if (evt.button.button == SDL_BUTTON_LEFT) {
+                    selectTileAt({(int)evt.button.x, (int)evt.button.y});
+                }
+                break;
+        }
     }
 }
 
 BaseScreen* SpritesheetPreviewScreen::isSubscreenOf() { 
     return caller; 
-}
-
-void SpritesheetPreviewScreen::eventTextInput(int evt_id, std::string data)
-{
 }
 
 void SpritesheetPreviewScreen::eventButtonPressed(int evt_id)
@@ -339,4 +328,15 @@ int SpritesheetPreviewScreen::calcMaxTimelineScale() {
         scale--;
     }
     return scale;
+}
+
+void SpritesheetPreviewScreen::selectTileAt(XY pos)
+{
+    if (caller->ssne.tileDimensions.x != 0 && caller->ssne.tileDimensions.y != 0
+        && canvas.pointInCanvasBounds(canvas.screenPointToCanvasPoint(pos)))
+    {
+        XY tile = canvas.getTilePosAt(pos, caller->ssne.tileDimensions);
+        sprites.push_back(tile);
+        addTimelineButton();
+    }
 }

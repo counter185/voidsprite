@@ -20,6 +20,8 @@ public:
 
     Canvas canvas;
     bool scrollingCanvas = false;
+    XY lastTapPosition = { 0,0 };
+    Timer64 lastTapTimer;
 
     bool closeNextTick = false;
 
@@ -34,8 +36,8 @@ public:
     void tick() override;
     void defaultInputAction(SDL_Event evt) override;
     BaseScreen* isSubscreenOf() override;
+    bool takesTouchEvents() { return true; }
 
-    void eventTextInput(int evt_id, std::string data) override;
     void eventButtonPressed(int evt_id) override;
 
     std::string getName() override { return TL("vsp.spritesheetpreview"); }
@@ -46,5 +48,7 @@ public:
     void addTimelineButton();
     void popTimelineButton();
     int calcMaxTimelineScale();
+
+    void selectTileAt(XY pos);
 };
 

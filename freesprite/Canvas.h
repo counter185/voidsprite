@@ -12,11 +12,15 @@ public:
     int minScale = 1;
     bool middleMouseHold = false;
 
+    bool pinchZooming = false;
+    double lastPinchZoomDistance = 0;
+
     Canvas() {}
     Canvas(XY dims) : dimensions(dims) {}
 
     //okay actually LET'S NOT USE THIS
     bool takeInput(SDL_Event evt);
+    bool takeTouchPanZoomInput(SDL_Event evt);
 
     void lockToScreenBounds(int top = 0, int left = 0, int bottom = 0, int right = 0, XY bounds = {-1,-1});
     bool pointInCanvasBounds(XY point);

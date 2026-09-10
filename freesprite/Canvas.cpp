@@ -21,6 +21,53 @@ bool Canvas::takeInput(SDL_Event evt)
         case SDL_MOUSEWHEEL:
             zoomFromWheelInput(evt.wheel.y);
             break;
+        case SDL_FINGERMOTION:
+            return takeTouchPanZoomInput(evt);
+    }
+    return false;
+}
+
+bool Canvas::takeTouchPanZoomInput(SDL_Event evt)
+{
+    if (evt.type == SDL_EVENT_FINGER_MOTION) {
+        if (g_touchPointsOnScreen == 2) {
+            int num = 0; //should be 2 anyway
+            SDL_Finger** fingers = SDL_GetTouchFingers(evt.tfinger.touchID, &num);
+
+            if (num == 2) {
+                SDL_Finger* oppositeFinger = fingers[0]->id == evt.tfinger.fingerID ? fingers[1] : fingers[0];
+                XYd oppositeFingerPos = { oppositeFinger->x, oppositeFinger->y };
+                XYd thisFingerPos = { evt.tfinger.x, evt.tfinger.y };
+
+                double distanceNow = xydDistance(thisFingerPos, oppositeFingerPos);
+
+                if (pinchZooming) {
+
+                    double zoomVal = -(lastPinchZoomDistance - distanceNow) / 0.04;
+                    //loginfo(frmt("distanceNow = {}, zoomval = {}", distanceNow, zoomVal));
+
+                    XY midPoint = statLineEndpoint(
+                        xydToXy(XYd{ thisFingerPos.x * g_windowW, thisFingerPos.y * g_windowH }),
+                        xydToXy(XYd{ oppositeFingerPos.x * g_windowW, oppositeFingerPos.y * g_windowH }),
+                        0.5);
+                    zoomFromWheelInput((float)zoomVal, midPoint);
+                }
+                pinchZooming = true;
+                lastPinchZoomDistance = distanceNow;
+            }
+            else {
+                logerr("expected 2 fingers on the screen in zoom motion");
+            }
+        }
+        else {
+            pinchZooming = false;
+        }
+        XY rel = {
+            (evt.tfinger.dx * g_windowW) / (pinchZooming ? 2 : 1),
+            (evt.tfinger.dy * g_windowH) / (pinchZooming ? 2 : 1)
+        };
+        panCanvas(rel);
+        return true;
     }
     return false;
 }
