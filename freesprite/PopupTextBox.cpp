@@ -15,7 +15,7 @@ PopupTextBox::PopupTextBox(std::string tt, std::string tx, std::string defaultVa
     tbox = new UITextField();
     tbox->position = XY{ 20, ixmax(80, bodyEndpoint.y+10) };
     tbox->wxWidth = textFieldWidth;
-    tbox->onTextChangedConfirmCallback = [this](...) {accept(); };
+    tbox->onTextChangedConfirmCallback = [this](UITextField*, std::string) {this->accept(); };
     tbox->setText(defaultValue);
     wxsManager.addDrawable(tbox);
 
