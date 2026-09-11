@@ -4,12 +4,14 @@
 
 void ToolRectClone::clickPress(MainEditor* editor, XY pos)
 {
+    pos = clampPointInsideCanvasIfParam(editor, pos);
     mouseDown = true;
     mouseDownPoint = pos;
 }
 
 void ToolRectClone::clickRelease(MainEditor* editor, XY pos)
 {
+    pos = clampPointInsideCanvasIfParam(editor, pos);
     if (mouseDown) {
         mouseDown = false;
 
@@ -39,10 +41,13 @@ void ToolRectClone::clickRelease(MainEditor* editor, XY pos)
             g_addNotification(NOTIF_MALLOC_FAIL);
             return;
         }
+
+        bool sampleWholeImage = editor->toolProperties["brush.rectclone.samplewholeimage"] == 1;
+
         uint64_t copyIndex = 0;
         for (int y = ymin; y < ymax; y++) {
             for (int x = xmin; x < xmax; x++) {
-                clonedArea[copyIndex++] = editor->layer_getPixelAt(XY{ x,y });
+                clonedArea[copyIndex++] = sampleWholeImage ? editor->pickColorFromAllLayers(XY{x,y}) : editor->layer_getPixelAt(XY{ x,y });
             }
         }
         clonedAreaIsIndexed = editor->isPalettized;
@@ -83,6 +88,7 @@ void ToolRectClone::clickRelease(MainEditor* editor, XY pos)
 void ToolRectClone::rightClickPress(MainEditor* editor, XY pos)
 {
     if (clonedArea != NULL) {
+        pos = clampPointInsideCanvasIfParam(editor, pos);
 
         if (editor->isPalettized && !clonedAreaIsIndexed) {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Cannot paste RGB data into a indexed image."));
@@ -108,8 +114,9 @@ void ToolRectClone::rightClickPress(MainEditor* editor, XY pos)
 
 void ToolRectClone::renderOnCanvas(MainEditor* editor, int scale) {
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
+    XY mousePos = clampPointInsideCanvasIfParam(editor, lastMouseMotionPos);
     if (mouseDown) {
-        drawPixelRect(mouseDownPoint, lastMouseMotionPos, canvasDrawPoint, scale);
+        drawPixelRect(mouseDownPoint, mousePos, canvasDrawPoint, scale);
     }
     else if (clonedArea != NULL) {
         SDL_Color accent = editor->getAccentColor();
@@ -123,8 +130,8 @@ void ToolRectClone::renderOnCanvas(MainEditor* editor, int scale) {
         SDL_RenderDrawRect(g_rd, &cAreaRect);
 
         SDL_Rect previewRect = SDL_Rect{
-            canvasDrawPoint.x + lastMouseMotionPos.x * scale,
-            canvasDrawPoint.y + lastMouseMotionPos.y * scale,
+            canvasDrawPoint.x + mousePos.x * scale,
+            canvasDrawPoint.y + mousePos.y * scale,
             clonedAreaPointAndDimensions.w * scale,
             clonedAreaPointAndDimensions.h * scale
         };
@@ -139,5 +146,15 @@ void ToolRectClone::renderOnCanvas(MainEditor* editor, int scale) {
     }
 
     SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x30);
-    drawLocalPoint(canvasDrawPoint, lastMouseMotionPos, scale);
+    drawLocalPoint(canvasDrawPoint, mousePos, scale);
+}
+
+XY ToolRectClone::clampPointInsideCanvasIfParam(MainEditor* editor, XY point)
+{
+    return editor->toolProperties["brush.rectclone.locktobounds"] == 1 ?
+        XY{
+            ixmin(ixmax(point.x, 0), editor->canvas.dimensions.x - 1),
+            ixmin(ixmax(point.y, 0), editor->canvas.dimensions.y - 1)
+    }
+    : point;
 }

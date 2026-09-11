@@ -662,6 +662,7 @@
     {"vsp.brush.param.round", "Round"},
     {"vsp.brush.param.gradsize", "Increasing size"},
     {"vsp.brush.param.lockbounds", "Lock to canvas bounds"},
+    {"vsp.brush.param.samplewholeimage", "Sample whole image"},
 
     {"vsp.brush.undefined", "Default brush"},
     {"vsp.brush.squarepixel", "Pixel"},

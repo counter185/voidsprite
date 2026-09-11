@@ -19,6 +19,13 @@ class ToolRectClone :
     std::string getName() override { return "Clone rect"; }
     std::string getTooltip() override { return "Select an area with Mouse Left.\nPaste it at a different location with Mouse Right."; }
     std::string getIconPath() override { return "tool_cloner.png"; }
+    std::map<std::string, BrushProperty> getProperties() override
+    {
+        return {
+            {"brush.rectclone.locktobounds", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.lockbounds"),0)},
+            {"brush.rectclone.samplewholeimage", BRUSH_BOOL_PROPERTY(TL("vsp.brush.param.samplewholeimage"),0)},
+        };
+    }
     XY getSection() override { return XY{ 1,0 }; }
 
     bool overrideRightClick() override { return true; }
@@ -27,5 +34,7 @@ class ToolRectClone :
     void rightClickPress(MainEditor* editor, XY pos) override;
     bool isReadOnly() override { return true; }
     void renderOnCanvas(MainEditor* editor, int scale) override;
+
+    XY clampPointInsideCanvasIfParam(MainEditor* editor, XY point);
 };
 
