@@ -8,6 +8,8 @@
 #include "PanelSpritesheetPreview.h"
 #include "UIButton.h"
 #include "TilemapPreviewScreen.h"
+#include "io/io_avif.h"
+#include "Notification.h"
 
 #define N_BUTTONS_ADDED_TO_TIMELINE 3
 #define MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES 120
@@ -31,21 +33,24 @@ SpritesheetPreviewScreen::SpritesheetPreviewScreen(MainEditor* parent) {
         {
             {
                 SDL_SCANCODE_F,
-                {
-                    "File",
-                    {},
+                makeNavbarSection(
+                    TL("vsp.nav.file"), g_iconNavbarTabFile,
                     {
-                        {SDL_SCANCODE_C, { "Close",
-                                [this]() {
-                                    this->closeNextTick = true;
-                                }
-                            }
-                        },
-                    },
-                    g_iconNavbarTabFile
-                }
+                        {SDL_SCANCODE_E, { "Export animation...", [this]() { promptSaveAnimation(); }}},
+                        {SDL_SCANCODE_C, { "Close", [this]() { this->closeNextTick = true; }}},
+                    }
+                )
             },
-        }, { SDL_SCANCODE_F });
+            {
+                SDL_SCANCODE_E,
+                makeNavbarSection(
+                    TL("vsp.nav.edit"), g_iconNavbarTabEdit,
+                    {
+                        {SDL_SCANCODE_C, { "Clear timeline", [this]() { sprites.clear(); genTimelineButtons(); }}},
+                    }
+                )
+            },
+        }, { SDL_SCANCODE_F, SDL_SCANCODE_E });
     wxsManager.addDrawable(navbar);
 
 
@@ -203,6 +208,24 @@ BaseScreen* SpritesheetPreviewScreen::isSubscreenOf() {
     return caller; 
 }
 
+void SpritesheetPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
+{
+    //temporarily
+    if (evt_id == 0) {
+        if (!sprites.empty()) {
+#if VSP_USE_LIBAVIF
+            g_startNewOperation([this, name]() {
+                AVIFVideoEncoder* enc = new AVIFVideoEncoder();
+                enc->startRecording(name, msPerSprite, 100);
+                saveCurrentAnimation(enc, 3);
+                enc->stopRecording();
+                delete enc;
+            });
+#endif
+        }
+    }
+}
+
 void SpritesheetPreviewScreen::eventButtonPressed(int evt_id)
 {
     int timelineIndex = evt_id / N_BUTTONS_ADDED_TO_TIMELINE;
@@ -253,8 +276,8 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int scale, int which)
 
         for (Layer*& l : caller->getLayerStack()) {
             if (!l->hidden) {
-                l->prerender();
-                SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, &layersClipArea, &spriteDrawArea);
+                l->render(spriteDrawArea, layersClipArea, l->layerAlpha);
+                //SDL_RenderCopy(g_rd, l->renderData[g_rd].tex, &layersClipArea, &spriteDrawArea);
             }
         }
     }
@@ -338,5 +361,32 @@ void SpritesheetPreviewScreen::selectTileAt(XY pos)
         XY tile = canvas.getTilePosAt(pos, caller->ssne.tileDimensions);
         sprites.push_back(tile);
         addTimelineButton();
+    }
+}
+
+void SpritesheetPreviewScreen::promptSaveAnimation()
+{
+    platformTrySaveOtherFile(this, { {".avif", "AVIF Animation"} }, "save animation", 0);
+}
+
+void SpritesheetPreviewScreen::saveCurrentAnimation(VideoEncoder* encoder, int scale)
+{
+    Layer* flat = caller->flattenImage();
+    if (flat != NULL) {
+        for (auto& frame : sprites) {
+            SDL_Rect sourceRect = caller->getPaddedTilePosAndDimensions(frame);
+            Layer* t = flat->trim(sourceRect);
+            if (scale > 1) {
+                Layer* tt = t->copyAllVariantsScaled({ t->w * scale, t->h * scale });
+                delete t;
+                t = tt;
+            }
+            encoder->submitFrame(t);
+            delete t;
+        }
+        delete flat;
+    }
+    else {
+        g_addNotification(NOTIF_MALLOC_FAIL);
     }
 }

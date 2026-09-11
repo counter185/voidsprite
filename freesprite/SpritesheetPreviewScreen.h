@@ -32,16 +32,17 @@ public:
     ~SpritesheetPreviewScreen();
 
     void render() override;
-    void RenderCanvas();
     void tick() override;
     void defaultInputAction(SDL_Event evt) override;
     BaseScreen* isSubscreenOf() override;
     bool takesTouchEvents() { return true; }
 
+    void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) override;
     void eventButtonPressed(int evt_id) override;
 
     std::string getName() override { return TL("vsp.spritesheetpreview"); }
 
+    void RenderCanvas();
     void drawPreview(XY at, int scale, int which = -1);
     void drawBackground();
     void genTimelineButtons();
@@ -50,5 +51,8 @@ public:
     int calcMaxTimelineScale();
 
     void selectTileAt(XY pos);
+
+    void promptSaveAnimation();
+    void saveCurrentAnimation(VideoEncoder* encoder, int scale);
 };
 
