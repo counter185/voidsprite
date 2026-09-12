@@ -14,11 +14,7 @@ PopupRecordTimelapse::PopupRecordTimelapse(MainEditor* caller) : parent(caller)
 
 	actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](...) { closePopup(); };
 
-	std::vector<TimelapseRecorder> recorders = {
-#if VSP_USE_LIBAVIF
-		{"AVIF animation", ".avif", "AVIF animation", []() { return new AVIFVideoEncoder(); }}
-#endif
-	};
+	std::vector<AnimationRecorder> recorders = g_getAnimRecorders();
 
 	if (recorders.empty()) {
 		g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No compatible video encoders"));
@@ -48,7 +44,7 @@ PopupRecordTimelapse::PopupRecordTimelapse(MainEditor* caller) : parent(caller)
 	}, {10, 90}));
 
 	actionButton(TL("vsp.cmn.confirm"))->onClickCallback = [this](...) { 
-		platformTrySaveOtherFile(this, { {".avif", "AVIF animation"} }, "voidsprite: save timelapse", 0);
+		platformTrySaveOtherFile(this, { {this->recorder.extension, this->recorder.name} }, "save timelapse", 0);
 	};
 }
 

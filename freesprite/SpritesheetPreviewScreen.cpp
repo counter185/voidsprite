@@ -10,6 +10,7 @@
 #include "TilemapPreviewScreen.h"
 #include "io/io_avif.h"
 #include "Notification.h"
+#include "PopupSaveAnimation.h"
 
 #define N_BUTTONS_ADDED_TO_TIMELINE 3
 #define MIN_DISTANCE_BETWEEN_TIMELINE_SPRITES 120
@@ -208,24 +209,6 @@ BaseScreen* SpritesheetPreviewScreen::isSubscreenOf() {
     return caller; 
 }
 
-void SpritesheetPreviewScreen::eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex)
-{
-    //temporarily
-    if (evt_id == 0) {
-        if (!sprites.empty()) {
-#if VSP_USE_LIBAVIF
-            g_startNewOperation([this, name]() {
-                AVIFVideoEncoder* enc = new AVIFVideoEncoder();
-                enc->startRecording(name, msPerSprite, 100);
-                saveCurrentAnimation(enc, 3);
-                enc->stopRecording();
-                delete enc;
-            });
-#endif
-        }
-    }
-}
-
 void SpritesheetPreviewScreen::eventButtonPressed(int evt_id)
 {
     int timelineIndex = evt_id / N_BUTTONS_ADDED_TO_TIMELINE;
@@ -366,25 +349,45 @@ void SpritesheetPreviewScreen::selectTileAt(XY pos)
 
 void SpritesheetPreviewScreen::promptSaveAnimation()
 {
-    platformTrySaveOtherFile(this, { {".avif", "AVIF Animation"} }, "save animation", 0);
+    PopupSaveAnimation* popup = new PopupSaveAnimation("Export animation", "Export the current spritesheet preview as an animation?");
+    popup->msPerFrame = msPerSprite;
+    popup->quality = 100;
+    popup->onConfirmCallback = [this](PopupSaveAnimation* p, PlatformNativePathString path) {
+        auto rec = p->recorder;
+        auto msPerFrame = p->msPerFrame;
+        auto quality = p->quality;
+        auto scale = p->scale;
+        auto repeat = p->repeatTimes;
+        g_startNewOperation([this, path, rec, msPerFrame, quality, scale, repeat]() {
+            VideoEncoder* enc = rec.createFn();
+            enc->startRecording(path, msPerFrame, quality);
+            saveCurrentAnimation(enc, scale, repeat);
+            enc->stopRecording();
+            delete enc;
+        });
+    };
+    g_addPopup(popup);
 }
 
-void SpritesheetPreviewScreen::saveCurrentAnimation(VideoEncoder* encoder, int scale)
+void SpritesheetPreviewScreen::saveCurrentAnimation(VideoEncoder* encoder, int scale, int repeat)
 {
     Layer* flat = caller->flattenImage();
     if (flat != NULL) {
-        for (auto& frame : sprites) {
-            SDL_Rect sourceRect = caller->getPaddedTilePosAndDimensions(frame);
-            Layer* t = flat->trim(sourceRect);
-            if (scale > 1) {
-                Layer* tt = t->copyAllVariantsScaled({ t->w * scale, t->h * scale });
+        for (int i = 0; i < repeat; i++) {
+            for (auto& frame : sprites) {
+                SDL_Rect sourceRect = caller->getPaddedTilePosAndDimensions(frame);
+                Layer* t = flat->trim(sourceRect);
+                if (scale > 1) {
+                    Layer* tt = t->copyAllVariantsScaled({ t->w * scale, t->h * scale });
+                    delete t;
+                    t = tt;
+                }
+                encoder->submitFrame(t);
                 delete t;
-                t = tt;
             }
-            encoder->submitFrame(t);
-            delete t;
         }
         delete flat;
+        g_addNotificationFromThread(Notification("Animation saved", TL("Saved {} frames", sprites.size() * repeat)));
     }
     else {
         g_addNotification(NOTIF_MALLOC_FAIL);

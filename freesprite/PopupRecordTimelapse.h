@@ -1,13 +1,7 @@
 #pragma once
 #include "BasePopup.h"
 #include "EventCallbackListener.h"
-
-struct TimelapseRecorder {
-    std::string name;
-    std::string extension;
-    std::string extensionDesc;
-    std::function<VideoEncoder*()> createFn;
-};
+#include "PopupSaveAnimation.h"
 
 class PopupRecordTimelapse :
     public BasePopup, public EventCallbackListener
@@ -17,7 +11,7 @@ protected:
     int msPerFrame = 100;
     int quality = 90;
     int skipNFrames = 0;
-    TimelapseRecorder recorder;
+    AnimationRecorder recorder;
 public:
     PopupRecordTimelapse(MainEditor* caller);
 

@@ -777,6 +777,9 @@
     <ClCompile Include="PopupRecordTimelapse.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="PopupSaveAnimation.cpp">
+      <Filter>Source files\popup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1548,6 +1551,9 @@
       <Filter>Header files\util</Filter>
     </ClInclude>
     <ClInclude Include="PopupRecordTimelapse.h">
+      <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSaveAnimation.h">
       <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>

@@ -37,7 +37,6 @@ public:
     BaseScreen* isSubscreenOf() override;
     bool takesTouchEvents() { return true; }
 
-    void eventFileSaved(int evt_id, PlatformNativePathString name, int exporterIndex) override;
     void eventButtonPressed(int evt_id) override;
 
     std::string getName() override { return TL("vsp.spritesheetpreview"); }
@@ -53,6 +52,6 @@ public:
     void selectTileAt(XY pos);
 
     void promptSaveAnimation();
-    void saveCurrentAnimation(VideoEncoder* encoder, int scale);
+    void saveCurrentAnimation(VideoEncoder* encoder, int scale, int repeat);
 };
 

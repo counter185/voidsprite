@@ -263,6 +263,7 @@
     <ClInclude Include="io\io_graphicsgale.h" />
     <ClCompile Include="PopupRecordTimelapse.cpp" />
     <ClCompile Include="PopupRenameLayer.cpp" />
+    <ClCompile Include="PopupSaveAnimation.cpp" />
     <ClCompile Include="ScreenCubemapPreview.cpp" />
     <ClCompile Include="ScreenPreprocessImage.cpp" />
     <ClCompile Include="ASCIIEditor.cpp" />
@@ -657,6 +658,7 @@
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupRecordTimelapse.h" />
     <ClInclude Include="PopupRenameLayer.h" />
+    <ClInclude Include="PopupSaveAnimation.h" />
     <ClInclude Include="PopupSet9SPattern.h" />
     <ClInclude Include="PopupSetParameters.h" />
     <ClInclude Include="PopupSetTemplateInfo.h" />
