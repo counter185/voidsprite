@@ -387,7 +387,7 @@ void SpritesheetPreviewScreen::saveCurrentAnimation(VideoEncoder* encoder, int s
             }
         }
         delete flat;
-        g_addNotificationFromThread(Notification("Animation saved", TL("Saved {} frames", sprites.size() * repeat)));
+        g_addNotificationFromThread(Notification("Animation saved", frmt("Saved {} frames", sprites.size() * repeat)));
     }
     else {
         g_addNotification(NOTIF_MALLOC_FAIL);
