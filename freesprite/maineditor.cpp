@@ -347,7 +347,7 @@ void MainEditor::RenderCanvas()
     }
 
     //draw a separate 1x1 grid if the scale is >= 1600%
-    if (canvas.scale >= 10) {
+    if (ssne.showTileGrid && canvas.scale >= 10) {
 
         SDL_Color gridColor = getAccentColor();
         uint8_t tileGridAlpha = canvas.scale < 16 ? 0x10 * ((canvas.scale - 9) / 7.0) : 0x10;
@@ -3102,12 +3102,7 @@ void MainEditor::promptForImageAction(PlatformNativePathString path)
 void MainEditor::togglePixelGrid()
 {
     TOGGLE(ssne.showTileGrid);
-    if (xyEqual(ssne.tileDimensions, {0,0})) {
-        g_addNotification(ErrorNotification("Pixel grid is not set.", ""));
-    }
-    else {
-        g_addNotification(Notification(ssne.showTileGrid ? "Pixel grid shown" : "Pixel grid hidden", ""));
-    }
+    g_addNotification(Notification(ssne.showTileGrid ? "Pixel grid shown" : "Pixel grid hidden", ""));
 }
 
 void MainEditor::setLastConfirmedSavePath(PlatformNativePathString path)

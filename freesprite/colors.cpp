@@ -503,8 +503,8 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
                     return 0xFF000000 | std::stoul(color, nullptr, 16);
                 });
                 if (writePltVOIDPLT(outputFile, colorsU32)) {
-                    g_startNewMainThreadOperation([]() {
-                        g_addNotification(SuccessNotification(TL("vsp.success.lospecpaletteinstalled"), ""));
+                    g_startNewMainThreadOperation([name]() {
+                        g_addNotification(SuccessNotification(TL("vsp.success.lospecpaletteinstalled"), name));
                         g_reloadColorMap();
                     });
                 }
