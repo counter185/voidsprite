@@ -49,10 +49,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v4
-      with:
-        log-accepted-android-sdk-licenses: false
+    #- name: Setup Android SDK
+    #  uses: android-actions/setup-android@v4
+    #  with:
+    #    log-accepted-android-sdk-licenses: false
 
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
