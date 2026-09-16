@@ -18,3 +18,7 @@ bool writePISKEL(PlatformNativePathString path, MainEditor* editor);
 //JPixel
 MainEditor* readJPixel(PlatformNativePathString path);
 //bool writeJPixel(PlatformNativePathString path, MainEditor* editor);
+
+//PxerStudio
+MainEditor* readPxer(PlatformNativePathString path);
+//bool writePxer(PlatformNativePathString path, MainEditor* editor);

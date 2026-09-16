@@ -2582,6 +2582,7 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::sessionImporter("Piskel", ".piskel", &readPISKEL, exPiskel));
     g_fileImporters.push_back(FileImporter::sessionImporter("Pixil", ".pixil", &readPIXIL, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("JPixel", ".jpx", &readJPixel, NULL));
+    g_fileImporters.push_back(FileImporter::sessionImporter("PxerStudio", ".pxer", &readPxer, NULL));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".aseprite", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,
         magicVerify(4, "\xE0\xA5")));
     g_fileImporters.push_back(FileImporter::sessionImporter("Aseprite Sprite", ".ase", &readAsepriteASE, exAsepriteASE, FORMAT_RGB | FORMAT_PALETTIZED,

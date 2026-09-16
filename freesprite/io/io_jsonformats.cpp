@@ -333,3 +333,30 @@ MainEditor* readJPixel(PlatformNativePathString path)
     }
     return NULL;
 }
+
+MainEditor* readPxer(PlatformNativePathString path)
+{
+    std::ifstream f = platformOpenIFStream(path);
+    if (f.is_open()) {
+        json j = json::parse(f);
+        f.close();
+
+        std::vector<Layer*> layers;
+
+        for (auto& layer : j) {
+            Layer* l = Layer::tryAllocLayer(layer["width"], layer["height"]);
+            if (l != NULL) {
+                for (auto& pxer : layer["pxers"]) {
+                    l->setPixel(XY{ (int)pxer["x"], (int)pxer["y"] }, (u32)(int)pxer["color"]);
+                }
+                l->hidden = !(bool)layer["visible"];
+                layers.insert(layers.begin(), l);
+            }
+        }
+
+        if (!layers.empty()) {
+            return new MainEditor(layers);
+        }
+    }
+    return NULL;
+}
