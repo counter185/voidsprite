@@ -284,7 +284,7 @@ PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNat
 }
 
 XY getSnappedPoint(XY from, XY to) {
-    double ang = angleBetweenTwoPoints(from, to);
+    /*double ang = angleBetweenTwoPoints(from, to);
     if ((ang > 70 && ang < 110) || (ang > 250 && ang < 290)) {
         return { from.x, to.y };
     }
@@ -306,6 +306,144 @@ XY getSnappedPoint(XY from, XY to) {
             int diff = abs(diffs[0]) > abs(diffs[1]) ? diffs[0] : diffs[1];
             return { from.x + diff, from.y + diff };
         }
+    }*/
+
+    PointSnapResult s = getSnappedPointV2(from, to);
+    if (s.aspect != 0) {
+        s.to = to;
+    }
+    return getSnappedPointEndpoint(s, to);
+}
+
+PointSnapResult getSnappedPointV2(XY from, XY to)
+{
+    double distanceFromTo = xyDistance(from, to);
+
+    XY toDiff = xySubtract(to, from);
+
+    int f = ((toDiff.x < 0) ^ (toDiff.y < 0)) ? -1 : 1;
+
+    std::vector<PointSnapResult> points;
+    if (distanceFromTo > 1) {
+        points.push_back(PointSnapResult{ 0, from, xyAdd(from, {toDiff.x, 0}), xyDistance(toDiff, {toDiff.x, 0}) });
+        points.push_back(PointSnapResult{ 0, from, xyAdd(from, {0, toDiff.y}), xyDistance(toDiff, {0, toDiff.y}) });
+        for (int i = 1; i <= ixmin(8, (int)distanceFromTo); i++) {
+            double A = i * f;
+            double A2 = 1.0/i * f;
+            double distanceToLine = abs(A * toDiff.x - toDiff.y) / sqrt(A*A + 1);
+            double distanceToLine2 = abs(A2 * toDiff.x - toDiff.y) / sqrt(A2*A2 + 1);
+            points.push_back({ i, from, xyAdd(from, {toDiff.x, (int)(A * toDiff.x)}), distanceToLine, false });
+            points.push_back({ i, from, xyAdd(from, {toDiff.x, (int)(A2 * toDiff.x)}), distanceToLine2, true });
+        }
+
+        PointSnapResult& r = points.front();
+        for (auto& p : points) {
+            if (r.distance > p.distance) {
+                r = p;
+            }
+        }
+        return r;
+    }
+    else {
+        return { 0, from, to, 0 };
+    }
+}
+
+XY getSnappedPointEndpoint(PointSnapResult snap, XY point)
+{
+    XY from = snap.from;
+    XY to = snap.to;
+
+    if (from.x == to.x || from.y == to.y) {
+        return to;
+    }
+
+    XY pos = from;
+    XY lastPos = pos;
+    double distanceNow = xyDistance(pos, to);
+    int direction =
+        to.x > from.x && to.y > from.y ? 0  //up-right
+        : to.x > from.x && to.y < from.y ? 1 //down-right
+        : to.x < from.x && to.y > from.y ? 2 //up-left
+        : 3;    //down-left
+    int aspect = snap.aspect;
+
+    int aspectCounter = 0;
+    while (true) {
+        double nextDistance = xyDistance(pos, to);
+        if (nextDistance > distanceNow) {
+            return lastPos;
+        }
+        lastPos = pos;
+        distanceNow = nextDistance;
+
+        switch (direction) {
+        case 0:
+            if (snap.divOne) {
+                pos.x++;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.y++;
+                }
+            }
+            else {
+                pos.y++;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.x++;
+                }
+            }
+            break;
+        case 1:
+            if (snap.divOne) {
+                pos.x++;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.y--;
+                }
+            }
+            else {
+                pos.y--;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.x++;
+                }
+            }
+            break;
+        case 2:
+            if (snap.divOne) {
+                pos.x--;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.y++;
+                }
+            }
+            else {
+                pos.y++;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.x--;
+                }
+            }
+            break;
+        case 3:
+            if (snap.divOne) {
+                pos.x--;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.y--;
+                }
+            }
+            else {
+                pos.y--;
+                if (++aspectCounter == aspect) {
+                    aspectCounter = 0;
+                    pos.x--;
+                }
+            }
+            break;
+        }
+
     }
 }
 
@@ -391,6 +529,104 @@ void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc
             }
         }
     }
+}
+void rasterizeSnappedLine(PointSnapResult p, std::function<void(XY)> forEachPixel)
+{
+    XY from = p.from;
+    XY to = p.to;
+
+    if (from.x == to.x || from.y == to.y) {
+        rasterizeLine(from, to, forEachPixel);
+        return;
+    }
+
+    XY pos = from;
+    double distanceNow = xyDistance(pos, to);
+    int direction =
+        to.x > from.x && to.y > from.y ? 0  //up-right
+        : to.x > from.x && to.y < from.y ? 1 //down-right
+        : to.x < from.x && to.y > from.y ? 2 //up-left
+        : 3;    //down-left
+    int aspect = p.aspect;
+
+    int aspectCounter = 0;
+    while (true) {
+        double nextDistance = xyDistance(pos, to);
+        if (nextDistance > distanceNow) {
+            break;
+        }
+        distanceNow = nextDistance;
+        forEachPixel(pos);
+
+        switch (direction) {
+            case 0:
+                if (p.divOne) {
+                    pos.x++;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.y++;
+                    }
+                }
+                else {
+                    pos.y++;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.x++;
+                    }
+                }
+                break;
+            case 1:
+                if (p.divOne) {
+                    pos.x++;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.y--;
+                    }
+                }
+                else {
+                    pos.y--;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.x++;
+                    }
+                }
+                break;
+            case 2:
+                if (p.divOne) {
+                    pos.x--;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.y++;
+                    }
+                }
+                else {
+                    pos.y++;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.x--;
+                    }
+                }
+                break;
+            case 3:
+                if (p.divOne) {
+                    pos.x--;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.y--;
+                    }
+                }
+                else {
+                    pos.y--;
+                    if (++aspectCounter == aspect) {
+                        aspectCounter = 0;
+                        pos.x--;
+                    }
+                }
+                break;
+        }
+
+    }
+
 }
 void rasterizeDiamond(XY from, XY to, std::function<void(XY)> forEachPixel)
 {

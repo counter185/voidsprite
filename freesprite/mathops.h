@@ -72,7 +72,18 @@ SDL_FPoint xytofp(XY p);
 SDL_Rect offsetRect(SDL_Rect r, int offset);
 SDL_Rect offsetRect(SDL_Rect r, int offsetX, int offsetY);
 double angleBetweenTwoPoints(XY a, XY b);
+
+struct PointSnapResult {
+    int aspect;
+    XY from;
+    XY to;
+    double distance;
+    bool divOne = false;
+};
+//deprecated, use getSnappedPointV2
 XY getSnappedPoint(XY from, XY to);
+PointSnapResult getSnappedPointV2(XY from, XY to);
+XY getSnappedPointEndpoint(PointSnapResult snap, XY point);
 
 XYZd xyzdAdd(XYZd p1, XYZd p2);
 double xyzdDistance(XYZd p1, XYZd p2);
@@ -97,6 +108,7 @@ PlatformNativePathString appendPath(PlatformNativePathString parent, PlatformNat
 void rasterizePoint(XY point, int thickness, std::function<void(XY)> forEachPixel, bool round = false);
 void rasterizeCirclePoint(XY point, int r, std::function<void(XY)> forEachPoint);
 void rasterizeLine(XY from, XY to, std::function<void(XY)> forEachPixel, int arc = 0, bool ceilLine = false);
+void rasterizeSnappedLine(PointSnapResult p, std::function<void(XY)> forEachPixel);
 void rasterizeDiamond(XY from, XY to, std::function<void(XY)> forEachPixel);
 void rasterizeEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);
 void rasterizeSplitEllipse(XY posMin, XY posMax, std::function<void(XY)> forEachPixel);

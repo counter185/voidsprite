@@ -8,6 +8,8 @@ void BrushDiamond::clickPress(MainEditor* editor, XY pos)
 
 void BrushDiamond::clickRelease(MainEditor* editor, XY pos)
 {
+    pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
+
     XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
     XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
 
@@ -27,8 +29,11 @@ void BrushDiamond::renderOnCanvas(MainEditor* editor, int scale)
     if (heldDown) {
         drawSelectedPoint(editor, startPos);
 
-        XY posMin = { ixmin(lastMouseMotionPos.x, startPos.x), ixmin(lastMouseMotionPos.y, startPos.y) };
-        XY posMax = { ixmax(lastMouseMotionPos.x, startPos.x), ixmax(lastMouseMotionPos.y, startPos.y) };
+        XY pos = lastMouseMotionPos;
+        pos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
+
+        XY posMin = { ixmin(pos.x, startPos.x), ixmin(pos.y, startPos.y) };
+        XY posMax = { ixmax(pos.x, startPos.x), ixmax(pos.y, startPos.y) };
         rasterizeDiamond(posMin, posMax, [&](XY a) {
             drawSelectedPoint(editor, a);
         });

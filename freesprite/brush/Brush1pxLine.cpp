@@ -12,16 +12,29 @@ void Brush1pxLine::clickRelease(MainEditor* editor, XY pos)
     bool roundB = editor->toolProperties["brush.pxline.round"] == 1;
     bool gradualSize = editor->toolProperties["brush.pxline.gradsize"] == 1;
 
-    XY endPos = g_shiftModifier ? getSnappedPoint(startPos, pos) : pos;
-    rasterizeLine(startPos, endPos, [&](XY p) {
+    XY endPos = pos;
+
+    std::function<void(XY)> rasterizeFn = [&](XY p) {
         int tsize = size;
         if (gradualSize) {
             tsize = (int)round(size * (xyDistance(p, endPos) / xyDistance(startPos, endPos)));
         }
         rasterizePoint(p, tsize, [&](XY pp) {
             editor->SetPixel(pp, editor->getActiveColor());
-        }, roundB);
-    });
+            }, roundB);
+        };
+
+    if (g_shiftModifier) {
+        auto snap = getSnappedPointV2(startPos, endPos);
+        if (snap.aspect != 0) {
+            snap.to = endPos;
+        }
+
+        rasterizeSnappedLine(snap, rasterizeFn);
+    }
+    else {
+        rasterizeLine(startPos, endPos, rasterizeFn);
+    }
     dragging = false;
 }
 
@@ -32,30 +45,36 @@ void Brush1pxLine::renderOnCanvas(MainEditor* editor, int scale)
 
     XY canvasDrawPoint = editor->canvas.currentDrawPoint;
     if (dragging) {
-        /*std::map<u64, bool> ps;
-        rasterizeLine(startPos, g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos, [&](XY a) {
-            rasterizePoint(a, size, [&](XY p) {
-                ps[encodeXY(p)] = true;
-            }, round);
-        });
 
-        for (auto& [encxy, _] : ps) {
-            drawSelectedPoint(editor, decodeXY(encxy));
-        }*/
-        //rasterizing the whole line with  thickness is
-        //very slow
+        XY endPos = lastMouseMotionPos;
 
-        XY endPos = g_shiftModifier ? getSnappedPoint(startPos, lastMouseMotionPos) : lastMouseMotionPos;
-        rasterizeLine(startPos, endPos, [&](XY a) {
+        std::function<void(XY)> rasterizeFn = [&](XY a) {
             if (xyEqual(a, startPos) || xyEqual(a, endPos)) {
                 rasterizePoint(a, size, [&](XY p) {
                     drawSelectedPoint(editor, p);
-                }, round);
+                    }, round);
             }
             else {
                 drawSelectedPoint(editor, a);
             }
-        });
+        };
+
+        if (g_shiftModifier) {
+            auto snap = getSnappedPointV2(startPos, lastMouseMotionPos);
+            
+            g_ttp->addTooltip(Tooltip{ editor->canvas.canvasPointToScreenPoint(startPos), frmt("{}:{}", snap.divOne ? snap.aspect : 1, snap.divOne ? 1 : snap.aspect) });
+            //getSnappedPoint(startPos, lastMouseMotionPos);
+            if (snap.aspect != 0) {
+                snap.to = lastMouseMotionPos;
+            }
+
+            endPos = snap.to;
+
+            rasterizeSnappedLine(snap, rasterizeFn);
+        }
+        else {
+            rasterizeLine(startPos, endPos, rasterizeFn);
+        }
     }
     else {
         rasterizePoint(lastMouseMotionPos, size, [&](XY p) {
