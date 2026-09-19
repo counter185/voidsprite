@@ -327,7 +327,7 @@ PointSnapResult getSnappedPointV2(XY from, XY to)
     if (distanceFromTo > 1) {
         points.push_back(PointSnapResult{ 0, from, xyAdd(from, {toDiff.x, 0}), xyDistance(toDiff, {toDiff.x, 0}) });
         points.push_back(PointSnapResult{ 0, from, xyAdd(from, {0, toDiff.y}), xyDistance(toDiff, {0, toDiff.y}) });
-        for (int i = 1; i <= ixmin(8, (int)distanceFromTo); i++) {
+        for (int i = 1; i <= ixmin(ixmax(1, g_config.lineSnapMaxAspect), (int)distanceFromTo); i++) {
             double A = i * f;
             double A2 = 1.0/i * f;
             double distanceToLine = abs(A * toDiff.x - toDiff.y) / sqrt(A*A + 1);

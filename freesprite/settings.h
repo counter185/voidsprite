@@ -50,6 +50,7 @@ public:
     bool resetEraserOnToolSwitch = false;
     bool showFeaturedUGC = true;
     bool editorShowGitRepo = true;
+    int lineSnapMaxAspect = 8;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

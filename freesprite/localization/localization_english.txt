@@ -590,6 +590,7 @@
     {"vsp.config.opt.showfeaturedugc", "Show featured user art submissions"},
     {"vsp.config.opt.showfeaturedugc.desc", "Featured art from the voidsprite community will be shown on voidsprite Launchpad.\n"
                                             "A restart is required for this to fully take effect."},
+    {"vsp.config.opt.linesnapmaxaspect", "Max. snap aspect"},
 
     {"vsp.config.bindkey.pressanykey", "Press any key to bind to:"},
     {"vsp.config.bindkey.esctoclear", "[ESC] to clear"},

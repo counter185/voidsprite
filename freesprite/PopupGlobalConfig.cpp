@@ -298,6 +298,8 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.canvaszoomsens"), "", &g_config.canvasZoomSensitivity, 1, 10, &posInTab));
 
+    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.linesnapmaxaspect"), "", &g_config.lineSnapMaxAspect, 1, 60, &posInTab));
+
     UIColorInputField* backtraceColorInput = new UIColorInputField(false);
     backtraceColorInput->button->wxWidth = 80;
     backtraceColorInput->setColor(g_config.backtraceColor);
@@ -891,60 +893,38 @@ UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tool
 
 Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position)
 {
-    Panel* p = new Panel();
-    p->sizeToContent = true;
-    p->position = *position;
-    UILabel* lbl = new UILabel(name);
-    lbl->position = XY{ 0,0 };
-    p->subWidgets.addDrawable(lbl);
 
     int valueNow = *target;
 
-    UITextField* tf = new UITextField();
-    tf->isNumericField = true;
-    tf->position = XY{ 30 + lbl->statSize().x, 0 };
+    UINumberInputField* tf = new UINumberInputField(target);
     tf->wxWidth = 40;
     tf->wxHeight = 25;
     tf->fontsize = 16;
-    tf->setText(std::to_string(valueNow));
-    p->subWidgets.addDrawable(tf);
+    tf->validateFunction = [min, max](int v) { return v >= min && v <= max; };
 
     UISlider* sld = NULL;
 
     if (max != -1 && max != min) {
         int range = max - min;
         sld = new UISlider();
-        sld->position = XY{ tf->position.x + tf->wxWidth + 10, 0 };
         sld->wxWidth = 200;
         sld->wxHeight = 25;
         sld->setValue(min, max, valueNow);
         sld->onChangeValueCallback = [target, tf, range, min](UISlider* sld, float val) {
             int vv = min + range * val;
             *target = vv;
-            tf->setText(std::to_string(vv), false);
         };
-        p->subWidgets.addDrawable(sld);
     }
 
-    tf->onTextChangedCallback = [target, min, max, sld](UITextField* tf, std::string text) {
-        try {
-            int val = std::stoi(text);
-            if (max != -1 && max != min) {
-                if (val < min) val = min;
-                if (val > max) val = max;
-                if (sld != NULL) {
-                    sld->setValue(min, max, val);
-                }
-            }
-            *target = val;
-        }
-        catch (std::exception&) {
-            //ignore
+    tf->valueUpdatedCallback = [target, min, max, sld](int v) {
+        if (sld != NULL) {
+            sld->setValue(min, max, v);
         }
     };
-    tf->onTextChangedConfirmCallback = [target, min, max](UITextField* tf, std::string text) {
-        tf->setText(std::to_string(*target), false);
-    };
+
+    Panel* p = UIStackPanel::Horizontal(10, {
+        new UILabel(name), Panel::Space(20, 1), tf, sld
+    }, *position);
 
     position->y += 35;
     return p;
