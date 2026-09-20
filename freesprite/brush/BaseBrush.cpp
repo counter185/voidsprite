@@ -130,3 +130,70 @@ void g_loadBrushes()
         g_brushes.push_back(extbrush);
     }
 }
+
+void LineSelectBrush::renderLineOnCanvas(MainEditor* editor, XY from, XY to, int pointSize, bool roundPoint)
+{
+    rasterizeLine(from, to, [&](XY a) {
+        if (xyEqual(a, startPos) || xyEqual(a, to)) {
+            rasterizePoint(a, pointSize, [&](XY p) {
+                drawSelectedPoint(editor, p);
+                }, roundPoint);
+        }
+        else {
+            drawSelectedPoint(editor, a);
+        }
+    });
+}
+
+void LineSelectBrush::renderSnappedLineOnCanvas(MainEditor* editor, PointSnapResult snap, int pointSize, bool roundPoint)
+{
+    XY endPoint = snap.to;
+
+    if (snap.aspect != 0) {
+        snap.to = lastMouseMotionPos;
+    }
+
+    rasterizeSnappedLine(snap, [&](XY a) {
+        if (xyEqual(a, startPos) || xyEqual(a, endPoint)) {
+            rasterizePoint(a, pointSize, [&](XY p) {
+                drawSelectedPoint(editor, p);
+            }, roundPoint);
+        }
+        else {
+            drawSelectedPoint(editor, a);
+        }
+    });
+}
+
+void LineSelectBrush::clickRelease(MainEditor* editor, XY pos)
+{ 
+    if (dragging) { 
+        pos = (!snapManuallyOnRelease() && g_shiftModifier) ? getSnappedPoint(startPos, pos) : pos;
+        lineSelected(editor, startPos, pos); 
+    } 
+    dragging = false; 
+}
+
+void LineSelectBrush::renderOnCanvas(MainEditor* editor, int scale)
+{
+    defaultRenderOnCanvas(editor, 1, false);
+}
+
+void LineSelectBrush::defaultRenderOnCanvas(MainEditor* editor, int pointSize, bool roundPoint)
+{
+    if (dragging) {
+        if (g_shiftModifier) {
+            auto snap = getSnappedPointV2(startPos, lastMouseMotionPos);
+
+            g_ttp->addTooltip(Tooltip{ editor->canvas.canvasPointToScreenPoint(startPos), frmt("{}:{}", snap.divOne ? snap.aspect : 1, snap.divOne ? 1 : snap.aspect) });
+
+            renderSnappedLineOnCanvas(editor, snap, pointSize, roundPoint);
+        }
+        else {
+            renderLineOnCanvas(editor, startPos, lastMouseMotionPos, pointSize, roundPoint);
+        }
+    }
+    else {
+        rasterizePoint(lastMouseMotionPos, pointSize, [&](XY p) {drawSelectedPoint(editor, p); }, roundPoint);
+    }
+}

@@ -74,4 +74,29 @@ public:
     void drawPixelRect(XY from, XY to, XY canvasDrawPoint, int scale);
 };
 
+class LineSelectBrush : public BaseBrush {
+protected:
+    XY startPos = { 0,0 };
+    bool dragging = false;
+
+    //should lineselected not give an already snapped end point
+    virtual bool snapManuallyOnRelease() { return false; }
+    virtual void lineSelected(MainEditor* editor, XY start, XY end) {}
+
+    void renderLineOnCanvas(MainEditor* editor, XY from, XY to, int pointSize, bool roundPoint);
+    void renderSnappedLineOnCanvas(MainEditor* editor, PointSnapResult snap, int pointSize, bool roundPoint);
+
+    void defaultRenderOnCanvas(MainEditor* editor, int pointSize, bool roundPoint);
+
+public:
+    void resetState() override { startPos = XY{ 0,0 }; dragging = false; }
+    void clickPress(MainEditor* editor, XY pos) override { startPos = pos; dragging = true; };
+    void clickRelease(MainEditor* editor, XY pos) override;
+    void renderOnCanvas(MainEditor* editor, int scale) override;
+};
+
+class RectSelectBrush : public LineSelectBrush {
+    virtual void rectSelected(MainEditor* editor, SDL_Rect rect) {}
+};
+
 void g_loadBrushes();

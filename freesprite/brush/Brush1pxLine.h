@@ -2,15 +2,9 @@
 #include "BaseBrush.h"
 
 class Brush1pxLine :
-    public BaseBrush
+    public LineSelectBrush
 {
 
-    XY startPos = XY{ 0,0 };
-    bool dragging = false;
-
-    void resetState() override {
-        startPos = XY{ 0,0 };
-    }
     std::string getName() override { return TL("vsp.brush.line:v2"); };
     std::string getTooltip() override { return TL("vsp.brush.line.desc"); }
     std::string getIconPath() override { return "brush_1pxline.png"; }
@@ -24,9 +18,10 @@ class Brush1pxLine :
     }
     XY getSection() override { return XY{ 0,2 }; }
 
-    void clickPress(MainEditor* editor, XY pos) override;
-    void clickDrag(MainEditor* editor, XY from, XY to) override {}
-    void clickRelease(MainEditor* editor, XY pos) override;
+    bool snapManuallyOnRelease() override { return true; }
+
     void renderOnCanvas(MainEditor* editor, int scale) override;
+
+    void lineSelected(MainEditor* editor, XY start, XY end) override;
 };
 
