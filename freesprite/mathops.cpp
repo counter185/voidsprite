@@ -1413,6 +1413,16 @@ std::string randomUUID()
     return ret;
 }
 
+std::string randomUnityGUID()
+{
+    std::string chars = "0123456789abcdef";
+    std::string ret = "";
+    for (int i = 0; i < 32; i++) {
+        ret += chars[rand() % 16];
+    }
+    return ret;
+}
+
 std::string secondsTimeToHumanReadable(u64 seconds)
 {
     u64 s = seconds % 60;

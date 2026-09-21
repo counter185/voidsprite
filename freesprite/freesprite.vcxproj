@@ -258,7 +258,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="actions\actions.cpp" />
     <ClCompile Include="io\io_graphicsgale.cpp" />
+    <ClInclude Include="actions\actions.h" />
     <ClInclude Include="git.h" />
     <ClInclude Include="io\io_graphicsgale.h" />
     <ClCompile Include="PopupRecordTimelapse.cpp" />

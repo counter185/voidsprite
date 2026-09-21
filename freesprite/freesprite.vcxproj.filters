@@ -145,6 +145,12 @@
     <Filter Include="Header files\external\pep">
       <UniqueIdentifier>{cf271b90-e083-40d7-b1b0-e4b0ee330a53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\actions">
+      <UniqueIdentifier>{578ec3e8-8224-48b6-891a-47a467ad3bd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\actions">
+      <UniqueIdentifier>{ca8b04c1-6189-41e6-88a9-b3af3cf543c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -779,6 +785,9 @@
     </ClCompile>
     <ClCompile Include="PopupSaveAnimation.cpp">
       <Filter>Source files\popup</Filter>
+    </ClCompile>
+    <ClCompile Include="actions\actions.cpp">
+      <Filter>Source files\actions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1555,6 +1564,9 @@
     </ClInclude>
     <ClInclude Include="PopupSaveAnimation.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="actions\actions.h">
+      <Filter>Header files\actions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

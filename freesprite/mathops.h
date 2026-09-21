@@ -151,6 +151,7 @@ std::vector<std::string> split(std::string a, char b);
 
 int randomInt(int minIncl, int maxExcl);
 std::string randomUUID();
+std::string randomUnityGUID();
 std::string secondsTimeToHumanReadable(u64 seconds);
 
 SDL_Event handleNumLockInEvent(SDL_Event src);

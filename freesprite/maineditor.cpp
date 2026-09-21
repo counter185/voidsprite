@@ -1,6 +1,7 @@
 #include "json/json.hpp"
 
 #include "maineditor.h"
+#include "actions/actions.h"
 #include "multiwindow.h"
 #include "MainEditorPalettized.h"
 #include "FontRenderer.h"
@@ -1484,10 +1485,11 @@ void MainEditor::setUpWidgets()
         };
     }
     //load actions
-    if (externalEditorActions.size() > 0) {
+    auto editorActions = joinVectors({ g_defaultEditorActions, externalEditorActions });
+    if (editorActions.size() > 0) {
         std::vector<std::pair<SDL_Scancode, NamedOperation>> actions;
         int i = 0;
-        for (auto& action : externalEditorActions) {
+        for (auto& action : editorActions) {
             actions.push_back({ keyorder[i], { action.name, [this, action]() {action.function(this); } } });
             //todo
             if (++i >= 26) {

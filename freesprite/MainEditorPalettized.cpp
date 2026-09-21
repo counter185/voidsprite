@@ -16,6 +16,7 @@
 #include "UndoStack.h"
 #include "EditorFramePicker.h"
 #include "layer_conversions.h"
+#include "actions/actions.h"
 
 #include "PopupIntegerScale.h"
 #include "PopupMessageBox.h"
@@ -562,10 +563,11 @@ void MainEditorPalettized::setUpWidgets()
                                SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V, SDL_SCANCODE_B, SDL_SCANCODE_N, SDL_SCANCODE_M };
 
     //load actions
-    if (externalEditorActions.size() > 0) {
+    auto editorActions = joinVectors({ g_defaultEditorActions, externalEditorActions });
+    if (editorActions.size() > 0) {
         std::vector<std::pair<SDL_Scancode, NamedOperation>> actions;
         int i = 0;
-        for (auto& action : externalEditorActions) {
+        for (auto& action : editorActions) {
             actions.push_back({ keyorder[i], { action.name, [this, action]() {action.function(this); } } });
             //todo
             if (++i >= 26) {

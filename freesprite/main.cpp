@@ -33,6 +33,7 @@
 #include "sdk_pluginloader.h"
 #include "multiwindow.h"
 #include "thumbnail_loader.h"
+#include "actions/actions.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -1072,6 +1073,8 @@ int main(int argc, char** argv)
         g_createVSPSDK();
         initSteps.updateLastSection("Loading plugins");
         g_loadPlugins();
+        initSteps.updateLastSection("Loading default actions");
+        g_registerDefaultActions();
         initSteps.updateLastSection("Setting up color models");
         g_setupColorModels();
         initSteps.updateLastSection("Setting up file operations");
