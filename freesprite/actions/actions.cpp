@@ -104,16 +104,16 @@ void action_editorExportUnitySpritesheet(MainEditor* editor)
                     (int)ceil(editor->canvas.dimensions.y / (double)editor->ssne.tileDimensions.y)
                 };
 
-                for (int y = 0; y < tileCounts.y; y++) {
-                    for (int x = 0; x < tileCounts.x; x++) {
-                        std::string newName = frmt("{}__{}_{}", fileName, x, y);
+                for (int x = 0; x < tileCounts.x; x++) {
+                    for (int y = 0; y < tileCounts.y; y++) {
+                        std::string newName = frmt("{}__{}_{}", fileName, y, x);
                         int newID = PackRGBAtoARGB((u8)randomInt(0, 256), (u8)randomInt(0, 256), (u8)randomInt(0, 256), (u8)randomInt(0, 256));
                         f << "    - serializedVersion: 0\n";
                         f << "      name: " << newName << "\n";
                         f << "      rect:\n";
                         f << "        serializedVersion: 0\n";
                         f << "        x: " << (x * tileSize.x) << "\n";
-                        f << "        y: " << (y * tileSize.y) << "\n";
+                        f << "        y: " << (editor->canvas.dimensions.y - ((1+y) * tileSize.y)) << "\n";
                         f << "        width: " << tileSize.x << "\n";
                         f << "        height: " << tileSize.y << "\n";
                         f << "      alignment: 0\n";
