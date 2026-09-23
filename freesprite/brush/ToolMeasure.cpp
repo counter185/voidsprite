@@ -32,8 +32,9 @@ void ToolMeasure::rightClickPress(MainEditor* editor, XY pos)
     if (!xyEqual(lastOrigin, lastEnd)) {
         PopupContextMenu* popup = new PopupContextMenu({
             {editor->eraserMode ? "Remove guidelines around area" : "Place guidelines around area", [this, editor]() { editorPlaceGuidelinesAroundSelRegion(editor); }},
-            {"Crop to this area", [this, editor]() { editorCropToSelRegion(editor); }}
-            });
+            {"Crop to this area", [this, editor]() { editorCropToSelRegion(editor); }},
+            {"Set pixel grid to this size", [this, editor]() { editorSetGridToSelRegion(editor); }},
+        });
         g_addPopup(popup);
     }
     else {
@@ -130,4 +131,11 @@ void ToolMeasure::editorCropToSelRegion(MainEditor* editor)
     lastOrigin.y -= region.y;
     lastEnd.x -= region.x;
     lastEnd.y -= region.y;
+}
+
+void ToolMeasure::editorSetGridToSelRegion(MainEditor* editor) {
+    SDL_Rect region = getLastSelectedRegion(editor);
+    editor->ssne.showTileGrid = true;
+    editor->ssne.tileDimensions = {region.w, region.h};
+    editor->ssne.tileGridPaddingBottomRight = {0,0};
 }
