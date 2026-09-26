@@ -154,6 +154,11 @@ public:
     void renderCustomWindowFrame();
     bool handleCustomFrameInput(SDL_Event evt);
     SDL_HitTestResult getSDLHitTestAt(XY pos);
+    void renderWindowIconClose(SDL_Rect iconRect, double localTimer);
+    void renderWindowIconWindowsMaximize(SDL_Rect iconRect, double localTimer);
+    void renderWindowIconKDEMaximize(SDL_Rect iconRect, double localTimer);
+    void renderWindowIconWindowsMinimize(SDL_Rect iconRect, double localTimer);
+    void renderWindowIconKDEMinimize(SDL_Rect iconRect, double localTimer);
 
     std::pair<XY,XY> getSafeAreaCorners();
     int getSafeAreaLeft();

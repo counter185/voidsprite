@@ -98,6 +98,7 @@ bool g_saveConfig() {
         config["checkerboardSecondary"] = frmt("{:06X}", g_config.checkerboardSecondary);
         config["checkerboardSize"] = std::to_string(g_config.checkerboardSize);
         config["lineSnapMaxAspect"] = std::to_string(g_config.lineSnapMaxAspect);
+        config["framelessWindowButtonStyle"] = std::to_string(g_config.framelessWindowButtonStyle);
         
         int uqIndex = 0;
         auto keybinds = g_keybindManager.serializeKeybinds();
@@ -189,6 +190,7 @@ void g_loadConfig() {
     if (config.contains("checkerboardSecondary")) { try { g_config.checkerboardSecondary = std::stoul(config["checkerboardSecondary"], nullptr, 16); } catch (std::exception&) {} }
     if (config.contains("checkerboardSize")) { try { g_config.checkerboardSize = std::stoi(config["checkerboardSize"]); } catch (std::exception&) {} }
     if (config.contains("lineSnapMaxAspect")) { try { g_config.lineSnapMaxAspect = std::stoi(config["lineSnapMaxAspect"]); } catch (std::exception&) {} }
+    if (config.contains("framelessWindowButtonStyle")) { try { g_config.framelessWindowButtonStyle = std::stoi(config["framelessWindowButtonStyle"]); } catch (std::exception&) {} }
 
     for (auto& [key, value] : config) {
         if (stringStartsWithIgnoreCase(key, "keybind@")) {

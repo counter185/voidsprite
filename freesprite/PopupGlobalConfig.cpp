@@ -207,10 +207,17 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.acrylicpanels"), TL("vsp.config.opt.acrylicpanels.desc"), &g_config.acrylicPanels, &posInTab));
 #if VSP_PLATFORM != VSP_PLATFORM_ANDROID && VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
     auto framelessChk = optionCheckbox(TL("vsp.config.opt.framelesswindow"), TL("vsp.config.opt.framelesswindow.desc"), &g_config.customWindowFrame, &posInTab);
-    framelessChk->onStateChangeCallback = [](...) {
-        main_updateFramelessWindows();
-    };
+    framelessChk->onStateChangeCallback = [](...) { main_updateFramelessWindows(); };
     visualSettingsPanel->subWidgets.addDrawable(framelessChk);
+
+    std::vector<std::string> framelessStyles = {"Windows", "KDE"};
+    UIDropdown* framelessStyleDropdown = new UIDropdown(framelessStyles);
+    framelessStyleDropdown->setTextToSelectedItem = true;
+    framelessStyleDropdown->wxWidth = 120;
+    framelessStyleDropdown->text = framelessStyles[framelessStyles.size() > (u32)g_config.framelessWindowButtonStyle ? g_config.framelessWindowButtonStyle : 0];
+    framelessStyleDropdown->onDropdownItemSelectedCallback = [](UIDropdown*, int i, std::string) { g_config.framelessWindowButtonStyle = i; }; 
+    visualSettingsPanel->subWidgets.addDrawable(UIStackPanel::Horizontal(20, {new UILabel("Frameless window button style"), framelessStyleDropdown}, xyAdd(posInTab, {30, 0})));
+    posInTab.y += 35;
 #endif
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();
@@ -218,9 +225,6 @@ PopupGlobalConfig::PopupGlobalConfig()
     for (auto& meta : availableVisualConfs) {
         visualConfNames.push_back(meta.name);
     }
-    lbl4 = new UILabel(TL("vsp.config.opt.visualconfig"));
-    lbl4->position = posInTab;
-    visualSettingsPanel->subWidgets.addDrawable(lbl4);
     dd2 = new UIDropdown(visualConfNames);
     dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 240;
@@ -239,7 +243,9 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadFonts();
     };
     dd2->text = fileNameFromPath(visualConfigValue("meta/name"));
-    visualSettingsPanel->subWidgets.addDrawable(dd2);
+    visualSettingsPanel->subWidgets.addDrawable(
+        UIStackPanel::Horizontal(20, {new UILabel(TL("vsp.config.opt.visualconfig")), dd2}, posInTab)
+    );
     posInTab.y += 35;
 
     UICheckbox* smoothFontCheckbox = optionCheckbox(TL("vsp.config.opt.smoothfonts"), TL("vsp.config.opt.smoothfonts.desc"), &g_config.smoothFonts, &posInTab);

@@ -41,6 +41,9 @@ public:
     bool smoothFonts = true;
     bool acrylicPanels = true;
     bool customWindowFrame = ONPLATFORM(VSP_PLATFORM_WIN32, true, false);
+    int framelessWindowButtonStyle = ONPLATFORM(VSP_PLATFORM_LINUX, 1, 0);
+                                        //0: windows
+                                        //1: kde
     bool enableCheckerboard = false;
     bool checkerboardScaleWithCanvas = true;
     int checkerboardSize = 16;

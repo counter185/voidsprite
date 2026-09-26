@@ -472,25 +472,62 @@ void VSPWindow::renderCustomWindowFrame()
         switch (x) {
             case 0:
                 //close
-                drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y + iconRect.h }, localTimer);
-                drawLine({ iconRect.x, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+                renderWindowIconClose(iconRect, localTimer);
                 break;
             case 1:
                 //maximize
-                drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
-                drawLine({ iconRect.x, iconRect.y }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
-
-                drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
-                drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+                if (g_config.framelessWindowButtonStyle == 1) {
+                    renderWindowIconKDEMaximize(iconRect, localTimer);
+                } else {
+                    renderWindowIconWindowsMaximize(iconRect, localTimer);
+                }
                 break;
             case 2:
                 //minimize
-                drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 }, { iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2 }, localTimer);
+                if (g_config.framelessWindowButtonStyle == 1) {
+                    renderWindowIconKDEMinimize(iconRect, localTimer);
+                } else {
+                    renderWindowIconWindowsMinimize(iconRect, localTimer);
+                }
                 break;
         }
 
         buttonNow.x -= actionButtonW;
     }
+}
+
+void VSPWindow::renderWindowIconClose(SDL_Rect iconRect, double localTimer) {
+    drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y + iconRect.h }, localTimer);
+    drawLine({ iconRect.x, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+}
+
+void VSPWindow::renderWindowIconWindowsMaximize(SDL_Rect iconRect, double localTimer) {
+    drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+    drawLine({ iconRect.x, iconRect.y }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+
+    drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+    drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+}
+
+void VSPWindow::renderWindowIconKDEMaximize(SDL_Rect iconRect, double localTimer) {
+    if ((SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) == 0) {
+        drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 + iconRect.h / 4 }, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 - iconRect.h / 4 }, localTimer);
+        drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2 + iconRect.h / 4 }, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 - iconRect.h / 4 }, localTimer);
+    } else {
+        drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 }, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 - iconRect.h / 2 }, localTimer);
+        drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2}, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 - iconRect.h / 2 }, localTimer);
+        drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 }, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 + iconRect.h / 2 }, localTimer);
+        drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2}, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 + iconRect.h / 2 }, localTimer);
+    }
+}
+
+void VSPWindow::renderWindowIconWindowsMinimize(SDL_Rect iconRect, double localTimer) {
+    drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 }, { iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2 }, localTimer);
+}
+
+void VSPWindow::renderWindowIconKDEMinimize(SDL_Rect iconRect, double localTimer) {
+    drawLine({ iconRect.x, iconRect.y + iconRect.h / 2 - iconRect.h / 4 }, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 + iconRect.h / 4 }, localTimer);
+    drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h / 2 - iconRect.h / 4 }, { iconRect.x + iconRect.w / 2, iconRect.y + iconRect.h / 2 + iconRect.h / 4 }, localTimer);
 }
 
 bool VSPWindow::handleCustomFrameInput(SDL_Event evt)
