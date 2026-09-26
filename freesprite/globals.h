@@ -213,6 +213,7 @@ class UndoStackCaptureGroup;
 class OperationProgressReport;
 class RenderQueue;
 class VideoEncoder;
+class ParameterStore;
 
 //textrenderer
 class TextRenderer;
@@ -272,7 +273,6 @@ class TabbedView;
 class ScreenWideNavBar;
 class ScreenWideActionBar;
 class PanelReference;
-class ParameterStore;
 
 //filters
 class BaseFilter;
