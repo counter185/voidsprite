@@ -272,6 +272,7 @@ class TabbedView;
 class ScreenWideNavBar;
 class ScreenWideActionBar;
 class PanelReference;
+class ParameterStore;
 
 //filters
 class BaseFilter;
