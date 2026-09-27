@@ -502,11 +502,21 @@ void VSPWindow::renderWindowIconClose(SDL_Rect iconRect, double localTimer) {
 }
 
 void VSPWindow::renderWindowIconWindowsMaximize(SDL_Rect iconRect, double localTimer) {
-    drawLine({ iconRect.x, iconRect.y }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
-    drawLine({ iconRect.x, iconRect.y }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+    bool maximized = (SDL_GetWindowFlags(wd) & SDL_WINDOW_MAXIMIZED) != 0;
+    XY topRight = { iconRect.x + iconRect.w, iconRect.y };
+    if (maximized) {
+        drawLine(topRight, { iconRect.x + 3, topRight.y }, localTimer);
+        drawLine(topRight, { topRight.x, iconRect.y + iconRect.h - 3 }, localTimer);
 
-    drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
-    drawLine({ iconRect.x + iconRect.w, iconRect.y + iconRect.h }, { iconRect.x + iconRect.w, iconRect.y }, localTimer);
+        topRight.x -= 3;
+        topRight.y += 3;
+    }
+
+    drawLine({ iconRect.x, topRight.y }, { topRight.x, topRight.y }, localTimer);
+    drawLine({ iconRect.x, topRight.y }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+
+    drawLine({ topRight.x, iconRect.y + iconRect.h }, { iconRect.x, iconRect.y + iconRect.h }, localTimer);
+    drawLine({ topRight.x, iconRect.y + iconRect.h }, { topRight.x, topRight.y }, localTimer);
 }
 
 void VSPWindow::renderWindowIconKDEMaximize(SDL_Rect iconRect, double localTimer) {
