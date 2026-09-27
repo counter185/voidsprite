@@ -789,6 +789,9 @@
     <ClCompile Include="actions\actions.cpp">
       <Filter>Source files\actions</Filter>
     </ClCompile>
+    <ClCompile Include="brush\BrushGradient.cpp">
+      <Filter>Source files\brushes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1567,6 +1570,9 @@
     </ClInclude>
     <ClInclude Include="actions\actions.h">
       <Filter>Header files\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="brush\BrushGradient.h">
+      <Filter>Header files\brushes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

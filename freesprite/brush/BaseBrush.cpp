@@ -15,6 +15,7 @@
 #include "Brush9SegmentRect.h"
 #include "Brush1x1ArcX.h"
 #include "Brush1x1ArcY.h"
+#include "BrushGradient.h"
 #include "BrushReplaceColor.h"
 #include "ToolRectFlip.h"
 #include "ToolRectRotate.h"
@@ -125,6 +126,7 @@ void g_loadBrushes()
     g_brushes.push_back(new ToolSetYSymmetry());
     g_brushes.push_back(new ToolMeasure());
     g_brushes.push_back(new ToolText());
+    g_brushes.push_back(new BrushGradient());
 
     for (auto extbrush : g_pluginBrushes) {
         g_brushes.push_back(extbrush);
