@@ -74,6 +74,35 @@ struct VTF_RESOURCE_ENTRY
     unsigned int	offset;			// The offset of this resource's data in the file. 
 };
 
+//based on https://github.com/ValveResourceFormat/ValveResourceFormat/blob/master/docs/guides/read-resource.md
+struct S2_COMPILED_HEADER {
+    u32 fileSize;
+    u16 headerVersion;
+    u16 version;
+    u32 blockOffset;
+    u32 blockCount;
+};
+
+struct S2_BLOCK_ENTRY {
+    u32 blockType;
+    u32 offset;
+    u32 size;
+};
+
+struct S2_VTEX_HEADER {
+    u16 version;    //should be 1
+    u16 flags;
+    float reflectivity[4];
+    u16 w;
+    u16 h;
+    u16 depth;
+    u8 format;
+    u8 mipCount;
+    u32 picmip0Res;
+    u32 extDataOffset;
+    u32 extDataCount;
+};
+
 enum VTFFORMAT
 {
     IMAGE_FORMAT_NONE = -1,
@@ -105,6 +134,40 @@ enum VTFFORMAT
     IMAGE_FORMAT_RGBA16161616,
     IMAGE_FORMAT_UVLX8888
 };
+
+enum S2_VTEXFORMAT {
+    VTEX_UNKNOWN = 0,
+    VTEX_DXT1 = 1,
+    VTEX_DXT5 = 2,
+    VTEX_I8 = 3,
+    VTEX_RGBA8888 = 4,
+    VTEX_R16 = 5,
+    VTEX_RG1616 = 6,
+    VTEX_RGBA16161616 = 7,
+    VTEX_R16F = 8,
+    VTEX_RG1616F = 9,
+    VTEX_RGBA16161616F = 10,
+    VTEX_R32F = 11,
+    VTEX_RG3232F = 12,
+    VTEX_RGB323232F = 13,
+    VTEX_RGBA32323232F = 14,
+    VTEX_JPEG_RGBA8888 = 15,
+    VTEX_PNG_RGBA8888 = 16,
+    VTEX_JPEG_DXT5 = 17,
+    VTEX_PNG_DXT5 = 18,
+    VTEX_BC6H = 19,
+    VTEX_BC7 = 20,
+    VTEX_ATI2N = 21,
+    VTEX_IA88 = 22,
+    VTEX_ETC2 = 23,
+    VTEX_ETC2_EAC = 24,
+    VTEX_R11_EAC = 25,
+    VTEX_RG11_EAC = 26,
+    VTEX_ATI1N = 27,
+    VTEX_BGRA8888 = 28,
+    VTEX_WEBP_RGBA8888 = 29,
+    VTEX_WEBP_DXT5 = 30
+};
 #pragma pack(pop)
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
@@ -113,3 +176,5 @@ MainEditor* readValveSPR(PlatformNativePathString path);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
 
 bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressReport* report, ParameterStore* params);
+
+Layer* readValveVTEX_C(PlatformNativePathString path, u64 seek = 0);

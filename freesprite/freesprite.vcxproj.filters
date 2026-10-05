@@ -792,6 +792,9 @@
     <ClCompile Include="brush\BrushGradient.cpp">
       <Filter>Source files\brushes</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_dds.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1573,6 +1576,9 @@
     </ClInclude>
     <ClInclude Include="brush\BrushGradient.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_dds.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

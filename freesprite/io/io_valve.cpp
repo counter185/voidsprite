@@ -79,7 +79,8 @@ MainEditor* readValveSPR(PlatformNativePathString path)
 }
 
 u64 VTFgetImageSizeInBytesForFormat(int imageFormat, int w, int h) {
-    return imageFormat == IMAGE_FORMAT_I8 ? w * h
+    return 
+        imageFormat == IMAGE_FORMAT_I8 ? w * h
         : imageFormat == IMAGE_FORMAT_A8 ? w * h
         : imageFormat == IMAGE_FORMAT_IA88 ? w * h * 2
         : imageFormat == IMAGE_FORMAT_RGB565 ? w * h * 2
@@ -94,6 +95,13 @@ u64 VTFgetImageSizeInBytesForFormat(int imageFormat, int w, int h) {
         : imageFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
         : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
         : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+
+        : imageFormat == VTEX_RGBA8888 ? w * h * 4
+        : imageFormat == VTEX_BGRA8888 ? w * h * 4
+        : imageFormat == VTEX_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
+        : imageFormat == VTEX_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+        : imageFormat == VTEX_BC7 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+
         : 0;
 }
 
@@ -444,4 +452,54 @@ bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressRepor
         return true;
     }
     return false;
+}
+
+Layer* readValveVTEX_C(PlatformNativePathString path, u64 seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        DoOnReturn closeFile([f]() {fclose(f); });
+        S2_COMPILED_HEADER header{};
+        fread(&header, sizeof(S2_COMPILED_HEADER), 1, f);
+
+        if (header.headerVersion == 0x0c) {
+
+            u64 blockIndexTablePos = 0x08 + header.blockOffset;
+
+            u32 vtexDataOffset = 0;
+            u32 vtexDataSize = 0;
+
+            std::vector<S2_BLOCK_ENTRY> blocks;
+            for (int i = 0; i < header.blockCount; i++) {
+                u64 pos = ftell(f);
+                S2_BLOCK_ENTRY b{};
+                fread(&b, sizeof(S2_BLOCK_ENTRY), 1, f);
+                b.offset += 4 + pos;
+
+                char* c = (char*)&b.blockType;
+                loginfo(frmt("[VTEX_C] block: {}{}{}{} at {:x} size {:x}", c[0],c[1],c[2],c[3], b.offset, b.size));
+                blocks.push_back(b);
+
+                if (b.blockType == 'ATAD') {
+                    vtexDataOffset = b.offset;
+                    vtexDataSize = b.size;
+                }
+            }
+
+            if (vtexDataOffset != 0) {
+                fseek(f, vtexDataOffset, SEEK_SET);
+                S2_VTEX_HEADER vtexHeader{};
+                fread(&vtexHeader, sizeof(S2_VTEX_HEADER), 1, f);
+                loginfo(frmt("[VTEX_C] w:{} h:{} bpp:{}  format:{}", vtexHeader.w, vtexHeader.h, vtexHeader.depth, vtexHeader.format));
+            }
+            else {
+                logerr("[VTEX_C] no DATA block");
+                return NULL;
+            }
+
+            u64 textureData = vtexDataOffset + vtexDataSize;
+            fseek(f, textureData, SEEK_SET);
+        }
+    }
+    return NULL;
 }

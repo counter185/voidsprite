@@ -260,10 +260,12 @@
   <ItemGroup>
     <ClCompile Include="actions\actions.cpp" />
     <ClCompile Include="brush\BrushGradient.cpp" />
+    <ClCompile Include="io\io_dds.cpp" />
     <ClCompile Include="io\io_graphicsgale.cpp" />
     <ClInclude Include="actions\actions.h" />
     <ClInclude Include="brush\BrushGradient.h" />
     <ClInclude Include="git.h" />
+    <ClInclude Include="io\io_dds.h" />
     <ClInclude Include="io\io_graphicsgale.h" />
     <ClCompile Include="PopupRecordTimelapse.cpp" />
     <ClCompile Include="PopupRenameLayer.cpp" />
