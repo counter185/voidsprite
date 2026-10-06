@@ -53,6 +53,8 @@ public:
 };
 
 class VSPWindow {
+protected:
+    VSPWindow() {}
 public:
     RenderQueue overlayRenderQueue;
     SDL_WindowID windowID = -1;
@@ -133,6 +135,7 @@ public:
     }
 
     bool tryCreateRenderer();
+    virtual std::vector<std::string> getRenderDrivers();
 
     void updateViewportScaler();
     void autoViewportScale();
@@ -187,14 +190,9 @@ protected:
 public:
     bool ignoreMouse = false;
 
-    SingleScreenTransparentWindow(std::string title, XY size, u32 flags) 
-        : VSPWindow(title, size, flags) 
-    {
-        setCustomWindowFrame(this->shouldUseCustomWindowFrame());
-    }
+    SingleScreenTransparentWindow(std::string title, XY size, u32 flags);
 
     static VSPWindow* tryCreateSSTWindow(std::string title, XY size, u32 flags) {
-        flags |= SDL_WINDOW_TRANSPARENT;
         VSPWindow* ret = new SingleScreenTransparentWindow(title, size, flags);
         if (ret->wd == NULL || ret->rd == NULL) {
             logerr(frmt("Failed to create window: {}\n  {}", title, SDL_GetError()));
@@ -205,6 +203,7 @@ public:
         return ret;
     }
 
+    std::vector<std::string> getRenderDrivers() override;
     u32 defaultWindowFlags() override { return VSPWindow::defaultWindowFlags() | SDL_WINDOW_TRANSPARENT; }
     void clearWindow() override { SDL_SetRenderDrawColor(rd, 0, 0, 0, 0); SDL_RenderClear(rd); }
     bool shouldUseCustomWindowFrame() override { return true; }

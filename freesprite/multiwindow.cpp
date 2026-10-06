@@ -211,27 +211,23 @@ void VSPWindow::thisWindowsTurn() {
 }
 
 bool VSPWindow::tryCreateRenderer() {
-    g_availableRenderersNow.clear();
-    for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
-        char* name = (char*)SDL_GetRenderDriver(x);
-        if (name != NULL) {
-            std::string renderDriverName = name;
-            g_availableRenderersNow.push_back(renderDriverName);
-            loginfo(frmt("Renderer {}: {}", x, renderDriverName));
-        }
+    auto renderDrivers = this->getRenderDrivers();
+    if (g_availableRenderersNow.empty()) {
+        g_availableRenderersNow = renderDrivers;
     }
-    g_availableRenderersNow.push_back(SDL_SOFTWARE_RENDERER);
     if (std::find(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), g_config.preferredRenderer) == g_availableRenderersNow.end()) {
         g_config.preferredRenderer = GlobalConfig().preferredRenderer;  //reset to default
     }
-    std::string useRenderer = g_config.preferredRenderer;
+    bool preferredRendererIsOnList = g_config.preferredRenderer == ""
+        || std::find(renderDrivers.begin(), renderDrivers.end(), g_config.preferredRenderer) != renderDrivers.end();
+    std::string useRenderer = preferredRendererIsOnList ? g_config.preferredRenderer : renderDrivers.front();
     loginfo(frmt("Picking renderer: {}", useRenderer));
     rd = SDL_CreateRenderer(wd, useRenderer.c_str());
     while (rd == NULL) {
         g_addNotification(ErrorNotification(TL("vsp.cmn.error"), frmt("Renderer failed: {}", useRenderer)));
         logerr(frmt("Failed to create renderer: {}\n  {}", useRenderer, SDL_GetError()));
-        g_availableRenderersNow.erase(std::remove(g_availableRenderersNow.begin(), g_availableRenderersNow.end(), useRenderer), g_availableRenderersNow.end());
-        if (g_availableRenderersNow.empty()) {
+        std::erase(renderDrivers, useRenderer);
+        if (renderDrivers.empty()) {
             logerr("No renderers available");
             std::string errorTitle = frmt("voidsprite: {}", TL("vsp.error.norenderer.title"));
             std::string errorMsg = TL("vsp.error.norenderer.body");
@@ -239,7 +235,7 @@ bool VSPWindow::tryCreateRenderer() {
             return false;
         }
         else {
-            useRenderer = g_availableRenderersNow[0];
+            useRenderer = renderDrivers.front();
             g_config.preferredRenderer = useRenderer;
             loginfo(frmt("Trying renderer: {}", useRenderer));
             if (useRenderer == SDL_SOFTWARE_RENDERER) {
@@ -250,6 +246,28 @@ bool VSPWindow::tryCreateRenderer() {
     }
     SDL_SetRenderDrawBlendMode(rd, SDL_BLENDMODE_BLEND);
     return true;
+}
+
+std::vector<std::string> VSPWindow::getRenderDrivers()
+{
+    std::vector<std::string> ret;
+    for (int x = 0; x < SDL_GetNumRenderDrivers() - 1; x++) {
+        char* name = (char*)SDL_GetRenderDriver(x);
+        if (name != NULL) {
+            std::string renderDriverName = name;
+            ret.push_back(renderDriverName);
+            loginfo(frmt("Renderer {}: {}", x, renderDriverName));
+        }
+    }
+
+    if (std::find(ret.begin(), ret.end(), "opengl") != ret.end()) {
+        //put opengl at the front so that transparent windows work on vmware
+        std::erase(ret, "opengl");
+        ret.insert(ret.begin(), "opengl");
+    }
+
+    ret.push_back(SDL_SOFTWARE_RENDERER);
+    return ret;
 }
 
 void VSPWindow::updateViewportScaler() {
@@ -1051,6 +1069,45 @@ void RenderQueue::renderAll()
         op();
     }
     queue.clear();
+}
+
+SingleScreenTransparentWindow::SingleScreenTransparentWindow(std::string title, XY size, u32 flags)
+{
+    flags |= this->defaultWindowFlags();
+    wd = SDL_CreateWindow(title.c_str(), size.x, size.y, flags);
+    if (wd != NULL) {
+        platformWindowCreated(this);
+    }
+    windowID = SDL_GetWindowID(wd);
+    tryCreateRenderer();
+    setWindowTitle(title);
+    setVsync(g_config.vsync);
+    setCustomWindowFrame(this->shouldUseCustomWindowFrame());
+    SDL_GetWindowSize(wd, &size.x, &size.y);
+    unscaledWindowSize = scaledWindowSize = size;
+    if (g_config.autoViewportScale) {
+        autoViewportScale();
+    }
+    blurBuffer = new WindowBlurBuffer(this);
+    setCustomWindowFrame(this->shouldUseCustomWindowFrame());
+}
+
+std::vector<std::string> SingleScreenTransparentWindow::getRenderDrivers()
+{
+    auto baseDrivers = VSPWindow::getRenderDrivers();
+    std::vector<std::string> transparentBlacklist = {
+        "direct3d12",       //fails to create
+        "direct3d",         //does not support transparency
+        "vulkan",           //does not support transparency
+        "gpu"               //fails to create
+    };
+    for (auto& s : transparentBlacklist) {
+        auto f = std::find(baseDrivers.begin(), baseDrivers.end(), s);
+        if (f != baseDrivers.end()) {
+            std::erase(baseDrivers, *f);
+        }
+    }
+    return baseDrivers;
 }
 
 void SingleScreenTransparentWindow::setIgnoreMouseInput(bool ignoreMouseInput)
