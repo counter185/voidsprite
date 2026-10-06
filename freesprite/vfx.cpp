@@ -157,9 +157,9 @@ void g_newVFX(VFXType type, u32 durationMS, u32 extData1, SDL_Rect extData2, std
     }
 }
 
-void g_renderVFX() {
+void g_renderVFX(VSPWindow* forWindow) {
     if (g_config.vfxEnabled) {
-		std::vector<VFX>& targetVFX = currentVfxs[g_currentWindow];
+		std::vector<VFX>& targetVFX = currentVfxs[forWindow];
         for (int i = 0; i < targetVFX.size(); i++) {
             targetVFX[i].render();
             if (targetVFX[i].expired()) {

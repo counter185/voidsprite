@@ -206,33 +206,6 @@ SDL_Texture* IMGLoadAssetToTexture(std::string path, SDL_Renderer* rd) {
     return ret;
 }
 
-void renderbgOpInProgressScreen() {
-
-    SDL_Rect r = { 0, 0, g_windowW, g_windowH };
-    
-    u32 colFB = PackRGBAtoARGB(0, 0, 0, (u8)(0xd0 * g_bgOpStartTimer.percentElapsedTime(600)));
-    u32 colHB = PackRGBAtoARGB(0, 0, 0, (u8)(0x80 * g_bgOpStartTimer.percentElapsedTime(600)));
-
-    renderGradient({ 0,0,g_windowW,g_windowH / 2 }, colFB, colFB, colHB, colHB);
-    renderGradient({ 0,g_windowH/2,g_windowW,g_windowH / 2 + 1 }, colHB, colHB, colFB, colFB);
-
-    TooltipsLayer localttp;
-
-    static std::string bgOpInProgressText = TL("vsp.bgop.inprogress");
-
-    std::string currentText = bgOpInProgressText;
-
-    int lines = 1;
-    auto progressReports = g_bgOpProgressReport->getCurrentSections();
-    for (const std::string& report : progressReports) {
-        currentText += frmt("\n    {}", report);
-        lines++;
-    }
-
-    localttp.addTooltip(Tooltip{ {0,g_windowH - (12 + 18*lines) }, currentText, {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
-    localttp.renderAll();
-}
-
 void main_toggleFullscreen()
 {
     fullscreen = !fullscreen;
@@ -242,7 +215,7 @@ void main_toggleFullscreen()
 
 void main_newWindow() {
     std::string title = frmt("<{}>", g_windows.size());
-    VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
+    VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, 0);
     if (newWindow != NULL) {
         newWindow->addToWindowList();
         VSPWindow* oldWindow = g_currentWindow;
@@ -263,13 +236,39 @@ void main_newWindow() {
     }
 }
 
+VSPWindow* main_newSingleScreenTransparentWindow(BaseScreen* screen)
+{
+    std::string title = frmt("<{}>", g_windows.size());
+    VSPWindow* newWindow = SingleScreenTransparentWindow::tryCreateSSTWindow(title, { g_windowW, g_windowH }, 0);
+    if (newWindow != NULL) {
+        newWindow->addToWindowList();
+        VSPWindow* oldWindow = g_currentWindow;
+        newWindow->thisWindowsTurn();
+        newWindow->initFonts();
+        newWindow->updateViewportScaler();
+        g_currentWindow = newWindow;
+        g_newVFX(VFX_SCREENSWITCH, 800);
+        newWindow->addScreen(screen, true);
+        loginfo(frmt("Opening window ID {}", newWindow->windowID));
+        if (oldWindow != NULL) {
+            oldWindow->thisWindowsTurn();
+        }
+        SDL_RaiseWindow(newWindow->wd);
+        return newWindow;
+    }
+    else {
+        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.windowcreationfailed")));
+    }
+    return NULL;
+}
+
 void main_currentWorkspaceToNewWindow()
 {
     std::string title = frmt("<{}>", g_windows.size());
-    if (g_currentWindow != NULL && g_currentWindow->popupStack.empty()) {
+    if (g_currentWindow != NULL && g_currentWindow->popupStack.empty() && g_currentWindow->canMoveScreens()) {
         if (g_currentWindow->screenStack.size() > 1) {
             BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
-            VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, SDL_WINDOW_RESIZABLE);
+            VSPWindow* newWindow = VSPWindow::tryCreateWindow(title, { g_windowW, g_windowH }, 0);
             if (newWindow != NULL) {
                 g_currentWindow->detachScreen(currentScreen);
                 newWindow->addToWindowList();
@@ -296,7 +295,7 @@ void main_currentWorkspaceToNewWindow()
 }
 
 void main_attachCurrentWorkspaceToMainWindow() {
-    if (g_mainWindow != NULL && g_currentWindow != g_mainWindow) {
+    if (g_mainWindow != NULL && g_currentWindow != g_mainWindow && g_currentWindow->canMoveScreens()) {
         BaseScreen* currentScreen = g_currentWindow->screenStack[g_currentWindow->currentScreen];
         g_currentWindow->detachScreen(currentScreen);
         g_mainWindow->addScreen(currentScreen, true);
@@ -430,13 +429,22 @@ void main_registerCExceptionHandlers()
 
 std::string windowTitle = "";
 uint64_t ticksBegin = SDL_GetTicks64();
-int lastFrameCount = 0;
 int rtFrameCount = 0;
 u64 frameCountTimestamp = 0;
 
 int main_getLastFPS()
 {
     return lastFrameCount;
+}
+
+bool main_anyPopupsOpen()
+{
+    for (auto& [id, wd] : g_windows) {
+        if (wd->hasPopupsOpen()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void main_handleIPCMessage(std::string msg) {
@@ -488,10 +496,7 @@ void g_mainLoop() {
 
     g_fullFramerateThisFrame = false;
     bool firedQuitEventThisFrame = false;
-    bool anyPopupsOpen = false;
-    for (auto& [id, wd] : g_windows) {
-        anyPopupsOpen |= wd->hasPopupsOpen();
-    }
+    bool anyPopupsOpen = main_anyPopupsOpen();
 
     while (SDL_PollEvent(&evt)) {
         VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
@@ -660,214 +665,11 @@ void g_mainLoop() {
 
         wd->thisWindowsTurn();
 
-        if (!wd->popupStack.empty()) {
-            wd->popupStack[wd->popupStack.size() - 1]->tick();
-        }
-        if (!wd->screenStack.empty()) {
-            wd->screenStack[wd->currentScreen]->tick();
-        }
+        wd->tickWindow();
         g_runMainThreadOperations();
 
-        if (wd->viewport != NULL) {
-            g_pushRenderTarget(wd->viewport);
-        }
+        wd->renderWindow();
 
-        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 255);
-        SDL_RenderClear(g_rd);
-
-        if (!wd->screenStack.empty()) {
-            if (!wd->popupStack.empty()) {
-                g_ttp->takeTooltips = false;
-                wd->screenStack[wd->currentScreen]->render();
-                g_ttp->takeTooltips = true;
-            }
-            else {
-                wd->screenStack[wd->currentScreen]->render();
-            }
-        }
-
-        for (BasePopup*& popup : wd->popupStack) {
-            if (popup != wd->popupStack[wd->popupStack.size() - 1]) {
-                g_ttp->takeTooltips = false;
-                popup->render();
-                g_ttp->takeTooltips = true;
-            }
-            else {
-                popup->render();
-            }
-        }
-
-        /*if (!popupStack.empty()) {
-            popupStack[popupStack.size() - 1]->render();
-        }*/
-
-        //debug: render safearea
-        /*auto safeArea = wd->getSafeAreaCorners();
-        SDL_Rect safeAreaRect = {safeArea.first.x, safeArea.first.y,
-                                 safeArea.second.x - safeArea.first.x,
-                                 safeArea.second.y - safeArea.first.y};
-        SDL_SetRenderDrawColor(wd->rd, 255,0,0,255);
-        SDL_RenderDrawRect(wd->rd, &safeAreaRect);*/
-
-        wd->overlayRenderQueue.renderAll();
-
-        g_renderVFX();
-
-#if _DEBUG
-        XY origin = { g_windowW - 240, g_windowH - 90 };
-        for (auto& mem : g_named_memmap) {
-            g_fnt->RenderString(frmt("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
-                origin.y, { 255, 255, 255, 100 }, 14);
-            origin.y -= 16;
-        }
-        g_fnt->RenderString(frmt("Textures created: {}", g_allocated_textures), origin.x, origin.y,
-            { 255, 255, 255, 100 }, 14);
-        origin.y -= 16;
-        g_fnt->RenderString(frmt("Drawables created: {}", g_createdDrawables), origin.x, origin.y,
-            { 255, 255, 255, 100 }, 14);
-        origin.y -= 16;
-        g_fnt->RenderString(frmt("Thumbnail cache: {}", bytesToFriendlyString(thumbnails_cacheSize)), origin.x, origin.y,
-            { 255, 255, 255, 100 }, 14);
-        origin.y -= 16;
-        //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
-        //origin.y -= 16;
-#endif
-
-        int rightX = wd->getSafeAreaRight();
-        XY nextStatusBarOrigin = { g_windowW - rightX, g_windowH - 26 };
-
-        //draw the screen icons
-        //XY screenIcons = { g_windowW, g_windowH - 10 };
-        nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(26 * wd->screenStack.size()), 0 });
-        XY screenIconOrigin = nextStatusBarOrigin;
-
-        for (int x = 0; x < wd->screenStack.size(); x++) {
-            BaseScreen* s = wd->screenStack[x];
-            //this is where screen icons were rendered
-            wd->screenButtons[x]->position = screenIconOrigin;
-            screenIconOrigin.x += 26;
-        }
-        wd->overlayWidgets.renderAll();
-        //todo: make this a uilabel
-        if (!wd->screenStack.empty()) {
-            std::string screenName = wd->screenStack[wd->currentScreen]->getName();
-            int statW = g_fnt->StatStringDimensions(screenName, 16).x;
-            XY screenNameOrigin = xySubtract({ g_windowW - rightX, g_windowH }, { 10 + statW, 55 });
-            g_fnt->RenderString(wd->screenStack[wd->currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
-        }
-
-        //draw battery icon
-        int batteryRectW = 60;
-        int batterySeconds, batteryPercent;
-        SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
-        if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
-            XY batteryOrigin = xySubtract(nextStatusBarOrigin, { 120, 0 });
-            XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
-            XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
-
-            nextStatusBarOrigin = xySubtract(batteryOrigin, { 30,0 });
-
-            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
-            SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
-            SDL_RenderDrawRect(g_rd, &batteryRect);
-
-            if (batteryPercent <= 10 && powerstate != SDL_POWERSTATE_CHARGING && (SDL_GetTicks64() - wd->lastLowBatteryPulseTime) > 3000) {
-                wd->lastLowBatteryPulseTime = SDL_GetTicks64();
-                g_newVFX(VFX_LOWBATTERYPULSE, 2000, 0, batteryRect);
-            }
-
-            SDL_Color primaryColor =
-                powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{ 253, 255, 146, 0x80 }
-                : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
-                : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
-                : batteryPercent <= 10 ? SDL_Color{ 255, 0x50, 0x50, 0x80 }
-            : SDL_Color{ 255,255,255, 0x80 };
-
-            SDL_SetRenderDrawColor(g_rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
-            drawLine(batteryOrigin, batteryOriginLow);
-            drawLine(batteryEnd, xyAdd(batteryOriginLow, { batteryRectW, 0 }));
-            XY statPercent = statLineEndpoint(batteryOrigin, xyAdd(batteryOrigin, { batteryRectW, 0 }), batteryPercent / 100.0);
-            XY statPercentLow = { statPercent.x, batteryOriginLow.y };
-            drawLine(statPercent, statPercentLow);
-            drawLine(batteryOrigin, statPercent);
-            drawLine(batteryOriginLow, statPercentLow);
-            g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
-
-            if (powerstate == SDL_POWERSTATE_CHARGING) {
-                g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 });
-            }
-            else if (powerstate == SDL_POWERSTATE_CHARGED) {
-                g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
-            }
-            else if (powerstate == SDL_POWERSTATE_ERROR) {
-                g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
-            }
-        }
-
-        if (g_config.showSystemClock) {
-            std::tm sysTime = getLocalTime();
-            XY sysTimeOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
-            nextStatusBarOrigin = sysTimeOrigin;
-            XY timeEndpoint = g_fnt->RenderString(frmt("{:02}:{:02}", sysTime.tm_hour, sysTime.tm_min), sysTimeOrigin.x, sysTimeOrigin.y - 5, { 255,255,255,0x80 }, 16);
-            g_fnt->RenderString(frmt(":{:02}", sysTime.tm_sec), timeEndpoint.x, timeEndpoint.y, { 255,255,255,0x50 }, 12);
-        }
-
-        if (g_config.showFPS) {
-            XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
-            nextStatusBarOrigin = fpsOrigin;
-            g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
-        }
-
-        g_tickNotifications();
-        g_renderNotifications();
-
-        g_ttp->renderAll();
-
-        g_cleanUpDoneAsyncThreads();
-        if (anyPopupsOpen && !wd->hasPopupsOpen()) {
-            SDL_Rect wdrect = { 0, 0, g_windowW, g_windowH };
-            SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
-            SDL_RenderFillRect(g_rd, &wdrect);
-        }
-
-        if (g_bgOpRunning) {
-            renderbgOpInProgressScreen();
-        }
-        else {
-            //draw the mouse position 4x4 square
-            SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
-            SDL_Rect temp = { g_mouseX, g_mouseY, 4, 4 };
-            SDL_RenderFillRect(g_rd, &temp);
-        }
-
-        //g_fnt->RenderString("voidsprite 19.03.2024", 0, 0, SDL_Color{ 255,255,255,0x30 });
-
-
-        if (wd->viewport != NULL) {
-            g_popRenderTarget();
-            SDL_RenderCopy(g_rd, wd->viewport, NULL, NULL);
-        }
-
-        if (g_config.customWindowFrame) {
-            wd->renderCustomWindowFrame();
-        }
-
-        //g_fnt->RenderString(frmt("Frame time: {}\nFPS: {}", g_deltaTime, round(1.0/g_deltaTime)), 0, 30);
-
-        uint64_t ticksNonRenderEnd = SDL_GetTicks64();
-        SDL_RenderPresent(wd->rd);
-        if (!g_config.vsync) {
-            SDL_Delay(3);
-        }
-        if (!g_windowFocused && !g_fullFramerateThisFrame) {
-            if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
-                SDL_Delay(500);
-            }
-            else if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
-                SDL_Delay(45);
-            }
-
-        }
         uint64_t ticksEnd = SDL_GetTicks64();
 
         rtFrameCount++;
@@ -879,7 +681,6 @@ void g_mainLoop() {
         }
 
         g_deltaTime = ixmax(1, ticksEnd - ticksBegin) / 1000.0;
-        g_frameDeltaTime = (ticksNonRenderEnd - ticksBegin) / 1000.0;
 
         ticksBegin = SDL_GetTicks64();
 
@@ -896,7 +697,7 @@ void g_mainLoop() {
 
             g_updateRPC(
                 numOverallWorkspaces == 1 ? tl1ActiveWorkspaceString : frmt("{} {}", numOverallWorkspaces, tlActiveWorkspacesString),
-                numOverallWorkspaces > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "-"
+                (numOverallWorkspaces > 0 && wd->currentScreen < wd->screenStack.size()) ? wd->screenStack[wd->currentScreen]->getRPCString() : ""
             );
             std::string newWindowTitle = windowTitle + frmt("   " UTF8_EMPTY_DIAMOND "{}   " UTF8_EMPTY_DIAMOND "{} {}", (wd->screenStack.size() > 0 ? wd->screenStack[wd->currentScreen]->getRPCString() : "--"), wd->screenStack.size(), tlActiveWorkspacesString);
             if (newWindowTitle != wd->lastWindowTitle) {
@@ -1025,8 +826,7 @@ int main(int argc, char** argv)
 #endif
             ;
         u32 windowFlags = ONPLATFORM(VSP_PLATFORM_ANDROID, SDL_WINDOW_MAXIMIZED, 0) 
-            | ONPLATFORM(VSP_PLATFORM_WIN32, SDL_WINDOW_HIDDEN, 0)
-            | SDL_WINDOW_RESIZABLE;
+            | ONPLATFORM(VSP_PLATFORM_WIN32, SDL_WINDOW_HIDDEN, 0);
         initSteps.updateLastSection("Creating main window");
         g_mainWindow = VSPWindow::tryCreateWindow(windowTitle, { g_windowW, g_windowH }, windowFlags);
         g_mainWindow->isMainWindow = true;

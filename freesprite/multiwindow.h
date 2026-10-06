@@ -4,6 +4,7 @@
 #include "Timer64.h"
 #include "DrawableManager.h"
 
+
 class WindowBlurBuffer {
 protected:
     const int downscaleFactor = 96;
@@ -106,9 +107,7 @@ public:
         return w->getSDLHitTestAt({ area->x, area->y });
     }
 
-    bool hasPopupsOpen() {
-        return !popupStack.empty();
-    }
+    bool hasPopupsOpen() { return !popupStack.empty(); }
 
     std::string findFallbackSystemFont(std::vector<std::string> font);
     void initFonts();
@@ -151,6 +150,17 @@ public:
     void assignFavScreen();
     void switchToFavScreen();
 
+    void tickWindow();
+    void renderWindow();
+    void doFrameDelay();
+    virtual void clearWindow() { SDL_SetRenderDrawColor(rd, 0, 0, 0, 255); SDL_RenderClear(rd); }
+    void renderDebugInfo();
+    void renderStatusBar();
+    void renderBackgroundOpInProgressScreen();
+    void renderScreenAndPopups();
+    void renderVFX();
+
+    virtual bool shouldUseCustomWindowFrame() { return g_config.customWindowFrame; }
     void renderCustomWindowFrame();
     bool handleCustomFrameInput(SDL_Event evt);
     SDL_HitTestResult getSDLHitTestAt(XY pos);
@@ -164,5 +174,42 @@ public:
     int getSafeAreaLeft();
     int getSafeAreaRight();
 
+    virtual u32 defaultWindowFlags() { return SDL_WINDOW_RESIZABLE; }
+    virtual bool canMoveScreens() { return true; }
+    virtual bool shouldRenderStatus() { return true; }
+
     bool IsMaximized();
+};
+
+class SingleScreenTransparentWindow : public VSPWindow {
+protected:
+    u32 prevStyle = 0;
+public:
+    bool ignoreMouse = false;
+
+    SingleScreenTransparentWindow(std::string title, XY size, u32 flags) 
+        : VSPWindow(title, size, flags) 
+    {
+        setCustomWindowFrame(this->shouldUseCustomWindowFrame());
+    }
+
+    static VSPWindow* tryCreateSSTWindow(std::string title, XY size, u32 flags) {
+        flags |= SDL_WINDOW_TRANSPARENT;
+        VSPWindow* ret = new SingleScreenTransparentWindow(title, size, flags);
+        if (ret->wd == NULL || ret->rd == NULL) {
+            logerr(frmt("Failed to create window: {}\n  {}", title, SDL_GetError()));
+            delete ret;
+            return NULL;
+        }
+        ret->renderScale = g_renderScale;
+        return ret;
+    }
+
+    u32 defaultWindowFlags() override { return VSPWindow::defaultWindowFlags() | SDL_WINDOW_TRANSPARENT; }
+    void clearWindow() override { SDL_SetRenderDrawColor(rd, 0, 0, 0, 0); SDL_RenderClear(rd); }
+    bool shouldUseCustomWindowFrame() override { return true; }
+    bool shouldRenderStatus() override { return false; } 
+    bool canMoveScreens() override { return false; }
+
+    void setIgnoreMouseInput(bool ignoreMouseInput);
 };

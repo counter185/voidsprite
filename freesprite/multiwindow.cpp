@@ -7,11 +7,21 @@
 #include "FontRenderer.h"
 #include "ButtonStartScreenSession.h"
 #include "ScreenWideNavBar.h"
+#include "TooltipsLayer.h"
 
 #include "main.h"
+#include "thumbnail_loader.h"
+
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+#include <Windows.h>
+#endif
+
+#define windowW scaledWindowSize.x
+#define windowH scaledWindowSize.y
 
 
 VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
+    flags |= this->defaultWindowFlags();
     wd = SDL_CreateWindow(title.c_str(), size.x, size.y, flags);
     if (wd != NULL) {
         platformWindowCreated(this);
@@ -20,7 +30,7 @@ VSPWindow::VSPWindow(std::string title, XY size, u32 flags) {
     tryCreateRenderer();
     setWindowTitle(title);
     setVsync(g_config.vsync);
-    setCustomWindowFrame(g_config.customWindowFrame);
+    setCustomWindowFrame(this->shouldUseCustomWindowFrame());
     SDL_GetWindowSize(wd, &size.x, &size.y);
     unscaledWindowSize = scaledWindowSize = size;
     if (g_config.autoViewportScale) {
@@ -410,6 +420,265 @@ void VSPWindow::switchToFavScreen()
 
 }
 
+void VSPWindow::tickWindow()
+{
+    if (!popupStack.empty()) {
+        popupStack[popupStack.size() - 1]->tick();
+    }
+    if (!screenStack.empty()) {
+        screenStack[currentScreen]->tick();
+    }
+}
+
+void VSPWindow::renderWindow()
+{
+    if (viewport != NULL) {
+        g_pushRenderTarget(viewport);
+    }
+
+    clearWindow();
+
+    renderScreenAndPopups();
+
+    //debug: render safearea
+    /*auto safeArea = wd->getSafeAreaCorners();
+    SDL_Rect safeAreaRect = {safeArea.first.x, safeArea.first.y,
+                             safeArea.second.x - safeArea.first.x,
+                             safeArea.second.y - safeArea.first.y};
+    SDL_SetRenderDrawColor(rd, 255,0,0,255);
+    SDL_RenderDrawRect(rd, &safeAreaRect);*/
+
+    overlayRenderQueue.renderAll();
+
+    renderVFX();
+
+
+    if (this->shouldRenderStatus()) {
+        renderDebugInfo();
+        renderStatusBar();
+    }
+
+    g_tickNotifications();
+    g_renderNotifications();
+
+    g_ttp->renderAll();
+
+    g_cleanUpDoneAsyncThreads();
+    if (main_anyPopupsOpen() && !hasPopupsOpen()) {
+        SDL_Rect wdrect = { 0, 0, g_windowW, g_windowH };
+        SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x80);
+        SDL_RenderFillRect(g_rd, &wdrect);
+    }
+
+    if (g_bgOpRunning) {
+        renderBackgroundOpInProgressScreen();
+    }
+    else {
+        //draw the mouse position 4x4 square
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
+        SDL_Rect temp = { g_mouseX, g_mouseY, 4, 4 };
+        SDL_RenderFillRect(g_rd, &temp);
+    }
+
+    if (viewport != NULL) {
+        g_popRenderTarget();
+        SDL_RenderCopy(g_rd, viewport, NULL, NULL);
+    }
+
+    if (this->shouldUseCustomWindowFrame()) {
+        renderCustomWindowFrame();
+    }
+
+    SDL_RenderPresent(rd);
+    doFrameDelay();
+}
+
+void VSPWindow::doFrameDelay()
+{
+    if (!g_config.vsync) {
+        SDL_Delay(3);
+    }
+    int batterySeconds, batteryPercent;
+    SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
+    if (!g_windowFocused && !g_fullFramerateThisFrame) {
+        if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
+            SDL_Delay(500);
+        }
+        else if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
+            SDL_Delay(45);
+        }
+
+    }
+}
+
+void VSPWindow::renderDebugInfo()
+{
+#if _DEBUG
+    XY origin = { windowW - 240, windowH - 90 };
+    for (auto& mem : g_named_memmap) {
+        g_fnt->RenderString(frmt("{} | {}", mem.first, bytesToFriendlyString(mem.second)), origin.x,
+            origin.y, { 255, 255, 255, 100 }, 14);
+        origin.y -= 16;
+    }
+    g_fnt->RenderString(frmt("Textures created: {}", g_allocated_textures), origin.x, origin.y,
+        { 255, 255, 255, 100 }, 14);
+    origin.y -= 16;
+    g_fnt->RenderString(frmt("Drawables created: {}", g_createdDrawables), origin.x, origin.y,
+        { 255, 255, 255, 100 }, 14);
+    origin.y -= 16;
+    g_fnt->RenderString(frmt("Thumbnail cache: {}", bytesToFriendlyString(thumbnails_cacheSize)), origin.x, origin.y,
+        { 255, 255, 255, 100 }, 14);
+    origin.y -= 16;
+    //g_fnt->RenderString(frmt("{} FPS", lastFrameCount), origin.x, origin.y, { 255,255,255,100 }, 14);
+    //origin.y -= 16;
+#endif
+}
+
+void VSPWindow::renderStatusBar()
+{
+    int rightX = getSafeAreaRight();
+    XY nextStatusBarOrigin = { windowW - rightX, windowH - 26 };
+
+    //draw the screen icons
+    //XY screenIcons = { g_windowW, g_windowH - 10 };
+    nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(26 * screenStack.size()), 0 });
+    XY screenIconOrigin = nextStatusBarOrigin;
+
+    for (int x = 0; x < screenStack.size(); x++) {
+        BaseScreen* s = screenStack[x];
+        //this is where screen icons were rendered
+        screenButtons[x]->position = screenIconOrigin;
+        screenIconOrigin.x += 26;
+    }
+    overlayWidgets.renderAll();
+    //todo: make this a uilabel
+    if (!screenStack.empty()) {
+        std::string screenName = screenStack[currentScreen]->getName();
+        int statW = g_fnt->StatStringDimensions(screenName, 16).x;
+        XY screenNameOrigin = xySubtract({ windowW - rightX, windowH }, { 10 + statW, 55 });
+        g_fnt->RenderString(screenStack[currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
+    }
+
+    //draw battery icon
+    int batteryRectW = 60;
+    int batterySeconds, batteryPercent;
+    SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
+    if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
+        XY batteryOrigin = xySubtract(nextStatusBarOrigin, { 120, 0 });
+        XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
+        XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
+
+        nextStatusBarOrigin = xySubtract(batteryOrigin, { 30,0 });
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
+        SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
+        SDL_RenderDrawRect(g_rd, &batteryRect);
+
+        if (batteryPercent <= 10 && powerstate != SDL_POWERSTATE_CHARGING && (SDL_GetTicks64() - lastLowBatteryPulseTime) > 3000) {
+            lastLowBatteryPulseTime = SDL_GetTicks64();
+            g_newVFX(VFX_LOWBATTERYPULSE, 2000, 0, batteryRect);
+        }
+
+        SDL_Color primaryColor =
+            powerstate == SDL_POWERSTATE_CHARGING ? SDL_Color{ 253, 255, 146, 0x80 }
+            : powerstate == SDL_POWERSTATE_CHARGED ? SDL_Color{ 78,255,249, 0x80 }
+            : powerstate == SDL_POWERSTATE_ERROR ? SDL_Color{ 255, 40, 40, 0x80 }
+            : batteryPercent <= 10 ? SDL_Color{ 255, 0x50, 0x50, 0x80 }
+        : SDL_Color{ 255,255,255, 0x80 };
+
+        SDL_SetRenderDrawColor(rd, primaryColor.r, primaryColor.g, primaryColor.b, primaryColor.a);
+        drawLine(batteryOrigin, batteryOriginLow);
+        drawLine(batteryEnd, xyAdd(batteryOriginLow, { batteryRectW, 0 }));
+        XY statPercent = statLineEndpoint(batteryOrigin, xyAdd(batteryOrigin, { batteryRectW, 0 }), batteryPercent / 100.0);
+        XY statPercentLow = { statPercent.x, batteryOriginLow.y };
+        drawLine(statPercent, statPercentLow);
+        drawLine(batteryOrigin, statPercent);
+        drawLine(batteryOriginLow, statPercentLow);
+        g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
+
+        if (powerstate == SDL_POWERSTATE_CHARGING) {
+            g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 });
+        }
+        else if (powerstate == SDL_POWERSTATE_CHARGED) {
+            g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
+        }
+        else if (powerstate == SDL_POWERSTATE_ERROR) {
+            g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
+        }
+    }
+
+    if (g_config.showSystemClock) {
+        std::tm sysTime = getLocalTime();
+        XY sysTimeOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
+        nextStatusBarOrigin = sysTimeOrigin;
+        XY timeEndpoint = g_fnt->RenderString(frmt("{:02}:{:02}", sysTime.tm_hour, sysTime.tm_min), sysTimeOrigin.x, sysTimeOrigin.y - 5, { 255,255,255,0x80 }, 16);
+        g_fnt->RenderString(frmt(":{:02}", sysTime.tm_sec), timeEndpoint.x, timeEndpoint.y, { 255,255,255,0x50 }, 12);
+    }
+
+    if (g_config.showFPS) {
+        XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
+        nextStatusBarOrigin = fpsOrigin;
+        g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
+    }
+}
+
+void VSPWindow::renderBackgroundOpInProgressScreen()
+{
+    SDL_Rect r = { 0, 0, g_windowW, g_windowH };
+
+    u32 colFB = PackRGBAtoARGB(0, 0, 0, (u8)(0xd0 * g_bgOpStartTimer.percentElapsedTime(600)));
+    u32 colHB = PackRGBAtoARGB(0, 0, 0, (u8)(0x80 * g_bgOpStartTimer.percentElapsedTime(600)));
+
+    renderGradient({ 0,0,g_windowW,g_windowH / 2 }, colFB, colFB, colHB, colHB);
+    renderGradient({ 0,g_windowH / 2,g_windowW,g_windowH / 2 + 1 }, colHB, colHB, colFB, colFB);
+
+    TooltipsLayer localttp;
+
+    static std::string bgOpInProgressText = TL("vsp.bgop.inprogress");
+
+    std::string currentText = bgOpInProgressText;
+
+    int lines = 1;
+    auto progressReports = g_bgOpProgressReport->getCurrentSections();
+    for (const std::string& report : progressReports) {
+        currentText += frmt("\n    {}", report);
+        lines++;
+    }
+
+    localttp.addTooltip(Tooltip{ {0,g_windowH - (12 + 18 * lines) }, currentText, {255,255,255,255}, g_bgOpStartTimer.percentElapsedTime(600) });
+    localttp.renderAll();
+}
+
+void VSPWindow::renderScreenAndPopups()
+{
+    if (!screenStack.empty()) {
+        if (!popupStack.empty()) {
+            g_ttp->takeTooltips = false;
+            screenStack[currentScreen]->render();
+            g_ttp->takeTooltips = true;
+        }
+        else {
+            screenStack[currentScreen]->render();
+        }
+    }
+
+    for (BasePopup*& popup : popupStack) {
+        if (popup != popupStack.back()) {
+            g_ttp->takeTooltips = false;
+            popup->render();
+            g_ttp->takeTooltips = true;
+        }
+        else {
+            popup->render();
+        }
+    }
+}
+
+void VSPWindow::renderVFX()
+{
+    g_renderVFX(this);
+}
+
 void VSPWindow::renderCustomWindowFrame()
 {
     SDL_SetRenderDrawColor(rd, 255, 255, 255, 0x30);
@@ -782,4 +1051,25 @@ void RenderQueue::renderAll()
         op();
     }
     queue.clear();
+}
+
+void SingleScreenTransparentWindow::setIgnoreMouseInput(bool ignoreMouseInput)
+{
+    //loginfo(frmt("setIgnoreMouseInput {}", ignoreMouseInput));
+    ignoreMouse = ignoreMouseInput;
+    SDL_SetWindowAlwaysOnTop(wd, ignoreMouseInput);
+#if VSP_PLATFORM == VSP_PLATFORM_WIN32
+    SDL_PropertiesID p = SDL_GetWindowProperties(wd);
+    HWND h = (HWND)SDL_GetPointerProperty(p, SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+    if (prevStyle == 0) {
+        prevStyle = GetWindowLong(h, GWL_EXSTYLE);
+    }
+
+    if (ignoreMouseInput) {
+        SetWindowLong(h, GWL_EXSTYLE, prevStyle | WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOPMOST);
+    }
+    else {
+        SetWindowLong(h, GWL_EXSTYLE, prevStyle);
+    }
+#endif
 }

@@ -76,6 +76,7 @@
 #include <ctime>
 #include "UIStackPanel.h"
 #endif
+#include "main.h"
 
 using namespace nlohmann;
 
@@ -1306,68 +1307,61 @@ void MainEditor::setUpWidgets()
         },
         {
             SDL_SCANCODE_V,
+            makeNavbarSection(TL("vsp.nav.view"), g_iconNavbarTabView,
             {
-                makeNavbarSection(TL("vsp.nav.view"), g_iconNavbarTabView,
-                {
-                    {SDL_SCANCODE_R, { "Recenter canvas", [this]() { this->recenterCanvas(); }}},
-                    {SDL_SCANCODE_F, { "Add reference...",
-                            [this]() {
-                                PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE, true);
-                            }
+                {SDL_SCANCODE_R, { "Recenter canvas", [this]() { this->recenterCanvas(); }}},
+                {SDL_SCANCODE_F, { "Add reference...",
+                        [this]() {
+                            PopupFilePicker::PlatformAnyImageImportDialog(this, TL("vsp.popup.addreference"), EVENT_MAINEDITOR_ADD_REFERENCE, true);
                         }
-                    },
-                    {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
-                    {SDL_SCANCODE_B, { "Toggle background color", [this]() { TOGGLE(this->ssne.alternateBackground); }}},
-                    {SDL_SCANCODE_C, { "Toggle comments",
-                            [this]() {
-                                (*(int*)&this->ssne.commentViewMode)++;
-                                (*(int*)&this->ssne.commentViewMode) %= 3;
-                                g_addNotification(Notification(frmt("{}",
-                                    this->ssne.commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
-                                    this->ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
-                                    "All comments shown"), "", 1500
-                                ));
-                            }
+                    }
+                },
+                {SDL_SCANCODE_V, { "Add reference from clipboard...", [this]() { tryAddReferenceFromClipboard(); }}},
+                {SDL_SCANCODE_B, { "Toggle background color", [this]() { TOGGLE(this->ssne.alternateBackground); }}},
+                {SDL_SCANCODE_C, { "Toggle comments",
+                        [this]() {
+                            (*(int*)&this->ssne.commentViewMode)++;
+                            (*(int*)&this->ssne.commentViewMode) %= 3;
+                            g_addNotification(Notification(frmt("{}",
+                                this->ssne.commentViewMode == COMMENTMODE_HIDE_ALL ? "All comments hidden" :
+                                this->ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED ? "Comments shown on hover" :
+                                "All comments shown"), "", 1500
+                            ));
                         }
-                    },                    
-                    {SDL_SCANCODE_L, { "Toggle guidelines",
-                            [this]() {
-                                (*(int*)&this->ssne.guidelineDisplayMode)++;
-                                (*(int*)&this->ssne.guidelineDisplayMode) %= 3;
-                                g_addNotification(Notification(frmt("{}",
-                                    this->ssne.guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
-                                    this->ssne.guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
-                                    "Guidelines shown in UI color"), "", 1500
-                                ));
-                            }
+                    }
+                },                    
+                {SDL_SCANCODE_L, { "Toggle guidelines",
+                        [this]() {
+                            (*(int*)&this->ssne.guidelineDisplayMode)++;
+                            (*(int*)&this->ssne.guidelineDisplayMode) %= 3;
+                            g_addNotification(Notification(frmt("{}",
+                                this->ssne.guidelineDisplayMode == GUIDELINE_HIDE_ALL ? "All guidelines hidden" :
+                                this->ssne.guidelineDisplayMode == GUIDELINE_SHOW_COLORED ? "Guidelines shown in active color" :
+                                "Guidelines shown in UI color"), "", 1500
+                            ));
                         }
-                    },
-                    {SDL_SCANCODE_G, { "Set pixel grid...",
-                            [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
+                    }
+                },
+                {SDL_SCANCODE_G, { "Set pixel grid...",
+                        [this]() { g_addPopup(new PopupSetEditorPixelGrid(this, "Set pixel grid", "Enter grid size <w>x<h>:")); }
+                    }
+                },
+                {SDL_SCANCODE_H, { "Toggle pixel grid", [this]() { togglePixelGrid(); }}},
+                {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
+                {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
+                {SDL_SCANCODE_A, { "Open frames panel...",
+                        [this]() {
+                            framePicker->enabled = true;
+                            framePicker->playPanelOpenVFX();
                         }
-                    },
-                    {SDL_SCANCODE_H, { "Toggle pixel grid", [this]() { togglePixelGrid(); }}},
-                    {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
-                    {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
-                    {SDL_SCANCODE_A, { "Open frames panel...",
-                            [this]() {
-                                framePicker->enabled = true;
-                                framePicker->playPanelOpenVFX();
-                            }
-                        }
-                    },
-                })
-            }
+                    }
+                },
+            })
         },
         {
             SDL_SCANCODE_P,
             makeNavbarSection(TL("vsp.nav.preview"), {
-                {SDL_SCANCODE_F, { "Preview in separate workspace...",
-                        [this]() {
-                            g_addScreen(new ViewSessionScreen(this));
-                        }
-                    }
-                },
+                {SDL_SCANCODE_F, { "Preview in separate workspace...", [this]() {g_addScreen(new ViewSessionScreen(this)); } }},
                 {SDL_SCANCODE_3, { "Preview 3D cube...",
                         [this]() {
                             if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
@@ -1401,13 +1395,7 @@ void MainEditor::setUpWidgets()
                         }
                     }
                 },
-                {SDL_SCANCODE_C, { "Preview cubemap...",
-                        [this]() {
-                            ScreenCubemapPreview* newScreen = new ScreenCubemapPreview(this);
-                            g_addScreen(newScreen);
-                        }
-                    }
-                },
+                {SDL_SCANCODE_C, { "Preview cubemap...", [this]() { g_addScreen(new ScreenCubemapPreview(this));}}},
                 {SDL_SCANCODE_M, { "Preview Minecraft skin...",
                         [this]() {
                             if (!MinecraftSkinPreviewScreen::dimensionsValidForPreview(this->canvas.dimensions)) {
@@ -1462,13 +1450,23 @@ void MainEditor::setUpWidgets()
         };
     }
 
+    if (platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
+        mainEditorKeyActions[SDL_SCANCODE_P].order.insert(mainEditorKeyActions[SDL_SCANCODE_P].order.begin(), SDL_SCANCODE_G);
+        mainEditorKeyActions[SDL_SCANCODE_P].actions[SDL_SCANCODE_G] = { 
+            "Preview in transparent window...",
+            [this]() {
+                TransparentViewSessionScreen* s = new TransparentViewSessionScreen(this);
+                VSPWindow* w = main_newSingleScreenTransparentWindow(s);
+                s->assignWindow((SingleScreenTransparentWindow*)w);
+            }
+        };
+    }
+
     //load filters
     int i = 0;
     for (auto& filter : g_filters) {
         mainEditorKeyActions[SDL_SCANCODE_Q].actions[keyorder[i++]] = {
-            filter->name(), [this, filter]() {
-                openFilterUI(filter);
-            }
+            filter->name(), [this, filter]() { openFilterUI(filter); }
         };
     }
     //load render filters

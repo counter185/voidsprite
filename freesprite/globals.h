@@ -297,7 +297,6 @@ inline std::vector<BaseBrush*> g_pluginBrushes;
 extern std::vector<Pattern*> g_patterns;
 inline std::vector<BaseTemplate*> g_templates;
 inline double g_deltaTime = 1.0;
-inline double g_frameDeltaTime = 0.001;
 inline std::vector<NineSegmentPattern*> g_9spatterns;
 inline std::vector<BaseFilter*> g_filters;
 inline std::vector<BaseFilter*> g_pluginFilters;

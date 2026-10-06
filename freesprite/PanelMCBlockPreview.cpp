@@ -4,6 +4,8 @@
 #include "UICheckbox.h"
 #include "MinecraftBlockPreviewScreen.h"
 
+#undef small
+
 PanelMCBlockPreview::PanelMCBlockPreview(MinecraftBlockPreviewScreen* caller, bool small)
 {
     this->caller = caller;
