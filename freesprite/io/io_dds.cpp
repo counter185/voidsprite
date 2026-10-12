@@ -87,7 +87,7 @@ void DeXT1(Layer* ret, int width, int height, FILE* infile)
     }
 }
 void DeXT23(Layer* ret, int width, int height, FILE* infile) {
-    uint32_t* pxd = ret->pixels32();
+    u32* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             // Extract color endpoints
@@ -108,8 +108,7 @@ void DeXT23(Layer* ret, int width, int height, FILE* infile) {
             alphaPtr = 0;
             //fread(alphaData, 2, 4, infile);
 
-            uint16_t color0;
-            uint16_t color1;
+            u16 color0, color1;
             fread(&color0, 2, 1, infile);
             fread(&color1, 2, 1, infile);
 
@@ -130,20 +129,16 @@ void DeXT23(Layer* ret, int width, int height, FILE* infile) {
             temp = (color1 & 0x001F) * 255 + 16;
             unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
 
-            uint8_t a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
+            u8 a = r1 == 0 && g1 == 0 && b1 == 0 ? 0 : 255;
 
-            // Decode 4-bit indices
-            uint32_t code;
+            u32 code;
             fread(&code, 4, 1, infile);
-            //Read4BitIndices(compressedData, indices);
-
-
 
             // Fill ARGB array
             for (int dy = 0; dy < 4; ++dy) {
                 for (int dx = 0; dx < 4; ++dx) {
-                    unsigned char positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
-                    uint32_t color = 0;
+                    u8 positionCode = (code >> 2 * (4 * dy + dx)) & 0x03;
+                    u32 color = 0;
                     if (color0 > color1)
                     {
                         switch (positionCode)
@@ -193,38 +188,36 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             //gonna be real i have no idea what's going on here
-            u8 alpha0;
-            u8 alpha1;
+            u8 alpha0, alpha1;
             fread(&alpha0, 1, 1, infile);
             fread(&alpha1, 1, 1, infile);
 
             u8 bits[6];
             fread(bits, 1, 6, infile);
-            unsigned long alphaCode1 = bits[2] | (bits[3] << 8) | (bits[4] << 16) | (bits[5] << 24);
+            u32 alphaCode1 = bits[2] | (bits[3] << 8) | (bits[4] << 16) | (bits[5] << 24);
             u16 alphaCode2 = bits[0] | (bits[1] << 8);
 
-            u16 color0;
-            u16 color1;
+            u16 color0, color1;
             fread(&color0, 2, 1, infile);
             fread(&color1, 2, 1, infile);
 
-            unsigned long temp;
+            u32 temp;
 
             temp = (color0 >> 11) * 255 + 16;
-            unsigned char r0 = (unsigned char)((temp / 32 + temp) / 32);
+            u8 r0 = (u8)((temp / 32 + temp) / 32);
             temp = ((color0 & 0x07E0) >> 5) * 255 + 32;
-            unsigned char g0 = (unsigned char)((temp / 64 + temp) / 64);
+            u8 g0 = (u8)((temp / 64 + temp) / 64);
             temp = (color0 & 0x001F) * 255 + 16;
-            unsigned char b0 = (unsigned char)((temp / 32 + temp) / 32);
+            u8 b0 = (u8)((temp / 32 + temp) / 32);
 
             temp = (color1 >> 11) * 255 + 16;
-            unsigned char r1 = (unsigned char)((temp / 32 + temp) / 32);
+            u8 r1 = (u8)((temp / 32 + temp) / 32);
             temp = ((color1 & 0x07E0) >> 5) * 255 + 32;
-            unsigned char g1 = (unsigned char)((temp / 64 + temp) / 64);
+            u8 g1 = (u8)((temp / 64 + temp) / 64);
             temp = (color1 & 0x001F) * 255 + 16;
-            unsigned char b1 = (unsigned char)((temp / 32 + temp) / 32);
+            u8 b1 = (u8)((temp / 32 + temp) / 32);
 
-            unsigned long code;
+            u32 code;
             fread(&code, 4, 1, infile);
 
             for (int j = 0; j < 4; j++)
@@ -247,7 +240,7 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
                         alphaCode = (alphaCode1 >> (alphaCodeIndex - 16)) & 0x07;
                     }
 
-                    unsigned char finalAlpha;
+                    u8 finalAlpha;
                     if (alphaCode == 0)
                     {
                         finalAlpha = alpha0;
@@ -273,24 +266,14 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
                         }
                     }
 
-                    unsigned char colorCode = (code >> 2 * (4 * j + i)) & 0x03;
+                    u8 colorCode = (code >> 2 * (4 * j + i)) & 0x03;
 
-                    uint32_t color;
-                    switch (colorCode)
-                    {
-                    case 0:
-                        color = PackRGBAtoARGB(r0, g0, b0, finalAlpha);
-                        break;
-                    case 1:
-                        color = PackRGBAtoARGB(r1, g1, b1, finalAlpha);
-                        break;
-                    case 2:
-                        color = PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, finalAlpha);
-                        break;
-                    case 3:
-                        color = PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, finalAlpha);
-                        break;
-                    }
+                    u32 color =
+                        colorCode == 0 ? PackRGBAtoARGB(r0, g0, b0, finalAlpha)
+                        : colorCode == 1 ? PackRGBAtoARGB(r1, g1, b1, finalAlpha)
+                        : colorCode == 2 ? PackRGBAtoARGB((2 * r0 + r1) / 3, (2 * g0 + g1) / 3, (2 * b0 + b1) / 3, finalAlpha)
+                        : colorCode == 3 ? PackRGBAtoARGB((r0 + 2 * r1) / 3, (g0 + 2 * g1) / 3, (b0 + 2 * b1) / 3, finalAlpha)
+                        : 0;
 
                     if (x + i < width)
                         ret->setPixel(XY{ x + i, y + j }, color);
@@ -303,7 +286,7 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
 void DeBC7(Layer* ret, int width, int height, FILE* infile)
 {
     u32* pxd = ret->pixels32();
-    memset(pxd, 0xcc, width * height * 4);
+    //memset(pxd, 0xcc, width * height * 4);
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             u8 block[16];
@@ -359,18 +342,18 @@ Layer* readDDS(PlatformNativePathString path, uint64_t seek)
             //todo holy fucking shit please clean this up
             ret = new Layer(desc.width, desc.height);
             ret->name = "DDS DXT2/3 Layer";
-            DeXT23(ret, desc.width, desc.width, infile);
+            DeXT23(ret, desc.width, desc.height, infile);
             break;
         case ddspp::BC3_UNORM:
             //todo holy fucking shit please clean this up
             ret = new Layer(desc.width, desc.height);
             ret->name = "DDS DXT4/5 Layer";
-            DeXT45(ret, desc.width, desc.width, infile);
+            DeXT45(ret, desc.width, desc.height, infile);
             break;
         case ddspp::BC7_UNORM:
             ret = new Layer(desc.width, desc.height);
             ret->name = "DDS BC7 Layer";
-            DeBC7(ret, desc.width, desc.width, infile);
+            DeBC7(ret, desc.width, desc.height, infile);
             break;
         case ddspp::B8G8R8A8_UNORM:
         {
