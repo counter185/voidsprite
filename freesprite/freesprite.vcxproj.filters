@@ -151,6 +151,12 @@
     <Filter Include="Source files\actions">
       <UniqueIdentifier>{ca8b04c1-6189-41e6-88a9-b3af3cf543c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\external\bc7enc_rdo">
+      <UniqueIdentifier>{4d5c62bf-a49a-48dc-aff0-654a0695bfb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\external\bc7enc_rdo">
+      <UniqueIdentifier>{f605d798-7647-4baa-ab98-1b335f8962e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -791,6 +797,18 @@
     </ClCompile>
     <ClCompile Include="brush\BrushGradient.cpp">
       <Filter>Source files\brushes</Filter>
+    </ClCompile>
+    <ClCompile Include="io\io_dds.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="bc7enc_rdo\bc7decomp.cpp">
+      <Filter>Source files\external\bc7enc_rdo</Filter>
+    </ClCompile>
+    <ClCompile Include="bc7enc_rdo\bc7enc.cpp">
+      <Filter>Source files\external\bc7enc_rdo</Filter>
+    </ClCompile>
+    <ClCompile Include="bc7enc_rdo\rgbcx.cpp">
+      <Filter>Source files\external\bc7enc_rdo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1573,6 +1591,24 @@
     </ClInclude>
     <ClInclude Include="brush\BrushGradient.h">
       <Filter>Header files\brushes</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_dds.h">
+      <Filter>Header files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="bc7enc_rdo\bc7enc.h">
+      <Filter>Header files\external\bc7enc_rdo</Filter>
+    </ClInclude>
+    <ClInclude Include="bc7enc_rdo\rgbcx.h">
+      <Filter>Header files\external\bc7enc_rdo</Filter>
+    </ClInclude>
+    <ClInclude Include="bc7enc_rdo\bc7decomp.h">
+      <Filter>Header files\external\bc7enc_rdo</Filter>
+    </ClInclude>
+    <ClInclude Include="bc7enc_rdo\rgbcx_table4.h">
+      <Filter>Header files\external\bc7enc_rdo</Filter>
+    </ClInclude>
+    <ClInclude Include="bc7enc_rdo\rgbcx_table4_small.h">
+      <Filter>Header files\external\bc7enc_rdo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

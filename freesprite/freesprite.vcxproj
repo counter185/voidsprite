@@ -259,11 +259,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="actions\actions.cpp" />
+    <ClCompile Include="bc7enc_rdo\bc7decomp.cpp" />
+    <ClCompile Include="bc7enc_rdo\bc7enc.cpp" />
+    <ClCompile Include="bc7enc_rdo\rgbcx.cpp" />
     <ClCompile Include="brush\BrushGradient.cpp" />
+    <ClCompile Include="io\io_dds.cpp" />
     <ClCompile Include="io\io_graphicsgale.cpp" />
     <ClInclude Include="actions\actions.h" />
+    <ClInclude Include="bc7enc_rdo\bc7decomp.h" />
+    <ClInclude Include="bc7enc_rdo\bc7enc.h" />
+    <ClInclude Include="bc7enc_rdo\rgbcx.h" />
+    <ClInclude Include="bc7enc_rdo\rgbcx_table4.h" />
+    <ClInclude Include="bc7enc_rdo\rgbcx_table4_small.h" />
     <ClInclude Include="brush\BrushGradient.h" />
     <ClInclude Include="git.h" />
+    <ClInclude Include="io\io_dds.h" />
     <ClInclude Include="io\io_graphicsgale.h" />
     <ClCompile Include="PopupRecordTimelapse.cpp" />
     <ClCompile Include="PopupRenameLayer.cpp" />

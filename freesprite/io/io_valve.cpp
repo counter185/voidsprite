@@ -1,5 +1,6 @@
 #include "io_base.h"
 #include "io_valve.h"
+#include "io_dds.h"
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile);
 void DeXT23(Layer* ret, int width, int height, FILE* infile);
@@ -79,7 +80,8 @@ MainEditor* readValveSPR(PlatformNativePathString path)
 }
 
 u64 VTFgetImageSizeInBytesForFormat(int imageFormat, int w, int h) {
-    return imageFormat == IMAGE_FORMAT_I8 ? w * h
+    return 
+        imageFormat == IMAGE_FORMAT_I8 ? w * h
         : imageFormat == IMAGE_FORMAT_A8 ? w * h
         : imageFormat == IMAGE_FORMAT_IA88 ? w * h * 2
         : imageFormat == IMAGE_FORMAT_RGB565 ? w * h * 2
@@ -94,21 +96,25 @@ u64 VTFgetImageSizeInBytesForFormat(int imageFormat, int w, int h) {
         : imageFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
         : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
         : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+
+        : 0;
+}
+
+u64 S2getImageSizeInBytesForFormat(int imageFormat, int w, int h) {
+    return 
+        imageFormat == VTEX_RGBA8888 ? w * h * 4
+        : imageFormat == VTEX_BGRA8888 ? w * h * 4
+        : imageFormat == VTEX_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
+        : imageFormat == VTEX_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+        : imageFormat == VTEX_BC7 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
+
         : 0;
 }
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat)
 {
     Layer* ret = NULL;
-    int w = width;
-    int h = height;
-    for (int skipMMap = 0; skipMMap < mipmapCount - 1; skipMMap++) {
-        w = ixmax(1, w / 2);
-        h = ixmax(1, h / 2);
-        int seekBy = VTFgetImageSizeInBytesForFormat(imageFormat, w, h);
-
-        fseek(infile, seekBy * frames, SEEK_CUR);
-    }
+    _VTFSeekToLargestMipmap(width, height, mipmapCount, imageFormat, infile, frames);
     //fseek(infile, 16, SEEK_CUR);
 
     switch (imageFormat) {
@@ -274,6 +280,34 @@ Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int m
             break;
     }
     return ret;
+}
+
+void _VTFSeekToLargestMipmap(int width, int height, int mipmapCount, int imageFormat, FILE* infile, int frames)
+{
+    int w = width;
+    int h = height;
+    for (int skipMMap = 0; skipMMap < mipmapCount - 1; skipMMap++) {
+        w = ixmax(1, w / 2);
+        h = ixmax(1, h / 2);
+        int seekBy = VTFgetImageSizeInBytesForFormat(imageFormat, w, h);
+        loginfo(frmt("  skipping {}x{}x{} mipmap ({} b)", w,h, frames, seekBy * frames));
+
+        fseek(infile, seekBy * frames, SEEK_CUR);
+    }
+}
+
+void _S2SeekToLargestMipmap(int width, int height, int mipmapCount, int imageFormat, FILE* infile)
+{
+    int w = width;
+    int h = height;
+    for (int skipMMap = 0; skipMMap < mipmapCount - 1; skipMMap++) {
+        w = ixmax(1, w / 2);
+        h = ixmax(1, h / 2);
+        int seekBy = S2getImageSizeInBytesForFormat(imageFormat, w, h);
+        loginfo(frmt("  skipping {}x{} mipmap ({} b)", w,h, seekBy));
+
+        fseek(infile, seekBy, SEEK_CUR);
+    }
 }
 
 
@@ -444,4 +478,90 @@ bool writeVTF(PlatformNativePathString path, Layer* data, OperationProgressRepor
         return true;
     }
     return false;
+}
+
+Layer* readValveVTEX_C(PlatformNativePathString path, u64 seek)
+{
+    FILE* f = platformOpenFile(path, PlatformFileModeRB);
+    if (f != NULL) {
+        DoOnReturn closeFile([f]() {fclose(f); });
+        S2_COMPILED_HEADER header{};
+        fread(&header, sizeof(S2_COMPILED_HEADER), 1, f);
+
+        if (header.headerVersion == 0x0c) {
+
+            u64 blockIndexTablePos = 0x08 + header.blockOffset;
+
+            u32 vtexDataOffset = 0;
+            u32 vtexDataSize = 0;
+
+            std::vector<S2_BLOCK_ENTRY> blocks;
+            for (int i = 0; i < header.blockCount; i++) {
+                u64 pos = ftell(f);
+                S2_BLOCK_ENTRY b{};
+                fread(&b, sizeof(S2_BLOCK_ENTRY), 1, f);
+                b.offset += 4 + pos;
+
+                char* c = (char*)&b.blockType;
+                loginfo(frmt("[VTEX_C] block: {}{}{}{} at {:x} size {:x}", c[0],c[1],c[2],c[3], b.offset, b.size));
+                blocks.push_back(b);
+
+                if (b.blockType == 'ATAD') {
+                    vtexDataOffset = b.offset;
+                    vtexDataSize = b.size;
+                }
+            }
+
+            S2_VTEX_HEADER vtexHeader{};
+
+            if (vtexDataOffset != 0) {
+                fseek(f, vtexDataOffset, SEEK_SET);
+                fread(&vtexHeader, sizeof(S2_VTEX_HEADER), 1, f);
+                loginfo(frmt("[VTEX_C] w:{} h:{} bpp:{}  format:{}  flags:{:x}", vtexHeader.w, vtexHeader.h, vtexHeader.depth, vtexHeader.format, vtexHeader.flags));
+
+                u64 extDataOrigin = ftell(f) + vtexHeader.extDataOffset - 8;
+                fseek(f, extDataOrigin, SEEK_SET);
+                for (int i = 0; i < vtexHeader.extDataCount; i++) {
+                    u32 type, offset, size;
+                    fread(&type, 4, 1, f);
+                    fread(&offset, 4, 1, f);
+                    fread(&size, 4, 1, f);
+                    offset -= 8;
+
+                    u64 pos = ftell(f);
+                    fseek(f, offset, SEEK_CUR);
+                    loginfo(frmt("[VTEX_C]    extdata {} at {:x}", type, offset));
+
+                    fseek(f, pos, SEEK_SET);
+                }
+            }
+            else {
+                logerr("[VTEX_C] no DATA block");
+                return NULL;
+            }
+
+            u64 textureData = vtexDataOffset + vtexDataSize;
+            fseek(f, textureData, SEEK_SET);
+
+            Layer* ll = Layer::tryAllocLayer(vtexHeader.w, vtexHeader.h);
+            if (ll != NULL) {
+                switch (vtexHeader.format) {
+                    case VTEX_BC7:
+                        _S2SeekToLargestMipmap(ll->w, ll->h, vtexHeader.mipCount, vtexHeader.format, f);
+                        ll->name = "VTEX BC7 Layer";
+                        DeBC7(ll, ll->w, ll->h, f);
+                        return ll;
+                    default:
+                        delete ll;
+                        logerr(frmt("[VTEX_C] unknown format: {}", vtexHeader.format));
+                        return NULL;
+                }
+            }
+            else {
+                g_addNotificationFromThread(NOTIF_MALLOC_FAIL);
+                return NULL;
+            }
+        }
+    }
+    return NULL;
 }

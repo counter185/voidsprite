@@ -13,10 +13,6 @@ std::map<std::string, std::string> parseINI(PlatformNativePathString path);
 
 uint8_t* DecompressMarioPaintSRM(FILE* f);
 
-void DeXT1(Layer* ret, int width, int height, FILE* infile);
-void DeXT23(Layer* ret, int width, int height, FILE* infile);
-void DeXT45(Layer* ret, int width, int height, FILE* infile);
-
 LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, u64 dataSize);
@@ -37,6 +33,7 @@ void emDownloadFile(PlatformNativePathString path);
 
 #include "io/io_png.h"
 #include "io/io_astc.h"
+#include "io/io_dds.h"
 #include "io/io_aseprite.h"
 #include "io/io_jsonformats.h"
 #include "io/io_pix2d.h"
@@ -69,7 +66,6 @@ Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSDLImage(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readNES(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readDDS(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readGCI(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMSP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek = 0);
