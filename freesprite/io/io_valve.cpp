@@ -97,7 +97,12 @@ u64 VTFgetImageSizeInBytesForFormat(int imageFormat, int w, int h) {
         : imageFormat == IMAGE_FORMAT_DXT3 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
         : imageFormat == IMAGE_FORMAT_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
 
-        : imageFormat == VTEX_RGBA8888 ? w * h * 4
+        : 0;
+}
+
+u64 S2getImageSizeInBytesForFormat(int imageFormat, int w, int h) {
+    return 
+        imageFormat == VTEX_RGBA8888 ? w * h * 4
         : imageFormat == VTEX_BGRA8888 ? w * h * 4
         : imageFormat == VTEX_DXT1 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 8
         : imageFormat == VTEX_DXT5 ? (ixmax(w, 4) / 4) * (ixmax(4, h) / 4) * 16
@@ -285,8 +290,23 @@ void _VTFSeekToLargestMipmap(int width, int height, int mipmapCount, int imageFo
         w = ixmax(1, w / 2);
         h = ixmax(1, h / 2);
         int seekBy = VTFgetImageSizeInBytesForFormat(imageFormat, w, h);
+        loginfo(frmt("  skipping {}x{}x{} mipmap ({} b)", w,h, frames, seekBy * frames));
 
         fseek(infile, seekBy * frames, SEEK_CUR);
+    }
+}
+
+void _S2SeekToLargestMipmap(int width, int height, int mipmapCount, int imageFormat, FILE* infile)
+{
+    int w = width;
+    int h = height;
+    for (int skipMMap = 0; skipMMap < mipmapCount - 1; skipMMap++) {
+        w = ixmax(1, w / 2);
+        h = ixmax(1, h / 2);
+        int seekBy = S2getImageSizeInBytesForFormat(imageFormat, w, h);
+        loginfo(frmt("  skipping {}x{} mipmap ({} b)", w,h, seekBy));
+
+        fseek(infile, seekBy, SEEK_CUR);
     }
 }
 
@@ -497,7 +517,23 @@ Layer* readValveVTEX_C(PlatformNativePathString path, u64 seek)
             if (vtexDataOffset != 0) {
                 fseek(f, vtexDataOffset, SEEK_SET);
                 fread(&vtexHeader, sizeof(S2_VTEX_HEADER), 1, f);
-                loginfo(frmt("[VTEX_C] w:{} h:{} bpp:{}  format:{}", vtexHeader.w, vtexHeader.h, vtexHeader.depth, vtexHeader.format));
+                loginfo(frmt("[VTEX_C] w:{} h:{} bpp:{}  format:{}  flags:{:x}", vtexHeader.w, vtexHeader.h, vtexHeader.depth, vtexHeader.format, vtexHeader.flags));
+
+                u64 extDataOrigin = ftell(f) + vtexHeader.extDataOffset - 8;
+                fseek(f, extDataOrigin, SEEK_SET);
+                for (int i = 0; i < vtexHeader.extDataCount; i++) {
+                    u32 type, offset, size;
+                    fread(&type, 4, 1, f);
+                    fread(&offset, 4, 1, f);
+                    fread(&size, 4, 1, f);
+                    offset -= 8;
+
+                    u64 pos = ftell(f);
+                    fseek(f, offset, SEEK_CUR);
+                    loginfo(frmt("[VTEX_C]    extdata {} at {:x}", type, offset));
+
+                    fseek(f, pos, SEEK_SET);
+                }
             }
             else {
                 logerr("[VTEX_C] no DATA block");
@@ -511,7 +547,7 @@ Layer* readValveVTEX_C(PlatformNativePathString path, u64 seek)
             if (ll != NULL) {
                 switch (vtexHeader.format) {
                     case VTEX_BC7:
-                        _VTFSeekToLargestMipmap(ll->w, ll->h, vtexHeader.mipCount, vtexHeader.format, f, 2);
+                        _S2SeekToLargestMipmap(ll->w, ll->h, vtexHeader.mipCount, vtexHeader.format, f);
                         ll->name = "VTEX BC7 Layer";
                         DeBC7(ll, ll->w, ll->h, f);
                         return ll;

@@ -172,6 +172,7 @@ enum S2_VTEXFORMAT {
 
 Layer* _VTFseekToLargestMipmapAndRead(FILE* infile, int width, int height, int mipmapCount, int frames, int imageFormat);
 void _VTFSeekToLargestMipmap(int width, int height, int mipmapCount, int imageFormat, FILE* infile, int frames);
+void _S2SeekToLargestMipmap(int width, int height, int mipmapCount, int imageFormat, FILE* infile);
 
 MainEditor* readValveSPR(PlatformNativePathString path);
 Layer* readVTF(PlatformNativePathString path, uint64_t seek = 0);
