@@ -2,6 +2,7 @@
 #include "io_dds.h"
 
 #include "../ddspp/ddspp.h"
+#include "../bc7enc_rdo/bc7decomp.h"
 
 void DeXT1(Layer* ret, int width, int height, FILE* infile)
 {
@@ -188,22 +189,22 @@ void DeXT23(Layer* ret, int width, int height, FILE* infile) {
     }
 }
 void DeXT45(Layer* ret, int width, int height, FILE* infile) {
-    uint32_t* pxd = ret->pixels32();
+    u32* pxd = ret->pixels32();
     for (int y = 0; y < height; y += 4) {
         for (int x = 0; x < width; x += 4) {
             //gonna be real i have no idea what's going on here
-            unsigned char alpha0;
-            unsigned char alpha1;
+            u8 alpha0;
+            u8 alpha1;
             fread(&alpha0, 1, 1, infile);
             fread(&alpha1, 1, 1, infile);
 
-            unsigned char bits[6];
+            u8 bits[6];
             fread(bits, 1, 6, infile);
             unsigned long alphaCode1 = bits[2] | (bits[3] << 8) | (bits[4] << 16) | (bits[5] << 24);
-            unsigned short alphaCode2 = bits[0] | (bits[1] << 8);
+            u16 alphaCode2 = bits[0] | (bits[1] << 8);
 
-            unsigned short color0;
-            unsigned short color1;
+            u16 color0;
+            u16 color1;
             fread(&color0, 2, 1, infile);
             fread(&color1, 2, 1, infile);
 
@@ -301,6 +302,28 @@ void DeXT45(Layer* ret, int width, int height, FILE* infile) {
 
 void DeBC7(Layer* ret, int width, int height, FILE* infile)
 {
+    u32* pxd = ret->pixels32();
+    memset(pxd, 0xcc, width * height * 4);
+    for (int y = 0; y < height; y += 4) {
+        for (int x = 0; x < width; x += 4) {
+            u8 block[16];
+            fread(block, 16, 1, infile);
+            bc7decomp::color_rgba pixelData[16];
+            bc7decomp::unpack_bc7(block, pixelData);
+
+            for (int yy = 0; yy < 4; yy++) {
+                if (y + yy >= height) {
+                    break;
+                }
+                for (int xx = 0; xx < 4; xx++) {
+                    if (x + xx < width) {
+                        auto c = ARRAY2DPOINT(pixelData, xx, yy, 4);
+                        ARRAY2DPOINT(pxd, x + xx, y + yy, width) = PackRGBAtoARGB(c.r, c.g, c.b, c.a);
+                    }
+                }
+            }
+        }
+    }
 }
 
 Layer* readDDS(PlatformNativePathString path, uint64_t seek)

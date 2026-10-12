@@ -52,6 +52,7 @@ inline std::string getLibraryLicenses() {
         "pugixml\n"
         "skyline\n"
         "libbzip2\n"
+        "bc7enc_rdo\n"
         "s3tc-dxt-decompression\n"
         "SDL3, SDL3_image, SDL3_ttf, SDL3_net\n"
         "AndroidDeviceNames\n"
