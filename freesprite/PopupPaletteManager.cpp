@@ -7,9 +7,12 @@
 #include "PopupTextBox.h"
 #include "PopupYesNo.h"
 #include "Notification.h"
+#include "PopupPickColor.h"
+#include "UIColorPicker.h"
 
-void PopupPaletteManager::reloadPaletteList(std::string filterQuery)
+void PopupPaletteManager::reloadPaletteList()
 {
+    std::string filterQuery = lastFilterQuery;
     mainPanel->subWidgets.freeAllDrawables();
     std::vector<Drawable*> stack;
     for (IPalette*& palette : g_loadedPalettes) {
@@ -17,6 +20,10 @@ void PopupPaletteManager::reloadPaletteList(std::string filterQuery)
         std::string name = palette->getName();
         if (filterQuery == "" || stringContainsIgnoreCase(name, filterQuery)) {
 
+            bool formatSupportsSections = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_EXT);
+            bool formatSupportsName = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_NAME);
+            bool formatSupportsDescription = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_DESCRIPTION);
+            bool formatSupportsColorRenames = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_COLOR_NAMES);
             bool editable = palette->canSave();
 
             UILabel* descLabel = NULL;
@@ -45,52 +52,54 @@ void PopupPaletteManager::reloadPaletteList(std::string filterQuery)
             auto& rows = palette->getColorList();
             int rowIndex = 0;
             for (auto& [rowName, rowColors] : rows) {
-                UILabel* rowNameLabel = new UILabel(rowName.empty() ? "<no name>" : rowName);
-                rowNameLabel->fontsize = 14;
-                rowNameLabel->color = uint32ToSDLColor(0xB0FFFFFF);
-                if (editable) {
-                    UIButton* deleteRow = new UIButton("Delete");
-                    deleteRow->fontSize = 12;
-                    deleteRow->wxWidth = 80;
-                    deleteRow->wxHeight = 20;
-                    deleteRow->onClickCallback = [this, palette, rowIndex, filterQuery](...) {
-                        if (palette->getColorList().size() == 1) {
-                            g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't delete last section."));
-                        }
-                        else {
-                            PopupYesNo* confirm = new PopupYesNo("Delete section?", "This section will be deleted.");
-                            confirm->onFinishCallback = [this, palette, rowIndex, filterQuery](PopupYesNo*, bool yes) {
-                                if (yes) {
-                                    auto& list = palette->getColorList();
-                                    list.erase(list.begin() + rowIndex);
-                                    palette->save();
-                                    g_reloadColorMap();
-                                    reloadPaletteList(filterQuery);
-                                }
-                            };
-                            g_addPopup(confirm);
-                        }
-                    };
-
-                    UIButton* renameRow = new UIButton("Rename");
-                    renameRow->fontSize = 12;
-                    renameRow->wxWidth = 80;
-                    renameRow->wxHeight = 20;
-                    renameRow->onClickCallback = [this, palette, rowIndex, rowName, filterQuery](...) {
-                        PopupTextBox* textInput = new PopupTextBox("Rename palette section", "Choose new name for this section:", rowName);
-                        textInput->allowEmptyText = true;
-                        textInput->onTextInputConfirmedCallback = [this, palette, rowIndex, rowName, filterQuery](PopupTextBox*, std::string s) {
-                            palette->getColorList()[rowIndex].name = s;
-                            palette->save();
-                            reloadPaletteList(filterQuery);
+                //don't show <no name> if format doesn't support this
+                if (!rowName.empty() || formatSupportsSections) {
+                    UILabel* rowNameLabel = new UILabel(rowName.empty() ? "<no name>" : rowName);
+                    rowNameLabel->fontsize = 14;
+                    rowNameLabel->color = uint32ToSDLColor(0xB0FFFFFF);
+                    if (editable && formatSupportsSections) {
+                        UIButton* deleteRow = new UIButton("Delete");
+                        deleteRow->fontSize = 12;
+                        deleteRow->wxWidth = 80;
+                        deleteRow->wxHeight = 20;
+                        deleteRow->onClickCallback = [this, palette, rowIndex, filterQuery](...) {
+                            if (palette->getColorList().size() == 1) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Can't delete last section."));
+                            }
+                            else {
+                                PopupYesNo* confirm = new PopupYesNo("Delete section?", "This section will be deleted.");
+                                confirm->onFinishCallback = [this, palette, rowIndex, filterQuery](PopupYesNo*, bool yes) {
+                                    if (yes) {
+                                        auto& list = palette->getColorList();
+                                        list.erase(list.begin() + rowIndex);
+                                        palette->save();
+                                        g_reloadColorMap();
+                                    }
+                                };
+                                g_addPopup(confirm);
+                            }
                         };
-                        g_addPopup(textInput);
-                    };
 
-                    paletteRows.push_back(UIStackPanel::Horizontal(5, { rowNameLabel, Panel::Space(20,1), deleteRow, renameRow }));
-                }
-                else {
-                    paletteRows.push_back(rowNameLabel);
+                        UIButton* renameRow = new UIButton("Rename");
+                        renameRow->fontSize = 12;
+                        renameRow->wxWidth = 80;
+                        renameRow->wxHeight = 20;
+                        renameRow->onClickCallback = [this, palette, rowIndex, rowName, filterQuery](...) {
+                            PopupTextBox* textInput = new PopupTextBox("Rename palette section", "Choose new name for this section:", rowName);
+                            textInput->allowEmptyText = true;
+                            textInput->onTextInputConfirmedCallback = [this, palette, rowIndex, rowName, filterQuery](PopupTextBox*, std::string s) {
+                                palette->getColorList()[rowIndex].name = s;
+                                palette->save();
+                                reloadPaletteList();
+                            };
+                            g_addPopup(textInput);
+                        };
+
+                        paletteRows.push_back(UIStackPanel::Horizontal(5, { rowNameLabel, Panel::Space(20,1), deleteRow, renameRow }));
+                    }
+                    else {
+                        paletteRows.push_back(rowNameLabel);
+                    }
                 }
 
 
@@ -120,7 +129,7 @@ void PopupPaletteManager::reloadPaletteList(std::string filterQuery)
                 paletteRows.push_back(UIStackPanel::Horizontal(0, colorButtons));
                 rowIndex++;
             }
-            if (editable) {
+            if (editable && formatSupportsSections) {
                 UIButton* addSection = new UIButton("New section...");
                 addSection->fontSize = 14;
                 addSection->wxWidth = 120;
@@ -128,7 +137,7 @@ void PopupPaletteManager::reloadPaletteList(std::string filterQuery)
                 addSection->onClickCallback = [palette, this, filterQuery](...) {
                     palette->getColorList().push_back(PaletteRow{ "",{} }); 
                     palette->save(); 
-                    reloadPaletteList(filterQuery);
+                    reloadPaletteList();
                 };
                 paletteRows.push_back(addSection);
             }
@@ -142,6 +151,14 @@ void PopupPaletteManager::reloadPaletteList(std::string filterQuery)
             }));
         }
     }
+
+    UIButton* newPaletteButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette"));
+    newPaletteButton->position = XY{ 5, 60 };
+    newPaletteButton->wxWidth = 140;
+    newPaletteButton->onClickCallback = [this, filterQuery](UIButton*) {
+        g_promptCreateNewPalette({}, []() { });
+    };
+    stack.push_back(newPaletteButton);
 
     mainPanel->subWidgets.addDrawable(UIStackPanel::Vertical(30, stack));
 }
@@ -160,7 +177,8 @@ PopupPaletteManager::PopupPaletteManager()
     UITextField* searchField = new UITextField();
     searchField->wxWidth = 200;
     searchField->onTextChangedCallback = [this](UITextField*, std::string s) {
-        reloadPaletteList(s);
+        lastFilterQuery = s;
+        reloadPaletteList();
     };
 
     UIStackPanel* searchAndListStack =
@@ -175,4 +193,19 @@ PopupPaletteManager::PopupPaletteManager()
     wxsManager.addDrawable(searchAndListStack);
 
     actionButton(TL("vsp.cmn.close"))->onClickCallback = [this](...) { closePopup(); };
+}
+
+void PopupPaletteManager::promptAddColorToPalette(IPalette* p, int rowIndex, u32 defaultColor)
+{
+    PopupPickColor* popup = new PopupPickColor("Add color", "");
+    popup->colorPicker->canEditPalettes = false;
+    popup->colorPicker->reloadColorLists();
+    popup->setRGB(defaultColor);
+    popup->onColorConfirmedCallback = [rowIndex, p](PopupPickColor*, u32 color) {
+        p->addColor("", color, rowIndex);
+        if (p->save()) {
+            g_reloadColorMap();
+        }
+    };
+    g_addPopup(popup);
 }

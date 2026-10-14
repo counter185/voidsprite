@@ -466,6 +466,9 @@ IPalette* readPltPixelStudioPALETTE(PlatformNativePathString name)
 
         std::vector<u32> ret;
 
+        std::string name = j["Name"];
+        std::string author = j["Author"];
+
         auto colors = j["Colors"];
         for (auto& color : colors) {
             auto r = color["r"].get<int>();
@@ -476,12 +479,11 @@ IPalette* readPltPixelStudioPALETTE(PlatformNativePathString name)
             ret.push_back(PackRGBAtoARGB(r, g, b, a));
         }
 
-        if (ret.size() > 0) {
-            return new ImportedPalette("", ret);
-        }
-        else {
-            logerr("No colors in Pixel Studio palette file");
-        }
+        ImportedPalette* p = new ImportedPalette("", ret);
+        p->name = name;
+        p->description = "by " + author;
+        p->formatFlags = PALETTE_FORMAT_FEATURE_NAME;
+        return p;
     }
     return NULL;
 }

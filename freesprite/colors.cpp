@@ -504,6 +504,8 @@ void g_reloadColorMap() {
     }
 
     g_generateColorMap();
+
+    ColorListModifiedObserver::notifyAll();
 }
 
 IPalette* g_paletteByName(std::string name)
@@ -579,7 +581,8 @@ void g_promptCreateNewPalette(std::vector<u32> newPalette, std::function<void()>
             PopupChooseFormat* popup2 = PopupChooseFormat::withDefaultPaletteExportFormats("Choose format", "");
             popup2->onFormatChosenCallback = [newPalette, name, onSuccessCallback](FormatDef* f) {
                 PlatformNativePathString newPalettePath = platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + name + f->extension);
-                if (((PaletteExporter*)f->udata)->exportData(newPalettePath, (void*)&newPalette)) {
+                ColorPalette tempNewPalette = ColorPalette("", newPalette);
+                if (((PaletteExporter*)f->udata)->exportData(newPalettePath, (void*)&tempNewPalette)) {
                     g_reloadColorMap();
                     onSuccessCallback();
                 }
@@ -593,7 +596,7 @@ void g_promptCreateNewPalette(std::vector<u32> newPalette, std::function<void()>
             //invalid characters in name
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid characters in name"));
         }
-        };
+    };
     g_addPopup(popup);
 }
 
@@ -602,4 +605,24 @@ bool ImportedPalette::save() {
         return correspondingExporter->exportData(path, this);
     }
     return false;
+}
+
+
+void ColorListModifiedObserver::notifyAll()
+{
+    for (auto& o : observers) {
+        o->onColorListModified();
+    }
+}
+
+std::vector<ColorListModifiedObserver*> ColorListModifiedObserver::observers = {};
+
+void ColorListModifiedObserver::registerColorListModifiedObserver()
+{
+    observers.push_back(this);
+}
+
+void ColorListModifiedObserver::unregisterColorListModifiedObserver()
+{
+    observers.erase(std::find(observers.begin(), observers.end(), this));
 }

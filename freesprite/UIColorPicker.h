@@ -38,10 +38,9 @@ public:
 };
 
 
-class UIColorPicker : public Panel, public EventCallbackListener
+class UIColorPicker : public Panel, public EventCallbackListener, public ColorListModifiedObserver
 {
 protected:
-    bool canEditPalettes = true;
     std::vector<IPalette*> extraPalettes;
 
     void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
@@ -52,6 +51,7 @@ protected:
 public:
     std::function<void(UIColorPicker*, u32)> onColorChangedCallback = NULL;
     u32 colorNowU32 = 0xFF000000;
+    bool canEditPalettes = true;
 
     double currentH = 0, currentS = 0, currentV = 0;
     int currentR = 0, currentG = 0, currentB = 0;
@@ -89,6 +89,8 @@ public:
     void eventTextInputConfirm(int evt_id, std::string data) override;
     void eventSliderPosChanged(int evt_id, float f) override;
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
+
+    void onColorListModified() override;
 
     void reloadColorLists();
     void addColorToPalette(IPalette* p, int row, u32 color);

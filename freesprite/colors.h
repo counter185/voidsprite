@@ -4,6 +4,25 @@
 #define HINT_NEXT_LINE_HERE {HINT_NEXT_LINE,0}
 #define PALETTE_DEFAULT "Grayscale"
 
+#define PALETTE_FORMAT_FEATURE_NAME         0b00000001
+#define PALETTE_FORMAT_FEATURE_COLOR_NAMES  0b00000010
+#define PALETTE_FORMAT_FEATURE_DESCRIPTION  0b00000100
+//it is assumed that voidpltv2 supports everything
+#define PALETTE_FORMAT_FEATURE_EXT ~0
+
+class ColorListModifiedObserver {
+public:
+    ColorListModifiedObserver() { registerColorListModifiedObserver(); }
+    ~ColorListModifiedObserver() { unregisterColorListModifiedObserver(); }
+
+    virtual void onColorListModified() {}
+
+    static std::vector<ColorListModifiedObserver*> observers;
+    static void notifyAll();
+    void registerColorListModifiedObserver();
+    void unregisterColorListModifiedObserver();
+};
+
 struct NamedColor {
     std::string name;
     u32 value;
@@ -26,6 +45,8 @@ public:
     virtual std::string getName() { return "INVALID PALETTE"; };
     virtual std::string getDescription() { return ""; };
     virtual std::string getExternalUrl() { return ""; };
+    virtual u8 getFormatFeatureFlags() { return 0; }
+    virtual bool formatFeatureSupported(u8 feature) { return (getFormatFeatureFlags() & feature) == feature; }
     virtual PaletteRows& getColorList() {
         logerr("accessed placeholder color list. this must not happen"); 
         return placeholderColors;
@@ -121,6 +142,7 @@ class ImportedPalette : public ColorPalette {
 public:
     PlatformNativePathString path;
     PaletteExporter* correspondingExporter = NULL;
+    u8 formatFlags = 0;
 
     ImportedPalette(std::string name, PaletteRows rows)
         : ColorPalette(name, rows, false) {}
@@ -130,6 +152,7 @@ public:
 
     bool canSave() override { return correspondingExporter != NULL && !path.empty(); }
     bool save() override;
+    u8 getFormatFeatureFlags() { return formatFlags; }
 
     bool isBuiltIn() override { return false; }
 };

@@ -14,6 +14,7 @@
 #include "PopupContextMenu.h"
 #include "PopupChooseFormat.h"
 #include "UICheckbox.h"
+#include "PopupPaletteManager.h"
 #include "io/io_voidsprite.h"
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
@@ -378,12 +379,16 @@ void UIColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int
         if (platformCopyFile(name, platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + fname))) {
             g_addNotification(SuccessShortNotification("Success", "Palette imported into colorlist"));
             g_reloadColorMap();
-            reloadColorLists();
         }
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to import palette"));
         }
     }
+}
+
+void UIColorPicker::onColorListModified()
+{
+    reloadColorLists();
 }
 
 ColorPickerColorButton* UIColorPicker::genPaletteColorButton(IPalette* p, int rowIndex, int colorIndex, bool large)
@@ -407,7 +412,6 @@ ColorPickerColorButton* UIColorPicker::genPaletteColorButton(IPalette* p, int ro
                             if (result) {
                                 p->removeColor(colorIndex, rowIndex);
                                 g_reloadColorMap();
-                                reloadColorLists();
                             }
                         };
                         g_addPopup(popup);
@@ -417,14 +421,12 @@ ColorPickerColorButton* UIColorPicker::genPaletteColorButton(IPalette* p, int ro
                     [this, colorIndex, colorValue, p, rowIndex]() {
                         p->moveColor(colorIndex, false, rowIndex);
                         g_reloadColorMap();
-                        reloadColorLists();
                     }
                 },
                 { "Move color right",
                     [this, colorIndex, colorValue, p, rowIndex]() {
                         p->moveColor(colorIndex, true, rowIndex);
                         g_reloadColorMap();
-                        reloadColorLists();
                     }
                 },
             });
@@ -474,14 +476,7 @@ Panel* UIColorPicker::genPaletteRowPanel(IPalette* p, int rowIndex)
         addColorButton->tooltip = TL("vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip");
         addColorButton->onClickCallback = [this, rowIndex, p](UIButton*) {
             if (!g_shiftModifier) {
-                PopupPickColor* popup = new PopupPickColor("Add color", "");
-                popup->colorPicker->canEditPalettes = false;
-                popup->colorPicker->reloadColorLists();
-                popup->setRGB(colorNowU32);
-                popup->onColorConfirmedCallback = [this, rowIndex, p](PopupPickColor*, u32 color) {
-                    addColorToPalette(p, rowIndex, color);
-                };
-                g_addPopup(popup);
+                PopupPaletteManager::promptAddColorToPalette(p, rowIndex, colorNowU32);
             }
             else {
                 addColorToPalette(p, rowIndex, colorNowU32);
@@ -584,14 +579,14 @@ void UIColorPicker::reloadColorLists()
     UIButton* reloadButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.refresh"));
     reloadButton->position = XY{ 150, 20 };
     reloadButton->wxWidth = 100;
-    reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
+    reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); };
     otherButtons->subWidgets.addDrawable(reloadButton);
 
     UIButton* newPaletteButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette"));
     newPaletteButton->position = XY{ 5, 60 };
     newPaletteButton->wxWidth = 140;
     newPaletteButton->onClickCallback = [this](UIButton*) {
-        g_promptCreateNewPalette({}, [this]() { reloadColorLists(); });
+        g_promptCreateNewPalette({}, []() { });
     };
     otherButtons->subWidgets.addDrawable(newPaletteButton);
 
@@ -606,10 +601,9 @@ void UIColorPicker::reloadColorLists()
 
 void UIColorPicker::addColorToPalette(IPalette* p, int row, u32 color)
 {
-    p->addColor("newcolor", color, row);
+    p->addColor("", color, row);
     if (p->save()) {
         g_reloadColorMap();
-        reloadColorLists();
     }
 }
 

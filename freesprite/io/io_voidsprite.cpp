@@ -1036,19 +1036,30 @@ IPalette* readPltVOIDPLT(PlatformNativePathString name)
             fread(&fileversion, 1, 1, f);
 
             if (fileversion == 1) {
-                std::vector<uint32_t> newPalette;
+                std::vector<u32> newPalette;
                 u32 count = voidsnReadU32(f);
                 for (int x = 0; x < count; x++) {
                     newPalette.push_back(voidsnReadU32(f));
                 }
-                return new ImportedPalette("", newPalette);
+                ImportedPalette* ret = new ImportedPalette("", newPalette);
+                ret->formatFlags = PALETTE_FORMAT_FEATURE_EXT;
+                return ret;
             }
             else if (fileversion == 2) {
                 PaletteRows rows{};
 
                 std::string name = voidsnReadString(f);
-                std::string description = voidsnReadString(f);
-                std::string extUrl = voidsnReadString(f);
+
+                std::string description = "", extUrl = "";
+
+                u32 extDataCount = voidsnReadU32(f);
+                for (int i = 0; i < extDataCount; i++) {
+                    std::string k = voidsnReadString(f);
+                    std::string v = voidsnReadString(f);
+
+                    if (k == "palette.description") { description = v; }
+                    else if (k == "palette.exturl") { extUrl = v; }
+                }
 
                 u32 rowCount = voidsnReadU32(f);
                 for (int i = 0; i < rowCount; i++) {
@@ -1066,6 +1077,7 @@ IPalette* readPltVOIDPLT(PlatformNativePathString name)
                 ImportedPalette* ret = new ImportedPalette(name, rows);
                 ret->description = description;
                 ret->extUrl = extUrl;
+                ret->formatFlags = PALETTE_FORMAT_FEATURE_EXT;
                 return ret;
             }
             else {
@@ -1109,12 +1121,18 @@ bool writePltVOIDPLTv2(PlatformNativePathString path, IPalette* palette)
         auto rows = palette->getColorList();
 
         voidsnWriteString(outfile, palette->getName());
-        voidsnWriteString(outfile, palette->getDescription());
-        voidsnWriteString(outfile, palette->getExternalUrl());
+
+        std::vector<std::pair<std::string, std::string>> extData = {
+            { "palette.description", palette->getDescription() },
+            { "palette.exturl", palette->getExternalUrl() }
+        };
+        voidsnWriteU32(outfile, extData.size());
+        for (auto& [k, v] : extData) {
+            voidsnWriteString(outfile, k);
+            voidsnWriteString(outfile, v);
+        }
+
         voidsnWriteU32(outfile, rows.size());
-
-        std::vector<std::pair<std::string, std::string>> extData;
-
         for (PaletteRow& r : rows) {
             voidsnWriteString(outfile, r.name);
             voidsnWriteU32(outfile, r.colors.size());
