@@ -14,13 +14,13 @@ std::string getlibpngVersion()
     return PNG_LIBPNG_VER_STRING;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltPNG(PlatformNativePathString name)
+IPalette* readPltPNG(PlatformNativePathString name)
 {
     Layer* png = readPNG(name);
     if (png != NULL) {
         DoOnReturn deletePNG([png]() {delete png; });
         if (png->isPalettized) {
-            return { true, ((LayerPalettized*)png)->palette };
+            return new ImportedPalette("", ((LayerPalettized*)png)->palette);
         }
         else {
             std::vector<u32> colorList;
@@ -36,30 +36,31 @@ std::pair<bool, std::vector<uint32_t>> readPltPNG(PlatformNativePathString name)
                 }
             }
            
-            return { true, colorList };
+            return new ImportedPalette("", colorList);
         }
     }
     else {
-        return { false,{} };
+        return NULL;
     }
 }
 
-bool writePltPNG(PlatformNativePathString path, std::vector<u32> palette)
+bool writePltPNG(PlatformNativePathString path, IPalette* palette)
 {
+    auto colors = palette->toFlatColorValues();
     int layerW =
-        palette.size() <= 1 ? 1
-        : palette.size() <= 4 ? 2
-        : palette.size() <= 16 ? 4
-        : palette.size() <= 36 ? 6
-        : palette.size() <= 64 ? 8
-        : palette.size() <= 256 ? 16
+        colors.size() <= 1 ? 1
+        : colors.size() <= 4 ? 2
+        : colors.size() <= 16 ? 4
+        : colors.size() <= 36 ? 6
+        : colors.size() <= 64 ? 8
+        : colors.size() <= 256 ? 16
         : 24;
-    int layerH = (palette.size() / layerW) + ((palette.size() % layerW != 0) ? 1 : 0);
+    int layerH = (colors.size() / layerW) + ((colors.size() % layerW != 0) ? 1 : 0);
     Layer* ll = Layer::tryAllocLayer(layerW, layerH);
     if (ll != NULL) {
         DoOnReturn freeLayer([ll]() {delete ll; });
         u32* ppx = ll->pixels32();
-        for (u32& c : palette) {
+        for (u32& c : colors) {
             *(ppx++) = c;
         }
         return writePNG(path, ll);

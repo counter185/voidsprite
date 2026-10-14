@@ -213,7 +213,7 @@ public:
     std::vector<Guideline> guidelines;
     GuidelineDisplayMode guidelineDisplayMode = GUIDELINE_SHOW_COLORED;
 
-    std::vector<std::pair<std::string, u32>> ineditorColorList;
+    PaletteRows ineditorColorList = { {"",{}} };
 
     std::string templateName = "";
     std::string templateDescription = "";

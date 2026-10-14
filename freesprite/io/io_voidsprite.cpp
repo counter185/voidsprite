@@ -1024,26 +1024,49 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
     return NULL;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name)
+IPalette* readPltVOIDPLT(PlatformNativePathString name)
 {
     FILE* f = platformOpenFile(name, PlatformFileModeRB);
     if (f != NULL) {
+        DoOnReturn closeFile([f]() {fclose(f); });
         char header[7];
         fread(header, 7, 1, f);
         if (memcmp(header, "VOIDPLT", 7) == 0) {
-            uint8_t fileversion;
+            u8 fileversion;
             fread(&fileversion, 1, 1, f);
+
             if (fileversion == 1) {
                 std::vector<uint32_t> newPalette;
-                uint32_t count;
-                fread(&count, 1, 4, f);
+                u32 count = voidsnReadU32(f);
                 for (int x = 0; x < count; x++) {
-                    uint32_t col;
-                    fread(&col, 1, 4, f);
-                    newPalette.push_back(col);
+                    newPalette.push_back(voidsnReadU32(f));
                 }
-                fclose(f);
-                return { true, newPalette };
+                return new ImportedPalette("", newPalette);
+            }
+            else if (fileversion == 2) {
+                PaletteRows rows{};
+
+                std::string name = voidsnReadString(f);
+                std::string description = voidsnReadString(f);
+                std::string extUrl = voidsnReadString(f);
+
+                u32 rowCount = voidsnReadU32(f);
+                for (int i = 0; i < rowCount; i++) {
+                    PaletteRow newRow{};
+                    newRow.name = voidsnReadString(f);
+                    u32 colorCount = voidsnReadU32(f);
+                    for (int j = 0; j < colorCount; j++) {
+                        NamedColor nc{};
+                        nc.name = voidsnReadString(f);
+                        nc.value = voidsnReadU32(f);
+                        newRow.colors.push_back(nc);
+                    }
+                    rows.push_back(newRow);
+                }
+                ImportedPalette* ret = new ImportedPalette(name, rows);
+                ret->description = description;
+                ret->extUrl = extUrl;
+                return ret;
             }
             else {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported VOIDPLT file version"));
@@ -1052,12 +1075,11 @@ std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString n
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid palette file"));
         }
-        fclose(f);
     }
-    return { false, {} };
+    return NULL;
 }
 
-bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
+bool writePltVOIDPLTv1(PlatformNativePathString path, IPalette* palette)
 {
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
@@ -1065,9 +1087,38 @@ bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
         //file version 1
         fwrite("\x1", 1, 1, outfile);
 
-        voidsnWriteU32(outfile, palette.size());
-        for (u32& c : palette) {
+        auto flatList = palette->toFlatColorValues();
+
+        voidsnWriteU32(outfile, flatList.size());
+        for (u32& c : flatList) {
             voidsnWriteU32(outfile, c);
+        }
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writePltVOIDPLTv2(PlatformNativePathString path, IPalette* palette)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fwrite("VOIDPLT", 1, 7, outfile);
+        fwrite("\x2", 1, 1, outfile);
+
+        auto rows = palette->getColorList();
+
+        voidsnWriteString(outfile, palette->getName());
+        voidsnWriteString(outfile, palette->getDescription());
+        voidsnWriteString(outfile, palette->getExternalUrl());
+        voidsnWriteU32(outfile, rows.size());
+        for (PaletteRow& r : rows) {
+            voidsnWriteString(outfile, r.name);
+            voidsnWriteU32(outfile, r.colors.size());
+            for (NamedColor c : r.colors) {
+                voidsnWriteString(outfile, c.name);
+                voidsnWriteU32(outfile, c.value);
+            }
         }
         fclose(outfile);
         return true;

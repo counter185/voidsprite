@@ -4880,7 +4880,7 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     }
 
     std::string ineditorColorListData = "";
-    for (auto& [name, color] : ineditorColorList) {
+    for (auto& [name, color] : ineditorColorList[0].colors) {
         ineditorColorListData += frmt("{:08X};", color);
     }
 
@@ -4949,7 +4949,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
         auto split = splitString(ineditorColorListData, ';');
         for (int i = 0; i < split.size() - 1; i++) {
             try {
-                prefs.ineditorColorList.push_back({ frmt("{:02}", i), std::stoul(split[i], NULL, 16) });
+                prefs.ineditorColorList[0].colors.push_back({frmt("{:02}", i), std::stoul(split[i], NULL, 16)});
             }
             catch (std::exception& e) {
                 logerr(frmt("Failed to parse color ({}):\n {}", split[i], e.what()));

@@ -9,8 +9,8 @@
 #include "PopupChooseFormat.h"
 #include "io/io_voidsprite.h"
 
-std::vector<NamedColorPalette> g_baseNamedColorMap = {
-    NamedColorPalette(
+std::vector<IPalette*> g_builtInPalettes = {
+    new ColorPalette(
         "Base Colors",
         {
             {"r", 0xFFFF0000},
@@ -23,7 +23,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"w", 0xFFFFFFFF}
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "CSS",
         {
             {"aliceblue", 0xFFF0F8FF},
@@ -176,65 +176,90 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"yellowgreen", 0xFF9ACD32}
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "NES/Famicom",
         {
-            {"nes00", 0xFF757575}, {"nes01", 0xFF271B8F}, {"nes02", 0xFF0000AB}, {"nes03", 0xFF47009F},
-            {"nes04", 0xFF8F0077}, {"nes05", 0xFFAB0013}, {"nes06", 0xFFA70000}, {"nes07", 0xFF7F0B00},
-            {"nes08", 0xFF432F00}, {"nes09", 0xFF004700}, {"nes0a", 0xFF005100}, {"nes0b", 0xFF003f17},
-            {"nes0c", 0xFF1b3f5f},
-            HINT_NEXT_LINE_HERE,
-            {"nes10", 0xFFbcbcbc}, {"nes11", 0xFF0073ef}, {"nes12", 0xFF233bef}, {"nes13", 0xFF8300f3},
-            {"nes14", 0xFFbf00bf}, {"nes15", 0xFFe7005b}, {"nes16", 0xFFdb2b00}, {"nes17", 0xFFcb4f0f},
-            {"nes18", 0xFF8b7300}, {"nes19", 0xFF009700}, {"nes1a", 0xFF00ab00}, {"nes1b", 0xFF00933b},
-            {"nes1c", 0xFF00838b},
-            HINT_NEXT_LINE_HERE,
-            {"nes20", 0xFFffffff}, {"nes21", 0xFF3fbfff}, {"nes22", 0xFF5f97ff}, {"nes23", 0xFFa78bfd},
-            {"nes24", 0xFFf77bff}, {"nes25", 0xFFff77b7}, {"nes26", 0xFFff7763}, {"nes27", 0xFFff9b3b},
-            {"nes28", 0xFFf3bf3f}, {"nes29", 0xFF83d313}, {"nes2a", 0xFF4fdf4b}, {"nes2b", 0xFF58f898},
-            {"nes2c", 0xFF00ebdb},
-            HINT_NEXT_LINE_HERE,
-            {"nes30", 0xFFffffff}, {"nes31", 0xFFabe7ff}, {"nes32", 0xFFc7d7ff}, {"nes33", 0xFFd7cbff},
-            {"nes34", 0xFFffc7ff}, {"nes35", 0xFFffc7db}, {"nes36", 0xFFffbfb3}, {"nes37", 0xFFffdbab},
-            {"nes38", 0xFFffe7a3}, {"nes39", 0xFFe3ffa3}, {"nes3a", 0xFFabf3bf}, {"nes3b", 0xFFb3ffcf},
-            {"nes3c", 0xFF9ffff3},
-            HINT_NEXT_LINE_HERE,
-            {"nes0d", 0xFF000000}, {"nes0e", 0xFF000000}, {"nes0f", 0xFF000000}, {"nes1d", 0xFF000000},
-            {"nes1e", 0xFF000000}, {"nes1f", 0xFF000000}, {"nes2d", 0xFF000000}, {"nes2e", 0xFF000000},
-            {"nes2f", 0xFF000000}, {"nes3d", 0xFF000000}, {"nes3e", 0xFF000000}, {"nes3f", 0xFF000000},
+            { "", {
+                    {"nes00", 0xFF757575}, {"nes01", 0xFF271B8F}, {"nes02", 0xFF0000AB}, {"nes03", 0xFF47009F},
+                    {"nes04", 0xFF8F0077}, {"nes05", 0xFFAB0013}, {"nes06", 0xFFA70000}, {"nes07", 0xFF7F0B00},
+                    {"nes08", 0xFF432F00}, {"nes09", 0xFF004700}, {"nes0a", 0xFF005100}, {"nes0b", 0xFF003f17},
+                    {"nes0c", 0xFF1b3f5f},
+                }
+            },
+            { "", {
+                    {"nes10", 0xFFbcbcbc}, {"nes11", 0xFF0073ef}, {"nes12", 0xFF233bef}, {"nes13", 0xFF8300f3},
+                    {"nes14", 0xFFbf00bf}, {"nes15", 0xFFe7005b}, {"nes16", 0xFFdb2b00}, {"nes17", 0xFFcb4f0f},
+                    {"nes18", 0xFF8b7300}, {"nes19", 0xFF009700}, {"nes1a", 0xFF00ab00}, {"nes1b", 0xFF00933b},
+                    {"nes1c", 0xFF00838b},
+                }
+            },
+            { "", {
+                    {"nes20", 0xFFffffff}, {"nes21", 0xFF3fbfff}, {"nes22", 0xFF5f97ff}, {"nes23", 0xFFa78bfd},
+                    {"nes24", 0xFFf77bff}, {"nes25", 0xFFff77b7}, {"nes26", 0xFFff7763}, {"nes27", 0xFFff9b3b},
+                    {"nes28", 0xFFf3bf3f}, {"nes29", 0xFF83d313}, {"nes2a", 0xFF4fdf4b}, {"nes2b", 0xFF58f898},
+                    {"nes2c", 0xFF00ebdb},
+                }
+            },
+            { "", {
+                    {"nes30", 0xFFffffff}, {"nes31", 0xFFabe7ff}, {"nes32", 0xFFc7d7ff}, {"nes33", 0xFFd7cbff},
+                    {"nes34", 0xFFffc7ff}, {"nes35", 0xFFffc7db}, {"nes36", 0xFFffbfb3}, {"nes37", 0xFFffdbab},
+                    {"nes38", 0xFFffe7a3}, {"nes39", 0xFFe3ffa3}, {"nes3a", 0xFFabf3bf}, {"nes3b", 0xFFb3ffcf},
+                    {"nes3c", 0xFF9ffff3},
+                }
+            },
+            { "", {
+                    {"nes0d", 0xFF000000}, {"nes0e", 0xFF000000}, {"nes0f", 0xFF000000}, {"nes1d", 0xFF000000},
+                    {"nes1e", 0xFF000000}, {"nes1f", 0xFF000000}, {"nes2d", 0xFF000000}, {"nes2e", 0xFF000000},
+                    {"nes2f", 0xFF000000}, {"nes3d", 0xFF000000}, {"nes3e", 0xFF000000}, {"nes3f", 0xFF000000},
+                }
+            }
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "Game Boy/GB Pocket/GB Light",
         {
-            {"dmg0", 0xFF294139}, {"dmg1", 0xFF39594A}, {"dmg2", 0xFF5A7942}, {"dmg3", 0xFF7B8210},
-            HINT_NEXT_LINE_HERE,
-            {"gbp0", 0xFF181818}, {"gbp1", 0xFF4a5138}, {"gbp2", 0xFF8c926b}, {"gbp3", 0xFFc5caa4},
-            HINT_NEXT_LINE_HERE,
-            {"gbl0", 0xFF004f3a}, {"gbl1", 0xFF00694a}, {"gbl2", 0xFF009a70}, {"gbl3", 0xFF00b582},
+            { "DMG",
+                { {"dmg0", 0xFF294139}, {"dmg1", 0xFF39594A}, {"dmg2", 0xFF5A7942}, {"dmg3", 0xFF7B8210}, }
+            },
+            { "GB Pocket",
+                { {"gbp0", 0xFF181818}, {"gbp1", 0xFF4a5138}, {"gbp2", 0xFF8c926b}, {"gbp3", 0xFFc5caa4}, }
+            },
+            { "GB Light",
+                { {"gbl0", 0xFF004f3a}, {"gbl1", 0xFF00694a}, {"gbl2", 0xFF009a70}, {"gbl3", 0xFF00b582}, }
+            }
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "Windows / OS/2 16 Color mode",
         {
-            {"9x00", 0xFF000000}, {"9x01", 0xFF800000}, {"9x02", 0xFF008000}, {"9x03", 0xFF808000}, 
-            {"9x04", 0xFF000080}, {"9x05", 0xFF800080}, {"9x06", 0xFF008080}, {"9x07", 0xFFC0C0C0},
-            HINT_NEXT_LINE_HERE,
-            {"9x08", 0xFF808080}, {"9x09", 0xFFFF0000}, {"9x0a", 0xFF00FF00}, {"9x0b", 0xFFFFFF00}, 
-            {"9x0c", 0xFF0000FF}, {"9x0d", 0xFFFF00FF}, {"9x0e", 0xFF00FFFF}, {"9x0f", 0xFFFFFFFF}
+            {"", {
+                    {"9x00", 0xFF000000}, {"9x01", 0xFF800000}, {"9x02", 0xFF008000}, {"9x03", 0xFF808000},
+                    {"9x04", 0xFF000080}, {"9x05", 0xFF800080}, {"9x06", 0xFF008080}, {"9x07", 0xFFC0C0C0},
+                }
+            },
+            { "", {
+                    {"9x08", 0xFF808080}, {"9x09", 0xFFFF0000}, {"9x0a", 0xFF00FF00}, {"9x0b", 0xFFFFFF00},
+                    {"9x0c", 0xFF0000FF}, {"9x0d", 0xFFFF00FF}, {"9x0e", 0xFF00FFFF}, {"9x0f", 0xFFFFFFFF}
+                }
+            }
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "Color Graphics Adapter [CGA]",
         {
-            {"cga0", 0xFF000000}, {"cga1", 0xFF0000AA}, {"cga2", 0xFF00AA00}, {"cga3", 0xFF00AAAA}, 
-            {"cga4", 0xFFAA0000}, {"cga5", 0xFFAA00AA}, {"cga6", 0xFFAA5500}, {"cga7", 0xFFAAAAAA},
-            HINT_NEXT_LINE_HERE,
-            {"cga8", 0xFF555555}, {"cga9", 0xFF5555FF}, {"cga10", 0xFF55FF55}, {"cga11", 0xFF55FFFF}, 
-            {"cga12", 0xFFFF5555}, {"cga13", 0xFFFF55FF}, {"cga14", 0xFFFFFF55}, {"cga15", 0xFFFFFFFF}
+            { "", {
+                    {"cga0", 0xFF000000}, {"cga1", 0xFF0000AA}, {"cga2", 0xFF00AA00}, {"cga3", 0xFF00AAAA},
+                    {"cga4", 0xFFAA0000}, {"cga5", 0xFFAA00AA}, {"cga6", 0xFFAA5500}, {"cga7", 0xFFAAAAAA},
+                }
+            },
+            { "", {
+                    {"cga8", 0xFF555555}, {"cga9", 0xFF5555FF}, {"cga10", 0xFF55FF55}, {"cga11", 0xFF55FFFF},
+                    {"cga12", 0xFFFF5555}, {"cga13", 0xFFFF55FF}, {"cga14", 0xFFFFFF55}, {"cga15", 0xFFFFFFFF}
+                }
+            }
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "Enhanced Graphics Adapter [EGA]",
         {
             {"ega00", 0xFF000000}, {"ega01", 0xFF0000AA}, {"ega02", 0xFF00AA00}, {"ega03", 0xFF00AAAA},
@@ -262,33 +287,38 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
             {"ega3c", 0xFFFF5555}, {"ega3d", 0xFFFF55FF}, {"ega3e", 0xFFFFFF55}, {"ega3f", 0xFFFFFFFF}
         }
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "Mario Paint",
         {
-          0x00000000,0xFFFF0000,0xffFF8400,0xffFFFF00,0xff00FF00,0xff00842f,0xff00FFFF,0xff0000FF,0xffC62F10,0xff845700,0xffFFC684,0xffC600C6,0xffFFFFFF,0xff000000,0xff848484,0xffC6C6C6
+          0x00000000, 0xFFFF0000, 0xffFF8400, 0xffFFFF00, 0xff00FF00, 0xff00842f, 0xff00FFFF, 0xff0000FF, 0xffC62F10, 0xff845700, 0xffFFC684, 0xffC600C6, 0xffFFFFFF, 0xff000000, 0xff848484, 0xffC6C6C6
         }
     ),
-    NamedColorPalette(
-        "Flipnote Studio (DSi / 3D)",
+    new ColorPalette(
+        "Flipnote Studio",
         {
-            {"ppm0", 0xFF000000}, {"ppm1", 0xFFFFFFFF}, {"ppm2", 0xFFFF0000}, {"ppm3", 0xFF0000FF},
-            HINT_NEXT_LINE_HERE,
-            {"kwz0", 0xFF141414}, {"kwz1", 0xFFFFFFFF}, {"kwz2", 0xFFFF1717}, {"kwz3", 0xFF003CC8}, 
-            {"kwz4", 0xFFFFE600}, {"kwz5", 0xFF008232}
+            { "DSi", 
+                { {"ppm0", 0xFF000000}, {"ppm1", 0xFFFFFFFF}, {"ppm2", 0xFFFF0000}, {"ppm3", 0xFF0000FF}, }
+            },
+            { "3DS", { 
+                    {"kwz0", 0xFF141414}, {"kwz1", 0xFFFFFFFF}, {"kwz2", 0xFFFF1717}, {"kwz3", 0xFF003CC8}, 
+                    {"kwz4", 0xFFFFE600}, {"kwz5", 0xFF008232}
+                }
+            }
         }
     ),
-    GenAtRuntimePalette(
+    new GenAtRuntimePalette(
         PALETTE_DEFAULT,    //grayscale
         []() {
-            std::vector<std::pair<std::string, u32>> ret;
+            PaletteRow ret{};
+            ret.name = "";
             for (int i = 0; i < 256; i++) {
-                ret.push_back({frmt("g{:02x}", i), PackRGBAtoARGB(i,i,i, 255)});
+                ret.colors.push_back(NamedColor{frmt("g{:02x}", i), PackRGBAtoARGB(i,i,i, 255)});
             }
-            return ret;
+            return PaletteRows{ret};
         },
         true
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "Slim Render (8-bit)",
         {
         0x00000000,0x004A0000,0x00940000,0x00DE0000,0x00004A00,0x004A4A00,0x00944A00,0x00DE4A00,0x00009400,0x004A9400,0x00949400,0x00DE9400,0x0000DE00,0x004ADE00,0x0094DE00,0x00DEDE00,
@@ -310,7 +340,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
         },
         true
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "XCOM:UFO 1(GeoScape)",
         {
         0x00000000,0xFFFFA6D6,0xFFC6719C,0xFFFF8200,0xFFC65D00,0xFFFFFFFF,0xFFC6C3C6,0xFF00FF00,0xFF00C300,0xFF00FFFF,0xFF00C3C6,0xFFFFFF00,0xFFC6C300,0xFFFF0000,0xFFC60000,0xFF000000,
@@ -331,7 +361,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
         0xFF42B26B,0xFF318E52,0xFF296D42,0xFF184D29,0xFF102C18,0xFF84BEE7,0xFF6BA2CE,0xFF5A8ABD,0xFF4271A5,0xFF315D8C,0xFF29457B,0xFF183463,0xFFFFFFA5,0xFFDEEB8C,0xFFC6D77B,0xFFA5C36B,
         }, true
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "XCOM:UFO 2(BaseScape)",
         {
         0x00000000,0xFFFFFFFF,0xFFEFEBEF,0xFFDEDBDE,0xFFC6C7C6,0xFFB5B2B5,0xFFA5A2A5,0xFF8C8E8C,0xFF7B7D7B,0xFF6B696B,0xFF5A595A,0xFF424542,0xFF313431,0xFF212021,0xFF080C08,0xFF000000,
@@ -353,7 +383,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
         },
         true
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "XCOM:UFO 3(Graphs)",
         {
         0x00000000,0xFFFFFFFF,0xFFEFEFEF,0xFFDEDBDE,0xFFCECBCE,0xFFBDBABD,0xFFADAAAD,0xFF9C9A9C,0xFF8C8A8C,0xFF7B797B,0xFF6B696B,0xFF5A595A,0xFF4A494A,0xFF393839,0xFF292829,0xFF181818,
@@ -375,7 +405,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
         },
         true
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "XCOM:UFO 4(Research)",
         {
         0x00000000,0xFFFFFFE7,0xFFFFFBDE,0xFFFFFBCE,0xFFFFF7C6,0xFFFFF3BD,0xFFFFEFAD,0xFFFFE7A5,0xFFFFDF9C,0xFFFFDB8C,0xFFFFD384,0xFFFFC773,0xFFFFBE6B,0xFFFFB263,0xFFFFA652,0xFFFF9A4A,
@@ -397,7 +427,7 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
         },
         true
     ),
-    NamedColorPalette(
+    new ColorPalette(
         "XCOM:UFO 5(Tactical)",
         {
         0x00000000,0xFFFFFFFF,0xFFEFEBEF,0xFFDEDBDE,0xFFC6C7C6,0xFFB5B2B5,0xFFA5A2A5,0xFF8C8E8C,0xFF7B7D7B,0xFF6B696B,0xFF5A595A,0xFF424542,0xFF313431,0xFF212021,0xFF080C08,0xFF000000,
@@ -423,18 +453,20 @@ std::vector<NamedColorPalette> g_baseNamedColorMap = {
 
 void g_generateColorMap() {
     g_colors.clear();
-    for (NamedColorPalette& palette : g_namedColorMap) {
-        for (auto& color : palette.colorMap) {
-            if (color.first != HINT_NEXT_LINE) {
-                g_colors[color.first] = color.second;
-            }
+    for (IPalette*& palette : g_loadedPalettes) {
+        for (auto& color : palette->toFlatColorList()) {
+            g_colors[color.name] = color.value;
         }
     }
 }
 
 void g_reloadColorMap() {
-    g_namedColorMap.clear();
-    g_namedColorMap.insert(g_namedColorMap.end(), g_baseNamedColorMap.begin(), g_baseNamedColorMap.end());
+    for (auto*& p : g_loadedPalettes) {
+        if (!p->isBuiltIn()) {
+            delete p;
+        }
+    }
+    g_loadedPalettes = g_builtInPalettes;
 
     for (auto& palImport : g_paletteImporters) {
         auto fileList = platformListFilesInDir(platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("palettes"), palImport->extension());
@@ -442,18 +474,14 @@ void g_reloadColorMap() {
             std::string fileName = fileNameFromPath(convertStringToUTF8OnWin32(file));
             try {
                 if (palImport->canImport(file)) {
-                    auto result = palImport->importPalette(file);
-                    if (result.first) {
-                        auto colorList = result.second;
-                        NamedColorPalette ncp;
-                        ncp.name = fileName;
-                        ncp.correspondingExporter = palImport->getCorrespondingExporter();
-                        ncp.path = file;
-                        int i = 0;
-                        for (auto& color : colorList) {
-                            ncp.colorMap.push_back({ frmt("{}:{:02x}", fileName, i++), color });
+                    ImportedPalette* result = (ImportedPalette*)palImport->importPalette(file);
+                    if (result != NULL) {
+                        if (result->name == "") {
+                            result->name = fileName;
                         }
-                        g_namedColorMap.push_back(ncp);
+                        result->correspondingExporter = palImport->getCorrespondingExporter();
+                        result->path = file;
+                        g_loadedPalettes.push_back(result);
                     }
                     else {
                         logerr(frmt("Failed to load palette: {}", fileName));
@@ -471,9 +499,9 @@ void g_reloadColorMap() {
 
 IPalette* g_paletteByName(std::string name)
 {
-    for (auto& p : g_namedColorMap) {
-        if (p.getName() == name) {
-            return &p;
+    for (auto& p : g_loadedPalettes) {
+        if (p->getName() == name) {
+            return p;
         }
     }
     return NULL;
@@ -493,16 +521,23 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
             try {
                 std::string response = platformFetchTextFile(dlUrl);
                 nlohmann::json j = nlohmann::json::parse(response);
-                std::string name = j["name"].get<std::string>();
+                std::string name = j["name"];
+                std::string author = j["author"];
+
                 std::vector<std::string> colors;
                 for (auto& color : j["colors"]) {
                     colors.push_back(color.get<std::string>());
                 }
+
                 std::vector<u32> colorsU32;
                 std::transform(colors.begin(), colors.end(), std::back_inserter(colorsU32), [](const std::string& color) {
                     return 0xFF000000 | std::stoul(color, nullptr, 16);
                 });
-                if (writePltVOIDPLT(outputFile, colorsU32)) {
+
+                ColorPalette tempPalette = ColorPalette(name, colorsU32);
+                tempPalette.description = frmt("by Lospec user {}", author);
+                tempPalette.extUrl = frmt("https://lospec.com/palette-list/{}", url);
+                if (writePltVOIDPLTv2(outputFile, &tempPalette)) {
                     g_startNewMainThreadOperation([name]() {
                         g_addNotification(SuccessNotification(TL("vsp.success.lospecpaletteinstalled"), name));
                         g_reloadColorMap();
@@ -553,13 +588,9 @@ void g_promptCreateNewPalette(std::vector<u32> newPalette, std::function<void()>
     g_addPopup(popup);
 }
 
-bool NamedColorPalette::save() {
+bool ImportedPalette::save() {
     if (correspondingExporter != NULL && !path.empty()) {
-        std::vector<u32> colors;
-        for (auto& color : colorMap) {
-            colors.push_back(color.second);
-        }
-        return correspondingExporter->exportData(path, &colors);
+        return correspondingExporter->exportData(path, this);
     }
     return false;
 }

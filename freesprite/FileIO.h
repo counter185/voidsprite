@@ -343,7 +343,7 @@ public:
     static PaletteImporter* paletteImporter(
         std::string name, 
         std::string extension, 
-        std::function<std::pair<bool, std::vector<uint32_t>>(PlatformNativePathString)> importFunction,
+        std::function<IPalette*(PlatformNativePathString)> importFunction,
         std::function<bool(PlatformNativePathString)> canImport = NULL, PaletteExporter* reverse = NULL) 
     {
 
@@ -361,11 +361,11 @@ public:
     virtual bool canImport(PlatformNativePathString path) {
         return _canImport != NULL ? _canImport(path) : true;
     }
-    virtual std::pair<bool, std::vector<uint32_t>> importPalette(PlatformNativePathString path) {
+    virtual IPalette* importPalette(PlatformNativePathString path) {
         return _importFunction(path);
     };
 protected:
-    std::function<std::pair<bool, std::vector<uint32_t>>(PlatformNativePathString)> _importFunction = NULL;
+    std::function<IPalette*(PlatformNativePathString)> _importFunction = NULL;
     std::function<bool(PlatformNativePathString)> _canImport = NULL;
     PaletteExporter* _correspondingExporter = NULL;
 };
@@ -377,7 +377,7 @@ public:
         std::string name, 
         std::string extension,
         std::string description,
-        std::function<bool(PlatformNativePathString, std::vector<u32>)> exportFunction) 
+        std::function<bool(PlatformNativePathString, IPalette*)> exportFunction) 
     {
         PaletteExporter* ret = new PaletteExporter();
         ret->_name = name;
@@ -390,11 +390,9 @@ public:
     virtual bool canExport(void* data) {
         return true;
     }
-    // pass pointer to std::vector<u32>
     virtual bool exportData(PlatformNativePathString path, void* data) {
         try {
-            std::vector<u32> d = *(std::vector<u32>*)data;
-            return _exportFunction(path, d);
+            return _exportFunction(path, (IPalette*)data);
         }
         catch (std::exception& e) {
             logerr(frmt("Data export failed:\n {}", e.what()));
@@ -402,7 +400,7 @@ public:
         }
     }
 protected:
-    std::function<bool(PlatformNativePathString, std::vector<u32>)> _exportFunction = NULL;
+    std::function<bool(PlatformNativePathString, IPalette*)> _exportFunction = NULL;
 };
 
 inline std::vector<FileExporter*> g_fileExporters;

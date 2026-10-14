@@ -34,7 +34,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
 {
     isPalettized = true;
     canvas.dimensions = dimensions;
-    palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+    palette = g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues();
     LayerPalettized* pltLayer = new LayerPalettized(dimensions.x, dimensions.y);
     pltLayer->palette = palette;
     getLayerStack().push_back(pltLayer);

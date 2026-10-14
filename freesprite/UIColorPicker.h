@@ -46,6 +46,9 @@ protected:
 
     void colorUpdatedRGB(SDL_Color col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
     void colorUpdatedHSV(hsv col, ColorChangeSource from = COLORCHANGE_EXTERNAL, std::string dontUpdateThisColorModel = "");
+
+    ColorPickerColorButton* genPaletteColorButton(IPalette* palette, int rowIndex, int colorIndex, bool large);
+    Panel* genPaletteRowPanel(IPalette* palette, int rowIndex);
 public:
     std::function<void(UIColorPicker*, u32)> onColorChangedCallback = NULL;
     u32 colorNowU32 = 0xFF000000;

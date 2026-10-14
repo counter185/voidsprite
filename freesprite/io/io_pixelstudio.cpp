@@ -456,7 +456,7 @@ bool writePixelStudioPSX(PlatformNativePathString path, MainEditor* data)
     return false;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativePathString name)
+IPalette* readPltPixelStudioPALETTE(PlatformNativePathString name)
 {
     FILE* f = platformOpenFile(name, PlatformFileModeR);
     if (f != NULL) {
@@ -464,7 +464,7 @@ std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativeP
         //auto fileData = readWholeFile(f);
         json j = json::parse(f);
 
-        std::vector<uint32_t> ret;
+        std::vector<u32> ret;
 
         auto colors = j["Colors"];
         for (auto& color : colors) {
@@ -477,11 +477,11 @@ std::pair<bool, std::vector<uint32_t>> readPltPixelStudioPALETTE(PlatformNativeP
         }
 
         if (ret.size() > 0) {
-            return { true, ret };
+            return new ImportedPalette("", ret);
         }
         else {
             logerr("No colors in Pixel Studio palette file");
         }
     }
-    return { false,{} };
+    return NULL;
 }
