@@ -20,6 +20,7 @@
 #include "PopupYesNo.h"
 #include "PopupSetupNetworkCanvas.h"
 #include "PopupListLAN.h"
+#include "PopupPaletteManager.h"
 #include "UIButton.h"
 #include "MainEditorPalettized.h"
 #include "UILabel.h"
@@ -97,7 +98,7 @@ StartScreen::StartScreen() {
     lastOpenFilesSection->position = { startScreenPanelEndpoint + 20, 75 };
     wxsManager.addDrawable(lastOpenFilesSection);
 
-    std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_W, SDL_SCANCODE_V, SDL_SCANCODE_H };
+    std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_W, SDL_SCANCODE_V, SDL_SCANCODE_H };
     if (!platformSupportsFeature(VSP_FEATURE_MULTIWINDOW)) {
         navbarOrder.erase(std::remove(navbarOrder.begin(), navbarOrder.end(), SDL_SCANCODE_W), navbarOrder.end());
         // remove the window tab if we shouldn't be able to use it
@@ -107,67 +108,66 @@ StartScreen::StartScreen() {
         {
             {
                 SDL_SCANCODE_F,
+                makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile,
                 {
-                    makeNavbarSection(TL("vsp.nav.file"), g_iconNavbarTabFile,
-                    {
-                        { SDL_SCANCODE_O,{ TL("vsp.nav.open"), [this]() { this->openImageLoadDialog();} } },
-                        { SDL_SCANCODE_V,{ TL("vsp.launchpad.nav.openclipboard"), [this]() { this->tryOpenImageFromClipboard();} } },
-                        { SDL_SCANCODE_E,{ TL("vsp.launchpad.nav.quickconvert"), [this]() { g_addPopup(new PopupQuickConvert(TL("vsp.launchpad.nav.quickconvert"), TL("vsp.launchpad.quickconvert.desc"))); } } },
-                        { SDL_SCANCODE_S,{ TL("vsp.launchpad.nav.newsplitsession:v2"),
-                            [this]() {
-                                    platformTrySaveOtherFile(this,{ { ".voidspsn", TL("vsp.cmn.filetype.splitsession") } }, TL("vsp.popup.newsplitsession:v2"), 0);
-                                }
+                    { SDL_SCANCODE_O,{ TL("vsp.nav.open"), [this]() { this->openImageLoadDialog();} } },
+                    { SDL_SCANCODE_V,{ TL("vsp.launchpad.nav.openclipboard"), [this]() { this->tryOpenImageFromClipboard();} } },
+                    { SDL_SCANCODE_E,{ TL("vsp.launchpad.nav.quickconvert"), [this]() { g_addPopup(new PopupQuickConvert(TL("vsp.launchpad.nav.quickconvert"), TL("vsp.launchpad.quickconvert.desc"))); } } },
+                    { SDL_SCANCODE_S,{ TL("vsp.launchpad.nav.newsplitsession:v2"),
+                        [this]() {
+                                platformTrySaveOtherFile(this,{ { ".voidspsn", TL("vsp.cmn.filetype.splitsession") } }, TL("vsp.popup.newsplitsession:v2"), 0);
                             }
-                        },
-                        { SDL_SCANCODE_T,{ TL("vsp.launchpad.nav.preprocess"), [this]() { this->openImagePreprocessDialog(); }}},
-                        { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
-                        { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
-                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
+                        }
+                    },
+                    { SDL_SCANCODE_T,{ TL("vsp.launchpad.nav.preprocess"), [this]() { this->openImagePreprocessDialog(); }}},
+                    { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
+                    { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
+                    { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
 #if VSP_NETWORKING
-                        { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}},
-                        { SDL_SCANCODE_F,{ TL("vsp.launchpad.nav.findcollabonlan"), []() { g_addPopup(new PopupListLAN()); }}},
+                    { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}},
+                    { SDL_SCANCODE_F,{ TL("vsp.launchpad.nav.findcollabonlan"), []() { g_addPopup(new PopupListLAN()); }}},
 #endif
-                    })
-                }
+                })
+
+            },
+            {
+                SDL_SCANCODE_E,
+                makeNavbarSection(TL("vsp.nav.edit"), {
+                    {SDL_SCANCODE_P, {"Manage palettes...", []() {g_addPopup(new PopupPaletteManager()); }}}
+                })
             },
             {
                 SDL_SCANCODE_W,
+                makeNavbarSection(TL("vsp.nav.window"),
                 {
-                    makeNavbarSection(TL("vsp.nav.window"),
-                    {
-                        { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.newwindow"), [this]() { main_newWindow();} } },
-                    })
-                }
+                    { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.newwindow"), [this]() { main_newWindow();} } },
+                })
             },
             {
                 SDL_SCANCODE_V,
+                makeNavbarSection(TL("vsp.nav.view"),
                 {
-                    makeNavbarSection(TL("vsp.nav.view"),
-                    {
-                        { SDL_SCANCODE_F, { TL("vsp.launchpad.nav.togglefullscreen"),
-                                []() { main_toggleFullscreen(); }
-                            }
+                    { SDL_SCANCODE_F, { TL("vsp.launchpad.nav.togglefullscreen"),
+                            []() { main_toggleFullscreen(); }
                         }
-                    })
-                }
+                    }
+                })
             },
             {
                 SDL_SCANCODE_H,
+                makeNavbarSection(TL("vsp.nav.help"),
                 {
-                    makeNavbarSection(TL("vsp.nav.help"),
-                    {
-                        { SDL_SCANCODE_U,{ TL("vsp.launchpad.nav.opennightlylinkdl"),
-                                [this]() { platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main"); }
-                            }
-                        },
-                        { SDL_SCANCODE_A,{ TL("vsp.launchpad.nav.about"), [this]() { g_addPopup(new PopupAbout());} } },
-                        { SDL_SCANCODE_H,{ TL("vsp.launchpad.nav.webmanual"), [this]() { platformOpenWebpageURL("https://counter185.github.io/voidsprite-web-manual"); }}},
+                    { SDL_SCANCODE_U,{ TL("vsp.launchpad.nav.opennightlylinkdl"),
+                            [this]() { platformOpenWebpageURL("https://nightly.link/counter185/voidsprite/workflows/msbuild/main"); }
+                        }
+                    },
+                    { SDL_SCANCODE_A,{ TL("vsp.launchpad.nav.about"), [this]() { g_addPopup(new PopupAbout());} } },
+                    { SDL_SCANCODE_H,{ TL("vsp.launchpad.nav.webmanual"), [this]() { platformOpenWebpageURL("https://counter185.github.io/voidsprite-web-manual"); }}},
 #if VSP_PLATFORM == VSP_PLATFORM_ANDROID
-                        { SDL_SCANCODE_D, { "Download latest version..." , []() { platformRunAutoUpdate(); } } },
+                    { SDL_SCANCODE_D, { "Download latest version..." , []() { platformRunAutoUpdate(); } } },
 #endif
 
-                    })
-                }
+                })
             }
         }, navbarOrder);
     wxsManager.addDrawable(navbar);

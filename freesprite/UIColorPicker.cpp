@@ -472,19 +472,19 @@ Panel* UIColorPicker::genPaletteRowPanel(IPalette* p, int rowIndex)
         addColorButton->wxWidth = 24;
         addColorButton->wxHeight = 20;
         addColorButton->tooltip = TL("vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip");
-        addColorButton->onClickCallback = [this, p](UIButton*) {
+        addColorButton->onClickCallback = [this, rowIndex, p](UIButton*) {
             if (!g_shiftModifier) {
                 PopupPickColor* popup = new PopupPickColor("Add color", "");
                 popup->colorPicker->canEditPalettes = false;
                 popup->colorPicker->reloadColorLists();
                 popup->setRGB(colorNowU32);
-                popup->onColorConfirmedCallback = [this, p](PopupPickColor*, u32 color) {
-                    addColorToPalette(p, color);
+                popup->onColorConfirmedCallback = [this, rowIndex, p](PopupPickColor*, u32 color) {
+                    addColorToPalette(p, rowIndex, color);
                 };
                 g_addPopup(popup);
             }
             else {
-                addColorToPalette(p, colorNowU32);
+                addColorToPalette(p, rowIndex, colorNowU32);
             }
         };
         currentColorButtonsStack.push_back(addColorButton);
@@ -578,7 +578,7 @@ void UIColorPicker::reloadColorLists()
             filetypes.push_back({ importer->extension(), importer->name() });
         }
         platformTryLoadOtherFile(this, filetypes, TL("vsp.popup.openpalette"), EVENT_PALETTECOLORPICKER_LOADPALETTE);
-        };
+    };
     otherButtons->subWidgets.addDrawable(loadNewButton);
 
     UIButton* reloadButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.refresh"));
@@ -604,9 +604,9 @@ void UIColorPicker::reloadColorLists()
     };
 }
 
-void UIColorPicker::addColorToPalette(IPalette* p, u32 color)
+void UIColorPicker::addColorToPalette(IPalette* p, int row, u32 color)
 {
-    p->addColor("newcolor", color);
+    p->addColor("newcolor", color, row);
     if (p->save()) {
         g_reloadColorMap();
         reloadColorLists();

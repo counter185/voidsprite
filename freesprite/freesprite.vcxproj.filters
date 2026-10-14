@@ -810,6 +810,9 @@
     <ClCompile Include="bc7enc_rdo\rgbcx.cpp">
       <Filter>Source files\external\bc7enc_rdo</Filter>
     </ClCompile>
+    <ClCompile Include="PopupPaletteManager.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1609,6 +1612,9 @@
     </ClInclude>
     <ClInclude Include="bc7enc_rdo\rgbcx_table4_small.h">
       <Filter>Header files\external\bc7enc_rdo</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupPaletteManager.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

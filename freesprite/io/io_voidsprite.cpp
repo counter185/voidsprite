@@ -1112,6 +1112,9 @@ bool writePltVOIDPLTv2(PlatformNativePathString path, IPalette* palette)
         voidsnWriteString(outfile, palette->getDescription());
         voidsnWriteString(outfile, palette->getExternalUrl());
         voidsnWriteU32(outfile, rows.size());
+
+        std::vector<std::pair<std::string, std::string>> extData;
+
         for (PaletteRow& r : rows) {
             voidsnWriteString(outfile, r.name);
             voidsnWriteU32(outfile, r.colors.size());

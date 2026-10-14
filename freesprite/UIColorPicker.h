@@ -91,7 +91,7 @@ public:
     void eventFileOpen(int evt_id, PlatformNativePathString name, int importerIndex = -1) override;
 
     void reloadColorLists();
-    void addColorToPalette(IPalette* p, u32 color);
+    void addColorToPalette(IPalette* p, int row, u32 color);
     void updateColorModelSliders(std::string dontUpdate = "");
     void updateHSVTextBoxOnInputEvent(std::string data, double* value);
 

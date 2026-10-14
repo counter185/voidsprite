@@ -262,29 +262,38 @@ std::vector<IPalette*> g_builtInPalettes = {
     new ColorPalette(
         "Enhanced Graphics Adapter [EGA]",
         {
-            {"ega00", 0xFF000000}, {"ega01", 0xFF0000AA}, {"ega02", 0xFF00AA00}, {"ega03", 0xFF00AAAA},
-            {"ega04", 0xFFAA0000}, {"ega05", 0xFFAA00AA}, {"ega06", 0xFFAAAA00}, {"ega07", 0xFFAAAAAA},
-            HINT_NEXT_LINE_HERE,
-            {"ega08", 0xFF000055}, {"ega09", 0xFF0000FF}, {"ega0a", 0xFF00AA55}, {"ega0b", 0xFF00AAFF},
-            {"ega0c", 0xFFAA0055}, {"ega0d", 0xFFAA00FF}, {"ega0e", 0xFFAAAA55}, {"ega0f", 0xFFAAAAFF},
-            HINT_NEXT_LINE_HERE,
-            {"ega10", 0xFF005500}, {"ega11", 0xFF0055AA}, {"ega12", 0xFF00FF00}, {"ega13", 0xFF00FFAA},
-            {"ega14", 0xFFAA5500}, {"ega15", 0xFFAA55AA}, {"ega16", 0xFFAAFF00}, {"ega17", 0xFFAAFFAA},
-            HINT_NEXT_LINE_HERE,
-            {"ega18", 0xFF005555}, {"ega19", 0xFF0055FF}, {"ega1a", 0xFF00FF55}, {"ega1b", 0xFF00FFFF},
-            {"ega1c", 0xFFAA5555}, {"ega1d", 0xFFAA55FF}, {"ega1e", 0xFFAAFF55}, {"ega1f", 0xFFAAFFFF},
-            HINT_NEXT_LINE_HERE,
-            {"ega20", 0xFF550000}, {"ega21", 0xFF5500AA}, {"ega22", 0xFF55AA00}, {"ega23", 0xFF55AAAA},
-            {"ega24", 0xFFFF0000}, {"ega25", 0xFFFF00AA}, {"ega26", 0xFFFFAA00}, {"ega27", 0xFFFFAAAA},
-            HINT_NEXT_LINE_HERE,
-            {"ega28", 0xFF550055}, {"ega29", 0xFF5500FF}, {"ega2a", 0xFF55AA55}, {"ega2b", 0xFF55AAFF},
-            {"ega2c", 0xFFFF0055}, {"ega2d", 0xFFFF00FF}, {"ega2e", 0xFFFFAA55}, {"ega2f", 0xFFFFAAFF},
-            HINT_NEXT_LINE_HERE,
-            {"ega30", 0xFF555500}, {"ega31", 0xFF5555AA}, {"ega32", 0xFF55FF00}, {"ega33", 0xFF55FFAA},
-            {"ega34", 0xFFFF5500}, {"ega35", 0xFFFF55AA}, {"ega36", 0xFFFFFF00}, {"ega37", 0xFFFFFFAA},
-            HINT_NEXT_LINE_HERE,
-            {"ega38", 0xFF555555}, {"ega39", 0xFF5555FF}, {"ega3a", 0xFF55FF55}, {"ega3b", 0xFF55FFFF},
-            {"ega3c", 0xFFFF5555}, {"ega3d", 0xFFFF55FF}, {"ega3e", 0xFFFFFF55}, {"ega3f", 0xFFFFFFFF}
+            {"",{
+                {"ega00", 0xFF000000}, {"ega01", 0xFF0000AA}, {"ega02", 0xFF00AA00}, {"ega03", 0xFF00AAAA},
+                {"ega04", 0xFFAA0000}, {"ega05", 0xFFAA00AA}, {"ega06", 0xFFAAAA00}, {"ega07", 0xFFAAAAAA},
+            }},
+            {"",{
+                {"ega08", 0xFF000055}, {"ega09", 0xFF0000FF}, {"ega0a", 0xFF00AA55}, {"ega0b", 0xFF00AAFF},
+                {"ega0c", 0xFFAA0055}, {"ega0d", 0xFFAA00FF}, {"ega0e", 0xFFAAAA55}, {"ega0f", 0xFFAAAAFF},
+            }},
+            {"",{
+                {"ega10", 0xFF005500}, {"ega11", 0xFF0055AA}, {"ega12", 0xFF00FF00}, {"ega13", 0xFF00FFAA},
+                {"ega14", 0xFFAA5500}, {"ega15", 0xFFAA55AA}, {"ega16", 0xFFAAFF00}, {"ega17", 0xFFAAFFAA},
+            }},
+            {"",{
+                {"ega18", 0xFF005555}, {"ega19", 0xFF0055FF}, {"ega1a", 0xFF00FF55}, {"ega1b", 0xFF00FFFF},
+                {"ega1c", 0xFFAA5555}, {"ega1d", 0xFFAA55FF}, {"ega1e", 0xFFAAFF55}, {"ega1f", 0xFFAAFFFF},
+            }},
+            {"",{
+                {"ega20", 0xFF550000}, {"ega21", 0xFF5500AA}, {"ega22", 0xFF55AA00}, {"ega23", 0xFF55AAAA},
+                {"ega24", 0xFFFF0000}, {"ega25", 0xFFFF00AA}, {"ega26", 0xFFFFAA00}, {"ega27", 0xFFFFAAAA},
+            }},
+            {"",{
+                {"ega28", 0xFF550055}, {"ega29", 0xFF5500FF}, {"ega2a", 0xFF55AA55}, {"ega2b", 0xFF55AAFF},
+                {"ega2c", 0xFFFF0055}, {"ega2d", 0xFFFF00FF}, {"ega2e", 0xFFFFAA55}, {"ega2f", 0xFFFFAAFF},
+            }},
+            {"",{
+                {"ega30", 0xFF555500}, {"ega31", 0xFF5555AA}, {"ega32", 0xFF55FF00}, {"ega33", 0xFF55FFAA},
+                {"ega34", 0xFFFF5500}, {"ega35", 0xFFFF55AA}, {"ega36", 0xFFFFFF00}, {"ega37", 0xFFFFFFAA},
+            }},
+            {"",{
+                {"ega38", 0xFF555555}, {"ega39", 0xFF5555FF}, {"ega3a", 0xFF55FF55}, {"ega3b", 0xFF55FFFF},
+                {"ega3c", 0xFFFF5555}, {"ega3d", 0xFFFF55FF}, {"ega3e", 0xFFFFFF55}, {"ega3f", 0xFFFFFFFF}
+            }}
         }
     ),
     new ColorPalette(
