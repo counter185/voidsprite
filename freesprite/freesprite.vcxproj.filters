@@ -811,7 +811,7 @@
       <Filter>Source files\external\bc7enc_rdo</Filter>
     </ClCompile>
     <ClCompile Include="PopupPaletteManager.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\popup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1614,7 +1614,7 @@
       <Filter>Header files\external\bc7enc_rdo</Filter>
     </ClInclude>
     <ClInclude Include="PopupPaletteManager.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\popup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
