@@ -206,7 +206,7 @@ void PopupPaletteManager::reloadPaletteList()
             }
 
             UILabel* idLabel = NULL;
-            if (formatIsImported || _DEBUG) {
+            if (formatIsImported) {
                 idLabel = new UILabel(palette->getID(), {}, 13);
                 idLabel->color = uint32ToSDLColor(0x60FFFFFF);
             }
