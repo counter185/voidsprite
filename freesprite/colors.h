@@ -7,6 +7,7 @@
 #define PALETTE_FORMAT_FEATURE_NAME         0b00000001
 #define PALETTE_FORMAT_FEATURE_COLOR_NAMES  0b00000010
 #define PALETTE_FORMAT_FEATURE_DESCRIPTION  0b00000100
+#define PALETTE_FORMAT_FEATURE_IMPORTED     0b00001000
 //it is assumed that voidpltv2 supports everything
 #define PALETTE_FORMAT_FEATURE_EXT ~0
 
@@ -45,6 +46,7 @@ public:
     virtual std::string getName() { return "INVALID PALETTE"; };
     virtual std::string getDescription() { return ""; };
     virtual std::string getExternalUrl() { return ""; };
+    virtual std::string getID() { return getName(); }
     virtual u8 getFormatFeatureFlags() { return 0; }
     virtual bool formatFeatureSupported(u8 feature) { return (getFormatFeatureFlags() & feature) == feature; }
     virtual PaletteRows& getColorList() {
@@ -143,12 +145,15 @@ public:
     PlatformNativePathString path;
     PaletteExporter* correspondingExporter = NULL;
     u8 formatFlags = 0;
+    std::string id = "";
 
     ImportedPalette(std::string name, PaletteRows rows)
         : ColorPalette(name, rows, false) {}
 
     ImportedPalette(std::string name, std::vector<u32> colors)
         : ColorPalette(name, colors, false) {}
+
+    std::string getID() override { return id; }
 
     bool canSave() override { return correspondingExporter != NULL && !path.empty(); }
     bool save() override;
@@ -175,5 +180,6 @@ inline std::vector<IPalette*> g_loadedPalettes = {};
 void g_generateColorMap();
 void g_reloadColorMap();
 IPalette* g_paletteByName(std::string name);
+IPalette* g_paletteByID(std::string id);
 void g_downloadAndInstallPaletteFromLospec(std::string url);
 void g_promptCreateNewPalette(std::vector<u32> newPalette, std::function<void()> onSuccessCallback);

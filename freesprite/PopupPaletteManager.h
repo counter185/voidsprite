@@ -14,5 +14,7 @@ public:
     void onColorListModified() override { reloadPaletteList(); }
 
     static void promptAddColorToPalette(IPalette* p, int rowIndex, u32 defaultColor = 0xFFFFFF);
+    static bool paletteIsHidden(IPalette* p);
+    static void togglePaletteHidden(IPalette* p);
 };
 

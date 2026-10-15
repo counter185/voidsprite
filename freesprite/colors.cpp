@@ -488,6 +488,8 @@ void g_reloadColorMap() {
                         if (result->name == "") {
                             result->name = fileName;
                         }
+                        result->id = fileName;
+                        result->formatFlags |= PALETTE_FORMAT_FEATURE_IMPORTED;
                         result->correspondingExporter = palImport->getCorrespondingExporter();
                         result->path = file;
                         g_loadedPalettes.push_back(result);
@@ -512,6 +514,16 @@ IPalette* g_paletteByName(std::string name)
 {
     for (auto& p : g_loadedPalettes) {
         if (p->getName() == name) {
+            return p;
+        }
+    }
+    return NULL;
+}
+
+IPalette* g_paletteByID(std::string id)
+{
+    for (auto& p : g_loadedPalettes) {
+        if (p->getID() == id) {
             return p;
         }
     }

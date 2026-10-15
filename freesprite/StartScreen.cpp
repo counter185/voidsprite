@@ -390,8 +390,8 @@ void PanelNewImage::newIndexedSession(std::string palette)
 
     LayerPalettized* newLayer = LayerPalettized::tryAllocIndexedLayer(imgSize.x, imgSize.y);
     if (newLayer != NULL) {
-        IPalette* plt = g_paletteByName(palette);
-        newLayer->palette = plt == NULL ? g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues() : plt->toFlatColorValues();
+        IPalette* plt = g_paletteByID(palette);
+        newLayer->palette = plt == NULL ? g_paletteByID(PALETTE_DEFAULT)->toFlatColorValues() : plt->toFlatColorValues();
         MainEditorPalettized* newMainEditor = new MainEditorPalettized(newLayer);
         if (newImageTabs->openTab == 1) {
             newMainEditor->ssne.tileDimensions = newImgCellSizeTab1;
@@ -1368,7 +1368,7 @@ PanelNewImage::PanelNewImage()
 
     std::vector<std::string> palettes;
     for (auto& pal : g_loadedPalettes) {
-        palettes.push_back(pal->getName());
+        palettes.push_back(pal->getID());
     }
 
     for (int x = 0; x < 2; x++) {
@@ -1393,7 +1393,7 @@ PanelNewImage::PanelNewImage()
 
         UIDropdown* palettePicker = new UIDropdown(palettes);
         palettePicker->customButtonGenFunction = [](std::string name, int index) {
-            IPalette* p = g_paletteByName(name);
+            IPalette* p = g_paletteByID(name);
             PaletteButton* ret = new PaletteButton(p != NULL ? p->toFlatColorValues() : std::vector<u32>{}, 36);
             ret->text = name;
             ret->wxWidth = 300;

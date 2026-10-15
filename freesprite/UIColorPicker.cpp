@@ -524,6 +524,11 @@ void UIColorPicker::reloadColorLists()
     }
 
     for (auto*& p : palettes) {
+
+        if (PopupPaletteManager::paletteIsHidden(p)) {
+            continue;
+        }
+
         std::vector<Drawable*> palettePanels;
 
         UIButton* collapseButton = new UIButton("-");
