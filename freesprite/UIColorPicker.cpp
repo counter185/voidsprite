@@ -406,15 +406,13 @@ ColorPickerColorButton* UIColorPicker::genPaletteColorButton(IPalette* p, int ro
             PopupContextMenu* menu = new PopupContextMenu({
                 { "Remove color",
                     [this, colorIndex, colorValue, p, rowIndex]() {
-                        PopupYesNo* popup = new PopupYesNo("Remove color",
-                            frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()));
-                        popup->onFinishCallback = [this, colorIndex, p, rowIndex](PopupYesNo*, bool result) {
-                            if (result) {
+                        g_addPopup(PopupYesNo::ConfirmPrompt(
+                            "Remove color",
+                            frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()),
+                            [p, colorIndex, rowIndex]() {
                                 p->removeColor(colorIndex, rowIndex);
                                 g_reloadColorMap();
-                            }
-                        };
-                        g_addPopup(popup);
+                            }));
                     }
                 },
                 { "Move color left",

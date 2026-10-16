@@ -7,6 +7,8 @@ protected:
     ScrollingPanel* mainPanel;
     std::string lastFilterQuery = "";
 
+    UIButton* genColorButton(IPalette* p, NamedColor& c, int rIndex, int cIndex, bool editable, bool canRename);
+
     void reloadPaletteList();
 public:
     PopupPaletteManager();

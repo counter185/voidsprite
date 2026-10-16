@@ -8,7 +8,64 @@
 #include "PopupYesNo.h"
 #include "Notification.h"
 #include "PopupPickColor.h"
+#include "PopupContextMenu.h"
 #include "UIColorPicker.h"
+
+UIButton* PopupPaletteManager::genColorButton(IPalette* p, NamedColor& c, int rIndex, int cIndex, bool editable, bool canRename)
+{
+    UIButton* ret = new UIButton();
+    ret->wxWidth = 20;
+    ret->wxHeight = 20;
+    ret->fill = Fill::Solid(c.value);
+    ret->tooltip = c.name;
+    if (editable) {
+        ret->onRightClickCallback = [this, rIndex, cIndex, p, c, canRename](UIButton*) {
+            std::vector<NamedOperation> colorOperations = {
+                { "Remove color",
+                    [this, rIndex, cIndex, c, p]() {
+                        g_addPopup(PopupYesNo::ConfirmPrompt(
+                            "Remove color",
+                            frmt("Remove the color #{} : {:06X} from palette {}?", cIndex, c.value, p->getName()),
+                            [p, cIndex, rIndex]() {
+                                p->removeColor(cIndex, rIndex);
+                                g_reloadColorMap();
+                            }));
+                    }
+                },
+                { "Move color left",
+                    [this, cIndex, p, rIndex]() {
+                        p->moveColor(cIndex, false, rIndex);
+                        g_reloadColorMap();
+                    }
+                },
+                { "Move color right",
+                    [this, cIndex, p, rIndex]() {
+                        p->moveColor(cIndex, true, rIndex);
+                        g_reloadColorMap();
+                    }
+                },
+            };
+
+            if (canRename) {
+                colorOperations.push_back({
+                    "Rename color", [p, c, cIndex, rIndex]() {
+                        PopupTextBox* tx = new PopupTextBox("Rename color", frmt("Rename color #{} : {:06X}", cIndex, c.value), c.name);
+                        tx->onTextInputConfirmedCallback = [p, rIndex, cIndex](PopupTextBox*, std::string t) {
+                            p->getColorList()[rIndex].colors[cIndex].name = t;
+                            p->save();
+                            g_reloadColorMap();
+                        };
+                        g_addPopup(tx);
+                    }
+                });
+            }
+
+            PopupContextMenu* menu = new PopupContextMenu(colorOperations);
+            g_addPopup(menu);
+        };
+    }
+    return ret;
+}
 
 void PopupPaletteManager::reloadPaletteList()
 {
@@ -36,15 +93,31 @@ void PopupPaletteManager::reloadPaletteList()
 
             std::vector<Drawable*> paletteActionsRow = {};
 
-            std::string url = palette->getExternalUrl();
-            if (!url.empty()) {
-                UIButton* openExternal = new UIButton("View online...");
-                openExternal->fontSize = 14;
-                openExternal->wxWidth = 100;
-                openExternal->wxHeight = 22;
-                openExternal->tooltip = url;
-                openExternal->onClickCallback = [url](...) { platformOpenWebpageURL(url); };
-                paletteActionsRow.push_back(openExternal);
+            UIButton* showHideButton = new UIButton(hidden ? "Unhide" : "Hide");
+            showHideButton->fontSize = 14;
+            showHideButton->wxWidth = 80;
+            showHideButton->wxHeight = 22;
+            showHideButton->onClickCallback = [this, palette](...) {togglePaletteHidden(palette); g_reloadColorMap(); };
+            paletteActionsRow.push_back(showHideButton);
+
+            if (formatIsImported) {
+                UIButton* deleteButton = new UIButton("Delete");
+                deleteButton->fontSize = 14;
+                deleteButton->wxWidth = 80;
+                deleteButton->wxHeight = 22;
+                deleteButton->onClickCallback = [this, palette](...) {
+                    g_addPopup(PopupYesNo::ConfirmPrompt(frmt("Delete {}?", palette->getName()), "The palette will be deleted.",
+                        [palette]() {
+                            try {
+                                std::filesystem::remove(std::filesystem::path(((ImportedPalette*)palette)->path));
+                                g_reloadColorMap();
+                            }
+                            catch (std::exception& e) {
+                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), e.what()));
+                            }
+                        }));
+                    };
+                paletteActionsRow.push_back(deleteButton);
             }
 
             if (editable && formatSupportsName) {
@@ -81,32 +154,16 @@ void PopupPaletteManager::reloadPaletteList()
                 paletteActionsRow.push_back(descButton);
             }
 
-            if (formatIsImported) {
-                UIButton* deleteButton = new UIButton("Delete");
-                deleteButton->fontSize = 14;
-                deleteButton->wxWidth = 80;
-                deleteButton->wxHeight = 22;
-                deleteButton->onClickCallback = [this, palette](...) {
-                    g_addPopup(PopupYesNo::ConfirmPrompt(frmt("Delete {}?", palette->getName()), "The palette will be deleted.",
-                        [palette]() {
-                            try {
-                                std::filesystem::remove(std::filesystem::path(((ImportedPalette*)palette)->path));
-                                g_reloadColorMap();
-                            }
-                            catch (std::exception& e) { 
-                                g_addNotification(ErrorNotification(TL("vsp.cmn.error"), e.what()));
-                            }
-                        }));
-                };
-                paletteActionsRow.push_back(deleteButton);
+            std::string url = palette->getExternalUrl();
+            if (!url.empty()) {
+                UIButton* openExternal = new UIButton("View online...");
+                openExternal->fontSize = 14;
+                openExternal->wxWidth = 100;
+                openExternal->wxHeight = 22;
+                openExternal->tooltip = url;
+                openExternal->onClickCallback = [url](...) { platformOpenWebpageURL(url); };
+                paletteActionsRow.push_back(openExternal);
             }
-
-            UIButton* showHideButton = new UIButton(hidden ? "Unhide" : "Hide");
-            showHideButton->fontSize = 14;
-            showHideButton->wxWidth = 80;
-            showHideButton->wxHeight = 22;
-            showHideButton->onClickCallback = [this, palette](...) {togglePaletteHidden(palette); g_reloadColorMap(); };
-            paletteActionsRow.push_back(showHideButton);
 
             //make palette rows
             std::vector<Drawable*> paletteRows;
@@ -150,9 +207,9 @@ void PopupPaletteManager::reloadPaletteList()
                                     palette->getColorList()[rowIndex].name = s;
                                     palette->save();
                                     reloadPaletteList();
-                                    };
-                                g_addPopup(textInput);
                                 };
+                                g_addPopup(textInput);
+                            };
 
                             paletteRows.push_back(UIStackPanel::Horizontal(5, { rowNameLabel, Panel::Space(20,1), deleteRow, renameRow }));
                         }
@@ -166,13 +223,9 @@ void PopupPaletteManager::reloadPaletteList()
 
                     //generate color buttons
                     std::vector<Drawable*> colorButtons;
-                    for (auto& [colName, colValue] : rowColors) {
-                        UIButton* colorButton = new UIButton();
-                        colorButton->wxWidth = 20;
-                        colorButton->wxHeight = 20;
-                        colorButton->fill = Fill::Solid(colValue);
-                        colorButton->tooltip = colName;
-                        colorButtons.push_back(colorButton);
+                    int colorIndex = 0;
+                    for (NamedColor& nc : rowColors) {
+                        colorButtons.push_back(genColorButton(palette, nc, rowIndex, colorIndex++, editable, formatSupportsColorRenames));
                         if (colorButtons.size() >= maxInLine) {
                             paletteRows.push_back(UIStackPanel::Horizontal(0, colorButtons));
                             colorButtons.clear();
@@ -185,7 +238,7 @@ void PopupPaletteManager::reloadPaletteList()
                         addButton->text = "+";
                         addButton->onClickCallback = [this, palette, rowIndex](...) {
                             promptAddColorToPalette(palette, rowIndex);
-                            };
+                        };
                         colorButtons.push_back(addButton);
                     }
                     paletteRows.push_back(UIStackPanel::Horizontal(0, colorButtons));
