@@ -43,6 +43,7 @@ std::vector<ConfigBoolOption> getBoolOptions() {
         {"resetEraserOnToolSwitch", &g_config.resetEraserOnToolSwitch},
         {"showFeaturedUGC", &g_config.showFeaturedUGC},
         {"editorShowGitRepo", &g_config.editorShowGitRepo},
+        {"editorAlwaysOpenTouchPanel", &g_config.editorAlwaysOpenTouchPanel},
         {"debug.testLocalization", &g_debugConfig.debugTestLocalization }
     };
 }

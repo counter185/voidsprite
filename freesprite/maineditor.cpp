@@ -1533,7 +1533,7 @@ void MainEditor::setUpWidgets()
     setActiveBrush(g_brushes[0]);
     setActiveSinglePattern(g_patterns[0]);
 
-    if (g_lastConfirmInputWasTouch) {
+    if (g_lastConfirmInputWasTouch || g_config.editorAlwaysOpenTouchPanel) {
         openTouchModePanel();
     }
 

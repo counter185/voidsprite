@@ -573,6 +573,9 @@
     {"vsp.config.opt.showgitrepo", "Show Git repository details"},
     {"vsp.config.opt.showgitrepo.desc", "Opening a file that's inside a Git repository will show its name and current branch.\n"
                                         "May marginally slow down load times."},
+    {"vsp.config.opt.alwaysopentouchpanel", "Always open touch mode panel"},
+    {"vsp.config.opt.alwaysopentouchpanel.desc", "When enabled, the touch mode panel will always open when starting Editor sessions.\n"
+                                                 "By default, it will only appear when using touch input."},
     {"vsp.config.opt.smoothfonts", "Smooth fonts"},
     {"vsp.config.opt.smoothfonts.desc", "If disabled, fonts will be rendered with solid pixels instead of smooth.\n"
                                         "This will make custom pixel fonts render properly.\n"

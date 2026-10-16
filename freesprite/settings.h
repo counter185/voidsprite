@@ -54,6 +54,7 @@ public:
     bool showFeaturedUGC = true;
     bool editorShowGitRepo = true;
     int lineSnapMaxAspect = 8;
+    bool editorAlwaysOpenTouchPanel = false;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;
