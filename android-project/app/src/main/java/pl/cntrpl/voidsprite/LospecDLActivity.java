@@ -53,7 +53,7 @@ public class LospecDLActivity extends Activity {
                     if (Utils.writeVOIDPLTv2(outputFile, colorList,
                             name, "by Lospec user " + author, extUrl, true))
                     {
-                        String message = "Palette downloaded: " + targetName;
+                        String message = "Palette downloaded: " + name;
                         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
                     } else {
                         String errorMessage = "Failed to write palette file: " + targetName;
@@ -90,7 +90,7 @@ public class LospecDLActivity extends Activity {
             new LospecDLTask(this, uri.toString()).start();
         }
 
-        finish();
+        //finish();
 
     }
 }

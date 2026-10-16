@@ -298,7 +298,14 @@ void PopupPaletteManager::reloadPaletteList()
     newPaletteButton->onClickCallback = [this, filterQuery](UIButton*) {
         g_promptCreateNewPalette({}, []() { });
     };
-    stack.push_back(newPaletteButton);
+
+    UIButton* refreshButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.refresh"));
+    refreshButton->position = XY{ 5, 60 };
+    refreshButton->wxWidth = 140;
+    refreshButton->onClickCallback = [this, filterQuery](UIButton*) {
+        g_reloadColorMap();
+    };
+    stack.push_back(UIStackPanel::Horizontal(10, { newPaletteButton, refreshButton }));
 
     mainPanel->subWidgets.addDrawable(UIStackPanel::Vertical(30, stack));
 }
