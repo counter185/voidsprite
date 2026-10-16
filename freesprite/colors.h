@@ -46,6 +46,7 @@ public:
     virtual std::string getName() { return "INVALID PALETTE"; };
     virtual std::string getDescription() { return ""; };
     virtual std::string getExternalUrl() { return ""; };
+    virtual bool getLocked() { return false; }
     virtual std::string getID() { return getName(); }
     virtual u8 getFormatFeatureFlags() { return 0; }
     virtual bool formatFeatureSupported(u8 feature) { return (getFormatFeatureFlags() & feature) == feature; }
@@ -146,6 +147,7 @@ public:
     PaletteExporter* correspondingExporter = NULL;
     u8 formatFlags = 0;
     std::string id = "";
+    bool locked = false;
 
     ImportedPalette(std::string name, PaletteRows rows)
         : ColorPalette(name, rows, false) {}
@@ -155,10 +157,11 @@ public:
 
     std::string getID() override { return id; }
 
-    bool canSave() override { return correspondingExporter != NULL && !path.empty(); }
+    bool canSave() override { return !locked && correspondingExporter != NULL && !path.empty(); }
     bool save() override;
     u8 getFormatFeatureFlags() { return formatFlags; }
 
+    bool getLocked() override { return locked; }
     bool isBuiltIn() override { return false; }
 };
 

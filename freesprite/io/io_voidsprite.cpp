@@ -1047,6 +1047,7 @@ IPalette* readPltVOIDPLT(PlatformNativePathString name)
                 std::string name = voidsnReadString(f);
 
                 std::string description = "", extUrl = "";
+                bool locked = false;
 
                 u32 extDataCount = voidsnReadU32(f);
                 for (int i = 0; i < extDataCount; i++) {
@@ -1055,6 +1056,7 @@ IPalette* readPltVOIDPLT(PlatformNativePathString name)
 
                     if (k == "palette.description") { description = v; }
                     else if (k == "palette.exturl") { extUrl = v; }
+                    else if (k == "palette.locked") { locked = v == "1"; }
                 }
 
                 u32 rowCount = voidsnReadU32(f);
@@ -1073,6 +1075,7 @@ IPalette* readPltVOIDPLT(PlatformNativePathString name)
                 ImportedPalette* ret = new ImportedPalette(name, rows);
                 ret->description = description;
                 ret->extUrl = extUrl;
+                ret->locked = locked;
                 ret->formatFlags = PALETTE_FORMAT_FEATURE_EXT;
                 return ret;
             }
@@ -1120,7 +1123,8 @@ bool writePltVOIDPLTv2(PlatformNativePathString path, IPalette* palette)
 
         std::vector<std::pair<std::string, std::string>> extData = {
             { "palette.description", palette->getDescription() },
-            { "palette.exturl", palette->getExternalUrl() }
+            { "palette.exturl", palette->getExternalUrl() },
+            { "palette.locked", palette->getLocked() ? "1" : "0" }
         };
         voidsnWriteU32(outfile, extData.size());
         for (auto& [k, v] : extData) {

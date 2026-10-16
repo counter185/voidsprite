@@ -78,6 +78,7 @@ void PopupPaletteManager::reloadPaletteList()
         if (filterQuery == "" || stringContainsIgnoreCase(name, filterQuery)) {
 
             bool formatSupportsSections = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_EXT);
+            bool formatSupportsLocking = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_EXT);
             bool formatSupportsName = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_NAME);
             bool formatSupportsDescription = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_DESCRIPTION);
             bool formatSupportsColorRenames = palette->formatFeatureSupported(PALETTE_FORMAT_FEATURE_COLOR_NAMES);
@@ -101,7 +102,7 @@ void PopupPaletteManager::reloadPaletteList()
             paletteActionsRow.push_back(showHideButton);
 
             if (formatIsImported) {
-                UIButton* deleteButton = new UIButton("Delete");
+                UIButton* deleteButton = new UIButton("Delete...");
                 deleteButton->fontSize = 14;
                 deleteButton->wxWidth = 80;
                 deleteButton->wxHeight = 22;
@@ -135,6 +136,21 @@ void PopupPaletteManager::reloadPaletteList()
                     g_addPopup(rename);
                 };
                 paletteActionsRow.push_back(renameButton);
+            }
+
+            if (formatIsImported && formatSupportsLocking) {
+                UIButton* lockButton = new UIButton(palette->getLocked() ? "Unlock" : "Lock");
+                lockButton->tooltip = "Lock to prevent accidental edits.\n"
+                                      "The palette will not be editable until it is unlocked.";
+                lockButton->fontSize = 14;
+                lockButton->wxWidth = 100;
+                lockButton->wxHeight = 22;
+                lockButton->onClickCallback = [this, palette](...) {
+                    ((ImportedPalette*)palette)->locked = !palette->getLocked();
+                    palette->save();
+                    g_reloadColorMap();
+                };
+                paletteActionsRow.push_back(lockButton);
             }
 
             if (editable && formatSupportsDescription) {
@@ -172,7 +188,7 @@ void PopupPaletteManager::reloadPaletteList()
                 int rowIndex = 0;
                 for (auto& [rowName, rowColors] : rows) {
                     //don't show <no name> if format doesn't support this
-                    if (!rowName.empty() || formatSupportsSections) {
+                    if (!rowName.empty() || (!palette->getLocked() && formatSupportsSections)) {
                         UILabel* rowNameLabel = new UILabel(rowName.empty() ? "<no name>" : rowName);
                         rowNameLabel->fontsize = 14;
                         rowNameLabel->color = uint32ToSDLColor(0xB0FFFFFF);

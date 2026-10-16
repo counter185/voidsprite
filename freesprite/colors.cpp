@@ -557,7 +557,8 @@ void g_downloadAndInstallPaletteFromLospec(std::string url)
                     return 0xFF000000 | std::stoul(color, nullptr, 16);
                 });
 
-                ColorPalette tempPalette = ColorPalette(name, colorsU32);
+                ImportedPalette tempPalette = ImportedPalette(name, colorsU32);
+                tempPalette.locked = true;
                 tempPalette.description = frmt("by Lospec user {}", author);
                 tempPalette.extUrl = frmt("https://lospec.com/palette-list/{}", url);
                 if (writePltVOIDPLTv2(outputFile, &tempPalette)) {
