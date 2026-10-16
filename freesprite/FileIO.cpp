@@ -922,7 +922,7 @@ Layer* readMarioPaintSRM(PlatformNativePathString path, uint64_t seek)
 
             LayerPalettized* l = De4BPPBitplane(256, 174, fullDecompressedData + 0x6000);
             l->name = "Mario Paint Layer";
-            l->palette = g_paletteByName("Mario Paint")->toRawColorList();
+            l->palette = g_paletteByName("Mario Paint")->toFlatColorValues();
 
             tracked_free(fullDecompressedData);
             fclose(f);
@@ -948,7 +948,7 @@ Layer* readXComSPK(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+        ret->palette = g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues();
         ret->name = "SPK Layer";
         uint32_t* pxd = ret->pixels32();
         uint64_t layerPointer = 0;
@@ -1001,7 +1001,7 @@ Layer* readXComBDY(PlatformNativePathString path, uint64_t seek)
     FILE* f = platformOpenFile(path, PlatformFileModeRB);
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
-        ret->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+        ret->palette = g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues();
         ret->name = "BDY Layer";
         uint32_t* pxd = ret->pixels32();
         uint32_t* end = pxd + (320 * 200);
@@ -1044,7 +1044,7 @@ Layer* readXComSCR(PlatformNativePathString path, uint64_t seek)
     if (f != NULL) {
         LayerPalettized* ret = new LayerPalettized(320, 200);
         uint32_t* pxd = ret->pixels32();
-        ret->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+        ret->palette = g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues();
         for (int x = 0; x < 320 * 200; x++) {
             uint8_t pixel;
             fread(&pixel, 1, 1, f);
@@ -1141,7 +1141,7 @@ Layer* readSR8(PlatformNativePathString path, uint64_t seek)
         }
         l->palette = pal;*/
         IPalette* palette = g_paletteByName("Slim Render (8-bit)");
-        l->palette = palette->toRawColorList();
+        l->palette = palette->toFlatColorValues();
 
         u32* ppx = l->pixels32();
         for (int dataPointer = 0; dataPointer < l->w * l->h; dataPointer++) {
@@ -1609,8 +1609,9 @@ bool tryInstallPalette(PlatformNativePathString path)
         std::string fileName = fileNameFromPath(conv);
         if (stringEndsWithIgnoreCase(conv, paletteImporter->extension()) && paletteImporter->canImport(path)) {
             auto result = paletteImporter->importPalette(path);
-            if (result.first) {
+            if (result != NULL) {
                 try {
+                    delete result;
                     std::filesystem::copy_file(path, std::filesystem::path(platformEnsureDirAndGetConfigFilePath()) / "palettes" / fileName,
                         std::filesystem::copy_options::overwrite_existing);
                 }
@@ -2312,7 +2313,8 @@ void g_setupIO() {
         * exVOIDPLT,
         * exHexPLT,
         * exPNGPLT;
-    g_paletteExporters.push_back(exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", TL("vsp.export.palette.voidplt"), &writePltVOIDPLT));
+    g_paletteExporters.push_back(exVOIDPLT = PaletteExporter::paletteExporter("voidsprite palette", ".voidplt", TL("vsp.export.palette.voidplt"), &writePltVOIDPLTv2));
+    g_paletteExporters.push_back(PaletteExporter::paletteExporter("voidsprite palette v1", ".voidplt", TL("vsp.export.palette.voidplt"), &writePltVOIDPLTv1));
     g_paletteExporters.push_back(exHexPLT = PaletteExporter::paletteExporter("Hex palette", ".hex", TL("vsp.export.palette.hex"), &writePltHEX));
     g_paletteExporters.push_back(exPNGPLT = PaletteExporter::paletteExporter("PNG palette", ".png", TL("vsp.export.palette.png"), &writePltPNG));
 

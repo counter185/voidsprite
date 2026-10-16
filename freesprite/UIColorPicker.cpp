@@ -14,6 +14,7 @@
 #include "PopupContextMenu.h"
 #include "PopupChooseFormat.h"
 #include "UICheckbox.h"
+#include "PopupPaletteManager.h"
 #include "io/io_voidsprite.h"
 
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
@@ -378,12 +379,115 @@ void UIColorPicker::eventFileOpen(int evt_id, PlatformNativePathString name, int
         if (platformCopyFile(name, platformEnsureDirAndGetConfigFilePath() + convertStringOnWin32("/palettes/" + fname))) {
             g_addNotification(SuccessShortNotification("Success", "Palette imported into colorlist"));
             g_reloadColorMap();
-            reloadColorLists();
         }
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Failed to import palette"));
         }
     }
+}
+
+void UIColorPicker::onColorListModified()
+{
+    reloadColorLists();
+}
+
+ColorPickerColorButton* UIColorPicker::genPaletteColorButton(IPalette* p, int rowIndex, int colorIndex, bool large)
+{
+    NamedColor& color = p->getColorList()[rowIndex].colors[colorIndex];
+    std::string colorName = color.name;
+    u32 colorValue = color.value;
+
+    ColorPickerColorButton* b = new ColorPickerColorButton(this, colorValue);
+    b->tooltip = colorName;
+    b->wxWidth = large ? 48 : 24;
+    b->wxHeight = large ? 32 : 20;
+    if (canEditPalettes && p->canSave()) {
+        b->onRightClickCallback = [colorIndex, this, p, colorValue, rowIndex](UIButton*) {
+            PopupContextMenu* menu = new PopupContextMenu({
+                { "Remove color",
+                    [this, colorIndex, colorValue, p, rowIndex]() {
+                        g_addPopup(PopupYesNo::ConfirmPrompt(
+                            "Remove color",
+                            frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()),
+                            [p, colorIndex, rowIndex]() {
+                                p->removeColor(colorIndex, rowIndex);
+                                g_reloadColorMap();
+                            }));
+                    }
+                },
+                { "Move color left",
+                    [this, colorIndex, colorValue, p, rowIndex]() {
+                        p->moveColor(colorIndex, false, rowIndex);
+                        g_reloadColorMap();
+                    }
+                },
+                { "Move color right",
+                    [this, colorIndex, colorValue, p, rowIndex]() {
+                        p->moveColor(colorIndex, true, rowIndex);
+                        g_reloadColorMap();
+                    }
+                },
+            });
+            g_addPopup(menu);
+        };
+    }
+    return b;
+}
+
+Panel* UIColorPicker::genPaletteRowPanel(IPalette* p, int rowIndex)
+{
+    std::vector<Drawable*> rowsStackPanel;
+
+    auto& rows = p->getColorList();
+    auto& row = rows[rowIndex];
+    auto& colors = row.colors;
+
+    if (row.name != "") {
+        UILabel* label = new UILabel(row.name, { 0,0 }, 12);
+        label->color = uint32ToSDLColor(0xA0FFFFFF);
+        rowsStackPanel.push_back(label);
+    }
+
+    bool largeColorButtons = colors.size() < 8;
+    bool paletteModifiable = canEditPalettes && p->canSave();
+
+    std::vector<Drawable*> currentColorButtonsStack{};
+
+    int maxButtonsInLine = palettePanel->wxWidth / (largeColorButtons ? 48 : 24);
+
+    //create all the color buttons
+    for (int colorIndex = 0; colorIndex < colors.size(); colorIndex++) {
+
+        ColorPickerColorButton* b = genPaletteColorButton(p, rowIndex, colorIndex, largeColorButtons);
+        currentColorButtonsStack.push_back(b);
+        if (currentColorButtonsStack.size() >= maxButtonsInLine) {
+            rowsStackPanel.push_back(UIStackPanel::Horizontal(0, currentColorButtonsStack));
+            currentColorButtonsStack.clear();
+        }
+    }
+
+    //create the + button if applicable
+    if (paletteModifiable) {
+        UIButton* addColorButton = new UIButton("+");
+        addColorButton->wxWidth = 24;
+        addColorButton->wxHeight = 20;
+        addColorButton->tooltip = TL("vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip");
+        addColorButton->onClickCallback = [this, rowIndex, p](UIButton*) {
+            if (!g_shiftModifier) {
+                PopupPaletteManager::promptAddColorToPalette(p, rowIndex, colorNowU32);
+            }
+            else {
+                addColorToPalette(p, rowIndex, colorNowU32);
+            }
+        };
+        currentColorButtonsStack.push_back(addColorButton);
+    }
+
+    if (!currentColorButtonsStack.empty()) {
+        rowsStackPanel.push_back(UIStackPanel::Horizontal(0, currentColorButtonsStack));
+    }
+
+    return UIStackPanel::Vertical(0, rowsStackPanel);
 }
 
 void UIColorPicker::reloadColorLists()
@@ -413,144 +517,44 @@ void UIColorPicker::reloadColorLists()
     std::vector<UIButton*> collapseButtons;
 
     std::vector<IPalette*> palettes = extraPalettes;
-    for (auto& p : g_namedColorMap) {
-        palettes.push_back(&p);
+    for (auto& p : g_loadedPalettes) {
+        palettes.push_back(p);
     }
 
-
     for (auto*& p : palettes) {
-        Panel* pp = new Panel();
-        pp->sizeToContent = true;
+
+        if (PopupPaletteManager::paletteIsHidden(p)) {
+            continue;
+        }
+
+        std::vector<Drawable*> palettePanels;
+
         UIButton* collapseButton = new UIButton("-");
-        collapseButton->position = { 5,10 };
         collapseButton->wxWidth = 20;
         collapseButton->wxHeight = 20;
-        pp->subWidgets.addDrawable(collapseButton);
         collapseButtons.push_back(collapseButton);
-
 
         UILabel* nameLabel = new UILabel(p->getName());
         nameLabel->position = XY{ 30, 10 };
-        pp->subWidgets.addDrawable(nameLabel);
 
-        stack->addWidget(pp);
+        stack->addWidget(UIStackPanel::Horizontal(5, {
+            Panel::Space(0,0), collapseButton, nameLabel
+        }));
 
-        int yNow = 0;
-        int xNow = 0;
-        
-        Panel* colorButtonsPanel = new Panel();
-        colorButtonsPanel->sizeToContent = true;
-        colorButtonsPanel->passThroughMouse = true;
+        auto& rows = p->getColorList();
+        std::vector<Drawable*> rowPanels;
 
-        //check if we should create large color buttons
-        int lineCount = 1;
-        int currentCountInLine = 0;
-        int maxCountInLine = 0;
-        for (auto& color : p->getColorList()) {
-            if (color.first == HINT_NEXT_LINE) {
-                currentCountInLine = 0;
-                lineCount++;
-            }
-            else {
-                if (++currentCountInLine > maxCountInLine) {
-                    maxCountInLine = currentCountInLine;
-                }
-            }
+        for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+
+            rowPanels.push_back(genPaletteRowPanel(p, rowIndex));
         }
-        bool largeColorButtons = maxCountInLine < 8;
+        UIStackPanel* rowsPanel = UIStackPanel::Vertical(0, rowPanels);
+        stack->addWidget(rowsPanel);
+        stack->addWidget(Panel::Space(1,10));
 
-        int itemHeight = largeColorButtons ? 32 : 20;
-
-        bool paletteModifiable = canEditPalettes && p->canSave();
-
-        //create all the color buttons
-        int colorIndex = 0;
-        for (auto& [colorName, colorValue] : p->getColorList()) {
-            if (colorName == HINT_NEXT_LINE) {
-                xNow = 0;
-                yNow += itemHeight;
-                colorIndex++;
-                continue;
-            }
-
-            ColorPickerColorButton* b = new ColorPickerColorButton(this, colorValue);
-            b->position = XY{ xNow, yNow };
-            b->tooltip = colorName;
-            b->wxWidth = largeColorButtons ? 48 : 24;
-            b->wxHeight = itemHeight;
-            if (paletteModifiable) {
-                b->onRightClickCallback = [colorIndex, this, p, colorValue](UIButton*) {
-                    PopupContextMenu* menu = new PopupContextMenu({
-                        { "Remove color", 
-                            [this, colorIndex, colorValue, p]() {
-                                PopupYesNo* popup = new PopupYesNo("Remove color",
-                                    frmt("Remove the color #{} : {:06X} from palette {}?", colorIndex, colorValue, p->getName()));
-                                popup->onFinishCallback = [this, colorIndex, p](PopupYesNo*, bool result) {
-                                    if (result) {
-                                        p->removeColor(colorIndex);
-                                        g_reloadColorMap();
-                                        reloadColorLists();
-                                    }
-                                };
-                                g_addPopup(popup);
-                            }
-                        },
-                        { "Move color left", 
-                            [this, colorIndex, colorValue, p]() {
-                                p->moveColor(colorIndex, false);
-                                g_reloadColorMap();
-                                reloadColorLists();
-                            }
-                        },
-                        { "Move color right", 
-                            [this, colorIndex, colorValue, p]() {
-                                p->moveColor(colorIndex, true);
-                                g_reloadColorMap();
-                                reloadColorLists();
-                            }
-                        },
-                    });
-                    g_addPopup(menu);
-                };
-            }
-            colorButtonsPanel->subWidgets.addDrawable(b);
-            xNow += b->wxWidth;
-            if (xNow + b->wxWidth >= palettePanel->wxWidth) {
-                xNow = 0;
-                yNow += b->wxHeight;
-            }
-            colorIndex++;
-        }
-
-        //create the + button if applicable
-        if (paletteModifiable) {
-            UIButton* addColorButton = new UIButton("+");
-            addColorButton->wxWidth = 24;
-            addColorButton->wxHeight = 20;
-            addColorButton->position = XY{ xNow, yNow };
-            addColorButton->tooltip = TL("vsp.maineditor.panel.colorpicker.tab.palettes.addcolor.tooltip");
-            addColorButton->onClickCallback = [this, p](UIButton*) {
-                if (!g_shiftModifier) {
-                    PopupPickColor* popup = new PopupPickColor("Add color", "");
-                    popup->colorPicker->canEditPalettes = false;
-                    popup->colorPicker->reloadColorLists();
-                    popup->setRGB(colorNowU32);
-                    popup->onColorConfirmedCallback = [this, p](PopupPickColor*, u32 color) {
-                        addColorToPalette(p, color);
-                    };
-                    g_addPopup(popup);
-                }
-                else {
-                    addColorToPalette(p, colorNowU32);
-                }
-            };
-            colorButtonsPanel->subWidgets.addDrawable(addColorButton);
-        }
-        stack->addWidget(colorButtonsPanel);
-
-        collapseButton->onClickCallback = [colorButtonsPanel, stack](UIButton* btn) {
-            colorButtonsPanel->enabled = !colorButtonsPanel->enabled;
-            btn->text = colorButtonsPanel->enabled ? "-" : "+";
+        collapseButton->onClickCallback = [rowsPanel, stack](UIButton* btn) {
+            rowsPanel->enabled = !rowsPanel->enabled;
+            btn->text = rowsPanel->enabled ? "-" : "+";
             stack->recalculateLayout();
         };
 
@@ -572,20 +576,20 @@ void UIColorPicker::reloadColorLists()
             filetypes.push_back({ importer->extension(), importer->name() });
         }
         platformTryLoadOtherFile(this, filetypes, TL("vsp.popup.openpalette"), EVENT_PALETTECOLORPICKER_LOADPALETTE);
-        };
+    };
     otherButtons->subWidgets.addDrawable(loadNewButton);
 
     UIButton* reloadButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.refresh"));
     reloadButton->position = XY{ 150, 20 };
     reloadButton->wxWidth = 100;
-    reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); reloadColorLists(); };
+    reloadButton->onClickCallback = [this](UIButton* btn) { g_reloadColorMap(); };
     otherButtons->subWidgets.addDrawable(reloadButton);
 
     UIButton* newPaletteButton = new UIButton(TL("vsp.maineditor.panel.colorpicker.tab.palettes.newpalette"));
     newPaletteButton->position = XY{ 5, 60 };
     newPaletteButton->wxWidth = 140;
     newPaletteButton->onClickCallback = [this](UIButton*) {
-        g_promptCreateNewPalette({}, [this]() { reloadColorLists(); });
+        g_promptCreateNewPalette({}, []() { });
     };
     otherButtons->subWidgets.addDrawable(newPaletteButton);
 
@@ -598,12 +602,11 @@ void UIColorPicker::reloadColorLists()
     };
 }
 
-void UIColorPicker::addColorToPalette(IPalette* p, u32 color)
+void UIColorPicker::addColorToPalette(IPalette* p, int row, u32 color)
 {
-    p->addColor("newcolor", color);
+    p->addColor("", color, row);
     if (p->save()) {
         g_reloadColorMap();
-        reloadColorLists();
     }
 }
 

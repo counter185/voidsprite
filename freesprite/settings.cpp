@@ -119,6 +119,10 @@ bool g_saveConfig() {
             config[frmt("favlayername@{:05}", uqIndex++)] = f;
         }
 
+        for (std::string& f : g_config.hiddenPalettes) {
+            config[frmt("hidepalette@{:05}", uqIndex++)] = f;
+        }
+
         for (auto& [key, value] : config) {
             file << key << "=" << value << std::endl;
         }
@@ -201,6 +205,9 @@ void g_loadConfig() {
         }
         else if (stringStartsWithIgnoreCase(key, "favlayername@") && !value.empty()) {
             g_config.favLayerNames.push_back(value);
+        }
+        else if (stringStartsWithIgnoreCase(key, "hidepalette@") && !value.empty()) {
+            g_config.hiddenPalettes.push_back(value);
         }
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
         else if (stringStartsWithIgnoreCase(key, "lastfile@") && !value.empty()) {

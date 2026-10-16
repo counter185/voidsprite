@@ -275,6 +275,7 @@
     <ClInclude Include="git.h" />
     <ClInclude Include="io\io_dds.h" />
     <ClInclude Include="io\io_graphicsgale.h" />
+    <ClCompile Include="PopupPaletteManager.cpp" />
     <ClCompile Include="PopupRecordTimelapse.cpp" />
     <ClCompile Include="PopupRenameLayer.cpp" />
     <ClCompile Include="PopupSaveAnimation.cpp" />
@@ -668,6 +669,7 @@
     <ClInclude Include="PopupListLAN.h" />
     <ClInclude Include="PopupListRecoveryAutosaves.h" />
     <ClInclude Include="PopupNewImage.h" />
+    <ClInclude Include="PopupPaletteManager.h" />
     <ClInclude Include="PopupPickColor.h" />
     <ClInclude Include="PopupQuickConvert.h" />
     <ClInclude Include="PopupRecordTimelapse.h" />

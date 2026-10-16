@@ -11,13 +11,15 @@ public:
     SessionLocalColorList(MainEditor* target) : target(target) {}
 
     std::string getName() override { return "Session-local palette"; }
-    std::vector<std::pair<std::string, u32>>& getColorList() { return target->ssne.ineditorColorList; }
+    PaletteRows& getColorList() { return target->ssne.ineditorColorList; }
 
     bool canSave() override { return true; }
     bool save() override { 
         int i = 0;
-        for (auto& kv : getColorList()) {
-            kv.first = frmt("{:02}", i++);
+        for (auto& row : getColorList()) {
+            for (auto& nc : row.colors) {
+                nc.name = frmt("sl{:02}", i++);
+            }
         }
         target->changesSinceLastSave = HAS_UNSAVED_CHANGES; 
         return true; 

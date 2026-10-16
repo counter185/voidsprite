@@ -31,13 +31,18 @@ public class LospecDLActivity extends Activity {
         public void run() {
             Looper.prepare();
             String targetName = fullUri.substring("lospec-palette://".length());
-            String apiUrl = "https://lospec.com/palette-list/" + targetName + ".json";
+            String extUrl = "https://lospec.com/palette-list/" + targetName;
+            String apiUrl = extUrl + ".json";
             File outputFile = new File(downloadsDir, targetName + ".voidplt");
 
             String response = Utils.fetchStringHTTP(apiUrl);
             if (response != null) {
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
+
+                    String name = jsonResponse.getString("name");
+                    String author = jsonResponse.getString("author");
+
                     JSONArray colorsArray = jsonResponse.getJSONArray("colors");
                     ArrayList<Integer> colorList = new ArrayList<>();
                     for (int i = 0; i < colorsArray.length(); i++) {
@@ -45,8 +50,10 @@ public class LospecDLActivity extends Activity {
                         int colorInt = Integer.parseUnsignedInt(colorHex, 16);
                         colorList.add(colorInt);
                     }
-                    if (Utils.writeVOIDPLTv1(outputFile, colorList)) {
-                        String message = "Palette downloaded: " + targetName;
+                    if (Utils.writeVOIDPLTv2(outputFile, colorList,
+                            name, "by Lospec user " + author, extUrl, true))
+                    {
+                        String message = "Palette downloaded: " + name;
                         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
                     } else {
                         String errorMessage = "Failed to write palette file: " + targetName;
@@ -82,6 +89,8 @@ public class LospecDLActivity extends Activity {
 
             new LospecDLTask(this, uri.toString()).start();
         }
+
+        //finish();
 
     }
 }

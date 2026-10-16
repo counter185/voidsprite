@@ -39,8 +39,8 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     wxsTarget().addDrawable(pickedColorLabel);
 
     std::vector<std::string> palettes;
-    for (auto& pal : g_namedColorMap) {
-        palettes.push_back(pal.getName());
+    for (auto& pal : g_loadedPalettes) {
+        palettes.push_back(pal->getName());
     }
 
     UIButton* buttonSavePalette = new UIButton();
@@ -79,7 +79,7 @@ PalettizedEditorColorPicker::PalettizedEditorColorPicker(MainEditorPalettized* c
     UIDropdown* defaultpalettePicker = new UIDropdown(palettes);
     defaultpalettePicker->customButtonGenFunction = [](std::string name, int index) {
         IPalette* p = g_paletteByName(name);
-        PaletteButton* ret = new PaletteButton(p != NULL ? p->toRawColorList() : std::vector<u32>{}, 36);
+        PaletteButton* ret = new PaletteButton(p != NULL ? p->toFlatColorValues() : std::vector<u32>{}, 36);
         ret->text = name;
         ret->wxWidth = 300;
         ret->wxHeight = 70;
@@ -152,7 +152,7 @@ void PalettizedEditorColorPicker::eventDropdownItemSelected(int evt_id, int inde
     if (evt_id == EVENT_PALETTECOLORPICKER_PALETTELIST) {
         IPalette* p = g_paletteByName(name);
         if (p != NULL) {
-            caller->setPalette(p->toRawColorList());
+            caller->setPalette(p->toFlatColorValues());
         }
         else {
             logerr(frmt("palette not found: {}", name));
@@ -165,10 +165,11 @@ void PalettizedEditorColorPicker::eventFileOpen(int evt_id, PlatformNativePathSt
     if (evt_id == EVENT_PALETTECOLORPICKER_LOADPALETTE) {
         importerIndex--;
         auto result = g_paletteImporters[importerIndex]->importPalette(name);
-        if (result.first) {
-            caller->setPalette(result.second);
+        if (result != NULL) {
+            caller->setPalette(result->toFlatColorValues());
             updateForcedColorPaletteButtons();
             g_addNotification(SuccessNotification("Success", "Palette file loaded"));
+            delete result;
         }
         else {
             g_addNotification(ErrorNotification("Error", "Could not load palette file"));

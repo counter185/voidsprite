@@ -58,6 +58,7 @@ public:
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;
     std::vector<std::string> favLayerNames;
+    std::vector<std::string> hiddenPalettes;
 
     //this is only during initial load. not updated at runtime.
     std::vector<std::string> keybinds;

@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class Utils {
@@ -88,6 +89,16 @@ public class Utils {
         }
     }
 
+    public static void writeString(FileOutputStream out, String s) {
+        try {
+            byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+            writeU32(out, bytes.length);
+            out.write(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static boolean writeVOIDPLTv1(File outFile, List<Integer> colorList) {
         try {
             FileOutputStream fos = new FileOutputStream(outFile);
@@ -96,6 +107,40 @@ public class Utils {
             fos.write(header.getBytes("ASCII"));
             writeU32(fos, colorList.size());
             for (Integer color : colorList) {
+                color |= 0xFF000000;
+                writeU32(fos, color);
+            }
+            fos.close();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public static boolean writeVOIDPLTv2(File outFile, List<Integer> colorList, String name, String description, String extUrl, boolean locked) {
+        try {
+            FileOutputStream fos = new FileOutputStream(outFile);
+
+            String header = "VOIDPLT\2";
+            fos.write(header.getBytes("ASCII"));
+
+            writeString(fos, name);
+
+            writeU32(fos, 3);
+            writeString(fos,"palette.description");
+            writeString(fos, description);
+            writeString(fos, "palette.exturl");
+            writeString(fos, extUrl);
+            writeString(fos, "palette.locked");
+            writeString(fos, locked ? "1" : "0");
+
+            writeU32(fos, 1);   //rows count
+
+            writeString(fos, "");   //row1 name
+            writeU32(fos, colorList.size());    //row1 colorcount
+            for (Integer color : colorList) {
+                writeString(fos, ""); //color name...
                 color |= 0xFF000000;
                 writeU32(fos, color);
             }

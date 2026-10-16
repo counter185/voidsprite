@@ -21,12 +21,13 @@ public:
 
     std::string getName() override { return TL("vsp.fullscreenpreview"); }
     BaseScreen* isSubscreenOf() override;
+    bool takesTouchEvents() override { return true; }
     void takeInput(SDL_Event evt) {
         this->resetInputTimerOnInput(evt);
         BaseScreen::takeInput(evt);
     }
     void render() override;
-    void defaultInputAction(SDL_Event evt) override;;
+    void defaultInputAction(SDL_Event evt) override;
 
 };
 

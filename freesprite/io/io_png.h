@@ -52,5 +52,5 @@ bool writeAPNG(PlatformNativePathString path, MainEditor* data);
 
 std::string getlibpngVersion();
 
-std::pair<bool, std::vector<uint32_t>> readPltPNG(PlatformNativePathString name);
-bool writePltPNG(PlatformNativePathString path, std::vector<u32> palette);
+IPalette* readPltPNG(PlatformNativePathString name);
+bool writePltPNG(PlatformNativePathString path, IPalette* palette);

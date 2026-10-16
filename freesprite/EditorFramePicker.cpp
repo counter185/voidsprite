@@ -94,10 +94,10 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
         new UIDynamicLabel([]() { return frmt("(@{})",(int)(1.0 / ixmax(1,main_getLastFPS()) * 1000)); },{0,0}, 12)
     });
 
-    UINumberInputField* backtraceInput = new UINumberInputField(&parent->backtraceFrames);
+    UINumberInputField* backtraceInput = new UINumberInputField(&parent->ssne.backtraceFrames);
     backtraceInput->wxWidth = 30;
 
-    UINumberInputField* fwdtraceInput = new UINumberInputField(&parent->fwdtraceFrames);
+    UINumberInputField* fwdtraceInput = new UINumberInputField(&parent->ssne.fwdtraceFrames);
     fwdtraceInput->wxWidth = 30;
 
     fwdtraceInput->valueUpdatedCallback = backtraceInput->valueUpdatedCallback = [this](int) {
@@ -107,9 +107,9 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
     UISlider* opacitySlider = new UISlider();
     opacitySlider->wxHeight = 25;
     opacitySlider->wxWidth = 130;
-    opacitySlider->setValue(0, 1, parent->traceOpacity);
+    opacitySlider->setValue(0, 1, parent->ssne.traceOpacity);
     opacitySlider->onChangeValueCallback = [this](UISlider* sld, float val) {
-        parent->traceOpacity = val;
+        parent->ssne.traceOpacity = val;
     };
 
     UIStackPanel* traceRow = UIStackPanel::Horizontal(4, {
@@ -204,8 +204,8 @@ void EditorFramePicker::createFrameButtons()
         if (i == parent->activeFrame) {
             frameBtn->fill = fillActiveFrame;
         }
-        else if (i >= parent->activeFrame - parent->backtraceFrames 
-                 && i <= parent->activeFrame + parent->fwdtraceFrames) {
+        else if (i >= parent->activeFrame - parent->ssne.backtraceFrames 
+                 && i <= parent->activeFrame + parent->ssne.fwdtraceFrames) {
             frameBtn->fill = fillTracedFrame;
         }
         frameButtonStack->addWidget(frameBtn);

@@ -213,7 +213,7 @@ public:
     std::vector<Guideline> guidelines;
     GuidelineDisplayMode guidelineDisplayMode = GUIDELINE_SHOW_COLORED;
 
-    std::vector<std::pair<std::string, u32>> ineditorColorList;
+    PaletteRows ineditorColorList = { {"",{}} };
 
     std::string templateName = "";
     std::string templateDescription = "";
@@ -224,6 +224,10 @@ public:
     bool symmetryEnabled[2] = { false, false };
 
     BlendMode blendAlphaMode = BLENDMODE_REPLACE;
+
+    int backtraceFrames = 0;
+    int fwdtraceFrames = 0;
+    double traceOpacity = 0.4;
 
 
     std::map<std::string, std::string> serializeToKeyVals();
@@ -257,9 +261,6 @@ public:
     int frameAnimMSPerFrame = 200;
     std::pair<SDL_Renderer*, SDL_Texture*> frameFB = {NULL, NULL};
     XY frameFBSize = {0, 0};
-    int backtraceFrames = 0;
-    int fwdtraceFrames = 0;
-    double traceOpacity = 0.4;
     bool traceColorMod = false;
 
     int selLayer = 0;

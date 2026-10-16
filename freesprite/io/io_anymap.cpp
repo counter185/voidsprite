@@ -89,7 +89,7 @@ Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek)
                 std::getline(f, line);
             }
             ret = new LayerPalettized(w, h);
-            ((LayerPalettized*)ret)->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+            ((LayerPalettized*)ret)->palette = g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues();
             ret->name = "Anymap PGM layer";
 
             for (int y = 0; y < h; y++) {
@@ -116,7 +116,7 @@ Layer* readAnymapPGM(PlatformNativePathString path, uint64_t seek)
             f >> cols;
             std::getline(f, line);
             ret = new LayerPalettized(w, h);
-            ((LayerPalettized*)ret)->palette = g_paletteByName(PALETTE_DEFAULT)->toRawColorList();
+            ((LayerPalettized*)ret)->palette = g_paletteByName(PALETTE_DEFAULT)->toFlatColorValues();
             ret->name = "Anymap PGM layer";
             uint64_t dataPointer = 0;
             while (!f.eof() && dataPointer < w * h) {

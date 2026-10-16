@@ -1,7 +1,7 @@
 #include "io_base.h"
 #include "io_palettes.h"
 
-std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString name)
+IPalette* readPltJASCPAL(PlatformNativePathString name)
 {
     std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
@@ -19,14 +19,14 @@ std::pair<bool, std::vector<uint32_t>> readPltJASCPAL(PlatformNativePathString n
                 newPalette.push_back((0xff << 24) | (r << 16) | (g << 8) | b);
             }
             f.close();
-            return { true, newPalette };
+            return new ImportedPalette("", newPalette);
         }
         f.close();
     }
-    return { false, {} };
+    return NULL;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString name)
+IPalette* readPltGIMPGPL(PlatformNativePathString name)
 {
     std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
@@ -51,7 +51,7 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
                 if (magic != "GIMP Palette") {
                     g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid GIMP palette file"));
                     f.close();
-                    return { false, {} };
+                    return NULL;
                 }
             }
             else if (stringStartsWithIgnoreCase(line, "name: ")) {
@@ -68,16 +68,16 @@ std::pair<bool, std::vector<uint32_t>> readPltGIMPGPL(PlatformNativePathString n
             }
         }
         f.close();
-        return { true, ret };
+        return new ImportedPalette(name, ret);
     }
-    return { false, {} };
+    return NULL;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
+IPalette* readPltHEX(PlatformNativePathString name)
 {
     std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
-        std::pair<bool, std::vector<uint32_t>> ret;
+        std::vector<u32> ret;
         bool anyNonEmptyLine = false;
         while (!f.eof()) {
             std::string line;
@@ -94,22 +94,21 @@ std::pair<bool, std::vector<uint32_t>> readPltHEX(PlatformNativePathString name)
                 int gi = std::stoi(g, 0, 16);
                 int bi = std::stoi(b, 0, 16);
                 int ai = std::stoi(a, 0, 16);
-                ret.second.push_back(PackRGBAtoARGB(ri, gi, bi, ai));
+                ret.push_back(PackRGBAtoARGB(ri, gi, bi, ai));
             }
         }
         f.close();
         //allow empty files so that creating a new .hex palette works
-        ret.first = !anyNonEmptyLine || ret.second.size() > 0;
-        return ret;
+        return (!anyNonEmptyLine || ret.size() > 0) ? new ImportedPalette("", ret) : NULL;
     }
-    return { false,{} };
+    return NULL;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString name)
+IPalette* readPltPDNTXT(PlatformNativePathString name)
 {
     std::ifstream f = platformOpenIFStream(name);
     if (f.is_open()) {
-        std::pair<bool, std::vector<uint32_t>> ret;
+        std::vector<uint32_t> ret;
         while (!f.eof()) {
             std::string line;
             std::getline(f, line);
@@ -127,21 +126,20 @@ std::pair<bool, std::vector<uint32_t>> readPltPDNTXT(PlatformNativePathString na
                 int gi = std::stoi(g, 0, 16);
                 int bi = std::stoi(b, 0, 16);
                 int ai = std::stoi(a, 0, 16);
-                ret.second.push_back(PackRGBAtoARGB(ri, gi, bi, ai));
+                ret.push_back(PackRGBAtoARGB(ri, gi, bi, ai));
             }
         }
         f.close();
-        ret.first = ret.second.size() > 0;
-        return ret;
+        return (ret.size() > 0) ? new ImportedPalette("", ret) : NULL;
     }
-    return { false,{} };
+    return NULL;
 }
 
-bool writePltHEX(PlatformNativePathString path, std::vector<u32> palette)
+bool writePltHEX(PlatformNativePathString path, IPalette* palette)
 {
     std::ofstream f(std::filesystem::path(path), std::ios::out);
     if (f.is_open()) {
-        for (u32& col : palette) {
+        for (u32& col : palette->toFlatColorValues()) {
             f << frmt("{:06x}\n", col & 0xFFFFFF);
         }
         f.close();

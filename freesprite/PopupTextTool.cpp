@@ -75,7 +75,7 @@ void PopupTextTool::defaultInputAction(SDL_Event evt)
 {
     if (evt.type == SDL_EVENT_DROP_FILE) {
         std::string filePath = evt.drop.data;
-        if (stringEndsWithIgnoreCase(filePath, ".ttf")) {
+        if (stringEndsWithIgnoreCase(filePath, ".ttf") || stringEndsWithIgnoreCase(filePath, ".ttc")) {
             fontPath = filePath;
             loginfo(frmt("[ToolText] changed font to {}", filePath));
             fontButton->text = fileNameFromPath(filePath);
@@ -125,6 +125,9 @@ std::vector<std::string> PopupTextTool::listAllSystemFonts()
     std::vector<std::string> ret;
     for (auto& path : paths) {
         for (auto& file : platformListFilesInDir(path, ".ttf")) {
+            ret.push_back(convertStringToUTF8OnWin32(file));
+        }
+        for (auto& file : platformListFilesInDir(path, ".ttc")) {
             ret.push_back(convertStringToUTF8OnWin32(file));
         }
     }

@@ -12,11 +12,17 @@ public:
 
     std::function<void(PopupYesNo*, bool)> onFinishCallback = NULL;
 
-    PopupYesNo(std::string tt, std::string tx) : PopupChooseAction(tt, tx, {
+    PopupYesNo(std::string tt, std::string tx) 
+        : PopupChooseAction(tt, tx, {
             {SDL_SCANCODE_N, {TL("vsp.cmn.no"), [this]() { finish(false); }}},
             {SDL_SCANCODE_Y, {TL("vsp.cmn.yes"), [this]() { finish(true); }}},
         }) 
-    {
+    {}
+
+    static PopupYesNo* ConfirmPrompt(std::string tt, std::string tx, std::function<void()> onConfirm) {
+        PopupYesNo* p = new PopupYesNo(tt, tx);
+        p->onFinishCallback = [onConfirm](PopupYesNo*, bool yes) { if (yes) { onConfirm(); } };
+        return p;
     }
 
     void finish(bool r) {

@@ -582,9 +582,7 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor, OperationP
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
             {"edit.time", std::to_string(editor->editTime)},
             {"frame.active", std::to_string(editor->activeFrame)},
-            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)},
-            {"frame.backtrace", std::to_string(editor->backtraceFrames)},
-            {"frame.fwdtrace", std::to_string(editor->fwdtraceFrames)},
+            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)}
         };
 
         if (g_config.saveLoadReferences) {
@@ -950,8 +948,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
             if (extData.contains("frame.active")) { ret->activeFrame = -1; ret->switchFrame(std::stoi(extData["frame.active"])); }
             if (extData.contains("frame.ms")) { ret->setMSPerFrame(std::stoi(extData["frame.ms"])); }
-            if (extData.contains("frame.backtrace")) { ret->backtraceFrames = std::stoi(extData["frame.backtrace"]); }
-            if (extData.contains("frame.fwdtrace")) { ret->fwdtraceFrames = std::stoi(extData["frame.fwdtrace"]); }
             if (extData.contains("layer.visibility")) {
                 std::string layerVisibilityData = extData["layer.visibility"];
                 for (int x = 0; x < frames.front()->layers.size() && x < layerVisibilityData.size(); x++) {
@@ -1024,26 +1020,64 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
     return NULL;
 }
 
-std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString name)
+IPalette* readPltVOIDPLT(PlatformNativePathString name)
 {
     FILE* f = platformOpenFile(name, PlatformFileModeRB);
     if (f != NULL) {
+        DoOnReturn closeFile([f]() {fclose(f); });
         char header[7];
         fread(header, 7, 1, f);
         if (memcmp(header, "VOIDPLT", 7) == 0) {
-            uint8_t fileversion;
+            u8 fileversion;
             fread(&fileversion, 1, 1, f);
+
             if (fileversion == 1) {
-                std::vector<uint32_t> newPalette;
-                uint32_t count;
-                fread(&count, 1, 4, f);
+                std::vector<u32> newPalette;
+                u32 count = voidsnReadU32(f);
                 for (int x = 0; x < count; x++) {
-                    uint32_t col;
-                    fread(&col, 1, 4, f);
-                    newPalette.push_back(col);
+                    newPalette.push_back(voidsnReadU32(f));
                 }
-                fclose(f);
-                return { true, newPalette };
+                ImportedPalette* ret = new ImportedPalette("", newPalette);
+                ret->formatFlags = PALETTE_FORMAT_FEATURE_EXT;
+                return ret;
+            }
+            else if (fileversion == 2) {
+                PaletteRows rows{};
+
+                std::string name = voidsnReadString(f);
+
+                std::string description = "", extUrl = "";
+                bool locked = false;
+
+                u32 extDataCount = voidsnReadU32(f);
+                for (int i = 0; i < extDataCount; i++) {
+                    std::string k = voidsnReadString(f);
+                    std::string v = voidsnReadString(f);
+
+                    if (k == "palette.description") { description = v; }
+                    else if (k == "palette.exturl") { extUrl = v; }
+                    else if (k == "palette.locked") { locked = v == "1"; }
+                }
+
+                u32 rowCount = voidsnReadU32(f);
+                for (int i = 0; i < rowCount; i++) {
+                    PaletteRow newRow{};
+                    newRow.name = voidsnReadString(f);
+                    u32 colorCount = voidsnReadU32(f);
+                    for (int j = 0; j < colorCount; j++) {
+                        NamedColor nc{};
+                        nc.name = voidsnReadString(f);
+                        nc.value = voidsnReadU32(f);
+                        newRow.colors.push_back(nc);
+                    }
+                    rows.push_back(newRow);
+                }
+                ImportedPalette* ret = new ImportedPalette(name, rows);
+                ret->description = description;
+                ret->extUrl = extUrl;
+                ret->locked = locked;
+                ret->formatFlags = PALETTE_FORMAT_FEATURE_EXT;
+                return ret;
             }
             else {
                 g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Unsupported VOIDPLT file version"));
@@ -1052,12 +1086,11 @@ std::pair<bool, std::vector<uint32_t>> readPltVOIDPLT(PlatformNativePathString n
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Invalid palette file"));
         }
-        fclose(f);
     }
-    return { false, {} };
+    return NULL;
 }
 
-bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
+bool writePltVOIDPLTv1(PlatformNativePathString path, IPalette* palette)
 {
     FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
     if (outfile != NULL) {
@@ -1065,9 +1098,48 @@ bool writePltVOIDPLT(PlatformNativePathString path, std::vector<u32> palette)
         //file version 1
         fwrite("\x1", 1, 1, outfile);
 
-        voidsnWriteU32(outfile, palette.size());
-        for (u32& c : palette) {
+        auto flatList = palette->toFlatColorValues();
+
+        voidsnWriteU32(outfile, flatList.size());
+        for (u32& c : flatList) {
             voidsnWriteU32(outfile, c);
+        }
+        fclose(outfile);
+        return true;
+    }
+    return false;
+}
+
+bool writePltVOIDPLTv2(PlatformNativePathString path, IPalette* palette)
+{
+    FILE* outfile = platformOpenFile(path, PlatformFileModeWB);
+    if (outfile != NULL) {
+        fwrite("VOIDPLT", 1, 7, outfile);
+        fwrite("\x2", 1, 1, outfile);
+
+        auto rows = palette->getColorList();
+
+        voidsnWriteString(outfile, palette->getName());
+
+        std::vector<std::pair<std::string, std::string>> extData = {
+            { "palette.description", palette->getDescription() },
+            { "palette.exturl", palette->getExternalUrl() },
+            { "palette.locked", palette->getLocked() ? "1" : "0" }
+        };
+        voidsnWriteU32(outfile, extData.size());
+        for (auto& [k, v] : extData) {
+            voidsnWriteString(outfile, k);
+            voidsnWriteString(outfile, v);
+        }
+
+        voidsnWriteU32(outfile, rows.size());
+        for (PaletteRow& r : rows) {
+            voidsnWriteString(outfile, r.name);
+            voidsnWriteU32(outfile, r.colors.size());
+            for (NamedColor c : r.colors) {
+                voidsnWriteString(outfile, c.name);
+                voidsnWriteU32(outfile, c.value);
+            }
         }
         fclose(outfile);
         return true;

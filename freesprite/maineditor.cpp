@@ -292,12 +292,12 @@ void MainEditor::RenderCanvas()
         }
     }
     //render backtrace frames
-    for (int backFrame = 0; backFrame < backtraceFrames; backFrame++) {
+    for (int backFrame = 0; backFrame < ssne.backtraceFrames; backFrame++) {
         int targetIndex = activeFrame - (backFrame + 1);
         if (targetIndex >= 0) {
             Frame* f = frames[targetIndex];
             renderFrameTo(f, frameFB.second);
-            double alpha = traceOpacity * (1.0 - (double)backFrame / backtraceFrames);
+            double alpha = ssne.traceOpacity * (1.0 - (double)backFrame / ssne.backtraceFrames);
             SDL_Color colorMod = traceColorMod ? uint32ToSDLColor(g_config.backtraceColor) : SDL_Color{ 255,255,255,255 };
             SDL_SetTextureColorMod(frameFB.second, colorMod.r, colorMod.g, colorMod.b);
             SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
@@ -308,12 +308,12 @@ void MainEditor::RenderCanvas()
         }
     }
     //render fwdtrace frames
-    for (int fwdFrame = 0; fwdFrame < fwdtraceFrames; fwdFrame++) {
+    for (int fwdFrame = 0; fwdFrame < ssne.fwdtraceFrames; fwdFrame++) {
         int targetIndex = activeFrame + (fwdFrame + 1);
         if (targetIndex < (int)frames.size()) {
             Frame* f = frames[targetIndex];
             renderFrameTo(f, frameFB.second);
-            double alpha = traceOpacity * (1.0 - (double)fwdFrame / fwdtraceFrames);
+            double alpha = ssne.traceOpacity * (1.0 - (double)fwdFrame / ssne.fwdtraceFrames);
             SDL_Color colorMod = traceColorMod ? uint32ToSDLColor(g_config.fwdtraceColor) : SDL_Color{ 255,255,255,255 };
             SDL_SetTextureColorMod(frameFB.second, colorMod.r, colorMod.g, colorMod.b);
             SDL_SetTextureAlphaMod(frameFB.second, (u8)(alpha * 255));
@@ -4880,7 +4880,7 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     }
 
     std::string ineditorColorListData = "";
-    for (auto& [name, color] : ineditorColorList) {
+    for (auto& [name, color] : ineditorColorList[0].colors) {
         ineditorColorListData += frmt("{:08X};", color);
     }
 
@@ -4903,6 +4903,9 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["guidelines.displaymode"] = std::to_string((int)guidelineDisplayMode);
     kvs["palette.colorlist"] = ineditorColorListData;
     kvs["blendmode.index"] = std::to_string((int)blendAlphaMode);
+    kvs["frame.backtrace"] = std::to_string((int)backtraceFrames);
+    kvs["frame.fwdtrace"] = std::to_string((int)fwdtraceFrames);
+    kvs["frame.traceopacity"] = std::to_string((int)(traceOpacity * 100));
     if (!templateName.empty()) {
         kvs["template.name"] = templateName;
         kvs["template.desc"] = templateDescription;
@@ -4930,6 +4933,9 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.templateName = kvs["template.name"]; } catch (...) {}
     try { prefs.templateDescription = kvs["template.desc"]; } catch (...) {}
     try { prefs.blendAlphaMode = (BlendMode)ixmax(0, ixmin(blendOperations.size()-1, std::stoi(kvs["blendmode.index"]))); } catch (...) {}
+    try { prefs.backtraceFrames = std::stoi(kvs["frame.backtrace"]); } catch (...) {}
+    try { prefs.fwdtraceFrames = std::stoi(kvs["frame.fwdtrace"]); } catch (...) {}
+    try { prefs.traceOpacity = std::stoi(kvs["frame.traceopacity"]) / 100.0; } catch (...) {}
 
     try {
         std::string guidelinesData = kvs["guidelines"];
@@ -4949,7 +4955,7 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
         auto split = splitString(ineditorColorListData, ';');
         for (int i = 0; i < split.size() - 1; i++) {
             try {
-                prefs.ineditorColorList.push_back({ frmt("{:02}", i), std::stoul(split[i], NULL, 16) });
+                prefs.ineditorColorList[0].colors.push_back({frmt("{:02}", i), std::stoul(split[i], NULL, 16)});
             }
             catch (std::exception& e) {
                 logerr(frmt("Failed to parse color ({}):\n {}", split[i], e.what()));
