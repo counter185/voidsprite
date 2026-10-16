@@ -150,7 +150,7 @@ void ToolMeasure::editorExportSelRegion(MainEditor* editor)
         FileExporter* ff = (FileExporter*)f->udata;
         g_startNewOperation([this, editor, ff, path](OperationProgressReport* progress) {
             SDL_Rect region = getLastSelectedRegion(editor);
-            Layer* l = editor->flattenImage();
+            Layer* l = editor->isPalettized ? ((MainEditorPalettized*)editor)->flattenImageWithoutConvertingToRGB() : editor->flattenImage();
             if (l != NULL) {
                 bool result = false;
                 l->applyScaleData(l->crop(region));
