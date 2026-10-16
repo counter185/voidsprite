@@ -582,9 +582,7 @@ bool writeVOIDSNv7(PlatformNativePathString path, MainEditor* editor, OperationP
             {"palette.enabled", editor->isPalettized ? "1" : "0"},
             {"edit.time", std::to_string(editor->editTime)},
             {"frame.active", std::to_string(editor->activeFrame)},
-            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)},
-            {"frame.backtrace", std::to_string(editor->backtraceFrames)},
-            {"frame.fwdtrace", std::to_string(editor->fwdtraceFrames)},
+            {"frame.ms", std::to_string(editor->frameAnimMSPerFrame)}
         };
 
         if (g_config.saveLoadReferences) {
@@ -950,8 +948,6 @@ MainEditor* readVOIDSN(PlatformNativePathString path, OperationProgressReport* p
             if (extData.contains("edit.time")) { ret->editTime = std::stoull(extData["edit.time"]); }
             if (extData.contains("frame.active")) { ret->activeFrame = -1; ret->switchFrame(std::stoi(extData["frame.active"])); }
             if (extData.contains("frame.ms")) { ret->setMSPerFrame(std::stoi(extData["frame.ms"])); }
-            if (extData.contains("frame.backtrace")) { ret->backtraceFrames = std::stoi(extData["frame.backtrace"]); }
-            if (extData.contains("frame.fwdtrace")) { ret->fwdtraceFrames = std::stoi(extData["frame.fwdtrace"]); }
             if (extData.contains("layer.visibility")) {
                 std::string layerVisibilityData = extData["layer.visibility"];
                 for (int x = 0; x < frames.front()->layers.size() && x < layerVisibilityData.size(); x++) {
