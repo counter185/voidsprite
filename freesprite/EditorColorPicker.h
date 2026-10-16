@@ -13,6 +13,7 @@ public:
     std::string getName() override { return "Session-local palette"; }
     PaletteRows& getColorList() { return target->ssne.ineditorColorList; }
 
+    u8 getFormatFeatureFlags() override { return PALETTE_FORMAT_FEATURE_COLOR_NAMES; }
     bool canSave() override { return true; }
     bool save() override { 
         int i = 0;
