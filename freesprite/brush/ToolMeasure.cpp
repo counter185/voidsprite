@@ -3,6 +3,8 @@
 #include "../TooltipsLayer.h"
 #include "../PopupContextMenu.h"
 #include "../Notification.h"
+#include "../PopupChooseFormat.h"
+#include "../FileIO.h"
 
 void ToolMeasure::clickPress(MainEditor* editor, XY pos)
 {
@@ -34,6 +36,7 @@ void ToolMeasure::rightClickPress(MainEditor* editor, XY pos)
             {editor->eraserMode ? "Remove guidelines around area" : "Place guidelines around area", [this, editor]() { editorPlaceGuidelinesAroundSelRegion(editor); }},
             {"Crop to this area", [this, editor]() { editorCropToSelRegion(editor); }},
             {"Set pixel grid to this size", [this, editor]() { editorSetGridToSelRegion(editor); }},
+            {"Export this area", [this, editor]() { editorExportSelRegion(editor); }},
         });
         g_addPopup(popup);
     }
@@ -138,4 +141,35 @@ void ToolMeasure::editorSetGridToSelRegion(MainEditor* editor) {
     editor->ssne.showTileGrid = true;
     editor->ssne.tileDimensions = {region.w, region.h};
     editor->ssne.tileGridPaddingBottomRight = {0,0};
+}
+
+void ToolMeasure::editorExportSelRegion(MainEditor* editor)
+{
+    PopupChooseFormat* p = PopupChooseFormat::withDefaultExportFormats("Choose export format", "");
+    p->chooseFormatAndDoFileSavePrompt("export region", [this, editor](FormatDef* f, PlatformNativePathString path) {
+        FileExporter* ff = (FileExporter*)f->udata;
+        g_startNewOperation([this, editor, ff, path](OperationProgressReport* progress) {
+            SDL_Rect region = getLastSelectedRegion(editor);
+            Layer* l = editor->flattenImage();
+            if (l != NULL) {
+                bool result = false;
+                l->applyScaleData(l->crop(region));
+                if (ff->exportsWholeSession()) {
+                    MainEditor* e = l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l);
+                    e->ssne = editor->ssne;
+                    result = ff->exportData(path, e, progress, &editor->exportParameters);
+                    delete e;
+                }
+                else {
+                    result = ff->exportData(path, l, progress, &editor->exportParameters);
+                    delete l;
+                }
+                g_addNotificationFromThread(result ? SuccessNotification("Success", "File exported successfully.") :
+                    ErrorNotification(TL("vsp.cmn.error"), TL("vsp.cmn.error.exportfail")));
+#if VSP_PLATFORM == VSP_PLATFORM_EMSCRIPTEN
+                if (result) { emDownloadFile(path); }
+#endif
+            }
+        });
+    });
 }

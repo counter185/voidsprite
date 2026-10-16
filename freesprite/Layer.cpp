@@ -519,6 +519,18 @@ LayerScaleData Layer::rotate(bool right)
     });
 }
 
+void Layer::applyScaleData(LayerScaleData s)
+{
+    if (s.success) {
+        w = s.newSize.x;
+        h = s.newSize.y;
+        for (auto& v : layerData) {
+            tracked_free(v.pixelData);
+        }
+        layerData = s.scaledVariants;
+    }
+}
+
 ScanlineMap Layer::selectAllOfColor(u32 c)
 {
     ScanlineMap r;

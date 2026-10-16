@@ -37,5 +37,6 @@ class ToolMeasure :
     void editorPlaceGuidelinesAroundSelRegion(MainEditor* editor);
     void editorCropToSelRegion(MainEditor* editor);
     void editorSetGridToSelRegion(MainEditor* editor);
+    void editorExportSelRegion(MainEditor* editor);
 };
 
