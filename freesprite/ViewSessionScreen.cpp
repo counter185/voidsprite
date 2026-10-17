@@ -47,7 +47,9 @@ void ViewSessionScreen::render()
 
     SDL_Rect canvasRenderRect = c.getCanvasOnScreenRect();
     for (Layer*& l : caller->getLayerStack()) {
-        l->render(canvasRenderRect, l->layerAlpha);
+        if (!l->hidden) {
+            l->render(canvasRenderRect, l->layerAlpha);
+        }
     }
 
     if (lastInputTimer.elapsedTime() < 2000) {
