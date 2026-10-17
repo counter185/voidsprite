@@ -1196,6 +1196,7 @@ void MainEditor::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_S, { TL("vsp.maineditor.dsel"), [this]() { deselectAndCommitToUndoStack(); } } },
+                    {SDL_SCANCODE_I, { TL("vsp.maineditor.invertsel"), [this]() { invertSelectionAndCommitToUndoStack(); } } },
                     {SDL_SCANCODE_V, { TL("vsp.maineditor.rescanv_bytile"),
                             [this]() {
                                 if (this->ssne.tileDimensions.x == 0 || this->ssne.tileDimensions.y == 0) {
@@ -1557,6 +1558,22 @@ void MainEditor::deselectAndCommitToUndoStack()
         isolatedFragment.clear();
         commitIsolatedFragmentState(old);
         isolateEnabled = false;
+    }
+}
+
+void MainEditor::invertSelectionAndCommitToUndoStack()
+{
+    if (isolateEnabled) {
+        ScanlineMap old = isolatedFragment;
+        commitIsolatedFragmentState(old);
+        isolatedFragment.clear();
+        for (int y = 0; y < canvas.dimensions.y; y++) {
+            for (int x = 0; x < canvas.dimensions.x; x++) {
+                if (!old.pointExists({ x,y })) {
+                    isolatedFragment.addPoint({ x,y });
+                }
+            }
+        }
     }
 }
 

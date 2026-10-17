@@ -88,6 +88,7 @@ void ToolRectIsolate::rightClickPress(MainEditor* editor, XY pos)
 {
     g_addPopup(new PopupContextMenu({
         {"Deselect", [editor]() {editor->deselectAndCommitToUndoStack(); }},
+        {"Invert selection", [editor]() {editor->invertSelectionAndCommitToUndoStack(); }},
         {"Select layer alpha", [editor]() {editor->layer_selectCurrentAlpha(); }},
         {"Fill area", [editor]() {editor->layer_fillActiveColor(); }},
         {"Clear area", [editor]() {editor->layer_clearSelectedArea(); }},

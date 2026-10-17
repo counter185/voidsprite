@@ -496,6 +496,7 @@ public:
     void commitStateToCurrentLayer();
     void commitIsolatedFragmentState(ScanlineMap old);
     void deselectAndCommitToUndoStack();
+    void invertSelectionAndCommitToUndoStack();
     void addToUndoStack(UndoStackElementV2* undo);
     void discardUndoStack();
     void discardRedoStack();

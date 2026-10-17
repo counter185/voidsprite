@@ -377,6 +377,7 @@
     {"vsp.maineditor.rotright", "Rotate image 90d right"},
     {"vsp.maineditor.rescanv","Resize canvas"}, // translation note: this scales the canvas, image remains the same
     {"vsp.maineditor.dsel","Deselect"},
+    {"vsp.maineditor.invertsel","Invert selection"},
     {"vsp.maineditor.rescanv_bytile","Resize canvas (per tile)"},
     {"vsp.maineditor.rescanv_ntile","Resize canvas (per n.tiles)"}, // translation note: n.tiles means "number of tiles"
     {"vsp.maineditor.intscale","Integer scale canvas"},
