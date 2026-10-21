@@ -72,8 +72,7 @@ Some dependencies can be disabled with build flags:
 
 voidsprite is open for community contributions. Here are some ways you can help:
 
-- Open PRs to contribute to the code
-- Open Issues (or report them on Discord) to help get bugs and other problems fixed
+- Open PRs and Issues. [More details](CONTRIBUTING.MD)
 - Share your custom [Patterns](community-content/community-patterns) and [Templates](community-content/community-templates)
 - Translate voidsprite into your language. [More details](freesprite/localization)
 
