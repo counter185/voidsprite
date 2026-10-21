@@ -289,6 +289,16 @@ std::vector<u8> base64ToBytes(std::string b64)
     return ret;
 }
 
+std::string stringToBase64(std::string s)
+{
+    return base64::to_base64(s);
+}
+
+std::string base64ToString(std::string b64)
+{
+    return base64::from_base64(b64);
+}
+
 std::vector<u8> decompressGzip(u8* data, size_t dataSize)
 {
     std::string dec = gzip::decompress((const char*)data, dataSize);

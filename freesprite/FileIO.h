@@ -18,6 +18,8 @@ LayerPalettized* De4BPPBitplane(int width, int height, uint8_t* input);
 std::vector<u8> decompressZlibWithoutUncompressedSize(u8* data, u64 dataSize);
 std::vector<u8> compressZlib(u8* data, size_t dataSize);
 std::vector<u8> base64ToBytes(std::string b64);
+std::string stringToBase64(std::string s);
+std::string base64ToString(std::string b64);
 std::vector<u8> decompressGzip(u8* data, size_t dataSize);
 
 void zlibFile(PlatformNativePathString path);

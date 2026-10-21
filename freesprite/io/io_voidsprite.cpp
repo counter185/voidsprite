@@ -1309,6 +1309,20 @@ MainEditor* loadSplitSession(PlatformNativePathString path, OperationProgressRep
                             logerr("error reading comment");
                         }
                     }
+                    else if (stringStartsWithIgnoreCase(line, "commentv2:")) {
+                        try {
+                            auto split = splitString(line.substr(8), ';');
+                            if (split.size() >= 3) {
+                                int x = std::stoi(split[1]);
+                                int y = std::stoi(split[2]);
+                                std::string comment = base64ToString(split[0]);
+                                comments.push_back(CommentData{ XY{x,y}, comment });
+                            }
+                        }
+                        catch (std::exception&) {
+                            logerr("error reading comment");
+                        }
+                    }
                     else if (stringStartsWithIgnoreCase(line, "+") && line.find(':') != std::string::npos) {
                         auto kv = splitString(line, ':');
                         if (kv[0].size() > 1) {
@@ -1372,7 +1386,8 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data, Operation
     progress->enterSection("Writing split session file...");
     f << "voidsprite split session file v0\n";
     for (CommentData& comment : data->frames[0]->comments) {
-        f << "comment:" << comment.data << ";" << comment.position.x << ";" << comment.position.y << "\n";
+        //encode into b64 so that multiline works
+        f << "commentv2:" << stringToBase64(comment.data) << ";" << comment.position.x << ";" << comment.position.y << "\n";
     }
     auto ssneKeyvals = data->ssne.serializeToKeyVals();
     for (auto& [k, v] : ssneKeyvals) {
@@ -1393,8 +1408,15 @@ bool saveSplitSession(PlatformNativePathString path, MainEditor* data, Operation
         if (separateImage.exporter != NULL) {
             Layer* trimmed = flat->trim({ separateImage.positionInOverallImage.x, separateImage.positionInOverallImage.y,
                 separateImage.dimensions.x, separateImage.dimensions.y });
-            separateImage.exporter->exportData(subImageFile, trimmed, NULL, NULL);
-            delete trimmed;
+            if (separateImage.exporter->exportsWholeSession()) {
+                MainEditor* copySession = trimmed->isPalettized ? new MainEditorPalettized((LayerPalettized*)trimmed) : new MainEditor(trimmed);
+                separateImage.exporter->exportData(subImageFile, copySession, NULL, NULL);
+                delete copySession;
+            }
+            else {
+                separateImage.exporter->exportData(subImageFile, trimmed, NULL, NULL);
+                delete trimmed;
+            }
         }
         else {
             g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "No exporter for split session image"));
