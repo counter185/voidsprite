@@ -41,7 +41,7 @@ Make your changes on a new branch separate from `main`, that way we can modify t
 
 voidsprite is a project centered around fun and creativity, so features that are wanted include:
 
-- import/export support for files from other applications
+- import/export support for files from other applications (especially if it's interesting legacy software)
 - filters and tools that transform images in creative ways
 - features that support interoperability with game engines and other creative tools
 - usability improvements and comfort features
@@ -65,6 +65,7 @@ Every case will be different, so most things on this list aren't outright banned
 #endif
 ```
 - Any new .cpp or .h file needs to be added to the Visual Studio project (if not using Visual Studio, use a text editor to manually add it to the .vcxproj and .vcxproj.filters XMLs).
+- voidsprite targets Windows 7, so try not to use functions from newer Windows APIs. If you really want to, make sure it doesn't break compatibility (for example by dynamic loading).
 - When copying code from or adding an open-source library, be sure to follow its copying rules. Add its license text file to the [OPEN_SOURCE_LICENSES](OPEN_SOURCE_LICENSES) folder. 
 
 
