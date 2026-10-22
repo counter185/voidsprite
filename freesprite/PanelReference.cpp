@@ -78,6 +78,9 @@ bool PanelReference::defaultInputAction(SDL_Event evt, XY gPosOffset)
                 }
             }
         }
+        else {
+            return false;
+        }
     }
     else {
         dragging = 0;
