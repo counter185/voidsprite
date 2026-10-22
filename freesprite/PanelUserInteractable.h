@@ -77,7 +77,7 @@ public:
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     void windowResized(XY from, XY to) override;
     
-    XY getDimensions() override { return (collapsible && collapsed) ? XY{wxWidth, 30} : Panel::getDimensions(); }
+    XY getDimensions() override { return (collapsible && collapsed) ? XY{wxWidth, UISCALED(30)} : Panel::getDimensions(); }
     void applyScaling(double scale) override {
         if (anchor.x == 0) {
             position.x = (int)(position.x * scale);
@@ -85,13 +85,17 @@ public:
         if (anchor.y == 0) {
             position.y = (int)(position.y * scale);
         }
-        if (anchor.x != 0 || anchor.y != 0) {
-            windowResized({ g_windowW, g_windowH }, { (int)(g_windowW / scale), (int)(g_windowH / scale) });
-        }
         subWidgets.applyScalingToAll(scale);
         if (!sizeToContent) {
+            XY prevSize = { wxWidth, wxHeight };
             wxWidth = (int)(wxWidth * scale);
             wxHeight = (int)(wxHeight * scale);
+            if (anchor.x == 1) {
+                position.x -= (wxWidth - prevSize.x);
+            }
+            if (anchor.y == 1) {
+                position.y -= (wxHeight - prevSize.y);
+            }
         }
     }
     

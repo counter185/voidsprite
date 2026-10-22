@@ -46,9 +46,20 @@ void UIDropdown::render(XY pos)
 
     int textX = pos.x + 2;
     if (icon != NULL) {
-        SDL_Rect iconRect = SDL_Rect{ pos.x + 1, pos.y + 1, wxHeight - 2, wxHeight - 2 };
-        SDL_RenderCopy(g_rd, icon->get(), NULL, &iconRect);
-        textX += iconRect.w;
+        SDL_Texture* icn = icon->get();
+        float iconW = 0, iconH = 0;
+        SDL_GetTextureSize(icn, &iconW, &iconH);
+        XY vpSize = { wxHeight - 2, wxHeight - 2 };
+        int wpW = vpSize.x;
+        int wpH = vpSize.y;
+        int maxIScale = ixmax(1, ixmin(wpW / iconW, wpH / iconH));
+        wpW = iconW * maxIScale;
+        wpH = iconH * maxIScale;
+        int iconOffsetX = (vpSize.x - wpW) / 2;
+
+        SDL_Rect iconRect = SDL_Rect{ pos.x + 1 + iconOffsetX, pos.y + 1 + (vpSize.y - wpH) / 2, wpW, wpH };
+        SDL_RenderCopy(g_rd, icn, NULL, &iconRect);
+        textX += iconRect.w + iconOffsetX;
     }
 
     g_fnt->RenderString(text, textX, pos.y + 2, textColor, fontSize);

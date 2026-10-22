@@ -985,55 +985,58 @@ void MainEditor::DrawForeground()
     int leftX = g_currentWindow->getSafeAreaLeft();
     int rightX = g_currentWindow->getSafeAreaRight();
 
-    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+    int baseFontSize = UISCALED(18);
+    int hOffset = UISCALED(28);
 
-    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xd0});
+    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2 + leftX, g_windowH - hOffset, SDL_Color{255,255,255,0xa0}, baseFontSize);
+
+    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), UISCALED(200) + leftX, g_windowH - hOffset, SDL_Color{255,255,255,0xd0}, baseFontSize);
     if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
         std::string s = frmt("(t{}:{} in{}:{})", 
             (int)floor(mousePixelTargetPoint.x / (float)ssne.tileDimensions.x), 
             (int)floor(mousePixelTargetPoint.y / (float)ssne.tileDimensions.y),
             mousePixelTargetPoint.x%ssne.tileDimensions.x,
             mousePixelTargetPoint.y%ssne.tileDimensions.y);
-        endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 });
+        endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 }, baseFontSize);
     }
 
     if (currentBrush != NULL) {
         static std::string eraserModeText = TL("vsp.maineditor.erasermode");
-        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 30, 370 + leftX), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + UISCALED(30), UISCALED(370) + leftX), g_windowH - hOffset, SDL_Color{ 255,255,255,0xa0 }, baseFontSize);
     }
 
     if (!activePatterns.empty()) {
         g_fnt->RenderString(
             frmt("{} {}", activePatterns.front()->getName(), activePatterns.size() <= 1 ? "" : frmt("(+{})", activePatterns.size()-1)),
-            620 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+            UISCALED(620) + leftX, g_windowH - hOffset, SDL_Color{255,255,255,0xa0}, baseFontSize);
     }
 
     SDL_Color textColor = getAccentColor();
 
-    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2 + leftX, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
+    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2 + leftX, g_windowH - hOffset * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) }, baseFontSize);
 
-    XY rightOrigin = { g_windowW - ixmax(rightX, 2), g_windowH - 50 };
+    XY rightOrigin = { g_windowW - ixmax(rightX, 2), g_windowH - UISCALED(50)};
     if (savedFileGitData.found && g_config.editorShowGitRepo) {
-        rightOrigin.y -= 18;
+        rightOrigin.y -= UISCALED(18);
         std::string s = frmt("git:  {}:{}", savedFileGitData.friendlyRepoName, savedFileGitData.branch);
-        int fw = g_fnt->StatStringDimensions(s, 13).x;
-        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
+        int fw = g_fnt->StatStringDimensions(s, UISCALED(13)).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, UISCALED(13));
     }
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
-        rightOrigin.y -= 20;
+        rightOrigin.y -= UISCALED(20);
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
-        int fw = g_fnt->StatStringDimensions(unsavedSymbol).x;
-        g_fnt->RenderString(unsavedSymbol, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 });
+        int fw = g_fnt->StatStringDimensions(unsavedSymbol, baseFontSize).x;
+        g_fnt->RenderString(unsavedSymbol, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, baseFontSize);
 
         std::string timeString = frmt("({})", secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
-        int fw2 = g_fnt->StatStringDimensions(timeString, 12).x;
-        g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
+        int fw2 = g_fnt->StatStringDimensions(timeString, UISCALED(12)).x;
+        g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, UISCALED(12));
     }
     if (timelapseRecorder != NULL) {
-        rightOrigin.y -= 18;
+        rightOrigin.y -= UISCALED(18);
         std::string s = frmt("Recoding timelapse (frame {})", timelapseRecorder->getFramesWritten());
-        int fw = g_fnt->StatStringDimensions(s, 13).x;
-        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
+        int fw = g_fnt->StatStringDimensions(s, UISCALED(13)).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, UISCALED(13));
     }
 }
 

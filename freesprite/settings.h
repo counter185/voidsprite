@@ -1,5 +1,7 @@
 #pragma once
 
+#define UISCALED(a) ((int)(a*g_config.uiScale))
+
 class GlobalConfig {
 public:
     bool openSavedPath = ONPLATFORM(VSP_PLATFORM_ANDROID, false, true);
