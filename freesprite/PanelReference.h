@@ -27,13 +27,14 @@ public:
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     bool defaultInputAction(SDL_Event evt, XY gPosOffset) override;
-
     void renderAfterBG(XY at) override;
 
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
     void initWidgets();
     SDL_Rect getCanvasDrawRect(XY at);
+    SDL_Rect getFitModeRect(SDL_Rect canvasDraw);
+    void colorPickReferenceAt(XY pos);
     Layer* getLayer() { return previewTex; }
 };
 

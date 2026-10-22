@@ -46,10 +46,8 @@ bool PanelReference::defaultInputAction(SDL_Event evt, XY gPosOffset)
             }
             else if (evtc.button.button == SDL_BUTTON_RIGHT) {
                 if (!parent->isPalettized) {
-                    XY pos = c.screenPointToCanvasPoint(xySubtract({ (int)evtc.button.x, (int)evtc.button.y }, gPosOffset));
-                    u32 colorAtPosition = previewTex->getPixelAt(pos);
-                    parent->colorPicker->setColorRGB(colorAtPosition);
-                    g_newVFX(VFX_COLORPICKER, 500, colorAtPosition, { g_mouseX, g_mouseY,-1,-1 }, {0u});
+                    colorPickReferenceAt(
+                        c.screenPointToCanvasPoint(xySubtract({ (int)evtc.button.x, (int)evtc.button.y }, gPosOffset)));
                 }
             }
         }
@@ -65,12 +63,29 @@ bool PanelReference::defaultInputAction(SDL_Event evt, XY gPosOffset)
             return false;
         }
     }
+    else if (currentMode == REFERENCE_FIT) {
+        if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
+            && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
+            if (evtc.button.button == SDL_BUTTON_RIGHT) {
+                if (!parent->isPalettized) {
+                    SDL_Rect fitRect = getFitModeRect(canvasDraw);
+                    XY clickPos = { (int)evtc.button.x, (int)evtc.button.y };
+                    if (pointInBox(clickPos, fitRect)) {
+                        XYd rectPoint = { (clickPos.x - fitRect.x) / (double)fitRect.w, (clickPos.y - fitRect.y) / (double)fitRect.h};
+                        colorPickReferenceAt(
+                            XY{ (int)(previewTex->w * rectPoint.x), (int)(previewTex->h * rectPoint.y) });
+                    }
+                }
+            }
+        }
+    }
     else {
         dragging = 0;
         return false;
     }
     return true;
 }
+
 
 void PanelReference::renderAfterBG(XY at)
 {
@@ -89,10 +104,22 @@ void PanelReference::renderAfterBG(XY at)
         g_popClip();
     }
     else if (currentMode == REFERENCE_FIT) {    //fit
-        previewTex->render(fitInside(canvasDraw, {0,0,previewTex->w, previewTex->h}));
+        previewTex->render(getFitModeRect(canvasDraw));
         //previewTex->render(canvasDraw);
     }
 
+}
+
+void PanelReference::colorPickReferenceAt(XY pos)
+{
+    u32 colorAtPosition = previewTex->getPixelAt(pos);
+    parent->colorPicker->setColorRGB(colorAtPosition);
+    g_newVFX(VFX_COLORPICKER, 500, colorAtPosition, { g_mouseX, g_mouseY,-1,-1 }, { 0u });
+}
+
+SDL_Rect PanelReference::getFitModeRect(SDL_Rect canvasDraw)
+{
+    return fitInside(canvasDraw, {0,0,previewTex->w, previewTex->h});
 }
 
 void PanelReference::eventDropdownItemSelected(int evt_id, int index, std::string name)
