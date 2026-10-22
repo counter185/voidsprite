@@ -30,6 +30,10 @@ public:
     void takeInput(SDL_Event evt) override;
     void defaultInputAction(SDL_Event evt) override;
     void playPopupCloseVFX() override;
+    void scaleScreen(double s) override {
+        BasePopup::scaleScreen(s);
+        setContextMenuOrigin(originPoint);
+    }
 
     void renderContextMenuBackground();
 

@@ -46,6 +46,14 @@ public:
         Drawable::mouseHoverOut();
         subWidgets.forceUnhover();
     }
+    void applyScaling(double scale) override { 
+        Drawable::applyScaling(scale); 
+        subWidgets.applyScalingToAll(scale);
+        if (!sizeToContent) {
+            wxWidth = (int)(wxWidth * scale);
+            wxHeight = (int)(wxHeight * scale);
+        }
+    }
     void mouseHoverMotion(XY mousePos, XY gPosOffset) override;
     void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
     bool isPanel() override { return true; }

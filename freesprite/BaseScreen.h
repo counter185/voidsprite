@@ -42,6 +42,9 @@ public:
     virtual void screenResized(XY from, XY to) {
         wxsManager.processWindowResizeEvent(from, to);
     }
+    virtual void scaleScreen(double scale) {
+        wxsManager.applyScalingToAll(scale);
+    }
 
     //called on crash
     virtual std::vector<std::string> dropEverythingYoureDoingAndSave() { return {}; }

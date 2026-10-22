@@ -813,7 +813,7 @@ void PopupGlobalConfig::createKeybindButtons(std::string filterName)
                         this->currentBindTargetButton = (KeybindButton*)b;
                         keyBindingTimer.start();
                     }
-                    };
+                };
                 keybindsStack->subWidgets.addDrawable(btn);
             }
         }

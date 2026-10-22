@@ -42,6 +42,12 @@ public:
     XY getDimensions() override { 
         return XY{ wxWidth, wxHeight};
     };
+    void applyScaling(double scale) override {
+        Drawable::applyScaling(scale);
+        wxWidth = (int)(wxWidth * scale);
+        wxHeight = (int)(wxHeight * scale);
+        fontSize = (int)(fontSize * scale);
+    }
 
     void eventButtonPressed(int evt_id) override;
 

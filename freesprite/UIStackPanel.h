@@ -61,6 +61,10 @@ public:
     static UIStackPanel* Horizontal(int spacing, std::vector<Drawable*> content, XY position = {0,0});
 
     void render(XY at) override;
+    void applyScaling(double scale) override {
+        Panel::applyScaling(scale);
+        recalculateLayout();
+    }
 
     void addWidget(Drawable* d);
     void recalculateLayout();

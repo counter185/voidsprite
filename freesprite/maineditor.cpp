@@ -1549,6 +1549,8 @@ void MainEditor::setUpWidgets()
 
         SetupCompactEditor(createSections);
     }
+
+    wxsManager.applyScalingToAll(g_config.uiScale);
 }
 
 void MainEditor::deselectAndCommitToUndoStack()

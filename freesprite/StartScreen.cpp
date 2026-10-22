@@ -185,6 +185,7 @@ StartScreen::StartScreen() {
 
     populateLastOpenFiles();
     startupAnimTimer.start();
+    wxsManager.applyScalingToAll(g_config.uiScale);
 }
 
 void StartScreen::render()

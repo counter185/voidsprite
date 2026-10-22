@@ -95,7 +95,7 @@ void ScreenWideNavBar::render(XY position) {
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0xa0);
         drawLine(XY{ 0, wxHeight }, XY{ g_windowW, wxHeight }, XM1PW3P1(focusTimer.percentElapsedTime(600)));
     }
-    submenuPanel->position.y = (int)(30 * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)));
+    submenuPanel->position.y = (int)(wxHeight * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)));
     subWidgets.renderAll(position);
 }
 
@@ -208,5 +208,6 @@ void ScreenWideNavBar::updateCurrentSubmenu() {
                 submenuPanel->subWidgets.addDrawable(newBtn);
             }
         }
+        submenuPanel->subWidgets.applyScalingToAll(g_config.uiScale);
     }
 }

@@ -55,6 +55,7 @@ public:
     bool editorShowGitRepo = true;
     int lineSnapMaxAspect = 8;
     bool editorAlwaysOpenTouchPanel = false;
+    double uiScale = 1.0;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

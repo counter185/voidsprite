@@ -319,6 +319,7 @@ void VSPWindow::autoViewportScale() {
 }
 
 void VSPWindow::addScreen(BaseScreen* a, bool switchTo) {
+    a->scaleScreen(g_config.uiScale);
     screenStack.push_back(a);
     if (switchTo) {
         switchScreen(screenStack.size() - 1);
