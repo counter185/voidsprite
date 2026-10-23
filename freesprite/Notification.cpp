@@ -7,7 +7,7 @@ bool renderingNotifications = false;
 void g_calcNotifBounds() {
     int notifW = UISCALED_UP(400);
     int notifH = UISCALED_UP(60);
-    int notifHCompact = UISCALED_UP(30);
+    int notifHCompact = UISCALED(30);
 
     int notifY = UISCALED(30);
     int notifOriginX = g_windowW - (notifW + UISCALED(50));

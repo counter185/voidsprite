@@ -105,7 +105,7 @@ void UIDropdown::eventButtonPressed(int evt_id)
 
 void UIDropdown::renderDropdownIcon(XY pos)
 {
-    int iconW = 20;
+    int iconW = UISCALED(20);
     int iconPad = 5;
     XY origin = { pos.x + wxWidth - iconW/2 - iconPad, pos.y + wxHeight / 2 };
 
