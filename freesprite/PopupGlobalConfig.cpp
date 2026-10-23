@@ -81,48 +81,49 @@ PopupGlobalConfig::PopupGlobalConfig()
     configTabs->tabs[0].add(generalSettingsPanel);
     XY posInTab = { 0,10 };
     
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData, &posInTab));
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.saverefs"), TL("vsp.config.opt.saverefs.desc"), &g_config.saveLoadReferences, &posInTab));
+    UIStackPanel* tabGeneralStack = UIStackPanel::Vertical(5, {}, {0, 10});
+    generalSettingsPanel->subWidgets.addDrawable(tabGeneralStack);
+
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.pngextdata"), TL("vsp.config.opt.pngextdata.desc"), &g_config.saveLoadFlatImageExtData));
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.saverefs"), TL("vsp.config.opt.saverefs.desc"), &g_config.saveLoadReferences));
     if (VSP_DISCORD_RPC){
-        generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC, &posInTab));
+        tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.discordrpc"), TL("vsp.config.opt.discordrpc.desc"), &g_config.useDiscordRPC));
     }
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog, &posInTab));
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath, &posInTab));
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.usesystemfilepicker"), TL("vsp.config.opt.usesystemfilepicker.desc"), &g_config.useSystemFileDialog));
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.opensavelocation"), "", &g_config.openSavedPath));
     if (platformSupportsFeature(VSP_FEATURE_WEB_FETCH)) {
-        generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates, &posInTab));
+        tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.checkupdates"), TL("vsp.config.opt.checkupdates.desc"), &g_config.checkUpdates));
     }
     if (platformSupportsFeature(VSP_FEATURE_INSTANCE_IPC)) {
-        generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.singleinstance"), TL("vsp.config.opt.singleinstance.desc"), &g_config.singleInstance, &posInTab));
+        tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.singleinstance"), TL("vsp.config.opt.singleinstance.desc"), &g_config.singleInstance));
     }
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.longerrornotifs"), TL("vsp.config.opt.longerrornotifs.desc"), &g_config.longErrorNotifs, &posInTab));
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showsysclock"), "", &g_config.showSystemClock, &posInTab));
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.longerrornotifs"), TL("vsp.config.opt.longerrornotifs.desc"), &g_config.longErrorNotifs));
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.showsysclock"), "", &g_config.showSystemClock));
 
-    generalSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showfeaturedugc"), TL("vsp.config.opt.showfeaturedugc.desc"), &g_config.showFeaturedUGC, &posInTab));
+    tabGeneralStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.showfeaturedugc"), TL("vsp.config.opt.showfeaturedugc.desc"), &g_config.showFeaturedUGC));
 
     std::vector<std::string> langNames;
     for (auto& loc : getLocalizations()) {
         langLocNames.push_back(loc.first);
         langNames.push_back(loc.second.langName);
     }
-    UILabel* lbl4 = new UILabel(TL("vsp.config.opt.lang"));
-    lbl4->position = posInTab;
-    generalSettingsPanel->subWidgets.addDrawable(lbl4);
     UIDropdown* dd2 = new UIDropdown(langNames);
-    dd2->position = xyAdd(posInTab, { 300, 0 });
     dd2->wxWidth = 180;
     dd2->setCallbackListener(DROPDOWN_LANGUAGE, this);
     dd2->setTextToSelectedItem = true;
     dd2->text = getLocalizations().contains(g_config.language) ? getLocalizations()[g_config.language].langName : "???";
-    generalSettingsPanel->subWidgets.addDrawable(dd2);
-    posInTab.y += 35;
 
     languageCredit = new UILabel("");
     languageCredit->fontsize = 16;
-    languageCredit->position = xyAdd(posInTab, {30, 0});
     languageCredit->color = { 255,255,255,0xa0 };
-    generalSettingsPanel->subWidgets.addDrawable(languageCredit);
-    posInTab.y += 70;
+    tabGeneralStack->addWidgetNoRecalc(UIStackPanel::Vertical(0, {
+        UIStackPanel::Horizontal(200, { new UILabel(TL("vsp.config.opt.lang")), dd2} ),
+        languageCredit
+    }));
+
+    tabGeneralStack->recalculateLayout();
     updateLanguageCredit();
+
 
     /*
         -------------------------
@@ -137,59 +138,56 @@ PopupGlobalConfig::PopupGlobalConfig()
     visualSettingsPanel->scrollHorizontally = false;
     configTabs->tabs[1].add(visualSettingsPanel);
 
-    posInTab = { 0,10 };
+    UIStackPanel* tabVisualStack = UIStackPanel::Vertical(5, {}, { 0, 10 });
+    visualSettingsPanel->subWidgets.addDrawable(tabVisualStack);
 
-    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync, &posInTab));
+    HAlign* visualTabHAlign = new HAlign();
 
-    UILabel* lbl3 = new UILabel(TL("vsp.config.opt.bganim"));
-    lbl3->position = posInTab;
-    visualSettingsPanel->subWidgets.addDrawable(lbl3);
+    tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync));
+
+    uiScaleWhole = (int)(g_config.uiScale * 100);
+    tabVisualStack->addWidgetNoRecalc(optionNumberInput("UI scale [BETA] (restart required)", "", &uiScaleWhole, 50, 300, [](int v) {
+        g_config.uiScale = v / 100.0;
+    }));
+
     UIDropdown* dd1 = new UIDropdown({ TL("vsp.config.opt.bganim.none"), TL("vsp.config.opt.bganim.sharp"), TL("vsp.config.opt.bganim.smooth"), TL("vsp.config.opt.bganim.sharpstatic"), TL("vsp.config.opt.bganim.smoothstatic") });
-    dd1->position = { ixmax(lbl3->calcEndpoint().x + 30, posInTab.x + 200), posInTab.y };
     dd1->wxWidth = 180;
     dd1->setCallbackListener(CHECKBOX_ANIMATED_BACKGROUND, this);
     dd1->setTextToSelectedItem = true;
     dd1->text = g_config.animatedBackground < dd1->items.size() ? dd1->items[g_config.animatedBackground] : "--";
-    visualSettingsPanel->subWidgets.addDrawable(dd1);
-    posInTab.y += 35;
+    tabVisualStack->addWidgetNoRecalc(UIStackPanel::Horizontal(50, 
+        { new UILabel(TL("vsp.config.opt.bganim")), visualTabHAlign->alignPoint(), dd1 }));
 
-    UILabel* lbl7 = new UILabel(TL("vsp.config.opt.powersaver"));
-    lbl7->position = posInTab;
-    visualSettingsPanel->subWidgets.addDrawable(lbl7);
+
     UIDropdown* dd3 = new UIDropdown({
         TL("vsp.config.opt.powersaver.off"),
         TL("vsp.config.opt.powersaver.mid"),
         TL("vsp.config.opt.powersaver.max"),
         TL("vsp.config.opt.powersaver.auto")
     });
-    dd3->position = { ixmax(lbl7->calcEndpoint().x + 30, posInTab.x + 200), posInTab.y };
     dd3->wxWidth = 180;
     dd3->onDropdownItemSelectedCallback = [&](UIDropdown* dd, int index, std::string) {
         g_config.powerSaverLevel = index;
     };
     dd3->setTextToSelectedItem = true;
     dd3->text = g_config.powerSaverLevel < dd3->items.size() ? dd3->items[g_config.powerSaverLevel] : "--";
-    visualSettingsPanel->subWidgets.addDrawable(dd3);
-    posInTab.y += 35;
+    tabVisualStack->addWidgetNoRecalc(UIStackPanel::Horizontal(50, 
+        { new UILabel(TL("vsp.config.opt.powersaver")), visualTabHAlign->alignPoint(), dd3 }));
 
-    lbl4 = new UILabel(TL("vsp.config.opt.renderer:v2"));
-    lbl4->position = posInTab;
-    visualSettingsPanel->subWidgets.addDrawable(lbl4);
+
     dd2 = new UIDropdown(joinVectors({ {"<auto>"}, g_availableRenderersNow }));
-    dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 180;
     dd2->onDropdownItemSelectedCallback = [this](UIDropdown* dd, int index, std::string name) {
         if (name == "vulkan") {
-            PopupYesNo* popup = new PopupYesNo("Warning",
+            g_addPopup(PopupYesNo::ConfirmPrompt("Warning",
                 "The Vulkan renderer in SDL is currently broken and has heavy visual issues.\n"
                 "Expect to see a lot of flashing visuals and broken graphics.\n"
-                "\n\nEnable Vulkan anyway?");
-
-            popup->onFinishCallback = [name, this, dd](PopupYesNo* p, bool result) {
-                g_config.preferredRenderer = result ? name : "";
-                dd->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
-            };
-            g_addPopup(popup);
+                "\n\nEnable Vulkan anyway?",
+                [name, this, dd]() {
+                    g_config.preferredRenderer = name;
+                    dd->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
+                }
+            ));
         }
         else {
             g_config.preferredRenderer = name == "<auto>" ? "" : name;
@@ -197,18 +195,19 @@ PopupGlobalConfig::PopupGlobalConfig()
     };
     dd2->setTextToSelectedItem = true;
     dd2->text = g_config.preferredRenderer != "" ? g_config.preferredRenderer : "<auto>";
-    visualSettingsPanel->subWidgets.addDrawable(dd2);
-    posInTab.y += 35;
+    tabVisualStack->addWidgetNoRecalc(UIStackPanel::Horizontal(50, 
+        { new UILabel(TL("vsp.config.opt.renderer:v2")), visualTabHAlign->alignPoint(), dd2 }));
 
-    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled, &posInTab));
-    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS, &posInTab));
-    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor, &posInTab));
-    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.autoscale"), TL("vsp.config.opt.autoscale.desc"), &g_config.autoViewportScale, &posInTab));
-    visualSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.acrylicpanels"), TL("vsp.config.opt.acrylicpanels.desc"), &g_config.acrylicPanels, &posInTab));
+
+    tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.vfx"), TL("vsp.config.opt.vfx.desc"), &g_config.vfxEnabled));
+    tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.showfps"), TL("vsp.config.opt.showfps.desc"), &g_config.showFPS));
+    tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.cursor"), TL("vsp.config.opt.cursor.desc"), &g_config.overrideCursor));
+    tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.autoscale"), TL("vsp.config.opt.autoscale.desc"), &g_config.autoViewportScale));
+    tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.acrylicpanels"), TL("vsp.config.opt.acrylicpanels.desc"), &g_config.acrylicPanels));
 #if VSP_PLATFORM != VSP_PLATFORM_ANDROID && VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
-    auto framelessChk = optionCheckbox(TL("vsp.config.opt.framelesswindow"), TL("vsp.config.opt.framelesswindow.desc"), &g_config.customWindowFrame, &posInTab);
+    auto framelessChk = optionCheckbox(TL("vsp.config.opt.framelesswindow"), TL("vsp.config.opt.framelesswindow.desc"), &g_config.customWindowFrame);
     framelessChk->onStateChangeCallback = [](...) { main_updateFramelessWindows(); };
-    visualSettingsPanel->subWidgets.addDrawable(framelessChk);
+    tabVisualStack->addWidgetNoRecalc(framelessChk);
 
     std::vector<std::string> framelessStyles = {"Windows", "KDE"};
     UIDropdown* framelessStyleDropdown = new UIDropdown(framelessStyles);
@@ -216,8 +215,8 @@ PopupGlobalConfig::PopupGlobalConfig()
     framelessStyleDropdown->wxWidth = 120;
     framelessStyleDropdown->text = framelessStyles[framelessStyles.size() > (u32)g_config.framelessWindowButtonStyle ? g_config.framelessWindowButtonStyle : 0];
     framelessStyleDropdown->onDropdownItemSelectedCallback = [](UIDropdown*, int i, std::string) { g_config.framelessWindowButtonStyle = i; }; 
-    visualSettingsPanel->subWidgets.addDrawable(UIStackPanel::Horizontal(20, {new UILabel("Frameless window button style"), framelessStyleDropdown}, xyAdd(posInTab, {30, 0})));
-    posInTab.y += 35;
+    tabVisualStack->addWidgetNoRecalc(UIStackPanel::Horizontal(20, 
+        {Panel::Space(5,1), new UILabel("Frameless window button style"), visualTabHAlign->alignPoint(), framelessStyleDropdown}));
 #endif
 
     auto availableVisualConfs = g_getAvailableVisualConfigs();
@@ -226,7 +225,6 @@ PopupGlobalConfig::PopupGlobalConfig()
         visualConfNames.push_back(meta.name);
     }
     dd2 = new UIDropdown(visualConfNames);
-    dd2->position = { ixmax(lbl4->calcEndpoint().x + 30, posInTab.x + 100), posInTab.y };
     dd2->wxWidth = 240;
     dd2->setTextToSelectedItem = true;
     dd2->onDropdownItemSelectedCallback = [this, availableVisualConfs](UIDropdown* dd, int index, std::string name) {
@@ -243,16 +241,15 @@ PopupGlobalConfig::PopupGlobalConfig()
         g_reloadFonts();
     };
     dd2->text = fileNameFromPath(visualConfigValue("meta/name"));
-    visualSettingsPanel->subWidgets.addDrawable(
-        UIStackPanel::Horizontal(20, {new UILabel(TL("vsp.config.opt.visualconfig")), dd2}, posInTab)
-    );
-    posInTab.y += 35;
+    tabVisualStack->addWidgetNoRecalc(UIStackPanel::Horizontal(20, 
+        {new UILabel(TL("vsp.config.opt.visualconfig")), visualTabHAlign->alignPoint(), dd2}));
+
 
     UICheckbox* smoothFontCheckbox = optionCheckbox(TL("vsp.config.opt.smoothfonts"), TL("vsp.config.opt.smoothfonts.desc"), &g_config.smoothFonts, &posInTab);
-    visualSettingsPanel->subWidgets.addDrawable(smoothFontCheckbox);
-    smoothFontCheckbox->onStateChangeCallback = [this](UICheckbox* cb, bool newState) {
-        g_reloadFonts();
-    };
+    smoothFontCheckbox->onStateChangeCallback = [this](UICheckbox* cb, bool newState) { g_reloadFonts();};
+    tabVisualStack->addWidgetNoRecalc(smoothFontCheckbox);
+
+    tabVisualStack->recalculateLayout();
 
     /*
         -------------------------
@@ -268,104 +265,66 @@ PopupGlobalConfig::PopupGlobalConfig()
     editorSettingsPanel->scrollHorizontally = false;
     configTabs->tabs[2].add(editorSettingsPanel);
 
-    posInTab = { 0,10 };
+    UIStackPanel* tabEditorStack = UIStackPanel::Vertical(5, {}, { 0, 10 });
+    editorSettingsPanel->subWidgets.addDrawable(tabEditorStack);
 
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad, &posInTab));
 
-    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.maxundocount"), "", &g_config.maxUndoHistory, 1, 150, &posInTab));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.startrowcolidxat1"), "", &g_config.rowColIndexesStartAt1));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.altscrolling"), "", &g_config.scrollWithTouchpad));
 
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.compacteditor"), TL("vsp.config.opt.compacteditor.desc"), &g_config.compactEditor, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.huewheel"), TL("vsp.config.opt.huewheel.desc"), &g_config.hueWheelInsteadOfSlider, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showgitrepo"), TL("vsp.config.opt.showgitrepo.desc"), &g_config.editorShowGitRepo, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.alwaysopentouchpanel"), TL("vsp.config.opt.alwaysopentouchpanel.desc"), &g_config.editorAlwaysOpenTouchPanel, &posInTab));
+    tabEditorStack->addWidgetNoRecalc(optionNumberInput(TL("vsp.config.opt.maxundocount"), "", &g_config.maxUndoHistory, 1, 150));
 
-    UILabel* lbl2 = new UILabel(TL("vsp.config.opt.recoveryautosavetime"));
-    lbl2->position = posInTab;
-    editorSettingsPanel->subWidgets.addDrawable(lbl2);
-    UITextField* tf2 = new UITextField();
-    tf2->isNumericField = true;
-    tf2->position = XY{ posInTab.x + 10 + lbl2->statSize().x, posInTab.y };
-    tf2->wxWidth = 80;
-    tf2->setText(std::to_string(g_config.autosaveInterval));
-    tf2->setCallbackListener(TEXTFIELD_AUTOSAVE_INTERVAL, this);
-    editorSettingsPanel->subWidgets.addDrawable(tf2);
-    posInTab.y += 35;
-    lbl2 = new UILabel(TL("vsp.config.hint.recoveryautosaves"));
-    lbl2->fontsize = 14;
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.selectonlocktile"), TL("vsp.config.opt.selectonlocktile.desc"), &g_config.isolateRectOnLockTile));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.lockfilltotiles"), TL("vsp.config.opt.lockfilltotiles.desc"), &g_config.fillToolTileBound));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.brushcolorpreview"), TL("vsp.config.opt.brushcolorpreview.desc"), &g_config.brushColorPreview));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.compacteditor"), TL("vsp.config.opt.compacteditor.desc"), &g_config.compactEditor));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.huewheel"), TL("vsp.config.opt.huewheel.desc"), &g_config.hueWheelInsteadOfSlider));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.showgitrepo"), TL("vsp.config.opt.showgitrepo.desc"), &g_config.editorShowGitRepo));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.alwaysopentouchpanel"), TL("vsp.config.opt.alwaysopentouchpanel.desc"), &g_config.editorAlwaysOpenTouchPanel));
+
+    UILabel* lbl2 = new UILabel(TL("vsp.config.hint.recoveryautosaves"), {}, 14);
     lbl2->color = { 255,255,255,0xa0 };
-    lbl2->position = xySubtract(posInTab, {0,4});
-    editorSettingsPanel->subWidgets.addDrawable(lbl2);
-    posInTab.y += 35;
+    tabEditorStack->addWidgetNoRecalc(UIStackPanel::Vertical(0, {
+        optionNumberInput(TL("vsp.config.opt.recoveryautosavetime"), "", &g_config.autosaveInterval, 0, 7200), 
+        lbl2
+    }));
 
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.showpenpressure"), TL("vsp.config.opt.showpenpressure.desc"), &g_config.showPenPressure, &posInTab));
 
-    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.canvaszoomsens"), "", &g_config.canvasZoomSensitivity, 1, 10, &posInTab));
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.showpenpressure"), TL("vsp.config.opt.showpenpressure.desc"), &g_config.showPenPressure));
 
-    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.linesnapmaxaspect"), "", &g_config.lineSnapMaxAspect, 1, 60, &posInTab));
+    tabEditorStack->addWidgetNoRecalc(optionNumberInput(TL("vsp.config.opt.canvaszoomsens"), "", &g_config.canvasZoomSensitivity, 1, 10));
 
-    UIColorInputField* backtraceColorInput = new UIColorInputField(false);
-    backtraceColorInput->button->wxWidth = 80;
-    backtraceColorInput->setColor(g_config.backtraceColor);
-    backtraceColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
-        g_config.backtraceColor = newColor;
-    };
-
-    UIColorInputField* fwdtraceColorInput = new UIColorInputField(false);
-    fwdtraceColorInput->setColor(g_config.fwdtraceColor);
-    fwdtraceColorInput->button->wxWidth = 80;
-    fwdtraceColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
-        g_config.fwdtraceColor = newColor;
-    };
+    tabEditorStack->addWidgetNoRecalc(optionNumberInput(TL("vsp.config.opt.linesnapmaxaspect"), "", &g_config.lineSnapMaxAspect, 1, 60));
 
     UIStackPanel* stack = UIStackPanel::Horizontal(4, {
         new UILabel(TL("vsp.config.opt.tracecolormods")),
-        Panel::Space(12,2),
-        new UILabel("Back"),
-        backtraceColorInput,
-        Panel::Space(4,2),
-        new UILabel("Next"),
-        fwdtraceColorInput
+        Panel::Space(20,2),
+        optionColorU32Input("Back", "", &g_config.backtraceColor, false),
+        Panel::Space(8,2),
+        optionColorU32Input("Next", "", &g_config.fwdtraceColor, false),
     });
-    stack->position = posInTab;
-    editorSettingsPanel->subWidgets.addDrawable(stack);
-    posInTab.y += 35;
+    tabEditorStack->addWidgetNoRecalc(stack);
 
 
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.enablecheckerboard"), "", &g_config.enableCheckerboard, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionNumberInput(TL("vsp.config.opt.checkerboardsize"), "", &g_config.checkerboardSize, 4, 512, &posInTab));
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.checkerboardscalewithcanvas"), "", &g_config.checkerboardScaleWithCanvas, &posInTab));
-    UIColorInputField* checkerboardPrimaryColorInput = new UIColorInputField(true);
-    checkerboardPrimaryColorInput->button->wxWidth = 80;
-    checkerboardPrimaryColorInput->setColor(g_config.checkerboardPrimary);
-    checkerboardPrimaryColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
-        g_config.checkerboardPrimary = newColor;
-    };
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.enablecheckerboard"), "", &g_config.enableCheckerboard));
+    tabEditorStack->addWidgetNoRecalc(UIStackPanel::Horizontal(0, {
+        Panel::Space(20, 1),
+        UIStackPanel::Vertical(5, {
+            optionNumberInput(TL("vsp.config.opt.checkerboardsize"), "", &g_config.checkerboardSize, 4, 512),
+            optionCheckbox(TL("vsp.config.opt.checkerboardscalewithcanvas"), "", &g_config.checkerboardScaleWithCanvas),
+            UIStackPanel::Horizontal(4, {
+                new UILabel(TL("vsp.config.opt.checkerboardcolors")),
+                Panel::Space(20,2),
+                optionColorU32Input("Primary", "", &g_config.checkerboardPrimary, true),
+                Panel::Space(8,2),
+                optionColorU32Input("Secondary", "", &g_config.checkerboardSecondary, true),
+            })
+        })
+    }));
 
-    UIColorInputField* checkerboardSecondaryColorInput = new UIColorInputField(true);
-    checkerboardSecondaryColorInput->setColor(g_config.checkerboardSecondary);
-    checkerboardSecondaryColorInput->button->wxWidth = 80;
-    checkerboardSecondaryColorInput->onColorChangedCallback = [this](UIColorInputField* uicf, u32 newColor) {
-        g_config.checkerboardSecondary = newColor;
-    };
+    tabEditorStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.reseteraser"), "", &g_config.resetEraserOnToolSwitch, &posInTab));
 
-    stack = UIStackPanel::Horizontal(4, {
-        new UILabel(TL("vsp.config.opt.checkerboardcolors")),
-        Panel::Space(12,2),
-        new UILabel("Primary"),
-        checkerboardPrimaryColorInput,
-        Panel::Space(4,2),
-        new UILabel("Secondary"),
-        checkerboardSecondaryColorInput
-    });
-    stack->position = posInTab;
-    editorSettingsPanel->subWidgets.addDrawable(stack);
-    posInTab.y += 35;
-
-    editorSettingsPanel->subWidgets.addDrawable(optionCheckbox(TL("vsp.config.opt.reseteraser"), "", &g_config.resetEraserOnToolSwitch, &posInTab));
+    tabEditorStack->recalculateLayout();
 
     /*
         -------------------------
@@ -757,21 +716,6 @@ void PopupGlobalConfig::takeInput(SDL_Event evt)
     }
 }
 
-void PopupGlobalConfig::eventTextInput(int evt_id, std::string text)
-{
-    switch (evt_id) {
-        case TEXTFIELD_AUTOSAVE_INTERVAL:
-            try {
-                g_config.autosaveInterval = std::stoi(text);
-            }
-            catch (std::exception&) {
-                g_config.autosaveInterval = previousConfig.autosaveInterval;
-            }
-            break;
-        
-    }
-}
-
 void PopupGlobalConfig::eventDropdownItemSelected(int evt_id, int index, std::string name)
 {
     if (evt_id == CHECKBOX_ANIMATED_BACKGROUND) {
@@ -890,15 +834,17 @@ void PopupGlobalConfig::shellExtensionAction(bool install)
 UICheckbox* PopupGlobalConfig::optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position)
 {
     UICheckbox* cb7 = new UICheckbox(name, target);
-    cb7->position = *position;
     if (tooltip != "") {
         cb7->checkbox->tooltip = tooltip;
     }
-    position->y += 35;
+    if (position != NULL) {
+        cb7->position = *position;
+        position->y += 35;
+    }
     return cb7;
 }
 
-Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position)
+Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, std::function<void(int)> onModified)
 {
 
     int valueNow = *target;
@@ -907,7 +853,7 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
     tf->wxWidth = 40;
     tf->wxHeight = 25;
     tf->fontsize = 16;
-    tf->validateFunction = [min, max](int v) { return v >= min && v <= max; };
+    tf->validateFunction = [min, max](int v) { return v >= min && (max == -1 || v <= max); };
 
     UISlider* sld = NULL;
 
@@ -917,9 +863,12 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
         sld->wxWidth = 200;
         sld->wxHeight = 25;
         sld->setValue(min, max, valueNow);
-        sld->onChangeValueCallback = [target, tf, range, min](UISlider* sld, float val) {
+        sld->onChangeValueCallback = [target, tf, range, min, onModified](UISlider* sld, float val) {
             int vv = min + range * val;
             *target = vv;
+            if (onModified != NULL) {
+                onModified(vv);
+            }
         };
     }
 
@@ -931,8 +880,20 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
 
     Panel* p = UIStackPanel::Horizontal(10, {
         new UILabel(name), Panel::Space(20, 1), tf, sld
-    }, *position);
+    }, {0,0});
 
-    position->y += 35;
     return p;
+}
+
+Panel* PopupGlobalConfig::optionColorU32Input(std::string name, std::string tooltip, u32* target, bool allowAlpha)
+{
+    UIColorInputField* colorInput = new UIColorInputField(allowAlpha);
+    colorInput->button->tooltip = tooltip;
+    colorInput->button->wxWidth = 80;
+    colorInput->setColor(*target);
+    colorInput->onColorChangedCallback = [target](UIColorInputField* uicf, u32 newColor) {
+        *target = newColor;
+    };
+
+    return UIStackPanel::Horizontal(8, { new UILabel(name), colorInput });
 }

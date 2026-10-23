@@ -100,7 +100,7 @@ bool g_saveConfig() {
         config["checkerboardSize"] = std::to_string(g_config.checkerboardSize);
         config["lineSnapMaxAspect"] = std::to_string(g_config.lineSnapMaxAspect);
         config["framelessWindowButtonStyle"] = std::to_string(g_config.framelessWindowButtonStyle);
-        config["uiScale"] = std::to_string((int)g_config.uiScale * 1000);
+        config["uiScale"] = std::to_string((int)(g_config.uiScale * 1000));
         
         int uqIndex = 0;
         auto keybinds = g_keybindManager.serializeKeybinds();

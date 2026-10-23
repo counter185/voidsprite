@@ -18,7 +18,7 @@ void TooltipsLayer::renderAll()
 {
 	for (Tooltip& t : tooltips)
 	{
-		XY dim = g_fnt->StatStringDimensions(t.text);
+		XY dim = g_fnt->StatStringDimensions(t.text, UISCALED(18));
 		double timer = XM1PW3P1(t.timer);
 		SDL_Rect rect = { t.position.x, t.position.y, dim.x + 8, (dim.y + 12) * timer };
 
@@ -53,7 +53,7 @@ void TooltipsLayer::renderAll()
 		SDL_Color textCol = t.textColor;
 		textCol.a = alpha;
 
-		g_fnt->RenderString(t.text, rectPos.x + 4, rectPos.y + 2 - (20 * (1.0-timer)), textCol);
+		g_fnt->RenderString(t.text, rectPos.x + 4, rectPos.y + 2 - (20 * (1.0-timer)), textCol, UISCALED(18));
 	}
 	clearTooltips();
 }

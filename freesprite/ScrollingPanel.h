@@ -12,6 +12,7 @@ protected:
 
     Timer64 horizontalScrollbarHoverTimer;
     bool draggingHorizontalScrollbar = false;
+
 public:
     XY lastPosOnScreen{};
 

@@ -497,6 +497,7 @@ void StartScreen::populateLastOpenFiles()
         button->fill = visualConfigFill("launchpad/last_open_files/bg");
         lastOpenFilesPanel->addWidget(button);
     }
+    lastOpenFilesPanel->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void PanelNewImage::populateTemplatesPanel()
@@ -895,20 +896,20 @@ void StartScreen::renderFeaturedImages()
         featuredCurrentImage %= g_featured.size();
 
         bool compactLayout = true;
-        XY origin = { newImagePanel->getDimensions().x + newImagePanel->position.x + 20, 330 };
+        XY origin = { newImagePanel->getDimensions().x + newImagePanel->position.x + 20, UISCALED(330) };
         XY targetSize = { 400, 256 };
 
-        if (g_windowW >= 630 + newImagePanel->getDimensions().x + 400) {
+        if (g_windowW >= UISCALED(630 + 400) + newImagePanel->getDimensions().x) {
             compactLayout = false;
-            origin = { newImagePanel->getDimensions().x + 630 + newImagePanel->position.x + 30, newImagePanel->position.y };
+            origin = { newImagePanel->getDimensions().x + UISCALED(630 + 30) + newImagePanel->position.x, newImagePanel->position.y };
             targetSize = { 512, 512 };
         }
 
-        g_fnt->RenderString("Featured", origin.x, origin.y, { 255,255,255,255, }, 22);
+        g_fnt->RenderString("Featured", origin.x, origin.y, { 255,255,255,255, }, UISCALED(22));
         origin.y += 26;
         if (g_motd != "") {
-            g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, 16);
-            origin.y += 24;
+            g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, UISCALED(16));
+            origin.y += UISCALED(24);
         }
         if (!g_featured.empty()) {
             auto& feat = g_featured[featuredCurrentImage];
@@ -980,7 +981,7 @@ void StartScreen::renderFeaturedImages()
                 SDL_RenderFillRect(g_rd, &timeBarRect);
             }
 
-            g_fnt->RenderString(frmt("{}/{}", featuredCurrentImage + 1, g_featured.size()), timeBarRect.x + imgRect.w + 2, timeBarRect.y - 22, { 255,255,255,120 }, 18);
+            g_fnt->RenderString(frmt("{}/{}", featuredCurrentImage + 1, g_featured.size()), timeBarRect.x + imgRect.w + 2, timeBarRect.y - UISCALED(22), { 255,255,255,120 }, UISCALED(18));
 
             if (compactLayout) {
                 origin.x += imgRect.w + 10;
@@ -989,13 +990,14 @@ void StartScreen::renderFeaturedImages()
                 origin.y += imgRect.h + 4;
             }
             XY ep = origin;
-            ep = g_fnt->RenderString(feat.title + " ", origin.x, origin.y, {255,255,255,220,}, 18);
+            ep = g_fnt->RenderString(feat.title + " ", origin.x, origin.y, {255,255,255,220,}, UISCALED(18));
             origin.y += 20;
             if (feat.artistName != "") {
-                g_fnt->RenderString(frmt("by {}", feat.artistName), ep.x, ep.y, {255,255,255,180,}, 14);
+                g_fnt->RenderString(frmt("by {}", feat.artistName), origin.x, origin.y, {255,255,255,180,}, UISCALED(14));
+                origin.y += 18;
             }
             if (feat.artistLinks != "") {
-                g_fnt->RenderString(feat.artistLinks, origin.x, origin.y, {255,255,255,127,}, 12);
+                g_fnt->RenderString(feat.artistLinks, origin.x, origin.y, {255,255,255,127,}, UISCALED(12));
                 origin.y += 16;
             }
         }

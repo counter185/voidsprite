@@ -141,6 +141,7 @@ std::vector<UIButton*> UIDropdown::genButtonsList()
             btn->text = items[y];
             btn->wxWidth = wxWidth;
             btn->wxHeight = wxHeight;
+            btn->fontSize = fontSize;
             btn->fill = colorBGFocused;
             btn->position = { 0, wxHeight + y * btn->wxHeight };
             btn->tooltip = tooltips.size() > y ? tooltips[y] : "";
@@ -171,6 +172,7 @@ void UIDropdown::click()
         wxs.forceUnfocus();
     }*/
     auto ctxmenu = new PopupContextMenu(genButtonsList());
+    ctxmenu->dontScaleButtons = true;
     ctxmenu->scrollable = true;
     ctxmenu->setContextMenuOrigin(xyAdd(lastPosOnScreen, XY{ 0, wxHeight }));
     ctxmenu->onExitCallback = [this](PopupContextMenu* p) {

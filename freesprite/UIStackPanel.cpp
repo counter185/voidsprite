@@ -59,6 +59,11 @@ void UIStackPanel::addWidget(Drawable* d) {
     recalculateLayout();
 }
 
+void UIStackPanel::addWidgetNoRecalc(Drawable* d)
+{
+    subWidgets.addDrawable(d);
+}
+
 void UIStackPanel::recalculateLayout()
 {
     subWidgets.applyScalingToAll(g_config.uiScale);

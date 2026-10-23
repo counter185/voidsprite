@@ -37,7 +37,9 @@ XY UICheckbox::getDimensions() {
 void UICheckboxButton::render(XY pos) {
     UIButton::render(pos);
 
-    SDL_Rect r = { pos.x + position.x + 5, pos.y + position.y + 5, wxWidth - 10, wxHeight - 10 };
+    int offsW = UISCALED(10);
+
+    SDL_Rect r = { pos.x + position.x + offsW/2, pos.y + position.y + offsW/2, wxWidth - offsW, wxHeight - offsW };
     SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 255);
 
     XY lineP1 = { r.x, r.y + r.h / 2 };

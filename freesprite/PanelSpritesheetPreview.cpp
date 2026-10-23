@@ -35,8 +35,8 @@ void PanelSpritesheetPreview::renderAfterBG(XY position)
             caller->canvas.scale * callerPaddedTileSize.x,
             caller->canvas.scale * callerPaddedTileSize.y,
         };
-        wxWidth = ixmax(320, previewPos.x + tileSize.x + 10);
-        wxHeight = ixmax(200, previewPos.y + tileSize.y + 10);
+        wxWidth = ixmax(UISCALED(320), previewPos.x + tileSize.x + 10);
+        wxHeight = ixmax(UISCALED(200), previewPos.y + tileSize.y + 10);
         caller->drawPreview(xyAdd(position, previewPos), caller->canvas.scale);
     }
 }

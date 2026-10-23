@@ -1518,6 +1518,7 @@ void MainEditor::setUpWidgets()
 
     brushPicker = new EditorBrushPicker(this);
     brushPicker->position = {10 + leftX, 458};
+    brushPicker->scale(g_config.uiScale);
     brushPicker->reanchor();
     wxsManager.addDrawable(brushPicker);
 
@@ -1751,11 +1752,13 @@ void MainEditor::initToolParameters()
         }
     }
     actionbar->evalHeight();
+    toolPropertiesPanel->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void MainEditor::addWidget(Drawable* wx)
 {
     wxsManager.addDrawable(wx);
+    wx->scale(g_config.uiScale);
 }
 
 void MainEditor::removeWidget(Drawable* wx)

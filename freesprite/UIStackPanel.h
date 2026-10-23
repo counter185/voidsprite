@@ -67,6 +67,7 @@ public:
     }
 
     void addWidget(Drawable* d);
+    void addWidgetNoRecalc(Drawable* d);
     void recalculateLayout();
 
     XY getDimensions() override {
