@@ -61,7 +61,7 @@ void ScreenWideNavBar::render(XY position) {
     SDL_Rect r = SDL_Rect{ 0,0,g_windowW, wxHeight };
     (focused ? bgFocused : bgUnfocused).fill(r);
 
-    SDL_Rect iconRect = { 1,1,32,32 };
+    SDL_Rect iconRect = { 1,1,32*NSCALE,32*NSCALE };
     SDL_RenderCopy(g_rd, g_iconVSP32x32->get(), NULL, &iconRect);
 
     if (focused) {

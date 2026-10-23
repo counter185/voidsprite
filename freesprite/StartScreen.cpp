@@ -192,7 +192,7 @@ void StartScreen::render()
 {
     renderBackground();
 
-    SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
+    SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4 * NSCALE, 128 * 4 * NSCALE, 40 * 4 * NSCALE };
     SDL_RenderCopy(g_rd, g_mainlogo->get(g_rd), NULL, &logoRect);
 
     //do not make these two variables static (crashes linux)

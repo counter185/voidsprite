@@ -81,19 +81,21 @@ void g_renderNotifications()
                 notif.closeBoundsRect.x + notif.closeBoundsRect.w / 2,
                 notif.closeBoundsRect.y + notif.closeBoundsRect.h / 2
             };
-            drawLine(xyAdd(centerPoint, {-10,-10}), xyAdd(centerPoint, { 10,10 }), 1.0);
-            drawLine(xyAdd(centerPoint, {10,-10}), xyAdd(centerPoint, { -10,10 }), 1.0);
+            int closeIconSize = UISCALED(10);
+            drawLine(xyAdd(centerPoint, {-closeIconSize,-closeIconSize }), xyAdd(centerPoint, { closeIconSize,closeIconSize }), 1.0);
+            drawLine(xyAdd(centerPoint, { closeIconSize,-closeIconSize }), xyAdd(centerPoint, { -closeIconSize,closeIconSize }), 1.0);
         }
 
         //icon
         int textX = notifX + 10;
         if (notif.icon != NULL && notif.icon->get(g_rd) != NULL) {
+            int iconW = 50 * NSCALE;
             SDL_Texture* iconTex = notif.icon->get(g_rd);
-            SDL_Rect iconRect = { notifX + 5, notifY + 5, 50, 50 };
+            SDL_Rect iconRect = { notifX + 5, notifY + 5, iconW, iconW };
             SDL_SetTextureAlphaMod(iconTex, (uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 200)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))));
             SDL_RenderCopy(g_rd, iconTex, NULL, &iconRect);
             SDL_SetTextureAlphaMod(iconTex, 0xff);
-            textX += 50;
+            textX += iconW;
         }
 
         //text
