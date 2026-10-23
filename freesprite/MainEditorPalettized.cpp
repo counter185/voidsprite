@@ -596,6 +596,9 @@ void MainEditorPalettized::setUpWidgets()
 
     framePicker = new EditorFramePicker(this);
     framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67 };
+    if (frames.size() == 1) {
+        framePicker->enabled = false;
+    }
     wxsManager.addDrawable(framePicker);
 
     navbar = new ScreenWideNavBar(this, mainEditorKeyActions, { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_L, SDL_SCANCODE_V, SDL_SCANCODE_P, SDL_SCANCODE_A });

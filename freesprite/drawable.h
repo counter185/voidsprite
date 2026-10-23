@@ -13,6 +13,7 @@ public:
     DrawableManager* parentManager = NULL;
     bool focused = false;
     XY position = XY{ 50,50 };
+    bool scalePosition = true;
 
     int callback_id = -1;
     EventCallbackListener* callback = NULL;
@@ -61,7 +62,12 @@ public:
     virtual XY getRenderDimensions() { return getDimensions(); };
     virtual bool isPanel() { return false; }
     virtual bool shouldMoveToFrontOnFocus() { return false; }
-    virtual void applyScaling(double scale) { position.x = (int)(position.x * scale); position.y = (int)(position.y * scale); }
+    virtual void applyScaling(double scale) {
+        if (scalePosition) {
+            position.x = (int)(position.x * scale);  
+            position.y = (int)(position.y * scale);
+        }
+    }
     void scale(double s) {
         if (!didScale && s != 1.0) {
             applyScaling(s);

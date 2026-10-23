@@ -241,9 +241,6 @@ UIColorPicker::UIColorPicker()
         new UILabel("A"),
         mix1Input
     });
-    mxAsp->position = { 20,25 };
-    colorModeTabs->tabs[3].add(mxAsp);
-
 
     mix2Input = new UIColorInputField();
     mix2Input->button->wxWidth = 100;
@@ -257,9 +254,10 @@ UIColorPicker::UIColorPicker()
         new UICheckbox("Lock", &this->lockMix2)
     });
     mxBsp->position = { 200, 25 };
-    colorModeTabs->tabs[3].add(mxBsp);
 
-    colorModeTabs->tabs[3].add(new UILabel("+", { 150, 50 }));
+    colorModeTabs->tabs[3].add(UIStackPanel::Horizontal(10, {
+        mxAsp, UIStackPanel::Vertical(0, {Panel::Space(1,10), new UILabel("+",{}, 22)}), mxBsp
+    }, {20,25}));
 
     mixSlider = new UIColorSlider();
     mixSlider->position = XY{ 40, 140 };

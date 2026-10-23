@@ -1625,6 +1625,7 @@ void MainEditor::openTouchModePanel()
         this->touchModePanel->position = { 
             g_windowW - this->touchModePanel->wxWidth - ixmax(10, g_currentWindow->getSafeAreaRight()), 
             g_windowH - this->touchModePanel->wxHeight - 40};
+        this->touchModePanel->anchor = { 1,1 };
         this->addWidget(this->touchModePanel);
     }
 }
@@ -1684,16 +1685,15 @@ void MainEditor::makeActionBar()
 
     int leftX = g_currentWindow->getSafeAreaLeft();
 
+    toolPropertiesPanel = new Panel();
+    toolPropertiesPanel->sizeToContent = true;
+
     UIStackPanel* actionsStack = UIStackPanel::Horizontal(5, {
-        undoButton, redoButton, saveButton, zoomoutButton, zoominButton, blendModeDropdown
+        undoButton, redoButton, saveButton, zoomoutButton, zoominButton, blendModeDropdown,
+        Panel::Space(50,1), toolPropertiesPanel
     });
     actionsStack->position = { ixmax(5, leftX), 5 };
     actionbar->addDrawable(actionsStack);
-
-    toolPropertiesPanel = new Panel();
-    toolPropertiesPanel->sizeToContent = true;
-    toolPropertiesPanel->position = { actionsStack->getDimensions().x  + 50 + leftX, 0};
-    actionbar->addDrawable(toolPropertiesPanel);
 
     wxsManager.addDrawable(actionbar);
 }

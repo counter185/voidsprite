@@ -5,8 +5,12 @@ std::vector<Notification> g_notifications;
 bool renderingNotifications = false;
 
 void g_calcNotifBounds() {
-    int notifY = 30;
-    int notifOriginX = g_windowW - 450;
+    int notifW = UISCALED_UP(400);
+    int notifH = UISCALED_UP(60);
+    int notifHCompact = UISCALED_UP(30);
+
+    int notifY = UISCALED(30);
+    int notifOriginX = g_windowW - (notifW + UISCALED(50));
     for (auto it = g_notifications.rbegin(); it != g_notifications.rend(); it++) {
         Notification& notif = *it;
 
@@ -14,14 +18,14 @@ void g_calcNotifBounds() {
 
         //bounds
         int notifX = notifOriginX + 30 * (1.0 - XM1PW3P1(notif.timer.percentElapsedTime(300)));
-        notif.boundsRect = { notifX, notifY, 400, compactNotification ? 30 : 60 };
+        notif.boundsRect = { notifX, notifY, notifW, compactNotification ? notifHCompact : notifH };
 
         SDL_Rect closeBounds = notif.boundsRect;
         closeBounds.w /= 6;
         closeBounds.x += notif.boundsRect.w - closeBounds.w;
         notif.closeBoundsRect = closeBounds;
 
-        notifY += (notif.boundsRect.h + 5) 
+        notifY += (notif.boundsRect.h + UISCALED(5)) 
             * XM1PW3P1(notif.timer.percentElapsedTime(300)  //start
             * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500)));   //end
     }
@@ -94,15 +98,15 @@ void g_renderNotifications()
 
         //text
         int notifTextMidpoint = notifY + (compactNotification ? 3 : 15);
-        int fontSize = compactNotification ? 16 : 18;
-        g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + 5 : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize);
-        g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + 30 : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize - 2);
+        int fontSize = UISCALED(compactNotification ? 16 : 18);
+        g_fnt->RenderString(notif.title, textX, notif.message != "" ? notifY + UISCALED(5) : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xff * XM1PW3P1(notif.timer.percentElapsedTime(200, 100)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize);
+        g_fnt->RenderString(notif.message, textX, notif.title != "" ? notifY + UISCALED(30) : notifTextMidpoint, SDL_Color{ 255,255,255,(uint8_t)(0xd0 * XM1PW3P1(notif.timer.percentElapsedTime(200, 150)) * (1.0 - notif.timer.percentElapsedTime(500, notif.duration - 500))) }, fontSize - 2);
 
         //pulse outline
         if (g_config.vfxEnabled) {
             double timer800ms = notif.timer.percentElapsedTime(800);
             SDL_SetRenderDrawColor(g_rd, notif.color.r, notif.color.g, notif.color.b, (u8)(0x80 * (1.0 - XM1PW3P1(timer800ms))));
-            SDL_Rect rg = offsetRect(r, 1 + 20 * XM1PW3P1(timer800ms));
+            SDL_Rect rg = offsetRect(r, 1 + UISCALED(20) * XM1PW3P1(timer800ms));
             SDL_RenderDrawRect(g_rd, &rg);
 
             for (int x = 1; x < 6; x++) {

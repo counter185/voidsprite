@@ -1,6 +1,7 @@
 #pragma once
 
-#define UISCALED(a) ((int)(a*g_config.uiScale))
+#define UISCALED(a) ((int)((a)*g_config.uiScale))
+#define UISCALED_UP(a) ((int)((a)*(g_config.uiScale>1?g_config.uiScale:1)))
 
 class GlobalConfig {
 public:

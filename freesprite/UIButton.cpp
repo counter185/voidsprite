@@ -94,7 +94,7 @@ void UIButton::handleInput(SDL_Event evt, XY gPosOffset)
                 touchHoldingDown = false;
                 XY touchPosition = { (int)(evt.tfinger.x * g_windowW), (int)(evt.tfinger.y * g_windowH) };
                 if (pointInBox(touchPosition, SDL_Rect{ gPosOffset.x, gPosOffset.y, wxWidth, wxHeight })
-                    && xyDistance(touchHoldDownPos, touchPosition) < touchTapMaxDistance) {
+                    && xyDistance(touchHoldDownPos, touchPosition) < UISCALED_UP(touchTapMaxDistance)) {
                     if (touchHoldDownTimer.elapsedTime() >= 1200) {
                         rightClick();
                     }
