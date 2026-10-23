@@ -12,8 +12,8 @@ public:
     ButtonStartScreenSession(VSPWindow* parent, int screenIndex) {
 		targetWindow = parent;
         correspondingScreen = screenIndex;
-        wxWidth = 16;
-        wxHeight = 16;
+        wxWidth = UISCALED(16);
+        wxHeight = UISCALED(16);
         instantTooltip = true;
     }
 
