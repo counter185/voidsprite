@@ -252,6 +252,8 @@ void PopupFilePicker::populateFileList() {
         l->position = {5, fileY};
         fileList->subWidgets.addDrawable(l);
     }
+
+    fileList->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void PopupFilePicker::chooseDirectory(PlatformNativePathString dir)

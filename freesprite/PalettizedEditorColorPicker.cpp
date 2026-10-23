@@ -209,7 +209,6 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
             colorButtons.push_back(colBtn);
             paletteIndex++;
         }
-        colorPaletteTabs->tabs[0].tabPanel->subWidgets.applyScalingToAll(g_config.uiScale);
     }
 
     int paletteCount = caller->palette.size();
@@ -227,6 +226,8 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
         };
         colorPaletteTabs->tabs[0].add(newColorButton);
     }
+
+    colorPaletteTabs->tabs[0].tabPanel->subWidgets.applyScalingToAll(g_config.uiScale);
     highlightActiveColorButton();
 }
 

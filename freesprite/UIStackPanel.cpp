@@ -11,7 +11,7 @@ UIStackPanel* UIStackPanel::FromContent(std::vector<Drawable*> content, bool ver
         }
     }
     panel->position = {0,0};
-    panel->scale(g_config.uiScale);
+    panel->subWidgets.applyScalingToAll(g_config.uiScale);
     panel->manuallyRecalculateLayout = true;
     panel->recalculateLayout();
     return panel;

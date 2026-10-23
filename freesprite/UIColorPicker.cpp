@@ -224,6 +224,7 @@ UIColorPicker::UIColorPicker()
     palettePanel->scrollVertically = true;
     palettePanel->wxWidth = 370;
     palettePanel->wxHeight = 270;
+    palettePanel->scale(g_config.uiScale);
     reloadColorLists();
     colorModeTabs->tabs[2].add(palettePanel);
 
@@ -451,7 +452,7 @@ Panel* UIColorPicker::genPaletteRowPanel(IPalette* p, int rowIndex)
 
     std::vector<Drawable*> currentColorButtonsStack{};
 
-    int maxButtonsInLine = palettePanel->wxWidth / (largeColorButtons ? 48 : 24);
+    int maxButtonsInLine = palettePanel->wxWidth / UISCALED(largeColorButtons ? 48 : 24);
 
     //create all the color buttons
     for (int colorIndex = 0; colorIndex < colors.size(); colorIndex++) {

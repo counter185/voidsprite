@@ -205,4 +205,5 @@ void EditorColorPicker::updateLastColorButtons()
         }
     }
     lastColorsChanged = false;
+    wColorPicker->colorModeTabs->tabs[1].tabPanel->subWidgets.applyScalingToAll(g_config.uiScale);
 }
