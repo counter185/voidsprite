@@ -95,7 +95,8 @@ StartScreen::StartScreen() {
         new UILabel(TL("vsp.launchpad.lastfiles"), { 0,0 }, 22),
         lastOpenFilesPanelContainer
     });
-    lastOpenFilesSection->position = { startScreenPanelEndpoint + 20, 75 };
+    lastOpenFilesSection->position = { startScreenPanelEndpoint + UISCALED(20), UISCALED(75) };
+    lastOpenFilesSection->scalePosition = false;
     wxsManager.addDrawable(lastOpenFilesSection);
 
     std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_W, SDL_SCANCODE_V, SDL_SCANCODE_H };
@@ -906,7 +907,7 @@ void StartScreen::renderFeaturedImages()
         }
 
         g_fnt->RenderString("Featured", origin.x, origin.y, { 255,255,255,255, }, UISCALED(22));
-        origin.y += 26;
+        origin.y += UISCALED(26);
         if (g_motd != "") {
             g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, UISCALED(16));
             origin.y += UISCALED(24);
@@ -984,21 +985,21 @@ void StartScreen::renderFeaturedImages()
             g_fnt->RenderString(frmt("{}/{}", featuredCurrentImage + 1, g_featured.size()), timeBarRect.x + imgRect.w + 2, timeBarRect.y - UISCALED(22), { 255,255,255,120 }, UISCALED(18));
 
             if (compactLayout) {
-                origin.x += imgRect.w + 10;
+                origin.x += imgRect.w + UISCALED(10);
             }
             else {
-                origin.y += imgRect.h + 4;
+                origin.y += imgRect.h + UISCALED(4);
             }
             XY ep = origin;
             ep = g_fnt->RenderString(feat.title + " ", origin.x, origin.y, {255,255,255,220,}, UISCALED(18));
-            origin.y += 20;
+            origin.y += UISCALED(20);
             if (feat.artistName != "") {
                 g_fnt->RenderString(frmt("by {}", feat.artistName), origin.x, origin.y, {255,255,255,180,}, UISCALED(14));
-                origin.y += 18;
+                origin.y += UISCALED(18);
             }
             if (feat.artistLinks != "") {
                 g_fnt->RenderString(feat.artistLinks, origin.x, origin.y, {255,255,255,127,}, UISCALED(12));
-                origin.y += 16;
+                origin.y += UISCALED(16);
             }
         }
     }
