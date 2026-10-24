@@ -1859,6 +1859,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_FINGER_DOWN:
             case SDL_EVENT_FINGER_MOTION:
                 if (touchMode != TOUCHMODE_PAN) {
+                    penPressure = dxmin(1.0, (double)evt.tfinger.pressure);
                     evt = convertTouchToMouseEvent(evt);
                     if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN || evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
                         evt.button.button = touchMode == TOUCHMODE_LEFTCLICK ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
