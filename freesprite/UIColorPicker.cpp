@@ -228,7 +228,6 @@ UIColorPicker::UIColorPicker()
     reloadColorLists();
     colorModeTabs->tabs[2].add(palettePanel);
 
-
     //-----------------
     //| Mix tab
 
@@ -513,35 +512,32 @@ void UIColorPicker::reloadColorLists()
 
     stack->addWidget(topButtonsPanel);
 
-    std::vector<UIButton*> collapseButtons;
+    std::vector<UIButton*> collapseButtons{};
 
     std::vector<IPalette*> palettes = extraPalettes;
     for (auto& p : g_loadedPalettes) {
         palettes.push_back(p);
     }
-
-    for (auto*& p : palettes) {
+    
+    for (IPalette*& p : palettes) {
 
         if (PopupPaletteManager::paletteIsHidden(p)) {
             continue;
         }
-
-        std::vector<Drawable*> palettePanels;
 
         UIButton* collapseButton = new UIButton("-");
         collapseButton->wxWidth = 20;
         collapseButton->wxHeight = 20;
         collapseButtons.push_back(collapseButton);
 
-        UILabel* nameLabel = new UILabel(p->getName());
-        nameLabel->position = XY{ 30, 10 };
+        UILabel* nameLabel = new UILabel(p->getName(), {30,10});
 
         stack->addWidget(UIStackPanel::Horizontal(5, {
-            Panel::Space(0,0), collapseButton, nameLabel
+            Panel::Space(1,1), collapseButton, nameLabel
         }));
 
         auto& rows = p->getColorList();
-        std::vector<Drawable*> rowPanels;
+        std::vector<Drawable*> rowPanels{};
 
         for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
 

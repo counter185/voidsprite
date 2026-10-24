@@ -83,6 +83,7 @@ inline void g_startNewOperation(std::function<void(OperationProgressReport*)> fu
     g_bgOpProgress = 0.0;
     threadSet = true;
     g_bgOpThread = std::thread([function]() {
+        g_isMainThread = false;
         srand(time(NULL) * 1000 + SDL_GetTicks());
         function(g_bgOpProgressReport);
         g_bgOpRunning = false;
@@ -103,6 +104,7 @@ inline void g_startNewAsyncOperation(std::function<void()> function) {
     AsyncOp* op = new AsyncOp();
     g_asyncOpThreads.push_back(op);
     op->thread = new std::thread([function, op]() {
+        g_isMainThread = false;
         srand(time(NULL) * 1000 + SDL_GetTicks());
         function();
         op->done = true;
@@ -150,5 +152,22 @@ inline void g_waitAndRemoveAllBgOpAndAsyncThreads() {
             delete g_asyncOpThreads[x]->thread;
         }
         delete g_asyncOpThreads[x];
+    }
+}
+
+inline void g_doAndWaitForMainThread(std::function<void()> fn) {
+    if (g_isMainThread) {
+        fn();
+    }
+    else {
+        std::atomic<bool> done = false;
+        auto* dd = &done;
+        g_startNewMainThreadOperation([fn, dd]() {
+            fn();
+            *dd = true;
+        });
+        while (!done) {
+            SDL_Delay(2);
+        }
     }
 }

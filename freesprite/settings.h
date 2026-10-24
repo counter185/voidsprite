@@ -1,7 +1,7 @@
 #pragma once
 
-#define UISCALED(a) ((int)((a)*g_config.uiScale))
-#define UISCALED_UP(a) ((int)((a)*(g_config.uiScale>1?g_config.uiScale:1)))
+#define UISCALED(a) (g_config.uiScale==1?a:(int)((a)*g_config.uiScale))
+#define UISCALED_UP(a) (g_config.uiScale==1?a:(int)((a)*(g_config.uiScale>1?g_config.uiScale:1)))
 #define NSCALE (ixmax(1,(int)g_config.uiScale))
 
 class GlobalConfig {

@@ -267,7 +267,7 @@ void MainEditor::RenderCanvas()
 
     //prepare frame framebuffer
     if (frameFB.first != g_rd || !xyEqual(frameFBSize, canvas.dimensions)) {
-        SDL_DestroyTexture(frameFB.second);
+        tracked_destroyTexture(frameFB.second);
         frameFB.second = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, canvas.dimensions.x, canvas.dimensions.y);
         frameFBSize = canvas.dimensions;
         frameFB.first = g_rd;
@@ -1471,7 +1471,7 @@ void MainEditor::setUpWidgets()
             }
         };
     }
-
+    
     //load filters
     int i = 0;
     for (auto& filter : g_filters) {
@@ -3467,12 +3467,17 @@ Layer* MainEditor::flattenFrame(Frame* target)
     Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (ret != NULL) {
         int x = 0;
-        uint32_t* retppx = ret->pixels32();
+        u32* retppx = ret->pixels32();
         for (Layer*& l : target->layers) {
+            if (l->w != canvas.dimensions.x || l->h != canvas.dimensions.y) {
+                logerr("flattenFrame LAYER DIMENSIONS DO NOT MATCH EDITOR");
+                delete ret;
+                return NULL;
+            }
             if (l->hidden) {
                 continue;
             }
-            uint32_t* ppx = l->pixels32();
+            u32* ppx = l->pixels32();
             if (x++ == 0) {
                 if (l->layerAlpha == 255) {
                     memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4ull);
