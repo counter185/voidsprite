@@ -307,6 +307,7 @@ inline SDL_PropertiesID g_props;
 inline bool g_lastConfirmInputWasTouch = false;
 inline int g_crashsaveIndex = 0;
 inline thread_local bool g_interactiveContext = true;
+inline thread_local bool g_isMainThread = true;
 
 inline HotReloadableTexture* g_mainlogo = NULL,
    *g_iconVSP32x32 = NULL,

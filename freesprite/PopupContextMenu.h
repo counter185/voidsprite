@@ -15,6 +15,7 @@ private:
 
 public:
     bool scrollable = false;
+    bool dontScaleButtons = false;
 
     std::function<void(PopupContextMenu*)> onExitCallback = NULL;
 
@@ -30,6 +31,12 @@ public:
     void takeInput(SDL_Event evt) override;
     void defaultInputAction(SDL_Event evt) override;
     void playPopupCloseVFX() override;
+    void scaleScreen(double s) override {
+        if (!dontScaleButtons) {
+            BasePopup::scaleScreen(s);
+        }
+        setContextMenuOrigin(originPoint);
+    }
 
     void renderContextMenuBackground();
 

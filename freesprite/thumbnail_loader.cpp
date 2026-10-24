@@ -3,6 +3,8 @@
 #include "thumbnail_loader.h"
 #include "FileIO.h"
 
+#define VSP_THUMBNAILS_ENABLED ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 0, 1)
+
 struct ThumbnailData {
     PlatformNativePathString filePath;
     Layer* thumbnail;
@@ -18,7 +20,7 @@ bool thumbnails_running = false;
 
 void thumbnails_start()
 {
-#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+#if VSP_THUMBNAILS_ENABLED
     thumbnails_running = true;
     threadThumbnailLoader = new std::thread(thumbnails_threadLoop);
 #endif
@@ -26,7 +28,7 @@ void thumbnails_start()
 
 void thumbnails_stop()
 {
-#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+#if VSP_THUMBNAILS_ENABLED
     if (thumbnails_running) {
         thumbnails_running = false;
         if (threadThumbnailLoader->joinable()) {
@@ -112,7 +114,7 @@ void thumbnails_clearHalfOfCache()
 
 void thumbnails_removeFromCache(PlatformNativePathString path)
 {
-#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+#if VSP_THUMBNAILS_ENABLED
     std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
     auto find = std::find_if(thumbnails.begin(), thumbnails.end(), [path](ThumbnailData& t) { return t.filePath == path; });
     if (find == thumbnails.end()) {
@@ -128,7 +130,7 @@ void thumbnails_removeFromCache(PlatformNativePathString path)
 
 void thumbnails_request(PlatformNativePathString path)
 {
-#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+#if VSP_THUMBNAILS_ENABLED
     const u64 maxFileSize = 50 * 1024 * 1024;//max 50mb files
     {
         std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
@@ -163,7 +165,7 @@ void thumbnails_request(PlatformNativePathString path)
 
 XY thumbnails_getSize(PlatformNativePathString path)
 {
-#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+#if VSP_THUMBNAILS_ENABLED
     std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
     auto find = std::find_if(thumbnails.begin(), thumbnails.end(), [path](ThumbnailData& t) { return t.filePath == path; });
     if (find == thumbnails.end()) {
@@ -180,7 +182,7 @@ XY thumbnails_getSize(PlatformNativePathString path)
 
 void thumbnails_render(PlatformNativePathString path, SDL_Rect* src, SDL_Rect* dst)
 {
-#if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
+#if VSP_THUMBNAILS_ENABLED
     std::lock_guard<std::recursive_mutex> lock(thumbnailsMutex);
     auto find = std::find_if(thumbnails.begin(), thumbnails.end(), [path](ThumbnailData& t) { return t.filePath == path; });
     if (find != thumbnails.end()) {

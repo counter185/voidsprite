@@ -34,13 +34,14 @@ private:
     std::vector<SDL_Scancode> reservedKeysNow = {};
 
     std::vector<std::string> langLocNames;
+
+    int uiScaleWhole = 100;
 public:
     PopupGlobalConfig();
 
     void render() override;
     void takeInput(SDL_Event evt) override;
 
-    void eventTextInput(int evt_id, std::string text) override;
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
     void createKeybindButtons(std::string filterName);
@@ -50,7 +51,9 @@ public:
 
     void shellExtensionAction(bool install);
 
-    UICheckbox* optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position);
-    static Panel* optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, XY* position);
+    UICheckbox* optionCheckbox(std::string name, std::string tooltip, bool* target, XY* position = NULL);
+    static Panel* optionNumberInput(std::string name, std::string tooltip, int* target, int min, int max, 
+        std::function<void(int)> onModified = NULL);
+    Panel* optionColorU32Input(std::string name, std::string tooltip, u32* target, bool allowAlpha);
 };
 

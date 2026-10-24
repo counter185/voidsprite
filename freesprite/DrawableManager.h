@@ -40,6 +40,7 @@ public:
 	void processWindowResizeEvent(XY from, XY to);
 	bool processHoverEvent(XY thisPositionOnScreen, XY mousePos);
 	bool processMouseWheelEvent(XY thisPositionOnScreen, XY mousePos, XYf scrollDirection);
+	void applyScalingToAll(double scale);
 	//void tickAnchors();
 
 	void freeAllDrawables();

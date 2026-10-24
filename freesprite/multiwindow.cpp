@@ -319,6 +319,7 @@ void VSPWindow::autoViewportScale() {
 }
 
 void VSPWindow::addScreen(BaseScreen* a, bool switchTo) {
+    a->scaleScreen(g_config.uiScale);
     screenStack.push_back(a);
     if (switchTo) {
         switchScreen(screenStack.size() - 1);
@@ -554,42 +555,46 @@ void VSPWindow::renderDebugInfo()
 
 void VSPWindow::renderStatusBar()
 {
+    int buttonDistance = UISCALED(26);
+
     int rightX = getSafeAreaRight();
-    XY nextStatusBarOrigin = { windowW - rightX, windowH - 26 };
+    XY nextStatusBarOrigin = { windowW - rightX, windowH - buttonDistance };
 
     //draw the screen icons
     //XY screenIcons = { g_windowW, g_windowH - 10 };
-    nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(26 * screenStack.size()), 0 });
+    nextStatusBarOrigin = xySubtract(nextStatusBarOrigin, XY{ (int)(buttonDistance * screenStack.size()), 0 });
     XY screenIconOrigin = nextStatusBarOrigin;
 
     for (int x = 0; x < screenStack.size(); x++) {
         BaseScreen* s = screenStack[x];
         //this is where screen icons were rendered
         screenButtons[x]->position = screenIconOrigin;
-        screenIconOrigin.x += 26;
+        screenIconOrigin.x += buttonDistance;
     }
     overlayWidgets.renderAll();
     //todo: make this a uilabel
     if (!screenStack.empty()) {
         std::string screenName = screenStack[currentScreen]->getName();
-        int statW = g_fnt->StatStringDimensions(screenName, 16).x;
-        XY screenNameOrigin = xySubtract({ windowW - rightX, windowH }, { 10 + statW, 55 });
-        g_fnt->RenderString(screenStack[currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, 16);
+        int statW = g_fnt->StatStringDimensions(screenName, UISCALED(16)).x;
+        XY screenNameOrigin = xySubtract({ windowW - rightX, windowH }, { 10 + statW, UISCALED(55) });
+        g_fnt->RenderString(screenStack[currentScreen]->getName(), screenNameOrigin.x, screenNameOrigin.y, { 255,255,255,255 }, UISCALED(16));
     }
 
     //draw battery icon
-    int batteryRectW = 60;
     int batterySeconds, batteryPercent;
     SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
     if (powerstate != SDL_POWERSTATE_NO_BATTERY && powerstate != SDL_POWERSTATE_UNKNOWN) {
-        XY batteryOrigin = xySubtract(nextStatusBarOrigin, { 120, 0 });
-        XY batteryOriginLow = xyAdd(batteryOrigin, { 0,15 });
+        int batteryRectW = UISCALED(60);
+        int batteryRectH = UISCALED(16);
+
+        XY batteryOrigin = xySubtract(nextStatusBarOrigin, { UISCALED(120), 0 });
+        XY batteryOriginLow = xyAdd(batteryOrigin, { 0,UISCALED(15) });
         XY batteryEnd = xyAdd(batteryOrigin, { batteryRectW, 0 });
 
-        nextStatusBarOrigin = xySubtract(batteryOrigin, { 30,0 });
+        nextStatusBarOrigin = xySubtract(batteryOrigin, { UISCALED(30),0 });
 
         SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 0x30);
-        SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, 16 };
+        SDL_Rect batteryRect = { batteryOrigin.x, batteryOrigin.y, batteryRectW, batteryRectH };
         SDL_RenderDrawRect(g_rd, &batteryRect);
 
         if (batteryPercent <= 10 && powerstate != SDL_POWERSTATE_CHARGING && (SDL_GetTicks64() - lastLowBatteryPulseTime) > 3000) {
@@ -612,31 +617,31 @@ void VSPWindow::renderStatusBar()
         drawLine(statPercent, statPercentLow);
         drawLine(batteryOrigin, statPercent);
         drawLine(batteryOriginLow, statPercentLow);
-        g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor);
+        g_fnt->RenderString(frmt("{}%", batteryPercent), batteryEnd.x + 5, batteryEnd.y - 5, primaryColor, UISCALED(18));
 
         if (powerstate == SDL_POWERSTATE_CHARGING) {
-            g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 });
+            g_fnt->RenderString("+", batteryOrigin.x + 2, batteryOrigin.y - 7, { 253, 255, 146,0x80 }, UISCALED(18));
         }
         else if (powerstate == SDL_POWERSTATE_CHARGED) {
-            g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 });
+            g_fnt->RenderString(UTF8_DIAMOND, batteryOrigin.x - 18, batteryOrigin.y - 5, { 78,255,249, 0x80 }, UISCALED(18));
         }
         else if (powerstate == SDL_POWERSTATE_ERROR) {
-            g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 });
+            g_fnt->RenderString("x", batteryOrigin.x + 2, batteryOrigin.y - 7, { 255,60,60,0x80 }, UISCALED(18));
         }
     }
 
     if (g_config.showSystemClock) {
         std::tm sysTime = getLocalTime();
-        XY sysTimeOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
+        XY sysTimeOrigin = xySubtract(nextStatusBarOrigin, { UISCALED(70), 0 });
         nextStatusBarOrigin = sysTimeOrigin;
-        XY timeEndpoint = g_fnt->RenderString(frmt("{:02}:{:02}", sysTime.tm_hour, sysTime.tm_min), sysTimeOrigin.x, sysTimeOrigin.y - 5, { 255,255,255,0x80 }, 16);
-        g_fnt->RenderString(frmt(":{:02}", sysTime.tm_sec), timeEndpoint.x, timeEndpoint.y, { 255,255,255,0x50 }, 12);
+        XY timeEndpoint = g_fnt->RenderString(frmt("{:02}:{:02}", sysTime.tm_hour, sysTime.tm_min), sysTimeOrigin.x, sysTimeOrigin.y - 5, { 255,255,255,0x80 }, UISCALED(16));
+        g_fnt->RenderString(frmt(":{:02}", sysTime.tm_sec), timeEndpoint.x, timeEndpoint.y, { 255,255,255,0x50 }, UISCALED(12));
     }
 
     if (g_config.showFPS) {
-        XY fpsOrigin = xySubtract(nextStatusBarOrigin, { 70, 0 });
+        XY fpsOrigin = xySubtract(nextStatusBarOrigin, { UISCALED(70), 0 });
         nextStatusBarOrigin = fpsOrigin;
-        g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, 16);
+        g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, UISCALED(16));
     }
 }
 

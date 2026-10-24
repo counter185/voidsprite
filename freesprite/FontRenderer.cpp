@@ -185,7 +185,7 @@ void TextRenderer::precacheFontCommonChars(int size)
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "1234567890"
-        "!@#$%^&*()[]:\\/|+_<>?`~";
+        "!@#$%^&*()[]:\\/|+_<>?`~ ";
     StatStringDimensions(str, size);
 }
 

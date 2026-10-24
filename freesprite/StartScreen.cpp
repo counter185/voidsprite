@@ -95,7 +95,8 @@ StartScreen::StartScreen() {
         new UILabel(TL("vsp.launchpad.lastfiles"), { 0,0 }, 22),
         lastOpenFilesPanelContainer
     });
-    lastOpenFilesSection->position = { startScreenPanelEndpoint + 20, 75 };
+    lastOpenFilesSection->position = { startScreenPanelEndpoint + UISCALED(20), UISCALED(75) };
+    lastOpenFilesSection->scalePosition = false;
     wxsManager.addDrawable(lastOpenFilesSection);
 
     std::vector<SDL_Scancode> navbarOrder = { SDL_SCANCODE_F, SDL_SCANCODE_E, SDL_SCANCODE_W, SDL_SCANCODE_V, SDL_SCANCODE_H };
@@ -185,13 +186,14 @@ StartScreen::StartScreen() {
 
     populateLastOpenFiles();
     startupAnimTimer.start();
+    wxsManager.applyScalingToAll(g_config.uiScale);
 }
 
 void StartScreen::render()
 {
     renderBackground();
 
-    SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4, 128 * 4, 40 * 4 };
+    SDL_Rect logoRect = SDL_Rect{ 4, g_windowH - 4 - 40 * 4 * NSCALE, 128 * 4 * NSCALE, 40 * 4 * NSCALE };
     SDL_RenderCopy(g_rd, g_mainlogo->get(g_rd), NULL, &logoRect);
 
     //do not make these two variables static (crashes linux)
@@ -496,6 +498,7 @@ void StartScreen::populateLastOpenFiles()
         button->fill = visualConfigFill("launchpad/last_open_files/bg");
         lastOpenFilesPanel->addWidget(button);
     }
+    lastOpenFilesPanel->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void PanelNewImage::populateTemplatesPanel()
@@ -894,20 +897,20 @@ void StartScreen::renderFeaturedImages()
         featuredCurrentImage %= g_featured.size();
 
         bool compactLayout = true;
-        XY origin = { newImagePanel->getDimensions().x + newImagePanel->position.x + 20, 330 };
+        XY origin = { newImagePanel->getDimensions().x + newImagePanel->position.x + 20, UISCALED(330) };
         XY targetSize = { 400, 256 };
 
-        if (g_windowW >= 630 + newImagePanel->getDimensions().x + 400) {
+        if (g_windowW >= UISCALED(630 + 400) + newImagePanel->getDimensions().x) {
             compactLayout = false;
-            origin = { newImagePanel->getDimensions().x + 630 + newImagePanel->position.x + 30, newImagePanel->position.y };
+            origin = { newImagePanel->getDimensions().x + UISCALED(630 + 30) + newImagePanel->position.x, newImagePanel->position.y };
             targetSize = { 512, 512 };
         }
 
-        g_fnt->RenderString("Featured", origin.x, origin.y, { 255,255,255,255, }, 22);
-        origin.y += 26;
+        g_fnt->RenderString("Featured", origin.x, origin.y, { 255,255,255,255, }, UISCALED(22));
+        origin.y += UISCALED(26);
         if (g_motd != "") {
-            g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, 16);
-            origin.y += 24;
+            g_fnt->RenderString(g_motd, origin.x, origin.y, { 255,255,255,127, }, UISCALED(16));
+            origin.y += UISCALED(24);
         }
         if (!g_featured.empty()) {
             auto& feat = g_featured[featuredCurrentImage];
@@ -979,23 +982,24 @@ void StartScreen::renderFeaturedImages()
                 SDL_RenderFillRect(g_rd, &timeBarRect);
             }
 
-            g_fnt->RenderString(frmt("{}/{}", featuredCurrentImage + 1, g_featured.size()), timeBarRect.x + imgRect.w + 2, timeBarRect.y - 22, { 255,255,255,120 }, 18);
+            g_fnt->RenderString(frmt("{}/{}", featuredCurrentImage + 1, g_featured.size()), timeBarRect.x + imgRect.w + 2, timeBarRect.y - UISCALED(22), { 255,255,255,120 }, UISCALED(18));
 
             if (compactLayout) {
-                origin.x += imgRect.w + 10;
+                origin.x += imgRect.w + UISCALED(10);
             }
             else {
-                origin.y += imgRect.h + 4;
+                origin.y += imgRect.h + UISCALED(4);
             }
             XY ep = origin;
-            ep = g_fnt->RenderString(feat.title + " ", origin.x, origin.y, {255,255,255,220,}, 18);
-            origin.y += 20;
+            ep = g_fnt->RenderString(feat.title + " ", origin.x, origin.y, {255,255,255,220,}, UISCALED(18));
+            origin.y += UISCALED(20);
             if (feat.artistName != "") {
-                g_fnt->RenderString(frmt("by {}", feat.artistName), ep.x, ep.y, {255,255,255,180,}, 14);
+                g_fnt->RenderString(frmt("by {}", feat.artistName), origin.x, origin.y, {255,255,255,180,}, UISCALED(14));
+                origin.y += UISCALED(18);
             }
             if (feat.artistLinks != "") {
-                g_fnt->RenderString(feat.artistLinks, origin.x, origin.y, {255,255,255,127,}, 12);
-                origin.y += 16;
+                g_fnt->RenderString(feat.artistLinks, origin.x, origin.y, {255,255,255,127,}, UISCALED(12));
+                origin.y += UISCALED(16);
             }
         }
     }
@@ -1448,9 +1452,9 @@ void ButtonLaunchpadLastFile::renderText(XY pos)
 {
     SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
 
-    int textX = pos.x + 5;
+    int textX = pos.x + UISCALED(5);
 
     XY textEP = g_fnt->RenderString(text, textX, pos.y + 2, fileExists ? textColor : SDL_Color{255, 128, 128, 120}, fontSize);
-    g_fnt->RenderString(path, textEP.x + 10, pos.y - 3, {255,255,255,120}, 14);
-    g_fnt->RenderString(size, textEP.x + 10, pos.y + 11, {255,255,255,180}, 14);
+    g_fnt->RenderString(path, pos.x+wxWidth + UISCALED(3), pos.y - 3, {255,255,255,120}, UISCALED(14));
+    g_fnt->RenderString(size, pos.x+wxWidth + UISCALED(3), pos.y + UISCALED(11), {255,255,255,180}, UISCALED(14));
 }

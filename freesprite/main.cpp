@@ -75,6 +75,7 @@ std::vector<Pattern*> g_patterns;
 Timer64 lastPenEvent;
 
 void g_addPopup(BasePopup* a) {
+    a->scaleScreen(g_config.uiScale);
     g_currentWindow->popupStack.push_back(a);
     a->startTimer.start();
 }

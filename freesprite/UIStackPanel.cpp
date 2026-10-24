@@ -11,6 +11,7 @@ UIStackPanel* UIStackPanel::FromContent(std::vector<Drawable*> content, bool ver
         }
     }
     panel->position = {0,0};
+    panel->subWidgets.applyScalingToAll(g_config.uiScale);
     panel->manuallyRecalculateLayout = true;
     panel->recalculateLayout();
     return panel;
@@ -26,7 +27,7 @@ UIStackPanel* UIStackPanel::Vertical(int spacing, std::vector<Drawable*> content
 {
     auto panel = FromContent(content, true);
     panel->position = position;
-    panel->spacing = spacing;
+    panel->spacing = (int)(g_config.uiScale * spacing);
     panel->recalculateLayout();
     return panel;
 }
@@ -35,7 +36,7 @@ UIStackPanel* UIStackPanel::Horizontal(int spacing, std::vector<Drawable*> conte
 {
     auto panel = FromContent(content, false);
     panel->position = position;
-    panel->spacing = spacing;
+    panel->spacing = (int)(g_config.uiScale * spacing);
     panel->recalculateLayout();
     return panel;
 }
@@ -58,8 +59,14 @@ void UIStackPanel::addWidget(Drawable* d) {
     recalculateLayout();
 }
 
+void UIStackPanel::addWidgetNoRecalc(Drawable* d)
+{
+    subWidgets.addDrawable(d);
+}
+
 void UIStackPanel::recalculateLayout()
 {
+    subWidgets.applyScalingToAll(g_config.uiScale);
     XY nextPos = { 0,0 };
     for (Drawable* d : subWidgets.drawablesList) {
         d->position = nextPos;

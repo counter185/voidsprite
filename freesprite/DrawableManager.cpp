@@ -97,6 +97,7 @@ bool DrawableManager::processInputEventInMultiple(std::vector<std::reference_wra
 void DrawableManager::addDrawable(Drawable* d) {
     if (d != NULL) {
         d->parentManager = this;
+        //d->scale(g_config.uiScale);
         drawablesList.push_back(d);
     }
 }
@@ -327,17 +328,12 @@ bool DrawableManager::processMouseWheelEvent(XY thisPositionOnScreen, XY mousePo
     return mouseTarget != NULL;
 }
 
-/*void DrawableManager::tickAnchors()
+void DrawableManager::applyScalingToAll(double scale)
 {
     for (Drawable*& d : drawablesList) {
-        if (d->anchor.x == 1) {
-            d->position.x = g_windowW - d->getDimensions().x;
-        }
-        if (d->anchor.y == 1) {
-            d->position.y = g_windowH - d->getDimensions().y;
-        }
+        d->scale(scale);
     }
-}*/
+}
 
 void DrawableManager::freeAllDrawables()
 {

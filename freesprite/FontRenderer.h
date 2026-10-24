@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "mathops.h"
+#include "background_operation.h"
 
 #define CHAR_RANGE_ALL {{0,0xFFFFFFFF}}
 
@@ -91,13 +92,13 @@ public:
 
     bool hasGlyphForChar(u32 ch, int size) override {
         if (!renderedGlyphs[size].contains(ch)) {
-            RenderGlyph(ch, size);
+            g_doAndWaitForMainThread([this, ch, size]() { RenderGlyph(ch, size); });
         }
         return renderedGlyphs[size][ch].texture != NULL;
     }
     GlyphData getGlyphForChar(u32 ch, int size) override {
         if (!renderedGlyphs[size].contains(ch)) {
-            RenderGlyph(ch, size);
+            g_doAndWaitForMainThread([this, ch, size]() { RenderGlyph(ch, size); });
         }
         return renderedGlyphs[size][ch];
     }

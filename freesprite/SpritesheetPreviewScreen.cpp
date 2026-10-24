@@ -294,6 +294,7 @@ void SpritesheetPreviewScreen::genTimelineButtons()
     for (int x = 0; x < sprites.size(); x++) {
         addTimelineButton();
     }
+    spriteView->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void SpritesheetPreviewScreen::addTimelineButton()

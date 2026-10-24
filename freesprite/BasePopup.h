@@ -31,6 +31,12 @@ public:
         wxWidth = size.x;
         wxHeight = size.y;
     }
+
+    void scaleScreen(double s) override {
+        BaseScreen::scaleScreen(s);
+        setSize({ (int)(wxWidth * s), (int)(wxHeight * s) });
+    }
+
 private:
     int nextActionButtonX = -1;
     bool actionButtonXInit = false;

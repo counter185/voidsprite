@@ -225,13 +225,13 @@ void MainEditor::render() {
         if (p == g_patterns[0]) {
             continue;
         }
-        SDL_Rect patternRect = { patternIconsOrigin.x + xOffs, patternIconsOrigin.y, 22, 22 };
+        SDL_Rect patternRect = { patternIconsOrigin.x + xOffs, patternIconsOrigin.y, NSCALE*22, NSCALE*22 };
         SDL_SetTextureAlphaMod(p->cachedIcon->get(), 0xa0);
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
         SDL_RenderFillRect(g_rd, &patternRect);
         SDL_RenderCopy(g_rd, p->cachedIcon->get(), NULL, &patternRect);
 
-        xOffs += 24;
+        xOffs += NSCALE*24;
     }
     if (invertPattern) {
         g_fnt->RenderString("~", patternIconsOrigin.x + xOffs, patternIconsOrigin.y);
@@ -267,7 +267,7 @@ void MainEditor::RenderCanvas()
 
     //prepare frame framebuffer
     if (frameFB.first != g_rd || !xyEqual(frameFBSize, canvas.dimensions)) {
-        SDL_DestroyTexture(frameFB.second);
+        tracked_destroyTexture(frameFB.second);
         frameFB.second = tracked_createTexture(g_rd, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, canvas.dimensions.x, canvas.dimensions.y);
         frameFBSize = canvas.dimensions;
         frameFB.first = g_rd;
@@ -985,55 +985,58 @@ void MainEditor::DrawForeground()
     int leftX = g_currentWindow->getSafeAreaLeft();
     int rightX = g_currentWindow->getSafeAreaRight();
 
-    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+    int baseFontSize = UISCALED(18);
+    int hOffset = UISCALED(28);
 
-    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), 200 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xd0});
+    g_fnt->RenderString(frmt("{}x{} ({}%)", canvas.dimensions.x, canvas.dimensions.y, canvas.scale * 100), 2 + leftX, g_windowH - hOffset, SDL_Color{255,255,255,0xa0}, baseFontSize);
+
+    XY endpoint = g_fnt->RenderString(frmt("{}:{}", mousePixelTargetPoint.x, mousePixelTargetPoint.y), UISCALED(200) + leftX, g_windowH - hOffset, SDL_Color{255,255,255,0xd0}, baseFontSize);
     if (ssne.tileDimensions.x != 0 && ssne.tileDimensions.y != 0) {
         std::string s = frmt("(t{}:{} in{}:{})", 
             (int)floor(mousePixelTargetPoint.x / (float)ssne.tileDimensions.x), 
             (int)floor(mousePixelTargetPoint.y / (float)ssne.tileDimensions.y),
             mousePixelTargetPoint.x%ssne.tileDimensions.x,
             mousePixelTargetPoint.y%ssne.tileDimensions.y);
-        endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 });
+        endpoint = g_fnt->RenderString(s, endpoint.x + 5, endpoint.y, SDL_Color{ 255,255,255,0x90 }, baseFontSize);
     }
 
     if (currentBrush != NULL) {
         static std::string eraserModeText = TL("vsp.maineditor.erasermode");
-        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + 30, 370 + leftX), g_windowH - 28, SDL_Color{ 255,255,255,0xa0 });
+        g_fnt->RenderString(frmt("{} {}", currentBrush->getName(), eraserMode ? eraserModeText : ""), ixmax(endpoint.x + UISCALED(30), UISCALED(370) + leftX), g_windowH - hOffset, SDL_Color{ 255,255,255,0xa0 }, baseFontSize);
     }
 
     if (!activePatterns.empty()) {
         g_fnt->RenderString(
             frmt("{} {}", activePatterns.front()->getName(), activePatterns.size() <= 1 ? "" : frmt("(+{})", activePatterns.size()-1)),
-            620 + leftX, g_windowH - 28, SDL_Color{255,255,255,0xa0});
+            UISCALED(620) + leftX, g_windowH - hOffset, SDL_Color{255,255,255,0xa0}, baseFontSize);
     }
 
     SDL_Color textColor = getAccentColor();
 
-    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2 + leftX, g_windowH - 28 * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) });
+    g_fnt->RenderString(secondsTimeToHumanReadable(editTime), 2 + leftX, g_windowH - hOffset * 2, { textColor.r, textColor.g, textColor.b, (u8)(g_windowFocused ? 0x50 : 0x30) }, baseFontSize);
 
-    XY rightOrigin = { g_windowW - ixmax(rightX, 2), g_windowH - 50 };
+    XY rightOrigin = { g_windowW - ixmax(rightX, 2), g_windowH - UISCALED(50)};
     if (savedFileGitData.found && g_config.editorShowGitRepo) {
-        rightOrigin.y -= 18;
+        rightOrigin.y -= UISCALED(18);
         std::string s = frmt("git:  {}:{}", savedFileGitData.friendlyRepoName, savedFileGitData.branch);
-        int fw = g_fnt->StatStringDimensions(s, 13).x;
-        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
+        int fw = g_fnt->StatStringDimensions(s, UISCALED(13)).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, UISCALED(13));
     }
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
-        rightOrigin.y -= 20;
+        rightOrigin.y -= UISCALED(20);
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
-        int fw = g_fnt->StatStringDimensions(unsavedSymbol).x;
-        g_fnt->RenderString(unsavedSymbol, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 });
+        int fw = g_fnt->StatStringDimensions(unsavedSymbol, baseFontSize).x;
+        g_fnt->RenderString(unsavedSymbol, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, baseFontSize);
 
         std::string timeString = frmt("({})", secondsTimeToHumanReadable(timerSinceLastSave.elapsedTime() / 1000));
-        int fw2 = g_fnt->StatStringDimensions(timeString, 12).x;
-        g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, 12);
+        int fw2 = g_fnt->StatStringDimensions(timeString, UISCALED(12)).x;
+        g_fnt->RenderString(timeString, rightOrigin.x - fw - fw2 - 1, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x60 }, UISCALED(12));
     }
     if (timelapseRecorder != NULL) {
-        rightOrigin.y -= 18;
+        rightOrigin.y -= UISCALED(18);
         std::string s = frmt("Recoding timelapse (frame {})", timelapseRecorder->getFramesWritten());
-        int fw = g_fnt->StatStringDimensions(s, 13).x;
-        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, 13);
+        int fw = g_fnt->StatStringDimensions(s, UISCALED(13)).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, UISCALED(13));
     }
 }
 
@@ -1050,17 +1053,17 @@ void MainEditor::renderComments()
     XY origin = canvas.currentDrawPoint;
     for (CommentData& c : getCommentStack()) {
         XY onScreenPosition = canvas.canvasPointToScreenPoint(c.position); //xyAdd(origin, { c.position.x * scale, c.position.y * scale });
-        SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
+        SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, NSCALE*16, NSCALE*16 };
         SDL_SetTextureAlphaMod(g_iconComment->get(g_rd), 0x80);
         SDL_RenderCopy(g_rd, g_iconComment->get(g_rd), NULL, &iconRect);
-        if (ssne.commentViewMode == COMMENTMODE_SHOW_ALL || (ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32)) {
+        if (ssne.commentViewMode == COMMENTMODE_SHOW_ALL || (ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < UISCALED(32))) {
             if (!c.hovered) {
                 c.animTimer.start();
                 c.hovered = true;
             }
             //int yOffset = 16 * (1.0f- XM1PW3P1(c.animTimer.percentElapsedTime(200)));
             //g_fnt->RenderString(c.data, onScreenPosition.x + 17, onScreenPosition.y + yOffset, SDL_Color{ 255,255,255, (uint8_t)(0xff * c.animTimer.percentElapsedTime(200))});
-            localTtp.addTooltip(Tooltip{ XY{onScreenPosition.x + 17, onScreenPosition.y}, c.data, {0xff,0xff,0xff,0xff}, c.animTimer.percentElapsedTime(200) });
+            localTtp.addTooltip(Tooltip{ XY{onScreenPosition.x + (NSCALE*16)+1, onScreenPosition.y}, c.data, {0xff,0xff,0xff,0xff}, c.animTimer.percentElapsedTime(200)});
         } else {
             c.hovered = false;
         }
@@ -1070,12 +1073,12 @@ void MainEditor::renderComments()
 
 void MainEditor::renderUndoStack()
 {
-    XY center = { g_windowW / 2, g_windowH - 40 };
+    XY center = { g_windowW / 2, g_windowH - UISCALED(40) };
 
     double mouseDistance = abs(center.y - g_mouseY);
     SDL_Color accentColor = getAccentColor();
 
-    if (mouseDistance < 30) {
+    if (mouseDistance < UISCALED(30)) {
         undoTimelineHoverTimer.startIfNotStarted();
     } else {
         undoTimelineHoverTimer.stop();
@@ -1087,13 +1090,16 @@ void MainEditor::renderUndoStack()
     if (hoverTimer > 0) {
         static std::string undoText = TL("vsp.maineditor.undostack");
         int xw = g_fnt->StatStringDimensions(undoText, 14).x;
-        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35 + (20 * (1.0-hoverTimer)), SDL_Color{ accentColor.r,accentColor.g,accentColor.b,(u8)(0x50 * hoverTimer) }, 14);
+        g_fnt->RenderString(undoText, 
+            center.x - (xw / 2), 
+            center.y - UISCALED(35 + (20 * (1.0-hoverTimer))), 
+            SDL_Color{ accentColor.r,accentColor.g,accentColor.b,(u8)(0x50 * hoverTimer) }, UISCALED(14));
     }
 
-    int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * 5 * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
+    int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * UISCALED_UP(5) * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
     center.x += xOffset;
 
-    double tickDistance = 10 + 10.0*hoverTimerFast;
+    int tickDistance = UISCALED(10 + 10.0*hoverTimerFast);
 
     for (auto& [stack, d] : std::vector<std::pair<std::vector<UndoStackElementV2*>&, int>> 
         { {undoStack, -1}, {redoStack, 1} }) 
@@ -1110,13 +1116,16 @@ void MainEditor::renderUndoStack()
                 distPercent = tickMouseDistance < 80 ? (1.0 - tickMouseDistance/80.0) : 0;
             }
             SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x30 + (u8)(0x70*distPercent));
-            drawLine(screenPos, xySubtract(screenPos, {0,10}));
+            drawLine(screenPos, xySubtract(screenPos, {0,UISCALED(10)}));
         }
     }
 
     //center line
     SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x50);
-    SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
+    drawLine(
+        xyAdd(center, { 0,UISCALED(2) }),
+        xyAdd(center, { 0, -UISCALED(15) }),
+        dxmax(0.2, XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
 }
 
 void MainEditor::initLayers()
@@ -1462,7 +1471,7 @@ void MainEditor::setUpWidgets()
             }
         };
     }
-
+    
     //load filters
     int i = 0;
     for (auto& filter : g_filters) {
@@ -1515,6 +1524,7 @@ void MainEditor::setUpWidgets()
 
     brushPicker = new EditorBrushPicker(this);
     brushPicker->position = {10 + leftX, 458};
+    brushPicker->scale(g_config.uiScale);
     brushPicker->reanchor();
     wxsManager.addDrawable(brushPicker);
 
@@ -1549,6 +1559,8 @@ void MainEditor::setUpWidgets()
 
         SetupCompactEditor(createSections);
     }
+
+    wxsManager.applyScalingToAll(g_config.uiScale);
 }
 
 void MainEditor::deselectAndCommitToUndoStack()
@@ -1619,6 +1631,7 @@ void MainEditor::openTouchModePanel()
         this->touchModePanel->position = { 
             g_windowW - this->touchModePanel->wxWidth - ixmax(10, g_currentWindow->getSafeAreaRight()), 
             g_windowH - this->touchModePanel->wxHeight - 40};
+        this->touchModePanel->anchor = { 1,1 };
         this->addWidget(this->touchModePanel);
     }
 }
@@ -1678,16 +1691,15 @@ void MainEditor::makeActionBar()
 
     int leftX = g_currentWindow->getSafeAreaLeft();
 
+    toolPropertiesPanel = new Panel();
+    toolPropertiesPanel->sizeToContent = true;
+
     UIStackPanel* actionsStack = UIStackPanel::Horizontal(5, {
-        undoButton, redoButton, saveButton, zoomoutButton, zoominButton, blendModeDropdown
+        undoButton, redoButton, saveButton, zoomoutButton, zoominButton, blendModeDropdown,
+        Panel::Space(50,1), toolPropertiesPanel
     });
     actionsStack->position = { ixmax(5, leftX), 5 };
     actionbar->addDrawable(actionsStack);
-
-    toolPropertiesPanel = new Panel();
-    toolPropertiesPanel->sizeToContent = true;
-    toolPropertiesPanel->position = { actionsStack->getDimensions().x  + 50 + leftX, 0};
-    actionbar->addDrawable(toolPropertiesPanel);
 
     wxsManager.addDrawable(actionbar);
 }
@@ -1746,11 +1758,13 @@ void MainEditor::initToolParameters()
         }
     }
     actionbar->evalHeight();
+    toolPropertiesPanel->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void MainEditor::addWidget(Drawable* wx)
 {
     wxsManager.addDrawable(wx);
+    wx->scale(g_config.uiScale);
 }
 
 void MainEditor::removeWidget(Drawable* wx)
@@ -1845,6 +1859,7 @@ void MainEditor::takeInput(SDL_Event evt) {
             case SDL_EVENT_FINGER_DOWN:
             case SDL_EVENT_FINGER_MOTION:
                 if (touchMode != TOUCHMODE_PAN) {
+                    penPressure = dxmin(1.0, (double)evt.tfinger.pressure);
                     evt = convertTouchToMouseEvent(evt);
                     if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN || evt.type == SDL_EVENT_MOUSE_BUTTON_UP) {
                         evt.button.button = touchMode == TOUCHMODE_LEFTCLICK ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
@@ -3452,12 +3467,17 @@ Layer* MainEditor::flattenFrame(Frame* target)
     Layer* ret = Layer::tryAllocLayer(canvas.dimensions.x, canvas.dimensions.y);
     if (ret != NULL) {
         int x = 0;
-        uint32_t* retppx = ret->pixels32();
+        u32* retppx = ret->pixels32();
         for (Layer*& l : target->layers) {
+            if (l->w != canvas.dimensions.x || l->h != canvas.dimensions.y) {
+                logerr("flattenFrame LAYER DIMENSIONS DO NOT MATCH EDITOR");
+                delete ret;
+                return NULL;
+            }
             if (l->hidden) {
                 continue;
             }
-            uint32_t* ppx = l->pixels32();
+            u32* ppx = l->pixels32();
             if (x++ == 0) {
                 if (l->layerAlpha == 255) {
                     memcpy(ret->pixels32(), l->pixels32(), l->w * l->h * 4ull);
