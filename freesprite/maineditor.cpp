@@ -225,13 +225,13 @@ void MainEditor::render() {
         if (p == g_patterns[0]) {
             continue;
         }
-        SDL_Rect patternRect = { patternIconsOrigin.x + xOffs, patternIconsOrigin.y, 22, 22 };
+        SDL_Rect patternRect = { patternIconsOrigin.x + xOffs, patternIconsOrigin.y, NSCALE*22, NSCALE*22 };
         SDL_SetTextureAlphaMod(p->cachedIcon->get(), 0xa0);
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0x60);
         SDL_RenderFillRect(g_rd, &patternRect);
         SDL_RenderCopy(g_rd, p->cachedIcon->get(), NULL, &patternRect);
 
-        xOffs += 24;
+        xOffs += NSCALE*24;
     }
     if (invertPattern) {
         g_fnt->RenderString("~", patternIconsOrigin.x + xOffs, patternIconsOrigin.y);
@@ -1053,17 +1053,17 @@ void MainEditor::renderComments()
     XY origin = canvas.currentDrawPoint;
     for (CommentData& c : getCommentStack()) {
         XY onScreenPosition = canvas.canvasPointToScreenPoint(c.position); //xyAdd(origin, { c.position.x * scale, c.position.y * scale });
-        SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, 16, 16 };
+        SDL_Rect iconRect = { onScreenPosition.x, onScreenPosition.y, NSCALE*16, NSCALE*16 };
         SDL_SetTextureAlphaMod(g_iconComment->get(g_rd), 0x80);
         SDL_RenderCopy(g_rd, g_iconComment->get(g_rd), NULL, &iconRect);
-        if (ssne.commentViewMode == COMMENTMODE_SHOW_ALL || (ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < 32)) {
+        if (ssne.commentViewMode == COMMENTMODE_SHOW_ALL || (ssne.commentViewMode == COMMENTMODE_SHOW_HOVERED && xyDistance(onScreenPosition, XY{ g_mouseX, g_mouseY }) < UISCALED(32))) {
             if (!c.hovered) {
                 c.animTimer.start();
                 c.hovered = true;
             }
             //int yOffset = 16 * (1.0f- XM1PW3P1(c.animTimer.percentElapsedTime(200)));
             //g_fnt->RenderString(c.data, onScreenPosition.x + 17, onScreenPosition.y + yOffset, SDL_Color{ 255,255,255, (uint8_t)(0xff * c.animTimer.percentElapsedTime(200))});
-            localTtp.addTooltip(Tooltip{ XY{onScreenPosition.x + 17, onScreenPosition.y}, c.data, {0xff,0xff,0xff,0xff}, c.animTimer.percentElapsedTime(200) });
+            localTtp.addTooltip(Tooltip{ XY{onScreenPosition.x + (NSCALE*16)+1, onScreenPosition.y}, c.data, {0xff,0xff,0xff,0xff}, c.animTimer.percentElapsedTime(200)});
         } else {
             c.hovered = false;
         }
@@ -1073,12 +1073,12 @@ void MainEditor::renderComments()
 
 void MainEditor::renderUndoStack()
 {
-    XY center = { g_windowW / 2, g_windowH - 40 };
+    XY center = { g_windowW / 2, g_windowH - UISCALED(40) };
 
     double mouseDistance = abs(center.y - g_mouseY);
     SDL_Color accentColor = getAccentColor();
 
-    if (mouseDistance < 30) {
+    if (mouseDistance < UISCALED(30)) {
         undoTimelineHoverTimer.startIfNotStarted();
     } else {
         undoTimelineHoverTimer.stop();
@@ -1090,13 +1090,16 @@ void MainEditor::renderUndoStack()
     if (hoverTimer > 0) {
         static std::string undoText = TL("vsp.maineditor.undostack");
         int xw = g_fnt->StatStringDimensions(undoText, 14).x;
-        g_fnt->RenderString(undoText, center.x - (xw / 2), center.y - 35 + (20 * (1.0-hoverTimer)), SDL_Color{ accentColor.r,accentColor.g,accentColor.b,(u8)(0x50 * hoverTimer) }, 14);
+        g_fnt->RenderString(undoText, 
+            center.x - (xw / 2), 
+            center.y - UISCALED(35 + (20 * (1.0-hoverTimer))), 
+            SDL_Color{ accentColor.r,accentColor.g,accentColor.b,(u8)(0x50 * hoverTimer) }, UISCALED(14));
     }
 
-    int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * 5 * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
+    int xOffset = undoTimer.started ? ((lastUndoWasRedo ? -1 : 1) * UISCALED_UP(5) * XM1PW3P1(undoTimer.percentElapsedTime(200))) : 0;
     center.x += xOffset;
 
-    double tickDistance = 10 + 10.0*hoverTimerFast;
+    int tickDistance = UISCALED(10 + 10.0*hoverTimerFast);
 
     for (auto& [stack, d] : std::vector<std::pair<std::vector<UndoStackElementV2*>&, int>> 
         { {undoStack, -1}, {redoStack, 1} }) 
@@ -1113,13 +1116,16 @@ void MainEditor::renderUndoStack()
                 distPercent = tickMouseDistance < 80 ? (1.0 - tickMouseDistance/80.0) : 0;
             }
             SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x30 + (u8)(0x70*distPercent));
-            drawLine(screenPos, xySubtract(screenPos, {0,10}));
+            drawLine(screenPos, xySubtract(screenPos, {0,UISCALED(10)}));
         }
     }
 
     //center line
     SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x50);
-    SDL_RenderDrawLine(g_rd, center.x, center.y + 2, center.x, center.y - (15 * XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
+    drawLine(
+        xyAdd(center, { 0,UISCALED(2) }),
+        xyAdd(center, { 0, -UISCALED(15) }),
+        dxmax(0.2, XM1PW3P1(undoTimer.started ? undoTimer.percentElapsedTime(200) : 1.0)));
 }
 
 void MainEditor::initLayers()

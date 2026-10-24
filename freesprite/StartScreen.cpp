@@ -1452,9 +1452,9 @@ void ButtonLaunchpadLastFile::renderText(XY pos)
 {
     SDL_Color textColor = focused ? colorTextFocused : colorTextUnfocused;
 
-    int textX = pos.x + 5;
+    int textX = pos.x + UISCALED(5);
 
     XY textEP = g_fnt->RenderString(text, textX, pos.y + 2, fileExists ? textColor : SDL_Color{255, 128, 128, 120}, fontSize);
-    g_fnt->RenderString(path, textEP.x + UISCALED(11), pos.y - 3, {255,255,255,120}, UISCALED(14));
-    g_fnt->RenderString(size, textEP.x + UISCALED(11), pos.y + UISCALED(11), {255,255,255,180}, UISCALED(14));
+    g_fnt->RenderString(path, pos.x+wxWidth + UISCALED(3), pos.y - 3, {255,255,255,120}, UISCALED(14));
+    g_fnt->RenderString(size, pos.x+wxWidth + UISCALED(3), pos.y + UISCALED(11), {255,255,255,180}, UISCALED(14));
 }
