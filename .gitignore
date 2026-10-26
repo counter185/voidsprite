@@ -478,3 +478,4 @@ android-project/local.properties
 /freesprite/.vscode
 *.kate-swp
 /build_appimage
+/build_vita
