@@ -814,6 +814,32 @@ void drawLine(XY p1, XY p2, double percent)
 
     p2 = statLineEndpoint(p1, p2, percent);
 
+    //secret render lines as triangles tech so that they get rasterized on gpu and not cpu
+    //might help performance in some cases idk
+    //also render just 0,1,2 for a cool effect that i might use on launchpad
+    /*u8 r,g,b,a;
+    SDL_GetRenderDrawColor(g_rd, &r, &g, &b, &a);
+    if (p1.x == p2.x || p1.y == p2.y) {
+        XY minp = {ixmin(p1.x, p2.x), ixmin(p1.y, p2.y)};
+        XY size = {ixmax(p1.x, p2.x) - minp.x + 1, ixmax(p1.y, p2.y) - minp.y + 1};
+        Fill::Solid(PackRGBAtoARGB(r,g,b,a)).fill({minp.x, minp.y, size.x, size.y});
+    } else {
+        //a = 255;
+        SDL_Vertex vts[4];
+        vts[0].position = xytofp(p1);
+        vts[1].position = xytofp(p2);
+        vts[0].color = vts[1].color = vts[2].color = toFColor(SDL_Color(r,g,b,a));
+        vts[2] = vts[0];
+        vts[3] = vts[1];
+        vts[2].position = xytofp(xyAdd(p1, {0, 1}));
+        vts[3].position = xytofp(xyAdd(p2, {-1, 0}));
+        vts[0].tex_coord = vts[1].tex_coord = vts[2].tex_coord = {};
+        int inds[6] = {0,1,2, 2,1,3};
+        if (!SDL_RenderGeometry(g_rd, NULL, vts, 4, inds, 6)) {
+            logerr(SDL_GetError());
+        }
+    }*/
+
     SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
 }
 

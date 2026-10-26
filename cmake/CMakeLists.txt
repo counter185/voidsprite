@@ -34,7 +34,18 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fdiagnostics-show-option -w -Wno-c++11-narrowing")
 
-add_definitions(-DVSP_USE_LIBAVIF=1)
+if (VITASDK_BUILD)
+    include("$ENV{VITASDK}/share/vita.cmake" REQUIRED)
+    add_definitions(-DVSP_USE_LIBAVIF=0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVITASDK=1 -fcompare-debug-second -pthread -static-libstdc++")
+    set(VOIDSPRITE_ASSETS_PATH "app0:/")
+
+    set(VITA_APP_NAME "voidsprite")
+    set(VITA_TITLEID  "CNTRPL039")
+    set(VITA_VERSION  "01.00")
+else()
+    add_definitions(-DVSP_USE_LIBAVIF=1)
+endif()
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
 
 if(DEFINED ENV{GIT_HASH})
@@ -145,6 +156,11 @@ if(VOIDSPRITE_UNITY_BUILD)
     if (FLATPAK)
         #flatpak builder is single threaded so just build all of it at once
         set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 500)
+    elseif(VITASDK_BUILD)
+        #gcc has a really bad memory leak
+        #if you do a unity build it will work on emulator but crash on hardware
+        set_property(TARGET voidsprite PROPERTY UNITY_BUILD false)
+        set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 20)
     else()
         set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 40)
     endif()
@@ -153,7 +169,11 @@ endif()
 target_link_libraries(voidsprite PRIVATE SDL3::SDL3)
 target_link_libraries(voidsprite PRIVATE SDL3_ttf::SDL3_ttf)
 target_link_libraries(voidsprite PRIVATE SDL3_image::SDL3_image)
+if (NOT VITASDK_BUILD)
 target_link_libraries(voidsprite PRIVATE avif)
+else()
+#target_link_libraries(voidsprite PUBLIC pthread)
+endif()
 target_link_libraries(voidsprite PRIVATE ZLIB::ZLIBSTATIC)
 if (DEFINED WIN32)
     target_link_libraries(voidsprite PRIVATE d3d9 dwmapi winhttp iphlpapi)
@@ -200,5 +220,21 @@ if (WIN32)
     add_custom_command(TARGET voidsprite POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:voidsprite> $<TARGET_FILE_DIR:voidsprite>
         COMMAND_EXPAND_LISTS
+    )
+endif()
+if (VITASDK_BUILD)
+    vita_create_self(voidsprite.self voidsprite UNSAFE)
+    # The FILE directive lets you add additional files to the VPK, the syntax is
+    # FILE src_path dst_path_in_vpk. In this case, we add the LiveArea paths.
+    vita_create_vpk(voidsprite.vpk ${VITA_TITLEID} voidsprite.self
+    VERSION ${VITA_VERSION}
+    NAME ${VITA_APP_NAME}
+    FILE ../vita-resources/sce_sys/icon0.png sce_sys/icon0.png
+    FILE ../vita-resources/sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
+    FILE ../vita-resources/sce_sys/livearea/contents/startup.png sce_sys/livearea/contents/startup.png
+    FILE ../vita-resources/sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+    FILE ../freesprite/appfont-MPLUSRounded1c-Medium.ttf appfont-MPLUSRounded1c-Medium.ttf
+    FILE ../freesprite/appfontcyr-ZenKakuGothicNew-Medium.ttf appfontcyr-ZenKakuGothicNew-Medium.ttf
+    FILE ../freesprite/assets assets
     )
 endif()
