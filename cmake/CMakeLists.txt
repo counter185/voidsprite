@@ -158,7 +158,8 @@ if(VOIDSPRITE_UNITY_BUILD)
         set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 500)
     elseif(VITASDK_BUILD)
         #gcc has a really bad memory leak
-        #set_property(TARGET voidsprite PROPERTY UNITY_BUILD false)
+        #if you do a unity build it will work on emulator but crash on hardware
+        set_property(TARGET voidsprite PROPERTY UNITY_BUILD false)
         set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 20)
     else()
         set_property(TARGET voidsprite PROPERTY UNITY_BUILD_BATCH_SIZE 40)

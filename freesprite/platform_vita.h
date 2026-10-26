@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include <psp2/appmgr.h>
+
 #include "EventCallbackListener.h"
 #include "Notification.h"
 #include "PopupFilePicker.h"
@@ -123,18 +125,22 @@ std::vector<RootDirInfo> platformListRootDirectories() {
     ret.push_back({"Application data", platformEnsureDirAndGetConfigFilePath()});
     ret.push_back({"ux0", "ux0:"});
     ret.push_back({"ur0", "ur0:"});
-    if (std::filesystem::exists("uma0:")) {
-        ret.push_back({"uma0", "uma0:"});
-    }
-    if (std::filesystem::exists("usb0:")) {
-        ret.push_back({"usb0", "usb0:"});
-    }
-
-    for (auto& p : std::vector<std::string>{"ux0:", "uma0:"}) {
-        if (std::filesystem::exists(p + "pspemu")) {
-            ret.push_back({frmt("PSP ({})", p), p + "pspemu/"});
+    try {
+        if (std::filesystem::exists("uma0:")) {
+            ret.push_back({"uma0", "uma0:"});
         }
-    }
+        for (auto& p : std::vector<std::string>{"ux0:", "uma0:"}) {
+            if (std::filesystem::exists(p + "pspemu")) {
+                ret.push_back({frmt("PSP ({})", p), p + "pspemu/"});
+            }
+        }
+
+        //trying to check if usb0 exists throws an exception if it's not there
+        //filesystem error: status: No such device [usb0:]
+        if (std::filesystem::exists("usb0:")) {
+            ret.push_back({"usb0", "usb0:"});
+        }
+    } catch (std::exception&) {}
     return ret;
 }
 
@@ -144,7 +150,10 @@ bool platformHasFileAccessPermissions() {
 void platformRequestFileAccessPermissions() {}
 
 void platformOpenWebpageURL(std::string url) {
-    //todo
+    //char param[1024];
+    //memset(param, 0, 1024);
+    //sceAppMgrGetAppParam(param);
+    sceAppMgrLaunchAppByName(0x60000, "NPXS10003", url.c_str());
 }
 
 std::string platformFetchTextFile(std::string url) {

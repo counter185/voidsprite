@@ -78,6 +78,7 @@ endif()
 
 #these are static and can be used on virtually any platform
 set(ZLIB_BUILD_TESTING OFF)
+set(ZLIB_BUILD_SHARED OFF)
 add_subdirectory(external/zlib)
 add_subdirectory(external/fmt)
 
