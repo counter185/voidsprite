@@ -451,6 +451,7 @@ void VSPWindow::tickWindow()
 
 void VSPWindow::renderWindow()
 {
+    u64 tickStart = SDL_GetTicks();
     if (viewport != NULL) {
         g_pushRenderTarget(viewport);
     }
@@ -509,14 +510,19 @@ void VSPWindow::renderWindow()
     }
 
     SDL_RenderPresent(rd);
-    doFrameDelay();
+    u64 frameTimeMS = SDL_GetTicks() - tickStart;
+    lastCPURenderTime = frameTimeMS;
+    doFrameDelay(frameTimeMS);
 }
 
-void VSPWindow::doFrameDelay()
+void VSPWindow::doFrameDelay(u64 frameTime)
 {
     if (!g_config.vsync) {
         SDL_Delay(3);
     }
+    /*else if (frameTime < 16) {
+        SDL_Delay(16 - frameTime);
+    }*/
     int batterySeconds, batteryPercent;
     SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
     if (!g_windowFocused && !g_fullFramerateThisFrame) {
@@ -641,7 +647,8 @@ void VSPWindow::renderStatusBar()
     if (g_config.showFPS) {
         XY fpsOrigin = xySubtract(nextStatusBarOrigin, { UISCALED(70), 0 });
         nextStatusBarOrigin = fpsOrigin;
-        g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, UISCALED(16));
+        XY ep = g_fnt->RenderString(frmt("{} FPS", lastFrameCount), fpsOrigin.x, fpsOrigin.y - 5, { 255,255,255,0x80 }, UISCALED(16));
+        //g_fnt->RenderString(frmt("({}ms)", lastCPURenderTime), ep.x, ep.y, { 255,255,255,0x80 }, UISCALED(12));
     }
 }
 

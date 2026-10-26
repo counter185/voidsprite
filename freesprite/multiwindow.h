@@ -75,6 +75,7 @@ public:
     u64 lastLowBatteryPulseTime = 0;
     bool prevMouseInActionButtonRange = false;
     Timer64 windowActionButtonsAnimTimer;
+    u64 lastCPURenderTime = 0;
 
     BaseScreen* favScreen = NULL;
 
@@ -155,7 +156,7 @@ public:
 
     void tickWindow();
     void renderWindow();
-    void doFrameDelay();
+    void doFrameDelay(u64 frameTime);
     virtual void clearWindow() { SDL_SetRenderDrawColor(rd, 0, 0, 0, 255); SDL_RenderClear(rd); }
     void renderDebugInfo();
     void renderStatusBar();

@@ -16,7 +16,12 @@ private:
 public:
     bool border = true;
     bool takeTooltips = true;
-    Fill tooltipFill = visualConfigFill("tooltips/fill");
+    Fill tooltipFill = Fill::None();
+
+    TooltipsLayer() {
+        static Fill ttpFill = visualConfigFill("tooltips/fill");
+        tooltipFill = ttpFill;
+    }
 
     void addTooltip(Tooltip t);
     void renderAll();

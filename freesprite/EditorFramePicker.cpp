@@ -165,7 +165,7 @@ void EditorFramePicker::renderPlayhead(XY at)
 
         double animTime = parent->frameAnimationStartTimer.elapsedLoopingTime(parent->frames.size() * parent->frameAnimMSPerFrame);
         animTime /= parent->frameAnimMSPerFrame;
-        int animXPos = playheadBegin.x + animTime * frameButtonW;
+        int animXPos = playheadBegin.x + animTime * frameButtons.front()->wxWidth;
 
         g_pushClip(panelRect);
         SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 0xA0);

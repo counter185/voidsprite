@@ -1089,7 +1089,7 @@ void MainEditor::renderUndoStack()
 
     if (hoverTimer > 0) {
         static std::string undoText = TL("vsp.maineditor.undostack");
-        int xw = g_fnt->StatStringDimensions(undoText, 14).x;
+        int xw = g_fnt->StatStringDimensions(undoText, UISCALED(14)).x;
         g_fnt->RenderString(undoText, 
             center.x - (xw / 2), 
             center.y - UISCALED(35 + (20 * (1.0-hoverTimer))), 
