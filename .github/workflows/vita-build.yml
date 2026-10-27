@@ -1,0 +1,36 @@
+name: PSV build
+
+on:
+  - workflow_dispatch
+  - workflow_call
+
+jobs:
+  build-vita:
+    runs-on: ubuntu-latest
+    container:
+      image: vitasdk/vitasdk:2026.08-minimal
+      options: --user root
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Configure git
+        run: git config --global --add safe.directory "$(pwd)"
+
+      - name: install pkgs
+        run: yes | vdpm install freetype
+        continue-on-error: true
+
+      - name: build using container
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: mkdir build_vita && cd build_vita && cmake .. -DVITASDK_BUILD=ON -DRELEASE=ON && make -j4
+      
+      - name: Push build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: voidsprite-build-vita
+          path: build_vita/cmake/voidsprite.vpk
+          
+                  
