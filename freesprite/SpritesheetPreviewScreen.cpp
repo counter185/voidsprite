@@ -268,7 +268,10 @@ void SpritesheetPreviewScreen::drawPreview(XY at, int scale, int which)
 
 void SpritesheetPreviewScreen::drawBackground()
 {
-    TilemapPreviewScreen::drawBackground();
+    uint32_t colorBG1 = 0xFF000000;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x000000 : 0xDFDFDF);
+    uint32_t colorBG2 = 0xFF000000 | 0x202020;//| (sdlcolorToUint32(backgroundColor) == 0xFF000000 ? 0x202020 : 0x808080);
+    renderGradient({ 0,0, g_windowW, g_windowH }, colorBG1, colorBG1, colorBG1, colorBG2);
+
     if (g_config.animatedBackground) {
         u64 now = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
         u64 progress = now % 120000;
@@ -285,7 +288,6 @@ void SpritesheetPreviewScreen::drawBackground()
             if (x >= 0) {
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19);
                 drawLine({ x, 0 }, { x, g_windowH });
-                SDL_RenderDrawLine(g_rd, x, 0, x, g_windowH);
             }
         }
     }
