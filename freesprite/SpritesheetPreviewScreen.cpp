@@ -270,18 +270,21 @@ void SpritesheetPreviewScreen::drawBackground()
 {
     TilemapPreviewScreen::drawBackground();
     if (g_config.animatedBackground) {
-        uint64_t now = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
-        uint64_t progress = now % 120000;
-        for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += 50) {
+        u64 now = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
+        u64 progress = now % 120000;
+        int distance1 = UISCALED_UP(50);
+        int distance2 = UISCALED_UP(30);
+        for (int y = -(1.0 - progress / 120000.0) * g_windowH; y < g_windowH; y += distance1) {
             if (y >= 0) {
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x22);
-                SDL_RenderDrawLine(g_rd, 0, y, g_windowW, y);
+                drawLine({ 0,y }, { g_windowW, y });
             }
         }
 
-        for (int x = -(1.0 - (now % 100000) / 100000.0) * g_windowW; x < g_windowW; x += 30) {
+        for (int x = -(1.0 - (now % 100000) / 100000.0) * g_windowW; x < g_windowW; x += distance2) {
             if (x >= 0) {
                 SDL_SetRenderDrawColor(g_rd, 0xff, 0xff, 0xff, 0x19);
+                drawLine({ x, 0 }, { x, g_windowH });
                 SDL_RenderDrawLine(g_rd, x, 0, x, g_windowH);
             }
         }

@@ -806,7 +806,28 @@ XY statLineEndpoint(XY p1, XY p2, double percent) {
     return p2;
 }
 
+XYf statLineEndpointF(XYf p1, XYf p2, double percent)
+{
+    if (percent != 1.0 && percent >= 0.0 && percent < 1.0) {
+        p2.x = p1.x + ((p2.x - p1.x) * percent);
+        p2.y = p1.y + ((p2.y - p1.y) * percent);
+    }
+    return p2;
+}
+
 void drawLine(XY p1, XY p2, double percent)
+{
+    if (percent == 0.0) {
+        return;
+    }
+    else if (percent != 1.0) {
+        p2 = statLineEndpoint(p1, p2, percent);
+    }
+
+    SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
+}
+
+void drawArcLine(XY p1, XY p2, double percent)
 {
     if (percent == 0.0) {
         return;
@@ -814,7 +835,35 @@ void drawLine(XY p1, XY p2, double percent)
 
     p2 = statLineEndpoint(p1, p2, percent);
 
-    SDL_RenderDrawLine(g_rd, p1.x, p1.y, p2.x, p2.y);
+    u8 r,g,b,a;
+    SDL_GetRenderDrawColor(g_rd, &r, &g, &b, &a);
+    if (p1.x == p2.x || p1.y == p2.y) {
+        XY minp = {ixmin(p1.x, p2.x), ixmin(p1.y, p2.y)};
+        XY size = {ixmax(p1.x, p2.x) - minp.x + 1, ixmax(p1.y, p2.y) - minp.y + 1};
+        Fill::Solid(PackRGBAtoARGB(r,g,b,a)).fill({minp.x, minp.y, size.x, size.y});
+    } else {
+        SDL_Vertex vts[3];
+        vts[0].position = xytofp(p1);
+        vts[1].position = xytofp(p2);
+        vts[0].color = vts[1].color = vts[2].color = toFColor(SDL_Color(r,g,b,a));
+        vts[2] = vts[0];
+        vts[2].position = xytofp(xyAdd(p1, {0, 1}));
+        vts[0].tex_coord = vts[1].tex_coord = vts[2].tex_coord = {};
+        int inds[3] = {0,1,2};
+        SDL_RenderGeometry(g_rd, NULL, vts, 3, inds, 3);
+    }
+}
+
+void drawLineF(XYf p1, XYf p2, double percent)
+{
+    if (percent == 0.0) {
+        return;
+    }
+    else if (percent != 1.0) {
+        p2 = statLineEndpointF(p1, p2, percent);
+    }
+
+    SDL_RenderLine(g_rd, p1.x, p1.y, p2.x, p2.y);
 }
 
 XY evalBezierPoint(std::vector<XY> vtx, double percent)

@@ -578,28 +578,33 @@ void MainEditor::DrawBackground()
     SDL_Color accentColor = getAccentColor();
 
     uint64_t bgtimer = g_config.animatedBackground >= 3 ? 0 : SDL_GetTicks64();
+    int lineW = UISCALED_UP(60);
+    int lineX = UISCALED_UP(400);
+    float windowHF = (float)g_windowH;
+
+    //sharp and sharp(static)
     if (g_config.animatedBackground == 1 || g_config.animatedBackground == 3) {
-        int lineX = 400;
-        for (int x = 40 + (bgtimer % 5000 / 5000.0 * 60); x < g_windowW + lineX; x += 60) {
+        for (float x = 40 + (bgtimer % 5000 / 5000.0 * lineW); x < g_windowW + lineX; x += lineW) {
             SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x40 / (g_windowFocused ? 1 : 3));
-            SDL_RenderDrawLine(g_rd, x, 0, x - lineX, g_windowH);
+            drawLineF({ x,0 }, { x - lineX, windowHF });
             if (g_windowFocused) {
                 SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x40 / 2);
-                SDL_RenderDrawLine(g_rd, x - 1, 0, x - lineX - 1, g_windowH);
+                drawLineF({ x - 1,0 }, { x - lineX - 1, windowHF });
                 SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x40 / 3);
-                SDL_RenderDrawLine(g_rd, x - 2, 0, x - lineX - 2, g_windowH);
+                drawLineF({ x - 2,0 }, { x - lineX - 2, windowHF });
             }
 
+            //backside lines
             SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x0d);
-            SDL_RenderDrawLine(g_rd, g_windowW - x, 0, g_windowW - x + lineX / 4 * 6, g_windowH);
+            drawLineF({ g_windowW - x, 0 }, { g_windowW - x + lineX / 4 * 6, windowHF });
             SDL_SetRenderDrawColor(g_rd, accentColor.r, accentColor.g, accentColor.b, 0x0d/2);
-            SDL_RenderDrawLine(g_rd, g_windowW - x - 1, 0, g_windowW - x + lineX / 4 * 6 - 1, g_windowH);
+            drawLineF({ g_windowW - x - 1, 0 }, { g_windowW - x + lineX / 4 * 6 - 1, windowHF });
         }
     }
+    //smooth and smooth(static)
     else if (g_config.animatedBackground == 2 || g_config.animatedBackground == 4) {
         //draw lines in the background
-        int lineX = 400;
-        for (int x = 40 + (bgtimer % 5000 / 5000.0 * 60); x < g_windowW + lineX; x += 60) {
+        for (int x = 40 + (bgtimer % 5000 / 5000.0 * lineW); x < g_windowW + lineX; x += lineW) {
             XY l1 = { x, 0 };
             XY l2 = { x - lineX, g_windowH };
             XY ll1 = xyAdd(l1, { 4, 0 });

@@ -116,7 +116,10 @@ void rasterizeSplitEllipseByY(XY posMin, XY posMax, std::function<void(XY)> forE
 void rasterizeBezierCurve(std::vector<XY> points, std::function<void(XY)> forEachPixel);
 
 XY statLineEndpoint(XY p1, XY p2, double percent);
+XYf statLineEndpointF(XYf p1, XYf p2, double percent);
 void drawLine(XY p1, XY p2, double percent = 1.0);
+void drawArcLine(XY p1, XY p2, double percent = 1.0);
+void drawLineF(XYf p1, XYf p2, double percent = 1.0);
 XY evalBezierPoint(std::vector<XY> vtx, double percent);
 double interpolatePos(double start, double end, double t);
 XYd interpolatePosXYd(XYd start, XYd end, double t);

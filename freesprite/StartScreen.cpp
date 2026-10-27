@@ -646,7 +646,7 @@ void StartScreen::renderBackground()
                 remove = effects[x].timer.percentElapsedTime(2000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 120) / 960.0), g_windowH * ((effects[x].pos.y - 120) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x30 * (1.0 - effects[x].timer.percentElapsedTime(2000)));
-                drawLine(normPosition, normPosition2, 1.0);
+                drawArcLine(normPosition, normPosition2, 1.0);
             }
             break;
             case 1:
@@ -655,7 +655,7 @@ void StartScreen::renderBackground()
                 remove = effects[x].timer.percentElapsedTime(1000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 500) / 960.0), g_windowH * ((effects[x].pos.y - 500) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x30 - 0x20 * effects[x].timer.percentElapsedTime(700));
-                drawLine(normPosition, normPosition2, 1.0-XM1PW3P1(effects[x].timer.percentElapsedTime(700)));
+                drawArcLine(normPosition, normPosition2, 1.0-XM1PW3P1(effects[x].timer.percentElapsedTime(700)));
             }
                 break;
             case 2:
@@ -664,7 +664,7 @@ void StartScreen::renderBackground()
                 remove = effects[x].timer.percentElapsedTime(3000) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 40) / 960.0), g_windowH * ((effects[x].pos.y - 40) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(3000)));
-                drawLine(normPosition, normPosition2, 1.0);
+                drawArcLine(normPosition, normPosition2, 1.0);
             }
                 break;
             case 3:
@@ -673,7 +673,7 @@ void StartScreen::renderBackground()
                 remove = effects[x].timer.percentElapsedTime(2500) == 1.0;
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 90) / 960.0), g_windowH * ((effects[x].pos.y - 90) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x20 * (1.0 - effects[x].timer.percentElapsedTime(2500)));
-                drawLine(normPosition, normPosition2, 1.0);
+                drawArcLine(normPosition, normPosition2, 1.0);
             }
                 break;
             case 4:
@@ -683,8 +683,8 @@ void StartScreen::renderBackground()
                 XY normPosition2 = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 15) / 960.0) };
                 XY normPosition3 = { g_windowW * ((effects[x].pos.x - 15) / 960.0), g_windowH * ((effects[x].pos.y + 15) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x50 - 0x50 * effects[x].timer.percentElapsedTime(1000));
-                drawLine(normPosition, normPosition2, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
-                drawLine(normPosition, normPosition3, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
+                drawArcLine(normPosition, normPosition2, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
+                drawArcLine(normPosition, normPosition3, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1000)));
             }
                 break;
             case 5:
@@ -696,10 +696,10 @@ void StartScreen::renderBackground()
                 XY posUp = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y - 12) / 960.0) };
                 XY posDown = { g_windowW * ((effects[x].pos.x + 15) / 960.0), g_windowH * ((effects[x].pos.y + 12) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x24 - 0x24 * effects[x].timer.percentElapsedTime(600));
-                drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
-                drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
-                drawLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
-                drawLine(posRight, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawArcLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawArcLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawArcLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
+                drawArcLine(posRight, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(600)));
             }
                 break;
             case 6:
@@ -711,10 +711,10 @@ void StartScreen::renderBackground()
                 XY posUp = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y - 24) / 960.0) };
                 XY posDown = { g_windowW * ((effects[x].pos.x + 30) / 960.0), g_windowH * ((effects[x].pos.y + 24) / 960.0) };
                 SDL_SetRenderDrawColor(g_rd, vfxColor.r, vfxColor.g, vfxColor.b, 0x19 - 0x19 * effects[x].timer.percentElapsedTime(1300));
-                drawLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
-                drawLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
-                drawLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
-                drawLine(posRight, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawArcLine(posLeft, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawArcLine(posLeft, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawArcLine(posRight, posUp, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
+                drawArcLine(posRight, posDown, 1.0 - XM1PW3P1(effects[x].timer.percentElapsedTime(1300)));
             }
                 break;
         }
@@ -851,30 +851,30 @@ void StartScreen::renderBGStars()
         switch (star.size) {
             case 0:
                 SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha);
-                drawLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
+                drawArcLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
 
                 SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha / 2);
-                drawLine(pUR, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
-                drawLine(pLL, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawArcLine(pUR, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawArcLine(pLL, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
                 break;
             case 1:
                 SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha);
-                drawLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
+                drawArcLine(realPosition, endPos, XM1PW3P1(star.timer.percentElapsedTime(1000)));
 
                 {
                     XY pURx2 = bgSpaceTransform(xyAdd(center, { blinkDistance*2, -blinkDistance*2 }));
                     XY pLLx2 = bgSpaceTransform(xyAdd(center, { -blinkDistance*2, blinkDistance*2 }));
 
                     SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha);
-                    drawLine(pURx2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.6) / 0.6));
-                    drawLine(pLLx2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.6) / 0.6));
+                    drawArcLine(pURx2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.6) / 0.6));
+                    drawArcLine(pLLx2, centerInBgSpace, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.6) / 0.6));
                 }
 
                 SDL_SetRenderDrawColor(g_rd, starColor.r, starColor.g, starColor.b, alpha/3*2);
-                drawLine(pUR, pUL, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
-                drawLine(pLL, pUL, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
-                drawLine(pLL, pLR, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
-                drawLine(pUR, pLR, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawArcLine(pUR, pUL, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawArcLine(pLL, pUL, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawArcLine(pLL, pLR, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
+                drawArcLine(pUR, pLR, 1.0 - XM1PW3P1(dxmin(blinkTimer, 0.3) / 0.3));
                 break;
         }
         i++;
