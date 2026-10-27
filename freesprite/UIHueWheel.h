@@ -22,6 +22,11 @@ public:
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     XY getDimensions() override { return { wxWidth, wxHeight }; }
+    void applyScaling(double scale) override {
+        Drawable::applyScaling(scale);
+        wxWidth = (int)(wxWidth * scale);
+        wxHeight = (int)(wxHeight * scale);
+    }
 
     void renderWheelPosition(XY gPosOffset);
     SDL_Rect innerRect();

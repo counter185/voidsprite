@@ -222,8 +222,8 @@ public:
     }
 
     void render(SDL_Rect where, uint8_t alpha = 255) {
-        SDL_Texture* target = effectPreviewTexture ? effectPreviewTexture : renderData[g_rd].tex;
         prerender();
+        SDL_Texture* target = effectPreviewTexture ? effectPreviewTexture : renderData[g_rd].tex;
         SDL_SetTextureAlphaMod(target, alpha);
         SDL_RenderCopy(g_rd, target, NULL, &where);
     }
@@ -241,7 +241,7 @@ public:
         int pitch;
         SDL_LockTexture(ret, NULL, (void**)&pixels, &pitch);
         if (!isPalettized) {
-            memcpy(pixels, pixels32(), w * h * 4);
+            copyPixelsToTexture(pixels32(), w, h, pixels, pitch);
         }
         else {
             uint32_t* px32 = (uint32_t*)pixels;

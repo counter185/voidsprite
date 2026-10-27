@@ -42,6 +42,9 @@ public:
     virtual void screenResized(XY from, XY to) {
         wxsManager.processWindowResizeEvent(from, to);
     }
+    virtual void scaleScreen(double scale) {
+        wxsManager.applyScalingToAll(scale);
+    }
 
     //called on crash
     virtual std::vector<std::string> dropEverythingYoureDoingAndSave() { return {}; }
@@ -50,7 +53,8 @@ public:
     virtual std::string getRPCString() { return getName(); }
 
     void drawBottomBar() {
-        SDL_Rect r = { 0, g_windowH - 30, g_windowW, 30 };
+        int height = UISCALED(30);
+        SDL_Rect r = { 0, g_windowH - height, g_windowW, height };
         SDL_SetRenderDrawColor(g_rd, 0, 0, 0, 0xb0);
         SDL_RenderFillRect(g_rd, &r);
     }

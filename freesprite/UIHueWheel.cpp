@@ -21,6 +21,7 @@ void UIHueWheel::render(XY at)
     double accuracy = 12;
 
     std::vector<SDL_Vertex> vertexBuffer;
+    vertexBuffer.reserve((int)(360 / accuracy) * 2 + 2);
 
     for (double a = 0; a < 360; a += accuracy) {
 

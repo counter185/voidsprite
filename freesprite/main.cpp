@@ -75,6 +75,7 @@ std::vector<Pattern*> g_patterns;
 Timer64 lastPenEvent;
 
 void g_addPopup(BasePopup* a) {
+    a->scaleScreen(g_config.uiScale);
     g_currentWindow->popupStack.push_back(a);
     a->startTimer.start();
 }
@@ -854,6 +855,7 @@ int main(int argc, char** argv)
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
+        SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "2");
 
         g_props = SDL_CreateProperties();
         

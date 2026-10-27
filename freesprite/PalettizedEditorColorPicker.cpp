@@ -100,17 +100,15 @@ void PalettizedEditorColorPicker::renderAfterBG(XY position)
     if (!enabled) {
         return;
     }
-    uint32_t colorNow = (caller->pickedPaletteIndex == -1 || caller->pickedPaletteIndex >= caller->palette.size()) ? 0x00000000 : caller->palette[caller->pickedPaletteIndex];
-    SDL_Color colorNowB = { (colorNow >> 16) & 0xff, (colorNow >> 8) & 0xff, colorNow & 0xff, (colorNow >> 24) & 0xff };
+    u32 colorNow = (caller->pickedPaletteIndex == -1 || caller->pickedPaletteIndex >= caller->palette.size()) ? 0x00000000 : caller->palette[caller->pickedPaletteIndex];
+    SDL_Color colorNowB = uint32ToSDLColor(colorNow);
     hsv colorNowHSV = rgb2hsv({colorNowB.r / 255.0, colorNowB.g / 255.0, colorNowB.b / 255.0});
     SDL_Color valCol = rgb2sdlcolor(hsv2rgb(hsv{ colorNowHSV.h, colorNowHSV.s, dxmin(colorNowHSV.v + 0.4, 1.0) }));
 
     SDL_Color previewCol = colorNowB;
 
-    SDL_Rect r = SDL_Rect{ position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35 };
-
-    SDL_SetRenderDrawColor(g_rd, previewCol.r, previewCol.g, previewCol.b, 0xff);
-    SDL_RenderFillRect(g_rd, &r);
+    SDL_Rect r = SDL_Rect{ position.x + wxWidth - UISCALED(60), position.y + wxHeight - UISCALED(40), UISCALED(55), UISCALED(35) };
+    Fill::Solid(colorNow | 0xFF000000).fill(r);
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 
@@ -228,6 +226,8 @@ void PalettizedEditorColorPicker::updateForcedColorPaletteButtons()
         };
         colorPaletteTabs->tabs[0].add(newColorButton);
     }
+
+    colorPaletteTabs->tabs[0].tabPanel->subWidgets.applyScalingToAll(g_config.uiScale);
     highlightActiveColorButton();
 }
 

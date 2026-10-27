@@ -51,6 +51,12 @@ public:
     XY getDimensions() override { return XY{ wxWidth, wxHeight }; };
     bool takesTouchEvents() override { return true; }
     bool focusableWithTab() override { return true; }
+    void applyScaling(double scale) override {
+        Drawable::applyScaling(scale);
+        wxWidth = (int)(wxWidth * scale);
+        wxHeight = (int)(wxHeight * scale);
+        fontSize = (int)(fontSize * scale);
+    }
 
     void renderAnimations(XY pos);
     virtual void renderText(XY pos);

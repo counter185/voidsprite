@@ -185,15 +185,18 @@ void TextRenderer::precacheFontCommonChars(int size)
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "1234567890"
-        "!@#$%^&*()[]:\\/|+_<>?`~";
+        "!@#$%^&*()[]:\\/|+_<>?`~ ";
     StatStringDimensions(str, size);
 }
 
 GlyphData TextRenderer::getGlyphForChar(uint32_t ch, int size)
 {
     for (auto& font : fontStack) {
-        if (font->charInBounds(ch) && font->hasGlyphForChar(ch, size)) {
-            return font->getGlyphForChar(ch, size);
+        if (font->charInBounds(ch)) {
+            auto glyph = font->getGlyphForChar(ch, size);
+            if (glyph.texture != NULL) {
+                return glyph;
+            }
         }
     }
     return GlyphData{ 0,0,0,0,0,0,0,NULL };

@@ -70,14 +70,13 @@ void EditorColorPicker::renderAfterBG(XY position)
     if (!enabled) {
         return; 
     }
-    SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ wColorPicker->currentH, wColorPicker->currentS, wColorPicker->currentV }));
+    //SDL_Color previewCol = rgb2sdlcolor(hsv2rgb(hsv{ wColorPicker->currentH, wColorPicker->currentS, wColorPicker->currentV }));
     SDL_Color valCol = rgb2sdlcolor(hsv2rgb(hsv{ wColorPicker->currentH, wColorPicker->currentS, dxmin(wColorPicker->currentV + 0.4, 1.0) }));
 
     SDL_Rect r = SDL_Rect{ position.x, position.y, wxWidth, wxHeight };
 
-    r = SDL_Rect{ position.x + wxWidth - 60, position.y + wxHeight - 40, 55, 35 };
-    SDL_SetRenderDrawColor(g_rd, previewCol.r, previewCol.g, previewCol.b, 0xff);
-    SDL_RenderFillRect(g_rd, &r);
+    r = SDL_Rect{ position.x + wxWidth - UISCALED(60), position.y + wxHeight - UISCALED(40), UISCALED(55), UISCALED(35) };
+    Fill::Solid(wColorPicker->colorNowU32 | 0xFF000000).fill(r);
     SDL_SetRenderDrawColor(g_rd, valCol.r, valCol.g, valCol.b, 0xff);
     SDL_RenderDrawRect(g_rd, &r);
 }
@@ -206,4 +205,5 @@ void EditorColorPicker::updateLastColorButtons()
         }
     }
     lastColorsChanged = false;
+    wColorPicker->colorModeTabs->tabs[1].tabPanel->subWidgets.applyScalingToAll(g_config.uiScale);
 }

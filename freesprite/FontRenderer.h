@@ -1,6 +1,7 @@
 #pragma once
 #include "globals.h"
 #include "mathops.h"
+#include "background_operation.h"
 
 #define CHAR_RANGE_ALL {{0,0xFFFFFFFF}}
 
@@ -50,7 +51,7 @@ struct GlyphData {
 
 class FontObject {
 protected:
-    std::map<int, std::map<uint32_t, GlyphData>> renderedGlyphs;
+    std::unordered_map<int, std::unordered_map<uint32_t, GlyphData>> renderedGlyphs;
 public:
     std::vector<std::pair<u32, u32>> charBounds;
     
@@ -90,16 +91,18 @@ public:
     ~TTFFontObject() override;
 
     bool hasGlyphForChar(u32 ch, int size) override {
-        if (!renderedGlyphs[size].contains(ch)) {
-            RenderGlyph(ch, size);
+        auto& thisSize = renderedGlyphs[size];
+        if (!thisSize.contains(ch)) {
+            g_doAndWaitForMainThread([this, ch, size]() { RenderGlyph(ch, size); });
         }
-        return renderedGlyphs[size][ch].texture != NULL;
+        return thisSize[ch].texture != NULL;
     }
     GlyphData getGlyphForChar(u32 ch, int size) override {
-        if (!renderedGlyphs[size].contains(ch)) {
-            RenderGlyph(ch, size);
+        auto& thisSize = renderedGlyphs[size];
+        if (!thisSize.contains(ch)) {
+            g_doAndWaitForMainThread([this, ch, size]() { RenderGlyph(ch, size); });
         }
-        return renderedGlyphs[size][ch];
+        return thisSize[ch];
     }
 };
 

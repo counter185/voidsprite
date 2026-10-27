@@ -403,7 +403,7 @@ void UIColorTextField::renderTextFieldText(XY at)
         int textPtr = 0;
         XY origin = xyAdd(at, { 2,2 });
         if (text[0] == '#') {
-            origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{ 0x80,0x80,0x80,255 });
+            origin = g_fnt->RenderString("#", origin.x, origin.y, SDL_Color{ 0x80,0x80,0x80,255 }, fontsize);
             textPtr++;
         }
         origin = g_fnt->RenderString(text.substr(textPtr, ixmin(2, text.size() - textPtr)), origin.x, origin.y, SDL_Color{ 255,0x32,0x32,255 }, fontsize);

@@ -70,6 +70,12 @@ public:
     void handleInput(SDL_Event evt, XY gPosOffset) override;
     bool focusableWithTab() override { return true; }
     XY getDimensions() override { return { wxWidth, wxHeight }; }
+    void applyScaling(double scale) override {
+        Drawable::applyScaling(scale);
+        wxWidth = (int)(wxWidth * scale);
+        wxHeight = (int)(wxHeight * scale);
+        fontsize = (int)(fontsize * scale);
+    }
 
     virtual void renderTextFieldText(XY at);
     void renderTextField(XY at);

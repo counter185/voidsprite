@@ -1,5 +1,9 @@
 #pragma once
 
+#define UISCALED(a) (g_config.uiScale==1?a:(int)((a)*g_config.uiScale))
+#define UISCALED_UP(a) (g_config.uiScale==1?a:(int)((a)*(g_config.uiScale>1?g_config.uiScale:1)))
+#define NSCALE (ixmax(1,(int)g_config.uiScale))
+
 class GlobalConfig {
 public:
     bool openSavedPath = ONPLATFORM(VSP_PLATFORM_ANDROID, false, true);
@@ -55,6 +59,7 @@ public:
     bool editorShowGitRepo = true;
     int lineSnapMaxAspect = 8;
     bool editorAlwaysOpenTouchPanel = false;
+    double uiScale = 1.0;
 
     std::vector<std::string> lastOpenFiles;
     std::vector<std::string> favExportFormats;

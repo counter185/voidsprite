@@ -224,9 +224,9 @@ UIColorPicker::UIColorPicker()
     palettePanel->scrollVertically = true;
     palettePanel->wxWidth = 370;
     palettePanel->wxHeight = 270;
+    palettePanel->scale(g_config.uiScale);
     reloadColorLists();
     colorModeTabs->tabs[2].add(palettePanel);
-
 
     //-----------------
     //| Mix tab
@@ -241,9 +241,6 @@ UIColorPicker::UIColorPicker()
         new UILabel("A"),
         mix1Input
     });
-    mxAsp->position = { 20,25 };
-    colorModeTabs->tabs[3].add(mxAsp);
-
 
     mix2Input = new UIColorInputField();
     mix2Input->button->wxWidth = 100;
@@ -257,9 +254,10 @@ UIColorPicker::UIColorPicker()
         new UICheckbox("Lock", &this->lockMix2)
     });
     mxBsp->position = { 200, 25 };
-    colorModeTabs->tabs[3].add(mxBsp);
 
-    colorModeTabs->tabs[3].add(new UILabel("+", { 150, 50 }));
+    colorModeTabs->tabs[3].add(UIStackPanel::Horizontal(10, {
+        mxAsp, UIStackPanel::Vertical(0, {Panel::Space(1,10), new UILabel("+",{}, 22)}), mxBsp
+    }, {20,25}));
 
     mixSlider = new UIColorSlider();
     mixSlider->position = XY{ 40, 140 };
@@ -453,7 +451,7 @@ Panel* UIColorPicker::genPaletteRowPanel(IPalette* p, int rowIndex)
 
     std::vector<Drawable*> currentColorButtonsStack{};
 
-    int maxButtonsInLine = palettePanel->wxWidth / (largeColorButtons ? 48 : 24);
+    int maxButtonsInLine = palettePanel->wxWidth / UISCALED(largeColorButtons ? 48 : 24);
 
     //create all the color buttons
     for (int colorIndex = 0; colorIndex < colors.size(); colorIndex++) {
@@ -514,35 +512,32 @@ void UIColorPicker::reloadColorLists()
 
     stack->addWidget(topButtonsPanel);
 
-    std::vector<UIButton*> collapseButtons;
+    std::vector<UIButton*> collapseButtons{};
 
     std::vector<IPalette*> palettes = extraPalettes;
     for (auto& p : g_loadedPalettes) {
         palettes.push_back(p);
     }
-
-    for (auto*& p : palettes) {
+    
+    for (IPalette*& p : palettes) {
 
         if (PopupPaletteManager::paletteIsHidden(p)) {
             continue;
         }
-
-        std::vector<Drawable*> palettePanels;
 
         UIButton* collapseButton = new UIButton("-");
         collapseButton->wxWidth = 20;
         collapseButton->wxHeight = 20;
         collapseButtons.push_back(collapseButton);
 
-        UILabel* nameLabel = new UILabel(p->getName());
-        nameLabel->position = XY{ 30, 10 };
+        UILabel* nameLabel = new UILabel(p->getName(), {30,10});
 
         stack->addWidget(UIStackPanel::Horizontal(5, {
-            Panel::Space(0,0), collapseButton, nameLabel
+            Panel::Space(1,1), collapseButton, nameLabel
         }));
 
         auto& rows = p->getColorList();
-        std::vector<Drawable*> rowPanels;
+        std::vector<Drawable*> rowPanels{};
 
         for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
 

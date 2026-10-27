@@ -27,6 +27,11 @@ public:
 		Drawable::focusOut();
 		mouseHeld = false;
 	}
+	void applyScaling(double scale) override {
+		Drawable::applyScaling(scale);
+		wxWidth = (int)(wxWidth * scale);
+		wxHeight = (int)(wxHeight * scale);
+	}
 
 	void onSVValueChanged();
 };

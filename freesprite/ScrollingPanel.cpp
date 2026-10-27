@@ -133,7 +133,7 @@ void ScrollingPanel::handleInput(SDL_Event evt, XY gPosOffset) {
 bool ScrollingPanel::mouseInVerticalScrollBar() {
     if (scrollVertically) {
         XY localMousePos = xySubtract({g_mouseX, g_mouseY}, lastPosOnScreen);
-        return pointInBox(localMousePos, {wxWidth-scrollbarThickness,0,scrollbarThickness, wxHeight});
+        return pointInBox(localMousePos, {wxWidth-UISCALED(scrollbarThickness),0,UISCALED(scrollbarThickness), wxHeight});
     }
     return false;
 }
@@ -156,7 +156,7 @@ double ScrollingPanel::getVerticalScrollBarPixelScale() {
 bool ScrollingPanel::mouseInHorizontalScrollBar() {
     if (scrollHorizontally) {
         XY localMousePos = xySubtract({g_mouseX, g_mouseY}, lastPosOnScreen);
-        return pointInBox(localMousePos, {0,wxHeight-scrollbarThickness,wxWidth, scrollbarThickness});
+        return pointInBox(localMousePos, {0,wxHeight-UISCALED(scrollbarThickness),wxWidth, UISCALED(scrollbarThickness) });
     }
     return false;
 }
@@ -190,7 +190,7 @@ void ScrollingPanel::renderVerticalScrollbar(XY at) {
             }
 
             int height = scrollbarPositions.second.y - scrollbarPositions.first.y;
-            int thickness = 1 + scrollbarThickness * 
+            int thickness = 1 + UISCALED(scrollbarThickness) * 
                 (mouseInScrollbar ? XM1PW3P1(verticalScrollbarHoverTimer.percentElapsedTime(200)) : 0);
 
             if (mouseInScrollbar) {
@@ -205,7 +205,7 @@ void ScrollingPanel::renderVerticalScrollbar(XY at) {
                 //border line
                 static SDL_Color handleBorder = visualConfigColor("ui/scrollpanel/handle_border");
                 SDL_SetRenderDrawColor(g_rd, handleBorder.r, handleBorder.g, handleBorder.b, handleBorder.a);
-                XY p1 = {wxWidth - scrollbarThickness - 4, 0};
+                XY p1 = {wxWidth - UISCALED(scrollbarThickness) - 4, 0};
                 XY p2 = xyAdd(p1, {0, wxHeight});
                 drawLine(xyAdd(at,p1), xyAdd(at,p2), XM1PW3P1(verticalScrollbarHoverTimer.percentElapsedTime(800)));
             }
@@ -252,7 +252,7 @@ void ScrollingPanel::renderHorizontalScrollbar(XY at) {
             }
 
             int width = scrollbarPositions.second.x - scrollbarPositions.first.x;
-            int thickness = 1 + scrollbarThickness * 
+            int thickness = 1 + UISCALED(scrollbarThickness) *
                 (mouseInScrollbar ? XM1PW3P1(horizontalScrollbarHoverTimer.percentElapsedTime(200)) : 0);
 
             if (mouseInScrollbar) {
@@ -267,7 +267,7 @@ void ScrollingPanel::renderHorizontalScrollbar(XY at) {
                 //border line
                 static SDL_Color handleBorder = visualConfigColor("ui/scrollpanel/handle_border");
                 SDL_SetRenderDrawColor(g_rd, handleBorder.r, handleBorder.g, handleBorder.b, handleBorder.a);
-                XY p1 = {0, wxHeight - scrollbarThickness - 4};
+                XY p1 = {0, wxHeight - UISCALED(scrollbarThickness) - 4};
                 XY p2 = xyAdd(p1, {wxWidth, 0});
                 drawLine(xyAdd(at,p1), xyAdd(at,p2), XM1PW3P1(horizontalScrollbarHoverTimer.percentElapsedTime(800)));
             }

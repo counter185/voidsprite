@@ -26,6 +26,10 @@ public:
     XY getDimensions() override { return statSize(); };
     bool focusable() override { return false; }
     void render(XY pos) override;
+    void applyScaling(double scale) override { 
+        Drawable::applyScaling(scale); 
+        fontsize = (int)(fontsize * scale); 
+    }
 };
 
 class UIDynamicLabel : public UILabel {
