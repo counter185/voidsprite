@@ -11,7 +11,7 @@
     inline void* platformProcAddress(ModuleHandle module, const char* procName) { return (void*)GetProcAddress(module, procName); }
     inline void platformUnloadNativeModule(ModuleHandle module) { FreeLibrary(module); }
     inline std::string moduleExtension = ".dll";
-#elif VITASDK
+#elif VSP_PLATFORM == VSP_PLATFORM_VITA
     #define ModuleHandle void*
     inline ModuleHandle platformLoadNativeModule(PlatformNativePathString path) { return NULL; }
     inline void* platformProcAddress(ModuleHandle module, const char* procName) { return NULL; }
