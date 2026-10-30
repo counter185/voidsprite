@@ -6,6 +6,7 @@
 #include "UIStackPanel.h"
 #include "UILabel.h"
 #include "UISlider.h"
+#include "TooltipsLayer.h"
 #include "maineditor.h"
 
 PopupFreeformTransform::PopupFreeformTransform(MainEditor* caller, Layer* target)
@@ -152,6 +153,16 @@ SDL_Rect PopupFreeformTransform::evalPasteRectChange()
 {
     SDL_Rect pasteRect = targetPasteRect;
     XY dragPoint = getCallerCanvas().screenPointToCanvasPoint({ g_mouseX, g_mouseY });
+
+    if (g_shiftModifier) {
+        auto snap = getSnappedPointV2(dragStart, dragPoint);
+        if (snap.aspect != 0) {
+            snap.to = dragPoint;
+        }
+        dragPoint = getSnappedPointEndpoint(snap, dragPoint);
+        g_ttp->addTooltip(Tooltip{ getCallerCanvas().canvasPointToScreenPoint(dragStart), frmt("{}:{}", snap.divOne ? snap.aspect : 1, snap.divOne ? 1 : snap.aspect)});
+    }
+
     XY diff = xySubtract(dragStart, dragPoint);
     if (draggingCorner == 8) {	//drag
         pasteRect.x -= diff.x;
