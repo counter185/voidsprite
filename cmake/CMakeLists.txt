@@ -55,7 +55,7 @@ if(DEFINED ENV{GIT_BRANCH})
     add_definitions(-DGIT_BRANCH="$ENV{GIT_BRANCH}")
 endif()
 if(DEFINED ENV{GIT_RELEASE})
-    add_definitions(-DGIT_BRANCH="$ENV{GIT_RELEASE}")
+    add_definitions(-DGIT_RELEASE="$ENV{GIT_RELEASE}")
 endif()
 
 if(NOT TARGET SDL3::SDL3)
