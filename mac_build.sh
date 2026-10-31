@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #./linux_build.sh --release --portable
 
 mkdir build
