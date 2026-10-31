@@ -76,7 +76,7 @@ u32 Gamepad::GetColorForGamepadName(std::string name)
         || stringContainsIgnoreCase(name, "ps4")
         || stringContainsIgnoreCase(name, "dualsense")
         || stringContainsIgnoreCase(name, "dualshock")
-        || stringContainsIgnoreCase(name, "ps vita")) {
+        || stringContainsIgnoreCase(name, "psvita")) {
         return 0xFF0000FF;
     }
     if (stringContainsIgnoreCase(name, "xbox")

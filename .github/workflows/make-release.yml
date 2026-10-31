@@ -22,8 +22,15 @@ jobs:
       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
   
+  build-vita:
+    uses: ./.github/workflows/vita-build.yml
+    with:
+      release-tag: ${{ inputs.tagName }}
+  
   create-release:
-    needs: build-all
+    needs:
+      - build-all
+      - build-vita
     runs-on: ubuntu-latest
     permissions: 
       contents: write
@@ -77,6 +84,12 @@ jobs:
         skip-decompress: true
         name: voidsprite-build-emscripten
     
+    - name: download vita
+      uses: actions/download-artifact@v8
+      with:
+        skip-decompress: false
+        name: voidsprite-build-vita
+
     - name: download sdk
       uses: actions/download-artifact@v8
       with:
@@ -167,6 +180,15 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./voidsprite-build-emscripten.zip
         asset_name: voidsprite-${{ inputs.tagName }}-emscripten.zip
+        asset_content_type: application/zip    
+    - name: upload vita
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./voidsprite.vpk
+        asset_name: voidsprite-${{ inputs.tagName }}-vita.vpk
         asset_content_type: application/zip
     - name: upload sdk
       uses: actions/upload-release-asset@v1

@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include <psp2/appmgr.h>
+#include <psp2/kernel/sysmem.h>
 
 #include "EventCallbackListener.h"
 #include "Notification.h"
@@ -115,7 +116,7 @@ FILE *platformOpenFile(PlatformNativePathString path,
 }
 
 std::string platformGetSystemInfo() {
-    std::string ret = "PS Vita";
+    std::string ret = sceKernelIsPSVitaTV() ? "PSTV/Vita TV" : "PS Vita";
     return ret;
 }
 

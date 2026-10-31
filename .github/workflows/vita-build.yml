@@ -1,8 +1,22 @@
 name: PSV build
 
 on:
-  - workflow_dispatch
-  - workflow_call
+  workflow_call:
+    inputs:
+      release-tag:
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        required: false
+        type: string
+
+
+env:
+  GIT_HASH: ${{ github.sha }}
+  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+  GIT_RELEASE: ${{ inputs.release-tag }}
 
 jobs:
   build-vita:
