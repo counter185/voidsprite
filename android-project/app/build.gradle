@@ -6,6 +6,9 @@ plugins {
 def buildWithCMake = true;
 
 android {
+    buildFeatures {
+        buildConfig true
+    }
     namespace = "pl.cntrpl.voidsprite"
     compileSdkVersion 36
     defaultConfig {
@@ -13,6 +16,7 @@ android {
         targetSdkVersion 35
         versionCode 1
         versionName "1.0"
+        buildConfigField "boolean", "FDROID_BUILD", "false"
         externalNativeBuild {
             ndkBuild {
                 arguments "APP_PLATFORM=android-21"
@@ -76,6 +80,21 @@ android {
             def buildArch = System.getenv("VSP_BUILD_ARCH")
             ndk {
                 abiFilters new String[]{buildArch != null ? buildArch : "arm64-v8a"}
+            }
+        }
+        releaseFDroid {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            buildConfigField "boolean", "FDROID_BUILD", "true"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            }
+
+            externalNativeBuild {
+                cmake {
+                    arguments "-DFDROID=ON"
+                }
             }
         }
     }
