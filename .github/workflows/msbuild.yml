@@ -301,14 +301,8 @@ jobs:
   
   android-merge-cpu-apks:
     needs: [build-android-x64, build-android-arm64, build-android-armv7]
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        packages: 'platform-tools build-tools;36.1.0'
-        log-accepted-android-sdk-licenses: false
-
     - name: Decode Keystore
       env:
         ENCODED_STRING: ${{ secrets.KEYSTORE }}
