@@ -479,3 +479,4 @@ android-project/local.properties
 *.kate-swp
 /build_appimage
 /build_vita
+/android-project/app/releaseFDroid

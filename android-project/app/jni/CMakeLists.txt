@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.6)
 
 project(GAME)
 
+option(FDROID "Disable some of the F-Droid antifeatures (update checker, external updater)" OFF)
+
 set(CMAKE_DEBUG_POSTFIX "")
 
 # SDL sources are in a subfolder named "SDL"
 add_subdirectory(SDL)
 
-# we have our own avif
+# i brought my own avif
 set(SDLIMAGE_AVIF OFF)
 set(SDLIMAGE_ZLIB_SHARED OFF)
 add_subdirectory(SDL_image)

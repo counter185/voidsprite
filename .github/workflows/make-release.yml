@@ -31,7 +31,7 @@ jobs:
     needs:
       - build-all
       - build-vita
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions: 
       contents: write
     steps:

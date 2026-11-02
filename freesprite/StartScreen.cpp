@@ -164,7 +164,7 @@ StartScreen::StartScreen() {
                     },
                     { SDL_SCANCODE_A,{ TL("vsp.launchpad.nav.about"), [this]() { g_addPopup(new PopupAbout());} } },
                     { SDL_SCANCODE_H,{ TL("vsp.launchpad.nav.webmanual"), [this]() { platformOpenWebpageURL("https://counter185.github.io/voidsprite-web-manual"); }}},
-#if VSP_PLATFORM == VSP_PLATFORM_ANDROID
+#if VSP_PLATFORM == VSP_PLATFORM_ANDROID && !VSP_FDROID_BUILD
                     { SDL_SCANCODE_D, { "Download latest version..." , []() { platformRunAutoUpdate(); } } },
 #endif
 

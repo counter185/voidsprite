@@ -16,7 +16,7 @@ git checkout release-3.4.8
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_image.git
 cd SDL_image
-git checkout release-3.4.4
+git checkout release-3.4.8
 cd ..
 git clone --recursive https://github.com/libsdl-org/SDL_ttf.git
 REM   git clone --recursive https://github.com/libsdl-org/SDL_net.git

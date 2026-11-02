@@ -301,7 +301,7 @@ jobs:
   
   android-merge-cpu-apks:
     needs: [build-android-x64, build-android-arm64, build-android-armv7]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3

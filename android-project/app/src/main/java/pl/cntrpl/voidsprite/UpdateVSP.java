@@ -26,6 +26,7 @@ import androidx.core.content.FileProvider;
 import pl.cntrpl.voidsprite.util.InstallerReceiver;
 import pl.cntrpl.voidsprite.util.Utils;
 
+//this is not ran in FDROID=ON builds
 public class UpdateVSP  {
 
     public static class VSPDownloadAPKTask extends Thread {

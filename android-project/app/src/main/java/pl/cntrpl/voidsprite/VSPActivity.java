@@ -71,15 +71,20 @@ public class VSPActivity extends SDLActivity {
         String appdataPath = getExternalFilesDir(null).getAbsolutePath() + "/";
         passAppdataPathString(appdataPath);
 
-        DeviceName.with(this).request((info, error) -> {
-            deviceName = info.getName();
-        });
+        if (!pl.cntrpl.voidsprite.BuildConfig.FDROID_BUILD) {
+            DeviceName.with(this).request((info, error) -> {
+                deviceName = info.getName();
+            });
+        }
 
         String systemInformation = "Android " + android.os.Build.VERSION.RELEASE + " (SDK " + android.os.Build.VERSION.SDK_INT + ")\n";
         systemInformation += String.format("CPU supported ABIs: %s\n  os.arch: %s\n", String.join(", ", Build.SUPPORTED_ABIS), System.getProperty("os.arch"));
         systemInformation += String.format("%s (%s %s | %s %s)\n", deviceName, Build.MANUFACTURER, Build.PRODUCT, Build.MODEL, Build.DEVICE);
         if (Build.VERSION.SDK_INT >= 31) {
             systemInformation += String.format("SOC: %s %s\n", Build.SOC_MANUFACTURER, Build.SOC_MODEL);
+        }
+        if (pl.cntrpl.voidsprite.BuildConfig.FDROID_BUILD) {
+            systemInformation += "** (F-Droid build)";
         }
         passSystemInformationString(systemInformation);
 
@@ -182,6 +187,7 @@ public class VSPActivity extends SDLActivity {
         }
     }
 
+    //this is not ran in FDROID=ON builds
     public static void runUpdaterActivity() {
         UpdateVSP.runUpdater(activitySingleton);
     }

@@ -27,7 +27,7 @@ public:
     bool showPenPressure = true;
     bool showFPS = false;
     bool showSystemClock = false;
-    bool checkUpdates = true;
+    bool checkUpdates = VSP_FDROID_BUILD ? false : true;
     int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 2,
                           ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 1, 3));
                                 // 0: none
@@ -55,7 +55,7 @@ public:
     u32 checkerboardSecondary = 0xFF2A2A2A;
     bool saveLoadReferences = false;
     bool resetEraserOnToolSwitch = false;
-    bool showFeaturedUGC = true;
+    bool showFeaturedUGC = VSP_FDROID_BUILD ? false : true;
     bool editorShowGitRepo = true;
     int lineSnapMaxAspect = 8;
     bool editorAlwaysOpenTouchPanel = false;

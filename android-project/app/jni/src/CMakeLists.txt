@@ -7,6 +7,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narro
 add_definitions(-DVSP_USE_LIBAVIF=1)
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
 
+if(FDROID)
+    add_definitions(-DVSP_FDROID_BUILD=1)
+endif()
+
 if(DEFINED ENV{GIT_HASH})
     add_definitions(-DGIT_HASH="$ENV{GIT_HASH}")
 endif()
@@ -14,7 +18,7 @@ if(DEFINED ENV{GIT_BRANCH})
     add_definitions(-DGIT_BRANCH="$ENV{GIT_BRANCH}")
 endif()
 if(DEFINED ENV{GIT_RELEASE})
-    add_definitions(-DGIT_BRANCH="$ENV{GIT_RELEASE}")
+    add_definitions(-DGIT_RELEASE="$ENV{GIT_RELEASE}")
 endif()
 
 if(NOT TARGET SDL3::SDL3)
@@ -89,7 +93,7 @@ add_library(main SHARED
 set_source_files_properties(${C_FILES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION true)
 set_property(TARGET main PROPERTY UNITY_BUILD true)
 set_property(TARGET main PROPERTY UNITY_BUILD_MODE BATCH)
-set_property(TARGET main PROPERTY UNITY_BUILD_BATCH_SIZE 40)
+set_property(TARGET main PROPERTY UNITY_BUILD_BATCH_SIZE 80)
 
 target_link_libraries(main PRIVATE SDL3::SDL3)
 target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)

@@ -313,10 +313,12 @@ std::vector<PlatformNativePathString> platformGetSystemFontPaths() {
 }
 
 void platformRunAutoUpdate() {
+#if !VSP_FDROID_BUILD
     jmethodID checkMethod = lastJNI->GetStaticMethodID(vspActivityClass, "runUpdaterActivity", "()V");
     if (checkMethod != nullptr) {
         lastJNI->CallStaticVoidMethod(vspActivityClass, checkMethod);
     }
+#endif
 }
 
 bool platformSetupIPC() {
