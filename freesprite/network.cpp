@@ -5,10 +5,21 @@
 #include <SDL3_net/SDL_net.h>
 #endif
 
+#if VSP_STEAMWORKS
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
 
 
 std::vector<NetInterface*> g_netInterfaces = {};
 void g_initNet() {
+	SteamNet* steamInterface = new SteamNet();
+	if (steamInterface->init()) {
+		g_netInterfaces.push_back(steamInterface);
+	}
+	else {
+		delete steamInterface;
+	}
 #if VSP_NETWORKING
 	SDLNet* sdlNetInterface = new SDLNet();
 	if (sdlNetInterface->init()) {
@@ -28,6 +39,13 @@ std::string g_getAllNetworkLibsVersions()
 		std::to_string(SDL_NET_MICRO_VERSION) + "\n";
 #endif
 	return ret;
+}
+
+void g_runNetworkCallbacks()
+{
+	for (auto*& netIf : g_netInterfaces) {
+		netIf->runCallbacks();
+	}
 }
 
 #if VSP_NETWORKING
@@ -200,4 +218,30 @@ void SDLNet::broadcastMessage(NetMessage& msg)
 		}
 	}
 }
+#endif
+
+#if VSP_STEAMWORKS
+bool SteamNet::init()
+{
+	HMODULE m = LoadLibraryW(L"steam_api64.dll");
+	if (m != NULL) {
+		SteamAPI_InitSafe = (bool(_cdecl*)())GetProcAddress(m, "SteamAPI_InitSafe");
+		SteamAPI_Shutdown = (void(_cdecl*)())GetProcAddress(m, "SteamAPI_Shutdown");
+		SteamAPI_RunCallbacks = (void(_cdecl*)())GetProcAddress(m, "SteamAPI_RunCallbacks");
+
+		if (SteamAPI_InitSafe != NULL) {
+			return SteamAPI_InitSafe();
+		}
+	}
+	return false;
+}
+
+void SteamNet::runCallbacks()
+{
+	if (SteamAPI_RunCallbacks != NULL) {
+		SteamAPI_RunCallbacks();
+	}
+}
+
+
 #endif

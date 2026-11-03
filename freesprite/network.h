@@ -1,6 +1,8 @@
 #pragma once
 #include "globals.h"
 
+#define VSP_STEAMWORKS 1
+
 class NetInterface;
 
 struct NetSocket {
@@ -75,10 +77,13 @@ public:
 	virtual NetMessage readMessageFromSocket(NetSocket* s) = 0;
 	virtual bool messageAvailable(NetSocket* s) = 0;
 
+	//for lan discovery:
 	virtual NetBroadcastSocket* createBroadcastListener(std::string address) = 0;
 	virtual void destroyBroadcastListener(NetBroadcastSocket* s) = 0;
 	virtual bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) = 0;
 	virtual void broadcastMessage(NetMessage& msg) {}
+
+	virtual void runCallbacks() {}
 };
 
 #if VSP_NETWORKING
@@ -104,7 +109,35 @@ public:
 };
 #endif
 
+#if VSP_STEAMWORKS
+class SteamNet : public NetInterface {
+private:
+	bool (_cdecl *SteamAPI_InitSafe)() = NULL;
+	void (_cdecl *SteamAPI_Shutdown)() = NULL;
+	void (_cdecl *SteamAPI_RunCallbacks)() = NULL;
+public:
+	bool init() override;
+	std::string getFriendlyAddress(NetSocket* s) override { return ""; };
+	NetServer* createServer(std::string address, int port) override { return NULL; };
+	NetSocket* createClient(std::string address, int port) override { return NULL; };
+	NetSocket* acceptNextClient(NetServer* s) override { return NULL; };
+	void destroyServer(NetServer* s) override {};
+	void destroySocket(NetSocket* s) override {};
+	void writeMessageToSocket(NetSocket* s, NetMessage& msg) override {};
+	NetMessage readMessageFromSocket(NetSocket* s) override { throw std::exception("not implemented"); };
+	bool messageAvailable(NetSocket* s) override { return false; };
+
+	NetBroadcastSocket* createBroadcastListener(std::string address) override { return NULL; };
+	void destroyBroadcastListener(NetBroadcastSocket* s) override {};
+	bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) override { return false; };
+	void broadcastMessage(NetMessage& msg) override {};
+
+	void runCallbacks() override;
+};
+#endif
+
 extern std::vector<NetInterface*> g_netInterfaces;
 
 void g_initNet();
 std::string g_getAllNetworkLibsVersions();
+void g_runNetworkCallbacks();

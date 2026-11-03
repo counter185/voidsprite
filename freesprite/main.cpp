@@ -693,6 +693,8 @@ void g_mainLoop() {
                 numOverallWorkspaces += w->screenStack.size();
             }
 
+            g_runNetworkCallbacks();
+
             //tl strings shouldn't be read every frame
             static std::string tl1ActiveWorkspaceString = TL("vsp.rpc.1activeworkspace");
             static std::string tlActiveWorkspacesString = TL("vsp.rpc.activeworkspaces");
