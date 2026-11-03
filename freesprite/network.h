@@ -1,5 +1,7 @@
 #pragma once
 #include "globals.h"
+#include <queue>
+#include <mutex>
 
 #define VSP_STEAMWORKS 1
 
@@ -66,6 +68,8 @@ public:
 
 class NetInterface {
 public:
+	virtual std::string interfaceName() = 0;
+
 	virtual bool init() = 0;
 	virtual std::string getFriendlyAddress(NetSocket* s) = 0;
 	virtual NetServer* createServer(std::string address, int port) = 0;
@@ -91,6 +95,8 @@ class SDLNet : public NetInterface {
 private:
 	bool readNBytesFromSocketBlocking(NetSocket* s, int n, u8* dst);
 public:
+	std::string interfaceName() override { return "Manual networking (TCP/UDP)"; }
+
 	bool init() override;
 	std::string getFriendlyAddress(NetSocket* s) override;
 	NetServer* createServer(std::string address, int port) override;
@@ -110,22 +116,34 @@ public:
 #endif
 
 #if VSP_STEAMWORKS
+/*typedef u64 SteamID;
+typedef u64 SteamAPICall_t;
+typedef u32 HSteamListenSocket;
+#define SteamNetworkingConfigValue_t void
+#define ISteamNetworking void
+#define ISteamNetworkingSockets void
+#define ISteamUser void*/
+
+#include "steam/steam_api.h"
+
 class SteamNet : public NetInterface {
 private:
-	bool (_cdecl *SteamAPI_InitSafe)() = NULL;
-	void (_cdecl *SteamAPI_Shutdown)() = NULL;
-	void (_cdecl *SteamAPI_RunCallbacks)() = NULL;
+	std::mutex inboundConnectionsMutex;
+	std::map<HSteamListenSocket, std::queue<HSteamNetConnection>> inboundConnections;
+	STEAM_CALLBACK(SteamNet, handleSteamNetConnectionStatusChangedCallback, SteamNetConnectionStatusChangedCallback_t);
 public:
+	std::string interfaceName() override { return "Steam"; }
+
 	bool init() override;
-	std::string getFriendlyAddress(NetSocket* s) override { return ""; };
-	NetServer* createServer(std::string address, int port) override { return NULL; };
-	NetSocket* createClient(std::string address, int port) override { return NULL; };
-	NetSocket* acceptNextClient(NetServer* s) override { return NULL; };
-	void destroyServer(NetServer* s) override {};
-	void destroySocket(NetSocket* s) override {};
-	void writeMessageToSocket(NetSocket* s, NetMessage& msg) override {};
-	NetMessage readMessageFromSocket(NetSocket* s) override { throw std::exception("not implemented"); };
-	bool messageAvailable(NetSocket* s) override { return false; };
+	std::string getFriendlyAddress(NetSocket* s) override { return "<steam socket>"; };
+	NetServer* createServer(std::string address, int port) override;
+	NetSocket* createClient(std::string address, int port) override;
+	NetSocket* acceptNextClient(NetServer* s) override;
+	void destroyServer(NetServer* s) override;
+	void destroySocket(NetSocket* s) override;
+	void writeMessageToSocket(NetSocket* s, NetMessage& msg) override;
+	NetMessage readMessageFromSocket(NetSocket* s) override;
+	bool messageAvailable(NetSocket* s) override { return true; };
 
 	NetBroadcastSocket* createBroadcastListener(std::string address) override { return NULL; };
 	void destroyBroadcastListener(NetBroadcastSocket* s) override {};

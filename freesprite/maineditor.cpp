@@ -4081,7 +4081,18 @@ void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
 {
 #if VSP_NETWORKING
     NetMessage response{};
+    Timer64 authTimeout{};
     NetMessage authCmdMsg = clientSocket->netIf->readMessageFromSocket(clientSocket);
+    while (authCmdMsg.bytes.size() == 0) {
+        if (authTimeout.elapsedTime() > 1000) {
+            networkSendCommand(response, "HSDC");
+            networkSendString(response, "Authentication timeout");
+            clientSocket->netIf->writeMessageToSocket(clientSocket, response);
+            clientSocket->netIf->destroySocket(clientSocket);
+            return;
+        }
+        authCmdMsg = clientSocket->netIf->readMessageFromSocket(clientSocket);
+    }
     std::string authCommand = networkReadCommand(authCmdMsg);
     if (authCommand != "AUTH" || !networkCanvasProcessAUTHCommand(networkReadString(authCmdMsg))) {
         networkSendCommand(response, "HSDC");

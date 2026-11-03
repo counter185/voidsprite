@@ -6,8 +6,8 @@
 #endif
 
 #if VSP_STEAMWORKS
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "steam/steam_api.h"
+#include "steam/isteamuser.h"
 #endif
 
 
@@ -221,19 +221,116 @@ void SDLNet::broadcastMessage(NetMessage& msg)
 #endif
 
 #if VSP_STEAMWORKS
+void SteamNet::handleSteamNetConnectionStatusChangedCallback(SteamNetConnectionStatusChangedCallback_t* cb)
+{
+	if (cb->m_info.m_eState == k_ESteamNetworkingConnectionState_Connecting) {
+		std::lock_guard<std::mutex> mtx(inboundConnectionsMutex);
+		inboundConnections[cb->m_info.m_hListenSocket].push(cb->m_hConn);
+	}
+}
 bool SteamNet::init()
 {
-	HMODULE m = LoadLibraryW(L"steam_api64.dll");
+	/*HMODULE m = LoadLibraryW(L"steam_api64.dll");
 	if (m != NULL) {
-		SteamAPI_InitSafe = (bool(_cdecl*)())GetProcAddress(m, "SteamAPI_InitSafe");
-		SteamAPI_Shutdown = (void(_cdecl*)())GetProcAddress(m, "SteamAPI_Shutdown");
-		SteamAPI_RunCallbacks = (void(_cdecl*)())GetProcAddress(m, "SteamAPI_RunCallbacks");
+		SteamAPI_InitSafe = (decltype(SteamAPI_InitSafe))GetProcAddress(m, "SteamAPI_InitSafe");
+		SteamAPI_Shutdown = (decltype(SteamAPI_Shutdown))GetProcAddress(m, "SteamAPI_Shutdown");
+		SteamAPI_RunCallbacks = (decltype(SteamAPI_RunCallbacks))GetProcAddress(m, "SteamAPI_RunCallbacks");
+		SteamAPI_SteamUser_v023 = (decltype(SteamAPI_SteamUser_v023))GetProcAddress(m, "SteamAPI_SteamUser_v023");
+		SteamAPI_ISteamUser_GetSteamID = (decltype(SteamAPI_ISteamUser_GetSteamID))GetProcAddress(m, "SteamAPI_ISteamUser_GetSteamID");
 
 		if (SteamAPI_InitSafe != NULL) {
-			return SteamAPI_InitSafe();
+			bool ret = SteamAPI_InitSafe();
+			if (ret) {
+				loginfo(frmt("Steam ID: {}", SteamAPI_ISteamUser_GetSteamID(SteamAPI_SteamUser_v023())));
+			}
+			return ret;
+		}
+	}*/
+
+	bool ret = SteamAPI_Init();
+	if (ret) {
+		u64 steamID = SteamUser()->GetSteamID().ConvertToUint64();
+		loginfo(frmt("[Steamworks] Logged in as Steam ID: {} ({})", steamID, SteamFriends()->GetPersonaName()));
+	}
+
+	return ret;
+}
+
+NetServer* SteamNet::createServer(std::string address, int port) { 
+	HSteamListenSocket socket = SteamNetworkingSockets()->CreateListenSocketP2P(port, 0, NULL);
+	SteamNetworkingUtils()->InitRelayNetworkAccess();
+	loginfo(frmt("[Steamworks] Server socket ID {}", socket));
+	std::lock_guard<std::mutex> mtx(inboundConnectionsMutex);
+	NetServer* s = new NetServer{ this, (void*)socket };
+	inboundConnections[socket] = {};
+	return s;
+}
+
+NetSocket* SteamNet::createClient(std::string address, int port) {
+	try {
+		SteamNetworkingIdentity id{};
+		id.SetSteamID64(std::stoull(address));
+
+		HSteamNetConnection conn = SteamNetworkingSockets()->ConnectP2P(id, port, 0, NULL);
+		loginfo(frmt("[Steamworks] Client socket ID {}", conn));
+		return new NetSocket{ this, (void*)conn };
+	}
+	catch (std::exception&) {
+		return NULL;
+	}
+}
+
+NetSocket* SteamNet::acceptNextClient(NetServer* s) {
+	std::lock_guard<std::mutex> mtx(inboundConnectionsMutex);
+	auto& q = inboundConnections[(HSteamListenSocket)s->nativePtr];
+	if (!q.empty()) {
+		auto next = q.front();
+		q.pop();
+		EResult res = SteamNetworkingSockets()->AcceptConnection(next);
+		if (res == k_EResultInvalidParam || res == k_EResultInvalidState) {
+			return NULL;
+		}
+		else {
+			return new NetSocket{ this, (void*)next };
 		}
 	}
-	return false;
+	return NULL;
+}
+
+void SteamNet::destroyServer(NetServer* s) {
+	loginfo(frmt("[Steamworks] Closing server socket {}", (HSteamListenSocket)s->nativePtr));
+	bool r = SteamNetworkingSockets()->CloseListenSocket((HSteamListenSocket)s->nativePtr);
+	delete s;
+}
+
+void SteamNet::destroySocket(NetSocket* s) {
+	SteamNetworkingSockets()->CloseConnection((HSteamNetConnection)s->nativePtr, ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Generic, NULL, false);
+	delete s;
+}
+
+void SteamNet::writeMessageToSocket(NetSocket* s, NetMessage& msg) {
+	s64 pOutMsgNum = 0;
+	EResult res = SteamNetworkingSockets()->SendMessageToConnection((HSteamNetConnection)s->nativePtr, msg.bytes.data(), msg.bytes.size(), k_nSteamNetworkingSend_Reliable, &pOutMsgNum);
+	if (res > k_EResultOK) {
+		logerr(frmt("[Steamworks] Error writing message: {}", (int)res));
+	}
+}
+
+NetMessage SteamNet::readMessageFromSocket(NetSocket* s) {
+	SteamNetworkingMessage_t* outMsgs[] = {NULL};
+	int n = SteamNetworkingSockets()->ReceiveMessagesOnConnection((HSteamNetConnection)s->nativePtr, outMsgs, 1);
+	if (n == -1) {
+		throw std::runtime_error("ReceiveMessagesOnConnection invalid handle");
+	}
+	else if (n == 1) {
+		NetMessage msg{};
+		msg.putBytes((u8*)outMsgs[0]->GetData(), outMsgs[0]->GetSize());
+		outMsgs[0]->Release();
+		return msg;
+	}
+	else {
+		return NetMessage{};
+	}
 }
 
 void SteamNet::runCallbacks()
