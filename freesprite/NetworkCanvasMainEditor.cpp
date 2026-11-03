@@ -3,6 +3,7 @@
 #include <thread>
 #include "json/json.hpp"
 #include "background_operation.h"
+#include "network.h"
 
 #include "EditorLayerPicker.h"
 #include "Notification.h"
@@ -15,28 +16,32 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
 #if VSP_NETWORKING
     networkCanvasSendAUTH();
 
-    std::string commandBuffer = "";
+    NetMessage commandBuffer{};
     networkCanvasSendInfoRequest();
     while (networkRunning) {
         try {
             u64 ticksNow = SDL_GetTicks();
-            if (networkReadCommandIfAvailable(clientSocket, commandBuffer)) {
+            if (networkReadCommandIfAvailable(clientSocket, &commandBuffer)) {
                 networkCanvasProcessCommandFromServer(commandBuffer);
-                commandBuffer = "";
+                commandBuffer.reset();
             }
             if ((ticksNow - lastCanvasUpdate) > 64) {
                 networkCanvasSendInfoRequest();
-                networkSendCommand(clientSocket, "UPDD");
+                NetMessage outMsg{};
+                networkSendCommand(outMsg, "UPDD");
                 lastCanvasUpdate = ticksNow;
+                clientSocket->netIf->writeMessageToSocket(clientSocket, outMsg);
 
                 networkCanvasSendLocalChanges();
             }
             {
                 std::lock_guard<std::mutex> guard(chatMsgQueueMutex);
                 if (!chatMsgQueue.empty()) {
-                    networkSendCommand(clientSocket, "CHTQ");
-                    networkSendString(clientSocket, chatMsgQueue.front());
+                    NetMessage outMsg{};
+                    networkSendCommand(outMsg, "CHTQ");
+                    networkSendString(outMsg, chatMsgQueue.front());
                     chatMsgQueue.pop();
+                    clientSocket->netIf->writeMessageToSocket(clientSocket, outMsg);
                 }
             }
         }
@@ -47,7 +52,7 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
     }
     networkRunning = false;
 
-    NET_DestroyStreamSocket(clientSocket);
+    clientSocket->netIf->destroySocket(clientSocket);
     mainThreadOps.add([this]() {
         g_addNotification(Notification(TL("vsp.collabeditor.error.disconnected"), ""));
         closeNextTick = true;
@@ -58,10 +63,14 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
 #endif
 }
 
-void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string command)
+void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(NetMessage& command)
 {
-    if (command == "INFO") {
-        std::string inputString = networkReadString(clientSocket);
+    std::string commandName = networkReadCommand(command);
+
+    NetMessage response{};
+    
+    if (commandName == "INFO") {
+        std::string inputString = networkReadString(command);
         json infoJson = json::parse(inputString);
         std::string serverName = infoJson["serverName"];
         XY canvasSize = XY{ infoJson["canvasWidth"], infoJson["canvasHeight"] };
@@ -148,19 +157,19 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
         });
 
         if (networkCanvasCurrentChatState != NULL && chatState != networkCanvasCurrentChatState->messagesState) {
-            networkSendCommand(clientSocket, "CHTS");
+            networkSendCommand(response, "CHTS");
         }
     }
-    else if (command == "LRDT") {
+    else if (commandName == "LRDT") {
         u32 frameIndex;
         u32 index;
         u64 dataSize;
-        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
-        networkReadBytes(clientSocket, (u8*)&index, 4);
-        networkReadBytes(clientSocket, (u8*)&dataSize, 8);
+        networkReadBytes(command, (u8*)&frameIndex, 4);
+        networkReadBytes(command, (u8*)&index, 4);
+        networkReadBytes(command, (u8*)&dataSize, 8);
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
-            networkReadBytes(clientSocket, dataBuffer, dataSize);
+            networkReadBytes(command, dataBuffer, dataSize);
             Layer* l = frames[frameIndex]->layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
@@ -179,9 +188,9 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             logerr("Failed to allocate memory for layer pixel data update");
         }
     }
-    else if (command == "UPDD") {
+    else if (commandName == "UPDD") {
         u32 oldStateID = canvasStateID;
-        networkReadBytes(clientSocket, (u8*)&canvasStateID, 4);
+        networkReadBytes(command, (u8*)&canvasStateID, 4);
         //loginfo("Received UPDD back");
         if (oldStateID != canvasStateID || !receivedDataOnce) {
             loginfo(frmt("{:08X} != {:08X}, updating", oldStateID, canvasStateID));
@@ -189,15 +198,15 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             networkCanvasSendInfoRequest();
             for (int fi = 0; fi < frames.size(); fi++) {
                 for (int i = 0; i < frames[fi]->layers.size(); i++) {
-                    networkSendCommand(clientSocket, "LRRQ");
-                    networkSendBytes(clientSocket, (u8*)&fi, 4);
-                    networkSendBytes(clientSocket, (u8*)&i, 4);
+                    networkSendCommand(response, "LRRQ");
+                    networkSendBytes(response, (u8*)&fi, 4);
+                    networkSendBytes(response, (u8*)&i, 4);
                 }
             }
         }
     }
-    else if (command == "CHTD") {
-        std::string jsonStr = networkReadString(clientSocket);
+    else if (commandName == "CHTD") {
+        std::string jsonStr = networkReadString(command);
         networkCanvasCurrentChatState->fromJson(jsonStr);
         mainThreadOps.add([this]() {
             if (networkCanvasChatPanel != NULL) {
@@ -205,15 +214,20 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(std::string 
             }
         });
     }
-    else if (command == "HSDC") {
-        std::string disconnectReason = networkReadString(clientSocket);
+    else if (commandName == "HSDC") {
+        std::string disconnectReason = networkReadString(command);
         g_addNotificationFromThread(ErrorNotification(TL("vsp.collabeditor.error.disconnected"), disconnectReason));
+    }
+
+    if (!response.bytes.empty()) {
+        clientSocket->netIf->writeMessageToSocket(clientSocket, response);
     }
 }
 
 void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
 {
-    networkSendCommand(clientSocket, "INFO");
+    NetMessage msg{};
+    networkSendCommand(msg, "INFO");
     json infoJson = {
         {"clientName", thisClientInfo->clientName},
         {"cursorX", mousePixelTargetPoint.x},
@@ -221,15 +235,17 @@ void NetworkCanvasMainEditor::networkCanvasSendInfoRequest()
         {"clientColor", frmt("{:06X}", thisClientInfo->clientColor&0xFFFFFF)},
         {"activeFrame", activeFrame}
     };
-    networkSendString(clientSocket, infoJson.dump());
-
+    networkSendString(msg, infoJson.dump());
+    clientSocket->netIf->writeMessageToSocket(clientSocket, msg);
 }
 
 void NetworkCanvasMainEditor::networkCanvasSendLocalChanges()
 {
     clientSideChangesMutex.lock();
     for (auto& c : clientSideChanges) {
-        networkCanvasSendLRDT(clientSocket, c.first.first, c.first.second, frames[c.first.first]->layers[c.first.second]);
+        NetMessage msg{};
+        networkCanvasSendLRDT(msg, c.first.first, c.first.second, frames[c.first.first]->layers[c.first.second]);
+        clientSocket->netIf->writeMessageToSocket(clientSocket, msg);
     }
     clientSideChanges.clear();
     clientSideChangesMutex.unlock();
@@ -242,12 +258,14 @@ void NetworkCanvasMainEditor::networkCanvasSendNewLayerRequest()
 
 void NetworkCanvasMainEditor::networkCanvasSendAUTH()
 {
-    networkSendCommand(clientSocket, "AUTH");
+    NetMessage msg{};
+    networkSendCommand(msg, "AUTH");
     json authJson = {
         {"password", networkCanvasPassword},
         {"version", 2}
     };
-    networkSendString(clientSocket, authJson.dump());
+    networkSendString(msg, authJson.dump());
+    clientSocket->netIf->writeMessageToSocket(clientSocket, msg);
 }
 
 void NetworkCanvasMainEditor::reallocLayers(Frame* f, XY size, int numLayers)
@@ -272,7 +290,7 @@ void NetworkCanvasMainEditor::reallocLayers(Frame* f, XY size, int numLayers)
     }
 }
 
-NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NET_StreamSocket* socket)
+NetworkCanvasMainEditor::NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NetSocket* socket)
 {
     targetIP = displayIP;
     thisClientInfo = new NetworkCanvasClientInfo();

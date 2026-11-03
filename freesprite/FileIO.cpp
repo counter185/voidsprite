@@ -68,8 +68,7 @@ std::string getAllLibsVersions() {
            std::to_string(SDL_TTF_MICRO_VERSION) + "\n";
 
 #if VSP_NETWORKING
-    ret += "SDL_net: " + std::to_string(SDL_NET_MAJOR_VERSION) + "." + std::to_string(SDL_NET_MINOR_VERSION) + "." +
-           std::to_string(SDL_NET_MICRO_VERSION) + "\n";
+    ret += g_getAllNetworkLibsVersions();
 #endif
 
     ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +

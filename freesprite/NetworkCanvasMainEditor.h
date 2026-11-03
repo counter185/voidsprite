@@ -11,7 +11,7 @@ class NetworkCanvasMainEditor :
 {
 protected:
     std::thread* clientThread = NULL;
-    NET_StreamSocket* clientSocket = NULL;
+    NetSocket* clientSocket = NULL;
 
     std::string targetIP;
     bool receivedInfo = false;
@@ -27,7 +27,7 @@ protected:
     std::mutex chatMsgQueueMutex;
 
     void networkCanvasClientThread();
-    void networkCanvasProcessCommandFromServer(std::string command);
+    void networkCanvasProcessCommandFromServer(NetMessage& command);
     void networkCanvasSendInfoRequest();
     void networkCanvasSendLocalChanges();
     void networkCanvasSendNewLayerRequest();
@@ -36,7 +36,7 @@ protected:
     void reallocLayers(Frame* f, XY size, int numLayers);
 
 public:
-    NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NET_StreamSocket* socket);
+    NetworkCanvasMainEditor(std::string displayIP, PopupSetNetworkCanvasData userData, NetSocket* socket);
     ~NetworkCanvasMainEditor() {
         endClientNetworkSession();
     }

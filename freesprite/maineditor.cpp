@@ -3975,18 +3975,10 @@ void MainEditor::exportTilesIndividually()
     }
 }
 
-std::string MainEditor::networkGetSocketAddress(NET_StreamSocket* sock)
+std::string MainEditor::networkGetSocketAddress(NetSocket* sock)
 {
 #if VSP_NETWORKING
-    NET_Address* addr = NET_GetStreamSocketAddress(sock);
-    DoOnReturn a([&]() { NET_UnrefAddress(addr); });
-    NET_GetAddressString(addr);
-    int resolved = NET_WaitUntilResolved(addr, -1);
-    if (resolved == 1) {
-        const char* clientAddressStr = NET_GetAddressString(addr);
-        return clientAddressStr != NULL ? std::string(clientAddressStr) : "<address unknown>";
-    }
-    return "<address unknown>";
+    return sock->netIf->getFriendlyAddress(sock);
 #endif
     return "";
 }
@@ -4007,14 +3999,12 @@ void MainEditor::promptStartNetworkSession()
 
         networkCanvasCurrentChatState = new NetworkCanvasChatHostState;
         networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
-        networkCanvasChatPanel->position.y = 64;
-        networkCanvasChatPanel->position.x = 730;
+        networkCanvasChatPanel->position = {730, 64};
         wxsManager.addDrawable(networkCanvasChatPanel);
 
         
         networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this);
-        networkCanvasHostPanel->position.y = 64;
-        networkCanvasHostPanel->position.x = 420;
+        networkCanvasHostPanel->position = {420, 64};
         wxsManager.addDrawable(networkCanvasHostPanel);
 
         thisClientInfo = new NetworkCanvasClientInfo;
@@ -4042,7 +4032,7 @@ void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
 #if VSP_NETWORKING
-    NET_Server* server = NET_CreateServer(NULL, startData.port, 0);
+    NetServer* server = g_netInterfaces.front()->createServer("", startData.port);
 
     thisClientInfo->uid = nextClientUID++;
     thisClientInfo->clientName = startData.username;
@@ -4067,8 +4057,7 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
     
 
     while (networkRunning) {
-        NET_StreamSocket* clientSocket = NULL;
-        NET_AcceptClient(server, &clientSocket);
+        NetSocket* clientSocket = server->netIf->acceptNextClient(server);
         if (clientSocket == NULL) {
             SDL_Delay(100);
         }
@@ -4080,7 +4069,7 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
             });
         }
     }
-    NET_DestroyServer(server);
+    server->netIf->destroyServer(server);
     std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     networkClients.clear();
 #else
@@ -4088,14 +4077,17 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 #endif
 }
 
-void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSocket)
+void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
 {
 #if VSP_NETWORKING
-    std::string authCommand = networkReadCommand(clientSocket);
-    if (authCommand != "AUTH" || !networkCanvasProcessAUTHCommand(networkReadString(clientSocket))) {
-        networkSendCommand(clientSocket, "HSDC");
-        networkSendString(clientSocket, "Authentication failed");
-        NET_DestroyStreamSocket(clientSocket);
+    NetMessage response{};
+    NetMessage authCmdMsg = clientSocket->netIf->readMessageFromSocket(clientSocket);
+    std::string authCommand = networkReadCommand(authCmdMsg);
+    if (authCommand != "AUTH" || !networkCanvasProcessAUTHCommand(networkReadString(authCmdMsg))) {
+        networkSendCommand(response, "HSDC");
+        networkSendString(response, "Authentication failed");
+        clientSocket->netIf->writeMessageToSocket(clientSocket, response);
+        clientSocket->netIf->destroySocket(clientSocket);
         return;
     }
 
@@ -4113,11 +4105,17 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
 
     while (networkRunning && !clientInfo.hostKick) {
         try {
-            std::string commandStr = networkReadCommand(clientSocket);
-            networkCanvasProcessCommandFromClient(commandStr, clientSocket, &clientInfo);
-            if (!receivedName && commandStr == "INFO") {
-                receivedName = true;
-                networkCanvasSystemMessage(frmt("{} connected", clientInfo.clientName));
+            NetMessage nextMsg{};
+            if (networkReadCommandIfAvailable(clientSocket, &nextMsg)) {
+                std::string commandStr = networkReadCommand(nextMsg);
+                networkCanvasProcessCommandFromClient(commandStr, clientSocket, nextMsg, &clientInfo);
+                if (!receivedName && commandStr == "INFO") {
+                    receivedName = true;
+                    networkCanvasSystemMessage(frmt("{} connected", clientInfo.clientName));
+                }
+            }
+            else {
+                SDL_Delay(1);
             }
         }
         catch (std::exception& e) {
@@ -4126,8 +4124,10 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         }
     }
     if (clientInfo.hostKick) {
-        networkSendCommand(clientSocket, "HSDC");
-        networkSendString(clientSocket, "Kicked by host");
+        NetMessage kickMsg{};
+        networkSendCommand(kickMsg, "HSDC");
+        networkSendString(kickMsg, "Kicked by host");
+        clientSocket->netIf->writeMessageToSocket(clientSocket, kickMsg);
     }
 
     {
@@ -4135,7 +4135,7 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
         networkClients.erase(std::remove(networkClients.begin(), networkClients.end(), &clientInfo), networkClients.end());
     }
 
-    NET_DestroyStreamSocket(clientSocket);
+    clientSocket->netIf->destroySocket(clientSocket);
     mainThreadOps.add([this]() {
         networkCanvasHostPanel->updateClientList();
     });
@@ -4146,12 +4146,13 @@ void MainEditor::networkCanvasServerResponderThread(NET_StreamSocket* clientSock
     
 }
 
-void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket, NetworkCanvasClientInfo* clientInfo)
+void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NetSocket* clientSocket, NetMessage& inMessage, NetworkCanvasClientInfo* clientInfo)
 {
     clientInfo->lastReportTime = SDL_GetTicks();
+    NetMessage response{};
     if (command == "INFO") {
         bool anyDataUpdated = false;
-        std::string inputString = networkReadString(clientSocket);
+        std::string inputString = networkReadString(inMessage);
         json inputJson = json::parse(inputString);
 
         std::string newClientName = inputJson.value("clientName", "Unknown Client");
@@ -4217,27 +4218,26 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
             }
         }
 
-
         if (anyDataUpdated) {
             mainThreadOps.add([this]() {
                 networkCanvasHostPanel->updateClientList();
             });
         }
 
-        networkSendCommand(clientSocket, "INFO");
-        networkSendString(clientSocket, infoJson.dump());
+        networkSendCommand(response, "INFO");
+        networkSendString(response, infoJson.dump());
         
     }
     //layer data request
     else if (command == "LRRQ") {
         u32 frameIndex;
         u32 index;
-        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
-        networkReadBytes(clientSocket, (u8*)&index, 4);
+        networkReadBytes(inMessage, (u8*)&frameIndex, 4);
+        networkReadBytes(inMessage, (u8*)&index, 4);
 
         if (frameIndex < frames.size() && index < frames[frameIndex]->layers.size()) {
             Layer* l = frames[frameIndex]->layers[index];
-            networkCanvasSendLRDT(clientSocket, frameIndex, index, l);
+            networkCanvasSendLRDT(response, frameIndex, index, l);
         }
     }
     //layer pixel data update request
@@ -4245,12 +4245,12 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         u32 frameIndex;
         u32 index;
         u64 dataSize;
-        networkReadBytes(clientSocket, (u8*)&frameIndex, 4);
-        networkReadBytes(clientSocket, (u8*)&index, 4);
-        networkReadBytes(clientSocket, (u8*)&dataSize, 8);
+        networkReadBytes(inMessage, (u8*)&frameIndex, 4);
+        networkReadBytes(inMessage, (u8*)&index, 4);
+        networkReadBytes(inMessage, (u8*)&dataSize, 8);
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
-            networkReadBytes(clientSocket, dataBuffer, dataSize);
+            networkReadBytes(inMessage, dataBuffer, dataSize);
             Layer* l = frames[frameIndex]->layers[index];
             auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
             if (decompressed.size() != l->w * l->h * 4) {
@@ -4272,16 +4272,16 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
         }
     }
     else if (command == "UPDD") {
-        networkSendCommand(clientSocket, "UPDD");
-        networkSendBytes(clientSocket, (u8*)&canvasStateID, 4);
+        networkSendCommand(response, "UPDD");
+        networkSendBytes(response, (u8*)&canvasStateID, 4);
     }
     else if (command == "CHTS") {
         std::string chatState = ((NetworkCanvasChatHostState*)(networkCanvasCurrentChatState))->toJson();
-        networkSendCommand(clientSocket, "CHTD");
-        networkSendString(clientSocket, chatState);
+        networkSendCommand(response, "CHTD");
+        networkSendString(response, chatState);
     }
     else if (command == "CHTQ") {
-        std::string message = networkReadString(clientSocket);
+        std::string message = networkReadString(inMessage);
         if (message.size() < 720) {
             NetworkCanvasChatMessage msg;
             msg.fromColor = clientInfo->clientColor;
@@ -4299,6 +4299,9 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NET_
     }
     else {
         logerr(frmt("Unknown command from client: {}", command));
+    }
+    if (!response.bytes.empty()) {
+        clientSocket->netIf->writeMessageToSocket(clientSocket, response);
     }
 }
 
@@ -4320,7 +4323,7 @@ bool MainEditor::networkCanvasProcessAUTHCommand(std::string request)
     return false;
 }
 
-std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
+std::string MainEditor::networkReadCommand(NetMessage& socket)
 {
     std::string commandName;
     commandName.resize(8);
@@ -4333,36 +4336,34 @@ std::string MainEditor::networkReadCommand(NET_StreamSocket* socket)
     }
 }
 
-bool MainEditor::networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand)
+bool MainEditor::networkReadCommandIfAvailable(NetSocket* socket, NetMessage* outCommand)
 {
 #if VSP_NETWORKING
-    int bytesToRead = 8 - outCommand.size();
-    char buffer[9];
-    memset(buffer, 0, 9);
-    int bytesRead = NET_ReadFromStreamSocket(socket, buffer, bytesToRead);
-    if (bytesRead == -1) {
-        throw std::runtime_error("Failed to read from network socket");
+    //int bytesToRead = 8 - outCommand.size();
+    if (!socket->netIf->messageAvailable(socket)) {
+        return false;
     }
-    outCommand += std::string(buffer, bytesRead);
-    if (outCommand.size() == 8) {
-        std::string cmd = outCommand;
-        outCommand = "";
 
-        if (cmd.substr(0,4) != "VDNC") {
+    NetMessage newCommand = socket->netIf->readMessageFromSocket(socket);
+    if (newCommand.bytes.size() >= 8) {
+        std::string cmd;
+        cmd.resize(4);
+        newCommand.readBytes((u8*)cmd.data(), 4);
+        if (cmd != "VDNC") {
             logerr("Invalid command prefix: " + cmd);
             return false;
         }
-        outCommand = cmd.substr(4);
+        newCommand.seekToStart();
+        *outCommand = newCommand;
         return true;
     }
-
     return false;
 #else
     return false;
 #endif
 }
 
-void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string commandName)
+void MainEditor::networkSendCommand(NetMessage& socket, std::string commandName)
 {
     std::string fullCommand = "VDNC" + commandName;
     if (fullCommand.size() > 8) {
@@ -4371,33 +4372,34 @@ void MainEditor::networkSendCommand(NET_StreamSocket* socket, std::string comman
     networkSendBytes(socket, (u8*)&fullCommand[0], 8);
 }
 
-bool MainEditor::networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
+bool MainEditor::networkReadBytes(NetMessage& socket, u8* buffer, u32 count)
 {
 #if VSP_NETWORKING
-    int read = 0;
-    while (read < count) {
-        int bytesRead = NET_ReadFromStreamSocket(socket, buffer + read, count - read);
+    socket.readBytes(buffer, count);
+    //int read = 0;
+    /*while (read < count) {
+        int bytesRead = socket.readBytes(buffer + read, count - read);
         if (bytesRead == -1) {
             return false;
         }
         else {
             read += bytesRead;
         }
-    }
+    }*/
     return true;
 #else
     return false;
 #endif
 }
 
-void MainEditor::networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count)
+void MainEditor::networkSendBytes(NetMessage& socket, u8* buffer, u32 count)
 {
 #if VSP_NETWORKING
-    NET_WriteToStreamSocket(socket, buffer, count);
+    socket.putBytes(buffer, count);
 #endif
 }
 
-void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
+void MainEditor::networkSendString(NetMessage& socket, std::string s)
 {
     u32 size = s.size();
     networkSendBytes(socket, (u8*)&size, 4);
@@ -4409,18 +4411,19 @@ void MainEditor::networkSendString(NET_StreamSocket* socket, std::string s)
     }
 }
 
-void MainEditor::networkCanvasSendLRDT(NET_StreamSocket* socket, int frameIndex, int index, Layer* l)
+void MainEditor::networkCanvasSendLRDT(NetMessage& socket, int frameIndex, int index, Layer* l)
 {
     auto compressedData = compressZlib(l->pixels8(), 4ull * l->w * l->h);
     u64 dataSize = compressedData.size();
     networkSendCommand(socket, "LRDT");
-    networkSendBytes(socket, (u8*)&frameIndex, 4);
-    networkSendBytes(socket, (u8*)&index, 4);
-    networkSendBytes(socket, (u8*)&dataSize, 8);
-    networkSendBytes(socket, (u8*)&compressedData[0], dataSize);
+    socket.putU32(frameIndex);
+    socket.putU32(index);
+    socket.putU64(dataSize);
+    socket.putBytes((u8*)&compressedData[0], dataSize);
+    
 }
 
-std::string MainEditor::networkReadString(NET_StreamSocket* socket)
+std::string MainEditor::networkReadString(NetMessage& socket)
 {
     u32 size;
     networkReadBytes(socket, (u8*)&size, 4);
@@ -4466,7 +4469,7 @@ void MainEditor::networkCanvasSystemMessage(std::string msg)
     }
     msgEntry.messageColor = 0xFFFFF682;
     msgEntry.timestamp = std::time(nullptr);
-    ((NetworkCanvasChatHostState*)(networkCanvasCurrentChatState))->newMessage(msgEntry);
+    ((NetworkCanvasChatHostState*)networkCanvasCurrentChatState)->newMessage(msgEntry);
     mainThreadOps.add([this]() {
         if (networkCanvasChatPanel != NULL) {
             networkCanvasChatPanel->updateChat();
@@ -4491,25 +4494,10 @@ void MainEditor::networkCanvasChatSendCallback(std::string content)
 void MainEditor::networkCanvasBroadcastToLAN()
 {
 #if VSP_NETWORKING
-    auto adapters = platformGetNetworkAdapters();
+    NetMessage broadcastMsg{};
+    broadcastMsg.putString(frmt("vspcollab:{}", networkCanvasPort));
 
-    for (auto& adapter : adapters) {
-        NET_Address* addr = NET_ResolveHostname(adapter.broadcastAddress.c_str());
-        NET_Address* addr2 = NET_ResolveHostname(adapter.thisMachineAddress.c_str());
-        NET_WaitUntilResolved(addr, -1);
-        NET_WaitUntilResolved(addr2, -1);
-        //loginfo(frmt("Broadcasting to {}...", NET_GetAddressString(addr)));
-        if (addr != NULL) {
-            DoOnReturn unrefAddr([addr]() {NET_UnrefAddress(addr); });
-            DoOnReturn unrefAddr2([addr2]() {NET_UnrefAddress(addr2); });
-            NET_DatagramSocket* sock = NET_CreateDatagramSocket(addr2, LAN_BROADCAST_PORT, 0);
-            if (sock != NULL) {
-                DoOnReturn freeSock([sock]() { NET_DestroyDatagramSocket(sock); });
-                std::string str = frmt("vspcollab:{}", networkCanvasPort);
-                bool r = NET_SendDatagram(sock, addr, LAN_BROADCAST_PORT, (u8*)str.c_str(), str.size());
-            }
-        }
-    }
+    g_netInterfaces.front()->broadcastMessage(broadcastMsg);
     networkCanvasLastLANBroadcast.start();
 #endif
 }
@@ -4791,7 +4779,7 @@ std::string NetworkCanvasChatHostState::toJson() {
                 { "message", msg.message },
                 { "messageColor", frmt("{:06X}", msg.messageColor & 0xFFFFFF) },
                 { "timestamp", msg.timestamp }
-                }));
+            }));
         }
         json j = json::object({
             { "messages", jmsgs },

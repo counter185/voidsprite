@@ -125,13 +125,6 @@
     #define VSP_FDROID_BUILD 0
 #endif
 
-#if VSP_NETWORKING
-    #include <SDL3_net/SDL_net.h>
-#else
-    struct NET_StreamSocket;
-    struct NET_DatagramSocket;
-#endif
-
 #if SDL_MAJOR_VERSION == 3
 #include "sdl23compat.h"
 #endif
@@ -281,6 +274,12 @@ class PanelReference;
 //filters
 class BaseFilter;
 class RenderFilter;
+
+//networking
+class NetSocket;
+class NetServer;
+class NetBroadcastSocket;
+class NetMessage;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;

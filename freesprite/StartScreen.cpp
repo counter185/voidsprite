@@ -40,6 +40,7 @@
 #include "TooltipsLayer.h"
 #include "thumbnail_loader.h"
 #include "multiwindow.h"
+#include "network.h"
 #include "online_community.h"
 #include "main.h"
 
@@ -1082,26 +1083,13 @@ void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
             report->enterSection("Connecting...");
 
             report->enterSection("Resolving hostname");
-            NET_Address* addr = NET_ResolveHostname(input.ip.c_str());
-            if (NET_WaitUntilResolved(addr, 15000) == 1) {
-                report->exitSection();
-
-                report->enterSection("Connecting to server");
-                NET_StreamSocket* s = NET_CreateClient(addr, input.port, 0);
-                if (NET_WaitUntilConnected(s, -1) == 1) {
-                    report->exitSection();
-                    g_startNewMainThreadOperation([input, s, thisWindow]() {
-                        g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
-                    });
-                }
-                else {
-                    logerr(frmt("Connection to {} failed", input.ip));
-                    g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
-                }
-            }
-            else {
-                logerr(frmt("Failed to resolve hostname: {}", input.ip));
-                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.badhostname")));
+            NetSocket* s = g_netInterfaces.front()->createClient(input.ip, input.port);
+            if (s != NULL) {
+                g_startNewMainThreadOperation([input, s, thisWindow]() {
+                    g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
+                });
+            } else {
+                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
             }
         });
 #else

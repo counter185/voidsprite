@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "BaseScreen.h"
 #include "splitsession.h"
+#include "network.h"
 #include "Layer.h"
 #include "Canvas.h"
 #include "EventCallbackListener.h"
@@ -566,22 +567,22 @@ public:
     void tryExportPalettizedImage();
     virtual void exportTilesIndividually();
 
-    std::string networkGetSocketAddress(NET_StreamSocket* sock);
+    std::string networkGetSocketAddress(NetSocket* sock);
     virtual void promptStartNetworkSession();
     virtual void networkCanvasStateUpdated(int whichFrame, int whichLayer);
     void networkCanvasServerThread(PopupSetNetworkCanvasData startData);
-    void networkCanvasServerResponderThread(NET_StreamSocket* clientSocket);
-    void networkCanvasProcessCommandFromClient(std::string command, NET_StreamSocket* clientSocket,
-                                               NetworkCanvasClientInfo* clientInfo);
+    void networkCanvasServerResponderThread(NetSocket* clientSocket);
+    void networkCanvasProcessCommandFromClient(std::string command, NetSocket* clientSocket,
+                                               NetMessage& inMessage, NetworkCanvasClientInfo* clientInfo);
     bool networkCanvasProcessAUTHCommand(std::string request);
-    std::string networkReadCommand(NET_StreamSocket* socket);
-    bool networkReadCommandIfAvailable(NET_StreamSocket* socket, std::string& outCommand);
-    void networkSendCommand(NET_StreamSocket* socket, std::string commandName);
-    bool networkReadBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
-    void networkSendBytes(NET_StreamSocket* socket, u8* buffer, u32 count);
-    void networkSendString(NET_StreamSocket* socket, std::string s);
-    void networkCanvasSendLRDT(NET_StreamSocket* socket, int frameIndex, int index, Layer* l);
-    std::string networkReadString(NET_StreamSocket* socket);
+    std::string networkReadCommand(NetMessage& socket);
+    bool networkReadCommandIfAvailable(NetSocket* socket, NetMessage* outCommand);
+    bool networkReadBytes(NetMessage& socket, u8* buffer, u32 count);
+    std::string networkReadString(NetMessage& socket);
+    void networkSendCommand(NetMessage& socket, std::string commandName);
+    void networkSendBytes(NetMessage& socket, u8* buffer, u32 count);
+    void networkSendString(NetMessage& socket, std::string s);
+    void networkCanvasSendLRDT(NetMessage& socket, int frameIndex, int index, Layer* l);
     void networkCanvasKickUID(u32 uid);
     void networkCanvasSystemMessage(std::string msg);
     virtual void networkCanvasChatSendCallback(std::string content);

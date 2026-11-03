@@ -34,6 +34,7 @@
 #include "multiwindow.h"
 #include "thumbnail_loader.h"
 #include "actions/actions.h"
+#include "network.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"
@@ -837,16 +838,9 @@ int main(int argc, char** argv)
 
         loginfo("Passed SDL_Init");
 
-#if VSP_NETWORKING
-        initSteps.updateLastSection("Initializing SDL_net");
-        bool netInit = NET_Init();
-        if (!netInit) {
-            logerr("NET_Init failed: " + std::string(SDL_GetError()));
-        }
-        else {
-            loginfo("Passed NET_Init");
-        }
-#endif
+        initSteps.updateLastSection("Initializing networking");
+        g_initNet();
+
         initSteps.exitSection();
         initSteps.updateLastSection("Init");
 

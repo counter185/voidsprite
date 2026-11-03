@@ -5,6 +5,7 @@
 #include "UIButton.h"
 #include "background_operation.h"
 #include "StartScreen.h"
+#include "network.h"
 
 PopupListLAN::PopupListLAN()
 {
@@ -71,7 +72,7 @@ void PopupListLAN::populateList()
 void PopupListLAN::lanScannerThread()
 {
 #if VSP_NETWORKING
-    NET_DatagramSocket* broadcastSocket = NET_CreateDatagramSocket(NULL, LAN_BROADCAST_PORT, 0);
+    NetBroadcastSocket* broadcastSocket = g_netInterfaces.front()->createBroadcastListener("");
 
     if (broadcastSocket == NULL) {
         logerr("Failed to create LAN broadcast socket");
@@ -79,27 +80,24 @@ void PopupListLAN::lanScannerThread()
     }
     
     DoOnReturn closeSocket([broadcastSocket]() {
-        NET_DestroyDatagramSocket(broadcastSocket);
+        broadcastSocket->netIf->destroyBroadcastListener(broadcastSocket);
     });
     loginfo(frmt("Listening on {}", LAN_BROADCAST_PORT));
 
     while (runThread) {
-        NET_Datagram* dgram = NULL;
-        if (NET_ReceiveDatagram(broadcastSocket, &dgram) && dgram != NULL) {
+        NetBroadcastMessage nmsg{};
+        if (broadcastSocket->netIf->tryReceiveBroadcastMessage(broadcastSocket, &nmsg)) {
 
-            if (dgram->buflen >= 10 && memcmp(dgram->buf, "vspcollab:", 10) == 0) {
+            if (nmsg.bytes.size() >= 10 && memcmp(nmsg.bytes.data(), "vspcollab:", 10) == 0) {
                 std::string fullRequest;
-                fullRequest.resize(dgram->buflen);
-                memcpy(fullRequest.data(), dgram->buf, dgram->buflen);
+                fullRequest.resize(nmsg.bytes.size());
+                memcpy((u8*)fullRequest.data(), nmsg.bytes.data(), nmsg.bytes.size());
 
                 std::smatch matchRequestData;
                 if (std::regex_match(fullRequest, matchRequestData, std::regex("^vspcollab:([0-9]+)"))) {
                     int port = std::stoi(matchRequestData[1]);
 
-                    NET_WaitUntilResolved(dgram->addr, -1);
-                    const char* addr = NET_GetAddressString(dgram->addr);
-
-                    std::string fullAddr = addr;
+                    std::string fullAddr = nmsg.srcAddress;
                     std::smatch s;
                     if (std::regex_match(fullAddr, s, std::regex(".*:([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})$"))) {
                         fullAddr = s[1];
@@ -118,8 +116,6 @@ void PopupListLAN::lanScannerThread()
                     addressListMutex.unlock();
                 }
             }
-
-            NET_DestroyDatagram(dgram);
         }
         SDL_Delay(250);
     }

@@ -813,6 +813,9 @@
     <ClCompile Include="PopupPaletteManager.cpp">
       <Filter>Source files\popup</Filter>
     </ClCompile>
+    <ClCompile Include="network.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -1615,6 +1618,9 @@
     </ClInclude>
     <ClInclude Include="PopupPaletteManager.h">
       <Filter>Header files\popup</Filter>
+    </ClInclude>
+    <ClInclude Include="network.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
