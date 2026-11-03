@@ -5,6 +5,8 @@
 #include "PopupPickColor.h"
 #include "Notification.h"
 #include "UILabel.h"
+#include "UIDropdown.h"
+#include "network.h"
 
 PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx, bool ipField, bool portField, bool rpcOptions)
 {
@@ -49,6 +51,7 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
                 ret.username = textboxUsername->textEmpty() ? "User" : textboxUsername->getText();
                 ret.userColor = userColor;
                 ret.password = textboxPassword->getText();
+                ret.netIf = g_netInterfaces[netInterfaceIndex];
                 onInputConfirmCallback(this, ret);
                 closePopup();
             }
@@ -87,7 +90,7 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
     textboxUsername = new UITextField();
     textboxUsername->position = XY{ ixmax(labelUsername->calcEndpoint().x + 30, 90), 120 };
     textboxUsername->wxWidth = 190;
-    textboxUsername->setText("User");
+    textboxUsername->setText(g_netInterfaces[netInterfaceIndex]->getDefaultUsername());
     wxsManager.addDrawable(textboxUsername);
 
     UILabel* labelUsercolor = new UILabel(TL("vsp.collabeditor.popup.usercolor"));
@@ -119,6 +122,20 @@ PopupSetupNetworkCanvas::PopupSetupNetworkCanvas(std::string tt, std::string tx,
     textboxPassword->setText("");
     textboxPassword->placeholderText = TL("vsp.collabeditor.popup.password.none");
     wxsManager.addDrawable(textboxPassword);
+
+    std::vector<std::string> netInterfaces;
+    for (auto& netIf : g_netInterfaces) {
+        netInterfaces.push_back(netIf->interfaceName());
+    }
+    UIDropdown* netIfDropdown = new UIDropdown(netInterfaces);
+    netIfDropdown->position = XY{ 280, 80 };
+    netIfDropdown->setTextToSelectedItem = true;
+    netIfDropdown->text = netInterfaces[netInterfaceIndex];
+    netIfDropdown->onDropdownItemSelectedCallback = [this](UIDropdown*, int i, std::string) {
+        netInterfaceIndex = i;
+        textboxUsername->setText(g_netInterfaces[i]->getDefaultUsername());
+    };
+    wxsManager.addDrawable(netIfDropdown);
 
     updateUserColorButton();
 

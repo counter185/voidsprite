@@ -4032,7 +4032,7 @@ void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
 #if VSP_NETWORKING
-    NetServer* server = g_netInterfaces.front()->createServer("", startData.port);
+    NetServer* server = startData.netIf->createServer("", startData.port);
 
     thisClientInfo->uid = nextClientUID++;
     thisClientInfo->clientName = startData.username;

@@ -280,6 +280,7 @@ class NetSocket;
 class NetServer;
 class NetBroadcastSocket;
 class NetMessage;
+class NetInterface;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;

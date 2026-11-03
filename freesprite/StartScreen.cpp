@@ -1083,7 +1083,7 @@ void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
             report->enterSection("Connecting...");
 
             report->enterSection("Resolving hostname");
-            NetSocket* s = g_netInterfaces.front()->createClient(input.ip, input.port);
+            NetSocket* s = input.netIf->createClient(input.ip, input.port);
             if (s != NULL) {
                 g_startNewMainThreadOperation([input, s, thisWindow]() {
                     g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));

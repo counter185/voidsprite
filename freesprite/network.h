@@ -69,6 +69,7 @@ public:
 class NetInterface {
 public:
 	virtual std::string interfaceName() = 0;
+	virtual std::string getDefaultUsername() { return "User"; }
 
 	virtual bool init() = 0;
 	virtual std::string getFriendlyAddress(NetSocket* s) = 0;
@@ -133,6 +134,7 @@ private:
 	STEAM_CALLBACK(SteamNet, handleSteamNetConnectionStatusChangedCallback, SteamNetConnectionStatusChangedCallback_t);
 public:
 	std::string interfaceName() override { return "Steam"; }
+	std::string getDefaultUsername() override;
 
 	bool init() override;
 	std::string getFriendlyAddress(NetSocket* s) override { return "<steam socket>"; };
