@@ -127,6 +127,8 @@ typedef u32 HSteamListenSocket;
 #define ISteamNetworkingSockets void
 #define ISteamUser void*/
 
+#define NOTIF_COLOR_STEAM uint32ToSDLColor(0xFF5CCEFF)
+
 #if defined(_MSC_VER)
     #if _WIN64
         #pragma comment(lib, "steam_api64.lib")

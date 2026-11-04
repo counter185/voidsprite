@@ -1078,20 +1078,20 @@ void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
     prompt->textboxIP->setText(ip);
     prompt->textboxPort->setText(port);
     prompt->onInputConfirmCallback = [thisWindow](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
-    g_startNewOperation([input, thisWindow](OperationProgressReport* report) {
+        g_startNewOperation([input, thisWindow](OperationProgressReport* report) {
 
-        report->enterSection("Connecting...");
+            report->enterSection("Connecting...");
 
-        report->enterSection("Resolving hostname");
-        NetSocket* s = input.netIf->createClient(input.ip, input.port);
-        if (s != NULL) {
-            g_startNewMainThreadOperation([input, s, thisWindow]() {
-                g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
-            });
-        } else {
-            g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
-        }
-    });
+            report->enterSection("Resolving hostname");
+            NetSocket* s = input.netIf->createClient(input.ip, input.port);
+            if (s != NULL) {
+                g_startNewMainThreadOperation([input, s, thisWindow]() {
+                    g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
+                });
+            } else {
+                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
+            }
+        });
     };
     g_addPopup(prompt);
 }

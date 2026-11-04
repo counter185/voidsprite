@@ -250,6 +250,9 @@ void SteamNet::handleLobbyEnter(LobbyEnter_t* cb)
         StartScreen::promptConnectToNetworkCanvas(frmt("{}", SteamMatchmaking()->GetLobbyOwner(cb->m_ulSteamIDLobby).ConvertToUint64()), "");
         SteamMatchmaking()->LeaveLobby(cb->m_ulSteamIDLobby);
     }
+    else {
+        g_addNotificationFromThread(Notification("Steam lobby created", "Invite users using the Friends list", 5000, NULL, NOTIF_COLOR_STEAM));
+    }
 }
 void SteamNet::handleGameLobbyJoinRequested(GameLobbyJoinRequested_t* cb)
 {
@@ -282,7 +285,7 @@ bool SteamNet::init()
     if (ret) {
         u64 steamID = SteamUser()->GetSteamID().ConvertToUint64();
         loginfo(frmt("[Steamworks] Logged in as Steam ID: {} ({})", steamID, SteamFriends()->GetPersonaName()));
-        g_addNotificationFromThread(Notification("Connected to Steam", frmt("{} ({})", SteamFriends()->GetPersonaName(), steamID)));
+        g_addNotificationFromThread(Notification("Connected to Steam", frmt("{} ({})", SteamFriends()->GetPersonaName(), steamID), 5000, NULL, NOTIF_COLOR_STEAM));
     }
 
     return ret;
