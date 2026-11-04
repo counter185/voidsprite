@@ -5,6 +5,8 @@
 
 #if VSP_NETWORKING
 #include <SDL3_net/SDL_net.h>
+
+#pragma comment(lib, "SDL3_net.lib")
 #endif
 
 #if VSP_STEAMWORKS
@@ -15,6 +17,7 @@
 
 std::vector<NetInterface*> g_netInterfaces = {};
 void g_initNet() {
+#if VSP_STEAMWORKS
     SteamNet* steamInterface = new SteamNet();
     if (steamInterface->init()) {
         g_netInterfaces.push_back(steamInterface);
@@ -23,6 +26,8 @@ void g_initNet() {
         logerr(frmt("Failed to initialize {}", steamInterface->interfaceName()));
         delete steamInterface;
     }
+#endif
+
 #if VSP_NETWORKING
     SDLNet* sdlNetInterface = new SDLNet();
     if (sdlNetInterface->init()) {
@@ -130,8 +135,8 @@ void SDLNet::writeMessageToSocket(NetSocket* s, NetMessage& msg)
     u64 msgSize = msg.bytes.size();
     NET_WriteToStreamSocket((NET_StreamSocket*)s->nativePtr, &msgSize,  8);
     NET_WriteToStreamSocket((NET_StreamSocket*)s->nativePtr, msg.bytes.data(), msgSize);
-    std::string str = std::string(msg.bytes.begin(), msg.bytes.begin() + ixmin(msg.bytes.size(), 8));
-    loginfo(frmt("[{:x}] >> {} ({}b)", (u64)s, str, msgSize));
+    //std::string str = std::string(msg.bytes.begin(), msg.bytes.begin() + ixmin(msg.bytes.size(), 8));
+    //loginfo(frmt("[{:x}] >> {} ({}b)", (u64)s, str, msgSize));
 }
 
 NetMessage SDLNet::readMessageFromSocket(NetSocket* s)
@@ -141,8 +146,8 @@ NetMessage SDLNet::readMessageFromSocket(NetSocket* s)
     if (readNBytesFromSocketBlocking(s, 8, (u8*)&msgSize)) {
         ret.bytes.resize(msgSize);
         readNBytesFromSocketBlocking(s, msgSize, ret.bytes.data());
-        std::string str = std::string(ret.bytes.begin(), ret.bytes.begin() + ixmin(ret.bytes.size(), 8));
-        loginfo(frmt("[{:x}] << {} ({}b)", (u64)s, str, msgSize));
+        //std::string str = std::string(ret.bytes.begin(), ret.bytes.begin() + ixmin(ret.bytes.size(), 8));
+        //loginfo(frmt("[{:x}] << {} ({}b)", (u64)s, str, msgSize));
     }
     return ret;
 }
@@ -166,6 +171,11 @@ bool SDLNet::messageAvailable(NetSocket* s)
 {
     void* vsockets[] = { (void*)s->nativePtr };
     return NET_WaitUntilInputAvailable(vsockets, 1, 0) == 1;
+}
+
+bool SDLNet::socketConnected(NetSocket* s)
+{
+    return NET_GetConnectionStatus((NET_StreamSocket*)s->nativePtr) == NET_SUCCESS;
 }
 
 NetBroadcastSocket* SDLNet::createBroadcastListener(std::string address)
@@ -335,6 +345,7 @@ void SteamNet::destroyServer(NetServer* s) {
 }
 
 void SteamNet::destroySocket(NetSocket* s) {
+    SteamNetworkingSockets()->FlushMessagesOnConnection((HSteamNetConnection)s->nativePtr);
     SteamNetworkingSockets()->CloseConnection((HSteamNetConnection)s->nativePtr, ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Generic, NULL, false);
     delete s;
     if (runningLobby) {
@@ -348,6 +359,7 @@ void SteamNet::writeMessageToSocket(NetSocket* s, NetMessage& msg) {
     EResult res = SteamNetworkingSockets()->SendMessageToConnection((HSteamNetConnection)s->nativePtr, msg.bytes.data(), msg.bytes.size(), k_nSteamNetworkingSend_Reliable, &pOutMsgNum);
     if (res > k_EResultOK) {
         logerr(frmt("[Steamworks] Error writing message: {}", (int)res));
+        throw std::runtime_error("SendMessageToConnection failed");
     }
 }
 
@@ -366,6 +378,18 @@ NetMessage SteamNet::readMessageFromSocket(NetSocket* s) {
     else {
         return NetMessage{};
     }
+}
+
+bool SteamNet::socketConnected(NetSocket* s) {
+    SteamNetConnectionInfo_t out{};
+    if (SteamNetworkingSockets()->GetConnectionInfo((HSteamNetConnection)s->nativePtr, &out)) {
+        auto connState = out.m_eState;
+        return 
+            connState == k_ESteamNetworkingConnectionState_Connecting
+            || connState == k_ESteamNetworkingConnectionState_Connected
+            || connState == k_ESteamNetworkingConnectionState_FindingRoute;
+    }
+    return false;
 }
 
 void SteamNet::runCallbacks()

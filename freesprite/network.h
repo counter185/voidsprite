@@ -3,116 +3,118 @@
 #include <queue>
 #include <mutex>
 
-#define VSP_STEAMWORKS 1
-
 class NetInterface;
 
 struct NetSocket {
-	NetInterface* netIf = 0;
-	//for sdl_net this is a net_streamsocket
-	void* nativePtr = 0;
+    NetInterface* netIf = 0;
+    //for sdl_net this is a net_streamsocket
+    //for steamworks this is a HSteamNetConnection
+    void* nativePtr = 0;
 };
 struct NetBroadcastSocket {
-	NetInterface* netIf = 0;
-	//for sdl_net this is a net_datagramsocket
-	void* nativePtr = 0;
+    NetInterface* netIf = 0;
+    //for sdl_net this is a net_datagramsocket
+    void* nativePtr = 0;
 };
 
 struct NetServer {
-	NetInterface* netIf = 0;
-	//for sdl_net this is a net_server
-	void* nativePtr = 0;
+    NetInterface* netIf = 0;
+    //for sdl_net this is a net_server
+    //for steamworks this is a HSteamListenSocket
+    void* nativePtr = 0;
 };
 
 class NetMessage {
 private:
-	size_t readPtr = 0;
+    size_t readPtr = 0;
 public:
-	std::vector<u8> bytes;
+    std::vector<u8> bytes;
 
-	void reset() { bytes.clear(); readPtr = 0; }
-	void seekToStart() { readPtr = 0; }
+    void reset() { bytes.clear(); readPtr = 0; }
+    void seekToStart() { readPtr = 0; }
 
-	void putBytes(u8* a, size_t count) {
-		size_t sizeNow = bytes.size();
-		bytes.resize(bytes.size() + count);
-		memcpy(bytes.data() + sizeNow, a, count);
-	}
-	void putString(std::string a) {
-		putBytes((u8*)a.data(), a.size());
-	}
-	void putU32(u32 a) {
-		putBytes((u8*)&a, 4);
-	}
-	void putU64(u64 a) {
-		putBytes((u8*)&a, 8);
-	}
+    void putBytes(u8* a, size_t count) {
+        size_t sizeNow = bytes.size();
+        bytes.resize(bytes.size() + count);
+        memcpy(bytes.data() + sizeNow, a, count);
+    }
+    void putString(std::string a) {
+        putBytes((u8*)a.data(), a.size());
+    }
+    void putU32(u32 a) {
+        putBytes((u8*)&a, 4);
+    }
+    void putU64(u64 a) {
+        putBytes((u8*)&a, 8);
+    }
 
-	void readBytes(u8* target, size_t count) {
-		if (readPtr + count > bytes.size()) {
-			logerr(frmt("** [NetMessage] out of bounds read (buffer={}b, readPtr={}, count={})", bytes.size(), readPtr, count));
-		}
-		else {
-			memcpy(target, bytes.data() + readPtr, count);
-			readPtr += count;
-		}
+    void readBytes(u8* target, size_t count) {
+        if (readPtr + count > bytes.size()) {
+            logerr(frmt("** [NetMessage] out of bounds read (buffer={}b, readPtr={}, count={})", bytes.size(), readPtr, count));
+        }
+        else {
+            memcpy(target, bytes.data() + readPtr, count);
+            readPtr += count;
+        }
 
-	}
+    }
 };
 
 class NetBroadcastMessage : public NetMessage {
 public:
-	std::string srcAddress;
-	int srcPort;
+    std::string srcAddress;
+    int srcPort;
 };
 
 class NetInterface {
 public:
-	virtual std::string interfaceName() = 0;
-	virtual std::string getDefaultUsername() { return "User"; }
+    virtual std::string interfaceName() = 0;
+    virtual std::string getDefaultUsername() { return "User"; }
 
-	virtual bool init() = 0;
-	virtual std::string getFriendlyAddress(NetSocket* s) = 0;
-	virtual NetServer* createServer(std::string address, int port) = 0;
-	virtual NetSocket* createClient(std::string address, int port) = 0;
-	virtual NetSocket* acceptNextClient(NetServer* s) = 0;
-	virtual void destroyServer(NetServer* s) = 0;
-	virtual void destroySocket(NetSocket* s) = 0;
-	virtual void writeMessageToSocket(NetSocket* s, NetMessage& msg) = 0;
-	virtual NetMessage readMessageFromSocket(NetSocket* s) = 0;
-	virtual bool messageAvailable(NetSocket* s) = 0;
+    virtual bool init() = 0;
+    virtual std::string getFriendlyAddress(NetSocket* s) = 0;
+    virtual NetServer* createServer(std::string address, int port) = 0;
+    virtual NetSocket* createClient(std::string address, int port) = 0;
+    virtual NetSocket* acceptNextClient(NetServer* s) = 0;
+    virtual void destroyServer(NetServer* s) = 0;
+    virtual void destroySocket(NetSocket* s) = 0;
+    virtual void writeMessageToSocket(NetSocket* s, NetMessage& msg) = 0;
+    virtual NetMessage readMessageFromSocket(NetSocket* s) = 0;
+    virtual bool messageAvailable(NetSocket* s) = 0;
+    virtual bool socketConnected(NetSocket* s) = 0;
 
-	//for lan discovery:
-	virtual NetBroadcastSocket* createBroadcastListener(std::string address) = 0;
-	virtual void destroyBroadcastListener(NetBroadcastSocket* s) = 0;
-	virtual bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) = 0;
-	virtual void broadcastMessage(NetMessage& msg) {}
+    //for lan discovery:
+    virtual NetBroadcastSocket* createBroadcastListener(std::string address) = 0;
+    virtual void destroyBroadcastListener(NetBroadcastSocket* s) = 0;
+    virtual bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) = 0;
+    virtual void broadcastMessage(NetMessage& msg) {}
 
-	virtual void runCallbacks() {}
+    virtual void runCallbacks() {}
 };
 
 #if VSP_NETWORKING
 class SDLNet : public NetInterface {
 private:
-	bool readNBytesFromSocketBlocking(NetSocket* s, int n, u8* dst);
+    bool readNBytesFromSocketBlocking(NetSocket* s, int n, u8* dst);
 public:
-	std::string interfaceName() override { return "Manual networking (TCP/UDP)"; }
+    std::string interfaceName() override { return "Manual networking (TCP/UDP)"; }
 
-	bool init() override;
-	std::string getFriendlyAddress(NetSocket* s) override;
-	NetServer* createServer(std::string address, int port) override;
-	NetSocket* createClient(std::string address, int port) override;
-	NetSocket* acceptNextClient(NetServer* s) override;
-	void destroyServer(NetServer* s) override;
-	void destroySocket(NetSocket* s) override;
-	void writeMessageToSocket(NetSocket* s, NetMessage& msg) override;
-	NetMessage readMessageFromSocket(NetSocket* s) override;
-	bool messageAvailable(NetSocket* s) override;
+    bool init() override;
+    std::string getFriendlyAddress(NetSocket* s) override;
+    NetServer* createServer(std::string address, int port) override;
+    NetSocket* createClient(std::string address, int port) override;
+    NetSocket* acceptNextClient(NetServer* s) override;
+    void destroyServer(NetServer* s) override;
+    void destroySocket(NetSocket* s) override;
+    void writeMessageToSocket(NetSocket* s, NetMessage& msg) override;
+    NetMessage readMessageFromSocket(NetSocket* s) override;
+    bool messageAvailable(NetSocket* s) override;
+    bool socketConnected(NetSocket* s) override;
 
-	NetBroadcastSocket* createBroadcastListener(std::string address) override;
-	void destroyBroadcastListener(NetBroadcastSocket* s) override;
-	bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) override;
-	void broadcastMessage(NetMessage& msg) override;
+    NetBroadcastSocket* createBroadcastListener(std::string address) override;
+    void destroyBroadcastListener(NetBroadcastSocket* s) override;
+    bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) override;
+    void broadcastMessage(NetMessage& msg) override;
 };
 #endif
 
@@ -125,39 +127,48 @@ typedef u32 HSteamListenSocket;
 #define ISteamNetworkingSockets void
 #define ISteamUser void*/
 
+#if defined(_MSC_VER)
+    #if _WIN64
+        #pragma comment(lib, "steam_api64.lib")
+    #else
+        #pragma comment(lib, "steam_api.lib")
+    #endif
+#endif
+
 #include "steam/steam_api.h"
 
 class SteamNet : public NetInterface {
 private:
-	bool runningLobby = false;
-	CSteamID currentLobbyID{};
-	std::mutex inboundConnectionsMutex;
-	std::map<HSteamListenSocket, std::queue<HSteamNetConnection>> inboundConnections;
+    bool runningLobby = false;
+    CSteamID currentLobbyID{};
+    std::mutex inboundConnectionsMutex;
+    std::map<HSteamListenSocket, std::queue<HSteamNetConnection>> inboundConnections;
 
-	STEAM_CALLBACK(SteamNet, handleSteamNetConnectionStatusChangedCallback, SteamNetConnectionStatusChangedCallback_t);
-	STEAM_CALLBACK(SteamNet, handleLobbyEnter, LobbyEnter_t);
-	STEAM_CALLBACK(SteamNet, handleGameLobbyJoinRequested, GameLobbyJoinRequested_t);
+    STEAM_CALLBACK(SteamNet, handleSteamNetConnectionStatusChangedCallback, SteamNetConnectionStatusChangedCallback_t);
+    STEAM_CALLBACK(SteamNet, handleLobbyEnter, LobbyEnter_t);
+    STEAM_CALLBACK(SteamNet, handleGameLobbyJoinRequested, GameLobbyJoinRequested_t);
 public:
-	std::string interfaceName() override { return "Steam"; }
-	std::string getDefaultUsername() override;
+    std::string interfaceName() override { return "Steam"; }
+    std::string getDefaultUsername() override;
 
-	bool init() override;
-	std::string getFriendlyAddress(NetSocket* s) override { return "<steam socket>"; };
-	NetServer* createServer(std::string address, int port) override;
-	NetSocket* createClient(std::string address, int port) override;
-	NetSocket* acceptNextClient(NetServer* s) override;
-	void destroyServer(NetServer* s) override;
-	void destroySocket(NetSocket* s) override;
-	void writeMessageToSocket(NetSocket* s, NetMessage& msg) override;
-	NetMessage readMessageFromSocket(NetSocket* s) override;
-	bool messageAvailable(NetSocket* s) override { return true; };
+    bool init() override;
+    std::string getFriendlyAddress(NetSocket* s) override { return "<steam socket>"; }
+    NetServer* createServer(std::string address, int port) override;
+    NetSocket* createClient(std::string address, int port) override;
+    NetSocket* acceptNextClient(NetServer* s) override;
+    void destroyServer(NetServer* s) override;
+    void destroySocket(NetSocket* s) override;
+    void writeMessageToSocket(NetSocket* s, NetMessage& msg) override;
+    NetMessage readMessageFromSocket(NetSocket* s) override;
+    bool messageAvailable(NetSocket* s) override { return true; }
+    bool socketConnected(NetSocket* s) override;
 
-	NetBroadcastSocket* createBroadcastListener(std::string address) override { return NULL; };
-	void destroyBroadcastListener(NetBroadcastSocket* s) override {};
-	bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) override { return false; };
-	void broadcastMessage(NetMessage& msg) override {};
+    NetBroadcastSocket* createBroadcastListener(std::string address) override { return NULL; };
+    void destroyBroadcastListener(NetBroadcastSocket* s) override {};
+    bool tryReceiveBroadcastMessage(NetBroadcastSocket* s, NetBroadcastMessage* outMsg) override { return false; };
+    void broadcastMessage(NetMessage& msg) override {};
 
-	void runCallbacks() override;
+    void runCallbacks() override;
 };
 #endif
 

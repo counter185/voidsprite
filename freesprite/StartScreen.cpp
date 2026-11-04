@@ -125,7 +125,8 @@ StartScreen::StartScreen() {
                     { SDL_SCANCODE_P,{ TL("vsp.launchpad.nav.preferences"), [this]() { g_addPopup(new PopupGlobalConfig());} } },
                     { SDL_SCANCODE_R,{ TL("vsp.launchpad.nav.recoveryautosaves"), [this]() { g_addPopup(new PopupListRecoveryAutosaves());} } },
                     { SDL_SCANCODE_N,{ TL("vsp.launchpad.nav.openurl"), [this]() { this->promptOpenFromURL(); }}},
-#if VSP_NETWORKING
+//todo: only check if any net interface is available
+#if VSP_NETWORKING || VSP_STEAMWORKS
                     { SDL_SCANCODE_M,{ TL("vsp.launchpad.nav.connecttocollab"), []() { promptConnectToNetworkCanvas(); }}},
                     { SDL_SCANCODE_F,{ TL("vsp.launchpad.nav.findcollabonlan"), []() { g_addPopup(new PopupListLAN()); }}},
 #endif
@@ -1077,24 +1078,20 @@ void StartScreen::promptConnectToNetworkCanvas(std::string ip, std::string port)
     prompt->textboxIP->setText(ip);
     prompt->textboxPort->setText(port);
     prompt->onInputConfirmCallback = [thisWindow](PopupSetupNetworkCanvas*, PopupSetNetworkCanvasData input) {
-#if VSP_NETWORKING
-        g_startNewOperation([input, thisWindow](OperationProgressReport* report) {
+    g_startNewOperation([input, thisWindow](OperationProgressReport* report) {
 
-            report->enterSection("Connecting...");
+        report->enterSection("Connecting...");
 
-            report->enterSection("Resolving hostname");
-            NetSocket* s = input.netIf->createClient(input.ip, input.port);
-            if (s != NULL) {
-                g_startNewMainThreadOperation([input, s, thisWindow]() {
-                    g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
-                });
-            } else {
-                g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
-            }
-        });
-#else
-        logerr("attempted to connect on non-network build");
-#endif
+        report->enterSection("Resolving hostname");
+        NetSocket* s = input.netIf->createClient(input.ip, input.port);
+        if (s != NULL) {
+            g_startNewMainThreadOperation([input, s, thisWindow]() {
+                g_addScreenToWindow(thisWindow, new NetworkCanvasMainEditor(frmt("{} :{}", input.ip, input.port), input, s));
+            });
+        } else {
+            g_addNotificationFromThread(ErrorNotification(TL("vsp.cmn.error"), TL("vsp.launchpad.error.connectfail")));
+        }
+    });
     };
     g_addPopup(prompt);
 }

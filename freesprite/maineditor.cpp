@@ -1172,7 +1172,8 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"), [this]() { this->copyImageToClipboard(); } } },
                     {SDL_SCANCODE_V, { TL("vsp.cmn.paste"), [this]() { this->promptImageActionFromClipboard(); } } },
-#if VSP_NETWORKING
+//todo: only check if any net interface is available
+#if VSP_NETWORKING || VSP_STEAMWORKS
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
 #endif
                     {SDL_SCANCODE_T, { "Start/stop recording timelapse", [this]() { if (timelapseRecorder == NULL) timelapsePromptStart(); else timelapseStop(); }}},
@@ -3977,10 +3978,7 @@ void MainEditor::exportTilesIndividually()
 
 std::string MainEditor::networkGetSocketAddress(NetSocket* sock)
 {
-#if VSP_NETWORKING
     return sock->netIf->getFriendlyAddress(sock);
-#endif
-    return "";
 }
 
 void MainEditor::promptStartNetworkSession()
@@ -4031,7 +4029,6 @@ void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 
 void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
-#if VSP_NETWORKING
     NetServer* server = startData.netIf->createServer("", startData.port);
 
     thisClientInfo->uid = nextClientUID++;
@@ -4072,14 +4069,10 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
     server->netIf->destroyServer(server);
     std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     networkClients.clear();
-#else
-    logerr("Attempted to run network thread in non-network build");
-#endif
 }
 
 void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
 {
-#if VSP_NETWORKING
     NetMessage response{};
     Timer64 authTimeout{};
     NetMessage authCmdMsg = clientSocket->netIf->readMessageFromSocket(clientSocket);
@@ -4114,7 +4107,7 @@ void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
     }
 
 
-    while (networkRunning && !clientInfo.hostKick) {
+    while (networkRunning && !clientInfo.hostKick && clientSocket->netIf->socketConnected(clientSocket)) {
         try {
             NetMessage nextMsg{};
             if (networkReadCommandIfAvailable(clientSocket, &nextMsg)) {
@@ -4153,8 +4146,6 @@ void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
     g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
     networkCanvasSystemMessage(frmt("{} disconnected", clientInfo.clientName));
     logerr(frmt("Disconnected from {}", clientInfo.clientName));
-#endif
-    
 }
 
 void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NetSocket* clientSocket, NetMessage& inMessage, NetworkCanvasClientInfo* clientInfo)
@@ -4349,7 +4340,6 @@ std::string MainEditor::networkReadCommand(NetMessage& socket)
 
 bool MainEditor::networkReadCommandIfAvailable(NetSocket* socket, NetMessage* outCommand)
 {
-#if VSP_NETWORKING
     //int bytesToRead = 8 - outCommand.size();
     if (!socket->netIf->messageAvailable(socket)) {
         return false;
@@ -4369,9 +4359,6 @@ bool MainEditor::networkReadCommandIfAvailable(NetSocket* socket, NetMessage* ou
         return true;
     }
     return false;
-#else
-    return false;
-#endif
 }
 
 void MainEditor::networkSendCommand(NetMessage& socket, std::string commandName)
@@ -4385,7 +4372,6 @@ void MainEditor::networkSendCommand(NetMessage& socket, std::string commandName)
 
 bool MainEditor::networkReadBytes(NetMessage& socket, u8* buffer, u32 count)
 {
-#if VSP_NETWORKING
     socket.readBytes(buffer, count);
     //int read = 0;
     /*while (read < count) {
@@ -4398,9 +4384,6 @@ bool MainEditor::networkReadBytes(NetMessage& socket, u8* buffer, u32 count)
         }
     }*/
     return true;
-#else
-    return false;
-#endif
 }
 
 void MainEditor::networkSendBytes(NetMessage& socket, u8* buffer, u32 count)

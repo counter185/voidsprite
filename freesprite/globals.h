@@ -121,6 +121,10 @@
     #define VSP_NETWORKING ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 0, 1)
 #endif
 
+#ifndef VSP_STEAMWORKS
+    #define VSP_STEAMWORKS 1
+#endif
+
 #ifndef VSP_FDROID_BUILD
     #define VSP_FDROID_BUILD 0
 #endif

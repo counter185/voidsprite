@@ -13,12 +13,11 @@ using namespace nlohmann;
 
 void NetworkCanvasMainEditor::networkCanvasClientThread()
 {
-#if VSP_NETWORKING
     networkCanvasSendAUTH();
 
     NetMessage commandBuffer{};
     networkCanvasSendInfoRequest();
-    while (networkRunning) {
+    while (networkRunning && clientSocket->netIf->socketConnected(clientSocket)) {
         try {
             u64 ticksNow = SDL_GetTicks();
             if (networkReadCommandIfAvailable(clientSocket, &commandBuffer)) {
@@ -57,10 +56,6 @@ void NetworkCanvasMainEditor::networkCanvasClientThread()
         g_addNotification(Notification(TL("vsp.collabeditor.error.disconnected"), ""));
         closeNextTick = true;
     });
-#else
-    logerr("networkCanvasClientThread called on non-network build");
-    closeNextTick = true;
-#endif
 }
 
 void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(NetMessage& command)
