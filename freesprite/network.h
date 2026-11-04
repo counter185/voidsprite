@@ -129,9 +129,14 @@ typedef u32 HSteamListenSocket;
 
 class SteamNet : public NetInterface {
 private:
+	bool runningLobby = false;
+	CSteamID currentLobbyID{};
 	std::mutex inboundConnectionsMutex;
 	std::map<HSteamListenSocket, std::queue<HSteamNetConnection>> inboundConnections;
+
 	STEAM_CALLBACK(SteamNet, handleSteamNetConnectionStatusChangedCallback, SteamNetConnectionStatusChangedCallback_t);
+	STEAM_CALLBACK(SteamNet, handleLobbyEnter, LobbyEnter_t);
+	STEAM_CALLBACK(SteamNet, handleGameLobbyJoinRequested, GameLobbyJoinRequested_t);
 public:
 	std::string interfaceName() override { return "Steam"; }
 	std::string getDefaultUsername() override;

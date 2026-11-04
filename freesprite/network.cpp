@@ -1,6 +1,7 @@
 #include "network.h"
 #include "mathops.h"
 #include "Notification.h"
+#include "StartScreen.h"
 
 #if VSP_NETWORKING
 #include <SDL3_net/SDL_net.h>
@@ -19,6 +20,7 @@ void g_initNet() {
         g_netInterfaces.push_back(steamInterface);
     }
     else {
+        logerr(frmt("Failed to initialize {}", steamInterface->interfaceName()));
         delete steamInterface;
     }
 #if VSP_NETWORKING
@@ -229,6 +231,20 @@ void SteamNet::handleSteamNetConnectionStatusChangedCallback(SteamNetConnectionS
         inboundConnections[cb->m_info.m_hListenSocket].push(cb->m_hConn);
     }
 }
+void SteamNet::handleLobbyEnter(LobbyEnter_t* cb)
+{
+    loginfo(frmt("[Steamworks] Entering lobby {}", cb->m_ulSteamIDLobby));
+    currentLobbyID = cb->m_ulSteamIDLobby;
+    runningLobby = true;
+    if (SteamMatchmaking()->GetLobbyOwner(cb->m_ulSteamIDLobby) != SteamUser()->GetSteamID()) {
+        StartScreen::promptConnectToNetworkCanvas(frmt("{}", SteamMatchmaking()->GetLobbyOwner(cb->m_ulSteamIDLobby).ConvertToUint64()), "");
+        SteamMatchmaking()->LeaveLobby(cb->m_ulSteamIDLobby);
+    }
+}
+void SteamNet::handleGameLobbyJoinRequested(GameLobbyJoinRequested_t* cb)
+{
+    SteamMatchmaking()->JoinLobby(cb->m_steamIDLobby);
+}
 std::string SteamNet::getDefaultUsername()
 {
     return SteamFriends()->GetPersonaName();
@@ -263,9 +279,14 @@ bool SteamNet::init()
 }
 
 NetServer* SteamNet::createServer(std::string address, int port) { 
+    if (runningLobby) {
+        logerr("[Steamworks] Already running Steam lobby.");
+        return NULL;
+    }
     HSteamListenSocket socket = SteamNetworkingSockets()->CreateListenSocketP2P(port, 0, NULL);
     SteamNetworkingUtils()->InitRelayNetworkAccess();
     loginfo(frmt("[Steamworks] Server socket ID {}", socket));
+    SteamMatchmaking()->CreateLobby(k_ELobbyTypePublic, 100);
     std::lock_guard<std::mutex> mtx(inboundConnectionsMutex);
     NetServer* s = new NetServer{ this, (void*)socket };
     inboundConnections[socket] = {};
@@ -307,11 +328,19 @@ void SteamNet::destroyServer(NetServer* s) {
     loginfo(frmt("[Steamworks] Closing server socket {}", (HSteamListenSocket)s->nativePtr));
     bool r = SteamNetworkingSockets()->CloseListenSocket((HSteamListenSocket)s->nativePtr);
     delete s;
+    if (runningLobby) {
+        SteamMatchmaking()->LeaveLobby(currentLobbyID);
+        runningLobby = false;
+    }
 }
 
 void SteamNet::destroySocket(NetSocket* s) {
     SteamNetworkingSockets()->CloseConnection((HSteamNetConnection)s->nativePtr, ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Generic, NULL, false);
     delete s;
+    if (runningLobby) {
+        SteamMatchmaking()->LeaveLobby(currentLobbyID);
+        runningLobby = false;
+    }
 }
 
 void SteamNet::writeMessageToSocket(NetSocket* s, NetMessage& msg) {
