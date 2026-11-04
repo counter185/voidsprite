@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narro
 
 add_definitions(-DVSP_USE_LIBAVIF=1)
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
+add_definitions(-DVSP_STEAMWORKS=0)
 
 if(FDROID)
     add_definitions(-DVSP_FDROID_BUILD=1)

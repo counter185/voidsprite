@@ -4047,7 +4047,7 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
         networkClients.push_back(thisClientInfo);
     }
 
-
+    networkCanvasBroadcastInterface = server->netIf;
     mainThreadOps.add([this]() {
         networkCanvasHostPanel->updateClientList();
     });
@@ -4253,19 +4253,24 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NetS
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(inMessage, dataBuffer, dataSize);
-            Layer* l = frames[frameIndex]->layers[index];
-            auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
-            if (decompressed.size() != l->w * l->h * 4) {
-                logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+            if (frames.size() > frameIndex && frames[frameIndex]->layers.size() > index) {
+                Layer* l = frames[frameIndex]->layers[index];
+                auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
+                if (decompressed.size() != l->w * l->h * 4) {
+                    logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+                }
+                else {
+                    if (index != selLayer || !leftMouseHold) {
+                        memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
+                        l->markLayerDirty();
+                        changesSinceLastSave = HAS_UNSAVED_CHANGES;
+                        networkCanvasStateUpdated(frameIndex, index);
+                        mainThreadOps.add([this]() { timelapsePush(); });
+                    }
+                }
             }
             else {
-                if (index != selLayer || !leftMouseHold) {
-                    memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
-                    l->markLayerDirty();
-                    changesSinceLastSave = HAS_UNSAVED_CHANGES;
-                    networkCanvasStateUpdated(frameIndex, index);
-                    mainThreadOps.add([this]() { timelapsePush(); });
-                }
+                logerr(frmt("LRDT into invalid frame/layer ({}f {}l)", frameIndex, index));
             }
             tracked_free(dataBuffer);
         }
@@ -4487,13 +4492,13 @@ void MainEditor::networkCanvasChatSendCallback(std::string content)
 
 void MainEditor::networkCanvasBroadcastToLAN()
 {
-#if VSP_NETWORKING
-    NetMessage broadcastMsg{};
-    broadcastMsg.putString(frmt("vspcollab:{}", networkCanvasPort));
+    if (networkCanvasBroadcastInterface != NULL) {
+        NetMessage broadcastMsg{};
+        broadcastMsg.putString(frmt("vspcollab:{}", networkCanvasPort));
 
-    g_netInterfaces.front()->broadcastMessage(broadcastMsg);
-    networkCanvasLastLANBroadcast.start();
-#endif
+        networkCanvasBroadcastInterface->broadcastMessage(broadcastMsg);
+        networkCanvasLastLANBroadcast.start();
+    }
 }
 
 void MainEditor::endNetworkSession()

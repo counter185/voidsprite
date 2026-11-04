@@ -6,7 +6,9 @@
 #if VSP_NETWORKING
 #include <SDL3_net/SDL_net.h>
 
-#pragma comment(lib, "SDL3_net.lib")
+    #if defined(_MSC_VER)
+        #pragma comment(lib, "SDL3_net.lib")
+    #endif
 #endif
 
 #if VSP_STEAMWORKS

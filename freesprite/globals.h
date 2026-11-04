@@ -94,7 +94,8 @@
 #if _M_ARM64
     #define VOIDSPRITE_JXL_ENABLED 0
     #define VSP_DISCORD_RPC 0 
-    #define VSP_USE_LIBAVIF 0 
+    #define VSP_USE_LIBAVIF 0
+    #define VSP_STEAMWORKS 0
 #endif
 
 #ifndef VSP_DISCORD_RPC
@@ -122,7 +123,11 @@
 #endif
 
 #ifndef VSP_STEAMWORKS
-    #define VSP_STEAMWORKS 1
+    #if VSP_PLATFORM == VSP_PLATFORM_WIN32
+        #define VSP_STEAMWORKS 1
+    #else
+        #define VSP_STEAMWORKS 0
+    #endif
 #endif
 
 #ifndef VSP_FDROID_BUILD
