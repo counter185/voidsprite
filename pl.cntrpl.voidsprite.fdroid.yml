@@ -19,7 +19,7 @@ Repo: https://github.com/counter185/voidsprite.git
 Builds:
   - versionName: 'beta-2026.10'
     versionCode: 202610
-    commit: 9acd516f19ed1f555283bc685d9ab0e7b55e3e5d
+    commit: c165f7dff3ebf293c52556519085b4b17d6248fa
     subdir: android-project/app
     submodules: false
     forceversion: true
