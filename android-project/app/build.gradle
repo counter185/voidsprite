@@ -17,6 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
         buildConfigField "boolean", "FDROID_BUILD", "false"
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         externalNativeBuild {
             ndkBuild {
                 arguments "APP_PLATFORM=android-21"
@@ -49,15 +50,21 @@ android {
             versionNameSuffix "◆debug"
             signingConfig signingConfigs.debug
             ndk {
-                abiFilters 'x86_64', 'arm64-v8a'
+                abiFilters 'arm64-v8a'
             }
         }
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig file("keystore/vsp_keystore.jks").exists() ? signingConfigs.release
+                    : signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments "-DRELEASE=ON"
+                }
             }
         }
         debugOneArch {
@@ -65,7 +72,7 @@ android {
             applicationIdSuffix ".debug"
             versionNameSuffix "◆debug"
             signingConfig signingConfigs.debug
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             def buildArch = System.getenv("VSP_BUILD_ARCH")
             ndk {
@@ -74,23 +81,32 @@ android {
         }
         releaseOneArch {
             minifyEnabled false
-            signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig file("keystore/vsp_keystore.jks").exists() ? signingConfigs.release
+                    : signingConfigs.debug
 
             def buildArch = System.getenv("VSP_BUILD_ARCH")
             ndk {
                 abiFilters new String[]{buildArch != null ? buildArch : "arm64-v8a"}
             }
-        }
-        releaseFDroid {
-            minifyEnabled false
-            signingConfig signingConfigs.debug
-            buildConfigField "boolean", "FDROID_BUILD", "true"
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            externalNativeBuild {
+                cmake {
+                    arguments "-DRELEASE=ON"
+                }
             }
+        }
+    }
 
+    flavorDimensions "deploymentType"
+    productFlavors {
+        standalone {
+            getIsDefault().set(true)
+            dimension "deploymentType"
+        }
+        fdroid {
+            dimension "deploymentType"
+            versionNameSuffix "◆fdroid"
+
+            buildConfigField "boolean", "FDROID_BUILD", "true"
             externalNativeBuild {
                 cmake {
                     arguments "-DFDROID=ON"

@@ -1,0 +1,38 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Registers the lospec-palette:// URI to download palette files from the Lospec service.
+Categories:
+  - Graphics
+License: GPL-2.0-only
+AuthorName: cntrpl
+WebSite: https://cntrpl.itch.io/voidsprite
+SourceCode: https://github.com/counter185/voidsprite
+IssueTracker: https://github.com/counter185/voidsprite/issues
+Donate:
+  - https://ko-fi.com/cntrpl
+  - litecoin:ltc1q6hjcze266hl6lvutz46a87nttkjt6vmuuwa86y
+
+AutoName: voidsprite
+
+RepoType: git
+Repo: https://github.com/counter185/voidsprite.git
+
+Builds:
+  - versionName: 'beta-2026.10'
+    versionCode: 202610
+    commit: beta-2026.10
+    subdir: android-project/app
+    submodules: true
+    forceversion: true
+    forcevercode: true
+    prebuild:
+      - cd ../.. && chmod +x ./setup_android_on_linux.sh && ./setup_android_on_linux.sh
+    ndk: r29
+    gradle:
+      - fdroid
+
+ArchivePolicy: 3
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 'beta-2026.10'
+CurrentVersionCode: 202610

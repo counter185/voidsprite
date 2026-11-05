@@ -4,6 +4,12 @@ project(my_app)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fpermissive -Wno-c++11-narrowing -Wno-macro-redefined -Wno-switch -Wno-inconsistent-missing-override -Wno-constant-conversion")
 
+if (RELEASE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_DEBUG=1")
+endif()
+
 add_definitions(-DVSP_USE_LIBAVIF=1)
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
 
@@ -93,7 +99,7 @@ add_library(main SHARED
 set_source_files_properties(${C_FILES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION true)
 set_property(TARGET main PROPERTY UNITY_BUILD true)
 set_property(TARGET main PROPERTY UNITY_BUILD_MODE BATCH)
-set_property(TARGET main PROPERTY UNITY_BUILD_BATCH_SIZE 80)
+set_property(TARGET main PROPERTY UNITY_BUILD_BATCH_SIZE 50)
 
 target_link_libraries(main PRIVATE SDL3::SDL3)
 target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)

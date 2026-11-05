@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 project(GAME)
 
 option(FDROID "Disable some of the F-Droid antifeatures (update checker, external updater)" OFF)
+option(RELEASE "Enable optimization" OFF)
 
 set(CMAKE_DEBUG_POSTFIX "")
 
