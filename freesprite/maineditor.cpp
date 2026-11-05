@@ -2082,13 +2082,25 @@ void MainEditor::exportIndexed(FileExporter* exporter, PlatformNativePathString 
     ENSURE_REPORT_VALID(report);
     bool result = false;
 
-    MainEditorPalettized* rgbConvEditor = toPalettizedSession();
+    MainEditorPalettized* rgbConvEditor = NULL;
+    if (exporter->exportsWholeSession()) {
+        MainEditorPalettized* rgbConvEditor = toPalettizedSession();
+    }
+    else {
+        Layer* f = flattenFrame(getCurrentFrame());
+        if (f != NULL) {
+            MainEditor* tempEditor = new MainEditor({ f });
+            rgbConvEditor = tempEditor->toPalettizedSession();
+            delete tempEditor;
+        }
+    }
+
     if (rgbConvEditor != NULL) {
         if (exporter->exportsWholeSession()) {
             result = exporter->exportData(name, rgbConvEditor, report, &exportParameters);
         }
         else {
-            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(rgbConvEditor->getCurrentFrame(), rgbConvEditor->palette);// rgbConvEditor->flattenImageWithoutConvertingToRGB();
+            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(rgbConvEditor->getCurrentFrame(), rgbConvEditor->palette);
             result = exporter->exportData(name, l, report, &exportParameters);
             delete l;
         }
@@ -3917,7 +3929,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
                     } else {
                         auto findIdx = std::find(palette.begin(), palette.end(), px);
                         if (findIdx == palette.end()) {
-                            logerr(frmt("COLOR {:08X} NOT FOUND IN PALETTE (?????)", ppx[p]));
+                            logerr(frmt("COLOR {:08X} NOT FOUND IN PALETTE (?)", ppx[p]));
                         }
                         outpx[p] = findIdx - palette.begin();
                     }
