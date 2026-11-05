@@ -8,9 +8,8 @@ AuthorName: cntrpl
 WebSite: https://cntrpl.itch.io/voidsprite
 SourceCode: https://github.com/counter185/voidsprite
 IssueTracker: https://github.com/counter185/voidsprite/issues
-Donate:
-  - https://ko-fi.com/cntrpl
-  - litecoin:ltc1q6hjcze266hl6lvutz46a87nttkjt6vmuuwa86y
+Donate: https://ko-fi.com/cntrpl
+Litecoin: ltc1q6hjcze266hl6lvutz46a87nttkjt6vmuuwa86y
 
 AutoName: voidsprite
 
@@ -20,16 +19,21 @@ Repo: https://github.com/counter185/voidsprite.git
 Builds:
   - versionName: 'beta-2026.10'
     versionCode: 202610
-    commit: beta-2026.10
+    commit: 9acd516f19ed1f555283bc685d9ab0e7b55e3e5d
     subdir: android-project/app
-    submodules: true
+    submodules: false
     forceversion: true
     forcevercode: true
+    ndk: r29
     prebuild:
       - cd ../.. && chmod +x ./setup_android_on_linux.sh && ./setup_android_on_linux.sh
-    ndk: r29
     gradle:
       - fdroid
+    scandelete:
+      - cmake
+      - community-content
+      - freesprite/devlibs
+      - android-project/app/jni/SDL
 
 ArchivePolicy: 3
 AutoUpdateMode: Version

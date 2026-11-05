@@ -104,7 +104,6 @@ android {
         }
         fdroid {
             dimension "deploymentType"
-            versionNameSuffix "◆fdroid"
 
             buildConfigField "boolean", "FDROID_BUILD", "true"
             externalNativeBuild {
