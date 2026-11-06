@@ -87,6 +87,6 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: voidsprite-build-android-${{ inputs.build-arch }}
-        retention-days: ${{ case(inputs.common-build == true), 30, 1 }}
+        retention-days: ${{ case(inputs.common-build == true, 30, 1) }}
         path: |
           android-project/app/build/outputs/apk/standalone/releaseOneArch
