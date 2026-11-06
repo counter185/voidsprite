@@ -1,4 +1,5 @@
 name: Build (common platforms)
+#needs to be called msbuild.yml to not kill existing nightly.link links
 
 on:
   push:
@@ -8,6 +9,6 @@ on:
 
 jobs:
   build-all:
-    uses: ./.github/workflows/msbuild.yml
+    uses: ./.github/workflows/build-all.yml
     with:
       common-only: true
