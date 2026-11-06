@@ -86,6 +86,9 @@ public:
             position.y = (int)(position.y * scale);
         }
         subWidgets.applyScalingToAll(scale);
+        if (resizable) {
+            minResizableSize = { (int)(minResizableSize.x * scale), (int)(minResizableSize.y * scale) };
+        }
         if (!sizeToContent) {
             XY prevSize = { wxWidth, wxHeight };
             wxWidth = (int)(wxWidth * scale);

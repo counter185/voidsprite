@@ -40,7 +40,7 @@ public class UpdateVSP  {
         public void run() {
             Looper.prepare();
             Toast.makeText(context, "Download started", Toast.LENGTH_LONG).show();
-            String url = "https://nightly.link/counter185/voidsprite/workflows/msbuild/main/voidsprite-build-android.zip";
+            String url = "https://nightly.link/counter185/voidsprite/workflows/msbuild/main/voidsprite-build-android-arm64-v8a.zip";
             byte[] data = Utils.fetchDataHTTP(url);
             if (data == null) {
                 Toast.makeText(context, "Failed to download update", Toast.LENGTH_LONG).show();

@@ -1027,6 +1027,12 @@ void MainEditor::DrawForeground()
         int fw = g_fnt->StatStringDimensions(s, UISCALED(13)).x;
         g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, UISCALED(13));
     }
+    if (networkRunning) {
+        rightOrigin.y -= UISCALED(18);
+        std::string s = frmt("hosting network session :{}", networkCanvasPort);
+        int fw = g_fnt->StatStringDimensions(s, UISCALED(13)).x;
+        g_fnt->RenderString(s, rightOrigin.x - fw, rightOrigin.y, SDL_Color{ textColor.r, textColor.g, textColor.b,0x70 }, UISCALED(13));
+    }
     if (changesSinceLastSave != NO_UNSAVED_CHANGES) {
         rightOrigin.y -= UISCALED(20);
         std::string unsavedSymbol = changesSinceLastSave == CHANGES_RECOVERY_AUTOSAVED ? UTF8_EMPTY_DIAMOND : UTF8_DIAMOND;
@@ -4010,12 +4016,12 @@ void MainEditor::promptStartNetworkSession()
         networkCanvasCurrentChatState = new NetworkCanvasChatHostState;
         networkCanvasChatPanel = new EditorNetworkCanvasChatPanel(this);
         networkCanvasChatPanel->position = {730, 64};
-        wxsManager.addDrawable(networkCanvasChatPanel);
+        addWidget(networkCanvasChatPanel);
 
         
         networkCanvasHostPanel = new EditorNetworkCanvasHostPanel(this);
         networkCanvasHostPanel->position = {420, 64};
-        wxsManager.addDrawable(networkCanvasHostPanel);
+        addWidget(networkCanvasHostPanel);
 
         thisClientInfo = new NetworkCanvasClientInfo;
         thisClientInfo->clientIP = "localhost";
@@ -4739,17 +4745,26 @@ EditorNetworkCanvasHostPanel::EditorNetworkCanvasHostPanel(MainEditor* caller, b
 
 void EditorNetworkCanvasHostPanel::updateClientList()
 {
-    clientList->subWidgets.freeAllDrawables();
-    int clientY = 0;
     std::lock_guard<std::recursive_mutex> lock(parent->networkClientsListMutex);
+
+    if (clientListButtons.size() != parent->networkClients.size()) {
+        clientList->subWidgets.freeAllDrawables();
+        clientListButtons.clear();
+        for (auto& client : parent->networkClients) {
+            clientListButtons.push_back(new UIButton());
+        }
+        clientList->subWidgets.addDrawable(UIStackPanel::VerticalExt(0, clientListButtons));
+    }
+
+    loginfo("updating client list...");
+    int i = 0;
     for (auto*& client : parent->networkClients) {
-        UIButton* clientButton = new UIButton();
+        UIButton*& clientButton = clientListButtons[i++];
         clientButton->text = std::string((clientSide ? (client->uid == parent->thisClientInfo->uid) : (client == parent->thisClientInfo)) ? UTF8_DIAMOND : "") + client->clientName;
-        clientButton->colorTextFocused = clientButton->colorTextUnfocused = uint32ToSDLColor(0xFF000000|client->clientColor);
-        clientButton->position = { 0, clientY };
+        clientButton->colorTextFocused = clientButton->colorTextUnfocused = uint32ToSDLColor(0xFF000000 | client->clientColor);
         clientButton->onClickCallback = [this, client](UIButton* b) {
             parent->canvas.centerOnPoint(client->cursorPosition);
-        };
+            };
         u32 uid = client->uid;
         if (!clientSide) {
             clientButton->tooltip = client->clientIP;
@@ -4763,10 +4778,8 @@ void EditorNetworkCanvasHostPanel::updateClientList()
                     });
                 };
         }
-        clientList->subWidgets.addDrawable(clientButton);
-
-        clientY += 30;
     }
+    clientList->subWidgets.applyScalingToAll(g_config.uiScale);
 }
 
 void NetworkCanvasChatHostState::newMessage(NetworkCanvasChatMessage msg) {
@@ -4845,6 +4858,7 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
 
     setupDraggable();
     setupCollapsible();
+    setupResizable({ 350, 250 });
     addTitleText(TL("vsp.maineditor.panel.netcollab.chat.title"));
 
     chatMsgPanel = new ScrollingPanel();
@@ -4853,17 +4867,26 @@ EditorNetworkCanvasChatPanel::EditorNetworkCanvasChatPanel(MainEditor* caller, b
     chatMsgPanel->wxHeight = wxHeight - 35 - 35;
     wxsTarget().addDrawable(chatMsgPanel);
 
-    UITextField* inputField = new UITextField();
-    inputField->position = { 5, wxHeight - 35 };
-    inputField->wxWidth = wxWidth - 10;
+    inputField = new UITextField();
     inputField->wxHeight = 30;
+    inputField->wxWidth = wxWidth - 10;
+    inputField->position = { 5, wxHeight - 35 };
 
-    inputField->onTextChangedConfirmCallback = [this, inputField](UITextField*, std::string text) {
+    inputField->onTextChangedConfirmCallback = [this](UITextField*, std::string text) {
         parent->networkCanvasChatSendCallback(text);
         inputField->clearText();
     };
 
     wxsTarget().addDrawable(inputField);
+}
+
+void EditorNetworkCanvasChatPanel::panelResized(XY from, XY to)
+{
+    chatMsgPanel->wxWidth = wxWidth - UISCALED(10);
+    chatMsgPanel->wxHeight = wxHeight - UISCALED(35 + 35);
+
+    inputField->wxWidth = wxWidth - UISCALED(10);
+    inputField->position.y = wxHeight - inputField->wxHeight - UISCALED(5);
 }
 
 void EditorNetworkCanvasChatPanel::updateChat()
@@ -4911,6 +4934,7 @@ void EditorNetworkCanvasChatPanel::updateChat()
         }
     }
     parent->networkCanvasCurrentChatState->messagesMutex.unlock();
+    chatMsgPanel->subWidgets.applyScalingToAll(g_config.uiScale);
     chatMsgPanel->scrollToBottom();
 }
 

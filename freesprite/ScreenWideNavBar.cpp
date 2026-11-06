@@ -71,7 +71,7 @@ void ScreenWideNavBar::render(XY position) {
                     XY underButton = xyAdd(section.button->position, { 0, (int)(section.button->wxHeight * XM1PW3P1(focusTimer.percentElapsedTime(200))) });
                     SDL_Rect underButtonRect = { underButton.x, underButton.y, section.button->wxWidth, 60 };
                     Fill::ThreePointVerticalGradient(0xFF000000, 0xFF000000, 0xE0000000, 0xE0000000, 0x00000000, 0x00000000).fill(underButtonRect);
-                    g_fnt->RenderString(frmt("[{}]", SDL_GetScancodeName(scancode)), underButton.x + 5, underButton.y, {200,200,200,(u8)(220 * focusTimer.percentElapsedTime(200))}, 26);
+                    g_fnt->RenderString(frmt("[{}]", SDL_GetScancodeName(scancode)), underButton.x + 5, underButton.y, {200,200,200,(u8)(220 * focusTimer.percentElapsedTime(200))}, UISCALED(26));
                 }
             }
         }
@@ -86,7 +86,7 @@ void ScreenWideNavBar::render(XY position) {
                     XY buttonEndpoint = xyAdd(xyAdd(submenuPanel->position, btn->position), { (int)(btn->wxWidth - 30 + (30 * XM1PW3P1(submenuOpenTimer.percentElapsedTime(200)))), 0 });
                     SDL_Rect rightOfButtonRect = { buttonEndpoint.x, buttonEndpoint.y, 90, btn->wxHeight };
                     Fill::Gradient(0xFF000000, 0x00000000, 0xFF000000, 0x00000000).fill(rightOfButtonRect);
-                    g_fnt->RenderString(frmt("[{}]", SDL_GetScancodeName(subScancode)), buttonEndpoint.x + 5, buttonEndpoint.y, { 230, 230, 230, (u8)(220 * submenuOpenTimer.percentElapsedTime(200)) }, 18);
+                    g_fnt->RenderString(frmt("[{}]", SDL_GetScancodeName(subScancode)), buttonEndpoint.x + 5, buttonEndpoint.y, { 230, 230, 230, (u8)(220 * submenuOpenTimer.percentElapsedTime(200)) }, UISCALED(18));
                 }
                 i++;
             }

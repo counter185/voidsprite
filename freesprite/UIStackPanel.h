@@ -60,6 +60,13 @@ public:
     static UIStackPanel* Vertical(int spacing, std::vector<Drawable*> content, XY position = {0,0});
     static UIStackPanel* Horizontal(int spacing, std::vector<Drawable*> content, XY position = {0,0});
 
+    template<typename T>
+    static UIStackPanel* VerticalExt(int spacing, std::vector<T*> content, XY position = { 0,0 }) {
+        std::vector<Drawable*> d;
+        for (T*& a : content) { d.push_back(a); }
+        return UIStackPanel::Vertical(spacing, d, position);
+    }
+
     void render(XY at) override;
     void applyScaling(double scale) override {
         Panel::applyScaling(scale);

@@ -13,7 +13,8 @@ public:
     SDL_Color color = { 255, 255, 255, 255 };
     
     UILabel() {}
-    UILabel(std::string t, XY pos = { 0,0 }, int size = 18) : text(t), fontsize(size)  { 
+    UILabel(std::string t, XY pos = { 0,0 }, int size = 18, u32 color = 0xFFFFFFFF) 
+        : text(t), fontsize(size), color(uint32ToSDLColor(color))  { 
         this->position = pos; 
     }
 
@@ -36,8 +37,8 @@ class UIDynamicLabel : public UILabel {
 public:
     std::function<std::string()> getTextFunction = []() { return ""; };
 
-    UIDynamicLabel(std::function<std::string()> func, XY pos = { 0,0 }, int size = 18) 
-        : UILabel("", pos, size), getTextFunction(func) {}
+    UIDynamicLabel(std::function<std::string()> func, XY pos = { 0,0 }, int size = 18, u32 color = 0xFFFFFFFF) 
+        : UILabel("", pos, size, color), getTextFunction(func) {}
 
     void render(XY pos) override {
         text = getTextFunction();

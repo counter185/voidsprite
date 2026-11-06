@@ -172,11 +172,14 @@ class EditorNetworkCanvasChatPanel : public PanelUserInteractable {
 protected:
     MainEditor* parent = NULL;
     ScrollingPanel* chatMsgPanel = NULL;
+    UITextField* inputField = NULL;
     bool clientSide = false;
 
 public:
     EditorNetworkCanvasChatPanel(MainEditor* caller, bool clientSide = false);
 
+
+    void panelResized(XY from, XY to) override;
     void updateChat();
 };
 
@@ -185,6 +188,8 @@ protected:
     MainEditor* parent = NULL;
     ScrollingPanel* clientList = NULL;
     bool clientSide = false;
+
+    std::vector<UIButton*> clientListButtons;
 
 public:
     EditorNetworkCanvasHostPanel(MainEditor* caller, bool clientSide = false);

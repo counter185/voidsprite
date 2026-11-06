@@ -145,6 +145,23 @@ PopupGlobalConfig::PopupGlobalConfig()
 
     tabVisualStack->addWidgetNoRecalc(optionCheckbox(TL("vsp.config.opt.vsync"), TL("vsp.config.opt.vsync.desc"), &g_config.vsync));
 
+    UIButton* upscale = new UIButton("+");
+    upscale->wxWidth = 30;
+    upscale->onClickCallback = [](...) { main_renderScaleUp(); };
+
+    UIButton* downscale = new UIButton("-");
+    downscale->wxWidth = 30;
+    downscale->onClickCallback = [](...) { main_renderScaleDown(); };
+    tabVisualStack->addWidgetNoRecalc(UIStackPanel::Horizontal(10, {
+        new UILabel("Display scale"),
+        Panel::Space(20,1),
+        upscale,
+        downscale,
+        new UIDynamicLabel([]() { return frmt("{}% ({}x{})", 
+            g_currentWindow->renderScale * 100, g_currentWindow->unscaledWindowSize.x, g_currentWindow->unscaledWindowSize.y); },
+            {}, 14, 0xFF808080)
+    }));
+
     uiScaleWhole = (int)(g_config.uiScale * 100);
     tabVisualStack->addWidgetNoRecalc(optionNumberInput("UI scale [BETA] (restart required)", "", &uiScaleWhole, 50, 300, [](int v) {
         g_config.uiScale = v / 100.0;
