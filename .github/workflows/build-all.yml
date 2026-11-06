@@ -237,6 +237,7 @@ jobs:
             voidsprite-universal.app.tar
 
   build-emscipten:
+    if: ${{ inputs.common-only == false }}
     runs-on: ubuntu-latest
 
     steps:
