@@ -280,7 +280,7 @@ jobs:
     with:
       build-arch: x86_64
       release-tag: ${{ inputs.release-tag }}
-      common-build: ${{ inputs.common-build }}
+      common-build: ${{ inputs.common-only }}
   
   build-android-arm64:
     uses: ./.github/workflows/android-build.yml
@@ -292,7 +292,7 @@ jobs:
     with:
       build-arch: arm64-v8a
       release-tag: ${{ inputs.release-tag }}
-      common-build: ${{ inputs.common-build }}
+      common-build: ${{ inputs.common-only }}
   
   build-android-armv7:
     if: ${{ inputs.common-only == false }}
@@ -305,7 +305,7 @@ jobs:
     with:
       build-arch: armeabi-v7a
       release-tag: ${{ inputs.release-tag }}
-      common-build: ${{ inputs.common-build }}
+      common-build: ${{ inputs.common-only }}
   
   android-merge-cpu-apks:
     needs: [build-android-x64, build-android-arm64, build-android-armv7]
