@@ -123,11 +123,7 @@
 #endif
 
 #ifndef VSP_STEAMWORKS
-    #if VSP_PLATFORM == VSP_PLATFORM_WIN32
-        #define VSP_STEAMWORKS 1
-    #else
-        #define VSP_STEAMWORKS 0
-    #endif
+	#define VSP_STEAMWORKS 0
 #endif
 
 #ifndef VSP_FDROID_BUILD

@@ -480,3 +480,4 @@ android-project/local.properties
 /build_appimage
 /build_vita
 /android-project/app/releaseFDroid
+/freesprite/steam/*.h
