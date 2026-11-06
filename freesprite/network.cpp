@@ -303,7 +303,8 @@ NetServer* SteamNet::createServer(std::string address, int port) {
     loginfo(frmt("[Steamworks] Server socket ID {}", socket));
     SteamMatchmaking()->CreateLobby(k_ELobbyTypePublic, 100);
     std::lock_guard<std::mutex> mtx(inboundConnectionsMutex);
-    NetServer* s = new NetServer{ this, (void*)socket };
+    SteamNetServer* a = new SteamNetServer { socket };
+    NetServer* s = new NetServer{ this, (void*)a };
     inboundConnections[socket] = {};
     return s;
 }
@@ -315,7 +316,8 @@ NetSocket* SteamNet::createClient(std::string address, int port) {
 
         HSteamNetConnection conn = SteamNetworkingSockets()->ConnectP2P(id, port, 0, NULL);
         loginfo(frmt("[Steamworks] Client socket ID {}", conn));
-        return new NetSocket{ this, (void*)conn };
+        SteamNetSocket* a = new SteamNetSocket { conn };
+        return new NetSocket{ this, (void*)a };
     }
     catch (std::exception&) {
         return NULL;
@@ -324,7 +326,7 @@ NetSocket* SteamNet::createClient(std::string address, int port) {
 
 NetSocket* SteamNet::acceptNextClient(NetServer* s) {
     std::lock_guard<std::mutex> mtx(inboundConnectionsMutex);
-    auto& q = inboundConnections[(HSteamListenSocket)s->nativePtr];
+    auto& q = inboundConnections[((SteamNetServer*)s->nativePtr)->srv];
     if (!q.empty()) {
         auto next = q.front();
         q.pop();
@@ -340,8 +342,9 @@ NetSocket* SteamNet::acceptNextClient(NetServer* s) {
 }
 
 void SteamNet::destroyServer(NetServer* s) {
-    loginfo(frmt("[Steamworks] Closing server socket {}", (HSteamListenSocket)s->nativePtr));
-    bool r = SteamNetworkingSockets()->CloseListenSocket((HSteamListenSocket)s->nativePtr);
+    loginfo(frmt("[Steamworks] Closing server socket {}", ((SteamNetServer*)s->nativePtr)->srv));
+    bool r = SteamNetworkingSockets()->CloseListenSocket(((SteamNetServer*)s->nativePtr)->srv);
+    delete (SteamNetServer*)s->nativePtr;
     delete s;
     if (runningLobby) {
         SteamMatchmaking()->LeaveLobby(currentLobbyID);
@@ -350,8 +353,9 @@ void SteamNet::destroyServer(NetServer* s) {
 }
 
 void SteamNet::destroySocket(NetSocket* s) {
-    SteamNetworkingSockets()->FlushMessagesOnConnection((HSteamNetConnection)s->nativePtr);
-    SteamNetworkingSockets()->CloseConnection((HSteamNetConnection)s->nativePtr, ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Generic, NULL, false);
+    SteamNetworkingSockets()->FlushMessagesOnConnection(((SteamNetSocket*)s->nativePtr)->conn);
+    SteamNetworkingSockets()->CloseConnection(((SteamNetSocket*)s->nativePtr)->conn, ESteamNetConnectionEnd::k_ESteamNetConnectionEnd_App_Generic, NULL, false);
+    delete (SteamNetSocket*)s->nativePtr;
     delete s;
     if (runningLobby) {
         SteamMatchmaking()->LeaveLobby(currentLobbyID);
@@ -361,7 +365,7 @@ void SteamNet::destroySocket(NetSocket* s) {
 
 void SteamNet::writeMessageToSocket(NetSocket* s, NetMessage& msg) {
     s64 pOutMsgNum = 0;
-    EResult res = SteamNetworkingSockets()->SendMessageToConnection((HSteamNetConnection)s->nativePtr, msg.bytes.data(), msg.bytes.size(), k_nSteamNetworkingSend_Reliable, &pOutMsgNum);
+    EResult res = SteamNetworkingSockets()->SendMessageToConnection(((SteamNetSocket*)s->nativePtr)->conn, msg.bytes.data(), msg.bytes.size(), k_nSteamNetworkingSend_Reliable, (int64*)&pOutMsgNum);
     if (res > k_EResultOK) {
         logerr(frmt("[Steamworks] Error writing message: {}", (int)res));
         throw std::runtime_error("SendMessageToConnection failed");
@@ -370,7 +374,7 @@ void SteamNet::writeMessageToSocket(NetSocket* s, NetMessage& msg) {
 
 NetMessage SteamNet::readMessageFromSocket(NetSocket* s) {
     SteamNetworkingMessage_t* outMsgs[] = {NULL};
-    int n = SteamNetworkingSockets()->ReceiveMessagesOnConnection((HSteamNetConnection)s->nativePtr, outMsgs, 1);
+    int n = SteamNetworkingSockets()->ReceiveMessagesOnConnection(((SteamNetSocket*)s->nativePtr)->conn, outMsgs, 1);
     if (n == -1) {
         throw std::runtime_error("ReceiveMessagesOnConnection invalid handle");
     }
@@ -387,7 +391,7 @@ NetMessage SteamNet::readMessageFromSocket(NetSocket* s) {
 
 bool SteamNet::socketConnected(NetSocket* s) {
     SteamNetConnectionInfo_t out{};
-    if (SteamNetworkingSockets()->GetConnectionInfo((HSteamNetConnection)s->nativePtr, &out)) {
+    if (SteamNetworkingSockets()->GetConnectionInfo(((SteamNetSocket*)s->nativePtr)->conn, &out)) {
         auto connState = out.m_eState;
         return 
             connState == k_ESteamNetworkingConnectionState_Connecting

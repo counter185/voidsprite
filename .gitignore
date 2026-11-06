@@ -481,3 +481,5 @@ android-project/local.properties
 /build_vita
 /android-project/app/releaseFDroid
 /freesprite/steam/*.h
+cmake/libsteam_api64.so
+freesprite/steam/steam_api.json

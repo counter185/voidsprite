@@ -8,7 +8,7 @@ class NetInterface;
 struct NetSocket {
     NetInterface* netIf = 0;
     //for sdl_net this is a net_streamsocket
-    //for steamworks this is a HSteamNetConnection
+    //for steamworks this is a steamnetsocket
     void* nativePtr = 0;
 };
 struct NetBroadcastSocket {
@@ -20,7 +20,7 @@ struct NetBroadcastSocket {
 struct NetServer {
     NetInterface* netIf = 0;
     //for sdl_net this is a net_server
-    //for steamworks this is a HSteamListenSocket
+    //for steamworks this is a steamnetserver
     void* nativePtr = 0;
 };
 
@@ -138,6 +138,13 @@ typedef u32 HSteamListenSocket;
 #endif
 
 #include "steam/steam_api.h"
+
+struct SteamNetSocket {
+    HSteamNetConnection conn;
+};
+struct SteamNetServer {
+    HSteamListenSocket srv;
+};
 
 class SteamNet : public NetInterface {
 private:
