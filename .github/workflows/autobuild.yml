@@ -1,0 +1,13 @@
+name: Build (common platforms)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-all:
+    uses: ./.github/workflows/msbuild.yml
+    with:
+      common-only: true

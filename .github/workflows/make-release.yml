@@ -16,21 +16,16 @@ jobs:
     uses: ./.github/workflows/msbuild.yml
     with:
       release-tag: ${{ inputs.tagName }}
+      common-only: false
     secrets:
       KEYSTORE: ${{ secrets.KEYSTORE }}
       SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
   
-  build-vita:
-    uses: ./.github/workflows/vita-build.yml
-    with:
-      release-tag: ${{ inputs.tagName }}
-  
   create-release:
     needs:
       - build-all
-      - build-vita
     runs-on: ubuntu-slim
     permissions: 
       contents: write

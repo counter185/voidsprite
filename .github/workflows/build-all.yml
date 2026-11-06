@@ -6,15 +6,15 @@
 name: Build (all target platforms)
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_call:
     inputs:
       release-tag:
         required: false
         type: string
+      common-only:
+        required: false
+        type: boolean
+        default: true
     secrets:
       KEYSTORE:
         required: true
@@ -47,20 +47,21 @@ jobs:
       release-tag: ${{ inputs.release-tag }}
   
   build-windows-arm64:
+    if: ${{ inputs.common-only == false }}
     uses: ./.github/workflows/windows-build.yml
     with:
       build-arch: ARM64
       release-tag: ${{ inputs.release-tag }}
 
   build-sdk:
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
 
     steps:
       - uses: actions/checkout@v4
 
       - name: run script
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: ./make_sdk.ps1
+        run: powershell ./make_sdk.ps1
     
       - name: Push build artifacts
         uses: actions/upload-artifact@v7
@@ -70,6 +71,7 @@ jobs:
             voidsprite_sdk.h
           
   build-linux64-flatpak:
+    if: ${{ inputs.common-only == false }}
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
@@ -123,6 +125,7 @@ jobs:
           voidsprite-latest-x86_64.AppImage
         
   build-mac-x64:
+    if: ${{ inputs.common-only == false }}
     runs-on: macos-15-intel
     steps:
     - uses: actions/checkout@v6
@@ -168,7 +171,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with: 
         name: voidsprite-build-mac-arm64
-        retention-days: 1
+        retention-days: ${{ case(inputs.common-only == true), 30, 1 }}
         path: |
           voidsprite.app.tar
   
@@ -267,6 +270,7 @@ jobs:
         path: web-build
 
   build-android-x64:
+    if: ${{ inputs.common-only == false }}
     uses: ./.github/workflows/android-build.yml
     secrets:
       KEYSTORE: ${{ secrets.KEYSTORE }}
@@ -276,6 +280,7 @@ jobs:
     with:
       build-arch: x86_64
       release-tag: ${{ inputs.release-tag }}
+      common-build: ${{ inputs.common-build }}
   
   build-android-arm64:
     uses: ./.github/workflows/android-build.yml
@@ -287,8 +292,10 @@ jobs:
     with:
       build-arch: arm64-v8a
       release-tag: ${{ inputs.release-tag }}
+      common-build: ${{ inputs.common-build }}
   
   build-android-armv7:
+    if: ${{ inputs.common-only == false }}
     uses: ./.github/workflows/android-build.yml
     secrets:
       KEYSTORE: ${{ secrets.KEYSTORE }}
@@ -298,6 +305,7 @@ jobs:
     with:
       build-arch: armeabi-v7a
       release-tag: ${{ inputs.release-tag }}
+      common-build: ${{ inputs.common-build }}
   
   android-merge-cpu-apks:
     needs: [build-android-x64, build-android-arm64, build-android-armv7]
@@ -353,6 +361,12 @@ jobs:
         name: voidsprite-build-android
         path: |
           output
+  
+  build-vita:
+    if: ${{ inputs.common-only == false }}
+    uses: ./.github/workflows/vita-build.yml
+    with:
+      release-tag: ${{ inputs.tagName }}
       
 
 
