@@ -94,7 +94,8 @@
 #if _M_ARM64
     #define VOIDSPRITE_JXL_ENABLED 0
     #define VSP_DISCORD_RPC 0 
-    #define VSP_USE_LIBAVIF 0 
+    #define VSP_USE_LIBAVIF 0
+    #define VSP_STEAMWORKS 0
 #endif
 
 #ifndef VSP_DISCORD_RPC
@@ -119,6 +120,10 @@
 
 #ifndef VSP_NETWORKING
     #define VSP_NETWORKING ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 0, 1)
+#endif
+
+#ifndef VSP_STEAMWORKS
+	#define VSP_STEAMWORKS 0
 #endif
 
 #ifndef VSP_FDROID_BUILD
@@ -280,6 +285,7 @@ class NetSocket;
 class NetServer;
 class NetBroadcastSocket;
 class NetMessage;
+class NetInterface;
 
 extern bool g_ctrlModifier, g_shiftModifier;
 extern int g_windowW, g_windowH;

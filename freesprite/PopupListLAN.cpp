@@ -71,7 +71,11 @@ void PopupListLAN::populateList()
 
 void PopupListLAN::lanScannerThread()
 {
-#if VSP_NETWORKING
+    if (g_netInterfaces.empty()) {
+        logerr("** no net interfaces available");
+        return;
+    }
+
     NetBroadcastSocket* broadcastSocket = g_netInterfaces.front()->createBroadcastListener("");
 
     if (broadcastSocket == NULL) {
@@ -119,5 +123,4 @@ void PopupListLAN::lanScannerThread()
         }
         SDL_Delay(250);
     }
-#endif
 }

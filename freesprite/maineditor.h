@@ -382,6 +382,7 @@ public:
     bool networkCanvasRPCPrivate = false;
     std::string networkCanvasRPCAddress = "";
     Timer64 networkCanvasLastLANBroadcast;
+    NetInterface* networkCanvasBroadcastInterface = NULL;
 
     MainEditor(XY dimensions);
     MainEditor(SDL_Surface* srf);

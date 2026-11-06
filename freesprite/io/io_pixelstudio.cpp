@@ -12,6 +12,23 @@
 
 using namespace nlohmann;
 
+#define PIXELSTUDIO_DEBUG_HISTORY_REENACTMENT 0
+#if PIXELSTUDIO_DEBUG_HISTORY_REENACTMENT
+#include "io_avif.h"
+#endif
+
+XY psToVSPPos(XY a, int height) {
+    return { a.x, height - 1 - a.y };
+}
+
+void pixelStudioDumpProblematicToolInfo(int id, std::vector<XY> positions, std::string fullJson) {
+    logwarn(frmt("[PixelStudio] problematic tool id {}", id));
+    for (auto& xy : positions) {
+        logwarn(frmt("\t  - {}:{}", xy.x, xy.y));
+    }
+    logwarn(frmt("\tFull json:{}", fullJson));
+}
+
 MainEditor* deserializePixelStudioSession(json j)
 {
     int pspversion = j["Version"].get<int>();
@@ -27,9 +44,9 @@ MainEditor* deserializePixelStudioSession(json j)
     json clips = j["Clips"];
     json clip0 = clips[0];
     std::string name = clip0["Name"];
-    logprintf("Clip Name: %s\n", name.c_str());
+    loginfo(frmt("[PixelStudio] Clip Name: {}", name));
     int activeFrameIndex = clip0["ActiveFrameIndex"].get<int>();
-    logprintf("Active Frame Index: %i\n", activeFrameIndex);
+    loginfo(frmt("[PixelStudio] Active Frame Index: {}", activeFrameIndex));
 
     bool showWarning = false;
 
@@ -39,7 +56,8 @@ MainEditor* deserializePixelStudioSession(json j)
     for (json& frame : frames) {
         Frame* curFrame = new Frame();
         retFrames.push_back(curFrame);
-        
+
+        int n = 0;
         for (json& layer : frame["Layers"]) {
 
             std::string id = layer["Id"];
@@ -53,20 +71,29 @@ MainEditor* deserializePixelStudioSession(json j)
 
             json subJson = json::parse(history);
             std::string source = subJson["_source"];
-            std::string base64ImageData = base64::from_base64(source);
-            uint8_t* imageData = (uint8_t*)base64ImageData.c_str();
-            Layer* nlayer = readPNGFromMem(imageData, base64ImageData.size());
+            Layer* nlayer = readPNGFromBase64String(source);
+            
             if (nlayer != NULL) {
-
+                nlayer->hidden = hidden;
                 nlayer->name = layerName;
                 //std::cout << subJson.dump(4) << std::endl;
                 json actions = subJson["Actions"];
                 int actionIndex = subJson["Index"];
                 int nAction = 0;
+
+#if PIXELSTUDIO_DEBUG_HISTORY_REENACTMENT
+                AVIFVideoEncoder* debugEnc = new AVIFVideoEncoder();
+                debugEnc->startRecording(convertStringOnWin32(frmt("test_layer_{}.avif", n++)), 200, 100);
+#endif
+
                 for (json& action : actions) {
                     if (nAction++ >= actionIndex) {
                         break;
                     }
+
+#if PIXELSTUDIO_DEBUG_HISTORY_REENACTMENT
+                    debugEnc->submitFrame(nlayer);
+#endif
 
                     bool invalid = action["Invalid"];
                     if (invalid) {
@@ -87,18 +114,21 @@ MainEditor* deserializePixelStudioSession(json j)
                     }
 
                     std::string positionsB64 = base64::from_base64(std::string(action["Positions"]));
+                    s16* positionVals = (s16*)positionsB64.data();
                     std::vector<XY> positions;
                     for (int p = 0; p < positionsB64.size() / 4; p++) {
-                        u16 x = *(u16*)(positionsB64.c_str() + (p * 4));
-                        u16 y = dimensions.y - 1 - *(u16*)(positionsB64.c_str() + (p * 4 + 2));
-                        positions.push_back(XY{ x,y });
+                        s16 x = *(positionVals++);
+                        s16 y = *(positionVals++);
+                        positions.push_back(psToVSPPos({ x,y }, dimensions.y));
                     }
 #if _DEBUG
-                    loginfo(action.dump(4));
+                    //loginfo(action.dump(4));
 #endif
                     switch (tool) {
-                        //1px pencil
+                    //1px pencil
                     case 0:
+                    //eraser pen (erase if clicked opaque, draw if clicked transparent)
+                    case 19:
                     {
                         json colorIndexes = action["ColorIndexes"];
                         int colIndex = 0;
@@ -111,15 +141,13 @@ MainEditor* deserializePixelStudioSession(json j)
                     //color picker, has no values at all attached to it
                     case 1:
                         break;
-                        //eraser
+                    //eraser
                     case 2:
-                        //"eraser pen"
-                    case 19:
                         for (XY& p : positions) {
                             nlayer->setPixel(p, modAlpha(colors[0], 0));
                         }
                         break;
-                        //paint bucket
+                    //paint bucket
                     case 3:
                         for (XY& p : positions) {
                             nlayer->paintBucket(p, colors[0]);
@@ -130,8 +158,8 @@ MainEditor* deserializePixelStudioSession(json j)
                     {
                         std::string metaString = action["Meta"];
                         json meta = json::parse(metaString);
-                        XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
-                        XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+                        XY from = psToVSPPos({ meta["From"]["X"], (int)meta["From"]["Y"] }, dimensions.y);
+                        XY to = psToVSPPos({ meta["To"]["X"], (int)meta["To"]["Y"] }, dimensions.y);
 
                         nlayer->fillRect(from, to, 0x00000000);
                         /*for (XY& p : positions) {
@@ -142,37 +170,68 @@ MainEditor* deserializePixelStudioSession(json j)
                     //move
                     case 10:
                     {
-                        std::string metaString = action["Meta"];
-                        json meta = json::parse(metaString);
-                        XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
-                        XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+                        XY delta = xySubtract(positions[1], positions[0]);
+                        if (action.contains("Meta")) {
 
-                        SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
+                            std::string metaString = action["Meta"];
+                            json meta = json::parse(metaString);
+                            XY from = psToVSPPos({ meta["From"]["X"], (int)meta["From"]["Y"] }, dimensions.y);
+                            XY to = psToVSPPos({ meta["To"]["X"], (int)meta["To"]["Y"] }, dimensions.y);
 
-                        XY blitAt = positions[1];
-                        u32* pixelData = (u32*)tracked_malloc(rect.w * rect.h * 4);
-                        for (int y = 0; y < rect.h; y++) {
-                            for (int x = 0; x < rect.w; x++) {
-                                pixelData[y * rect.w + x] = nlayer->getPixelAt({ rect.x + x, rect.y + y });
-                            }
-                        }
+                            SDL_Rect rect = {
+                                ixmin(from.x, to.x),
+                                ixmin(from.y, to.y),
+                                abs(from.x - to.x) + 1,
+                                abs(from.y - to.y) + 1
+                            };
 
-                        for (int y = 0; y < rect.h; y++) {
-                            for (int x = 0; x < rect.w; x++) {
-                                nlayer->setPixel({ rect.x + x, rect.y + y }, 0);
-                            }
-                        }
-
-                        for (int y = 0; y < rect.h; y++) {
-                            for (int x = 0; x < rect.w; x++) {
-                                u32 srcColor = pixelData[y * rect.w + x];
-                                if (srcColor >> 24 != 0) {
-                                    nlayer->setPixel({ blitAt.x + x, blitAt.y + y }, srcColor);
+                            //copy current pixels to temp
+                            u32* pixelData = (u32*)tracked_malloc(rect.w * rect.h * 4);
+                            for (int y = 0; y < rect.h; y++) {
+                                for (int x = 0; x < rect.w; x++) {
+                                    ARRAY2DPOINT(pixelData, x, y, rect.w) = nlayer->getPixelAt({ rect.x + x, rect.y + y });
                                 }
                             }
+
+                            //0fill selected area
+                            for (int y = 0; y < rect.h; y++) {
+                                for (int x = 0; x < rect.w; x++) {
+                                    nlayer->setPixel({ rect.x + x, rect.y + y }, 0);
+                                }
+                            }
+
+                            //paste temp pixels into dst position
+                            XY blitAt = xyAdd({ rect.x, rect.y }, delta);
+                            for (int y = 0; y < rect.h; y++) {
+                                for (int x = 0; x < rect.w; x++) {
+                                    u32 srcColor = ARRAY2DPOINT(pixelData, x, y, rect.w);
+                                    if (srcColor >> 24 != 0) {
+                                        nlayer->setPixel(xyAdd(blitAt, { x,y }), srcColor);
+                                    }
+                                }
+                            }
+                            tracked_free(pixelData);
                         }
-                        showWarning = true;
-                        tracked_free(pixelData);
+                        else if (positions.size() > 2) {
+                            //non-rect move.
+                            //move positions from [2]-... by delta
+                            std::vector<u32> colorVals;
+                            colorVals.resize(positions.size() - 2);
+                            u32* c = colorVals.data();
+
+                            //store color values and erase src
+                            for (int i = 2; i < positions.size(); i++) {
+                                c[i-2] = nlayer->getPixelAt(positions[i]);
+                                nlayer->setPixel(positions[i], 0);
+                            }
+
+                            //paste color values
+                            for (int i = 2; i < positions.size(); i++) {
+                                nlayer->setPixel(xyAdd(positions[i], delta), c[i - 2]);
+                            }
+                        }
+                        //pixelStudioDumpProblematicToolInfo(tool, positions, action.dump());
+                        //showWarning = true;
                     }
                     break;
                     //flip x
@@ -180,8 +239,8 @@ MainEditor* deserializePixelStudioSession(json j)
                     {
                         std::string metaString = action["Meta"];
                         json meta = json::parse(metaString);
-                        XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
-                        XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+                        XY from = psToVSPPos({ meta["From"]["X"], (int)meta["From"]["Y"] }, dimensions.y);
+                        XY to = psToVSPPos({ meta["To"]["X"], (int)meta["To"]["Y"] }, dimensions.y);
 
                         SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
                         nlayer->flipHorizontally(rect);
@@ -192,8 +251,8 @@ MainEditor* deserializePixelStudioSession(json j)
                     {
                         std::string metaString = action["Meta"];
                         json meta = json::parse(metaString);
-                        XY from = { meta["From"]["X"], dimensions.y - 1 - (int)meta["From"]["Y"] };
-                        XY to = { meta["To"]["X"],  dimensions.y - 1 - (int)meta["To"]["Y"] };
+                        XY from = psToVSPPos({ meta["From"]["X"], (int)meta["From"]["Y"] }, dimensions.y);
+                        XY to = psToVSPPos({ meta["To"]["X"], (int)meta["To"]["Y"] }, dimensions.y);
 
                         SDL_Rect rect = { ixmin(from.x, to.x),ixmin(from.y, to.y),abs(from.x - to.x) + 1,abs(from.y - to.y) + 1 };
                         nlayer->flipVertically(rect);
@@ -204,20 +263,19 @@ MainEditor* deserializePixelStudioSession(json j)
                         for (XY& p : positions) {
                             nlayer->replaceColor(nlayer->getPixelAt(p), colors[0]);
                         }
+                        pixelStudioDumpProblematicToolInfo(tool, positions, action.dump());
+                        //showWarning = true;
                         break;
-                        //image paste
+                    //image paste
                     case 20:
                     {
                         std::string subsubJson = action["Meta"];
                         json subsubJsonJ = json::parse(subsubJson);
-                        //std::cout << subsubJsonJ.dump(4) << std::endl;
                         std::string pixels = subsubJsonJ["Pixels"];
-                        std::string pixelsb64 = base64::from_base64(pixels);
-                        uint8_t* imageData = (uint8_t*)pixelsb64.c_str();
-                        Layer* nnlayer = readPNGFromMem(imageData, pixelsb64.size());
+                        Layer* nnlayer = readPNGFromBase64String(pixels);
 
-                        XY rectFrom = { subsubJsonJ["Rect"]["From"]["X"], dimensions.y - 1 - (int)subsubJsonJ["Rect"]["From"]["Y"] };
-                        XY rectTo = { subsubJsonJ["Rect"]["To"]["X"], dimensions.y - 1 - (int)subsubJsonJ["Rect"]["To"]["Y"] };
+                        XY rectFrom = psToVSPPos({ subsubJsonJ["Rect"]["From"]["X"], (int)subsubJsonJ["Rect"]["From"]["Y"] }, dimensions.y);                    
+                        XY rectTo =   psToVSPPos({ subsubJsonJ["Rect"]["To"]["X"], (int)subsubJsonJ["Rect"]["To"]["Y"] }, dimensions.y);
 
                         SDL_Rect dstRect = {
                             ixmin(rectFrom.x, rectTo.x),
@@ -227,7 +285,10 @@ MainEditor* deserializePixelStudioSession(json j)
                         };
 
                         XY rectSourceFrom = { subsubJsonJ["RectSource"]["From"]["X"], subsubJsonJ["RectSource"]["From"]["Y"] };
-                        XY rectSourceTo = { subsubJsonJ["RectSource"]["To"]["X"], subsubJsonJ["RectSource"]["To"]["Y"] };
+                        XY rectSourceTo =   { subsubJsonJ["RectSource"]["To"]["X"], subsubJsonJ["RectSource"]["To"]["Y"] };
+
+                        //XY rectSourceFrom = psToVSPPos({ subsubJsonJ["RectSource"]["From"]["X"], subsubJsonJ["RectSource"]["From"]["Y"] }, nnlayer->h);
+                        //XY rectSourceTo =   psToVSPPos({ subsubJsonJ["RectSource"]["To"]["X"], subsubJsonJ["RectSource"]["To"]["Y"] }, nnlayer->h);
 
                         SDL_Rect srcRect = {
                             ixmin(rectSourceFrom.x, rectSourceTo.x),
@@ -241,7 +302,8 @@ MainEditor* deserializePixelStudioSession(json j)
                         }
 
                         nlayer->blit(nnlayer, { dstRect.x, dstRect.y }, srcRect);
-                        showWarning = true;
+                        pixelStudioDumpProblematicToolInfo(tool, positions, action.dump());
+                        //showWarning = true;
                         delete nnlayer;
                     }
                     break;
@@ -271,25 +333,33 @@ MainEditor* deserializePixelStudioSession(json j)
                             px32[dataPtr] = hslShiftPixelStudioCompat(px32[dataPtr], shift);
                         }
                         //nlayer->shiftLayerHSL(shift);
+                        pixelStudioDumpProblematicToolInfo(tool, positions, action.dump());
+                        showWarning = true;
 
                     }
                     break;
                     default:
                         g_addNotification(ErrorNotification("PixelStudio Error", frmt("Tool {} not implemented", tool)));
-                        logprintf("[pixel studio PSP] TOOL %i NOT IMPLEMENTED\n", tool);
-                        logprintf("\trelevant position data:\n");
+                        logerr(frmt("[pixel studio PSP] TOOL {} NOT IMPLEMENTED", tool));
+                        logerr("\trelevant position data:");
                         for (XY& p : positions) {
-                            logprintf("\t%i, %i\n", p.x, p.y);
+                            logerr(frmt("\t{}, {}", p.x, p.y));
                         }
-                        logprintf("\trelevant color data:\n");
+                        logerr("\trelevant color data:");
                         for (u32& c : colors) {
-                            logprintf("\t%x\n", c);
+                            logerr(frmt("\t{:x}", c));
                         }
-                        loginfo(action.dump(4));
+                        logerr(action.dump(4));
                         showWarning = true;
                         break;
                     }
                 }
+
+#if PIXELSTUDIO_DEBUG_HISTORY_REENACTMENT
+                debugEnc->submitFrame(nlayer);
+                debugEnc->stopRecording();
+                delete debugEnc;
+#endif
 
                 curFrame->layers.push_back(nlayer);
             }

@@ -7,6 +7,7 @@ struct PopupSetNetworkCanvasData {
     std::string username;
     u32 userColor = 0xFFFFFF;
     std::string password = "";
+    NetInterface* netIf = NULL;
 };
 
 class PopupSetupNetworkCanvas :
@@ -16,6 +17,7 @@ public:
     UITextField* textboxIP, *textboxPort, *textboxUsername, *textboxPassword;
     UIButton* buttonSetUserColor;
     u32 userColor = 0xFFFFFF;
+    int netInterfaceIndex = 0;
 
     bool rpcEnabled = false;
     UITextField* textboxExternalIP = NULL;

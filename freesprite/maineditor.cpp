@@ -1172,7 +1172,8 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"), [this]() { this->copyImageToClipboard(); } } },
                     {SDL_SCANCODE_V, { TL("vsp.cmn.paste"), [this]() { this->promptImageActionFromClipboard(); } } },
-#if VSP_NETWORKING
+//todo: only check if any net interface is available
+#if VSP_NETWORKING || VSP_STEAMWORKS
                     {SDL_SCANCODE_M, { TL("vsp.maineditor.startcollab"), [this]() { promptStartNetworkSession(); } } },
 #endif
                     {SDL_SCANCODE_T, { "Start/stop recording timelapse", [this]() { if (timelapseRecorder == NULL) timelapsePromptStart(); else timelapseStop(); }}},
@@ -2081,13 +2082,25 @@ void MainEditor::exportIndexed(FileExporter* exporter, PlatformNativePathString 
     ENSURE_REPORT_VALID(report);
     bool result = false;
 
-    MainEditorPalettized* rgbConvEditor = toPalettizedSession();
+    MainEditorPalettized* rgbConvEditor = NULL;
+    if (exporter->exportsWholeSession()) {
+        MainEditorPalettized* rgbConvEditor = toPalettizedSession();
+    }
+    else {
+        Layer* f = flattenFrame(getCurrentFrame());
+        if (f != NULL) {
+            MainEditor* tempEditor = new MainEditor({ f });
+            rgbConvEditor = tempEditor->toPalettizedSession();
+            delete tempEditor;
+        }
+    }
+
     if (rgbConvEditor != NULL) {
         if (exporter->exportsWholeSession()) {
             result = exporter->exportData(name, rgbConvEditor, report, &exportParameters);
         }
         else {
-            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(rgbConvEditor->getCurrentFrame(), rgbConvEditor->palette);// rgbConvEditor->flattenImageWithoutConvertingToRGB();
+            Layer* l = flattenIndexedFrameWithoutTransparencyIndex(rgbConvEditor->getCurrentFrame(), rgbConvEditor->palette);
             result = exporter->exportData(name, l, report, &exportParameters);
             delete l;
         }
@@ -3916,7 +3929,7 @@ MainEditorPalettized* MainEditor::toPalettizedSession()
                     } else {
                         auto findIdx = std::find(palette.begin(), palette.end(), px);
                         if (findIdx == palette.end()) {
-                            logerr(frmt("COLOR {:08X} NOT FOUND IN PALETTE (?????)", ppx[p]));
+                            logerr(frmt("COLOR {:08X} NOT FOUND IN PALETTE (?)", ppx[p]));
                         }
                         outpx[p] = findIdx - palette.begin();
                     }
@@ -3977,10 +3990,7 @@ void MainEditor::exportTilesIndividually()
 
 std::string MainEditor::networkGetSocketAddress(NetSocket* sock)
 {
-#if VSP_NETWORKING
     return sock->netIf->getFriendlyAddress(sock);
-#endif
-    return "";
 }
 
 void MainEditor::promptStartNetworkSession()
@@ -4031,8 +4041,7 @@ void MainEditor::networkCanvasStateUpdated(int whichFrame, int whichLayer)
 
 void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
 {
-#if VSP_NETWORKING
-    NetServer* server = g_netInterfaces.front()->createServer("", startData.port);
+    NetServer* server = startData.netIf->createServer("", startData.port);
 
     thisClientInfo->uid = nextClientUID++;
     thisClientInfo->clientName = startData.username;
@@ -4050,7 +4059,7 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
         networkClients.push_back(thisClientInfo);
     }
 
-
+    networkCanvasBroadcastInterface = server->netIf;
     mainThreadOps.add([this]() {
         networkCanvasHostPanel->updateClientList();
     });
@@ -4072,16 +4081,23 @@ void MainEditor::networkCanvasServerThread(PopupSetNetworkCanvasData startData)
     server->netIf->destroyServer(server);
     std::lock_guard<std::recursive_mutex> lock(networkClientsListMutex);
     networkClients.clear();
-#else
-    logerr("Attempted to run network thread in non-network build");
-#endif
 }
 
 void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
 {
-#if VSP_NETWORKING
     NetMessage response{};
+    Timer64 authTimeout{};
     NetMessage authCmdMsg = clientSocket->netIf->readMessageFromSocket(clientSocket);
+    while (authCmdMsg.bytes.size() == 0) {
+        if (authTimeout.elapsedTime() > 1000) {
+            networkSendCommand(response, "HSDC");
+            networkSendString(response, "Authentication timeout");
+            clientSocket->netIf->writeMessageToSocket(clientSocket, response);
+            clientSocket->netIf->destroySocket(clientSocket);
+            return;
+        }
+        authCmdMsg = clientSocket->netIf->readMessageFromSocket(clientSocket);
+    }
     std::string authCommand = networkReadCommand(authCmdMsg);
     if (authCommand != "AUTH" || !networkCanvasProcessAUTHCommand(networkReadString(authCmdMsg))) {
         networkSendCommand(response, "HSDC");
@@ -4103,7 +4119,7 @@ void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
     }
 
 
-    while (networkRunning && !clientInfo.hostKick) {
+    while (networkRunning && !clientInfo.hostKick && clientSocket->netIf->socketConnected(clientSocket)) {
         try {
             NetMessage nextMsg{};
             if (networkReadCommandIfAvailable(clientSocket, &nextMsg)) {
@@ -4142,8 +4158,6 @@ void MainEditor::networkCanvasServerResponderThread(NetSocket* clientSocket)
     g_addNotificationFromThread(Notification("User disconnected", clientInfo.clientName));
     networkCanvasSystemMessage(frmt("{} disconnected", clientInfo.clientName));
     logerr(frmt("Disconnected from {}", clientInfo.clientName));
-#endif
-    
 }
 
 void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NetSocket* clientSocket, NetMessage& inMessage, NetworkCanvasClientInfo* clientInfo)
@@ -4251,19 +4265,24 @@ void MainEditor::networkCanvasProcessCommandFromClient(std::string command, NetS
         u8* dataBuffer = (u8*)tracked_malloc(dataSize);
         if (dataBuffer != NULL) {
             networkReadBytes(inMessage, dataBuffer, dataSize);
-            Layer* l = frames[frameIndex]->layers[index];
-            auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
-            if (decompressed.size() != l->w * l->h * 4) {
-                logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+            if (frames.size() > frameIndex && frames[frameIndex]->layers.size() > index) {
+                Layer* l = frames[frameIndex]->layers[index];
+                auto decompressed = decompressZlibWithoutUncompressedSize(dataBuffer, dataSize);
+                if (decompressed.size() != l->w * l->h * 4) {
+                    logerr(frmt("Decompressed data size mismatch: expected {}, got {}", l->w * l->h * 4, decompressed.size()));
+                }
+                else {
+                    if (index != selLayer || !leftMouseHold) {
+                        memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
+                        l->markLayerDirty();
+                        changesSinceLastSave = HAS_UNSAVED_CHANGES;
+                        networkCanvasStateUpdated(frameIndex, index);
+                        mainThreadOps.add([this]() { timelapsePush(); });
+                    }
+                }
             }
             else {
-                if (index != selLayer || !leftMouseHold) {
-                    memcpy(l->pixels8(), decompressed.data(), 4ull * l->w * l->h);
-                    l->markLayerDirty();
-                    changesSinceLastSave = HAS_UNSAVED_CHANGES;
-                    networkCanvasStateUpdated(frameIndex, index);
-                    mainThreadOps.add([this]() { timelapsePush(); });
-                }
+                logerr(frmt("LRDT into invalid frame/layer ({}f {}l)", frameIndex, index));
             }
             tracked_free(dataBuffer);
         }
@@ -4338,7 +4357,6 @@ std::string MainEditor::networkReadCommand(NetMessage& socket)
 
 bool MainEditor::networkReadCommandIfAvailable(NetSocket* socket, NetMessage* outCommand)
 {
-#if VSP_NETWORKING
     //int bytesToRead = 8 - outCommand.size();
     if (!socket->netIf->messageAvailable(socket)) {
         return false;
@@ -4358,9 +4376,6 @@ bool MainEditor::networkReadCommandIfAvailable(NetSocket* socket, NetMessage* ou
         return true;
     }
     return false;
-#else
-    return false;
-#endif
 }
 
 void MainEditor::networkSendCommand(NetMessage& socket, std::string commandName)
@@ -4374,7 +4389,6 @@ void MainEditor::networkSendCommand(NetMessage& socket, std::string commandName)
 
 bool MainEditor::networkReadBytes(NetMessage& socket, u8* buffer, u32 count)
 {
-#if VSP_NETWORKING
     socket.readBytes(buffer, count);
     //int read = 0;
     /*while (read < count) {
@@ -4387,9 +4401,6 @@ bool MainEditor::networkReadBytes(NetMessage& socket, u8* buffer, u32 count)
         }
     }*/
     return true;
-#else
-    return false;
-#endif
 }
 
 void MainEditor::networkSendBytes(NetMessage& socket, u8* buffer, u32 count)
@@ -4493,13 +4504,13 @@ void MainEditor::networkCanvasChatSendCallback(std::string content)
 
 void MainEditor::networkCanvasBroadcastToLAN()
 {
-#if VSP_NETWORKING
-    NetMessage broadcastMsg{};
-    broadcastMsg.putString(frmt("vspcollab:{}", networkCanvasPort));
+    if (networkCanvasBroadcastInterface != NULL) {
+        NetMessage broadcastMsg{};
+        broadcastMsg.putString(frmt("vspcollab:{}", networkCanvasPort));
 
-    g_netInterfaces.front()->broadcastMessage(broadcastMsg);
-    networkCanvasLastLANBroadcast.start();
-#endif
+        networkCanvasBroadcastInterface->broadcastMessage(broadcastMsg);
+        networkCanvasLastLANBroadcast.start();
+    }
 }
 
 void MainEditor::endNetworkSession()
