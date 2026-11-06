@@ -47,7 +47,8 @@ jobs:
       release-tag: ${{ inputs.release-tag }}
   
   build-windows-arm64:
-    if: ${{ inputs.common-only == false }}
+    #keep arm64 for autoupdater users
+    #if: ${{ inputs.common-only == false }}
     uses: ./.github/workflows/windows-build.yml
     with:
       build-arch: ARM64
