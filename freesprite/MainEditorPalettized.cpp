@@ -209,6 +209,7 @@ uint32_t MainEditorPalettized::getActiveColor()
 
 void MainEditorPalettized::setActiveColor(uint32_t col)
 {
+    ONLY_IN_INTERACTIVE_CONTEXT;
     if (col == -1) {
         col = 0;
     }

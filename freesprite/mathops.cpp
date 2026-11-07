@@ -1310,6 +1310,14 @@ double dxmin(double a, double b) { return a > b ? b : a; }
 double dxmax(double a, double b) { return a > b ? a : b; }
 double dclamp(double vmin, double b, double vmax) { return dxmax(vmin, dxmin(b, vmax)); }
 
+int align(int a, int to)
+{
+    if ((a%to) != 0) {
+        a += to - (a % to);
+    }
+    return a;
+}
+
 
 uint32_t BEtoLE32(uint32_t a)
 {

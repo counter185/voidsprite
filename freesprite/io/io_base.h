@@ -24,6 +24,9 @@ public:
 
     BitReader(FILE* file) : f(file), usingFile(true) {}
     BitReader(u8* inputData, u64 size) : data(inputData), dataSize(size), usingFile(false) {}
+    void flush() {
+        bitsInBuffer = 0;
+    }
     u32 readBits(int n) {
         int result = 0;
         int bitsRead = 0;

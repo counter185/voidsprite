@@ -4,7 +4,6 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "gzip/decompress.hpp"
-#include "easybmp/EasyBMP.h"
 #include "zip/zip.h"
 #include "pugixml/pugixml.hpp"
 #include "base64/base64.hpp"
@@ -81,7 +80,6 @@ std::string getAllLibsVersions() {
 #if VSP_USE_LIBAVIF
     ret += frmt("libavif: {}\n", getLibAVIFVersion());
 #endif
-    ret += "EasyBMP:" _EasyBMP_Version_String_ "\n";
 
 #ifdef USE_FMT_FORMAT
     ret += frmt("fmt: {}\n", FMT_VERSION);
@@ -402,27 +400,6 @@ Layer* readTGA(PlatformNativePathString path, uint64_t seek) {
     }
 
     TGAClose(tga);*/
-}
-
-Layer* readBMP(PlatformNativePathString path, uint64_t seek)
-{
-    BMP nbmp;
-    FILE* bmpf = platformOpenFile(path, PlatformFileModeRB);
-    nbmp._ReadFromFile(bmpf);
-    int w = nbmp.TellWidth();
-    int h = nbmp.TellHeight();
-    Layer* nlayer = new Layer(w, h);
-    nlayer->name = "BMP Layer";
-    unsigned long dataPtr = 0;
-    uint32_t* pxData32 = nlayer->pixels32();
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            RGBApixel px = nbmp.GetPixel(x,y);
-            px.Alpha = 255; //TODO
-            pxData32[dataPtr++] = (px.Alpha << 24) + (px.Red << 16) + (px.Green << 8) + px.Blue;
-        }
-    }
-    return nlayer;
 }
 
 Layer* readAETEX(PlatformNativePathString path, uint64_t seek) {
@@ -1636,31 +1613,6 @@ bool tryInstallPalette(PlatformNativePathString path)
     return false;
 }
 
-bool writeBMP(PlatformNativePathString path, Layer* data) {
-
-    if (data->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Palettized image export not implemented"));
-        return false;
-    }
-
-    BMP outbmp = BMP();
-    outbmp.SetBitDepth(24);
-    outbmp.SetSize(data->w, data->h);
-    for (int y = 0; y < data->h; y++) {
-        for (int x = 0; x < data->w; x++) {
-            RGBApixel px;
-            uint32_t pxx = data->getPixelAt(XY{ x,y });
-            px.Alpha = 255;
-            px.Red = pxx >> 16 & 0xff;
-            px.Green = pxx >> 8 & 0xff;
-            px.Blue = pxx & 0xff;
-            outbmp.SetPixel(x, y, px);
-        }
-    }
-    FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
-    return outbmp.WriteToFileP(nfile);
-}
-
 bool writeJPEG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params)
 {
     int quality = params == NULL || !params->hasParam("jpeg.quality") ? 100 : params->getInt("jpeg.quality");
@@ -1685,37 +1637,6 @@ bool writeJPEG(PlatformNativePathString path, Layer* data, OperationProgressRepo
     SDL_FreeSurface(surface);
 
     return ret;
-}
-
-bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data) {
-
-    if (data->isPalettized) {
-        g_addNotification(ErrorNotification(TL("vsp.cmn.error"), "Indexed image export not implemented"));
-        return false;
-    }
-
-    BMP outbmp = BMP();
-    outbmp.SetBitDepth(24);
-    outbmp.SetSize(data->w, data->h);
-    for (int y = 0; y < data->h; y++) {
-        for (int x = 0; x < data->w; x++) {
-            RGBApixel px;
-            uint32_t pxx = data->getPixelAt(XY{ x,y });
-            px.Alpha = 255;
-            px.Red = pxx >> 16 & 0xff;
-            px.Green = pxx >> 8 & 0xff;
-            px.Blue = pxx & 0xff;
-            outbmp.SetPixel(x, y, px);
-        }
-    }
-    FILE* nfile = platformOpenFile(path, PlatformFileModeWB);
-    if (outbmp.WriteToFileP(nfile, false)) {
-        fseek(nfile, 0, SEEK_END);
-        fwrite("(C)Pixel", 8, 1, nfile);
-        fclose(nfile);
-        return true;
-    }
-    return false;
 }
 
 bool writeXBM(PlatformNativePathString path, Layer* data)
@@ -2155,7 +2076,11 @@ void g_setupIO() {
     );
 
     g_fileExporters.push_back(exXYZ = FileExporter::flatExporter("RPG2000/2003 XYZ", ".xyz", TL("vsp.export.xyz"), &writeXYZ, FORMAT_RGB | FORMAT_PALETTIZED));
-    g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", "", &writeBMP));
+    g_fileExporters.push_back(exBMP = FileExporter::flatExporter("BMP", ".bmp", TL("vsp.export.bmp"), &writeBMP, FORMAT_RGB | FORMAT_PALETTIZED)
+        ->buildParameters({
+            BOOL_PARAM("bmp.rgb32bit", false),
+            BOOL_PARAM("bmp.rgbtransparent", true),
+        }));
 #if VOIDSPRITE_JXL_ENABLED
     FileExporter* exJXL;
     g_fileExporters.push_back(exJXL = FileExporter::sessionExporter("JPEG XL", ".jxl", "", &writeJpegXL, FORMAT_RGB));

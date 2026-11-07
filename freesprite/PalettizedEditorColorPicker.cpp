@@ -243,6 +243,7 @@ void PalettizedEditorColorPicker::highlightActiveColorButton() {
 void PalettizedEditorColorPicker::setPickedPaletteIndex(int32_t index)
 {
     caller->pickedPaletteIndex = index;
+    highlightActiveColorButton();
 }
 
 void PalettizedEditorColorPicker::setEraserMode(bool state)

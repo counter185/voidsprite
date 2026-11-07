@@ -24,9 +24,6 @@
     <Filter Include="Source files\templates">
       <UniqueIdentifier>{61618ffa-829c-42b3-90c1-027a310b7063}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\external\easybmp">
-      <UniqueIdentifier>{f354d5c4-bf0c-44ca-b52b-db514ccfb8c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\external\zip">
       <UniqueIdentifier>{c2afb396-8f85-4d44-bcd4-4c678580e351}</UniqueIdentifier>
     </Filter>
@@ -54,9 +51,6 @@
     </Filter>
     <Filter Include="Header files\external">
       <UniqueIdentifier>{81e8270e-1bb6-412d-806b-77e2e141642d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header files\external\easybmp">
-      <UniqueIdentifier>{7dd202aa-e86a-4bec-b121-5c24da536967}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header files\external\ddspp">
       <UniqueIdentifier>{4b6da3e0-e184-40b0-abaa-0b4cded17aaf}</UniqueIdentifier>
@@ -257,9 +251,6 @@
     </ClCompile>
     <ClCompile Include="TemplateRPG2KCharset.cpp">
       <Filter>Source files\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="easybmp\EasyBMP.cpp">
-      <Filter>Source files\external\easybmp</Filter>
     </ClCompile>
     <ClCompile Include="EditorLayerPicker.cpp">
       <Filter>Source files\ui_widgets</Filter>
@@ -819,6 +810,9 @@
     <ClCompile Include="network.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="io\io_bmp.cpp">
+      <Filter>Source files\io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
@@ -913,18 +907,6 @@
     </ClInclude>
     <ClInclude Include="TemplateRPG2KCharset.h">
       <Filter>Header files\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="easybmp\EasyBMP.h">
-      <Filter>Header files\external\easybmp</Filter>
-    </ClInclude>
-    <ClInclude Include="easybmp\EasyBMP_BMP.h">
-      <Filter>Header files\external\easybmp</Filter>
-    </ClInclude>
-    <ClInclude Include="easybmp\EasyBMP_DataStructures.h">
-      <Filter>Header files\external\easybmp</Filter>
-    </ClInclude>
-    <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h">
-      <Filter>Header files\external\easybmp</Filter>
     </ClInclude>
     <ClInclude Include="EditorLayerPicker.h">
       <Filter>Header files\ui_widgets</Filter>
@@ -1756,6 +1738,9 @@
     </ClInclude>
     <ClInclude Include="steam\isteamremotestorage.h">
       <Filter>Header files\external\steam</Filter>
+    </ClInclude>
+    <ClInclude Include="io\io_bmp.h">
+      <Filter>Header files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

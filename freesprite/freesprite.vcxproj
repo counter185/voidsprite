@@ -265,8 +265,10 @@
     <ClCompile Include="bc7enc_rdo\bc7enc.cpp" />
     <ClCompile Include="bc7enc_rdo\rgbcx.cpp" />
     <ClCompile Include="brush\BrushGradient.cpp" />
+    <ClCompile Include="io\io_bmp.cpp" />
     <ClCompile Include="io\io_dds.cpp" />
     <ClCompile Include="io\io_graphicsgale.cpp" />
+    <ClInclude Include="io\io_bmp.h" />
     <ClInclude Include="steam\isteamapps.h" />
     <ClInclude Include="steam\isteamappticket.h" />
     <ClInclude Include="steam\isteamclient.h" />
@@ -527,9 +529,6 @@
     <ClCompile Include="brush\ToolRectMove.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="DrawableManager.cpp" />
-    <ClCompile Include="easybmp\EasyBMP.cpp">
-      <IncludeInUnityFile>false</IncludeInUnityFile>
-    </ClCompile>
     <ClCompile Include="EditorBrushPicker.cpp" />
     <ClCompile Include="EditorColorPicker.cpp" />
     <ClCompile Include="EditorLayerPicker.cpp" />
@@ -778,10 +777,6 @@
     <ClInclude Include="ddspp\ddspp.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="DrawableManager.h" />
-    <ClInclude Include="easybmp\EasyBMP.h" />
-    <ClInclude Include="easybmp\EasyBMP_BMP.h" />
-    <ClInclude Include="easybmp\EasyBMP_DataStructures.h" />
-    <ClInclude Include="easybmp\EasyBMP_VariousBMPutilities.h" />
     <ClInclude Include="EditorBrushPicker.h" />
     <ClInclude Include="IEditorColorPicker.h" />
     <ClInclude Include="EditorColorPicker.h" />

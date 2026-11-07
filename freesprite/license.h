@@ -39,7 +39,6 @@ inline std::string getLibraryLicenses() {
         "astc_dec\n"
         "base64\n"
         "ddspp\n"
-        "EasyBMP\n"
 #ifdef USE_FMT_FORMAT
         "fmt\n"
 #endif

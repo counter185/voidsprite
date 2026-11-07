@@ -54,6 +54,9 @@
                        "Each frame may only have up to 256 colors and 1-bit transparency."},
     {"vsp.export.jpeg", "The most compatible single-image format.\n"
                         "Does not support transparency and has lossy compression."},
+    {"vsp.export.bmp", "Legacy format supported by old software.\n"
+                       "RGB sessions can be saved as either 24-bit or 32-bit.\n"
+                       "Indexed sessions will be saved as 8-bit."},
     {"vsp.export.c", "Export the image as an array of numbers that can be used with the C programming language."},
     {"vsp.export.python", "Export the image as a 2D array of pixels that can be used in a Python script."},
     {"vsp.export.html", "Export the image as a PNG encoded into Base64 for an inline <img> tag for HTML."},
@@ -78,6 +81,8 @@
     {"vsp.export.option.yytex.compressed", "Compressed YYTEX"},
     {"vsp.export.option.gif.loopanim", "Loop animation"},
     {"vsp.export.option.vtf.genmaterial", "Generate material VMT"},
+    {"vsp.export.option.bmp.rgb32bit", "[RGB] Save to 32-bit BMP"},
+    {"vsp.export.option.bmp.rgbtransparent", "[RGB] 32-bit: Transparency"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},

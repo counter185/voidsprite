@@ -59,11 +59,11 @@ void emDownloadFile(PlatformNativePathString path);
 #include "io/io_gamemaker.h"
 #include "io/io_pep.h"
 #include "io/io_graphicsgale.h"
+#include "io/io_bmp.h"
 
 #include "io/io_palettes.h"
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek = 0);
-Layer* readBMP(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readAETEX(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readSDLImage(PlatformNativePathString path, uint64_t seek = 0);
 Layer* readWiiGCTPL(PlatformNativePathString path, uint64_t seek = 0);
@@ -87,10 +87,8 @@ MainEditor* loadAnyIntoSession(std::string utf8path, FileImporter** outputFoundI
 
 bool tryInstallPalette(PlatformNativePathString path);
 
-bool writeBMP(PlatformNativePathString path, Layer* data);
 bool writeJPEG(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params);
 bool writeTGA(PlatformNativePathString path, Layer* data, OperationProgressReport* progress, ParameterStore* params);
-bool writeCaveStoryPBM(PlatformNativePathString path, Layer* data);
 bool writeXBM(PlatformNativePathString path, Layer* data);
 bool writeCHeader(PlatformNativePathString path, Layer* data);
 bool writePythonNPArray(PlatformNativePathString path, Layer* data);

@@ -137,6 +137,8 @@ double dxmin(double a, double b);
 double dxmax(double a, double b);
 double dclamp(double vmin, double b, double vmax);
 
+int align(int a, int to);
+
 uint32_t BEtoLE32(uint32_t a);
 uint16_t BEtoLE16(uint16_t a);
 
