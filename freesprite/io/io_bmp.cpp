@@ -1,6 +1,99 @@
 #include "io_base.h"
 #include "io_bmp.h"
 
+void bmpEncode8BitEncodedMode(u8 value, int count, std::vector<u8>& ret)
+{
+    while (count > 0) {
+        int next = ixmin(255, count);
+        ret.push_back((u8)next);
+        ret.push_back(value);
+        count -= next;
+    }
+}
+
+void bmpEncode8BitAbsoluteMode(std::vector<u8>& values, std::vector<u8>& ret)
+{
+    if (values.size() > 2) {
+        ret.push_back(0);
+        ret.push_back((u8)values.size());
+        for (u8& r : values) {
+            ret.push_back(r);
+        }
+        if ((values.size() % 2) == 1) {
+            ret.push_back(0);
+        }
+    }
+    else {
+        for (u8& r : values) {
+            bmpEncode8BitEncodedMode(r, 1, ret);
+        }
+    }
+}
+
+std::vector<u8> bmpEncode8BitRLELine(u32* values, int n)
+{
+    struct bmpRLERun {
+        int count = 0;
+        u8 val = 0;
+    };
+
+    std::vector<bmpRLERun> runs{};
+
+    bmpRLERun lastRun{};
+
+    for (int i = 0; i < n; i++) {
+        u8 nextVal = (u8)values[i];
+        if (lastRun.val == nextVal) {
+            lastRun.count++;
+        }
+        else {
+            if (lastRun.count > 0) {
+                runs.push_back(lastRun);
+            }
+            lastRun = {1, nextVal};
+        }
+    }
+    if (lastRun.count > 0) {
+        runs.push_back(lastRun);
+    }
+
+    std::vector<u8> nextAbsoluteRun{};
+    std::vector<u8> ret{};
+    for (bmpRLERun& r : runs) {
+        if (r.count > 1) {
+            bmpEncode8BitAbsoluteMode(nextAbsoluteRun, ret);
+            nextAbsoluteRun = {};
+            bmpEncode8BitEncodedMode(r.val, r.count, ret);
+        }
+        else if (r.count == 1) {
+            nextAbsoluteRun.push_back(r.val);
+            if (nextAbsoluteRun.size() == 255) {
+                bmpEncode8BitAbsoluteMode(nextAbsoluteRun, ret);
+                nextAbsoluteRun = {};
+            }
+        }
+        else {
+            //??
+        }
+    }
+
+    bmpEncode8BitAbsoluteMode(nextAbsoluteRun, ret);
+
+    return ret;
+}
+
+void bmpEncode8BitRLE(LayerPalettized* data, FILE* f)
+{
+    u32* ppx = data->pixels32();
+    for (int y = data->h - 1; y >= 0; y--) {
+        u32* line = &ARRAY2DPOINT(ppx, 0, y, data->w);
+        auto bytes = bmpEncode8BitRLELine(line, data->w);
+        bytes.push_back(0);
+        bytes.push_back(y == 0 ? 1 : 0);
+        fwrite(bytes.data(), bytes.size(), 1, f);
+    }
+}
+
 void bmpDecode8BitRLE(Layer* ret, FILE* f)
 {
     u32* ppx = ret->pixels32();
@@ -295,6 +388,7 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
 {
     bool rgb32bit = params != NULL && params->hasParam("bmp.rgb32bit") ? params->getBool("bmp.rgb32bit") : false;
     bool rgbTransparent = params != NULL && params->hasParam("bmp.rgbtransparent") ? params->getBool("bmp.rgbtransparent") : false;
+    bool indexedCompressRLE = params != NULL && params->hasParam("bmp.indexedrle") ? params->getBool("bmp.indexedrle") : true;
 
     progress->enterSection("Writing headers...");
     vsp_BITMAPFILEHEADER h1{};
@@ -315,7 +409,7 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     h2.bitCount = data->isPalettized ? 8 
         : rgb32bit ? 32 : 24;
     //todo
-    h2.compression = data->isPalettized ? 0
+    h2.compression = data->isPalettized ? (indexedCompressRLE ? 1 : 0)
         : (rgb32bit && rgbTransparent) ? 3 : 0;
     h2.imageSize = 0;
     //idk
@@ -346,27 +440,32 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
 
     progress->updateLastSection("Writing pixel data...");
     u32* ppx = data->pixels32();
-    for (int y = data->h - 1; y >= 0; y--) {
-        int bytesInLine = data->isPalettized ? data->w : data->w * (rgb32bit ? 4 : 3);
-        for (int x = 0; x < data->w; x++) {
-            u32 px = ARRAY2DPOINT(ppx, x, y, data->w);
-            //8bit
-            if (data->isPalettized) {
-                u8 a = (u8)px;
-                fwrite(&a, 1, 1, f);
+    if (data->isPalettized && indexedCompressRLE) {
+        bmpEncode8BitRLE((LayerPalettized*)data, f);
+    }
+    else {
+        for (int y = data->h - 1; y >= 0; y--) {
+            int bytesInLine = data->isPalettized ? data->w : data->w * (rgb32bit ? 4 : 3);
+            for (int x = 0; x < data->w; x++) {
+                u32 px = ARRAY2DPOINT(ppx, x, y, data->w);
+                //8bit
+                if (data->isPalettized) {
+                    u8 a = (u8)px;
+                    fwrite(&a, 1, 1, f);
+                }
+                //24/32bit
+                else {
+                    auto color = uint32ToSDLColor(px);
+                    u8 bytes[4] = { color.b, color.g, color.r, color.a };
+                    fwrite(bytes, rgb32bit ? 4 : 3, 1, f);
+                }
             }
-            //24/32bit
-            else {
-                auto color = uint32ToSDLColor(px);
-                u8 bytes[4] = { color.b, color.g, color.r, color.a };
-                fwrite(bytes, rgb32bit ? 4 : 3, 1, f);
+            //align to 4
+            u8 pad[4] = { 0,0,0,0 };
+            int padBytes = align(bytesInLine, 4) - bytesInLine;
+            if (padBytes > 0) {
+                fwrite(pad, padBytes, 1, f);
             }
-        }
-        //align to 4
-        u8 pad[4] = { 0,0,0,0 };
-        int padBytes = align(bytesInLine, 4) - bytesInLine;
-        if (padBytes > 0) {
-            fwrite(pad, padBytes, 1, f);
         }
     }
 

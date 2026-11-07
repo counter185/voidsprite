@@ -2080,6 +2080,7 @@ void g_setupIO() {
         ->buildParameters({
             BOOL_PARAM("bmp.rgb32bit", false),
             BOOL_PARAM("bmp.rgbtransparent", true),
+            BOOL_PARAM("bmp.indexedrle", true),
         }));
 #if VOIDSPRITE_JXL_ENABLED
     FileExporter* exJXL;
