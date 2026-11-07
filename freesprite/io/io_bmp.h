@@ -24,6 +24,11 @@ struct vsp_BITMAPINFOHEADER {
 };
 #pragma pack(pop)
 
+void bmpEncode4BitEncodedMode(u8 v1v2, int count, std::vector<u8>& ret);
+void bmpEncode4BitAbsoluteMode(std::vector<u8>& values4bit, std::vector<u8>& ret);
+std::vector<u8> bmpEncode4BitRLELine(u32* values, int n);
+void bmpEncode4BitRLE(LayerPalettized* data, FILE* f);
+
 void bmpEncode8BitEncodedMode(u8 value, int count, std::vector<u8>& ret);
 void bmpEncode8BitAbsoluteMode(std::vector<u8>& values, std::vector<u8>& ret);
 std::vector<u8> bmpEncode8BitRLELine(u32* values, int n);

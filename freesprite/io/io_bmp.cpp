@@ -1,6 +1,123 @@
 #include "io_base.h"
 #include "io_bmp.h"
 
+void bmpEncode4BitEncodedMode(u8 v1v2, int count, std::vector<u8>& ret)
+{
+    while (count > 0) {
+        int next = ixmin(255, count);
+        ret.push_back((u8)next);
+        ret.push_back(v1v2);
+        count -= next;
+    }
+}
+
+void bmpEncode4BitAbsoluteMode(std::vector<u8>& values4bit, std::vector<u8>& ret)
+{
+    if (values4bit.size() > 2) {
+        BitWriter bits = BitWriter();
+        for (u8& r : values4bit) {
+            bits.writeBits(r, 4);
+        }
+        bits.flush();
+
+        std::vector<u8>& values = bits.getData();
+        for (int i = 0; i < values.size(); i++) {
+            values[i] = (values[i] >> 4) | (values[i] << 4);
+        }
+
+        ret.push_back(0);
+        ret.push_back((u8)values4bit.size());
+        for (u8& r : values) {
+            ret.push_back(r);
+        }
+        if ((values.size() % 2) == 1) {
+            ret.push_back(0);
+        }
+    }
+    else {
+        for (u8& r : values4bit) {
+            bmpEncode4BitEncodedMode(r<<4, 1, ret);
+        }
+    }
+}
+
+std::vector<u8> bmpEncode4BitRLELine(u32* values, int n)
+{
+    struct bmp4bRLERun {
+        int count = 0;
+        u8 vals[2] = { 0,0 };
+    };
+
+    std::vector<bmp4bRLERun> runs{};
+
+    bmp4bRLERun lastRun{};
+
+    for (int i = 0; i < n; i++) {
+        u8 nextVal = (u8)values[i] & 0b1111;
+        if (lastRun.count == 0) {
+            lastRun.count++;
+            lastRun.vals[0] = nextVal;
+        }
+        else if (lastRun.count == 1) {
+            lastRun.count++;
+            lastRun.vals[1] = nextVal;
+        }
+        else if (lastRun.vals[lastRun.count % 2] == nextVal) {
+            lastRun.count++;
+        }
+        else {
+            if (lastRun.count <= 2) {
+                //explode the grouped runs into 2 separate single ones
+                runs.push_back({ 1, {lastRun.vals[0],0} });
+                lastRun = { 2, {lastRun.vals[1],nextVal} };
+            }
+            else {
+                runs.push_back(lastRun);
+                lastRun = { 1,{nextVal,0} };
+            }
+        }
+    }
+    if (lastRun.count > 0) {
+        runs.push_back(lastRun);
+    }
+
+    std::vector<u8> nextAbsoluteRun{};
+    std::vector<u8> ret{};
+    for (bmp4bRLERun& r : runs) {
+        if (r.count > 1) {
+            bmpEncode4BitAbsoluteMode(nextAbsoluteRun, ret);
+            nextAbsoluteRun = {};
+            bmpEncode4BitEncodedMode((r.vals[0] << 4) | (r.vals[1]), r.count, ret);
+        }
+        else if (r.count == 1) {
+            nextAbsoluteRun.push_back(r.vals[0]);
+            if (nextAbsoluteRun.size() == 255) {
+                bmpEncode4BitAbsoluteMode(nextAbsoluteRun, ret);
+                nextAbsoluteRun = {};
+            }
+        }
+        else {
+            //??
+        }
+    }
+
+    bmpEncode4BitAbsoluteMode(nextAbsoluteRun, ret);
+
+    return ret;
+}
+
+void bmpEncode4BitRLE(LayerPalettized* data, FILE* f)
+{
+    u32* ppx = data->pixels32();
+    for (int y = data->h - 1; y >= 0; y--) {
+        u32* line = &ARRAY2DPOINT(ppx, 0, y, data->w);
+        auto bytes = bmpEncode4BitRLELine(line, data->w);
+        bytes.push_back(0);
+        bytes.push_back(y == 0 ? 1 : 0);
+        fwrite(bytes.data(), bytes.size(), 1, f);
+    }
+}
+
 void bmpEncode8BitEncodedMode(u8 value, int count, std::vector<u8>& ret)
 {
     while (count > 0) {
@@ -395,9 +512,10 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     vsp_BITMAPINFOHEADER h2{};
 
     bool writeChannelMasks = !data->isPalettized && rgb32bit && rgbTransparent;
+    bool canBe4Bit = data->isPalettized && ((LayerPalettized*)data)->palette.size() <= 16;
 
     h1.magic = 'MB';
-    h1.dataOffset = sizeof(h1) + sizeof(h2) + (writeChannelMasks ? 4*4 : 0) + (data->isPalettized ? ((LayerPalettized*)data)->palette.size() * 4 : 0);
+    h1.dataOffset = sizeof(h1) + sizeof(h2) + (writeChannelMasks ? 4*4 : 0) + (data->isPalettized ? (canBe4Bit ? 16 : 256) * 4 : 0);
     h1.reserved = 0;
     u64 sizePosition = 2;
     fwrite(&h1, sizeof(vsp_BITMAPFILEHEADER), 1, f);
@@ -406,16 +524,17 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     h2.width = data->w;
     h2.height = data->h;
     h2.planes = 1;
-    h2.bitCount = data->isPalettized ? 8 
+    h2.bitCount = data->isPalettized ? (canBe4Bit ? 4 : 8)
         : rgb32bit ? 32 : 24;
     //todo
-    h2.compression = data->isPalettized ? (indexedCompressRLE ? 1 : 0)
+    h2.compression = data->isPalettized ? (indexedCompressRLE ? (canBe4Bit ? 2 : 1) : 0)
         : (rgb32bit && rgbTransparent) ? 3 : 0;
     h2.imageSize = 0;
     //idk
     h2.xPixelsPerM = 100;
     h2.yPixelsPerM = 100;
-    h2.colorsUsed = 256;
+    h2.colorsUsed = data->isPalettized ? (canBe4Bit ? 16 : 256)
+        : 0;
     h2.colorsImportant = 0;
     fwrite(&h2, sizeof(vsp_BITMAPINFOHEADER), 1, f);
 
@@ -430,7 +549,7 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     if (data->isPalettized) {
         progress->updateLastSection("Writing palette...");
         auto& palette = ((LayerPalettized*)data)->palette;
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < (canBe4Bit ? 16 : 256); i++) {
             //b, g then r
             auto color = uint32ToSDLColor(palette.size() > i ? palette[i] : 0);
             u8 bytes[4] = { color.b, color.g, color.r, 0 };
@@ -441,7 +560,12 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     progress->updateLastSection("Writing pixel data...");
     u32* ppx = data->pixels32();
     if (data->isPalettized && indexedCompressRLE) {
-        bmpEncode8BitRLE((LayerPalettized*)data, f);
+        if (canBe4Bit) {
+            bmpEncode4BitRLE((LayerPalettized*)data, f);
+        }
+        else {
+            bmpEncode8BitRLE((LayerPalettized*)data, f);
+        }
     }
     else {
         for (int y = data->h - 1; y >= 0; y--) {

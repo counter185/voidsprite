@@ -56,7 +56,7 @@
                         "Does not support transparency and has lossy compression."},
     {"vsp.export.bmp", "Legacy format supported by old software.\n"
                        "RGB sessions can be saved as either 24-bit or 32-bit.\n"
-                       "Indexed sessions will be saved as 8-bit."},
+                       "Indexed sessions will be saved as 4-bit for 16-color palettes, otherwise 8-bit."},
     {"vsp.export.c", "Export the image as an array of numbers that can be used with the C programming language."},
     {"vsp.export.python", "Export the image as a 2D array of pixels that can be used in a Python script."},
     {"vsp.export.html", "Export the image as a PNG encoded into Base64 for an inline <img> tag for HTML."},
