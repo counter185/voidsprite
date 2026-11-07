@@ -372,7 +372,11 @@ Layer* readBMP(PlatformNativePathString path, u64 seek, OperationProgressReport*
                 return NULL;
             }
             //1-bit
-            ret = new LayerPalettized(infoHeader.width, infoHeader.height);
+            ret = LayerPalettized::tryAllocIndexedLayer(infoHeader.width, infoHeader.height);
+            if (ret == NULL) {
+                logerr("[BMP] alloc failed");
+                return NULL;
+            }
             ret->name = "BMP 1-bit layer";
             ((LayerPalettized*)ret)->palette = palette;
             BitReader bits(f);
@@ -393,7 +397,11 @@ Layer* readBMP(PlatformNativePathString path, u64 seek, OperationProgressReport*
                 logerr(frmt("[BMP] unsupported compression for bitcount 4:  {}", infoHeader.compression));
                 return NULL;
             }
-            ret = new LayerPalettized(infoHeader.width, infoHeader.height);
+            ret = LayerPalettized::tryAllocIndexedLayer(infoHeader.width, infoHeader.height);
+            if (ret == NULL) {
+                logerr("[BMP] alloc failed");
+                return NULL;
+            }
             ret->name = "BMP 4-bit layer";
             ((LayerPalettized*)ret)->palette = palette;
             //uncompressed
@@ -425,7 +433,11 @@ Layer* readBMP(PlatformNativePathString path, u64 seek, OperationProgressReport*
                 return NULL;
             }
             //8-bit
-            ret = new LayerPalettized(infoHeader.width, infoHeader.height);
+            ret = LayerPalettized::tryAllocIndexedLayer(infoHeader.width, infoHeader.height);
+            if (ret == NULL) {
+                logerr("[BMP] alloc failed");
+                return NULL;
+            }
             ret->name = "BMP 8-bit layer";
             ((LayerPalettized*)ret)->palette = palette;
             //uncompressed
@@ -454,7 +466,11 @@ Layer* readBMP(PlatformNativePathString path, u64 seek, OperationProgressReport*
                 return NULL;
             }
             //24-bit
-            ret = new Layer(infoHeader.width, infoHeader.height);
+            ret = LayerPalettized::tryAllocLayer(infoHeader.width, infoHeader.height);
+            if (ret == NULL) {
+                logerr("[BMP] alloc failed");
+                return NULL;
+            }
             ret->name = "BMP 24-bit layer";
             //uncompressed
             if (infoHeader.compression == 0) {
@@ -477,7 +493,11 @@ Layer* readBMP(PlatformNativePathString path, u64 seek, OperationProgressReport*
                 return NULL;
             }
             //32-bit
-            ret = new Layer(infoHeader.width, infoHeader.height);
+            ret = LayerPalettized::tryAllocLayer(infoHeader.width, infoHeader.height);
+            if (ret == NULL) {
+                logerr("[BMP] alloc failed");
+                return NULL;
+            }
             ret->name = "BMP 32-bit layer";
             //uncompressed
             bool discardAlpha = infoHeader.compression == 0;

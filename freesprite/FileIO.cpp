@@ -2169,6 +2169,8 @@ void g_setupIO() {
     g_fileImporters.push_back(FileImporter::flatImporter("TGA", ".tga", &readSDLImage, exTGA, FORMAT_RGB));
     g_fileImporters.push_back(FileImporter::sessionImporter("AVIF", ".avif", &readAVIF, exAVIF));
     g_fileImporters.push_back(FileImporter::flatImporter("BMP", ".bmp", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
+    g_fileImporters.push_back(FileImporter::flatImporter("Device-independent bitmap DIB", ".dib", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
+    g_fileImporters.push_back(FileImporter::flatImporter("Run-length encoded bitmap RLE", ".rle", &readBMP, exBMP, FORMAT_RGB, magicVerify(0, "BM")));
 #if VOIDSPRITE_JXL_ENABLED
     g_fileImporters.push_back(FileImporter::sessionImporter("JPEG XL", ".jxl", &readJpegXL, exJXL));
 #endif
