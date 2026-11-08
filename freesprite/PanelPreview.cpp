@@ -21,10 +21,7 @@ bool PanelPreview::defaultInputAction(SDL_Event evt, XY gPosOffset)
 {
     SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
-    if (c.takeInput(evt)) {
-        return true;
-    }
-    else if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
+    if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
         && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
         dragging++;
     }

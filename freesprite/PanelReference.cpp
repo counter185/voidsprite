@@ -39,8 +39,7 @@ bool PanelReference::defaultInputAction(SDL_Event evt, XY gPosOffset)
     SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
     if (currentMode == REFERENCE_PIXEL_PERFECT) {
-        if (!c.takeInput(evt)
-            && evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
+        if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
             && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
             if (evtc.button.button == SDL_BUTTON_LEFT) {
                 dragging++;
@@ -147,18 +146,18 @@ void PanelReference::initWidgets()
     wxsTarget().freeAllDrawables();
 
     if (currentMode == REFERENCE_PIXEL_PERFECT) { //pixel-perfect
-        wxWidth = 400;
-        wxHeight = 300;
+        wxWidth = WX_SCALED(400);
+        wxHeight = WX_SCALED(300);
         setupResizable({ 380, 200 });
     }
     else if (currentMode == REFERENCE_FIT) {  //fit
-        wxWidth = 400;
-        wxHeight = (int)(400.0 / previewTex->w * previewTex->h);
+        wxWidth = WX_SCALED(400);
+        wxHeight = (int)WX_SCALED(400.0 / previewTex->w * previewTex->h);
         setupResizable({ 380, 200 });
     }
     else if (currentMode == REFERENCE_UNDER_CANVAS || currentMode == REFERENCE_OVER_CANVAS) {
-        wxWidth = 400;
-        wxHeight = 80;
+        wxWidth = WX_SCALED(400);
+        wxHeight = WX_SCALED(80);
         disableResizable();
 
         UISlider* opacitySlider = new UISlider();
@@ -166,12 +165,12 @@ void PanelReference::initWidgets()
         opacitySlider->onChangeValueCallback = [this](UISlider* target, float v) {
             opacity = v;
         };
-        opacitySlider->position = { this->wxWidth / 2, 35 };
-        opacitySlider->wxWidth = this->wxWidth / 2 - 5;
-        opacitySlider->wxHeight = 20;
+        opacitySlider->position = { this->wxWidth / 2, WX_SCALED(35) };
+        opacitySlider->wxWidth = this->wxWidth / 2 - WX_SCALED(5);
+        opacitySlider->wxHeight = WX_SCALED(20);
         wxsTarget().addDrawable(opacitySlider);
 
-        wxsTarget().addDrawable(new UILabel(TL("vsp.cmn.opacity"), { 5, 35 }));
+        wxsTarget().addDrawable(new UILabel(TL("vsp.cmn.opacity"), { WX_SCALED(5), WX_SCALED(35) }));
     }
 
     c.recenter({ wxWidth, wxHeight });
@@ -180,8 +179,8 @@ void PanelReference::initWidgets()
     UIDropdown* modeSwitch = new UIDropdown(modes);
     modeSwitch->text = modes[currentMode];
     modeSwitch->lastClick.start();
-    modeSwitch->wxWidth = 170;
-    modeSwitch->position = { wxWidth - 40 - modeSwitch->wxWidth, 1 };
+    modeSwitch->wxWidth = WX_SCALED(170);
+    modeSwitch->position = { wxWidth - WX_SCALED(40) - modeSwitch->wxWidth, 1 };
     modeSwitch->setCallbackListener(0, this);
     wxsTarget().addDrawable(modeSwitch);
 
@@ -194,6 +193,7 @@ void PanelReference::initWidgets()
             wxs->removeDrawable(getTopmostParent());
         }
     });
+
 }
 
 SDL_Rect PanelReference::getCanvasDrawRect(XY at)

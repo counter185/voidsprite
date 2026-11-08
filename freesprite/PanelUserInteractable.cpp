@@ -44,8 +44,8 @@ void PanelUserInteractable::setupCloseButton(std::function<void()> callback)
 {
     closeButton = new UIButton("X");
     repositionCloseButton();
-    closeButton->wxWidth = 20;
-    closeButton->wxHeight = 20;
+    closeButton->wxWidth = WX_SCALED(20);
+    closeButton->wxHeight = WX_SCALED(20);
     closeButton->onClickCallback = [callback](UIButton* btn) {
         callback();
     };
@@ -82,7 +82,7 @@ void PanelUserInteractable::renderResizeHandle(XY at)
 void PanelUserInteractable::repositionCloseButton()
 {
     if (closeButton != NULL) {
-        closeButton->position = { wxWidth - 25, 2 };
+        closeButton->position = { wxWidth - UISCALED(25), UISCALED(2) };
     }
 }
 
@@ -195,9 +195,12 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
     switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
             if (evt.button.button == SDL_BUTTON_LEFT) {
-                if (PointInResizeRange({ g_mouseX, g_mouseY })) {
+                if (PointInResizeRange({ (int)evt.button.x, (int)evt.button.y })) {
                     resizing = true;
                     return true;
+                }
+                else {
+                    resizing = false;
                 }
             }
             break;
@@ -214,8 +217,8 @@ bool PanelUserInteractable::processResize(SDL_Event evt)
                 wxWidth = newSize.x;
                 wxHeight = newSize.y;
                 panelResized(oldSize, newSize);
-                //repositionCloseButton();
-                reanchorInnerDrawable(closeButton, oldSize, newSize, { 1,0 });
+                repositionCloseButton();
+                //reanchorInnerDrawable(closeButton, oldSize, newSize, { 1,0 });
 
                 tryMoveOutOfOOB();
                 return true;

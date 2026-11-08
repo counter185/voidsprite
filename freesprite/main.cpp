@@ -53,6 +53,8 @@
     #include <emscripten/emscripten.h>
 #endif
 
+#define DEBUG_EMULATE_TOUCH_EVENTS 0
+
 #include "main.h"
 
 int g_windowW = 1280;
@@ -502,6 +504,14 @@ void g_mainLoop() {
     bool anyPopupsOpen = main_anyPopupsOpen();
 
     while (SDL_PollEvent(&evt)) {
+#if DEBUG_EMULATE_TOUCH_EVENTS
+        if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN
+            || evt.type == SDL_EVENT_MOUSE_BUTTON_UP
+            || evt.type == SDL_EVENT_MOUSE_MOTION) {
+            continue;
+        }
+#endif
+
         VSPWindow* wdTarget = VSPWindow::windowEventTarget(evt);
         if (wdTarget == NULL) {
             continue;
@@ -849,7 +859,7 @@ int main(int argc, char** argv)
 
         platformInit();
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
-        SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+        SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, DEBUG_EMULATE_TOUCH_EVENTS ? "1" : "0");
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
         SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "2");
