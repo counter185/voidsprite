@@ -67,15 +67,16 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
     int y = 0;
     for (auto& p : *paramList) {
         int i = addOrGetParamIndex(p);
-        UILabel* label = new UILabel(locKeyPrefix != "" ? TL(frmt("{}.{}",locKeyPrefix, p.name)) : p.name);
-        label->position = XY{ 10, y + 2 };
+        UILabel* label = new UILabel(locKeyPrefix != "" ? TL(frmt("{}.{}",locKeyPrefix, p.name)) : p.name, { 10, y + 2 });
         panel->subWidgets.addDrawable(label);
+
+        int optionPosX = ixmax(250, label->position.x + label->getDimensions().x + 10);
 
         switch (p.paramType) {
             case PT_BOOL:
             {
                 UICheckbox* checkbox = new UICheckbox("", p.vNum == 1);
-                checkbox->position = XY{ 250, y };
+                checkbox->position = XY{ optionPosX, y };
                 checkbox->onStateChangeCallback = [this, i, onChangedCallback](UICheckbox* c, bool v) {
                     parameters.at(i).vNum = v ? 1 : 0;
                     onChangedCallback();
@@ -86,7 +87,7 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
             case PT_STRING:
             {
                 UITextField* tf = new UITextField(p.vStr);
-                tf->position = XY{ 250, y };
+                tf->position = XY{ optionPosX, y };
                 tf->onTextChangedCallback = [this, i, onChangedCallback](UITextField*, std::string text) {
                     parameters.at(i).vStr = text;
                     onChangedCallback();
@@ -100,7 +101,7 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
             {
                 float v = (p.vNum - p.numMinValue) / (p.numMaxValue - p.numMinValue);
                 UISlider* slider = new UISlider();
-                slider->position = XY{ 285, y };
+                slider->position = XY{ optionPosX + 85, y };
                 slider->sliderPos = v;
                 slider->wxHeight = 25;
                 if (p.paramType == PT_COLOR_L) {
@@ -109,7 +110,7 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
                 panel->subWidgets.addDrawable(slider);
 
                 UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 84, 0 });
+                valueLabel->position = { optionPosX , y};
                 panel->subWidgets.addDrawable(valueLabel);
 
                 slider->onChangeValueCallback = [this, i, valueLabel, onChangedCallback, updateLabelFn](UISlider* s, float v) {
@@ -135,7 +136,7 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
             case PT_COLOR_RGB:
             {
                 UIColorInputField* colorInput = new UIColorInputField();
-                colorInput->position = XY{ 250, y };
+                colorInput->position = XY{ optionPosX, y };
                 colorInput->wxHeight = 25;
                 colorInput->setColor(p.vU32);
                 panel->subWidgets.addDrawable(colorInput);
@@ -150,7 +151,7 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
                 float vl = (p.vNum - p.numMinValue) / (p.numMaxValue - p.numMinValue);
                 float vm = (p.vNum2 - p.numMinValue) / (p.numMaxValue - p.numMinValue);
                 UIDoubleSlider* slider = new UIDoubleSlider();
-                slider->position = XY{ 285, y };
+                slider->position = XY{ optionPosX + 85, y };
                 slider->sliderPos.min = vl;
                 slider->sliderPos.max = vm;
                 slider->bodyColor = p.vU32;
@@ -158,7 +159,7 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
                 panel->subWidgets.addDrawable(slider);
 
                 UILabel* valueLabel = new UILabel();
-                valueLabel->position = xySubtract(slider->position, { 84, 0 });
+                valueLabel->position = { optionPosX , y};
                 panel->subWidgets.addDrawable(valueLabel);
 
                 slider->onChangeValueCallback = [this, i, valueLabel, onChangedCallback, updateLabelFn](UIDoubleSlider* s, UIDoubleSliderBounds v) {

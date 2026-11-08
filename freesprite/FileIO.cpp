@@ -2081,6 +2081,7 @@ void g_setupIO() {
             BOOL_PARAM("bmp.rgb32bit", false),
             BOOL_PARAM("bmp.rgbtransparent", true),
             BOOL_PARAM("bmp.indexedrle", true),
+            INT_PARAM("bmp.biclrimportant", 0, 256, 1),
         }));
 #if VOIDSPRITE_JXL_ENABLED
     FileExporter* exJXL;

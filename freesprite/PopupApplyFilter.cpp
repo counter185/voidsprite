@@ -173,7 +173,8 @@ void PopupApplyFilter::setupWidgets()
 
     regenParameterUI();
 
-    setSize({ 550, 130 + paramUI->getContentBoxSize().y + 70});
+    XY paramsSize = paramUI->getContentBoxSize();
+    setSize({ ixmax(350, paramsSize.x + 10), 130 + paramsSize.y + 70});
 
     actionButton(TL("vsp.cmn.cancel"))->onClickCallback = [this](UIButton* b) { closePopup(); };
     actionButton(TL("vsp.cmn.apply"))->onClickCallback = [this](UIButton* b) { applyAndClose(); };

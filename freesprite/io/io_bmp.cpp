@@ -526,6 +526,7 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     bool rgb32bit = params != NULL && params->hasParam("bmp.rgb32bit") ? params->getBool("bmp.rgb32bit") : false;
     bool rgbTransparent = params != NULL && params->hasParam("bmp.rgbtransparent") ? params->getBool("bmp.rgbtransparent") : false;
     bool indexedCompressRLE = params != NULL && params->hasParam("bmp.indexedrle") ? params->getBool("bmp.indexedrle") : true;
+    int colorsImportant = params != NULL && params->hasParam("bmp.biclrimportant") ? params->getInt("bmp.biclrimportant") : 0;
 
     progress->enterSection("Writing headers...");
     vsp_BITMAPFILEHEADER h1{};
@@ -555,7 +556,7 @@ void bmpWriteToFile(Layer* data, FILE* f, OperationProgressReport* progress, Par
     h2.yPixelsPerM = 100;
     h2.colorsUsed = data->isPalettized ? (canBe4Bit ? 16 : 256)
         : 0;
-    h2.colorsImportant = 0;
+    h2.colorsImportant = colorsImportant;
     fwrite(&h2, sizeof(vsp_BITMAPINFOHEADER), 1, f);
 
     if (writeChannelMasks) {

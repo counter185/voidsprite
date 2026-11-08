@@ -84,6 +84,7 @@
     {"vsp.export.option.bmp.rgb32bit", "[RGB] Save to 32-bit BMP"},
     {"vsp.export.option.bmp.rgbtransparent", "[RGB] 32-bit: Transparency"},
     {"vsp.export.option.bmp.indexedrle", "[Indexed] RLE compression"},
+    {"vsp.export.option.bmp.biclrimportant", "Num. important colors"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
