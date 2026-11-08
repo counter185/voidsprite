@@ -50,6 +50,7 @@ public:
     void render() override;
     void tick() override;
     void takeInput(SDL_Event evt) override;
+    void defaultInputAction(SDL_Event evt) override;
     std::string getName() override { return TL("vsp.lmupreview"); }
     BaseScreen* isSubscreenOf() override;
 

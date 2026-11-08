@@ -889,9 +889,12 @@ Panel* PopupGlobalConfig::optionNumberInput(std::string name, std::string toolti
         };
     }
 
-    tf->valueUpdatedCallback = [target, min, max, sld](int v) {
+    tf->valueUpdatedCallback = [target, min, max, sld, onModified](int v) {
         if (sld != NULL) {
             sld->setValue(min, max, v);
+            if (onModified != NULL) {
+                onModified(v);
+            }
         }
     };
 

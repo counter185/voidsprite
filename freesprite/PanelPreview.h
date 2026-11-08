@@ -15,6 +15,7 @@ public:
 
     bool isMouseIn(XY thisPositionOnScreen, XY mousePos) override;
     bool defaultInputAction(SDL_Event evt, XY gPosOffset) override;
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override;
 
     void renderAfterBG(XY at) override;
 

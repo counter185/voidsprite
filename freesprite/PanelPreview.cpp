@@ -21,7 +21,10 @@ bool PanelPreview::defaultInputAction(SDL_Event evt, XY gPosOffset)
 {
     SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
-    if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
+    if (c.takeInput(evt)) {
+        return true;
+    }
+    else if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
         && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
         dragging++;
     }
@@ -35,6 +38,17 @@ bool PanelPreview::defaultInputAction(SDL_Event evt, XY gPosOffset)
         return false;
     }
     return true;
+}
+
+void PanelPreview::mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction)
+{
+    if (collapsed) {
+        return;
+    }
+    XY localPos = xySubtract(mousePos, position);
+    if (pointInBox(mousePos, getCanvasDrawRect(position))) {
+        c.zoomFromWheelInput(direction.y, localPos);
+    }
 }
 
 void PanelPreview::renderAfterBG(XY at)
@@ -67,7 +81,8 @@ void PanelPreview::renderAfterBG(XY at)
 }
 
 SDL_Rect PanelPreview::getCanvasDrawRect(XY at) {
-    return SDL_Rect{ at.x + 5, at.y + 35, wxWidth - 10, wxHeight - 40 };
+    int y = UISCALED(30);
+    return SDL_Rect{ at.x + 5, at.y + y, wxWidth - 10, wxHeight - y - 5 };
 }
 
 bool PanelPreview::isMouseIn(XY thisPositionOnScreen, XY mousePos)

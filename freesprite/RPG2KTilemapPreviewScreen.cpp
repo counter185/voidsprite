@@ -140,15 +140,6 @@ void RPG2KTilemapPreviewScreen::tick()
 
 void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
 {
-    DrawableManager::processHoverEventInMultiple({ wxsManager }, evt);
-
-    if (evt.type == SDL_QUIT) {
-        g_closeScreen(this);
-        return;
-    }
-
-    LALT_TO_SUMMON_NAVBAR;
-
     if (evt.type == SDL_DROPFILE) {
         PlatformNativePathString p = convertStringOnWin32(evt.drop.data);
         if (stringEndsWithIgnoreCase(p, convertStringOnWin32(".lmu"))) {
@@ -156,18 +147,15 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
         }
         return;
     }
+    BaseScreen::takeInput(evt);
+}
 
-    if (!DrawableManager::processInputEventInMultiple({wxsManager}, evt)) {
-        switch (evt.type) {
-        case SDL_MOUSEWHEEL:
-            canvas.zoomFromWheelInput(evt.wheel.y);
-            break;
+void RPG2KTilemapPreviewScreen::defaultInputAction(SDL_Event evt)
+{
+    switch (evt.type) {
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
-            if (evt.button.button == SDL_BUTTON_MIDDLE) {
-                scrollingTilemap = evt.button.down;
-            }
-            else if (evt.button.button == SDL_BUTTON_RIGHT && evt.button.down) {
+            if (evt.button.button == SDL_BUTTON_RIGHT && evt.button.down) {
                 LMUEvent* mapEvt = eventAtScreenSpacePos({ (int)evt.button.x, (int)evt.button.y });
                 if (mapEvt != NULL) {
                     PopupContextMenu* ctx = new PopupContextMenu({
@@ -177,13 +165,8 @@ void RPG2KTilemapPreviewScreen::takeInput(SDL_Event evt)
                 }
             }
             break;
-        case SDL_MOUSEMOTION:
-            if (scrollingTilemap) {
-                canvas.panCanvas(XY{ (int)(evt.motion.xrel), (int)(evt.motion.yrel) });
-            }
-            break;
-        }
     }
+    canvas.takeInput(evt);
 }
 
 BaseScreen* RPG2KTilemapPreviewScreen::isSubscreenOf()

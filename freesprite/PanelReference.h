@@ -31,6 +31,19 @@ public:
 
     void eventDropdownItemSelected(int evt_id, int index, std::string name) override;
 
+    void mouseWheelEvent(XY mousePos, XY gPosOffset, XYf direction) override
+    {
+        if (collapsed) {
+            return;
+        }
+        XY localPos = xySubtract(mousePos, position);
+        if (currentMode == REFERENCE_PIXEL_PERFECT) {
+            if (pointInBox(mousePos, getCanvasDrawRect(position))) {
+                c.zoomFromWheelInput(direction.y, localPos);
+            }
+        }
+    }
+
     void initWidgets();
     SDL_Rect getCanvasDrawRect(XY at);
     SDL_Rect getFitModeRect(SDL_Rect canvasDraw);

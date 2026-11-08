@@ -39,7 +39,8 @@ bool PanelReference::defaultInputAction(SDL_Event evt, XY gPosOffset)
     SDL_Event evtc = convertTouchToMouseEvent(evt);
     SDL_Rect canvasDraw = getCanvasDrawRect(gPosOffset);
     if (currentMode == REFERENCE_PIXEL_PERFECT) {
-        if (evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
+        if (!c.takeInput(evt)
+            && evtc.type == SDL_EVENT_MOUSE_BUTTON_DOWN
             && pointInBox({ (int)evtc.button.x, (int)evtc.button.y }, canvasDraw)) {
             if (evtc.button.button == SDL_BUTTON_LEFT) {
                 dragging++;
@@ -104,7 +105,13 @@ void PanelReference::renderAfterBG(XY at)
         texDraw.x += at.x;
         texDraw.y += at.y;
         previewTex->render(texDraw);
+        SDL_Rect outline = offsetRect(texDraw, 1);
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 40);
+        SDL_RenderDrawRect(g_rd, &outline);
         g_popClip();
+
+        SDL_SetRenderDrawColor(g_rd, 255, 255, 255, 80);
+        SDL_RenderDrawRect(g_rd, &canvasDraw);
     }
     else if (currentMode == REFERENCE_FIT) {    //fit
         previewTex->render(getFitModeRect(canvasDraw));
@@ -129,6 +136,8 @@ void PanelReference::eventDropdownItemSelected(int evt_id, int index, std::strin
 {
     if (evt_id == 0) {
         currentMode = (ReferencePanelMode)index;
+        c.scale = 0;
+        c.recenter({ wxWidth, wxHeight });
         initWidgets();
     }
 }
@@ -192,5 +201,6 @@ SDL_Rect PanelReference::getCanvasDrawRect(XY at)
     if (currentMode == REFERENCE_UNDER_CANVAS || currentMode == REFERENCE_OVER_CANVAS) {
         return SDL_Rect{ 0,0,0,0 };
     }
-    return SDL_Rect{ at.x + 5, at.y + 35, wxWidth - 10, wxHeight - 40 };
+    int y = UISCALED(35);
+    return SDL_Rect{ at.x + 5, at.y + y, wxWidth - 10, wxHeight - y - 5 };
 }

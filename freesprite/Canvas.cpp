@@ -8,6 +8,7 @@ bool Canvas::takeInput(SDL_Event evt)
         case SDL_MOUSEBUTTONUP:
             if (evt.button.button == SDL_BUTTON_MIDDLE) {
                 middleMouseHold = evt.type == SDL_MOUSEBUTTONDOWN;
+                return true;
             }
             break;
         case SDL_MOUSEMOTION:
@@ -16,10 +17,12 @@ bool Canvas::takeInput(SDL_Event evt)
                     ((int)evt.motion.xrel) * (g_shiftModifier ? 2 : 1),
                     ((int)evt.motion.yrel) * (g_shiftModifier ? 2 : 1)
                 });
+                return true;
             }
             break;
         case SDL_MOUSEWHEEL:
             zoomFromWheelInput(evt.wheel.y);
+            return true;
             break;
         case SDL_FINGERMOTION:
             return takeTouchPanZoomInput(evt);
