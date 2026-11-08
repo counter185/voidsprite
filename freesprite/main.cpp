@@ -35,6 +35,7 @@
 #include "thumbnail_loader.h"
 #include "actions/actions.h"
 #include "network.h"
+#include "io/io_voidsprite.h"
 
 #include "TemplateMC64x32Skin.h"
 #include "TemplateRPG2KBattleAnim.h"

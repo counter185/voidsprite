@@ -11,7 +11,7 @@
 
 #include "platform_universal.h"
 #include "PopupFilePicker.h"
-#include "FileIO.h"
+#include "io/io_png.h"
 
 JNIEnv* lastJNI = NULL;
 JavaVM* lastJVM = NULL;

@@ -19,6 +19,37 @@
 #include "RPG2KTilemapPreviewScreen.h"
 #include "PopupMessageBox.h"
 
+#include "io/io_png.h"
+#include "io/io_astc.h"
+#include "io/io_dds.h"
+#include "io/io_aseprite.h"
+#include "io/io_jsonformats.h"
+#include "io/io_pix2d.h"
+#include "io/io_gim.h"
+#include "io/io_rpgm.h"
+#include "io/io_jxl.h"
+#include "io/io_dibv5.h"
+#include "io/io_valve.h"
+#include "io/io_voidsprite.h"
+#include "io/io_openraster.h"
+#include "io/io_pixelstudio.h"
+#include "io/io_iw.h"
+#include "io/io_xna.h"
+#include "io/io_flipnote.h"
+#include "io/io_gif.h"
+#include "io/io_avi.h"
+#include "io/io_godot.h"
+#include "io/io_resprite.h"
+#include "io/io_avif.h"
+#include "io/io_anymap.h"
+#include "io/io_gamemaker.h"
+#include "io/io_pep.h"
+#include "io/io_graphicsgale.h"
+#include "io/io_bmp.h"
+
+#include "io/io_palettes.h"
+
+
 #if VSP_PLATFORM == VSP_PLATFORM_WIN32
     #include <windows.h>
 #endif
@@ -377,7 +408,6 @@ PlatformNativePathString newTempFile()
     PlatformNativePathString tempFileName = tempPath + convertStringOnWin32(frmt("/temp-{}", randomUUID()));
     return tempFileName;
 }
-
 
 Layer* readTGA(PlatformNativePathString path, uint64_t seek) {
 

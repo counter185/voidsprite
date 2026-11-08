@@ -28,6 +28,7 @@
 #include "platform_universal.h"
 #include "maineditor.h"
 #include "io/io_png.h"
+#include "io/io_dibv5.h"
 #include "Notification.h"
 #include "multiwindow.h"
 #include "main.h"

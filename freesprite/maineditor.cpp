@@ -65,6 +65,8 @@
 #include "PopupRecordTimelapse.h"
 #include "multiwindow.h"
 #include "thumbnail_loader.h"
+#include "videoencoder.h"
+#include "io/io_voidsprite.h"
 
 #include "discord_rpc.h"
 

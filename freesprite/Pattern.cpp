@@ -3,6 +3,7 @@
 #include "Notification.h"
 #include "LayerPalettized.h"
 #include "FileIO.h"
+#include "io/io_anymap.h"
 
 void g_loadPatterns()
 {

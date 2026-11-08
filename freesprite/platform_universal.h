@@ -6,6 +6,7 @@
 #include "EventCallbackListener.h"
 #include "PopupFilePicker.h"
 #include "Notification.h"
+#include "io/io_png.h"
 
 inline int findIndexByExtension(
         const std::vector<std::pair<std::string, std::string>> &filetypes,
