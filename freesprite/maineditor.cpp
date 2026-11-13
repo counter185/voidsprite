@@ -2696,9 +2696,11 @@ void MainEditor::deleteFrame(int index)
         if (frames.size() != 1) {
             Frame* target = frames[index];
             frames.erase(frames.begin() + index);
-            framePicker->createFrameButtons();
             if (activeFrame >= frames.size()) {
                 switchFrame(frames.size() - 1);
+            }
+            else {
+                switchFrame(activeFrame);
             }
             addToUndoStack(new UndoFrameRemoved(target, index));
         } else {
@@ -2716,10 +2718,9 @@ void MainEditor::switchFrame(int index)
     activeFrame = ixmax(0, ixmin(frames.size()-1, index));
     //loginfo(frmt("switching to frame {}", index));
     selLayer = ixmin(getCurrentFrame()->layers.size()-1, getCurrentFrame()->activeLayer);
-    if (g_interactiveContext) {
-        layerPicker->updateLayers();
-        framePicker->createFrameButtons();
-    }
+    ONLY_IN_INTERACTIVE_CONTEXT;
+    layerPicker->updateLayers();
+    framePicker->createFrameButtons();
 }
 
 void MainEditor::prerenderAllFrames()

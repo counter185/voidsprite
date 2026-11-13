@@ -36,3 +36,4 @@ public:
 void g_renderNotifications();
 void g_tickNotifications();
 bool g_takeInputNotifications(SDL_Event evt);
+bool g_anyNotifications();

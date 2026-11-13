@@ -526,10 +526,7 @@ void VSPWindow::doFrameDelay(u64 frameTime)
     int batterySeconds, batteryPercent;
     SDL_PowerState powerstate = SDL_GetPowerInfo(&batterySeconds, &batteryPercent);
     if (!g_windowFocused && !g_fullFramerateThisFrame) {
-        if (g_config.powerSaverLevel == 2 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY && batteryPercent <= 15)) {
-            SDL_Delay(500);
-        }
-        else if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
+        if (g_config.powerSaverLevel == 1 || (g_config.powerSaverLevel == 3 && powerstate != SDL_POWERSTATE_NO_BATTERY)) {
             SDL_Delay(45);
         }
 

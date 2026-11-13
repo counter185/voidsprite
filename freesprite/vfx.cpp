@@ -175,3 +175,13 @@ void g_removeVFXWindow(VSPWindow* wd) {
 		currentVfxs.erase(wd);
 	}
 }
+
+bool g_anyVFX()
+{
+    for (auto& l : currentVfxs) {
+        if (!l.second.empty()) {
+            return true;
+        }
+    }
+    return false;
+}

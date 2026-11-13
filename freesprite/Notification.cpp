@@ -135,6 +135,7 @@ void g_addNotificationFromThread(Notification a) {
     });
 }
 void g_tickNotifications() {
+    g_fullFramerateThisFrame |= !g_notifications.empty();
     for (int x = 0; x < g_notifications.size(); x++) {
         Notification& notif = g_notifications[x];
 
@@ -168,4 +169,9 @@ bool g_takeInputNotifications(SDL_Event evt)
         }
     }
     return false;
+}
+
+bool g_anyNotifications()
+{
+    return !g_notifications.empty();
 }

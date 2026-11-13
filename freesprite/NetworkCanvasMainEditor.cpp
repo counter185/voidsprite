@@ -97,6 +97,7 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(NetMessage& 
         }
         if (activeFrame >= numFrames) {
             activeFrame = numFrames - 1;
+            //selLayer = getCurrentFrame()->activeLayer;
         }
 
         for (int fi = 0; fi < numFrames; fi++) {
@@ -193,9 +194,11 @@ void NetworkCanvasMainEditor::networkCanvasProcessCommandFromServer(NetMessage& 
             networkCanvasSendInfoRequest();
             for (int fi = 0; fi < frames.size(); fi++) {
                 for (int i = 0; i < frames[fi]->layers.size(); i++) {
-                    networkSendCommand(response, "LRRQ");
-                    networkSendBytes(response, (u8*)&fi, 4);
-                    networkSendBytes(response, (u8*)&i, 4);
+                    NetMessage frameRq{};
+                    networkSendCommand(frameRq, "LRRQ");
+                    networkSendBytes(frameRq, (u8*)&fi, 4);
+                    networkSendBytes(frameRq, (u8*)&i, 4);
+                    clientSocket->netIf->writeMessageToSocket(clientSocket, frameRq);
                 }
             }
         }
@@ -238,8 +241,9 @@ void NetworkCanvasMainEditor::networkCanvasSendLocalChanges()
 {
     clientSideChangesMutex.lock();
     for (auto& c : clientSideChanges) {
+        auto& [targetFrame, targetLayer] = c.first;
         NetMessage msg{};
-        networkCanvasSendLRDT(msg, c.first.first, c.first.second, frames[c.first.first]->layers[c.first.second]);
+        networkCanvasSendLRDT(msg, targetFrame, targetLayer, frames[targetFrame]->layers[targetLayer]);
         clientSocket->netIf->writeMessageToSocket(clientSocket, msg);
     }
     clientSideChanges.clear();
@@ -280,6 +284,7 @@ void NetworkCanvasMainEditor::reallocLayers(Frame* f, XY size, int numLayers)
     }
     if (getCurrentFrame() == f) {
         mainThreadOps.add([this]() {
+            switchActiveLayer(getCurrentFrame()->activeLayer);
             initLayers();
         });
     }

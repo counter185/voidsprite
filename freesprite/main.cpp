@@ -502,6 +502,7 @@ void g_mainLoop() {
     g_fullFramerateThisFrame = false;
     bool firedQuitEventThisFrame = false;
     bool anyPopupsOpen = main_anyPopupsOpen();
+    bool motionThisFrame = false;
 
     while (SDL_PollEvent(&evt)) {
 #if DEBUG_EMULATE_TOUCH_EVENTS
@@ -529,6 +530,7 @@ void g_mainLoop() {
             evt.type = SDL_EVENT_QUIT;
             break;
         case SDL_EVENT_KEY_DOWN:
+            motionThisFrame = true;
             if (evt.key.scancode == SDL_SCANCODE_AC_BACK) {
                 evt.type = SDL_EVENT_QUIT;
             }
@@ -540,6 +542,7 @@ void g_mainLoop() {
             }
             break;
         case SDL_EVENT_KEY_UP:
+            motionThisFrame = true;
             if (evt.key.scancode == SDL_SCANCODE_LCTRL) {
                 g_ctrlModifier = false;
             }
@@ -555,6 +558,7 @@ void g_mainLoop() {
 #endif
             break;
         case SDL_EVENT_WINDOW_RESIZED:
+            motionThisFrame = true;
             wdTarget->unscaledWindowSize = { evt.window.data1, evt.window.data2 };
             if (g_config.autoViewportScale) {
                 wdTarget->autoViewportScale();
@@ -564,6 +568,7 @@ void g_mainLoop() {
             }
             break;
         case SDL_EVENT_MOUSE_MOTION:
+            motionThisFrame = true;
             if (!lastPenEvent.started || lastPenEvent.elapsedTime() > 100) {
                 wdTarget->mouseX = (int)(evt.motion.x);
                 wdTarget->mouseY = (int)(evt.motion.y);
@@ -579,6 +584,7 @@ void g_mainLoop() {
                 wdTarget->mouseX = evt.tfinger.x * g_windowW;
                 wdTarget->mouseY = evt.tfinger.y * g_windowH;
                 wdTarget->unscaledMousePos = { (int)(unscaledEvent.tfinger.x * g_windowW), (int)(unscaledEvent.tfinger.y * g_windowH) };
+                motionThisFrame = true;
             }
             break;
         case SDL_EVENT_PEN_MOTION:
@@ -586,6 +592,7 @@ void g_mainLoop() {
             wdTarget->mouseX = (int)(evt.pmotion.x);
             wdTarget->mouseY = (int)(evt.pmotion.y);
             wdTarget->unscaledMousePos = { (int)unscaledEvent.pmotion.x, (int)unscaledEvent.pmotion.y };
+            motionThisFrame = true;
             break;
         case SDL_EVENT_PEN_DOWN:
         case SDL_EVENT_PEN_UP:
@@ -593,9 +600,14 @@ void g_mainLoop() {
         case SDL_EVENT_PEN_BUTTON_UP:
             g_lastConfirmInputWasTouch = false;
             lastPenEvent.start();
+            motionThisFrame = true;
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
             g_lastConfirmInputWasTouch = false;
+            motionThisFrame = true;
+            break;
+        case SDL_EVENT_MOUSE_WHEEL:
+            motionThisFrame = true;
             break;
         }
 
@@ -659,6 +671,10 @@ void g_mainLoop() {
         g_windowFocused |= ((SDL_GetWindowFlags(w->wd) & SDL_WINDOW_INPUT_FOCUS) != 0);
     }
 
+    motionThisFrame |= g_anyVFX();
+    motionThisFrame |= g_anyNotifications();
+    motionThisFrame |= g_fullFramerateThisFrame;
+
     for (auto wit = g_windows.cbegin(); wit != g_windows.cend(); ) {
         VSPWindow* wd = (*wit).second;
 
@@ -681,7 +697,12 @@ void g_mainLoop() {
         wd->tickWindow();
         g_runMainThreadOperations();
 
-        wd->renderWindow();
+        if (g_config.powerSaverLevel != 2 || motionThisFrame) {
+            wd->renderWindow();
+        }
+        else {
+            SDL_Delay(16);
+        }
 
         uint64_t ticksEnd = SDL_GetTicks64();
 
