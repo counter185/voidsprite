@@ -12,6 +12,7 @@ cp build_appimage/cmake/voidsprite AppDir/usr/bin/voidsprite
 mkdir /tmp/appimage-libs
 cp ./cmake/libdiscord_game_sdk_linux_x64.so /tmp/appimage-libs/libdiscord_game_sdk_linux_x64.so
 if [ -f ./cmake/libsteam_api.so ]; then
+  echo 480 > ./AppDir/usr/bin/steam_appid.txt
   cp ./cmake/libsteam_api.so /tmp/appimage-libs/libsteam_api.so
 fi
 cp ./build_appimage/external/SDL_image/libSDL3_image.so.0 /tmp/appimage-libs/libSDL3_image.so.0
