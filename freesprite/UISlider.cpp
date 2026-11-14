@@ -95,5 +95,35 @@ void UISlider::handleInput(SDL_Event evt, XY gPosOffset)
                 this->onSliderPosChanged();
             }
             break;
+        case SDL_EVENT_KEY_DOWN:
+
+
+            switch (evt.key.key) {
+            case SDLK_LEFT:
+                if (g_shiftModifier) {
+                    sliderPos -= 0.25f;
+                }
+                else {
+                    sliderPos -= 0.1f;     
+                }     
+                break;
+            case SDLK_RIGHT:
+                if (g_shiftModifier) {
+                    sliderPos += 0.25f;
+                }
+                else {
+                    sliderPos += 0.1f;     
+                }   
+                break;
+            case SDLK_UP:
+                sliderPos = 1.0f;
+                break;
+            case SDLK_DOWN:
+                sliderPos = 0.0f;
+                break;
+            }
+
+            this->onSliderPosChanged();
+
     }
 }
