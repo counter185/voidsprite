@@ -234,7 +234,8 @@ public:
     int backtraceFrames = 0;
     int fwdtraceFrames = 0;
     double traceOpacity = 0.4;
-
+    int animPlayFrom = -1;
+    int animPlayTo = -1;
 
     std::map<std::string, std::string> serializeToKeyVals();
     std::string serializeToJson();
@@ -519,6 +520,8 @@ public:
     virtual void moveFrameLeft(int index);
     virtual void moveFrameRight(int index);
     void toggleFrameAnimation();
+    void setAnimFrom(int index);
+    void setAnimTo(int index);
     void setMSPerFrame(int ms);
     void renderFrameTo(Frame* f, SDL_Texture* target, bool clear = true);
 

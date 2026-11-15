@@ -236,6 +236,13 @@ void TTFFontObject::RenderGlyph(uint32_t a, int size)
         SDL_Surface* gl = g_config.smoothFonts ? TTF_RenderGlyph_Blended(font, (Uint32)a, SDL_Color{ 255,255,255,255 })
             : TTF_RenderGlyph_Solid(font, (Uint32)a, SDL_Color{ 255,255,255,255 });
         if (gl != NULL) {
+            if (gl->format != SDL_PIXELFORMAT_ABGR4444) {
+                SDL_Surface* conv = SDL_ConvertSurface(gl, SDL_PIXELFORMAT_ABGR4444);
+                if (conv != NULL) {
+                    SDL_FreeSurface(gl);
+                    gl = conv;
+                }
+            }
             SDL_Texture* newTexture = tracked_createTextureFromSurface(g_rd, gl);
 
             GlyphData newGlyphData;

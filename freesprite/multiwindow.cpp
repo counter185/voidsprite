@@ -280,13 +280,13 @@ void VSPWindow::updateViewportScaler() {
     }
     scaledWindowSize.x = unscaledWindowSize.x / g_renderScale;
     scaledWindowSize.y = unscaledWindowSize.y / g_renderScale;
-    screenPreviewFB = tracked_createTexture(rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
+    screenPreviewFB = tracked_createTexture(rd, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
     SDL_SetTextureScaleMode(screenPreviewFB, SDL_SCALEMODE_LINEAR);
     if (g_renderScale == 1) {
         viewport = NULL;
     }
     else {
-        viewport = tracked_createTexture(rd, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
+        viewport = tracked_createTexture(rd, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, scaledWindowSize.x, scaledWindowSize.y);
     }
 
     if (blurBuffer != NULL) {

@@ -146,6 +146,7 @@ EditorFramePicker::EditorFramePicker(MainEditor* caller)
 
 void EditorFramePicker::render(XY at) {
     PanelUserInteractable::render(at);
+    renderAnimBounds(at);
     renderPlayhead(at);
 }
 
@@ -163,15 +164,56 @@ void EditorFramePicker::renderPlayhead(XY at)
 
         XY playheadBegin = xyAdd(offs, { frameButtonPanel->scrollOffset.x, 0 });
 
-        double animTime = parent->frameAnimationStartTimer.elapsedLoopingTime(parent->frames.size() * parent->frameAnimMSPerFrame);
+        int firstFrameIndex = parent->ssne.animPlayFrom >= 0 && parent->ssne.animPlayFrom < parent->frames.size() ? parent->ssne.animPlayFrom : 0;
+        int lastFrameIndex = parent->ssne.animPlayTo >= 0 && parent->ssne.animPlayTo < parent->frames.size() ? parent->ssne.animPlayTo : (parent->frames.size() - 1);
+
+        if (lastFrameIndex < firstFrameIndex && lastFrameIndex != -1) {
+            int t = lastFrameIndex;
+            lastFrameIndex = firstFrameIndex;
+            firstFrameIndex = t;
+        }
+
+        int numFrames = lastFrameIndex - firstFrameIndex + 1;
+
+        double animTime = parent->frameAnimationStartTimer.elapsedLoopingTime(numFrames * parent->frameAnimMSPerFrame);
         animTime /= parent->frameAnimMSPerFrame;
+        animTime += firstFrameIndex;
         int animXPos = playheadBegin.x + animTime * frameButtons.front()->wxWidth;
 
         g_pushClip(panelRect);
         SDL_SetRenderDrawColor(g_rd, 0, 255, 0, 0xA0);
-        SDL_RenderDrawLine(g_rd, animXPos, panelRect.y, animXPos, panelRect.y + panelRect.h);
+        drawLine({ animXPos, panelRect.y }, { animXPos, panelRect.y + panelRect.h });
         g_popClip();
     }
+}
+
+void EditorFramePicker::renderAnimBounds(XY at)
+{
+    XY offs = frameButtonPanel->lastPosOnScreen;
+    SDL_Rect panelRect = { offs.x, offs.y, frameButtonPanel->wxWidth, frameButtonPanel->wxHeight };
+    XY origin = xyAdd(offs, { frameButtonPanel->scrollOffset.x, 0 });
+
+    int fromXPos = origin.x + parent->ssne.animPlayFrom * frameButtons.front()->wxWidth;
+    int toXPos = origin.x + (parent->ssne.animPlayTo + 1) * frameButtons.front()->wxWidth;
+
+    if (parent->ssne.animPlayFrom > 0) {
+        g_pushClip(panelRect);
+        SDL_SetRenderDrawColor(g_rd, 0xFF, 0x83, 0, 0xA0);
+        XY posBottom = { fromXPos, panelRect.y + panelRect.h - 1 };
+        drawLine({ fromXPos, panelRect.y }, posBottom);
+        drawLine(posBottom, xyAdd(posBottom, {frameButtons.front()->wxWidth/3, 0}));
+        g_popClip();
+    }
+
+    if (parent->ssne.animPlayTo > 0) {
+        g_pushClip(panelRect);
+        SDL_SetRenderDrawColor(g_rd, 0xFF, 0x83, 0, 0xA0);
+        XY posBottom = { toXPos, panelRect.y + panelRect.h - 1 };
+        drawLine({ toXPos, panelRect.y }, posBottom);
+        drawLine(posBottom, xySubtract(posBottom, { frameButtons.front()->wxWidth / 3, 0 }));
+        g_popClip();
+    }
+
 }
 
 void EditorFramePicker::createFrameButtons()
@@ -191,12 +233,11 @@ void EditorFramePicker::createFrameButtons()
         };
         frameBtn->onRightClickCallback = [this, i](UIButton* btn) {
             PopupContextMenu* ctx = new PopupContextMenu({
-                {"Delete frame", [this, i]() {
-                    parent->deleteFrame(i);
-                }},
-                {"Duplicate frame", [this, i]() {
-                    parent->duplicateFrame(i);
-                }}
+                {"Delete frame", [this, i]() { parent->deleteFrame(i); }},
+                {"Duplicate frame", [this, i]() { parent->duplicateFrame(i); }},
+                {"Mark animation start", [this, i]() { parent->setAnimFrom(i); }},
+                {"Mark animation end", [this, i]() { parent->setAnimTo(i); }},
+                {"Open as reference", [this,i]() { openFrameAsReference(i); }}
             });
 
             g_addPopup(ctx);
@@ -217,5 +258,14 @@ void EditorFramePicker::flashFrame(int index)
 {
     if (index >= 0 && index < frameButtons.size()) {
         frameButtons[index]->playClickVFXNextFrame();
+    }
+}
+
+void EditorFramePicker::openFrameAsReference(int index)
+{
+    std::lock_guard<std::recursive_mutex> lock(parent->framesMutex);
+    if (parent->frames.size() > index) {
+        Layer* flat = parent->flattenFrame(parent->frames[index]);
+        parent->addReference(flat);
     }
 }

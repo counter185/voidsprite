@@ -30,6 +30,8 @@ public:
     void createFrameButtons();
 
     void renderPlayhead(XY at);
+    void renderAnimBounds(XY at);
     void flashFrame(int index);
+    void openFrameAsReference(int index);
 };
 

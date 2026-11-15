@@ -102,7 +102,7 @@ void UISlider::handleInput(SDL_Event evt, XY gPosOffset)
                 {
                     float factor = g_shiftModifier ? 0.25f : 0.1f;
                     factor *= (evt.key.key == SDLK_LEFT ? -1 : 1);
-                    sliderPos = fclamp(0.0f, sliderPos + factor, 1.);
+                    sliderPos = fclamp(0.0f, sliderPos + factor, 1.0f);
                     this->onSliderPosChanged();
                     break;
                 }

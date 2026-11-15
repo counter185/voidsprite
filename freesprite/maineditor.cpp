@@ -490,10 +490,21 @@ void MainEditor::tick() {
     mainThreadOps.process();
 
     if (frameAnimationPlaying && frameAnimMSPerFrame > 0) {
+        int firstFrameIndex = ssne.animPlayFrom >= 0 && ssne.animPlayFrom < frames.size() ? ssne.animPlayFrom : 0;
+        int lastFrameIndex = ssne.animPlayTo >= 0 && ssne.animPlayTo < frames.size() ? ssne.animPlayTo : (frames.size()-1);
+
+        if (lastFrameIndex < firstFrameIndex && lastFrameIndex != -1) {
+            int t = lastFrameIndex;
+            lastFrameIndex = firstFrameIndex;
+            firstFrameIndex = t;
+        }
+
+        int numFrames = lastFrameIndex - firstFrameIndex + 1;
+
         u64 elapsed = frameAnimationStartTimer.elapsedTime();
         elapsed /= frameAnimMSPerFrame;
-        elapsed %= frames.size();
-        int targetFrame = (int)elapsed;
+        elapsed %= numFrames;
+        int targetFrame = firstFrameIndex + (int)elapsed;
         if (targetFrame != activeFrame) {
             switchFrame(targetFrame);
         }
@@ -2771,6 +2782,26 @@ void MainEditor::toggleFrameAnimation()
     frameAnimationStartTimer.start();
 }
 
+void MainEditor::setAnimFrom(int index)
+{
+    ssne.animPlayFrom = (index == 0 || index == ssne.animPlayFrom) ? -1 : index;
+    if (ssne.animPlayTo != -1 && ssne.animPlayFrom > ssne.animPlayTo) {
+        int t = ssne.animPlayFrom;
+        ssne.animPlayFrom = ssne.animPlayTo + 1;
+        ssne.animPlayTo = t;
+    }
+}
+
+void MainEditor::setAnimTo(int index)
+{
+    ssne.animPlayTo = index == ssne.animPlayTo ? -1 : index;
+    if (ssne.animPlayFrom != -1 && ssne.animPlayFrom > ssne.animPlayTo) {
+        int t = ssne.animPlayFrom;
+        ssne.animPlayFrom = ssne.animPlayTo + 1;
+        ssne.animPlayTo = t;
+    }
+}
+
 void MainEditor::setMSPerFrame(int ms)
 {
     if (framePicker != NULL) {
@@ -4974,6 +5005,8 @@ std::map<std::string, std::string> SessionEditorPrefs::serializeToKeyVals() {
     kvs["frame.backtrace"] = std::to_string((int)backtraceFrames);
     kvs["frame.fwdtrace"] = std::to_string((int)fwdtraceFrames);
     kvs["frame.traceopacity"] = std::to_string((int)(traceOpacity * 100));
+    kvs["frame.animfrom"] = std::to_string(animPlayFrom);
+    kvs["frame.animto"] = std::to_string(animPlayTo);
     if (!templateName.empty()) {
         kvs["template.name"] = templateName;
         kvs["template.desc"] = templateDescription;
@@ -5003,6 +5036,8 @@ SessionEditorPrefs SessionEditorPrefs::deserializeFromKeyVals(std::map<std::stri
     try { prefs.blendAlphaMode = (BlendMode)ixmax(0, ixmin(blendOperations.size()-1, std::stoi(kvs["blendmode.index"]))); } catch (...) {}
     try { prefs.backtraceFrames = std::stoi(kvs["frame.backtrace"]); } catch (...) {}
     try { prefs.fwdtraceFrames = std::stoi(kvs["frame.fwdtrace"]); } catch (...) {}
+    try { prefs.animPlayFrom = std::stoi(kvs["frame.animfrom"]); } catch (...) {}
+    try { prefs.animPlayTo = std::stoi(kvs["frame.animto"]); } catch (...) {}
     try { prefs.traceOpacity = std::stoi(kvs["frame.traceopacity"]) / 100.0; } catch (...) {}
 
     try {
