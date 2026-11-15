@@ -29,7 +29,7 @@ public:
     bool showFPS = false;
     bool showSystemClock = false;
     bool checkUpdates = VSP_FDROID_BUILD ? false : true;
-    int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 2,
+    int powerSaverLevel = ONPLATFORM(VSP_PLATFORM_ANDROID, 1,
                           ONPLATFORM(VSP_PLATFORM_EMSCRIPTEN, 1, 3));
                                 // 0: none
                                 // 1: delay 45 on unfocus

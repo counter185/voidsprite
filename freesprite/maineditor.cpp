@@ -2730,6 +2730,7 @@ void MainEditor::switchFrame(int index)
     //loginfo(frmt("switching to frame {}", index));
     selLayer = ixmin(getCurrentFrame()->layers.size()-1, getCurrentFrame()->activeLayer);
     ONLY_IN_INTERACTIVE_CONTEXT;
+    g_fullFramerateThisFrame = true;
     layerPicker->updateLayers();
     framePicker->createFrameButtons();
 }

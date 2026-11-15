@@ -25,6 +25,9 @@ public:
         }
     }
 
+    void tick() override {
+        g_fullFramerateThisFrame |= (startTimer.percentElapsedTime(300) != 1.0);
+    }
     void render() override;
 
     void setSize(XY size) {

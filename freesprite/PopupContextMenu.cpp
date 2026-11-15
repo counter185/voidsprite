@@ -57,6 +57,7 @@ void PopupContextMenu::tick()
     }
 
     double animTimer = XM1PW3P1(startTimer.percentElapsedTime(500));
+    g_fullFramerateThisFrame |= (animTimer != 1.0);
     int lastEndpointY = 0;
     for (int x = 0; x < items.size(); x++) {
         Drawable* item = items[x];

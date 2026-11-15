@@ -696,8 +696,12 @@ void g_mainLoop() {
 
         wd->tickWindow();
         g_runMainThreadOperations();
+        motionThisFrame |= g_fullFramerateThisFrame;
 
-        if (g_config.powerSaverLevel != 2 || motionThisFrame) {
+        if (VSP_PLATFORM == VSP_PLATFORM_ANDROID && !g_windowFocused) {
+            SDL_Delay(500);
+        }
+        else if (g_config.powerSaverLevel != 2 || motionThisFrame) {
             wd->renderWindow();
         }
         else {

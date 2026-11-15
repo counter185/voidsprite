@@ -100,6 +100,10 @@ public:
                 position.y -= (wxHeight - prevSize.y);
             }
         }
+
+        if (closeButton != NULL) {
+            repositionCloseButton();
+        }
     }
     
     void toggleCollapse();

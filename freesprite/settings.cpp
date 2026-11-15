@@ -91,7 +91,7 @@ bool g_saveConfig() {
         config["autosaveInterval"] = std::to_string(g_config.autosaveInterval);
         config["language"] = g_config.language;
         config["visualConfig"] = g_config.customVisualConfigPath;
-        config["powerSaverLevel"] = std::to_string(g_config.powerSaverLevel);
+        config["powerSaverLevel:v2"] = std::to_string(g_config.powerSaverLevel);
         config["canvasZoomSensitivity"] = std::to_string(g_config.canvasZoomSensitivity);
         config["backtraceColor"] = frmt("{:06X}", g_config.backtraceColor);
         config["fwdtraceColor"] = frmt("{:06X}", g_config.fwdtraceColor);
@@ -188,7 +188,7 @@ void g_loadConfig() {
     if (config.contains("autosaveInterval")) { try { g_config.autosaveInterval = std::stoi(config["autosaveInterval"]); } catch (std::exception&) {} }
     if (config.contains("language")) { g_config.language = config["language"]; }
     if (config.contains("visualConfig")) { g_config.customVisualConfigPath = config["visualConfig"]; }
-    if (config.contains("powerSaverLevel")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel"]); } catch (std::exception&) {} }
+    if (config.contains("powerSaverLevel:v2")) { try { g_config.powerSaverLevel = std::stoi(config["powerSaverLevel:v2"]); } catch (std::exception&) {} }
     if (config.contains("canvasZoomSensitivity")) { try { g_config.canvasZoomSensitivity = std::stoi(config["canvasZoomSensitivity"]); } catch (std::exception&) {} }
     if (config.contains("backtraceColor")) { try { g_config.backtraceColor = std::stoul(config["backtraceColor"], nullptr, 16); } catch (std::exception&) {} }
     if (config.contains("fwdtraceColor")) { try { g_config.fwdtraceColor = std::stoul(config["fwdtraceColor"], nullptr, 16); } catch (std::exception&) {} }
