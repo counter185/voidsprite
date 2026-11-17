@@ -3,6 +3,7 @@
 #include "FileIO.h"
 #include "Notification.h"
 #include "ScreenWideNavBar.h"
+#include "io/io_voidsprite.h"
 
 NineSegmentPatternEditorScreen::NineSegmentPatternEditorScreen(MainEditor* parent) {
     caller = parent;

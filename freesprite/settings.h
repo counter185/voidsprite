@@ -66,6 +66,7 @@ public:
     std::vector<std::string> favExportFormats;
     std::vector<std::string> favLayerNames;
     std::vector<std::string> hiddenPalettes;
+    std::unordered_map<std::string, std::string> sdlHints;
 
     //this is only during initial load. not updated at runtime.
     std::vector<std::string> keybinds;

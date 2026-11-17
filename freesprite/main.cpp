@@ -660,7 +660,8 @@ void g_mainLoop() {
             else {
                 if (!wdTarget->screenStack.empty()) {
                     //pass event to screen
-                    wdTarget->screenStack[wdTarget->currentScreen]->takeInput(wdTarget->screenStack[wdTarget->currentScreen]->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
+                    wdTarget->screenStack[wdTarget->currentScreen]->takeInput(
+                        wdTarget->screenStack[wdTarget->currentScreen]->takesTouchEvents() ? evt : convertTouchToMouseEvent(evt));
                 }
             }
         }
@@ -858,6 +859,12 @@ int main(int argc, char** argv)
         initSteps.updateLastSection("Initializing SDL");
         SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "candidates");
         SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_SCALE_TO_DISPLAY, "1");
+#if VSP_PLATFORM == VSP_PLATFORM_VITA
+        SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "2");
+#endif
+        for (auto& [hintK, hintV] : g_config.sdlHints) {
+            SDL_SetHint(hintK.c_str(), hintV.c_str());
+        }
         int canInit = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD);
         //IMG_Init(-1);   //😈time to get evil
         windowTitle = "void" UTF8_DIAMOND "sprite"
@@ -887,7 +894,6 @@ int main(int argc, char** argv)
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, DEBUG_EMULATE_TOUCH_EVENTS ? "1" : "0");
         //SDL_SetHint(SDL_HINT_PEN_MOUSE_EVENTS, "0");
         SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
-        SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "2");
 
         g_props = SDL_CreateProperties();
         

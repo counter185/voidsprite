@@ -125,6 +125,10 @@ bool g_saveConfig() {
             config[frmt("hidepalette@{:05}", uqIndex++)] = f;
         }
 
+        for (auto& [k,v] : g_config.sdlHints) {
+            config[frmt("sdlhint@{}", k)] = v;
+        }
+
         for (auto& [key, value] : config) {
             file << key << "=" << value << std::endl;
         }
@@ -211,6 +215,9 @@ void g_loadConfig() {
         }
         else if (stringStartsWithIgnoreCase(key, "hidepalette@") && !value.empty()) {
             g_config.hiddenPalettes.push_back(value);
+        }
+        else if (stringStartsWithIgnoreCase(key, "sdlhint@") && !value.empty()) {
+            g_config.sdlHints[splitString(key, '@')[1]] = value;
         }
 #if VSP_PLATFORM != VSP_PLATFORM_EMSCRIPTEN
         else if (stringStartsWithIgnoreCase(key, "lastfile@") && !value.empty()) {
