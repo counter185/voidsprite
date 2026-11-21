@@ -42,7 +42,9 @@ public:
         return min + (max - min) * sliderPos;
     }
     virtual void setValue(double min, double max, double val) {
-        sliderPos = (val - min) / (max - min);
+        if (max != min) {
+            sliderPos = (val - min) / (max - min);
+        }
     }
 
     virtual void onSliderPosChanged() {

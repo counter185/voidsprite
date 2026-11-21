@@ -85,6 +85,7 @@
     {"vsp.export.option.bmp.rgbtransparent", "[RGB] 32-bit: Transparency"},
     {"vsp.export.option.bmp.indexedrle", "[Indexed] RLE compression"},
     {"vsp.export.option.bmp.biclrimportant", "Num. important colors"},
+    {"vsp.export.option.mergeframes.framesinrow", "Frames in row"},
 
     // common navbar strings
     {"vsp.nav.file", "File"},
@@ -369,6 +370,7 @@
 
     {"vsp.maineditor.nav.forceautosave", "Force recovery autosave"},
     {"vsp.maineditor.nav.exportscaled", "Export scaled"},
+    {"vsp.maineditor.nav.mergeframestospritesheet", "Merge frames into spritesheet"},
     {"vsp.maineditor.nav.print", "Print"},
     {"vsp.maineditor.nav.print.scale", "Print image"},
     {"vsp.maineditor.nav.print.scale.desc", "Enter the scale of the printed image"},

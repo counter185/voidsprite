@@ -524,6 +524,8 @@ public:
     void setAnimTo(int index);
     void setMSPerFrame(int ms);
     void renderFrameTo(Frame* f, SDL_Texture* target, bool clear = true);
+    Layer* stitchAllFramesIntoSpritesheet(int numInRow);
+    void promptMergeFramesToSpritesheet();
 
     void setActiveSinglePattern(Pattern* newPattern);
     bool togglePatternInPatternStack(Pattern* newPattern);

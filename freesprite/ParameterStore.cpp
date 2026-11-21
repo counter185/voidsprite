@@ -99,10 +99,9 @@ Panel* ParameterStore::generateVerticalUI(std::function<void()> onChangedCallbac
             case PT_INT:
             case PT_FLOAT:
             {
-                float v = (p.vNum - p.numMinValue) / (p.numMaxValue - p.numMinValue);
                 UISlider* slider = new UISlider();
                 slider->position = XY{ optionPosX + 85, y };
-                slider->sliderPos = v;
+                slider->setValue(p.numMinValue, p.numMaxValue, p.vNum);
                 slider->wxHeight = 25;
                 if (p.paramType == PT_COLOR_L) {
                     slider->backgroundFill = Fill::Gradient(0xA0000000, 0xA0FFFFFF, 0xA0000000, 0xA0FFFFFF);

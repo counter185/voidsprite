@@ -1180,6 +1180,7 @@ void MainEditor::setUpWidgets()
                     },
                     {SDL_SCANCODE_E, { TL("vsp.maineditor.exportpal"), [this]() { this->tryExportPalettizedImage(); } } },
                     {SDL_SCANCODE_A, { TL("vsp.maineditor.exportind"), [this]() { this->exportTilesIndividually(); } } },
+                    {SDL_SCANCODE_H, { TL("vsp.maineditor.nav.mergeframestospritesheet"), [this]() { this->promptMergeFramesToSpritesheet(); }}},
                     {SDL_SCANCODE_R, { TL("vsp.maineditor.paledit"),
                             [this]() {
                                 MainEditorPalettized* newEditor = this->toPalettizedSession();
@@ -2826,6 +2827,61 @@ void MainEditor::renderFrameTo(Frame* f, SDL_Texture* target, bool clear)
     }
 
     g_popRenderTarget();
+}
+
+Layer* MainEditor::stitchAllFramesIntoSpritesheet(int numInRow)
+{
+    numInRow = ixmax(1, numInRow);
+    int tilesX = ixmin(numInRow, frames.size());
+    int tilesY = align(frames.size(), numInRow) / numInRow;
+
+    int frameW = canvas.dimensions.x;
+    int frameH = canvas.dimensions.y;
+
+    XY size = { frameW * tilesX, frameH * tilesY };
+    Layer* l = isPalettized ? LayerPalettized::tryAllocIndexedLayer(size.x, size.y) : Layer::tryAllocLayer(size.x, size.y);
+    if (l != NULL) {
+        if (isPalettized) {
+            ((LayerPalettized*)l)->palette = ((MainEditorPalettized*)this)->palette;
+        }
+
+        for (int i = 0; i < frames.size(); i++) {
+            Layer* flat = isPalettized ? flattenIndexedFrameKeepingTransparencyIndex(frames[i], ((LayerPalettized*)l)->palette) 
+                : flattenFrame(frames[i]);
+
+            XY position = { frameW * (i % tilesX), frameH * (i / tilesX) };
+
+            if (flat != NULL) {
+                l->blit(flat, position, { 0,0, frameW, frameH }, true);
+                delete flat;
+            }
+            else {
+                logerr(frmt("Error flattening frame {}", i));
+                g_addNotificationFromThread(NOTIF_MALLOC_FAIL);
+            }
+
+        }
+    }
+    else {
+        g_addNotificationFromThread(NOTIF_MALLOC_FAIL);
+    }
+    return l;
+}
+
+void MainEditor::promptMergeFramesToSpritesheet()
+{
+    ParamList params = {
+        INT_PARAM("mergeframes.framesinrow", 1, frames.size(), ixmin(4, frames.size()))
+    };
+    PopupSetParameters* setParamsPopup = new PopupSetParameters(TL("vsp.maineditor.nav.mergeframestospritesheet"), &exportParameters, &params, "vsp.export.option");
+    setParamsPopup->onFinishCallback = [this]() {
+        int framesInRow = exportParameters.getInt("mergeframes.framesinrow");
+        Layer* l = stitchAllFramesIntoSpritesheet(framesInRow);
+        if (l != NULL) {
+            g_addScreen(l->isPalettized ? new MainEditorPalettized((LayerPalettized*)l) : new MainEditor(l));
+        }
+    };
+    g_addPopup(setParamsPopup);
 }
 
 void MainEditor::setActiveSinglePattern(Pattern* newPattern)

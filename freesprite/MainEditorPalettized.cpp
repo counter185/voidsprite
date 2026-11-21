@@ -296,6 +296,7 @@ void MainEditorPalettized::setUpWidgets()
                     },
                     {SDL_SCANCODE_E, { "Export as RGB", [this]() { this->tryExportRGB(); } } },
                     {SDL_SCANCODE_A, { "Export tiles individually", [this]() { this->exportTilesIndividually(); } } },
+                    {SDL_SCANCODE_H, { TL("vsp.maineditor.nav.mergeframestospritesheet"), [this]() { this->promptMergeFramesToSpritesheet(); }}},
                     {SDL_SCANCODE_R, { "Open in RGB editor", [this]() { this->openInNormalRGBEditor(); } } },
                     {SDL_SCANCODE_C, { TL("vsp.maineditor.copyflattoclipboard"), [this]() { this->copyImageToClipboard(); } } },
                     {SDL_SCANCODE_P, { TL("vsp.maineditor.preference"), [this]() { g_addPopup(new PopupGlobalConfig()); } } },
