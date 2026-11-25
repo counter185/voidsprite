@@ -58,6 +58,7 @@ You can also build the program as a Flatpak, see [Flatpak README](https://github
 
 1. Run the `setup_android.bat` script on Windows, or the `setup_android_on_linux.sh` script on other systems.
 2. Open the `android-project` directory with Android Studio and build it like any other project.
+3. Alternatively, build using Gradle tasks. `gradle assembleStandaloneDebug` to make a debug build.
 
 ### Optional dependencies
 
@@ -67,6 +68,7 @@ Some dependencies can be disabled with build flags:
 - `-DUSE_FMT_FORMAT=1` will use `fmt` for string formatting instead of `std::format`. `fmt` needs to be present.
 - `-DVSP_USE_LIBLCF=0` will disable RPG Maker map preview and LMU tileset import (drops `liblcf` requirement). Import/export of XYZ images is not affected.
 - `-DVSP_USE_LIBAVIF=0` will disable AVIF support (drops `libavif` requirement). AVIF might still be importable and exportable through SDL_image.
+- `-DVSP_VENDORED_ALL_OFF=ON` will force CMake to use system-installed libraries instead of those included in [external/](external). 
 
 ## ◆Contribute
 
