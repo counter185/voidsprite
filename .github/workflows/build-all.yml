@@ -112,7 +112,7 @@ jobs:
         python-version: '3.13'
         cache: 'pip'
     
-    - run: pip install git+https://github.com/AppImageCrafters/appimage-builder.git@v1.1.0
+    - run: pip install git+https://github.com/AppImageCrafters/appimage-builder.git@b1d6ca4b6e39cb7bced3dccfde95a83bef62a500
 
     - name: appimage
       working-directory: ${{env.GITHUB_WORKSPACE}}
