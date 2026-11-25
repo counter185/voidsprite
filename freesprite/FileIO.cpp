@@ -90,19 +90,16 @@ using json = nlohmann::json;
 
 std::string getAllLibsVersions() {
     std::string ret = "";
-    ret += "SDL: " + std::to_string(SDL_MAJOR_VERSION) + "." + std::to_string(SDL_MINOR_VERSION) + "." +
-           std::to_string(SDL_MICRO_VERSION) + "\n";
-    ret += "SDL_image: " + std::to_string(SDL_IMAGE_MAJOR_VERSION) + "." + std::to_string(SDL_IMAGE_MINOR_VERSION) +
-           "." + std::to_string(SDL_IMAGE_MICRO_VERSION) + "\n";
-    ret += "SDL_ttf: " + std::to_string(SDL_TTF_MAJOR_VERSION) + "." + std::to_string(SDL_TTF_MINOR_VERSION) + "." +
-           std::to_string(SDL_TTF_MICRO_VERSION) + "\n";
+    ret += frmt("SDL: {}.{}.{} (lib: {}, h: {})\n", 
+        SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_GetVersion(), SDL_VERSION);
+    ret += frmt("SDL_image: {}.{}.{}\n", SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_MICRO_VERSION);
+    ret += frmt("SDL_ttf: {}.{}.{}\n", SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_MICRO_VERSION);
 
 #if VSP_NETWORKING
     ret += g_getAllNetworkLibsVersions();
 #endif
 
-    ret += "json: " + std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." + std::to_string(NLOHMANN_JSON_VERSION_MINOR) +
-           "." + std::to_string(NLOHMANN_JSON_VERSION_PATCH) + "\n";
+    ret += frmt("json: {}.{}.{}\n", NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR, NLOHMANN_JSON_VERSION_PATCH);
     ret += frmt("libpng: {}\n", getlibpngVersion());
     ret += "zlib: " ZLIB_VERSION "\n";
 #if VOIDSPRITE_JXL_ENABLED

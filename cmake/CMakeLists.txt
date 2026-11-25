@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(my_app)
 
-option(USE_FMT_FORMAT "Use fmt::format instead of std::format" OFF)
 option(VOIDSPRITE_UNITY_BUILD "Use unity build" ON)
 option(VSP_DISCORD_RPC "Enable Discord RPC. Only for x64 Linux (for Windows use the VS sln)" OFF)
 option(VSP_STEAMWORKS "Enable Steamworks. Unpack the headers into freesprite/steam. Only for x64 Linux (for Windows use the VS sln)" OFF)
@@ -45,16 +44,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fdiagnostics-show-option -
 
 if (VITASDK_BUILD)
     include("$ENV{VITASDK}/share/vita.cmake" REQUIRED)
-    add_definitions(-DVSP_USE_LIBAVIF=0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVITASDK=1 -fcompare-debug-second -pthread -static-libstdc++")
     set(VOIDSPRITE_ASSETS_PATH "app0:/")
 
     set(VITA_APP_NAME "voidsprite")
     set(VITA_TITLEID  "CNTRPL039")
     set(VITA_VERSION  "01.00")
-else()
-    add_definitions(-DVSP_USE_LIBAVIF=1)
 endif()
+
 add_definitions(-DVOIDSPRITE_JXL_ENABLED=0)
 
 if(DEFINED ENV{GIT_HASH})
@@ -134,7 +131,6 @@ file(COPY ../freesprite/appfont-MPLUSRounded1c-Medium.ttf DESTINATION "${CMAKE_B
 file(COPY ../freesprite/appfontcyr-ZenKakuGothicNew-Medium.ttf DESTINATION "${CMAKE_BINARY_DIR}/cmake")
 
 if (DEFINED EMSCRIPTEN)
-    add_definitions(-DVSP_USE_LIBLCF=0)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -sMALLOC=emmalloc -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=FS -fexceptions -fPIC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --embed-file ${CMAKE_BINARY_DIR}/cmake/assets@assets")
@@ -178,26 +174,38 @@ endif()
 target_link_libraries(voidsprite PRIVATE SDL3::SDL3)
 target_link_libraries(voidsprite PRIVATE SDL3_ttf::SDL3_ttf)
 target_link_libraries(voidsprite PRIVATE SDL3_image::SDL3_image)
-if (NOT VITASDK_BUILD)
-target_link_libraries(voidsprite PRIVATE avif)
+
+if (VSP_USE_LIBAVIF)
+    add_definitions(-DVSP_USE_LIBAVIF=1)
+    target_link_libraries(voidsprite PRIVATE avif)
 else()
-#target_link_libraries(voidsprite PUBLIC pthread)
+    add_definitions(-DVSP_USE_LIBAVIF=0)
 endif()
+
+if (VSP_VENDORED_ZLIB)
 target_link_libraries(voidsprite PRIVATE ZLIB::ZLIBSTATIC)
+else()
+target_link_libraries(voidsprite PRIVATE z)
+endif()
+
 if (DEFINED WIN32)
     target_link_libraries(voidsprite PRIVATE d3d9 dwmapi winhttp iphlpapi)
 endif()
+
 if (VSP_NETWORKING)
     add_definitions(-DVSP_NETWORKING=1)
     target_link_libraries(voidsprite PRIVATE SDL3_net::SDL3_net)
 else()
     add_definitions(-DVSP_NETWORKING=0)
 endif()
-if (NOT DEFINED EMSCRIPTEN)
-    #if (NOT FLATPAK)
+
+if (VSP_USE_LIBLCF)
+    add_definitions(-DVSP_USE_LIBLCF=1)
     target_link_libraries(voidsprite PRIVATE lcf)
-    #endif()
+else()
+    add_definitions(-DVSP_USE_LIBLCF=0)
 endif()
+
 if (USE_FMT_FORMAT)
     target_link_libraries(voidsprite PRIVATE fmt)
 endif()
