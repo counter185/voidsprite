@@ -449,6 +449,7 @@ public:
     void focusOnColorInputTextBox();
     void initLayers();
     virtual void setUpWidgets();
+    void repositionWidgets();
     void openFilterUI(BaseFilter* filter);
     void SetupCompactEditor(std::vector<CompactEditorSection> createSections);
     void openTouchModePanel();

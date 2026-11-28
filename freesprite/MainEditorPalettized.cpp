@@ -39,6 +39,7 @@ MainEditorPalettized::MainEditorPalettized(XY dimensions)
     pltLayer->palette = palette;
     getLayerStack().push_back(pltLayer);
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -52,6 +53,7 @@ MainEditorPalettized::MainEditorPalettized(LayerPalettized* layer)
     getLayerStack().push_back(layer);
     palette = layer->palette;
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -68,6 +70,7 @@ MainEditorPalettized::MainEditorPalettized(std::vector<LayerPalettized*> layerss
     }
     palette = layerss[0]->palette;
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -86,6 +89,7 @@ MainEditorPalettized::MainEditorPalettized(std::vector<Frame*> framess)
     canvas.dimensions = { firstLayer->w, firstLayer->h };
     palette = ((LayerPalettized*)firstLayer)->palette;
 
+    ONLY_IN_INTERACTIVE_CONTEXT;
     setUpWidgets();
     recenterCanvas();
     initLayers();
@@ -455,6 +459,7 @@ void MainEditorPalettized::setUpWidgets()
                         }
                     },
                     {SDL_SCANCODE_H, { "Toggle pixel grid", [this]() { togglePixelGrid(); }}},
+                    {SDL_SCANCODE_Q, { "Reset panel positions", [this]() { repositionWidgets(); }}},
                     {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
                     {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
                     {SDL_SCANCODE_A, { "Open frames panel...",
@@ -581,23 +586,18 @@ void MainEditorPalettized::setUpWidgets()
 
     colorPicker = new PalettizedEditorColorPicker(this);
     auto colorPickerPanel = colorPicker->getPanel();
-    colorPickerPanel->position.y = 63;
-    colorPickerPanel->position.x = 10;
     wxsManager.addDrawable(colorPickerPanel);
     ((PalettizedEditorColorPicker*)colorPicker)->setPickedPaletteIndex(pickedPaletteIndex);
     //regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position = { 10, 454 };
     wxsManager.addDrawable(brushPicker);
 
     layerPicker = new PalettizedEditorLayerPicker(this);
-    layerPicker->position = XY{ g_windowW - 260, 80 };
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
     framePicker = new EditorFramePicker(this);
-    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x, 67 };
     if (frames.size() == 1) {
         framePicker->enabled = false;
     }
@@ -625,6 +625,8 @@ void MainEditorPalettized::setUpWidgets()
 
         SetupCompactEditor(createSections);
     }
+
+    repositionWidgets();
 }
 
 void MainEditorPalettized::trySaveAsImage()

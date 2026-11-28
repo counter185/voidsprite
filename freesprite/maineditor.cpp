@@ -1383,6 +1383,7 @@ void MainEditor::setUpWidgets()
                     }
                 },
                 {SDL_SCANCODE_H, { "Toggle pixel grid", [this]() { togglePixelGrid(); }}},
+                {SDL_SCANCODE_Q, { "Reset panel positions", [this]() { repositionWidgets(); }}},
                 {SDL_SCANCODE_P, { "Open preview panel...", [this]() { openPreviewPanel(); }}},
                 {SDL_SCANCODE_T, { "Open touch mode panel...", [this]() { openTouchModePanel(); }}},
                 {SDL_SCANCODE_A, { "Open frames panel...",
@@ -1542,25 +1543,21 @@ void MainEditor::setUpWidgets()
 
     colorPicker = new EditorColorPicker(this);
     Panel* colorPickerPanel = colorPicker->getPanel();
-    colorPickerPanel->position.y = 67;
-    colorPickerPanel->position.x = 10 + leftX;
+    
     wxsManager.addDrawable(colorPickerPanel);
     colorPicker->setColorRGB(pickedColor);
     regenerateLastColors();
 
     brushPicker = new EditorBrushPicker(this);
-    brushPicker->position = {10 + leftX, 458};
     brushPicker->scale(g_config.uiScale);
     brushPicker->reanchor();
     wxsManager.addDrawable(brushPicker);
 
     layerPicker = new EditorLayerPicker(this);
-    layerPicker->position = XY{ g_windowW - 260, 80 };
     layerPicker->anchor = XY{ 1,0 };
     wxsManager.addDrawable(layerPicker);
 
     framePicker = new EditorFramePicker(this);
-    framePicker->position = XY{ 10 + colorPickerPanel->getDimensions().x + leftX, 67};
     if (frames.size() == 1) {
         framePicker->enabled = false;
     }
@@ -1587,6 +1584,49 @@ void MainEditor::setUpWidgets()
     }
 
     wxsManager.applyScalingToAll(g_config.uiScale);
+    repositionWidgets();
+}
+
+void MainEditor::repositionWidgets()
+{
+    int leftX = g_currentWindow->getSafeAreaLeft();
+    int rightX = g_currentWindow->getSafeAreaRight();
+
+    int s10 = UISCALED(10);
+
+    if (colorPicker != NULL) {
+        ((PanelUserInteractable*)colorPicker->getPanel())->anchor = { 0,0 };
+        colorPicker->getPanel()->position = { s10 + leftX, UISCALED(67) };
+    }
+
+    if (brushPicker != NULL && colorPicker != NULL) {
+        Panel* colorPickerPanel = colorPicker->getPanel();
+        brushPicker->anchor = {0,0};
+        brushPicker->position = { s10 + leftX, colorPickerPanel->position.y + colorPickerPanel->wxHeight + 3 };
+    }
+
+    if (layerPicker != NULL) {
+        layerPicker->anchor = { 1,0 };
+        layerPicker->position = XY{ g_windowW - (rightX + layerPicker->wxWidth + s10), UISCALED(80) };
+    }
+
+    if (framePicker != NULL && colorPicker != NULL) {
+        framePicker->anchor = { 0,0 };
+        framePicker->position = XY{ s10 + colorPicker->getPanel()->getDimensions().x + colorPicker->getPanel()->position.x + leftX, UISCALED(67)};
+    }
+
+    if (touchModePanel != NULL) {
+        touchModePanel->anchor = { 1,1 };
+;        this->touchModePanel->position = {
+            g_windowW - this->touchModePanel->wxWidth - ixmax(s10, rightX),
+            g_windowH - this->touchModePanel->wxHeight - UISCALED(40) };
+    }
+    XY p = { 50, 50 };
+    for (auto*& refPanel : openReferencePanels) {
+        refPanel->position = p;
+        refPanel->anchor = { 0,0 };
+        p = xyAdd(p, { UISCALED_UP(30), UISCALED_UP(30) });
+    }
 }
 
 void MainEditor::deselectAndCommitToUndoStack()

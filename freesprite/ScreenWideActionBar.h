@@ -49,5 +49,10 @@ public:
         }
         wxHeight = h;
     }
+
+    void applyScaling(double s) {
+        Panel::applyScaling(s);
+        evalHeight();
+    }
 };
 
